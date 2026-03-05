@@ -25,18 +25,6 @@ export const player = defineType({
       readOnly: true,
     }),
     defineField({
-      name: 'jerseyNumber',
-      title: 'Jersey number',
-      type: 'number',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'positionPsd',
-      title: 'Position (PSD)',
-      type: 'string',
-      readOnly: true,
-    }),
-    defineField({
       name: 'birthDate',
       title: 'Birth date',
       type: 'date',
@@ -49,28 +37,35 @@ export const player = defineType({
       readOnly: true,
     }),
     defineField({
+      name: 'keeper',
+      title: 'Keeper',
+      type: 'boolean',
+      readOnly: true,
+      description: 'Synced from PSD — always reliable for keepers',
+    }),
+    defineField({
+      name: 'positionPsd',
+      title: 'Position (PSD)',
+      type: 'string',
+      readOnly: true,
+      description:
+        'Synced from PSD bestPosition — null until the club populates positions in PSD. Use position field as fallback.',
+    }),
+    // Editorial — not available from PSD for KCVV
+    defineField({
+      name: 'jerseyNumber',
+      title: 'Jersey number',
+      type: 'number',
+    }),
+    defineField({
       name: 'height',
       title: 'Height (cm)',
       type: 'number',
-      readOnly: true,
     }),
     defineField({
       name: 'weight',
       title: 'Weight (kg)',
       type: 'number',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'joinDate',
-      title: 'Join date',
-      type: 'date',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'leaveDate',
-      title: 'Leave date',
-      type: 'date',
-      readOnly: true,
     }),
     defineField({
       name: 'psdImageUrl',
@@ -94,11 +89,10 @@ export const player = defineType({
       description: 'Used for first-team Instagram share cards',
     }),
     defineField({
-      name: 'positionOverride',
-      title: 'Position override',
+      name: 'position',
+      title: 'Position',
       type: 'string',
-      description:
-        'Full Dutch name (Keeper, Verdediger, Middenvelder, Aanvaller). Overrides PSD position code.',
+      description: 'PSD does not provide position data for KCVV — set manually.',
       options: {
         list: ['Keeper', 'Verdediger', 'Middenvelder', 'Aanvaller', 'Speler'],
       },

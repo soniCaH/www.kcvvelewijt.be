@@ -41,9 +41,10 @@ export const staffMember = defineType({
     }),
     defineField({
       name: 'psdId',
-      title: 'PSD ID (future sync)',
+      title: 'PSD ID',
       type: 'string',
-      description: 'Leave blank until Phase 4 PSD staff sync is implemented',
+      description:
+        'Set by PSD sync (GET /teams/{id}/staff). When synced, role is mapped from PSD functionTitle (free-text, e.g. "Keeperstrainer", "T2").',
     }),
   ],
   preview: {
