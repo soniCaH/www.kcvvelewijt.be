@@ -45,16 +45,15 @@ async function resolveImage(
   ref: { id: string } | null | undefined,
 ): Promise<string | null> {
   if (!ref) return null;
-  const mediaRes = await fetch(
-    drupalUrl(`media/image/${ref.id}?include=field_media_image`),
-  );
-  if (!mediaRes.ok) return null;
-  const mediaJson = (await mediaRes.json()) as { included?: DrupalFile[] };
-  const file = mediaJson.included?.[0];
-  if (!file?.attributes.uri.url) return null;
-  const fullUrl = file.attributes.uri.url.startsWith("http")
-    ? file.attributes.uri.url
-    : `${process.env.DRUPAL_BASE_URL}${file.attributes.uri.url}`;
+  // field_image on node/player and node/staff is a direct file--file reference
+  const res = await fetch(drupalUrl(`file/file/${ref.id}`));
+  if (!res.ok) return null;
+  const json = (await res.json()) as { data: DrupalFile };
+  const url = json.data?.attributes?.uri?.url;
+  if (!url) return null;
+  const fullUrl = url.startsWith("http")
+    ? url
+    : `${process.env.DRUPAL_BASE_URL}${url}`;
   return uploadImageFromUrl(fullUrl);
 }
 
@@ -62,9 +61,7 @@ async function main() {
   // Migrate node--player coaching staff (those with a position_short role code)
   console.log("Fetching coaches (node--player with role codes) from Drupal...");
   const allPlayers = await fetchAllPages<DrupalPlayer>(
-    drupalUrl(
-      "node/player?include=field_image.field_media_image&page[limit]=100",
-    ),
+    drupalUrl("node/player?page[limit]=100"),
   );
   const coaches = allPlayers.filter(
     (p) =>
@@ -104,9 +101,7 @@ async function main() {
   // Migrate node--staff board members
   console.log("Fetching board staff (node--staff) from Drupal...");
   const boardMembers = await fetchAllPages<DrupalStaff>(
-    drupalUrl(
-      "node/staff?include=field_image.field_media_image&page[limit]=100",
-    ),
+    drupalUrl("node/staff?page[limit]=100"),
   );
 
   for (const member of boardMembers) {

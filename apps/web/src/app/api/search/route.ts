@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
-import { DrupalService, DrupalServiceLive } from "@/lib/effect/services";
+import { runPromise } from "@/lib/effect/runtime";
+import { SanityService } from "@/lib/effect/services/SanityService";
 import type { SearchResult } from "@/types/search";
 
 export const runtime = "nodejs";
@@ -29,102 +30,38 @@ const debugLog = (...args: unknown[]) => {
  */
 const searchArticles = (query: string) =>
   Effect.gen(function* () {
-    const drupal = yield* DrupalService;
+    const sanity = yield* SanityService;
+    const allArticles = yield* sanity.getArticles();
 
-    // Fetch ALL articles by paginating through all pages
-    // Similar to searchPlayers, we need to paginate to avoid missing matches
-    const allArticles = [];
-    let page = 1;
-    let hasMore = true;
-
-    while (hasMore && page <= 20) {
-      // Safety limit of 20 pages
-      const { articles, links } = yield* drupal.getArticles({
-        limit: 50,
-        page,
-      });
-
-      allArticles.push(...articles);
-      hasMore = !!links?.next;
-      page++;
-    }
-
-    debugLog(
-      `[Search API] Total articles fetched: ${allArticles.length} (across ${page} pages)`,
-    );
+    debugLog(`[Search API] Total articles fetched: ${allArticles.length}`);
 
     const queryLower = query.toLowerCase();
 
     return allArticles
       .filter((article) => {
-        const titleMatch = article.attributes.title
+        const titleMatch = article.title.toLowerCase().includes(queryLower);
+        const tagMatch = (article.tags ?? []).some((tag) =>
+          tag.toLowerCase().includes(queryLower),
+        );
+        // Search body via JSON stringification of Portable Text
+        const bodyMatch = JSON.stringify(article.body ?? "")
           .toLowerCase()
           .includes(queryLower);
-        const tagMatch =
-          article.relationships.field_tags?.data?.some((tag) => {
-            if ("attributes" in tag && tag.attributes?.name) {
-              return tag.attributes.name.toLowerCase().includes(queryLower);
-            }
-            return false;
-          }) || false;
-
-        // Also search in article body text
-        const bodyText =
-          article.attributes.body?.value ||
-          article.attributes.body?.processed ||
-          "";
-        const bodyMatch = bodyText
-          ? bodyText.toLowerCase().includes(queryLower)
-          : false;
 
         return titleMatch || tagMatch || bodyMatch;
       })
-      .map((article): SearchResult => {
-        const imageData = article.relationships.field_media_article_image?.data;
-        const imageUrl =
-          imageData && "uri" in imageData ? imageData.uri.url : undefined;
-
-        const tags =
-          article.relationships.field_tags?.data
-            ?.map((tag) =>
-              "attributes" in tag && tag.attributes?.name
-                ? tag.attributes.name
-                : null,
-            )
-            .filter((tag): tag is string => tag !== null) || [];
-
-        // Use summary if available, otherwise strip HTML from body
-        let description: string | undefined;
-        if (article.attributes.body?.summary) {
-          description = article.attributes.body.summary.substring(0, 150);
-        } else if (article.attributes.body?.value) {
-          // Strip ALL HTML tags uniformly using iterative sanitization
-          // This approach is more robust than targeting specific tags like <script>
-          // because it handles all variations, incomplete tags, and nested structures
-          let sanitized = article.attributes.body.value;
-          let previousLength = 0;
-
-          // Repeat until no more tags are removed (handles incomplete/nested/malformed tags)
-          while (sanitized.length !== previousLength) {
-            previousLength = sanitized.length;
-            sanitized = sanitized.replace(/<[^>]*>/g, "");
-          }
-
-          // Since output is plain text, no HTML preservation needed - universal stripping is safest
-          description = sanitized.replace(/\s+/g, " ").trim().substring(0, 150);
-        }
-
-        return {
-          id: article.id,
+      .map(
+        (article): SearchResult => ({
+          id: article._id,
           type: "article",
-          title: article.attributes.title,
-          description,
-          url: article.attributes.path.alias,
-          imageUrl,
-          tags,
-          date: article.attributes.created.toISOString(),
-        };
-      });
+          title: article.title,
+          description: undefined,
+          url: `/news/${article.slug.current}`,
+          imageUrl: article.coverImageUrl ?? undefined,
+          tags: article.tags ?? [],
+          date: article.publishAt ?? "",
+        }),
+      );
   });
 
 /**
@@ -133,38 +70,14 @@ const searchArticles = (query: string) =>
  */
 const getAllPlayers = unstable_cache(
   async () => {
-    const fetchProgram = Effect.gen(function* () {
-      const drupal = yield* DrupalService;
-
-      // Fetch ALL players by paginating through all pages
-      // Drupal API has a max limit per page (~50), so we need to fetch multiple pages
-      const allPlayers = [];
-      let page = 1;
-      let hasMore = true;
-
-      while (hasMore && page <= 20) {
-        // Safety limit of 20 pages
-        const { players, links } = yield* drupal.getPlayers({
-          limit: 50,
-          page,
-        });
-
-        allPlayers.push(...players);
-
-        hasMore = !!links?.next;
-        page++;
-      }
-
-      debugLog(
-        `[Search API] Fetched ${allPlayers.length} players (across ${page - 1} pages)`,
-      );
-
-      return allPlayers;
-    });
-
-    return await Effect.runPromise(
-      fetchProgram.pipe(Effect.provide(DrupalServiceLive)),
+    const players = await runPromise(
+      Effect.gen(function* () {
+        const sanity = yield* SanityService;
+        return yield* sanity.getPlayers();
+      }),
     );
+    debugLog(`[Search API] Fetched ${players.length} players`);
+    return players;
   },
   ["all-players"],
   {
@@ -175,67 +88,37 @@ const getAllPlayers = unstable_cache(
 
 /**
  * Search across players by name
- * Note: Players are stored as node--player in Drupal
  */
 const searchPlayers = (query: string) =>
   Effect.gen(function* () {
-    // Use cached player data to avoid repeated API calls
     const allPlayers = yield* Effect.promise(() => getAllPlayers());
 
     const queryLower = query.toLowerCase();
 
     const filtered = allPlayers.filter((player) => {
-      const firstName = player.attributes.field_firstname || "";
-      const lastName = player.attributes.field_lastname || "";
+      const firstName = player.firstName ?? "";
+      const lastName = player.lastName ?? "";
       const fullName = `${firstName} ${lastName}`.toLowerCase().trim();
-      const title = player.attributes.title.toLowerCase();
-
-      // Search in name fields or title
-      const nameMatch =
-        fullName.includes(queryLower) || title.includes(queryLower);
-
-      // Search in position (for players) and position_short (for staff like T1, T2)
-      const position = player.attributes.field_position || "";
-      const positionShort = player.attributes.field_position_short || "";
-      const positionMatch =
-        position.toLowerCase().includes(queryLower) ||
-        positionShort.toLowerCase().includes(queryLower);
-
-      const matches = nameMatch || positionMatch;
-
-      return matches;
+      return fullName.includes(queryLower);
     });
 
     debugLog(`[Search API] Found ${filtered.length} player matches`);
 
     return filtered.map((player): SearchResult => {
-      const firstName = player.attributes.field_firstname || "";
-      const lastName = player.attributes.field_lastname || "";
-      const fullName =
-        `${firstName} ${lastName}`.trim() || player.attributes.title;
-
-      const imageData = player.relationships.field_image?.data;
-      const imageUrl =
-        imageData && "uri" in imageData ? imageData.uri.url : undefined;
-
-      // Use field_position for players, field_position_short for staff (e.g., T1, T2)
-      const description =
-        player.attributes.field_position ||
-        player.attributes.field_position_short ||
-        undefined;
-
-      // Transform Drupal path from /player/slug to /players/slug (app uses plural)
-      const slug =
-        player.attributes.path.alias.replace("/player/", "") || player.id;
-      const url = `/players/${slug}`;
+      const firstName = player.firstName ?? "";
+      const lastName = player.lastName ?? "";
+      const fullName = `${firstName} ${lastName}`.trim() || player._id;
+      const position = player.keeper
+        ? "Keeper"
+        : (player.position ?? player.positionPsd ?? undefined);
 
       return {
-        id: player.id,
+        id: player._id,
         type: "player",
         title: fullName,
-        description,
-        url,
-        imageUrl,
+        description: position,
+        url: `/players/${player.psdId}`,
+        imageUrl: player.transparentImageUrl ?? player.psdImageUrl ?? undefined,
       };
     });
   });
@@ -245,32 +128,23 @@ const searchPlayers = (query: string) =>
  */
 const searchTeams = (query: string) =>
   Effect.gen(function* () {
-    const drupal = yield* DrupalService;
-    const teams = yield* drupal.getTeams();
+    const sanity = yield* SanityService;
+    const teams = yield* sanity.getTeams();
 
     const queryLower = query.toLowerCase();
 
     return teams
-      .filter((team) => {
-        const nameMatch = team.attributes.title
-          .toLowerCase()
-          .includes(queryLower);
-        return nameMatch;
-      })
-      .map((team): SearchResult => {
-        const imageData = team.relationships.field_image?.data;
-        const imageUrl =
-          imageData && "uri" in imageData ? imageData.uri.url : undefined;
-
-        return {
-          id: team.id,
+      .filter((team) => team.name.toLowerCase().includes(queryLower))
+      .map(
+        (team): SearchResult => ({
+          id: team._id,
           type: "team",
-          title: team.attributes.title,
-          description: undefined,
-          url: team.attributes.path.alias,
-          imageUrl,
-        };
-      });
+          title: team.name,
+          description: team.divisionFull ?? team.division ?? undefined,
+          url: `/team/${team.slug.current}`,
+          imageUrl: team.teamImageUrl ?? undefined,
+        }),
+      );
   });
 
 /**
@@ -348,9 +222,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Execute the program
-    const results = await Effect.runPromise(
-      searchProgram.pipe(Effect.provide(DrupalServiceLive)),
-    );
+    const results = await runPromise(searchProgram);
 
     // Sort by relevance (simple: prioritize title matches)
     const sorted = results.sort((a, b) => {

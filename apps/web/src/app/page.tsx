@@ -5,7 +5,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
+import { SanityService } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
   FeaturedArticles,
@@ -13,7 +13,7 @@ import {
   UpcomingMatches,
 } from "@/components/home";
 import {
-  mapArticlesToHomepageArticles,
+  mapSanityArticlesToHomepageArticles,
   mapMatchesToUpcomingMatches,
 } from "@/lib/mappers";
 import type { Metadata } from "next";
@@ -45,19 +45,11 @@ export default async function HomePage() {
   const [articlesResult, matchesResult] = await Promise.all([
     runPromise(
       Effect.gen(function* () {
-        const drupal = yield* DrupalService;
-        // Get 9 latest articles (3 featured + 6 latest news)
-        return yield* drupal.getArticles({
-          page: 1,
-          limit: 9,
-          sort: "-created",
-        });
-      }).pipe(
-        // Graceful fallback: return empty articles array on error
-        Effect.catchAll(() =>
-          Effect.succeed({ articles: [], links: undefined }),
-        ),
-      ),
+        const sanity = yield* SanityService;
+        const all = yield* sanity.getArticles();
+        // Return 9 most-recent articles (already sorted by publishAt desc in GROQ)
+        return all.slice(0, 9);
+      }).pipe(Effect.catchAll(() => Effect.succeed([]))),
     ),
     runPromise(
       Effect.gen(function* () {
@@ -73,15 +65,15 @@ export default async function HomePage() {
     ),
   ]);
 
-  const { articles } = articlesResult;
+  const articles = articlesResult;
   const matches = matchesResult;
 
   // Split articles: first 3 for featured carousel, remaining 6 for latest news
-  const featuredArticles = mapArticlesToHomepageArticles(
+  const featuredArticles = mapSanityArticlesToHomepageArticles(
     articles.slice(0, 3),
     true,
   );
-  const latestNewsArticles = mapArticlesToHomepageArticles(
+  const latestNewsArticles = mapSanityArticlesToHomepageArticles(
     articles.slice(3, 9),
     false,
   );

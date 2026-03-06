@@ -1,6 +1,6 @@
-import {defineStructure} from 'sanity/structure'
+import type {StructureResolver} from 'sanity/structure'
 
-export const structure = defineStructure((S) =>
+export const structure: StructureResolver = (S) =>
   S.list()
     .title('Content')
     .items([
@@ -42,5 +42,4 @@ export const structure = defineStructure((S) =>
       S.listItem()
         .title('Pages')
         .child(S.documentTypeList('page').title('Pages')),
-    ]),
-)
+    ])

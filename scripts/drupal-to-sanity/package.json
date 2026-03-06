@@ -9,14 +9,15 @@
     "migrate:staff": "tsx src/migrate-staff.ts"
   },
   "dependencies": {
-    "@sanity/client": "*",
-    "@portabletext/to-portable-text": "^1.0.0",
-    "effect": "*",
-    "node-html-parser": "^6.0.0",
-    "jsdom": "^25.0.0"
+    "@portabletext/block-tools": "^5.1.0",
+    "@sanity/client": "^7.16.0",
+    "@sanity/schema": "^3.69.0",
+    "dotenv": "^16.0.0",
+    "jsdom": "^25.0.0",
+    "node-html-parser": "^6.0.0"
   },
   "devDependencies": {
     "@types/jsdom": "^21.0.0",
-    "tsx": "*"
+    "tsx": "^4.0.0"
   }
 }

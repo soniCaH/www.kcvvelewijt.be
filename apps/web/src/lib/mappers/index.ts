@@ -6,6 +6,8 @@
 export {
   mapArticleToHomepageArticle,
   mapArticlesToHomepageArticles,
+  mapSanityArticleToHomepageArticle,
+  mapSanityArticlesToHomepageArticles,
 } from "./article.mapper";
 export {
   mapMatchToUpcomingMatch,

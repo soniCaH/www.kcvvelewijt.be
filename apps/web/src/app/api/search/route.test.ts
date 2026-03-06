@@ -13,8 +13,15 @@ vi.mock("next/cache", () => ({
   unstable_cache: <T extends (...args: any[]) => any>(fn: T) => fn,
 }));
 
-// Mock fetch to return Drupal responses for testing
-const mockFetch = vi.fn();
+// Hoist mock so it's available inside vi.mock factory
+const { mockSanityFetch } = vi.hoisted(() => ({
+  mockSanityFetch: vi.fn().mockResolvedValue([]),
+}));
+
+// Mock Sanity client to avoid projectId requirement in tests
+vi.mock("@/lib/sanity/client", () => ({
+  sanityClient: { fetch: mockSanityFetch },
+}));
 
 // Helper to create NextRequest
 function createRequest(url: string): NextRequest {
@@ -25,22 +32,12 @@ describe("GET /api/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Use vi.stubGlobal for proper cleanup between tests
-    vi.stubGlobal("fetch", mockFetch);
-
-    // Setup mock fetch to return empty Drupal responses by default
-    // This allows tests to pass without complex schema-compliant mocks
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [],
-        links: {},
-      }),
-    });
+    // Reset Sanity mock to return empty arrays by default
+    mockSanityFetch.mockResolvedValue([]);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    mockSanityFetch.mockResolvedValue([]);
   });
 
   describe("Query Validation", () => {
@@ -202,10 +199,8 @@ describe("GET /api/search", () => {
   });
 
   describe("Error Handling", () => {
-    it("should return 500 when fetch throws", async () => {
-      mockFetch.mockImplementation(() => {
-        throw new Error("boom");
-      });
+    it("should return 500 when Sanity fetch throws", async () => {
+      mockSanityFetch.mockRejectedValueOnce(new Error("boom"));
 
       const request = createRequest("/api/search?q=test");
       const response = await GET(request);

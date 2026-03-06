@@ -6,10 +6,10 @@
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import type { SanityTeam } from "@/lib/effect/services/SanityService";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
-import type { Team } from "@/lib/effect/schemas";
-import { parseAgeGroup } from "@/app/(main)/team/[slug]/utils";
+import { getSanityAgeGroup } from "@/app/(main)/team/[slug]/utils";
 
 export const metadata: Metadata = {
   title: "Jeugdploegen | KCVV Elewijt",
@@ -24,54 +24,39 @@ export const metadata: Metadata = {
 };
 
 /**
- * Transform Drupal Team to TeamData for TeamOverview component
+ * Transform Sanity Team to TeamData for TeamOverview component
  */
-function transformTeamToData(team: Team): TeamData | null {
-  const ageGroup = parseAgeGroup(team);
+function transformTeamToData(team: SanityTeam): TeamData | null {
+  const ageGroup = getSanityAgeGroup(team);
 
   // Only include youth teams (those with age groups)
   if (!ageGroup) return null;
 
-  // Extract final path segment from alias (e.g., "/team/u15a" -> "u15a")
-  const pathAlias = team.attributes.path?.alias || "";
-  const slug = pathAlias.split("/").filter(Boolean).pop() || team.id;
-
-  // Log the generated slug (server-side). Useful to verify links from Drupal.
-  console.info(
-    `[jeugd] Overview link -> /team/${slug} (alias: ${pathAlias || team.id})`,
-  );
-
   return {
-    id: team.id,
-    name: team.attributes.title,
-    href: `/team/${slug}`,
+    id: team._id,
+    name: team.name,
+    href: `/team/${team.slug.current}`,
     ageGroup,
     teamType: "youth",
-    tagline:
-      team.attributes.field_division_full ||
-      team.attributes.field_tagline ||
-      undefined,
+    tagline: team.divisionFull ?? team.tagline ?? undefined,
   };
 }
 
 /**
- * Fetch all youth teams from Drupal
+ * Fetch all youth teams from Sanity
  */
 async function fetchYouthTeams(): Promise<TeamData[]> {
   try {
     const teams = await runPromise(
       Effect.gen(function* () {
-        const drupal = yield* DrupalService;
-        return yield* drupal.getTeams();
+        const sanity = yield* SanityService;
+        return yield* sanity.getTeams();
       }),
     );
 
-    // Transform and filter to only youth teams
-    const youthTeams = teams
+    return teams
       .map(transformTeamToData)
       .filter((team): team is TeamData => team !== null);
-
-    return youthTeams;
   } catch (error) {
     console.error("Failed to fetch youth teams:", error);
     return [];

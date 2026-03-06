@@ -1,14 +1,33 @@
 import "dotenv/config";
 import { JSDOM } from "jsdom";
-import { htmlToBlocks } from "@portabletext/to-portable-text";
+import { htmlToBlocks } from "@portabletext/block-tools";
+import { Schema } from "@sanity/schema";
 import { fetchAllPages, drupalUrl } from "./drupal-fetcher";
 import { uploadImageFromUrl, createDoc } from "./sanity-uploader";
+
+// Minimal schema so htmlToBlocks knows which block type to use
+const schema = Schema.compile({
+  name: "migration",
+  types: [
+    {
+      name: "article",
+      type: "document",
+      fields: [{ name: "body", type: "array", of: [{ type: "block" }] }],
+    },
+  ],
+});
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const blockContentType = (schema.get("article") as any).fields.find(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (f: any) => f.name === "body",
+).type;
 
 interface DrupalArticle {
   id: string;
   attributes: {
     title: string;
     status: boolean;
+    created?: string | null;
     path?: { alias?: string };
     body?: { processed?: string } | null;
     publish_on?: string | null;
@@ -16,7 +35,8 @@ interface DrupalArticle {
   };
   relationships: {
     field_media_article_image?: { data: { id: string } | null };
-    field_tags?: { data: Array<{ id: string }> };
+    field_tags?: { data: Array<{ type: string; id: string }> };
+    field_related_content?: { data: Array<{ type: string; id: string }> };
   };
 }
 
@@ -61,19 +81,34 @@ async function main() {
       }
     }
 
-    // Tags
+    // Tags — vocabulary is "category" (type: taxonomy_term--category)
     const tags: string[] = [];
     for (const tagRef of article.relationships.field_tags?.data ?? []) {
-      const termRes = await fetch(drupalUrl(`taxonomy_term/tags/${tagRef.id}`));
+      // Derive JSON:API path from type: "taxonomy_term--category" → "taxonomy_term/category"
+      const resourcePath = tagRef.type.replace("--", "/");
+      const termRes = await fetch(drupalUrl(`${resourcePath}/${tagRef.id}`));
       if (termRes.ok) {
         const termJson = (await termRes.json()) as { data: DrupalTerm };
         tags.push(termJson.data.attributes.name);
       }
     }
 
+    // Related articles — field_related_content may reference players/teams/articles;
+    // only keep node--article references and map to Sanity IDs
+    const relatedArticles = (
+      article.relationships.field_related_content?.data ?? []
+    )
+      .filter((ref) => ref.type === "node--article")
+      .map((ref) => ({
+        _type: "reference" as const,
+        _ref: `article-drupal-${ref.id}`,
+        _key: ref.id,
+        _weak: true, // don't fail if target doesn't exist (e.g. unpublished)
+      }));
+
     // Body: HTML → Portable Text (jsdom for Node.js DOMParser compatibility)
     const body = article.attributes.body?.processed
-      ? htmlToBlocks(article.attributes.body.processed, {
+      ? htmlToBlocks(article.attributes.body.processed, blockContentType, {
           parseHtml: (html) => new JSDOM(html).window.document,
         })
       : [];
@@ -87,10 +122,12 @@ async function main() {
       _type: "article",
       title: article.attributes.title,
       slug: { _type: "slug", current: slug },
-      publishAt: article.attributes.publish_on ?? null,
+      // publish_on is only set for scheduled articles; fall back to created date
+      publishAt: article.attributes.publish_on ?? article.attributes.created ?? null,
       featured: article.attributes.field_featured ?? false,
       tags,
       body,
+      ...(relatedArticles.length > 0 ? { relatedArticles } : {}),
       ...(coverAssetId
         ? {
             coverImage: {

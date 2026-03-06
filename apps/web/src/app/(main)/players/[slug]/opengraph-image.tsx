@@ -12,8 +12,7 @@
 import { ImageResponse } from "next/og";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
-import { getTeamName } from "./utils";
+import { SanityService } from "@/lib/effect/services/SanityService";
 
 export const runtime = "edge";
 
@@ -47,16 +46,20 @@ export default async function Image({ params }: ImageProps) {
   try {
     const player = await runPromise(
       Effect.gen(function* () {
-        const drupal = yield* DrupalService;
-        return yield* drupal.getPlayerBySlug(slug);
+        const sanity = yield* SanityService;
+        return yield* sanity.getPlayerByPsdId(slug);
       }),
     );
 
-    firstName = player.attributes.field_firstname || "";
-    lastName = player.attributes.field_lastname || "";
-    position = player.attributes.field_position || "";
-    number = player.attributes.field_shirtnumber ?? undefined;
-    teamName = getTeamName(player);
+    if (player) {
+      firstName = player.firstName ?? "";
+      lastName = player.lastName ?? "";
+      position = player.keeper
+        ? "Keeper"
+        : (player.position ?? player.positionPsd ?? "");
+      number = player.jerseyNumber ?? undefined;
+      teamName = "KCVV Elewijt";
+    }
   } catch {
     // Use fallback values if player not found
     firstName = "KCVV";
