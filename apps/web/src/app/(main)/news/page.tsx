@@ -1,131 +1,76 @@
 /**
  * News Listing Page
- * Displays paginated list of articles with category filters
+ * Displays articles with category filters, sourced from Sanity
  */
 
 import { Effect } from "effect";
-import Link from "next/link";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import type { SanityArticle } from "@/lib/effect/services/SanityService";
 import { ArticleCard, CategoryFilters } from "@/components/article";
 import { PageTitle } from "@/components/layout";
 import { formatArticleDate } from "@/lib/utils/dates";
-import { isDrupalImage } from "@/lib/utils/drupal-content";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 interface NewsPageProps {
   searchParams: Promise<{ category?: string; page?: string }>;
 }
 
-/**
- * Generate page title and description for the news archive, optionally tailored to a category filter.
- *
- * If a category slug is provided and matches a known category, the returned metadata includes that
- * category's name in the title and description. On error or when no matching category is found,
- * returns the default archive title and description.
- *
- * @returns Metadata object containing `title` and `description`; when a category match is found
- * the values include the category name, otherwise they are the default archive metadata.
- */
 export async function generateMetadata({
   searchParams,
 }: NewsPageProps): Promise<Metadata> {
-  const params = await searchParams;
-  const categorySlug = params.category;
-
-  // If no category filter, return default metadata
-  if (!categorySlug) {
+  const { category } = await searchParams;
+  if (!category) {
     return {
       title: "Nieuwsarchief | KCVV Elewijt",
       description:
         "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
     };
   }
-
-  // Fetch tags to find category name
-  try {
-    const tags = await runPromise(
-      Effect.gen(function* () {
-        const drupal = yield* DrupalService;
-        return yield* drupal.getTags({ vocabulary: "category" });
-      }),
-    );
-
-    // Find matching category
-    const category = tags.find((tag) => {
-      const slug = tag.attributes.path?.alias?.split("/").pop();
-      return slug === categorySlug;
-    });
-
-    if (category) {
-      return {
-        title: `${category.attributes.name} - Nieuwsarchief | KCVV Elewijt`,
-        description: `Bekijk al het ${category.attributes.name} nieuws van KCVV Elewijt.`,
-      };
-    }
-  } catch (error) {
-    console.error("Failed to generate metadata:", error);
-  }
-
-  // Fallback if category not found
   return {
-    title: "Nieuwsarchief | KCVV Elewijt",
-    description:
-      "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
+    title: `${category} - Nieuwsarchief | KCVV Elewijt`,
+    description: `Bekijk al het ${category} nieuws van KCVV Elewijt.`,
   };
 }
 
-/**
- * Render the news listing page with category filters, a paginated article grid, and navigation controls.
- *
- * @param searchParams - A promise resolving to an object with optional `category` and `page` string values used to determine the active category filter and current page
- * @returns The JSX element for the news listing page
- */
+const PAGE_SIZE = 9;
+
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.category;
-
-  // Parse and validate page parameter
   const parsedPage = params.page ? parseInt(params.page, 10) : 1;
   const page = Number.isFinite(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
 
-  const limit = 9; // 3 complete rows in 3-column grid
-
-  // First fetch tags to look up category ID
-  const tags = await runPromise(
+  const allArticles = await runPromise(
     Effect.gen(function* () {
-      const drupal = yield* DrupalService;
-      return yield* drupal.getTags({ vocabulary: "category" });
-    }),
+      const sanity = yield* SanityService;
+      return yield* sanity.getArticles();
+    }).pipe(Effect.catchAll(() => Effect.succeed([] as SanityArticle[]))),
   );
 
-  // Extract slug from path and find matching category
-  const activeCategory = categorySlug
-    ? tags.find((tag) => {
-        const slug = tag.attributes.path?.alias?.split("/").pop();
-        return slug === categorySlug;
-      })
-    : undefined;
+  // Collect unique tags across all articles for the category filter
+  const allTags = Array.from(
+    new Set(allArticles.flatMap((a) => a.tags ?? [])),
+  ).sort();
 
-  const categoryId = activeCategory?.attributes.drupal_internal__tid;
+  // Filter by active category tag
+  const filtered = categorySlug
+    ? allArticles.filter((a) => a.tags?.includes(categorySlug))
+    : allArticles;
 
-  // Fetch articles with category filter
-  const { articles, links } = await runPromise(
-    Effect.gen(function* () {
-      const drupal = yield* DrupalService;
-      return yield* drupal.getArticles({
-        page,
-        limit,
-        categoryId,
-        sort: "-created",
-      });
-    }),
-  );
+  // In-memory pagination
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const articles = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // Generate dynamic page title
-  const pageTitle = activeCategory
-    ? `${activeCategory.attributes.name} - Nieuwsarchief KCVV Elewijt`
+  const pageTitle = categorySlug
+    ? `${categorySlug} - Nieuwsarchief KCVV Elewijt`
     : "Nieuwsarchief KCVV Elewijt";
+
+  const categories = allTags.map((tag) => ({
+    id: tag,
+    attributes: { name: tag, slug: tag },
+  }));
 
   return (
     <>
@@ -136,75 +81,53 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         <section className="mb-6 uppercase">
           <h5 className="mb-2">Filter op categorie</h5>
           <CategoryFilters
-            categories={tags.map((tag) => ({
-              id: tag.id,
-              attributes: {
-                name: tag.attributes.name,
-                slug: tag.attributes.path?.alias?.split("/").pop() || "",
-              },
-            }))}
+            categories={categories}
             activeCategory={categorySlug}
           />
         </section>
 
         {/* Articles grid */}
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 mb-6">
-          {articles.map((article) => {
-            const imageData =
-              article.relationships.field_media_article_image?.data;
-            const hasValidImage = imageData && isDrupalImage(imageData);
-            const tags =
-              article.relationships.field_tags?.data
-                ?.map((tag) =>
-                  "attributes" in tag && tag.attributes?.name
-                    ? { name: tag.attributes.name }
-                    : null,
-                )
-                .filter((tag): tag is { name: string } => tag !== null) || [];
-
-            return (
-              <ArticleCard
-                key={article.id}
-                title={article.attributes.title}
-                href={article.attributes.path.alias}
-                imageUrl={hasValidImage ? imageData.uri.url : undefined}
-                imageAlt={
-                  hasValidImage
-                    ? imageData.alt || article.attributes.title
-                    : article.attributes.title
-                }
-                date={formatArticleDate(article.attributes.created)}
-                tags={tags}
-              />
-            );
-          })}
+          {articles.map((article) => (
+            <ArticleCard
+              key={article._id}
+              title={article.title}
+              href={`/news/${article.slug.current}`}
+              imageUrl={article.coverImageUrl ?? undefined}
+              imageAlt={article.title}
+              date={
+                article.publishAt
+                  ? formatArticleDate(new Date(article.publishAt))
+                  : undefined
+              }
+              tags={(article.tags ?? []).map((name) => ({ name }))}
+            />
+          ))}
         </main>
 
         {/* Pagination */}
         <footer className="border-t border-kcvv-green-100 pt-6 grid grid-cols-2 gap-4">
           <div>
-            {links?.prev && (
+            {page > 1 ? (
               <Link
                 href={`/news${categorySlug ? `?category=${categorySlug}&page=${page - 1}` : `?page=${page - 1}`}`}
                 className="text-kcvv-green-bright hover:underline"
               >
                 &laquo; Vorige
               </Link>
-            )}
-            {!links?.prev && (
+            ) : (
               <span className="text-gray-400">&laquo; Vorige</span>
             )}
           </div>
           <div className="text-right">
-            {links?.next && (
+            {page < totalPages ? (
               <Link
                 href={`/news${categorySlug ? `?category=${categorySlug}&page=${page + 1}` : `?page=${page + 1}`}`}
                 className="text-kcvv-green-bright hover:underline"
               >
                 Volgende &raquo;
               </Link>
-            )}
-            {!links?.next && (
+            ) : (
               <span className="text-gray-400">Volgende &raquo;</span>
             )}
           </div>
@@ -214,7 +137,4 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   );
 }
 
-/**
- * Enable ISR with 1 hour revalidation
- */
 export const revalidate = 3600;
