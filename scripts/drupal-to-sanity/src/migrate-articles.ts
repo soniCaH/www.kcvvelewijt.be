@@ -5,14 +5,14 @@ import { Schema } from "@sanity/schema";
 import { fetchAllPages, drupalUrl } from "./drupal-fetcher";
 import { uploadImageFromUrl, createDoc } from "./sanity-uploader";
 
-// Minimal schema — include image so htmlToBlocks emits image blocks
+// Minimal schema for htmlToBlocks — image blocks are handled via custom rule, not schema
 const schema = Schema.compile({
   name: "migration",
   types: [
     {
       name: "article",
       type: "document",
-      fields: [{ name: "body", type: "array", of: [{ type: "block" }, { type: "image" }] }],
+      fields: [{ name: "body", type: "array", of: [{ type: "block" }] }],
     },
   ],
 });
