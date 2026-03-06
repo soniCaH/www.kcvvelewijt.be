@@ -32,7 +32,11 @@ export const structure: StructureResolver = (S) =>
       S.divider(),
       S.listItem()
         .title('Articles')
-        .child(S.documentTypeList('article').title('Articles')),
+        .child(
+          S.documentTypeList('article')
+            .title('Articles')
+            .defaultOrdering([{field: 'publishAt', direction: 'desc'}]),
+        ),
       S.listItem()
         .title('Sponsors')
         .child(S.documentTypeList('sponsor').title('Sponsors')),

@@ -4,6 +4,18 @@ export const article = defineType({
   name: 'article',
   title: 'Article',
   type: 'document',
+  orderings: [
+    {
+      title: 'Publish date, newest first',
+      name: 'publishAtDesc',
+      by: [{field: 'publishAt', direction: 'desc'}],
+    },
+    {
+      title: 'Publish date, oldest first',
+      name: 'publishAtAsc',
+      by: [{field: 'publishAt', direction: 'asc'}],
+    },
+  ],
   fields: [
     defineField({
       name: 'title',

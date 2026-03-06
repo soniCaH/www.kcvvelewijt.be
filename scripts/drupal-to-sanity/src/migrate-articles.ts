@@ -54,7 +54,7 @@ async function main() {
   console.log("Fetching articles from Drupal...");
   const articles = await fetchAllPages<DrupalArticle>(
     drupalUrl(
-      "node/article?include=field_media_article_image.field_media_image,field_tags&filter[status]=1&sort=-publish_on&page[limit]=50",
+      "node/article?include=field_media_article_image.field_media_image,field_tags&filter[status]=1&sort=-publish_on,-created&page[limit]=50",
     ),
   );
   console.log(`Found ${articles.length} articles`);
@@ -120,6 +120,8 @@ async function main() {
     await createDoc({
       _id: `article-drupal-${article.id}`,
       _type: "article",
+      // Preserve Drupal creation date so Studio "Sort by Created" works correctly
+      ...(article.attributes.created ? { _createdAt: article.attributes.created } : {}),
       title: article.attributes.title,
       slug: { _type: "slug", current: slug },
       // publish_on is only set for scheduled articles; fall back to created date
