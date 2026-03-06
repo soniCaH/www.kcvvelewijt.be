@@ -1,7 +1,11 @@
 "use client";
 
 import { PortableText } from "@portabletext/react";
-import type { PortableTextBlock } from "@portabletext/react";
+import type {
+  PortableTextBlock,
+  PortableTextComponents,
+} from "@portabletext/react";
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
 interface FileAttachmentValue {
@@ -10,7 +14,7 @@ interface FileAttachmentValue {
   fileUrl?: string;
 }
 
-const components = {
+const components: PortableTextComponents = {
   types: {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
       if (!value.fileUrl) return null;
@@ -20,7 +24,7 @@ const components = {
             href={value.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-kcvv-green-bright text-white rounded hover:bg-kcvv-green-darker transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-kcvv-green-bright text-white rounded hover:bg-kcvv-green-darker transition-colors no-underline"
           >
             ↓ {value.label ?? "Download"}
           </a>
@@ -30,16 +34,47 @@ const components = {
     image: ({
       value,
     }: {
-      value: { asset?: { url?: string }; alt?: string };
+      value: {
+        asset?: { url?: string };
+        alt?: string;
+        width?: number;
+        height?: number;
+      };
     }) => {
       if (!value.asset?.url) return null;
       return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={value.asset.url}
-          alt={value.alt ?? ""}
-          className="my-4 rounded"
-        />
+        <figure className="my-6">
+          <Image
+            src={value.asset.url}
+            alt={value.alt ?? ""}
+            width={value.width ?? 800}
+            height={value.height ?? 450}
+            className="rounded w-full h-auto"
+          />
+        </figure>
+      );
+    },
+  },
+  block: {
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-kcvv-green-bright pl-4 my-4 italic text-gray-600 not-italic">
+        {children}
+      </blockquote>
+    ),
+  },
+  marks: {
+    link: ({ children, value }) => {
+      const href: string = value?.href ?? "#";
+      const isExternal = href.startsWith("http");
+      return (
+        <a
+          href={href}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="text-kcvv-green-bright underline hover:text-kcvv-green-darker transition-colors"
+        >
+          {children}
+        </a>
       );
     },
   },
@@ -55,31 +90,16 @@ export const SanityArticleBody = ({
   className,
 }: SanityArticleBodyProps) => {
   return (
-    <div className={cn("article-body px-3 lg:px-0 py-3", className)}>
-      <style>{`
-        .article-body a:not(.btn) {
-          color: var(--color-kcvv-green-bright);
-          text-decoration: underline;
-        }
-        .article-body a:not(.btn):hover {
-          color: var(--color-kcvv-green-darker);
-        }
-        .article-body blockquote {
-          border-left: 4px solid var(--color-kcvv-green-bright);
-          padding-left: 1rem;
-          margin: 1rem 0;
-          color: #555;
-          font-style: italic;
-        }
-        .article-body h1, .article-body h2, .article-body h3,
-        .article-body h4, .article-body h5, .article-body h6 {
-          font-weight: bold;
-          margin: 1rem 0 0.5rem;
-        }
-        .article-body p { margin: 0.75rem 0; }
-        .article-body ul { list-style: disc; padding-left: 1.5rem; margin: 0.75rem 0; }
-        .article-body ol { list-style: decimal; padding-left: 1.5rem; margin: 0.75rem 0; }
-      `}</style>
+    <div
+      className={cn(
+        "prose prose-lg max-w-none px-3 lg:px-0 py-3",
+        "prose-headings:font-bold prose-headings:text-gray-900",
+        "prose-a:text-kcvv-green-bright prose-a:no-underline hover:prose-a:text-kcvv-green-darker",
+        "prose-blockquote:border-l-4 prose-blockquote:border-kcvv-green-bright prose-blockquote:not-italic prose-blockquote:text-gray-600",
+        "prose-table:w-full prose-th:bg-gray-100 prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-gray-200",
+        className,
+      )}
+    >
       <PortableText value={content} components={components} />
     </div>
   );
