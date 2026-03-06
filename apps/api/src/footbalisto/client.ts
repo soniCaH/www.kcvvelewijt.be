@@ -218,6 +218,8 @@ export const FootbalistoClientLive = Layer.effect(
                     ? ({ ...next, teamId: team.id } as PsdGame)
                     : null;
                 }),
+                // A single team failing should not abort the whole request
+                Effect.catchAll(() => Effect.succeed(null)),
               ),
             ),
             { concurrency: 5 },
