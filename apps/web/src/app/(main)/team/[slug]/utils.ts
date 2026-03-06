@@ -10,6 +10,11 @@ import type {
   RankingEntry,
 } from "@/lib/effect/schemas";
 import type {
+  SanityPlayer,
+  SanityStaffMember,
+  SanityTeam,
+} from "@/lib/effect/services/SanityService";
+import type {
   ScheduleMatch,
   ScheduleTeam,
 } from "@/components/team/TeamSchedule";
@@ -254,4 +259,65 @@ export function transformRankingToStandings(
     goalDifference: entry.goal_difference,
     points: entry.points,
   };
+}
+
+// ─── Sanity transform functions ──────────────────────────────────────────────
+
+/**
+ * Transform SanityPlayer to RosterPlayer for TeamRoster component
+ */
+export function transformSanityPlayerToRoster(
+  player: SanityPlayer,
+): RosterPlayer {
+  const position = player.keeper
+    ? "Keeper"
+    : (player.position ?? player.positionPsd ?? "Speler");
+  return {
+    id: player._id,
+    firstName: player.firstName ?? "",
+    lastName: player.lastName ?? "",
+    position,
+    number: player.jerseyNumber ?? undefined,
+    imageUrl: player.transparentImageUrl ?? player.psdImageUrl ?? undefined,
+    href: `/players/${player.psdId}`,
+  };
+}
+
+/**
+ * Transform SanityStaffMember to StaffMember for TeamRoster component
+ */
+export function transformSanityStaffToMember(
+  member: SanityStaffMember,
+): StaffMember {
+  return {
+    id: member._id,
+    firstName: member.firstName,
+    lastName: member.lastName,
+    role: member.role,
+    imageUrl: member.photoUrl ?? undefined,
+  };
+}
+
+/**
+ * Get team tagline from Sanity team (tagline → divisionFull → division)
+ */
+export function getSanityTeamTagline(team: SanityTeam): string | undefined {
+  return team.tagline ?? team.divisionFull ?? team.division ?? undefined;
+}
+
+/**
+ * Derive team type from Sanity team age field
+ */
+export function getSanityTeamType(team: SanityTeam): "youth" | "senior" {
+  const age = team.age?.toLowerCase() ?? "";
+  return age.startsWith("u") || age.includes("jeugd") ? "youth" : "senior";
+}
+
+/**
+ * Derive age group label from Sanity team age field (e.g. "U15", "U17A")
+ */
+export function getSanityAgeGroup(team: SanityTeam): string | undefined {
+  if (!team.age) return undefined;
+  const match = team.age.match(/U\d{1,2}[A-Z]?/i);
+  return match ? match[0].toUpperCase() : undefined;
 }

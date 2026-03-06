@@ -58,6 +58,9 @@ export interface SanityTeam {
   age: string;
   gender: string;
   footbelId: number | null;
+  leagueId: number | null;
+  division: string | null;
+  divisionFull: string | null;
   tagline: string | null;
   teamImageUrl: string | null;
   trainingSchedule: SanityTrainingSession[];
