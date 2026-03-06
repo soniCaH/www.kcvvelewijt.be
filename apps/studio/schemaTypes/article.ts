@@ -43,7 +43,7 @@ export const article = defineType({
       name: 'body',
       title: 'Body',
       type: 'array',
-      of: [{type: 'block'}, {type: 'image', options: {hotspot: true}}],
+      of: [{type: 'block'}, {type: 'image', options: {hotspot: true}}, {type: 'fileAttachment'}],
     }),
     defineField({
       name: 'relatedArticles',

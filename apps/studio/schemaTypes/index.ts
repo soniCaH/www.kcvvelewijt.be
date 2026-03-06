@@ -5,5 +5,6 @@ import {article} from './article'
 import {sponsor} from './sponsor'
 import {event} from './event'
 import {page} from './page'
+import {fileAttachment} from './fileAttachment'
 
-export const schemaTypes = [player, team, trainingDay, staffMember, article, sponsor, event, page]
+export const schemaTypes = [player, team, trainingDay, staffMember, article, sponsor, event, page, fileAttachment]
