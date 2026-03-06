@@ -114,7 +114,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <div className="mb-6 lg:mb-10">
         <main className="w-full max-w-inner-lg mx-auto px-0 lg:flex lg:flex-row-reverse">
-          <aside className="lg:flex lg:flex-col lg:max-w-[20rem] lg:self-start">
+          <aside className="lg:flex lg:flex-col lg:w-[20rem] lg:shrink-0 lg:self-start">
             <ArticleMetadata
               author="KCVV Elewijt"
               date={
