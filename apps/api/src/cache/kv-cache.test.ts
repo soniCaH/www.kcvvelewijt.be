@@ -22,6 +22,9 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
     PSD_API_CLUB: "test-club",
     PSD_API_AUTH: "test-auth",
     PSD_CACHE: mockKv as unknown as KVNamespace,
+    SANITY_PROJECT_ID: "test-project",
+    SANITY_DATASET: "test",
+    SANITY_API_TOKEN: "test-token",
   });
 }
 

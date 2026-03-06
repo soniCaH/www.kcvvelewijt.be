@@ -37,6 +37,9 @@ importers:
       "@kcvv/api-contract":
         specifier: workspace:*
         version: link:../../packages/api-contract
+      "@sanity/client":
+        specifier: ^7.16.0
+        version: 7.16.0(debug@4.4.3)
       effect:
         specifier: 3.19.19
         version: 3.19.19

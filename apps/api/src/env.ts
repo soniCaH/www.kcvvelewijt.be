@@ -7,6 +7,9 @@ export interface WorkerEnv {
   readonly PSD_API_CLUB: string; // wrangler secret
   readonly PSD_API_AUTH: string; // wrangler secret (Authorization header value)
   readonly PSD_CACHE: KVNamespace;
+  readonly SANITY_PROJECT_ID: string; // "vhb33jaz"
+  readonly SANITY_DATASET: string; // "production" or "staging"
+  readonly SANITY_API_TOKEN: string; // write token — wrangler secret
 }
 
 export class WorkerEnvTag extends Context.Tag("WorkerEnv")<
