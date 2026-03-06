@@ -41,6 +41,8 @@ function makeClientMock(
     getRawMatchDetail: () => Effect.fail(new Error("not needed") as never),
     getRawRanking: () => Effect.succeed(rawCompetitions),
     getRawTeamStats: () => Effect.fail(new Error("not needed") as never),
+    getRawTeams: () => Effect.succeed([]),
+    getRawMembers: () => Effect.succeed([]),
     ...overrides,
   };
 }
@@ -86,6 +88,8 @@ describe("getRankingHandler", () => {
       getRawMatchDetail: () => Effect.fail(new Error("unexpected") as never),
       getRawRanking: () => Effect.fail(new Error("unexpected") as never),
       getRawTeamStats: () => Effect.fail(new Error("unexpected") as never),
+      getRawTeams: () => Effect.fail(new Error("unexpected") as never),
+      getRawMembers: () => Effect.fail(new Error("unexpected") as never),
     };
 
     const result = await Effect.runPromise(

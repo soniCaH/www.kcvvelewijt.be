@@ -12,6 +12,9 @@ SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "production"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 
+[triggers]
+crons = ["0 2 * * *"] # 02:00 UTC daily
+
 [[kv_namespaces]]
 binding = "PSD_CACHE"
 id = "82533c23954d4ed98871dd53465c5c0e"

@@ -2,6 +2,12 @@ import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import {
+  PsdMember,
+  PsdMembersPage,
+  PsdTeam,
+  PsdTeamsArray,
+} from "@kcvv/api-contract";
+import {
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
   PsdSeason,
@@ -60,6 +66,13 @@ export interface FootbalistoClientInterface {
   readonly getRawTeamStats: (
     teamId: number,
   ) => Effect.Effect<PsdTeamStatsResponse, FootbalistoClientError>;
+  readonly getRawTeams: () => Effect.Effect<
+    readonly PsdTeam[],
+    FootbalistoClientError
+  >;
+  readonly getRawMembers: (
+    teamId: number,
+  ) => Effect.Effect<readonly PsdMember[], FootbalistoClientError>;
 }
 
 export class FootbalistoClient extends Context.Tag("FootbalistoClient")<
@@ -198,6 +211,15 @@ export const FootbalistoClientLive = Layer.effect(
             psdHeaders,
           );
         }),
+
+      getRawTeams: () => fetchJson(`${base}/teams`, PsdTeamsArray, psdHeaders),
+
+      getRawMembers: (teamId: number) =>
+        fetchJson(
+          `${base}/teams/${teamId}/members`,
+          PsdMembersPage,
+          psdHeaders,
+        ).pipe(Effect.map((page) => page.content)),
     };
   }),
 );
