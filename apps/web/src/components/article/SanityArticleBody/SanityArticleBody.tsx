@@ -40,7 +40,16 @@ const components: PortableTextComponents = {
       if (!value.html) return null;
       return (
         <div
-          className="my-4 overflow-x-auto"
+          className={cn(
+            "my-4 overflow-x-auto",
+            // Explicit table styling — prose :where() selectors lose to browser defaults
+            // on raw Drupal HTML. Arbitrary variants provide full specificity.
+            "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm",
+            "[&_thead]:bg-gray-100",
+            "[&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold",
+            "[&_td]:border [&_td]:border-gray-200 [&_td]:p-2 [&_td]:align-top",
+            "[&_tr:nth-child(even)_td]:bg-gray-50",
+          )}
           dangerouslySetInnerHTML={{ __html: value.html }}
         />
       );
