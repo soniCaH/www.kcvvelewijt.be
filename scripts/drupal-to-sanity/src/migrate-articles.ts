@@ -22,6 +22,46 @@ const blockContentType = (schema.get("article") as any).fields.find(
   (f: any) => f.name === "body",
 ).type;
 
+/**
+ * Split an HTML string at top-level <table> boundaries.
+ * Non-table segments are converted via htmlToBlocks (preserves ul, ol, blockquote, etc.).
+ * Table segments become {_type: 'htmlTable'} objects with the raw HTML preserved verbatim
+ * (all th, td, tr, thead, tbody semantics intact).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function htmlSplitToBlocks(html: string, blockContentType: any): unknown[] {
+  const doc = new JSDOM(html).window.document;
+  const blocks: unknown[] = [];
+  let buffer = '';
+
+  const flushBuffer = () => {
+    if (!buffer.trim()) { buffer = ''; return; }
+    const ptBlocks = htmlToBlocks(buffer, blockContentType, {
+      parseHtml: (h) => new JSDOM(h).window.document,
+    });
+    blocks.push(...ptBlocks);
+    buffer = '';
+  };
+
+  for (const child of Array.from(doc.body.childNodes)) {
+    if (child.nodeName === 'TABLE') {
+      flushBuffer();
+      blocks.push({
+        _type: 'htmlTable',
+        _key: crypto.randomUUID(),
+        html: (child as Element).outerHTML,
+      });
+    } else if (child.nodeName === '#text') {
+      const text = child.textContent?.trim() ?? '';
+      if (text) buffer += `<p>${text}</p>`;
+    } else {
+      buffer += (child as Element).outerHTML ?? '';
+    }
+  }
+  flushBuffer();
+  return blocks;
+}
+
 interface DrupalArticle {
   id: string;
   attributes: {
@@ -106,11 +146,9 @@ async function main() {
         _weak: true, // don't fail if target doesn't exist (e.g. unpublished)
       }));
 
-    // Body: HTML → Portable Text (jsdom for Node.js DOMParser compatibility)
+    // Body: HTML → Portable Text, preserving <table> blocks as htmlTable objects
     const body = article.attributes.body?.processed
-      ? htmlToBlocks(article.attributes.body.processed, blockContentType, {
-          parseHtml: (html) => new JSDOM(html).window.document,
-        })
+      ? htmlSplitToBlocks(article.attributes.body.processed, blockContentType)
       : [];
 
     // Slug from Drupal path alias (/news/my-article → my-article)

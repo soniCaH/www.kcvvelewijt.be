@@ -14,6 +14,11 @@ interface FileAttachmentValue {
   fileUrl?: string;
 }
 
+interface HtmlTableValue {
+  _type: "htmlTable";
+  html?: string;
+}
+
 const components: PortableTextComponents = {
   types: {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
@@ -29,6 +34,15 @@ const components: PortableTextComponents = {
             ↓ {value.label ?? "Download"}
           </a>
         </div>
+      );
+    },
+    htmlTable: ({ value }: { value: HtmlTableValue }) => {
+      if (!value.html) return null;
+      return (
+        <div
+          className="my-4 overflow-x-auto"
+          dangerouslySetInnerHTML={{ __html: value.html }}
+        />
       );
     },
     image: ({
