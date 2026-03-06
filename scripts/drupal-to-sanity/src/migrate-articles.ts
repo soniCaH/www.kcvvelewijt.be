@@ -5,14 +5,14 @@ import { Schema } from "@sanity/schema";
 import { fetchAllPages, drupalUrl } from "./drupal-fetcher";
 import { uploadImageFromUrl, createDoc } from "./sanity-uploader";
 
-// Minimal schema so htmlToBlocks knows which block type to use
+// Minimal schema — include image so htmlToBlocks emits image blocks
 const schema = Schema.compile({
   name: "migration",
   types: [
     {
       name: "article",
       type: "document",
-      fields: [{ name: "body", type: "array", of: [{ type: "block" }] }],
+      fields: [{ name: "body", type: "array", of: [{ type: "block" }, { type: "image" }] }],
     },
   ],
 });
@@ -23,21 +23,71 @@ const blockContentType = (schema.get("article") as any).fields.find(
 ).type;
 
 /**
- * Split an HTML string at top-level <table> boundaries.
- * Non-table segments are converted via htmlToBlocks (preserves ul, ol, blockquote, etc.).
- * Table segments become {_type: 'htmlTable'} objects with the raw HTML preserved verbatim
- * (all th, td, tr, thead, tbody semantics intact).
+ * Upload all <img> tags in the HTML (outside <table> elements) to Sanity
+ * and annotate each with data-sanity-asset-id so the custom htmlToBlocks
+ * rule can create proper asset references without a second DOM pass.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function htmlSplitToBlocks(html: string, blockContentType: any): unknown[] {
+async function uploadBodyImages(
+  doc: Document,
+  drupalBase: string,
+): Promise<void> {
+  const imgs = Array.from(doc.querySelectorAll('img'));
+  await Promise.all(
+    imgs.map(async (img) => {
+      if (img.closest('table')) return; // tables are stored as raw HTML
+      const src = img.getAttribute('src');
+      if (!src) return;
+      const fullUrl = src.startsWith('http') ? src : `${drupalBase}${src}`;
+      try {
+        const assetId = await uploadImageFromUrl(fullUrl);
+        img.setAttribute('data-sanity-asset-id', assetId);
+      } catch (e) {
+        console.warn(`  ⚠ Could not upload body image ${src}:`, e);
+      }
+    }),
+  );
+}
+
+/**
+ * Split an HTML string at top-level <table> boundaries.
+ * - <table> → {_type:'htmlTable'} with raw HTML (all thead/tbody/th/td semantics preserved)
+ * - Everything else → htmlToBlocks (handles ul, ol, blockquote, headings, links)
+ * - <img> tags → proper Sanity image blocks (assets pre-uploaded by uploadBodyImages)
+ */
+async function htmlSplitToBlocks(
+  html: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bct: any,
+  drupalBase: string,
+): Promise<unknown[]> {
   const doc = new JSDOM(html).window.document;
+
+  // Upload all non-table images first, annotate elements with asset IDs
+  await uploadBodyImages(doc, drupalBase);
+
   const blocks: unknown[] = [];
   let buffer = '';
 
   const flushBuffer = () => {
     if (!buffer.trim()) { buffer = ''; return; }
-    const ptBlocks = htmlToBlocks(buffer, blockContentType, {
+    const ptBlocks = htmlToBlocks(buffer, bct, {
       parseHtml: (h) => new JSDOM(h).window.document,
+      rules: [
+        {
+          // Convert annotated <img> elements to proper Sanity image blocks
+          deserialize(el, _next, block) {
+            if (el.nodeName !== 'IMG') return undefined;
+            const assetId = (el as Element).getAttribute('data-sanity-asset-id');
+            if (!assetId) return undefined;
+            return block({
+              _type: 'image',
+              _key: crypto.randomUUID(),
+              asset: { _type: 'reference', _ref: assetId },
+              alt: (el as Element).getAttribute('alt') ?? undefined,
+            });
+          },
+        },
+      ],
     });
     blocks.push(...ptBlocks);
     buffer = '';
@@ -147,8 +197,13 @@ async function main() {
       }));
 
     // Body: HTML → Portable Text, preserving <table> blocks as htmlTable objects
+    // and uploading <img> tags to Sanity as proper asset references
     const body = article.attributes.body?.processed
-      ? htmlSplitToBlocks(article.attributes.body.processed, blockContentType)
+      ? await htmlSplitToBlocks(
+          article.attributes.body.processed,
+          blockContentType,
+          process.env.DRUPAL_BASE_URL ?? "",
+        )
       : [];
 
     // Slug from Drupal path alias (/news/my-article → my-article)
