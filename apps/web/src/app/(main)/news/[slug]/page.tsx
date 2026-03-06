@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             />
           </aside>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-x-clip">
             {Array.isArray(article.body) && article.body.length > 0 && (
               <SanityArticleBody
                 content={article.body as PortableTextBlock[]}
