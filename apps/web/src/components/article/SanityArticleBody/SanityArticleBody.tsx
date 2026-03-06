@@ -66,7 +66,7 @@ const components: PortableTextComponents = {
     }) => {
       if (!value.asset?.url) return null;
       return (
-        <figure className="my-6 overflow-hidden rounded max-w-full">
+        <figure className="my-6 overflow-hidden rounded lg:-mr-80">
           <Image
             src={value.asset.url}
             alt={value.alt ?? ""}
