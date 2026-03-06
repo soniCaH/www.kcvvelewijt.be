@@ -66,13 +66,14 @@ const components: PortableTextComponents = {
     }) => {
       if (!value.asset?.url) return null;
       return (
-        <figure className="my-6">
+        <figure className="my-6 overflow-hidden rounded">
           <Image
             src={value.asset.url}
             alt={value.alt ?? ""}
             width={value.width ?? 800}
             height={value.height ?? 450}
-            className="rounded w-full h-auto"
+            className="w-full h-auto rounded transition-transform duration-300 ease-in-out hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 720px"
           />
         </figure>
       );
