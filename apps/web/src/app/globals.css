@@ -276,6 +276,11 @@ article a:hover,
   color: var(--color-kcvv-green-hover);
 }
 
+/* In-body article links get underlines for readability */
+.prose a {
+  text-decoration: underline;
+}
+
 /* Ensure navigation links stay white (override any default link styles) */
 nav a {
   text-decoration: none;
