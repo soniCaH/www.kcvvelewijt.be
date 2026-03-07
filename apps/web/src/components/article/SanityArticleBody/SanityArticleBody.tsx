@@ -118,7 +118,7 @@ export const SanityArticleBody = ({
       className={cn(
         "prose prose-lg max-w-none px-3 lg:px-0 py-3",
         "prose-headings:font-bold prose-headings:text-gray-900",
-        "prose-a:text-kcvv-green-bright prose-a:no-underline hover:prose-a:text-kcvv-green-darker",
+        "prose-a:text-kcvv-green-bright prose-a:underline hover:prose-a:text-kcvv-green-darker",
         "prose-blockquote:border-l-4 prose-blockquote:border-kcvv-green-bright prose-blockquote:not-italic prose-blockquote:text-gray-600",
         "prose-table:w-full prose-th:bg-gray-100 prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-gray-200",
         className,
