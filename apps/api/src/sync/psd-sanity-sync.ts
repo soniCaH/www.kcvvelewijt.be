@@ -18,7 +18,12 @@ export function transformMember(
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null, // strip time "HH:MM"
     nationality: psd.nationality,
     keeper: psd.keeper,
-    positionPsd: psd.bestPosition,
+    positionPsd:
+      typeof psd.bestPosition === "string"
+        ? psd.bestPosition
+        : psd.bestPosition !== null
+          ? psd.bestPosition.type.name
+          : null,
     psdImageUrl: psd.profilePictureURL
       ? `${baseUrl}${psd.profilePictureURL}`
       : null,
@@ -81,6 +86,10 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 1 }, // teams sequentially to avoid rate limits
   );
 }).pipe(
-  Effect.tapError((e) => Effect.log(`Sync failed: ${String(e)}`)),
+  Effect.tapError((e) =>
+    Effect.log(
+      `Sync failed: ${String(e)} | cause: ${e instanceof Error && e.cause ? String(e.cause) : "none"}`,
+    ),
+  ),
   Effect.annotateLogs({ service: "psd-sanity-sync" }),
 );
