@@ -1,11 +1,11 @@
 import {defineField, defineType} from 'sanity'
-import {TableIcon} from '@sanity/icons'
+import {InlineElementIcon} from '@sanity/icons'
 
 export const htmlTable = defineType({
   name: 'htmlTable',
   title: 'HTML Table',
   type: 'object',
-  icon: TableIcon,
+  icon: InlineElementIcon,
   fields: [
     defineField({
       name: 'html',
