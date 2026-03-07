@@ -276,8 +276,12 @@ article a:hover,
   color: var(--color-kcvv-green-hover);
 }
 
-/* In-body article links get underlines for readability */
+/* In-body article links match footer link style: underline on hover only */
 .prose a {
+  text-decoration: none;
+}
+
+.prose a:hover {
   text-decoration: underline;
 }
 
