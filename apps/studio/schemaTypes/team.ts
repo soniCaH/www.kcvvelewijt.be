@@ -99,6 +99,14 @@ export const team = defineType({
       readOnly: true,
     }),
     // Editorial
+    defineField({
+      name: 'showInNavigation',
+      title: 'Show in navigation',
+      type: 'boolean',
+      description:
+        'Uncheck to hide this team from the website navigation and team listings. Use for external/opponent teams or teams with their own nav item.',
+      initialValue: true,
+    }),
     defineField({name: 'tagline', title: 'Tagline', type: 'string'}),
     defineField({
       name: 'body',

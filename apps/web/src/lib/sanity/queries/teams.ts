@@ -1,4 +1,4 @@
-export const TEAMS_QUERY = `*[_type == "team"] | order(name asc) {
+export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | order(name asc) {
   _id, psdId, name, slug, age, gender, footbelId, leagueId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
   "teamImageUrl": teamImage.asset->url,
