@@ -28,16 +28,16 @@
 - For simple feature/fix tasks: read relevant code → implement → test. No planning phase needed.
 - When you learn something new about the Drupal/Footbalisto API (gotcha, edge case, failed approach), append it to the relevant skill file under "## Learnings".
 
-## Current State (updated: 2026-03-04)
+## Current State (updated: 2026-03-09)
 
 ### Platform Overhaul Phases (api-contract → BFF → CMS)
 
-| Phase | Description                                    | Status      | Issue |
-| ----- | ---------------------------------------------- | ----------- | ----- |
-| 0     | Monorepo Setup                                 | Done        | #721  |
-| 1     | api-contract (schemas + HttpApi)               | Done        | #722  |
-| 2     | Effect BFF in `apps/api/` (Cloudflare Workers) | Not started | #723  |
-| 3     | Sanity CMS (replace Drupal)                    | Not started | —     |
+| Phase | Description                                    | Status | Issue |
+| ----- | ---------------------------------------------- | ------ | ----- |
+| 0     | Monorepo Setup                                 | Done   | #721  |
+| 1     | api-contract (schemas + HttpApi)               | Done   | #722  |
+| 2     | Effect BFF in `apps/api/` (Cloudflare Workers) | Done   | #723  |
+| 3     | Sanity CMS (replace Drupal)                    | ~90%   | #724  |
 
 ### Migration Phases (Gatsby → Next.js)
 
@@ -45,12 +45,18 @@
 | ----------------------------- | ----------- | ----- |
 | 0: Monorepo Setup             | Done        | #721  |
 | 1: Design System + Foundation | Done        | —     |
-| 2: Content Pages              | ~70%        | —     |
+| 2: Content Pages              | Done        | —     |
 | 3: Team & Player Features     | Done        | —     |
 | 4: Calendar & Events          | Not started | #517  |
-| 5: Club Information Pages     | Not started | #518  |
+| 5: Club Information Pages     | ~10%        | #518  |
 | 6: Search & Utility           | ~90%        | #519  |
 | 7: Kiosk Mode                 | Not started | #520  |
+
+### Phase 3 remaining (#724)
+
+- Organigram → Sanity staffMember (#748)
+- Static pages → Sanity page schema
+- Nightly image sync verification (02:00 UTC)
 
 ## Git Workflow
 
