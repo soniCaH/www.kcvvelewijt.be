@@ -10,7 +10,7 @@ import { WorkerEnvTag } from "../env";
 export function transformMember(
   psd: PsdMember,
   baseUrl: string,
-): SanityPlayerDoc {
+): SanityPlayerDoc & { _psdImageUrl: string | null } {
   return {
     psdId: String(psd.id),
     firstName: psd.firstName,
@@ -24,7 +24,7 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
-    psdImageUrl: psd.profilePictureURL
+    _psdImageUrl: psd.profilePictureURL
       ? `${baseUrl}${psd.profilePictureURL}`
       : null,
   };
@@ -65,6 +65,9 @@ export const runSync = Effect.gen(function* () {
   const env = yield* WorkerEnvTag;
   const baseUrl = env.PSD_API_BASE_URL;
 
+  // Pre-fetch existing player image state to avoid redundant uploads
+  const imageState = yield* sanity.getPlayersImageState();
+
   const teams = yield* psd.getRawTeams();
 
   yield* Effect.forEach(
@@ -76,7 +79,22 @@ export const runSync = Effect.gen(function* () {
 
         yield* Effect.forEach(
           activePlayers,
-          (m) => sanity.upsertPlayer(transformMember(m, baseUrl)),
+          (m) =>
+            Effect.gen(function* () {
+              const doc = transformMember(m, baseUrl);
+              yield* sanity.upsertPlayer(doc);
+
+              const newImageUrl = doc._psdImageUrl;
+              if (newImageUrl) {
+                const existing = imageState.get(doc.psdId);
+                const needsUpload =
+                  !existing?.hasPsdImage ||
+                  existing.psdImageUrl !== newImageUrl;
+                if (needsUpload) {
+                  yield* sanity.uploadPlayerImage(doc.psdId, newImageUrl);
+                }
+              }
+            }),
           { concurrency: 5 },
         );
 

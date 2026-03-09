@@ -12,7 +12,6 @@ export interface SanityPlayerDoc {
   nationality: string | null;
   keeper: boolean;
   positionPsd: string | null; // from PSD bestPosition — null until KCVV populates
-  psdImageUrl: string | null; // absolute URL (base prepended)
 }
 
 export interface SanityTeamDoc {
@@ -40,12 +39,27 @@ export class SanityWriteError extends Error {
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
+export interface PlayerImageState {
+  psdImageUrl: string | null;
+  hasPsdImage: boolean;
+}
+
 export interface SanityWriteClientInterface {
   readonly upsertPlayer: (
     doc: SanityPlayerDoc,
   ) => Effect.Effect<void, SanityWriteError>;
   readonly upsertTeam: (
     doc: SanityTeamDoc,
+  ) => Effect.Effect<void, SanityWriteError>;
+  /** Fetch existing psdImageUrl + psdImage presence for all player docs. */
+  readonly getPlayersImageState: () => Effect.Effect<
+    Map<string, PlayerImageState>,
+    SanityWriteError
+  >;
+  /** Download image from imageUrl and upload to Sanity, patching psdImage + psdImageUrl. */
+  readonly uploadPlayerImage: (
+    psdId: string,
+    imageUrl: string,
   ) => Effect.Effect<void, SanityWriteError>;
 }
 
@@ -100,8 +114,60 @@ export const SanityWriteClientLive = Layer.effect(
           nationality: doc.nationality,
           keeper: doc.keeper,
           positionPsd: doc.positionPsd,
-          psdImageUrl: doc.psdImageUrl,
         }),
+
+      getPlayersImageState: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<
+              Array<{
+                psdId: string;
+                psdImageUrl: string | null;
+                hasPsdImage: boolean;
+              }>
+            >(
+              `*[_type == "player"] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
+            );
+            return new Map(
+              rows.map((r) => [
+                r.psdId,
+                { psdImageUrl: r.psdImageUrl, hasPsdImage: r.hasPsdImage },
+              ]),
+            );
+          },
+          catch: (cause) =>
+            new SanityWriteError("Failed to fetch player image state", cause),
+        }),
+
+      uploadPlayerImage: (psdId, imageUrl) =>
+        Effect.tryPromise({
+          try: async () => {
+            const response = await fetch(imageUrl);
+            if (!response.ok)
+              throw new Error(
+                `PSD image fetch failed: ${response.status} ${response.statusText}`,
+              );
+            const blob = await response.blob();
+            const asset = await client.assets.upload("image", blob, {
+              filename: `player-psd-${psdId}.jpg`,
+            });
+            await client
+              .patch(docId("player", psdId))
+              .set({
+                psdImage: {
+                  _type: "image",
+                  asset: { _type: "reference", _ref: asset._id },
+                },
+                psdImageUrl: imageUrl,
+              })
+              .commit();
+          },
+          catch: (cause) =>
+            new SanityWriteError(
+              `Failed to upload image for player ${psdId}`,
+              cause,
+            ),
+        }).pipe(Effect.asVoid),
 
       upsertTeam: (doc) =>
         upsert("team", doc.psdId, {

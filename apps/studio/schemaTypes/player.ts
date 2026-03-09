@@ -69,9 +69,18 @@ export const player = defineType({
     }),
     defineField({
       name: 'psdImageUrl',
-      title: 'PSD image URL',
+      title: 'PSD image source URL',
       type: 'url',
       readOnly: true,
+      description: 'Raw PSD URL — used to detect when the image needs re-syncing. Not served to the site.',
+      hidden: true,
+    }),
+    defineField({
+      name: 'psdImage',
+      title: 'PSD image',
+      type: 'image',
+      readOnly: true,
+      description: 'Player photo synced from PSD and uploaded to Sanity CDN.',
     }),
     // Editorial enrichment
     defineField({
