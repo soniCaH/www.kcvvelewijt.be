@@ -79,6 +79,9 @@ jobs:
         run: npx turbo build --filter=@kcvv/web
         env:
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
       - name: Build Storybook
         run: cd apps/web && pnpm run build-storybook
