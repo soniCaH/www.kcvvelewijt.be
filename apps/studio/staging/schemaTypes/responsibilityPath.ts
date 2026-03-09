@@ -130,7 +130,15 @@ export const responsibilityPath = defineType({
       type: 'object',
       description: 'Main contact person for this path',
       fields: contactFields,
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().custom((contact: Record<string, unknown> | undefined) => {
+          if (!contact) return 'Primary contact is required'
+          const hasRef = Boolean(contact.staffMember)
+          const hasInline = Boolean(contact.email || contact.phone || contact.role)
+          return hasRef || hasInline
+            ? true
+            : 'Provide either a staff member reference or at least one of: email, phone, role'
+        }),
     }),
     defineField({
       name: 'steps',
