@@ -6,8 +6,9 @@
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
-import { mapSponsorsToComponentSponsors } from "@/lib/mappers";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import type { SanitySponsor } from "@/lib/effect/services/SanityService";
+import type { Sponsor } from "@/components/sponsors/Sponsors";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
 export const metadata: Metadata = {
@@ -15,46 +16,42 @@ export const metadata: Metadata = {
   description: "Overzicht van de sponsors die KCVV Elewijt steunen.",
 };
 
+const GOLD_TYPES = ["crossing"];
+const SILVER_TYPES = ["green", "white"];
+
+function mapToSponsor(s: SanitySponsor): Sponsor {
+  return {
+    id: s._id,
+    name: s.name,
+    logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
+    url: s.url ?? undefined,
+  };
+}
+
 export default async function SponsorsPageRoute() {
-  const [goldSponsors, silverSponsors, bronzeSponsors] = await runPromise(
-    Effect.all(
-      [
-        Effect.gen(function* () {
-          const drupal = yield* DrupalService;
-          const sponsors = yield* drupal.getSponsors({
-            promoted: true,
-            type: ["crossing"],
-            sort: "title",
-          });
-          return mapSponsorsToComponentSponsors(sponsors);
-        }),
-        Effect.gen(function* () {
-          const drupal = yield* DrupalService;
-          const sponsors = yield* drupal.getSponsors({
-            promoted: true,
-            type: ["green", "white"],
-            sort: "title",
-          });
-          return mapSponsorsToComponentSponsors(sponsors);
-        }),
-        Effect.gen(function* () {
-          const drupal = yield* DrupalService;
-          const sponsors = yield* drupal.getSponsors({
-            promoted: true,
-            type: ["training", "panel", "other"],
-            sort: "title",
-          });
-          return mapSponsorsToComponentSponsors(sponsors);
-        }),
-      ],
-      { concurrency: 3 },
-    ).pipe(
+  const sponsors = await runPromise(
+    Effect.gen(function* () {
+      const sanity = yield* SanityService;
+      return yield* sanity.getSponsors();
+    }).pipe(
       Effect.catchAll((error) => {
         console.error("[SponsorsPage] Failed to fetch sponsors:", error);
-        return Effect.succeed([[], [], []]);
+        return Effect.succeed([] as SanitySponsor[]);
       }),
     ),
   );
+
+  const goldSponsors = sponsors
+    .filter((s) => GOLD_TYPES.includes(s.type))
+    .map(mapToSponsor);
+  const silverSponsors = sponsors
+    .filter((s) => SILVER_TYPES.includes(s.type))
+    .map(mapToSponsor);
+  const bronzeSponsors = sponsors
+    .filter(
+      (s) => !GOLD_TYPES.includes(s.type) && !SILVER_TYPES.includes(s.type),
+    )
+    .map(mapToSponsor);
 
   return (
     <SponsorsPage
@@ -65,7 +62,4 @@ export default async function SponsorsPageRoute() {
   );
 }
 
-/**
- * Enable ISR with 1 hour revalidation
- */
 export const revalidate = 3600;

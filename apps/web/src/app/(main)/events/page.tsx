@@ -1,13 +1,13 @@
 /**
  * Events Page
- * Upcoming club events fetched from Drupal node--event content type
+ * Upcoming club events from Sanity
  */
 
 import type { Metadata } from "next";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
-import type { Event } from "@/lib/effect/schemas/event.schema";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import type { SanityEvent } from "@/lib/effect/services/SanityService";
 import { EventsList, type EventsListItem } from "@/components/event/EventsList";
 
 export const metadata: Metadata = {
@@ -24,46 +24,32 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-function transformEvent(event: Event): EventsListItem {
-  const alias = event.attributes.path?.alias ?? "";
-  const slug = alias.startsWith("/events/")
-    ? alias.slice("/events/".length)
-    : event.id;
-  const imageData = event.relationships.field_media_image?.data;
-  const imageUrl =
-    imageData && "uri" in imageData ? imageData.uri.url : undefined;
-
+function transformEvent(event: SanityEvent): EventsListItem {
   return {
-    title: event.attributes.title,
-    href: `/events/${slug}`,
-    date: event.attributes.field_daterange?.value
-      ? new Date(event.attributes.field_daterange.value)
-      : undefined,
-    endDate: event.attributes.field_daterange?.end_value
-      ? new Date(event.attributes.field_daterange.end_value)
-      : undefined,
-    imageUrl,
+    title: event.title,
+    href: event.externalLink?.url ?? "#",
+    date: new Date(event.dateStart),
+    endDate: event.dateEnd ? new Date(event.dateEnd) : undefined,
+    imageUrl: event.coverImageUrl ?? undefined,
   };
 }
 
-async function fetchEvents(): Promise<EventsListItem[]> {
+export default async function EventsPage() {
   const events = await runPromise(
     Effect.gen(function* () {
-      const drupal = yield* DrupalService;
-      return yield* drupal.getEvents({ upcoming: true });
+      const sanity = yield* SanityService;
+      return yield* sanity.getEvents();
     }).pipe(
       Effect.catchAll((error) => {
         console.error("[Events] Failed to fetch events:", error);
-        return Effect.succeed([] as Event[]);
+        return Effect.succeed([] as SanityEvent[]);
       }),
     ),
   );
 
-  return events.map(transformEvent);
-}
-
-export default async function EventsPage() {
-  const events = await fetchEvents();
+  const upcomingEvents = events
+    .filter((e) => new Date(e.dateStart) >= new Date())
+    .map(transformEvent);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
@@ -80,7 +66,7 @@ export default async function EventsPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <EventsList events={events} />
+        <EventsList events={upcomingEvents} />
       </div>
     </div>
   );

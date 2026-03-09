@@ -8,6 +8,12 @@ PSD_API_BASE_URL = "https://clubapi.prosoccerdata.com"
 # FOOTBALISTO_LOGO_CDN_URL: fallback logo source — use RankingVO.clubLogo / Club.logo (direct from PSD) first; fall back to CDN construction when the field is empty
 FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 # PSD_API_KEY, PSD_API_CLUB, PSD_API_AUTH are secrets — set via wrangler secret put (never in toml)
+SANITY_PROJECT_ID = "vhb33jaz"
+SANITY_DATASET = "production"
+# SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
+
+[triggers]
+crons = ["0 2 * * *"] # 02:00 UTC daily
 
 [[kv_namespaces]]
 binding = "PSD_CACHE"
@@ -17,9 +23,15 @@ preview_id = "4ee68193dd574f7fa01fba9d53d5d475"
 [env.staging]
 name = "kcvv-api-staging"
 
+[env.staging.triggers]
+crons = [] # no scheduled sync on staging — shares PSD API quota with production
+
 [env.staging.vars]
 PSD_API_BASE_URL = "https://clubapi.prosoccerdata.com"
 FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
+SANITY_PROJECT_ID = "vhb33jaz"
+SANITY_DATASET = "staging"
+# SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
 
 [[env.staging.kv_namespaces]]
 binding = "PSD_CACHE"

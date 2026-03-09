@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* ========================================================================
    KCVV Elewijt Design System - Tailwind CSS v4 Configuration
@@ -273,6 +274,15 @@ main a:hover,
 article a:hover,
 .content a:hover {
   color: var(--color-kcvv-green-hover);
+}
+
+/* In-body article links match footer link style: underline on hover only */
+.prose a {
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
 }
 
 /* Ensure navigation links stay white (override any default link styles) */

@@ -24,10 +24,16 @@ vi.mock("next/image", () => ({
   },
 }));
 
+const mockYouthTeams = [
+  { _id: "1", name: "KCVV U21", slug: "kcvv-elewijt-u21", age: "U21" },
+  { _id: "2", name: "KCVV U17", slug: "kcvv-elewijt-u17", age: "U17" },
+];
+
 describe("MobileMenu", () => {
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
+    youthTeams: mockYouthTeams,
   };
 
   beforeEach(() => {

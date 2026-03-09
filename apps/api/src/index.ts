@@ -15,7 +15,7 @@ import {
   HttpPlatform,
   Path,
 } from "@effect/platform";
-import { Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { PsdApi } from "@kcvv/api-contract";
 import { WorkerEnvTag, type WorkerEnv } from "./env";
 import { FootbalistoClientLive } from "./footbalisto/client";
@@ -23,6 +23,8 @@ import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
 import { StatsApiLive } from "./handlers/stats";
+import { SanityWriteClientLive } from "./sanity/client";
+import { runSync } from "./sync/psd-sanity-sync";
 
 /**
  * Provides DefaultServices (HttpPlatform | Etag.Generator | FileSystem | Path)
@@ -59,5 +61,19 @@ export default {
     } finally {
       await dispose();
     }
+  },
+
+  async scheduled(
+    _event: ScheduledEvent,
+    env: WorkerEnv,
+    ctx: ExecutionContext,
+  ): Promise<void> {
+    const envLayer = Layer.succeed(WorkerEnvTag, env);
+    const layer = Layer.mergeAll(
+      FootbalistoClientLive,
+      SanityWriteClientLive,
+      envLayer,
+    ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
+    ctx.waitUntil(Effect.runPromise(Effect.provide(runSync, layer)));
   },
 };

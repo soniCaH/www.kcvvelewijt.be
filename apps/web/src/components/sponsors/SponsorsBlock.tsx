@@ -6,9 +6,8 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
-import { Sponsors } from "./Sponsors";
-import { mapSponsorsToComponentSponsors } from "@/lib/mappers";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import { Sponsors, type Sponsor } from "./Sponsors";
 
 export interface SponsorsBlockProps {
   /**
@@ -71,21 +70,21 @@ export async function SponsorsBlock({
   viewAllHref = "/sponsors",
   className,
 }: SponsorsBlockProps) {
-  // Fetch promoted sponsors with types crossing, green, white
-  // Matches Gatsby query:
-  // filter: { promote: { eq: true }, status: { eq: true }, field_type: { in: ["crossing", "green", "white"] } }
-  // sort: [{ field_type: ASC }, { title: ASC }]
   const sponsors = await runPromise(
     Effect.gen(function* () {
-      const drupal = yield* DrupalService;
-      const drupalSponsors = yield* drupal.getSponsors({
-        promoted: true,
-        type: ["crossing", "green", "white"],
-        sort: "field_type,title", // CSV format for multiple sort fields
-      });
-      return mapSponsorsToComponentSponsors(drupalSponsors);
+      const sanity = yield* SanityService;
+      const all = yield* sanity.getSponsors();
+      return all
+        .filter((s) => ["crossing", "green", "white"].includes(s.type))
+        .map(
+          (s): Sponsor => ({
+            id: s._id,
+            name: s.name,
+            logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
+            url: s.url ?? undefined,
+          }),
+        );
     }).pipe(
-      // Graceful fallback: return empty array on error
       Effect.catchAll((error) => {
         console.error("[SponsorsBlock] Failed to fetch sponsors:", error);
         return Effect.succeed([]);

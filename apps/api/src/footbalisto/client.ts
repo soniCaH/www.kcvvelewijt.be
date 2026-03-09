@@ -2,6 +2,12 @@ import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import {
+  PsdMember,
+  PsdMembersPage,
+  PsdTeam,
+  PsdTeamsArray,
+} from "@kcvv/api-contract";
+import {
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
   PsdSeason,
@@ -60,6 +66,13 @@ export interface FootbalistoClientInterface {
   readonly getRawTeamStats: (
     teamId: number,
   ) => Effect.Effect<PsdTeamStatsResponse, FootbalistoClientError>;
+  readonly getRawTeams: () => Effect.Effect<
+    readonly PsdTeam[],
+    FootbalistoClientError
+  >;
+  readonly getRawMembers: (
+    teamId: number,
+  ) => Effect.Effect<readonly PsdMember[], FootbalistoClientError>;
 }
 
 export class FootbalistoClient extends Context.Tag("FootbalistoClient")<
@@ -172,9 +185,52 @@ export const FootbalistoClientLive = Layer.effect(
           return data.content;
         }),
       getRawNextMatches: () =>
-        Effect.fail(
-          new FootbalistoError("getRawNextMatches not implemented"),
-        ) as Effect.Effect<readonly PsdGame[], FootbalistoClientError>,
+        Effect.gen(function* () {
+          const teams = yield* fetchJson(
+            `${base}/teams`,
+            PsdTeamsArray,
+            psdHeaders,
+          );
+          const season = yield* getCurrentSeason();
+          const now = Date.now();
+
+          /** Convert PsdGame date + time fields to a UTC millisecond timestamp */
+          const toMs = (m: PsdGame): number => {
+            const datePart = m.date.split(" ")[0]!;
+            const timeStr = m.time ?? "00:00";
+            const [year, month, day] = datePart.split("-").map(Number);
+            const [hour = 0, minute = 0] = timeStr.split(":").map(Number);
+            return Date.UTC(year!, month! - 1, day!, hour, minute);
+          };
+
+          const teamNextMatches = yield* Effect.all(
+            teams.map((team) =>
+              fetchJson(
+                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                PsdMatchListSchema,
+                psdHeaders,
+              ).pipe(
+                Effect.map((data) => {
+                  const next = [...data.content]
+                    .filter((m) => toMs(m) >= now)
+                    .sort((a, b) => toMs(a) - toMs(b))[0];
+                  return next
+                    ? ({ ...next, teamId: team.id } as PsdGame)
+                    : null;
+                }),
+                // A single team failing should not abort the whole request
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `getRawNextMatches: team ${team.id} failed: ${String(e)}`,
+                  ).pipe(Effect.as(null)),
+                ),
+              ),
+            ),
+            { concurrency: 5 },
+          );
+
+          return teamNextMatches.filter((m): m is PsdGame => m !== null);
+        }),
       getRawMatchDetail: (matchId: number) =>
         fetchJson(
           `${base}/games/${matchId}/info`,
@@ -198,6 +254,15 @@ export const FootbalistoClientLive = Layer.effect(
             psdHeaders,
           );
         }),
+
+      getRawTeams: () => fetchJson(`${base}/teams`, PsdTeamsArray, psdHeaders),
+
+      getRawMembers: (teamId: number) =>
+        fetchJson(
+          `${base}/teams/${teamId}/members`,
+          PsdMembersPage,
+          psdHeaders,
+        ).pipe(Effect.map((page) => page.content)),
     };
   }),
 );

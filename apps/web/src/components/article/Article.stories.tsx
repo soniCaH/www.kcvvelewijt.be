@@ -4,12 +4,9 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import {
-  ArticleHeader,
-  ArticleMetadata,
-  ArticleBody,
-  ArticleFooter,
-} from "./index";
+import { ArticleHeader, ArticleMetadata, ArticleFooter } from "./index";
+import { SanityArticleBody } from "./SanityArticleBody/SanityArticleBody";
+import type { PortableTextBlock } from "@portabletext/react";
 
 const meta = {
   title: "Pages/Article",
@@ -28,41 +25,79 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const sampleArticleContent = `
-  <p>KCVV Elewijt heeft afgelopen weekend een indrukwekkende overwinning behaald tegen hun rivalen met een score van 3-1. Het team toonde uitstekende teamwork en determinatie gedurende de hele wedstrijd.</p>
-
-  <p>
-    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop" alt="Team celebrating the opening goal" />
-  </p>
-
-  <h2>Eerste Helft Dominantie</h2>
-  <p>Vanaf het eerste fluitsignaal nam KCVV Elewijt de controle over de wedstrijd. Met een sterk middenveld en uitstekende passing creëerden ze kans na kans. In de 23e minuut opende <a href="/player/jan-janssens">Jan Janssens</a> de score met een prachtig schot van buiten de zestien.</p>
-
-  <blockquote>
-    <p>Dit was een van onze beste prestaties van het seizoen. Het team heeft hard gewerkt en het resultaat laat dat zien.</p>
-  </blockquote>
-
-  <p>
-    <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&h=600&fit=crop" alt="Match action shot" />
-  </p>
-
-  <h2>Tweede Helft Spanning</h2>
-  <p>De tweede helft begon met meer druk van de tegenstander, maar onze verdediging bleef sterk. <a href="/player/piet-pieters">Piet Pieters</a> verdubbelde de voorsprong in de 67e minuut met een kopbal na een perfecte hoekschop.</p>
-
-  <p>Ondanks dat de tegenstander terugkwam tot 2-1, wist <a href="/player/jan-janssens">Jan Janssens</a> de wedstrijd in de 89e minuut definitief te beslissen met zijn tweede doelpunt van de dag.</p>
-
-  <h3>Statistieken</h3>
-  <ul>
-    <li>Balbezit: 62%</li>
-    <li>Schoten op doel: 8</li>
-    <li>Hoekschoppen: 7</li>
-    <li>Overtredingen: 12</li>
-  </ul>
-
-  <p>Meer informatie over <a href="/team/a-ploeg">onze A-Ploeg</a> en de komende wedstrijden vind je op <a href="https://kcvvelewijt.be/calendar" target="_blank">onze kalender</a>.</p>
-
-  <p><em><strong>💡 Tip:</strong> Hover over de afbeeldingen om ze te vergroten!</em></p>
-`;
+const sampleArticleContent: PortableTextBlock[] = [
+  {
+    _type: "block",
+    _key: "1",
+    style: "normal",
+    children: [
+      {
+        _type: "span",
+        _key: "1a",
+        text: "KCVV Elewijt heeft afgelopen weekend een indrukwekkende overwinning behaald tegen hun rivalen met een score van 3-1. Het team toonde uitstekende teamwork en determinatie gedurende de hele wedstrijd.",
+        marks: [],
+      },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "2",
+    style: "h2",
+    children: [
+      { _type: "span", _key: "2a", text: "Eerste Helft Dominantie", marks: [] },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "3",
+    style: "normal",
+    children: [
+      {
+        _type: "span",
+        _key: "3a",
+        text: "Vanaf het eerste fluitsignaal nam KCVV Elewijt de controle over de wedstrijd. In de 23e minuut opende Jan Janssens de score met een prachtig schot van buiten de zestien.",
+        marks: [],
+      },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "4",
+    style: "blockquote",
+    children: [
+      {
+        _type: "span",
+        _key: "4a",
+        text: "Dit was een van onze beste prestaties van het seizoen. Het team heeft hard gewerkt en het resultaat laat dat zien.",
+        marks: [],
+      },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "5",
+    style: "normal",
+    listItem: "bullet",
+    level: 1,
+    children: [{ _type: "span", _key: "5a", text: "Balbezit: 62%", marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "6",
+    style: "normal",
+    listItem: "bullet",
+    level: 1,
+    children: [
+      { _type: "span", _key: "6a", text: "Schoten op doel: 8", marks: [] },
+    ],
+    markDefs: [],
+  },
+];
 
 /**
  * Default article page with all components
@@ -99,7 +134,7 @@ export const Default: Story = {
 
         {/* Body - Second in HTML, displays on LEFT on desktop */}
         <div className="flex-1">
-          <ArticleBody content={sampleArticleContent} />
+          <SanityArticleBody content={sampleArticleContent} />
         </div>
       </main>
 
@@ -167,12 +202,7 @@ export const WithoutImage: Story = {
         </aside>
 
         <div className="flex-1">
-          <ArticleBody
-            content={`
-              <p>Wegens de winterstop wordt het trainingsschema aangepast. Alle teams trainen vanaf nu op dinsdag- en donderdagavond.</p>
-              <p>Meer informatie over de <a href="/team/a-ploeg">trainingstijden per ploeg</a>.</p>
-            `}
-          />
+          <SanityArticleBody content={sampleArticleContent} />
         </div>
       </main>
 
@@ -228,36 +258,7 @@ export const LongArticle: Story = {
         </aside>
 
         <div className="flex-1">
-          <ArticleBody
-            content={`
-              <p>Het seizoen 2024-2025 is tot nu toe een memorabel seizoen geweest voor KCVV Elewijt. Met een mix van jonge talenten en ervaren spelers heeft het team uitstekende resultaten behaald.</p>
-
-              <h2>Augustus - September: Sterke Start</h2>
-              <p>De competitie begon veelbelovend met vier opeenvolgende overwinningen. De ploeg toonde direct aan klaar te zijn voor een succesvol seizoen.</p>
-
-              <blockquote>
-                <p>We zijn trots op wat het team tot nu toe heeft gepresteerd. De chemie tussen de spelers is uitstekend.</p>
-              </blockquote>
-
-              <h2>Oktober - November: Uitdagingen</h2>
-              <p>Deze maanden brachten enkele uitdagingen met zich mee. Blessures bij belangrijke spelers dwongen de coach om tactische aanpassingen te maken.</p>
-
-              <h3>Belangrijke Statistieken</h3>
-              <ul>
-                <li>20 wedstrijden gespeeld</li>
-                <li>13 overwinningen</li>
-                <li>4 gelijke spelen</li>
-                <li>3 nederlagen</li>
-                <li>42 doelpunten voor</li>
-                <li>18 doelpunten tegen</li>
-              </ul>
-
-              <h2>December: Herstel en Groei</h2>
-              <p>Met de terugkeer van belangrijke spelers herpakte het team zich en behaalde opnieuw uitstekende resultaten. De winterstop komt op een goed moment om te herstellen en voorbereidingen te treffen voor de tweede helft van het seizoen.</p>
-
-              <p>Lees meer over onze <a href="/team/a-ploeg">A-Ploeg spelers</a> en bekijk het volledige <a href="https://kcvvelewijt.be/ranking" target="_blank">klassement</a>.</p>
-            `}
-          />
+          <SanityArticleBody content={sampleArticleContent} />
         </div>
       </main>
 

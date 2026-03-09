@@ -11,3 +11,6 @@ afterEach(() => {
 process.env.DRUPAL_API_URL = "https://api.kcvvelewijt.be";
 process.env.FOOTBALISTO_API_URL = "https://footbalisto.be";
 process.env.NEXT_PUBLIC_TYPEKIT_ID = "cvo5raz";
+process.env.KCVV_API_URL = "http://localhost:8787";
+process.env.NEXT_PUBLIC_SANITY_PROJECT_ID = "test-project";
+process.env.NEXT_PUBLIC_SANITY_DATASET = "production";

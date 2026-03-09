@@ -12,8 +12,8 @@
 import { ImageResponse } from "next/og";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { DrupalService } from "@/lib/effect/services/DrupalService";
-import { parseAgeGroup, getTeamTagline } from "./utils";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import { getSanityAgeGroup, getSanityTeamTagline } from "./utils";
 
 export const runtime = "edge";
 
@@ -43,16 +43,18 @@ export default async function Image({ params }: ImageProps) {
   let tagline: string | undefined;
 
   try {
-    const { team } = await runPromise(
+    const team = await runPromise(
       Effect.gen(function* () {
-        const drupal = yield* DrupalService;
-        return yield* drupal.getTeamWithRoster(slug);
+        const sanity = yield* SanityService;
+        return yield* sanity.getTeamBySlug(slug);
       }),
     );
 
-    teamName = team.attributes.title;
-    ageGroup = parseAgeGroup(team);
-    tagline = getTeamTagline(team);
+    if (team) {
+      teamName = team.name;
+      ageGroup = getSanityAgeGroup(team);
+      tagline = getSanityTeamTagline(team);
+    }
   } catch {
     // Use fallback values if team not found
     teamName = "KCVV Elewijt";
