@@ -77,14 +77,14 @@ const mockMembers: OrgChartNode[] = [
     id: "gen-1",
     name: "Club",
     title: "KCVV Elewijt",
-    department: "general" as const,
+    department: "algemeen" as const,
     parentId: null,
   },
   {
     id: "gen-2",
     name: "President",
     title: "Voorzitter",
-    department: "general" as const,
+    department: "algemeen" as const,
     parentId: null,
   },
 ];
@@ -120,7 +120,7 @@ const DepartmentFilterWithState = (args: Partial<DepartmentFilterProps>) => {
             : mockMembers.filter(
                 (m) =>
                   m.department === value ||
-                  (value === "hoofdbestuur" && m.department === "general"),
+                  (value === "hoofdbestuur" && m.department === "algemeen"),
               ).length}
         </p>
       </div>
@@ -329,7 +329,7 @@ export const WithSearchBar: Story = {
         : mockMembers.filter(
             (m) =>
               m.department === department ||
-              (department === "hoofdbestuur" && m.department === "general"),
+              (department === "hoofdbestuur" && m.department === "algemeen"),
           );
 
     const searchedMembers = search
