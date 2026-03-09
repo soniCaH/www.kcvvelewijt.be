@@ -9,21 +9,31 @@ const client = createClient({
 });
 
 export async function uploadImageFromUrl(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      console.error(`Failed to fetch image ${url}: ${res.status} ${res.statusText}`);
+      return null;
+    }
     const buffer = Buffer.from(await res.arrayBuffer());
     const asset = await client.assets.upload("image", buffer, {
       filename: url.split("/").pop(),
     });
     return asset._id;
-  } catch {
+  } catch (error) {
+    console.error(`Failed to upload image ${url}`, error);
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 export async function createDoc(doc: Record<string, unknown>): Promise<void> {
-  await client.createOrReplace(doc);
+  const id = doc._id as string;
+  await client.createIfNotExists({ ...doc, _id: id });
+  await client.patch(id).set(doc).commit();
 }
 
 export { client };

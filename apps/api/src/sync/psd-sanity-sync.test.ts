@@ -94,7 +94,7 @@ describe("transformTeam", () => {
     const result = transformTeam(
       {
         id: 7,
-        name: "KCVVE  U15 ",
+        name: "KCVVÉ  U15 & Dames/Jeugd",
         age: "U15",
         gender: "mannen",
         footbelId: null,
@@ -102,6 +102,6 @@ describe("transformTeam", () => {
       },
       [],
     );
-    expect(result.slug).toBe("kcvve-u15");
+    expect(result.slug).toBe("kcvve-u15-dames-jeugd");
   });
 });
