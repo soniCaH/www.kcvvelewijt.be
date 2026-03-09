@@ -4,7 +4,12 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["DRUPAL_API_URL", "REVALIDATION_SECRET", "KCVV_API_URL"]
+      "env": [
+        "DRUPAL_API_URL",
+        "REVALIDATION_SECRET",
+        "KCVV_API_URL",
+        "FOOTBALISTO_API_URL"
+      ]
     },
     "dev": {
       "cache": false,
