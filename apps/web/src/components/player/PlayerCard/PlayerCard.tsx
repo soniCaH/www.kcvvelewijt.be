@@ -151,6 +151,7 @@ export const PlayerCard = forwardRef<HTMLElement, PlayerCardProps>(
                   src={imageUrl}
                   alt={fullName}
                   fill
+                  unoptimized={imageUrl.includes("clubapi.prosoccerdata.com")}
                   className="object-cover object-top"
                   sizes={
                     isCompact ? "180px" : "(max-width: 960px) 232px, 299px"

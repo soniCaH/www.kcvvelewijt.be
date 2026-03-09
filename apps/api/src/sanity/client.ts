@@ -155,10 +155,32 @@ export const SanityWriteClientLive = Layer.effect(
               throw new Error(
                 `PSD image fetch failed: ${response.status} ${response.statusText}`,
               );
-            const blob = await response.blob();
-            const asset = await client.assets.upload("image", blob, {
-              filename: `player-psd-${psdId}.jpg`,
+
+            const contentType =
+              response.headers.get("content-type") ?? "image/jpeg";
+            const arrayBuffer = await response.arrayBuffer();
+
+            // Use REST API directly — client.assets.upload() uses Node.js internals
+            // incompatible with Cloudflare Workers runtime.
+            const uploadUrl = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${env.SANITY_DATASET}?filename=player-psd-${psdId}.jpg`;
+            const uploadRes = await fetch(uploadUrl, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
+                "Content-Type": contentType,
+              },
+              body: arrayBuffer,
             });
+            if (!uploadRes.ok) {
+              const text = await uploadRes.text();
+              throw new Error(
+                `Sanity upload failed: ${uploadRes.status} ${text}`,
+              );
+            }
+            const { document: asset } = (await uploadRes.json()) as {
+              document: { _id: string };
+            };
+
             await client
               .patch(docId("player", psdId))
               .set({

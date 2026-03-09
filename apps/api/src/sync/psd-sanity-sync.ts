@@ -96,7 +96,7 @@ export const runSync = Effect.gen(function* () {
                     .pipe(
                       Effect.catchAll((e) =>
                         Effect.log(
-                          `Image upload skipped for player ${doc.psdId}: ${e.message}`,
+                          `Image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
                         ),
                       ),
                     );
