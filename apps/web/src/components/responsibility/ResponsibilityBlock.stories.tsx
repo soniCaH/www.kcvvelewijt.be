@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ResponsibilityBlock } from "./ResponsibilityBlock";
-import { responsibilityPaths } from "@/data/responsibility-paths";
+import { mockResponsibilityPaths as responsibilityPaths } from "./__fixtures__/responsibility-paths.fixture";
 
 const meta = {
   title: "Features/Responsibility/ResponsibilityBlock",

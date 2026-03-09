@@ -20,8 +20,6 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "check-all": "npm run lint && npm run type-check && npm run test && npm run build",
-    "build:responsibility": "tsx scripts/generate-responsibility-data.ts",
-    "watch:responsibility": "tsx watch scripts/generate-responsibility-data.ts",
     "migration:status": "node scripts/migration-status.js",
     "migration:create": "node scripts/migration-create.js"
   },

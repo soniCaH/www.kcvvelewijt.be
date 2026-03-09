@@ -1,19 +1,6 @@
-/**
- * Responsibility Paths Data
- *
- * AUTO-GENERATED - DO NOT EDIT MANUALLY
- *
- * This file is generated from markdown files in content/responsibility/
- * To update, edit the markdown files and run: npm run build:responsibility
- *
- * Source: content/responsibility/*.md
- * Generator: scripts/generate-responsibility-data.ts
- * Schema: src/lib/effect/schemas/responsibility.schema.ts
- */
-
 import type { ResponsibilityPath } from "@/types/responsibility";
 
-export const responsibilityPaths: ResponsibilityPath[] = [
+export const mockResponsibilityPaths: ResponsibilityPath[] = [
   {
     id: "club-sponsoren",
     role: ["niet-lid"],
@@ -56,13 +43,9 @@ export const responsibilityPaths: ResponsibilityPath[] = [
         order: 3,
         description: "Bespreek de verschillende pakketten en mogelijkheden",
       },
-      {
-        order: 4,
-        description: "Onderteken de sponsorovereenkomst",
-      },
+      { order: 4, description: "Onderteken de sponsorovereenkomst" },
     ],
   },
-
   {
     id: "herstel-blessure",
     role: ["speler", "ouder"],
@@ -79,10 +62,7 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       "Breng je trainer op de hoogte en lever een medisch attest af indien vereist.",
     category: "medisch",
     icon: "zap",
-    primaryContact: {
-      role: "Trainer",
-      department: "jeugdbestuur",
-    },
+    primaryContact: { role: "Trainer", department: "jeugdbestuur" },
     steps: [
       {
         order: 1,
@@ -100,7 +80,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "inschrijving-nieuw-lid",
     role: ["niet-lid", "ouder"],
@@ -139,21 +118,14 @@ export const responsibilityPaths: ResponsibilityPath[] = [
         description:
           "Bezorg de nodige documenten: identiteitskaart, medisch attest, pasfoto",
       },
-      {
-        order: 4,
-        description: "Betaal het lidgeld volgens de instructies",
-      },
+      { order: 4, description: "Betaal het lidgeld volgens de instructies" },
       {
         order: 5,
         description: "Je ontvangt een bevestiging per e-mail",
-        contact: {
-          role: "Jeugdsecretaris",
-          email: "jeugd@kcvvelewijt.be",
-        },
+        contact: { role: "Jeugdsecretaris", email: "jeugd@kcvvelewijt.be" },
       },
     ],
   },
-
   {
     id: "inschrijving-stage",
     role: ["ouder", "speler"],
@@ -186,10 +158,7 @@ export const responsibilityPaths: ResponsibilityPath[] = [
         order: 2,
         description: "Vul het inschrijvingsformulier in voor de gewenste stage",
       },
-      {
-        order: 3,
-        description: "Betaal het stagegeld volgens de instructies",
-      },
+      { order: 3, description: "Betaal het stagegeld volgens de instructies" },
       {
         order: 4,
         description: "Je ontvangt een bevestiging met praktische info",
@@ -200,7 +169,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "mutualiteit-attest",
     role: ["ouder"],
@@ -228,22 +196,15 @@ export const responsibilityPaths: ResponsibilityPath[] = [
         order: 1,
         description: "Download of vraag het attest bij je mutualiteit",
       },
-      {
-        order: 2,
-        description: "Vul het attest in met de nodige gegevens",
-      },
+      { order: 2, description: "Vul het attest in met de nodige gegevens" },
       {
         order: 3,
         description:
           "Bezorg het attest aan de secretaris voor het clubstempel en de handtekening",
-        contact: {
-          role: "Secretaris",
-          email: "secretaris@kcvvelewijt.be",
-        },
+        contact: { role: "Secretaris", email: "secretaris@kcvvelewijt.be" },
       },
     ],
   },
-
   {
     id: "ongepast-gedrag-rapporteren",
     role: ["speler", "ouder", "trainer"],
@@ -276,10 +237,7 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       {
         order: 2,
         description: "Neem vertrouwelijk contact op met de voorzitter",
-        contact: {
-          role: "Voorzitter",
-          email: "voorzitter@kcvvelewijt.be",
-        },
+        contact: { role: "Voorzitter", email: "voorzitter@kcvvelewijt.be" },
       },
       {
         order: 3,
@@ -291,7 +249,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "ongeval-speler-training",
     role: ["speler", "ouder"],
@@ -342,7 +299,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "prosoccerdata-gebruiken",
     role: ["speler", "ouder", "trainer"],
@@ -366,19 +322,13 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       orgLink: "/club/organigram",
     },
     steps: [
-      {
-        order: 1,
-        description: "Vraag je logingegevens bij je trainer",
-      },
+      { order: 1, description: "Vraag je logingegevens bij je trainer" },
       {
         order: 2,
         description: "Download de ProSoccerData app of ga naar de website",
         link: "https://www.prosoccerdata.com",
       },
-      {
-        order: 3,
-        description: "Log in met je persoonlijke gegevens",
-      },
+      { order: 3, description: "Log in met je persoonlijke gegevens" },
       {
         order: 4,
         description: "Bij problemen, contacteer de technisch coördinator",
@@ -389,7 +339,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "sportief-verantwoordelijke-zoeken",
     role: ["speler", "ouder"],
@@ -425,14 +374,10 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       {
         order: 3,
         description: "Of contacteer de algemene jeugdcoördinator",
-        contact: {
-          role: "Jeugdcoördinator",
-          email: "jeugd@kcvvelewijt.be",
-        },
+        contact: { role: "Jeugdcoördinator", email: "jeugd@kcvvelewijt.be" },
       },
     ],
   },
-
   {
     id: "trainer-worden",
     role: ["niet-lid"],
@@ -465,10 +410,7 @@ export const responsibilityPaths: ResponsibilityPath[] = [
           email: "technisch@kcvvelewijt.be",
         },
       },
-      {
-        order: 2,
-        description: "Bespreek je ervaring en beschikbaarheid",
-      },
+      { order: 2, description: "Bespreek je ervaring en beschikbaarheid" },
       {
         order: 3,
         description: "Volg eventueel een trainerscursus indien nodig",
@@ -480,7 +422,6 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-
   {
     id: "wedstrijden-zoeken",
     role: ["speler", "ouder", "supporter"],
@@ -497,10 +438,7 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       "Bekijk de wedstrijdkalender op de website of gebruik ProSoccerData.",
     category: "sportief",
     icon: "calendar",
-    primaryContact: {
-      role: "Website",
-      email: "communicatie@kcvvelewijt.be",
-    },
+    primaryContact: { role: "Website", email: "communicatie@kcvvelewijt.be" },
     steps: [
       {
         order: 1,
@@ -518,16 +456,4 @@ export const responsibilityPaths: ResponsibilityPath[] = [
       },
     ],
   },
-];
-
-/**
- * User roles with labels
- * Used for role selector UI
- */
-export const userRoles: { value: string; label: string }[] = [
-  { value: "speler", label: "Speler" },
-  { value: "ouder", label: "Ouder" },
-  { value: "trainer", label: "Trainer" },
-  { value: "supporter", label: "Supporter" },
-  { value: "niet-lid", label: "Niet-lid" },
 ];

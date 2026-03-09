@@ -188,7 +188,8 @@ function mapResponsibilityPath(
     category: p.category as ResponsibilityPath["category"],
     ...(p.icon ? { icon: p.icon } : {}),
     primaryContact: mapContact(p.primaryContact),
-    steps: p.steps.map((s) => ({
+    steps: p.steps.map((s, i) => ({
+      order: i + 1,
       description: s.description,
       ...(s.link ? { link: s.link } : {}),
       ...(s.contact ? { contact: mapContact(s.contact) } : {}),

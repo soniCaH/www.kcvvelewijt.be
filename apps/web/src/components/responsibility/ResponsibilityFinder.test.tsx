@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
-import { responsibilityPaths } from "@/data/responsibility-paths";
+import { mockResponsibilityPaths as responsibilityPaths } from "./__fixtures__/responsibility-paths.fixture";
 
 /**
  * Helper function to select a role from the dropdown

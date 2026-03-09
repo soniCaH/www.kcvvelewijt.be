@@ -9,7 +9,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HelpPage } from "./HelpPage";
-import { responsibilityPaths } from "@/data/responsibility-paths";
+import { mockResponsibilityPaths as responsibilityPaths } from "@/components/responsibility/__fixtures__/responsibility-paths.fixture";
 
 // ---------------------------------------------------------------------------
 // Meta
