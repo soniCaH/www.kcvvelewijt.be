@@ -108,6 +108,7 @@ export const SanityWriteClientLive = Layer.effect(
     return {
       upsertPlayer: (doc) =>
         upsert("player", doc.psdId, {
+          psdId: doc.psdId,
           firstName: doc.firstName,
           lastName: doc.lastName,
           birthDate: doc.birthDate,
@@ -225,6 +226,7 @@ export const SanityWriteClientLive = Layer.effect(
 
       upsertTeam: (doc) =>
         upsert("team", doc.psdId, {
+          psdId: doc.psdId,
           name: doc.name,
           slug: { _type: "slug", current: doc.slug },
           age: doc.age,
