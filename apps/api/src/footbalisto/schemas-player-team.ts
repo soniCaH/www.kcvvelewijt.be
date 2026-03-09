@@ -85,7 +85,9 @@ export class PsdMember extends S.Class<PsdMember>("PsdMember")({
   nationality: S.NullOr(S.String),
   profilePictureURL: S.NullOr(S.String),
   keeper: S.Boolean,
-  bestPosition: S.NullOr(S.String),
+  bestPosition: S.NullOr(
+    S.Union(S.String, S.Struct({ type: S.Struct({ name: S.String }) })),
+  ),
   active: S.Boolean,
   status: S.String,
   functionTitle: S.NullOr(S.String),

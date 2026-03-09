@@ -9,7 +9,10 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import type { SanityTeam } from "@/lib/effect/services/SanityService";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
-import { getSanityAgeGroup } from "@/app/(main)/team/[slug]/utils";
+import {
+  getSanityAgeGroup,
+  getSanityTeamTagline,
+} from "@/app/(main)/team/[slug]/utils";
 
 export const metadata: Metadata = {
   title: "Jeugdploegen | KCVV Elewijt",
@@ -29,8 +32,8 @@ export const metadata: Metadata = {
 function transformTeamToData(team: SanityTeam): TeamData | null {
   const ageGroup = getSanityAgeGroup(team);
 
-  // Only include youth teams (those with age groups)
-  if (!ageGroup) return null;
+  // Only include youth teams with a valid slug
+  if (!ageGroup || !team.slug?.current) return null;
 
   return {
     id: team._id,
@@ -38,7 +41,7 @@ function transformTeamToData(team: SanityTeam): TeamData | null {
     href: `/team/${team.slug.current}`,
     ageGroup,
     teamType: "youth",
-    tagline: team.divisionFull ?? team.tagline ?? undefined,
+    tagline: getSanityTeamTagline(team),
   };
 }
 

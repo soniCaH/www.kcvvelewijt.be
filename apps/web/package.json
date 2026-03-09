@@ -48,6 +48,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-share": "5.2.2",
+    "sanitize-html": "^2.17.1",
     "tailwind-merge": "3.5.0"
   },
   "devDependencies": {
@@ -69,6 +70,7 @@
     "@types/node": "24.11.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/sanitize-html": "^2.16.1",
     "@vitejs/plugin-react": "5.1.4",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",

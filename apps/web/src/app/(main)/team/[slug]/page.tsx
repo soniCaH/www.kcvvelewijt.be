@@ -128,7 +128,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       const sanity = yield* SanityService;
       return yield* sanity.getTeamBySlug(slug);
     }),
-  ).catch(() => null);
+  );
 
   if (!team) notFound();
 

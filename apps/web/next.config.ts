@@ -95,11 +95,6 @@ const nextConfig: NextConfig = {
       },
       { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
       { protocol: "https", hostname: "cdn.sanity.io", pathname: "/**" },
-      {
-        protocol: "https",
-        hostname: "clubapi.prosoccerdata.com",
-        pathname: "/**",
-      },
     ],
     // SVG Security Configuration
     // Current analysis (2025-01-05):

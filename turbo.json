@@ -8,7 +8,10 @@
         "DRUPAL_API_URL",
         "REVALIDATION_SECRET",
         "KCVV_API_URL",
-        "FOOTBALISTO_API_URL"
+        "FOOTBALISTO_API_URL",
+        "NEXT_PUBLIC_SANITY_PROJECT_ID",
+        "NEXT_PUBLIC_SANITY_DATASET",
+        "SANITY_API_READ_TOKEN"
       ]
     },
     "dev": {
@@ -18,7 +21,7 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
-      "inputs": ["src/**", "vitest.config.*"]
+      "inputs": ["src/**", "tests/**", "vitest.config.*"]
     },
     "lint": {
       "dependsOn": ["^build"]

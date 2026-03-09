@@ -1,4 +1,4 @@
-export const YOUTH_TEAMS_NAV_QUERY = `*[_type == "team" && showInNavigation != false && defined(age) && !(age in ["A", "B"])] {
+export const YOUTH_TEAMS_NAV_QUERY = `*[_type == "team" && showInNavigation != false && defined(age) && !(age in ["A", "B"])] | order(name asc) {
   _id, name, "slug": slug.current, age
 }`;
 
@@ -16,7 +16,7 @@ export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | or
   trainingSchedule,
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-    "psdImageUrl": coalesce(psdImage.asset->url, psdImageUrl), "transparentImageUrl": transparentImage.asset->url
+    "psdImageUrl": psdImage.asset->url, "transparentImageUrl": transparentImage.asset->url
   },
   staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url }
 }`;
@@ -28,7 +28,7 @@ export const TEAM_BY_SLUG_QUERY = `*[_type == "team" && slug.current == $slug][0
   trainingSchedule,
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-    "psdImageUrl": coalesce(psdImage.asset->url, psdImageUrl), "transparentImageUrl": transparentImage.asset->url
+    "psdImageUrl": psdImage.asset->url, "transparentImageUrl": transparentImage.asset->url
   },
   staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url }
 }`;

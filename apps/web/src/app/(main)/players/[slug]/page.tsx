@@ -75,7 +75,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       const sanity = yield* SanityService;
       return yield* sanity.getPlayerByPsdId(slug);
     }),
-  ).catch(() => null);
+  );
 
   if (!player) notFound();
 

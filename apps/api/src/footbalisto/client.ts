@@ -219,7 +219,11 @@ export const FootbalistoClientLive = Layer.effect(
                     : null;
                 }),
                 // A single team failing should not abort the whole request
-                Effect.catchAll(() => Effect.succeed(null)),
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `getRawNextMatches: team ${team.id} failed: ${String(e)}`,
+                  ).pipe(Effect.as(null)),
+                ),
               ),
             ),
             { concurrency: 5 },

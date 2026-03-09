@@ -142,13 +142,16 @@ export const SanityWriteClientLive = Layer.effect(
       uploadPlayerImage: (psdId, imageUrl) =>
         Effect.tryPromise({
           try: async () => {
+            const psdAbort = new AbortController();
+            const psdTimeout = setTimeout(() => psdAbort.abort(), 10_000);
             const response = await fetch(imageUrl, {
+              signal: psdAbort.signal,
               headers: {
                 "x-api-key": env.PSD_API_KEY,
                 "x-api-club": env.PSD_API_CLUB,
                 Authorization: env.PSD_API_AUTH,
               },
-            });
+            }).finally(() => clearTimeout(psdTimeout));
             // 404 = player has no photo in PSD — skip silently
             if (response.status === 404) return;
             if (!response.ok)
@@ -163,14 +166,17 @@ export const SanityWriteClientLive = Layer.effect(
             // Use REST API directly — client.assets.upload() uses Node.js internals
             // incompatible with Cloudflare Workers runtime.
             const uploadUrl = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${env.SANITY_DATASET}?filename=player-psd-${psdId}.jpg`;
+            const sanityAbort = new AbortController();
+            const sanityTimeout = setTimeout(() => sanityAbort.abort(), 10_000);
             const uploadRes = await fetch(uploadUrl, {
+              signal: sanityAbort.signal,
               method: "POST",
               headers: {
                 Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
                 "Content-Type": contentType,
               },
               body: arrayBuffer,
-            });
+            }).finally(() => clearTimeout(sanityTimeout));
             if (!uploadRes.ok) {
               const text = await uploadRes.text();
               throw new Error(

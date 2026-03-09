@@ -6,7 +6,26 @@ import type {
   PortableTextComponents,
 } from "@portabletext/react";
 import Image from "next/image";
+import sanitizeHtml from "sanitize-html";
 import { cn } from "@/lib/utils/cn";
+
+const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    "table",
+    "thead",
+    "tbody",
+    "tfoot",
+    "tr",
+    "th",
+    "td",
+    "caption",
+    "colgroup",
+    "col",
+  ],
+  allowedAttributes: {
+    "*": ["colspan", "rowspan", "scope"],
+  },
+};
 
 interface FileAttachmentValue {
   _type: "fileAttachment";
@@ -50,7 +69,9 @@ const components: PortableTextComponents = {
             "[&_td]:border [&_td]:border-gray-200 [&_td]:p-2 [&_td]:align-top",
             "[&_tr:nth-child(even)_td]:bg-gray-50",
           )}
-          dangerouslySetInnerHTML={{ __html: value.html }}
+          dangerouslySetInnerHTML={{
+            __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
+          }}
         />
       );
     },

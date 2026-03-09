@@ -71,7 +71,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       const sanity = yield* SanityService;
       return yield* sanity.getArticleBySlug(slug);
     }),
-  ).catch(() => notFound());
+  );
 
   if (!article) notFound();
 

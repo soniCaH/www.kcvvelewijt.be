@@ -314,9 +314,6 @@ export function TeamRoster({
                         src={member.imageUrl}
                         alt={`${member.firstName} ${member.lastName}`}
                         fill
-                        unoptimized={member.imageUrl.includes(
-                          "clubapi.prosoccerdata.com",
-                        )}
                         className="object-contain object-bottom"
                         sizes={
                           isCompact

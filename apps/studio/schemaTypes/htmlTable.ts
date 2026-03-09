@@ -12,6 +12,7 @@ export const htmlTable = defineType({
       title: 'Table HTML',
       type: 'text',
       description: 'Raw HTML table imported from Drupal. Edit the surrounding article text, but leave this block for table data.',
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {

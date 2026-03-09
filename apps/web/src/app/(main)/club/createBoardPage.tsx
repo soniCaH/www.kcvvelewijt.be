@@ -32,7 +32,7 @@ async function fetchBoardTeamOrNotFound(slug: string) {
       const sanity = yield* SanityService;
       return yield* sanity.getTeamBySlug(slug);
     }),
-  ).catch(() => null);
+  );
 
   if (!team) notFound();
   return team;

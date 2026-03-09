@@ -60,6 +60,7 @@ export const team = defineType({
       type: 'slug',
       options: {source: 'name'},
       readOnly: true,
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'leagueId',
