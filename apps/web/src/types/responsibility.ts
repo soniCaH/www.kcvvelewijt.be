@@ -39,8 +39,8 @@ export interface Contact {
  * Step in the solution path
  */
 export interface SolutionStep {
-  /** Order of the step */
-  order: number;
+  /** Order of the step (optional — use array index when not set) */
+  order?: number;
   /** Description of what to do */
   description: string;
   /** Optional link to more info */

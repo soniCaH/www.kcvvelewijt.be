@@ -4,6 +4,7 @@ import { CardHierarchy } from "./CardHierarchy";
 import type { CardHierarchyProps } from "./CardHierarchy";
 import type { OrgChartNode } from "@/types/organigram";
 import { clubStructure } from "@/data/club-structure";
+import { responsibilityPaths } from "@/data/responsibility-paths";
 
 const meta: Meta<typeof CardHierarchy> = {
   title: "Features/Organigram/CardHierarchy",
@@ -44,6 +45,9 @@ const meta: Meta<typeof CardHierarchy> = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    responsibilityPaths,
+  },
   argTypes: {
     initialExpandedDepth: {
       control: { type: "number", min: 0, max: 5 },
@@ -74,6 +78,7 @@ const CardHierarchyWithState = (args: Partial<CardHierarchyProps>) => {
     <div>
       <CardHierarchy
         members={args.members || []}
+        responsibilityPaths={args.responsibilityPaths ?? []}
         isLoading={args.isLoading ?? false}
         initialExpandedDepth={args.initialExpandedDepth ?? 2}
         maxDepth={args.maxDepth ?? 10}

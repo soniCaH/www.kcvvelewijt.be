@@ -12,6 +12,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
+import { responsibilityPaths } from "@/data/responsibility-paths";
 
 const meta = {
   title: "Features/Responsibility/ResponsibilityFinder",
@@ -45,6 +46,9 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
     },
   },
   tags: ["autodocs"],
+  args: {
+    paths: responsibilityPaths,
+  },
   argTypes: {
     compact: {
       control: "boolean",
@@ -189,7 +193,7 @@ export const AllRoles: Story = {
       <p className="text-gray-dark">
         Users can select from these roles to filter relevant questions:
       </p>
-      <ResponsibilityFinder />
+      <ResponsibilityFinder paths={responsibilityPaths} />
       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-bold mb-2">Role Types:</h4>
         <ul className="list-disc list-inside space-y-1 text-sm">
@@ -262,7 +266,7 @@ export const SizeComparison: Story = {
       <div>
         <h3 className="text-2xl font-bold mb-4">Full Size (Default)</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg">
-          <ResponsibilityFinder />
+          <ResponsibilityFinder paths={responsibilityPaths} />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Large typography (4xl-6xl) for dedicated /hulp page
@@ -272,7 +276,7 @@ export const SizeComparison: Story = {
       <div>
         <h3 className="text-2xl font-bold mb-4">Compact Size</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg bg-green-main/5">
-          <ResponsibilityFinder compact />
+          <ResponsibilityFinder paths={responsibilityPaths} compact />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Smaller typography (2xl-4xl) for homepage integration
@@ -516,7 +520,7 @@ export const CategoryColorCoding: Story = {
         <p className="text-gray-dark mb-4">
           Select a role and search to see colors in action:
         </p>
-        <ResponsibilityFinder />
+        <ResponsibilityFinder paths={responsibilityPaths} />
       </div>
     </div>
   ),

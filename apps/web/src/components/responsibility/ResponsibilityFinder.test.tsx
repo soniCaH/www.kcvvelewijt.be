@@ -49,13 +49,13 @@ async function selectRole(
 describe("ResponsibilityFinder", () => {
   describe("Rendering", () => {
     it("renders the component", () => {
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
       expect(screen.getByText(/IK BEN/i)).toBeInTheDocument();
     });
 
     it("renders dropdown with all role options", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       // Check for dropdown button
       const dropdownButton = screen.getByRole("button", { name: /een\.\.\./i });
@@ -85,14 +85,16 @@ describe("ResponsibilityFinder", () => {
     });
 
     it("does not show question input initially", () => {
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
       expect(
         screen.queryByPlaceholderText(/typ je vraag/i),
       ).not.toBeInTheDocument();
     });
 
     it("renders in compact mode when prop is true", () => {
-      const { container } = render(<ResponsibilityFinder compact />);
+      const { container } = render(
+        <ResponsibilityFinder paths={responsibilityPaths} compact />,
+      );
       expect(container.querySelector(".compact")).toBeInTheDocument();
     });
   });
@@ -100,7 +102,7 @@ describe("ResponsibilityFinder", () => {
   describe("Role Selection", () => {
     it("shows question input after selecting a role", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -109,7 +111,7 @@ describe("ResponsibilityFinder", () => {
 
     it("updates dropdown button text with selected role", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -120,7 +122,7 @@ describe("ResponsibilityFinder", () => {
 
     it("can change selected role", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
       let dropdownButton = screen.getByRole("button", { name: /speler/i });
@@ -133,7 +135,7 @@ describe("ResponsibilityFinder", () => {
 
     it("focuses input after role selection", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -147,7 +149,7 @@ describe("ResponsibilityFinder", () => {
   describe("Search Functionality", () => {
     it("shows suggestions when typing", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -162,7 +164,7 @@ describe("ResponsibilityFinder", () => {
 
     it("filters suggestions by selected role", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "ouder");
 
@@ -178,7 +180,7 @@ describe("ResponsibilityFinder", () => {
 
     it("shows maximum 6 suggestions", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -215,7 +217,7 @@ describe("ResponsibilityFinder", () => {
 
     it("clears search when clicking clear button", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -233,7 +235,7 @@ describe("ResponsibilityFinder", () => {
       render(
         <div>
           <div data-testid="outside-element">Outside</div>
-          <ResponsibilityFinder />
+          <ResponsibilityFinder paths={responsibilityPaths} />
         </div>,
       );
 
@@ -270,7 +272,7 @@ describe("ResponsibilityFinder", () => {
   describe("Result Selection", () => {
     it("shows result card when clicking suggestion", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -291,7 +293,12 @@ describe("ResponsibilityFinder", () => {
     it("calls onResultSelect callback", async () => {
       const onResultSelect = vi.fn();
       const user = userEvent.setup();
-      render(<ResponsibilityFinder onResultSelect={onResultSelect} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          onResultSelect={onResultSelect}
+        />,
+      );
 
       await selectRole(user, "speler");
 
@@ -311,7 +318,7 @@ describe("ResponsibilityFinder", () => {
 
     it("displays all result card sections", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -334,7 +341,7 @@ describe("ResponsibilityFinder", () => {
   describe("Accessibility", () => {
     it("has proper ARIA labels", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       // Dropdown button should be accessible
       const dropdownButton = screen.getByRole("button", { name: /een\.\.\./i });
@@ -351,7 +358,7 @@ describe("ResponsibilityFinder", () => {
 
     it("is keyboard navigable", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       const dropdownButton = screen.getByRole("button", { name: /een\.\.\./i });
 
@@ -369,7 +376,7 @@ describe("ResponsibilityFinder", () => {
 
     it("input has placeholder text", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -381,7 +388,7 @@ describe("ResponsibilityFinder", () => {
   describe("Edge Cases", () => {
     it("handles no search results gracefully", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -421,7 +428,7 @@ describe("ResponsibilityFinder", () => {
 
     it("handles empty search gracefully", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -434,7 +441,7 @@ describe("ResponsibilityFinder", () => {
 
     it("handles rapid role switching", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       const roles = ["speler", "ouder", "trainer", "supporter"];
 
@@ -451,7 +458,7 @@ describe("ResponsibilityFinder", () => {
 
   describe("Data Integration", () => {
     it("uses real responsibility paths data", () => {
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       // Should have access to the imported data
       expect(responsibilityPaths).toBeDefined();
@@ -460,7 +467,7 @@ describe("ResponsibilityFinder", () => {
 
     it("matches against keywords correctly", async () => {
       const user = userEvent.setup();
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
@@ -481,7 +488,12 @@ describe("ResponsibilityFinder", () => {
     it("calls onMemberSelect when clicking organigram link", async () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
-      render(<ResponsibilityFinder onMemberSelect={onMemberSelect} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          onMemberSelect={onMemberSelect}
+        />,
+      );
 
       // Find a path with memberId from the actual data
       const pathWithMemberId = responsibilityPaths.find(
@@ -525,7 +537,12 @@ describe("ResponsibilityFinder", () => {
     it("shows organigram button for results with memberId", async () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
-      render(<ResponsibilityFinder onMemberSelect={onMemberSelect} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          onMemberSelect={onMemberSelect}
+        />,
+      );
 
       // Select role and search for question with memberId (sponsor question is for "niet-lid")
       await selectRole(user, "niet-lid");
@@ -549,7 +566,7 @@ describe("ResponsibilityFinder", () => {
     it("shows organigram link when onMemberSelect not provided", async () => {
       const user = userEvent.setup();
       // Render WITHOUT onMemberSelect callback
-      render(<ResponsibilityFinder />);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       // Use "niet-lid" role for sponsor question
       await selectRole(user, "niet-lid");
@@ -577,7 +594,12 @@ describe("ResponsibilityFinder", () => {
       // Find a responsibility path to test with
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPathId={testPath.id} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPathId={testPath.id}
+        />,
+      );
 
       // Should pre-select the result
       expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
@@ -587,7 +609,12 @@ describe("ResponsibilityFinder", () => {
     it("pre-fills with initialPath object", () => {
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPath={testPath} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPath={testPath}
+        />,
+      );
 
       // Should pre-select the result
       expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
@@ -603,6 +630,7 @@ describe("ResponsibilityFinder", () => {
 
       render(
         <ResponsibilityFinder
+          paths={responsibilityPaths}
           initialPathId={pathFromId.id}
           initialPath={pathFromObject}
         />,
@@ -616,7 +644,12 @@ describe("ResponsibilityFinder", () => {
     it("sets role when pre-filling with initialPath", () => {
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPath={testPath} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPath={testPath}
+        />,
+      );
 
       // Role dropdown should show the first role from the path
       const expectedRole = Array.isArray(testPath.role)
@@ -631,7 +664,12 @@ describe("ResponsibilityFinder", () => {
     it("sets question text when pre-filling", () => {
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPath={testPath} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPath={testPath}
+        />,
+      );
 
       // Question input should show the path's question
       const input = screen.getByPlaceholderText(/typ je vraag/i);
@@ -641,7 +679,12 @@ describe("ResponsibilityFinder", () => {
     it("does not show suggestions when pre-filled", () => {
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPath={testPath} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPath={testPath}
+        />,
+      );
 
       // Should not show the autocomplete dropdown
       const buttons = screen.queryAllByRole("button");
@@ -679,6 +722,7 @@ describe("ResponsibilityFinder", () => {
 
       render(
         <ResponsibilityFinder
+          paths={responsibilityPaths}
           initialPath={testPath}
           onResultSelect={onResultSelect}
         />,
@@ -690,7 +734,12 @@ describe("ResponsibilityFinder", () => {
     });
 
     it("handles invalid initialPathId gracefully", () => {
-      render(<ResponsibilityFinder initialPathId="non-existent-id" />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPathId="non-existent-id"
+        />,
+      );
 
       // Should render without crashing
       expect(screen.getByText(/IK BEN/i)).toBeInTheDocument();
@@ -703,7 +752,12 @@ describe("ResponsibilityFinder", () => {
       const user = userEvent.setup();
       const testPath = responsibilityPaths[0];
 
-      render(<ResponsibilityFinder initialPath={testPath} />);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          initialPath={testPath}
+        />,
+      );
 
       // Initially shows the pre-filled result
       expect(screen.getByText(testPath.question)).toBeInTheDocument();

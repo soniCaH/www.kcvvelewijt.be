@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HelpPage } from "./HelpPage";
+import { responsibilityPaths } from "@/data/responsibility-paths";
 
 // ---------------------------------------------------------------------------
 // Meta
@@ -27,6 +28,9 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    paths: responsibilityPaths,
+  },
 } satisfies Meta<typeof HelpPage>;
 
 export default meta;

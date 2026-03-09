@@ -7,6 +7,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ResponsibilityBlock } from "./ResponsibilityBlock";
+import { responsibilityPaths } from "@/data/responsibility-paths";
 
 const meta = {
   title: "Features/Responsibility/ResponsibilityBlock",
@@ -32,6 +33,9 @@ Perfect for homepage "How can we help?" sections that provide quick access to th
     },
   },
   tags: ["autodocs"],
+  args: {
+    paths: responsibilityPaths,
+  },
 } satisfies Meta<typeof ResponsibilityBlock>;
 
 export default meta;
@@ -151,7 +155,7 @@ export const WithPageContext: Story = {
       </section>
 
       {/* Responsibility Block */}
-      <ResponsibilityBlock />
+      <ResponsibilityBlock paths={responsibilityPaths} />
 
       {/* Simulated page footer */}
       <footer className="bg-black text-white p-6 mt-12">
@@ -208,7 +212,7 @@ export const VisualStates: Story = {
     <div className="space-y-8">
       <div>
         <h3 className="text-xl font-bold mb-4 px-4">Initial State</h3>
-        <ResponsibilityBlock />
+        <ResponsibilityBlock paths={responsibilityPaths} />
       </div>
 
       <div className="border-t-4 border-gray-200 pt-8">
@@ -217,10 +221,10 @@ export const VisualStates: Story = {
         </h3>
         <div className="space-y-4">
           <div className="bg-white p-8">
-            <ResponsibilityBlock />
+            <ResponsibilityBlock paths={responsibilityPaths} />
           </div>
           <div className="bg-gray-100 p-8">
-            <ResponsibilityBlock />
+            <ResponsibilityBlock paths={responsibilityPaths} />
           </div>
         </div>
       </div>

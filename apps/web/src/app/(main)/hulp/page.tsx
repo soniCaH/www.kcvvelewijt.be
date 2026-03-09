@@ -5,7 +5,11 @@
  */
 
 import type { Metadata } from "next";
+import { Effect } from "effect";
 import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
+import { runPromise } from "@/lib/effect/runtime";
+import { SanityService } from "@/lib/effect/services/SanityService";
+import type { ResponsibilityPath } from "@/types/responsibility";
 
 export const metadata: Metadata = {
   title: "Hulp & Contact | KCVV Elewijt",
@@ -26,6 +30,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HelpPageRoute() {
-  return <HelpPage />;
+export default async function HelpPageRoute() {
+  const paths = await runPromise(
+    Effect.gen(function* () {
+      const sanity = yield* SanityService;
+      return yield* sanity.getResponsibilityPaths();
+    }),
+  ).catch(() => [] as ResponsibilityPath[]);
+
+  return <HelpPage paths={paths as ResponsibilityPath[]} />;
 }
+
+export const revalidate = 3600;

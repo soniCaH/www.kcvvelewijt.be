@@ -5,8 +5,9 @@
 
 import Link from "next/link";
 import { ResponsibilityFinder } from "@/components/responsibility";
+import type { ResponsibilityPath } from "@/types/responsibility";
 
-export function HelpPage() {
+export function HelpPage({ paths = [] }: { paths?: ResponsibilityPath[] }) {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
       {/* Hero Section */}
@@ -29,7 +30,7 @@ export function HelpPage() {
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <ResponsibilityFinder />
+        <ResponsibilityFinder paths={paths} />
 
         {/* Additional Info */}
         <h2

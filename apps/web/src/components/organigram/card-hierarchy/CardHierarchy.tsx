@@ -34,11 +34,12 @@ import { SearchBar } from "../shared/SearchBar";
 import { DepartmentFilter } from "../shared/DepartmentFilter";
 import { HierarchyLevel } from "./HierarchyLevel";
 import { renderNode, type NodeData } from "../chart/NodeRenderer";
-import { responsibilityPaths } from "@/data/responsibility-paths";
 import type { OrgChartNode } from "@/types/organigram";
+import type { ResponsibilityPath } from "@/types/responsibility";
 
 export interface CardHierarchyProps {
   members: OrgChartNode[];
+  responsibilityPaths?: ResponsibilityPath[];
   onMemberClick?: (member: OrgChartNode) => void;
   initialExpandedDepth?: number;
   maxDepth?: number;
@@ -59,6 +60,7 @@ export interface CardHierarchyProps {
  */
 export function CardHierarchy({
   members,
+  responsibilityPaths = [],
   onMemberClick,
   initialExpandedDepth = 2,
   maxDepth = 10,

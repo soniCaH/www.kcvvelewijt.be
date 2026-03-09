@@ -11,6 +11,7 @@ import {
 } from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import { EVENTS_QUERY } from "../../sanity/queries/events";
+import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
@@ -99,6 +100,33 @@ export interface SanityEvent {
   coverImageUrl: string | null;
 }
 
+export interface SanityResponsibilityContact {
+  role: string | null;
+  email: string | null;
+  phone: string | null;
+  department: string | null;
+  name: string | null;
+}
+
+export interface SanityResponsibilityStep {
+  description: string;
+  link: string | null;
+  contact: SanityResponsibilityContact | null;
+}
+
+export interface SanityResponsibilityPath {
+  id: string;
+  role: string[];
+  question: string;
+  keywords: string[];
+  summary: string;
+  category: string;
+  icon: string | null;
+  primaryContact: SanityResponsibilityContact;
+  steps: SanityResponsibilityStep[];
+  relatedPaths: string[];
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
@@ -114,6 +142,9 @@ export interface SanityServiceInterface {
   ) => Effect.Effect<SanityArticle | null>;
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
+  readonly getResponsibilityPaths: () => Effect.Effect<
+    SanityResponsibilityPath[]
+  >;
 }
 
 export class SanityService extends Context.Tag("SanityService")<
@@ -141,4 +172,6 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityArticle | null>(ARTICLE_BY_SLUG_QUERY, { slug }),
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
+  getResponsibilityPaths: () =>
+    fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY),
 });

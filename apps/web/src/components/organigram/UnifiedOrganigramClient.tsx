@@ -37,7 +37,6 @@ import {
   buildOrganigramUrl,
   parseOrganigramParams,
 } from "@/lib/organigram-utils";
-import { responsibilityPaths } from "@/data/responsibility-paths";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import type { FilterTab } from "../design-system/FilterTabs/FilterTabs";
@@ -58,6 +57,7 @@ type ViewType = "cards" | "chart" | "responsibilities";
 
 export interface UnifiedOrganigramClientProps {
   members: OrgChartNode[];
+  responsibilityPaths?: ResponsibilityPath[];
   className?: string;
 }
 
@@ -91,6 +91,7 @@ function getInitialView(urlView: string | null): ViewType {
  */
 export function UnifiedOrganigramClient({
   members,
+  responsibilityPaths = [],
   className = "",
 }: UnifiedOrganigramClientProps) {
   const searchParams = useSearchParams();
@@ -452,6 +453,7 @@ export function UnifiedOrganigramClient({
         {activeView === "cards" && (
           <CardHierarchy
             members={members}
+            responsibilityPaths={responsibilityPaths}
             onMemberClick={handleMemberClick}
             initialExpandedDepth={2}
           />
@@ -491,6 +493,7 @@ export function UnifiedOrganigramClient({
               }
             >
               <ResponsibilityFinder
+                paths={responsibilityPaths}
                 onMemberSelect={handleResponsibilityMemberSelect}
                 initialPathId={selectedResponsibilityId ?? undefined}
                 initialPath={selectedResponsibilityPath ?? undefined}

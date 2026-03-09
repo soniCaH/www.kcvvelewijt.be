@@ -13,7 +13,13 @@ import type {
   ResponsibilityPath,
   AutocompleteSuggestion,
 } from "@/types/responsibility";
-import { responsibilityPaths, userRoles } from "@/data/responsibility-paths";
+const userRoles: { value: string; label: string }[] = [
+  { value: "speler", label: "Speler" },
+  { value: "ouder", label: "Ouder" },
+  { value: "trainer", label: "Trainer" },
+  { value: "supporter", label: "Supporter" },
+  { value: "niet-lid", label: "Niet-lid" },
+];
 import {
   X,
   User,
@@ -25,6 +31,7 @@ import {
 import { getIcon } from "@/lib/icons";
 
 interface ResponsibilityFinderProps {
+  paths?: ResponsibilityPath[];
   onResultSelect?: (path: ResponsibilityPath) => void;
   onMemberSelect?: (memberId: string) => void;
   compact?: boolean;
@@ -82,6 +89,7 @@ const categoryColors = {
  * @returns A React element that renders the ResponsibilityFinder UI (role selection, question input, suggestions, and result display).
  */
 export function ResponsibilityFinder({
+  paths = [],
   onResultSelect,
   onMemberSelect,
   compact = false,
@@ -104,63 +112,60 @@ export function ResponsibilityFinder({
 
     const query = questionText.toLowerCase();
 
-    const matches = responsibilityPaths.reduce<AutocompleteSuggestion[]>(
-      (acc, path) => {
-        let score = 0;
+    const matches = paths.reduce<AutocompleteSuggestion[]>((acc, path) => {
+      let score = 0;
 
-        // Filter by role first (required match)
-        if (selectedRole && !path.role.includes(selectedRole as UserRole)) {
-          return acc; // Skip if role doesn't match
+      // Filter by role first (required match)
+      if (selectedRole && !path.role.includes(selectedRole as UserRole)) {
+        return acc; // Skip if role doesn't match
+      }
+
+      if (selectedRole) {
+        score += 30; // Boost if role matches
+      }
+
+      // Match against question text
+      if (query) {
+        const questionLower = path.question.toLowerCase();
+
+        // Exact match in question
+        if (questionLower.includes(query)) {
+          score += 50;
         }
 
-        if (selectedRole) {
-          score += 30; // Boost if role matches
-        }
+        // Keyword matching (case-insensitive)
+        const matchedKeywords = path.keywords.filter((kw) => {
+          const kwLower = kw.toLowerCase();
+          return kwLower.includes(query) || query.includes(kwLower);
+        });
+        score += matchedKeywords.length * 10;
 
-        // Match against question text
-        if (query) {
-          const questionLower = path.question.toLowerCase();
-
-          // Exact match in question
-          if (questionLower.includes(query)) {
-            score += 50;
-          }
-
-          // Keyword matching (case-insensitive)
-          const matchedKeywords = path.keywords.filter((kw) => {
+        // Word-by-word matching
+        const queryWords = query.split(" ").filter((w) => w.length > 2);
+        queryWords.forEach((word) => {
+          if (questionLower.includes(word)) score += 5;
+          path.keywords.forEach((kw) => {
             const kwLower = kw.toLowerCase();
-            return kwLower.includes(query) || query.includes(kwLower);
+            if (kwLower.includes(word)) score += 3;
           });
-          score += matchedKeywords.length * 10;
+        });
+      }
 
-          // Word-by-word matching
-          const queryWords = query.split(" ").filter((w) => w.length > 2);
-          queryWords.forEach((word) => {
-            if (questionLower.includes(word)) score += 5;
-            path.keywords.forEach((kw) => {
-              const kwLower = kw.toLowerCase();
-              if (kwLower.includes(word)) score += 3;
-            });
-          });
-        }
+      // Only include if there's some match
+      // When there's a query, require matches beyond just role (score > 30)
+      // When there's no query, show all results for the selected role
+      if (!query && selectedRole) {
+        return [...acc, { path, score }];
+      } else if (query && score > 30) {
+        return [...acc, { path, score }];
+      }
 
-        // Only include if there's some match
-        // When there's a query, require matches beyond just role (score > 30)
-        // When there's no query, show all results for the selected role
-        if (!query && selectedRole) {
-          return [...acc, { path, score }];
-        } else if (query && score > 30) {
-          return [...acc, { path, score }];
-        }
-
-        return acc;
-      },
-      [],
-    );
+      return acc;
+    }, []);
 
     // Sort by score (highest first)
     return matches.sort((a, b) => b.score - a.score).slice(0, 6);
-  }, [questionText, selectedRole]);
+  }, [questionText, selectedRole, paths]);
 
   // Handle role selection
   const handleRoleSelect = (role: string) => {
@@ -233,7 +238,7 @@ export function ResponsibilityFinder({
 
     // Fallback to initialPathId
     if (initialPathId) {
-      const path = responsibilityPaths.find((p) => p.id === initialPathId);
+      const path = paths.find((p) => p.id === initialPathId);
       if (path) {
         setSelectedResult(path);
         setQuestionText(path.question);
@@ -244,7 +249,7 @@ export function ResponsibilityFinder({
         setShowSuggestions(false);
       }
     }
-  }, [initialPath, initialPathId]);
+  }, [initialPath, initialPathId, paths]);
 
   return (
     <div className={`responsibility-finder ${compact ? "compact" : ""}`}>
@@ -658,13 +663,13 @@ function ResultCard({
             Wat moet je doen?
           </h4>
           <ol className="space-y-3">
-            {path.steps.map((step) => (
-              <li key={step.order} className="flex gap-3 group">
+            {path.steps.map((step, stepIdx) => (
+              <li key={stepIdx} className="flex gap-3 group">
                 <div
                   className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
                   style={{ backgroundColor: colors.accent }}
                 >
-                  {step.order}
+                  {stepIdx + 1}
                 </div>
                 <div className="flex-1 pt-1">
                   <p className="text-gray-700 text-sm leading-relaxed">

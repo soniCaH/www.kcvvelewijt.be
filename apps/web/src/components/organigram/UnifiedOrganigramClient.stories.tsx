@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UnifiedOrganigramClient } from "./UnifiedOrganigramClient";
 import { clubStructure } from "@/data/club-structure";
+import { responsibilityPaths } from "@/data/responsibility-paths";
 
 /**
  * UnifiedOrganigramClient - Tabbed interface for organigram views
@@ -34,6 +35,9 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    responsibilityPaths,
+  },
 } satisfies Meta<typeof UnifiedOrganigramClient>;
 
 export default meta;

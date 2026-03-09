@@ -6,7 +6,8 @@
     "migrate:sponsors": "tsx src/migrate-sponsors.ts",
     "migrate:events": "tsx src/migrate-events.ts",
     "migrate:articles": "tsx src/migrate-articles.ts",
-    "migrate:staff": "tsx src/migrate-staff.ts"
+    "migrate:staff": "tsx src/migrate-staff.ts",
+    "migrate:responsibility-paths": "tsx src/migrate-responsibility-paths.ts"
   },
   "dependencies": {
     "@portabletext/block-tools": "^5.1.0",
