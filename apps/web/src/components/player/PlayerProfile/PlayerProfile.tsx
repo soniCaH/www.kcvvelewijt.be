@@ -265,6 +265,9 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                       src={imageUrl}
                       alt={fullName}
                       fill
+                      unoptimized={imageUrl.includes(
+                        "clubapi.prosoccerdata.com",
+                      )}
                       className="object-cover object-top"
                       sizes="(max-width: 1024px) 280px, 350px"
                       priority
