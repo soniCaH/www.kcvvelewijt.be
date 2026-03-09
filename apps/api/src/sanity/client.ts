@@ -142,7 +142,15 @@ export const SanityWriteClientLive = Layer.effect(
       uploadPlayerImage: (psdId, imageUrl) =>
         Effect.tryPromise({
           try: async () => {
-            const response = await fetch(imageUrl);
+            const response = await fetch(imageUrl, {
+              headers: {
+                "x-api-key": env.PSD_API_KEY,
+                "x-api-club": env.PSD_API_CLUB,
+                Authorization: env.PSD_API_AUTH,
+              },
+            });
+            // 404 = player has no photo in PSD — skip silently
+            if (response.status === 404) return;
             if (!response.ok)
               throw new Error(
                 `PSD image fetch failed: ${response.status} ${response.statusText}`,

@@ -91,7 +91,15 @@ export const runSync = Effect.gen(function* () {
                   !existing?.hasPsdImage ||
                   existing.psdImageUrl !== newImageUrl;
                 if (needsUpload) {
-                  yield* sanity.uploadPlayerImage(doc.psdId, newImageUrl);
+                  yield* sanity
+                    .uploadPlayerImage(doc.psdId, newImageUrl)
+                    .pipe(
+                      Effect.catchAll((e) =>
+                        Effect.log(
+                          `Image upload skipped for player ${doc.psdId}: ${e.message}`,
+                        ),
+                      ),
+                    );
                 }
               }
             }),
