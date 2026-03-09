@@ -4,7 +4,7 @@ import { WorkerEnvTag } from "../env";
 /** Per-endpoint TTLs in seconds */
 export const TTL = {
   MATCHES_TEAM: 60 * 60, // 1 hour — season schedule rarely changes
-  NEXT_MATCHES: 60, // 60 seconds — freshness on match day
+  NEXT_MATCHES: 60 * 5, // 5 minutes — fresh enough on match day, avoids burning PSD quota
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
   MATCH_DETAIL_LIVE: 60, // 60 seconds — live match updates
   RANKING: 60 * 60, // 1 hour — updates after each match day
