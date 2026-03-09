@@ -26,6 +26,14 @@ interface BoardPageConfig {
   fallbackTitle: string;
 }
 
+/**
+ * Fetches a team by its Sanity slug or triggers a Next.js 404 response when absent.
+ *
+ * If no team is found, this function calls Next.js `notFound()` to end the request with a 404.
+ *
+ * @param slug - The Sanity team slug (for example: "bestuur", "jeugdbestuur")
+ * @returns The fetched team object from Sanity
+ */
 async function fetchBoardTeamOrNotFound(slug: string) {
   const team = await runPromise(
     Effect.gen(function* () {
@@ -38,6 +46,16 @@ async function fetchBoardTeamOrNotFound(slug: string) {
   return team;
 }
 
+/**
+ * Create a page factory for a club board that provides metadata generation and a page component.
+ *
+ * @param slug - Sanity team slug identifying which team to fetch (e.g., "bestuur", "jeugdbestuur")
+ * @param fallbackDescription - Description used when the team has no tagline or Sanity data is unavailable
+ * @param fallbackTitle - Title used when Sanity data cannot be fetched
+ * @returns An object with:
+ *  - `generateMetadata`: a function that builds the page Metadata (title, description, and Open Graph data) for the configured team slug
+ *  - `Page`: a React component that renders the BestuurPage using the fetched Sanity team data (header, players, and staff)
+ */
 export function createBoardPage({
   slug,
   fallbackDescription,

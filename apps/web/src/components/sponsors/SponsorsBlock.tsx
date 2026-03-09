@@ -47,19 +47,11 @@ export interface SponsorsBlockProps {
 }
 
 /**
- * SponsorsBlock server component
+ * Fetches sponsors of types "crossing", "green", and "white" from the CMS and renders the Sponsors component with the resulting list.
  *
- * Fetches promoted sponsors from Drupal CMS with types: crossing, green, white
- * Sorted by type then title (matching Gatsby implementation)
+ * The function falls back to an empty sponsor list on error and forwards received display props (title, description, columns, variant, showViewAll, viewAllHref, className) to the rendered Sponsors component.
  *
- * @example
- * ```tsx
- * // In page footer (dark theme)
- * <SponsorsBlock variant="dark" />
- *
- * // On homepage (light theme)
- * <SponsorsBlock variant="light" columns={4} />
- * ```
+ * @returns A JSX element rendering the Sponsors component populated with the fetched sponsor list
  */
 export async function SponsorsBlock({
   title = "Onze sponsors",

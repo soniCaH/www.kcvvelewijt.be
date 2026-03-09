@@ -14,6 +14,11 @@ interface PlayerPageProps {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Generate static route parameters for all players.
+ *
+ * @returns An array of objects each containing a `slug` property set to the player's `psdId`; returns an empty array if player retrieval fails.
+ */
 export async function generateStaticParams() {
   try {
     const players = await runPromise(
@@ -28,6 +33,17 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Build page and Open Graph metadata for a player identified by the provided slug.
+ *
+ * Fetches the player by its `psdId` and constructs a localized title, description,
+ * and `openGraph` information including profile fields and an image when available.
+ *
+ * @param params - An object whose `slug` promise resolves to the player's `psdId`
+ * @returns A Metadata object containing the page title, description, and `openGraph`
+ *          fields for the player; if the player is not found, returns a Metadata
+ *          object with the title "Speler niet gevonden | KCVV Elewijt".
+ */
 export async function generateMetadata({
   params,
 }: PlayerPageProps): Promise<Metadata> {
@@ -67,6 +83,15 @@ export async function generateMetadata({
   }
 }
 
+/**
+ * Render the player detail page for the given route slug.
+ *
+ * Fetches the player by `psdId` (slug) and renders a PlayerProfile and PlayerShare section.
+ * If no player is found for the provided slug, triggers a 404 via `notFound()`.
+ *
+ * @param params - A promise resolving to route params containing the `slug` identifying the player
+ * @returns A JSX element containing the player's profile and share section
+ */
 export default async function PlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params;
 

@@ -28,10 +28,10 @@ interface ImageProps {
 }
 
 /**
- * Generate an Open Graph PNG image for a player identified by the provided slug.
+ * Generate an Open Graph PNG for a player identified by the provided slug.
  *
- * @param params - A promise that resolves to an object containing the `slug` string identifying the player
- * @returns An ImageResponse containing a 1200×630 PNG with the player's name, optional jersey-number watermark, position and team info, a green bottom accent bar, and KCVV branding
+ * @param params - Object with a `slug` string identifying the player
+ * @returns An ImageResponse with a 1200×630 PNG showing the player's name, optional jersey-number watermark, position and team, a green bottom accent bar, and KCVV branding
  */
 export default async function Image({ params }: ImageProps) {
   const { slug } = await params;

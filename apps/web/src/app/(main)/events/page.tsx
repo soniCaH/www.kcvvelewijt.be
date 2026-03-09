@@ -24,6 +24,12 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
+/**
+ * Convert a SanityEvent into an EventsListItem suitable for rendering in the UI.
+ *
+ * @param event - The SanityEvent to convert; uses `title`, `dateStart`, `dateEnd`, `coverImageUrl`, and `externalLink?.url`.
+ * @returns An EventsListItem with `title`, `href` (uses `externalLink.url` or `"#"`), `date` from `dateStart`, optional `endDate` from `dateEnd`, and optional `imageUrl` from `coverImageUrl`.
+ */
 function transformEvent(event: SanityEvent): EventsListItem {
   return {
     title: event.title,
@@ -34,6 +40,13 @@ function transformEvent(event: SanityEvent): EventsListItem {
   };
 }
 
+/**
+ * Renders the events page: fetches events from Sanity, selects upcoming events, transforms them for display, and returns the page UI.
+ *
+ * Fetch errors are logged and treated as an empty events list.
+ *
+ * @returns The React element for the events page containing a hero section and an EventsList populated with upcoming events.
+ */
 export default async function EventsPage() {
   const events = await runPromise(
     Effect.gen(function* () {

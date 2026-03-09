@@ -41,6 +41,12 @@ interface DrupalFile {
   attributes: { uri: { url: string } };
 }
 
+/**
+ * Resolve a Drupal file reference to a Sanity image asset ID.
+ *
+ * @param ref - Drupal file reference object containing an `id`, or `null`/`undefined` to indicate no file
+ * @returns The Sanity image asset ID when the file is found and uploaded, `null` otherwise
+ */
 async function resolveImage(
   ref: { id: string } | null | undefined,
 ): Promise<string | null> {
@@ -57,6 +63,12 @@ async function resolveImage(
   return uploadImageFromUrl(fullUrl);
 }
 
+/**
+ * Migrate coaches and board staff from Drupal into Sanity as staffMember documents.
+ *
+ * Fetches player and staff nodes from Drupal, resolves optional image assets, creates corresponding
+ * Sanity documents with mapped roles and available photo references, and logs progress for each item.
+ */
 async function main() {
   // Migrate node--player coaching staff (those with a position_short role code)
   console.log("Fetching coaches (node--player with role codes) from Drupal...");

@@ -27,7 +27,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Transform Sanity Team to TeamData for TeamOverview component
+ * Convert a Sanity team object into a TeamData object suitable for the TeamOverview component.
+ *
+ * @param team - The Sanity team object to transform.
+ * @returns A `TeamData` object with id, name, href, ageGroup, teamType, and tagline, or `null` if the team's age group cannot be determined or `slug.current` is missing.
  */
 function transformTeamToData(team: SanityTeam): TeamData | null {
   const ageGroup = getSanityAgeGroup(team);
@@ -46,7 +49,12 @@ function transformTeamToData(team: SanityTeam): TeamData | null {
 }
 
 /**
- * Fetch all youth teams from Sanity
+ * Retrieve youth teams from Sanity and convert them into data objects for the UI.
+ *
+ * Fetches teams from the Sanity service, transforms valid entries into `TeamData`,
+ * and excludes invalid or incomplete teams.
+ *
+ * @returns An array of `TeamData` objects for valid youth teams; an empty array if fetching fails or no valid teams are found.
  */
 async function fetchYouthTeams(): Promise<TeamData[]> {
   try {
