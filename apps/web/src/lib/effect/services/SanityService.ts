@@ -12,6 +12,10 @@ import {
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import { EVENTS_QUERY } from "../../sanity/queries/events";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
+import type {
+  ResponsibilityPath,
+  Contact,
+} from "../../../types/responsibility";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
@@ -142,9 +146,7 @@ export interface SanityServiceInterface {
   ) => Effect.Effect<SanityArticle | null>;
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
-  readonly getResponsibilityPaths: () => Effect.Effect<
-    SanityResponsibilityPath[]
-  >;
+  readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
 }
 
 export class SanityService extends Context.Tag("SanityService")<
@@ -160,6 +162,40 @@ const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
     catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
   }).pipe(Effect.orDie);
 
+// ─── Responsibility path mappers ──────────────────────────────────────────────
+
+function mapContact(c: SanityResponsibilityContact): Contact {
+  return {
+    role: c.role ?? "",
+    ...(c.name ? { name: c.name } : {}),
+    ...(c.email ? { email: c.email } : {}),
+    ...(c.phone ? { phone: c.phone } : {}),
+    ...(c.department
+      ? { department: c.department as Contact["department"] }
+      : {}),
+  };
+}
+
+function mapResponsibilityPath(
+  p: SanityResponsibilityPath,
+): ResponsibilityPath {
+  return {
+    id: p.id,
+    role: p.role as ResponsibilityPath["role"],
+    question: p.question,
+    keywords: p.keywords,
+    summary: p.summary,
+    category: p.category as ResponsibilityPath["category"],
+    ...(p.icon ? { icon: p.icon } : {}),
+    primaryContact: mapContact(p.primaryContact),
+    steps: p.steps.map((s) => ({
+      description: s.description,
+      ...(s.link ? { link: s.link } : {}),
+      ...(s.contact ? { contact: mapContact(s.contact) } : {}),
+    })),
+  };
+}
+
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getPlayers: () => fetchGroq<SanityPlayer[]>(PLAYERS_QUERY),
   getPlayerByPsdId: (psdId) =>
@@ -173,5 +209,7 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
   getResponsibilityPaths: () =>
-    fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY),
+    fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(
+      Effect.map((paths) => paths.map(mapResponsibilityPath)),
+    ),
 });

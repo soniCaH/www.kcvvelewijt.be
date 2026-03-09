@@ -19,7 +19,7 @@ const mockMembers: OrgChartNode[] = [
     id: "club",
     name: "KCVV Elewijt",
     title: "Voetbalclub",
-    department: "general",
+    department: "algemeen",
     parentId: null,
   },
   {

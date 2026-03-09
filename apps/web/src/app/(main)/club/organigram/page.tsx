@@ -14,7 +14,6 @@ import { UnifiedOrganigramClient } from "@/components/organigram";
 import { clubStructure } from "@/data/club-structure";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
-import type { ResponsibilityPath } from "@/types/responsibility";
 
 export const metadata: Metadata = {
   title: "Organigram & Hulp | KCVV Elewijt",
@@ -51,7 +50,7 @@ export default async function OrganigramPage() {
       const sanity = yield* SanityService;
       return yield* sanity.getResponsibilityPaths();
     }),
-  ).catch(() => [] as ResponsibilityPath[]);
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,7 +77,7 @@ export default async function OrganigramPage() {
         <Suspense fallback={<div className="text-center py-12">Laden...</div>}>
           <UnifiedOrganigramClient
             members={clubStructure}
-            responsibilityPaths={responsibilityPaths as ResponsibilityPath[]}
+            responsibilityPaths={responsibilityPaths}
           />
         </Suspense>
       </div>

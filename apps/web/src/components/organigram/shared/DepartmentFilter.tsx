@@ -23,7 +23,7 @@ import type { DepartmentFilterProps } from "./types";
 /**
  * Render a department filter as tabs with optional member counts.
  *
- * Computes counts for the three tabs: "Alle" (total members), "Hoofdbestuur" (members whose department is "hoofdbestuur" or "general"), and "Jeugdbestuur" (members whose department is "jeugdbestuur").
+ * Computes counts for the three tabs: "Alle" (total members), "Hoofdbestuur" (members whose department is "hoofdbestuur" or "algemeen"), and "Jeugdbestuur" (members whose department is "jeugdbestuur").
  *
  * @param value - The currently active department key ("all" | "hoofdbestuur" | "jeugdbestuur")
  * @param onChange - Called when the active tab changes with the new department key
@@ -55,7 +55,7 @@ export function DepartmentFilter({
         value: "hoofdbestuur",
         label: "Hoofdbestuur",
         count: members.filter(
-          (m) => m.department === "hoofdbestuur" || m.department === "general",
+          (m) => m.department === "hoofdbestuur" || m.department === "algemeen",
         ).length,
       },
       {

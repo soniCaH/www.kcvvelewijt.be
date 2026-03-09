@@ -220,7 +220,7 @@ export function MemberDetailsModal({
           )}
 
           {/* Department Badge */}
-          {member.department && member.department !== "general" && (
+          {member.department && member.department !== "algemeen" && (
             <div>
               <h3
                 className="text-lg font-bold text-gray-blue mb-3"

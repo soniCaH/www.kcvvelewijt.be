@@ -49,7 +49,6 @@ export const staffMember = defineType({
         list: [
           {title: 'Hoofdbestuur', value: 'hoofdbestuur'},
           {title: 'Jeugdbestuur', value: 'jeugdbestuur'},
-          {title: 'Senioren', value: 'senioren'},
           {title: 'Algemeen', value: 'algemeen'},
         ],
       },

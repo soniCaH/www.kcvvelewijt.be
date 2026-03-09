@@ -13,7 +13,84 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
-import { responsibilityPaths } from "@/data/responsibility-paths";
+import type { ResponsibilityPath } from "@/types/responsibility";
+
+const storyPaths: ResponsibilityPath[] = [
+  {
+    id: "ongeval-speler-training",
+    role: ["speler", "ouder"],
+    question: "heb een ongeval op training/wedstrijd",
+    keywords: ["ongeval", "blessure", "letsel", "kwetsuur", "pijn"],
+    summary:
+      "Meld het ongeval onmiddellijk bij je trainer en neem contact op met de verzekeringverantwoordelijke.",
+    category: "medisch",
+    icon: "heart",
+    primaryContact: {
+      role: "Verzekeringverantwoordelijke",
+      email: "verzekering@kcvvelewijt.be",
+      department: "algemeen",
+    },
+    steps: [
+      { description: "Meld het ongeval bij je trainer" },
+      {
+        description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
+        contact: {
+          role: "Verzekeringverantwoordelijke",
+          email: "verzekering@kcvvelewijt.be",
+        },
+      },
+      {
+        description: "Vul het ongevalformulier in",
+        link: "/club/downloads",
+      },
+    ],
+  },
+  {
+    id: "inschrijving-nieuw-lid",
+    role: ["niet-lid", "ouder"],
+    question: "wil mij graag inschrijven",
+    keywords: ["inschrijven", "lid worden", "aansluiten", "lidmaatschap"],
+    summary:
+      "Gebruik het online inschrijvingsformulier of neem contact op met de jeugdsecretaris.",
+    category: "administratief",
+    icon: "file-text",
+    primaryContact: {
+      role: "Jeugdsecretaris",
+      email: "jeugd@kcvvelewijt.be",
+      department: "jeugdbestuur",
+    },
+    steps: [
+      { description: "Ga naar de inschrijvingspagina", link: "/club/register" },
+      { description: "Vul het formulier in met alle gevraagde gegevens" },
+      { description: "Betaal het lidgeld" },
+    ],
+  },
+  {
+    id: "trainer-worden",
+    role: ["niet-lid"],
+    question: "wil graag trainer worden",
+    keywords: ["trainer", "coach", "vrijwilliger", "helpen"],
+    summary:
+      "Neem contact op met de technisch coördinator of jeugdcoördinator.",
+    category: "algemeen",
+    icon: "graduation-cap",
+    primaryContact: {
+      role: "Technisch Coördinator",
+      email: "technisch@kcvvelewijt.be",
+      department: "hoofdbestuur",
+    },
+    steps: [
+      {
+        description: "Contacteer de technisch coördinator",
+        contact: {
+          role: "Technisch Coördinator",
+          email: "technisch@kcvvelewijt.be",
+        },
+      },
+      { description: "Bespreek je ervaring en beschikbaarheid" },
+    ],
+  },
+];
 
 const meta = {
   title: "Features/Responsibility/ResponsibilityFinder",
@@ -48,7 +125,7 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
   },
   tags: ["autodocs"],
   args: {
-    paths: responsibilityPaths,
+    paths: storyPaths,
     onResultSelect: fn(),
   },
   argTypes: {

@@ -3,8 +3,54 @@ import { useState } from "react";
 import { CardHierarchy } from "./CardHierarchy";
 import type { CardHierarchyProps } from "./CardHierarchy";
 import type { OrgChartNode } from "@/types/organigram";
+import type { ResponsibilityPath } from "@/types/responsibility";
 import { clubStructure } from "@/data/club-structure";
-import { responsibilityPaths } from "@/data/responsibility-paths";
+
+const storyPaths: ResponsibilityPath[] = [
+  {
+    id: "ongeval-speler-training",
+    role: ["speler", "ouder"],
+    question: "heb een ongeval op training/wedstrijd",
+    keywords: ["ongeval", "blessure", "letsel"],
+    summary:
+      "Meld het ongeval onmiddellijk bij je trainer en neem contact op met de verzekeringverantwoordelijke.",
+    category: "medisch",
+    icon: "heart",
+    primaryContact: {
+      role: "Verzekeringverantwoordelijke",
+      email: "verzekering@kcvvelewijt.be",
+      department: "algemeen",
+    },
+    steps: [
+      { description: "Meld het ongeval bij je trainer" },
+      {
+        description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
+        contact: {
+          role: "Verzekeringverantwoordelijke",
+          email: "verzekering@kcvvelewijt.be",
+        },
+      },
+    ],
+  },
+  {
+    id: "inschrijving-nieuw-lid",
+    role: ["niet-lid", "ouder"],
+    question: "wil mij graag inschrijven",
+    keywords: ["inschrijven", "lid worden"],
+    summary: "Gebruik het online inschrijvingsformulier.",
+    category: "administratief",
+    icon: "file-text",
+    primaryContact: {
+      role: "Jeugdsecretaris",
+      email: "jeugd@kcvvelewijt.be",
+      department: "jeugdbestuur",
+    },
+    steps: [
+      { description: "Ga naar de inschrijvingspagina", link: "/club/register" },
+      { description: "Vul het formulier in" },
+    ],
+  },
+];
 
 const meta: Meta<typeof CardHierarchy> = {
   title: "Features/Organigram/CardHierarchy",
@@ -46,7 +92,7 @@ const meta: Meta<typeof CardHierarchy> = {
   },
   tags: ["autodocs"],
   args: {
-    responsibilityPaths,
+    responsibilityPaths: storyPaths,
   },
   argTypes: {
     initialExpandedDepth: {
@@ -190,14 +236,14 @@ export const ThreeLevelsExpanded: Story = {
 // ==================== DEEP HIERARCHY ====================
 
 export const DeepHierarchy: Story = {
-  render: () => {
+  render: (args) => {
     // Create a deeper hierarchy for testing
     const deepMembers: OrgChartNode[] = [
       {
         id: "root",
         name: "CEO",
         title: "Chief Executive Officer",
-        department: "general",
+        department: "algemeen",
         parentId: null,
       },
       {
@@ -250,6 +296,7 @@ export const DeepHierarchy: Story = {
           7-level deep hierarchy to test nested expansion
         </p>
         <CardHierarchy
+          {...args}
           members={deepMembers}
           initialExpandedDepth={3}
           onMemberClick={(member) =>
@@ -271,7 +318,7 @@ export const DeepHierarchy: Story = {
 // ==================== SEARCH & AUTO-EXPAND ====================
 
 export const SearchWithAutoExpand: Story = {
-  render: () => {
+  render: (args) => {
     return (
       <div>
         <p className="text-sm text-kcvv-gray mb-4">
@@ -279,6 +326,7 @@ export const SearchWithAutoExpand: Story = {
           hierarchy will auto-expand to show results
         </p>
         <CardHierarchy
+          {...args}
           members={clubStructure}
           initialExpandedDepth={1}
           onMemberClick={(member) =>
@@ -370,10 +418,10 @@ export const EmptyState: Story = {
 // ==================== DEPARTMENT FILTERING ====================
 
 export const FilteredHoofdbestuur: Story = {
-  render: () => {
+  render: (args) => {
     // Pre-filtered to Hoofdbestuur
     const hoofdbestuurMembers = clubStructure.filter(
-      (m) => m.department === "hoofdbestuur" || m.department === "general",
+      (m) => m.department === "hoofdbestuur" || m.department === "algemeen",
     );
 
     return (
@@ -382,6 +430,7 @@ export const FilteredHoofdbestuur: Story = {
           Showing only Hoofdbestuur members (use Department Filter to switch)
         </p>
         <CardHierarchy
+          {...args}
           members={hoofdbestuurMembers}
           initialExpandedDepth={2}
           onMemberClick={(member) =>
@@ -403,12 +452,13 @@ export const FilteredHoofdbestuur: Story = {
 // ==================== INTERACTION EXAMPLES ====================
 
 export const InteractionExample: Story = {
-  render: () => {
+  render: (args) => {
     const [expandHistory, setExpandHistory] = useState<string[]>([]);
 
     return (
       <div className="space-y-6">
         <CardHierarchy
+          {...args}
           members={clubStructure}
           initialExpandedDepth={1}
           onMemberClick={(member) => {
@@ -454,7 +504,7 @@ export const InteractionExample: Story = {
 // ==================== ANIMATION SHOWCASE ====================
 
 export const AnimationShowcase: Story = {
-  render: () => {
+  render: (args) => {
     // Create a simple 3-level hierarchy for animation testing
     const simpleHierarchy: OrgChartNode[] = [
       {
@@ -500,6 +550,7 @@ export const AnimationShowcase: Story = {
           Click expand/collapse buttons to see smooth animations
         </p>
         <CardHierarchy
+          {...args}
           members={simpleHierarchy}
           initialExpandedDepth={1}
           onMemberClick={(member) =>
@@ -521,14 +572,14 @@ export const AnimationShowcase: Story = {
 // ==================== LARGE DATASET ====================
 
 export const LargeDataset: Story = {
-  render: () => {
+  render: (args) => {
     // Generate a larger hierarchy
     const largeHierarchy: OrgChartNode[] = [
       {
         id: "root",
         name: "Club",
         title: "KCVV Elewijt",
-        department: "general",
+        department: "algemeen",
         parentId: null,
       },
       ...Array.from({ length: 50 }, (_, i) => ({
@@ -549,6 +600,7 @@ export const LargeDataset: Story = {
           Large dataset (50 members) to test performance
         </p>
         <CardHierarchy
+          {...args}
           members={largeHierarchy}
           initialExpandedDepth={2}
           onMemberClick={(member) =>

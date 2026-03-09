@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { createDoc } from "./sanity-uploader";
+import { createDoc, client } from "./sanity-uploader";
 
 // Static data from the web app — copied inline to avoid cross-package imports in this script context
 const responsibilityPaths = [
@@ -238,7 +238,25 @@ interface PathData {
   steps: StepData[];
 }
 
-function mapContact(contact: { role: string; email?: string; department?: string }) {
+async function findStaffMemberByEmail(email: string): Promise<string | null> {
+  const result = await client.fetch<{ _id: string } | null>(
+    '*[_type == "staffMember" && email == $email][0]{_id}',
+    { email },
+  );
+  return result?._id ?? null;
+}
+
+async function mapContact(contact: { role: string; email?: string; department?: string }) {
+  if (contact.email) {
+    const staffId = await findStaffMemberByEmail(contact.email);
+    if (staffId) {
+      return {
+        staffMember: { _type: "reference", _ref: staffId },
+        role: contact.role,
+        ...(contact.department ? { department: contact.department } : {}),
+      };
+    }
+  }
   return {
     role: contact.role,
     ...(contact.email ? { email: contact.email } : {}),
@@ -246,7 +264,14 @@ function mapContact(contact: { role: string; email?: string; department?: string
   };
 }
 
-function mapPath(path: PathData) {
+async function mapPath(path: PathData) {
+  const [primaryContact, ...stepContacts] = await Promise.all([
+    mapContact(path.primaryContact),
+    ...path.steps.map((step) =>
+      step.contact ? mapContact(step.contact) : Promise.resolve(null),
+    ),
+  ]);
+
   return {
     _type: "responsibilityPath",
     _id: `responsibility-path-${path.id}`,
@@ -259,20 +284,13 @@ function mapPath(path: PathData) {
     summary: path.summary,
     category: path.category,
     icon: path.icon,
-    primaryContact: mapContact(path.primaryContact),
-    steps: path.steps.map((step) => ({
+    primaryContact,
+    steps: path.steps.map((step, i) => ({
       _type: "solutionStep",
       _key: Math.random().toString(36).slice(2),
       description: step.description,
       ...(step.link ? { link: step.link } : {}),
-      ...(step.contact
-        ? {
-            contact: {
-              role: step.contact.role,
-              ...(step.contact.email ? { email: step.contact.email } : {}),
-            },
-          }
-        : {}),
+      ...(stepContacts[i] ? { contact: stepContacts[i] } : {}),
     })),
   };
 }
@@ -281,7 +299,7 @@ async function main() {
   console.log(`Migrating ${responsibilityPaths.length} responsibility paths to Sanity...`);
 
   for (const path of responsibilityPaths) {
-    const doc = mapPath(path as PathData);
+    const doc = await mapPath(path as PathData);
     await createDoc(doc as Record<string, unknown>);
     console.log(`  ✓ ${doc._id} (${path.id})`);
   }
