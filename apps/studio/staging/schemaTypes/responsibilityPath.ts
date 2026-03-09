@@ -153,6 +153,7 @@ export const responsibilityPath = defineType({
               title: 'Link',
               type: 'string',
               description: 'Optional relative or absolute URL',
+              validation: (Rule) => Rule.uri({allowRelative: true}),
             }),
             defineField({
               name: 'contact',

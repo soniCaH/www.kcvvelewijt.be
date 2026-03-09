@@ -185,13 +185,13 @@ export const WithResultSelected: Story = {
  */
 export const AllRoles: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-6">
       <h3 className="text-2xl font-bold">Available Roles</h3>
       <p className="text-gray-dark">
         Users can select from these roles to filter relevant questions:
       </p>
-      <ResponsibilityFinder paths={responsibilityPaths} />
+      <ResponsibilityFinder {...args} />
       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-bold mb-2">Role Types:</h4>
         <ul className="list-disc list-inside space-y-1 text-sm">
@@ -259,12 +259,12 @@ export const KeyboardNavigation: Story = {
  */
 export const SizeComparison: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-12">
       <div>
         <h3 className="text-2xl font-bold mb-4">Full Size (Default)</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg">
-          <ResponsibilityFinder paths={responsibilityPaths} />
+          <ResponsibilityFinder {...args} />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Large typography (4xl-6xl) for dedicated /hulp page
@@ -274,7 +274,7 @@ export const SizeComparison: Story = {
       <div>
         <h3 className="text-2xl font-bold mb-4">Compact Size</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg bg-green-main/5">
-          <ResponsibilityFinder paths={responsibilityPaths} compact />
+          <ResponsibilityFinder {...args} compact />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Smaller typography (2xl-4xl) for homepage integration
@@ -472,7 +472,7 @@ Instead of large button cards, the role selector becomes an inline sentence:
  */
 export const CategoryColorCoding: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-8">
       <div>
         <h3 className="text-2xl font-bold mb-4">Category Color System</h3>
@@ -518,7 +518,7 @@ export const CategoryColorCoding: Story = {
         <p className="text-gray-dark mb-4">
           Select a role and search to see colors in action:
         </p>
-        <ResponsibilityFinder paths={responsibilityPaths} />
+        <ResponsibilityFinder {...args} />
       </div>
     </div>
   ),
