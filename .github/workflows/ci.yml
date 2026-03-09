@@ -46,6 +46,9 @@ jobs:
       - name: Lint + type check Studio
         run: npx turbo lint type-check --filter=@kcvv/studio
 
+      - name: Build Studio
+        run: npx turbo build --filter=@kcvv/studio
+
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:

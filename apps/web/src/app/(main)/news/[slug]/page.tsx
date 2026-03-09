@@ -86,13 +86,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     hashtags: article.tags ?? [],
   };
 
-  const relatedContent: RelatedContent[] = (article.relatedArticles ?? []).map(
-    (related) => ({
+  const relatedContent: RelatedContent[] = (article.relatedArticles ?? [])
+    .filter((related) => related?.slug?.current)
+    .map((related) => ({
       title: related.title,
       href: `/news/${related.slug.current}`,
       type: "article" as const,
-    }),
-  );
+    }));
 
   return (
     <>

@@ -142,10 +142,28 @@ export const SanityWriteClientLive = Layer.effect(
       uploadPlayerImage: (psdId, imageUrl) =>
         Effect.tryPromise({
           try: async () => {
+            // Validate imageUrl before attaching PSD credentials
+            let parsedUrl: URL;
+            try {
+              parsedUrl = new URL(imageUrl);
+            } catch {
+              throw new Error(`Invalid image URL: ${imageUrl}`);
+            }
+            const expectedHost = new URL(env.PSD_API_BASE_URL).hostname;
+            if (
+              parsedUrl.protocol !== "https:" ||
+              parsedUrl.hostname !== expectedHost
+            ) {
+              throw new Error(
+                `Image URL host not allowed: ${parsedUrl.hostname}`,
+              );
+            }
+
             const psdAbort = new AbortController();
             const psdTimeout = setTimeout(() => psdAbort.abort(), 10_000);
             const response = await fetch(imageUrl, {
               signal: psdAbort.signal,
+              redirect: "manual",
               headers: {
                 "x-api-key": env.PSD_API_KEY,
                 "x-api-club": env.PSD_API_CLUB,
