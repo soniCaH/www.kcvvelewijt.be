@@ -143,8 +143,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
         teamType: getSanityTeamType(team),
         tagline: getSanityTeamTagline(team),
       }}
-      players={team.players.map(transformSanityPlayerToRoster)}
-      staff={team.staff.map(transformSanityStaffToMember)}
+      players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+      staff={(team.staff ?? []).map(transformSanityStaffToMember)}
       matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
       standings={bffData?.standings.map(transformRankingToStandings) ?? []}
       highlightTeamId={bffData?.teamId}

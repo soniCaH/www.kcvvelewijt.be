@@ -90,8 +90,8 @@ export function createBoardPage({
           tagline: getSanityTeamTagline(team),
           teamType: "club",
         }}
-        players={team.players.map(transformSanityPlayerToRoster)}
-        staff={team.staff.map(transformSanityStaffToMember)}
+        players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+        staff={(team.staff ?? []).map(transformSanityStaffToMember)}
       />
     );
   }
