@@ -140,6 +140,7 @@ export const responsibilityPath = defineType({
       of: [
         {
           type: 'object',
+          name: 'solutionStep',
           fields: [
             defineField({
               name: 'description',
