@@ -1,473 +1,249 @@
-# KCVV Elewijt - Next.js Website
+# KCVV Elewijt — www.kcvvelewijt.be
 
-Modern website for KCVV Elewijt football club, built with Next.js 15+ and powered by Drupal CMS.
+Club website for KCVV Elewijt, a Belgian football club. Built as a Turborepo monorepo with Next.js 16, powered by Sanity CMS and a Cloudflare Workers BFF.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.x-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.x-black)](https://nextjs.org/)
 [![Effect](https://img.shields.io/badge/Effect-Schema-purple)](https://effect.website/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8)](https://tailwindcss.com/)
 
 ---
 
-## 🎯 Overview
+## Architecture
 
-This is the Next.js-based website for **KCVV Elewijt**, a Belgian football club. The project is migrating from Gatsby to Next.js 15 with modern architecture and best practices.
-
-### Key Features
-
-- ✅ **Drupal CMS Integration** - Content managed via Drupal JSON:API
-- ✅ **Effect Schema Validation** - Runtime type safety for all API data
-- ✅ **Storybook Component Library** - Visual component development and testing
-- ✅ **Responsibility Finder** - Interactive help system (`/hulp`)
-- ✅ **Organigram** - Interactive club organization chart
-- ✅ **Design System** - Comprehensive KCVV brand guidelines
-- ⚠️ **ISR (Incremental Static Regeneration)** - Fast, up-to-date content
-- 🚧 **Migration in Progress** - Gatsby → Next.js 15
+| App/Package   | Path                     | Host               | Purpose                                |
+| ------------- | ------------------------ | ------------------ | -------------------------------------- |
+| Next.js web   | `apps/web/`              | Vercel             | Club website                           |
+| Sanity Studio | `apps/studio/`           | sanity.io          | CMS admin UI                           |
+| BFF API       | `apps/api/`              | Cloudflare Workers | ProSoccerData proxy + cache (Wrangler) |
+| API contract  | `packages/api-contract/` | (library)          | Shared Effect schemas + HttpApi        |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm, pnpm, yarn, or bun
+- Node.js 20+
+- pnpm 10+
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/soniCaH/kcvv-nextjs.git
-cd kcvv-nextjs
+git clone https://github.com/soniCaH/www.kcvvelewijt.be.git
+cd www.kcvvelewijt.be
 
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) for the web app, [http://localhost:6006](http://localhost:6006) for Storybook.
 
 ### Environment Variables
 
-Create `.env`:
+`apps/web/.env.local`:
 
 ```env
-# Drupal API
-NEXT_PUBLIC_DRUPAL_BASE_URL=https://api.kcvvelewijt.be
-
-# Adobe Typekit (for fonts)
+NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
+NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_TYPEKIT_ID=your_typekit_id
 ```
 
+`apps/api/.dev.vars`:
+
+```env
+PSD_API_BASE_URL=...
+PSD_API_KEY=...
+```
+
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core
 
-- **[Next.js 15](https://nextjs.org/)** - React framework with App Router
-- **[TypeScript](https://www.typescriptlang.org/)** - Strict type safety
-- **[React 19](https://react.dev/)** - UI library
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
+- **[Next.js 16](https://nextjs.org/)** — React framework with App Router + ISR
+- **[TypeScript](https://www.typescriptlang.org/)** — strict mode
+- **[React 19](https://react.dev/)** — UI library
+- **[Tailwind CSS v4](https://tailwindcss.com/)** — utility-first styling (primary green `#4acf52`)
 
 ### Data & Validation
 
-- **[Effect Schema](https://effect.website/docs/schema/introduction)** - Runtime type validation
-- **[Drupal JSON:API](https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module)** - Content API
+- **[Effect Schema](https://effect.website/docs/schema/introduction)** — runtime type validation for all API data
+- **[Sanity](https://www.sanity.io/)** — CMS for articles, teams, players, organigram, sponsors, events
+- **[ProSoccerData API](https://prosoccerdata.com/)** — match results and rankings via BFF
+- **[Cloudflare Workers](https://workers.cloudflare.com/)** — BFF proxy with caching (Wrangler)
 
 ### UI Components
 
-- **[shadcn/ui](https://ui.shadcn.com/)** - Base component library
-- **[Radix UI](https://www.radix-ui.com/)** - Accessible primitives
-- **[d3-org-chart](https://github.com/bumbeishvili/org-chart)** - Organization chart visualization
+- **[d3-org-chart](https://github.com/bumbeishvili/org-chart)** — organization chart visualization
 
 ### Development Tools
 
-- **[Storybook](https://storybook.js.org/)** - Component development
-- **[Vitest](https://vitest.dev/)** - Unit testing
-- **[ESLint](https://eslint.org/)** - Code linting
-- **[Prettier](https://prettier.io/)** - Code formatting
-- **[Husky](https://typicode.github.io/husky/)** - Git hooks
+- **[Turborepo](https://turbo.build/)** — monorepo build orchestration
+- **[Storybook 10](https://storybook.js.org/)** — component development and visual testing
+- **[Vitest](https://vitest.dev/)** — unit testing
+- **[ESLint](https://eslint.org/)** + **[Prettier](https://prettier.io/)** — linting and formatting
+- **[Husky](https://typicode.github.io/husky/)** — git hooks (lint-staged, commitlint, type-check)
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
-kcvv-nextjs/
-├── .claude/                      # Claude Code configuration
-│   ├── agents/                   # Migration agents (deprecated)
-│   ├── skills/                   # Reusable skills (Drupal API, migrations)
-│   ├── CLAUDE.local.md          # Project instructions for Claude
-│   ├── WORKFLOW.md              # Git workflow
-│   └── SETUP_VERIFICATION.md    # Setup verification report
-├── .github/                      # GitHub workflows and templates
-│   ├── workflows/               # CI/CD pipelines
-│   └── ISSUE_TEMPLATE/          # Issue templates
-├── .storybook/                   # Storybook configuration
-├── public/                       # Static assets
-│   └── images/                  # Images and graphics
-├── src/
-│   ├── app/                     # Next.js App Router
-│   │   ├── (main)/             # Main site pages
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Homepage
-│   ├── components/              # React components
-│   │   ├── ui/                 # Base UI components (shadcn)
-│   │   ├── organigram/         # Organigram feature
-│   │   ├── responsibility/     # Responsibility finder
-│   │   └── ...                 # Feature-specific components
-│   ├── lib/
-│   │   ├── effect/             # Effect Schema setup
-│   │   │   ├── schemas/        # Drupal entity schemas
-│   │   │   └── services/       # API services
-│   │   ├── mappers/            # JSON:API data mappers
-│   │   └── utils/              # Utility functions
-│   ├── data/                    # Static data
-│   │   └── club-structure.ts   # Organigram data
-│   ├── types/                   # TypeScript types
-│   └── styles/                  # Global styles
-├── tests/                        # Test files
-├── DESIGN_SYSTEM.md             # ⭐ Design system reference
-├── SCHEMA_GUIDE.md              # ⭐ Effect Schema guide
-├── STORYBOOK.md                 # ⭐ Storybook guide
-├── RESPONSIBILITY.md            # Responsibility finder docs
-├── ORGANOGRAM.md                # Organigram docs (⚠️ feature has issues)
-├── SECURITY.md                  # Security policy
-├── MIGRATION_PLAN.md            # Migration progress tracking
-└── package.json
+www.kcvvelewijt.be/
+├── apps/
+│   ├── web/              # Next.js 16 club website
+│   │   ├── src/
+│   │   │   ├── app/      # App Router pages
+│   │   │   ├── components/   # React components (feature + design system)
+│   │   │   └── lib/      # Effect schemas, services, utils
+│   │   └── CLAUDE.md     # app-specific dev notes
+│   ├── studio/           # Sanity Studio CMS
+│   └── api/              # Cloudflare Workers BFF (Wrangler)
+├── packages/
+│   └── api-contract/     # Shared Effect schemas + HttpApi definitions
+├── scripts/
+│   └── drupal-to-sanity/ # One-off Drupal → Sanity migration scripts
+├── docs/plans/           # Architecture decision records
+├── .claude/              # Claude Code configuration + skills
+├── turbo.json            # Turborepo pipeline
+├── pnpm-workspace.yaml   # pnpm workspaces
+└── package.json          # Root scripts + devDependencies
 ```
-
-**⭐ Key Documentation:**
-
-- `DESIGN_SYSTEM.md` - Authoritative design reference
-- `SCHEMA_GUIDE.md` - How to create/validate schemas
-- `STORYBOOK.md` - Component development guide
 
 ---
 
-## 📜 Available Scripts
+## Available Scripts
+
+All commands run from the monorepo root via Turborepo.
 
 ### Development
 
 ```bash
-npm run dev              # Start dev server (http://localhost:3000)
-npm run build            # Build for production
-npm run start            # Start production server
-npm run lint             # Run ESLint
-npm run lint:fix         # Fix ESLint errors
-npm run type-check       # Run TypeScript compiler
-npm run format           # Format with Prettier
-npm run check-all        # Run all quality checks (lint + type + test + build)
+pnpm dev              # Start all dev servers (web + studio + api)
+pnpm build            # Build all apps
+pnpm lint             # Lint all packages
+pnpm type-check       # TypeScript check all packages
+pnpm test             # Run all unit tests
 ```
 
-### Testing
+### Per-app commands (web)
 
 ```bash
-npm run test             # Run unit tests
-npm run test:watch       # Run tests in watch mode
+pnpm --filter @kcvv/web dev
+pnpm --filter @kcvv/web check-all   # lint + type-check + test + build
+pnpm --filter @kcvv/web storybook
+pnpm --filter @kcvv/web build-storybook
 ```
 
-### Storybook
+### BFF (Cloudflare Worker)
 
 ```bash
-npm run storybook        # Start Storybook (http://localhost:6006)
-npm run build-storybook  # Build static Storybook
-npm run test-storybook   # Run Storybook interaction tests
-```
-
-### Migration
-
-```bash
-npm run migration:status    # Check migration progress
-npm run migration:create    # Create migration tracking issue
+pnpm --filter @kcvv/api dev         # wrangler dev
+pnpm --filter @kcvv/api deploy      # wrangler deploy
 ```
 
 ---
 
-## 🎨 Design System
+## Features
 
-The project follows a comprehensive design system documented in **`DESIGN_SYSTEM.md`**.
+### Responsibility Finder (`/hulp`)
 
-### Key Guidelines
+Interactive help system — visitors describe their role and question to find the right contact person.
 
-- **Primary Color**: `#4acf52` (KCVV green)
-- **Fonts**: Quasimoda (headings), Montserrat (body)
-- **Spacing**: Tailwind scale with custom additions
-- **Breakpoints**: `768px`, `992px`, `1280px`, `1440px`
-
-**Before creating components:** Review `DESIGN_SYSTEM.md` for colors, typography, spacing, and component patterns.
-
----
-
-## 🧪 Testing Strategy
-
-### Unit Tests (Vitest)
-
-- All components have test files (`.test.tsx`)
-- Target: 80%+ coverage
-- Run: `npm test`
-
-### Storybook Stories
-
-- Component development and documentation
-- Interactive testing
-- Run: `npm run storybook`
-
-### Integration Tests
-
-- E2E tests (planned)
-
----
-
-## 📚 Key Features
-
-### 1. Responsibility Finder (`/hulp`)
-
-Interactive help system where visitors find the right contact person.
-
-**Status:** ✅ Active — data managed via Sanity CMS
+**Status:** Active — data managed via Sanity CMS
 **Docs:** `RESPONSIBILITY.md`
-**Issues:** #429-436
 
-### 2. Organigram (`/club/organigram`)
+### Organigram (`/club/organigram`)
 
-Interactive organizational chart showing club structure.
+Interactive organizational chart of the club structure.
 
-**Status:** ⚠️ Implemented but unusable (readability/navigation issues)
-**Docs:** `ORGANOGRAM.md`
-**Issues:** #437-440 (CRITICAL fixes needed)
+**Status:** Implemented — migration to Sanity in progress (#755)
 
-### 3. Design System
+### Design System
 
 Comprehensive KCVV brand guidelines and component patterns.
 
-**Status:** ✅ Complete and authoritative
+**Status:** Active
 **Docs:** `DESIGN_SYSTEM.md`
 
-### 4. Drupal Integration
+### Sanity CMS Integration
 
-Fetches content from Drupal CMS via JSON:API with Effect Schema validation.
+Content for articles, teams, players, organigram, sponsors, and events.
 
-**Status:** ✅ Working (articles, teams, players, etc.)
-**Docs:** `SCHEMA_GUIDE.md`
-
-### 5. Storybook
-
-Component library and development environment.
-
-**Status:** 🚧 Partial (Responsibility Finder complete, ~55+ components need stories)
-**Docs:** `STORYBOOK.md`
-**Issues:** #441-444
+**Status:** Active (~90% migrated from Drupal)
 
 ---
 
-## 🔒 Security
+## Design System
 
-See **`SECURITY.md`** for security policies including:
+- **Primary Color:** `#4acf52` (KCVV green)
+- **Fonts:** Quasimoda (headings), Montserrat (body) via Adobe Typekit
+- **Spacing:** Tailwind v4 scale
+- **Breakpoints:** standard Tailwind (`sm`, `md`, `lg`, `xl`, `2xl`)
 
-- Image handling and SVG security
-- File upload validation
-- Drupal server-side validation requirements
-- Defense-in-depth approach
-
-**Reporting vulnerabilities:** [kevin@kcvvelewijt.be](mailto:kevin@kcvvelewijt.be)
+See `DESIGN_SYSTEM.md` for full reference.
 
 ---
 
-## 🚧 Migration Status
+## Testing
 
-This project is **migrating from Gatsby to Next.js 15**.
-
-### Progress
-
-- ✅ Phase 0: Design System - COMPLETED
-- ✅ Phase 1: Foundation - COMPLETED
-- 🚧 Phase 2: Content Pages - IN PROGRESS
-- ⏳ Phases 3-9: Upcoming
-
-**Track progress:** `MIGRATION_PLAN.md` (too large for viewing, use `npm run migration:status`)
+- **Unit tests:** Vitest — target 80%+ coverage. Run: `pnpm test`
+- **Component stories:** Storybook 10 with interaction tests. Run: `pnpm --filter @kcvv/web storybook`
+- **E2E:** Playwright configured, no specs yet
 
 ---
 
-## 🤝 Contributing
-
-### Git Workflow
-
-**Always work on feature branches:**
+## Git Workflow
 
 ```bash
 # Create feature branch
 git checkout -b feat/feature-name
-# or
-git checkout -b fix/bug-name
-# or
-git checkout -b migrate/page-name
 
-# Make changes, commit with conventional commits
-git add .
+# Commit with conventional commits
 git commit -m "feat(news): add news card component"
 
-# Push to remote
+# Quality check before push
+pnpm --filter @kcvv/web check-all
+
+# Push
 git push -u origin feat/feature-name
-
-# Create PR (ask first!)
-gh pr create
 ```
 
-### Commit Message Format
+**Commit scopes:** `news`, `matches`, `teams`, `players`, `sponsors`, `calendar`, `ranking`, `api`, `ui`, `schema`, `migration`, `config`, `deps`
 
-Use [Conventional Commits](https://www.conventionalcommits.org/):
-
-```text
-<type>(<scope>): <description>
-
-[optional body]
-
-🤖 Generated with Claude Code
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
-
-**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `migrate`
-**Scopes:** `news`, `matches`, `teams`, `players`, `sponsors`, `calendar`, `ranking`, `api`, `ui`, `schema`, etc.
-
-### Pre-commit Hooks
-
-Husky runs automatically:
-
-- ESLint check
-- TypeScript check
-- Prettier formatting
-- Conventional commit validation
-
-### Code Quality
-
-Before pushing:
-
-```bash
-npm run check-all
-```
-
-This runs:
-
-1. ESLint (zero errors, zero warnings)
-2. TypeScript type check
-3. All unit tests
-4. Production build
+Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 
 ---
 
-## 🌐 Deployment
+## Deployment
 
-### Vercel (Recommended)
-
-The easiest way to deploy:
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-```
-
-### Environment Variables
-
-Set in Vercel dashboard:
-
-- `NEXT_PUBLIC_DRUPAL_BASE_URL`
-- `NEXT_PUBLIC_TYPEKIT_ID`
-
-### Build Configuration
-
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
-}
-```
+- **Web (apps/web):** Vercel — auto-deploys from `main`
+- **BFF (apps/api):** Cloudflare Workers — `pnpm --filter @kcvv/api deploy`
+- **Studio (apps/studio):** sanity.io — `pnpm --filter @kcvv/studio deploy`
 
 ---
 
-## 📖 Documentation
+## Documentation
 
-### Project Documentation
-
-- **DESIGN_SYSTEM.md** - Design guidelines (⭐ authoritative)
-- **SCHEMA_GUIDE.md** - Effect Schema patterns
-- **STORYBOOK.md** - Component development
-- **RESPONSIBILITY.md** - Responsibility finder feature
-- **ORGANOGRAM.md** - Organigram feature (⚠️ has issues)
-- **SECURITY.md** - Security policies
-- **MIGRATION_PLAN.md** - Migration tracking
-
-### Claude Code Documentation
-
-- **.claude/CLAUDE.local.md** - Project instructions
-- **.claude/WORKFLOW.md** - Git workflow
-- **.claude/SETUP_VERIFICATION.md** - Setup guide
-- **.claude/skills/** - Drupal API and migration skills
-
-### External Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Effect Documentation](https://effect.website/docs)
-- [Drupal JSON:API](https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module)
+- `DESIGN_SYSTEM.md` — design tokens, colors, typography, component patterns
+- `SCHEMA_GUIDE.md` — Effect Schema patterns for this project
+- `STORYBOOK.md` — Storybook authoring guide
+- `RESPONSIBILITY.md` — Responsibility Finder feature
+- `ORGANIGRAM.md` — Organigram feature
+- `SECURITY.md` — security policies
+- `.claude/CLAUDE.md` — Claude Code project instructions
+- `docs/plans/` — architecture decision records
 
 ---
 
-## 🐛 Known Issues
+## Links
 
-### Critical
-
-- **Organigram unusable** (#437-440) - Readability, navigation, UX problems
-
-### High Priority
-
-- **Responsibility Finder incomplete** (#429) - Only 15 questions, needs more
-- **Storybook coverage low** (#441-444) - ~55+ components need stories
-
-### See All Issues
-
-- [GitHub Issues](https://github.com/soniCaH/kcvv-nextjs/issues)
+- **GitHub Issues:** [soniCaH/www.kcvvelewijt.be/issues](https://github.com/soniCaH/www.kcvvelewijt.be/issues)
+- **GitHub Project:** [Platform Overhaul](https://github.com/users/soniCaH/projects/2)
+- **Contact:** [kevin@kcvvelewijt.be](mailto:kevin@kcvvelewijt.be)
 
 ---
 
-## 📞 Support
-
-### For Developers
-
-- Check documentation files (listed above)
-- Review code comments
-- Run `npm run migration:status` for progress
-- See `.claude/` files for Claude Code integration
-
-### For Questions
-
-- Create a [GitHub issue](https://github.com/soniCaH/kcvv-nextjs/issues)
-- Email: [kevin@kcvvelewijt.be](mailto:kevin@kcvvelewijt.be)
-
----
-
-## 📄 License
-
-Copyright © 2025 KCVV Elewijt. All rights reserved.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/) by Vercel
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
-- Type safety with [Effect](https://effect.website/)
-- Developed with assistance from [Claude Code](https://claude.com/claude-code)
-
----
-
-**Last Updated:** December 2025
-**Version:** 1.0.0-beta
-**Status:** 🚧 Migration in Progress
+Copyright © 2026 KCVV Elewijt. All rights reserved.

@@ -4,7 +4,7 @@
 
 - **Site:** KCVV Elewijt Football Club — Gatsby → Next.js migration
 - **Stack:** Turborepo monorepo + pnpm workspaces; Next.js 16, TypeScript strict, Effect, Tailwind CSS v4, Storybook 10, Vitest
-- **Hosting:** Vercel | **CMS:** Drupal JSON:API + Footbalisto API
+- **Hosting:** Vercel (web) + Cloudflare Workers (BFF/API) | **CMS:** Sanity + Footbalisto API
 - **Primary green:** #4acf52
 
 ## Platform Architecture
@@ -23,12 +23,14 @@
 
 - Do NOT read DESIGN_SYSTEM.md, SCHEMA_GUIDE.md, STORYBOOK.md, or MIGRATION_PLAN.md unless explicitly asked. Use existing source code as reference instead.
 - Do NOT spawn Explore/Plan agents for tasks involving ≤3 files. Read the files directly.
-- Do NOT re-analyze project status. Check `gh issue list` or this file.
+- Do NOT re-analyze project status. Check `gh issue list`.
 - Do NOT explain what you're about to do — just do it.
 - For simple feature/fix tasks: read relevant code → implement → test. No planning phase needed.
 - When you learn something new about the Drupal/Footbalisto API (gotcha, edge case, failed approach), append it to the relevant skill file under "## Learnings".
 
-## Current State (updated: 2026-03-09)
+## Current State (updated: 2026-03-10)
+
+> Track progress in GitHub issues — use `gh issue list` for current status.
 
 ### Platform Overhaul Phases (api-contract → BFF → CMS)
 
@@ -39,22 +41,9 @@
 | 2     | Effect BFF in `apps/api/` (Cloudflare Workers) | Done   | #723  |
 | 3     | Sanity CMS (replace Drupal)                    | ~90%   | #724  |
 
-### Migration Phases (Gatsby → Next.js)
-
-| Phase                         | Status      | Issue |
-| ----------------------------- | ----------- | ----- |
-| 0: Monorepo Setup             | Done        | #721  |
-| 1: Design System + Foundation | Done        | —     |
-| 2: Content Pages              | Done        | —     |
-| 3: Team & Player Features     | Done        | —     |
-| 4: Calendar & Events          | Not started | #517  |
-| 5: Club Information Pages     | ~10%        | #518  |
-| 6: Search & Utility           | ~90%        | #519  |
-| 7: Kiosk Mode                 | Not started | #520  |
-
 ### Phase 3 remaining (#724)
 
-- Organigram → Sanity staffMember (#748)
+- Organigram → Sanity staffMember (#755)
 - Static pages → Sanity page schema
 - Nightly image sync verification (02:00 UTC)
 
@@ -84,7 +73,7 @@
 - **Build verification before push** — after any change to `packages/api-contract`, run `pnpm turbo build --filter=@kcvv/web` locally. Turbopack resolves package exports differently from tsc project references; type-check passing ≠ build passing.
 - **Barrel duplicate export pitfall** — if schema file A re-exports a type that also comes from schema file B, and the barrel does `export * from A` + `export * from B`, TypeScript silently drops the duplicate. Never re-export a type in a schema file unless it exists only there.
 - **YAGNI for HttpApi** — don't add endpoints or response wrapper types to api-contract until `apps/api` actually needs to return them. `MatchesResponse`/`RankingResponse` are present but unused; remove if they remain unused after Phase 2.
-- **No Players/Teams HttpApiGroup** — player and team data comes from Drupal (DrupalService), not the BFF. Only match, ranking, and stats endpoints belong in PsdApi.
+- **No Players/Teams HttpApiGroup** — player and team data comes from Sanity (SanityService), not the BFF. Only match, ranking, and stats endpoints belong in PsdApi.
 
 ## Skills
 
