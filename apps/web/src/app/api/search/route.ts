@@ -148,8 +148,21 @@ const searchTeams = (query: string) =>
   });
 
 /**
- * GET /api/search
- * Search across all content types
+ * Handle GET /api/search requests and return matching articles, players, and teams.
+ *
+ * Accepts query parameter `q` (required, at least 2 characters) and optional `type`
+ * filter (`"article"`, `"player"`, or `"team"`). Performs searches across the
+ * requested content types, ranks results by a simple relevance heuristic
+ * (exact title match, then starts-with, then alphabetical), and returns a JSON
+ * payload with the original query, result count, and ordered results.
+ *
+ * Validation responses:
+ * - 400 when `q` is missing, empty, or shorter than 2 characters, or when `type`
+ *   is not one of the allowed values.
+ * - 500 on internal server error (generic error message returned to the client).
+ *
+ * @returns A JSON object `{ query: string, count: number, results: SearchResult[] }` on success;
+ *          on error returns `{ error: string }` with an appropriate HTTP status.
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

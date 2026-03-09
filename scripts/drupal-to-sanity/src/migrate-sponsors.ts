@@ -20,6 +20,11 @@ interface DrupalFile {
   attributes: { uri: { url: string } };
 }
 
+/**
+ * Migrate sponsor nodes from Drupal into the Sanity dataset, creating sponsor documents and uploading linked logo images when available.
+ *
+ * For each sponsor, this function fetches media image data if present, uploads the image to obtain an asset reference, and creates a Sanity document containing the sponsor's id, name, type (defaults to "other"), URL (nullable), active state, and an optional logo image reference.
+ */
 async function main() {
   console.log("Fetching sponsors from Drupal...");
   const sponsors = await fetchAllPages<DrupalSponsor>(

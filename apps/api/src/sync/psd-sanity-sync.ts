@@ -5,7 +5,13 @@ import { SanityWriteClient } from "../sanity/client";
 import { FootbalistoClient } from "../footbalisto/client";
 import { WorkerEnvTag } from "../env";
 
-// ─── Transforms ───────────────────────────────────────────────────────────────
+/**
+ * Convert a PSD member record into a Sanity-compatible player document and include the PSD image URL when present.
+ *
+ * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, nationality, keeper, bestPosition, profilePictureURL)
+ * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
+ * @returns A Sanity player document populated from the PSD member with an additional `_psdImageUrl` set to the absolute image URL or `null`
+ */
 
 export function transformMember(
   psd: PsdMember,
@@ -30,6 +36,13 @@ export function transformMember(
   };
 }
 
+/**
+ * Convert a PSD team object into a Sanity-compatible team document.
+ *
+ * @param psd - The PSD team object containing team metadata
+ * @param playerPsdIds - Array of PSD player IDs to associate with the team
+ * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided `playerPsdIds`
+ */
 export function transformTeam(
   psd: PsdTeam,
   playerPsdIds: string[],

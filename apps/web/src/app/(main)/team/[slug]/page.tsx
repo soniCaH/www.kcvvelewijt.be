@@ -25,6 +25,11 @@ interface TeamPageProps {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Produce static route parameters for all teams.
+ *
+ * @returns An array of route parameter objects with `slug` set to each team's slug; returns an empty array if teams cannot be fetched.
+ */
 export async function generateStaticParams() {
   try {
     const teams = await runPromise(
@@ -39,6 +44,12 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Generate page metadata for a team identified by the route slug.
+ *
+ * @param params - A promise resolving to route parameters containing `slug`, used to fetch the team
+ * @returns A Metadata object with `title`, `description`, and `openGraph` fields for the team; if the team cannot be found or an error occurs, a Metadata object with a not-found title is returned
+ */
 export async function generateMetadata({
   params,
 }: TeamPageProps): Promise<Metadata> {
@@ -82,6 +93,13 @@ interface BffData {
   teamId: number;
 }
 
+/**
+ * Fetches matches and standings from the BFF for a given team.
+ *
+ * @param footbelId - The team's Footbel identifier; when falsy, the function returns `null`.
+ * @param leagueId - Optional league identifier used to select the ranking; if provided, standings are fetched for this league, otherwise the team's `footbelId` is used.
+ * @returns An object with `matches`, `standings`, and `teamId` when successful; `null` if `footbelId` is falsy or on error.
+ */
 async function fetchBffData(
   footbelId: number | null,
   leagueId: number | null,
@@ -120,6 +138,14 @@ async function fetchBffData(
   }
 }
 
+/**
+ * Renders the team detail page for the given team slug.
+ *
+ * Loads team and related BFF data and returns the TeamDetail element populated with the team's header, roster, staff, matches, and standings. Triggers a 404 when no team is found for the provided slug.
+ *
+ * @param props.params - An object whose `slug` identifies the team to render
+ * @returns The TeamDetail React element for the specified team
+ */
 export default async function TeamPage({ params }: TeamPageProps) {
   const { slug } = await params;
 

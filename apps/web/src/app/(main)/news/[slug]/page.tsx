@@ -21,6 +21,13 @@ interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Provides all article slugs for static pre-rendering.
+ *
+ * Fetches available articles from the Sanity service and returns an array of parameter objects each containing a `slug` property.
+ *
+ * @returns An array of `{ slug: string }` objects for static route generation; returns an empty array if articles cannot be retrieved.
+ */
 export async function generateStaticParams() {
   try {
     const articles = await runPromise(
@@ -35,6 +42,12 @@ export async function generateStaticParams() {
   }
 }
 
+/**
+ * Produce page and Open Graph metadata for the article identified by the route params.
+ *
+ * @param params - Route parameters (resolve to obtain the article slug) used to locate the article
+ * @returns A metadata object with `title` and, when the article exists, an `openGraph` object containing `title`, `type`, optional `publishedTime`, `authors`, and optional `images`. If the article cannot be found, returns a title indicating the article was not found.
+ */
 export async function generateMetadata({ params }: ArticlePageProps) {
   const { slug } = await params;
   try {
@@ -63,6 +76,14 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   }
 }
 
+/**
+ * Render the article detail page for the provided route slug.
+ *
+ * Fetches the article by slug and renders header, metadata, body, and related content; if the article cannot be found, triggers a 404 response.
+ *
+ * @param params - Route parameters object whose `slug` resolves to the article's slug string
+ * @returns A JSX element representing the complete article page (or causes a 404 when the article is missing)
+ */
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
 

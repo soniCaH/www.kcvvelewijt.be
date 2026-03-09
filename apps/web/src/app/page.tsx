@@ -33,12 +33,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the homepage with a featured articles carousel and a latest-news list.
+ * Render the homepage composed of a featured articles carousel, upcoming matches, and latest news.
  *
- * Fetches nine most-recent articles, uses the first three as featured items (including descriptions)
- * and the remaining six as latest-news items, then returns the composed homepage element.
+ * Fetches up to nine most-recent articles (first three become featured items with descriptions, next six become latest-news items without descriptions) and the upcoming matches; if both article and match fetches fail or return empty, renders a centered fallback message indicating content cannot be loaded.
  *
- * @returns The homepage React element containing the featured articles carousel and latest news section
+ * @returns The homepage React element containing the featured articles carousel, upcoming matches, and latest news, or a fallback message when no content is available.
  */
 export default async function HomePage() {
   // Fetch latest articles and upcoming matches in parallel with error handling

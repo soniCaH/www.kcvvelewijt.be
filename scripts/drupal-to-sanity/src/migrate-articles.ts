@@ -23,9 +23,12 @@ const blockContentType = (schema.get("article") as any).fields.find(
 ).type;
 
 /**
- * Upload all <img> tags in the HTML (outside <table> elements) to Sanity
- * and annotate each with data-sanity-asset-id so the custom htmlToBlocks
- * rule can create proper asset references without a second DOM pass.
+ * Uploads non-table `<img>` elements found in the provided document to Sanity and annotates them with `data-sanity-asset-id`.
+ *
+ * For each `<img>` not inside a `<table>`, the function resolves its `src` (using `drupalBase` for relative URLs), uploads the image, and sets `data-sanity-asset-id` on the element for later conversion to Sanity image blocks.
+ *
+ * @param doc - The DOM Document containing the HTML to scan for `<img>` elements.
+ * @param drupalBase - Base URL to prepend to relative image `src` values when constructing the upload URL.
  */
 async function uploadBodyImages(
   doc: Document,
@@ -49,10 +52,13 @@ async function uploadBodyImages(
 }
 
 /**
- * Split an HTML string at top-level <table> boundaries.
- * - <table> → {_type:'htmlTable'} with raw HTML (all thead/tbody/th/td semantics preserved)
- * - Everything else → htmlToBlocks (handles ul, ol, blockquote, headings, links)
- * - <img> tags → proper Sanity image blocks (assets pre-uploaded by uploadBodyImages)
+ * Split an HTML string into Sanity-ready blocks, preserving top-level tables as raw HTML blocks
+ * and converting other content into Portable Text blocks with pre-uploaded images turned into image blocks.
+ *
+ * @param html - The HTML fragment to split and convert
+ * @param bct - The block content type from the compiled Sanity schema used by htmlToBlocks
+ * @param drupalBase - Base URL used to resolve relative image URLs before upload
+ * @returns An array of blocks suitable for a Sanity `body` field: top-level `<table>` elements become `_type: 'htmlTable'` blocks containing raw HTML; all other content becomes Portable Text blocks; `<img>` elements outside tables are converted to image blocks referencing uploaded assets
  */
 async function htmlSplitToBlocks(
   html: string,
@@ -140,6 +146,11 @@ interface DrupalTerm {
   attributes: { name: string };
 }
 
+/**
+ * Migrate published Drupal articles into Sanity.
+ *
+ * Fetches published Drupal articles (including media and tags), uploads cover images and inline body images to Sanity, converts body HTML into Portable Text while preserving top-level tables, resolves tags and related-article references, and creates corresponding Sanity `article` documents. Logs progress for each migrated article and prints a final completion notice.
+ */
 async function main() {
   console.log("Fetching articles from Drupal...");
   const articles = await fetchAllPages<DrupalArticle>(

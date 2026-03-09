@@ -42,10 +42,10 @@ export function transformMatchToSchedule(match: Match): ScheduleMatch {
 }
 
 /**
- * Transform Footbalisto RankingEntry to StandingsEntry for TeamStandings component
+ * Convert a Footbalisto ranking entry into a StandingsEntry suitable for the TeamStandings UI.
  *
- * @param entry - Ranking entry from Footbalisto API
- * @returns StandingsEntry object for display
+ * @param entry - Ranking entry object from the Footbalisto API
+ * @returns A StandingsEntry containing position, team identifiers and display fields (teamId, teamName, teamLogo), match totals (played, won, drawn, lost), goal totals (goalsFor, goalsAgainst, goalDifference), and points
  */
 export function transformRankingToStandings(
   entry: RankingEntry,
@@ -69,7 +69,12 @@ export function transformRankingToStandings(
 // ─── Sanity transform functions ──────────────────────────────────────────────
 
 /**
- * Transform SanityPlayer to RosterPlayer for TeamRoster component
+ * Convert a SanityPlayer record into a RosterPlayer suitable for the TeamRoster component.
+ *
+ * Maps player identifiers, names, jersey number, position, image URL, and player link. Position will be `"Keeper"` when `player.keeper` is true; otherwise it uses `player.position`, then `player.positionPsd`, and falls back to `"Speler"`. Image URL prefers `transparentImageUrl` and falls back to `psdImageUrl`. The player link is built from `player.psdId`.
+ *
+ * @param player - The SanityPlayer object to transform
+ * @returns A RosterPlayer with fields: `id`, `firstName`, `lastName`, `position`, `number`, `imageUrl`, and `href`
  */
 export function transformSanityPlayerToRoster(
   player: SanityPlayer,
@@ -89,7 +94,10 @@ export function transformSanityPlayerToRoster(
 }
 
 /**
- * Transform SanityStaffMember to StaffMember for TeamRoster component
+ * Convert a Sanity staff member document into a StaffMember suitable for the team roster.
+ *
+ * @param member - The SanityStaffMember document to transform
+ * @returns A StaffMember containing `id`, `firstName`, `lastName`, `role`, and `imageUrl` (or `undefined` if not present)
  */
 export function transformSanityStaffToMember(
   member: SanityStaffMember,
@@ -104,14 +112,20 @@ export function transformSanityStaffToMember(
 }
 
 /**
- * Get team tagline from Sanity team (tagline → divisionFull → division)
+ * Select the most appropriate display tagline for a Sanity team.
+ *
+ * @param team - The Sanity team object to derive the tagline from; fields are checked in order of preference.
+ * @returns The team's tagline, or the full division, or the division, whichever is available; `undefined` if none are present.
  */
 export function getSanityTeamTagline(team: SanityTeam): string | undefined {
   return team.tagline ?? team.divisionFull ?? team.division ?? undefined;
 }
 
 /**
- * Derive team type from Sanity team age field
+ * Determine whether a Sanity team represents a youth or senior team based on its age field.
+ *
+ * @param team - The Sanity team whose `age` field will be inspected
+ * @returns `"youth"` if the `age` value starts with `U` or contains `jeugd` (case-insensitive), `"senior"` otherwise
  */
 export function getSanityTeamType(team: SanityTeam): "youth" | "senior" {
   const age = team.age?.toLowerCase() ?? "";
@@ -119,7 +133,10 @@ export function getSanityTeamType(team: SanityTeam): "youth" | "senior" {
 }
 
 /**
- * Derive age group label from Sanity team age field (e.g. "U15", "U17A")
+ * Extracts the age-group label (e.g., "U15", "U17A") from a Sanity team's age string.
+ *
+ * @param team - The Sanity team object containing an `age` field
+ * @returns The age-group label in uppercase if present (such as `"U15"` or `"U17A"`), `undefined` otherwise
  */
 export function getSanityAgeGroup(team: SanityTeam): string | undefined {
   if (!team.age) return undefined;

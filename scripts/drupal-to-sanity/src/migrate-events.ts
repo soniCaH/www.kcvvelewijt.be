@@ -20,6 +20,13 @@ interface DrupalFile {
   attributes: { uri: { url: string } };
 }
 
+/**
+ * Migrates published event nodes from Drupal into Sanity as event documents.
+ *
+ * Fetches published events (including media references), uploads any referenced images to Sanity,
+ * and creates a corresponding Sanity document for each event with title, date range, external link,
+ * and an optional cover image reference.
+ */
 async function main() {
   console.log("Fetching events from Drupal...");
   const events = await fetchAllPages<DrupalEvent>(

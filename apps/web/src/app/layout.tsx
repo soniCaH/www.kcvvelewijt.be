@@ -29,10 +29,12 @@ export const viewport: Viewport = {
 };
 
 /**
- * Root layout that wraps pages with HTML structure, loads Adobe Typekit, and renders the global header and footer.
+ * Render the application's root HTML layout, including the global header and footer, and conditionally load Adobe Typekit.
  *
- * @param children - The page content to render between the header and footer.
- * @returns The root JSX element for the application layout.
+ * Fetches youth team navigation items, sorts them by numeric age in descending order, and passes them to the header component.
+ *
+ * @param children - Page content to render between the header and footer
+ * @returns The root JSX element containing the HTML, head, and body for the application
  */
 export default async function RootLayout({
   children,

@@ -17,6 +17,12 @@ interface NewsPageProps {
   searchParams: Promise<{ category?: string; page?: string }>;
 }
 
+/**
+ * Generate page metadata for the news archive based on the optional `category` search parameter.
+ *
+ * @param searchParams - Promise resolving to an object of search parameters; may include `category` to customize the title and description
+ * @returns Metadata with `title` and `description`. If `category` is present both values include the category; otherwise they use the default news archive text.
+ */
 export async function generateMetadata({
   searchParams,
 }: NewsPageProps): Promise<Metadata> {
@@ -36,6 +42,14 @@ export async function generateMetadata({
 
 const PAGE_SIZE = 9;
 
+/**
+ * Renders the news listing page with category filters, article cards, and pagination.
+ *
+ * Fetches articles from Sanity, derives category options from article tags, applies an optional category filter and in-memory pagination, then renders the resulting page UI.
+ *
+ * @param searchParams - A promise resolving to query parameters; supports `category` (active category slug) and `page` (1-based page number). If `page` is missing or invalid, it defaults to 1.
+ * @returns The page's JSX containing the page title, category filters, article grid, and previous/next pagination controls.
+ */
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.category;

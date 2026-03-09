@@ -19,6 +19,12 @@ export const metadata: Metadata = {
 const GOLD_TYPES = ["crossing"];
 const SILVER_TYPES = ["green", "white"];
 
+/**
+ * Convert a SanitySponsor record to the public Sponsor shape.
+ *
+ * @param s - The SanitySponsor to convert
+ * @returns A Sponsor object with `id`, `name`, `logo` (uses the placeholder "/images/placeholder-sponsor.png" if the source has no logo), and `url` (`undefined` if not provided)
+ */
 function mapToSponsor(s: SanitySponsor): Sponsor {
   return {
     id: s._id,
@@ -28,6 +34,13 @@ function mapToSponsor(s: SanitySponsor): Sponsor {
   };
 }
 
+/**
+ * Render the Sponsors page with sponsors grouped into gold, silver, and bronze tiers.
+ *
+ * If fetching sponsors fails, the page is rendered with empty sponsor lists.
+ *
+ * @returns A React element for the SponsorsPage populated with `goldSponsors`, `silverSponsors`, and `bronzeSponsors`.
+ */
 export default async function SponsorsPageRoute() {
   const sponsors = await runPromise(
     Effect.gen(function* () {
