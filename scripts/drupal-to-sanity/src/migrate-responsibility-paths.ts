@@ -307,7 +307,7 @@ async function mapPath(path: PathData) {
     primaryContact,
     steps: path.steps.map((step, i) => ({
       _type: "solutionStep",
-      _key: Math.random().toString(36).slice(2),
+      _key: crypto.randomUUID(),
       description: step.description,
       ...(step.link ? { link: step.link } : {}),
       ...(stepContacts[i] ? { contact: stepContacts[i] } : {}),

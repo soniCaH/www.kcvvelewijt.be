@@ -47,7 +47,7 @@ An interactive "Hulp" (Help) system that helps visitors quickly find the right c
 
 ### Data Flow
 
-```
+```text
 Sanity CMS (responsibilityPath docs)
   → GROQ query (responsibilityPaths.ts)
   → SanityService.getResponsibilityPaths()

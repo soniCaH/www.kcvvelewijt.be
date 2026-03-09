@@ -80,6 +80,18 @@ export interface ResponsibilityPath {
 }
 
 /**
+ * Role options for the UI role selector.
+ * "andere" is intentionally excluded — it is a valid UserRole for data but not shown as a picker choice.
+ */
+export const ROLE_OPTIONS: ReadonlyArray<{ value: UserRole; label: string }> = [
+  { value: "speler", label: "Speler" },
+  { value: "ouder", label: "Ouder" },
+  { value: "trainer", label: "Trainer" },
+  { value: "supporter", label: "Supporter" },
+  { value: "niet-lid", label: "Niet-lid" },
+];
+
+/**
  * Autocomplete suggestion
  */
 export interface AutocompleteSuggestion {

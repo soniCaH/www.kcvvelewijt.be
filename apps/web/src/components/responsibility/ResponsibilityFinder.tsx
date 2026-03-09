@@ -13,13 +13,7 @@ import type {
   ResponsibilityPath,
   AutocompleteSuggestion,
 } from "@/types/responsibility";
-const userRoles: { value: string; label: string }[] = [
-  { value: "speler", label: "Speler" },
-  { value: "ouder", label: "Ouder" },
-  { value: "trainer", label: "Trainer" },
-  { value: "supporter", label: "Supporter" },
-  { value: "niet-lid", label: "Niet-lid" },
-];
+import { ROLE_OPTIONS } from "@/types/responsibility";
 import {
   X,
   User,
@@ -29,6 +23,24 @@ import {
   Check,
 } from "lucide-react";
 import { getIcon } from "@/lib/icons";
+
+const ALLOWED_HREF_SCHEMES = ["http:", "https:", "mailto:", "tel:"];
+
+/**
+ * Returns `url` only when it is a relative path or uses an allowed scheme;
+ * returns `null` for any other value (including `javascript:` and unknown protocols).
+ */
+function toSafeHref(url: string | undefined | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/") || url.startsWith("#") || url.startsWith("?"))
+    return url;
+  try {
+    const { protocol } = new URL(url);
+    return ALLOWED_HREF_SCHEMES.includes(protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 interface ResponsibilityFinderProps {
   paths?: ResponsibilityPath[];
@@ -275,9 +287,9 @@ export function ResponsibilityFinder({
               }}
             >
               {selectedRole
-                ? (userRoles
-                    .find((r) => r.value === selectedRole)
-                    ?.label.toLowerCase() ?? selectedRole)
+                ? (ROLE_OPTIONS.find(
+                    (r) => r.value === selectedRole,
+                  )?.label.toLowerCase() ?? selectedRole)
                 : "een..."}
               <ChevronDown
                 className={`w-5 h-5 transition-transform ${showRoleDropdown ? "rotate-180" : ""}`}
@@ -290,7 +302,7 @@ export function ResponsibilityFinder({
                 ref={dropdownRef}
                 className="absolute z-50 top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[200px] animate-fadeIn"
               >
-                {userRoles.map((role, idx) => {
+                {ROLE_OPTIONS.map((role, idx) => {
                   const isSelected = selectedRole === role.value;
                   return (
                     <button
@@ -300,7 +312,7 @@ export function ResponsibilityFinder({
                         w-full text-left px-4 py-3 text-lg font-medium transition-colors
                         flex items-center justify-between
                         ${isSelected ? "" : "hover:bg-gray-50"}
-                        ${idx === userRoles.length - 1 ? "rounded-b-lg" : ""}
+                        ${idx === ROLE_OPTIONS.length - 1 ? "rounded-b-lg" : ""}
                         ${idx === 0 ? "rounded-t-lg" : ""}
                       `}
                       style={{
@@ -502,6 +514,7 @@ function ResultCard({
   const colors =
     categoryColors[path.category as keyof typeof categoryColors] ??
     categoryColors.algemeen;
+  const safeOrgLink = toSafeHref(path.primaryContact.orgLink);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
@@ -603,7 +616,7 @@ function ResultCard({
                 </a>
               </div>
             )}
-            {(path.primaryContact.orgLink || path.primaryContact.memberId) && (
+            {(path.primaryContact.memberId || safeOrgLink) && (
               <div>
                 {path.primaryContact.memberId && onMemberSelect ? (
                   <button
@@ -628,9 +641,9 @@ function ResultCard({
                     </svg>
                     Bekijk in organigram
                   </button>
-                ) : path.primaryContact.orgLink ? (
+                ) : safeOrgLink ? (
                   <a
-                    href={path.primaryContact.orgLink}
+                    href={safeOrgLink}
                     className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                   >
                     <svg
@@ -663,70 +676,73 @@ function ResultCard({
             Wat moet je doen?
           </h4>
           <ol className="space-y-3">
-            {path.steps.map((step, stepIdx) => (
-              <li key={stepIdx} className="flex gap-3 group">
-                <div
-                  className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
-                  style={{ backgroundColor: colors.accent }}
-                >
-                  {stepIdx + 1}
-                </div>
-                <div className="flex-1 pt-1">
-                  <p className="text-gray-700 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                  {step.link && (
-                    <a
-                      href={step.link}
-                      className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+            {path.steps.map((step, stepIdx) => {
+              const safeStepLink = toSafeHref(step.link);
+              return (
+                <li key={stepIdx} className="flex gap-3 group">
+                  <div
+                    className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
+                    style={{ backgroundColor: colors.accent }}
+                  >
+                    {stepIdx + 1}
+                  </div>
+                  <div className="flex-1 pt-1">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {step.description}
+                    </p>
+                    {safeStepLink && (
+                      <a
+                        href={safeStepLink}
+                        className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Meer info
-                    </a>
-                  )}
-                  {step.contact && (
-                    <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <div className="font-semibold text-gray-700 mb-1">
-                        {step.contact.role}
-                      </div>
-                      {step.contact.email && (
-                        <a
-                          href={`mailto:${step.contact.email}`}
-                          className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1"
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Meer info
+                      </a>
+                    )}
+                    {step.contact && (
+                      <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <div className="font-semibold text-gray-700 mb-1">
+                          {step.contact.role}
+                        </div>
+                        {step.contact.email && (
+                          <a
+                            href={`mailto:${step.contact.email}`}
+                            className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          </svg>
-                          {step.contact.email}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
+                            </svg>
+                            {step.contact.email}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </div>
