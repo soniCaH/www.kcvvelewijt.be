@@ -39,8 +39,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Renders the unified Organigram and Responsibility Finder page.
- * Responsibility paths are fetched server-side from Sanity and passed as a prop.
+ * Render the unified Organigram and Responsibility Finder page for KCVV Elewijt.
+ *
+ * Fetches responsibility paths from Sanity server-side and provides them, together with the club structure, to the client component that displays the organigram and responsibility finder.
  *
  * @returns The React element for the organigram page.
  */

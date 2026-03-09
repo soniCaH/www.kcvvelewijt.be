@@ -238,6 +238,12 @@ interface PathData {
   steps: StepData[];
 }
 
+/**
+ * Find the Sanity document ID for a staff member with the given email.
+ *
+ * @param email - Email address of the staff member to look up
+ * @returns The staff member document `_id` if found, `null` otherwise
+ */
 async function findStaffMemberByEmail(email: string): Promise<string | null> {
   const result = await client.fetch<{ _id: string } | null>(
     '*[_type == "staffMember" && email == $email][0]{_id}',
@@ -246,6 +252,12 @@ async function findStaffMemberByEmail(email: string): Promise<string | null> {
   return result?._id ?? null;
 }
 
+/**
+ * Resolve a contact to a Sanity-compatible contact object, preferring a staff member reference when the contact's email matches a staff record.
+ *
+ * @param contact - Contact information with `role` and optional `email` and `department`
+ * @returns An object with either a `staffMember` reference and `role` (plus optional `department`), or a plain contact object containing `role` and any provided `email` and `department`
+ */
 async function mapContact(contact: { role: string; email?: string; department?: string }) {
   if (contact.email) {
     const staffId = await findStaffMemberByEmail(contact.email);
@@ -264,6 +276,14 @@ async function mapContact(contact: { role: string; email?: string; department?: 
   };
 }
 
+/**
+ * Convert a PathData object into a Sanity `responsibilityPath` document.
+ *
+ * Resolves the `primaryContact` and any step `contact`s to staff member references when an email matches an existing staff record; otherwise preserves role/email/department fallback fields.
+ *
+ * @param path - The responsibility path data to transform into a Sanity document
+ * @returns A Sanity `responsibilityPath` document containing audience, question, keywords, summary, category, icon, the resolved `primaryContact`, and an array of `solutionStep` objects with descriptions, optional links, and resolved contacts
+ */
 async function mapPath(path: PathData) {
   const [primaryContact, ...stepContacts] = await Promise.all([
     mapContact(path.primaryContact),
@@ -295,6 +315,11 @@ async function mapPath(path: PathData) {
   };
 }
 
+/**
+ * Migrates the in-file responsibilityPaths into Sanity documents.
+ *
+ * Processes each responsibility path, transforms it into a Sanity document, persists it to Sanity, and logs progress for each item and on completion.
+ */
 async function main() {
   console.log(`Migrating ${responsibilityPaths.length} responsibility paths to Sanity...`);
 

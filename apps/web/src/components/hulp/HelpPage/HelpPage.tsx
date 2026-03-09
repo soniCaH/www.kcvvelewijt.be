@@ -7,6 +7,12 @@ import Link from "next/link";
 import { ResponsibilityFinder } from "@/components/responsibility";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
+/**
+ * Render the Help page with a responsibility-based finder, informational cards, and a three-step workflow.
+ *
+ * @param paths - Optional array of responsibility paths to populate the ResponsibilityFinder; defaults to an empty array.
+ * @returns The Help page as a JSX element.
+ */
 export function HelpPage({ paths = [] }: { paths?: ResponsibilityPath[] }) {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">

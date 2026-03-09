@@ -486,13 +486,11 @@ export function ResponsibilityFinder({
 }
 
 /**
- * Render a card that displays a responsibility path including its header, primary contact, and ordered steps.
+ * Display a formatted card for a ResponsibilityPath, showing its header (icon, question, category, summary), the primary contact panel, and an ordered list of steps.
  *
- * Shows the path icon, question, and summary; a primary contact panel with role, name, email, phone and optional organigram link; and an ordered list of actionable steps with optional links and contact information.
- *
- * @param path - The ResponsibilityPath to render in the result card
- * @param onMemberSelect - Optional callback for member selection (deep linking)
- * @returns A React element representing the formatted result card for the given responsibility path
+ * @param path - The responsibility path to display
+ * @param onMemberSelect - Optional callback invoked with a memberId when the "Bekijk in organigram" action is triggered
+ * @returns A React element rendering the styled result card for the provided `path`
  */
 function ResultCard({
   path,

@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Render the Help page populated with responsibility paths fetched from Sanity.
+ *
+ * Fetches responsibility paths and returns the HelpPage component with those paths provided as a prop.
+ *
+ * @returns The HelpPage React element rendered with the fetched responsibility paths.
+ */
 export default async function HelpPageRoute() {
   const paths = await runPromise(
     Effect.gen(function* () {

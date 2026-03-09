@@ -12,9 +12,10 @@ import { ResponsibilityFinder } from "./ResponsibilityFinder";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
 /**
- * Renders the responsibility block containing a compact finder, a link to the full help page, and three quick-link cards.
+ * Render the homepage responsibility block with a compact responsibility finder, a link to the full help page, and three quick-link cards.
  *
- * @returns The responsibility block UI element.
+ * @param paths - Optional list of responsibility paths supplied to the finder; defaults to an empty array.
+ * @returns The React element for the responsibility block.
  */
 export function ResponsibilityBlock({
   paths = [],

@@ -162,7 +162,12 @@ const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
     catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
   }).pipe(Effect.orDie);
 
-// ─── Responsibility path mappers ──────────────────────────────────────────────
+/**
+ * Converts a SanityResponsibilityContact into the public Contact shape.
+ *
+ * @param c - The source contact from Sanity; may omit name, email, phone, department, or role
+ * @returns A Contact object with `role` defaulting to an empty string when absent and including `name`, `email`, `phone`, and `department` only if present on the source
+ */
 
 function mapContact(c: SanityResponsibilityContact): Contact {
   return {
@@ -176,6 +181,12 @@ function mapContact(c: SanityResponsibilityContact): Contact {
   };
 }
 
+/**
+ * Convert a SanityResponsibilityPath record into a public ResponsibilityPath.
+ *
+ * @param p - The raw responsibility path as returned by Sanity
+ * @returns A ResponsibilityPath with the same core fields; includes `icon` only if present, maps `primaryContact`, and converts `steps` into ordered steps (order starts at 1) including optional `link` and `contact` when provided
+ */
 function mapResponsibilityPath(
   p: SanityResponsibilityPath,
 ): ResponsibilityPath {
