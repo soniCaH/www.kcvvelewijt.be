@@ -6,10 +6,9 @@ const CONTACT_PROJECTION = `{
   "role": role,
   "email": select(defined(staffMember) => staffMember->email, email),
   "phone": select(defined(staffMember) => staffMember->phone, phone),
-  "department": department,
+  "department": select(defined(staffMember) => staffMember->department, department),
   "name": select(
-    defined(staffMember),
-    staffMember->firstName + " " + staffMember->lastName,
+    defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
     null
   )
 }`;
@@ -26,7 +25,7 @@ export const RESPONSIBILITY_PATHS_QUERY = `*[_type == "responsibilityPath" && ac
   "steps": steps[] {
     description,
     link,
-    "contact": select(defined(contact), contact ${CONTACT_PROJECTION}, null)
+    "contact": select(defined(contact) => contact ${CONTACT_PROJECTION}, null)
   },
-  "relatedPaths": relatedPaths[]->slug.current
+  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])
 }`;

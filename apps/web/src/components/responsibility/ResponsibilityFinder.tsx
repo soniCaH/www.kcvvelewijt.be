@@ -398,7 +398,7 @@ export function ResponsibilityFinder({
                     const colors =
                       categoryColors[
                         suggestion.path.category as keyof typeof categoryColors
-                      ];
+                      ] ?? categoryColors.algemeen;
                     return (
                       <button
                         key={suggestion.path.id}
@@ -501,7 +501,9 @@ function ResultCard({
   path: ResponsibilityPath;
   onMemberSelect?: (memberId: string) => void;
 }) {
-  const colors = categoryColors[path.category as keyof typeof categoryColors];
+  const colors =
+    categoryColors[path.category as keyof typeof categoryColors] ??
+    categoryColors.algemeen;
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">

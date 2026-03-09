@@ -72,6 +72,7 @@ export const responsibilityPath = defineType({
               {title: 'Trainer', value: 'trainer'},
               {title: 'Supporter', value: 'supporter'},
               {title: 'Niet-lid', value: 'niet-lid'},
+              {title: 'Andere', value: 'andere'},
             ],
           },
         },
@@ -129,6 +130,7 @@ export const responsibilityPath = defineType({
       type: 'object',
       description: 'Main contact person for this path',
       fields: contactFields,
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'steps',

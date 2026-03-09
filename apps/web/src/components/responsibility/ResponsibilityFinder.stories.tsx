@@ -11,6 +11,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
 import { responsibilityPaths } from "@/data/responsibility-paths";
 
@@ -48,6 +49,7 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
   tags: ["autodocs"],
   args: {
     paths: responsibilityPaths,
+    onResultSelect: fn(),
   },
   argTypes: {
     compact: {
@@ -56,10 +58,6 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
       table: {
         defaultValue: { summary: "false" },
       },
-    },
-    onResultSelect: {
-      action: "result-selected",
-      description: "Callback when user selects a result",
     },
   },
 } satisfies Meta<typeof ResponsibilityFinder>;
