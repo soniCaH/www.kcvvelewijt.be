@@ -3,6 +3,11 @@ import Script from "next/script";
 import "./globals.css";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageFooter } from "@/components/layout/PageFooter";
+import { sanityClient } from "@/lib/sanity/client";
+import {
+  YOUTH_TEAMS_NAV_QUERY,
+  type YouthTeamNavItem,
+} from "@/lib/sanity/queries/teams";
 
 export const metadata: Metadata = {
   title: {
@@ -29,12 +34,21 @@ export const viewport: Viewport = {
  * @param children - The page content to render between the header and footer.
  * @returns The root JSX element for the application layout.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const typekitId = process.env.NEXT_PUBLIC_TYPEKIT_ID;
+
+  const youthTeams = await sanityClient
+    .fetch<
+      YouthTeamNavItem[]
+    >(YOUTH_TEAMS_NAV_QUERY, {}, { next: { revalidate: 3600 } })
+    .catch(() => [] as YouthTeamNavItem[]);
+
+  const parseAge = (age: string) => parseInt(age.replace(/\D/g, "")) || 0;
+  youthTeams.sort((a, b) => parseAge(b.age) - parseAge(a.age));
 
   return (
     <html lang="nl" suppressHydrationWarning>
@@ -53,7 +67,7 @@ export default function RootLayout({
         )}
       </head>
       <body suppressHydrationWarning>
-        <PageHeader />
+        <PageHeader youthTeams={youthTeams} />
         {children}
         <PageFooter />
       </body>

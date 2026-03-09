@@ -11,8 +11,10 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Search } from "@/lib/icons";
+import type { YouthTeamNavItem } from "@/lib/sanity/queries/teams";
 
 export interface NavigationProps {
+  youthTeams?: YouthTeamNavItem[];
   /**
    * Additional CSS classes
    */
@@ -25,7 +27,7 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-const menuItems: MenuItem[] = [
+const staticMenuItems: MenuItem[] = [
   { label: "Home", href: "/" },
   { label: "Nieuws", href: "/news" },
   { label: "Evenementen", href: "/events" },
@@ -47,25 +49,6 @@ const menuItems: MenuItem[] = [
       { label: "Spelers & Staff", href: "/team/b-ploeg?tab=lineup" },
       { label: "Wedstrijden", href: "/team/b-ploeg?tab=matches" },
       { label: "Stand", href: "/team/b-ploeg?tab=standings" },
-    ],
-  },
-  {
-    label: "Jeugd",
-    href: "/jeugd",
-    children: [
-      { label: "U21", href: "/team/u21" },
-      { label: "U17", href: "/team/u17" },
-      { label: "U16", href: "/team/u16" },
-      { label: "U15", href: "/team/u15" },
-      { label: "U14", href: "/team/u14" },
-      { label: "U13", href: "/team/u13" },
-      { label: "U12", href: "/team/u12" },
-      { label: "U11", href: "/team/u11" },
-      { label: "U10", href: "/team/u10" },
-      { label: "U9", href: "/team/u9" },
-      { label: "U8", href: "/team/u8" },
-      { label: "U7", href: "/team/u7" },
-      { label: "U6 & U5", href: "/team/u6" },
     ],
   },
   { label: "Sponsors", href: "/sponsors" },
@@ -102,10 +85,27 @@ const menuItems: MenuItem[] = [
  * - Dropdown border: 1px solid gray-700
  * - Dropdown font-size: 0.6875rem (11px)
  */
-export const Navigation = ({ className }: NavigationProps) => {
+export const Navigation = ({ youthTeams, className }: NavigationProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const jeugdItem: MenuItem = {
+    label: "Jeugd",
+    href: "/jeugd",
+    children: youthTeams?.map((t) => ({
+      label: t.age,
+      href: `/team/${t.slug}`,
+    })),
+  };
+
+  const menuItems = [
+    ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
+    staticMenuItems[3]!, // A-Ploeg
+    staticMenuItems[4]!, // B-Ploeg
+    jeugdItem,
+    ...staticMenuItems.slice(5), // Sponsors, Hulp, De club
+  ];
 
   /**
    * Check if a menu item is active, handling both pathname and query params

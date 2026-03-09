@@ -1,3 +1,14 @@
+export const YOUTH_TEAMS_NAV_QUERY = `*[_type == "team" && showInNavigation != false && defined(age) && !(age in ["A", "B"])] {
+  _id, name, "slug": slug.current, age
+}`;
+
+export type YouthTeamNavItem = {
+  _id: string;
+  name: string;
+  slug: string;
+  age: string;
+};
+
 export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | order(name asc) {
   _id, psdId, name, slug, age, gender, footbelId, leagueId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,

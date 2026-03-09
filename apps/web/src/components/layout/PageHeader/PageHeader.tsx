@@ -13,8 +13,10 @@ import { cn } from "@/lib/utils/cn";
 import { Search, Menu } from "@/lib/icons";
 import { Navigation } from "../Navigation";
 import { MobileMenu } from "../MobileMenu";
+import type { YouthTeamNavItem } from "@/lib/sanity/queries/teams";
 
 export interface PageHeaderProps {
+  youthTeams?: YouthTeamNavItem[];
   /**
    * Additional CSS classes
    */
@@ -32,7 +34,7 @@ export interface PageHeaderProps {
  * - Fixed positioning with z-index 50 (above content)
  * - Transition: height 0.3s
  */
-export const PageHeader = ({ className }: PageHeaderProps) => {
+export const PageHeader = ({ youthTeams, className }: PageHeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -107,7 +109,7 @@ export const PageHeader = ({ className }: PageHeaderProps) => {
 
             {/* Desktop Navigation - Suspense boundary for useSearchParams */}
             <Suspense fallback={<div className="flex-grow" />}>
-              <Navigation />
+              <Navigation youthTeams={youthTeams} />
             </Suspense>
           </div>
         </nav>
@@ -118,7 +120,11 @@ export const PageHeader = ({ className }: PageHeaderProps) => {
 
       {/* Mobile Menu Overlay - Suspense boundary for useSearchParams */}
       <Suspense fallback={null}>
-        <MobileMenu isOpen={isMobileMenuOpen} onClose={handleClose} />
+        <MobileMenu
+          isOpen={isMobileMenuOpen}
+          onClose={handleClose}
+          youthTeams={youthTeams}
+        />
       </Suspense>
     </>
   );
