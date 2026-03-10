@@ -66,7 +66,7 @@ export function MobileNavigationDrawer({
       if (activeDepartment === "hoofdbestuur") {
         return (
           member.department === "hoofdbestuur" ||
-          member.department === "general"
+          member.department === "algemeen"
         );
       }
       return member.department === activeDepartment;

@@ -37,7 +37,7 @@ export interface OrgChartNode {
   profileUrl?: string;
 
   /** Department or section this person belongs to */
-  department?: "hoofdbestuur" | "jeugdbestuur" | "general";
+  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
 
   /** Parent node ID (for building the hierarchy) */
   parentId?: string | null;

@@ -26,7 +26,7 @@ export const clubStructure: OrgChartNode[] = [
     name: "KCVV Elewijt",
     title: "Voetbalclub",
     imageUrl: "/images/logo-flat.png",
-    department: "general",
+    department: "algemeen",
     parentId: null,
   },
 
@@ -395,7 +395,7 @@ export function getHierarchicalStructure(): OrgChartNode {
  * @returns An array of `OrgChartNode` entries belonging to the specified department
  */
 export function getMembersByDepartment(
-  department: "hoofdbestuur" | "jeugdbestuur" | "general",
+  department: "hoofdbestuur" | "jeugdbestuur" | "algemeen",
 ) {
   return clubStructure.filter((node) => node.department === department);
 }

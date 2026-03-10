@@ -54,12 +54,13 @@ export interface EnhancedOrgChartProps {
 }
 
 /**
- * Render an enhanced, responsive organizational chart with search, department filters, mobile navigation, zoom/fit controls, expand/collapse, fullscreen, and image export.
+ * Render an interactive organizational chart UI with search, department filters, mobile navigation, zoom/fit controls, expand/collapse, fullscreen, and image export.
  *
- * @param members - All organization members used to build the chart and resolve ancestor nodes for search results
+ * @param members - Complete list of organization members used to build the chart and to resolve ancestor nodes for search results
  * @param onMemberClick - Optional callback invoked with the selected member when a chart node is clicked
- * @param isLoading - Optional flag that, when true, renders loading skeletons instead of the chart
+ * @param isLoading - When true, renders loading placeholders instead of the chart
  * @param className - Optional additional CSS classes applied to the component container
+ * @param centeredMemberId - Optional member ID to center the chart on after render
  * @returns The React element that renders the enhanced organizational chart UI
  */
 export function EnhancedOrgChart({
@@ -115,7 +116,7 @@ export function EnhancedOrgChart({
       if (activeDepartment === "hoofdbestuur") {
         return (
           member.department === "hoofdbestuur" ||
-          member.department === "general"
+          member.department === "algemeen"
         );
       }
       return member.department === activeDepartment;

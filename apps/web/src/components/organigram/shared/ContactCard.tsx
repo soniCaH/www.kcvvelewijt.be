@@ -22,7 +22,7 @@ import type { ContactCardProps } from "./types";
  * @param member - Member data to display (name, title, imageUrl, email, phone, department, positionShort, and optional `_children`)
  * @param variant - Layout variant: `"compact"`, `"detailed"`, or `"grid"`; controls sizing and typography
  * @param showQuickActions - If true, show inline email and phone action links when available
- * @param showDepartment - If true, show a department badge when `member.department` is present and not `"general"`
+ * @param showDepartment - If true, show a department badge when `member.department` is present and not `"algemeen"`
  * @param showExpandIndicator - If true and the member has children, show an expand/collapse indicator
  * @param isExpanded - Current expanded state used to choose the expand/collapse icon and hint text
  * @param onClick - Optional click handler invoked with `member` when the card is activated (click, Enter, or Space)
@@ -141,7 +141,7 @@ export function ContactCard({
           {/* Department Badge */}
           {showDepartment &&
             member.department &&
-            member.department !== "general" && (
+            member.department !== "algemeen" && (
               <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-kcvv-gray-dark rounded text-xs self-start">
                 {member.department === "hoofdbestuur"
                   ? "Hoofdbestuur"

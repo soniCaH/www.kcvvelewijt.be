@@ -9,13 +9,19 @@
 import Link from "next/link";
 import { ChevronRight, Users, Mail, UserPlus } from "@/lib/icons";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
+import type { ResponsibilityPath } from "@/types/responsibility";
 
 /**
- * Renders the responsibility block containing a compact finder, a link to the full help page, and three quick-link cards.
+ * Render the homepage responsibility block with a compact responsibility finder, a link to the full help page, and three quick-link cards.
  *
- * @returns The responsibility block UI element.
+ * @param paths - Optional list of responsibility paths supplied to the finder; defaults to an empty array.
+ * @returns The React element for the responsibility block.
  */
-export function ResponsibilityBlock() {
+export function ResponsibilityBlock({
+  paths = [],
+}: {
+  paths?: ResponsibilityPath[];
+}) {
   return (
     <section className="bg-gradient-to-br from-green-main/5 to-green-hover/5 py-16 px-4">
       <div className="max-w-5xl mx-auto">
@@ -36,7 +42,7 @@ export function ResponsibilityBlock() {
 
         {/* Compact Finder */}
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
-          <ResponsibilityFinder compact />
+          <ResponsibilityFinder paths={paths} compact />
 
           {/* Link to full page */}
           <div className="mt-8 text-center">

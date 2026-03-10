@@ -11,7 +11,86 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
+import type { ResponsibilityPath } from "@/types/responsibility";
+
+const storyPaths: ResponsibilityPath[] = [
+  {
+    id: "ongeval-speler-training",
+    role: ["speler", "ouder"],
+    question: "heb een ongeval op training/wedstrijd",
+    keywords: ["ongeval", "blessure", "letsel", "kwetsuur", "pijn"],
+    summary:
+      "Meld het ongeval onmiddellijk bij je trainer en neem contact op met de verzekeringverantwoordelijke.",
+    category: "medisch",
+    icon: "heart",
+    primaryContact: {
+      role: "Verzekeringverantwoordelijke",
+      email: "verzekering@kcvvelewijt.be",
+      department: "algemeen",
+    },
+    steps: [
+      { description: "Meld het ongeval bij je trainer" },
+      {
+        description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
+        contact: {
+          role: "Verzekeringverantwoordelijke",
+          email: "verzekering@kcvvelewijt.be",
+        },
+      },
+      {
+        description: "Vul het ongevalformulier in",
+        link: "/club/downloads",
+      },
+    ],
+  },
+  {
+    id: "inschrijving-nieuw-lid",
+    role: ["niet-lid", "ouder"],
+    question: "wil mij graag inschrijven",
+    keywords: ["inschrijven", "lid worden", "aansluiten", "lidmaatschap"],
+    summary:
+      "Gebruik het online inschrijvingsformulier of neem contact op met de jeugdsecretaris.",
+    category: "administratief",
+    icon: "file-text",
+    primaryContact: {
+      role: "Jeugdsecretaris",
+      email: "jeugd@kcvvelewijt.be",
+      department: "jeugdbestuur",
+    },
+    steps: [
+      { description: "Ga naar de inschrijvingspagina", link: "/club/register" },
+      { description: "Vul het formulier in met alle gevraagde gegevens" },
+      { description: "Betaal het lidgeld" },
+    ],
+  },
+  {
+    id: "trainer-worden",
+    role: ["niet-lid"],
+    question: "wil graag trainer worden",
+    keywords: ["trainer", "coach", "vrijwilliger", "helpen"],
+    summary:
+      "Neem contact op met de technisch coördinator of jeugdcoördinator.",
+    category: "algemeen",
+    icon: "graduation-cap",
+    primaryContact: {
+      role: "Technisch Coördinator",
+      email: "technisch@kcvvelewijt.be",
+      department: "hoofdbestuur",
+    },
+    steps: [
+      {
+        description: "Contacteer de technisch coördinator",
+        contact: {
+          role: "Technisch Coördinator",
+          email: "technisch@kcvvelewijt.be",
+        },
+      },
+      { description: "Bespreek je ervaring en beschikbaarheid" },
+    ],
+  },
+];
 
 const meta = {
   title: "Features/Responsibility/ResponsibilityFinder",
@@ -45,6 +124,10 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
     },
   },
   tags: ["autodocs"],
+  args: {
+    paths: storyPaths,
+    onResultSelect: fn(),
+  },
   argTypes: {
     compact: {
       control: "boolean",
@@ -52,10 +135,6 @@ The **ResponsibilityFinder** helps users quickly find the right contact person b
       table: {
         defaultValue: { summary: "false" },
       },
-    },
-    onResultSelect: {
-      action: "result-selected",
-      description: "Callback when user selects a result",
     },
   },
 } satisfies Meta<typeof ResponsibilityFinder>;
@@ -183,13 +262,13 @@ export const WithResultSelected: Story = {
  */
 export const AllRoles: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-6">
       <h3 className="text-2xl font-bold">Available Roles</h3>
       <p className="text-gray-dark">
         Users can select from these roles to filter relevant questions:
       </p>
-      <ResponsibilityFinder />
+      <ResponsibilityFinder {...args} />
       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-bold mb-2">Role Types:</h4>
         <ul className="list-disc list-inside space-y-1 text-sm">
@@ -257,12 +336,12 @@ export const KeyboardNavigation: Story = {
  */
 export const SizeComparison: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-12">
       <div>
         <h3 className="text-2xl font-bold mb-4">Full Size (Default)</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg">
-          <ResponsibilityFinder />
+          <ResponsibilityFinder {...args} />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Large typography (4xl-6xl) for dedicated /hulp page
@@ -272,7 +351,7 @@ export const SizeComparison: Story = {
       <div>
         <h3 className="text-2xl font-bold mb-4">Compact Size</h3>
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg bg-green-main/5">
-          <ResponsibilityFinder compact />
+          <ResponsibilityFinder {...args} compact />
         </div>
         <p className="mt-2 text-sm text-gray-medium">
           Smaller typography (2xl-4xl) for homepage integration
@@ -470,7 +549,7 @@ Instead of large button cards, the role selector becomes an inline sentence:
  */
 export const CategoryColorCoding: Story = {
   args: {},
-  render: () => (
+  render: (args) => (
     <div className="space-y-8">
       <div>
         <h3 className="text-2xl font-bold mb-4">Category Color System</h3>
@@ -516,7 +595,7 @@ export const CategoryColorCoding: Story = {
         <p className="text-gray-dark mb-4">
           Select a role and search to see colors in action:
         </p>
-        <ResponsibilityFinder />
+        <ResponsibilityFinder {...args} />
       </div>
     </div>
   ),

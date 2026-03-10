@@ -11,6 +11,11 @@ import {
 } from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import { EVENTS_QUERY } from "../../sanity/queries/events";
+import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
+import type {
+  ResponsibilityPath,
+  Contact,
+} from "../../../types/responsibility";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
@@ -99,6 +104,33 @@ export interface SanityEvent {
   coverImageUrl: string | null;
 }
 
+export interface SanityResponsibilityContact {
+  role: string | null;
+  email: string | null;
+  phone: string | null;
+  department: string | null;
+  name: string | null;
+}
+
+export interface SanityResponsibilityStep {
+  description: string;
+  link: string | null;
+  contact: SanityResponsibilityContact | null;
+}
+
+export interface SanityResponsibilityPath {
+  id: string;
+  role: string[];
+  question: string;
+  keywords: string[];
+  summary: string;
+  category: string;
+  icon: string | null;
+  primaryContact: SanityResponsibilityContact;
+  steps: SanityResponsibilityStep[];
+  relatedPaths: string[];
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
@@ -114,6 +146,7 @@ export interface SanityServiceInterface {
   ) => Effect.Effect<SanityArticle | null>;
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
+  readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
 }
 
 export class SanityService extends Context.Tag("SanityService")<
@@ -129,6 +162,52 @@ const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
     catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
   }).pipe(Effect.orDie);
 
+/**
+ * Converts a SanityResponsibilityContact into the public Contact shape.
+ *
+ * @param c - The source contact from Sanity; may omit name, email, phone, department, or role
+ * @returns A Contact object with `role` defaulting to an empty string when absent and including `name`, `email`, `phone`, and `department` only if present on the source
+ */
+
+function mapContact(c: SanityResponsibilityContact): Contact {
+  return {
+    role: c.role ?? "",
+    ...(c.name ? { name: c.name } : {}),
+    ...(c.email ? { email: c.email } : {}),
+    ...(c.phone ? { phone: c.phone } : {}),
+    ...(c.department
+      ? { department: c.department as Contact["department"] }
+      : {}),
+  };
+}
+
+/**
+ * Convert a SanityResponsibilityPath record into a public ResponsibilityPath.
+ *
+ * @param p - The raw responsibility path as returned by Sanity
+ * @returns A ResponsibilityPath with the same core fields; includes `icon` only if present, maps `primaryContact`, and converts `steps` into ordered steps (order starts at 1) including optional `link` and `contact` when provided
+ */
+function mapResponsibilityPath(
+  p: SanityResponsibilityPath,
+): ResponsibilityPath {
+  return {
+    id: p.id,
+    role: p.role as ResponsibilityPath["role"],
+    question: p.question,
+    keywords: p.keywords,
+    summary: p.summary,
+    category: p.category as ResponsibilityPath["category"],
+    ...(p.icon ? { icon: p.icon } : {}),
+    primaryContact: mapContact(p.primaryContact),
+    steps: p.steps.map((s, i) => ({
+      order: i + 1,
+      description: s.description,
+      ...(s.link ? { link: s.link } : {}),
+      ...(s.contact ? { contact: mapContact(s.contact) } : {}),
+    })),
+  };
+}
+
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getPlayers: () => fetchGroq<SanityPlayer[]>(PLAYERS_QUERY),
   getPlayerByPsdId: (psdId) =>
@@ -141,4 +220,8 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityArticle | null>(ARTICLE_BY_SLUG_QUERY, { slug }),
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
+  getResponsibilityPaths: () =>
+    fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(
+      Effect.map((paths) => paths.map(mapResponsibilityPath)),
+    ),
 });

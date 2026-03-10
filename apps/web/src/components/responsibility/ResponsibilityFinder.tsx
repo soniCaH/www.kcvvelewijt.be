@@ -13,7 +13,7 @@ import type {
   ResponsibilityPath,
   AutocompleteSuggestion,
 } from "@/types/responsibility";
-import { responsibilityPaths, userRoles } from "@/data/responsibility-paths";
+import { ROLE_OPTIONS } from "@/types/responsibility";
 import {
   X,
   User,
@@ -24,7 +24,26 @@ import {
 } from "lucide-react";
 import { getIcon } from "@/lib/icons";
 
+const ALLOWED_HREF_SCHEMES = ["http:", "https:", "mailto:", "tel:"];
+
+/**
+ * Returns `url` only when it is a relative path or uses an allowed scheme;
+ * returns `null` for any other value (including `javascript:` and unknown protocols).
+ */
+function toSafeHref(url: string | undefined | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/") || url.startsWith("#") || url.startsWith("?"))
+    return url;
+  try {
+    const { protocol } = new URL(url);
+    return ALLOWED_HREF_SCHEMES.includes(protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 interface ResponsibilityFinderProps {
+  paths?: ResponsibilityPath[];
   onResultSelect?: (path: ResponsibilityPath) => void;
   onMemberSelect?: (memberId: string) => void;
   compact?: boolean;
@@ -82,6 +101,7 @@ const categoryColors = {
  * @returns A React element that renders the ResponsibilityFinder UI (role selection, question input, suggestions, and result display).
  */
 export function ResponsibilityFinder({
+  paths = [],
   onResultSelect,
   onMemberSelect,
   compact = false,
@@ -104,63 +124,60 @@ export function ResponsibilityFinder({
 
     const query = questionText.toLowerCase();
 
-    const matches = responsibilityPaths.reduce<AutocompleteSuggestion[]>(
-      (acc, path) => {
-        let score = 0;
+    const matches = paths.reduce<AutocompleteSuggestion[]>((acc, path) => {
+      let score = 0;
 
-        // Filter by role first (required match)
-        if (selectedRole && !path.role.includes(selectedRole as UserRole)) {
-          return acc; // Skip if role doesn't match
+      // Filter by role first (required match)
+      if (selectedRole && !path.role.includes(selectedRole as UserRole)) {
+        return acc; // Skip if role doesn't match
+      }
+
+      if (selectedRole) {
+        score += 30; // Boost if role matches
+      }
+
+      // Match against question text
+      if (query) {
+        const questionLower = path.question.toLowerCase();
+
+        // Exact match in question
+        if (questionLower.includes(query)) {
+          score += 50;
         }
 
-        if (selectedRole) {
-          score += 30; // Boost if role matches
-        }
+        // Keyword matching (case-insensitive)
+        const matchedKeywords = path.keywords.filter((kw) => {
+          const kwLower = kw.toLowerCase();
+          return kwLower.includes(query) || query.includes(kwLower);
+        });
+        score += matchedKeywords.length * 10;
 
-        // Match against question text
-        if (query) {
-          const questionLower = path.question.toLowerCase();
-
-          // Exact match in question
-          if (questionLower.includes(query)) {
-            score += 50;
-          }
-
-          // Keyword matching (case-insensitive)
-          const matchedKeywords = path.keywords.filter((kw) => {
+        // Word-by-word matching
+        const queryWords = query.split(" ").filter((w) => w.length > 2);
+        queryWords.forEach((word) => {
+          if (questionLower.includes(word)) score += 5;
+          path.keywords.forEach((kw) => {
             const kwLower = kw.toLowerCase();
-            return kwLower.includes(query) || query.includes(kwLower);
+            if (kwLower.includes(word)) score += 3;
           });
-          score += matchedKeywords.length * 10;
+        });
+      }
 
-          // Word-by-word matching
-          const queryWords = query.split(" ").filter((w) => w.length > 2);
-          queryWords.forEach((word) => {
-            if (questionLower.includes(word)) score += 5;
-            path.keywords.forEach((kw) => {
-              const kwLower = kw.toLowerCase();
-              if (kwLower.includes(word)) score += 3;
-            });
-          });
-        }
+      // Only include if there's some match
+      // When there's a query, require matches beyond just role (score > 30)
+      // When there's no query, show all results for the selected role
+      if (!query && selectedRole) {
+        return [...acc, { path, score }];
+      } else if (query && score > 30) {
+        return [...acc, { path, score }];
+      }
 
-        // Only include if there's some match
-        // When there's a query, require matches beyond just role (score > 30)
-        // When there's no query, show all results for the selected role
-        if (!query && selectedRole) {
-          return [...acc, { path, score }];
-        } else if (query && score > 30) {
-          return [...acc, { path, score }];
-        }
-
-        return acc;
-      },
-      [],
-    );
+      return acc;
+    }, []);
 
     // Sort by score (highest first)
     return matches.sort((a, b) => b.score - a.score).slice(0, 6);
-  }, [questionText, selectedRole]);
+  }, [questionText, selectedRole, paths]);
 
   // Handle role selection
   const handleRoleSelect = (role: string) => {
@@ -233,7 +250,7 @@ export function ResponsibilityFinder({
 
     // Fallback to initialPathId
     if (initialPathId) {
-      const path = responsibilityPaths.find((p) => p.id === initialPathId);
+      const path = paths.find((p) => p.id === initialPathId);
       if (path) {
         setSelectedResult(path);
         setQuestionText(path.question);
@@ -244,7 +261,7 @@ export function ResponsibilityFinder({
         setShowSuggestions(false);
       }
     }
-  }, [initialPath, initialPathId]);
+  }, [initialPath, initialPathId, paths]);
 
   return (
     <div className={`responsibility-finder ${compact ? "compact" : ""}`}>
@@ -270,9 +287,9 @@ export function ResponsibilityFinder({
               }}
             >
               {selectedRole
-                ? (userRoles
-                    .find((r) => r.value === selectedRole)
-                    ?.label.toLowerCase() ?? selectedRole)
+                ? (ROLE_OPTIONS.find(
+                    (r) => r.value === selectedRole,
+                  )?.label.toLowerCase() ?? selectedRole)
                 : "een..."}
               <ChevronDown
                 className={`w-5 h-5 transition-transform ${showRoleDropdown ? "rotate-180" : ""}`}
@@ -285,7 +302,7 @@ export function ResponsibilityFinder({
                 ref={dropdownRef}
                 className="absolute z-50 top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[200px] animate-fadeIn"
               >
-                {userRoles.map((role, idx) => {
+                {ROLE_OPTIONS.map((role, idx) => {
                   const isSelected = selectedRole === role.value;
                   return (
                     <button
@@ -295,7 +312,7 @@ export function ResponsibilityFinder({
                         w-full text-left px-4 py-3 text-lg font-medium transition-colors
                         flex items-center justify-between
                         ${isSelected ? "" : "hover:bg-gray-50"}
-                        ${idx === userRoles.length - 1 ? "rounded-b-lg" : ""}
+                        ${idx === ROLE_OPTIONS.length - 1 ? "rounded-b-lg" : ""}
                         ${idx === 0 ? "rounded-t-lg" : ""}
                       `}
                       style={{
@@ -393,7 +410,7 @@ export function ResponsibilityFinder({
                     const colors =
                       categoryColors[
                         suggestion.path.category as keyof typeof categoryColors
-                      ];
+                      ] ?? categoryColors.algemeen;
                     return (
                       <button
                         key={suggestion.path.id}
@@ -481,13 +498,11 @@ export function ResponsibilityFinder({
 }
 
 /**
- * Render a card that displays a responsibility path including its header, primary contact, and ordered steps.
+ * Display a formatted card for a ResponsibilityPath, showing its header (icon, question, category, summary), the primary contact panel, and an ordered list of steps.
  *
- * Shows the path icon, question, and summary; a primary contact panel with role, name, email, phone and optional organigram link; and an ordered list of actionable steps with optional links and contact information.
- *
- * @param path - The ResponsibilityPath to render in the result card
- * @param onMemberSelect - Optional callback for member selection (deep linking)
- * @returns A React element representing the formatted result card for the given responsibility path
+ * @param path - The responsibility path to display
+ * @param onMemberSelect - Optional callback invoked with a memberId when the "Bekijk in organigram" action is triggered
+ * @returns A React element rendering the styled result card for the provided `path`
  */
 function ResultCard({
   path,
@@ -496,7 +511,10 @@ function ResultCard({
   path: ResponsibilityPath;
   onMemberSelect?: (memberId: string) => void;
 }) {
-  const colors = categoryColors[path.category as keyof typeof categoryColors];
+  const colors =
+    categoryColors[path.category as keyof typeof categoryColors] ??
+    categoryColors.algemeen;
+  const safeOrgLink = toSafeHref(path.primaryContact.orgLink);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
@@ -598,7 +616,7 @@ function ResultCard({
                 </a>
               </div>
             )}
-            {(path.primaryContact.orgLink || path.primaryContact.memberId) && (
+            {(path.primaryContact.memberId || safeOrgLink) && (
               <div>
                 {path.primaryContact.memberId && onMemberSelect ? (
                   <button
@@ -623,9 +641,9 @@ function ResultCard({
                     </svg>
                     Bekijk in organigram
                   </button>
-                ) : path.primaryContact.orgLink ? (
+                ) : safeOrgLink ? (
                   <a
-                    href={path.primaryContact.orgLink}
+                    href={safeOrgLink}
                     className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                   >
                     <svg
@@ -658,70 +676,73 @@ function ResultCard({
             Wat moet je doen?
           </h4>
           <ol className="space-y-3">
-            {path.steps.map((step) => (
-              <li key={step.order} className="flex gap-3 group">
-                <div
-                  className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
-                  style={{ backgroundColor: colors.accent }}
-                >
-                  {step.order}
-                </div>
-                <div className="flex-1 pt-1">
-                  <p className="text-gray-700 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                  {step.link && (
-                    <a
-                      href={step.link}
-                      className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+            {path.steps.map((step, stepIdx) => {
+              const safeStepLink = toSafeHref(step.link);
+              return (
+                <li key={stepIdx} className="flex gap-3 group">
+                  <div
+                    className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
+                    style={{ backgroundColor: colors.accent }}
+                  >
+                    {stepIdx + 1}
+                  </div>
+                  <div className="flex-1 pt-1">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {step.description}
+                    </p>
+                    {safeStepLink && (
+                      <a
+                        href={safeStepLink}
+                        className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Meer info
-                    </a>
-                  )}
-                  {step.contact && (
-                    <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <div className="font-semibold text-gray-700 mb-1">
-                        {step.contact.role}
-                      </div>
-                      {step.contact.email && (
-                        <a
-                          href={`mailto:${step.contact.email}`}
-                          className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1"
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Meer info
+                      </a>
+                    )}
+                    {step.contact && (
+                      <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <div className="font-semibold text-gray-700 mb-1">
+                          {step.contact.role}
+                        </div>
+                        {step.contact.email && (
+                          <a
+                            href={`mailto:${step.contact.email}`}
+                            className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          </svg>
-                          {step.contact.email}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
+                            </svg>
+                            {step.contact.email}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </div>

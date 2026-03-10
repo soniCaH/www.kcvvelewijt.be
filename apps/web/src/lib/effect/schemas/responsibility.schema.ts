@@ -132,9 +132,9 @@ export class SolutionStepSchema extends S.Class<SolutionStepSchema>(
   "SolutionStepSchema",
 )({
   /**
-   * Step number (1-indexed, sequential)
+   * Step number (1-indexed, sequential). Optional — use array index when not set.
    */
-  order: S.Number,
+  order: S.optional(S.Number),
 
   /**
    * Description of what to do

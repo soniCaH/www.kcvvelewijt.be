@@ -126,8 +126,7 @@ kcvv-nextjs/
 │   │   ├── mappers/            # JSON:API data mappers
 │   │   └── utils/              # Utility functions
 │   ├── data/                    # Static data
-│   │   ├── club-structure.ts   # Organigram data
-│   │   └── responsibility-paths.ts  # Help system Q&A
+│   │   └── club-structure.ts   # Organigram data
 │   ├── types/                   # TypeScript types
 │   └── styles/                  # Global styles
 ├── tests/                        # Test files
@@ -229,7 +228,7 @@ The project follows a comprehensive design system documented in **`DESIGN_SYSTEM
 
 Interactive help system where visitors find the right contact person.
 
-**Status:** ✅ Active but incomplete (15 questions, more needed)
+**Status:** ✅ Active — data managed via Sanity CMS
 **Docs:** `RESPONSIBILITY.md`
 **Issues:** #429-436
 

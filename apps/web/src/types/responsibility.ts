@@ -39,8 +39,8 @@ export interface Contact {
  * Step in the solution path
  */
 export interface SolutionStep {
-  /** Order of the step */
-  order: number;
+  /** Order of the step (optional — use array index when not set) */
+  order?: number;
   /** Description of what to do */
   description: string;
   /** Optional link to more info */
@@ -78,6 +78,18 @@ export interface ResponsibilityPath {
   /** Icon for visual representation */
   icon?: string;
 }
+
+/**
+ * Role options for the UI role selector.
+ * "andere" is intentionally excluded — it is a valid UserRole for data but not shown as a picker choice.
+ */
+export const ROLE_OPTIONS: ReadonlyArray<{ value: UserRole; label: string }> = [
+  { value: "speler", label: "Speler" },
+  { value: "ouder", label: "Ouder" },
+  { value: "trainer", label: "Trainer" },
+  { value: "supporter", label: "Supporter" },
+  { value: "niet-lid", label: "Niet-lid" },
+];
 
 /**
  * Autocomplete suggestion

@@ -37,7 +37,6 @@ import {
   buildOrganigramUrl,
   parseOrganigramParams,
 } from "@/lib/organigram-utils";
-import { responsibilityPaths } from "@/data/responsibility-paths";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import type { FilterTab } from "../design-system/FilterTabs/FilterTabs";
@@ -58,6 +57,7 @@ type ViewType = "cards" | "chart" | "responsibilities";
 
 export interface UnifiedOrganigramClientProps {
   members: OrgChartNode[];
+  responsibilityPaths?: ResponsibilityPath[];
   className?: string;
 }
 
@@ -78,19 +78,18 @@ function getInitialView(urlView: string | null): ViewType {
 }
 
 /**
- * Render a unified organigram UI that lets users switch between cards, chart,
- * and responsibilities views, search members or responsibilities, and inspect member details.
+ * Renders a unified organigram UI that lets users switch between cards, chart, and responsibilities views, search members or responsibilities, and inspect member details.
  *
- * The component synchronizes the active view and selected member with the URL,
- * persists the user's view preference to localStorage, and supports deep links
- * that open the member details modal.
+ * Synchronizes the active view and selected member with the URL, persists the user's view preference to localStorage, and supports deep links that open the member details modal.
  *
- * @param members - All organization members used to populate the views and search
- * @param className - Optional additional CSS classes to apply to the root container
+ * @param members - Organization members used to populate the views and search
+ * @param responsibilityPaths - Optional responsibility paths used by the Responsibilities view and search
+ * @param className - Optional additional CSS classes applied to the root container
  * @returns The rendered unified organigram React element
  */
 export function UnifiedOrganigramClient({
   members,
+  responsibilityPaths = [],
   className = "",
 }: UnifiedOrganigramClientProps) {
   const searchParams = useSearchParams();
@@ -452,6 +451,7 @@ export function UnifiedOrganigramClient({
         {activeView === "cards" && (
           <CardHierarchy
             members={members}
+            responsibilityPaths={responsibilityPaths}
             onMemberClick={handleMemberClick}
             initialExpandedDepth={2}
           />
@@ -491,6 +491,7 @@ export function UnifiedOrganigramClient({
               }
             >
               <ResponsibilityFinder
+                paths={responsibilityPaths}
                 onMemberSelect={handleResponsibilityMemberSelect}
                 initialPathId={selectedResponsibilityId ?? undefined}
                 initialPath={selectedResponsibilityPath ?? undefined}

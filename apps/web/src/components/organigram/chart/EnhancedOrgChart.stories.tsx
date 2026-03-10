@@ -445,7 +445,7 @@ export const LargeDataset: Story = {
         id: "root",
         name: "Club",
         title: "KCVV Elewijt",
-        department: "general",
+        department: "algemeen",
         parentId: null,
       },
       ...Array.from({ length: 60 }, (_, i) => ({
@@ -587,7 +587,7 @@ export const DeepHierarchy: Story = {
         id: "root",
         name: "CEO",
         title: "Chief Executive Officer",
-        department: "general",
+        department: "algemeen",
         parentId: null,
       },
       {

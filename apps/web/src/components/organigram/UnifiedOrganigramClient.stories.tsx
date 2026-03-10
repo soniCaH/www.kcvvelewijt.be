@@ -1,6 +1,53 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UnifiedOrganigramClient } from "./UnifiedOrganigramClient";
 import { clubStructure } from "@/data/club-structure";
+import type { ResponsibilityPath } from "@/types/responsibility";
+
+const storyPaths: ResponsibilityPath[] = [
+  {
+    id: "ongeval-speler-training",
+    role: ["speler", "ouder"],
+    question: "heb een ongeval op training/wedstrijd",
+    keywords: ["ongeval", "blessure", "letsel"],
+    summary:
+      "Meld het ongeval onmiddellijk bij je trainer en neem contact op met de verzekeringverantwoordelijke.",
+    category: "medisch",
+    icon: "heart",
+    primaryContact: {
+      role: "Verzekeringverantwoordelijke",
+      email: "verzekering@kcvvelewijt.be",
+      department: "algemeen",
+    },
+    steps: [
+      { description: "Meld het ongeval bij je trainer" },
+      {
+        description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
+        contact: {
+          role: "Verzekeringverantwoordelijke",
+          email: "verzekering@kcvvelewijt.be",
+        },
+      },
+    ],
+  },
+  {
+    id: "inschrijving-nieuw-lid",
+    role: ["niet-lid", "ouder"],
+    question: "wil mij graag inschrijven",
+    keywords: ["inschrijven", "lid worden", "lidmaatschap"],
+    summary: "Gebruik het online inschrijvingsformulier.",
+    category: "administratief",
+    icon: "file-text",
+    primaryContact: {
+      role: "Jeugdsecretaris",
+      email: "jeugd@kcvvelewijt.be",
+      department: "jeugdbestuur",
+    },
+    steps: [
+      { description: "Ga naar de inschrijvingspagina", link: "/club/register" },
+      { description: "Vul het formulier in" },
+    ],
+  },
+];
 
 /**
  * UnifiedOrganigramClient - Tabbed interface for organigram views
@@ -34,6 +81,9 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    responsibilityPaths: storyPaths,
+  },
 } satisfies Meta<typeof UnifiedOrganigramClient>;
 
 export default meta;
@@ -77,7 +127,7 @@ export const EmptyState: Story = {
 export const HoofdbestuurOnly: Story = {
   args: {
     members: clubStructure.filter(
-      (m) => m.department === "hoofdbestuur" || m.department === "general",
+      (m) => m.department === "hoofdbestuur" || m.department === "algemeen",
     ),
   },
 };

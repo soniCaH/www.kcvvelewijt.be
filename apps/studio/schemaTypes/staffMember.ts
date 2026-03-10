@@ -13,6 +13,7 @@ export const staffMember = defineType({
       type: 'string',
       options: {
         list: [
+          // Coaching staff
           {title: 'Hoofdtrainer', value: 'hoofdtrainer'},
           {title: 'Assistent-trainer', value: 'assistent'},
           {title: 'Keeperstrainer', value: 'keeperstrainer'},
@@ -20,11 +21,40 @@ export const staffMember = defineType({
           {title: 'Ploegdelegatie', value: 'ploegdelegatie'},
           {title: 'Afgevaardigde', value: 'afgevaardigde'},
           {title: 'Coach', value: 'coach'},
+          // Board / admin
+          {title: 'Voorzitter', value: 'voorzitter'},
+          {title: 'Ondervoorzitter', value: 'ondervoorzitter'},
+          {title: 'Secretaris', value: 'secretaris'},
+          {title: 'Penningmeester', value: 'penningmeester'},
+          {title: 'Jeugdcoördinator', value: 'jeugdcoordinator'},
+          {title: 'Jeugdsecretaris', value: 'jeugdsecretaris'},
+          {title: 'Technisch coördinator', value: 'technisch-coordinator'},
+          {title: 'Sportief verantwoordelijke', value: 'sportief-verantwoordelijke'},
+          {title: 'Verantwoordelijke sponsoring', value: 'sponsoring-verantwoordelijke'},
+          {title: 'Verzekeringverantwoordelijke', value: 'verzekering-verantwoordelijke'},
+          {title: 'Evenementencoördinator', value: 'evenementen-coordinator'},
+          {title: 'PR-verantwoordelijke', value: 'pr-verantwoordelijke'},
+          {title: 'Kantineverantwoordelijke', value: 'kantine-verantwoordelijke'},
+          {title: 'Webmaster', value: 'webmaster'},
           {title: 'Bestuur', value: 'bestuur'},
           {title: 'Andere', value: 'other'},
         ],
       },
     }),
+    defineField({
+      name: 'department',
+      title: 'Department',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Hoofdbestuur', value: 'hoofdbestuur'},
+          {title: 'Jeugdbestuur', value: 'jeugdbestuur'},
+          {title: 'Algemeen', value: 'algemeen'},
+        ],
+      },
+    }),
+    defineField({name: 'email', title: 'Email', type: 'string'}),
+    defineField({name: 'phone', title: 'Phone', type: 'string'}),
     defineField({name: 'birthDate', title: 'Birth date', type: 'date'}),
     defineField({name: 'joinDate', title: 'Join date', type: 'date'}),
     defineField({
