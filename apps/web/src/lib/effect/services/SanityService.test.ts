@@ -2,6 +2,8 @@ import { describe, it, expect, vi, type Mock } from "vitest";
 import { Effect } from "effect";
 import { SanityService, SanityServiceLive } from "./SanityService";
 import { sanityClient } from "../../sanity/client";
+import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
+import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 
 vi.mock("../../sanity/client", () => ({
   sanityClient: {
@@ -69,6 +71,11 @@ describe("SanityService.getStaffMembers", () => {
     }).pipe(Effect.provide(SanityServiceLive));
 
     const nodes = await Effect.runPromise(program);
+
+    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
+      STAFF_MEMBERS_QUERY,
+      expect.any(Object),
+    );
 
     expect(nodes[0]).toEqual({
       id: "club",
@@ -164,6 +171,12 @@ describe("SanityService.getResponsibilityPaths — memberId", () => {
     }).pipe(Effect.provide(SanityServiceLive));
 
     const paths = await Effect.runPromise(program);
+
+    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
+      RESPONSIBILITY_PATHS_QUERY,
+      expect.any(Object),
+    );
+
     expect(paths[0]?.primaryContact.memberId).toBe("staffMember-psd-42");
   });
 });
