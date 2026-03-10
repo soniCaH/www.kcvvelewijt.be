@@ -10,7 +10,7 @@
 
 ---
 
-### Task 1: Add GROQ query + Sanity interface
+## Task 1: Add GROQ query + Sanity interface
 
 **Files:**
 
@@ -72,7 +72,7 @@ git commit -m "feat(sanity): add PAGE_BY_SLUG_QUERY and SanityService.getPage"
 
 ---
 
-### Task 2: Add `getPage` test
+## Task 2: Add `getPage` test
 
 **Files:**
 
@@ -141,7 +141,7 @@ git commit -m "test(sanity): add getPage tests"
 
 ---
 
-### Task 3: Create dynamic `[slug]` route under `/club/`
+## Task 3: Create dynamic `[slug]` route under `/club/`
 
 **Files:**
 
@@ -227,7 +227,7 @@ git commit -m "feat(web): add dynamic Sanity-backed club/[slug] page route"
 
 ---
 
-### Task 4: Delete hardcoded pages
+## Task 4: Delete hardcoded pages
 
 **Files:**
 
@@ -265,7 +265,7 @@ git commit -m "feat(web): remove hardcoded register, cashless, downloads pages"
 
 ---
 
-### Task 5: Populate Sanity Studio with page content
+## Task 5: Populate Sanity Studio with page content
 
 > This is a manual content entry step, not a code task. After the code is deployed (or during local `sanity dev`), add three `page` documents in Sanity Studio.
 
@@ -296,7 +296,7 @@ git commit -m "feat(web): remove hardcoded register, cashless, downloads pages"
 
 ---
 
-### Task 6: Final checks + push
+## Task 6: Final checks + push
 
 **Step 1: Run full check**
 

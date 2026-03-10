@@ -271,7 +271,7 @@ async function uploadPdf(filename: string): Promise<string> {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const dataset = process.env.SANITY_DATASET ?? "production";
+  const dataset = process.env.SANITY_DATASET ?? "staging";
   console.log(`\nMigrating pages to Sanity dataset: ${dataset}\n`);
 
   // ── Upload PDFs for downloads page ──────────────────────────────────────────

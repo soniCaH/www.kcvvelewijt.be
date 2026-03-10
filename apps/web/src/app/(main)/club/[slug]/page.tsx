@@ -46,7 +46,7 @@ export default async function DynamicClubPage({ params }: Props) {
     <>
       <PageTitle title={page.title} />
       <div className="mx-auto max-w-inner-lg px-4 py-8 content">
-        <SanityArticleBody content={page.body as PortableTextBlock[]} />
+        <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
       </div>
     </>
   );
