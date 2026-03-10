@@ -1,0 +1,89 @@
+"use client";
+
+import { useState, useCallback, useRef } from "react";
+
+export interface SemanticSearchResult {
+  id: string;
+  slug: string;
+  type: "responsibilityPath" | "article" | "page";
+  score: number;
+  title: string;
+  excerpt: string;
+}
+
+interface UseSemanticSearchOptions {
+  type?: "responsibility" | "article" | "general";
+  limit?: number;
+  debounceMs?: number;
+}
+
+export interface UseSemanticSearchReturn {
+  results: SemanticSearchResult[];
+  loading: boolean;
+  error: string | null;
+  search: (query: string) => void;
+  clear: () => void;
+}
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://api.kcvvelewijt.be";
+
+export function useSemanticSearch(
+  options: UseSemanticSearchOptions = {},
+): UseSemanticSearchReturn {
+  const { type, limit = 5, debounceMs = 300 } = options;
+  const [results, setResults] = useState<SemanticSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const search = useCallback(
+    (query: string) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+
+      if (!query.trim()) {
+        setResults([]);
+        setError(null);
+        return;
+      }
+
+      timerRef.current = setTimeout(async () => {
+        abortRef.current?.abort();
+        abortRef.current = new AbortController();
+
+        setLoading(true);
+        setError(null);
+
+        try {
+          const res = await fetch(`${API_BASE}/search`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query, type, limit }),
+            signal: abortRef.current.signal,
+          });
+
+          if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+          const data = (await res.json()) as {
+            results: SemanticSearchResult[];
+          };
+          setResults(data.results);
+        } catch (err) {
+          if ((err as Error).name === "AbortError") return;
+          setError((err as Error).message);
+          setResults([]);
+        } finally {
+          setLoading(false);
+        }
+      }, debounceMs);
+    },
+    [type, limit, debounceMs],
+  );
+
+  const clear = useCallback(() => {
+    setResults([]);
+    setError(null);
+  }, []);
+
+  return { results, loading, error, search, clear };
+}
