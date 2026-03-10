@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
 import type { StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { HierarchyLevel } from "./HierarchyLevel";
 import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
@@ -19,9 +20,9 @@ const meta = {
   component: HierarchyLevel,
   parameters: { layout: "padded" },
   tags: ["autodocs"],
-  argTypes: {
-    onToggle: { action: "toggled" },
-    onMemberClick: { action: "member-clicked" },
+  args: {
+    onToggle: fn(),
+    onMemberClick: fn(),
   },
 };
 

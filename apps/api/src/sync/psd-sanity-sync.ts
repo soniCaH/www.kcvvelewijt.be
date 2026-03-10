@@ -80,7 +80,10 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
     firstName: psd.firstName,
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
-    positionShort: psd.functionTitle ?? null,
+    positionShort:
+      psd.functionTitle && psd.functionTitle.length <= 6
+        ? psd.functionTitle
+        : null,
   };
 }
 
@@ -114,7 +117,9 @@ export const runSync = Effect.gen(function* () {
       Effect.gen(function* () {
         yield* Effect.log(`team ${team.id} (${team.name}): fetching members`);
         const members = yield* psd.getRawMembers(team.id);
-        const activePlayers = members.filter((m) => m.active);
+        const activePlayers = members.filter(
+          (m) => m.active && m.status !== "staff",
+        );
         yield* Effect.log(
           `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
         );

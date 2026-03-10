@@ -56,7 +56,7 @@ const meta: Meta<typeof EnhancedOrgChart> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof EnhancedOrgChart>;
+type Story = StoryObj<typeof meta>;
 
 // ==================== CONTROLLED COMPONENT WRAPPER ====================
 

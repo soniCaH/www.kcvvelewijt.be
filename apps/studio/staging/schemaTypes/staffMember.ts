@@ -84,6 +84,12 @@ export const staffMember = defineType({
       weak: true,
       description: 'Hiërarchisch bovenliggende persoon. Leeg = rootniveau (rechtstreeks onder KCVV Elewijt).',
       hidden: ({document}) => !document?.inOrganigram,
+      options: {
+        filter: ({document}) => ({
+          filter: 'inOrganigram == true && _id != $selfId',
+          params: {selfId: document._id as string},
+        }),
+      },
     }),
     defineField({
       name: 'positionTitle',

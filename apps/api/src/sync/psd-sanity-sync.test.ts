@@ -105,6 +105,14 @@ describe("transformStaff", () => {
     expect(result.positionShort).toBeNull();
   });
 
+  it("sets positionShort to null when functionTitle exceeds 6 characters", () => {
+    const result = transformStaff({
+      ...baseStaff,
+      functionTitle: "Jeugdcoördinator",
+    });
+    expect(result.positionShort).toBeNull();
+  });
+
   it("handles null birthDate", () => {
     const result = transformStaff({ ...baseStaff, birthDate: null });
     expect(result.birthDate).toBeNull();

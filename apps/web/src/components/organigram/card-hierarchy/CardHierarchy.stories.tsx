@@ -111,7 +111,7 @@ const meta: Meta<typeof CardHierarchy> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof CardHierarchy>;
+type Story = StoryObj<typeof meta>;
 
 // ==================== CONTROLLED COMPONENT WRAPPER ====================
 
@@ -652,7 +652,13 @@ export const AccessibilityTest: Story = {
 export const SingleMember: Story = {
   render: CardHierarchyWithState,
   args: {
-    members: [clubStructure[0]],
+    members: [
+      clubStructure[0] ?? {
+        id: "club",
+        name: "KCVV Elewijt",
+        title: "Voetbalclub",
+      },
+    ],
   },
   parameters: {
     docs: {
