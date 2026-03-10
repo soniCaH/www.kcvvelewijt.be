@@ -81,6 +81,7 @@ export default {
           String(e),
           e instanceof Error ? e.stack : "",
         );
+        throw e;
       }),
     );
   },
