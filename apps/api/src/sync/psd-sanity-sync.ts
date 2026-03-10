@@ -1,6 +1,10 @@
 import { Effect } from "effect";
 import type { PsdMember, PsdTeam } from "@kcvv/api-contract";
-import type { SanityPlayerDoc, SanityTeamDoc } from "../sanity/client";
+import type {
+  SanityPlayerDoc,
+  SanityTeamDoc,
+  SanityStaffDoc,
+} from "../sanity/client";
 import { SanityWriteClient } from "../sanity/client";
 import { FootbalistoClient } from "../footbalisto/client";
 import { WorkerEnvTag } from "../env";
@@ -30,8 +34,10 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
+    // Strip the rotating ?profileAccessKey query param so the stored URL stays
+    // stable across syncs — the path alone uniquely identifies the player photo.
     _psdImageUrl: psd.profilePictureURL
-      ? `${baseUrl}${psd.profilePictureURL}`
+      ? `${baseUrl}${psd.profilePictureURL.split("?")[0]}`
       : null,
   };
 }
@@ -65,6 +71,24 @@ export function transformTeam(
   };
 }
 
+/**
+ * Convert a PSD staff member record into a Sanity staffMember document.
+ * Only PSD-sourced fields are written — editorial fields (role, department,
+ * parentMember, inOrganigram, positionTitle, responsibilities, photo) are never touched.
+ */
+export function transformStaff(psd: PsdMember): SanityStaffDoc {
+  return {
+    psdId: String(psd.id),
+    firstName: psd.firstName,
+    lastName: psd.lastName,
+    birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
+    positionShort:
+      psd.functionTitle && psd.functionTitle.length <= 6
+        ? psd.functionTitle
+        : undefined,
+  };
+}
+
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
 /**
@@ -95,7 +119,9 @@ export const runSync = Effect.gen(function* () {
       Effect.gen(function* () {
         yield* Effect.log(`team ${team.id} (${team.name}): fetching members`);
         const members = yield* psd.getRawMembers(team.id);
-        const activePlayers = members.filter((m) => m.active);
+        const activePlayers = members.filter(
+          (m) => m.active && m.status !== "staff",
+        );
         yield* Effect.log(
           `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
         );
@@ -128,6 +154,19 @@ export const runSync = Effect.gen(function* () {
               }
             }),
           { concurrency: 5 },
+        );
+
+        // Sync coaching staff from PSD
+        const staffMembers = members.filter(
+          (m) => m.status === "staff" && m.active,
+        );
+        yield* Effect.log(
+          `team ${team.id}: ${staffMembers.length} staff members`,
+        );
+        yield* Effect.forEach(
+          staffMembers,
+          (m) => sanity.upsertStaff(transformStaff(m)),
+          { concurrency: 3 },
         );
 
         const playerPsdIds = activePlayers.map((m) => String(m.id));

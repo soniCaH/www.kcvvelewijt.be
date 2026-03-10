@@ -24,6 +24,14 @@ export interface SanityTeamDoc {
   playerPsdIds: string[];
 }
 
+export interface SanityStaffDoc {
+  psdId: string;
+  firstName: string | null;
+  lastName: string | null;
+  birthDate: string | null; // "YYYY-MM-DD"
+  positionShort: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
+}
+
 // ─── Error ────────────────────────────────────────────────────────────────────
 
 export class SanityWriteError extends Error {
@@ -50,6 +58,9 @@ export interface SanityWriteClientInterface {
   ) => Effect.Effect<void, SanityWriteError>;
   readonly upsertTeam: (
     doc: SanityTeamDoc,
+  ) => Effect.Effect<void, SanityWriteError>;
+  readonly upsertStaff: (
+    doc: SanityStaffDoc,
   ) => Effect.Effect<void, SanityWriteError>;
   /** Fetch existing psdImageUrl + psdImage presence for all player docs. */
   readonly getPlayersImageState: () => Effect.Effect<
@@ -238,6 +249,19 @@ export const SanityWriteClientLive = Layer.effect(
             _key: id,
           })),
         }),
+
+      upsertStaff: (doc) => {
+        const fields: Record<string, unknown> = {
+          psdId: doc.psdId,
+          firstName: doc.firstName,
+          lastName: doc.lastName,
+          birthDate: doc.birthDate,
+        };
+        if (doc.positionShort !== undefined) {
+          fields["positionShort"] = doc.positionShort;
+        }
+        return upsert("staffMember", doc.psdId, fields);
+      },
     };
   }),
 );

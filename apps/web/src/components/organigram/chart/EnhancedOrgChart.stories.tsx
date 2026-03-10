@@ -3,7 +3,7 @@ import { useState } from "react";
 import { EnhancedOrgChart } from "./EnhancedOrgChart";
 import type { EnhancedOrgChartProps } from "./EnhancedOrgChart";
 import type { OrgChartNode } from "@/types/organigram";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
 const meta: Meta<typeof EnhancedOrgChart> = {
   title: "Features/Organigram/InteractiveChart",
@@ -56,7 +56,7 @@ const meta: Meta<typeof EnhancedOrgChart> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof EnhancedOrgChart>;
+type Story = StoryObj<typeof meta>;
 
 // ==================== CONTROLLED COMPONENT WRAPPER ====================
 

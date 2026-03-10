@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { MobileNavigationDrawer } from "./MobileNavigationDrawer";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
 const members = clubStructure.filter((n) => n.parentId !== null).slice(0, 12);
 

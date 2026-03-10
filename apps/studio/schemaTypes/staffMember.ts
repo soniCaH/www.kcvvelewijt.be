@@ -70,6 +70,52 @@ export const staffMember = defineType({
       of: [{type: 'block'}],
     }),
     defineField({
+      name: 'inOrganigram',
+      title: 'In organigram',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Zet aan om deze persoon in het organigram te tonen. Laat uit voor inactieve of onvolledige leden.',
+    }),
+    defineField({
+      name: 'parentMember',
+      title: 'Rapporteert aan',
+      type: 'reference',
+      to: [{type: 'staffMember'}],
+      weak: true,
+      description: 'Hiërarchisch bovenliggende persoon. Leeg = rootniveau (rechtstreeks onder KCVV Elewijt).',
+      hidden: ({document}) => !document?.inOrganigram,
+      options: {
+        filter: ({document}) => ({
+          filter: 'inOrganigram == true && _id != $selfId',
+          params: {selfId: document._id as string},
+        }),
+      },
+    }),
+    defineField({
+      name: 'positionTitle',
+      title: 'Functietitel (organigram)',
+      type: 'string',
+      description:
+        'Vrije tekst zoals getoond in het organigram, bv. "Technisch Coördinator Jeugd". Mag afwijken van het Rol-veld.',
+      hidden: ({document}) => !document?.inOrganigram,
+    }),
+    defineField({
+      name: 'positionShort',
+      title: 'Korte functiecode',
+      type: 'string',
+      description: 'Badge in het diagram, bv. "T1", "VP", "JC". Max 6 tekens. Gesynchroniseerd vanuit PSD voor trainers.',
+      validation: (Rule) => Rule.max(6),
+      hidden: ({document}) => !document?.inOrganigram,
+    }),
+    defineField({
+      name: 'responsibilities',
+      title: 'Verantwoordelijkheden',
+      type: 'text',
+      rows: 3,
+      description: 'Korte beschrijving van taken en verantwoordelijkheden. Getoond in het detail-venster van het organigram.',
+      hidden: ({document}) => !document?.inOrganigram,
+    }),
+    defineField({
       name: 'psdId',
       title: 'PSD ID',
       type: 'string',

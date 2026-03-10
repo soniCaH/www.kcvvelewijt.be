@@ -81,11 +81,12 @@ All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
 | Key pattern             | TTL                             |
 | ----------------------- | ------------------------------- |
 | `psd:current-season-id` | 24 h                            |
-| `matches:team:{id}`     | 1 h                             |
-| `matches:next`          | 60 s                            |
+| `matches:team:{id}`     | 6 h                             |
+| `matches:next`          | 30 min                          |
 | `match:detail:{id}`     | 60 s (live) / 7 days (finished) |
-| `ranking:team:{id}`     | 1 h                             |
-| `stats:team:{id}`       | 6 h                             |
+| `ranking:team:{id}`     | 4 h                             |
+| `stats:team:{id}`       | 12 h                            |
+| `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter)   |
 
 **Cache date deserialization**: `Date` objects become ISO strings in JSON. Always use
 `S.decodeUnknown(schema)` on cache reads — never `JSON.parse(...) as T`.

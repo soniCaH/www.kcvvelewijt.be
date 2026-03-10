@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { transformMember, transformTeam } from "./psd-sanity-sync";
+import {
+  transformMember,
+  transformTeam,
+  transformStaff,
+} from "./psd-sanity-sync";
+import type { PsdMember } from "@kcvv/api-contract";
 
 const BASE_URL = "https://clubapi.prosoccerdata.com";
 
@@ -24,8 +29,32 @@ describe("transformMember (player)", () => {
     expect(result.firstName).toBe("Alexander");
     expect(result.birthDate).toBe("1993-11-29"); // time stripped
     expect(result.keeper).toBe(false);
+    // Query string stripped — profileAccessKey rotates per API call
     expect(result._psdImageUrl).toBe(
-      `${BASE_URL}/api/v2/members/profilepicture/6453?profileAccessKey=abc123`,
+      `${BASE_URL}/api/v2/members/profilepicture/6453`,
+    );
+  });
+
+  it("strips rotating profileAccessKey query param from image URL", () => {
+    const result = transformMember(
+      {
+        id: 6453,
+        firstName: "Alexander",
+        lastName: "Bell",
+        birthDate: null,
+        nationality: null,
+        profilePictureURL:
+          "/api/v2/members/profilepicture/6453?profileAccessKey=newkey999",
+        keeper: false,
+        bestPosition: null,
+        active: true,
+        status: "speler",
+        functionTitle: null,
+      },
+      BASE_URL,
+    );
+    expect(result._psdImageUrl).toBe(
+      `${BASE_URL}/api/v2/members/profilepicture/6453`,
     );
   });
 
@@ -50,6 +79,26 @@ describe("transformMember (player)", () => {
     expect(result.keeper).toBe(true);
   });
 
+  it("extracts positionPsd from bestPosition object", () => {
+    const result = transformMember(
+      {
+        id: 1,
+        firstName: "Jan",
+        lastName: "Janssen",
+        birthDate: null,
+        nationality: null,
+        profilePictureURL: null,
+        keeper: false,
+        bestPosition: { type: { name: "Midfielder" } },
+        active: true,
+        status: "speler",
+        functionTitle: null,
+      },
+      BASE_URL,
+    );
+    expect(result.positionPsd).toBe("Midfielder");
+  });
+
   it("strips time component from birthDate", () => {
     const result = transformMember(
       {
@@ -68,6 +117,54 @@ describe("transformMember (player)", () => {
       BASE_URL,
     );
     expect(result.birthDate).toBe("1989-06-05");
+  });
+});
+
+const baseStaff: PsdMember = {
+  id: 99,
+  firstName: "Marc",
+  lastName: "Peeters",
+  birthDate: "1975-04-12 00:00",
+  nationality: "Belgium",
+  profilePictureURL: null,
+  keeper: false,
+  bestPosition: null,
+  active: true,
+  status: "staff",
+  functionTitle: "T1",
+};
+
+describe("transformStaff", () => {
+  it("maps PSD staff to SanityStaffDoc", () => {
+    const result = transformStaff(baseStaff);
+    expect(result.psdId).toBe("99");
+    expect(result.firstName).toBe("Marc");
+    expect(result.lastName).toBe("Peeters");
+    expect(result.birthDate).toBe("1975-04-12");
+    expect(result.positionShort).toBe("T1");
+  });
+
+  it("handles null functionTitle", () => {
+    const result = transformStaff({ ...baseStaff, functionTitle: null });
+    expect(result.positionShort).toBeUndefined();
+  });
+
+  it("accepts functionTitle of exactly 6 characters", () => {
+    const result = transformStaff({ ...baseStaff, functionTitle: "T12345" });
+    expect(result.positionShort).toBe("T12345");
+  });
+
+  it("sets positionShort to undefined when functionTitle exceeds 6 characters", () => {
+    const result = transformStaff({
+      ...baseStaff,
+      functionTitle: "Jeugdcoördinator",
+    });
+    expect(result.positionShort).toBeUndefined();
+  });
+
+  it("handles null birthDate", () => {
+    const result = transformStaff({ ...baseStaff, birthDate: null });
+    expect(result.birthDate).toBeNull();
   });
 });
 

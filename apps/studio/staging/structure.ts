@@ -28,7 +28,45 @@ export const structure: StructureResolver = (S) =>
         .child(S.documentTypeList('team').title('Teams')),
       S.listItem()
         .title('Staff')
-        .child(S.documentTypeList('staffMember').title('Staff')),
+        .child(
+          S.list()
+            .title('Staff')
+            .items([
+              S.listItem()
+                .title('Alle leden')
+                .child(
+                  S.documentTypeList('staffMember')
+                    .title('Alle leden')
+                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
+                ),
+              S.listItem()
+                .title('📋 Organigram beheer')
+                .child(
+                  S.documentList()
+                    .title('In organigram')
+                    .filter('_type == "staffMember" && inOrganigram == true')
+                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
+                ),
+              S.listItem()
+                .title('⚠️ Aanvullen vereist')
+                .child(
+                  S.documentList()
+                    .title('Ontbrekende velden')
+                    .filter(
+                      '_type == "staffMember" && inOrganigram == true && (!defined(positionTitle) || !defined(photo))',
+                    )
+                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
+                ),
+              S.listItem()
+                .title('🔄 PSD gesynchroniseerd')
+                .child(
+                  S.documentList()
+                    .title('PSD gesynchroniseerd')
+                    .filter('_type == "staffMember" && defined(psdId)')
+                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
+                ),
+            ]),
+        ),
       S.divider(),
       S.listItem()
         .title('Articles')

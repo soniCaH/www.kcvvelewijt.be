@@ -33,7 +33,7 @@ export interface OrgChartNode {
   /** Description of responsibilities */
   responsibilities?: string;
 
-  /** Link to staff profile */
+  /** Optional deep-link to a staff profile page (not populated by Sanity; reserved for future use) */
   profileUrl?: string;
 
   /** Department or section this person belongs to */
