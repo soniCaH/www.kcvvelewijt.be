@@ -74,6 +74,15 @@ export default {
       SanityWriteClientLive,
       envLayer,
     ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
-    ctx.waitUntil(Effect.runPromise(Effect.provide(runSync, layer)));
+    ctx.waitUntil(
+      Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
+        console.error(
+          "[scheduled] runSync promise rejected:",
+          String(e),
+          e instanceof Error ? e.stack : "",
+        );
+        throw e;
+      }),
+    );
   },
 };
