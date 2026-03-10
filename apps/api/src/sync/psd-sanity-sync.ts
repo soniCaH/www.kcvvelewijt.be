@@ -83,7 +83,7 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
     positionShort:
       psd.functionTitle && psd.functionTitle.length <= 6
         ? psd.functionTitle
-        : null,
+        : undefined,
   };
 }
 
@@ -163,11 +163,7 @@ export const runSync = Effect.gen(function* () {
         );
         yield* Effect.forEach(
           staffMembers,
-          (m) =>
-            Effect.gen(function* () {
-              const doc = transformStaff(m);
-              yield* sanity.upsertStaff(doc);
-            }),
+          (m) => sanity.upsertStaff(transformStaff(m)),
           { concurrency: 3 },
         );
 

@@ -55,6 +55,26 @@ describe("transformMember (player)", () => {
     expect(result.keeper).toBe(true);
   });
 
+  it("extracts positionPsd from bestPosition object", () => {
+    const result = transformMember(
+      {
+        id: 1,
+        firstName: "Jan",
+        lastName: "Janssen",
+        birthDate: null,
+        nationality: null,
+        profilePictureURL: null,
+        keeper: false,
+        bestPosition: { type: { name: "Midfielder" } },
+        active: true,
+        status: "speler",
+        functionTitle: null,
+      },
+      BASE_URL,
+    );
+    expect(result.positionPsd).toBe("Midfielder");
+  });
+
   it("strips time component from birthDate", () => {
     const result = transformMember(
       {
@@ -102,15 +122,15 @@ describe("transformStaff", () => {
 
   it("handles null functionTitle", () => {
     const result = transformStaff({ ...baseStaff, functionTitle: null });
-    expect(result.positionShort).toBeNull();
+    expect(result.positionShort).toBeUndefined();
   });
 
-  it("sets positionShort to null when functionTitle exceeds 6 characters", () => {
+  it("sets positionShort to undefined when functionTitle exceeds 6 characters", () => {
     const result = transformStaff({
       ...baseStaff,
       functionTitle: "Jeugdcoördinator",
     });
-    expect(result.positionShort).toBeNull();
+    expect(result.positionShort).toBeUndefined();
   });
 
   it("handles null birthDate", () => {

@@ -13,5 +13,5 @@ export const STAFF_MEMBERS_QUERY = `*[_type == "staffMember" && inOrganigram == 
   phone,
   "photoUrl": photo.asset->url,
   responsibilities,
-  "parentId": parentMember->_id
+  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true => parentMember->_id, null)
 }`;

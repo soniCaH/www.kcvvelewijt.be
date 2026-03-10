@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, type Mock } from "vitest";
 import { Effect } from "effect";
 import { SanityService, SanityServiceLive } from "./SanityService";
+import { sanityClient } from "../../sanity/client";
 
 vi.mock("../../sanity/client", () => ({
   sanityClient: {
@@ -27,6 +28,10 @@ vi.mock("../../sanity/client", () => ({
   },
 }));
 
+function mockFetch(value: unknown) {
+  (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce(value);
+}
+
 describe("SanityService.getPlayers", () => {
   it("returns players from Sanity", async () => {
     const program = Effect.gen(function* () {
@@ -42,8 +47,7 @@ describe("SanityService.getPlayers", () => {
 
 describe("SanityService.getStaffMembers", () => {
   it("prepends the club root node and maps a staffMember doc to OrgChartNode", async () => {
-    const { sanityClient } = await import("../../sanity/client");
-    (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce([
+    mockFetch([
       {
         _id: "staffMember-psd-42",
         firstName: "Jan",
@@ -82,8 +86,7 @@ describe("SanityService.getStaffMembers", () => {
   });
 
   it("preserves parentId when parentMember is set", async () => {
-    const { sanityClient } = await import("../../sanity/client");
-    (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce([
+    mockFetch([
       {
         _id: "staffMember-psd-1",
         firstName: "Root",
@@ -125,8 +128,7 @@ describe("SanityService.getStaffMembers", () => {
 
 describe("SanityService.getResponsibilityPaths — memberId", () => {
   it("forwards memberId from staffMember reference", async () => {
-    const { sanityClient } = await import("../../sanity/client");
-    (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce([
+    mockFetch([
       {
         id: "test-path",
         role: ["ouder"],
