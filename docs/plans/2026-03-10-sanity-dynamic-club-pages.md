@@ -4,7 +4,7 @@
 
 **Goal:** Replace hardcoded `/club/register`, `/club/cashless`, and `/club/downloads` pages with a single dynamic Next.js route that fetches `page` documents from Sanity, so editors can update content without a code deploy.
 
-**Architecture:** A `[slug]` dynamic route under `apps/web/src/app/(main)/club/` fetches any Sanity `page` document by slug and renders it via the existing `SanityArticleBody` (PortableText) component. Existing specific routes (`bestuur`, `jeugdbestuur`, `organigram`, etc.) continue to take priority via Next.js route resolution. A new `SanityService.getPage(slug)` method handles the fetch. Content for the three migrated pages is entered into Sanity Studio manually after the code ships.
+**Architecture:** A `[slug]` dynamic route under `apps/web/src/app/(main)/club/` fetches any Sanity `page` document by slug and renders it via the existing `SanityArticleBody` (PortableText) component. Existing specific routes (`bestuur`, `jeugdbestuur`, `organigram`, etc.) continue to take priority via Next.js route resolution. A new `SanityService.getPage(slug)` method handles the fetch. Content for the three pages is migrated via `scripts/drupal-to-sanity/src/migrate-pages.ts`, which uploads PDFs as Sanity file assets and creates the `page` documents in both staging and production datasets. Post-migration edits (e.g. price changes, new downloads) are made directly in Sanity Studio.
 
 **Tech Stack:** Next.js 15 App Router, Effect, Sanity GROQ, `@portabletext/react` (already installed), `SanityArticleBody` component (already exists)
 
@@ -265,27 +265,27 @@ git commit -m "feat(web): remove hardcoded register, cashless, downloads pages"
 
 ---
 
-## Task 5: Populate Sanity Studio with page content
+## Task 5: Migrate page content to Sanity
 
-> This is a manual content entry step, not a code task. After the code is deployed (or during local `sanity dev`), add three `page` documents in Sanity Studio.
+> Content is migrated via script — no manual Studio entry required.
 
-**Page 1 — Praktische Info**
+Run `scripts/drupal-to-sanity/src/migrate-pages.ts` against both datasets:
 
-- Title: `Praktische Informatie`
-- Slug: `register`
-- Body: Copy content from the deleted `register/page.tsx` — inschrijvingen, lidgeld, ProSoccerData, Wielertoerisme sections
+```bash
+# staging
+SANITY_DATASET=staging pnpm migrate:pages
 
-**Page 2 — Cashless Clubkaart**
+# production
+SANITY_DATASET=production pnpm migrate:pages
+```
 
-- Title: `Cashless Clubkaart`
-- Slug: `cashless`
-- Body: Copy content from the deleted `cashless/page.tsx` — Wat, Hoe opladen, KNIP-app, Verloren kaart sections
+The script:
 
-**Page 3 — Downloads**
+- Uploads the three PDFs from `apps/web/public/downloads/` as Sanity file assets
+- Creates `page` documents with slugs `cashless`, `register`, `downloads` using structured Portable Text body content
+- Uses `createOrReplace` so it is safe to re-run
 
-- Title: `Downloads`
-- Slug: `downloads`
-- Body: Add file attachment blocks for each download (use `fileAttachment` block type in Studio)
+Post-migration, editors can update page content directly in Sanity Studio without a code deploy.
 
 **Verification:**
 
