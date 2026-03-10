@@ -34,8 +34,10 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
+    // Strip the rotating ?profileAccessKey query param so the stored URL stays
+    // stable across syncs — the path alone uniquely identifies the player photo.
     _psdImageUrl: psd.profilePictureURL
-      ? `${baseUrl}${psd.profilePictureURL}`
+      ? `${baseUrl}${psd.profilePictureURL.split("?")[0]}`
       : null,
   };
 }
