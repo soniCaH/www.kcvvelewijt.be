@@ -137,10 +137,10 @@ export const FootbalistoClientLive = Layer.effect(
       return `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
     };
 
-    /** fetchJson + increment the daily PSD call counter. */
+    /** fetchJson + increment the daily PSD call counter (success and failure). */
     const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
       fetchJson(url, schema, psdHeaders).pipe(
-        Effect.tap(() => cache.increment(todayKey())),
+        Effect.ensuring(cache.increment(todayKey())),
       );
 
     /** Format an ISO date string as DDMMYYYY for PSD stat endpoint URLs */
