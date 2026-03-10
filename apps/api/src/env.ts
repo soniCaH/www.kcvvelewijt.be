@@ -10,6 +10,8 @@ export interface WorkerEnv {
   readonly SANITY_PROJECT_ID: string; // "vhb33jaz"
   readonly SANITY_DATASET: string; // "production" or "staging"
   readonly SANITY_API_TOKEN: string; // write token — wrangler secret
+  readonly AI: Ai; // Workers AI binding
+  readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
 }
 
 export class WorkerEnvTag extends Context.Tag("WorkerEnv")<

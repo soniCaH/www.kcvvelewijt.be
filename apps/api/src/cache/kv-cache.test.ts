@@ -25,6 +25,8 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
     SANITY_PROJECT_ID: "test-project",
     SANITY_DATASET: "test",
     SANITY_API_TOKEN: "test-token",
+    AI: {} as Ai,
+    SEARCH_INDEX: {} as VectorizeIndex,
   });
 }
 
