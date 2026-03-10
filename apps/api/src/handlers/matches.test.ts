@@ -63,6 +63,7 @@ function makeCacheMock(): KvCacheInterface {
   return {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
+    increment: () => Effect.succeed(undefined),
   };
 }
 
@@ -132,6 +133,7 @@ describe("getMatchDetailHandler", () => {
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(JSON.stringify(cachedDetail)),
             set: kvSetSpy,
+            increment: () => Effect.succeed(undefined),
           }),
         ),
       ),
@@ -151,6 +153,7 @@ describe("getMatchDetailHandler", () => {
         Effect.provide(
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(null),
+            increment: () => Effect.succeed(undefined),
             set: vi.fn((key, value, ttl) => {
               setCalls.push([key, value, ttl]);
               return Effect.succeed(undefined);
@@ -194,6 +197,7 @@ describe("getMatchDetailHandler", () => {
         Effect.provide(
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(null),
+            increment: () => Effect.succeed(undefined),
             set: vi.fn((key, value, ttl) => {
               setCalls.push([key, value, ttl]);
               return Effect.succeed(undefined);

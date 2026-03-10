@@ -50,6 +50,7 @@ function makeClientMock(
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
   set: () => Effect.succeed(undefined),
+  increment: () => Effect.succeed(undefined),
 };
 
 describe("getRankingHandler", () => {
@@ -101,6 +102,7 @@ describe("getRankingHandler", () => {
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(JSON.stringify(cachedRanking)),
             set: () => Effect.succeed(undefined),
+            increment: () => Effect.succeed(undefined),
           }),
         ),
       ),
@@ -118,6 +120,7 @@ describe("getRankingHandler", () => {
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed("not-valid-json{{{"),
             set: () => Effect.succeed(undefined),
+            increment: () => Effect.succeed(undefined),
           }),
         ),
       ),
@@ -137,6 +140,7 @@ describe("getRankingHandler", () => {
             // Syntactically valid JSON but does not match RankingArray shape
             get: () => Effect.succeed(JSON.stringify([{ foo: "bar" }])),
             set: () => Effect.succeed(undefined),
+            increment: () => Effect.succeed(undefined),
           }),
         ),
       ),

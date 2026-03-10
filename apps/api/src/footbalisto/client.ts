@@ -131,6 +131,18 @@ export const FootbalistoClientLive = Layer.effect(
       "Content-Type": "application/json",
     };
 
+    /** ISO date string for today in UTC — used as KV counter key suffix. */
+    const todayKey = () => {
+      const d = new Date();
+      return `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    };
+
+    /** fetchJson + increment the daily PSD call counter. */
+    const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
+      fetchJson(url, schema, psdHeaders).pipe(
+        Effect.tap(() => cache.increment(todayKey())),
+      );
+
     /** Format an ISO date string as DDMMYYYY for PSD stat endpoint URLs */
     function formatPsdDate(isoDate: string): string {
       const datePart = isoDate.split("T")[0]!; // "YYYY-MM-DD"
@@ -154,10 +166,9 @@ export const FootbalistoClientLive = Layer.effect(
           if (Option.isSome(decoded)) return decoded.value;
         }
 
-        const seasons = yield* fetchJson(
+        const seasons = yield* countedFetch(
           `${base}/seasons`,
           PsdSeasonsSchema,
-          psdHeaders,
         );
         const now = Date.now();
         const current = seasons.find(
@@ -177,20 +188,15 @@ export const FootbalistoClientLive = Layer.effect(
       getRawMatches: (teamId: number) =>
         Effect.gen(function* () {
           const season = yield* getCurrentSeason();
-          const data = yield* fetchJson(
+          const data = yield* countedFetch(
             `${base}/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
-            psdHeaders,
           );
           return data.content;
         }),
       getRawNextMatches: () =>
         Effect.gen(function* () {
-          const teams = yield* fetchJson(
-            `${base}/teams`,
-            PsdTeamsArray,
-            psdHeaders,
-          );
+          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
           const season = yield* getCurrentSeason();
           const now = Date.now();
 
@@ -205,10 +211,9 @@ export const FootbalistoClientLive = Layer.effect(
 
           const teamNextMatches = yield* Effect.all(
             teams.map((team) =>
-              fetchJson(
+              countedFetch(
                 `${base}/games/team/${team.id}/seasons/${season.id}`,
                 PsdMatchListSchema,
-                psdHeaders,
               ).pipe(
                 Effect.map((data) => {
                   const next = [...data.content]
@@ -232,37 +237,32 @@ export const FootbalistoClientLive = Layer.effect(
           return teamNextMatches.filter((m): m is PsdGame => m !== null);
         }),
       getRawMatchDetail: (matchId: number) =>
-        fetchJson(
+        countedFetch(
           `${base}/games/${matchId}/info`,
           FootbalistoMatchDetailResponse,
-          psdHeaders,
         ),
       getRawRanking: (teamId: number) =>
-        fetchJson(
+        countedFetch(
           `${base}/teams/${teamId}/ranking`,
           FootbalistoRankingArray,
-          psdHeaders,
         ),
       getRawTeamStats: (teamId: number) =>
         Effect.gen(function* () {
           const season = yield* getCurrentSeason();
           const from = formatPsdDate(season.start);
           const to = formatPsdDate(season.end);
-          return yield* fetchJson(
+          return yield* countedFetch(
             `${base}/statistics/team/${teamId}/from/${from}/to/${to}`,
             PsdTeamStatsResponse,
-            psdHeaders,
           );
         }),
 
-      getRawTeams: () => fetchJson(`${base}/teams`, PsdTeamsArray, psdHeaders),
+      getRawTeams: () => countedFetch(`${base}/teams`, PsdTeamsArray),
 
       getRawMembers: (teamId: number) =>
-        fetchJson(
-          `${base}/teams/${teamId}/members`,
-          PsdMembersPage,
-          psdHeaders,
-        ).pipe(Effect.map((page) => page.content)),
+        countedFetch(`${base}/teams/${teamId}/members`, PsdMembersPage).pipe(
+          Effect.map((page) => page.content),
+        ),
     };
   }),
 );
