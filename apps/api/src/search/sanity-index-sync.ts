@@ -18,7 +18,12 @@ interface SanityResponsibilityDoc {
 
 type FetchFn = () => Promise<SanityResponsibilityDoc[]>;
 
-// ─── Portable Text → plain text (issue #751) ──────────────────────────────────
+/**
+ * Convert Sanity Portable Text blocks into a plain-text string.
+ *
+ * @param blocks - Portable Text blocks (array of block objects); non-arrays are treated as empty
+ * @returns The concatenated plain-text content extracted from block children, trimmed. Returns an empty string if there is no text.
+ */
 
 function ptToText(blocks: unknown): string {
   if (!Array.isArray(blocks)) return "";
@@ -35,7 +40,12 @@ function ptToText(blocks: unknown): string {
     .trim();
 }
 
-// ─── Text to embed per document ───────────────────────────────────────────────
+/**
+ * Builds a single text string used for indexing a responsibility document.
+ *
+ * @param doc - The responsibility document whose title, question, keywords, and summary are combined
+ * @returns A string containing the document's title, question, keywords (joined by spaces), and summary with falsy parts omitted and segments separated by ". "
+ */
 
 function buildIndexText(doc: SanityResponsibilityDoc): string {
   return [doc.title, doc.question, doc.keywords.join(" "), doc.summary]

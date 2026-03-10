@@ -42,6 +42,12 @@ const WorkerPlatformLayer = Layer.mergeAll(
   HttpPlatform.layer.pipe(Layer.provide(FileSystem.layerNoop({}))),
 );
 
+/**
+ * Creates an application layer that builds the PsdApi runtime wired with live service implementations and the provided worker environment.
+ *
+ * @param env - The Worker environment (bindings such as KV namespaces and secrets) to supply to the runtime
+ * @returns A Layer supplying the PsdApi implementation composed with live services (matches, ranking, stats, search, embedding, vectorization, HTTP client, KV cache) and required platform services
+ */
 function buildAppLayer(env: WorkerEnv) {
   return HttpApiBuilder.api(PsdApi).pipe(
     Layer.provide(MatchesApiLive),

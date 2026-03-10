@@ -28,6 +28,20 @@ export interface UseSemanticSearchReturn {
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.kcvvelewijt.be";
 
+/**
+ * Provides a debounced, abortable semantic search hook that queries the application API.
+ *
+ * @param options - Optional configuration:
+ *   - `type` — filter for the search scope (`"responsibility" | "article" | "general"`).
+ *   - `limit` — maximum number of results to return (default: `5`).
+ *   - `debounceMs` — debounce delay in milliseconds before performing the request (default: `300`).
+ * @returns An object with:
+ *   - `results` — array of `SemanticSearchResult` matched by the query.
+ *   - `loading` — `true` while a request is in flight, `false` otherwise.
+ *   - `error` — error message string when a request fails, or `null`.
+ *   - `search` — function that initiates a debounced search for a given query string.
+ *   - `clear` — function that clears `results` and `error`.
+ */
 export function useSemanticSearch(
   options: UseSemanticSearchOptions = {},
 ): UseSemanticSearchReturn {
