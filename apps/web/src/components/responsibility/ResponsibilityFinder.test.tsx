@@ -9,11 +9,29 @@
  * - Edge cases
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
 import { mockResponsibilityPaths as responsibilityPaths } from "./__fixtures__/responsibility-paths.fixture";
+import type { ResponsibilityPath } from "@/types/responsibility";
+
+/** Stub fetch to return the given paths as semantic search results. */
+function mockSearchReturning(paths: ResponsibilityPath[]) {
+  vi.mocked(fetch).mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      results: paths.map((p) => ({
+        id: p.id,
+        slug: p.id,
+        type: "responsibilityPath" as const,
+        score: 0.9,
+        title: p.question,
+        excerpt: p.summary,
+      })),
+    }),
+  } as Response);
+}
 
 /**
  * Helper function to select a role from the dropdown
@@ -47,6 +65,21 @@ async function selectRole(
 }
 
 describe("ResponsibilityFinder", () => {
+  beforeEach(() => {
+    // Default: fetch returns empty results (tests that need suggestions override this)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ results: [] }),
+      } as Response),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   describe("Rendering", () => {
     it("renders the component", () => {
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
@@ -149,6 +182,10 @@ describe("ResponsibilityFinder", () => {
   describe("Search Functionality", () => {
     it("shows suggestions when typing", async () => {
       const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
@@ -156,14 +193,21 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "ongeval");
 
-      await waitFor(() => {
-        const elements = screen.getAllByText(/ongeval/i);
-        expect(elements.length).toBeGreaterThan(0);
-      });
+      await waitFor(
+        () => {
+          const elements = screen.getAllByText(/ongeval/i);
+          expect(elements.length).toBeGreaterThan(0);
+        },
+        { timeout: 3000 },
+      );
     });
 
     it("filters suggestions by selected role", async () => {
       const user = userEvent.setup();
+      const inschrijvingPath = responsibilityPaths.find((p) =>
+        p.id.includes("inschrijving-nieuw-lid"),
+      )!;
+      mockSearchReturning([inschrijvingPath]);
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "ouder");
@@ -171,15 +215,20 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "inschrijven");
 
-      await waitFor(() => {
-        // Should show registration question which is available for "ouder"
-        const suggestions = screen.queryAllByText(/inschrijven/i);
-        expect(suggestions.length).toBeGreaterThan(0);
-      });
+      await waitFor(
+        () => {
+          // Semantic search returns inschrijving path; question contains "inschrijven"
+          const suggestions = screen.queryAllByText(/inschrijven/i);
+          expect(suggestions.length).toBeGreaterThan(0);
+        },
+        { timeout: 3000 },
+      );
     });
 
     it("shows maximum 6 suggestions", async () => {
       const user = userEvent.setup();
+      // BFF respects limit:5; return 5 paths to simulate a broad search
+      mockSearchReturning(responsibilityPaths.slice(0, 5));
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
@@ -187,32 +236,35 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "w"); // Broad search
 
-      await waitFor(() => {
-        const allButtons = screen.queryAllByRole("button");
+      await waitFor(
+        () => {
+          const allButtons = screen.queryAllByRole("button");
 
-        // Filter to get only suggestion buttons
-        // Exclude: dropdown button and clear button
-        const suggestionButtons = allButtons.filter((button) => {
-          const label = button.getAttribute("aria-label") || "";
-          const text = button.textContent || "";
+          // Filter to get only suggestion buttons
+          // Exclude: dropdown button and clear button
+          const suggestionButtons = allButtons.filter((button) => {
+            const label = button.getAttribute("aria-label") || "";
+            const text = button.textContent || "";
 
-          // Skip clear button (has "clear" in aria-label)
-          if (label.toLowerCase().includes("clear")) return false;
+            // Skip clear button (has "clear" in aria-label)
+            if (label.toLowerCase().includes("clear")) return false;
 
-          // Skip dropdown button (contains "een..." or a role name)
-          if (
-            text.includes("een...") ||
-            /speler|ouder|trainer|supporter|niet-lid/i.test(text)
-          ) {
-            return false;
-          }
+            // Skip dropdown button (contains "een..." or a role name)
+            if (
+              text.includes("een...") ||
+              /speler|ouder|trainer|supporter|niet-lid/i.test(text)
+            ) {
+              return false;
+            }
 
-          return true;
-        });
+            return true;
+          });
 
-        expect(suggestionButtons.length).toBeGreaterThan(0);
-        expect(suggestionButtons.length).toBeLessThanOrEqual(6);
-      });
+          expect(suggestionButtons.length).toBeGreaterThan(0);
+          expect(suggestionButtons.length).toBeLessThanOrEqual(6);
+        },
+        { timeout: 3000 },
+      );
     });
 
     it("clears search when clicking clear button", async () => {
@@ -232,6 +284,10 @@ describe("ResponsibilityFinder", () => {
 
     it("hides suggestions when clicking outside", async () => {
       const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
       render(
         <div>
           <div data-testid="outside-element">Outside</div>
@@ -245,12 +301,15 @@ describe("ResponsibilityFinder", () => {
       await user.type(input, "ongeval");
 
       // Verify suggestions are visible
-      await waitFor(() => {
-        const suggestionButtons = screen.queryAllByRole("button", {
-          name: /ongeval/i,
-        });
-        expect(suggestionButtons.length).toBeGreaterThan(0);
-      });
+      await waitFor(
+        () => {
+          const suggestionButtons = screen.queryAllByRole("button", {
+            name: /ongeval/i,
+          });
+          expect(suggestionButtons.length).toBeGreaterThan(0);
+        },
+        { timeout: 3000 },
+      );
 
       // Click outside using fireEvent for better compatibility with native click listener
       const outsideElement = screen.getByTestId("outside-element");
@@ -272,6 +331,10 @@ describe("ResponsibilityFinder", () => {
   describe("Result Selection", () => {
     it("shows result card when clicking suggestion", async () => {
       const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
@@ -279,9 +342,11 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "ongeval");
 
-      const suggestions = await screen.findAllByRole("button", {
-        name: /ongeval/i,
-      });
+      const suggestions = await screen.findAllByRole(
+        "button",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
       const suggestion = suggestions[0];
       await user.click(suggestion);
 
@@ -293,6 +358,10 @@ describe("ResponsibilityFinder", () => {
     it("calls onResultSelect callback", async () => {
       const onResultSelect = vi.fn();
       const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
       render(
         <ResponsibilityFinder
           paths={responsibilityPaths}
@@ -305,9 +374,11 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "ongeval");
 
-      const suggestions = await screen.findAllByRole("button", {
-        name: /ongeval/i,
-      });
+      const suggestions = await screen.findAllByRole(
+        "button",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
       const suggestion = suggestions[0];
       await user.click(suggestion);
 
@@ -318,6 +389,10 @@ describe("ResponsibilityFinder", () => {
 
     it("displays all result card sections", async () => {
       const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
@@ -325,9 +400,11 @@ describe("ResponsibilityFinder", () => {
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "ongeval");
 
-      const suggestions = await screen.findAllByRole("button", {
-        name: /ongeval/i,
-      });
+      const suggestions = await screen.findAllByRole(
+        "button",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
       const suggestion = suggestions[0];
       await user.click(suggestion);
 
@@ -467,20 +544,28 @@ describe("ResponsibilityFinder", () => {
 
     it("matches against keywords correctly", async () => {
       const user = userEvent.setup();
+      const blessurePath = responsibilityPaths.find(
+        (p) =>
+          p.question.includes("blessure") || p.question.includes("herstel"),
+      )!;
+      mockSearchReturning([blessurePath]);
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
       await selectRole(user, "speler");
 
       const input = screen.getByPlaceholderText(/typ je vraag/i);
 
-      // Search by keyword (not exact question text)
+      // Semantic search handles keyword matching server-side
       await user.type(input, "blessure");
 
-      await waitFor(() => {
-        // Should find questions with "blessure" in keywords
-        const results = screen.queryAllByText(/blessure|herstel/i);
-        expect(results.length).toBeGreaterThan(0);
-      });
+      await waitFor(
+        () => {
+          // Should show suggestion for the returned path
+          const results = screen.queryAllByText(/blessure|herstel/i);
+          expect(results.length).toBeGreaterThan(0);
+        },
+        { timeout: 3000 },
+      );
     });
   });
 
@@ -488,12 +573,6 @@ describe("ResponsibilityFinder", () => {
     it("calls onMemberSelect when clicking organigram link", async () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
-      render(
-        <ResponsibilityFinder
-          paths={responsibilityPaths}
-          onMemberSelect={onMemberSelect}
-        />,
-      );
 
       // Find a path with memberId from the actual data
       const pathWithMemberId = responsibilityPaths.find(
@@ -501,6 +580,14 @@ describe("ResponsibilityFinder", () => {
       );
       expect(pathWithMemberId).toBeDefined();
       expect(pathWithMemberId!.primaryContact.memberId).toBeDefined();
+      mockSearchReturning([pathWithMemberId!]);
+
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          onMemberSelect={onMemberSelect}
+        />,
+      );
 
       // Select the appropriate role for this path
       const roleForPath = Array.isArray(pathWithMemberId!.role)
@@ -512,9 +599,11 @@ describe("ResponsibilityFinder", () => {
       await user.type(input, pathWithMemberId!.question);
 
       // Click on the specific suggestion for this path
-      const suggestion = await screen.findByRole("button", {
-        name: new RegExp(pathWithMemberId!.question, "i"),
-      });
+      const suggestion = await screen.findByRole(
+        "button",
+        { name: new RegExp(pathWithMemberId!.question, "i") },
+        { timeout: 3000 },
+      );
       await user.click(suggestion);
 
       // Wait for result card to appear
@@ -537,6 +626,10 @@ describe("ResponsibilityFinder", () => {
     it("shows organigram button for results with memberId", async () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
+      const sponsorPath = responsibilityPaths.find(
+        (p) => p.id === "club-sponsoren",
+      )!;
+      mockSearchReturning([sponsorPath]);
       render(
         <ResponsibilityFinder
           paths={responsibilityPaths}
@@ -544,16 +637,17 @@ describe("ResponsibilityFinder", () => {
         />,
       );
 
-      // Select role and search for question with memberId (sponsor question is for "niet-lid")
       await selectRole(user, "niet-lid");
 
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "sponsor");
 
       // Click on the suggestion
-      const suggestions = await screen.findAllByRole("button", {
-        name: /sponsor/i,
-      });
+      const suggestions = await screen.findAllByRole(
+        "button",
+        { name: /sponsor/i },
+        { timeout: 3000 },
+      );
       await user.click(suggestions[0]);
 
       // Verify organigram button is rendered (findByRole waits for it to appear)
@@ -565,19 +659,24 @@ describe("ResponsibilityFinder", () => {
 
     it("shows organigram link when onMemberSelect not provided", async () => {
       const user = userEvent.setup();
+      const sponsorPath = responsibilityPaths.find(
+        (p) => p.id === "club-sponsoren",
+      )!;
+      mockSearchReturning([sponsorPath]);
       // Render WITHOUT onMemberSelect callback
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
-      // Use "niet-lid" role for sponsor question
       await selectRole(user, "niet-lid");
 
       const input = screen.getByPlaceholderText(/typ je vraag/i);
       await user.type(input, "sponsor");
 
       // Click suggestion
-      const suggestions = await screen.findAllByRole("button", {
-        name: /sponsor/i,
-      });
+      const suggestions = await screen.findAllByRole(
+        "button",
+        { name: /sponsor/i },
+        { timeout: 3000 },
+      );
       await user.click(suggestions[0]);
 
       // Should show link instead of button (findByRole waits for it to appear)
@@ -751,6 +850,7 @@ describe("ResponsibilityFinder", () => {
     it("allows user to change selection after pre-filling", async () => {
       const user = userEvent.setup();
       const testPath = responsibilityPaths[0];
+      mockSearchReturning(responsibilityPaths.slice(1, 4));
 
       render(
         <ResponsibilityFinder

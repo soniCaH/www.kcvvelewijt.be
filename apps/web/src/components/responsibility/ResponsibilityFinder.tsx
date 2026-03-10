@@ -7,7 +7,8 @@
  * "Ik ben [ROLE] en ik [QUESTION]"
  */
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import type {
   UserRole,
   ResponsibilityPath,
@@ -118,66 +119,22 @@ export function ResponsibilityFinder({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Smart matching algorithm
-  const suggestions = useMemo((): AutocompleteSuggestion[] => {
-    if (!questionText.trim() && !selectedRole) return [];
+  const {
+    results: semanticResults,
+    loading: semanticLoading,
+    search: semanticSearch,
+  } = useSemanticSearch({ type: "responsibility", limit: 5 });
 
-    const query = questionText.toLowerCase();
+  useEffect(() => {
+    semanticSearch(questionText);
+  }, [questionText, semanticSearch]);
 
-    const matches = paths.reduce<AutocompleteSuggestion[]>((acc, path) => {
-      let score = 0;
-
-      // Filter by role first (required match)
-      if (selectedRole && !path.role.includes(selectedRole as UserRole)) {
-        return acc; // Skip if role doesn't match
-      }
-
-      if (selectedRole) {
-        score += 30; // Boost if role matches
-      }
-
-      // Match against question text
-      if (query) {
-        const questionLower = path.question.toLowerCase();
-
-        // Exact match in question
-        if (questionLower.includes(query)) {
-          score += 50;
-        }
-
-        // Keyword matching (case-insensitive)
-        const matchedKeywords = path.keywords.filter((kw) => {
-          const kwLower = kw.toLowerCase();
-          return kwLower.includes(query) || query.includes(kwLower);
-        });
-        score += matchedKeywords.length * 10;
-
-        // Word-by-word matching
-        const queryWords = query.split(" ").filter((w) => w.length > 2);
-        queryWords.forEach((word) => {
-          if (questionLower.includes(word)) score += 5;
-          path.keywords.forEach((kw) => {
-            const kwLower = kw.toLowerCase();
-            if (kwLower.includes(word)) score += 3;
-          });
-        });
-      }
-
-      // Only include if there's some match
-      // When there's a query, require matches beyond just role (score > 30)
-      // When there's no query, show all results for the selected role
-      if (!query && selectedRole) {
-        return [...acc, { path, score }];
-      } else if (query && score > 30) {
-        return [...acc, { path, score }];
-      }
-
-      return acc;
-    }, []);
-
-    // Sort by score (highest first)
-    return matches.sort((a, b) => b.score - a.score).slice(0, 6);
-  }, [questionText, selectedRole, paths]);
+  const suggestions: AutocompleteSuggestion[] = semanticResults
+    .map((r) => {
+      const path = paths.find((p) => p.id === r.slug);
+      return path ? { path, score: Math.round(r.score * 100) } : null;
+    })
+    .filter((s): s is AutocompleteSuggestion => s !== null);
 
   // Handle role selection
   const handleRoleSelect = (role: string) => {
@@ -390,18 +347,28 @@ export function ResponsibilityFinder({
                 </button>
               )}
 
-              {/* Empty State */}
-              {showSuggestions && questionText && suggestions.length === 0 && (
-                <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-xl p-6 text-center animate-fadeIn">
-                  <div className="text-5xl mb-3">🔍</div>
-                  <h3 className="text-lg font-bold text-kcvv-gray-blue mb-1">
-                    Geen resultaten gevonden
-                  </h3>
-                  <p className="text-sm text-kcvv-gray">
-                    Probeer een andere zoekterm of selecteer een andere rol
-                  </p>
+              {/* Loading State */}
+              {showSuggestions && questionText && semanticLoading && (
+                <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-xl p-4 text-center animate-fadeIn">
+                  <p className="text-sm text-kcvv-gray">Zoeken...</p>
                 </div>
               )}
+
+              {/* Empty State */}
+              {showSuggestions &&
+                questionText &&
+                !semanticLoading &&
+                suggestions.length === 0 && (
+                  <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-xl p-6 text-center animate-fadeIn">
+                    <div className="text-5xl mb-3">🔍</div>
+                    <h3 className="text-lg font-bold text-kcvv-gray-blue mb-1">
+                      Geen resultaten gevonden
+                    </h3>
+                    <p className="text-sm text-kcvv-gray">
+                      Probeer een andere zoekterm of selecteer een andere rol
+                    </p>
+                  </div>
+                )}
 
               {/* Autocomplete Suggestions */}
               {showSuggestions && suggestions.length > 0 && (
