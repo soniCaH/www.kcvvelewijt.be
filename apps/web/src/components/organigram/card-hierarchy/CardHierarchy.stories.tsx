@@ -4,7 +4,7 @@ import { CardHierarchy } from "./CardHierarchy";
 import type { CardHierarchyProps } from "./CardHierarchy";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
 const storyPaths: ResponsibilityPath[] = [
   {

@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import type { StoryObj } from "@storybook/nextjs-vite";
 import { HierarchyLevel } from "./HierarchyLevel";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
 // True roots only — nodes with parentId === null.
 // Including parentId === "club" children here causes them to be rendered twice

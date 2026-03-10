@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UnifiedOrganigramClient } from "./UnifiedOrganigramClient";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
 const storyPaths: ResponsibilityPath[] = [

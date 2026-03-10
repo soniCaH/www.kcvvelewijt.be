@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { ContactOverlay } from "./ContactOverlay";
-import { clubStructure } from "@/data/club-structure";
+import { staffMembersFixture } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
-const president = clubStructure.find((n) => n.id === "president") ?? {
+const president = staffMembersFixture.find((n) => n.id === "president") ?? {
   id: "president",
   name: "Voorzitter",
   title: "Voorzitter",
