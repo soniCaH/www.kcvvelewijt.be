@@ -5,7 +5,6 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { PageTitle } from "@/components/layout";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
-import type { PortableTextBlock } from "@portabletext/react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -46,7 +45,7 @@ export default async function DynamicClubPage({ params }: Props) {
     <>
       <PageTitle title={page.title} />
       <div className="mx-auto max-w-inner-lg px-4 py-8 content">
-        <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
+        <SanityArticleBody content={page.body ?? []} />
       </div>
     </>
   );

@@ -14,6 +14,7 @@ import { EVENTS_QUERY } from "../../sanity/queries/events";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
+import type { PortableTextBlock } from "@portabletext/react";
 import type {
   ResponsibilityPath,
   Contact,
@@ -153,7 +154,7 @@ export interface SanityPage {
   _id: string;
   title: string;
   slug: { current: string };
-  body: unknown[] | null;
+  body: PortableTextBlock[] | null;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
