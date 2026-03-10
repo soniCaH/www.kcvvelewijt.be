@@ -1,7 +1,6 @@
 /**
  * SponsorsBlock Server Component
- * Fetches and displays sponsors from Drupal CMS
- * Matches Gatsby implementation: promoted sponsors of types crossing, green, white
+ * Fetches and displays sponsors from Sanity CMS
  */
 
 import { Effect } from "effect";

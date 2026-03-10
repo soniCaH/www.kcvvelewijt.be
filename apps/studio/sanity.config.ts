@@ -9,7 +9,7 @@ export default defineConfig({
   title: 'kcvv-elewijt',
 
   projectId: 'vhb33jaz',
-  dataset: (import.meta.env.SANITY_STUDIO_DATASET as string) || 'production',
+  dataset: (process.env.SANITY_STUDIO_DATASET as string) || 'production',
 
   plugins: [structureTool({structure}), visionTool()],
 

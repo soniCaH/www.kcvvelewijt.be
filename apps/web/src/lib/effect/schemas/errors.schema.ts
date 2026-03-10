@@ -6,15 +6,6 @@
 import { Schema as S } from "effect";
 
 /**
- * Drupal API errors
- */
-export class DrupalError extends S.TaggedError<DrupalError>()("DrupalError", {
-  message: S.String,
-  status: S.optional(S.Number),
-  cause: S.optional(S.Unknown),
-}) {}
-
-/**
  * Resource not found error
  */
 export class NotFoundError extends S.TaggedError<NotFoundError>()(
@@ -76,7 +67,6 @@ export class TimeoutError extends S.TaggedError<TimeoutError>()(
  * Union of all possible errors
  */
 export type AppError =
-  | DrupalError
   | NotFoundError
   | FootbalistoError
   | ValidationError

@@ -10,7 +10,7 @@ export default defineConfig({
 
   projectId: 'vhb33jaz',
   dataset: (() => {
-    const ds = import.meta.env.SANITY_STUDIO_DATASET as string | undefined
+    const ds = process.env.SANITY_STUDIO_DATASET as string | undefined
     if (!ds) throw new Error('SANITY_STUDIO_DATASET env var is required for the staging studio')
     return ds
   })(),
