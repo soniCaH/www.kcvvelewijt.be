@@ -11,7 +11,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Effect } from "effect";
 import { UnifiedOrganigramClient } from "@/components/organigram";
-import { clubStructure } from "@/data/club-structure";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 
@@ -46,10 +45,13 @@ export const metadata: Metadata = {
  * @returns The React element for the organigram page.
  */
 export default async function OrganigramPage() {
-  const responsibilityPaths = await runPromise(
+  const [members, responsibilityPaths] = await runPromise(
     Effect.gen(function* () {
       const sanity = yield* SanityService;
-      return yield* sanity.getResponsibilityPaths();
+      return yield* Effect.all(
+        [sanity.getStaffMembers(), sanity.getResponsibilityPaths()],
+        { concurrency: 2 },
+      );
     }),
   );
 
@@ -77,7 +79,7 @@ export default async function OrganigramPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Suspense fallback={<div className="text-center py-12">Laden...</div>}>
           <UnifiedOrganigramClient
-            members={clubStructure}
+            members={members}
             responsibilityPaths={responsibilityPaths}
           />
         </Suspense>
