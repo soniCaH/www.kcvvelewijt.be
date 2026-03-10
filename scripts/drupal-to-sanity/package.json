@@ -7,7 +7,8 @@
     "migrate:events": "tsx src/migrate-events.ts",
     "migrate:articles": "tsx src/migrate-articles.ts",
     "migrate:staff": "tsx src/migrate-staff.ts",
-    "migrate:responsibility-paths": "tsx src/migrate-responsibility-paths.ts"
+    "migrate:responsibility-paths": "tsx src/migrate-responsibility-paths.ts",
+    "migrate:pages": "tsx src/migrate-pages.ts"
   },
   "dependencies": {
     "@portabletext/block-tools": "^5.1.0",
