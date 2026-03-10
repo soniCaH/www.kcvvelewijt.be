@@ -261,8 +261,18 @@ const PUBLIC_DIR = resolve(REPO_ROOT, "apps/web/public");
 
 async function uploadPdf(filename: string): Promise<string> {
   const filepath = resolve(PUBLIC_DIR, "downloads", filename);
-  console.log(`  Uploading ${filename}...`);
   const buffer = readFileSync(filepath);
+
+  const existing = await client.fetch<{ _id: string } | null>(
+    `*[_type == "sanity.file.asset" && originalFilename == $filename][0]{ _id }`,
+    { filename },
+  );
+  if (existing) {
+    console.log(`  Skipping ${filename} (already uploaded → ${existing._id})`);
+    return existing._id;
+  }
+
+  console.log(`  Uploading ${filename}...`);
   const asset = await client.assets.upload("file", buffer, { filename });
   console.log(`  Uploaded ${filename} → ${asset._id}`);
   return asset._id;
