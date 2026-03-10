@@ -28,24 +28,10 @@
 - For simple feature/fix tasks: read relevant code → implement → test. No planning phase needed.
 - When you learn something new about the Drupal/Footbalisto API (gotcha, edge case, failed approach), append it to the relevant skill file under "## Learnings".
 
-## Current State (updated: 2026-03-10)
+## Current State
 
 > Track progress in GitHub issues — use `gh issue list` for current status.
-
-### Platform Overhaul Phases (api-contract → BFF → CMS)
-
-| Phase | Description                                    | Status | Issue |
-| ----- | ---------------------------------------------- | ------ | ----- |
-| 0     | Monorepo Setup                                 | Done   | #721  |
-| 1     | api-contract (schemas + HttpApi)               | Done   | #722  |
-| 2     | Effect BFF in `apps/api/` (Cloudflare Workers) | Done   | #723  |
-| 3     | Sanity CMS (replace Drupal)                    | ~90%   | #724  |
-
-### Phase 3 remaining (#724)
-
-- Organigram → Sanity staffMember (#755)
-- Static pages → Sanity page schema
-- Nightly image sync verification (02:00 UTC)
+> Key issues: #721 (monorepo), #722 (api-contract), #723 (BFF), #724 (Sanity CMS), #755 (organigram).
 
 ## Git Workflow
 

@@ -37,7 +37,15 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the web app, [http://localhost:6006](http://localhost:6006) for Storybook.
+Open [http://localhost:3000](http://localhost:3000) for the web app.
+
+To start Storybook separately:
+
+```bash
+pnpm --filter @kcvv/web storybook
+```
+
+Open [http://localhost:6006](http://localhost:6006) for Storybook.
 
 ### Environment Variables
 
