@@ -293,6 +293,7 @@ Post-migration, editors can update page content directly in Sanity Studio withou
 - Visit `http://localhost:3000/club/cashless` — should render Sanity content
 - Visit `http://localhost:3000/club/downloads` — should render Sanity content
 - Visit `http://localhost:3000/club/organigram` — should still work (specific route takes priority)
+- Visit `http://localhost:3000/club/unknown-slug` — should return 404 / Not Found
 
 ---
 
