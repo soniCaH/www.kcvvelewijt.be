@@ -23,6 +23,10 @@ import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
 import { StatsApiLive } from "./handlers/stats";
+import { SearchApiLive } from "./handlers/search";
+import { EmbeddingServiceLive } from "./search/embedding";
+import { VectorizeServiceLive } from "./search/vectorize";
+import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
 import { runSync } from "./sync/psd-sanity-sync";
 
@@ -43,6 +47,9 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(MatchesApiLive),
     Layer.provide(RankingApiLive),
     Layer.provide(StatsApiLive),
+    Layer.provide(SearchApiLive),
+    Layer.provide(EmbeddingServiceLive),
+    Layer.provide(VectorizeServiceLive),
     Layer.provide(FootbalistoClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
@@ -72,12 +79,21 @@ export default {
     const layer = Layer.mergeAll(
       FootbalistoClientLive,
       SanityWriteClientLive,
+      EmbeddingServiceLive,
+      VectorizeServiceLive,
       envLayer,
     ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
     ctx.waitUntil(
-      Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
+      Effect.runPromise(
+        Effect.provide(
+          Effect.all([runSync, runSanityIndexSync()], {
+            concurrency: "unbounded",
+          }),
+          layer,
+        ),
+      ).catch((e) => {
         console.error(
-          "[scheduled] runSync promise rejected:",
+          "[scheduled] failed:",
           String(e),
           e instanceof Error ? e.stack : "",
         );
