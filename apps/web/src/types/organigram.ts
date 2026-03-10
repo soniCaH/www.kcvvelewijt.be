@@ -33,7 +33,7 @@ export interface OrgChartNode {
   /** Description of responsibilities */
   responsibilities?: string;
 
-  /** Link to Drupal staff profile (e.g., "/staff/john-doe") */
+  /** Link to staff profile */
   profileUrl?: string;
 
   /** Department or section this person belongs to */

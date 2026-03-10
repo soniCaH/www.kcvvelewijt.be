@@ -16,7 +16,6 @@ export const SITE_CONFIG = {
 
 // API Configuration
 export const API_CONFIG = {
-  drupal: process.env.DRUPAL_API_URL || "https://api.kcvvelewijt.be",
   footbalisto: process.env.FOOTBALISTO_API_URL || "https://footbalisto.be",
 } as const;
 
