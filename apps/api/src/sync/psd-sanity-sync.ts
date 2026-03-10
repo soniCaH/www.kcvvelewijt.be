@@ -78,17 +78,27 @@ export const runSync = Effect.gen(function* () {
   const env = yield* WorkerEnvTag;
   const baseUrl = env.PSD_API_BASE_URL;
 
-  // Pre-fetch existing player image state to avoid redundant uploads
-  const imageState = yield* sanity.getPlayersImageState();
+  yield* Effect.log("sync started");
 
+  // Pre-fetch existing player image state to avoid redundant uploads
+  yield* Effect.log("fetching player image state from Sanity");
+  const imageState = yield* sanity.getPlayersImageState();
+  yield* Effect.log(`player image state fetched: ${imageState.size} records`);
+
+  yield* Effect.log("fetching teams from PSD");
   const teams = yield* psd.getRawTeams();
+  yield* Effect.log(`teams fetched: ${teams.length} total`);
 
   yield* Effect.forEach(
     teams,
     (team) =>
       Effect.gen(function* () {
+        yield* Effect.log(`team ${team.id} (${team.name}): fetching members`);
         const members = yield* psd.getRawMembers(team.id);
         const activePlayers = members.filter((m) => m.active);
+        yield* Effect.log(
+          `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
+        );
 
         yield* Effect.forEach(
           activePlayers,
@@ -104,12 +114,13 @@ export const runSync = Effect.gen(function* () {
                   !existing?.hasPsdImage ||
                   existing.psdImageUrl !== newImageUrl;
                 if (needsUpload) {
+                  yield* Effect.log(`uploading image for player ${doc.psdId}`);
                   yield* sanity
                     .uploadPlayerImage(doc.psdId, newImageUrl)
                     .pipe(
                       Effect.catchAll((e) =>
                         Effect.log(
-                          `Image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
+                          `image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
                         ),
                       ),
                     );
@@ -121,9 +132,12 @@ export const runSync = Effect.gen(function* () {
 
         const playerPsdIds = activePlayers.map((m) => String(m.id));
         yield* sanity.upsertTeam(transformTeam(team, playerPsdIds));
+        yield* Effect.log(`team ${team.id} (${team.name}): done`);
       }),
     { concurrency: 1 }, // teams sequentially to avoid rate limits
   );
+
+  yield* Effect.log("sync completed successfully");
 }).pipe(
   Effect.tapError((e) =>
     Effect.log(
