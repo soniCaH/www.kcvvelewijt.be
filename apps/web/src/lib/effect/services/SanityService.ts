@@ -112,6 +112,7 @@ export interface SanityResponsibilityContact {
   phone: string | null;
   department: string | null;
   name: string | null;
+  memberId: string | null;
 }
 
 export interface SanityResponsibilityStep {
@@ -195,6 +196,7 @@ function mapContact(c: SanityResponsibilityContact): Contact {
     ...(c.department
       ? { department: c.department as Contact["department"] }
       : {}),
+    ...(c.memberId ? { memberId: c.memberId } : {}),
   };
 }
 

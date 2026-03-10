@@ -10,7 +10,8 @@ const CONTACT_PROJECTION = `{
   "name": select(
     defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
     null
-  )
+  ),
+  "memberId": staffMember->_id
 }`;
 
 export const RESPONSIBILITY_PATHS_QUERY = `*[_type == "responsibilityPath" && active == true] | order(title asc) {
