@@ -12,10 +12,12 @@ import {
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import { EVENTS_QUERY } from "../../sanity/queries/events";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
+import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import type {
   ResponsibilityPath,
   Contact,
 } from "../../../types/responsibility";
+import type { OrgChartNode } from "../../../types/organigram";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
@@ -131,6 +133,20 @@ export interface SanityResponsibilityPath {
   relatedPaths: string[];
 }
 
+export interface SanityOrgMember {
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  positionTitle: string | null;
+  positionShort: string | null;
+  department: string | null;
+  email: string | null;
+  phone: string | null;
+  photoUrl: string | null;
+  responsibilities: string | null;
+  parentId: string | null; // resolved from parentMember->_id
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
@@ -147,6 +163,7 @@ export interface SanityServiceInterface {
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
+  readonly getStaffMembers: () => Effect.Effect<OrgChartNode[]>;
 }
 
 export class SanityService extends Context.Tag("SanityService")<
@@ -208,6 +225,28 @@ function mapResponsibilityPath(
   };
 }
 
+const CLUB_ROOT_NODE: OrgChartNode = {
+  id: "club",
+  name: "KCVV Elewijt",
+  title: "Voetbalclub",
+  imageUrl: "/images/logo-flat.png",
+  department: "algemeen",
+  parentId: null,
+};
+
+const mapOrgMember = (m: SanityOrgMember): OrgChartNode => ({
+  id: m._id,
+  name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim(),
+  title: m.positionTitle ?? "",
+  positionShort: m.positionShort ?? undefined,
+  imageUrl: m.photoUrl ?? undefined,
+  email: m.email ?? undefined,
+  phone: m.phone ?? undefined,
+  responsibilities: m.responsibilities ?? undefined,
+  department: (m.department ?? undefined) as OrgChartNode["department"],
+  parentId: m.parentId ?? "club",
+});
+
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getPlayers: () => fetchGroq<SanityPlayer[]>(PLAYERS_QUERY),
   getPlayerByPsdId: (psdId) =>
@@ -223,5 +262,9 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
   getResponsibilityPaths: () =>
     fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(
       Effect.map((paths) => paths.map(mapResponsibilityPath)),
+    ),
+  getStaffMembers: () =>
+    fetchGroq<SanityOrgMember[]>(STAFF_MEMBERS_QUERY).pipe(
+      Effect.map((members) => [CLUB_ROOT_NODE, ...members.map(mapOrgMember)]),
     ),
 });
