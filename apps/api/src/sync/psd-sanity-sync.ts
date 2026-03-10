@@ -163,7 +163,16 @@ export const runSync = Effect.gen(function* () {
         );
         yield* Effect.forEach(
           staffMembers,
-          (m) => sanity.upsertStaff(transformStaff(m)),
+          (m) =>
+            sanity
+              .upsertStaff(transformStaff(m))
+              .pipe(
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `staff upsert skipped for ${m.id} (${m.firstName ?? ""} ${m.lastName ?? ""}) in team ${team.id}: ${e.message}`,
+                  ),
+                ),
+              ),
           { concurrency: 3 },
         );
 

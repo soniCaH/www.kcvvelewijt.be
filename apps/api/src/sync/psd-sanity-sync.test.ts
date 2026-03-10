@@ -125,6 +125,11 @@ describe("transformStaff", () => {
     expect(result.positionShort).toBeUndefined();
   });
 
+  it("accepts functionTitle of exactly 6 characters", () => {
+    const result = transformStaff({ ...baseStaff, functionTitle: "T12345" });
+    expect(result.positionShort).toBe("T12345");
+  });
+
   it("sets positionShort to undefined when functionTitle exceeds 6 characters", () => {
     const result = transformStaff({
       ...baseStaff,

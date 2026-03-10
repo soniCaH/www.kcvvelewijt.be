@@ -70,19 +70,27 @@ describe("SanityService.getStaffMembers", () => {
 
     const nodes = await Effect.runPromise(program);
 
-    expect(nodes[0]?.id).toBe("club");
-    expect(nodes[0]?.name).toBe("KCVV Elewijt");
-    expect(nodes[0]?.parentId).toBeNull();
+    expect(nodes[0]).toEqual({
+      id: "club",
+      name: "KCVV Elewijt",
+      title: "Voetbalclub",
+      imageUrl: "/images/logo-flat.png",
+      department: "algemeen",
+      parentId: null,
+    });
 
-    expect(nodes[1]?.id).toBe("staffMember-psd-42");
-    expect(nodes[1]?.name).toBe("Jan Smeets");
-    expect(nodes[1]?.title).toBe("Jeugdcoördinator");
-    expect(nodes[1]?.positionShort).toBe("JC");
-    expect(nodes[1]?.parentId).toBe("club"); // null parentId → root → "club"
-    expect(nodes[1]?.imageUrl).toBe(
-      "https://cdn.sanity.io/images/test/photo.jpg",
-    );
-    expect(nodes[1]?.responsibilities).toBe("Coördinatie jeugdwerking");
+    expect(nodes[1]).toEqual({
+      id: "staffMember-psd-42",
+      name: "Jan Smeets",
+      title: "Jeugdcoördinator",
+      positionShort: "JC",
+      imageUrl: "https://cdn.sanity.io/images/test/photo.jpg",
+      email: "jeugd@kcvvelewijt.be",
+      phone: undefined,
+      responsibilities: "Coördinatie jeugdwerking",
+      department: "jeugdbestuur",
+      parentId: "club", // null parentId → root → "club"
+    });
   });
 
   it("preserves parentId when parentMember is set", async () => {
