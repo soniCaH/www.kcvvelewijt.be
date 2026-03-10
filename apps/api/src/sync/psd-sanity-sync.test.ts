@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { transformMember, transformTeam } from "./psd-sanity-sync";
+import {
+  transformMember,
+  transformTeam,
+  transformStaff,
+} from "./psd-sanity-sync";
+import type { PsdMember } from "@kcvv/api-contract";
 
 const BASE_URL = "https://clubapi.prosoccerdata.com";
 
@@ -68,6 +73,41 @@ describe("transformMember (player)", () => {
       BASE_URL,
     );
     expect(result.birthDate).toBe("1989-06-05");
+  });
+});
+
+const baseStaff: PsdMember = {
+  id: 99,
+  firstName: "Marc",
+  lastName: "Peeters",
+  birthDate: "1975-04-12 00:00",
+  nationality: "Belgium",
+  profilePictureURL: null,
+  keeper: false,
+  bestPosition: null,
+  active: true,
+  status: "staff",
+  functionTitle: "T1",
+};
+
+describe("transformStaff", () => {
+  it("maps PSD staff to SanityStaffDoc", () => {
+    const result = transformStaff(baseStaff);
+    expect(result.psdId).toBe("99");
+    expect(result.firstName).toBe("Marc");
+    expect(result.lastName).toBe("Peeters");
+    expect(result.birthDate).toBe("1975-04-12");
+    expect(result.positionShort).toBe("T1");
+  });
+
+  it("handles null functionTitle", () => {
+    const result = transformStaff({ ...baseStaff, functionTitle: null });
+    expect(result.positionShort).toBeNull();
+  });
+
+  it("handles null birthDate", () => {
+    const result = transformStaff({ ...baseStaff, birthDate: null });
+    expect(result.birthDate).toBeNull();
   });
 });
 

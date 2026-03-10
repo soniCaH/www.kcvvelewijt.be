@@ -24,6 +24,14 @@ export interface SanityTeamDoc {
   playerPsdIds: string[];
 }
 
+export interface SanityStaffDoc {
+  psdId: string;
+  firstName: string | null;
+  lastName: string | null;
+  birthDate: string | null; // "YYYY-MM-DD"
+  positionShort: string | null; // from PSD functionTitle
+}
+
 // ─── Error ────────────────────────────────────────────────────────────────────
 
 export class SanityWriteError extends Error {
@@ -50,6 +58,9 @@ export interface SanityWriteClientInterface {
   ) => Effect.Effect<void, SanityWriteError>;
   readonly upsertTeam: (
     doc: SanityTeamDoc,
+  ) => Effect.Effect<void, SanityWriteError>;
+  readonly upsertStaff: (
+    doc: SanityStaffDoc,
   ) => Effect.Effect<void, SanityWriteError>;
   /** Fetch existing psdImageUrl + psdImage presence for all player docs. */
   readonly getPlayersImageState: () => Effect.Effect<
@@ -237,6 +248,15 @@ export const SanityWriteClientLive = Layer.effect(
             _ref: `player-psd-${id}`,
             _key: id,
           })),
+        }),
+
+      upsertStaff: (doc) =>
+        upsert("staffMember", doc.psdId, {
+          psdId: doc.psdId,
+          firstName: doc.firstName,
+          lastName: doc.lastName,
+          birthDate: doc.birthDate,
+          positionShort: doc.positionShort,
         }),
     };
   }),
