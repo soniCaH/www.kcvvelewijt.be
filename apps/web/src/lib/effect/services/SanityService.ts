@@ -13,6 +13,7 @@ import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import { EVENTS_QUERY } from "../../sanity/queries/events";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
+import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
 import type {
   ResponsibilityPath,
   Contact,
@@ -148,6 +149,13 @@ export interface SanityOrgMember {
   parentId: string | null; // resolved from parentMember->_id
 }
 
+export interface SanityPage {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  body: unknown[] | null;
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
@@ -165,6 +173,7 @@ export interface SanityServiceInterface {
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getStaffMembers: () => Effect.Effect<OrgChartNode[]>;
+  readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
 }
 
 export class SanityService extends Context.Tag("SanityService")<
@@ -269,4 +278,5 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityOrgMember[]>(STAFF_MEMBERS_QUERY).pipe(
       Effect.map((members) => [CLUB_ROOT_NODE, ...members.map(mapOrgMember)]),
     ),
+  getPage: (slug) => fetchGroq<SanityPage | null>(PAGE_BY_SLUG_QUERY, { slug }),
 });
