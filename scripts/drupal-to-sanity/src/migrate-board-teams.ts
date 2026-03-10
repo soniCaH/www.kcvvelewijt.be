@@ -9,7 +9,7 @@
  * Run against production: SANITY_DATASET=production pnpm migrate:board-teams
  */
 import "dotenv/config";
-import { client } from "./sanity-uploader";
+import { createDoc } from "./sanity-uploader";
 
 interface BoardTeam {
   _id: string;
@@ -78,7 +78,8 @@ async function main() {
       _key: `staff-${i}`,
     }));
 
-    const doc = {
+    console.log(`Creating team: ${team.name} (${team.slug})...`);
+    await createDoc({
       _id: team._id,
       _type: "team",
       name: team.name,
@@ -86,10 +87,7 @@ async function main() {
       tagline: team.tagline,
       showInNavigation: false,
       staff: staffRefs,
-    };
-
-    console.log(`Creating team: ${team.name} (${team.slug})...`);
-    await client.createOrReplace(doc);
+    });
     console.log(`  ✓ ${team.slug} (${staffRefs.length} staff linked)`);
   }
 
