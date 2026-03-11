@@ -127,18 +127,26 @@ export function ResponsibilityFinder({
     semanticSearch(questionText);
   }, [questionText, semanticSearch]);
 
-  const suggestions: AutocompleteSuggestion[] = semanticResults
-    .map((r) => {
-      const path = paths.find((p) => p.id === r.slug);
-      return path ? { path, score: Math.round(r.score * 100) } : null;
-    })
-    .filter((s): s is AutocompleteSuggestion => s !== null);
+  const suggestions: AutocompleteSuggestion[] = questionText
+    ? semanticResults
+        .map((r) => {
+          const path = paths.find((p) => p.id === r.slug);
+          return path ? { path, score: Math.round(r.score * 100) } : null;
+        })
+        .filter((s): s is AutocompleteSuggestion => s !== null)
+    : selectedRole
+      ? paths
+          .filter((p) => p.role.includes(selectedRole as UserRole))
+          .slice(0, 5)
+          .map((p) => ({ path: p, score: 100 }))
+      : [];
 
   // Handle role selection
   const handleRoleSelect = (role: string) => {
     setSelectedRole(role as UserRole);
     setSelectedResult(null);
     setShowRoleDropdown(false);
+    setShowSuggestions(true);
 
     // Clear any existing timeout
     if (focusTimeoutRef.current) {
