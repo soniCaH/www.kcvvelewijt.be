@@ -58,7 +58,7 @@ describe("VectorizeService", () => {
         yield* svc.upsert([
           {
             id: "doc-abc",
-            values: Array(768).fill(0.1),
+            values: Array(1024).fill(0.1),
             metadata: {
               slug: "kantine",
               type: "responsibilityPath",
@@ -79,7 +79,7 @@ describe("VectorizeService", () => {
     const matches = await Effect.runPromise(
       Effect.gen(function* () {
         const svc = yield* VectorizeService;
-        return yield* svc.query(Array(768).fill(0.1), {
+        return yield* svc.query(Array(1024).fill(0.1), {
           topK: 5,
           returnMetadata: "all",
         });
@@ -140,7 +140,7 @@ describe("VectorizeService", () => {
       Effect.gen(function* () {
         const svc = yield* VectorizeService;
         return yield* svc
-          .query(Array(768).fill(0.1), { topK: 5, returnMetadata: "all" })
+          .query(Array(1024).fill(0.1), { topK: 5, returnMetadata: "all" })
           .pipe(Effect.either);
       }).pipe(Effect.provide(layer)),
     );

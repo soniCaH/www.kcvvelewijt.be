@@ -9,7 +9,7 @@ import {
 } from "./vectorize";
 import { WorkerEnvTag } from "../env";
 
-const FAKE_VECTOR = Array(768).fill(0.1);
+const FAKE_VECTOR = Array(1024).fill(0.1);
 
 const mockDoc = {
   _id: "sanity-abc-123",

@@ -22,6 +22,7 @@ export class EmbeddingService extends Context.Tag("EmbeddingService")<
 
 // bge-m3: multilingual (100+ languages incl. Dutch), 1024 dims, cosine
 const MODEL = "@cf/baai/bge-m3";
+const EXPECTED_DIMS = 1024;
 
 export const EmbeddingServiceLive = Layer.effect(
   EmbeddingService,
@@ -40,6 +41,15 @@ export const EmbeddingServiceLive = Layer.effect(
             };
             const vector = result.data[0];
             if (!vector) throw new Error("Empty embedding response");
+            if (
+              !Array.isArray(vector) ||
+              vector.length !== EXPECTED_DIMS ||
+              typeof vector[0] !== "number"
+            ) {
+              throw new Error(
+                `Unexpected embedding shape: expected ${EXPECTED_DIMS}-dim number[], got ${Array.isArray(vector) ? `${vector.length}-dim ${typeof vector[0]}[]` : typeof vector}`,
+              );
+            }
             return vector;
           },
           catch: (cause) =>

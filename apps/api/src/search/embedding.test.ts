@@ -5,7 +5,7 @@ import { WorkerEnvTag } from "../env";
 
 function makeAiMock(runFn?: () => Promise<unknown>): Ai {
   return {
-    run: runFn ?? (async () => ({ data: [Array(768).fill(0.1)] })),
+    run: runFn ?? (async () => ({ data: [Array(1024).fill(0.1)] })),
   } as unknown as Ai;
 }
 
@@ -26,7 +26,7 @@ function makeEnvLayer(ai: Ai) {
 }
 
 describe("EmbeddingService", () => {
-  it("returns a 768-dimensional float array", async () => {
+  it("returns a 1024-dimensional float array", async () => {
     const layer = EmbeddingServiceLive.pipe(
       Layer.provide(makeEnvLayer(makeAiMock())),
     );
@@ -38,7 +38,7 @@ describe("EmbeddingService", () => {
       }).pipe(Effect.provide(layer)),
     );
 
-    expect(result).toHaveLength(768);
+    expect(result).toHaveLength(1024);
     expect(typeof result[0]).toBe("number");
   });
 
