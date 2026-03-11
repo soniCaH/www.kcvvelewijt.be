@@ -164,6 +164,40 @@ const searchTeams = (query: string) =>
  * @returns A JSON object `{ query: string, count: number, results: SearchResult[] }` on success;
  *          on error returns `{ error: string }` with an appropriate HTTP status.
  */
+/**
+ * Handle POST /api/search — proxies semantic search to the BFF.
+ *
+ * Forwards the request body to `KCVV_API_URL/search` and streams the response
+ * back to the client. Using a server-side proxy avoids CORS and keeps the BFF
+ * URL out of the client bundle.
+ */
+export async function POST(request: NextRequest) {
+  const bffUrl = process.env.KCVV_API_URL;
+  if (!bffUrl) {
+    return NextResponse.json(
+      { error: "Search service not configured" },
+      { status: 503 },
+    );
+  }
+
+  try {
+    const body = (await request.json()) as unknown;
+    const res = await fetch(`${bffUrl}/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json()) as unknown;
+    return NextResponse.json(data, { status: res.status });
+  } catch (error) {
+    console.error("[Search API] Semantic search proxy error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const rawQuery = searchParams.get("q");

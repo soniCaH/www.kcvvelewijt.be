@@ -25,9 +25,6 @@ export interface UseSemanticSearchReturn {
   clear: () => void;
 }
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://api.kcvvelewijt.be";
-
 /**
  * Provides a debounced, abortable semantic search hook that queries the application API.
  *
@@ -70,7 +67,7 @@ export function useSemanticSearch(
         setError(null);
 
         try {
-          const res = await fetch(`${API_BASE}/search`, {
+          const res = await fetch("/api/search", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query, type, limit }),

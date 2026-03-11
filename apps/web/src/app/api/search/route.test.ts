@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
-import { GET } from "./route";
+import { GET, POST } from "./route";
 
 // Mock Next.js cache - pass through the function
 vi.mock("next/cache", () => ({
@@ -27,6 +27,70 @@ vi.mock("@/lib/sanity/client", () => ({
 function createRequest(url: string): NextRequest {
   return new NextRequest(new URL(url, "http://localhost:3000"));
 }
+
+function makePostRequest(body: unknown): NextRequest {
+  return new NextRequest(new URL("/api/search", "http://localhost:3000"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+describe("POST /api/search", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("proxies to BFF and returns results", async () => {
+    const bffResponse = {
+      results: [
+        {
+          id: "doc-1",
+          slug: "kantine",
+          type: "responsibilityPath",
+          score: 0.9,
+          title: "Kantine",
+          excerpt: "...",
+        },
+      ],
+    };
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => bffResponse,
+    } as Response);
+
+    const response = await POST(
+      makePostRequest({ query: "kantine", type: "responsibility", limit: 5 }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.results).toHaveLength(1);
+    expect((body.results as Array<{ slug: string }>)[0]!.slug).toBe("kantine");
+  });
+
+  it("returns 503 when KCVV_API_URL is not set", async () => {
+    const saved = process.env.KCVV_API_URL;
+    delete process.env.KCVV_API_URL;
+    try {
+      const response = await POST(makePostRequest({ query: "test" }));
+      expect(response.status).toBe(503);
+    } finally {
+      if (saved !== undefined) process.env.KCVV_API_URL = saved;
+    }
+  });
+
+  it("returns 500 when BFF fetch throws", async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new Error("network error"));
+    const response = await POST(makePostRequest({ query: "test" }));
+    expect(response.status).toBe(500);
+  });
+});
 
 describe("GET /api/search", () => {
   beforeEach(() => {
