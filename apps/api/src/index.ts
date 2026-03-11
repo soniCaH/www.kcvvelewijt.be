@@ -77,51 +77,44 @@ export default {
   },
 
   async scheduled(
-    _event: ScheduledEvent,
+    event: ScheduledEvent,
     env: WorkerEnv,
     ctx: ExecutionContext,
   ): Promise<void> {
     const envLayer = Layer.succeed(WorkerEnvTag, env);
+
+    if (event.cron === "30 2 * * *") {
+      // Search embedding index sync — separate invocation budget
+      const layer = Layer.mergeAll(
+        EmbeddingServiceLive,
+        VectorizeServiceLive,
+        envLayer,
+      ).pipe(Layer.provide(envLayer));
+      ctx.waitUntil(
+        Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)).catch(
+          (e) => {
+            console.error(
+              "[scheduled] sanity-index-sync failed:",
+              String(e),
+              e instanceof Error ? e.stack : "",
+            );
+            throw e;
+          },
+        ),
+      );
+      return;
+    }
+
+    // Default: 0 2 * * * — PSD → Sanity player/team/match sync
     const layer = Layer.mergeAll(
       FootbalistoClientLive,
       SanityWriteClientLive,
-      EmbeddingServiceLive,
-      VectorizeServiceLive,
       envLayer,
     ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
     ctx.waitUntil(
-      Effect.runPromise(
-        Effect.provide(
-          Effect.all(
-            [
-              runSync.pipe(
-                Effect.catchAll((e) =>
-                  Effect.sync(() =>
-                    console.error(
-                      "[scheduled] psd-sanity-sync failed:",
-                      String(e),
-                    ),
-                  ),
-                ),
-              ),
-              runSanityIndexSync().pipe(
-                Effect.catchAll((e) =>
-                  Effect.sync(() =>
-                    console.error(
-                      "[scheduled] sanity-index-sync failed:",
-                      String(e),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            { concurrency: "unbounded" },
-          ),
-          layer,
-        ),
-      ).catch((e) => {
+      Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
         console.error(
-          "[scheduled] failed:",
+          "[scheduled] psd-sanity-sync failed:",
           String(e),
           e instanceof Error ? e.stack : "",
         );
