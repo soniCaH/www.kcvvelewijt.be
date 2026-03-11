@@ -3,7 +3,7 @@ import type { SearchRequest, SearchResponse } from "@kcvv/api-contract";
 import { EmbeddingService } from "./embedding";
 import { VectorizeService } from "./vectorize";
 
-export const MIN_SCORE = 0.4;
+export const MIN_SCORE = 0.35;
 
 const TYPE_FILTER: Record<string, string> = {
   responsibility: "responsibilityPath",

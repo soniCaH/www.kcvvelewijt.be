@@ -20,7 +20,9 @@ export class EmbeddingService extends Context.Tag("EmbeddingService")<
   EmbeddingServiceInterface
 >() {}
 
-const MODEL = "@cf/baai/bge-multilingual-gemma2";
+// bge-m3: multilingual (100+ languages incl. Dutch), 1024 dims, cosine
+const MODEL = "@cf/baai/bge-m3";
+const EXPECTED_DIMS = 1024;
 
 export const EmbeddingServiceLive = Layer.effect(
   EmbeddingService,
@@ -30,7 +32,7 @@ export const EmbeddingServiceLive = Layer.effect(
       embed: (text: string) =>
         Effect.tryPromise({
           try: async () => {
-            // Cast needed: bge-multilingual-gemma2 isn't in the AiModels type yet
+            // Cast needed: bge-m3 isn't in the AiModels type yet
             const ai = env.AI as unknown as {
               run: (model: string, input: unknown) => Promise<unknown>;
             };
@@ -39,6 +41,15 @@ export const EmbeddingServiceLive = Layer.effect(
             };
             const vector = result.data[0];
             if (!vector) throw new Error("Empty embedding response");
+            if (
+              !Array.isArray(vector) ||
+              vector.length !== EXPECTED_DIMS ||
+              typeof vector[0] !== "number"
+            ) {
+              throw new Error(
+                `Unexpected embedding shape: expected ${EXPECTED_DIMS}-dim number[], got ${Array.isArray(vector) ? `${vector.length}-dim ${typeof vector[0]}[]` : typeof vector}`,
+              );
+            }
             return vector;
           },
           catch: (cause) =>

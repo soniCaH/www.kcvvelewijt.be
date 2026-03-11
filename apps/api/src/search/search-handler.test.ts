@@ -8,7 +8,7 @@ import {
   type VectorizeMatch,
 } from "./vectorize";
 
-const FAKE_VECTOR = Array(768).fill(0.1);
+const FAKE_VECTOR = Array(1024).fill(0.1);
 
 function makeEmbeddingMock(): EmbeddingServiceInterface {
   return { embed: () => Effect.succeed(FAKE_VECTOR) };
@@ -99,6 +99,39 @@ describe("handleSearch", () => {
 
     expect(result.results.map((r) => r.id)).not.toContain("low");
     expect(result.results.map((r) => r.id)).toContain("high");
+  });
+
+  it("applies exact MIN_SCORE boundary: excludes 0.349, includes 0.35 and 0.351", async () => {
+    const makeHit = (id: string, score: number): VectorizeMatch => ({
+      id,
+      score,
+      metadata: {
+        slug: id,
+        type: "responsibilityPath",
+        title: id,
+        excerpt: id,
+      },
+    });
+    const result = await Effect.runPromise(
+      handleSearch({ query: "test", limit: 10 }).pipe(
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock([
+              makeHit("below", 0.349),
+              makeHit("at", 0.35),
+              makeHit("above", 0.351),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+    const ids = result.results.map((r) => r.id);
+    expect(ids, `MIN_SCORE is ${MIN_SCORE}`).not.toContain("below");
+    expect(ids, `MIN_SCORE is ${MIN_SCORE}`).toContain("at");
+    expect(ids, `MIN_SCORE is ${MIN_SCORE}`).toContain("above");
   });
 
   it("passes type filter to Vectorize query", async () => {
