@@ -92,9 +92,31 @@ export default {
     ctx.waitUntil(
       Effect.runPromise(
         Effect.provide(
-          Effect.all([runSync, runSanityIndexSync()], {
-            concurrency: "unbounded",
-          }),
+          Effect.all(
+            [
+              runSync.pipe(
+                Effect.catchAll((e) =>
+                  Effect.sync(() =>
+                    console.error(
+                      "[scheduled] psd-sanity-sync failed:",
+                      String(e),
+                    ),
+                  ),
+                ),
+              ),
+              runSanityIndexSync().pipe(
+                Effect.catchAll((e) =>
+                  Effect.sync(() =>
+                    console.error(
+                      "[scheduled] sanity-index-sync failed:",
+                      String(e),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            { concurrency: "unbounded" },
+          ),
           layer,
         ),
       ).catch((e) => {

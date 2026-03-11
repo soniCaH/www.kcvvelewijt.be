@@ -18,34 +18,7 @@ interface SanityResponsibilityDoc {
 
 type FetchFn = () => Promise<SanityResponsibilityDoc[]>;
 
-/**
- * Convert Sanity Portable Text blocks into a plain-text string.
- *
- * @param blocks - Portable Text blocks (array of block objects); non-arrays are treated as empty
- * @returns The concatenated plain-text content extracted from block children, trimmed. Returns an empty string if there is no text.
- */
-
-function ptToText(blocks: unknown): string {
-  if (!Array.isArray(blocks)) return "";
-  return blocks
-    .flatMap((block: unknown) => {
-      if (typeof block !== "object" || block === null) return [];
-      const b = block as Record<string, unknown>;
-      if (b["_type"] !== "block" || !Array.isArray(b["children"])) return [];
-      return (b["children"] as Array<{ text?: string }>)
-        .map((child) => child.text ?? "")
-        .filter(Boolean);
-    })
-    .join(" ")
-    .trim();
-}
-
-/**
- * Builds a single text string used for indexing a responsibility document.
- *
- * @param doc - The responsibility document whose title, question, keywords, and summary are combined
- * @returns A string containing the document's title, question, keywords (joined by spaces), and summary with falsy parts omitted and segments separated by ". "
- */
+// ─── Text to embed per document ───────────────────────────────────────────────
 
 function buildIndexText(doc: SanityResponsibilityDoc): string {
   return [doc.title, doc.question, doc.keywords.join(" "), doc.summary]
@@ -91,27 +64,32 @@ export const runSanityIndexSync = (fetchFn?: FetchFn) =>
 
     console.log(`[search-sync] Indexing ${docs.length} responsibility paths`);
 
-    for (const doc of docs) {
-      const text = buildIndexText(doc);
-      const vector = yield* embedding.embed(text).pipe(Effect.orDie);
-      yield* vectorize
-        .upsert([
-          {
-            id: doc._id,
-            values: vector,
-            metadata: {
-              slug: doc.slug,
-              type: "responsibilityPath",
-              title: doc.title,
-              excerpt: doc.summary.slice(0, 200),
-            },
-          },
-        ])
-        .pipe(Effect.orDie);
-    }
+    yield* Effect.forEach(
+      docs,
+      (doc) => {
+        const text = buildIndexText(doc);
+        return embedding.embed(text).pipe(
+          Effect.orDie,
+          Effect.flatMap((vector) =>
+            vectorize
+              .upsert([
+                {
+                  id: doc._id,
+                  values: vector,
+                  metadata: {
+                    slug: doc.slug,
+                    type: "responsibilityPath",
+                    title: doc.title,
+                    excerpt: doc.summary.slice(0, 200),
+                  },
+                },
+              ])
+              .pipe(Effect.orDie),
+          ),
+        );
+      },
+      { concurrency: 5 },
+    );
 
     console.log(`[search-sync] Indexed ${docs.length} documents`);
   });
-
-// re-export for unused lint suppression
-export { ptToText };

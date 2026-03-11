@@ -61,11 +61,37 @@ export const VectorizeServiceLive = Layer.effect(
         Effect.tryPromise({
           try: async () => {
             const result = await env.SEARCH_INDEX.query(vector, options);
-            return result.matches.map((m) => ({
-              id: m.id,
-              score: m.score,
-              metadata: m.metadata as Record<string, string> | undefined,
-            }));
+            return result.matches.map((m) => {
+              const rawMeta = m.metadata as
+                | Record<string, unknown>
+                | null
+                | undefined;
+              return {
+                id: m.id,
+                score: m.score,
+                metadata:
+                  rawMeta != null
+                    ? {
+                        slug:
+                          typeof rawMeta["slug"] === "string"
+                            ? rawMeta["slug"]
+                            : "",
+                        type:
+                          typeof rawMeta["type"] === "string"
+                            ? rawMeta["type"]
+                            : "",
+                        title:
+                          typeof rawMeta["title"] === "string"
+                            ? rawMeta["title"]
+                            : "",
+                        excerpt:
+                          typeof rawMeta["excerpt"] === "string"
+                            ? rawMeta["excerpt"]
+                            : "",
+                      }
+                    : undefined,
+              };
+            });
           },
           catch: (cause) =>
             new VectorizeError(

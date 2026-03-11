@@ -7,7 +7,7 @@ export const SearchContentType = S.Literal(
 );
 
 export class SearchRequest extends S.Class<SearchRequest>("SearchRequest")({
-  query: S.String.pipe(S.minLength(1)),
+  query: S.Trim.pipe(S.minLength(1), S.maxLength(1024)),
   type: S.optional(SearchContentType),
   limit: S.optional(S.Int.pipe(S.between(1, 10))).pipe(
     S.withDefaults({ constructor: () => 5, decoding: () => 5 }),

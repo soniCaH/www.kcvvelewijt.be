@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
-import { handleSearch } from "./search-handler";
+import { handleSearch, MIN_SCORE } from "./search-handler";
 import { EmbeddingService, type EmbeddingServiceInterface } from "./embedding";
 import {
   VectorizeService,
@@ -63,7 +63,7 @@ describe("handleSearch", () => {
     expect(result.results).toHaveLength(0);
   });
 
-  it("filters results below MIN_SCORE (0.4)", async () => {
+  it(`filters results below MIN_SCORE (${MIN_SCORE})`, async () => {
     const result = await Effect.runPromise(
       handleSearch({ query: "vague", limit: 5 }).pipe(
         Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
@@ -73,7 +73,7 @@ describe("handleSearch", () => {
             makeVectorizeMock([
               {
                 id: "low",
-                score: 0.2,
+                score: MIN_SCORE - 0.2,
                 metadata: {
                   slug: "x",
                   type: "responsibilityPath",
@@ -83,7 +83,7 @@ describe("handleSearch", () => {
               },
               {
                 id: "high",
-                score: 0.7,
+                score: MIN_SCORE + 0.3,
                 metadata: {
                   slug: "y",
                   type: "responsibilityPath",

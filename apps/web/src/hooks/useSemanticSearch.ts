@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface SemanticSearchResult {
   id: string;
@@ -97,6 +97,13 @@ export function useSemanticSearch(
   const clear = useCallback(() => {
     setResults([]);
     setError(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      abortRef.current?.abort();
+    };
   }, []);
 
   return { results, loading, error, search, clear };

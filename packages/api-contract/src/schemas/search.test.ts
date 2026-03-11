@@ -29,6 +29,20 @@ describe("SearchRequest", () => {
     ).rejects.toThrow();
   });
 
+  it("rejects whitespace-only query", async () => {
+    await expect(
+      Effect.runPromise(S.decodeUnknown(SearchRequest)({ query: "   " })),
+    ).rejects.toThrow();
+  });
+
+  it("rejects query longer than 1024 characters", async () => {
+    await expect(
+      Effect.runPromise(
+        S.decodeUnknown(SearchRequest)({ query: "a".repeat(1025) }),
+      ),
+    ).rejects.toThrow();
+  });
+
   it("rejects limit above 10", async () => {
     await expect(
       Effect.runPromise(
