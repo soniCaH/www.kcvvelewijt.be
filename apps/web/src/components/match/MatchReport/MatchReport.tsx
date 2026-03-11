@@ -146,7 +146,7 @@ export function MatchReport({
         </div>
       )}
 
-      {/* Content - sanitized with DOMPurify to prevent XSS */}
+      {/* Content - sanitized with sanitize-html to prevent XSS */}
       <div
         className={cn(
           "prose prose-gray max-w-none",

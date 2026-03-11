@@ -12,6 +12,14 @@
 import { Suspense } from "react";
 import sanitizeHtml from "sanitize-html";
 import * as Tabs from "@radix-ui/react-tabs";
+
+const PROSE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [...sanitizeHtml.defaults.allowedTags, "img"],
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    img: ["src", "srcset", "alt", "title", "width", "height", "loading"],
+  },
+};
 import { UrlTabs } from "@/components/ui/url-tabs";
 import { TeamHeader, type TeamHeaderProps } from "../TeamHeader";
 import { TeamRoster, type RosterPlayer, type StaffMember } from "../TeamRoster";
@@ -124,7 +132,10 @@ export function TeamDetail({
                   <h2 className="text-2xl font-bold mb-4">Contactinformatie</h2>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: sanitizeHtml(contactInfo!),
+                      __html: sanitizeHtml(
+                        contactInfo!,
+                        PROSE_SANITIZE_OPTIONS,
+                      ),
                     }}
                   />
                 </section>
@@ -149,7 +160,10 @@ export function TeamDetail({
                 <section className="prose prose-gray max-w-none">
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: sanitizeHtml(bodyContent!),
+                      __html: sanitizeHtml(
+                        bodyContent!,
+                        PROSE_SANITIZE_OPTIONS,
+                      ),
                     }}
                   />
                 </section>
