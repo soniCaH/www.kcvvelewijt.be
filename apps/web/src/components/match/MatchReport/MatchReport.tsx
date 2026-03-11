@@ -12,7 +12,7 @@
  */
 
 import Image from "next/image";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { cn } from "@/lib/utils/cn";
 import { User, Calendar } from "lucide-react";
 
@@ -156,7 +156,7 @@ export function MatchReport({
           // Style paragraphs
           "prose-p:text-gray-700 prose-p:leading-relaxed",
         )}
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
       />
 
       {/* Photo gallery */}

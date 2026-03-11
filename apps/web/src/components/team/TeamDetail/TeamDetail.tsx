@@ -10,7 +10,7 @@
  */
 
 import { Suspense } from "react";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import * as Tabs from "@radix-ui/react-tabs";
 import { UrlTabs } from "@/components/ui/url-tabs";
 import { TeamHeader, type TeamHeaderProps } from "../TeamHeader";
@@ -124,7 +124,7 @@ export function TeamDetail({
                   <h2 className="text-2xl font-bold mb-4">Contactinformatie</h2>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(contactInfo!),
+                      __html: sanitizeHtml(contactInfo!),
                     }}
                   />
                 </section>
@@ -149,7 +149,7 @@ export function TeamDetail({
                 <section className="prose prose-gray max-w-none">
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(bodyContent!),
+                      __html: sanitizeHtml(bodyContent!),
                     }}
                   />
                 </section>

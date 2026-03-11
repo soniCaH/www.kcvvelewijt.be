@@ -7,7 +7,7 @@
  */
 
 import Link from "next/link";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { TeamHeader, type TeamHeaderProps } from "@/components/team/TeamHeader";
 import {
   TeamRoster,
@@ -50,7 +50,7 @@ export function BestuurPage({
             <div
               className="prose prose-gray"
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(description),
+                __html: sanitizeHtml(description),
               }}
             />
           </section>
