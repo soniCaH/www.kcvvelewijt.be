@@ -61,7 +61,8 @@ export function useSemanticSearch(
 
       timerRef.current = setTimeout(async () => {
         abortRef.current?.abort();
-        abortRef.current = new AbortController();
+        const controller = new AbortController();
+        abortRef.current = controller;
 
         setLoading(true);
         setError(null);
@@ -71,7 +72,7 @@ export function useSemanticSearch(
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query, type, limit }),
-            signal: abortRef.current.signal,
+            signal: controller.signal,
           });
 
           if (!res.ok) throw new Error(`Search failed: ${res.status}`);
@@ -84,7 +85,9 @@ export function useSemanticSearch(
           setError((err as Error).message);
           setResults([]);
         } finally {
-          setLoading(false);
+          if (abortRef.current === controller) {
+            setLoading(false);
+          }
         }
       }, debounceMs);
     },
@@ -100,6 +103,7 @@ export function useSemanticSearch(
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       abortRef.current?.abort();
+      abortRef.current = null; // ensures the finally guard fails after unmount
     };
   }, []);
 

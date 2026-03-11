@@ -102,24 +102,25 @@ export default {
           },
         ),
       );
-      return;
+    } else if (event.cron === "0 2 * * *") {
+      // PSD → Sanity player/team/staff sync
+      const layer = Layer.mergeAll(
+        FootbalistoClientLive,
+        SanityWriteClientLive,
+        envLayer,
+      ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
+      ctx.waitUntil(
+        Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
+          console.error(
+            "[scheduled] psd-sanity-sync failed:",
+            String(e),
+            e instanceof Error ? e.stack : "",
+          );
+          throw e;
+        }),
+      );
+    } else {
+      console.warn(`[scheduled] unknown cron expression: ${event.cron}`);
     }
-
-    // Default: 0 2 * * * — PSD → Sanity player/team/match sync
-    const layer = Layer.mergeAll(
-      FootbalistoClientLive,
-      SanityWriteClientLive,
-      envLayer,
-    ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
-    ctx.waitUntil(
-      Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
-        console.error(
-          "[scheduled] psd-sanity-sync failed:",
-          String(e),
-          e instanceof Error ? e.stack : "",
-        );
-        throw e;
-      }),
-    );
   },
 };

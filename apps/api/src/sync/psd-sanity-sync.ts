@@ -125,6 +125,11 @@ export const runSync = Effect.gen(function* () {
   const teams = yield* psd.getRawTeams();
   yield* Effect.log(`teams fetched: ${teams.length} total`);
 
+  if (teams.length === 0) {
+    yield* Effect.log("no teams found — skipping sync");
+    return;
+  }
+
   const teamIndex = cursor % teams.length;
   const team = teams[teamIndex]!;
 
@@ -186,7 +191,9 @@ export const runSync = Effect.gen(function* () {
     catch: () => new Error("KV cursor write failed"),
   }).pipe(
     Effect.catchAll((e) =>
-      Effect.log(`cursor not persisted — will restart from 0: ${String(e)}`),
+      Effect.log(
+        `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+      ),
     ),
   );
 

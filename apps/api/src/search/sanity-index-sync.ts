@@ -30,11 +30,11 @@ function buildIndexText(doc: SanityResponsibilityDoc): string {
 
 const QUERY = `*[_type == "responsibilityPath" && active == true] {
   _id,
-  "slug": slug.current,
+  "slug": coalesce(slug.current, ""),
   title,
   question,
-  keywords,
-  summary,
+  "keywords": coalesce(keywords, []),
+  "summary": coalesce(summary, ""),
   category
 }`;
 
@@ -69,22 +69,24 @@ export const runSanityIndexSync = (fetchFn?: FetchFn) =>
       (doc) => {
         const text = buildIndexText(doc);
         return embedding.embed(text).pipe(
-          Effect.orDie,
           Effect.flatMap((vector) =>
-            vectorize
-              .upsert([
-                {
-                  id: doc._id,
-                  values: vector,
-                  metadata: {
-                    slug: doc.slug,
-                    type: "responsibilityPath",
-                    title: doc.title,
-                    excerpt: doc.summary.slice(0, 200),
-                  },
+            vectorize.upsert([
+              {
+                id: doc._id,
+                values: vector,
+                metadata: {
+                  slug: doc.slug,
+                  type: "responsibilityPath",
+                  title: doc.title,
+                  excerpt: doc.summary.slice(0, 200),
                 },
-              ])
-              .pipe(Effect.orDie),
+              },
+            ]),
+          ),
+          Effect.catchAll((e) =>
+            Effect.log(
+              `[search-sync] skipped doc ${doc._id} (${doc.slug}): ${String(e)}`,
+            ),
           ),
         );
       },

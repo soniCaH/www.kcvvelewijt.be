@@ -186,8 +186,15 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10_000),
     });
-    const data = (await res.json()) as unknown;
+    let data: unknown;
+    try {
+      data = (await res.json()) as unknown;
+    } catch {
+      const text = await res.text();
+      data = { error: text || "Unknown error from search service" };
+    }
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("[Search API] Semantic search proxy error:", error);

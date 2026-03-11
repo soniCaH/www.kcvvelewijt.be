@@ -37,12 +37,22 @@ function makePostRequest(body: unknown): NextRequest {
 }
 
 describe("POST /api/search", () => {
+  const TEST_BFF_URL = "http://localhost:8787";
+  let savedApiUrl: string | undefined;
+
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
+    savedApiUrl = process.env.KCVV_API_URL;
+    process.env.KCVV_API_URL = TEST_BFF_URL;
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    if (savedApiUrl !== undefined) {
+      process.env.KCVV_API_URL = savedApiUrl;
+    } else {
+      delete process.env.KCVV_API_URL;
+    }
   });
 
   it("proxies to BFF and returns results", async () => {
@@ -64,25 +74,26 @@ describe("POST /api/search", () => {
       json: async () => bffResponse,
     } as Response);
 
-    const response = await POST(
-      makePostRequest({ query: "kantine", type: "responsibility", limit: 5 }),
-    );
+    const requestBody = { query: "kantine", type: "responsibility", limit: 5 };
+    const response = await POST(makePostRequest(requestBody));
 
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.results).toHaveLength(1);
     expect((body.results as Array<{ slug: string }>)[0]!.slug).toBe("kantine");
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      `${TEST_BFF_URL}/search`,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(requestBody),
+      }),
+    );
   });
 
   it("returns 503 when KCVV_API_URL is not set", async () => {
-    const saved = process.env.KCVV_API_URL;
     delete process.env.KCVV_API_URL;
-    try {
-      const response = await POST(makePostRequest({ query: "test" }));
-      expect(response.status).toBe(503);
-    } finally {
-      if (saved !== undefined) process.env.KCVV_API_URL = saved;
-    }
+    const response = await POST(makePostRequest({ query: "test" }));
+    expect(response.status).toBe(503);
   });
 
   it("returns 500 when BFF fetch throws", async () => {

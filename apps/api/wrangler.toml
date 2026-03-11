@@ -56,4 +56,4 @@ binding = "AI"
 
 [[env.staging.vectorize]]
 binding = "SEARCH_INDEX"
-index_name = "kcvv-search"
+index_name = "kcvv-search" # staging has no cron — index is read-only from staging; shares production data
