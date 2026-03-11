@@ -127,7 +127,7 @@ export function ResponsibilityFinder({
     semanticSearch(questionText);
   }, [questionText, semanticSearch]);
 
-  const suggestions: AutocompleteSuggestion[] = questionText
+  const suggestions: AutocompleteSuggestion[] = questionText?.trim()
     ? semanticResults
         .map((r) => {
           const path = paths.find((p) => p.id === r.slug);
@@ -147,6 +147,7 @@ export function ResponsibilityFinder({
     setSelectedResult(null);
     setShowRoleDropdown(false);
     setShowSuggestions(true);
+    setQuestionText("");
 
     // Clear any existing timeout
     if (focusTimeoutRef.current) {
