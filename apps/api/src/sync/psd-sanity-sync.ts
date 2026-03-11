@@ -91,9 +91,14 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
 
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
+const CURSOR_KEY = "sync:team-cursor";
+
 /**
- * Fetches all club teams + members from PSD and upserts into Sanity.
- * Teams are processed sequentially; players per team are upserted with concurrency 5.
+ * Fetches all club teams from PSD and upserts ONE team per invocation using a
+ * KV cursor. This keeps each Worker invocation well within the subrequest
+ * budget regardless of plan tier. The cursor advances on every successful run
+ * and wraps back to 0 after the last team, so all teams are covered in a full
+ * rotation over N nightly cron invocations (N = number of teams).
  * Only PSD-sourced fields are written — editorial fields are never touched.
  */
 export const runSync = Effect.gen(function* () {
@@ -104,6 +109,13 @@ export const runSync = Effect.gen(function* () {
 
   yield* Effect.log("sync started");
 
+  // Read cursor from KV (defaults to 0 if missing or unreadable)
+  const cursorStr = yield* Effect.tryPromise({
+    try: () => env.PSD_CACHE.get(CURSOR_KEY),
+    catch: () => new Error("KV cursor read failed"),
+  }).pipe(Effect.orElseSucceed(() => null));
+  const cursor = Number(cursorStr ?? "0");
+
   // Pre-fetch existing player image state to avoid redundant uploads
   yield* Effect.log("fetching player image state from Sanity");
   const imageState = yield* sanity.getPlayersImageState();
@@ -113,70 +125,81 @@ export const runSync = Effect.gen(function* () {
   const teams = yield* psd.getRawTeams();
   yield* Effect.log(`teams fetched: ${teams.length} total`);
 
-  yield* Effect.forEach(
-    teams,
-    (team) =>
-      Effect.gen(function* () {
-        yield* Effect.log(`team ${team.id} (${team.name}): fetching members`);
-        const members = yield* psd.getRawMembers(team.id);
-        const activePlayers = members.filter(
-          (m) => m.active && m.status !== "staff",
-        );
-        yield* Effect.log(
-          `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
-        );
+  if (teams.length === 0) {
+    yield* Effect.log("no teams found — skipping sync");
+    return;
+  }
 
-        yield* Effect.forEach(
-          activePlayers,
-          (m) =>
-            Effect.gen(function* () {
-              const doc = transformMember(m, baseUrl);
-              yield* sanity.upsertPlayer(doc);
+  const teamIndex = cursor % teams.length;
+  const team = teams[teamIndex]!;
 
-              const newImageUrl = doc._psdImageUrl;
-              if (newImageUrl) {
-                const existing = imageState.get(doc.psdId);
-                const needsUpload =
-                  !existing?.hasPsdImage ||
-                  existing.psdImageUrl !== newImageUrl;
-                if (needsUpload) {
-                  yield* Effect.log(`uploading image for player ${doc.psdId}`);
-                  yield* sanity
-                    .uploadPlayerImage(doc.psdId, newImageUrl)
-                    .pipe(
-                      Effect.catchAll((e) =>
-                        Effect.log(
-                          `image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
-                        ),
-                      ),
-                    );
-                }
-              }
-            }),
-          { concurrency: 5 },
-        );
-
-        // Sync coaching staff from PSD
-        const staffMembers = members.filter(
-          (m) => m.status === "staff" && m.active,
-        );
-        yield* Effect.log(
-          `team ${team.id}: ${staffMembers.length} staff members`,
-        );
-        yield* Effect.forEach(
-          staffMembers,
-          (m) => sanity.upsertStaff(transformStaff(m)),
-          { concurrency: 3 },
-        );
-
-        const playerPsdIds = activePlayers.map((m) => String(m.id));
-        yield* sanity.upsertTeam(transformTeam(team, playerPsdIds));
-        yield* Effect.log(`team ${team.id} (${team.name}): done`);
-      }),
-    { concurrency: 1 }, // teams sequentially to avoid rate limits
+  yield* Effect.log(
+    `processing team ${teamIndex + 1}/${teams.length}: ${team.id} (${team.name})`,
   );
 
-  yield* Effect.log("sync completed successfully");
+  const members = yield* psd.getRawMembers(team.id);
+  const activePlayers = members.filter((m) => m.active && m.status !== "staff");
+  yield* Effect.log(
+    `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
+  );
+
+  yield* Effect.forEach(
+    activePlayers,
+    (m) =>
+      Effect.gen(function* () {
+        const doc = transformMember(m, baseUrl);
+        yield* sanity.upsertPlayer(doc);
+
+        const newImageUrl = doc._psdImageUrl;
+        if (newImageUrl) {
+          const existing = imageState.get(doc.psdId);
+          const needsUpload =
+            !existing?.hasPsdImage || existing.psdImageUrl !== newImageUrl;
+          if (needsUpload) {
+            yield* Effect.log(`uploading image for player ${doc.psdId}`);
+            yield* sanity
+              .uploadPlayerImage(doc.psdId, newImageUrl)
+              .pipe(
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
+                  ),
+                ),
+              );
+          }
+        }
+      }),
+    { concurrency: 5 },
+  );
+
+  const staffMembers = members.filter((m) => m.status === "staff" && m.active);
+  yield* Effect.log(`team ${team.id}: ${staffMembers.length} staff members`);
+  yield* Effect.forEach(
+    staffMembers,
+    (m) => sanity.upsertStaff(transformStaff(m)),
+    { concurrency: 3 },
+  );
+
+  const playerPsdIds = activePlayers.map((m) => String(m.id));
+  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds));
+  yield* Effect.log(`team ${team.id} (${team.name}): done`);
+
+  // Advance cursor for next invocation (wraps at end of team list)
+  const nextCursor = (teamIndex + 1) % teams.length;
+  yield* Effect.tryPromise({
+    try: () => env.PSD_CACHE.put(CURSOR_KEY, String(nextCursor)),
+    catch: () => new Error("KV cursor write failed"),
+  }).pipe(
+    Effect.catchAll((e) =>
+      Effect.log(
+        `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+      ),
+    ),
+  );
+
+  yield* Effect.log(
+    `sync completed — cursor advanced to ${nextCursor} (next: team index ${nextCursor})`,
+  );
 }).pipe(
   Effect.tapError((e) =>
     Effect.log(

@@ -1,0 +1,49 @@
+import { Context, Effect, Layer } from "effect";
+import { WorkerEnvTag } from "../env";
+
+export class EmbeddingError extends Error {
+  readonly _tag = "EmbeddingError" as const;
+  constructor(
+    message: string,
+    readonly cause?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+export interface EmbeddingServiceInterface {
+  readonly embed: (text: string) => Effect.Effect<number[], EmbeddingError>;
+}
+
+export class EmbeddingService extends Context.Tag("EmbeddingService")<
+  EmbeddingService,
+  EmbeddingServiceInterface
+>() {}
+
+const MODEL = "@cf/baai/bge-multilingual-gemma2";
+
+export const EmbeddingServiceLive = Layer.effect(
+  EmbeddingService,
+  Effect.gen(function* () {
+    const env = yield* WorkerEnvTag;
+    return {
+      embed: (text: string) =>
+        Effect.tryPromise({
+          try: async () => {
+            // Cast needed: bge-multilingual-gemma2 isn't in the AiModels type yet
+            const ai = env.AI as unknown as {
+              run: (model: string, input: unknown) => Promise<unknown>;
+            };
+            const result = (await ai.run(MODEL, { text: [text] })) as {
+              data: number[][];
+            };
+            const vector = result.data[0];
+            if (!vector) throw new Error("Empty embedding response");
+            return vector;
+          },
+          catch: (cause) =>
+            new EmbeddingError(`Failed to embed text: ${String(cause)}`, cause),
+        }),
+    };
+  }),
+);

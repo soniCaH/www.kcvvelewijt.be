@@ -23,6 +23,10 @@ import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
 import { StatsApiLive } from "./handlers/stats";
+import { SearchApiLive } from "./handlers/search";
+import { EmbeddingServiceLive } from "./search/embedding";
+import { VectorizeServiceLive } from "./search/vectorize";
+import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
 import { runSync } from "./sync/psd-sanity-sync";
 
@@ -38,11 +42,20 @@ const WorkerPlatformLayer = Layer.mergeAll(
   HttpPlatform.layer.pipe(Layer.provide(FileSystem.layerNoop({}))),
 );
 
+/**
+ * Creates an application layer that builds the PsdApi runtime wired with live service implementations and the provided worker environment.
+ *
+ * @param env - The Worker environment (bindings such as KV namespaces and secrets) to supply to the runtime
+ * @returns A Layer supplying the PsdApi implementation composed with live services (matches, ranking, stats, search, embedding, vectorization, HTTP client, KV cache) and required platform services
+ */
 function buildAppLayer(env: WorkerEnv) {
   return HttpApiBuilder.api(PsdApi).pipe(
     Layer.provide(MatchesApiLive),
     Layer.provide(RankingApiLive),
     Layer.provide(StatsApiLive),
+    Layer.provide(SearchApiLive),
+    Layer.provide(EmbeddingServiceLive),
+    Layer.provide(VectorizeServiceLive),
     Layer.provide(FootbalistoClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
@@ -64,25 +77,50 @@ export default {
   },
 
   async scheduled(
-    _event: ScheduledEvent,
+    event: ScheduledEvent,
     env: WorkerEnv,
     ctx: ExecutionContext,
   ): Promise<void> {
     const envLayer = Layer.succeed(WorkerEnvTag, env);
-    const layer = Layer.mergeAll(
-      FootbalistoClientLive,
-      SanityWriteClientLive,
-      envLayer,
-    ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
-    ctx.waitUntil(
-      Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
-        console.error(
-          "[scheduled] runSync promise rejected:",
-          String(e),
-          e instanceof Error ? e.stack : "",
-        );
-        throw e;
-      }),
-    );
+
+    if (event.cron === "30 2 * * *") {
+      // Search embedding index sync — separate invocation budget
+      const layer = Layer.mergeAll(
+        EmbeddingServiceLive,
+        VectorizeServiceLive,
+        envLayer,
+      ).pipe(Layer.provide(envLayer));
+      ctx.waitUntil(
+        Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)).catch(
+          (e) => {
+            console.error(
+              "[scheduled] sanity-index-sync failed:",
+              String(e),
+              e instanceof Error ? e.stack : "",
+            );
+            throw e;
+          },
+        ),
+      );
+    } else if (event.cron === "0 2 * * *") {
+      // PSD → Sanity player/team/staff sync
+      const layer = Layer.mergeAll(
+        FootbalistoClientLive,
+        SanityWriteClientLive,
+        envLayer,
+      ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
+      ctx.waitUntil(
+        Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
+          console.error(
+            "[scheduled] psd-sanity-sync failed:",
+            String(e),
+            e instanceof Error ? e.stack : "",
+          );
+          throw e;
+        }),
+      );
+    } else {
+      console.warn(`[scheduled] unknown cron expression: ${event.cron}`);
+    }
   },
 };

@@ -17,12 +17,22 @@ enabled = true
 invocation_logs = true # captures all console.log / Effect.log output per cron invocation
 
 [triggers]
-crons = ["0 2 * * *"] # 02:00 UTC daily
+crons = [
+  "0 2 * * *",  # 02:00 UTC — psd-sanity-sync (players, teams, matches)
+  "30 2 * * *", # 02:30 UTC — sanity-index-sync (semantic search embeddings)
+]
 
 [[kv_namespaces]]
 binding = "PSD_CACHE"
 id = "82533c23954d4ed98871dd53465c5c0e"
 preview_id = "4ee68193dd574f7fa01fba9d53d5d475"
+
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "SEARCH_INDEX"
+index_name = "kcvv-search"
 
 [env.staging]
 name = "kcvv-api-staging"
@@ -40,3 +50,10 @@ SANITY_DATASET = "staging"
 [[env.staging.kv_namespaces]]
 binding = "PSD_CACHE"
 id = "4ee68193dd574f7fa01fba9d53d5d475"
+
+[env.staging.ai]
+binding = "AI"
+
+[[env.staging.vectorize]]
+binding = "SEARCH_INDEX"
+index_name = "kcvv-search" # staging has no cron — index is read-only from staging; shares production data
