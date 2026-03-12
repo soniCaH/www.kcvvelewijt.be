@@ -20,7 +20,10 @@ import { WorkerEnvTag } from "../env";
 export function transformMember(
   psd: PsdMember,
   baseUrl: string,
-): SanityPlayerDoc & { _psdImageUrl: string | null } {
+): SanityPlayerDoc & {
+  _psdImageUrl: string | null;
+  _psdImageFetchUrl: string | null;
+} {
   return {
     psdId: String(psd.id),
     firstName: psd.firstName,
@@ -34,10 +37,14 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
-    // Strip the rotating ?profileAccessKey query param so the stored URL stays
-    // stable across syncs — the path alone uniquely identifies the player photo.
+    // Stable URL (no query param) used for dedup comparison across syncs.
+    // The path alone uniquely identifies the player photo.
     _psdImageUrl: psd.profilePictureURL
       ? `${baseUrl}${psd.profilePictureURL.split("?")[0]}`
+      : null,
+    // Full URL including ?profileAccessKey — required to actually fetch the image.
+    _psdImageFetchUrl: psd.profilePictureURL
+      ? `${baseUrl}${psd.profilePictureURL}`
       : null,
   };
 }
@@ -187,15 +194,16 @@ export const runSync = Effect.gen(function* () {
         const doc = transformMember(m, baseUrl);
         yield* sanity.upsertPlayer(doc);
 
-        const newImageUrl = doc._psdImageUrl;
-        if (newImageUrl) {
+        const stableImageUrl = doc._psdImageUrl;
+        const fetchImageUrl = doc._psdImageFetchUrl;
+        if (stableImageUrl && fetchImageUrl) {
           const existing = imageState.get(doc.psdId);
           const needsUpload =
-            !existing?.hasPsdImage || existing.psdImageUrl !== newImageUrl;
+            !existing?.hasPsdImage || existing.psdImageUrl !== stableImageUrl;
           if (needsUpload) {
             yield* Effect.log(`uploading image for player ${doc.psdId}`);
             yield* sanity
-              .uploadPlayerImage(doc.psdId, newImageUrl)
+              .uploadPlayerImage(doc.psdId, fetchImageUrl)
               .pipe(
                 Effect.catchAll((e) =>
                   Effect.log(
