@@ -85,7 +85,8 @@ export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
 /**
  * Upsert strategy: createIfNotExists sets the document skeleton on first run.
  * patch().set() overwrites only PSD-sourced fields — never touches editorial
- * fields (transparentImage, celebrationImage, position, bio, trainingSchedule, staff).
+ * fields (transparentImage, celebrationImage, position, bio, trainingSchedule).
+ * Both `players` and `staff` on team documents are sync-owned (readOnly in Studio).
  */
 export const SanityWriteClientLive = Layer.effect(
   SanityWriteClient,
