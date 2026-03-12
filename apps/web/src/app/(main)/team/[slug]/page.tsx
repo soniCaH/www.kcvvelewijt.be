@@ -150,7 +150,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   if (!team) notFound();
 
-  const bffData = await fetchBffData(Number(team.psdId));
+  const psdTeamId = parseInt(team.psdId, 10);
+  const bffData =
+    Number.isFinite(psdTeamId) && psdTeamId > 0
+      ? await fetchBffData(psdTeamId)
+      : null;
 
   return (
     <TeamDetail
