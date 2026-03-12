@@ -29,11 +29,27 @@ const mockYouthTeams = [
   { _id: "2", name: "KCVV U17", slug: "kcvv-elewijt-u17", age: "U17" },
 ];
 
+const mockSeniorTeams = [
+  {
+    _id: "a-id",
+    name: "Eerste Elftallen A",
+    slug: "eerste-elftallen-a",
+    age: "A",
+  },
+  {
+    _id: "b-id",
+    name: "Eerste Elftallen B",
+    slug: "eerste-elftallen-b",
+    age: "B",
+  },
+];
+
 describe("MobileMenu", () => {
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
     youthTeams: mockYouthTeams,
+    seniorTeams: mockSeniorTeams,
   };
 
   beforeEach(() => {
@@ -93,7 +109,7 @@ describe("MobileMenu", () => {
   describe("Query parameter active state", () => {
     it("should mark submenu item as active when pathname and tab param match", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/a-ploeg";
+      mockPathname = "/team/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams("tab=lineup");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -103,7 +119,7 @@ describe("MobileMenu", () => {
 
       // The "Spelers & Staff" link should be active (has ?tab=lineup)
       const spelersLink = container.querySelector(
-        'a[href="/team/a-ploeg?tab=lineup"]',
+        'a[href="/team/eerste-elftallen-a?tab=lineup"]',
       );
       expect(spelersLink).toHaveClass("active");
       expect(spelersLink).toHaveClass("text-kcvv-green-bright");
@@ -111,7 +127,7 @@ describe("MobileMenu", () => {
 
     it("should mark Info as active when on team page without tab param", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/a-ploeg";
+      mockPathname = "/team/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams();
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -120,14 +136,16 @@ describe("MobileMenu", () => {
       await user.click(aPloegButton);
 
       // The "Info" link should be active (no tab param)
-      const infoLink = container.querySelector('a[href="/team/a-ploeg"]');
+      const infoLink = container.querySelector(
+        'a[href="/team/eerste-elftallen-a"]',
+      );
       expect(infoLink).toHaveClass("active");
       expect(infoLink).toHaveClass("text-kcvv-green-bright");
     });
 
     it("should not mark Info as active when tab param exists", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/a-ploeg";
+      mockPathname = "/team/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams("tab=matches");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -136,13 +154,15 @@ describe("MobileMenu", () => {
       await user.click(aPloegButton);
 
       // The "Info" link should NOT be active when we're on ?tab=matches
-      const infoLink = container.querySelector('a[href="/team/a-ploeg"]');
+      const infoLink = container.querySelector(
+        'a[href="/team/eerste-elftallen-a"]',
+      );
       expect(infoLink).not.toHaveClass("active");
     });
 
     it("should mark Wedstrijden as active when tab=matches", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/b-ploeg";
+      mockPathname = "/team/eerste-elftallen-b";
       mockSearchParams = new URLSearchParams("tab=matches");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -152,14 +172,14 @@ describe("MobileMenu", () => {
 
       // The "Wedstrijden" link should be active
       const wedstrijdenLink = container.querySelector(
-        'a[href="/team/b-ploeg?tab=matches"]',
+        'a[href="/team/eerste-elftallen-b?tab=matches"]',
       );
       expect(wedstrijdenLink).toHaveClass("active");
     });
 
     it("should mark Stand as active when tab=standings", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/a-ploeg";
+      mockPathname = "/team/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams("tab=standings");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -169,7 +189,7 @@ describe("MobileMenu", () => {
 
       // The "Stand" link should be active
       const standLink = container.querySelector(
-        'a[href="/team/a-ploeg?tab=standings"]',
+        'a[href="/team/eerste-elftallen-a?tab=standings"]',
       );
       expect(standLink).toHaveClass("active");
     });
