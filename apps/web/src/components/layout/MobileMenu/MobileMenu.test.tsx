@@ -29,11 +29,17 @@ const mockYouthTeams = [
   { _id: "2", name: "KCVV U17", slug: "kcvv-elewijt-u17", age: "U17" },
 ];
 
+const mockSeniorTeams = [
+  { _id: "a-id", name: "Eerste Elftallen A", slug: "a-ploeg", age: "A" },
+  { _id: "b-id", name: "Eerste Elftallen B", slug: "b-ploeg", age: "B" },
+];
+
 describe("MobileMenu", () => {
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
     youthTeams: mockYouthTeams,
+    seniorTeams: mockSeniorTeams,
   };
 
   beforeEach(() => {

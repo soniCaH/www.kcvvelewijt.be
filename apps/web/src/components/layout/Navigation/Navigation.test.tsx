@@ -19,6 +19,11 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+const seniorTeams = [
+  { _id: "a-id", name: "Eerste Elftallen A", slug: "a-ploeg", age: "A" },
+  { _id: "b-id", name: "Eerste Elftallen B", slug: "b-ploeg", age: "B" },
+];
+
 describe("Navigation", () => {
   beforeEach(() => {
     mockPathname = "/";
@@ -27,12 +32,12 @@ describe("Navigation", () => {
 
   describe("Rendering", () => {
     it("should render navigation element", () => {
-      render(<Navigation />);
+      render(<Navigation seniorTeams={seniorTeams} />);
       expect(screen.getByRole("navigation")).toBeInTheDocument();
     });
 
     it("should render all main menu items", () => {
-      render(<Navigation />);
+      render(<Navigation seniorTeams={seniorTeams} />);
       expect(screen.getByText("Home")).toBeInTheDocument();
       expect(screen.getByText("Nieuws")).toBeInTheDocument();
       expect(screen.getByText("A-Ploeg")).toBeInTheDocument();
@@ -40,7 +45,7 @@ describe("Navigation", () => {
     });
 
     it("should render search link", () => {
-      render(<Navigation />);
+      render(<Navigation seniorTeams={seniorTeams} />);
       expect(screen.getByLabelText("Search")).toBeInTheDocument();
     });
   });
@@ -48,14 +53,14 @@ describe("Navigation", () => {
   describe("Active state detection", () => {
     it("should mark Home as active on root path", () => {
       mockPathname = "/";
-      render(<Navigation />);
+      render(<Navigation seniorTeams={seniorTeams} />);
       const homeLink = screen.getByText("Home").closest("a");
       expect(homeLink).toHaveClass("active");
     });
 
     it("should mark Nieuws as active on /news path", () => {
       mockPathname = "/news";
-      render(<Navigation />);
+      render(<Navigation seniorTeams={seniorTeams} />);
       const newsLink = screen.getByText("Nieuws").closest("a");
       expect(newsLink).toHaveClass("active");
     });
@@ -63,7 +68,7 @@ describe("Navigation", () => {
     it("should not mark base path as active when tab param exists", async () => {
       mockPathname = "/team/a-ploeg";
       mockSearchParams = new URLSearchParams("tab=lineup");
-      const { container } = render(<Navigation />);
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // A-Ploeg is a dropdown trigger - it should NOT have the "active" class
       const aPloegTrigger = screen.getByText("A-Ploeg").closest("a");
@@ -96,7 +101,7 @@ describe("Navigation", () => {
     it("should mark dropdown item as active when pathname and tab param match", async () => {
       mockPathname = "/team/a-ploeg";
       mockSearchParams = new URLSearchParams("tab=lineup");
-      const { container } = render(<Navigation />);
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // Hover over the A-Ploeg dropdown to open it using fireEvent
       const aPloegListItem = screen.getByText("A-Ploeg").closest("li");
@@ -121,7 +126,7 @@ describe("Navigation", () => {
     it("should mark Info as active when on team page without tab param", async () => {
       mockPathname = "/team/a-ploeg";
       mockSearchParams = new URLSearchParams();
-      const { container } = render(<Navigation />);
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // Hover over the A-Ploeg dropdown to open it using fireEvent
       const aPloegListItem = screen.getByText("A-Ploeg").closest("li");
@@ -145,7 +150,7 @@ describe("Navigation", () => {
     it("should not mark Info as active when tab param exists", async () => {
       mockPathname = "/team/a-ploeg";
       mockSearchParams = new URLSearchParams("tab=matches");
-      const { container } = render(<Navigation />);
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // Hover over the A-Ploeg dropdown to open it using fireEvent
       const aPloegListItem = screen.getByText("A-Ploeg").closest("li");
@@ -169,7 +174,7 @@ describe("Navigation", () => {
   describe("Nested routes", () => {
     it("should mark parent as active for nested routes", async () => {
       mockPathname = "/club/history";
-      const { container } = render(<Navigation />);
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // "De club" is a dropdown trigger - hover to open it
       const deClubListItem = screen.getByText("De club").closest("li");
@@ -190,7 +195,7 @@ describe("Navigation", () => {
 
   describe("Custom className", () => {
     it("should apply custom className", () => {
-      render(<Navigation className="custom-class" />);
+      render(<Navigation seniorTeams={seniorTeams} className="custom-class" />);
       const nav = screen.getByRole("navigation");
       expect(nav).toHaveClass("custom-class");
     });

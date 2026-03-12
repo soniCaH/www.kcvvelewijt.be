@@ -11,10 +11,14 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Search } from "@/lib/icons";
-import type { YouthTeamNavItem } from "@/lib/sanity/queries/teams";
+import type {
+  YouthTeamNavItem,
+  SeniorTeamNavItem,
+} from "@/lib/sanity/queries/teams";
 
 export interface NavigationProps {
   youthTeams?: YouthTeamNavItem[];
+  seniorTeams?: SeniorTeamNavItem[];
   /**
    * Additional CSS classes
    */
@@ -31,26 +35,6 @@ const staticMenuItems: MenuItem[] = [
   { label: "Home", href: "/" },
   { label: "Nieuws", href: "/news" },
   { label: "Evenementen", href: "/events" },
-  {
-    label: "A-Ploeg",
-    href: "/team/a-ploeg",
-    children: [
-      { label: "Info", href: "/team/a-ploeg" },
-      { label: "Spelers & Staff", href: "/team/a-ploeg?tab=lineup" },
-      { label: "Wedstrijden", href: "/team/a-ploeg?tab=matches" },
-      { label: "Stand", href: "/team/a-ploeg?tab=standings" },
-    ],
-  },
-  {
-    label: "B-Ploeg",
-    href: "/team/b-ploeg",
-    children: [
-      { label: "Info", href: "/team/b-ploeg" },
-      { label: "Spelers & Staff", href: "/team/b-ploeg?tab=lineup" },
-      { label: "Wedstrijden", href: "/team/b-ploeg?tab=matches" },
-      { label: "Stand", href: "/team/b-ploeg?tab=standings" },
-    ],
-  },
   { label: "Sponsors", href: "/sponsors" },
   { label: "Hulp", href: "/hulp" },
   {
@@ -85,10 +69,37 @@ const staticMenuItems: MenuItem[] = [
  * - Dropdown border: 1px solid gray-700
  * - Dropdown font-size: 0.6875rem (11px)
  */
-export const Navigation = ({ youthTeams, className }: NavigationProps) => {
+const buildSeniorMenuItem = (
+  team: SeniorTeamNavItem | undefined,
+  label: string,
+): MenuItem => {
+  const slug = team?.slug ?? "";
+  const href = `/team/${slug}`;
+  return {
+    label,
+    href,
+    children: slug
+      ? [
+          { label: "Info", href },
+          { label: "Spelers & Staff", href: `${href}?tab=lineup` },
+          { label: "Wedstrijden", href: `${href}?tab=matches` },
+          { label: "Stand", href: `${href}?tab=standings` },
+        ]
+      : undefined,
+  };
+};
+
+export const Navigation = ({
+  youthTeams,
+  seniorTeams,
+  className,
+}: NavigationProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const aTeam = seniorTeams?.find((t) => t.age === "A");
+  const bTeam = seniorTeams?.find((t) => t.age === "B");
 
   const jeugdItem: MenuItem = {
     label: "Jeugd",
@@ -101,10 +112,10 @@ export const Navigation = ({ youthTeams, className }: NavigationProps) => {
 
   const menuItems = [
     ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
-    staticMenuItems[3]!, // A-Ploeg
-    staticMenuItems[4]!, // B-Ploeg
+    buildSeniorMenuItem(aTeam, "A-Ploeg"),
+    buildSeniorMenuItem(bTeam, "B-Ploeg"),
     jeugdItem,
-    ...staticMenuItems.slice(5), // Sponsors, Hulp, De club
+    ...staticMenuItems.slice(3), // Sponsors, Hulp, De club
   ];
 
   /**

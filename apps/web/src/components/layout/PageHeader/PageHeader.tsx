@@ -13,10 +13,14 @@ import { cn } from "@/lib/utils/cn";
 import { Search, Menu } from "@/lib/icons";
 import { Navigation } from "../Navigation";
 import { MobileMenu } from "../MobileMenu";
-import type { YouthTeamNavItem } from "@/lib/sanity/queries/teams";
+import type {
+  YouthTeamNavItem,
+  SeniorTeamNavItem,
+} from "@/lib/sanity/queries/teams";
 
 export interface PageHeaderProps {
   youthTeams?: YouthTeamNavItem[];
+  seniorTeams?: SeniorTeamNavItem[];
   /**
    * Additional CSS classes
    */
@@ -34,7 +38,11 @@ export interface PageHeaderProps {
  * - Fixed positioning with z-index 50 (above content)
  * - Transition: height 0.3s
  */
-export const PageHeader = ({ youthTeams, className }: PageHeaderProps) => {
+export const PageHeader = ({
+  youthTeams,
+  seniorTeams,
+  className,
+}: PageHeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -109,7 +117,7 @@ export const PageHeader = ({ youthTeams, className }: PageHeaderProps) => {
 
             {/* Desktop Navigation - Suspense boundary for useSearchParams */}
             <Suspense fallback={<div className="flex-grow" />}>
-              <Navigation youthTeams={youthTeams} />
+              <Navigation youthTeams={youthTeams} seniorTeams={seniorTeams} />
             </Suspense>
           </div>
         </nav>
@@ -124,6 +132,7 @@ export const PageHeader = ({ youthTeams, className }: PageHeaderProps) => {
           isOpen={isMobileMenuOpen}
           onClose={handleClose}
           youthTeams={youthTeams}
+          seniorTeams={seniorTeams}
         />
       </Suspense>
     </>
