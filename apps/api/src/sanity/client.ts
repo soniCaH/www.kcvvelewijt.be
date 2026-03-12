@@ -22,6 +22,7 @@ export interface SanityTeamDoc {
   gender: string;
   footbelId: number | null;
   playerPsdIds: string[];
+  staffPsdIds: string[];
 }
 
 export interface SanityStaffDoc {
@@ -84,7 +85,8 @@ export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
 /**
  * Upsert strategy: createIfNotExists sets the document skeleton on first run.
  * patch().set() overwrites only PSD-sourced fields — never touches editorial
- * fields (transparentImage, celebrationImage, position, bio, trainingSchedule, staff).
+ * fields (transparentImage, celebrationImage, position, bio, trainingSchedule).
+ * Both `players` and `staff` on team documents are sync-owned (readOnly in Studio).
  */
 export const SanityWriteClientLive = Layer.effect(
   SanityWriteClient,
@@ -246,6 +248,11 @@ export const SanityWriteClientLive = Layer.effect(
           players: doc.playerPsdIds.map((id) => ({
             _type: "reference",
             _ref: `player-psd-${id}`,
+            _key: id,
+          })),
+          staff: doc.staffPsdIds.map((id) => ({
+            _type: "reference",
+            _ref: `staffMember-psd-${id}`,
             _key: id,
           })),
         }),

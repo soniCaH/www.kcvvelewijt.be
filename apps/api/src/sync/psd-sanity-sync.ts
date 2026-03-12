@@ -47,11 +47,13 @@ export function transformMember(
  *
  * @param psd - The PSD team object containing team metadata
  * @param playerPsdIds - Array of PSD player IDs to associate with the team
- * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided `playerPsdIds`
+ * @param staffPsdIds - Array of PSD staff member IDs to associate with the team
+ * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided player/staff IDs
  */
 export function transformTeam(
   psd: PsdTeam,
   playerPsdIds: string[],
+  staffPsdIds: string[],
 ): SanityTeamDoc {
   const slug = psd.name
     .toLowerCase()
@@ -68,6 +70,7 @@ export function transformTeam(
     gender: psd.gender,
     footbelId: psd.footbelId,
     playerPsdIds,
+    staffPsdIds,
   };
 }
 
@@ -87,6 +90,32 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
         ? psd.functionTitle
         : undefined,
   };
+}
+
+// ─── Member partitioning ──────────────────────────────────────────────────────
+
+/**
+ * Split a raw PSD member list into players and staff by explicit status match.
+ * Members with unknown statuses are returned separately so the caller can log
+ * and skip them — they must never be upserted as players or staff.
+ *
+ * Note: `active` is intentionally ignored — in PSD it means "has logged in to
+ * the platform", not club membership status.
+ */
+export function partitionMembers(members: readonly PsdMember[]): {
+  players: readonly PsdMember[];
+  staff: readonly PsdMember[];
+  unknown: readonly PsdMember[];
+} {
+  const players: PsdMember[] = [];
+  const staff: PsdMember[] = [];
+  const unknown: PsdMember[] = [];
+  for (const m of members) {
+    if (m.status === "speler") players.push(m);
+    else if (m.status === "staff") staff.push(m);
+    else unknown.push(m);
+  }
+  return { players, staff, unknown };
 }
 
 // ─── Sync effect ──────────────────────────────────────────────────────────────
@@ -138,13 +167,18 @@ export const runSync = Effect.gen(function* () {
   );
 
   const members = yield* psd.getRawMembers(team.id);
-  const activePlayers = members.filter((m) => m.active && m.status !== "staff");
+  const { players, staff: staffMembers, unknown } = partitionMembers(members);
   yield* Effect.log(
-    `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
+    `team ${team.id}: ${members.length} members, ${players.length} players, ${staffMembers.length} staff`,
   );
+  if (unknown.length > 0) {
+    yield* Effect.log(
+      `team ${team.id}: ${unknown.length} members with unknown status skipped: ${unknown.map((m) => `${m.id}(${m.status})`).join(", ")}`,
+    );
+  }
 
   yield* Effect.forEach(
-    activePlayers,
+    players,
     (m) =>
       Effect.gen(function* () {
         const doc = transformMember(m, baseUrl);
@@ -172,16 +206,15 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 5 },
   );
 
-  const staffMembers = members.filter((m) => m.status === "staff" && m.active);
-  yield* Effect.log(`team ${team.id}: ${staffMembers.length} staff members`);
   yield* Effect.forEach(
     staffMembers,
     (m) => sanity.upsertStaff(transformStaff(m)),
     { concurrency: 3 },
   );
 
-  const playerPsdIds = activePlayers.map((m) => String(m.id));
-  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds));
+  const playerPsdIds = players.map((m) => String(m.id));
+  const staffPsdIds = staffMembers.map((m) => String(m.id));
+  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds, staffPsdIds));
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // Advance cursor for next invocation (wraps at end of team list)

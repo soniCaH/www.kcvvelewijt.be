@@ -3,6 +3,7 @@ import {
   transformMember,
   transformTeam,
   transformStaff,
+  partitionMembers,
 } from "./psd-sanity-sync";
 import type { PsdMember } from "@kcvv/api-contract";
 
@@ -179,12 +180,14 @@ describe("transformTeam", () => {
       active: true,
     };
     const playerIds = ["6453", "6458"];
-    const result = transformTeam(psdTeam, playerIds);
+    const staffIds = ["101", "102"];
+    const result = transformTeam(psdTeam, playerIds, staffIds);
     expect(result.psdId).toBe("1");
     expect(result.slug).toBe("eerste-elftallen-a");
     expect(result.age).toBe("A");
     expect(result.footbelId).toBe(183904);
     expect(result.playerPsdIds).toEqual(["6453", "6458"]);
+    expect(result.staffPsdIds).toEqual(["101", "102"]);
   });
 
   it("slugifies names with special characters", () => {
@@ -198,7 +201,74 @@ describe("transformTeam", () => {
         active: true,
       },
       [],
+      [],
     );
     expect(result.slug).toBe("kcvve-u15-dames-jeugd");
+  });
+});
+
+const makeMember = (overrides: Partial<PsdMember>): PsdMember => ({
+  id: 1,
+  firstName: "Jan",
+  lastName: "Janssen",
+  birthDate: null,
+  nationality: null,
+  profilePictureURL: null,
+  keeper: false,
+  bestPosition: null,
+  active: true,
+  status: "speler",
+  functionTitle: null,
+  ...overrides,
+});
+
+describe("partitionMembers", () => {
+  it("puts status=speler members into players", () => {
+    const { players, staff, unknown } = partitionMembers([
+      makeMember({ id: 1, status: "speler" }),
+    ]);
+    expect(players).toHaveLength(1);
+    expect(staff).toHaveLength(0);
+    expect(unknown).toHaveLength(0);
+  });
+
+  it("puts status=staff members into staff", () => {
+    const { players, staff, unknown } = partitionMembers([
+      makeMember({ id: 2, status: "staff" }),
+    ]);
+    expect(players).toHaveLength(0);
+    expect(staff).toHaveLength(1);
+    expect(unknown).toHaveLength(0);
+  });
+
+  it("includes active=false players (PSD active means logged-in, not club membership)", () => {
+    const { players } = partitionMembers([
+      makeMember({ id: 3, status: "speler", active: false }),
+    ]);
+    expect(players).toHaveLength(1);
+    expect(players[0]!.id).toBe(3);
+  });
+
+  it("puts unknown status into unknown, not players or staff", () => {
+    const { players, staff, unknown } = partitionMembers([
+      makeMember({ id: 4, status: "bestuurslid" }),
+    ]);
+    expect(players).toHaveLength(0);
+    expect(staff).toHaveLength(0);
+    expect(unknown).toHaveLength(1);
+    expect(unknown[0]!.id).toBe(4);
+  });
+
+  it("partitions a mixed list correctly", () => {
+    const members = [
+      makeMember({ id: 1, status: "speler", active: true }),
+      makeMember({ id: 2, status: "speler", active: false }),
+      makeMember({ id: 3, status: "staff" }),
+      makeMember({ id: 4, status: "weird_status" }),
+    ];
+    const { players, staff, unknown } = partitionMembers(members);
+    expect(players.map((m) => m.id)).toEqual([1, 2]);
+    expect(staff.map((m) => m.id)).toEqual([3]);
+    expect(unknown.map((m) => m.id)).toEqual([4]);
   });
 });

@@ -138,6 +138,7 @@ export const team = defineType({
       title: 'Staff',
       type: 'array',
       of: [{type: 'reference', to: [{type: 'staffMember'}]}],
+      readOnly: true,
     }),
   ],
   preview: {
