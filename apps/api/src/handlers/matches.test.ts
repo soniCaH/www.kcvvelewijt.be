@@ -56,6 +56,7 @@ function makeClientMock(): FootbalistoClientInterface {
     getRawTeamStats: () => Effect.fail(new Error("not needed") as never),
     getRawTeams: () => Effect.succeed([]),
     getRawMembers: () => Effect.succeed([]),
+    getRawStaff: () => Effect.succeed([]),
   };
 }
 
@@ -120,6 +121,7 @@ describe("getMatchDetailHandler", () => {
       getRawTeamStats: () => Effect.fail(new Error("unexpected") as never),
       getRawTeams: () => Effect.fail(new Error("unexpected") as never),
       getRawMembers: () => Effect.fail(new Error("unexpected") as never),
+      getRawStaff: () => Effect.fail(new Error("unexpected") as never),
     };
 
     const kvSetSpy = vi.fn(() => Effect.succeed(undefined));

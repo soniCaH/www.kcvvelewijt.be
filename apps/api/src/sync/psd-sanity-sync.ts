@@ -166,10 +166,13 @@ export const runSync = Effect.gen(function* () {
     `processing team ${teamIndex + 1}/${teams.length}: ${team.id} (${team.name})`,
   );
 
-  const members = yield* psd.getRawMembers(team.id);
-  const { players, staff: staffMembers, unknown } = partitionMembers(members);
+  const [members, staffMembers] = yield* Effect.all(
+    [psd.getRawMembers(team.id), psd.getRawStaff(team.id)],
+    { concurrency: 2 },
+  );
+  const { players, unknown } = partitionMembers(members);
   yield* Effect.log(
-    `team ${team.id}: ${members.length} members, ${players.length} players, ${staffMembers.length} staff`,
+    `team ${team.id}: ${players.length} players, ${staffMembers.length} staff`,
   );
   if (unknown.length > 0) {
     yield* Effect.log(

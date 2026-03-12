@@ -244,7 +244,7 @@ export const SanityWriteClientLive = Layer.effect(
           slug: { _type: "slug", current: doc.slug },
           age: doc.age,
           gender: doc.gender,
-          footbelId: doc.footbelId,
+          ...(doc.footbelId != null && { footbelId: doc.footbelId }),
           players: doc.playerPsdIds.map((id) => ({
             _type: "reference",
             _ref: `player-psd-${id}`,
