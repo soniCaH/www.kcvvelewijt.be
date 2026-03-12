@@ -141,13 +141,15 @@ export const runSync = Effect.gen(function* () {
   );
 
   const members = yield* psd.getRawMembers(team.id);
-  const activePlayers = members.filter((m) => m.active && m.status !== "staff");
+  // `active` in PSD means "has logged in to PSD" — not club membership status.
+  // Filter only by status to avoid excluding players who haven't logged in yet.
+  const players = members.filter((m) => m.status !== "staff");
   yield* Effect.log(
-    `team ${team.id}: ${members.length} members, ${activePlayers.length} active`,
+    `team ${team.id}: ${members.length} members, ${players.length} players`,
   );
 
   yield* Effect.forEach(
-    activePlayers,
+    players,
     (m) =>
       Effect.gen(function* () {
         const doc = transformMember(m, baseUrl);
@@ -175,7 +177,7 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 5 },
   );
 
-  const staffMembers = members.filter((m) => m.status === "staff" && m.active);
+  const staffMembers = members.filter((m) => m.status === "staff");
   yield* Effect.log(`team ${team.id}: ${staffMembers.length} staff members`);
   yield* Effect.forEach(
     staffMembers,
@@ -183,7 +185,7 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 3 },
   );
 
-  const playerPsdIds = activePlayers.map((m) => String(m.id));
+  const playerPsdIds = players.map((m) => String(m.id));
   const staffPsdIds = staffMembers.map((m) => String(m.id));
   yield* sanity.upsertTeam(transformTeam(team, playerPsdIds, staffPsdIds));
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
