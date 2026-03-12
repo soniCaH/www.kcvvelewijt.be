@@ -92,6 +92,32 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
   };
 }
 
+// ─── Member partitioning ──────────────────────────────────────────────────────
+
+/**
+ * Split a raw PSD member list into players and staff by explicit status match.
+ * Members with unknown statuses are returned separately so the caller can log
+ * and skip them — they must never be upserted as players or staff.
+ *
+ * Note: `active` is intentionally ignored — in PSD it means "has logged in to
+ * the platform", not club membership status.
+ */
+export function partitionMembers(members: readonly PsdMember[]): {
+  players: readonly PsdMember[];
+  staff: readonly PsdMember[];
+  unknown: readonly PsdMember[];
+} {
+  const players: PsdMember[] = [];
+  const staff: PsdMember[] = [];
+  const unknown: PsdMember[] = [];
+  for (const m of members) {
+    if (m.status === "speler") players.push(m);
+    else if (m.status === "staff") staff.push(m);
+    else unknown.push(m);
+  }
+  return { players, staff, unknown };
+}
+
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
 const CURSOR_KEY = "sync:team-cursor";
@@ -141,12 +167,15 @@ export const runSync = Effect.gen(function* () {
   );
 
   const members = yield* psd.getRawMembers(team.id);
-  // `active` in PSD means "has logged in to PSD" — not club membership status.
-  // Filter only by status to avoid excluding players who haven't logged in yet.
-  const players = members.filter((m) => m.status !== "staff");
+  const { players, staff: staffMembers, unknown } = partitionMembers(members);
   yield* Effect.log(
-    `team ${team.id}: ${members.length} members, ${players.length} players`,
+    `team ${team.id}: ${members.length} members, ${players.length} players, ${staffMembers.length} staff`,
   );
+  if (unknown.length > 0) {
+    yield* Effect.log(
+      `team ${team.id}: ${unknown.length} members with unknown status skipped: ${unknown.map((m) => `${m.id}(${m.status})`).join(", ")}`,
+    );
+  }
 
   yield* Effect.forEach(
     players,
@@ -177,8 +206,6 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 5 },
   );
 
-  const staffMembers = members.filter((m) => m.status === "staff");
-  yield* Effect.log(`team ${team.id}: ${staffMembers.length} staff members`);
   yield* Effect.forEach(
     staffMembers,
     (m) => sanity.upsertStaff(transformStaff(m)),
