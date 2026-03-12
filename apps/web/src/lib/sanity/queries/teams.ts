@@ -9,7 +9,7 @@ export type YouthTeamNavItem = {
   age: string;
 };
 
-export const SENIOR_TEAMS_NAV_QUERY = `*[_type == "team" && showInNavigation != false && age in ["A", "B"]] | order(age asc) {
+export const SENIOR_TEAMS_NAV_QUERY = `*[_type == "team" && showInNavigation != false && age == "A"] | order(name asc) {
   _id, name, "slug": slug.current, age
 }`;
 

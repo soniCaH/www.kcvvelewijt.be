@@ -109,8 +109,10 @@ export const MobileMenu = ({
   const searchParams = useSearchParams();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-  const aTeam = seniorTeams?.find((t) => t.age === "A");
-  const bTeam = seniorTeams?.find((t) => t.age === "B");
+  const seniorNavLabel = (name: string): string => {
+    const lastWord = name.trim().split(/\s+/).at(-1) ?? name;
+    return /^[A-Z]$/.test(lastWord) ? `${lastWord}-Ploeg` : name;
+  };
 
   const jeugdItem: MenuItem = {
     label: "Jeugd",
@@ -121,10 +123,13 @@ export const MobileMenu = ({
     })),
   };
 
+  const seniorMenuItems = (seniorTeams ?? []).map((t) =>
+    buildSeniorMenuItem(t, seniorNavLabel(t.name)),
+  );
+
   const menuItems: MenuItem[] = [
     ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
-    buildSeniorMenuItem(aTeam, "A-Ploeg"),
-    buildSeniorMenuItem(bTeam, "B-Ploeg"),
+    ...seniorMenuItems,
     jeugdItem,
     ...staticMenuItems.slice(3), // Sponsors, Hulp, De club, Zoeken
   ].filter((item): item is MenuItem => item !== null);
