@@ -96,17 +96,10 @@ interface BffData {
 /**
  * Fetches matches and standings from the BFF for a given team.
  *
- * @param psdTeamId - The team's PSD internal ID (used for matches and as ranking fallback).
- * @param leagueId - Optional league identifier used to select the ranking; if provided,
- *   standings are fetched for this league instead of the PSD team ID.
+ * @param psdTeamId - The team's PSD internal ID (used for both matches and standings).
  * @returns An object with `matches`, `standings`, and `teamId` when successful; `null` on error.
  */
-async function fetchBffData(
-  psdTeamId: number,
-  leagueId: number | null,
-): Promise<BffData | null> {
-  const rankingId = leagueId ?? psdTeamId;
-
+async function fetchBffData(psdTeamId: number): Promise<BffData | null> {
   try {
     const [matches, standings] = await runPromise(
       Effect.gen(function* () {
@@ -119,7 +112,7 @@ async function fetchBffData(
                 Effect.catchAll(() => Effect.succeed([] as readonly Match[])),
               ),
             bff
-              .getRanking(rankingId)
+              .getRanking(psdTeamId)
               .pipe(
                 Effect.catchAll(() =>
                   Effect.succeed([] as readonly RankingEntry[]),
@@ -157,7 +150,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   if (!team) notFound();
 
-  const bffData = await fetchBffData(Number(team.psdId), team.leagueId);
+  const bffData = await fetchBffData(Number(team.psdId));
 
   return (
     <TeamDetail
