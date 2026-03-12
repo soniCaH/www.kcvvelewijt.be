@@ -40,7 +40,7 @@ const mockSeniorTeams = [
     _id: "b-id",
     name: "Eerste Elftallen B",
     slug: "eerste-elftallen-b",
-    age: "B",
+    age: "A",
   },
 ];
 
