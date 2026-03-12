@@ -83,20 +83,18 @@ const staticMenuItems: MenuItem[] = [
 const buildSeniorMenuItem = (
   team: SeniorTeamNavItem | undefined,
   label: string,
-): MenuItem => {
-  const slug = team?.slug ?? "";
-  const href = `/team/${slug}`;
+): MenuItem | null => {
+  if (!team?.slug) return null;
+  const href = `/team/${team.slug}`;
   return {
     label,
     href,
-    children: slug
-      ? [
-          { label: "Info", href },
-          { label: "Spelers & Staff", href: `${href}?tab=lineup` },
-          { label: "Wedstrijden", href: `${href}?tab=matches` },
-          { label: "Stand", href: `${href}?tab=standings` },
-        ]
-      : undefined,
+    children: [
+      { label: "Info", href },
+      { label: "Spelers & Staff", href: `${href}?tab=lineup` },
+      { label: "Wedstrijden", href: `${href}?tab=matches` },
+      { label: "Stand", href: `${href}?tab=standings` },
+    ],
   };
 };
 
@@ -123,13 +121,13 @@ export const MobileMenu = ({
     })),
   };
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
     buildSeniorMenuItem(aTeam, "A-Ploeg"),
     buildSeniorMenuItem(bTeam, "B-Ploeg"),
     jeugdItem,
     ...staticMenuItems.slice(3), // Sponsors, Hulp, De club, Zoeken
-  ];
+  ].filter((item): item is MenuItem => item !== null);
 
   // Lock body scroll when menu is open
   useEffect(() => {
