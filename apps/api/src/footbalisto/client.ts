@@ -187,6 +187,30 @@ export const FootbalistoClientLive = Layer.effect(
         return current;
       });
 
+    const fetchPaginatedTeamPeople = (
+      kind: "members" | "staff",
+      teamId: number,
+    ) =>
+      Effect.gen(function* () {
+        const firstPage = yield* countedFetch(
+          `${base}/teams/${teamId}/${kind}`,
+          PsdMembersPage,
+        );
+        if (firstPage.totalPages <= 1) return firstPage.content;
+
+        const remainingPages = yield* Effect.all(
+          Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
+            countedFetch(
+              `${base}/teams/${teamId}/${kind}?page=${i + 1}`,
+              PsdMembersPage,
+            ).pipe(Effect.map((page) => page.content)),
+          ),
+          { concurrency: 3 },
+        );
+
+        return [...firstPage.content, ...remainingPages.flat()];
+      });
+
     return {
       getRawMatches: (teamId: number) =>
         Effect.gen(function* () {
@@ -263,46 +287,10 @@ export const FootbalistoClientLive = Layer.effect(
       getRawTeams: () => countedFetch(`${base}/teams`, PsdTeamsArray),
 
       getRawMembers: (teamId: number) =>
-        Effect.gen(function* () {
-          const firstPage = yield* countedFetch(
-            `${base}/teams/${teamId}/members`,
-            PsdMembersPage,
-          );
-          if (firstPage.totalPages <= 1) return firstPage.content;
-
-          const remainingPages = yield* Effect.all(
-            Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
-              countedFetch(
-                `${base}/teams/${teamId}/members?page=${i + 1}`,
-                PsdMembersPage,
-              ).pipe(Effect.map((page) => page.content)),
-            ),
-            { concurrency: 3 },
-          );
-
-          return [...firstPage.content, ...remainingPages.flat()];
-        }),
+        fetchPaginatedTeamPeople("members", teamId),
 
       getRawStaff: (teamId: number) =>
-        Effect.gen(function* () {
-          const firstPage = yield* countedFetch(
-            `${base}/teams/${teamId}/staff`,
-            PsdMembersPage,
-          );
-          if (firstPage.totalPages <= 1) return firstPage.content;
-
-          const remainingPages = yield* Effect.all(
-            Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
-              countedFetch(
-                `${base}/teams/${teamId}/staff?page=${i + 1}`,
-                PsdMembersPage,
-              ).pipe(Effect.map((page) => page.content)),
-            ),
-            { concurrency: 3 },
-          );
-
-          return [...firstPage.content, ...remainingPages.flat()];
-        }),
+        fetchPaginatedTeamPeople("staff", teamId),
     };
   }),
 );
