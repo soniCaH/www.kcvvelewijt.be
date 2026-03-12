@@ -22,6 +22,7 @@ export interface SanityTeamDoc {
   gender: string;
   footbelId: number | null;
   playerPsdIds: string[];
+  staffPsdIds: string[];
 }
 
 export interface SanityStaffDoc {
@@ -246,6 +247,11 @@ export const SanityWriteClientLive = Layer.effect(
           players: doc.playerPsdIds.map((id) => ({
             _type: "reference",
             _ref: `player-psd-${id}`,
+            _key: id,
+          })),
+          staff: doc.staffPsdIds.map((id) => ({
+            _type: "reference",
+            _ref: `staffMember-psd-${id}`,
             _key: id,
           })),
         }),

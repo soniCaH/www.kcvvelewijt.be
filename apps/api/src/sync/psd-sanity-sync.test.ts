@@ -179,12 +179,14 @@ describe("transformTeam", () => {
       active: true,
     };
     const playerIds = ["6453", "6458"];
-    const result = transformTeam(psdTeam, playerIds);
+    const staffIds = ["101", "102"];
+    const result = transformTeam(psdTeam, playerIds, staffIds);
     expect(result.psdId).toBe("1");
     expect(result.slug).toBe("eerste-elftallen-a");
     expect(result.age).toBe("A");
     expect(result.footbelId).toBe(183904);
     expect(result.playerPsdIds).toEqual(["6453", "6458"]);
+    expect(result.staffPsdIds).toEqual(["101", "102"]);
   });
 
   it("slugifies names with special characters", () => {
@@ -197,6 +199,7 @@ describe("transformTeam", () => {
         footbelId: null,
         active: true,
       },
+      [],
       [],
     );
     expect(result.slug).toBe("kcvve-u15-dames-jeugd");

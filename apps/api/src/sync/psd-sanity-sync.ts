@@ -47,11 +47,13 @@ export function transformMember(
  *
  * @param psd - The PSD team object containing team metadata
  * @param playerPsdIds - Array of PSD player IDs to associate with the team
- * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided `playerPsdIds`
+ * @param staffPsdIds - Array of PSD staff member IDs to associate with the team
+ * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided player/staff IDs
  */
 export function transformTeam(
   psd: PsdTeam,
   playerPsdIds: string[],
+  staffPsdIds: string[],
 ): SanityTeamDoc {
   const slug = psd.name
     .toLowerCase()
@@ -68,6 +70,7 @@ export function transformTeam(
     gender: psd.gender,
     footbelId: psd.footbelId,
     playerPsdIds,
+    staffPsdIds,
   };
 }
 
@@ -181,7 +184,8 @@ export const runSync = Effect.gen(function* () {
   );
 
   const playerPsdIds = activePlayers.map((m) => String(m.id));
-  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds));
+  const staffPsdIds = staffMembers.map((m) => String(m.id));
+  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds, staffPsdIds));
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // Advance cursor for next invocation (wraps at end of team list)

@@ -96,17 +96,16 @@ interface BffData {
 /**
  * Fetches matches and standings from the BFF for a given team.
  *
- * @param footbelId - The team's Footbel identifier; when falsy, the function returns `null`.
- * @param leagueId - Optional league identifier used to select the ranking; if provided, standings are fetched for this league, otherwise the team's `footbelId` is used.
- * @returns An object with `matches`, `standings`, and `teamId` when successful; `null` if `footbelId` is falsy or on error.
+ * @param psdTeamId - The team's PSD internal ID (used for matches and as ranking fallback).
+ * @param leagueId - Optional league identifier used to select the ranking; if provided,
+ *   standings are fetched for this league instead of the PSD team ID.
+ * @returns An object with `matches`, `standings`, and `teamId` when successful; `null` on error.
  */
 async function fetchBffData(
-  footbelId: number | null,
+  psdTeamId: number,
   leagueId: number | null,
 ): Promise<BffData | null> {
-  if (!footbelId) return null;
-
-  const rankingId = leagueId ?? footbelId;
+  const rankingId = leagueId ?? psdTeamId;
 
   try {
     const [matches, standings] = await runPromise(
@@ -115,7 +114,7 @@ async function fetchBffData(
         const [matchesResult, standingsResult] = yield* Effect.all(
           [
             bff
-              .getMatches(footbelId)
+              .getMatches(psdTeamId)
               .pipe(
                 Effect.catchAll(() => Effect.succeed([] as readonly Match[])),
               ),
@@ -132,7 +131,7 @@ async function fetchBffData(
         return [matchesResult, standingsResult] as const;
       }),
     );
-    return { matches, standings, teamId: footbelId };
+    return { matches, standings, teamId: psdTeamId };
   } catch {
     return null;
   }
@@ -158,7 +157,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   if (!team) notFound();
 
-  const bffData = await fetchBffData(team.footbelId, team.leagueId);
+  const bffData = await fetchBffData(Number(team.psdId), team.leagueId);
 
   return (
     <TeamDetail
