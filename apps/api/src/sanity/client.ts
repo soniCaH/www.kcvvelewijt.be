@@ -184,6 +184,21 @@ export const SanityWriteClientLive = Layer.effect(
                 Authorization: env.PSD_API_AUTH,
               },
             }).finally(() => clearTimeout(psdTimeout));
+
+            // Count this PSD request in the daily counter (same logic as countedFetch).
+            // Image downloads use fetch() directly so they bypass countedFetch — track them here.
+            const d = new Date();
+            const counterKey = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+            await env.PSD_CACHE.get(counterKey)
+              .then((current) =>
+                env.PSD_CACHE.put(
+                  counterKey,
+                  String((current ? parseInt(current, 10) : 0) + 1),
+                  { expirationTtl: 60 * 60 * 48 },
+                ),
+              )
+              .catch(() => undefined);
+
             // 404 = player has no photo in PSD — skip silently
             if (response.status === 404) return;
             if (!response.ok)
