@@ -63,6 +63,25 @@ export const team = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'age',
+      title: 'Age group',
+      type: 'string',
+      readOnly: true,
+      description: 'e.g. "A", "U17", "U15"',
+    }),
+    defineField({
+      name: 'gender',
+      title: 'Gender',
+      type: 'string',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'footbelId',
+      title: 'Footbel ID',
+      type: 'number',
+      readOnly: true,
+    }),
+    defineField({
       name: 'leagueId',
       title: 'League ID',
       type: 'number',

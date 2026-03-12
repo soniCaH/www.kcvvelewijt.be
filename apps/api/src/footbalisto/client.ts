@@ -73,6 +73,9 @@ export interface FootbalistoClientInterface {
   readonly getRawMembers: (
     teamId: number,
   ) => Effect.Effect<readonly PsdMember[], FootbalistoClientError>;
+  readonly getRawStaff: (
+    teamId: number,
+  ) => Effect.Effect<readonly PsdMember[], FootbalistoClientError>;
 }
 
 export class FootbalistoClient extends Context.Tag("FootbalistoClient")<
@@ -271,6 +274,27 @@ export const FootbalistoClientLive = Layer.effect(
             Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
               countedFetch(
                 `${base}/teams/${teamId}/members?page=${i + 1}`,
+                PsdMembersPage,
+              ).pipe(Effect.map((page) => page.content)),
+            ),
+            { concurrency: 3 },
+          );
+
+          return [...firstPage.content, ...remainingPages.flat()];
+        }),
+
+      getRawStaff: (teamId: number) =>
+        Effect.gen(function* () {
+          const firstPage = yield* countedFetch(
+            `${base}/teams/${teamId}/staff`,
+            PsdMembersPage,
+          );
+          if (firstPage.totalPages <= 1) return firstPage.content;
+
+          const remainingPages = yield* Effect.all(
+            Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
+              countedFetch(
+                `${base}/teams/${teamId}/staff?page=${i + 1}`,
                 PsdMembersPage,
               ).pipe(Effect.map((page) => page.content)),
             ),

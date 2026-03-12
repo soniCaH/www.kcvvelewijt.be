@@ -39,6 +39,7 @@ function makeClientMock(): FootbalistoClientInterface {
     getRawTeamStats: (_teamId) => Effect.succeed(mockStats),
     getRawTeams: () => Effect.succeed([]),
     getRawMembers: () => Effect.succeed([]),
+    getRawStaff: () => Effect.succeed([]),
   };
 }
 
