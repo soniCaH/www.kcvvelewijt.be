@@ -226,7 +226,8 @@ export const SanityWriteClientLive = Layer.effect(
                   _type: "image",
                   asset: { _type: "reference", _ref: asset._id },
                 },
-                psdImageUrl: imageUrl,
+                // Store stable URL (no query param) for dedup comparison on future syncs.
+                psdImageUrl: imageUrl.split("?")[0],
               })
               .commit();
           },
