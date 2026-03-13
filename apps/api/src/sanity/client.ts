@@ -163,7 +163,9 @@ export const SanityWriteClientLive = Layer.effect(
             } catch {
               throw new Error(`Invalid image URL: ${imageUrl}`);
             }
-            const expectedHost = new URL(env.PSD_API_BASE_URL).hostname;
+            // Images are served from the club subdomain (e.g. kcvv.prosoccerdata.com),
+            // not from the API domain (clubapi.prosoccerdata.com).
+            const expectedHost = `${env.PSD_API_CLUB}.prosoccerdata.com`;
             if (
               parsedUrl.protocol !== "https:" ||
               parsedUrl.hostname !== expectedHost

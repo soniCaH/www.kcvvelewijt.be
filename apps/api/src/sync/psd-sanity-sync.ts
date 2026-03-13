@@ -142,6 +142,9 @@ export const runSync = Effect.gen(function* () {
   const sanity = yield* SanityWriteClient;
   const env = yield* WorkerEnvTag;
   const baseUrl = env.PSD_API_BASE_URL;
+  // PSD serves images from the club subdomain, not the API domain.
+  // profilePictureURL is a relative path — prepend the club subdomain base.
+  const imageBaseUrl = `https://${env.PSD_API_CLUB}.prosoccerdata.com`;
 
   yield* Effect.log("sync started");
 
@@ -196,7 +199,7 @@ export const runSync = Effect.gen(function* () {
     players,
     (m) =>
       Effect.gen(function* () {
-        const doc = transformMember(m, baseUrl);
+        const doc = transformMember(m, imageBaseUrl);
         yield* sanity.upsertPlayer(doc);
 
         const stableImageUrl = doc._psdImageUrl;
