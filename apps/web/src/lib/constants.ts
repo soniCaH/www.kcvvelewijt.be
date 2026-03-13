@@ -6,7 +6,7 @@
 // (CSS custom properties can't be read server-side, so we duplicate the primary here)
 export const BRAND = {
   primaryColor: "#4acf52",
-  backgroundColor: "#ffffff",
+  backgroundColor: "#fefefe",
 } as const;
 
 // Site Configuration

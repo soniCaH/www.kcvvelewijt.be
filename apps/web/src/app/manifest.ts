@@ -1,17 +1,22 @@
 import type { MetadataRoute } from "next";
-import { BRAND } from "@/lib/constants";
+import { BRAND, SITE_CONFIG } from "@/lib/constants";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "KCVV Elewijt",
+    name: SITE_CONFIG.title,
     short_name: "KCVV",
-    description:
-      "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
+    description: SITE_CONFIG.description,
     start_url: "/",
     display: "standalone",
     background_color: BRAND.backgroundColor,
     theme_color: BRAND.primaryColor,
     icons: [
+      {
+        src: "/icon.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
       {
         src: "/icon.png",
         sizes: "512x512",
