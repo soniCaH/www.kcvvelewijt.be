@@ -187,6 +187,11 @@ export const runSync = Effect.gen(function* () {
     );
   }
 
+  const playersWithImage = players.filter((m) => m.profilePictureURL);
+  yield* Effect.log(
+    `team ${team.id}: ${playersWithImage.length}/${players.length} players have a profilePictureURL from PSD`,
+  );
+
   yield* Effect.forEach(
     players,
     (m) =>
@@ -196,23 +201,36 @@ export const runSync = Effect.gen(function* () {
 
         const stableImageUrl = doc._psdImageUrl;
         const fetchImageUrl = doc._psdImageFetchUrl;
-        if (stableImageUrl && fetchImageUrl) {
-          const existing = imageState.get(doc.psdId);
-          const needsUpload =
-            !existing?.hasPsdImage || existing.psdImageUrl !== stableImageUrl;
-          if (needsUpload) {
-            yield* Effect.log(`uploading image for player ${doc.psdId}`);
-            yield* sanity
-              .uploadPlayerImage(doc.psdId, fetchImageUrl)
-              .pipe(
-                Effect.catchAll((e) =>
-                  Effect.log(
-                    `image upload skipped for player ${doc.psdId}: ${e.message} | cause: ${String(e.cause)}`,
-                  ),
-                ),
-              );
-          }
+        if (!stableImageUrl || !fetchImageUrl) {
+          yield* Effect.log(
+            `player ${doc.psdId}: no profilePictureURL from PSD — skipping image`,
+          );
+          return;
         }
+
+        const existing = imageState.get(doc.psdId);
+        const needsUpload =
+          !existing?.hasPsdImage || existing.psdImageUrl !== stableImageUrl;
+
+        if (!needsUpload) {
+          yield* Effect.log(
+            `player ${doc.psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
+          );
+          return;
+        }
+
+        yield* Effect.log(
+          `player ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
+        );
+        yield* sanity
+          .uploadPlayerImage(doc.psdId, fetchImageUrl)
+          .pipe(
+            Effect.catchAll((e) =>
+              Effect.log(
+                `player ${doc.psdId}: image upload failed — ${e.message} | cause: ${String(e.cause)}`,
+              ),
+            ),
+          );
       }),
     { concurrency: 5 },
   );
