@@ -163,7 +163,9 @@ export const SanityWriteClientLive = Layer.effect(
             } catch {
               throw new Error(`Invalid image URL: ${imageUrl}`);
             }
-            const expectedHost = new URL(env.PSD_API_BASE_URL).hostname;
+            // Images are served from the club subdomain (e.g. kcvv.prosoccerdata.com),
+            // not from the API domain (clubapi.prosoccerdata.com).
+            const expectedHost = `${env.PSD_API_CLUB}.prosoccerdata.com`;
             if (
               parsedUrl.protocol !== "https:" ||
               parsedUrl.hostname !== expectedHost
@@ -184,14 +186,14 @@ export const SanityWriteClientLive = Layer.effect(
 
             let response: Response;
             try {
+              // The profilePictureURL already embeds a per-member profileAccessKey
+              // query param that IS the auth token for this endpoint.
+              // Sending the regular PSD API headers (x-api-key / Authorization)
+              // alongside it causes a 404 — the image endpoint uses key-based auth
+              // only, not the REST API credentials.
               response = await fetch(imageUrl, {
                 signal: psdAbort.signal,
                 redirect: "follow",
-                headers: {
-                  "x-api-key": env.PSD_API_KEY,
-                  "x-api-club": env.PSD_API_CLUB,
-                  Authorization: env.PSD_API_AUTH,
-                },
               });
             } finally {
               clearTimeout(psdTimeout);
