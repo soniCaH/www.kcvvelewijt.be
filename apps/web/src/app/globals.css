@@ -473,3 +473,13 @@ blockquote::before {
   --cc-modal-border-radius: 0.5rem;
   --cc-btn-border-radius: 0.25rem;
 }
+
+/* Direct overrides — CSS variable cascade unreliable with Turbopack @import ordering */
+#cc-main .cm,
+#cc-main .pm {
+  background-color: #1e2024;
+}
+
+#cc-main .pm__footer {
+  background-color: #1e2024;
+}
