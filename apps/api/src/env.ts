@@ -2,6 +2,7 @@ import { Context } from "effect";
 
 export interface WorkerEnv {
   readonly PSD_API_BASE_URL: string; // https://clubapi.prosoccerdata.com
+  readonly PSD_IMAGE_BASE_URL: string; // https://kcvv.prosoccerdata.com — club subdomain that serves player images
   readonly FOOTBALISTO_LOGO_CDN_URL: string;
   readonly PSD_API_KEY: string; // wrangler secret
   readonly PSD_API_CLUB: string; // wrangler secret

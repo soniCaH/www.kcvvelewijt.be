@@ -26,6 +26,7 @@ function makeEnvLayer() {
     AI: {} as Ai,
     SEARCH_INDEX: {} as VectorizeIndex,
     PSD_API_BASE_URL: "",
+    PSD_IMAGE_BASE_URL: "",
     FOOTBALISTO_LOGO_CDN_URL: "",
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
