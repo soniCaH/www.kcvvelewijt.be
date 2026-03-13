@@ -22,3 +22,6 @@ export type { MobileMenuProps } from "./MobileMenu";
 // PageFooter
 export { PageFooter } from "./PageFooter";
 export type { PageFooterProps } from "./PageFooter";
+
+// CookieConsentBanner
+export { CookieConsentBanner } from "./CookieConsentBanner";
