@@ -10,6 +10,7 @@ import {
   SENIOR_TEAMS_NAV_QUERY,
   type SeniorTeamNavItem,
 } from "@/lib/sanity/queries/teams";
+import { BRAND } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: {
@@ -19,6 +20,10 @@ export const metadata: Metadata = {
   description:
     "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
   keywords: ["KCVV Elewijt", "voetbal", "football", "Elewijt", "voetbalclub"],
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 // Phase 4: Mobile viewport configuration with safe area support
@@ -28,6 +33,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover", // Enable safe area insets for modern mobile devices
+  themeColor: BRAND.primaryColor,
 };
 
 /**
