@@ -18,7 +18,7 @@ describe("transformMember (player)", () => {
       birthDate: "1993-11-29 00:00",
       nationality: null,
       profilePictureURL:
-        "/api/v2/members/profilepicture/6453?profileAccessKey=abc123",
+        "/api/v2/members/profilepicture/6453?profileAccessKey=abc123&v=1",
       keeper: false,
       bestPosition: null,
       active: true,
@@ -30,13 +30,36 @@ describe("transformMember (player)", () => {
     expect(result.firstName).toBe("Alexander");
     expect(result.birthDate).toBe("1993-11-29"); // time stripped
     expect(result.keeper).toBe(false);
-    // Query string stripped — profileAccessKey rotates per API call
+    // profileAccessKey stripped (ephemeral), v= retained (photo version for dedup)
     expect(result._psdImageUrl).toBe(
-      `${BASE_URL}/api/v2/members/profilepicture/6453`,
+      `${BASE_URL}/api/v2/members/profilepicture/6453?v=1`,
     );
   });
 
-  it("strips rotating profileAccessKey query param from image URL", () => {
+  it("strips profileAccessKey but retains v= from image URL", () => {
+    const result = transformMember(
+      {
+        id: 6453,
+        firstName: "Alexander",
+        lastName: "Bell",
+        birthDate: null,
+        nationality: null,
+        profilePictureURL:
+          "/api/v2/members/profilepicture/6453?profileAccessKey=newkey999&v=0",
+        keeper: false,
+        bestPosition: null,
+        active: true,
+        status: "speler",
+        functionTitle: null,
+      },
+      BASE_URL,
+    );
+    expect(result._psdImageUrl).toBe(
+      `${BASE_URL}/api/v2/members/profilepicture/6453?v=0`,
+    );
+  });
+
+  it("omits v= when not present in profilePictureURL", () => {
     const result = transformMember(
       {
         id: 6453,
