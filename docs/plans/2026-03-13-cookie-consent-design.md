@@ -18,16 +18,17 @@ A single `CookieConsentBanner` client component initialises `vanilla-cookieconse
 
 ## Files
 
-| File                                                                              | Change                                                                   |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `apps/web/src/components/layout/CookieConsentBanner/CookieConsentBanner.tsx`      | New — `"use client"`, calls `CookieConsent.run(config)` on mount         |
-| `apps/web/src/components/layout/CookieConsentBanner/CookieConsentBanner.test.tsx` | New — unit test                                                          |
-| `apps/web/src/components/layout/CookieConsentBanner/index.ts`                     | New — barrel export                                                      |
-| `apps/web/src/components/layout/index.ts`                                         | Add `CookieConsentBanner` export                                         |
-| `apps/web/src/app/layout.tsx`                                                     | Add `<CookieConsentBanner />` inside `<body>`                            |
-| `apps/web/src/components/layout/PageFooter/PageFooter.tsx`                        | Add "Cookie-instellingen" link calling `CookieConsent.showPreferences()` |
-| `apps/web/src/components/layout/PageFooter/PageFooter.test.tsx`                   | Update — assert link is present                                          |
-| `apps/web/src/app/globals.css`                                                    | Add CSS variable overrides for KCVV green theme                          |
+| File                                                                              | Change                                                                                                                      |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/components/layout/CookieConsentBanner/CookieConsentBanner.tsx`      | New — `"use client"`, calls `CookieConsent.run(config)` on mount                                                            |
+| `apps/web/src/components/layout/CookieConsentBanner/CookieConsentBanner.test.tsx` | New — unit test                                                                                                             |
+| `apps/web/src/components/layout/CookieConsentBanner/index.ts`                     | New — barrel export                                                                                                         |
+| `apps/web/src/components/layout/index.ts`                                         | Add `CookieConsentBanner` export                                                                                            |
+| `apps/web/src/app/layout.tsx`                                                     | Add `<CookieConsentBanner />` inside `<body>`                                                                               |
+| `apps/web/src/components/layout/PageFooter/CookiePreferencesButton.tsx`           | New — `"use client"` component; renders button that calls `CookieConsent.showPreferences()` guarded by `cookieConsentReady` |
+| `apps/web/src/components/layout/PageFooter/PageFooter.tsx`                        | Render `<CookiePreferencesButton />` (client) in the "Cookie-instellingen" row; PageFooter stays server-side                |
+| `apps/web/src/components/layout/PageFooter/PageFooter.test.tsx`                   | Update — assert "Cookie-instellingen" button is present                                                                     |
+| `apps/web/src/app/globals.css`                                                    | Add CSS variable overrides for KCVV green theme                                                                             |
 
 No new route needed — `/privacy` page already exists and covers the privacy statement.
 

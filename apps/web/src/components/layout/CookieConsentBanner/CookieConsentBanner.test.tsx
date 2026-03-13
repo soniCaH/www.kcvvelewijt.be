@@ -15,6 +15,8 @@ const { CookieConsentBanner } = await import("./CookieConsentBanner");
 describe("CookieConsentBanner", () => {
   beforeEach(() => {
     mockRun.mockClear();
+    mockReset.mockClear();
+    mockRun.mockResolvedValue(undefined);
   });
 
   it("calls CookieConsent.run on mount", () => {
@@ -33,5 +35,12 @@ describe("CookieConsentBanner", () => {
   it("renders nothing visible", () => {
     const { container } = render(<CookieConsentBanner />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("calls CookieConsent.reset on unmount", () => {
+    const { unmount } = render(<CookieConsentBanner />);
+    unmount();
+    expect(mockReset).toHaveBeenCalledTimes(1);
+    expect(mockReset).toHaveBeenCalledWith(false);
   });
 });

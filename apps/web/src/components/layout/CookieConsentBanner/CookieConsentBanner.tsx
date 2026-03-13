@@ -3,9 +3,13 @@
 import { useEffect } from "react";
 import * as CookieConsent from "vanilla-cookieconsent";
 
+// Tracks whether CookieConsent.run() has resolved; used by CookiePreferencesButton
+// to guard showPreferences() calls before initialization completes.
+export let cookieConsentReady = false;
+
 export function CookieConsentBanner() {
   useEffect(() => {
-    void CookieConsent.run({
+    CookieConsent.run({
       categories: {
         necessary: {
           enabled: true,
@@ -53,8 +57,18 @@ export function CookieConsentBanner() {
           },
         },
       },
-    });
-    return () => CookieConsent.reset(false);
+    })
+      .then(() => {
+        cookieConsentReady = true;
+      })
+      .catch((error: unknown) => {
+        console.error("CookieConsent initialization failed:", error);
+      });
+
+    return () => {
+      cookieConsentReady = false;
+      CookieConsent.reset(false);
+    };
   }, []);
 
   return null;

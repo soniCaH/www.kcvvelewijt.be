@@ -277,32 +277,43 @@ Expected: FAIL — button not found.
 
 **Step 3: Add the cookie preferences button to the footer**
 
-In `PageFooter.tsx`, the file starts with a `"use client"` directive because we need `CookieConsent.showPreferences()`. Add the directive and import at the top:
+`PageFooter.tsx` is a server component and must remain so. Create a small isolated client component `CookiePreferencesButton.tsx` alongside the footer:
 
 ```typescript
+// apps/web/src/components/layout/PageFooter/CookiePreferencesButton.tsx
 "use client";
 
 import * as CookieConsent from "vanilla-cookieconsent";
-```
+import { cookieConsentReady } from "../CookieConsentBanner/CookieConsentBanner";
 
-Then in the `contactRows` array, add a new entry after the existing `"Privacy & cookies"` row:
-
-```typescript
-{
-  label: "Cookie-instellingen",
-  value: (
+export function CookiePreferencesButton() {
+  return (
     <button
       type="button"
-      onClick={() => CookieConsent.showPreferences()}
+      onClick={() => {
+        if (cookieConsentReady) {
+          CookieConsent.showPreferences();
+        }
+      }}
       className="text-kcvv-green-bright hover:underline cursor-pointer bg-transparent border-0 p-0 text-[0.875rem]"
     >
       Cookie-instellingen
     </button>
-  ),
-},
+  );
+}
 ```
 
-> **Note:** Adding `"use client"` to `PageFooter` is fine — it already renders interactive social link components. The footer is not a server component boundary that matters here.
+Then in `PageFooter.tsx`, import and render `CookiePreferencesButton` in the `contactRows` array after the existing `"Privacy & cookies"` row — no `"use client"` directive or `vanilla-cookieconsent` import needed in the footer itself:
+
+```typescript
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
+
+// inside contactRows:
+{
+  label: "Cookie-instellingen",
+  value: <CookiePreferencesButton />,
+},
+```
 
 **Step 4: Run test to verify it passes**
 
@@ -381,14 +392,9 @@ Expected: build succeeds, no type errors.
 
 **Step 3: Push branch**
 
-```bash
-git push -u origin feat/favicon-and-pwa-icons
-```
+Create a dedicated feature branch for this work and push it:
 
-> Wait — this feature is on `feat/favicon-and-pwa-icons`. If this cookie consent work should be on its own branch, create one first:
->
-> ```bash
-> git checkout -b feat/cookie-consent
-> ```
->
-> Then cherry-pick or re-implement from there.
+```bash
+git checkout -b feat/cookie-consent
+git push -u origin feat/cookie-consent
+```
