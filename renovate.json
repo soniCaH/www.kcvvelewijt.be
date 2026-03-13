@@ -8,7 +8,7 @@
     "group:nextjsMonorepo",
     "security:openssf-scorecard"
   ],
-  "enabledManagers": ["npm", "pnpm", "nvm", "github-actions", "dockerfile"],
+  "enabledManagers": ["npm", "nvm", "github-actions", "dockerfile"],
   "packageRules": [
     {
       "description": "Security/vulnerability fixes with 🔒",
@@ -173,6 +173,7 @@
   "commitMessageAction": "{{semanticCommitType}}({{semanticCommitScope}}): update",
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
+  "postUpdateOptions": ["pnpmDedupe"],
   "prCreation": "immediate",
   "prConcurrentLimit": 3,
   "rebaseWhen": "behind-base-branch"
