@@ -2,6 +2,12 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PageFooter } from "./PageFooter";
 
+vi.mock("./CookiePreferencesButton", () => ({
+  CookiePreferencesButton: () => (
+    <button type="button">Cookie-instellingen</button>
+  ),
+}));
+
 // Mock the SponsorsBlock server component
 vi.mock("@/components/sponsors", () => ({
   SponsorsBlock: ({

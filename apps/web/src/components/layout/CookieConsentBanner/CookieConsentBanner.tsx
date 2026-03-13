@@ -5,7 +5,7 @@ import * as CookieConsent from "vanilla-cookieconsent";
 
 export function CookieConsentBanner() {
   useEffect(() => {
-    CookieConsent.run({
+    void CookieConsent.run({
       categories: {
         necessary: {
           enabled: true,
@@ -54,6 +54,7 @@ export function CookieConsentBanner() {
         },
       },
     });
+    return () => CookieConsent.reset(false);
   }, []);
 
   return null;

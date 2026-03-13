@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * PageFooter Component
  * Site footer with contact info, social links, and sponsors
@@ -7,7 +5,7 @@
  */
 
 import Link from "next/link";
-import * as CookieConsent from "vanilla-cookieconsent";
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import Image from "next/image";
 import { SocialLinks } from "@/components/design-system";
 import { SponsorsBlock } from "@/components/sponsors";
@@ -99,15 +97,7 @@ const contactRows: ContactRow[] = [
   },
   {
     label: "Cookie-instellingen",
-    value: (
-      <button
-        type="button"
-        onClick={() => CookieConsent.showPreferences()}
-        className="text-kcvv-green-bright hover:underline cursor-pointer bg-transparent border-0 p-0 text-[0.875rem]"
-      >
-        Cookie-instellingen
-      </button>
-    ),
+    value: <CookiePreferencesButton />,
   },
 ];
 

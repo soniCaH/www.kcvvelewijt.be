@@ -2,9 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
 
 const mockRun = vi.fn();
+const mockReset = vi.fn();
 
 vi.mock("vanilla-cookieconsent", () => ({
   run: mockRun,
+  reset: mockReset,
 }));
 
 // Import after mock is set up
