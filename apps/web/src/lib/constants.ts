@@ -2,6 +2,13 @@
  * KCVV Elewijt - Global Constants
  */
 
+// Brand tokens — single source of truth for values used in both CSS and JS/TS contexts
+// (CSS custom properties can't be read server-side, so we duplicate the primary here)
+export const BRAND = {
+  primaryColor: "#4acf52",
+  backgroundColor: "#fefefe",
+} as const;
+
 // Site Configuration
 export const SITE_CONFIG = {
   title: "KCVV Elewijt",
