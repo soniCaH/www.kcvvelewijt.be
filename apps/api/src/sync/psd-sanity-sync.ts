@@ -233,7 +233,7 @@ export const runSync = Effect.gen(function* () {
           `player ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
         );
         yield* sanity
-          .uploadPlayerImage(doc.psdId, fetchImageUrl)
+          .uploadPlayerImage(doc.psdId, fetchImageUrl, stableImageUrl)
           .pipe(
             Effect.catchAll((e) =>
               Effect.log(

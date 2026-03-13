@@ -68,10 +68,13 @@ export interface SanityWriteClientInterface {
     Map<string, PlayerImageState>,
     SanityWriteError
   >;
-  /** Download image from imageUrl and upload to Sanity, patching psdImage + psdImageUrl. */
+  /** Download image from fetchUrl and upload to Sanity, patching psdImage + psdImageUrl.
+   * stableUrl is persisted as psdImageUrl for dedup on future syncs — must match
+   * the value produced by transformMember._psdImageUrl (includes ?v=N if present). */
   readonly uploadPlayerImage: (
     psdId: string,
-    imageUrl: string,
+    fetchUrl: string,
+    stableUrl: string,
   ) => Effect.Effect<void, SanityWriteError>;
 }
 
@@ -153,7 +156,7 @@ export const SanityWriteClientLive = Layer.effect(
             new SanityWriteError("Failed to fetch player image state", cause),
         }),
 
-      uploadPlayerImage: (psdId, imageUrl) =>
+      uploadPlayerImage: (psdId, imageUrl, stableUrl) =>
         Effect.tryPromise({
           try: async () => {
             // Validate imageUrl before attaching PSD credentials
@@ -261,8 +264,9 @@ export const SanityWriteClientLive = Layer.effect(
                   _type: "image",
                   asset: { _type: "reference", _ref: asset._id },
                 },
-                // Store stable URL (no query param) for dedup comparison on future syncs.
-                psdImageUrl: imageUrl.split("?")[0],
+                // Store stable URL (path + ?v=N) for dedup comparison on future syncs.
+                // Must equal transformMember._psdImageUrl so needsUpload stabilizes.
+                psdImageUrl: stableUrl,
               })
               .commit();
             console.log(
