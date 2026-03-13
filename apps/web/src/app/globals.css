@@ -405,7 +405,9 @@ blockquote::before {
 }
 
 /* ===== vanilla-cookieconsent Theme — KCVV Elewijt ===== */
-#cc-main {
+/* Placed on :root (after library import) so cascade position wins over the
+   library's own :root defaults, covering both the consent and preferences modal. */
+:root {
   --cc-font-family: montserrat, -apple-system, system-ui, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
