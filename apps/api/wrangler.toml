@@ -5,6 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 PSD_API_BASE_URL = "https://clubapi.prosoccerdata.com"
+PSD_IMAGE_BASE_URL = "https://kcvv.prosoccerdata.com"
 # FOOTBALISTO_LOGO_CDN_URL: fallback logo source — use RankingVO.clubLogo / Club.logo (direct from PSD) first; fall back to CDN construction when the field is empty
 FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 # PSD_API_KEY, PSD_API_CLUB, PSD_API_AUTH are secrets — set via wrangler secret put (never in toml)
@@ -42,6 +43,7 @@ crons = [] # no scheduled sync on staging — shares PSD API quota with producti
 
 [env.staging.vars]
 PSD_API_BASE_URL = "https://clubapi.prosoccerdata.com"
+PSD_IMAGE_BASE_URL = "https://kcvv.prosoccerdata.com"
 FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "staging"

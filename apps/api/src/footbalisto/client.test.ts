@@ -13,6 +13,7 @@ global.fetch = vi.fn();
 function makeEnvLayer() {
   return Layer.succeed(WorkerEnvTag, {
     PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
+    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
     FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
     PSD_API_KEY: "test-key",
     PSD_API_CLUB: "test-club",
