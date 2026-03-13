@@ -208,6 +208,11 @@ export const SanityWriteClientLive = Layer.effect(
                 .catch(() => undefined);
             }
 
+            // Log PSD response details for diagnostics
+            console.log(
+              `[uploadPlayerImage] player=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,
+            );
+
             // 404 = player has no photo in PSD — skip silently
             if (response.status === 404) return;
             if (!response.ok)
@@ -218,6 +223,9 @@ export const SanityWriteClientLive = Layer.effect(
             const contentType =
               response.headers.get("content-type") ?? "image/jpeg";
             const arrayBuffer = await response.arrayBuffer();
+            console.log(
+              `[uploadPlayerImage] player=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
+            );
 
             // Use REST API directly — client.assets.upload() uses Node.js internals
             // incompatible with Cloudflare Workers runtime.
@@ -242,6 +250,9 @@ export const SanityWriteClientLive = Layer.effect(
             const { document: asset } = (await uploadRes.json()) as {
               document: { _id: string };
             };
+            console.log(
+              `[uploadPlayerImage] player=${psdId} sanity_asset_id=${asset._id}`,
+            );
 
             await client
               .patch(docId("player", psdId))
@@ -254,6 +265,9 @@ export const SanityWriteClientLive = Layer.effect(
                 psdImageUrl: imageUrl.split("?")[0],
               })
               .commit();
+            console.log(
+              `[uploadPlayerImage] player=${psdId} patch committed — image upload complete`,
+            );
           },
           catch: (cause) =>
             new SanityWriteError(
