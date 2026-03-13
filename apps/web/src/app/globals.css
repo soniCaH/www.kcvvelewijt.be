@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "vanilla-cookieconsent/dist/cookieconsent.css";
 @plugin "@tailwindcss/typography";
 
 /* ========================================================================
