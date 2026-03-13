@@ -141,7 +141,6 @@ export const runSync = Effect.gen(function* () {
   const psd = yield* FootbalistoClient;
   const sanity = yield* SanityWriteClient;
   const env = yield* WorkerEnvTag;
-  const baseUrl = env.PSD_API_BASE_URL;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
   // API domain (PSD_API_BASE_URL). profilePictureURL is a relative path.
   const imageBaseUrl = env.PSD_IMAGE_BASE_URL;
