@@ -37,10 +37,18 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
-    // Stable URL (no query param) used for dedup comparison across syncs.
-    // The path alone uniquely identifies the player photo.
+    // Stable URL used for dedup comparison across syncs.
+    // Includes ?v=N (PSD photo version) so that a player uploading a new photo
+    // to PSD (v increments) triggers a fresh upload on the next sync cycle.
+    // profileAccessKey is stripped — it is ephemeral and changes each sync.
     _psdImageUrl: psd.profilePictureURL
-      ? `${baseUrl}${psd.profilePictureURL.split("?")[0]}`
+      ? (() => {
+          const path = psd.profilePictureURL!.split("?")[0];
+          const v = new URLSearchParams(
+            psd.profilePictureURL!.split("?")[1] ?? "",
+          ).get("v");
+          return v !== null ? `${baseUrl}${path}?v=${v}` : `${baseUrl}${path}`;
+        })()
       : null,
     // Full URL including ?profileAccessKey — required to actually fetch the image.
     _psdImageFetchUrl: psd.profilePictureURL
@@ -225,7 +233,7 @@ export const runSync = Effect.gen(function* () {
           `player ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
         );
         yield* sanity
-          .uploadPlayerImage(doc.psdId, fetchImageUrl)
+          .uploadPlayerImage(doc.psdId, fetchImageUrl, stableImageUrl)
           .pipe(
             Effect.catchAll((e) =>
               Effect.log(
