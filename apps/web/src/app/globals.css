@@ -474,12 +474,9 @@ blockquote::before {
   --cc-btn-border-radius: 0.25rem;
 }
 
-/* Direct overrides — CSS variable cascade unreliable with Turbopack @import ordering */
+/* Direct overrides — library rules use background shorthand with higher specificity */
 #cc-main .cm,
-#cc-main .pm {
-  background-color: #1e2024;
-}
-
+#cc-main .pm,
 #cc-main .pm__footer {
-  background-color: #1e2024;
+  background-color: #1e2024 !important;
 }
