@@ -5,6 +5,7 @@
  */
 
 import Link from "next/link";
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import Image from "next/image";
 import { SocialLinks } from "@/components/design-system";
 import { SponsorsBlock } from "@/components/sponsors";
@@ -93,6 +94,10 @@ const contactRows: ContactRow[] = [
         Privacyverklaring
       </a>
     ),
+  },
+  {
+    label: "Cookie-instellingen",
+    value: <CookiePreferencesButton />,
   },
 ];
 

@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageFooter } from "@/components/layout/PageFooter";
+import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { sanityClient } from "@/lib/sanity/client";
 import {
   YOUTH_TEAMS_NAV_QUERY,
@@ -87,6 +88,7 @@ export default async function RootLayout({
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
         {children}
         <PageFooter />
+        <CookieConsentBanner />
       </body>
     </html>
   );

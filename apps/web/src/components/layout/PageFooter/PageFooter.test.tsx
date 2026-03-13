@@ -2,6 +2,12 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PageFooter } from "./PageFooter";
 
+vi.mock("./CookiePreferencesButton", () => ({
+  CookiePreferencesButton: () => (
+    <button type="button">Cookie-instellingen</button>
+  ),
+}));
+
 // Mock the SponsorsBlock server component
 vi.mock("@/components/sponsors", () => ({
   SponsorsBlock: ({
@@ -34,7 +40,7 @@ describe("PageFooter", () => {
     expect(logo).toBeInTheDocument();
   });
 
-  it("renders all 8 contact rows", () => {
+  it("renders all 9 contact rows", () => {
     render(<PageFooter />);
     expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
     expect(screen.getByText("Voorzitter")).toBeInTheDocument();
@@ -44,6 +50,15 @@ describe("PageFooter", () => {
     expect(screen.getByText("Verhuur kantine")).toBeInTheDocument();
     expect(screen.getByText("Website")).toBeInTheDocument();
     expect(screen.getByText("Privacy & cookies")).toBeInTheDocument();
+    expect(screen.getAllByText("Cookie-instellingen").length).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it("renders cookie preferences button", () => {
+    render(<PageFooter />);
+    const btn = screen.getByRole("button", { name: /cookie-instellingen/i });
+    expect(btn).toBeInTheDocument();
   });
 
   it("renders contact email links", () => {
