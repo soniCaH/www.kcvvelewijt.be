@@ -9,6 +9,8 @@ export let cookieConsentReady = false;
 
 export function CookieConsentBanner() {
   useEffect(() => {
+    let isMounted = true;
+
     CookieConsent.run({
       categories: {
         necessary: {
@@ -59,13 +61,16 @@ export function CookieConsentBanner() {
       },
     })
       .then(() => {
-        cookieConsentReady = true;
+        if (isMounted) {
+          cookieConsentReady = true;
+        }
       })
       .catch((error: unknown) => {
         console.error("CookieConsent initialization failed:", error);
       });
 
     return () => {
+      isMounted = false;
       cookieConsentReady = false;
       CookieConsent.reset(false);
     };

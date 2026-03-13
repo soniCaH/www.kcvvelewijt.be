@@ -409,7 +409,7 @@ blockquote::before {
    library's own :root defaults, covering both the consent and preferences modal. */
 :root {
   --cc-font-family: "Montserrat", "-apple-system", system-ui, "BlinkMacSystemFont",
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
 
   /* Surface — black base */
   --cc-bg: var(--color-kcvv-black);
