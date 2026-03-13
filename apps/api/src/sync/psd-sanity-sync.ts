@@ -235,7 +235,7 @@ export const runSync = Effect.gen(function* () {
             ),
           );
       }),
-    { concurrency: 5 },
+    { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
   yield* Effect.forEach(
