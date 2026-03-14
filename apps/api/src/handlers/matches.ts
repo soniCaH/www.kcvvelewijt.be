@@ -104,9 +104,10 @@ export const getMatchDetailHandler = (
 
     const rawDetail = yield* client.getRawMatchDetail(matchId);
     const detail = transformFootbalistoMatchDetail(rawDetail);
-    // Finished matches are immutable — cache 7 days. Live/upcoming — 60 seconds.
+    // Finished and forfeited matches are immutable — cache 7 days.
+    // Postponed/stopped may be rescheduled; scheduled = upcoming. Cache 60s.
     const ttl =
-      detail.status === "finished"
+      detail.status === "finished" || detail.status === "forfeited"
         ? TTL.MATCH_DETAIL_PAST
         : TTL.MATCH_DETAIL_LIVE;
     yield* cache.set(cacheKey, JSON.stringify(detail), ttl);

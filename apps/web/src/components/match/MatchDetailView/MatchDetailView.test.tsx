@@ -149,9 +149,9 @@ describe("MatchDetailView", () => {
       expect(screen.getByText("VS")).toBeInTheDocument();
     });
 
-    it("renders live match correctly", () => {
-      render(<MatchDetailView {...defaultProps} status="live" />);
-      expect(screen.getByText("Live")).toBeInTheDocument();
+    it("renders forfeited match correctly", () => {
+      render(<MatchDetailView {...defaultProps} status="forfeited" />);
+      expect(screen.getByText("FF")).toBeInTheDocument();
     });
 
     it("renders postponed match correctly", () => {
@@ -166,16 +166,16 @@ describe("MatchDetailView", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("renders cancelled match correctly", () => {
+    it("renders stopped match correctly", () => {
       render(
         <MatchDetailView
           {...defaultProps}
-          status="cancelled"
+          status="stopped"
           homeLineup={[]}
           awayLineup={[]}
         />,
       );
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
   });
 

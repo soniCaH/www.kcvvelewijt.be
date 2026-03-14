@@ -41,7 +41,7 @@ export interface ScheduleMatch {
   /** Away team score (for finished matches) */
   awayScore?: number;
   /** Match status */
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
   /** Competition name */
   competition?: string;
 }
@@ -87,17 +87,17 @@ function StatusBadge({ status }: { status: ScheduleMatch["status"] }) {
       </span>
     );
   }
-  if (status === "cancelled") {
+  if (status === "stopped") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-        Afgelast
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+        Gestopt
       </span>
     );
   }
-  if (status === "live") {
+  if (status === "forfeited") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white animate-pulse">
-        Live
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+        FF
       </span>
     );
   }

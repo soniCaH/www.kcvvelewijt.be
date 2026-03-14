@@ -77,7 +77,7 @@ export const mockLiveMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/628.png?v=1",
     score: 1,
   },
-  status: "live",
+  status: "scheduled",
   round: "U15",
   competition: "Competitie",
 };
@@ -121,7 +121,7 @@ export const mockPostponedMatch: UpcomingMatch = {
   competition: "Competitie",
 };
 
-export const mockCancelledMatch: UpcomingMatch = {
+export const mockForfeitedMatch: UpcomingMatch = {
   id: 13,
   date: new Date("2025-12-22T14:30:00Z"),
   homeTeam: {
@@ -134,7 +134,7 @@ export const mockCancelledMatch: UpcomingMatch = {
     name: "Kcvv Elewijt",
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1",
   },
-  status: "cancelled",
+  status: "forfeited",
   round: "U12",
   competition: "Competitie",
 };
@@ -147,7 +147,7 @@ export const mockMatches = {
   live: mockLiveMatch,
   finished: mockFinishedMatch,
   postponed: mockPostponedMatch,
-  cancelled: mockCancelledMatch,
+  forfeited: mockForfeitedMatch,
   all: [mockLiveMatch, ...mockScheduledMatches, mockFinishedMatch],
   mixed: [
     mockLiveMatch,
@@ -156,6 +156,6 @@ export const mockMatches = {
     mockScheduledMatches[1],
     mockPostponedMatch,
     mockScheduledMatches[2],
-    mockCancelledMatch,
+    mockForfeitedMatch,
   ],
 };

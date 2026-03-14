@@ -46,7 +46,7 @@ Used at the top of match detail pages (/game/[matchId]).
     time: { control: "text", description: "Match time (HH:MM)" },
     status: {
       control: "select",
-      options: ["scheduled", "live", "finished", "postponed", "cancelled"],
+      options: ["scheduled", "finished", "forfeited", "postponed", "stopped"],
       description: "Match status",
     },
     competition: { control: "text", description: "Competition name" },
@@ -100,23 +100,23 @@ export const Scheduled: Story = {
 };
 
 /**
- * Live match with pulsing indicator
+ * Forfeited match (FF result)
  */
-export const Live: Story = {
+export const Forfeited: Story = {
   args: {
     homeTeam: {
       name: "KCVV Elewijt",
       logo: KCVV_LOGO,
-      score: 2,
+      score: 3,
     },
     awayTeam: {
       name: "KFC Turnhout",
       logo: OPPONENT_LOGO,
-      score: 1,
+      score: 0,
     },
     date: new Date("2025-01-15T15:30:00Z"),
     time: "15:30",
-    status: "live",
+    status: "forfeited",
     competition: "3de Nationale",
   },
 };
@@ -142,9 +142,9 @@ export const Postponed: Story = {
 };
 
 /**
- * Cancelled match
+ * Stopped match (ended prematurely)
  */
-export const Cancelled: Story = {
+export const Stopped: Story = {
   args: {
     homeTeam: {
       name: "KCVV Elewijt",
@@ -156,7 +156,7 @@ export const Cancelled: Story = {
     },
     date: new Date("2025-12-07T15:00:00Z"),
     time: "15:00",
-    status: "cancelled",
+    status: "stopped",
     competition: "3de Nationale",
   },
 };

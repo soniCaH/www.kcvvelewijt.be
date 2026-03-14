@@ -101,7 +101,7 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
         score: 1,
       },
-      status: "live",
+      status: "forfeited",
       round: "U15",
       competition: "Competitie",
     };
@@ -110,7 +110,7 @@ describe("mapMatchToUpcomingMatch", () => {
 
     expect(result.homeTeam.score).toBe(2);
     expect(result.awayTeam.score).toBe(1);
-    expect(result.status).toBe("live");
+    expect(result.status).toBe("forfeited");
   });
 
   it("should handle postponed status", () => {
@@ -139,7 +139,7 @@ describe("mapMatchToUpcomingMatch", () => {
     expect(result.status).toBe("postponed");
   });
 
-  it("should handle cancelled status", () => {
+  it("should handle stopped status", () => {
     const match: Match = {
       id: 13,
       date: new Date("2025-12-22T14:30:00"),
@@ -155,14 +155,14 @@ describe("mapMatchToUpcomingMatch", () => {
         name: "Kcvv Elewijt",
         logo: "https://example.com/logo2.png",
       },
-      status: "cancelled",
+      status: "stopped",
       round: "U12",
       competition: "Competitie",
     };
 
     const result = mapMatchToUpcomingMatch(match);
 
-    expect(result.status).toBe("cancelled");
+    expect(result.status).toBe("stopped");
     expect(result.awayTeam.name).toBe("KCVV Elewijt");
   });
 });

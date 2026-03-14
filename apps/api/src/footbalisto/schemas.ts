@@ -31,7 +31,8 @@ export class FootbalistoMatch extends S.Class<FootbalistoMatch>(
   goalsAwayTeam: S.NullOr(S.Number),
   homeTeamId: S.NullOr(S.Number),
   awayTeamId: S.NullOr(S.Number),
-  status: S.Number, // 0=scheduled, 1=finished, 2=live, 3=postponed, 4=cancelled
+  status: S.Number, // 0=no special status, 1=FF, 2=AFG, 3=STOP
+  cancelled: S.optional(S.NullOr(S.Boolean)),
   competitionType: S.String,
   viewGameReport: S.Boolean,
 }) {}
@@ -134,6 +135,7 @@ export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetai
   competitionType: S.String,
   viewGameReport: S.Boolean,
   status: S.Number,
+  cancelled: S.optional(S.NullOr(S.Boolean)),
 }) {}
 
 export class FootbalistoMatchDetailResponse extends S.Class<FootbalistoMatchDetailResponse>(
@@ -182,6 +184,8 @@ export class PsdGame extends S.Class<PsdGame>("PsdGame")({
   competitionType: S.optional(S.NullOr(PsdCompetitionType)),
   reportGeneral: S.optional(S.NullOr(S.Boolean)),
   teamId: S.optional(S.NullOr(S.Number)),
+  // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
+  cancelled: S.optional(S.NullOr(S.Boolean)),
 }) {}
 
 export const PsdMatchListSchema = S.Struct({

@@ -70,13 +70,13 @@ describe("MatchHeader", () => {
       expect(screen.queryByText("VS")).not.toBeInTheDocument();
     });
 
-    it("renders score for live matches", () => {
+    it("renders score for forfeited matches", () => {
       render(
         <MatchHeader
           {...defaultProps}
           homeTeam={{ ...defaultProps.homeTeam, score: 2 }}
           awayTeam={{ ...defaultProps.awayTeam, score: 0 }}
-          status="live"
+          status="forfeited"
         />,
       );
       expect(screen.getByText("2")).toBeInTheDocument();
@@ -98,9 +98,9 @@ describe("MatchHeader", () => {
   });
 
   describe("status indicators", () => {
-    it("renders Live indicator for live matches", () => {
-      render(<MatchHeader {...defaultProps} status="live" />);
-      expect(screen.getByText("Live")).toBeInTheDocument();
+    it("renders FF badge for forfeited matches", () => {
+      render(<MatchHeader {...defaultProps} status="forfeited" />);
+      expect(screen.getByText("FF")).toBeInTheDocument();
     });
 
     it("renders Uitgesteld badge for postponed matches", () => {
@@ -108,9 +108,9 @@ describe("MatchHeader", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("renders Afgelast badge for cancelled matches", () => {
-      render(<MatchHeader {...defaultProps} status="cancelled" />);
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+    it("renders Gestopt badge for stopped matches", () => {
+      render(<MatchHeader {...defaultProps} status="stopped" />);
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
     it("does not show date for postponed matches", () => {
@@ -118,8 +118,8 @@ describe("MatchHeader", () => {
       expect(screen.queryByText("15:00")).not.toBeInTheDocument();
     });
 
-    it("does not show date for cancelled matches", () => {
-      render(<MatchHeader {...defaultProps} status="cancelled" time="15:00" />);
+    it("does not show date for stopped matches", () => {
+      render(<MatchHeader {...defaultProps} status="stopped" time="15:00" />);
       expect(screen.queryByText("15:00")).not.toBeInTheDocument();
     });
   });

@@ -40,7 +40,7 @@ export interface MatchTeaserProps {
   /** Score for live/finished matches */
   score?: { home: number; away: number };
   /** Match status */
-  status: "upcoming" | "live" | "finished" | "postponed" | "cancelled";
+  status: "upcoming" | "finished" | "forfeited" | "postponed" | "stopped";
   /** Link to match detail page */
   href?: string;
   /** Team ID to highlight (must match team.id) */
@@ -102,8 +102,7 @@ export function MatchTeaser({
   className,
 }: MatchTeaserProps) {
   const isCompact = variant === "compact";
-  const isLive = status === "live";
-  const hasScore = score && (status === "live" || status === "finished");
+  const hasScore = !!score;
 
   // Check if either team should be highlighted (strict ID equality)
   const isHomeHighlighted =
@@ -226,11 +225,8 @@ export function MatchTeaser({
   );
 
   const containerClasses = cn(
-    "block bg-white border rounded-lg transition-shadow",
+    "block bg-white border rounded-lg transition-shadow border-gray-200 hover:shadow-md",
     isCompact ? "p-3" : "p-4",
-    isLive
-      ? "border-red-300 ring-1 ring-red-200"
-      : "border-gray-200 hover:shadow-md",
     className,
   );
 
@@ -249,17 +245,6 @@ export function MatchTeaser({
  * Renders status badge for match
  */
 function StatusBadge({ status }: { status: MatchTeaserProps["status"] }) {
-  if (status === "live") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-        </span>
-        Live
-      </span>
-    );
-  }
   if (status === "postponed") {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
@@ -267,10 +252,17 @@ function StatusBadge({ status }: { status: MatchTeaserProps["status"] }) {
       </span>
     );
   }
-  if (status === "cancelled") {
+  if (status === "stopped") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-        Afgelast
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+        Gestopt
+      </span>
+    );
+  }
+  if (status === "forfeited") {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+        FF
       </span>
     );
   }

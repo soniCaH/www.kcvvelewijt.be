@@ -200,32 +200,32 @@ describe("TeamSchedule", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("shows cancelled badge", () => {
-      const cancelledMatch: ScheduleMatch = {
+    it("shows stopped badge", () => {
+      const stoppedMatch: ScheduleMatch = {
         id: 2002,
         date: futureDate,
         time: "15:00",
         homeTeam: { id: 1235, name: "KCVV Elewijt" },
         awayTeam: { id: 59, name: "KFC Turnhout" },
-        status: "cancelled",
+        status: "stopped",
       };
-      render(<TeamSchedule matches={[cancelledMatch]} teamId={1235} />);
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+      render(<TeamSchedule matches={[stoppedMatch]} teamId={1235} />);
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
-    it("shows live badge", () => {
-      const liveMatch: ScheduleMatch = {
+    it("shows FF badge for forfeited matches", () => {
+      const forfeitedMatch: ScheduleMatch = {
         id: 2003,
-        date: now,
+        date: pastDate,
         time: "15:00",
         homeTeam: { id: 1235, name: "KCVV Elewijt" },
         awayTeam: { id: 59, name: "KFC Turnhout" },
-        homeScore: 1,
+        homeScore: 3,
         awayScore: 0,
-        status: "live",
+        status: "forfeited",
       };
-      render(<TeamSchedule matches={[liveMatch]} teamId={1235} />);
-      expect(screen.getByText("Live")).toBeInTheDocument();
+      render(<TeamSchedule matches={[forfeitedMatch]} teamId={1235} />);
+      expect(screen.getByText("FF")).toBeInTheDocument();
     });
   });
 

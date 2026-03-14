@@ -55,16 +55,16 @@ export const Upcoming: Story = {
 };
 
 /**
- * Live match with current score
+ * Forfeited match (FF result)
  */
-export const Live: Story = {
+export const Forfeited: Story = {
   args: {
     homeTeam: kcvv,
     awayTeam: opponent,
     date: "2024-02-15",
     time: "15:00",
-    score: { home: 2, away: 1 },
-    status: "live",
+    score: { home: 3, away: 0 },
+    status: "forfeited",
     href: "/game/123",
   },
 };
@@ -99,15 +99,15 @@ export const Postponed: Story = {
 };
 
 /**
- * Cancelled match
+ * Stopped match (ended prematurely)
  */
-export const Cancelled: Story = {
+export const Stopped: Story = {
   args: {
     homeTeam: kcvv,
     awayTeam: opponent,
     date: "2024-02-15",
     time: "15:00",
-    status: "cancelled",
+    status: "stopped",
     href: "/game/123",
   },
 };

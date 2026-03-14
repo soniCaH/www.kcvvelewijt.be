@@ -10,7 +10,7 @@ import {
   mockLiveMatch,
   mockFinishedMatch,
   mockPostponedMatch,
-  mockCancelledMatch,
+  mockForfeitedMatch,
   mockMatches,
 } from "@/components/home/UpcomingMatches/UpcomingMatches.mocks";
 
@@ -103,9 +103,9 @@ export const Live: Story = {
   },
 };
 
-/** Postponed and cancelled matches. */
+/** Postponed and forfeited matches. */
 export const Disrupted: Story = {
   args: {
-    matches: [mockPostponedMatch, mockCancelledMatch],
+    matches: [mockPostponedMatch, mockForfeitedMatch],
   },
 };

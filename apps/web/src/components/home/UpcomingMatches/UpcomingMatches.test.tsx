@@ -73,7 +73,7 @@ describe("UpcomingMatches", () => {
         name: "KCVV Elewijt",
         score: 1,
       },
-      status: "live",
+      status: "forfeited",
       competition: "Beker van België",
     },
     {
@@ -165,10 +165,11 @@ describe("UpcomingMatches", () => {
   });
 
   describe("Match Status", () => {
-    it("renders live badge for live matches", () => {
+    it("renders FF badge for forfeited matches", () => {
       render(<UpcomingMatches matches={[mockMatches[1]]} />);
 
-      expect(screen.getByText("Live")).toBeInTheDocument();
+      const ffElements = screen.getAllByText("FF");
+      expect(ffElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it("renders scores for live matches", () => {
@@ -195,14 +196,14 @@ describe("UpcomingMatches", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("renders cancelled status", () => {
-      const cancelledMatch: UpcomingMatch = {
+    it("renders stopped status", () => {
+      const stoppedMatch: UpcomingMatch = {
         ...mockMatches[0],
-        status: "cancelled",
+        status: "stopped",
       };
-      render(<UpcomingMatches matches={[cancelledMatch]} />);
+      render(<UpcomingMatches matches={[stoppedMatch]} />);
 
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
   });
 
@@ -387,7 +388,7 @@ describe("UpcomingMatches", () => {
             id: 2,
             name: "FC Opponent",
           },
-          status: "live",
+          status: "forfeited",
           competition: "Tweede Provinciale",
         },
       ];

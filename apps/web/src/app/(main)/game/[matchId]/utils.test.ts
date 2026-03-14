@@ -188,9 +188,9 @@ describe("formatMatchTitle", () => {
     expect(formatMatchTitle(match)).toBe("KCVV Elewijt 3 - 1 KFC Turnhout");
   });
 
-  it("formats live match without score as VS", () => {
-    const match = createMatchDetail({ status: "live" });
-    // Live but no score - shows VS
+  it("formats forfeited match without score as VS", () => {
+    const match = createMatchDetail({ status: "forfeited" });
+    // Forfeited but no score - shows VS
     expect(formatMatchTitle(match)).toBe("KCVV Elewijt vs KFC Turnhout");
   });
 

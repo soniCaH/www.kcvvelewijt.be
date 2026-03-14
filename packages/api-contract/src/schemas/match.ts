@@ -9,13 +9,20 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
   score: S.optional(S.Number),
 }) {}
 
-/** Normalized match status */
+/**
+ * Normalized match status derived from PSD numeric status codes:
+ *   0 (no goals) → "scheduled"
+ *   0 (has goals) → "finished"
+ *   1 (FF)        → "forfeited"
+ *   2 (AFG)       → "postponed"  (afgelast — may be rescheduled)
+ *   3 (STOP)      → "stopped"    (ended prematurely — may be rescheduled)
+ */
 export const MatchStatus = S.Literal(
   "scheduled",
-  "live",
   "finished",
+  "forfeited",
   "postponed",
-  "cancelled",
+  "stopped",
 );
 export type MatchStatus = S.Schema.Type<typeof MatchStatus>;
 
