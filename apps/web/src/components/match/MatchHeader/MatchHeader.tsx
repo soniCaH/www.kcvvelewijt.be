@@ -15,6 +15,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { formatMatchDate } from "@/lib/utils/dates";
+import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 
 export interface MatchTeamProps {
   /** Team name */
@@ -35,7 +36,7 @@ export interface MatchHeaderProps {
   /** Match time (HH:MM format) */
   time?: string;
   /** Match status */
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   /** Competition name */
   competition?: string;
   /** Loading state */

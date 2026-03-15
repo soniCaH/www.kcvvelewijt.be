@@ -77,7 +77,7 @@ export const mockScheduledMatchWithScores: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/628.png?v=1",
     score: 1,
   },
-  status: "scheduled",
+  status: "finished",
   round: "U15",
   competition: "Competitie",
 };

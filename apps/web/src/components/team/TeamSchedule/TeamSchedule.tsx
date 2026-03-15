@@ -161,10 +161,12 @@ export function TeamSchedule({
     );
   }
 
+  const TERMINAL_STATUSES: MatchStatus[] = ["finished", "forfeited", "stopped"];
+
   // Filter matches based on showPast
   let filteredMatches = showPast
     ? matches
-    : matches.filter((m) => m.status !== "finished");
+    : matches.filter((m) => !TERMINAL_STATUSES.includes(m.status));
 
   // Sort by date
   filteredMatches = [...filteredMatches].sort(

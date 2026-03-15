@@ -37,7 +37,7 @@ export const Default: Story = {
   },
 };
 
-export const WithLiveMatch: Story = {
+export const WithScoredMatch: Story = {
   args: {
     matches: [mockScheduledMatchWithScores, ...mockScheduledMatches],
     title: "Volgende wedstrijden",
@@ -48,7 +48,7 @@ export const WithLiveMatch: Story = {
     docs: {
       description: {
         story:
-          "Displays a live match with pulsing indicator and current scores.",
+          "Displays a finished match with scores alongside scheduled matches.",
       },
     },
   },

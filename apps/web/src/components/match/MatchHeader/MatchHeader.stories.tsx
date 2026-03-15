@@ -27,7 +27,7 @@ Hero section for match detail pages.
 
 **Features:**
 - Team logos and names
-- Score display (for finished/live matches)
+- Score display (for finished matches)
 - Date and time
 - Competition badge
 - Status indicators (Postponed, Stopped, Forfeited)

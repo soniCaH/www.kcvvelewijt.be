@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   transformFootbalistoMatch,
   transformFootbalistoMatchDetail,
@@ -80,6 +80,21 @@ describe("transformFootbalistoMatch", () => {
     expect(transformFootbalistoMatch({ ...rawMatch, status: 3 }).status).toBe(
       "stopped",
     );
+  });
+
+  it("falls back to 'scheduled' and warns for unknown status codes", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = transformFootbalistoMatch({
+      ...rawMatch,
+      status: 99,
+      goalsHomeTeam: null,
+      goalsAwayTeam: null,
+    });
+    expect(result.status).toBe("scheduled");
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Unknown PSD game status code: 99"),
+    );
+    warnSpy.mockRestore();
   });
 
   it("maps cancelled=true to postponed regardless of status", () => {
