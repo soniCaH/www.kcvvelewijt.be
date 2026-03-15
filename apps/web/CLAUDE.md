@@ -51,6 +51,36 @@ Use these top-level groups — enforced by `storySort` in `.storybook/preview.ts
 
 MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) without `remark-gfm`. Always use native HTML `<table>` elements in `.mdx` files.
 
+## Design Conventions (Redesign — locked)
+
+### Section padding
+
+All full-width page sections use `py-20` (80px). Do not use `py-16`, `py-24`, or other values
+for top-level sections — consistency is load-bearing for the dark/light alternation rhythm.
+
+### Border-radius
+
+| Context                                       | Class                      | Value         |
+| --------------------------------------------- | -------------------------- | ------------- |
+| Interactive elements (buttons, chips, badges) | `rounded-sm`               | 2px           |
+| Cards                                         | `rounded`                  | 4px (maximum) |
+| Never outside design system components        | `rounded-lg`, `rounded-xl` | —             |
+
+No `rounded-lg` or larger outside of design system primitives.
+
+### Colour tokens (redesign palette)
+
+| Token             | Hex       | Usage                                        |
+| ----------------- | --------- | -------------------------------------------- |
+| `kcvv-green`      | `#4acf52` | Primary brand — CTAs, accents, active states |
+| `kcvv-green-dark` | `#008755` | Dark section backgrounds, depth accents      |
+| `kcvv-black`      | `#1E2024` | Nav, dark sections                           |
+
+### Section alternation
+
+Dark/light sections must alternate: `kcvv-black` / `kcvv-green-dark` ↔ white / `gray-100`.
+Never two dark or two light sections in a row.
+
 ### Design system locations
 
 | Concern           | Path                                                                          |
