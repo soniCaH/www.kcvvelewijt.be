@@ -62,3 +62,11 @@ export type { BadgeProps, BadgeVariant, BadgeSize } from "./Badge";
 // Alert
 export { Alert } from "./Alert";
 export type { AlertProps, AlertVariant } from "./Alert";
+
+// SectionDivider
+export { SectionDivider } from "./SectionDivider";
+export type {
+  SectionDividerProps,
+  SectionDividerColor,
+  SectionDividerPosition,
+} from "./SectionDivider";
