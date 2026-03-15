@@ -52,7 +52,7 @@ export const PageHeader = ({
   return (
     <>
       <header className={cn("relative z-50", className)}>
-        {/* Navigation Container with Green Background + Pattern */}
+        {/* Dark nav background with subtle bottom border */}
         <nav className="fixed top-[3px] left-0 right-0 z-50 h-16 transition-[height] duration-300 bg-kcvv-black border-b border-white/[0.06]">
           {/* Mobile Header */}
           <div className="lg:hidden h-full relative">

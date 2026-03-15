@@ -157,7 +157,7 @@ Expected: FAIL — `AccentStrip` not found.
 export const AccentStrip = () => (
   <div
     aria-hidden="true"
-    className="fixed top-0 left-0 right-0 h-[3px] bg-kcvv-green z-[51]"
+    className="fixed top-0 left-0 right-0 h-[3px] bg-kcvv-green-bright z-[51]"
   />
 );
 ```
