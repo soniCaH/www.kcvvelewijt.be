@@ -10,8 +10,8 @@
   /* KCVV Brand Colors */
   --color-kcvv-green-bright: #4acf52;
   --color-kcvv-green-bright-hover: #41b147;
-  --color-kcvv-green-dark: #4B9B48;
-  --color-kcvv-green-dark-hover: #3f833d;
+  --color-kcvv-green-dark: #008755;
+  --color-kcvv-green-dark-hover: #006b43;
 
   /* Neutral Colors */
   --color-kcvv-black: #1E2024;
@@ -35,14 +35,14 @@
   --color-green--bright--alpha--50: rgba(74, 207, 82, 0.5);
   --color-green--bright--alpha--75: rgba(74, 207, 82, 0.75);
   --color-green--bright--alpha--25: rgba(74, 207, 82, 0.25);
-  --color-green--dark: #4B9B48;
+  --color-green--dark: #008755;
   --color-black: #1E2024;
   --color-gray--light: #CCC;
   --color-gray--medium: #62656A;
   --color-gray--dark: #292c31;
   --color-gray-blue: #31404b;
   --color-green: #BADA55;
-  --color-green-dark-hover: #3f833d;
+  --color-green-dark-hover: #006b43;
 
   /* Layout Variables */
   --max-width--outer: 90rem;
@@ -100,9 +100,9 @@
   /* KCVV Brand Colors */
   --color-kcvv-green-DEFAULT: #4acf52;
   --color-kcvv-green-bright: #4acf52;
-  --color-kcvv-green-dark: #4B9B48;
+  --color-kcvv-green-dark: #008755;
   --color-kcvv-green-hover: #41b147;
-  --color-kcvv-green-hover-dark: #3f833d;
+  --color-kcvv-green-hover-dark: #006b43;
   --color-kcvv-green-100: rgba(74, 207, 82, 0.25);
 
   /* Ring Colors for Focus States */

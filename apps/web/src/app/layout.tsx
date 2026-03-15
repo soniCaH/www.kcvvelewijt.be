@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
+import { AccentStrip } from "@/components/layout/AccentStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageFooter } from "@/components/layout/PageFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
@@ -85,6 +86,7 @@ export default async function RootLayout({
         )}
       </head>
       <body suppressHydrationWarning>
+        <AccentStrip />
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
         {children}
         <PageFooter />
