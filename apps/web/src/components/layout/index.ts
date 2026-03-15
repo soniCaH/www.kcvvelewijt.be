@@ -25,3 +25,6 @@ export type { PageFooterProps } from "./PageFooter";
 
 // CookieConsentBanner
 export { CookieConsentBanner } from "./CookieConsentBanner";
+
+// AccentStrip
+export { AccentStrip } from "./AccentStrip";
