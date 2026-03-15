@@ -12,15 +12,15 @@
     "migrate:board-teams": "tsx src/migrate-board-teams.ts"
   },
   "dependencies": {
-    "@portabletext/block-tools": "^5.1.0",
-    "@sanity/client": "^7.16.0",
-    "@sanity/schema": "^3.69.0",
-    "dotenv": "^16.0.0",
-    "jsdom": "^25.0.0",
-    "node-html-parser": "^6.0.0"
+    "@portabletext/block-tools": "5.1.0",
+    "@sanity/client": "7.16.0",
+    "@sanity/schema": "3.99.0",
+    "dotenv": "16.6.1",
+    "jsdom": "25.0.1",
+    "node-html-parser": "6.1.13"
   },
   "devDependencies": {
     "@types/jsdom": "^21.0.0",
-    "tsx": "^4.0.0"
+    "tsx": "4.21.0"
   }
 }
