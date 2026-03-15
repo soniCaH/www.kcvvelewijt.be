@@ -53,11 +53,6 @@ describe("Navigation", () => {
       expect(screen.getByText("A-Ploeg")).toBeInTheDocument();
       expect(screen.getByText("B-Ploeg")).toBeInTheDocument();
     });
-
-    it("should render search link", () => {
-      render(<Navigation seniorTeams={seniorTeams} />);
-      expect(screen.getByLabelText("Search")).toBeInTheDocument();
-    });
   });
 
   describe("Active state detection", () => {

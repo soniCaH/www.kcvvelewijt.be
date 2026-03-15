@@ -10,7 +10,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { Search } from "@/lib/icons";
 import type {
   YouthTeamNavItem,
   SeniorTeamNavItem,
@@ -177,7 +176,7 @@ export const Navigation = ({
               left: 50%;
               height: 2px;
               width: 0;
-              background: #fff;
+              background: #4acf52;
               transition: width 0.3s ease 0s, left 0.3s ease 0s;
             }
             .nav-link:hover::after,
@@ -262,18 +261,6 @@ export const Navigation = ({
               </li>
             );
           })}
-
-          {/* Search Link */}
-          <li className="inline-block">
-            <Link
-              href="/search"
-              className="nav-link text-[0.7rem] xl:text-[0.875rem] uppercase font-bold text-white whitespace-nowrap no-underline py-2 px-2 transition-all duration-300 inline-block"
-              aria-label="Search"
-            >
-              <Search size={16} className="inline-block align-middle" />
-              <span className="sr-only">Search</span>
-            </Link>
-          </li>
         </ul>
       </nav>
     </>
