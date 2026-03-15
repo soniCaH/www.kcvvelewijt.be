@@ -156,7 +156,7 @@ export const WithoutTags: Story = {
 };
 
 /**
- * Article with many tags (only shows first 3)
+ * Article with many tags (only shows first tag as category badge)
  */
 export const ManyTags: Story = {
   args: {

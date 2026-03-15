@@ -56,11 +56,12 @@ describe("FeaturedArticles", () => {
     expect(screen.getAllByText("20 januari 2025")).toHaveLength(2);
   });
 
-  it("displays article tags", () => {
+  it("displays first tag as category badge above the title", () => {
     render(<FeaturedArticles articles={mockArticles} />);
 
+    // Only the first tag renders as a badge; remaining tags are not shown
     expect(screen.getByText("Ploeg")).toBeInTheDocument();
-    expect(screen.getByText("Nieuws")).toBeInTheDocument();
+    expect(screen.queryByText("Nieuws")).not.toBeInTheDocument();
   });
 
   it("renders navigation dots when multiple articles exist", () => {
@@ -264,7 +265,7 @@ describe("FeaturedArticles", () => {
     expect(screen.queryByText("Ploeg")).not.toBeInTheDocument();
   });
 
-  it("limits tag display to 3 tags maximum", () => {
+  it("shows only the first tag as category badge, ignores the rest", () => {
     const articleWithManyTags = [
       {
         ...mockArticles[0],
@@ -281,8 +282,8 @@ describe("FeaturedArticles", () => {
     render(<FeaturedArticles articles={articleWithManyTags} />);
 
     expect(screen.getByText("Tag 1")).toBeInTheDocument();
-    expect(screen.getByText("Tag 2")).toBeInTheDocument();
-    expect(screen.getByText("Tag 3")).toBeInTheDocument();
+    expect(screen.queryByText("Tag 2")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tag 3")).not.toBeInTheDocument();
     expect(screen.queryByText("Tag 4")).not.toBeInTheDocument();
     expect(screen.queryByText("Tag 5")).not.toBeInTheDocument();
   });

@@ -198,7 +198,7 @@ export const FeaturedArticles = ({
             />
           )}
           {/* Dark gradient: strong on left (where text sits), fades right toward sidebar */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/20" />
         </div>
 
         {/* Content Overlay — padded away from sidebar on desktop */}
@@ -207,111 +207,106 @@ export const FeaturedArticles = ({
             href={activeArticle.href}
             className="group flex flex-col justify-center max-w-lg lg:max-w-xl"
           >
-            <h2 className="frontpage__featured_article__title text-white! text-4xl lg:text-6xl font-bold leading-tight mb-4 group-hover:text-kcvv-green-bright! transition-colors">
+            {activeArticle.tags && activeArticle.tags[0] && (
+              <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-[10px] font-bold uppercase tracking-widest px-[10px] py-[3px] rounded-sm mb-4 w-fit">
+                {activeArticle.tags[0].name}
+              </span>
+            )}
+
+            <h2 className="frontpage__featured_article__title font-title text-white! text-[clamp(1.75rem,5.5vw,5rem)]! font-black! leading-[1.02]! tracking-tight mb-5! group-hover:text-white/75! transition-colors">
               {activeArticle.title}
             </h2>
 
             {activeArticle.description && (
-              <p className="frontpage__featured_article__title__description text-white! text-lg lg:text-xl mb-6 line-clamp-3">
+              <p className="frontpage__featured_article__title__description text-white/75 text-[1.1rem] leading-[1.55] mb-5 line-clamp-3">
                 {activeArticle.description}
               </p>
             )}
 
-            <div className="frontpage__featured_article__meta__wrapper flex items-center gap-4 text-sm text-white!">
+            <div className="frontpage__featured_article__meta__wrapper flex items-center gap-4 text-[13px] text-white/60">
               <time
                 className="frontpage__featured_article__meta"
                 dateTime={activeArticle.dateIso}
               >
                 {activeArticle.date}
               </time>
-
-              {activeArticle.tags && activeArticle.tags.length > 0 && (
-                <div className="frontpage__featured_article__meta__tags flex gap-2">
-                  {activeArticle.tags.slice(0, 3).map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-1 bg-kcvv-green-bright border border-kcvv-green-bright !text-white text-xs uppercase font-semibold"
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </Link>
         </div>
 
         {/* Navigation Dots + Pause Button */}
         {articles.length > 1 && (
-          <div className="absolute bottom-6 left-4 lg:left-10 z-20 flex items-center gap-3">
+          <div className="absolute bottom-6 left-4 lg:left-10 z-20 flex items-center gap-2">
             {/* Pause/Play toggle — WCAG 2.2.2 */}
             {autoRotate && (
               <button
                 type="button"
                 onClick={handleUserPauseToggle}
                 className={cn(
-                  "p-1.5 rounded-full transition-colors",
+                  "p-1 rounded-full transition-all",
                   isUserPaused
-                    ? "bg-white text-kcvv-black"
-                    : "bg-black/50 text-white hover:bg-black/70",
+                    ? "bg-white/20 text-white"
+                    : "bg-transparent text-white/40 hover:text-white/80",
                 )}
                 aria-label={
                   isUserPaused ? "Artikelen hervatten" : "Artikelen pauzeren"
                 }
               >
                 {isUserPaused ? (
-                  <Play className="w-3 h-3" aria-hidden="true" />
+                  <Play className="w-2.5 h-2.5" aria-hidden="true" />
                 ) : (
-                  <Pause className="w-3 h-3" aria-hidden="true" />
+                  <Pause className="w-2.5 h-2.5" aria-hidden="true" />
                 )}
               </button>
             )}
 
             {/* Progress dots — active dot fills with green over the interval duration */}
-            {articles.map((article, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className="group p-1.5"
-                aria-label={`Artikel ${index + 1}: ${article.title}`}
-                aria-current={index === clampedIndex ? "true" : undefined}
-              >
-                {/* Visual dot — overflow-hidden clips the progress fill animation */}
-                <span
-                  className={cn(
-                    "relative block overflow-hidden rounded-full transition-all",
-                    index === clampedIndex
-                      ? "w-10 h-3 bg-white/25"
-                      : "w-3 h-3 bg-white/40 group-hover:bg-white/65",
-                  )}
+            <div className="flex items-center gap-1">
+              {articles.map((article, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  className="group p-1"
+                  aria-label={`Artikel ${index + 1}: ${article.title}`}
+                  aria-current={index === clampedIndex ? "true" : undefined}
                 >
-                  {/* Progress fill — animates via CSS keyframe when autoRotate is on.
+                  {/* Visual dot — overflow-hidden clips the progress fill animation */}
+                  <span
+                    className={cn(
+                      "relative block overflow-hidden rounded-full transition-all",
+                      index === clampedIndex
+                        ? "w-10 h-3 bg-white/25"
+                        : "w-3 h-3 bg-white/40 group-hover:bg-white/65",
+                    )}
+                  >
+                    {/* Progress fill — animates via CSS keyframe when autoRotate is on.
                       Keyed on pauseGen so the span remounts (resetting the animation)
                       whenever the carousel resumes, keeping it in sync with the interval. */}
-                  {index === clampedIndex && (
-                    <span
-                      key={resumeGen}
-                      className={cn(
-                        "absolute inset-0 rounded-full bg-kcvv-green-bright",
-                        autoRotate && "carousel-progress-fill",
-                      )}
-                      style={
-                        autoRotate
-                          ? {
-                              animationDuration: `${safeInterval}ms`,
-                              animationPlayState: isPaused
-                                ? "paused"
-                                : "running",
-                            }
-                          : undefined
-                      }
-                      aria-hidden="true"
-                    />
-                  )}
-                </span>
-              </button>
-            ))}
+                    {index === clampedIndex && (
+                      <span
+                        key={resumeGen}
+                        className={cn(
+                          "absolute inset-0 rounded-full bg-kcvv-green-bright",
+                          autoRotate && "carousel-progress-fill",
+                        )}
+                        style={
+                          autoRotate
+                            ? {
+                                animationDuration: `${safeInterval}ms`,
+                                animationPlayState: isPaused
+                                  ? "paused"
+                                  : "running",
+                              }
+                            : undefined
+                        }
+                        aria-hidden="true"
+                      />
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -324,7 +319,7 @@ export const FeaturedArticles = ({
                 type="button"
                 onClick={() => setActiveIndex(index)}
                 className={cn(
-                  "frontpage__featured_article group flex items-start gap-3 p-3 rounded-lg transition-all cursor-pointer text-left border backdrop-blur-sm",
+                  "frontpage__featured_article group flex items-start gap-3 p-3 rounded-sm transition-all cursor-pointer text-left border backdrop-blur-sm",
                   index === clampedIndex
                     ? "frontpage__featured_article--active bg-kcvv-black/90 border-kcvv-green-bright"
                     : "bg-black/65 border-white/10 hover:bg-black/80 hover:border-white/25",
