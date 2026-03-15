@@ -49,7 +49,7 @@ export const Default: Story = {
     <div style={{ transform: "translateX(0)" }}>
       <AccentStrip />
       <PageHeader />
-      <div className="p-8 pt-[calc(7.5rem+3px)]">
+      <div className="p-8 pt-[calc(4rem+3px)]">
         <h1 className="text-2xl font-bold mb-4">KCVV Elewijt</h1>
         <p className="text-gray-600 mb-4">
           The header above shows the dark nav with the green accent strip. Hover
@@ -76,7 +76,7 @@ export const MobileView: Story = {
     <div style={{ transform: "translateX(0)" }}>
       <AccentStrip />
       <PageHeader />
-      <div className="p-4 pt-[calc(5rem+3px)]">
+      <div className="p-4 pt-[calc(4rem+3px)]">
         <h1 className="text-xl font-bold mb-4">Mobile Layout</h1>
         <p className="text-sm text-gray-600">
           Click the hamburger icon to open the mobile menu.
@@ -100,7 +100,7 @@ export const WithContent: Story = {
     >
       <AccentStrip />
       <PageHeader />
-      <main className="flex-1 pt-[calc(7.5rem+3px)]">
+      <main className="flex-1 pt-[calc(4rem+3px)]">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-kcvv-gray-blue mb-4">
             Welcome to KCVV Elewijt
