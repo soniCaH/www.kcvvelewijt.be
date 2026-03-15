@@ -1,0 +1,1 @@
+export { AccentStrip } from "./AccentStrip";
