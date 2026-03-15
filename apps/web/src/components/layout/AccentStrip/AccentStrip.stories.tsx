@@ -20,15 +20,31 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  render: () => (
+    <div className="min-h-[120px] bg-white relative">
+      <AccentStrip />
+      <div className="pt-4 px-4 text-sm text-kcvv-gray">
+        3px kcvv-green strip fixed at top-0
+      </div>
+    </div>
+  ),
+};
 
 export const OnDarkBackground: Story = {
   parameters: {
-    backgrounds: { default: "dark" },
     docs: {
       description: {
         story: "How the strip appears above the dark nav (#1E2024).",
       },
     },
   },
+  render: () => (
+    <div className="min-h-[120px] bg-kcvv-black relative">
+      <AccentStrip />
+      <div className="pt-4 px-4 text-sm text-kcvv-gray-light">
+        Strip above dark nav background
+      </div>
+    </div>
+  ),
 };
