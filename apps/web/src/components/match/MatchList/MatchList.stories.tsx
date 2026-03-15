@@ -7,10 +7,9 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchList } from "./MatchList";
 import {
   mockScheduledMatches,
-  mockLiveMatch,
+  mockForfeitedMatch,
   mockFinishedMatch,
   mockPostponedMatch,
-  mockCancelledMatch,
   mockMatches,
 } from "@/components/home/UpcomingMatches/UpcomingMatches.mocks";
 
@@ -48,7 +47,7 @@ export const Upcoming: Story = {
   },
 };
 
-/** Mixed statuses — live, scheduled, finished, postponed, cancelled. */
+/** Mixed statuses — scheduled, finished, postponed, stopped, and forfeited. */
 export const Mixed: Story = {
   args: {
     matches: mockMatches.mixed,
@@ -95,17 +94,17 @@ export const Finished: Story = {
   },
 };
 
-/** Single live match. */
-export const Live: Story = {
+/** Single forfeited match. */
+export const Forfeited: Story = {
   args: {
-    matches: [mockLiveMatch],
+    matches: [mockForfeitedMatch],
     highlightTeamId: KCVV_ID,
   },
 };
 
-/** Postponed and cancelled matches. */
+/** Postponed and forfeited matches. */
 export const Disrupted: Story = {
   args: {
-    matches: [mockPostponedMatch, mockCancelledMatch],
+    matches: [mockPostponedMatch, mockForfeitedMatch],
   },
 };

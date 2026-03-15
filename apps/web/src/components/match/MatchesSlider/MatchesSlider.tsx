@@ -25,7 +25,7 @@ export interface MatchesSliderProps {
 
 function mapStatus(
   status: UpcomingMatch["status"],
-): "upcoming" | "live" | "finished" | "postponed" | "cancelled" {
+): "upcoming" | "finished" | "forfeited" | "postponed" | "stopped" {
   return status === "scheduled" ? "upcoming" : status;
 }
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   transformFootbalistoMatch,
   transformFootbalistoMatchDetail,
@@ -24,7 +24,7 @@ const rawMatch: FootbalistoMatch = {
   goalsAwayTeam: 1,
   homeTeamId: 1,
   awayTeamId: 2,
-  status: 1,
+  status: 0,
   competitionType: "3de Nationale",
   viewGameReport: true,
 };
@@ -70,16 +70,42 @@ describe("transformFootbalistoMatch", () => {
     expect(result.home_team.score).toBeUndefined();
   });
 
-  it("maps live (2), postponed (3), cancelled (4)", () => {
-    expect(transformFootbalistoMatch({ ...rawMatch, status: 2 }).status).toBe(
-      "live",
+  it("maps forfeited (1), postponed (2), stopped (3)", () => {
+    expect(transformFootbalistoMatch({ ...rawMatch, status: 1 }).status).toBe(
+      "forfeited",
     );
-    expect(transformFootbalistoMatch({ ...rawMatch, status: 3 }).status).toBe(
+    expect(transformFootbalistoMatch({ ...rawMatch, status: 2 }).status).toBe(
       "postponed",
     );
-    expect(transformFootbalistoMatch({ ...rawMatch, status: 4 }).status).toBe(
-      "cancelled",
+    expect(transformFootbalistoMatch({ ...rawMatch, status: 3 }).status).toBe(
+      "stopped",
     );
+  });
+
+  it("falls back to 'scheduled' and warns for unknown status codes", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = transformFootbalistoMatch({
+      ...rawMatch,
+      status: 99,
+      goalsHomeTeam: null,
+      goalsAwayTeam: null,
+    });
+    expect(result.status).toBe("scheduled");
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Unknown PSD game status code: 99"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("maps cancelled=true to postponed regardless of status", () => {
+    expect(
+      transformFootbalistoMatch({ ...rawMatch, status: 0, cancelled: true })
+        .status,
+    ).toBe("postponed");
+    expect(
+      transformFootbalistoMatch({ ...rawMatch, status: 1, cancelled: true })
+        .status,
+    ).toBe("postponed");
   });
 });
 
@@ -142,7 +168,7 @@ describe("transformFootbalistoMatchDetail", () => {
       goalsAwayTeam: 0,
       competitionType: "3de Nationale",
       viewGameReport: true,
-      status: 1,
+      status: 0,
     },
   };
 

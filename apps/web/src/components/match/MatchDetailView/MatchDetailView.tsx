@@ -25,7 +25,7 @@ export interface MatchDetailViewProps {
   /** Match time (HH:MM format) */
   time?: string;
   /** Match status */
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
   /** Competition name */
   competition?: string;
   /** Home team lineup */

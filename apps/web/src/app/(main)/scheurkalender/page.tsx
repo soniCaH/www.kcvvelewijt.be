@@ -33,7 +33,7 @@ async function fetchUpcomingMatches(): Promise<Match[]> {
   );
 
   return [...matches]
-    .filter((m) => m.status === "scheduled" || m.status === "live")
+    .filter((m) => m.status === "scheduled")
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 

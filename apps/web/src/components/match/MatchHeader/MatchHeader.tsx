@@ -6,22 +6,23 @@
  *
  * Features:
  * - Team logos and names
- * - Score display (for finished/live matches)
+ * - Score display (for finished/forfeited matches)
  * - Date and time
  * - Competition badge
- * - Status indicators (Live, Postponed, Cancelled)
+ * - Status indicators (Postponed, Stopped, Forfeited)
  */
 
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { formatMatchDate } from "@/lib/utils/dates";
+import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 
 export interface MatchTeamProps {
   /** Team name */
   name: string;
   /** Team logo URL */
   logo?: string;
-  /** Team score (for finished/live matches) */
+  /** Team score (for finished/forfeited matches) */
   score?: number;
 }
 
@@ -35,7 +36,7 @@ export interface MatchHeaderProps {
   /** Match time (HH:MM format) */
   time?: string;
   /** Match status */
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: MatchStatus;
   /** Competition name */
   competition?: string;
   /** Loading state */
@@ -47,16 +48,16 @@ export interface MatchHeaderProps {
 /**
  * Render a hero header for a match, showing competition, teams, score, status badges, and date/time.
  *
- * Displays a loading skeleton when `isLoading` is true. Shows a live indicator when `status` is "live",
- * displays numeric scores when `status` is "live" or "finished", and shows localized badges for
- * "postponed" ("Uitgesteld") and "cancelled" ("Afgelast"). Date and time are hidden when the match is
- * postponed or cancelled. `className` is merged into the outer container.
+ * Displays a loading skeleton when `isLoading` is true. Shows scores when `status` is "finished" or
+ * "forfeited", and shows localized badges for "postponed" ("Uitgesteld"), "stopped" ("Gestopt"),
+ * and "forfeited" ("FF"). Date and time are hidden when the match is postponed or stopped.
+ * `className` is merged into the outer container.
  *
  * @param homeTeam - Home team data (name, optional `logo`, optional `score`)
  * @param awayTeam - Away team data (name, optional `logo`, optional `score`)
  * @param date - Match date
  * @param time - Optional time string (e.g., "HH:MM")
- * @param status - Match status; one of `"scheduled" | "live" | "finished" | "postponed" | "cancelled"`
+ * @param status - Match status; one of `"scheduled" | "finished" | "forfeited" | "postponed" | "stopped"`
  * @param competition - Optional competition name displayed as a badge
  * @param isLoading - If `true`, render a placeholder skeleton instead of match content
  * @param className - Optional additional CSS classes applied to the root element
@@ -72,13 +73,13 @@ export function MatchHeader({
   isLoading = false,
   className,
 }: MatchHeaderProps) {
-  const isLive = status === "live";
   const isFinished = status === "finished";
+  const isForfeited = status === "forfeited";
   const isPostponed = status === "postponed";
-  const isCancelled = status === "cancelled";
-  // Only show score block if match is live/finished AND at least one score is present
+  const isStopped = status === "stopped";
+  // Only show score block if match is finished/forfeited AND at least one score is present
   const hasScore =
-    (isLive || isFinished) &&
+    (isFinished || isForfeited) &&
     (typeof homeTeam.score === "number" || typeof awayTeam.score === "number");
 
   // Loading skeleton
@@ -137,23 +138,6 @@ export function MatchHeader({
             </span>
           )}
 
-          {/* Live indicator */}
-          {isLive && (
-            <div
-              className="flex items-center gap-2"
-              role="status"
-              aria-live="polite"
-            >
-              <span className="relative flex h-3 w-3" aria-hidden="true">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-              </span>
-              <span className="text-red-100 font-bold uppercase text-sm tracking-wide">
-                Live
-              </span>
-            </div>
-          )}
-
           {/* Teams and Score */}
           <div className="flex items-center justify-center gap-4 lg:gap-8 w-full max-w-3xl">
             {/* Home Team */}
@@ -182,7 +166,7 @@ export function MatchHeader({
             <TeamDisplay team={awayTeam} side="away" />
           </div>
 
-          {/* Status badges for postponed/cancelled */}
+          {/* Status badges */}
           {isPostponed && (
             <div className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500/20 border border-orange-400/50">
               <span className="text-orange-100 font-semibold text-sm uppercase tracking-wide">
@@ -190,16 +174,23 @@ export function MatchHeader({
               </span>
             </div>
           )}
-          {isCancelled && (
-            <div className="inline-flex items-center px-4 py-2 rounded-md bg-red-500/20 border border-red-400/50">
-              <span className="text-red-100 font-semibold text-sm uppercase tracking-wide">
-                Afgelast
+          {isStopped && (
+            <div className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500/20 border border-orange-400/50">
+              <span className="text-orange-100 font-semibold text-sm uppercase tracking-wide">
+                Gestopt
+              </span>
+            </div>
+          )}
+          {isForfeited && (
+            <div className="inline-flex items-center px-4 py-2 rounded-md bg-gray-500/20 border border-gray-400/50">
+              <span className="text-gray-100 font-semibold text-sm uppercase tracking-wide">
+                FF
               </span>
             </div>
           )}
 
           {/* Date and Time */}
-          {!isPostponed && !isCancelled && (
+          {!isPostponed && !isStopped && (
             <div className="text-center text-white/90">
               <div className="font-semibold">{formatMatchDate(date)}</div>
               {time && <div className="text-white/70 text-sm">{time}</div>}

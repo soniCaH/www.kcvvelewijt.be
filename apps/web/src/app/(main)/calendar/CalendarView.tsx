@@ -26,7 +26,7 @@ export interface CalendarMatch {
   awayTeam: CalendarTeam;
   homeScore?: number;
   awayScore?: number;
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
   competition?: string;
   team?: string; // "A-ploeg" | "B-ploeg" | "U15 A" | etc.
 }
@@ -39,13 +39,6 @@ function formatDayHeader(dateStr: string): string {
 }
 
 function StatusBadge({ status }: { status: CalendarMatch["status"] }) {
-  if (status === "live") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white animate-pulse">
-        Live
-      </span>
-    );
-  }
   if (status === "postponed") {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
@@ -53,10 +46,17 @@ function StatusBadge({ status }: { status: CalendarMatch["status"] }) {
       </span>
     );
   }
-  if (status === "cancelled") {
+  if (status === "stopped") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-        Afgelast
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+        Gestopt
+      </span>
+    );
+  }
+  if (status === "forfeited") {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+        FF
       </span>
     );
   }

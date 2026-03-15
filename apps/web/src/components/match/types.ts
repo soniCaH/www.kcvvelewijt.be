@@ -42,7 +42,7 @@ export interface UpcomingMatch {
   /**
    * Match status
    */
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
   /**
    * Round/matchday (optional)
    */

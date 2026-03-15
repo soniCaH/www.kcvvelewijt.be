@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UpcomingMatches } from "./UpcomingMatches";
 import {
   mockScheduledMatches,
-  mockLiveMatch,
+  mockScheduledMatchWithScores,
   mockFinishedMatch,
   mockPostponedMatch,
-  mockCancelledMatch,
+  mockForfeitedMatch,
   mockMatches,
 } from "./UpcomingMatches.mocks";
 
@@ -25,7 +25,7 @@ const meta: Meta<typeof UpcomingMatches> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof UpcomingMatches>;
+type Story = StoryObj<typeof meta>;
 
 // Stories
 export const Default: Story = {
@@ -37,9 +37,9 @@ export const Default: Story = {
   },
 };
 
-export const WithLiveMatch: Story = {
+export const WithScoredMatch: Story = {
   args: {
-    matches: [mockLiveMatch, ...mockScheduledMatches],
+    matches: [mockScheduledMatchWithScores, ...mockScheduledMatches],
     title: "Volgende wedstrijden",
     showViewAll: true,
     viewAllHref: "/matches",
@@ -48,7 +48,7 @@ export const WithLiveMatch: Story = {
     docs: {
       description: {
         story:
-          "Displays a live match with pulsing indicator and current scores.",
+          "Displays a finished match with scores alongside scheduled matches.",
       },
     },
   },
@@ -86,9 +86,9 @@ export const WithPostponedMatch: Story = {
   },
 };
 
-export const WithCancelledMatch: Story = {
+export const WithForfeitedMatch: Story = {
   args: {
-    matches: [mockCancelledMatch, ...mockScheduledMatches],
+    matches: [mockForfeitedMatch, ...mockScheduledMatches],
     title: "Volgende wedstrijden",
     showViewAll: true,
     viewAllHref: "/matches",
@@ -96,7 +96,7 @@ export const WithCancelledMatch: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Displays a cancelled match with "Afgelast" status.',
+        story: 'Displays a forfeited match with "FF" status.',
       },
     },
   },
@@ -105,7 +105,7 @@ export const WithCancelledMatch: Story = {
 export const ManyMatches: Story = {
   args: {
     matches: [
-      mockLiveMatch,
+      mockScheduledMatchWithScores,
       ...mockScheduledMatches,
       mockFinishedMatch,
       ...mockScheduledMatches.map((m, i) => ({
@@ -114,7 +114,7 @@ export const ManyMatches: Story = {
         round: `Speeldag ${20 + i}`,
       })),
       mockPostponedMatch,
-      mockCancelledMatch,
+      mockForfeitedMatch,
     ],
     title: "Volgende wedstrijden",
     showViewAll: true,
@@ -132,7 +132,7 @@ export const ManyMatches: Story = {
 
 export const SingleMatch: Story = {
   args: {
-    matches: [mockScheduledMatches[0]],
+    matches: [mockScheduledMatches[0] ?? mockForfeitedMatch],
     title: "Volgende wedstrijden",
     showViewAll: true,
     viewAllHref: "/matches",
@@ -205,7 +205,7 @@ export const MixedStatuses: Story = {
     docs: {
       description: {
         story:
-          "Displays matches with mixed statuses: live, scheduled, finished, postponed, and cancelled.",
+          "Displays matches with mixed statuses: scheduled, finished, postponed, stopped, and forfeited.",
       },
     },
   },

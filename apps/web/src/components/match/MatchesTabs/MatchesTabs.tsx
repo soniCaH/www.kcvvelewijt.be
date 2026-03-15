@@ -37,11 +37,9 @@ export const MatchesTabs = ({
 }: MatchesTabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
-  const upcoming = matches.filter((m) =>
-    ["scheduled", "live"].includes(m.status),
-  );
+  const upcoming = matches.filter((m) => m.status === "scheduled");
   const results = matches.filter((m) =>
-    ["finished", "postponed", "cancelled"].includes(m.status),
+    ["finished", "forfeited", "postponed", "stopped"].includes(m.status),
   );
 
   const tabsWithCounts = TABS.map((t) => ({

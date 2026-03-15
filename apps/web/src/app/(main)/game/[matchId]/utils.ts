@@ -90,7 +90,7 @@ export function formatMatchTitle(match: MatchDetail): string {
 
   // Only show score if match is finished AND both scores are defined
   if (
-    match.status === "finished" &&
+    (match.status === "finished" || match.status === "forfeited") &&
     match.home_team.score !== undefined &&
     match.away_team.score !== undefined
   ) {

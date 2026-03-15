@@ -192,9 +192,11 @@ describe("CalendarView", () => {
   // ── StatusBadge ───────────────────────────────────────────────────────
 
   describe("StatusBadge", () => {
-    it("renders Live badge for live matches", () => {
-      render(<CalendarView matches={[makeMatch({ id: 1, status: "live" })]} />);
-      expect(screen.getByText("Live")).toBeInTheDocument();
+    it("renders FF badge for forfeited matches", () => {
+      render(
+        <CalendarView matches={[makeMatch({ id: 1, status: "forfeited" })]} />,
+      );
+      expect(screen.getByText("FF")).toBeInTheDocument();
     });
 
     it("renders Uitgesteld badge for postponed matches", () => {
@@ -204,20 +206,20 @@ describe("CalendarView", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("renders Afgelast badge for cancelled matches", () => {
+    it("renders Gestopt badge for stopped matches", () => {
       render(
-        <CalendarView matches={[makeMatch({ id: 1, status: "cancelled" })]} />,
+        <CalendarView matches={[makeMatch({ id: 1, status: "stopped" })]} />,
       );
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
     it("renders no status badge for scheduled matches", () => {
       render(
         <CalendarView matches={[makeMatch({ id: 1, status: "scheduled" })]} />,
       );
-      expect(screen.queryByText("Live")).not.toBeInTheDocument();
+      expect(screen.queryByText("FF")).not.toBeInTheDocument();
       expect(screen.queryByText("Uitgesteld")).not.toBeInTheDocument();
-      expect(screen.queryByText("Afgelast")).not.toBeInTheDocument();
+      expect(screen.queryByText("Gestopt")).not.toBeInTheDocument();
     });
 
     it("renders no status badge for finished matches", () => {
@@ -233,7 +235,9 @@ describe("CalendarView", () => {
           ]}
         />,
       );
-      expect(screen.queryByText("Live")).not.toBeInTheDocument();
+      expect(screen.queryByText("FF")).not.toBeInTheDocument();
+      expect(screen.queryByText("Uitgesteld")).not.toBeInTheDocument();
+      expect(screen.queryByText("Gestopt")).not.toBeInTheDocument();
     });
   });
 

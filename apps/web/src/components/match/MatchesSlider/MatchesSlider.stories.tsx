@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchesSlider } from "./MatchesSlider";
 import {
   mockScheduledMatches,
-  mockLiveMatch,
+  mockScheduledMatchWithScores,
   mockFinishedMatch,
   mockMatches,
 } from "@/components/home/UpcomingMatches/UpcomingMatches.mocks";
@@ -53,7 +53,7 @@ export const Many: Story = {
 /** Single match. */
 export const Single: Story = {
   args: {
-    matches: [mockLiveMatch],
+    matches: [mockScheduledMatchWithScores],
     highlightTeamId: KCVV_ID,
   },
 };
@@ -61,7 +61,11 @@ export const Single: Story = {
 /** Mixed statuses without a heading. */
 export const Mixed: Story = {
   args: {
-    matches: [mockLiveMatch, mockScheduledMatches[0], mockFinishedMatch],
+    matches: [
+      mockScheduledMatchWithScores,
+      mockScheduledMatches[0],
+      mockFinishedMatch,
+    ],
     highlightTeamId: KCVV_ID,
   },
 };

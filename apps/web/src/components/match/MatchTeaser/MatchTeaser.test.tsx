@@ -93,15 +93,15 @@ describe("MatchTeaser", () => {
   });
 
   describe("status badges", () => {
-    it("renders Live badge for live matches", () => {
+    it("renders FF badge for forfeited matches", () => {
       render(
         <MatchTeaser
           {...defaultProps}
-          status="live"
-          score={{ home: 1, away: 0 }}
+          status="forfeited"
+          score={{ home: 3, away: 0 }}
         />,
       );
-      expect(screen.getByText("Live")).toBeInTheDocument();
+      expect(screen.getByText("FF")).toBeInTheDocument();
     });
 
     it("renders Uitgesteld badge for postponed matches", () => {
@@ -109,16 +109,16 @@ describe("MatchTeaser", () => {
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
-    it("renders Afgelast badge for cancelled matches", () => {
-      render(<MatchTeaser {...defaultProps} status="cancelled" />);
-      expect(screen.getByText("Afgelast")).toBeInTheDocument();
+    it("renders Gestopt badge for stopped matches", () => {
+      render(<MatchTeaser {...defaultProps} status="stopped" />);
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
     it("does not render badge for upcoming matches", () => {
       render(<MatchTeaser {...defaultProps} status="upcoming" />);
-      expect(screen.queryByText("Live")).not.toBeInTheDocument();
+      expect(screen.queryByText("FF")).not.toBeInTheDocument();
       expect(screen.queryByText("Uitgesteld")).not.toBeInTheDocument();
-      expect(screen.queryByText("Afgelast")).not.toBeInTheDocument();
+      expect(screen.queryByText("Gestopt")).not.toBeInTheDocument();
     });
   });
 
@@ -137,11 +137,11 @@ describe("MatchTeaser", () => {
       expect(ones.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("renders score for live matches", () => {
+    it("renders score for forfeited matches", () => {
       render(
         <MatchTeaser
           {...defaultProps}
-          status="live"
+          status="forfeited"
           score={{ home: 2, away: 2 }}
         />,
       );
@@ -150,14 +150,8 @@ describe("MatchTeaser", () => {
       expect(twos.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("does not render score for upcoming matches", () => {
-      render(
-        <MatchTeaser
-          {...defaultProps}
-          status="upcoming"
-          score={{ home: 0, away: 0 }}
-        />,
-      );
+    it("renders VS for upcoming matches without score", () => {
+      render(<MatchTeaser {...defaultProps} status="upcoming" />);
       expect(screen.getByText("VS")).toBeInTheDocument();
     });
   });
@@ -266,19 +260,6 @@ describe("MatchTeaser", () => {
         <MatchTeaser {...defaultProps} className="custom-class" />,
       );
       expect(container.firstChild).toHaveClass("custom-class");
-    });
-  });
-
-  describe("live match styling", () => {
-    it("applies live match border styling", () => {
-      const { container } = render(
-        <MatchTeaser
-          {...defaultProps}
-          status="live"
-          score={{ home: 1, away: 0 }}
-        />,
-      );
-      expect(container.firstChild).toHaveClass("border-red-300");
     });
   });
 

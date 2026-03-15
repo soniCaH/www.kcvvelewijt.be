@@ -58,15 +58,15 @@ const mockMatches: CalendarMatch[] = [
     competition: "Nationale 1",
     team: "A-ploeg",
   },
-  // Fixed date fixture — represents a live match (2025-12-07T15:00:00Z)
+  // Fixed date fixture — represents a forfeited match (2025-12-07T15:00:00Z)
   {
     id: 3,
     date: "2025-12-07T15:00:00.000Z",
     homeTeam: kcvv,
     awayTeam: opponent2,
-    homeScore: 1,
-    awayScore: 1,
-    status: "live",
+    homeScore: 3,
+    awayScore: 0,
+    status: "forfeited",
     competition: "Beker",
     team: "B-ploeg",
   },
@@ -89,13 +89,13 @@ const mockMatches: CalendarMatch[] = [
     competition: "Jeugdcompetitie",
     team: "U15 A",
   },
-  // Future — cancelled
+  // Future — stopped
   {
     id: 6,
     date: "2026-03-08T15:00:00",
     homeTeam: kcvv,
     awayTeam: { id: 5, name: "Sporting Lokeren" },
-    status: "cancelled",
+    status: "stopped",
     competition: "Nationale 1",
     team: "A-ploeg",
   },

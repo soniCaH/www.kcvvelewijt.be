@@ -188,10 +188,19 @@ describe("formatMatchTitle", () => {
     expect(formatMatchTitle(match)).toBe("KCVV Elewijt 3 - 1 KFC Turnhout");
   });
 
-  it("formats live match without score as VS", () => {
-    const match = createMatchDetail({ status: "live" });
-    // Live but no score - shows VS
+  it("formats forfeited match without score as VS", () => {
+    const match = createMatchDetail({ status: "forfeited" });
+    // Forfeited but no score - shows VS
     expect(formatMatchTitle(match)).toBe("KCVV Elewijt vs KFC Turnhout");
+  });
+
+  it("formats forfeited match with score showing numeric result", () => {
+    const match = createMatchDetail({
+      status: "forfeited",
+      home_team: { id: 1, name: "KCVV Elewijt", score: 2 },
+      away_team: { id: 2, name: "KFC Turnhout", score: 1 },
+    });
+    expect(formatMatchTitle(match)).toBe("KCVV Elewijt 2 - 1 KFC Turnhout");
   });
 
   it("formats draw correctly", () => {

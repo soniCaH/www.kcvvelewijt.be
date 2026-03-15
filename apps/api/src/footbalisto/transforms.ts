@@ -18,18 +18,49 @@ import type {
 
 type MatchStatusType =
   | "scheduled"
-  | "live"
   | "finished"
+  | "forfeited"
   | "postponed"
-  | "cancelled";
+  | "stopped";
 
-const STATUS_MAP: Record<number, MatchStatusType> = {
-  0: "scheduled",
-  1: "finished",
-  2: "live",
-  3: "postponed",
-  4: "cancelled",
-};
+/**
+ * Map PSD numeric game status + goal presence to a normalized MatchStatus.
+ *
+ * PSD status codes (empirically derived — not documented in API spec):
+ *   0 = no special status; "finished" when goals are set, "scheduled" otherwise
+ *   1 = FF  (forfait)            → "forfeited"
+ *   2 = AFG (afgelast)           → "postponed"  (may be rescheduled)
+ *   3 = STOP (ended prematurely) → "stopped"    (may be rescheduled)
+ *
+ * The `cancelled` boolean takes full precedence — if true, status is always "postponed"
+ * regardless of the numeric code (unknown codes are still logged in that path).
+ * Any unknown code (when not cancelled) falls back to "scheduled" (safe default).
+ * Unknown codes are logged so we can detect undocumented PSD values in production.
+ */
+function mapGameStatus(
+  status: number,
+  goalsHome: number | null,
+  goalsAway: number | null,
+  cancelled?: boolean | null,
+): MatchStatusType {
+  // The `cancelled` boolean takes precedence over all numeric codes —
+  // a game can be cancelled regardless of its status field value.
+  if (cancelled) {
+    if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
+      console.warn(`[transforms] Unknown PSD game status code: ${status}`);
+    }
+    return "postponed";
+  }
+  if (status === 1) return "forfeited";
+  if (status === 2) return "postponed";
+  if (status === 3) return "stopped";
+  if (status === 0) {
+    return goalsHome !== null && goalsAway !== null ? "finished" : "scheduled";
+  }
+  // Unknown status — log and fall back to scheduled
+  console.warn(`[transforms] Unknown PSD game status code: ${status}`);
+  return "scheduled";
+}
 
 function parseDateString(dateStr: string): { date: Date; time: string } {
   const [datePart, timePart = "00:00"] = dateStr.split(" ");
@@ -39,10 +70,6 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
     date: new Date(Date.UTC(year!, month! - 1, day!, hour, minute)),
     time: timePart,
   };
-}
-
-function mapNumericStatus(status: number): MatchStatusType {
-  return STATUS_MAP[status] ?? "scheduled";
 }
 
 /**
@@ -58,7 +85,12 @@ export function transformPsdGame(game: PsdGame): Match {
   const { date: matchDate, time: timePart } = parseDateString(
     `${datePart} ${timeStr}`,
   );
-  const status = mapNumericStatus(game.status);
+  const status = mapGameStatus(
+    game.status,
+    game.goalsHomeTeam,
+    game.goalsAwayTeam,
+    game.cancelled,
+  );
 
   let roundLabel: string | undefined;
   if (game.teamId === 1) roundLabel = "A-ploeg";
@@ -89,7 +121,12 @@ export function transformPsdGame(game: PsdGame): Match {
 
 export function transformFootbalistoMatch(fbMatch: FootbalistoMatch): Match {
   const { date: matchDate, time: timePart } = parseDateString(fbMatch.date);
-  const status = mapNumericStatus(fbMatch.status);
+  const status = mapGameStatus(
+    fbMatch.status,
+    fbMatch.goalsHomeTeam,
+    fbMatch.goalsAwayTeam,
+    fbMatch.cancelled,
+  );
 
   let roundLabel: string | undefined = fbMatch.age
     ? `${fbMatch.age}`
@@ -200,7 +237,12 @@ export function transformFootbalistoMatchDetail(
 ): MatchDetail {
   const general = response.general;
   const { date: matchDate, time: timePart } = parseDateString(general.date);
-  const status = mapNumericStatus(general.status);
+  const status = mapGameStatus(
+    general.status,
+    general.goalsHomeTeam,
+    general.goalsAwayTeam,
+    general.cancelled,
+  );
   const cardMap = response.events ? buildPlayerCardMap(response.events) : null;
 
   let lineup:

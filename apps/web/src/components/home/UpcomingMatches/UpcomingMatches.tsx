@@ -228,27 +228,14 @@ export const UpcomingMatches = ({
  * Individual Match Card Component
  */
 const MatchCard = ({ match }: { match: UpcomingMatch }) => {
-  const isLive = match.status === "live";
   const isFinished = match.status === "finished";
+  const isForfeited = match.status === "forfeited";
   const isPostponed = match.status === "postponed";
-  const isCancelled = match.status === "cancelled";
+  const isStopped = match.status === "stopped";
 
   return (
     <div className="snap-start shrink-0 w-[280px] lg:w-[320px]">
       <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 h-full border border-gray-100">
-        {/* Match Status Badge */}
-        {isLive && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
-            <span className="text-red-600 font-bold uppercase text-xs tracking-wide">
-              Live
-            </span>
-          </div>
-        )}
-
         {/* Competition & Round */}
         {match.competition && (
           <div className="mb-5 flex items-center gap-2 text-xs flex-wrap">
@@ -267,7 +254,7 @@ const MatchCard = ({ match }: { match: UpcomingMatch }) => {
         <div
           className={cn(
             "mb-5",
-            isLive || isFinished ? "space-y-3" : "space-y-4",
+            isFinished || isForfeited ? "space-y-3" : "space-y-4",
           )}
         >
           {/* Home Team */}
@@ -288,15 +275,16 @@ const MatchCard = ({ match }: { match: UpcomingMatch }) => {
                 {match.homeTeam.name}
               </span>
             </div>
-            {(isLive || isFinished) && match.homeTeam.score !== undefined && (
-              <span className="text-3xl font-bold text-kcvv-green-dark flex-shrink-0">
-                {match.homeTeam.score}
-              </span>
-            )}
+            {(isFinished || isForfeited) &&
+              match.homeTeam.score !== undefined && (
+                <span className="text-3xl font-bold text-kcvv-green-dark flex-shrink-0">
+                  {match.homeTeam.score}
+                </span>
+              )}
           </div>
 
           {/* VS Divider - only show when there are scores */}
-          {(isLive || isFinished) && (
+          {(isFinished || isForfeited) && (
             <div className="flex items-center justify-center -my-1">
               <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
             </div>
@@ -320,11 +308,12 @@ const MatchCard = ({ match }: { match: UpcomingMatch }) => {
                 {match.awayTeam.name}
               </span>
             </div>
-            {(isLive || isFinished) && match.awayTeam.score !== undefined && (
-              <span className="text-3xl font-bold text-kcvv-green-dark flex-shrink-0">
-                {match.awayTeam.score}
-              </span>
-            )}
+            {(isFinished || isForfeited) &&
+              match.awayTeam.score !== undefined && (
+                <span className="text-3xl font-bold text-kcvv-green-dark flex-shrink-0">
+                  {match.awayTeam.score}
+                </span>
+              )}
           </div>
         </div>
 
@@ -337,14 +326,21 @@ const MatchCard = ({ match }: { match: UpcomingMatch }) => {
               </span>
             </div>
           )}
-          {isCancelled && (
-            <div className="inline-flex items-center px-3 py-1.5 rounded-md bg-red-50 border border-red-200">
-              <span className="text-red-700 font-semibold text-xs uppercase tracking-wide">
-                Afgelast
+          {isStopped && (
+            <div className="inline-flex items-center px-3 py-1.5 rounded-md bg-orange-50 border border-orange-200">
+              <span className="text-orange-700 font-semibold text-xs uppercase tracking-wide">
+                Gestopt
               </span>
             </div>
           )}
-          {!isPostponed && !isCancelled && (
+          {isForfeited && (
+            <div className="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-50 border border-gray-200">
+              <span className="text-gray-700 font-semibold text-xs uppercase tracking-wide">
+                FF
+              </span>
+            </div>
+          )}
+          {!isPostponed && !isStopped && !isForfeited && (
             <div className="text-sm text-gray-600 space-y-0.5">
               <div className="font-semibold text-gray-900">
                 {formatMatchDate(match.date)}

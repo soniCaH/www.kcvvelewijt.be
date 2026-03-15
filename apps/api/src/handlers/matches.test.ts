@@ -24,7 +24,7 @@ const rawMatch = {
   awayClub: { id: 456, name: "Opponent FC" },
   goalsHomeTeam: 3,
   goalsAwayTeam: 1,
-  status: 1,
+  status: 0,
   competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
   reportGeneral: true,
 } as const;
@@ -39,7 +39,7 @@ const rawDetail = {
     goalsAwayTeam: 0,
     competitionType: "3de Nationale",
     viewGameReport: true,
-    status: 1,
+    status: 0,
   },
 } as const;
 
