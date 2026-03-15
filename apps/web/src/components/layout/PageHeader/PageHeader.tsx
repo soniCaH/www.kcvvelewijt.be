@@ -53,7 +53,7 @@ export const PageHeader = ({
     <>
       <header className={cn("relative z-50", className)}>
         {/* Navigation Container with Green Background + Pattern */}
-        <nav className="fixed top-[3px] left-0 right-0 z-50 h-20 lg:h-[7.5rem] transition-[height] duration-300 bg-kcvv-black border-b border-white/[0.06]">
+        <nav className="fixed top-[3px] left-0 right-0 z-50 h-16 transition-[height] duration-300 bg-kcvv-black border-b border-white/[0.06]">
           {/* Mobile Header */}
           <div className="lg:hidden h-full relative">
             {/* Hamburger Button - left 34px */}
@@ -61,23 +61,20 @@ export const PageHeader = ({
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Toggle navigation menu"
-              className="absolute left-[34px] top-[calc((5rem-16px)/2)] text-white w-6 h-6 flex items-center justify-center"
+              className="absolute left-[34px] top-6 text-white w-6 h-6 flex items-center justify-center"
             >
               <Menu size={16} className="inline-block" />
             </button>
 
             {/* Mobile Logo - centered */}
-            <Link
-              href="/"
-              className="absolute left-1/2 -translate-x-1/2 top-[calc((5rem-100px)/2)]"
-            >
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-3">
               <Image
                 src="/images/logos/kcvv-logo.png"
                 alt="KCVV ELEWIJT"
-                width={100}
-                height={100}
+                width={40}
+                height={40}
                 priority
-                className="w-[100px] h-auto"
+                className="h-10 w-auto"
               />
             </Link>
 
@@ -85,7 +82,7 @@ export const PageHeader = ({
             <Link
               href="/search"
               aria-label="Search"
-              className="absolute right-[34px] top-[calc((5rem-16px)/2)] text-white w-6 h-6 flex items-center justify-center"
+              className="absolute right-[34px] top-6 text-white w-6 h-6 flex items-center justify-center"
             >
               <Search size={16} className="inline-block" />
             </Link>
@@ -98,10 +95,10 @@ export const PageHeader = ({
               <Image
                 src="/images/logos/kcvv-logo.png"
                 alt="KCVV ELEWIJT"
-                width={112}
-                height={112}
+                width={40}
+                height={40}
                 priority
-                className="h-28 w-auto transition-all duration-300"
+                className="h-10 w-auto"
               />
             </Link>
 
@@ -109,14 +106,28 @@ export const PageHeader = ({
             <Suspense fallback={<div className="flex-grow" />}>
               <Navigation youthTeams={youthTeams} seniorTeams={seniorTeams} />
             </Suspense>
+
+            {/* Desktop Utility Group */}
+            <div className="flex items-center gap-3 shrink-0">
+              <Link
+                href="/search"
+                aria-label="Search"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                <Search size={16} />
+              </Link>
+              <Link
+                href="/club/register"
+                className="border border-kcvv-green/60 text-white text-sm font-semibold px-4 py-1.5 rounded-sm hover:border-kcvv-green hover:text-kcvv-green transition-colors whitespace-nowrap"
+              >
+                Word lid
+              </Link>
+            </div>
           </div>
         </nav>
 
         {/* Spacer — accounts for fixed nav height + 3px accent strip */}
-        <div
-          className="h-[calc(5rem+3px)] lg:h-[calc(7.5rem+3px)]"
-          aria-hidden="true"
-        />
+        <div className="h-[calc(4rem+3px)]" aria-hidden="true" />
       </header>
 
       {/* Mobile Menu Overlay - Suspense boundary for useSearchParams */}

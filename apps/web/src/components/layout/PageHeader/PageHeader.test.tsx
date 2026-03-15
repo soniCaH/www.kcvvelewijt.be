@@ -40,6 +40,7 @@ describe("PageHeader", () => {
       const nav = container.querySelector("nav");
       expect(nav).toHaveClass("fixed");
       expect(nav).toHaveClass("top-[3px]");
+      expect(nav).toHaveClass("h-16");
     });
   });
 
@@ -74,6 +75,20 @@ describe("PageHeader", () => {
       const { container } = render(<PageHeader />);
       const nav = container.querySelector("nav");
       expect(nav).toBeInTheDocument();
+    });
+
+    it("should render 'Word lid' link pointing to /club/register", () => {
+      const { container } = render(<PageHeader />);
+      const wordLidLink = container.querySelector('a[href="/club/register"]');
+      expect(wordLidLink).toBeInTheDocument();
+      expect(wordLidLink).toHaveTextContent(/word lid/i);
+    });
+
+    it("should render desktop search link in utility group", () => {
+      const { container } = render(<PageHeader />);
+      // Desktop utility group search link - there are multiple search links (mobile + desktop)
+      const searchLinks = container.querySelectorAll('a[href="/search"]');
+      expect(searchLinks.length).toBeGreaterThanOrEqual(2);
     });
   });
 
