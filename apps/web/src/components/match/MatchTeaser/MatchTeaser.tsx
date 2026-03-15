@@ -6,8 +6,8 @@
  * Features:
  * - Team names and optional logos
  * - Date and time display
- * - Score display for live/finished matches
- * - Status badges (Live, Postponed, Cancelled)
+ * - Score display for finished/forfeited matches
+ * - Status badges (Postponed, Stopped, Forfeited)
  * - Compact variant for tight spaces
  * - Link to match detail page
  */
@@ -79,7 +79,8 @@ function formatDate(dateStr: string): string {
  * @param time - Optional match time in HH:MM format
  * @param venue - Optional venue name
  * @param score - Optional score object for live/finished matches
- * @param status - Match status (upcoming, live, finished, postponed, cancelled)
+ * @param status - Match status: "upcoming" (scheduled, not yet played), "finished" (played with score),
+ *   "forfeited" (FF result, may have score), "postponed" (Uitgesteld), "stopped" (Gestopt, ended prematurely)
  * @param href - Optional link to match detail page
  * @param highlightTeamId - Optional team ID to highlight
  * @param variant - Display variant (default or compact)

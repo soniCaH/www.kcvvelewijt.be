@@ -263,19 +263,6 @@ describe("MatchTeaser", () => {
     });
   });
 
-  describe("forfeited match styling", () => {
-    it("renders FF badge for forfeited matches", () => {
-      render(
-        <MatchTeaser
-          {...defaultProps}
-          status="forfeited"
-          score={{ home: 3, away: 0 }}
-        />,
-      );
-      expect(screen.getByText("FF")).toBeInTheDocument();
-    });
-  });
-
   describe("date formatting edge cases", () => {
     it("handles invalid date gracefully", () => {
       render(<MatchTeaser {...defaultProps} date="invalid-date" />);

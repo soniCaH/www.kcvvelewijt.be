@@ -15,6 +15,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 
 export interface ScheduleTeam {
   /** Team ID */
@@ -41,7 +42,7 @@ export interface ScheduleMatch {
   /** Away team score (for finished matches) */
   awayScore?: number;
   /** Match status */
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   /** Competition name */
   competition?: string;
 }

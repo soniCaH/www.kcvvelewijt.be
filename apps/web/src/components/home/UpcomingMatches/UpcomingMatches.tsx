@@ -236,15 +236,6 @@ const MatchCard = ({ match }: { match: UpcomingMatch }) => {
   return (
     <div className="snap-start shrink-0 w-[280px] lg:w-[320px]">
       <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 h-full border border-gray-100">
-        {/* Match Status Badge */}
-        {isForfeited && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-gray-600 font-bold uppercase text-xs tracking-wide">
-              FF
-            </span>
-          </div>
-        )}
-
         {/* Competition & Round */}
         {match.competition && (
           <div className="mb-5 flex items-center gap-2 text-xs flex-wrap">

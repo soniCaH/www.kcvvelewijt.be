@@ -30,7 +30,7 @@ Hero section for match detail pages.
 - Score display (for finished/live matches)
 - Date and time
 - Competition badge
-- Status indicators (Live, Postponed, Cancelled)
+- Status indicators (Postponed, Stopped, Forfeited)
 
 **Usage:**
 Used at the top of match detail pages (/game/[matchId]).

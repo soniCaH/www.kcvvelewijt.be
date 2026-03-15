@@ -16,6 +16,9 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
  *   1 (FF)        → "forfeited"
  *   2 (AFG)       → "postponed"  (afgelast — may be rescheduled)
  *   3 (STOP)      → "stopped"    (ended prematurely — may be rescheduled)
+ *
+ * Override: if cancelled === true, status is always "postponed" regardless of
+ * the numeric code (cancelled takes full precedence over 0/1/2/3).
  */
 export const MatchStatus = S.Literal(
   "scheduled",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UpcomingMatches } from "./UpcomingMatches";
 import {
   mockScheduledMatches,
-  mockLiveMatch,
+  mockScheduledMatchWithScores,
   mockFinishedMatch,
   mockPostponedMatch,
   mockForfeitedMatch,
@@ -25,7 +25,7 @@ const meta: Meta<typeof UpcomingMatches> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof UpcomingMatches>;
+type Story = StoryObj<typeof meta>;
 
 // Stories
 export const Default: Story = {
@@ -39,7 +39,7 @@ export const Default: Story = {
 
 export const WithLiveMatch: Story = {
   args: {
-    matches: [mockLiveMatch, ...mockScheduledMatches],
+    matches: [mockScheduledMatchWithScores, ...mockScheduledMatches],
     title: "Volgende wedstrijden",
     showViewAll: true,
     viewAllHref: "/matches",
@@ -105,7 +105,7 @@ export const WithForfeitedMatch: Story = {
 export const ManyMatches: Story = {
   args: {
     matches: [
-      mockLiveMatch,
+      mockScheduledMatchWithScores,
       ...mockScheduledMatches,
       mockFinishedMatch,
       ...mockScheduledMatches.map((m, i) => ({
@@ -132,7 +132,7 @@ export const ManyMatches: Story = {
 
 export const SingleMatch: Story = {
   args: {
-    matches: [mockScheduledMatches[0]],
+    matches: [mockScheduledMatches[0] ?? mockForfeitedMatch],
     title: "Volgende wedstrijden",
     showViewAll: true,
     viewAllHref: "/matches",

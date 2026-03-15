@@ -32,7 +32,9 @@ type MatchStatusType =
  *   2 = AFG (afgelast)           → "postponed"  (may be rescheduled)
  *   3 = STOP (ended prematurely) → "stopped"    (may be rescheduled)
  *
- * Any unknown code falls back to "scheduled" (safe default).
+ * The `cancelled` boolean takes full precedence — if true, status is always "postponed"
+ * regardless of the numeric code (unknown codes are still logged in that path).
+ * Any unknown code (when not cancelled) falls back to "scheduled" (safe default).
  * Unknown codes are logged so we can detect undocumented PSD values in production.
  */
 function mapGameStatus(
@@ -41,12 +43,17 @@ function mapGameStatus(
   goalsAway: number | null,
   cancelled?: boolean | null,
 ): MatchStatusType {
+  // The `cancelled` boolean takes precedence over all numeric codes —
+  // a game can be cancelled regardless of its status field value.
+  if (cancelled) {
+    if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
+      console.warn(`[transforms] Unknown PSD game status code: ${status}`);
+    }
+    return "postponed";
+  }
   if (status === 1) return "forfeited";
   if (status === 2) return "postponed";
   if (status === 3) return "stopped";
-  // The `cancelled` boolean is independent of the numeric status —
-  // a game can be cancelled even with goals set (e.g. 0-0 before being voided).
-  if (cancelled) return "postponed";
   if (status === 0) {
     return goalsHome !== null && goalsAway !== null ? "finished" : "scheduled";
   }

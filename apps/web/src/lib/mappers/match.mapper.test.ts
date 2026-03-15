@@ -83,7 +83,7 @@ describe("mapMatchToUpcomingMatch", () => {
     expect(result.awayTeam.name).toBe("Kfc Turnhout");
   });
 
-  it("should map a live match with scores correctly", () => {
+  it("should map a forfeited match with scores correctly", () => {
     const match: Match = {
       id: 10,
       date: new Date(),

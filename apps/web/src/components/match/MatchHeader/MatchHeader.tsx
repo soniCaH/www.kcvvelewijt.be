@@ -9,7 +9,7 @@
  * - Score display (for finished/forfeited matches)
  * - Date and time
  * - Competition badge
- * - Status indicators (Live, Postponed, Cancelled)
+ * - Status indicators (Postponed, Stopped, Forfeited)
  */
 
 import Image from "next/image";

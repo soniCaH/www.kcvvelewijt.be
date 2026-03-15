@@ -235,7 +235,9 @@ describe("CalendarView", () => {
           ]}
         />,
       );
-      expect(screen.queryByText("Live")).not.toBeInTheDocument();
+      expect(screen.queryByText("FF")).not.toBeInTheDocument();
+      expect(screen.queryByText("Uitgesteld")).not.toBeInTheDocument();
+      expect(screen.queryByText("Gestopt")).not.toBeInTheDocument();
     });
   });
 

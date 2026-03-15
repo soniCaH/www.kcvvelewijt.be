@@ -172,7 +172,7 @@ describe("UpcomingMatches", () => {
       expect(ffElements.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("renders scores for live matches", () => {
+    it("renders FF badge and scores for forfeited matches", () => {
       render(<UpcomingMatches matches={[mockMatches[1]]} />);
 
       const scores = screen.getAllByText(/[0-9]/);

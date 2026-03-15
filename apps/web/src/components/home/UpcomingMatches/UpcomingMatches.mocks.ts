@@ -61,7 +61,7 @@ export const mockScheduledMatches: UpcomingMatch[] = [
   },
 ];
 
-export const mockLiveMatch: UpcomingMatch = {
+export const mockScheduledMatchWithScores: UpcomingMatch = {
   id: 10,
   date: new Date("2025-01-15T15:30:00Z"),
   time: "15:30",
@@ -144,13 +144,17 @@ export const mockForfeitedMatch: UpcomingMatch = {
  */
 export const mockMatches = {
   scheduled: mockScheduledMatches,
-  live: mockLiveMatch,
+  scheduledWithScores: mockScheduledMatchWithScores,
   finished: mockFinishedMatch,
   postponed: mockPostponedMatch,
   forfeited: mockForfeitedMatch,
-  all: [mockLiveMatch, ...mockScheduledMatches, mockFinishedMatch],
+  all: [
+    mockScheduledMatchWithScores,
+    ...mockScheduledMatches,
+    mockFinishedMatch,
+  ],
   mixed: [
-    mockLiveMatch,
+    mockScheduledMatchWithScores,
     mockScheduledMatches[0],
     mockFinishedMatch,
     mockScheduledMatches[1],
