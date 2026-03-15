@@ -3,12 +3,13 @@
  * Showcases the main site header with navigation
  *
  * The PageHeader is the primary navigation component for the KCVV Elewijt website.
- * It features a bright green background (#4acf52) with pattern overlay, white text,
- * and responsive behavior that switches between desktop horizontal navigation and
- * mobile hamburger menu at 960px.
+ * It features a dark background (#1E2024) with white text, positioned below the
+ * 3px AccentStrip, and responsive behavior that switches between desktop horizontal
+ * navigation and mobile hamburger menu at 960px.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AccentStrip } from "../AccentStrip";
 import { PageHeader } from "./PageHeader";
 
 const meta = {
@@ -38,22 +39,21 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * Default header with logo and navigation.
- * Green background (#4acf52) with pattern overlay.
- * Desktop navigation shows on screens 960px and wider.
- * Hover over navigation items to see underline animation.
- * Dropdown menus appear on "A-Ploeg", "B-Ploeg", "Jeugd", and "De club".
+ * Dark background (#1E2024) with white text.
+ * The 3px green AccentStrip sits above the nav — both are fixed, contained by
+ * the wrapper's transform so they render relative to the story canvas.
  */
 export const Default: Story = {
   args: {},
   render: () => (
-    <div>
+    <div style={{ transform: "translateX(0)" }}>
+      <AccentStrip />
       <PageHeader />
-      <div className="p-8">
+      <div className="p-8 pt-[calc(7.5rem+3px)]">
         <h1 className="text-2xl font-bold mb-4">KCVV Elewijt</h1>
         <p className="text-gray-600 mb-4">
-          The header above shows the main navigation with green background and
-          white text. Hover over menu items to see the underline animation
-          effect.
+          The header above shows the dark nav with the green accent strip. Hover
+          over menu items to see the underline animation effect.
         </p>
         <div className="space-y-4">
           {Array.from({ length: 20 }).map((_, i) => (
@@ -73,9 +73,10 @@ export const Default: Story = {
  */
 export const MobileView: Story = {
   render: () => (
-    <div>
+    <div style={{ transform: "translateX(0)" }}>
+      <AccentStrip />
       <PageHeader />
-      <div className="p-4">
+      <div className="p-4 pt-[calc(5rem+3px)]">
         <h1 className="text-xl font-bold mb-4">Mobile Layout</h1>
         <p className="text-sm text-gray-600">
           Click the hamburger icon to open the mobile menu.
@@ -93,9 +94,13 @@ export const MobileView: Story = {
  */
 export const WithContent: Story = {
   render: () => (
-    <div className="min-h-screen flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ transform: "translateX(0)" }}
+    >
+      <AccentStrip />
       <PageHeader />
-      <main className="flex-1">
+      <main className="flex-1 pt-[calc(7.5rem+3px)]">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-kcvv-gray-blue mb-4">
             Welcome to KCVV Elewijt
