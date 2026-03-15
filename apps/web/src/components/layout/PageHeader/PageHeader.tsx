@@ -1,7 +1,7 @@
 /**
  * PageHeader Component
  * Main site header with logo and navigation
- * Matches Gatsby visual: green background (#4acf52) with pattern image
+ * Dark background (#1E2024), white text, sticky below the 3px AccentStrip. Offset top-[3px].
  */
 
 "use client";
@@ -53,17 +53,7 @@ export const PageHeader = ({
     <>
       <header className={cn("relative z-50", className)}>
         {/* Navigation Container with Green Background + Pattern */}
-        <nav
-          className="fixed top-0 left-0 right-0 z-50 h-20 lg:h-[7.5rem] transition-[height] duration-300"
-          style={{
-            backgroundColor: "#4acf52",
-            backgroundImage: "url(/images/header-pattern.png)",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "100vw auto",
-            backgroundPosition: "50% -7vw",
-            transform: "translate3d(0, 0, 0)",
-          }}
-        >
+        <nav className="fixed top-[3px] left-0 right-0 z-50 h-20 lg:h-[7.5rem] transition-[height] duration-300 bg-kcvv-black border-b border-white/[0.06]">
           {/* Mobile Header */}
           <div className="lg:hidden h-full relative">
             {/* Hamburger Button - left 34px */}
@@ -122,8 +112,11 @@ export const PageHeader = ({
           </div>
         </nav>
 
-        {/* Spacer to prevent content from hiding under fixed header */}
-        <div className="h-20 lg:h-[7.5rem]" aria-hidden="true" />
+        {/* Spacer — accounts for fixed nav height + 3px accent strip */}
+        <div
+          className="h-[calc(5rem+3px)] lg:h-[calc(7.5rem+3px)]"
+          aria-hidden="true"
+        />
       </header>
 
       {/* Mobile Menu Overlay - Suspense boundary for useSearchParams */}

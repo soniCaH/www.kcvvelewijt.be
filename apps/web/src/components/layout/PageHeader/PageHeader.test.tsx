@@ -38,7 +38,8 @@ describe("PageHeader", () => {
     it("should have fixed navigation", () => {
       const { container } = render(<PageHeader />);
       const nav = container.querySelector("nav");
-      expect(nav).toHaveClass("fixed", "top-0");
+      expect(nav).toHaveClass("fixed");
+      expect(nav).toHaveClass("top-[3px]");
     });
   });
 

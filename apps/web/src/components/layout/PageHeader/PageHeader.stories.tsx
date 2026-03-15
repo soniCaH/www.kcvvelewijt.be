@@ -19,7 +19,8 @@ const meta = {
     docs: {
       description: {
         component:
-          "Main site header with logo and navigation. Matches Gatsby design with green background, white text, and pattern image overlay.",
+          "Main site header with logo and navigation. Dark background (#1E2024), " +
+          "white text, sticky below the 3px AccentStrip. Offset top-[3px].",
       },
     },
   },
