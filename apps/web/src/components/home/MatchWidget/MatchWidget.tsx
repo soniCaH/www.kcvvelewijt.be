@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { SectionDivider } from "@/components/design-system";
-import { formatMatchDate } from "@/lib/utils/dates";
+import { formatWidgetDate } from "@/lib/utils/dates";
 import type { UpcomingMatch } from "@/components/match/types";
 
 export interface MatchWidgetProps {
@@ -17,10 +17,6 @@ export interface MatchWidgetProps {
  *
  * Sits between FeaturedArticles (bg-kcvv-black) and LatestNews (bg-gray-100).
  * Diagonal cuts at top and bottom connect all three sections.
- *
- * Parent sections must set their own SectionDivider to complete the boundary:
- * - FeaturedArticles: `<SectionDivider color="kcvv-green-dark" position="bottom" />`
- * - LatestNews: `<SectionDivider color="kcvv-green-dark" position="top" />`
  *
  * @example
  * ```tsx
@@ -42,6 +38,10 @@ export function MatchWidget({
     match.homeTeam.score !== undefined &&
     match.awayTeam.score !== undefined;
 
+  const dateTime = [formatWidgetDate(match.date), match.time]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <section
       aria-label={`Wedstrijd: ${match.homeTeam.name} vs ${match.awayTeam.name}`}
@@ -54,53 +54,60 @@ export function MatchWidget({
       <SectionDivider color="gray-100" position="bottom" />
 
       <div className="relative z-20 py-24 px-4 md:px-8 max-w-[1280px] mx-auto">
-        {/* Overline label */}
-        <p className="flex items-center justify-center gap-2 mb-6 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
-          <span aria-hidden="true" className="block w-5 h-px bg-white/30" />
+        {/* Overline — left-aligned, single leading rule */}
+        <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
+          <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
           VOLGENDE WEDSTRIJD · {teamLabel}
-          <span aria-hidden="true" className="block w-5 h-px bg-white/30" />
         </p>
 
-        {/* 3-column grid: home | center | away */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 lg:gap-8">
-          {/* Home team */}
+        {/* 3-column grid: home | center | away — items-center matches mockup */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 sm:gap-x-4 lg:gap-x-8">
+          {/* Home team — logo + name stacked, right-aligned */}
           <TeamColumn team={match.homeTeam} align="home" />
 
-          {/* Center: VS / score / meta */}
-          <div className="flex flex-col items-center gap-1 lg:gap-2 min-w-[72px] lg:min-w-[140px]">
+          {/* Center — VS / score / badge + meta */}
+          <div
+            className={cn(
+              "flex flex-col items-center gap-2 px-1 sm:px-2 lg:px-6",
+              // Keep center column tall enough for postponed/forfeited so
+              // team columns don't dwarf a lone badge
+              (isPostponed || isForfeited) && "min-h-[80px] justify-center",
+            )}
+          >
             {isPostponed && (
               <StatusBadge>
                 {match.status === "stopped" ? "GESTOPT" : "UITGESTELD"}
               </StatusBadge>
             )}
 
-            {isForfeited && !isPostponed && <StatusBadge>FF</StatusBadge>}
+            {isForfeited && !isPostponed && <StatusBadge>FORFAIT</StatusBadge>}
 
             {!isPostponed && !isForfeited && hasScore && (
-              <span className="text-4xl lg:text-5xl font-black text-white font-mono leading-none tracking-tight">
+              <span
+                className="font-title font-black text-white font-mono leading-none tracking-[-0.04em]"
+                style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
+              >
                 {match.homeTeam.score} – {match.awayTeam.score}
               </span>
             )}
 
             {!isPostponed && !isFinished && (
-              <span className="text-4xl lg:text-5xl font-black text-kcvv-green leading-none tracking-tight">
+              <span
+                className="font-title font-black text-kcvv-green-bright leading-none tracking-[-0.04em]"
+                style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
+              >
                 VS
               </span>
             )}
 
-            {/* Date / time / competition — always shown unless postponed */}
+            {/* Date · time + competition badge */}
             {!isPostponed && (
-              <div className="flex flex-col items-center gap-0.5 mt-1 lg:mt-2">
-                <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-white/70">
-                  {formatMatchDate(match.date)}
+              <div className="flex flex-col items-center gap-1 mt-1 w-[36vw] sm:w-auto">
+                <span className="text-[11px] sm:text-[13px] font-semibold text-white/70 text-center">
+                  {dateTime}
                 </span>
-                {match.time && (
-                  <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-white/70">
-                    {match.time}
-                  </span>
-                )}
                 {match.competition && (
-                  <span className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/40 px-2.5 py-0.5 rounded-sm">
+                  <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.1em] bg-white/10 text-white/40 px-2 sm:px-2.5 py-0.5 rounded-sm text-center leading-snug">
                     {match.competition}
                     {match.venue ? ` · ${match.venue}` : ""}
                   </span>
@@ -109,13 +116,13 @@ export function MatchWidget({
             )}
 
             {isPostponed && match.competition && (
-              <span className="mt-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/40 px-2.5 py-0.5 rounded-sm">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.1em] bg-white/10 text-white/40 px-2.5 py-0.5 rounded-sm">
                 {match.competition}
               </span>
             )}
           </div>
 
-          {/* Away team */}
+          {/* Away team — logo + name stacked, left-aligned */}
           <TeamColumn team={match.awayTeam} align="away" />
         </div>
       </div>
@@ -136,16 +143,17 @@ function TeamColumn({ team, align }: TeamColumnProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 lg:gap-3",
-        isHome ? "items-center lg:items-end" : "items-center lg:items-start",
+        "flex flex-col gap-3",
+        isHome ? "items-end" : "items-start",
       )}
     >
       <TeamLogo logo={team.logo} name={team.name} />
       <span
         className={cn(
-          "text-[11px] sm:text-sm lg:text-2xl xl:text-3xl font-black uppercase tracking-tight text-white line-clamp-2 leading-tight",
-          isHome ? "text-center lg:text-right" : "text-center lg:text-left",
+          "font-title font-extrabold uppercase text-white line-clamp-2 leading-tight tracking-[-0.02em]",
+          isHome ? "text-right" : "text-left",
         )}
+        style={{ fontSize: "clamp(0.875rem, 4vw, 1.6rem)" }}
       >
         {team.name}
       </span>
@@ -161,17 +169,17 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
     .join("");
 
   return (
-    <div className="relative w-12 h-12 lg:w-[72px] lg:h-[72px] flex items-center justify-center rounded bg-white/10 border-2 border-white/15 shrink-0 overflow-hidden">
+    <div className="relative w-12 h-12 sm:w-[72px] sm:h-[72px] flex items-center justify-center rounded bg-white/10 border-2 border-white/15 shrink-0 overflow-hidden">
       {logo ? (
         <Image
           src={logo}
           alt={`${name} logo`}
           fill
           className="object-contain p-1"
-          sizes="(max-width: 1024px) 48px, 72px"
+          sizes="(max-width: 640px) 64px, 72px"
         />
       ) : (
-        <span className="text-kcvv-green font-black text-lg lg:text-2xl">
+        <span className="text-kcvv-green-bright font-black text-2xl">
           {initials}
         </span>
       )}
@@ -181,7 +189,7 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
 
 function StatusBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-400 px-3 py-1 rounded-sm">
+    <span className="text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-400 px-3 py-1 rounded-sm">
       {children}
     </span>
   );

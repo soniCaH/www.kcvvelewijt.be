@@ -77,6 +77,19 @@ export const formatMatchDate = (date: Date | string): string => {
 };
 
 /**
+ * Format date in compact widget format (e.g., "Za 22 maart")
+ * Uses abbreviated weekday with capitalised first letter, no year.
+ */
+export const formatWidgetDate = (date: Date | string): string => {
+  const dt =
+    typeof date === "string"
+      ? DateTime.fromISO(date)
+      : DateTime.fromJSDate(date);
+  const s = dt.setLocale("nl").toFormat("ccc d MMMM");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+/**
  * Format time for match display (e.g., "15:00")
  * @param date - Date object or ISO string
  */

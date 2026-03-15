@@ -59,7 +59,7 @@ describe("MatchWidget", () => {
 
     it("shows match time", () => {
       render(<MatchWidget match={mockUpcomingMatch} />);
-      expect(screen.getByText("15:00")).toBeInTheDocument();
+      expect(screen.getByText(/15:00/)).toBeInTheDocument();
     });
 
     it("shows competition name", () => {
@@ -91,9 +91,9 @@ describe("MatchWidget", () => {
       expect(screen.getByText(/UITGESTELD/i)).toBeInTheDocument();
     });
 
-    it("shows FF badge for forfeited match", () => {
+    it("shows FORFAIT badge for forfeited match", () => {
       render(<MatchWidget match={mockForfeitedMatch} />);
-      expect(screen.getByText("FF")).toBeInTheDocument();
+      expect(screen.getByText("FORFAIT")).toBeInTheDocument();
     });
   });
 
