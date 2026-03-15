@@ -20,13 +20,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * The wrapper uses `transform: translateX(0)` to create a new CSS containing
+ * block for the fixed-positioned AccentStrip, so it renders relative to the
+ * story container rather than the Storybook page viewport.
+ */
 export const Playground: Story = {
   render: () => (
-    <div className="min-h-[120px] bg-white relative">
+    <div
+      className="min-h-[80px] bg-white"
+      style={{ transform: "translateX(0)" }}
+    >
       <AccentStrip />
-      <div className="pt-4 px-4 text-sm text-kcvv-gray">
-        3px kcvv-green strip fixed at top-0
-      </div>
     </div>
   ),
 };
@@ -40,11 +45,11 @@ export const OnDarkBackground: Story = {
     },
   },
   render: () => (
-    <div className="min-h-[120px] bg-kcvv-black relative">
+    <div
+      className="min-h-[80px] bg-kcvv-black"
+      style={{ transform: "translateX(0)" }}
+    >
       <AccentStrip />
-      <div className="pt-4 px-4 text-sm text-kcvv-gray-light">
-        Strip above dark nav background
-      </div>
     </div>
   ),
 };
