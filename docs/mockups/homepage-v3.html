@@ -831,11 +831,11 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
-   SPONSORS SECTION  (kcvv-black)
+   SPONSORS SECTION  (gray-100)
    ============================================================ */
 .section-sponsors {
-  background: var(--black);
-  padding: 80px 0;
+  background: var(--gray-100);
+  padding: 72px 0;
   position: relative;
 }
 .sponsor-grid {
@@ -843,12 +843,12 @@ img { max-width: 100%; display: block; }
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 40px 60px;
-  margin-top: 48px;
+  gap: 32px 52px;
+  margin-top: 44px;
 }
 .sponsor-item {
   display: block;
-  opacity: 0.4;
+  opacity: 0.35;
   filter: grayscale(100%);
   transition: opacity 0.3s ease, filter 0.3s ease;
   cursor: pointer;
@@ -859,11 +859,11 @@ img { max-width: 100%; display: block; }
 }
 .sponsor-ph {
   display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.08);
   border-radius: 3px;
   font-size: 11px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--white);
+  color: var(--black);
 }
 
 /* ============================================================
@@ -871,78 +871,78 @@ img { max-width: 100%; display: block; }
    ============================================================ */
 .footer {
   background: var(--black);
-  padding: 64px 0 32px;
+  padding: 44px 0 20px;
   border-top: 1px solid rgba(255,255,255,0.07);
 }
 .footer__grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: 56px;
-  padding-bottom: 48px;
+  gap: 40px;
+  padding-bottom: 32px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 .footer__logo-row {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
 }
-.footer__logo-row img { height: 52px; width: auto; }
+.footer__logo-row img { height: 44px; width: auto; }
 .footer__logo-name { line-height: 1.2; }
 .footer__logo-name strong {
   display: block;
-  font-size: 13px; font-weight: 800;
+  font-size: 12px; font-weight: 800;
   color: var(--white);
   text-transform: uppercase; letter-spacing: 0.08em;
 }
 .footer__logo-name span {
-  font-size: 11px; color: rgba(255,255,255,0.3);
+  font-size: 11px; color: rgba(255,255,255,0.28);
   letter-spacing: 0.04em;
 }
 .footer__contact {
-  display: flex; flex-direction: column; gap: 11px;
-  margin-top: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 14px;
 }
 .footer__contact-item {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 13px; color: rgba(255,255,255,0.45);
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12px; color: rgba(255,255,255,0.4);
   transition: color 0.15s;
 }
-.footer__contact-item:hover { color: rgba(255,255,255,0.7); }
+.footer__contact-item:hover { color: rgba(255,255,255,0.65); }
 .footer__contact-item svg {
-  width: 13px; height: 13px;
+  width: 12px; height: 12px;
   flex-shrink: 0; color: rgba(255,255,255,0.2);
 }
 .footer__social {
   display: flex; gap: 6px;
-  margin-top: 22px;
+  margin-top: 16px;
 }
 .footer__social-link {
   display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px;
+  width: 30px; height: 30px;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 2px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.28);
   transition: border-color 0.15s, color 0.15s;
 }
 .footer__social-link:hover { border-color: var(--green); color: var(--green); }
-.footer__social-link svg { width: 14px; height: 14px; }
+.footer__social-link svg { width: 13px; height: 13px; }
 .footer__heading {
   font-size: 10px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.16em;
-  color: rgba(255,255,255,0.22);
-  margin-bottom: 18px;
+  color: rgba(255,255,255,0.2);
+  margin-bottom: 14px;
 }
-.footer__links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer__links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .footer__links a {
-  font-size: 14px; color: rgba(255,255,255,0.45);
+  font-size: 13px; color: rgba(255,255,255,0.4);
   transition: color 0.15s;
 }
 .footer__links a:hover { color: var(--green); }
 .footer__bottom {
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 11px; color: rgba(255,255,255,0.18);
+  font-size: 11px; color: rgba(255,255,255,0.16);
 }
-.footer__bottom a { color: rgba(255,255,255,0.28); transition: color 0.15s; }
+.footer__bottom a { color: rgba(255,255,255,0.24); transition: color 0.15s; }
 .footer__bottom a:hover { color: var(--green); }
 
 /* ============================================================
@@ -1434,8 +1434,8 @@ img { max-width: 100%; display: block; }
 <section class="section-sponsors">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title section-title--dark">Sponsors</h2>
-      <a href="#" class="section-link section-link--dark">Word sponsor</a>
+      <h2 class="section-title section-title--light">Sponsors</h2>
+      <a href="#" class="section-link">Word sponsor</a>
     </div>
     <div class="sponsor-grid">
       <a href="#" class="sponsor-item"><div class="sponsor-ph" style="width:180px;height:72px;font-size:12px;">Hoofdsponsor A</div></a>
