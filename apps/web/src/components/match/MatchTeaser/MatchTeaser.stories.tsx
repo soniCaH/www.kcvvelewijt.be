@@ -186,6 +186,35 @@ export const Compact: Story = {
   },
 };
 
+export const WithTeamLabel: Story = {
+  args: {
+    ...Upcoming.args,
+    teamLabel: "A-Ploeg",
+  },
+};
+
+export const DarkTheme: Story = {
+  args: {
+    ...Upcoming.args,
+    theme: "dark",
+    teamLabel: "U21",
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
+export const DarkThemeWithScore: Story = {
+  args: {
+    ...Finished.args,
+    theme: "dark",
+    teamLabel: "A-Ploeg",
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
 /**
  * Loading state with skeleton
  */

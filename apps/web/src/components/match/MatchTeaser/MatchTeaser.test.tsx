@@ -263,6 +263,34 @@ describe("MatchTeaser", () => {
     });
   });
 
+  describe("teamLabel", () => {
+    it("renders teamLabel badge above date row", () => {
+      render(<MatchTeaser {...defaultProps} teamLabel="A-Ploeg" />);
+      expect(screen.getByText("A-Ploeg")).toBeInTheDocument();
+    });
+
+    it("does not render teamLabel badge when absent", () => {
+      const { container } = render(<MatchTeaser {...defaultProps} />);
+      // No empty badge element — verify no data-testid="team-label"
+      expect(container.querySelector("[data-testid='team-label']")).toBeNull();
+    });
+  });
+
+  describe("dark theme", () => {
+    it("renders dark container classes when theme=dark", () => {
+      const { container } = render(
+        <MatchTeaser {...defaultProps} theme="dark" />,
+      );
+      expect(container.firstChild).toHaveClass("bg-kcvv-black");
+      expect(container.firstChild).not.toHaveClass("bg-white");
+    });
+
+    it("renders light container classes by default", () => {
+      const { container } = render(<MatchTeaser {...defaultProps} />);
+      expect(container.firstChild).toHaveClass("bg-white");
+    });
+  });
+
   describe("date formatting edge cases", () => {
     it("handles invalid date gracefully", () => {
       render(<MatchTeaser {...defaultProps} date="invalid-date" />);
