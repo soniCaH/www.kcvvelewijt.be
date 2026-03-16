@@ -14,7 +14,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@effect/platform": "0.94.5",
+    "@effect/platform": "0.95.0",
     "@kcvv/api-contract": "workspace:*",
     "@sanity/client": "7.17.0",
     "effect": "3.19.19"
