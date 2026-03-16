@@ -12,16 +12,13 @@ export interface MatchWidgetProps {
 }
 
 /**
- * Homepage match widget — hero-style dark-green section showing the
- * next (or most recent) match for the first team.
+ * Render a hero-style match card that displays the given match for the primary team.
  *
- * Sits between FeaturedArticles (bg-kcvv-black) and LatestNews (bg-gray-100).
- * Diagonal cuts at top and bottom connect all three sections.
+ * Shows team logos or initials, team names, match status (e.g., postponed, forfeited, finished),
+ * the score or "VS"/"FT" indicator as appropriate, and date/competition metadata.
  *
- * @example
- * ```tsx
- * <MatchWidget match={upcomingMatches[0]} teamLabel="A-Ploeg" />
- * ```
+ * @param match - The match data to display
+ * @param teamLabel - Label used in the section overline (default: "A-Ploeg")
  */
 export function MatchWidget({
   match,
@@ -146,6 +143,13 @@ interface TeamColumnProps {
   align: "home" | "away";
 }
 
+/**
+ * Renders a vertically stacked team column showing the team's logo and name, aligned for home or away placement.
+ *
+ * @param team - The team object containing at least `name` and optionally `logo`.
+ * @param align - Layout alignment for the column; `"home"` right-aligns content, `"away"` left-aligns.
+ * @returns The JSX element for the team column (logo above team name) with responsive sizing and alignment.
+ */
 function TeamColumn({ team, align }: TeamColumnProps) {
   const isHome = align === "home";
 
@@ -170,6 +174,13 @@ function TeamColumn({ team, align }: TeamColumnProps) {
   );
 }
 
+/**
+ * Renders a circular team logo box showing the provided image or, when absent, the team's initials (first letters of up to two words).
+ *
+ * @param logo - Optional URL of the team's logo; when present an image is rendered.
+ * @param name - Team name used for the image alt text and to derive initials when no logo is provided.
+ * @returns The logo element (image or initial placeholder) wrapped in a styled circular container.
+ */
 function TeamLogo({ logo, name }: { logo?: string; name: string }) {
   const initials = name
     .split(/\s+/)
@@ -197,6 +208,12 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
   );
 }
 
+/**
+ * Renders a compact, uppercase status badge with orange styling.
+ *
+ * @param children - Content to display inside the badge
+ * @returns A span element containing `children` styled as a small orange status badge
+ */
 function StatusBadge({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-400 px-3 py-1 rounded-sm">
