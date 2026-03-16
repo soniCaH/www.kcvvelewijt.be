@@ -51,4 +51,6 @@ export interface UpcomingMatch {
    * Competition name (optional)
    */
   competition?: string;
+  /** Optional team label for display (e.g. "A-Ploeg", "U21") — set by calling page */
+  teamLabel?: string;
 }
