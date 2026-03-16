@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { Pause, Play } from "@/lib/icons";
+import { SectionDivider } from "@/components/design-system";
 
 export interface FeaturedArticle {
   /**
@@ -357,6 +358,9 @@ export const FeaturedArticles = ({
           </div>
         )}
       </div>
+
+      {/* Bottom diagonal — reveals kcvv-green-dark from MatchWidget */}
+      <SectionDivider color="kcvv-green-dark" position="bottom" />
     </section>
   );
 };
