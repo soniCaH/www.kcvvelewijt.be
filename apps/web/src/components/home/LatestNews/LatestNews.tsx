@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { ArticleCard } from "@/components/article";
 import { cn } from "@/lib/utils/cn";
+import { SectionDivider } from "@/components/design-system";
 
 export interface LatestNewsArticle {
   /**
@@ -90,11 +91,14 @@ export const LatestNews = ({
   return (
     <section
       className={cn(
-        "frontpage__main_content page__section w-full py-12 lg:py-16",
+        "frontpage__main_content page__section w-full bg-gray-100 relative overflow-hidden py-20",
         className,
       )}
     >
-      <div className="frontpage__main_content__wrapper max-w-inner-lg mx-auto px-3 lg:px-0">
+      {/* Top diagonal — reveals kcvv-green-dark from MatchWidget */}
+      <SectionDivider color="kcvv-green-dark" position="top" />
+
+      <div className="relative z-20 frontpage__main_content__wrapper max-w-inner-lg mx-auto px-3 lg:px-0">
         {/* Section Header */}
         <header className="flex items-center justify-between mb-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-kcvv-green-dark uppercase">
