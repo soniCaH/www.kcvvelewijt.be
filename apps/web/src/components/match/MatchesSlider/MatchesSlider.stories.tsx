@@ -70,6 +70,19 @@ export const Mixed: Story = {
   },
 };
 
+export const DarkTheme: Story = {
+  args: {
+    matches: mockMatches.mixed.map((m, i) => ({
+      ...m,
+      teamLabel: i % 2 === 0 ? "A-Ploeg" : "U17",
+    })),
+    theme: "dark",
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
 /** Empty matches array — component renders nothing (null). */
 export const Empty: Story = {
   args: {
