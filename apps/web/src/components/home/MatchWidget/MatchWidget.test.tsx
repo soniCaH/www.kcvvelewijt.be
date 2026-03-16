@@ -7,6 +7,7 @@ import {
   mockFinishedMatchDraw,
   mockPostponedMatch,
   mockForfeitedMatch,
+  mockLongTeamNames,
 } from "./MatchWidget.mocks";
 
 vi.mock("next/image", () => ({
@@ -94,6 +95,21 @@ describe("MatchWidget", () => {
     it("shows FORFAIT badge for forfeited match", () => {
       render(<MatchWidget match={mockForfeitedMatch} />);
       expect(screen.getByText("FORFAIT")).toBeInTheDocument();
+    });
+
+    it("shows FT fallback for finished match without scores", () => {
+      const noScoreMatch = {
+        ...mockFinishedMatchWin,
+        homeTeam: { ...mockFinishedMatchWin.homeTeam, score: undefined },
+        awayTeam: { ...mockFinishedMatchWin.awayTeam, score: undefined },
+      };
+      render(<MatchWidget match={noScoreMatch} />);
+      expect(screen.getByText("FT")).toBeInTheDocument();
+    });
+
+    it("renders long team names without crashing", () => {
+      render(<MatchWidget match={mockLongTeamNames} />);
+      expect(screen.getByText(/Verbroedering Hofstade/i)).toBeInTheDocument();
     });
   });
 

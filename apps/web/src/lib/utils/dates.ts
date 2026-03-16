@@ -85,6 +85,7 @@ export const formatWidgetDate = (date: Date | string): string => {
     typeof date === "string"
       ? DateTime.fromISO(date)
       : DateTime.fromJSDate(date);
+  if (!dt.isValid) return "";
   const s = dt.setLocale("nl").toFormat("ccc d MMMM");
   return s.charAt(0).toUpperCase() + s.slice(1);
 };

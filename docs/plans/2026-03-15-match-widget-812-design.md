@@ -103,7 +103,7 @@ Section: `relative overflow-hidden bg-kcvv-green-dark`
 
 **Overline** (full width, centered):
 
-```
+```text
 VOLGENDE WEDSTRIJD · A-PLOEG
 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-white/50
 flex items-center gap-2 justify-center mb-6
@@ -215,7 +215,7 @@ With:
 
 ## Mobile layout at 375px — verified
 
-```
+```text
 ┌────────────────────────────────────────┐
 │ [kcvv-black diagonal cut — 80px]       │  ← SectionDivider top
 │                                        │

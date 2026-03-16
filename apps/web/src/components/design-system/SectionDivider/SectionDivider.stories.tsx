@@ -41,6 +41,15 @@ const Wrapper = ({
   <div className={`relative overflow-hidden h-32 w-full ${bg}`}>{children}</div>
 );
 
+export const Playground: Story = {
+  args: { color: "kcvv-black", position: "top" },
+  render: (args) => (
+    <Wrapper bg="bg-white">
+      <SectionDivider {...args} />
+    </Wrapper>
+  ),
+};
+
 export const TopWhite: Story = {
   render: () => (
     <Wrapper bg="bg-kcvv-black">
@@ -116,19 +125,17 @@ export const PairExample: Story = {
   },
   render: () => (
     <div className="flex flex-col">
-      {/* FeaturedArticles bottom */}
+      {/* FeaturedArticles bottom — white lower-left cut */}
       <div className="relative overflow-hidden h-32 bg-kcvv-black">
-        <SectionDivider color="kcvv-green-dark" position="bottom" />
+        <SectionDivider color="white" position="bottom" flip />
       </div>
-      {/* MatchWidget */}
+      {/* MatchWidget — white upper-left + gray-100 lower-right */}
       <div className="relative overflow-hidden h-48 bg-kcvv-green-dark">
-        <SectionDivider color="kcvv-black" position="top" />
+        <SectionDivider color="white" position="top" />
         <SectionDivider color="gray-100" position="bottom" />
       </div>
       {/* LatestNews */}
-      <div className="relative overflow-hidden h-32 bg-gray-100">
-        <SectionDivider color="kcvv-green-dark" position="top" />
-      </div>
+      <div className="relative overflow-hidden h-32 bg-gray-100" />
     </div>
   ),
 };

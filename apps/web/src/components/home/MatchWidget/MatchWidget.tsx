@@ -53,7 +53,7 @@ export function MatchWidget({
       {/* Bottom diagonal — reveals gray-100 from LatestNews */}
       <SectionDivider color="gray-100" position="bottom" />
 
-      <div className="relative z-20 py-24 px-4 md:px-8 max-w-[1280px] mx-auto">
+      <div className="relative z-20 py-20 px-4 md:px-8 max-w-[1280px] mx-auto">
         {/* Overline — left-aligned, single leading rule */}
         <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
           <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
@@ -97,6 +97,15 @@ export function MatchWidget({
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 VS
+              </span>
+            )}
+
+            {!isPostponed && isFinished && !hasScore && (
+              <span
+                className="font-title font-black text-white font-mono leading-none tracking-[-0.04em]"
+                style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
+              >
+                FT
               </span>
             )}
 

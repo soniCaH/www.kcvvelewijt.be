@@ -74,7 +74,7 @@ export function SectionDivider({
     <div
       aria-hidden="true"
       className={cn(
-        "absolute inset-x-0 z-10",
+        "absolute inset-x-0 z-10 pointer-events-none",
         position === "top" ? "top-0" : "bottom-0",
         colorClass[color],
         className,
