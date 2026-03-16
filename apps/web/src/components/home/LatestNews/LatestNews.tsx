@@ -1,142 +1,108 @@
-/**
- * LatestNews Component
- * Displays latest news articles in a grid layout
- * Matching Gatsby frontpage__main_content section
- */
-
-import Link from "next/link";
-import { ArticleCard } from "@/components/article";
+// apps/web/src/components/home/LatestNews/LatestNews.tsx
 import { cn } from "@/lib/utils/cn";
+import { SectionHeader } from "@/components/design-system";
+import { NewsCard } from "./NewsCard";
 
 export interface LatestNewsArticle {
-  /**
-   * Article slug/path
-   */
   href: string;
-  /**
-   * Article title
-   */
   title: string;
-  /**
-   * Featured image URL
-   */
   imageUrl?: string;
-  /**
-   * Image alt text
-   */
   imageAlt: string;
-  /**
-   * Publication date (formatted)
-   */
   date: string;
-  /**
-   * Article tags/categories
-   */
   tags?: Array<{ name: string }>;
 }
 
+/** Stub for upcoming featured event — wired in #802 */
+export interface FeaturedEventStub {
+  title: string;
+  href: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  badge?: string;
+  date?: string;
+}
+
 export interface LatestNewsProps {
-  /**
-   * Array of latest news articles (6-9 recommended for grid)
-   */
+  /** 2–3 articles; first becomes featured when no featuredEvent */
   articles: LatestNewsArticle[];
-  /**
-   * Section title (default: "Laatste nieuws")
-   */
+  /** When provided, fills the featured slot instead of articles[0]. #802 */
+  featuredEvent?: FeaturedEventStub;
   title?: string;
-  /**
-   * Show "View All" link (default: true)
-   */
   showViewAll?: boolean;
-  /**
-   * View all link href (default: "/news")
-   */
   viewAllHref?: string;
-  /**
-   * Additional CSS classes
-   */
   className?: string;
 }
 
-/**
- * Latest news section for homepage
- *
- * Visual specifications (matching Gatsby):
- * - Section with title and "View All" link
- * - Grid layout: 3 columns on desktop, 1 column on mobile
- * - Uses ArticleCard components
- * - Green section background with padding
- *
- * @example
- * ```tsx
- * <LatestNews
- *   articles={latestArticles}
- *   title="Laatste nieuws"
- *   showViewAll={true}
- * />
- * ```
- */
 export const LatestNews = ({
   articles,
+  featuredEvent,
   title = "Laatste nieuws",
   showViewAll = true,
   viewAllHref = "/news",
   className,
 }: LatestNewsProps) => {
-  if (articles.length === 0) {
+  if (articles.length === 0 && !featuredEvent) {
     return null;
   }
 
+  // When an event fills the featured slot, articles[0] and [1] are standard.
+  // Otherwise articles[0] is featured, articles[1] and [2] are standard.
+  const standardArticles = featuredEvent
+    ? articles.slice(0, 2)
+    : articles.slice(1, 3);
+
   return (
-    <section
-      className={cn(
-        "frontpage__main_content page__section w-full bg-gray-100 relative overflow-hidden py-20",
-        className,
-      )}
-    >
-      <div className="relative z-20 frontpage__main_content__wrapper max-w-inner-lg mx-auto px-3 lg:px-0">
-        {/* Section Header */}
-        <header className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-kcvv-green-dark uppercase">
-            {title}
-          </h2>
+    <section className={cn("bg-gray-100 py-20", className)}>
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+        <SectionHeader
+          title={title}
+          linkText={showViewAll ? "Alle berichten" : undefined}
+          linkHref={showViewAll ? viewAllHref : undefined}
+        />
 
-          {showViewAll && (
-            <Link
-              href={viewAllHref}
-              className="text-kcvv-green-bright hover:text-kcvv-green-dark font-semibold uppercase text-sm transition-colors flex items-center gap-2"
-            >
-              Bekijk alles
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Link>
-          )}
-        </header>
-
-        {/* Articles Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-          {articles.map((article) => (
-            <ArticleCard
-              key={article.href}
-              title={article.title}
-              href={article.href}
-              imageUrl={article.imageUrl}
-              imageAlt={article.imageAlt}
-              date={article.date}
-              tags={article.tags}
+        {/* 1 featured + 2 standard grid */}
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
+          {/* Featured slot — event (if provided) or first article */}
+          {featuredEvent ? (
+            <NewsCard
+              variant="featured"
+              title={featuredEvent.title}
+              href={featuredEvent.href}
+              imageUrl={featuredEvent.imageUrl}
+              imageAlt={featuredEvent.imageAlt}
+              badge={featuredEvent.badge}
+              date={featuredEvent.date}
             />
-          ))}
+          ) : articles[0] ? (
+            <NewsCard
+              variant="featured"
+              title={articles[0].title}
+              href={articles[0].href}
+              imageUrl={articles[0].imageUrl}
+              imageAlt={articles[0].imageAlt}
+              badge={articles[0].tags?.[0]?.name}
+              date={articles[0].date}
+            />
+          ) : null}
+
+          {/* Standard slots — right column fills featured card height on desktop */}
+          {standardArticles.length > 0 && (
+            <div className="flex flex-col gap-4 md:h-full">
+              {standardArticles.map((article) => (
+                <NewsCard
+                  key={article.href}
+                  variant="standard"
+                  title={article.title}
+                  href={article.href}
+                  imageUrl={article.imageUrl}
+                  imageAlt={article.imageAlt}
+                  badge={article.tags?.[0]?.name}
+                  date={article.date}
+                  className="md:flex-1 md:aspect-auto"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

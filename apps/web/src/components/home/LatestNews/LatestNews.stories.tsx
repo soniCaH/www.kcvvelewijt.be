@@ -1,25 +1,20 @@
+// apps/web/src/components/home/LatestNews/LatestNews.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LatestNews } from "./LatestNews";
 
 const meta = {
-  title: "Features/Home/LatestNews",
+  title: "Features/News/NewsGrid",
   component: LatestNews,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
-  },
-  argTypes: {
-    title: {
-      control: "text",
-      description: "Section title",
-    },
-    showViewAll: {
-      control: "boolean",
-      description: 'Show "View All" link',
-    },
-    viewAllHref: {
-      control: "text",
-      description: 'URL for "View All" link',
+    docs: {
+      description: {
+        component:
+          "Homepage news section: 1 featured card (col-span-2) + 2 standard cards. " +
+          "Featured slot can hold an article or an upcoming event (#802). " +
+          "Data selection logic lives in the homepage — see #818.",
+      },
     },
   },
 } satisfies Meta<typeof LatestNews>;
@@ -29,169 +24,98 @@ type Story = StoryObj<typeof meta>;
 
 const mockArticles = [
   {
-    href: "/news/2025-06-20-definitieve-reeksindeling-3e-nationale-bis",
-    title: "Definitieve reeksindeling 3e Nationale BIS",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Stadion",
-    imageAlt: "Stadion KCVV Elewijt",
-    date: "20 juni 2025",
-    tags: [{ name: "Ploeg" }, { name: "Competitie" }],
+    href: "/news/2025-05-05-kampioen",
+    title: "Kampioen! 58 punten en titel in eerste provinciale",
+    imageUrl: "https://picsum.photos/900/500?random=10",
+    imageAlt: "Championship celebration",
+    date: "5 mei 2025",
+    tags: [{ name: "Clubnieuws" }],
   },
   {
-    href: "/news/2025-03-25-overlijden-jean-lepage",
-    title: "Overlijden Jean Lepage",
-    imageUrl: "https://placehold.co/600x400/1e2024/fff?text=In+Memoriam",
-    imageAlt: "Jean Lepage tribute",
-    date: "25 maart 2025",
-    tags: [{ name: "In Memoriam" }],
+    href: "/news/2026-03-14-spelersvoorstelling",
+    title:
+      "Spelersvoorstelling seizoen 2025-2026: versterkingen voor nationaal debuut",
+    imageUrl: "https://picsum.photos/600/400?random=11",
+    imageAlt: "New players",
+    date: "14 maart 2026",
+    tags: [{ name: "Selectie" }],
   },
   {
-    href: "/news/2025-01-15-winterstage-spanje",
-    title: "Winterstage in Spanje",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Training",
-    imageAlt: "Training KCVV Elewijt",
-    date: "15 januari 2025",
-    tags: [{ name: "Ploeg" }, { name: "Training" }],
-  },
-  {
-    href: "/news/2025-01-10-jeugdwerking-uitbreiding",
-    title: "Jeugdwerking breidt uit met nieuwe trainers",
-    imageUrl: "https://placehold.co/600x400/ffd700/000?text=Jeugd",
-    imageAlt: "Jeugdtraining",
-    date: "10 januari 2025",
+    href: "/news/2026-03-10-jeugdtoernooi",
+    title: "Jeugdtoernooi 2026: inschrijvingen open voor U9 t/m U15",
+    imageUrl: "https://picsum.photos/600/400?random=12",
+    imageAlt: "Youth tournament",
+    date: "10 maart 2026",
     tags: [{ name: "Jeugd" }],
-  },
-  {
-    href: "/news/2025-01-05-nieuwe-sponsor",
-    title: "Nieuwe hoofdsponsor voor seizoen 2025-2026",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Sponsor",
-    imageAlt: "Sponsorcontract ondertekening",
-    date: "5 januari 2025",
-    tags: [{ name: "Sponsoring" }],
-  },
-  {
-    href: "/news/2024-12-20-kersttoernooi",
-    title: "Kersttoernooi groot succes",
-    imageUrl: "https://placehold.co/600x400/ff0000/fff?text=Kerst",
-    imageAlt: "Kersttoernooi",
-    date: "20 december 2024",
-    tags: [{ name: "Evenement" }, { name: "Jeugd" }],
   },
 ];
 
-/**
- * Default latest news section with 6 articles
- */
+/** Default: 3 articles, first is featured */
 export const Default: Story = {
   args: {
     articles: mockArticles,
-    title: "Laatste nieuws",
+    title: "Nieuws",
     showViewAll: true,
     viewAllHref: "/news",
   },
 };
 
-/**
- * Three articles only (single row on desktop)
- */
-export const ThreeArticles: Story = {
+/** Two articles: featured + 1 standard */
+export const TwoArticles: Story = {
   args: {
-    articles: mockArticles.slice(0, 3),
-    title: "Laatste nieuws",
+    articles: mockArticles.slice(0, 2),
+    title: "Nieuws",
     showViewAll: true,
   },
 };
 
-/**
- * Nine articles (three rows on desktop)
- */
-export const NineArticles: Story = {
+/** One article: only featured slot rendered */
+export const SingleArticle: Story = {
   args: {
-    articles: [...mockArticles, ...mockArticles.slice(0, 3)],
-    title: "Nieuwsarchief",
+    articles: mockArticles.slice(0, 1),
+    title: "Nieuws",
     showViewAll: true,
   },
 };
 
-/**
- * Custom section title
- */
-export const CustomTitle: Story = {
+/** Featured event fills the wide slot; articles fill the 2 standard slots.
+ *  This is the #802 hook — FeaturedEventStub is typed but not yet wired. */
+export const WithFeaturedEventStub: Story = {
   args: {
-    articles: mockArticles,
-    title: "Recente berichten",
+    articles: mockArticles.slice(0, 2),
+    featuredEvent: {
+      title: "Jeugdtoernooi 2026 — schrijf je nu in!",
+      href: "/evenementen/jeugdtoernooi-2026",
+      imageUrl: "https://picsum.photos/900/500?random=20",
+      imageAlt: "Youth tournament 2026",
+      badge: "Evenement",
+      date: "18 april 2026",
+    },
+    title: "Nieuws & evenementen",
     showViewAll: true,
   },
 };
 
-/**
- * Without "View All" link
- */
+/** Cards without cover images — fallback background */
+export const WithoutImages: Story = {
+  args: {
+    articles: mockArticles.map((a) => ({ ...a, imageUrl: undefined })),
+    title: "Nieuws",
+    showViewAll: true,
+  },
+};
+
+/** No "Alle berichten" link */
 export const WithoutViewAll: Story = {
   args: {
     articles: mockArticles,
-    title: "Laatste nieuws",
+    title: "Nieuws",
     showViewAll: false,
   },
 };
 
-/**
- * Custom "View All" link
- */
-export const CustomViewAllLink: Story = {
-  args: {
-    articles: mockArticles,
-    title: "Laatste nieuws",
-    showViewAll: true,
-    viewAllHref: "/news?category=ploeg",
-  },
-};
-
-/**
- * Articles without images
- */
-export const WithoutImages: Story = {
-  args: {
-    articles: mockArticles.map((article) => ({
-      ...article,
-      imageUrl: undefined,
-    })),
-    title: "Laatste nieuws",
-    showViewAll: true,
-  },
-};
-
-/**
- * Articles without tags
- */
-export const WithoutTags: Story = {
-  args: {
-    articles: mockArticles.map((article) => ({
-      ...article,
-      tags: undefined,
-    })),
-    title: "Laatste nieuws",
-    showViewAll: true,
-  },
-};
-
-/**
- * Single article
- */
-export const SingleArticle: Story = {
-  args: {
-    articles: [mockArticles[0]],
-    title: "Laatste nieuws",
-    showViewAll: true,
-  },
-};
-
-/**
- * Empty state (hidden)
- */
-export const Empty: Story = {
-  args: {
-    articles: [],
-    title: "Laatste nieuws",
-    showViewAll: true,
-  },
+/** Mobile viewport */
+export const MobileView: Story = {
+  args: { ...Default.args },
+  globals: { viewport: { value: "mobile1" } },
 };
