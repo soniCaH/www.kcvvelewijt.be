@@ -12,6 +12,7 @@ export interface NewsCardProps {
   badge?: string;
   date?: string;
   variant?: "standard" | "featured";
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export const NewsCard = ({
   badge,
   date,
   variant = "standard",
+  as: Heading = "h3",
   className,
 }: NewsCardProps) => {
   const isFeatured = variant === "featured";
@@ -81,14 +83,14 @@ export const NewsCard = ({
           </span>
         )}
 
-        <h3
+        <Heading
           className={cn(
             "font-body text-white! group-hover:text-white/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3",
             isFeatured ? "text-2xl!" : "text-base!",
           )}
         >
           {title}
-        </h3>
+        </Heading>
 
         {(date ?? badge) && (
           <div className="border-t border-white/20 mt-3 pt-3 text-white/60 text-xs flex justify-between">
