@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { Pause, Play } from "@/lib/icons";
+import { SectionDivider } from "@/components/design-system";
 
 export interface FeaturedArticle {
   /**
@@ -236,7 +237,7 @@ export const FeaturedArticles = ({
 
         {/* Navigation Dots + Pause Button */}
         {articles.length > 1 && (
-          <div className="absolute bottom-6 left-4 lg:left-10 z-20 flex items-center gap-2">
+          <div className="absolute bottom-[calc(clamp(2rem,6vw,5rem)+0.75rem)] left-4 lg:left-10 z-20 flex items-center gap-2">
             {/* Pause/Play toggle — WCAG 2.2.2 */}
             {autoRotate && (
               <button
@@ -357,6 +358,9 @@ export const FeaturedArticles = ({
           </div>
         )}
       </div>
+
+      {/* Bottom diagonal — white cut in lower-left, matching MatchWidget's white top cut */}
+      <SectionDivider color="white" position="bottom" flip />
     </section>
   );
 };

@@ -7,11 +7,7 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
-import {
-  FeaturedArticles,
-  LatestNews,
-  UpcomingMatches,
-} from "@/components/home";
+import { FeaturedArticles, LatestNews, MatchWidget } from "@/components/home";
 import {
   mapSanityArticlesToHomepageArticles,
   mapMatchesToUpcomingMatches,
@@ -33,11 +29,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Render the homepage composed of a featured articles carousel, upcoming matches, and latest news.
+ * Render the homepage with a featured articles carousel, the next match widget, and a latest-news section.
  *
- * Fetches up to nine most-recent articles (first three become featured items with descriptions, next six become latest-news items without descriptions) and the upcoming matches; if both article and match fetches fail or return empty, renders a centered fallback message indicating content cannot be loaded.
+ * Fetches recent articles and upcoming matches, shows the first three articles as featured items and the next six as latest news, and renders a centered fallback message if both article and match data are unavailable.
  *
- * @returns The homepage React element containing the featured articles carousel, upcoming matches, and latest news, or a fallback message when no content is available.
+ * @returns The homepage React element containing the featured articles carousel, the next match widget (if available), and the latest news section, or a centered fallback message when no content is available.
  */
 export default async function HomePage() {
   // Fetch latest articles and upcoming matches in parallel with error handling
@@ -79,6 +75,7 @@ export default async function HomePage() {
 
   // Map matches to component format (Weitse Gans already filtered at service level)
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
+  const nextMatch = upcomingMatches[0];
 
   // Show fallback message if no content could be loaded at all
   if (articles.length === 0 && matches.length === 0) {
@@ -105,13 +102,8 @@ export default async function HomePage() {
         />
       )}
 
-      {/* Upcoming Matches Slider - component handles empty array internally */}
-      <UpcomingMatches
-        matches={upcomingMatches}
-        title="Volgende wedstrijden"
-        showViewAll={true}
-        viewAllHref="/matches"
-      />
+      {/* Match Widget — next A-team match */}
+      {nextMatch && <MatchWidget match={nextMatch} teamLabel="A-Ploeg" />}
 
       {/* Latest News Section */}
       {latestNewsArticles.length > 0 && (
