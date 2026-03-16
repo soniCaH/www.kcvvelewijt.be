@@ -47,6 +47,10 @@ export interface MatchTeaserProps {
   highlightTeamId?: string | number;
   /** Display variant */
   variant?: "default" | "compact";
+  /** Optional team label shown as a small green badge above the date row (e.g. "A-Ploeg") */
+  teamLabel?: string;
+  /** Theme variant — "dark" for dark-background sections */
+  theme?: "light" | "dark";
   /** Loading state */
   isLoading?: boolean;
   /** Additional CSS classes */
@@ -98,11 +102,14 @@ export function MatchTeaser({
   status,
   href,
   highlightTeamId,
+  teamLabel,
+  theme,
   variant = "default",
   isLoading = false,
   className,
 }: MatchTeaserProps) {
   const isCompact = variant === "compact";
+  const isDark = theme === "dark";
   const hasScore = !!score;
 
   // Check if either team should be highlighted (strict ID equality)
@@ -148,6 +155,15 @@ export function MatchTeaser({
 
   const content = (
     <>
+      {teamLabel && (
+        <div
+          data-testid="team-label"
+          className="mb-1 text-xs font-bold uppercase tracking-widest text-kcvv-green"
+        >
+          {teamLabel}
+        </div>
+      )}
+
       {/* Header: Date, time, status */}
       <div
         className={cn(
@@ -156,9 +172,20 @@ export function MatchTeaser({
         )}
       >
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900">{formatDate(date)}</span>
-          {time && <span className="text-gray-500">{time}</span>}
-          <StatusBadge status={status} />
+          <span
+            className={cn(
+              "font-medium",
+              isDark ? "text-white/70" : "text-gray-900",
+            )}
+          >
+            {formatDate(date)}
+          </span>
+          {time && (
+            <span className={cn(isDark ? "text-white/50" : "text-gray-500")}>
+              {time}
+            </span>
+          )}
+          <StatusBadge status={status} isDark={isDark} />
         </div>
         {venue && !isCompact && (
           <span className="text-gray-500 text-xs hidden sm:block">{venue}</span>
@@ -173,6 +200,7 @@ export function MatchTeaser({
           side="home"
           isHighlighted={isHomeHighlighted}
           compact={isCompact}
+          isDark={isDark}
         />
 
         {/* Score or VS */}
@@ -186,26 +214,39 @@ export function MatchTeaser({
             >
               <span
                 className={cn(
-                  isHomeHighlighted &&
-                    score.home > score.away &&
-                    "text-kcvv-green-bright",
+                  isHomeHighlighted && score.home > score.away
+                    ? "text-kcvv-green"
+                    : isDark
+                      ? "text-white"
+                      : "text-gray-900",
                 )}
               >
                 {score.home}
               </span>
-              <span className="text-gray-400">-</span>
+              <span className={cn(isDark ? "text-white/30" : "text-gray-400")}>
+                -
+              </span>
               <span
                 className={cn(
-                  isAwayHighlighted &&
-                    score.away > score.home &&
-                    "text-kcvv-green-bright",
+                  isAwayHighlighted && score.away > score.home
+                    ? "text-kcvv-green"
+                    : isDark
+                      ? "text-white"
+                      : "text-gray-900",
                 )}
               >
                 {score.away}
               </span>
             </div>
           ) : (
-            <span className="text-gray-400 font-medium">VS</span>
+            <span
+              className={cn(
+                "font-medium",
+                isDark ? "text-white/30" : "text-gray-400",
+              )}
+            >
+              VS
+            </span>
           )}
         </div>
 
@@ -215,6 +256,7 @@ export function MatchTeaser({
           side="away"
           isHighlighted={isAwayHighlighted}
           compact={isCompact}
+          isDark={isDark}
         />
       </div>
 
@@ -226,7 +268,10 @@ export function MatchTeaser({
   );
 
   const containerClasses = cn(
-    "block bg-white border rounded-lg transition-shadow border-gray-200 hover:shadow-md",
+    "block border rounded transition-shadow",
+    isDark
+      ? "bg-kcvv-black border-white/8 hover:border-white/20"
+      : "bg-white border-gray-200 hover:shadow-md",
     isCompact ? "p-3" : "p-4",
     className,
   );
@@ -245,24 +290,49 @@ export function MatchTeaser({
 /**
  * Renders status badge for match
  */
-function StatusBadge({ status }: { status: MatchTeaserProps["status"] }) {
+function StatusBadge({
+  status,
+  isDark,
+}: {
+  status: MatchTeaserProps["status"];
+  isDark?: boolean;
+}) {
   if (status === "postponed") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+      <span
+        className={cn(
+          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
+          isDark
+            ? "bg-orange-900/40 text-orange-300"
+            : "bg-orange-100 text-orange-800",
+        )}
+      >
         Uitgesteld
       </span>
     );
   }
   if (status === "stopped") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+      <span
+        className={cn(
+          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
+          isDark
+            ? "bg-orange-900/40 text-orange-300"
+            : "bg-orange-100 text-orange-800",
+        )}
+      >
         Gestopt
       </span>
     );
   }
   if (status === "forfeited") {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+      <span
+        className={cn(
+          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
+          isDark ? "bg-white/10 text-white/60" : "bg-gray-100 text-gray-700",
+        )}
+      >
         FF
       </span>
     );
@@ -278,11 +348,13 @@ function TeamDisplay({
   side,
   isHighlighted,
   compact,
+  isDark,
 }: {
   team: MatchTeaserTeam;
   side: "home" | "away";
   isHighlighted?: boolean;
   compact?: boolean;
+  isDark?: boolean;
 }) {
   const logoSize = compact ? 24 : 32;
 
@@ -304,12 +376,16 @@ function TeamDisplay({
       ) : (
         <div
           className={cn(
-            "rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0",
+            "rounded-full flex items-center justify-center flex-shrink-0",
             compact ? "w-6 h-6" : "w-8 h-8",
+            isDark ? "bg-white/15" : "bg-gray-200",
           )}
         >
           <span
-            className={cn("text-gray-500", compact ? "text-xs" : "text-sm")}
+            className={cn(
+              compact ? "text-xs" : "text-sm",
+              isDark ? "text-white/60" : "text-gray-500",
+            )}
           >
             {team.name.charAt(0)}
           </span>
@@ -321,7 +397,13 @@ function TeamDisplay({
           "truncate",
           compact ? "text-sm" : "text-base",
           side === "away" && "text-right",
-          isHighlighted ? "font-semibold text-gray-900" : "text-gray-700",
+          isDark
+            ? isHighlighted
+              ? "font-bold text-white"
+              : "text-white/85"
+            : isHighlighted
+              ? "font-semibold text-gray-900"
+              : "text-gray-700",
         )}
       >
         {team.name}
