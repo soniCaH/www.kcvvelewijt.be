@@ -97,7 +97,7 @@ export function MatchWidget({
               </span>
             )}
 
-            {!isPostponed && isFinished && !hasScore && (
+            {!isPostponed && isFinished && !isForfeited && !hasScore && (
               <span
                 className="font-title font-black text-white font-mono leading-none tracking-[-0.04em]"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}

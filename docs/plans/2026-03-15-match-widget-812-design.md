@@ -40,7 +40,7 @@ interface SectionDividerProps {
 ### Mechanics
 
 - Absolutely-positioned `<div aria-hidden="true">`
-- Full width (`inset-x-0`), height `h-20` (80px) — produces ~3.6° angle at 1280px / ~12° on 375px (intentionally aggressive on mobile)
+- Full width (`inset-x-0`), height `clamp(2rem, 6vw, 5rem)` (32px–80px) — produces a consistent ~3.6°–4.9° angle across all viewport widths; see `SectionDivider.tsx` and the FeaturedArticles navigation dots offset for usage
 - `top-0` for `position="top"`, `bottom-0` for `position="bottom"`
 - Inline `style={{ clipPath }}` — arbitrary Tailwind clip-path values don't compose cleanly with dynamic values
 - **Top polygon:** `polygon(0 0, 100% 0, 100% 0%, 0 100%)` — right triangle at top, diagonal runs top-right → bottom-left
@@ -167,10 +167,10 @@ Section already has `relative overflow-hidden` ✅
 Add at the **end** of the section JSX (after all content, inside `<section>`):
 
 ```tsx
-<SectionDivider color="kcvv-green-dark" position="bottom" />
+<SectionDivider color="white" position="bottom" flip />
 ```
 
-This overlays a green-dark triangle at the bottom of the black hero, creating the visual impression that the green MatchWidget section starts at a diagonal.
+This overlays a white lower-left triangle at the bottom of the hero, pairing with MatchWidget's `color="white" position="top"` cut to create a continuous white diagonal band between the two sections.
 
 ---
 
