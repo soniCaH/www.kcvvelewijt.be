@@ -31,9 +31,8 @@ const colorClass: Record<SectionDividerColor, string> = {
  * Full-width diagonal section divider.
  *
  * Place inside a `relative overflow-hidden` parent section.
- * The divider renders an 80px-tall absolutely-positioned triangle
- * that visually "cuts" the section boundary at a consistent angle
- * (~3.6° at 1280px, ~12° on 375px mobile).
+ * The divider height scales proportionally with viewport width (`6vw`, capped at 80px)
+ * so the diagonal angle stays consistent at ~3.5° across all screen sizes.
  *
  * @example
  * ```tsx
@@ -55,12 +54,12 @@ export function SectionDivider({
     <div
       aria-hidden="true"
       className={cn(
-        "absolute inset-x-0 h-20 z-10",
+        "absolute inset-x-0 z-10",
         position === "top" ? "top-0" : "bottom-0",
         colorClass[color],
         className,
       )}
-      style={{ clipPath }}
+      style={{ clipPath, height: "clamp(2rem, 6vw, 5rem)" }}
     />
   );
 }
