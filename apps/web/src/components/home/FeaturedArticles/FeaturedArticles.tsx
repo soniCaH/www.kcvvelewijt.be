@@ -359,8 +359,8 @@ export const FeaturedArticles = ({
         )}
       </div>
 
-      {/* Bottom diagonal — reveals kcvv-green-dark from MatchWidget */}
-      <SectionDivider color="kcvv-green-dark" position="bottom" />
+      {/* Bottom diagonal — white cut in lower-left, matching MatchWidget's white top cut */}
+      <SectionDivider color="white" position="bottom" flip />
     </section>
   );
 };

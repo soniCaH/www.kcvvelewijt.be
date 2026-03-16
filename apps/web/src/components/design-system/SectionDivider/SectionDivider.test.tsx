@@ -54,22 +54,36 @@ describe("SectionDivider", () => {
     expect(container.firstChild).toHaveClass("bg-kcvv-green-dark");
   });
 
-  it("sets top clip-path for position=top", () => {
+  it("sets upper-left clip-path for position=top (default)", () => {
     const { container } = render(
       <SectionDivider color="white" position="top" />,
     );
     const el = container.firstChild as HTMLElement;
-    expect(el.style.clipPath).toBe("polygon(0 0, 100% 0, 100% 0%, 0 100%)");
+    expect(el.style.clipPath).toBe("polygon(0 0, 100% 0, 0 100%)");
   });
 
-  it("sets bottom clip-path for position=bottom", () => {
+  it("sets lower-right clip-path for position=bottom (default)", () => {
     const { container } = render(
       <SectionDivider color="white" position="bottom" />,
     );
     const el = container.firstChild as HTMLElement;
-    expect(el.style.clipPath).toBe(
-      "polygon(0 100%, 100% 100%, 100% 0%, 0 100%)",
+    expect(el.style.clipPath).toBe("polygon(0 100%, 100% 100%, 100% 0%)");
+  });
+
+  it("sets upper-right clip-path for position=top flip", () => {
+    const { container } = render(
+      <SectionDivider color="white" position="top" flip />,
     );
+    const el = container.firstChild as HTMLElement;
+    expect(el.style.clipPath).toBe("polygon(0 0, 100% 0, 100% 100%)");
+  });
+
+  it("sets lower-left clip-path for position=bottom flip", () => {
+    const { container } = render(
+      <SectionDivider color="white" position="bottom" flip />,
+    );
+    const el = container.firstChild as HTMLElement;
+    expect(el.style.clipPath).toBe("polygon(0 0, 0 100%, 100% 100%)");
   });
 
   it("accepts extra className", () => {

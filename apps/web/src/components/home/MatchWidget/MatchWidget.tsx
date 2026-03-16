@@ -47,8 +47,8 @@ export function MatchWidget({
       aria-label={`Wedstrijd: ${match.homeTeam.name} vs ${match.awayTeam.name}`}
       className="relative overflow-hidden bg-kcvv-green-dark"
     >
-      {/* Top diagonal — reveals kcvv-black from FeaturedArticles */}
-      <SectionDivider color="kcvv-black" position="top" />
+      {/* Top diagonal — white cut in upper-left, pairs with FeaturedArticles' white bottom cut */}
+      <SectionDivider color="white" position="top" />
 
       {/* Bottom diagonal — reveals gray-100 from LatestNews */}
       <SectionDivider color="gray-100" position="bottom" />
