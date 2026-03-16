@@ -7,11 +7,7 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
-import {
-  FeaturedArticles,
-  LatestNews,
-  UpcomingMatches,
-} from "@/components/home";
+import { FeaturedArticles, LatestNews, MatchWidget } from "@/components/home";
 import {
   mapSanityArticlesToHomepageArticles,
   mapMatchesToUpcomingMatches,
@@ -79,6 +75,7 @@ export default async function HomePage() {
 
   // Map matches to component format (Weitse Gans already filtered at service level)
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
+  const nextMatch = upcomingMatches[0];
 
   // Show fallback message if no content could be loaded at all
   if (articles.length === 0 && matches.length === 0) {
@@ -105,13 +102,8 @@ export default async function HomePage() {
         />
       )}
 
-      {/* Upcoming Matches Slider - component handles empty array internally */}
-      <UpcomingMatches
-        matches={upcomingMatches}
-        title="Volgende wedstrijden"
-        showViewAll={true}
-        viewAllHref="/matches"
-      />
+      {/* Match Widget — next A-team match */}
+      {nextMatch && <MatchWidget match={nextMatch} teamLabel="A-Ploeg" />}
 
       {/* Latest News Section */}
       {latestNewsArticles.length > 0 && (
