@@ -5,7 +5,14 @@ export type {
 } from "./FeaturedArticles";
 
 export { LatestNews } from "./LatestNews";
-export type { LatestNewsProps, LatestNewsArticle } from "./LatestNews";
+export type {
+  LatestNewsProps,
+  LatestNewsArticle,
+  FeaturedEventStub,
+} from "./LatestNews";
+
+export { NewsCard } from "./LatestNews/NewsCard";
+export type { NewsCardProps } from "./LatestNews/NewsCard";
 
 export { UpcomingMatches } from "./UpcomingMatches";
 export type { UpcomingMatchesProps, UpcomingMatch } from "./UpcomingMatches";
