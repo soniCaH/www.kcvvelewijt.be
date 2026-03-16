@@ -99,7 +99,7 @@ interface MatchWidgetProps {
 
 Section: `relative overflow-hidden bg-kcvv-green-dark`
 
-**Padding:** `py-24` — intentional exception to the `py-20` section rule; the extra 16px clears the 80px diagonal so no content is obscured by the cut.
+**Padding:** `py-20` — standard full-width section padding; content sits at `z-20` above the `z-10` SectionDivider so no overlap occurs.
 
 **Overline** (full width, centered):
 
@@ -136,7 +136,7 @@ before/after: w-5 h-px bg-white/30 (decorative rules)
 
 **SectionDividers:**
 
-- Top: `<SectionDivider color="kcvv-black" position="top" />` — black triangle overlaid on green-dark
+- Top: `<SectionDivider color="white" position="top" />` — white triangle, pairs with FeaturedArticles' `color="white" flip` bottom cut to create the white diagonal band
 - Bottom: `<SectionDivider color="gray-100" position="bottom" />` — gray-100 triangle
 
 ### Storybook

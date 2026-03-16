@@ -172,7 +172,8 @@ function TeamColumn({ team, align }: TeamColumnProps) {
 
 function TeamLogo({ logo, name }: { logo?: string; name: string }) {
   const initials = name
-    .split(" ")
+    .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
