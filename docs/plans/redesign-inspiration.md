@@ -11,8 +11,11 @@ Living document. Add links, exports, and notes as you collect them.
 
 ## Reference Sites
 
-<!-- Football club sites worth studying -->
-<!-- Format: [Club name](URL) — what's interesting about it -->
+- [Sporting Hasselt](https://www.sportinghasselt.be) — Belgian football club at similar scale. Belgian football UX patterns, regional club identity.
+- [Real Madrid](https://www.realmadrid.com) — Benchmark for football UX, dark/dramatic aesthetic, match widget design.
+- [Inter Miami CF](https://www.intermiamicf.com) — Modern MLS club. Bold graphic identity, diagonal cuts, strong brand color use.
+
+**Key constraint:** KCVV has no professional photographer. Study these sites specifically for how they handle sections without strong photography — graphic/typographic design, solid color sections, pattern overlays, diagonal cuts.
 
 ## Pattern / Motif Notes
 
