@@ -9,6 +9,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils/cn";
+import { ChevronLeft, ChevronRight } from "@/lib/icons";
 import { MatchTeaser } from "../MatchTeaser/MatchTeaser";
 import type { UpcomingMatch } from "@/components/match/types";
 
@@ -19,6 +20,8 @@ export interface MatchesSliderProps {
   highlightTeamId?: number;
   /** Section heading */
   title?: string;
+  /** Theme variant — "dark" for kcvv-black sections */
+  theme?: "light" | "dark";
   /** Additional CSS classes */
   className?: string;
 }
@@ -33,6 +36,7 @@ export const MatchesSlider = ({
   matches,
   highlightTeamId,
   title,
+  theme,
   className,
 }: MatchesSliderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,22 +84,21 @@ export const MatchesSlider = ({
           <button
             type="button"
             onClick={() => scroll("left")}
-            className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+            className={cn(
+              "hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10",
+              "w-10 h-10 items-center justify-center transition-colors",
+              theme === "dark"
+                ? "bg-kcvv-black border border-kcvv-green rounded-sm hover:bg-kcvv-green/10"
+                : "bg-white rounded-full shadow-md hover:bg-gray-50",
+            )}
             aria-label="Scroll naar links"
           >
-            <svg
-              className="w-5 h-5 text-kcvv-green-dark"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeft
+              className={cn(
+                "w-5 h-5",
+                theme === "dark" ? "text-kcvv-green" : "text-kcvv-green-dark",
+              )}
+            />
           </button>
         )}
 
@@ -132,6 +135,8 @@ export const MatchesSlider = ({
                   }
                   status={mapStatus(match.status)}
                   highlightTeamId={highlightTeamId}
+                  teamLabel={match.teamLabel}
+                  theme={theme}
                   variant="compact"
                 />
               </div>
@@ -144,22 +149,21 @@ export const MatchesSlider = ({
           <button
             type="button"
             onClick={() => scroll("right")}
-            className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+            className={cn(
+              "hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10",
+              "w-10 h-10 items-center justify-center transition-colors",
+              theme === "dark"
+                ? "bg-kcvv-black border border-kcvv-green rounded-sm hover:bg-kcvv-green/10"
+                : "bg-white rounded-full shadow-md hover:bg-gray-50",
+            )}
             aria-label="Scroll naar rechts"
           >
-            <svg
-              className="w-5 h-5 text-kcvv-green-dark"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRight
+              className={cn(
+                "w-5 h-5",
+                theme === "dark" ? "text-kcvv-green" : "text-kcvv-green-dark",
+              )}
+            />
           </button>
         )}
       </div>
