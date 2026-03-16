@@ -91,19 +91,21 @@ describe("NewsCard", () => {
     it("standard variant uses text-base title", () => {
       render(<NewsCard {...defaultProps} variant="standard" />);
       expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
-        "text-base",
+        "text-base!",
       );
     });
 
     it("featured variant uses text-2xl title", () => {
       render(<NewsCard {...defaultProps} variant="featured" />);
-      expect(screen.getByRole("heading", { level: 3 })).toHaveClass("text-2xl");
+      expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
+        "text-2xl!",
+      );
     });
 
     it("defaults to standard variant", () => {
       render(<NewsCard {...defaultProps} />);
       expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
-        "text-base",
+        "text-base!",
       );
     });
   });

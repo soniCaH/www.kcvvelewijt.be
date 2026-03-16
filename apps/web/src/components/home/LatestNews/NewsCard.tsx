@@ -32,7 +32,7 @@ export const NewsCard = ({
       className={cn(
         "relative group overflow-hidden rounded bg-kcvv-black",
         "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
-        isFeatured ? "aspect-[3/2] md:aspect-[21/9]" : "aspect-[3/2]",
+        "aspect-[3/2]",
         className,
       )}
     >
@@ -83,8 +83,8 @@ export const NewsCard = ({
 
         <h3
           className={cn(
-            "text-white! group-hover:text-white/75! transition-colors font-bold leading-snug line-clamp-3",
-            isFeatured ? "text-2xl" : "text-base",
+            "font-body text-white! group-hover:text-white/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3",
+            isFeatured ? "text-2xl!" : "text-base!",
           )}
         >
           {title}

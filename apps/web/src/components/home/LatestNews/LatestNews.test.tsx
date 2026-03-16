@@ -117,17 +117,17 @@ describe("LatestNews", () => {
 
     it("renders first article with featured variant (text-2xl heading)", () => {
       render(<LatestNews articles={mockArticles} />);
-      // First article heading is h3 with text-2xl
+      // First article heading is h3 with text-2xl!
       const headings = screen.getAllByRole("heading", { level: 3 });
-      expect(headings[0]).toHaveClass("text-2xl");
+      expect(headings[0]).toHaveClass("text-2xl!");
     });
 
     it("renders subsequent articles with standard variant (text-base heading)", () => {
       render(<LatestNews articles={mockArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
       // headings[1] and [2] are standard
-      expect(headings[1]).toHaveClass("text-base");
-      expect(headings[2]).toHaveClass("text-base");
+      expect(headings[1]).toHaveClass("text-base!");
+      expect(headings[2]).toHaveClass("text-base!");
     });
 
     it("renders article tags as badge", () => {
@@ -164,12 +164,12 @@ describe("LatestNews", () => {
       const featuredHeading = headings.find((h) =>
         h.textContent?.includes("Jeugdtoernooi"),
       );
-      expect(featuredHeading).toHaveClass("text-2xl");
+      expect(featuredHeading).toHaveClass("text-2xl!");
       // First article is now standard
       const firstArticleHeading = headings.find((h) =>
         h.textContent?.includes("First News Article"),
       );
-      expect(firstArticleHeading).toHaveClass("text-base");
+      expect(firstArticleHeading).toHaveClass("text-base!");
     });
   });
 

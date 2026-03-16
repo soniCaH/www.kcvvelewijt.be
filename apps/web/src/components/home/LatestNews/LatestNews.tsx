@@ -1,6 +1,6 @@
 // apps/web/src/components/home/LatestNews/LatestNews.tsx
-import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "./NewsCard";
 
 export interface LatestNewsArticle {
@@ -54,27 +54,11 @@ export const LatestNews = ({
   return (
     <section className={cn("bg-gray-100 py-20", className)}>
       <div className="max-w-[1280px] mx-auto px-4 md:px-8">
-        {/* Section header */}
-        <header className="flex items-end justify-between mb-10">
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black uppercase tracking-tight leading-none pl-4 border-l-4 border-kcvv-green-bright text-kcvv-black">
-            {title}
-          </h2>
-
-          {showViewAll && (
-            <Link
-              href={viewAllHref}
-              className="text-xs font-bold uppercase tracking-[0.1em] text-kcvv-green-dark inline-flex items-center gap-2 group"
-            >
-              Alle berichten
-              <span
-                className="inline-block transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              >
-                →
-              </span>
-            </Link>
-          )}
-        </header>
+        <SectionHeader
+          title={title}
+          linkText={showViewAll ? "Alle berichten" : undefined}
+          linkHref={showViewAll ? viewAllHref : undefined}
+        />
 
         {/* 1 featured + 2 standard grid */}
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
@@ -101,9 +85,9 @@ export const LatestNews = ({
             />
           ) : null}
 
-          {/* Standard slots — right column */}
+          {/* Standard slots — right column fills featured card height on desktop */}
           {standardArticles.length > 0 && (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="flex flex-col gap-4 md:h-full">
               {standardArticles.map((article) => (
                 <NewsCard
                   key={article.href}
@@ -114,6 +98,7 @@ export const LatestNews = ({
                   imageAlt={article.imageAlt}
                   badge={article.tags?.[0]?.name}
                   date={article.date}
+                  className="md:flex-1 md:aspect-auto"
                 />
               ))}
             </div>

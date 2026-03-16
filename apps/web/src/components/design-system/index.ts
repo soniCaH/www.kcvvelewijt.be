@@ -70,3 +70,7 @@ export type {
   SectionDividerColor,
   SectionDividerPosition,
 } from "./SectionDivider";
+
+// SectionHeader
+export { SectionHeader } from "./SectionHeader";
+export type { SectionHeaderProps } from "./SectionHeader";
