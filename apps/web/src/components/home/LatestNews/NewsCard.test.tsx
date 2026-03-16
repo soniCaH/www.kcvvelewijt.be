@@ -82,7 +82,7 @@ describe("NewsCard", () => {
     it("does not render footer when no date and no badge", () => {
       const { container } = render(<NewsCard {...defaultProps} />);
       expect(
-        container.querySelector(".border-t.border-white\\/10"),
+        container.querySelector(".border-t.border-white\\/20"),
       ).not.toBeInTheDocument();
     });
   });

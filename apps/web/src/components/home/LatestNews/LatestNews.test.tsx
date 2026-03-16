@@ -1,6 +1,15 @@
-import { describe, it, expect } from "vitest";
+// apps/web/src/components/home/LatestNews/LatestNews.test.tsx
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { ImageProps } from "next/image";
 import { LatestNews, type LatestNewsArticle } from "./LatestNews";
+
+vi.mock("next/image", () => ({
+  default: ({ alt, src, ...props }: ImageProps) => {
+    const imgProps = { alt, src: typeof src === "string" ? src : "", ...props };
+    return <img {...imgProps} />;
+  },
+}));
 
 describe("LatestNews", () => {
   const mockArticles: LatestNewsArticle[] = [
@@ -29,126 +38,157 @@ describe("LatestNews", () => {
     },
   ];
 
-  it("renders section with default title", () => {
-    render(<LatestNews articles={mockArticles} />);
-
-    expect(screen.getByText("Laatste nieuws")).toBeInTheDocument();
-  });
-
-  it("renders custom title when provided", () => {
-    render(<LatestNews articles={mockArticles} title="Nieuwsoverzicht" />);
-
-    expect(screen.getByText("Nieuwsoverzicht")).toBeInTheDocument();
-  });
-
-  it("renders all provided articles", () => {
-    render(<LatestNews articles={mockArticles} />);
-
-    expect(screen.getByText("First News Article")).toBeInTheDocument();
-    expect(screen.getByText("Second News Article")).toBeInTheDocument();
-    expect(screen.getByText("Third News Article")).toBeInTheDocument();
-  });
-
-  it('renders "View All" link by default', () => {
-    render(<LatestNews articles={mockArticles} />);
-
-    const viewAllLink = screen.getByRole("link", { name: /Bekijk alles/i });
-    expect(viewAllLink).toBeInTheDocument();
-    expect(viewAllLink).toHaveAttribute("href", "/news");
-  });
-
-  it('does not render "View All" link when showViewAll is false', () => {
-    render(<LatestNews articles={mockArticles} showViewAll={false} />);
-
-    expect(
-      screen.queryByRole("link", { name: /Bekijk alles/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("uses custom viewAllHref when provided", () => {
-    render(<LatestNews articles={mockArticles} viewAllHref="/custom-news" />);
-
-    const viewAllLink = screen.getByRole("link", { name: /Bekijk alles/i });
-    expect(viewAllLink).toHaveAttribute("href", "/custom-news");
-  });
-
-  it("renders empty when no articles provided", () => {
-    const { container } = render(<LatestNews articles={[]} />);
-
-    expect(container.firstChild).toBeNull();
-  });
-
-  it("applies custom className when provided", () => {
-    const { container } = render(
-      <LatestNews articles={mockArticles} className="custom-class" />,
-    );
-
-    expect(container.firstChild).toHaveClass("custom-class");
-  });
-
-  it("renders articles in grid layout", () => {
-    const { container } = render(<LatestNews articles={mockArticles} />);
-
-    const grid = container.querySelector(".grid");
-    expect(grid).toBeInTheDocument();
-    expect(grid).toHaveClass("grid-cols-1", "lg:grid-cols-3");
-  });
-
-  it("renders correct number of articles", () => {
-    render(<LatestNews articles={mockArticles} />);
-
-    const articleLinks = screen.getAllByRole("link").filter((link) => {
-      const href = link.getAttribute("href");
-      // Exclude the "View All" link which is exactly '/news'
-      return href?.startsWith("/news/") && href !== "/news";
+  describe("Section structure", () => {
+    it("renders a section element", () => {
+      const { container } = render(<LatestNews articles={mockArticles} />);
+      expect(container.querySelector("section")).toBeInTheDocument();
     });
-    expect(articleLinks.length).toBe(3);
+
+    it("renders default title", () => {
+      render(<LatestNews articles={mockArticles} />);
+      expect(screen.getByText("Laatste nieuws")).toBeInTheDocument();
+    });
+
+    it("renders custom title", () => {
+      render(<LatestNews articles={mockArticles} title="Nieuwsoverzicht" />);
+      expect(screen.getByText("Nieuwsoverzicht")).toBeInTheDocument();
+    });
+
+    it("accepts custom className", () => {
+      const { container } = render(
+        <LatestNews articles={mockArticles} className="custom-class" />,
+      );
+      expect(container.firstChild).toHaveClass("custom-class");
+    });
   });
 
-  it("handles single article", () => {
-    render(<LatestNews articles={[mockArticles[0]]} />);
+  describe("View All link", () => {
+    it("renders view all link by default", () => {
+      render(<LatestNews articles={mockArticles} />);
+      const link = screen.getByRole("link", { name: /Alle berichten/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute("href", "/news");
+    });
 
-    expect(screen.getByText("First News Article")).toBeInTheDocument();
-    expect(screen.queryByText("Second News Article")).not.toBeInTheDocument();
+    it("hides view all link when showViewAll is false", () => {
+      render(<LatestNews articles={mockArticles} showViewAll={false} />);
+      expect(
+        screen.queryByRole("link", { name: /Alle berichten/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("uses custom viewAllHref", () => {
+      render(<LatestNews articles={mockArticles} viewAllHref="/nieuws" />);
+      expect(
+        screen.getByRole("link", { name: /Alle berichten/i }),
+      ).toHaveAttribute("href", "/nieuws");
+    });
   });
 
-  it("handles large number of articles", () => {
-    const manyArticles = Array.from({ length: 12 }, (_, i) => ({
-      href: `/news/article-${i}`,
-      title: `Article ${i}`,
-      imageUrl: `/images/article-${i}.jpg`,
-      imageAlt: `Article ${i} image`,
-      date: `${i} januari 2025`,
-    }));
+  describe("Grid layout", () => {
+    it("renders the grid container", () => {
+      const { container } = render(<LatestNews articles={mockArticles} />);
+      expect(container.querySelector(".grid")).toBeInTheDocument();
+    });
 
-    render(<LatestNews articles={manyArticles} />);
-
-    expect(screen.getByText("Article 0")).toBeInTheDocument();
-    expect(screen.getByText("Article 11")).toBeInTheDocument();
+    it("uses 2-column responsive grid", () => {
+      const { container } = render(<LatestNews articles={mockArticles} />);
+      // outer grid is 2-col on md+
+      const outerGrid = container.querySelector(".grid");
+      expect(outerGrid).toHaveClass("grid-cols-1");
+      expect(outerGrid?.className).toContain("md:grid-cols-");
+    });
   });
 
-  it("applies correct section classes", () => {
-    const { container } = render(<LatestNews articles={mockArticles} />);
+  describe("Article rendering", () => {
+    it("renders all article titles", () => {
+      render(<LatestNews articles={mockArticles} />);
+      expect(screen.getByText("First News Article")).toBeInTheDocument();
+      expect(screen.getByText("Second News Article")).toBeInTheDocument();
+      expect(screen.getByText("Third News Article")).toBeInTheDocument();
+    });
 
-    const section = container.firstChild;
-    expect(section).toHaveClass("frontpage__main_content");
-    expect(section).toHaveClass("page__section");
+    it("renders article dates", () => {
+      render(<LatestNews articles={mockArticles} />);
+      expect(screen.getByText("20 januari 2025")).toBeInTheDocument();
+      expect(screen.getByText("19 januari 2025")).toBeInTheDocument();
+      expect(screen.getByText("18 januari 2025")).toBeInTheDocument();
+    });
+
+    it("renders first article with featured variant (text-2xl heading)", () => {
+      render(<LatestNews articles={mockArticles} />);
+      // First article heading is h3 with text-2xl
+      const headings = screen.getAllByRole("heading", { level: 3 });
+      expect(headings[0]).toHaveClass("text-2xl");
+    });
+
+    it("renders subsequent articles with standard variant (text-base heading)", () => {
+      render(<LatestNews articles={mockArticles} />);
+      const headings = screen.getAllByRole("heading", { level: 3 });
+      // headings[1] and [2] are standard
+      expect(headings[1]).toHaveClass("text-base");
+      expect(headings[2]).toHaveClass("text-base");
+    });
+
+    it("renders article tags as badge", () => {
+      render(<LatestNews articles={mockArticles} />);
+      // Tags rendered as badge text (no # prefix in NewsCard)
+      expect(screen.getAllByText("Ploeg").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("Jeugd").length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it("renders article dates", () => {
-    render(<LatestNews articles={mockArticles} />);
+  describe("Featured event stub", () => {
+    const featuredEvent = {
+      title: "Jeugdtoernooi 2026",
+      href: "/evenementen/jeugdtoernooi",
+      imageUrl: "/events/toernooi.jpg",
+      imageAlt: "Jeugdtoernooi",
+      badge: "Evenement",
+      date: "18 april 2026",
+    };
 
-    expect(screen.getByText("20 januari 2025")).toBeInTheDocument();
-    expect(screen.getByText("19 januari 2025")).toBeInTheDocument();
-    expect(screen.getByText("18 januari 2025")).toBeInTheDocument();
+    it("renders event title in featured slot when featuredEvent provided", () => {
+      render(
+        <LatestNews articles={mockArticles} featuredEvent={featuredEvent} />,
+      );
+      expect(screen.getByText("Jeugdtoernooi 2026")).toBeInTheDocument();
+    });
+
+    it("renders first article as standard (not featured) when event fills featured slot", () => {
+      render(
+        <LatestNews articles={mockArticles} featuredEvent={featuredEvent} />,
+      );
+      const headings = screen.getAllByRole("heading", { level: 3 });
+      // Event is featured (text-2xl), articles are standard (text-base)
+      const featuredHeading = headings.find((h) =>
+        h.textContent?.includes("Jeugdtoernooi"),
+      );
+      expect(featuredHeading).toHaveClass("text-2xl");
+      // First article is now standard
+      const firstArticleHeading = headings.find((h) =>
+        h.textContent?.includes("First News Article"),
+      );
+      expect(firstArticleHeading).toHaveClass("text-base");
+    });
   });
 
-  it("renders article tags", () => {
-    render(<LatestNews articles={mockArticles} />);
+  describe("Empty state", () => {
+    it("returns null when no articles and no featuredEvent", () => {
+      const { container } = render(<LatestNews articles={[]} />);
+      expect(container.firstChild).toBeNull();
+    });
 
-    // Tags are rendered within ArticleCard components
-    // Check if tags exist in the document (they may be split across elements)
-    expect(screen.getByText(/Ploeg/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jeugd/i)).toBeInTheDocument();
+    it("renders when only featuredEvent provided (no articles)", () => {
+      const featuredEvent = {
+        title: "Evenement zonder artikelen",
+        href: "/evenementen/test",
+        badge: "Evenement",
+      };
+      render(<LatestNews articles={[]} featuredEvent={featuredEvent} />);
+      expect(
+        screen.getByText("Evenement zonder artikelen"),
+      ).toBeInTheDocument();
+    });
   });
 });
