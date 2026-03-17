@@ -118,7 +118,7 @@ export const NewsCard = ({
         </Heading>
 
         {/* Footer bar: date+time on left, countdown chip on right */}
-        {(countdown ?? date ?? badge ?? eventDate ?? eventTime) && (
+        {(countdown ?? date ?? eventDate ?? eventTime) && (
           <div className="border-t border-white/20 mt-3 pt-3 text-white/60 text-xs flex justify-between items-center">
             <div className="flex items-center gap-3">
               {eventDate && (
@@ -134,7 +134,6 @@ export const NewsCard = ({
                 </span>
               )}
               {!eventDate && !eventTime && date && <time>{date}</time>}
-              {badge && !eventDate && !eventTime && <span>{badge}</span>}
             </div>
             {countdown && (
               <span className="text-xs uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-sm font-medium text-white/70">
