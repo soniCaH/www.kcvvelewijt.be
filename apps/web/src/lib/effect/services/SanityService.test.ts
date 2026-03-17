@@ -221,3 +221,75 @@ describe("SanityService.getPage", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("SanityService.getNextFeaturedEvent", () => {
+  it("returns the next event with featuredOnHome=true when present", async () => {
+    const mockEvent = {
+      _id: "event-1",
+      title: "Sponsorfeest",
+      dateStart: "2026-04-26T19:00:00.000Z",
+      dateEnd: null,
+      externalLink: { url: "https://fb.com", label: "Facebook" },
+      coverImageUrl: "https://cdn.sanity.io/img.jpg",
+      featuredOnHome: true,
+    };
+    mockFetch(mockEvent);
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getNextFeaturedEvent();
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+    expect(result).not.toBeNull();
+    expect(result?._id).toBe("event-1");
+  });
+
+  it("returns null when no upcoming events exist", async () => {
+    mockFetch(null);
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getNextFeaturedEvent();
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+    expect(result).toBeNull();
+  });
+});
+
+describe("SanityService.getHomepageBanners", () => {
+  it("returns resolved banner data from homepage singleton", async () => {
+    mockFetch({
+      bannerSlotA: {
+        _id: "b1",
+        imageUrl: "/img.jpg",
+        alt: "Anti-racism",
+        href: null,
+      },
+      bannerSlotB: null,
+      bannerSlotC: null,
+    });
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getHomepageBanners();
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+    expect(result.bannerSlotA).not.toBeNull();
+    expect(result.bannerSlotB).toBeNull();
+  });
+
+  it("returns all-null banners when homepage doc is missing", async () => {
+    mockFetch(null);
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getHomepageBanners();
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+    expect(result).toEqual({
+      bannerSlotA: null,
+      bannerSlotB: null,
+      bannerSlotC: null,
+    });
+  });
+});

@@ -10,7 +10,11 @@ import {
   ARTICLE_BY_SLUG_QUERY,
 } from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
-import { EVENTS_QUERY } from "../../sanity/queries/events";
+import {
+  EVENTS_QUERY,
+  NEXT_FEATURED_EVENT_QUERY,
+} from "../../sanity/queries/events";
+import { HOMEPAGE_BANNERS_QUERY } from "../../sanity/queries/homePage";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
@@ -106,6 +110,20 @@ export interface SanityEvent {
   dateEnd: string | null;
   externalLink: { url: string; label: string } | null;
   coverImageUrl: string | null;
+  featuredOnHome?: boolean;
+}
+
+export interface SanityBannerSlot {
+  _id: string;
+  imageUrl: string;
+  alt: string;
+  href: string | null;
+}
+
+export interface SanityHomepageBanners {
+  bannerSlotA: SanityBannerSlot | null;
+  bannerSlotB: SanityBannerSlot | null;
+  bannerSlotC: SanityBannerSlot | null;
 }
 
 export interface SanityResponsibilityContact {
@@ -172,6 +190,8 @@ export interface SanityServiceInterface {
   ) => Effect.Effect<SanityArticle | null>;
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
+  readonly getNextFeaturedEvent: () => Effect.Effect<SanityEvent | null>;
+  readonly getHomepageBanners: () => Effect.Effect<SanityHomepageBanners>;
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getStaffMembers: () => Effect.Effect<OrgChartNode[]>;
   readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
@@ -271,6 +291,17 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityArticle | null>(ARTICLE_BY_SLUG_QUERY, { slug }),
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
+  getNextFeaturedEvent: () =>
+    fetchGroq<SanityEvent | null>(NEXT_FEATURED_EVENT_QUERY, {
+      now: new Date().toISOString(),
+    }),
+  getHomepageBanners: () =>
+    fetchGroq<SanityHomepageBanners | null>(HOMEPAGE_BANNERS_QUERY).pipe(
+      Effect.map(
+        (data) =>
+          data ?? { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
+      ),
+    ),
   getResponsibilityPaths: () =>
     fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(
       Effect.map((paths) => paths.map(mapResponsibilityPath)),
