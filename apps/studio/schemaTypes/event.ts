@@ -33,6 +33,13 @@ export const event = defineType({
         defineField({name: 'label', title: 'Label', type: 'string'}),
       ],
     }),
+    defineField({
+      name: 'featuredOnHome',
+      title: 'Featured on homepage',
+      type: 'boolean',
+      description: 'When enabled, this event fills the featured slot in the news section on the homepage.',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: {title: 'title', media: 'coverImage', dateStart: 'dateStart'},
