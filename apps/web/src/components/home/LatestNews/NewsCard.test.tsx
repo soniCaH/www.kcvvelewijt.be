@@ -68,10 +68,7 @@ describe("NewsCard", () => {
   describe("Badge and date", () => {
     it("renders badge above title", () => {
       render(<NewsCard {...defaultProps} badge="Clubnieuws" />);
-      // badge appears above title AND in footer — getAllByText
-      expect(screen.getAllByText("Clubnieuws").length).toBeGreaterThanOrEqual(
-        1,
-      );
+      expect(screen.getByText("Clubnieuws")).toBeInTheDocument();
     });
 
     it("renders date in footer", () => {
@@ -79,7 +76,7 @@ describe("NewsCard", () => {
       expect(screen.getByText("5 mei 2025")).toBeInTheDocument();
     });
 
-    it("does not render footer when no date and no badge", () => {
+    it("does not render footer when no date", () => {
       const { container } = render(<NewsCard {...defaultProps} />);
       expect(
         container.querySelector(".border-t.border-white\\/20"),
