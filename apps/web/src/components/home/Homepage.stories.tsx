@@ -1,6 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
 import { LatestNews } from "./LatestNews";
+import { MatchWidget } from "./MatchWidget";
+import { MatchesSliderSection } from "./MatchesSliderSection";
+import { YouthSection } from "./YouthSection";
+import { PageFooter } from "@/components/layout/PageFooter";
+import { Sponsors } from "@/components/sponsors/Sponsors";
+import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
+import { SectionHeader } from "@/components/design-system";
+import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
+import { mockMatches } from "./UpcomingMatches/UpcomingMatches.mocks";
 
 const meta: Meta = {
   title: "Pages/Homepage",
@@ -96,8 +105,36 @@ const mockLatestNews = [
   },
 ];
 
+const mockSliderMatches = mockMatches.mixed.map((m, i) => ({
+  ...m,
+  teamLabel: i < 3 ? "A-Ploeg" : "U17",
+}));
+
+/** SponsorsSection is an async server component — inline here with mock data */
+const SponsorsSectionMock = () => (
+  <section className="-mt-0.5 bg-gray-100 py-20">
+    <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <SectionHeader
+        title="Sponsors"
+        linkText="Word sponsor"
+        linkHref="/sponsors"
+      />
+      <Sponsors
+        sponsors={mockSponsors}
+        title=""
+        description=""
+        showViewAll={false}
+        variant="light"
+        columns={5}
+        className="py-0"
+      />
+    </div>
+  </section>
+);
+
 /**
- * Complete homepage layout with hero carousel and latest news
+ * Complete v3 homepage: hero → match widget → news → match slider →
+ * youth section → sponsors → footer
  */
 export const Default: Story = {
   render: () => (
@@ -107,58 +144,28 @@ export const Default: Story = {
         autoRotate={true}
         autoRotateInterval={5000}
       />
+      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
       <LatestNews
         articles={mockLatestNews}
         title="Laatste nieuws"
         showViewAll={true}
         viewAllHref="/news"
       />
+      <MatchesSliderSection
+        matches={mockSliderMatches}
+        highlightTeamId={1235}
+      />
+      <YouthSection />
+      <SponsorsSectionMock />
+      <PageFooter />
     </>
   ),
 };
 
 /**
- * Homepage with slow carousel rotation
+ * v3 homepage with featured event in the news section
  */
-export const SlowRotation: Story = {
-  render: () => (
-    <>
-      <FeaturedArticles
-        articles={mockFeaturedArticles}
-        autoRotate={true}
-        autoRotateInterval={8000}
-      />
-      <LatestNews
-        articles={mockLatestNews}
-        title="Laatste nieuws"
-        showViewAll={true}
-        viewAllHref="/news"
-      />
-    </>
-  ),
-};
-
-/**
- * Homepage without auto-rotation
- */
-export const NoAutoRotation: Story = {
-  render: () => (
-    <>
-      <FeaturedArticles articles={mockFeaturedArticles} autoRotate={false} />
-      <LatestNews
-        articles={mockLatestNews}
-        title="Laatste nieuws"
-        showViewAll={true}
-        viewAllHref="/news"
-      />
-    </>
-  ),
-};
-
-/**
- * Homepage with custom section title
- */
-export const CustomTitle: Story = {
+export const WithFeaturedEvent: Story = {
   render: () => (
     <>
       <FeaturedArticles
@@ -166,32 +173,30 @@ export const CustomTitle: Story = {
         autoRotate={true}
         autoRotateInterval={5000}
       />
+      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
       <LatestNews
-        articles={mockLatestNews}
-        title="Recente berichten"
-        showViewAll={true}
-        viewAllHref="/news"
-      />
-    </>
-  ),
-};
-
-/**
- * Minimal homepage (fewer articles)
- */
-export const Minimal: Story = {
-  render: () => (
-    <>
-      <FeaturedArticles
-        articles={mockFeaturedArticles.slice(0, 1)}
-        autoRotate={false}
-      />
-      <LatestNews
-        articles={mockLatestNews.slice(0, 3)}
+        articles={mockLatestNews.slice(0, 2)}
+        featuredEvent={{
+          title: "Jeugdtoernooi 2026 — schrijf je nu in!",
+          imageUrl: "https://placehold.co/800x600/008755/fff?text=Toernooi",
+          imageAlt: "Jeugdtoernooi KCVV",
+          badge: "EVENEMENT",
+          date: "26 apr",
+          time: "10:00–17:00",
+          countdown: "over 40 dagen",
+          isExternal: false,
+        }}
         title="Laatste nieuws"
         showViewAll={true}
         viewAllHref="/news"
       />
+      <MatchesSliderSection
+        matches={mockSliderMatches}
+        highlightTeamId={1235}
+      />
+      <YouthSection />
+      <SponsorsSectionMock />
+      <PageFooter />
     </>
   ),
 };
@@ -204,4 +209,29 @@ export const MobileViewport: Story = {
   globals: {
     viewport: { value: "kcvvMobile" },
   },
+};
+
+/**
+ * Homepage without auto-rotation
+ */
+export const NoAutoRotation: Story = {
+  render: () => (
+    <>
+      <FeaturedArticles articles={mockFeaturedArticles} autoRotate={false} />
+      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
+      <LatestNews
+        articles={mockLatestNews}
+        title="Laatste nieuws"
+        showViewAll={true}
+        viewAllHref="/news"
+      />
+      <MatchesSliderSection
+        matches={mockSliderMatches}
+        highlightTeamId={1235}
+      />
+      <YouthSection />
+      <SponsorsSectionMock />
+      <PageFooter />
+    </>
+  ),
 };

@@ -701,7 +701,7 @@ export const LatestNews = ({
 
   return (
     <section className={cn("bg-gray-100 py-20", className)}>
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section header */}
         <header className="flex items-end justify-between mb-10">
           <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black uppercase tracking-tight leading-none pl-4 border-l-4 border-kcvv-green text-kcvv-black">

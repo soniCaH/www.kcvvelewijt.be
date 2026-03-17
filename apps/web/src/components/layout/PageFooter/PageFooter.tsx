@@ -18,7 +18,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
         className,
       )}
     >
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-12">
           {/* Brand column */}
           <div>
@@ -124,7 +124,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
       {/* Bottom bar */}
       <div className="border-t border-white/6">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-white/25 text-xs">
             © {currentYear} K.C.V.V. Elewijt
           </p>
