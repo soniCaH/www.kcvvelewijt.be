@@ -99,6 +99,31 @@ export const NoBadge: Story = {
   },
 };
 
+export const FeaturedEvent: Story = {
+  args: {
+    variant: "featured",
+    title: "Sponsorfeest KCVV Elewijt 2026",
+    href: "https://facebook.com/event",
+    badge: "EVENEMENT",
+    eventDate: "26 apr",
+    eventTime: "19:00",
+    countdown: "over 33 dagen",
+    isExternal: true,
+    imageUrl: "https://picsum.photos/1200/500?random=6",
+  },
+};
+
+export const FeaturedEventNoImage: Story = {
+  args: {
+    variant: "featured",
+    title: "Sponsorfeest KCVV Elewijt 2026",
+    badge: "EVENEMENT",
+    eventDate: "26 apr",
+    eventTime: "19:00",
+    countdown: "over 33 dagen",
+  },
+};
+
 export const MobileView: Story = {
   args: { ...Default.args },
   globals: { viewport: { value: "mobile1" } },
