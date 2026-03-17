@@ -19,3 +19,6 @@ export type { UpcomingMatchesProps, UpcomingMatch } from "./UpcomingMatches";
 
 export { MatchWidget } from "./MatchWidget";
 export type { MatchWidgetProps } from "./MatchWidget";
+
+export { BannerSlot } from "./BannerSlot";
+export type { BannerSlotProps } from "./BannerSlot";
