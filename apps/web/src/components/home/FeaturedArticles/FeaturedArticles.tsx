@@ -185,7 +185,7 @@ export const FeaturedArticles = ({
         {activeArticle.title}
       </div>
 
-      <div className="relative w-full h-[400px] lg:h-[600px]">
+      <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           {activeArticle.imageUrl && (
@@ -203,7 +203,7 @@ export const FeaturedArticles = ({
         </div>
 
         {/* Content Overlay — padded away from sidebar on desktop */}
-        <div className="relative z-10 h-full flex items-center px-4 lg:px-10">
+        <div className="relative z-10 h-full flex items-start pt-10 md:pt-14 lg:items-center lg:pt-0 px-4 lg:px-10">
           <Link
             href={activeArticle.href}
             className="group flex flex-col justify-center max-w-lg lg:max-w-xl"
