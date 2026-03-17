@@ -1,209 +1,143 @@
-/**
- * PageFooter Component
- * Site footer with contact info, social links, and sponsors
- * Matches Gatsby visual: black background with SVG wavy top edge
- */
-
 import Link from "next/link";
-import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import Image from "next/image";
-import { SocialLinks } from "@/components/design-system";
-import { SponsorsBlock } from "@/components/sponsors";
+import { Mail, MapPin, Facebook, Instagram } from "@/lib/icons";
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import { cn } from "@/lib/utils/cn";
 
 export interface PageFooterProps {
-  /**
-   * Additional CSS classes
-   */
   className?: string;
 }
 
-interface ContactRow {
-  label: string;
-  value: string | React.ReactNode;
-}
-
-const contactRows: ContactRow[] = [
-  {
-    label: "KCVV Elewijt",
-    value: "Driesstraat 30, 1982 Elewijt",
-  },
-  {
-    label: "Voorzitter",
-    value: "Rudy Bautmans",
-  },
-  {
-    label: "GC",
-    value: (
-      <a
-        href="mailto:gc@kcvvelewijt.be"
-        className="text-kcvv-green-bright hover:underline"
-      >
-        John De Ron
-      </a>
-    ),
-  },
-  {
-    label: "Algemeen contact",
-    value: (
-      <a
-        href="mailto:info@kcvvelewijt.be"
-        className="text-kcvv-green-bright hover:underline"
-      >
-        info@kcvvelewijt.be
-      </a>
-    ),
-  },
-  {
-    label: "Jeugdwerking",
-    value: (
-      <a
-        href="mailto:jeugd@kcvvelewijt.be"
-        className="text-kcvv-green-bright hover:underline"
-      >
-        jeugd@kcvvelewijt.be
-      </a>
-    ),
-  },
-  {
-    label: "Verhuur kantine",
-    value: (
-      <a
-        href="mailto:verhuur@kcvvelewijt.be"
-        className="text-kcvv-green-bright hover:underline"
-      >
-        Ann Walgraef
-      </a>
-    ),
-  },
-  {
-    label: "Website",
-    value: (
-      <a
-        href="mailto:kevin@kcvvelewijt.be"
-        className="text-kcvv-green-bright hover:underline"
-      >
-        Kevin Van Ransbeeck
-      </a>
-    ),
-  },
-  {
-    label: "Privacy & cookies",
-    value: (
-      <a href="/privacy" className="text-kcvv-green-bright hover:underline">
-        Privacyverklaring
-      </a>
-    ),
-  },
-  {
-    label: "Cookie-instellingen",
-    value: <CookiePreferencesButton />,
-  },
-];
-
-/**
- * Site footer component
- *
- * Visual specifications (matching Gatsby):
- * - Background: Black (#1E2024) with SVG wavy top edge
- * - Text: White
- * - Contact table: 0.875rem (14px), uppercase labels
- * - Social links: Circle variant with gray borders
- * - Sponsors: 4-column grid, inverted logos, opacity 0.5→1
- * - Bottom motto: "Er is maar één plezante compagnie" with gradient line
- * - Padding: 75px top (to accommodate SVG wave), 2em sides
- * - Margin-top: 50px
- */
 export const PageFooter = ({ className }: PageFooterProps) => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer
-      className={cn("relative z-10 mt-[50px] text-white", className)}
-      style={{
-        background:
-          "linear-gradient(to bottom, transparent 0%, transparent 50px, #1E2024 50px 100%), url(/images/footer-top.svg) top center no-repeat",
-        backgroundSize: "100%",
-        padding: "75px 2rem 2rem",
-      }}
+      className={cn(
+        "bg-kcvv-black border-t border-white/6 text-white",
+        className,
+      )}
     >
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Contact Section - 5 columns */}
-          <div className="lg:col-span-5">
-            {/* Logo and Social */}
-            <div className="flex flex-row items-center mb-8">
-              <div className="mr-6">
-                <Link href="/">
-                  <Image
-                    src="/images/logo-flat.png"
-                    alt="KCVV ELEWIJT"
-                    width={150}
-                    height={60}
-                    className="h-auto w-auto"
-                  />
-                </Link>
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-12">
+          {/* Brand column */}
+          <div>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/images/logo-flat.png"
+                alt="KCVV Elewijt"
+                width={120}
+                height={48}
+                className="h-14 w-auto"
+              />
+            </Link>
+            <p className="font-bold text-white text-sm mb-0.5">
+              K.C.V.V. Elewijt
+            </p>
+            <p className="text-white/30 text-xs mb-6">Opgericht in 1964</p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-white/50 text-sm">
+                <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden />
+                <span>Driesstraat 32, 1982 Elewijt</span>
               </div>
-              <SocialLinks variant="circle" />
+              <a
+                href="mailto:info@kcvvelewijt.be"
+                className="flex items-center gap-2 text-white/50 text-sm hover:text-white transition-colors"
+              >
+                <Mail className="w-4 h-4 flex-shrink-0" aria-hidden />
+                <span>info@kcvvelewijt.be</span>
+              </a>
             </div>
 
-            {/* Contact Details Table */}
-            <table className="w-full text-[0.875rem]">
-              <tbody>
-                {contactRows.map((row, index) => (
-                  <tr
-                    key={index}
-                    className="lg:table-row flex flex-col lg:flex-row mb-2 lg:mb-0"
+            {/* Social icons */}
+            <div className="flex items-center gap-3">
+              <a
+                href="https://facebook.com/KCVVElewijt/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="KCVV Elewijt op Facebook"
+                className="text-white/30 hover:text-kcvv-green transition-colors"
+              >
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a
+                href="https://www.instagram.com/kcvve"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="KCVV Elewijt op Instagram"
+                className="text-white/30 hover:text-kcvv-green transition-colors"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Link column 1 — Club */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">
+              Club
+            </h3>
+            <ul className="space-y-2">
+              {[
+                { href: "/club/organigram", label: "Bestuur" },
+                { href: "/sponsors", label: "Sponsors" },
+                { href: "/privacy", label: "Privacy" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-white/50 hover:text-white transition-colors"
                   >
-                    <th className="text-left font-normal uppercase p-0 lg:pr-4 lg:pb-1 lg:align-top lg:w-[180px] underline lg:no-underline">
-                      {row.label}
-                    </th>
-                    <td className="p-0 lg:pb-1 lg:align-top text-white">
-                      {row.value}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Vertical Divider - 1 column */}
-          <div className="hidden lg:block lg:col-span-1 relative">
-            <div
-              className="absolute h-full w-px top-0 left-1/2"
-              style={{
-                background:
-                  "linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 100%)",
-              }}
-            />
-          </div>
-
-          {/* Sponsors Section - 6 columns */}
-          <div className="lg:col-span-6">
-            <SponsorsBlock variant="dark" columns={4} className="py-0" />
+          {/* Link column 2 — Website */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">
+              Website
+            </h3>
+            <ul className="space-y-2">
+              {[
+                { href: "/news", label: "Nieuws" },
+                { href: "/calendar", label: "Kalender" },
+                { href: "/jeugd", label: "Jeugd" },
+                { href: "/hulp", label: "Hulp" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-white/50 hover:text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
 
-      {/* Bottom Motto - Desktop only */}
-      <div
-        className="hidden lg:block relative pt-12 -mb-8 -mx-8"
-        style={{
-          width: "100vw",
-          marginLeft: "-2rem",
-        }}
-      >
-        {/* Gradient top border */}
-        <div
-          className="absolute top-4 left-0 w-full h-px"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 33%, rgba(255, 255, 255, 0.2) 66%, rgba(255, 255, 255, 0) 100%)",
-          }}
-        />
-
-        {/* Motto Text */}
-        <p className="text-center text-white/60 text-sm italic py-4">
-          Er is maar één plezante compagnie
-        </p>
+      {/* Bottom bar */}
+      <div className="border-t border-white/6">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-white/25 text-xs">
+            © {currentYear} K.C.V.V. Elewijt
+          </p>
+          <div className="flex items-center gap-4 text-xs text-white/25">
+            <Link
+              href="/privacy"
+              className="hover:text-white/50 transition-colors"
+            >
+              Privacyverklaring
+            </Link>
+            <CookiePreferencesButton />
+          </div>
+        </div>
       </div>
     </footer>
   );
