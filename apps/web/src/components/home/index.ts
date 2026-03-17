@@ -28,3 +28,6 @@ export type { MatchesSliderSectionProps } from "./MatchesSliderSection";
 
 export { YouthSection } from "./YouthSection";
 export type { YouthSectionProps } from "./YouthSection";
+
+export { SponsorsSection } from "./SponsorsSection";
+export type { SponsorsSectionProps } from "./SponsorsSection";
