@@ -34,7 +34,7 @@ importers:
     dependencies:
       '@effect/platform':
         specifier: 0.95.0
-        version: 0.95.0(effect@3.19.19)
+        version: 0.95.0(effect@3.20.0)
       '@kcvv/api-contract':
         specifier: workspace:*
         version: link:../../packages/api-contract
@@ -42,8 +42,8 @@ importers:
         specifier: 7.17.0
         version: 7.17.0(debug@4.4.3)
       effect:
-        specifier: 3.19.19
-        version: 3.19.19
+        specifier: 3.20.0
+        version: 3.20.0
     devDependencies:
       '@cloudflare/workers-types':
         specifier: 4.20260317.1
@@ -102,7 +102,7 @@ importers:
     dependencies:
       '@effect/platform':
         specifier: 0.95.0
-        version: 0.95.0(effect@3.19.19)
+        version: 0.95.0(effect@3.20.0)
       '@kcvv/api-contract':
         specifier: workspace:*
         version: link:../../packages/api-contract
@@ -134,8 +134,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       effect:
-        specifier: 3.19.19
-        version: 3.19.19
+        specifier: 3.20.0
+        version: 3.20.0
       embla-carousel-react:
         specifier: 8.6.0
         version: 8.6.0(react@19.2.4)
@@ -292,10 +292,10 @@ importers:
     dependencies:
       '@effect/platform':
         specifier: 0.95.0
-        version: 0.95.0(effect@3.19.19)
+        version: 0.95.0(effect@3.20.0)
       effect:
-        specifier: 3.19.19
-        version: 3.19.19
+        specifier: 3.20.0
+        version: 3.20.0
     devDependencies:
       typescript:
         specifier: 5.9.3
@@ -4562,8 +4562,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.19.19:
-    resolution: {integrity: sha512-Yc8U/SVXo2dHnaP7zNBlAo83h/nzSJpi7vph6Hzyl4ulgMBIgPmz3UzOjb9sBgpFE00gC0iETR244sfXDNLHRg==}
+  effect@3.20.0:
+    resolution: {integrity: sha512-qMLfDJscrNG8p/aw+IkT9W7fgj50Z4wG5bLBy0Txsxz8iUHjDIkOgO3SV0WZfnQbNG2VJYb0b+rDLMrhM4+Krw==}
 
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
@@ -9328,9 +9328,9 @@ snapshots:
       react: 19.2.4
       tslib: 2.8.1
 
-  '@effect/platform@0.95.0(effect@3.19.19)':
+  '@effect/platform@0.95.0(effect@3.20.0)':
     dependencies:
-      effect: 3.19.19
+      effect: 3.20.0
       find-my-way-ts: 0.1.6
       msgpackr: 1.11.8
       multipasta: 0.2.7
@@ -12894,7 +12894,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.19.19:
+  effect@3.20.0:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 3.23.2
@@ -13105,7 +13105,7 @@ snapshots:
       eslint: 9.39.4(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.39.4(jiti@2.6.1))
@@ -13138,7 +13138,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -13152,7 +13152,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
