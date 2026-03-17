@@ -151,6 +151,22 @@ describe("NewsCard", () => {
       expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
     });
 
+    it("renders eventDate alongside countdown when both provided", () => {
+      render(
+        <NewsCard
+          title="Sponsorfeest"
+          href="/event/1"
+          variant="featured"
+          eventDate="26 apr"
+          eventTime="19:00"
+          countdown="over 33 dagen"
+        />,
+      );
+      expect(screen.getByText("26 apr")).toBeInTheDocument();
+      expect(screen.getByText("19:00")).toBeInTheDocument();
+      expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
+    });
+
     it("renders ExternalLink indicator when isExternal=true and href is set", () => {
       render(
         <NewsCard

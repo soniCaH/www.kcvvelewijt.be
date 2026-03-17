@@ -117,11 +117,11 @@ export const NewsCard = ({
           {title}
         </Heading>
 
-        {/* Footer bar: countdown chip OR date+badge */}
+        {/* Footer bar: date+time on left, countdown chip on right */}
         {(countdown ?? date ?? badge ?? eventDate ?? eventTime) && (
           <div className="border-t border-white/20 mt-3 pt-3 text-white/60 text-xs flex justify-between items-center">
             <div className="flex items-center gap-3">
-              {eventDate && !countdown && (
+              {eventDate && (
                 <time className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden />
                   {eventDate}
