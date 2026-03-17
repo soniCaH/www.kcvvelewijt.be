@@ -33,13 +33,13 @@ describe("PageFooter", () => {
   it("renders Facebook link", () => {
     render(<PageFooter />);
     const fbLink = screen.getByRole("link", { name: /facebook/i });
-    expect(fbLink).toBeInTheDocument();
+    expect(fbLink).toHaveAttribute("href", "https://facebook.com/KCVVElewijt/");
   });
 
   it("renders Instagram link", () => {
     render(<PageFooter />);
     const igLink = screen.getByRole("link", { name: /instagram/i });
-    expect(igLink).toBeInTheDocument();
+    expect(igLink).toHaveAttribute("href", "https://www.instagram.com/kcvve");
   });
 
   it("renders copyright text", () => {
