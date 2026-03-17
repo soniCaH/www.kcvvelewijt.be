@@ -75,7 +75,7 @@ export const MatchesSlider = ({
   return (
     <div className={cn("", className)}>
       {title && (
-        <h3 className="text-lg font-bold text-[#31404b] mb-3">{title}</h3>
+        <h3 className="text-lg font-bold text-kcvv-black mb-3">{title}</h3>
       )}
 
       <div className="relative">
