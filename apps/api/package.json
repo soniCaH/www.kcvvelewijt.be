@@ -20,7 +20,7 @@
     "effect": "3.19.19"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260316.1",
+    "@cloudflare/workers-types": "4.20260317.1",
     "@vitest/coverage-v8": "4.0.18",
     "typescript": "5.9.3",
     "vitest": "4.0.18",
