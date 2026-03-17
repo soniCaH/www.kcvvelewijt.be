@@ -86,6 +86,18 @@ export const structure: StructureResolver = (S) =>
         .child(S.documentTypeList('page').title('Pages')),
       S.divider(),
       S.listItem()
+        .title('Banners')
+        .child(S.documentTypeList('banner').title('Banners')),
+      S.listItem()
+        .title('Homepage')
+        .child(
+          S.document()
+            .schemaType('homePage')
+            .documentId('homePage')
+            .title('Homepage configuratie'),
+        ),
+      S.divider(),
+      S.listItem()
         .title('Hulp & Contact')
         .child(
           S.documentTypeList('responsibilityPath')
