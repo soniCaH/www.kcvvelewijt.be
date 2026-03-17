@@ -50,7 +50,7 @@ export function MatchWidget({
       {/* Bottom diagonal — reveals gray-100 from LatestNews */}
       <SectionDivider color="gray-100" position="bottom" />
 
-      <div className="relative z-20 py-24 px-4 md:px-8 max-w-[1280px] mx-auto">
+      <div className="relative z-20 py-24 px-4 md:px-8 max-w-7xl mx-auto">
         {/* Overline — left-aligned, single leading rule */}
         <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
           <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />

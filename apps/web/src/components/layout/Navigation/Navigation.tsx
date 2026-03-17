@@ -201,8 +201,8 @@ export const Navigation = ({
         }}
       />
 
-      <nav className={cn("flex flex-grow max-w-[90%]", className)}>
-        <ul className="flex items-center justify-between flex-grow flex-nowrap list-none m-0 p-0">
+      <nav className={cn("flex grow max-w-[90%]", className)}>
+        <ul className="flex items-center justify-between grow flex-nowrap list-none m-0 p-0">
           {menuItems.map((item, index) => {
             const active = isActive(item.href) || hasActiveChild(item);
             const hasDropdown = item.children && item.children.length > 0;

@@ -85,10 +85,10 @@ export const MatchesSlider = ({
             type="button"
             onClick={() => scroll("left")}
             className={cn(
-              "hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10",
+              "flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10",
               "w-10 h-10 items-center justify-center transition-colors",
               theme === "dark"
-                ? "bg-kcvv-black border border-kcvv-green rounded-sm hover:bg-kcvv-green/10"
+                ? "bg-kcvv-black border border-kcvv-green-bright/50 rounded-sm hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright"
                 : "bg-white rounded-full shadow-md hover:bg-gray-50",
             )}
             aria-label="Scroll naar links"
@@ -96,7 +96,9 @@ export const MatchesSlider = ({
             <ChevronLeft
               className={cn(
                 "w-5 h-5",
-                theme === "dark" ? "text-kcvv-green" : "text-kcvv-green-dark",
+                theme === "dark"
+                  ? "text-kcvv-green-bright"
+                  : "text-kcvv-green-dark",
               )}
             />
           </button>
@@ -125,6 +127,16 @@ export const MatchesSlider = ({
                   }}
                   date={match.date.toISOString()}
                   time={match.time}
+                  venue={
+                    match.venue ??
+                    (highlightTeamId !== undefined
+                      ? match.homeTeam.id === highlightTeamId
+                        ? "Thuis"
+                        : match.awayTeam.id === highlightTeamId
+                          ? "Uit"
+                          : undefined
+                      : undefined)
+                  }
                   score={
                     match.homeTeam.score != null && match.awayTeam.score != null
                       ? {
@@ -150,10 +162,10 @@ export const MatchesSlider = ({
             type="button"
             onClick={() => scroll("right")}
             className={cn(
-              "hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10",
+              "flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10",
               "w-10 h-10 items-center justify-center transition-colors",
               theme === "dark"
-                ? "bg-kcvv-black border border-kcvv-green rounded-sm hover:bg-kcvv-green/10"
+                ? "bg-kcvv-black border border-kcvv-green-bright/50 rounded-sm hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright"
                 : "bg-white rounded-full shadow-md hover:bg-gray-50",
             )}
             aria-label="Scroll naar rechts"
@@ -161,7 +173,9 @@ export const MatchesSlider = ({
             <ChevronRight
               className={cn(
                 "w-5 h-5",
-                theme === "dark" ? "text-kcvv-green" : "text-kcvv-green-dark",
+                theme === "dark"
+                  ? "text-kcvv-green-bright"
+                  : "text-kcvv-green-dark",
               )}
             />
           </button>

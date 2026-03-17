@@ -103,7 +103,7 @@ export const PageHeader = ({
             </Link>
 
             {/* Desktop Navigation - Suspense boundary for useSearchParams */}
-            <Suspense fallback={<div className="flex-grow" />}>
+            <Suspense fallback={<div className="grow" />}>
               <Navigation youthTeams={youthTeams} seniorTeams={seniorTeams} />
             </Suspense>
 

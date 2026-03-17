@@ -79,7 +79,11 @@ export function SectionDivider({
         colorClass[color],
         className,
       )}
-      style={{ clipPath, height: "clamp(2rem, 6vw, 5rem)" }}
+      style={{
+        clipPath,
+        height: "clamp(2rem, 6vw, 5rem)",
+        transform: "translateZ(0)",
+      }}
     />
   );
 }

@@ -174,10 +174,10 @@ describe("MatchTeaser", () => {
       const { container } = render(
         <MatchTeaser {...defaultProps} variant="compact" />,
       );
-      expect(container.firstChild).toHaveClass("p-3");
+      expect(container.firstChild).toHaveClass("p-5");
     });
 
-    it("does not show venue in compact variant", () => {
+    it("shows venue in compact variant footer", () => {
       render(
         <MatchTeaser
           {...defaultProps}
@@ -185,8 +185,7 @@ describe("MatchTeaser", () => {
           venue="Sportpark Elewijt"
         />,
       );
-      // Venue is not shown in compact mode
-      expect(screen.queryByText("Sportpark Elewijt")).not.toBeInTheDocument();
+      expect(screen.getByText("Sportpark Elewijt")).toBeInTheDocument();
     });
   });
 
@@ -281,7 +280,7 @@ describe("MatchTeaser", () => {
       const { container } = render(
         <MatchTeaser {...defaultProps} theme="dark" />,
       );
-      expect(container.firstChild).toHaveClass("bg-kcvv-black");
+      expect(container.firstChild).toHaveClass("bg-white/8");
       expect(container.firstChild).not.toHaveClass("bg-white");
     });
 

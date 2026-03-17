@@ -13,7 +13,7 @@ const meta = {
   parameters: { layout: "fullscreen" },
   render: () => (
     <section className="bg-gray-100 py-20">
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         <SectionHeader
           title="Sponsors"
           linkText="Word sponsor"

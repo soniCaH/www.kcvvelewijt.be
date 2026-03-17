@@ -8,8 +8,8 @@ export interface SponsorsSectionProps {
 
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
   return (
-    <section className={cn("bg-gray-100 py-20", className)}>
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+    <section className={cn("bg-gray-100 py-20 -mt-0.5", className)}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         <SectionHeader
           title="Sponsors"
           linkText="Word sponsor"

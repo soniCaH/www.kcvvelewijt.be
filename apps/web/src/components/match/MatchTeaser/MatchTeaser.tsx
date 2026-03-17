@@ -76,21 +76,6 @@ function formatDate(dateStr: string): string {
 
 /**
  * Render a compact match preview showing teams, date, score, and status.
- *
- * @param homeTeam - Home team info (name and optional logo)
- * @param awayTeam - Away team info (name and optional logo)
- * @param date - Match date in ISO or YYYY-MM-DD format
- * @param time - Optional match time in HH:MM format
- * @param venue - Optional venue name
- * @param score - Optional score object for live/finished matches
- * @param status - Match status: "upcoming" (scheduled, not yet played), "finished" (played with score),
- *   "forfeited" (FF result, may have score), "postponed" (Uitgesteld), "stopped" (Gestopt, ended prematurely)
- * @param href - Optional link to match detail page
- * @param highlightTeamId - Optional team ID to highlight
- * @param variant - Display variant (default or compact)
- * @param isLoading - Show loading skeleton
- * @param className - Additional CSS classes
- * @returns The rendered match teaser element
  */
 export function MatchTeaser({
   homeTeam,
@@ -127,8 +112,9 @@ export function MatchTeaser({
     return (
       <div
         className={cn(
-          "bg-white border border-gray-200 rounded-lg",
-          isCompact ? "p-3" : "p-4",
+          "border rounded",
+          isDark ? "bg-white/8 border-white/8" : "bg-white border-gray-200",
+          isCompact ? "p-5" : "p-4",
           className,
         )}
       >
@@ -153,24 +139,138 @@ export function MatchTeaser({
     );
   }
 
-  const content = (
+  const containerClasses = cn(
+    "block border rounded transition-shadow",
+    isDark
+      ? "bg-white/8 border-white/8 hover:border-white/20"
+      : "bg-white border-gray-200 hover:shadow-md",
+    isCompact ? "p-5" : "p-4",
+    className,
+  );
+
+  const content = isCompact ? (
+    // COMPACT VARIANT — vertical team stack
+    <>
+      {/* Header: team label left + date right */}
+      <div className="flex items-start justify-between mb-4">
+        {teamLabel ? (
+          <span
+            data-testid="team-label"
+            className="text-xs font-bold uppercase tracking-[0.14em] text-kcvv-green-bright"
+          >
+            {teamLabel}
+          </span>
+        ) : (
+          <span />
+        )}
+        <span
+          className={cn(
+            "text-[11px] font-semibold",
+            isDark ? "text-white/30" : "text-gray-500",
+          )}
+        >
+          {formatDate(date)}
+        </span>
+      </div>
+
+      {/* Home team */}
+      <div className="flex items-center gap-3 h-10">
+        <CompactLogo
+          team={homeTeam}
+          isHighlighted={isHomeHighlighted}
+          isDark={isDark}
+        />
+        <span
+          className={cn(
+            "text-[13px] font-semibold truncate",
+            isDark
+              ? isHomeHighlighted
+                ? "text-white"
+                : "text-white/60"
+              : isHomeHighlighted
+                ? "text-gray-900"
+                : "text-gray-500",
+          )}
+        >
+          {homeTeam.name}
+        </span>
+      </div>
+
+      {/* "vs" separator — indented past logo */}
+      <div className="pl-11 flex items-center">
+        <span
+          className={cn(
+            "text-sm font-bold",
+            isDark ? "text-white/30" : "text-gray-300",
+          )}
+        >
+          vs
+        </span>
+      </div>
+
+      {/* Away team */}
+      <div className="flex items-center gap-3 h-10 mb-5">
+        <CompactLogo
+          team={awayTeam}
+          isHighlighted={isAwayHighlighted}
+          isDark={isDark}
+        />
+        <span
+          className={cn(
+            "text-[13px] font-semibold truncate",
+            isDark
+              ? isAwayHighlighted
+                ? "text-white"
+                : "text-white/60"
+              : isAwayHighlighted
+                ? "text-gray-900"
+                : "text-gray-500",
+          )}
+        >
+          {awayTeam.name}
+        </span>
+      </div>
+
+      {/* Divider */}
+      <div
+        className={cn(
+          "border-t mb-3",
+          isDark ? "border-white/10" : "border-gray-100",
+        )}
+      />
+
+      {/* Footer: time · venue (upcoming) or time · status badge */}
+      <div
+        className={cn(
+          "flex items-center gap-1.5 text-[11px] font-semibold",
+          isDark ? "text-white/30" : "text-gray-500",
+        )}
+      >
+        {time && <span>{time}</span>}
+        {time && status !== "upcoming" && status !== "finished" && (
+          <span aria-hidden="true">·</span>
+        )}
+        <StatusBadge status={status} isDark={isDark} />
+        {venue && status === "upcoming" && time && (
+          <span aria-hidden="true">·</span>
+        )}
+        {venue && status === "upcoming" && <span>{venue}</span>}
+      </div>
+    </>
+  ) : (
+    // DEFAULT VARIANT — horizontal layout
     <>
       {teamLabel && (
         <div
           data-testid="team-label"
-          className="mb-1 text-xs font-bold uppercase tracking-widest text-kcvv-green"
+          className="mb-1 text-xs font-bold uppercase tracking-widest text-kcvv-green-bright"
         >
           {teamLabel}
         </div>
       )}
 
       {/* Header: Date, time, status */}
-      <div
-        className={cn(
-          "flex items-center justify-between text-sm",
-          isCompact ? "mb-2" : "mb-3",
-        )}
-      >
+      <div className="flex items-center justify-between text-sm mb-3">
         <div className="flex items-center gap-2">
           <span
             className={cn(
@@ -187,35 +287,28 @@ export function MatchTeaser({
           )}
           <StatusBadge status={status} isDark={isDark} />
         </div>
-        {venue && !isCompact && (
+        {venue && (
           <span className="text-gray-500 text-xs hidden sm:block">{venue}</span>
         )}
       </div>
 
       {/* Teams and score */}
       <div className="flex items-center justify-between">
-        {/* Home team */}
         <TeamDisplay
           team={homeTeam}
           side="home"
           isHighlighted={isHomeHighlighted}
-          compact={isCompact}
+          compact={false}
           isDark={isDark}
         />
 
-        {/* Score or VS */}
-        <div className="flex-shrink-0 px-3">
+        <div className="shrink-0 px-3">
           {hasScore ? (
-            <div
-              className={cn(
-                "flex items-center gap-2 font-mono font-bold",
-                isCompact ? "text-base" : "text-lg",
-              )}
-            >
+            <div className="flex items-center gap-2 font-mono font-bold text-lg">
               <span
                 className={cn(
                   isHomeHighlighted && score.home > score.away
-                    ? "text-kcvv-green"
+                    ? "text-kcvv-green-bright"
                     : isDark
                       ? "text-white"
                       : "text-gray-900",
@@ -229,7 +322,7 @@ export function MatchTeaser({
               <span
                 className={cn(
                   isAwayHighlighted && score.away > score.home
-                    ? "text-kcvv-green"
+                    ? "text-kcvv-green-bright"
                     : isDark
                       ? "text-white"
                       : "text-gray-900",
@@ -250,30 +343,19 @@ export function MatchTeaser({
           )}
         </div>
 
-        {/* Away team */}
         <TeamDisplay
           team={awayTeam}
           side="away"
           isHighlighted={isAwayHighlighted}
-          compact={isCompact}
+          compact={false}
           isDark={isDark}
         />
       </div>
 
-      {/* Venue on mobile */}
-      {venue && !isCompact && (
+      {venue && (
         <div className="mt-2 text-xs text-gray-500 sm:hidden">{venue}</div>
       )}
     </>
-  );
-
-  const containerClasses = cn(
-    "block border rounded transition-shadow",
-    isDark
-      ? "bg-kcvv-black border-white/8 hover:border-white/20"
-      : "bg-white border-gray-200 hover:shadow-md",
-    isCompact ? "p-3" : "p-4",
-    className,
   );
 
   if (href) {
@@ -285,6 +367,47 @@ export function MatchTeaser({
   }
 
   return <div className={containerClasses}>{content}</div>;
+}
+
+/**
+ * Logo for compact variant — bare image (no container), circle letter fallback
+ */
+function CompactLogo({
+  team,
+  isHighlighted,
+  isDark,
+}: {
+  team: MatchTeaserTeam;
+  isHighlighted?: boolean;
+  isDark?: boolean;
+}) {
+  if (team.logo) {
+    return (
+      <Image
+        src={team.logo}
+        alt=""
+        width={32}
+        height={32}
+        className="w-8 h-8 shrink-0 object-contain"
+      />
+    );
+  }
+  return (
+    <div
+      className={cn(
+        "w-8 h-8 shrink-0 flex items-center justify-center text-sm font-bold rounded-full",
+        isHighlighted
+          ? isDark
+            ? "bg-kcvv-green/20 text-kcvv-green-bright"
+            : "bg-kcvv-green/15 text-kcvv-green-dark"
+          : isDark
+            ? "bg-white/10 text-white/40"
+            : "bg-gray-200 text-gray-500",
+      )}
+    >
+      {team.name.charAt(0).toUpperCase()}
+    </div>
+  );
 }
 
 /**
@@ -341,7 +464,7 @@ function StatusBadge({
 }
 
 /**
- * Renders team logo and name
+ * Renders team logo and name (default variant)
  */
 function TeamDisplay({
   team,
@@ -371,12 +494,12 @@ function TeamDisplay({
           alt={`${team.name} logo`}
           width={logoSize}
           height={logoSize}
-          className="object-contain flex-shrink-0"
+          className="object-contain shrink-0"
         />
       ) : (
         <div
           className={cn(
-            "rounded-full flex items-center justify-center flex-shrink-0",
+            "rounded-full flex items-center justify-center shrink-0",
             compact ? "w-6 h-6" : "w-8 h-8",
             isDark ? "bg-white/15" : "bg-gray-200",
           )}
