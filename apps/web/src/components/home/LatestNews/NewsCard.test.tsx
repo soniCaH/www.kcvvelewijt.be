@@ -124,6 +124,53 @@ describe("NewsCard", () => {
     });
   });
 
+  describe("event card features", () => {
+    it("renders eventTime with Calendar and Clock icons when time provided", () => {
+      render(
+        <NewsCard
+          title="Sponsorfeest"
+          href="/event/1"
+          variant="featured"
+          eventDate="15 apr"
+          eventTime="19:00"
+        />,
+      );
+      expect(screen.getByText("15 apr")).toBeInTheDocument();
+      expect(screen.getByText("19:00")).toBeInTheDocument();
+    });
+
+    it("renders countdown chip when countdown provided", () => {
+      render(
+        <NewsCard
+          title="Sponsorfeest"
+          href="/event/1"
+          variant="featured"
+          countdown="over 33 dagen"
+        />,
+      );
+      expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
+    });
+
+    it("renders ExternalLink indicator when isExternal=true and href is set", () => {
+      render(
+        <NewsCard
+          title="Sponsorfeest"
+          href="https://facebook.com/event"
+          variant="featured"
+          isExternal
+        />,
+      );
+      // ExternalLink icon is aria-hidden, verify the link has target="_blank"
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute("target", "_blank");
+    });
+
+    it("renders as non-interactive div when no href", () => {
+      render(<NewsCard title="Sponsorfeest" variant="featured" />);
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    });
+  });
+
   describe("Custom className", () => {
     it("accepts custom className on the article", () => {
       const { container } = render(

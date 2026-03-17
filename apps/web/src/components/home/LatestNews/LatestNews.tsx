@@ -15,11 +15,14 @@ export interface LatestNewsArticle {
 /** Stub for upcoming featured event — wired in #802 */
 export interface FeaturedEventStub {
   title: string;
-  href: string;
+  href?: string;
   imageUrl?: string;
   imageAlt?: string;
   badge?: string;
   date?: string;
+  time?: string;
+  countdown?: string;
+  isExternal?: boolean;
 }
 
 export interface LatestNewsProps {
@@ -70,8 +73,11 @@ export const LatestNews = ({
               href={featuredEvent.href}
               imageUrl={featuredEvent.imageUrl}
               imageAlt={featuredEvent.imageAlt}
-              badge={featuredEvent.badge}
-              date={featuredEvent.date}
+              badge={featuredEvent.badge ?? "EVENEMENT"}
+              eventDate={featuredEvent.date}
+              eventTime={featuredEvent.time}
+              countdown={featuredEvent.countdown}
+              isExternal={featuredEvent.isExternal}
             />
           ) : articles[0] ? (
             <NewsCard
