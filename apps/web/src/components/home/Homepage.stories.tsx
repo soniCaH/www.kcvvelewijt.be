@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
 import { LatestNews } from "./LatestNews";
 import { MatchWidget } from "./MatchWidget";
+import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
 import { YouthSection } from "./YouthSection";
 import { PageFooter } from "@/components/layout/PageFooter";
@@ -110,6 +111,12 @@ const mockSliderMatches = mockMatches.mixed.map((m, i) => ({
   teamLabel: i < 3 ? "A-Ploeg" : "U17",
 }));
 
+const mockBanner = {
+  image: "https://placehold.co/1280x213/1e2024/4acf52?text=Banner+Slot",
+  alt: "Mock banner",
+  href: "https://example.com",
+};
+
 /** SponsorsSection is an async server component — inline here with mock data */
 const SponsorsSectionMock = () => (
   <section className="-mt-0.5 bg-gray-100 py-20">
@@ -133,8 +140,8 @@ const SponsorsSectionMock = () => (
 );
 
 /**
- * Complete v3 homepage: hero → match widget → news → match slider →
- * youth section → sponsors → footer
+ * Complete v3 homepage: hero → match widget → banner A → news → banner B →
+ * match slider → youth section → banner C → sponsors → footer
  */
 export const Default: Story = {
   render: () => (
@@ -145,17 +152,20 @@ export const Default: Story = {
         autoRotateInterval={5000}
       />
       <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
+      <BannerSlot {...mockBanner} />
       <LatestNews
         articles={mockLatestNews}
         title="Laatste nieuws"
         showViewAll={true}
         viewAllHref="/news"
       />
+      <BannerSlot {...mockBanner} />
       <MatchesSliderSection
         matches={mockSliderMatches}
         highlightTeamId={1235}
       />
       <YouthSection />
+      <BannerSlot {...mockBanner} />
       <SponsorsSectionMock />
       <PageFooter />
     </>
@@ -174,6 +184,7 @@ export const WithFeaturedEvent: Story = {
         autoRotateInterval={5000}
       />
       <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
+      <BannerSlot {...mockBanner} />
       <LatestNews
         articles={mockLatestNews.slice(0, 2)}
         featuredEvent={{
@@ -190,11 +201,13 @@ export const WithFeaturedEvent: Story = {
         showViewAll={true}
         viewAllHref="/news"
       />
+      <BannerSlot {...mockBanner} />
       <MatchesSliderSection
         matches={mockSliderMatches}
         highlightTeamId={1235}
       />
       <YouthSection />
+      <BannerSlot {...mockBanner} />
       <SponsorsSectionMock />
       <PageFooter />
     </>
@@ -219,17 +232,20 @@ export const NoAutoRotation: Story = {
     <>
       <FeaturedArticles articles={mockFeaturedArticles} autoRotate={false} />
       <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
+      <BannerSlot {...mockBanner} />
       <LatestNews
         articles={mockLatestNews}
         title="Laatste nieuws"
         showViewAll={true}
         viewAllHref="/news"
       />
+      <BannerSlot {...mockBanner} />
       <MatchesSliderSection
         matches={mockSliderMatches}
         highlightTeamId={1235}
       />
       <YouthSection />
+      <BannerSlot {...mockBanner} />
       <SponsorsSectionMock />
       <PageFooter />
     </>

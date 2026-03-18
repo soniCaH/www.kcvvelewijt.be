@@ -27,7 +27,10 @@ describe("PageFooter", () => {
 
   it("renders club email", () => {
     render(<PageFooter />);
-    expect(screen.getByText("info@kcvvelewijt.be")).toBeInTheDocument();
+    const emailLink = screen.getByRole("link", {
+      name: /info@kcvvelewijt\.be/i,
+    });
+    expect(emailLink).toHaveAttribute("href", "mailto:info@kcvvelewijt.be");
   });
 
   it("renders Facebook link", () => {
@@ -44,7 +47,9 @@ describe("PageFooter", () => {
 
   it("renders copyright text", () => {
     render(<PageFooter />);
-    expect(screen.getByText(/©.*Elewijt/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/© \d{4} K\.C\.V\.V\. Elewijt/),
+    ).toBeInTheDocument();
   });
 
   it("renders privacy policy link", () => {
