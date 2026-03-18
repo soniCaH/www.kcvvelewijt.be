@@ -2,46 +2,26 @@ import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
 import { getTeamStatsHandler } from "./stats";
 import {
-  FootbalistoClient,
-  type FootbalistoClientInterface,
-} from "../footbalisto/client";
+  FootbalistoService,
+  type FootbalistoServiceInterface,
+} from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 
-const mockStats = {
-  squadPlayerStatistics: [
-    {
-      playerId: 1,
-      firstName: "Test",
-      lastName: "Player",
-      team: "KCVV Elewijt A",
-      gamesPlayed: 25,
-      gamesWon: 18,
-      gamesLost: 3,
-      gamesEqual: 4,
-      cleanSheets: 8,
-      minutes: 2250,
-      goals: 2,
-      assists: 1,
-      yellowCards: 1,
-      redCards: 0,
-    },
-  ],
-  goalsScored: [{ goal: { id: 1 } }],
-  goalsAgainst: [],
+const mockServiceImpl: FootbalistoServiceInterface = {
+  getTeamStats: (_teamId) =>
+    Effect.succeed({
+      team_id: 1,
+      team_name: "KCVV Elewijt A",
+      total_matches: 25,
+      wins: 18,
+      draws: 4,
+      losses: 3,
+      goals_scored: 1,
+      goals_conceded: 0,
+      clean_sheets: 8,
+      top_scorers: [],
+    }),
 };
-
-function makeClientMock(): FootbalistoClientInterface {
-  return {
-    getRawMatches: () => Effect.succeed([]),
-    getRawNextMatches: () => Effect.succeed([]),
-    getRawMatchDetail: () => Effect.fail(new Error("not needed") as never),
-    getRawRanking: () => Effect.succeed([]),
-    getRawTeamStats: (_teamId) => Effect.succeed(mockStats),
-    getRawTeams: () => Effect.succeed([]),
-    getRawMembers: () => Effect.succeed([]),
-    getRawStaff: () => Effect.succeed([]),
-  };
-}
 
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
@@ -53,7 +33,7 @@ describe("getTeamStatsHandler", () => {
   it("returns team stats", async () => {
     const result = await Effect.runPromise(
       getTeamStatsHandler(1).pipe(
-        Effect.provide(Layer.succeed(FootbalistoClient, makeClientMock())),
+        Effect.provide(Layer.succeed(FootbalistoService, mockServiceImpl)),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
       ),
     );
