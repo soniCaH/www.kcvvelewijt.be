@@ -1,18 +1,33 @@
 # PRD to GitHub Issues
 
-Convert the PRD at `docs/prd/[feature-name].md` into GitHub Issues and wire them together.
+Convert the PRD at `docs/prd/[feature-name].md` into GitHub Issues, a milestone, and wire them together.
 
-## Important
+## Before starting
 
-Do NOT run git commit or git push. After creating issues, tell the user
-what to commit and they will do it manually.
+Verify the current branch is main: `git branch --show-current`
+If not on main, stop and tell the user to run `git checkout main` first.
 
-## Rules for decomposition
+## Step 1 — Create a milestone for this PRD
 
-- One issue = one worktree = one PR. If it touches 5 files across 3 apps, split it.
-- The tracer bullet from the PRD is ALWAYS issue #1 in the set — labeled `tracer-bullet` + `ready`.
-- Issues with unresolved open questions get labeled `blocked`, not `ready`.
-- Every issue body must include its PRD phase so Ralph can find its spec.
+Every PRD gets its own milestone. This isolates it from other concurrent PRDs so Ralph can work on them independently in parallel.
+
+```bash
+MILESTONE_TITLE="[feature-name]"  # e.g. typed-kv-cache, footbalisto-domain-service
+
+gh api repos/soniCaH/www.kcvvelewijt.be/milestones \
+  --method POST \
+  --field title="$MILESTONE_TITLE" \
+  --field description="docs/prd/${MILESTONE_TITLE}.md"
+```
+
+## Step 2 — Decompose into issues
+
+Rules:
+
+- One issue = one worktree = one PR
+- The tracer bullet from the PRD is ALWAYS issue #1 — labeled `tracer-bullet` + `ready`
+- Issues with unresolved open questions get labeled `blocked`, not `ready`
+- Every issue body must reference its PRD phase and milestone
 
 ## Issue body template
 
@@ -22,8 +37,9 @@ what to commit and they will do it manually.
 [Why this issue exists — one paragraph linking back to the PRD phase]
 
 **PRD:** docs/prd/[feature-name].md — Phase [N]
+**Milestone:** [milestone-title]
 
-## Tracer bullet / Acceptance criteria
+## Acceptance criteria
 
 - [ ] [concrete testable condition]
 - [ ] [concrete testable condition]
@@ -32,11 +48,10 @@ what to commit and they will do it manually.
 ## Scope
 
 **Packages:** [apps/web | apps/api | packages/api-contract | apps/studio]
-**Worktree path:** `../kcvv-issue-<N>`
 
 ## Open questions
 
-[Copy any unresolved open questions from the PRD that affect THIS issue]
+[Any unresolved questions from the PRD that affect this issue]
 [If none: "None — ready to implement"]
 
 ## Blocked by
@@ -44,52 +59,58 @@ what to commit and they will do it manually.
 [#issue or "nothing"]
 ```
 
-## Creating issues
-
-For each phase in the PRD:
+## Step 3 — Create issues and assign to milestone
 
 ```bash
-# Create issue
+# Create each issue and assign to the milestone in one step
 URL=$(gh issue create \
   --title "[type](scope): [description]" \
   --label "ready" \
+  --milestone "$MILESTONE_TITLE" \
   --body "[body from template]" \
   --json url --jq '.url')
 
-# Add to GitHub Project board (project #2, owner soniCaH)
+# Add to GitHub Project board
 gh project item-add 2 --owner soniCaH --url "$URL"
 ```
 
-For blocked issues, use `--label "blocked"` instead of `--label "ready"`.
+For blocked issues use `--label "blocked"` instead of `--label "ready"`.
 
-## After all issues are created
+## Step 4 — Wire dependencies
 
-1. Print the full issue list with numbers, titles, and labels.
-2. Add `blocked-by: #N` comments to issues that depend on others:
+Add `blocked-by` comments to dependent issues:
 
 ```bash
 gh issue comment <blocked-issue> --body "Blocked by #<dependency>"
 ```
 
-3. Update the PRD file to include issue numbers next to each phase:
+## Step 5 — Update the PRD with issue numbers
 
-```bash
-# Edit docs/prd/[feature-name].md to add:
-# Phase 1: tracer bullet → #742
-# Phase 2: ... → #743
-# etc.
-git add docs/prd/[feature-name].md
-git commit -m "docs: link prd phases to github issues"
+Edit `docs/prd/[feature-name].md` to add issue numbers next to each phase, then tell the user:
+
+```
+PRD is ready. Do NOT commit yet — tell the user to run:
+  git add docs/prd/[feature-name].md
+  git commit -m "docs: link [feature-name] prd phases to github issues"
+  git push
 ```
 
-## Unblocking flow
+## Step 6 — Show the summary
 
-When a blocking issue is merged:
+Print a table of all created issues with numbers, titles, labels, and milestone.
+Then tell the user:
+
+```
+Run Ralph for this milestone:
+  ./scripts/ralph.sh --milestone [milestone-title]
+```
+
+## Unblocking flow (for Claude running inside a worktree)
+
+When a blocking issue is merged, Ralph handles unblocking automatically.
+If doing it manually:
 
 ```bash
-# Remove blocked label, add ready
 gh issue edit <blocked-issue> --remove-label "blocked" --add-label "ready"
-gh issue comment <blocked-issue> --body "Unblocked by merge of #<dependency>. Ready to pick up."
+gh issue comment <blocked-issue> --body "Unblocked by merge of #<dependency>."
 ```
-
-Ralph's `scripts/ralph.sh` checks for `ready` label — it will automatically pick up newly unblocked issues on the next iteration.

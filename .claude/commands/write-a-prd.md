@@ -4,9 +4,6 @@ Write a Product Requirements Document for the feature we've just discussed.
 
 ## Important: PRDs are living documents
 
-Do NOT run git commit or git push. After creating issues, tell the user
-what to commit and they will do it manually.
-
 A PRD is not a contract. It's a shared understanding at a point in time. Open questions belong IN the PRD, not resolved before writing. Unknowns discovered during implementation get fed back as GitHub issue updates. The PRD evolves.
 
 ## Structure

@@ -1,24 +1,28 @@
 #!/bin/bash
 # Ralph loop for KCVV — GitHub Issues source, worktree per issue, HITL mode
 # Usage:
-#   ./scripts/ralph.sh              # HITL: pauses between issues for approval
-#   ./scripts/ralph.sh --afk        # AFK: runs until no ready issues remain
-#   ./scripts/ralph.sh --issue 742  # Run a specific issue only
+#   ./scripts/ralph.sh                           # HITL: all ready issues
+#   ./scripts/ralph.sh --milestone typed-kv-cache # HITL: one PRD's issues only
+#   ./scripts/ralph.sh --issue 742               # single issue only
+#   ./scripts/ralph.sh --afk                     # AFK: independent issues only
+#   ./scripts/ralph.sh --milestone name --afk    # AFK: one milestone
 set -euo pipefail
 
-# Always use personal Claude account for this project.
-# Bypasses the interactive alias so --print mode works non-interactively.
+# Always use personal Claude account — bypasses interactive alias
 export CLAUDE_CONFIG_DIR=~/.claude-personal
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 MODE="hitl"
 SPECIFIC_ISSUE=""
+MILESTONE=""
 
 for arg in "$@"; do
   case $arg in
     --afk) MODE="afk" ;;
-    --issue) shift; SPECIFIC_ISSUE="$1" ;;
     --issue=*) SPECIFIC_ISSUE="${arg#*=}" ;;
+    --issue) shift; SPECIFIC_ISSUE="$1" ;;
+    --milestone=*) MILESTONE="${arg#*=}" ;;
+    --milestone) shift; MILESTONE="$1" ;;
   esac
 done
 
@@ -29,17 +33,21 @@ pick_next_issue() {
     echo "$SPECIFIC_ISSUE"
     return
   fi
-  # Oldest ready issue first (simple and reliable)
-  # Tracer-bullet issues naturally come first since they are created first
-  gh issue list \
-    --label "ready" \
-    --state open \
-    --json number \
-    --jq 'sort_by(.number) | first | .number' 2>/dev/null || echo ""
+
+  local args=(--label "ready" --state open --json number --jq 'sort_by(.number) | first | .number')
+  if [ -n "$MILESTONE" ]; then
+    args+=(--milestone "$MILESTONE")
+  fi
+
+  gh issue list "${args[@]}" 2>/dev/null || echo ""
 }
 
 count_ready() {
-  gh issue list --label "ready" --state open --json number --jq 'length' 2>/dev/null || echo "0"
+  local args=(--label "ready" --state open --json number --jq 'length')
+  if [ -n "$MILESTONE" ]; then
+    args+=(--milestone "$MILESTONE")
+  fi
+  gh issue list "${args[@]}" 2>/dev/null || echo "0"
 }
 
 create_worktree() {
@@ -55,7 +63,7 @@ create_worktree() {
     echo "  [worktree] Created at $path on branch $branch" >&2
   fi
 
-  # Only stdout is the path
+  # Only stdout is the path — everything else goes to stderr
   echo "$path"
 }
 
@@ -63,7 +71,6 @@ remove_worktree() {
   local issue=$1
   local path="${REPO_ROOT}/../kcvv-issue-${issue}"
   local branch="feat/issue-${issue}"
-
   git worktree remove "$path" --force 2>/dev/null || true
   git branch -d "$branch" 2>/dev/null || true
   echo "Cleaned up worktree for issue #$issue"
@@ -73,14 +80,13 @@ run_claude_on_issue() {
   local issue=$1
   local worktree=$2
 
-  # Load skill files at runtime so Claude gets the full content, not just a path reference.
-  # This is required because --print mode doesn't support slash commands.
+  # Load skill files at runtime — inlined so --print mode gets full content
   local TDD_SKILL=""
   local TDD_PATH="${REPO_ROOT}/.claude/commands/tdd.md"
   if [ -f "$TDD_PATH" ]; then
     TDD_SKILL=$(cat "$TDD_PATH")
   else
-    echo "WARNING: tdd.md not found at $TDD_PATH — TDD instructions will be missing" >&2
+    echo "WARNING: tdd.md not found at $TDD_PATH" >&2
   fi
 
   local STACK_SKILL=""
@@ -89,7 +95,6 @@ run_claude_on_issue() {
     STACK_SKILL=$(cat "$STACK_PATH")
   fi
 
-  # Build the prompt with inlined skill content
   local prompt
   prompt=$(cat <<EOF
 You are working on GitHub issue #${issue} for the KCVV Elewijt project.
@@ -100,7 +105,6 @@ All your work happens in this directory. Do NOT touch ${REPO_ROOT} (the main wor
 The main repo is available read-only at ${REPO_ROOT} for reading CLAUDE.md, docs/prd/, etc.
 
 ## Step 1 — Read your brief
-Run these before touching any code:
   gh issue view ${issue}
 
 Find the PRD path in the issue body (format: "docs/prd/[name].md") and read it:
@@ -110,8 +114,6 @@ Read the root CLAUDE.md for project-wide rules:
   cat ${REPO_ROOT}/CLAUDE.md
 
 ## Step 2 — Implement using TDD
-Follow this process exactly:
-
 ${TDD_SKILL}
 
 ## Step 3 — Open a PR when done
@@ -130,19 +132,21 @@ ${TDD_SKILL}
 
 Output the PR URL as the last line of your response.
 
-## If you get blocked mid-implementation
+## If blocked mid-implementation
   gh issue edit ${issue} --add-label "blocked" --remove-label "in-progress"
-  gh issue create --title "[type](scope): [blocker description]" --label "ready" --body "Discovered during #${issue}.\n\n[description]"
-  gh issue comment ${issue} --body "Blocked by [reason]. Created #[new] to resolve."
+  gh issue create \
+    --title "[type](scope): [blocker]" \
+    --label "ready" \
+    --body "Discovered during #${issue}.\n\n[description]"
+  gh issue comment ${issue} --body "Blocked by [reason]. Created #[N] to resolve."
 
-Then output on its own line: RALPH_BLOCKED: [one-line reason]
+Output on its own line: RALPH_BLOCKED: [one-line reason]
 
 ## Stack reference
 ${STACK_SKILL}
 EOF
 )
 
-  # Run Claude non-interactively in the worktree
   cd "$worktree"
   OUTPUT=$(command claude --dangerously-skip-permissions --print "$prompt" 2>&1) || true
   cd "$REPO_ROOT"
@@ -152,9 +156,10 @@ EOF
 
 # ── main loop ─────────────────────────────────────────────────────────────────
 
+MILESTONE_LABEL="${MILESTONE:+ (milestone: $MILESTONE)}"
 echo "╔══════════════════════════════════════════╗"
 echo "║  Ralph — KCVV GitHub Issues Loop         ║"
-echo "║  Mode: $MODE"
+echo "║  Mode: $MODE$MILESTONE_LABEL"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -164,23 +169,27 @@ i=0
 while [ $i -lt $MAX ]; do
   i=$((i + 1))
 
-  # ── pick issue ──
   ISSUE=$(pick_next_issue)
 
-  if [ -z "$ISSUE" ]; then
-    echo "✅ No ready issues remain. Ralph is done."
+  if [ -z "$ISSUE" ] || [ "$ISSUE" = "null" ]; then
+    if [ -n "$MILESTONE" ]; then
+      echo "✅ No ready issues remain in milestone '$MILESTONE'. Ralph is done."
+    else
+      echo "✅ No ready issues remain. Ralph is done."
+    fi
     exit 0
   fi
 
   ISSUE_TITLE=$(gh issue view "$ISSUE" --json title --jq '.title')
+  ISSUE_MILESTONE=$(gh issue view "$ISSUE" --json milestone --jq '.milestone.title // "none"')
   READY_COUNT=$(count_ready)
 
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "  Next issue: #${ISSUE} — ${ISSUE_TITLE}"
+  echo "  Next issue:  #${ISSUE} — ${ISSUE_TITLE}"
+  echo "  Milestone:   ${ISSUE_MILESTONE}"
   echo "  Ready queue: ${READY_COUNT} issue(s)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  # ── HITL approval ──
   if [ "$MODE" = "hitl" ]; then
     echo ""
     echo "  View: gh issue view $ISSUE"
@@ -193,24 +202,23 @@ while [ $i -lt $MAX ]; do
     esac
   fi
 
-  # ── mark in-progress ──
+  # Mark in-progress
   gh issue edit "$ISSUE" --add-label "in-progress" --remove-label "ready" 2>/dev/null || true
 
-  # ── create worktree ──
+  # Create worktree
   WORKTREE=$(create_worktree "$ISSUE")
   echo "  Worktree: $WORKTREE"
   echo ""
 
-  # ── run claude ──
+  # Run Claude
   OUTPUT=$(run_claude_on_issue "$ISSUE" "$WORKTREE")
   echo "$OUTPUT"
   echo ""
 
-  # ── check outcome ──
+  # Check outcome
   if echo "$OUTPUT" | grep -q "RALPH_BLOCKED"; then
     echo "⚠️  Issue #${ISSUE} is blocked. Moving on."
     remove_worktree "$ISSUE"
-
     if [ "$MODE" = "hitl" ]; then
       read -r -p "  Continue to next issue? [Y/n] " choice
       [[ "$choice" =~ ^[nN] ]] && exit 0
@@ -218,11 +226,15 @@ while [ $i -lt $MAX ]; do
     continue
   fi
 
-  # ── PR opened — check for unblocked issues ──
+  # PR opened
+  PR_URL=$(echo "$OUTPUT" | grep -o "https://github.com[^ ]*pull[^ ]*" | tail -1)
   echo "✅ Issue #${ISSUE} complete. PR opened."
+  if [ -n "$PR_URL" ]; then
+    echo "   $PR_URL"
+  fi
   echo ""
 
-  # Unblock any issues that were waiting on this one
+  # Unblock dependent issues
   UNBLOCKED=$(gh issue list \
     --label "blocked" \
     --state open \
@@ -233,15 +245,29 @@ while [ $i -lt $MAX ]; do
     for UNBLOCK_NUM in $UNBLOCKED; do
       gh issue edit "$UNBLOCK_NUM" --remove-label "blocked" --add-label "ready" 2>/dev/null || true
       gh issue comment "$UNBLOCK_NUM" \
-        --body "Unblocked: #${ISSUE} has been completed. This issue is now ready." 2>/dev/null || true
+        --body "Unblocked by completion of #${ISSUE}. Ready to pick up." 2>/dev/null || true
       echo "  Unblocked: #${UNBLOCK_NUM}"
     done
     echo ""
   fi
 
-  # Single-issue mode
+  # Single-issue mode exits here
   if [ -n "$SPECIFIC_ISSUE" ]; then
     echo "Single-issue mode complete."
+    exit 0
+  fi
+
+  # CodeRabbit / PR review gate — always pause here
+  echo "  PR review gate:"
+  if [ -n "$PR_URL" ]; then
+    echo "    $PR_URL"
+  fi
+  echo "  Wait for CodeRabbit (1-2 min), review, then merge before continuing."
+  echo "  To apply feedback: cd ../kcvv-issue-${ISSUE} && claude"
+  echo ""
+  read -r -p "  PR reviewed, merged, and ready for next? [Y/n] " pr_choice
+  if [[ "$pr_choice" =~ ^[nN] ]]; then
+    echo "  Paused. Re-run ./scripts/ralph.sh --milestone ${ISSUE_MILESTONE} when ready."
     exit 0
   fi
 
