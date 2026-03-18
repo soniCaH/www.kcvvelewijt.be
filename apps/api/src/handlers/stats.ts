@@ -6,11 +6,10 @@ import {
   type TeamStats as TeamStatsType,
 } from "@kcvv/api-contract";
 import {
-  FootbalistoClient,
-  type FootbalistoClientError,
-} from "../footbalisto/client";
+  FootbalistoService,
+  type FootbalistoServiceError,
+} from "../footbalisto/service";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
-import { transformPsdTeamStats } from "../footbalisto/transforms";
 
 const teamStatsCache = TypedKvCache(TeamStats);
 
@@ -18,14 +17,13 @@ export const getTeamStatsHandler = (
   teamId: number,
 ): Effect.Effect<
   TeamStatsType,
-  FootbalistoClientError,
-  FootbalistoClient | KvCacheService
+  FootbalistoServiceError,
+  FootbalistoService | KvCacheService
 > => {
   const cacheKey = `stats:team:${teamId}`;
   const fetchStats = Effect.gen(function* () {
-    const client = yield* FootbalistoClient;
-    const rawStats = yield* client.getRawTeamStats(teamId);
-    return transformPsdTeamStats(teamId, rawStats);
+    const service = yield* FootbalistoService;
+    return yield* service.getTeamStats(teamId);
   });
 
   return teamStatsCache.getOrFetch(cacheKey, fetchStats, TTL.STATS);

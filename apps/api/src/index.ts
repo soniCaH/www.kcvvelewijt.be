@@ -19,6 +19,7 @@ import { Effect, Layer } from "effect";
 import { PsdApi } from "@kcvv/api-contract";
 import { WorkerEnvTag, type WorkerEnv } from "./env";
 import { FootbalistoClientLive } from "./footbalisto/client";
+import { FootbalistoServiceLive } from "./footbalisto/service";
 import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
@@ -56,6 +57,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(SearchApiLive),
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
+    Layer.provide(FootbalistoServiceLive),
     Layer.provide(FootbalistoClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
