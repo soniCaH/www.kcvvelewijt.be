@@ -40,31 +40,6 @@ const CLIP_PATH: Record<"left" | "right", string> = {
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
 
-function SingleDiagonal({
-  from,
-  to,
-  direction,
-  testId = "st-sub",
-}: {
-  from: SectionBg;
-  to: SectionBg;
-  direction: "left" | "right";
-  testId?: string;
-}) {
-  return (
-    <div
-      data-testid={testId}
-      className={cn("relative w-full flex-1", BG_CLASS[from])}
-    >
-      <div
-        data-testid={`${testId}-overlay`}
-        className={cn("absolute inset-0", BG_CLASS[to])}
-        style={{ clipPath: CLIP_PATH[direction] }}
-      />
-    </div>
-  );
-}
-
 export function SectionTransition({
   from,
   to,
@@ -103,21 +78,37 @@ export function SectionTransition({
         data-height={height}
         data-margin-top={marginTop || undefined}
         data-z-index={zIndex || undefined}
-        className={cn("relative w-full flex flex-col", className)}
+        className={cn(
+          "relative w-full overflow-hidden",
+          BG_CLASS[from],
+          className,
+        )}
         style={style}
       >
-        <SingleDiagonal
-          from={from}
-          to={midColor}
-          direction={direction}
-          testId="st-sub"
-        />
-        <SingleDiagonal
-          from={midColor}
-          to={to}
-          direction={opposite}
-          testId="st-sub"
-        />
+        {/* Top half: from → via. Extra 1px height prevents sub-pixel seam. */}
+        <div
+          data-testid="st-sub"
+          className={cn("absolute left-0 right-0 top-0", BG_CLASS[from])}
+          style={{ height: "calc(50% + 1px)" }}
+        >
+          <div
+            data-testid="st-sub-overlay"
+            className={cn("absolute inset-0", BG_CLASS[midColor])}
+            style={{ clipPath: CLIP_PATH[direction] }}
+          />
+        </div>
+        {/* Bottom half: via → to. Extra 1px height prevents sub-pixel seam. */}
+        <div
+          data-testid="st-sub"
+          className={cn("absolute left-0 right-0 bottom-0", BG_CLASS[midColor])}
+          style={{ height: "calc(50% + 1px)" }}
+        >
+          <div
+            data-testid="st-sub-overlay"
+            className={cn("absolute inset-0", BG_CLASS[to])}
+            style={{ clipPath: CLIP_PATH[opposite] }}
+          />
+        </div>
       </div>
     );
   }
