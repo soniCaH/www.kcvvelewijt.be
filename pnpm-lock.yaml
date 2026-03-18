@@ -140,8 +140,8 @@ importers:
         specifier: 8.6.0
         version: 8.6.0(react@19.2.4)
       isomorphic-dompurify:
-        specifier: 3.5.0
-        version: 3.5.0(@noble/hashes@2.0.1)
+        specifier: 3.5.1
+        version: 3.5.1(@noble/hashes@2.0.1)
       lucide-react:
         specifier: 0.577.0
         version: 0.577.0(react@19.2.4)
@@ -5596,8 +5596,8 @@ packages:
     resolution: {integrity: sha512-nZmoK4wKdzPs5USq4JHBiimjdKSVAOm2T1KyDoadtMPNXYHxiENd19ou4iU/V4juFM6LVgYQnpxCYmxqNP4Obw==}
     engines: {node: '>=18'}
 
-  isomorphic-dompurify@3.5.0:
-    resolution: {integrity: sha512-TcANTpTDZqywJtCKL+7jESrGzlRHz1wFB9eSlgYbzix54qwnJDIPxwzlOz2EA4Y3PSlgKupr6Kx2ETuwho2HfA==}
+  isomorphic-dompurify@3.5.1:
+    resolution: {integrity: sha512-LlUCZikq/W6CmSq1UWcFLgS4nhkNBwimmVyNQtdByDffT0yVjKYef9lincZ7/ohBlknPkX1C97BBmjeNuFFR4Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
 
   istanbul-lib-coverage@3.2.2:
@@ -14096,7 +14096,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  isomorphic-dompurify@3.5.0(@noble/hashes@2.0.1):
+  isomorphic-dompurify@3.5.1(@noble/hashes@2.0.1):
     dependencies:
       dompurify: 3.3.3
       jsdom: 29.0.0(@noble/hashes@2.0.1)
