@@ -1,6 +1,6 @@
 // apps/web/src/components/home/LatestNews/LatestNews.tsx
 import { cn } from "@/lib/utils/cn";
-import { SectionDivider, SectionHeader } from "@/components/design-system";
+import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "./NewsCard";
 
 export interface LatestNewsArticle {
@@ -113,8 +113,6 @@ export const LatestNews = ({
           )}
         </div>
       </div>
-      {/* Diagonal bottom cut: gray-100 → kcvv-black (flip: diagonal reaches left edge) */}
-      <SectionDivider color="kcvv-black" position="bottom" flip />
     </section>
   );
 };

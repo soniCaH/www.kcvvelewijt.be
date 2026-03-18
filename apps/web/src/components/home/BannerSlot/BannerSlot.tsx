@@ -44,16 +44,22 @@ export const BannerSlot = ({
 
   if (href) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block max-w-7xl mx-auto px-4 md:px-8 py-8"
-      >
-        {inner}
-      </a>
+      <div className="bg-gray-100">
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block max-w-7xl mx-auto px-4 md:px-8 py-8"
+        >
+          {inner}
+        </a>
+      </div>
     );
   }
 
-  return <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">{inner}</div>;
+  return (
+    <div className="bg-gray-100">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">{inner}</div>
+    </div>
+  );
 };
