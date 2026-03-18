@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SectionDivider } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 
 export interface YouthSectionProps {
@@ -11,7 +10,7 @@ export const YouthSection = ({ className }: YouthSectionProps) => {
   return (
     <section
       className={cn(
-        "relative bg-kcvv-green-dark overflow-hidden py-20 text-center -mt-0.5",
+        "relative overflow-hidden bg-kcvv-green-dark py-20 text-center",
         className,
       )}
     >
@@ -31,11 +30,6 @@ export const YouthSection = ({ className }: YouthSectionProps) => {
         {/* Dark tint overlay — preserves green-dark mood while letting the photo breathe */}
         <div className="absolute inset-0 bg-kcvv-green-dark/55" />
       </div>
-
-      {/* Diagonal top cut: kcvv-black → kcvv-green-dark */}
-      <SectionDivider color="kcvv-black" position="top" />
-      {/* Diagonal bottom cut: kcvv-green-dark → gray-100 */}
-      <SectionDivider color="gray-100" position="bottom" flip />
 
       {/* Content — floats above the blurred background */}
       <div className="relative z-10">

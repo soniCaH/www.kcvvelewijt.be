@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
 import { LatestNews } from "./LatestNews";
+import type { FeaturedEventStub } from "./LatestNews";
 import { MatchWidget } from "./MatchWidget";
 import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
@@ -8,7 +9,8 @@ import { YouthSection } from "./YouthSection";
 import { PageFooter } from "@/components/layout/PageFooter";
 import { Sponsors } from "@/components/sponsors/Sponsors";
 import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
-import { SectionHeader } from "@/components/design-system";
+import { SectionStack, SectionHeader } from "@/components/design-system";
+import type { SectionConfig } from "@/components/design-system";
 import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
 import { mockMatches } from "./UpcomingMatches/UpcomingMatches.mocks";
 
@@ -117,9 +119,9 @@ const mockBanner = {
   href: "https://example.com",
 };
 
-/** SponsorsSection is an async server component — inline here with mock data */
-const SponsorsSectionMock = () => (
-  <section className="-mt-0.5 bg-gray-100 py-20">
+/** SponsorsSection is async — inline mock with same markup */
+const SponsorsSectionContent = () => (
+  <section>
     <div className="max-w-7xl mx-auto px-4 md:px-8">
       <SectionHeader
         title="Sponsors"
@@ -139,6 +141,100 @@ const SponsorsSectionMock = () => (
   </section>
 );
 
+function buildSections(
+  featuredEvent?: FeaturedEventStub,
+  autoRotate = true,
+): SectionConfig[] {
+  return [
+    {
+      key: "hero",
+      bg: "kcvv-black",
+      content: (
+        <FeaturedArticles
+          articles={mockFeaturedArticles}
+          autoRotate={autoRotate}
+          autoRotateInterval={5000}
+        />
+      ),
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      transition: {
+        type: "double-diagonal",
+        direction: "right",
+        via: "white",
+        overlap: "half",
+      },
+    },
+    {
+      key: "match-widget",
+      bg: "kcvv-green-dark",
+      content: <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />,
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "banner-a",
+      bg: "gray-100",
+      content: <BannerSlot {...mockBanner} />,
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "latest-news",
+      bg: "gray-100",
+      content: (
+        <LatestNews
+          articles={featuredEvent ? mockLatestNews.slice(0, 2) : mockLatestNews}
+          featuredEvent={featuredEvent}
+          title="Laatste nieuws"
+          showViewAll
+          viewAllHref="/news"
+        />
+      ),
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "banner-b",
+      bg: "gray-100",
+      content: <BannerSlot {...mockBanner} />,
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "matches-slider",
+      bg: "kcvv-black",
+      content: (
+        <MatchesSliderSection
+          matches={mockSliderMatches}
+          highlightTeamId={1235}
+        />
+      ),
+      transition: { type: "diagonal", direction: "right" },
+    },
+    {
+      key: "youth",
+      bg: "kcvv-green-dark",
+      content: <YouthSection />,
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "banner-c",
+      bg: "gray-100",
+      content: <BannerSlot {...mockBanner} />,
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+    },
+    {
+      key: "sponsors",
+      bg: "gray-100",
+      content: <SponsorsSectionContent />,
+    },
+  ];
+}
+
 /**
  * Complete v3 homepage: hero → match widget → banner A → news → banner B →
  * match slider → youth section → banner C → sponsors → footer
@@ -146,27 +242,7 @@ const SponsorsSectionMock = () => (
 export const Default: Story = {
   render: () => (
     <>
-      <FeaturedArticles
-        articles={mockFeaturedArticles}
-        autoRotate={true}
-        autoRotateInterval={5000}
-      />
-      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
-      <BannerSlot {...mockBanner} />
-      <LatestNews
-        articles={mockLatestNews}
-        title="Laatste nieuws"
-        showViewAll={true}
-        viewAllHref="/news"
-      />
-      <BannerSlot {...mockBanner} />
-      <MatchesSliderSection
-        matches={mockSliderMatches}
-        highlightTeamId={1235}
-      />
-      <YouthSection />
-      <BannerSlot {...mockBanner} />
-      <SponsorsSectionMock />
+      <SectionStack sections={buildSections()} />
       <PageFooter />
     </>
   ),
@@ -178,16 +254,8 @@ export const Default: Story = {
 export const WithFeaturedEvent: Story = {
   render: () => (
     <>
-      <FeaturedArticles
-        articles={mockFeaturedArticles}
-        autoRotate={true}
-        autoRotateInterval={5000}
-      />
-      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
-      <BannerSlot {...mockBanner} />
-      <LatestNews
-        articles={mockLatestNews.slice(0, 2)}
-        featuredEvent={{
+      <SectionStack
+        sections={buildSections({
           title: "Jeugdtoernooi 2026 — schrijf je nu in!",
           imageUrl: "https://placehold.co/800x600/008755/fff?text=Toernooi",
           imageAlt: "Jeugdtoernooi KCVV",
@@ -196,19 +264,8 @@ export const WithFeaturedEvent: Story = {
           time: "10:00–17:00",
           countdown: "over 40 dagen",
           isExternal: false,
-        }}
-        title="Laatste nieuws"
-        showViewAll={true}
-        viewAllHref="/news"
+        })}
       />
-      <BannerSlot {...mockBanner} />
-      <MatchesSliderSection
-        matches={mockSliderMatches}
-        highlightTeamId={1235}
-      />
-      <YouthSection />
-      <BannerSlot {...mockBanner} />
-      <SponsorsSectionMock />
       <PageFooter />
     </>
   ),
@@ -230,23 +287,7 @@ export const MobileViewport: Story = {
 export const NoAutoRotation: Story = {
   render: () => (
     <>
-      <FeaturedArticles articles={mockFeaturedArticles} autoRotate={false} />
-      <MatchWidget match={mockUpcomingMatch} teamLabel="A-Ploeg" />
-      <BannerSlot {...mockBanner} />
-      <LatestNews
-        articles={mockLatestNews}
-        title="Laatste nieuws"
-        showViewAll={true}
-        viewAllHref="/news"
-      />
-      <BannerSlot {...mockBanner} />
-      <MatchesSliderSection
-        matches={mockSliderMatches}
-        highlightTeamId={1235}
-      />
-      <YouthSection />
-      <BannerSlot {...mockBanner} />
-      <SponsorsSectionMock />
+      <SectionStack sections={buildSections(undefined, false)} />
       <PageFooter />
     </>
   ),

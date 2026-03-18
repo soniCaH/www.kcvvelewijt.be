@@ -35,6 +35,7 @@ export function SectionStack({ sections, className }: SectionStackProps) {
   return (
     <div className={cn("w-full", className)}>
       {filtered.map((section, i) => {
+        const prev = filtered[i - 1];
         const next = filtered[i + 1];
         const hasOverlap =
           section.transition &&
@@ -44,9 +45,28 @@ export function SectionStack({ sections, className }: SectionStackProps) {
           next !== undefined &&
           section.transition !== undefined &&
           section.bg !== next.bg;
+        // Pull up 1px to eliminate the sub-pixel seam between the preceding
+        // SectionTransition element and this section's wrapper div.
+        const prevHadTransition =
+          prev !== undefined &&
+          prev.transition !== undefined &&
+          prev.bg !== section.bg;
 
         return (
-          <div key={section.key ?? i}>
+          // The key wrapper carries the section's background so any sub-pixel
+          // gap between the section content div and the SectionTransition shows
+          // the section color rather than the page/canvas background.
+          // -mt-px: overlap 1px into the preceding SectionTransition so the
+          // TO section's background covers any fractional-pixel rendering gap
+          // at the key-wrapper boundary regardless of zoom or device pixel ratio.
+          <div
+            key={section.key ?? i}
+            className={cn(
+              "w-full",
+              BG_CLASS[section.bg],
+              prevHadTransition && "-mt-px",
+            )}
+          >
             {/* Section content wrapper */}
             <div
               className={cn(

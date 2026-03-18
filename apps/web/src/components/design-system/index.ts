@@ -63,13 +63,18 @@ export type { BadgeProps, BadgeVariant, BadgeSize } from "./Badge";
 export { Alert } from "./Alert";
 export type { AlertProps, AlertVariant } from "./Alert";
 
-// SectionDivider
-export { SectionDivider } from "./SectionDivider";
+// SectionTransition
+export { SectionTransition } from "./SectionTransition";
 export type {
-  SectionDividerProps,
-  SectionDividerColor,
-  SectionDividerPosition,
-} from "./SectionDivider";
+  SectionTransitionProps,
+  SectionBg,
+  TransitionOverlap,
+  SectionTransitionConfig,
+} from "./SectionTransition";
+
+// SectionStack
+export { SectionStack } from "./SectionStack";
+export type { SectionStackProps, SectionConfig } from "./SectionStack";
 
 // SectionHeader
 export { SectionHeader } from "./SectionHeader";

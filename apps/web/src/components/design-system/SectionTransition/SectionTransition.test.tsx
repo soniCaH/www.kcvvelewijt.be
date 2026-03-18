@@ -64,7 +64,7 @@ describe("SectionTransition", () => {
       expect(overlay.style.clipPath).toBe("polygon(0 0, 0 100%, 100% 100%)");
     });
 
-    it("applies no margin-top for overlap=none (default)", () => {
+    it("applies -2px margin-top for overlap=none (seam fix)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -75,7 +75,21 @@ describe("SectionTransition", () => {
         />,
       );
       const el = container.firstChild as HTMLElement;
-      expect(el.getAttribute("data-margin-top")).toBeNull();
+      expect(el.getAttribute("data-margin-top")).toBe("-2px");
+    });
+
+    it("applies -2px margin-bottom always (bottom seam fix)", () => {
+      const { container } = render(
+        <SectionTransition
+          from="kcvv-black"
+          to="gray-100"
+          type="diagonal"
+          direction="left"
+          overlap="none"
+        />,
+      );
+      const el = container.firstChild as HTMLElement;
+      expect(el.style.marginBottom).toBe("-2px");
     });
 
     it("applies negative margin-top for overlap=half (diagonal)", () => {

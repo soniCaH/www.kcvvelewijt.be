@@ -1,5 +1,4 @@
 // apps/web/src/components/home/LatestNews/LatestNews.tsx
-import { cn } from "@/lib/utils/cn";
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "./NewsCard";
 
@@ -55,9 +54,7 @@ export const LatestNews = ({
     : articles.slice(1, 3);
 
   return (
-    <section
-      className={cn("relative bg-gray-100 py-20 overflow-hidden", className)}
-    >
+    <section className={className}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <SectionHeader
           title={title}

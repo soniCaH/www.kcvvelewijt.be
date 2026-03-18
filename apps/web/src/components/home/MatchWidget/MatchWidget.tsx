@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { SectionDivider } from "@/components/design-system";
 import { formatWidgetDate } from "@/lib/utils/dates";
 import type { UpcomingMatch } from "@/components/match/types";
 
@@ -42,15 +41,8 @@ export function MatchWidget({
   return (
     <section
       aria-label={`Wedstrijd: ${match.homeTeam.name} vs ${match.awayTeam.name}`}
-      className="relative overflow-hidden bg-kcvv-green-dark"
     >
-      {/* Top diagonal — white cut in upper-left, pairs with FeaturedArticles' white bottom cut */}
-      <SectionDivider color="white" position="top" />
-
-      {/* Bottom diagonal — reveals gray-100 from LatestNews */}
-      <SectionDivider color="gray-100" position="bottom" />
-
-      <div className="relative z-20 py-20 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 max-w-7xl mx-auto">
         {/* Overline — left-aligned, single leading rule */}
         <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
           <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />

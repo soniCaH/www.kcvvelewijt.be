@@ -2,10 +2,8 @@
 
 ## Project
 
-- **Site:** KCVV Elewijt Football Club — Gatsby → Next.js migration
 - **Stack:** Turborepo monorepo + pnpm workspaces; Next.js 16, TypeScript strict, Effect, Tailwind CSS v4, Storybook 10, Vitest
-- **Hosting:** Vercel (web) + Cloudflare Workers (BFF/API) | **CMS:** Sanity + Footbalisto API
-- **Primary green:** #4acf52
+- **Hosting:** Vercel (web) + Cloudflare Workers (BFF/API) | **CMS:** Sanity + Footbalisto API (deprecated - migrating out)
 
 ## Platform Architecture
 
@@ -15,9 +13,6 @@
 | Sanity Studio | `apps/studio/`           | sanity.io          | CMS admin UI                    |
 | API contract  | `packages/api-contract/` | (library)          | Shared Effect schemas + HttpApi |
 | BFF           | `apps/api/`              | Cloudflare Workers | ProSoccerData proxy + cache     |
-
-**Design doc:** `docs/plans/2026-03-03-platform-architecture-design.md`
-**GitHub Project:** https://github.com/users/soniCaH/projects/2
 
 ## Efficiency Rules (MANDATORY)
 

@@ -19,6 +19,8 @@ import {
   SponsorsSection,
 } from "@/components/home";
 import type { FeaturedEventStub } from "@/components/home";
+import { SectionStack } from "@/components/design-system";
+import type { SectionConfig } from "@/components/design-system";
 import {
   mapSanityArticlesToHomepageArticles,
   mapMatchesToUpcomingMatches,
@@ -177,67 +179,141 @@ export default async function HomePage() {
     );
   }
 
-  return (
-    <>
-      {/* Hero */}
-      {featuredArticles.length > 0 && (
-        <FeaturedArticles
-          articles={featuredArticles}
-          autoRotate={true}
-          autoRotateInterval={5000}
-        />
-      )}
+  const heroSection: SectionConfig | false = featuredArticles.length > 0 && {
+    key: "hero",
+    bg: "kcvv-black",
+    content: (
+      <FeaturedArticles
+        articles={featuredArticles}
+        autoRotate={true}
+        autoRotateInterval={5000}
+      />
+    ),
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+    transition: {
+      type: "double-diagonal",
+      direction: "right",
+      via: "white",
+      overlap: "half",
+    },
+  };
 
-      {/* Match Widget — A-team next match */}
-      {nextMatch && <MatchWidget match={nextMatch} teamLabel="A-Ploeg" />}
+  const matchWidgetSection: SectionConfig | null = nextMatch
+    ? {
+        key: "match-widget",
+        bg: "kcvv-green-dark",
+        content: <MatchWidget match={nextMatch} teamLabel="A-Ploeg" />,
+        transition: { type: "diagonal", direction: "left" },
+      }
+    : null;
 
-      {/* Banner slot A — below match widget */}
-      {banners.bannerSlotA && (
-        <BannerSlot
-          image={banners.bannerSlotA.imageUrl}
-          alt={banners.bannerSlotA.alt}
-          href={banners.bannerSlotA.href ?? undefined}
-        />
-      )}
+  const bannerSlotASection: SectionConfig | null = banners.bannerSlotA
+    ? {
+        key: "banner-a",
+        bg: "gray-100",
+        content: (
+          <BannerSlot
+            image={banners.bannerSlotA.imageUrl}
+            alt={banners.bannerSlotA.alt}
+            href={banners.bannerSlotA.href ?? undefined}
+          />
+        ),
+        paddingTop: "pt-0",
+        paddingBottom: "pb-0",
+        transition: { type: "diagonal", direction: "left" },
+      }
+    : null;
 
-      {/* News + featured event */}
-      {(latestNewsArticles.length > 0 || featuredEvent) && (
-        <LatestNews
-          articles={latestNewsArticles}
-          featuredEvent={featuredEvent}
-          title="Laatste nieuws"
-          showViewAll
-          viewAllHref="/news"
-        />
-      )}
+  const latestNewsSection: SectionConfig | null =
+    latestNewsArticles.length > 0 || featuredEvent
+      ? {
+          key: "latest-news",
+          bg: "gray-100",
+          content: (
+            <LatestNews
+              articles={latestNewsArticles}
+              featuredEvent={featuredEvent}
+              title="Laatste nieuws"
+              showViewAll
+              viewAllHref="/news"
+            />
+          ),
+          transition: { type: "diagonal", direction: "left" },
+        }
+      : null;
 
-      {/* Banner slot B — below news */}
-      {banners.bannerSlotB && (
-        <BannerSlot
-          image={banners.bannerSlotB.imageUrl}
-          alt={banners.bannerSlotB.alt}
-          href={banners.bannerSlotB.href ?? undefined}
-        />
-      )}
+  const bannerSlotBSection: SectionConfig | null = banners.bannerSlotB
+    ? {
+        key: "banner-b",
+        bg: "gray-100",
+        content: (
+          <BannerSlot
+            image={banners.bannerSlotB.imageUrl}
+            alt={banners.bannerSlotB.alt}
+            href={banners.bannerSlotB.href ?? undefined}
+          />
+        ),
+        paddingTop: "pt-0",
+        paddingBottom: "pb-0",
+        transition: { type: "diagonal", direction: "left" },
+      }
+    : null;
 
-      {/* Match slider */}
+  const matchesSliderSection: SectionConfig = {
+    key: "matches-slider",
+    bg: "kcvv-black",
+    content: (
       <MatchesSliderSection matches={sliderMatches} highlightTeamId={1235} />
+    ),
+    transition: { type: "diagonal", direction: "right" },
+  };
 
-      {/* Youth section */}
-      <YouthSection />
+  const youthSection: SectionConfig = {
+    key: "youth",
+    bg: "kcvv-green-dark",
+    content: <YouthSection />,
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+    transition: { type: "diagonal", direction: "left" },
+  };
 
-      {/* Banner slot C — below youth */}
-      {banners.bannerSlotC && (
-        <BannerSlot
-          image={banners.bannerSlotC.imageUrl}
-          alt={banners.bannerSlotC.alt}
-          href={banners.bannerSlotC.href ?? undefined}
-        />
-      )}
+  const bannerSlotCSection: SectionConfig | null = banners.bannerSlotC
+    ? {
+        key: "banner-c",
+        bg: "gray-100",
+        content: (
+          <BannerSlot
+            image={banners.bannerSlotC.imageUrl}
+            alt={banners.bannerSlotC.alt}
+            href={banners.bannerSlotC.href ?? undefined}
+          />
+        ),
+        paddingTop: "pt-0",
+        paddingBottom: "pb-0",
+      }
+    : null;
 
-      {/* Sponsors */}
-      <SponsorsSection />
-    </>
+  const sponsorsSection: SectionConfig = {
+    key: "sponsors",
+    bg: "gray-100",
+    content: <SponsorsSection />,
+  };
+
+  return (
+    <SectionStack
+      sections={[
+        heroSection,
+        matchWidgetSection,
+        bannerSlotASection,
+        latestNewsSection,
+        bannerSlotBSection,
+        matchesSliderSection,
+        youthSection,
+        bannerSlotCSection,
+        sponsorsSection,
+      ]}
+    />
   );
 }
 

@@ -11,7 +11,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { Pause, Play } from "@/lib/icons";
-import { SectionDivider } from "@/components/design-system";
 
 export interface FeaturedArticle {
   /**
@@ -358,9 +357,6 @@ export const FeaturedArticles = ({
           </div>
         )}
       </div>
-
-      {/* Bottom diagonal — white cut in lower-left, matching MatchWidget's white top cut */}
-      <SectionDivider color="white" position="bottom" flip />
     </section>
   );
 };

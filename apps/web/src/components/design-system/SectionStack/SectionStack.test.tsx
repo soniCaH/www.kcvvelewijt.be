@@ -157,6 +157,30 @@ describe("SectionStack", () => {
     expect(container.querySelector(".bg-kcvv-black")).not.toBeNull();
   });
 
+  it("applies -mt-px to section that follows a transition (seam fix)", () => {
+    const { container } = render(
+      <SectionStack
+        sections={[
+          makeSection("kcvv-black", "A", {
+            type: "diagonal",
+            direction: "left",
+          }),
+          makeSection("gray-100", "B"),
+        ]}
+      />,
+    );
+    // The TO section wrapper should have -mt-px to cover the sub-pixel seam
+    const negMargin = container.querySelector(".-mt-px");
+    expect(negMargin).not.toBeNull();
+  });
+
+  it("does not apply -mt-px to the first section", () => {
+    const { container } = render(
+      <SectionStack sections={[makeSection("gray-100", "A")]} />,
+    );
+    expect(container.querySelector(".-mt-px")).toBeNull();
+  });
+
   it("applies position relative z-0 to FROM section when its transition has overlap", () => {
     const { container } = render(
       <SectionStack
