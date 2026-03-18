@@ -70,8 +70,13 @@ function fetchJson<A, I>(
 
 /** Format an ISO date string as DDMMYYYY for PSD stat endpoint URLs */
 function formatPsdDate(isoDate: string): string {
-  const datePart = isoDate.split("T")[0]!;
+  const datePart = isoDate.split("T")[0] ?? "";
   const [year, month, day] = datePart.split("-");
+  if (!year || !month || !day) {
+    throw new Error(
+      `formatPsdDate: expected ISO date string, got "${isoDate}"`,
+    );
+  }
   return `${day}${month}${year}`;
 }
 
