@@ -1,4 +1,4 @@
-import { Effect, Option, Schema as S } from "effect";
+import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import {
   PsdApi,
@@ -10,12 +10,15 @@ import {
   FootbalistoClient,
   type FootbalistoClientError,
 } from "../footbalisto/client";
-import { KvCacheService, TTL } from "../cache/kv-cache";
+import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import {
   transformPsdGame,
   transformFootbalistoMatchDetail,
   matchDetailToMatch,
 } from "../footbalisto/transforms";
+
+const matchesCache = TypedKvCache(MatchesArray);
+const matchDetailCache = TypedKvCache(MatchDetail);
 
 export const getMatchesByTeamHandler = (
   teamId: number,
@@ -23,54 +26,32 @@ export const getMatchesByTeamHandler = (
   readonly Match[],
   FootbalistoClientError,
   FootbalistoClient | KvCacheService
-> =>
-  Effect.gen(function* () {
+> => {
+  const cacheKey = `matches:team:${teamId}`;
+  const fetchMatches = Effect.gen(function* () {
     const client = yield* FootbalistoClient;
-    const cache = yield* KvCacheService;
-    const cacheKey = `matches:team:${teamId}`;
-
-    const cached = yield* cache.get(cacheKey);
-    if (cached) {
-      const decoded = yield* Effect.try({
-        try: () => JSON.parse(cached),
-        catch: () => null,
-      }).pipe(Effect.flatMap(S.decodeUnknown(MatchesArray)), Effect.option);
-      if (Option.isSome(decoded)) return decoded.value;
-    }
-
     const rawMatches = yield* client.getRawMatches(teamId);
-    const matches = rawMatches.map(transformPsdGame);
-    yield* cache.set(cacheKey, JSON.stringify(matches), TTL.MATCHES_TEAM);
-    return matches;
+    return rawMatches.map(transformPsdGame);
   });
+
+  return matchesCache.getOrFetch(cacheKey, fetchMatches, TTL.MATCHES_TEAM);
+};
 
 export const getNextMatchesHandler = (): Effect.Effect<
   readonly Match[],
   FootbalistoClientError,
   FootbalistoClient | KvCacheService
-> =>
-  Effect.gen(function* () {
+> => {
+  const cacheKey = "matches:next";
+  const fetchMatches = Effect.gen(function* () {
     const client = yield* FootbalistoClient;
-    const cache = yield* KvCacheService;
-    const cacheKey = "matches:next";
-
-    const cached = yield* cache.get(cacheKey);
-    if (cached) {
-      const decoded = yield* Effect.try({
-        try: () => JSON.parse(cached),
-        catch: () => null,
-      }).pipe(Effect.flatMap(S.decodeUnknown(MatchesArray)), Effect.option);
-      if (Option.isSome(decoded)) return decoded.value;
-    }
-
     const rawMatches = yield* client.getRawNextMatches();
     // Filter out Weitse Gans (teamId 23) — not KCVV but plays on KCVV pitch
-    const matches = rawMatches
-      .filter((m) => m.teamId !== 23)
-      .map(transformPsdGame);
-    yield* cache.set(cacheKey, JSON.stringify(matches), TTL.NEXT_MATCHES);
-    return matches;
+    return rawMatches.filter((m) => m.teamId !== 23).map(transformPsdGame);
   });
+
+  return matchesCache.getOrFetch(cacheKey, fetchMatches, TTL.NEXT_MATCHES);
+};
 
 export const getMatchByIdHandler = (
   matchId: number,
@@ -87,32 +68,22 @@ export const getMatchDetailHandler = (
   MatchDetail,
   FootbalistoClientError,
   FootbalistoClient | KvCacheService
-> =>
-  Effect.gen(function* () {
+> => {
+  const cacheKey = `match:detail:${matchId}`;
+  const fetchDetail = Effect.gen(function* () {
     const client = yield* FootbalistoClient;
-    const cache = yield* KvCacheService;
-    const cacheKey = `match:detail:${matchId}`;
-
-    const cached = yield* cache.get(cacheKey);
-    if (cached) {
-      const decoded = yield* Effect.try({
-        try: () => JSON.parse(cached),
-        catch: () => null,
-      }).pipe(Effect.flatMap(S.decodeUnknown(MatchDetail)), Effect.option);
-      if (Option.isSome(decoded)) return decoded.value;
-    }
-
     const rawDetail = yield* client.getRawMatchDetail(matchId);
-    const detail = transformFootbalistoMatchDetail(rawDetail);
-    // Finished and forfeited matches are immutable — cache 7 days.
-    // Postponed/stopped may be rescheduled; scheduled = upcoming. Cache 60s.
-    const ttl =
-      detail.status === "finished" || detail.status === "forfeited"
-        ? TTL.MATCH_DETAIL_PAST
-        : TTL.MATCH_DETAIL_LIVE;
-    yield* cache.set(cacheKey, JSON.stringify(detail), ttl);
-    return detail;
+    return transformFootbalistoMatchDetail(rawDetail);
   });
+
+  // Finished and forfeited matches are immutable — cache 7 days.
+  // Postponed/stopped may be rescheduled; scheduled = upcoming. Cache 60s.
+  return matchDetailCache.getOrFetch(cacheKey, fetchDetail, (detail) =>
+    detail.status === "finished" || detail.status === "forfeited"
+      ? TTL.MATCH_DETAIL_PAST
+      : TTL.MATCH_DETAIL_LIVE,
+  );
+};
 
 export const MatchesApiLive = HttpApiBuilder.group(
   PsdApi,
