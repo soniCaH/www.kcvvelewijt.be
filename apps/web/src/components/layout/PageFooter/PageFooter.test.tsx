@@ -47,9 +47,8 @@ describe("PageFooter", () => {
 
   it("renders copyright text", () => {
     render(<PageFooter />);
-    expect(
-      screen.getByText(/© \d{4} K\.C\.V\.V\. Elewijt/),
-    ).toBeInTheDocument();
+    const year = new Date().getFullYear();
+    expect(screen.getByText(`© ${year} K.C.V.V. Elewijt`)).toBeInTheDocument();
   });
 
   it("renders privacy policy link", () => {
@@ -71,8 +70,17 @@ describe("PageFooter", () => {
 
   it("renders navigation links", () => {
     render(<PageFooter />);
-    expect(screen.getByRole("link", { name: "Nieuws" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Kalender" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sponsors" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Nieuws" })).toHaveAttribute(
+      "href",
+      "/news",
+    );
+    expect(screen.getByRole("link", { name: "Kalender" })).toHaveAttribute(
+      "href",
+      "/calendar",
+    );
+    expect(screen.getByRole("link", { name: "Sponsors" })).toHaveAttribute(
+      "href",
+      "/sponsors",
+    );
   });
 });
