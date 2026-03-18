@@ -1,4 +1,4 @@
-import { Effect, Option, Schema as S } from "effect";
+import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import {
   PsdApi,
@@ -9,8 +9,10 @@ import {
   FootbalistoClient,
   type FootbalistoClientError,
 } from "../footbalisto/client";
-import { KvCacheService, TTL } from "../cache/kv-cache";
+import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { transformPsdTeamStats } from "../footbalisto/transforms";
+
+const teamStatsCache = TypedKvCache(TeamStats);
 
 export const getTeamStatsHandler = (
   teamId: number,
@@ -18,26 +20,16 @@ export const getTeamStatsHandler = (
   TeamStatsType,
   FootbalistoClientError,
   FootbalistoClient | KvCacheService
-> =>
-  Effect.gen(function* () {
+> => {
+  const cacheKey = `stats:team:${teamId}`;
+  const fetchStats = Effect.gen(function* () {
     const client = yield* FootbalistoClient;
-    const cache = yield* KvCacheService;
-    const cacheKey = `stats:team:${teamId}`;
-
-    const cached = yield* cache.get(cacheKey);
-    if (cached) {
-      const decoded = yield* Effect.try({
-        try: () => JSON.parse(cached),
-        catch: () => null,
-      }).pipe(Effect.flatMap(S.decodeUnknown(TeamStats)), Effect.option);
-      if (Option.isSome(decoded)) return decoded.value;
-    }
-
     const rawStats = yield* client.getRawTeamStats(teamId);
-    const stats = transformPsdTeamStats(teamId, rawStats);
-    yield* cache.set(cacheKey, JSON.stringify(stats), TTL.STATS);
-    return stats;
+    return transformPsdTeamStats(teamId, rawStats);
   });
+
+  return teamStatsCache.getOrFetch(cacheKey, fetchStats, TTL.STATS);
+};
 
 export const StatsApiLive = HttpApiBuilder.group(PsdApi, "stats", (handlers) =>
   handlers.handle("getTeamStats", ({ path: { teamId } }) =>

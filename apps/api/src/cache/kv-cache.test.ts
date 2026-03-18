@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
-import { KvCacheService, KvCacheLive } from "./kv-cache";
+import { Effect, Layer, Schema as S } from "effect";
+import { KvCacheService, KvCacheLive, TypedKvCache } from "./kv-cache";
 import { WorkerEnvTag } from "../env";
 
 function makeMockKv() {
@@ -30,6 +30,128 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
     SEARCH_INDEX: {} as VectorizeIndex,
   });
 }
+
+const TestSchema = S.Struct({ name: S.String, value: S.Number });
+
+describe("TypedKvCache", () => {
+  it("cache miss: calls fetch, caches result, returns value", async () => {
+    const mockKv = makeMockKv();
+    let fetchCalled = false;
+    const fetchEffect = Effect.sync(() => {
+      fetchCalled = true;
+      return { name: "test", value: 42 };
+    });
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "test", value: 42 });
+    expect(fetchCalled).toBe(true);
+    expect(mockKv.put).toHaveBeenCalledWith(
+      "test-key",
+      JSON.stringify({ name: "test", value: 42 }),
+      { expirationTtl: 60 },
+    );
+  });
+
+  it("cache hit with valid data: returns decoded value, fetch not called", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", JSON.stringify({ name: "cached", value: 99 }));
+
+    const fetchEffect = Effect.fail(
+      new Error("fetch should not be called") as never,
+    );
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "cached", value: 99 });
+  });
+
+  it("cache hit with corrupted JSON: logs warning, falls through to fetch", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", "not-valid-json{{{");
+
+    let fetchCalled = false;
+    const fetchEffect = Effect.sync(() => {
+      fetchCalled = true;
+      return { name: "fallback", value: 1 };
+    });
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "fallback", value: 1 });
+    expect(fetchCalled).toBe(true);
+  });
+
+  it("cache hit with stale schema: logs warning, falls through to fetch", async () => {
+    const mockKv = makeMockKv();
+    // Valid JSON but missing required 'value' field
+    mockKv.store.set("test-key", JSON.stringify({ name: "stale" }));
+
+    let fetchCalled = false;
+    const fetchEffect = Effect.sync(() => {
+      fetchCalled = true;
+      return { name: "fresh", value: 42 };
+    });
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "fresh", value: 42 });
+    expect(fetchCalled).toBe(true);
+  });
+
+  it("supports dynamic TTL function based on the fetched value", async () => {
+    const mockKv = makeMockKv();
+    const fetchEffect = Effect.succeed({ name: "test", value: 10 });
+
+    const typedCache = TypedKvCache(TestSchema);
+    await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, (v) => v.value * 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(mockKv.put).toHaveBeenCalledWith(
+      "test-key",
+      JSON.stringify({ name: "test", value: 10 }),
+      { expirationTtl: 600 },
+    );
+  });
+});
 
 describe("KvCacheService", () => {
   it("returns null on a cache miss", async () => {

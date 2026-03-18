@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 
 /** Per-endpoint TTLs in seconds */
@@ -26,6 +26,40 @@ export class KvCacheService extends Context.Tag("KvCacheService")<
   KvCacheService,
   KvCacheInterface
 >() {}
+
+export const TypedKvCache = <A>(schema: S.Schema<A>) => ({
+  getOrFetch: <E, R>(
+    key: string,
+    fetch: Effect.Effect<A, E, R>,
+    ttl: number | ((value: A) => number),
+  ): Effect.Effect<A, E, R | KvCacheService> =>
+    Effect.gen(function* () {
+      const cache = yield* KvCacheService;
+      const cached = yield* cache.get(key);
+
+      if (cached !== null) {
+        const decoded = yield* Effect.try({
+          try: () => JSON.parse(cached),
+          catch: (e) => new Error(String(e)),
+        }).pipe(
+          Effect.flatMap(S.decodeUnknown(schema)),
+          Effect.tapError((e) =>
+            Effect.logWarning(
+              `TypedKvCache: cache decode failed for key "${key}": ${String(e)}`,
+            ),
+          ),
+          Effect.option,
+        );
+
+        if (Option.isSome(decoded)) return decoded.value;
+      }
+
+      const value = yield* fetch;
+      const resolvedTtl = typeof ttl === "function" ? ttl(value) : ttl;
+      yield* cache.set(key, JSON.stringify(value), resolvedTtl);
+      return value;
+    }),
+});
 
 export const KvCacheLive = Layer.effect(
   KvCacheService,
