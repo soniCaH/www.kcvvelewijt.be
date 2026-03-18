@@ -15,18 +15,36 @@ const meta = {
   argTypes: {
     from: {
       control: "select",
-      options: ["white", "gray-100", "kcvv-black", "kcvv-green-dark"],
+      options: [
+        "white",
+        "gray-100",
+        "kcvv-black",
+        "kcvv-green-dark",
+        "transparent",
+      ],
     },
     to: {
       control: "select",
-      options: ["white", "gray-100", "kcvv-black", "kcvv-green-dark"],
+      options: [
+        "white",
+        "gray-100",
+        "kcvv-black",
+        "kcvv-green-dark",
+        "transparent",
+      ],
     },
     type: { control: "select", options: ["diagonal", "double-diagonal"] },
     direction: { control: "select", options: ["left", "right"] },
     overlap: { control: "select", options: ["none", "half", "full"] },
     via: {
       control: "select",
-      options: ["white", "gray-100", "kcvv-black", "kcvv-green-dark"],
+      options: [
+        "white",
+        "gray-100",
+        "kcvv-black",
+        "kcvv-green-dark",
+        "transparent",
+      ],
     },
   },
   decorators: [

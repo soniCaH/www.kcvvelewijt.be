@@ -26,6 +26,7 @@ const BG_CLASS: Record<SectionBg, string> = {
   "gray-100": "bg-gray-100",
   "kcvv-black": "bg-kcvv-black",
   "kcvv-green-dark": "bg-kcvv-green-dark",
+  transparent: "bg-transparent",
 };
 
 export function SectionStack({ sections, className }: SectionStackProps) {

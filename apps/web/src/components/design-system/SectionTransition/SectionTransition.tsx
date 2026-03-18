@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils/cn";
 
-export type SectionBg = "white" | "gray-100" | "kcvv-black" | "kcvv-green-dark";
+export type SectionBg =
+  | "white"
+  | "gray-100"
+  | "kcvv-black"
+  | "kcvv-green-dark"
+  | "transparent";
 export type TransitionOverlap = "none" | "half" | "full";
 export type SectionTransitionConfig =
   | {
@@ -30,6 +35,7 @@ const BG_CLASS: Record<SectionBg, string> = {
   "gray-100": "bg-gray-100",
   "kcvv-black": "bg-kcvv-black",
   "kcvv-green-dark": "bg-kcvv-green-dark",
+  transparent: "bg-transparent",
 };
 
 // FROM color fills the upper triangle (source side).
@@ -87,14 +93,14 @@ export function SectionTransition({
         data-z-index={zIndex || undefined}
         // No background color — transparent wrapper eliminates ghost-border artifacts
         // when this element overlaps an adjacent section.
-        className={cn("relative w-full overflow-hidden", className)}
+        className={cn("w-full overflow-hidden", className)}
         style={style}
       >
-        {/* Top half: from → via. Transparent sub-wrapper + two complementary clips. */}
+        {/* First diagonal: from → via. In-flow block so it butts flush against the second. */}
         <div
           data-testid="st-sub"
-          className="absolute left-0 right-0 top-0"
-          style={{ height: "calc(50% + 1px)" }}
+          className="relative w-full"
+          style={{ height: DIAGONAL_HEIGHT }}
         >
           <div
             className={cn("absolute inset-0", BG_CLASS[from])}
@@ -106,11 +112,11 @@ export function SectionTransition({
             style={{ clipPath: CLIP_PATH_TO[direction] }}
           />
         </div>
-        {/* Bottom half: via → to. */}
+        {/* Second diagonal: via → to (opposite direction). */}
         <div
           data-testid="st-sub"
-          className="absolute left-0 right-0 bottom-0"
-          style={{ height: "calc(50% + 1px)" }}
+          className="relative w-full"
+          style={{ height: DIAGONAL_HEIGHT }}
         >
           <div
             className={cn("absolute inset-0", BG_CLASS[midColor])}
