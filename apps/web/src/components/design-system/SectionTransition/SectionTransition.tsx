@@ -32,9 +32,16 @@ const BG_CLASS: Record<SectionBg, string> = {
   "kcvv-green-dark": "bg-kcvv-green-dark",
 };
 
-const CLIP_PATH: Record<"left" | "right", string> = {
-  left: "polygon(100% 0, 100% 100%, 0 100%)",
-  right: "polygon(0 0, 0 100%, 100% 100%)",
+// FROM color fills the upper triangle (source side).
+const CLIP_PATH_FROM: Record<"left" | "right", string> = {
+  left: "polygon(0 0, 100% 0, 0 100%)", // upper-left  — diagonal ↘ left
+  right: "polygon(0 0, 100% 0, 100% 100%)", // upper-right — diagonal ↙ right
+};
+
+// TO color fills the lower triangle (destination side) — perfect complement of FROM.
+const CLIP_PATH_TO: Record<"left" | "right", string> = {
+  left: "polygon(100% 0, 100% 100%, 0 100%)", // lower-right
+  right: "polygon(0 0, 0 100%, 100% 100%)", // lower-left
 };
 
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
@@ -78,35 +85,41 @@ export function SectionTransition({
         data-height={height}
         data-margin-top={marginTop || undefined}
         data-z-index={zIndex || undefined}
-        className={cn(
-          "relative w-full overflow-hidden",
-          BG_CLASS[from],
-          className,
-        )}
+        // No background color — transparent wrapper eliminates ghost-border artifacts
+        // when this element overlaps an adjacent section.
+        className={cn("relative w-full overflow-hidden", className)}
         style={style}
       >
-        {/* Top half: from → via. Extra 1px height prevents sub-pixel seam. */}
+        {/* Top half: from → via. Transparent sub-wrapper + two complementary clips. */}
         <div
           data-testid="st-sub"
-          className={cn("absolute left-0 right-0 top-0", BG_CLASS[from])}
+          className="absolute left-0 right-0 top-0"
           style={{ height: "calc(50% + 1px)" }}
         >
+          <div
+            className={cn("absolute inset-0", BG_CLASS[from])}
+            style={{ clipPath: CLIP_PATH_FROM[direction] }}
+          />
           <div
             data-testid="st-sub-overlay"
             className={cn("absolute inset-0", BG_CLASS[midColor])}
-            style={{ clipPath: CLIP_PATH[direction] }}
+            style={{ clipPath: CLIP_PATH_TO[direction] }}
           />
         </div>
-        {/* Bottom half: via → to. Extra 1px height prevents sub-pixel seam. */}
+        {/* Bottom half: via → to. */}
         <div
           data-testid="st-sub"
-          className={cn("absolute left-0 right-0 bottom-0", BG_CLASS[midColor])}
+          className="absolute left-0 right-0 bottom-0"
           style={{ height: "calc(50% + 1px)" }}
         >
           <div
+            className={cn("absolute inset-0", BG_CLASS[midColor])}
+            style={{ clipPath: CLIP_PATH_FROM[opposite] }}
+          />
+          <div
             data-testid="st-sub-overlay"
             className={cn("absolute inset-0", BG_CLASS[to])}
-            style={{ clipPath: CLIP_PATH[opposite] }}
+            style={{ clipPath: CLIP_PATH_TO[opposite] }}
           />
         </div>
       </div>
@@ -119,13 +132,18 @@ export function SectionTransition({
       data-height={height}
       data-margin-top={marginTop || undefined}
       data-z-index={zIndex || undefined}
-      className={cn("relative w-full", BG_CLASS[from], className)}
+      // No background color — transparent wrapper eliminates ghost-border artifacts.
+      className={cn("relative w-full", className)}
       style={style}
     >
       <div
+        className={cn("absolute inset-0", BG_CLASS[from])}
+        style={{ clipPath: CLIP_PATH_FROM[direction] }}
+      />
+      <div
         data-testid="st-overlay"
         className={cn("absolute inset-0", BG_CLASS[to])}
-        style={{ clipPath: CLIP_PATH[direction] }}
+        style={{ clipPath: CLIP_PATH_TO[direction] }}
       />
     </div>
   );

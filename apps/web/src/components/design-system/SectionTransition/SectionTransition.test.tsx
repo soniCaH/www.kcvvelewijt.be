@@ -41,6 +41,7 @@ describe("SectionTransition", () => {
           direction="left"
         />,
       );
+      // st-overlay carries the TO (destination) color — CLIP_PATH_TO[left]
       const overlay = container.querySelector(
         "[data-testid='st-overlay']",
       ) as HTMLElement;
@@ -56,6 +57,7 @@ describe("SectionTransition", () => {
           direction="right"
         />,
       );
+      // st-overlay carries the TO (destination) color — CLIP_PATH_TO[right]
       const overlay = container.querySelector(
         "[data-testid='st-overlay']",
       ) as HTMLElement;
@@ -180,11 +182,11 @@ describe("SectionTransition", () => {
       const overlays = container.querySelectorAll(
         "[data-testid='st-sub-overlay']",
       ) as NodeListOf<HTMLElement>;
-      // direction=right → first overlay polygon(0 0, 0 100%, 100% 100%)
+      // direction=right → TO (via) clip = CLIP_PATH_TO[right] = lower-left
       expect(overlays[0].style.clipPath).toBe(
         "polygon(0 0, 0 100%, 100% 100%)",
       );
-      // opposite = left → polygon(100% 0, 100% 100%, 0 100%)
+      // opposite=left → TO (to) clip = CLIP_PATH_TO[left] = lower-right
       expect(overlays[1].style.clipPath).toBe(
         "polygon(100% 0, 100% 100%, 0 100%)",
       );
