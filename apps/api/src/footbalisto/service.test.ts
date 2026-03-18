@@ -99,6 +99,19 @@ describe("FootbalistoService", () => {
     }
   });
 
+  it("getTeamStats fails when fetch rejects (network failure)", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error("Network error"),
+    );
+
+    const result = await runGetTeamStats(1);
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
+    }
+  });
+
   it("getTeamStats fails when fetch returns HTTP 500", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
