@@ -50,13 +50,14 @@ create_worktree() {
   local path="${REPO_ROOT}/../kcvv-issue-${issue}"
 
   if git worktree list | grep -q "$path"; then
-    echo "Worktree already exists at $path"
+    echo "  [worktree] Already exists at $path" >&2
   else
-    git fetch origin --quiet
-    git worktree add "$path" -b "$branch" origin/main
-    echo "Created worktree at $path on branch $branch"
+    git fetch origin --quiet 2>/dev/null
+    git worktree add "$path" -b "$branch" origin/main 2>/dev/null
+    echo "  [worktree] Created at $path on branch $branch" >&2
   fi
 
+  # Only stdout is the path
   echo "$path"
 }
 
