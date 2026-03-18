@@ -27,7 +27,7 @@ export class KvCacheService extends Context.Tag("KvCacheService")<
   KvCacheInterface
 >() {}
 
-export const TypedKvCache = <A>(schema: S.Schema<A>) => ({
+export const TypedKvCache = <A>(schema: S.Schema<A, any>) => ({
   getOrFetch: <E, R>(
     key: string,
     fetch: Effect.Effect<A, E, R>,
