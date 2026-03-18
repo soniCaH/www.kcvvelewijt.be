@@ -55,15 +55,32 @@ create_worktree() {
   local branch="feat/issue-${issue}"
   local path="${REPO_ROOT}/../kcvv-issue-${issue}"
 
+  # Always fetch origin/main first — ensures merged PRs are included
+  echo "  [worktree] Fetching origin/main..." >&2
+  git fetch origin main >/dev/null 2>&1
+  local main_sha
+  main_sha=$(git rev-parse origin/main)
+  echo "  [worktree] origin/main @ ${main_sha:0:7}" >&2
+
   if git worktree list | grep -q "$path"; then
-    echo "  [worktree] Already exists at $path" >&2
+    # Worktree exists — check if it predates the latest main
+    local worktree_base
+    worktree_base=$(git -C "$path" merge-base HEAD origin/main 2>/dev/null || echo "")
+    if [ "$worktree_base" != "$main_sha" ]; then
+      echo "  [worktree] WARNING: worktree at $path is behind origin/main." >&2
+      echo "  Missing merged PRs. Clean up and re-queue with:" >&2
+      echo "    git worktree remove $path --force" >&2
+      echo "    git branch -d $branch" >&2
+      echo "    gh issue edit $issue --remove-label in-progress --add-label ready" >&2
+    else
+      echo "  [worktree] Existing worktree is up to date." >&2
+    fi
   else
-    git fetch origin --quiet >/dev/null 2>&1
     git worktree add "$path" -b "$branch" origin/main >/dev/null 2>&1
     echo "  [worktree] Created at $path on branch $branch" >&2
   fi
 
-  # Only stdout is the path — everything else goes to stderr
+  # Only stdout is the path
   echo "$path"
 }
 
