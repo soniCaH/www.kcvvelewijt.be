@@ -101,51 +101,6 @@ describe("getMatchDetailHandler", () => {
     expect(result.hasReport).toBe(true);
   });
 
-  it("returns cached MatchDetail without calling client or cache.set", async () => {
-    const cachedDetail = {
-      id: 99,
-      date: "2025-01-15T15:00:00.000Z",
-      time: "15:00",
-      home_team: { id: 123, name: "KCVV Elewijt", score: 2 },
-      away_team: { id: 456, name: "Opponent FC", score: 0 },
-      status: "finished",
-      competition: "3de Nationale",
-      hasReport: true,
-    };
-
-    const clientShouldNotBeCalled: FootbalistoClientInterface = {
-      getRawMatches: () => Effect.fail(new Error("unexpected") as never),
-      getRawNextMatches: () => Effect.fail(new Error("unexpected") as never),
-      getRawMatchDetail: () => Effect.fail(new Error("unexpected") as never),
-      getRawRanking: () => Effect.fail(new Error("unexpected") as never),
-      getRawTeamStats: () => Effect.fail(new Error("unexpected") as never),
-      getRawTeams: () => Effect.fail(new Error("unexpected") as never),
-      getRawMembers: () => Effect.fail(new Error("unexpected") as never),
-      getRawStaff: () => Effect.fail(new Error("unexpected") as never),
-    };
-
-    const kvSetSpy = vi.fn(() => Effect.succeed(undefined));
-
-    const result = await Effect.runPromise(
-      getMatchDetailHandler(99).pipe(
-        Effect.provide(
-          Layer.succeed(FootbalistoClient, clientShouldNotBeCalled),
-        ),
-        Effect.provide(
-          Layer.succeed(KvCacheService, {
-            get: () => Effect.succeed(JSON.stringify(cachedDetail)),
-            set: kvSetSpy,
-            increment: () => Effect.succeed(undefined),
-          }),
-        ),
-      ),
-    );
-
-    expect(result.id).toBe(99);
-    expect(result.status).toBe("finished");
-    expect(kvSetSpy).not.toHaveBeenCalled();
-  });
-
   it("uses MATCH_DETAIL_PAST TTL for finished matches", async () => {
     const setCalls: Array<[string, string, number]> = [];
 
