@@ -29,15 +29,13 @@ pick_next_issue() {
     echo "$SPECIFIC_ISSUE"
     return
   fi
-  # Tracer-bullet issues first, then ready issues by issue number (oldest first)
+  # Oldest ready issue first (simple and reliable)
+  # Tracer-bullet issues naturally come first since they are created first
   gh issue list \
     --label "ready" \
     --state open \
-    --json number,title,labels \
-    --jq 'sort_by(.number) | 
-          (map(select(.labels[].name == "tracer-bullet")) + 
-           map(select(.labels[].name != "tracer-bullet"))) | 
-          first | .number' 2>/dev/null || echo ""
+    --json number \
+    --jq 'sort_by(.number) | first | .number' 2>/dev/null || echo ""
 }
 
 count_ready() {
@@ -52,8 +50,8 @@ create_worktree() {
   if git worktree list | grep -q "$path"; then
     echo "  [worktree] Already exists at $path" >&2
   else
-    git fetch origin --quiet 2>/dev/null
-    git worktree add "$path" -b "$branch" origin/main 2>/dev/null
+    git fetch origin --quiet >/dev/null 2>&1
+    git worktree add "$path" -b "$branch" origin/main >/dev/null 2>&1
     echo "  [worktree] Created at $path on branch $branch" >&2
   fi
 
@@ -146,7 +144,7 @@ EOF
 
   # Run Claude non-interactively in the worktree
   cd "$worktree"
-  OUTPUT=$(claude --dangerously-skip-permissions --print "$prompt" 2>&1) || true
+  OUTPUT=$(command claude --dangerously-skip-permissions --print "$prompt" 2>&1) || true
   cd "$REPO_ROOT"
 
   echo "$OUTPUT"
