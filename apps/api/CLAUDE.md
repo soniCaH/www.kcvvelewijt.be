@@ -53,27 +53,6 @@ wrangler secret put PSD_API_AUTH --env staging
 wrangler secret put PSD_API_CLUB --env staging
 ```
 
-## PSD API gotchas
-
-### `/games/team/{teamId}/seasons/{seasonId}`
-
-- Returns `{ content: PsdGame[] }` — unwrap `.content`
-- `competitionType` is `{ id, name: string|null, type: string }`, **not** a string
-- `homeTeam`/`awayTeam` are string codes (`"1"`, `"A"`) — use `homeClub`/`awayClub` for IDs
-- `time` is a separate field (`"HH:MM"`); `date` always has `00:00` as its time component
-
-### `/statistics/team/{teamId}/from/{from}/to/{to}`
-
-- `squadPlayerStatistics`: array of per-player season summaries — **used**
-- `otherPlayerStatistics`: same shape, different players — **not used, omit from schema**
-- `goalsScored`: array of goal event objects — use **`.length`** for total goals scored
-- `goalsAgainst`: array of goal event objects — use **`.length`** for total goals conceded
-
-### Schema philosophy
-
-Only declare fields actively used in transforms. Effect Schema classes discard unknown
-fields automatically — don't include unused fields, never use `S.Unknown` for PSD schemas.
-
 ## Cache
 
 All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
@@ -87,9 +66,6 @@ All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
 | `ranking:team:{id}`     | 4 h                             |
 | `stats:team:{id}`       | 12 h                            |
 | `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter)   |
-
-**Cache date deserialization**: `Date` objects become ISO strings in JSON. Always use
-`S.decodeUnknown(schema)` on cache reads — never `JSON.parse(...) as T`.
 
 ## Rules
 

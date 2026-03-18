@@ -6,12 +6,6 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 `/`, `/news`, `/news/[slug]`, `/players/[slug]`, `/team/[slug]`, `/jeugd`, `/game/[matchId]`, `/sponsors`, `/club/organigram`, `/hulp`, `/search`, `/privacy`
 
-## Test Coverage
-
-- Services ~98% | Schemas 100% | Components 100% | Utils ~74%
-- Gap: `dates.ts` at 52%, 3 unused schemas at 0%
-- No E2E tests yet (Playwright configured, no specs)
-
 ## Design System & Storybook (MANDATORY)
 
 ### When to update UI stories
@@ -51,35 +45,9 @@ Use these top-level groups — enforced by `storySort` in `.storybook/preview.ts
 
 MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) without `remark-gfm`. Always use native HTML `<table>` elements in `.mdx` files.
 
-## Design Conventions (Redesign — locked)
+## Design Conventions
 
-### Section padding
-
-All full-width page sections use `py-20` (80px). Do not use `py-16`, `py-24`, or other values
-for top-level sections — consistency is load-bearing for the dark/light alternation rhythm.
-
-### Border-radius
-
-| Context                                       | Class                      | Value         |
-| --------------------------------------------- | -------------------------- | ------------- |
-| Interactive elements (buttons, chips, badges) | `rounded-sm`               | 2px           |
-| Cards                                         | `rounded`                  | 4px (maximum) |
-| Never outside design system components        | `rounded-lg`, `rounded-xl` | —             |
-
-No `rounded-lg` or larger outside of design system primitives.
-
-### Colour tokens (redesign palette)
-
-| Token             | Hex       | Usage                                        |
-| ----------------- | --------- | -------------------------------------------- |
-| `kcvv-green`      | `#4acf52` | Primary brand — CTAs, accents, active states |
-| `kcvv-green-dark` | `#008755` | Dark section backgrounds, depth accents      |
-| `kcvv-black`      | `#1E2024` | Nav, dark sections                           |
-
-### Section alternation
-
-Dark/light sections must alternate: `kcvv-black` / `kcvv-green-dark` ↔ white / `gray-100`.
-Never two dark or two light sections in a row.
+**Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.
 
 ### Design system locations
 

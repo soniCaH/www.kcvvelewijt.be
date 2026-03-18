@@ -171,10 +171,7 @@ Interactive organizational chart of the club structure.
 
 ### Design System
 
-Comprehensive KCVV brand guidelines and component patterns.
-
-**Status:** Active
-**Docs:** `DESIGN_SYSTEM.md`
+Comprehensive KCVV brand guidelines and component patterns. See `apps/web/CLAUDE.md` for design conventions and tokens.
 
 ### Sanity CMS Integration
 
@@ -235,12 +232,11 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 
 ## Documentation
 
-- `DESIGN_SYSTEM.md` — design tokens, colors, typography, component patterns
-- `SCHEMA_GUIDE.md` — Effect Schema patterns for this project
-- `STORYBOOK.md` — Storybook authoring guide
 - `RESPONSIBILITY.md` — Responsibility Finder feature
 - `ORGANIGRAM.md` — Organigram feature
+- `ACCESSIBILITY_TESTING.md` — Accessibility testing guide
 - `SECURITY.md` — security policies
+- `apps/web/CLAUDE.md` — design system conventions (colors, spacing, Storybook rules)
 - `.claude/CLAUDE.md` — Claude Code project instructions
 - `docs/plans/` — architecture decision records
 
