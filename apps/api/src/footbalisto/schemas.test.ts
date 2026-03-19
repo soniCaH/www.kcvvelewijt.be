@@ -1,43 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { Schema as S } from "effect";
 import {
-  FootbalistoMatchesArray,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
 } from "./schemas";
-
-const rawMatch = {
-  id: 1,
-  teamId: 1,
-  teamName: "KCVV Elewijt A",
-  timestamp: 1737388800,
-  age: "Seniors",
-  date: "2025-01-15 15:00",
-  time: "1970-01-01 15:00",
-  homeClub: { id: 123, name: "KCVV Elewijt" },
-  awayClub: { id: 456, name: "Opponent FC" },
-  goalsHomeTeam: 3,
-  goalsAwayTeam: 1,
-  homeTeamId: 1,
-  awayTeamId: 2,
-  status: 1,
-  competitionType: "3de Nationale",
-  viewGameReport: true,
-};
-
-describe("FootbalistoMatchesArray", () => {
-  it("decodes a valid match array", () => {
-    const result = S.decodeUnknownSync(FootbalistoMatchesArray)([rawMatch]);
-    expect(result[0]?.id).toBe(1);
-    expect(result[0]?.status).toBe(1);
-  });
-
-  it("decodes a match without optional fields (teamId, age)", () => {
-    const { teamId: _, age: __, ...minimalMatch } = rawMatch;
-    const result = S.decodeUnknownSync(FootbalistoMatchesArray)([minimalMatch]);
-    expect(result[0]?.teamId).toBeUndefined();
-  });
-});
 
 describe("FootbalistoMatchDetailResponse", () => {
   it("decodes a response without lineup", () => {

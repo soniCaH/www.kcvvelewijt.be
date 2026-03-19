@@ -13,12 +13,14 @@ src/
 │   └── kv-cache.ts           ← KvCacheService (get/set with TTL)
 ├── footbalisto/
 │   ├── schemas.ts            ← Raw PSD API schemas (internal only)
-│   ├── transforms.ts         ← PSD → normalized api-contract types
-│   └── client.ts             ← FootbalistoClient Effect service + Live layer
-└── handlers/
-    ├── matches.ts            ← MatchesApi HttpApiGroup + business logic
-    ├── ranking.ts            ← RankingApi HttpApiGroup + business logic
-    └── stats.ts              ← StatsApi HttpApiGroup + business logic
+│   └── service.ts            ← FootbalistoService (fetch + transform + business logic)
+├── handlers/
+│   ├── matches.ts            ← MatchesApi HttpApiGroup
+│   ├── ranking.ts            ← RankingApi HttpApiGroup
+│   └── stats.ts              ← StatsApi HttpApiGroup
+└── sync/
+    ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
+    └── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
 ```
 
 ## Local development

@@ -15,30 +15,6 @@ export class FootbalistoClub extends S.Class<FootbalistoClub>(
   version: S.optional(S.NullOr(S.Number)),
 }) {}
 
-export class FootbalistoMatch extends S.Class<FootbalistoMatch>(
-  "FootbalistoMatch",
-)({
-  id: S.Number,
-  teamId: S.optional(S.Number), // Only in /matches/next
-  teamName: S.optional(S.String), // Only in /matches/next
-  timestamp: S.Number,
-  age: S.optional(S.String), // Only in /matches/next
-  date: S.String, // Format: "YYYY-MM-DD HH:MM"
-  time: S.String, // Legacy field
-  homeClub: FootbalistoClub,
-  awayClub: FootbalistoClub,
-  goalsHomeTeam: S.NullOr(S.Number),
-  goalsAwayTeam: S.NullOr(S.Number),
-  homeTeamId: S.NullOr(S.Number),
-  awayTeamId: S.NullOr(S.Number),
-  status: S.Number, // 0=no special status, 1=FF, 2=AFG, 3=STOP
-  cancelled: S.optional(S.NullOr(S.Boolean)),
-  competitionType: S.String,
-  viewGameReport: S.Boolean,
-}) {}
-
-export const FootbalistoMatchesArray = S.Array(FootbalistoMatch);
-
 export class FootbalistoRankingClub extends S.Class<FootbalistoRankingClub>(
   "FootbalistoRankingClub",
 )({
