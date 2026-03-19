@@ -6,6 +6,7 @@ import {
   type TeamStats as TeamStatsType,
   type Match,
   type MatchDetail,
+  type RankingEntry,
   PsdTeamsArray,
 } from "@kcvv/api-contract";
 import {
@@ -14,6 +15,7 @@ import {
   PsdTeamStatsResponse,
   PsdMatchListSchema,
   FootbalistoMatchDetailResponse,
+  FootbalistoRankingArray,
   type PsdGame,
 } from "./schemas";
 import {
@@ -21,6 +23,7 @@ import {
   transformPsdGame,
   transformFootbalistoMatchDetail,
   matchDetailToMatch,
+  transformFootbalistoRankingEntry,
 } from "./transforms";
 
 export class FootbalistoServiceError extends Error {
@@ -52,6 +55,10 @@ export interface FootbalistoServiceInterface {
   readonly getMatchDetail: (
     matchId: number,
   ) => Effect.Effect<MatchDetail, FootbalistoServiceError>;
+  readonly getRanking: (
+    teamId: number,
+    logoCdnUrl: string,
+  ) => Effect.Effect<readonly RankingEntry[], FootbalistoServiceError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -256,6 +263,30 @@ export const FootbalistoServiceLive = Layer.effect(
         fetchRawMatchDetail(matchId).pipe(
           Effect.map(transformFootbalistoMatchDetail),
         ),
+
+      getRanking: (teamId: number, logoCdnUrl: string) =>
+        Effect.gen(function* () {
+          const competitions = yield* countedFetch(
+            `${base}/teams/${teamId}/ranking`,
+            FootbalistoRankingArray,
+          );
+
+          const competition =
+            competitions.find(
+              (c) =>
+                c.teams.length > 0 &&
+                c.type.toUpperCase() !== "CUP" &&
+                c.type.toUpperCase() !== "FRIENDLY",
+            ) ?? competitions.find((c) => c.teams.length > 0);
+
+          if (!competition || competition.teams.length === 0) {
+            return [] as readonly RankingEntry[];
+          }
+
+          return competition.teams.map((e) =>
+            transformFootbalistoRankingEntry(e, logoCdnUrl),
+          );
+        }),
     };
   }),
 );

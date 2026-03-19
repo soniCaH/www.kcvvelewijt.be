@@ -2,48 +2,40 @@ import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
 import { getRankingHandler } from "./ranking";
 import {
-  FootbalistoClient,
-  type FootbalistoClientInterface,
-} from "../footbalisto/client";
+  FootbalistoService,
+  type FootbalistoServiceInterface,
+} from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import type { RankingEntry } from "@kcvv/api-contract";
 
-const rawCompetitions = [
+const rankingEntries: readonly RankingEntry[] = [
   {
-    name: "3de Nationale A",
-    type: "LEAGUE",
-    teams: [
-      {
-        id: 1,
-        rank: 1,
-        matchesPlayed: 20,
-        wins: 15,
-        draws: 3,
-        losses: 2,
-        goalsScored: 45,
-        goalsConceded: 20,
-        points: 48,
-        team: {
-          id: 101,
-          club: { id: 123, localName: "KCVV Elewijt", name: "KCVV Elewijt" },
-        },
-      },
-    ],
+    position: 1,
+    team_id: 101,
+    team_name: "KCVV Elewijt",
+    team_logo: "https://cdn.example.com/extra_groot/123.png",
+    played: 20,
+    won: 15,
+    drawn: 3,
+    lost: 2,
+    goals_for: 45,
+    goals_against: 20,
+    goal_difference: 25,
+    points: 48,
+    form: undefined,
   },
-  { name: "Beker", type: "CUP", teams: [] }, // should be skipped
 ];
 
-function makeClientMock(
-  overrides: Partial<FootbalistoClientInterface> = {},
-): FootbalistoClientInterface {
+function makeServiceMock(
+  overrides: Partial<FootbalistoServiceInterface> = {},
+): FootbalistoServiceInterface {
   return {
-    getRawMatches: () => Effect.succeed([]),
-    getRawNextMatches: () => Effect.succeed([]),
-    getRawMatchDetail: () => Effect.fail(new Error("not needed") as never),
-    getRawRanking: () => Effect.succeed(rawCompetitions),
-    getRawTeamStats: () => Effect.fail(new Error("not needed") as never),
-    getRawTeams: () => Effect.succeed([]),
-    getRawMembers: () => Effect.succeed([]),
-    getRawStaff: () => Effect.succeed([]),
+    getTeamStats: () => Effect.fail(new Error("not needed") as never),
+    getTeamMatches: () => Effect.fail(new Error("not needed") as never),
+    getNextMatches: () => Effect.fail(new Error("not needed") as never),
+    getMatchById: () => Effect.fail(new Error("not needed") as never),
+    getMatchDetail: () => Effect.fail(new Error("not needed") as never),
+    getRanking: () => Effect.succeed(rankingEntries),
     ...overrides,
   };
 }
@@ -55,10 +47,10 @@ const cacheMock: KvCacheInterface = {
 };
 
 describe("getRankingHandler", () => {
-  it("returns ranking from first non-CUP/FRIENDLY competition", async () => {
+  it("yields FootbalistoService and returns ranking entries", async () => {
     const result = await Effect.runPromise(
       getRankingHandler(1, "https://cdn.example.com").pipe(
-        Effect.provide(Layer.succeed(FootbalistoClient, makeClientMock())),
+        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
       ),
     );
@@ -67,15 +59,14 @@ describe("getRankingHandler", () => {
     expect(result[0]?.points).toBe(48);
   });
 
-  it("returns empty array when no competition has teams", async () => {
+  it("returns empty array when service returns empty", async () => {
     const result = await Effect.runPromise(
       getRankingHandler(1, "https://cdn.example.com").pipe(
         Effect.provide(
           Layer.succeed(
-            FootbalistoClient,
-            makeClientMock({
-              getRawRanking: () =>
-                Effect.succeed([{ name: "Cup", type: "CUP", teams: [] }]),
+            FootbalistoService,
+            makeServiceMock({
+              getRanking: () => Effect.succeed([]),
             }),
           ),
         ),
