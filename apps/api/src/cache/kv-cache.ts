@@ -4,7 +4,7 @@ import { WorkerEnvTag } from "../env";
 /** Per-endpoint TTLs in seconds */
 export const TTL = {
   MATCHES_TEAM: 60 * 60 * 6, // 6 hours — season schedule rarely changes mid-week
-  NEXT_MATCHES: 60 * 30, // 30 minutes — home page widget; was 5 min (too aggressive)
+  NEXT_MATCHES: 60 * 60 * 4, // 4 hours — no live scores, schedule is stable for hours
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
   MATCH_DETAIL_LIVE: 60, // 60 seconds — live match updates
   RANKING: 60 * 60 * 4, // 4 hours — updates only after a match day
