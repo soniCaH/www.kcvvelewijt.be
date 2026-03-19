@@ -66,13 +66,17 @@ export const getMatchDetailHandler = (
     return yield* service.getMatchDetail(matchId);
   });
 
-  // Finished and forfeited matches are immutable — cache 7 days.
-  // Postponed/stopped may be rescheduled; scheduled = upcoming. Cache 60s.
-  return matchDetailCache.getOrFetch(cacheKey, fetchDetail, (detail) =>
-    detail.status === "finished" || detail.status === "forfeited"
+  // Finished ≥48h ago → 7 days (immutable). All other cases → 24h.
+  const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+  return matchDetailCache.getOrFetch(cacheKey, fetchDetail, (detail) => {
+    const isFinished =
+      detail.status === "finished" || detail.status === "forfeited";
+    const isOldEnough =
+      Date.now() - new Date(detail.date).getTime() >= FORTY_EIGHT_HOURS_MS;
+    return isFinished && isOldEnough
       ? TTL.MATCH_DETAIL_PAST
-      : TTL.MATCH_DETAIL_LIVE,
-  );
+      : TTL.MATCH_DETAIL_DEFAULT;
+  });
 };
 
 export const MatchesApiLive = HttpApiBuilder.group(

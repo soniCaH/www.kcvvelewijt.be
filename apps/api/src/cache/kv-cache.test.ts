@@ -37,6 +37,30 @@ describe("TTL constants", () => {
   it("NEXT_MATCHES is 4 hours", () => {
     expect(TTL.NEXT_MATCHES).toBe(60 * 60 * 4);
   });
+
+  it("MATCHES_TEAM is 24 hours", () => {
+    expect(TTL.MATCHES_TEAM).toBe(60 * 60 * 24);
+  });
+
+  it("RANKING is 24 hours", () => {
+    expect(TTL.RANKING).toBe(60 * 60 * 24);
+  });
+
+  it("STATS is 24 hours", () => {
+    expect(TTL.STATS).toBe(60 * 60 * 24);
+  });
+
+  it("MATCH_DETAIL_LIVE does not exist", () => {
+    expect("MATCH_DETAIL_LIVE" in TTL).toBe(false);
+  });
+
+  it("MATCH_DETAIL_DEFAULT is 24 hours", () => {
+    expect(TTL.MATCH_DETAIL_DEFAULT).toBe(60 * 60 * 24);
+  });
+
+  it("MATCH_DETAIL_PAST is 7 days (unchanged)", () => {
+    expect(TTL.MATCH_DETAIL_PAST).toBe(60 * 60 * 24 * 7);
+  });
 });
 
 describe("TypedKvCache", () => {

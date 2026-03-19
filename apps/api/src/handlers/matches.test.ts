@@ -104,12 +104,19 @@ describe("getMatchDetailHandler", () => {
     expect(result.hasReport).toBe(true);
   });
 
-  it("uses MATCH_DETAIL_PAST TTL for finished matches", async () => {
+  it("uses MATCH_DETAIL_PAST TTL for finished matches ≥48h ago", async () => {
     const setCalls: Array<[string, string, number]> = [];
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
     await Effect.runPromise(
       getMatchDetailHandler(99).pipe(
-        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+        Effect.provide(
+          Layer.succeed(FootbalistoService, {
+            ...makeServiceMock(),
+            getMatchDetail: () =>
+              Effect.succeed({ ...baseDetail, date: threeDaysAgo }),
+          }),
+        ),
         Effect.provide(
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(null),
@@ -130,7 +137,40 @@ describe("getMatchDetailHandler", () => {
     expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_PAST);
   });
 
-  it("uses MATCH_DETAIL_LIVE TTL for scheduled matches", async () => {
+  it("uses MATCH_DETAIL_DEFAULT TTL for finished matches <48h ago", async () => {
+    const setCalls: Array<[string, string, number]> = [];
+    const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+
+    await Effect.runPromise(
+      getMatchDetailHandler(99).pipe(
+        Effect.provide(
+          Layer.succeed(FootbalistoService, {
+            ...makeServiceMock(),
+            getMatchDetail: () =>
+              Effect.succeed({ ...baseDetail, date: oneDayAgo }),
+          }),
+        ),
+        Effect.provide(
+          Layer.succeed(KvCacheService, {
+            get: () => Effect.succeed(null),
+            increment: () => Effect.succeed(undefined),
+            set: vi.fn((key, value, ttl) => {
+              setCalls.push([key, value, ttl]);
+              return Effect.succeed(undefined);
+            }),
+          }),
+        ),
+        Effect.orDie,
+      ),
+    );
+
+    const detailCall = setCalls.find(([key]) =>
+      key.startsWith("match:detail:"),
+    );
+    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_DEFAULT);
+  });
+
+  it("uses MATCH_DETAIL_DEFAULT TTL for scheduled matches", async () => {
     const setCalls: Array<[string, string, number]> = [];
 
     await Effect.runPromise(
@@ -158,7 +198,7 @@ describe("getMatchDetailHandler", () => {
     const detailCall = setCalls.find(([key]) =>
       key.startsWith("match:detail:"),
     );
-    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_LIVE);
+    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_DEFAULT);
   });
 });
 
