@@ -841,15 +841,15 @@ describe("ResponsibilityFinder", () => {
     it("shows example searches on empty state before role selection", () => {
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
-      // Should show hint buttons with hardcoded display text
-      expect(screen.getByText("Mijn kind wil inschrijven")).toBeInTheDocument();
+      // Should show hint buttons with text derived from the resolved path's question
+      expect(screen.getByText("wil mij graag inschrijven")).toBeInTheDocument();
       expect(
-        screen.getByText("Geblesseerd tijdens training"),
+        screen.getByText("heb een ongeval op training/wedstrijd"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Ik ontvang geen mails meer"),
+        screen.getByText("wil het attest van mijn mutualiteit invullen"),
       ).toBeInTheDocument();
-      expect(screen.getByText("Wedstrijden zoeken")).toBeInTheDocument();
+      expect(screen.getByText("zoek mijn wedstrijden")).toBeInTheDocument();
     });
 
     it("does not show hints after role is selected", async () => {
@@ -859,7 +859,7 @@ describe("ResponsibilityFinder", () => {
       await selectRole(user, "speler");
 
       expect(
-        screen.queryByText("Mijn kind wil inschrijven"),
+        screen.queryByText("wil mij graag inschrijven"),
       ).not.toBeInTheDocument();
     });
 
@@ -867,8 +867,8 @@ describe("ResponsibilityFinder", () => {
       const user = userEvent.setup();
       render(<ResponsibilityFinder paths={responsibilityPaths} />);
 
-      // Click the "Mijn kind wil inschrijven" hint
-      await user.click(screen.getByText("Mijn kind wil inschrijven"));
+      // Click the "inschrijving-nieuw-lid" hint
+      await user.click(screen.getByText("wil mij graag inschrijven"));
 
       // Should show the result card directly (no intermediate suggestion list)
       await waitFor(() => {
@@ -894,10 +894,12 @@ describe("ResponsibilityFinder", () => {
       render(<ResponsibilityFinder paths={pathsWithoutWedstrijden} />);
 
       // The hint for wedstrijden-zoeken should not appear
-      expect(screen.queryByText("Wedstrijden zoeken")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("zoek mijn wedstrijden"),
+      ).not.toBeInTheDocument();
 
       // Other hints should still appear
-      expect(screen.getByText("Mijn kind wil inschrijven")).toBeInTheDocument();
+      expect(screen.getByText("wil mij graag inschrijven")).toBeInTheDocument();
     });
   });
 
@@ -928,7 +930,7 @@ describe("ResponsibilityFinder", () => {
         ).toBeInTheDocument();
         expect(screen.getByRole("link", { name: /contact/i })).toHaveAttribute(
           "href",
-          "/contact",
+          "/club/contact",
         );
         expect(
           screen.getByRole("link", { name: /organigram/i }),
@@ -1012,7 +1014,7 @@ describe("ResponsibilityFinder", () => {
         ).not.toBeInTheDocument();
         // Hints should be back
         expect(
-          screen.getByText("Mijn kind wil inschrijven"),
+          screen.getByText("wil mij graag inschrijven"),
         ).toBeInTheDocument();
       });
     });

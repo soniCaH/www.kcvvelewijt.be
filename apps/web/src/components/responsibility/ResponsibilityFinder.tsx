@@ -91,11 +91,11 @@ const categoryColors = {
   },
 } as const;
 
-const ONBOARDING_HINTS = [
-  { slug: "inschrijving-nieuw-lid", label: "Mijn kind wil inschrijven" },
-  { slug: "ongeval-speler-training", label: "Geblesseerd tijdens training" },
-  { slug: "mutualiteit-attest", label: "Ik ontvang geen mails meer" },
-  { slug: "wedstrijden-zoeken", label: "Wedstrijden zoeken" },
+const ONBOARDING_HINT_SLUGS = [
+  "inschrijving-nieuw-lid",
+  "ongeval-speler-training",
+  "mutualiteit-attest",
+  "wedstrijden-zoeken",
 ] as const;
 
 /**
@@ -288,15 +288,16 @@ export function ResponsibilityFinder({
     }
   }, [initialPath, initialPathId, paths]);
 
-  // Resolve onboarding hints against available paths
-  const resolvedHints = ONBOARDING_HINTS.map((hint) => ({
-    ...hint,
-    path: paths.find((p) => p.id === hint.slug),
+  // Resolve onboarding hints against available paths — derive display text from path data
+  const resolvedHints = ONBOARDING_HINT_SLUGS.map((slug) => ({
+    slug,
+    path: paths.find((p) => p.id === slug),
   })).filter(
     (h): h is typeof h & { path: ResponsibilityPath } => h.path != null,
   );
 
-  const showOnboardingHints = !selectedRole && !selectedResult;
+  const showOnboardingHints =
+    !selectedRole && !selectedResult && !initialPath && !initialPathId;
 
   return (
     <div className={`responsibility-finder ${compact ? "compact" : ""}`}>
@@ -315,7 +316,7 @@ export function ResponsibilityFinder({
           <div className="role-dropdown-container relative inline-block">
             <button
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="min-h-[44px] min-w-[44px] px-4 py-2 border-b-4 text-kcvv-gray-blue transition-all inline-flex items-center gap-2 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+              className="min-h-11 min-w-11 px-4 py-2 border-b-4 text-kcvv-gray-blue transition-all inline-flex items-center gap-2 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
               style={{
                 fontFamily: "Montserrat, sans-serif",
                 borderBottomColor: "var(--color-kcvv-green-bright)",
@@ -344,7 +345,7 @@ export function ResponsibilityFinder({
                       key={role.value}
                       onClick={() => handleRoleSelect(role.value)}
                       className={`
-                        w-full text-left px-4 min-h-[44px] py-3 text-lg font-medium transition-colors
+                        w-full text-left px-4 min-h-11 py-3 text-lg font-medium transition-colors
                         flex items-center justify-between
                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-inset
                         ${isSelected ? "" : "hover:bg-gray-50"}
@@ -390,9 +391,9 @@ export function ResponsibilityFinder({
                 <button
                   key={hint.slug}
                   onClick={() => handleHintClick(hint.path)}
-                  className="min-h-[44px] px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-kcvv-green hover:text-kcvv-green transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                  className="min-h-11 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-kcvv-green hover:text-kcvv-green transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
                 >
-                  {hint.label}
+                  {hint.path.question}
                 </button>
               ))}
             </div>
@@ -450,7 +451,7 @@ export function ResponsibilityFinder({
                     setActiveDescendantIdx(-1);
                     inputRef.current?.focus();
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-kcvv-gray hover:text-white hover:bg-red-500 transition-all duration-200 rounded-full hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-kcvv-gray hover:text-white hover:bg-red-500 transition-all duration-200 rounded-full hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green"
                   aria-label="Clear search"
                 >
                   <X size={20} />
@@ -501,7 +502,7 @@ export function ResponsibilityFinder({
                         aria-selected={isActive}
                         onClick={() => handleSuggestionClick(suggestion.path)}
                         className={`
-                          w-full text-left px-5 min-h-[44px] py-4 transition-all duration-200 cursor-pointer
+                          w-full text-left px-5 min-h-11 py-4 transition-all duration-200 cursor-pointer
                           ${idx !== 0 ? "border-t border-gray-100" : ""}
                           ${isActive ? "bg-gray-100" : "hover:bg-gray-50"} group relative overflow-hidden
                           ${idx === 0 ? "rounded-t-xl" : ""} ${idx === suggestions.length - 1 ? "rounded-b-xl" : ""}
@@ -585,14 +586,14 @@ export function ResponsibilityFinder({
             <div className="flex gap-3 mb-4">
               <button
                 onClick={handleBack}
-                className="min-h-[44px] px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
               >
                 <ArrowLeft size={16} />
                 Terug
               </button>
               <button
                 onClick={handleReset}
-                className="min-h-[44px] px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
               >
                 <RotateCcw size={16} />
                 Opnieuw beginnen
@@ -608,14 +609,14 @@ export function ResponsibilityFinder({
               </h4>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="/contact"
-                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                  href="/club/contact"
+                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
                 >
                   Neem contact op
                 </Link>
                 <Link
                   href="/club/organigram"
-                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
                 >
                   Bekijk het organigram
                 </Link>
