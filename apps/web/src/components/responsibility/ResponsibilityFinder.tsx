@@ -239,6 +239,7 @@ export function ResponsibilityFinder({
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as Element).closest(".suggestions-container")) {
         setShowSuggestions(false);
+        setActiveDescendantIdx(-1);
       }
       if (
         dropdownRef.current &&
