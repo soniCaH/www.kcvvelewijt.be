@@ -18,6 +18,7 @@ import {
   PsdMatchListSchema,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
+  type PsdRawGame,
   type PsdGame,
   type FootbalistoLineupPlayer,
   type FootbalistoMatchEvent,
@@ -79,6 +80,14 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
     date: new Date(Date.UTC(year!, month! - 1, day!, hour, minute)),
     time: timePart,
   };
+}
+
+/**
+ * Type guard: narrows a PsdRawGame (external) to PsdGame (internal).
+ * Rejects "ghost" matches where a club is null (opponent forfeited/removed from league).
+ */
+function isValidGame(game: PsdRawGame): game is PsdGame {
+  return game.homeClub !== null && game.awayClub !== null;
 }
 
 function transformPsdGame(game: PsdGame): Match {
@@ -534,7 +543,13 @@ export const FootbalistoServiceLive = Layer.effect(
             `${base}/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
           );
-          return data.content.map(transformPsdGame);
+          const ghostGames = data.content.filter((g) => !isValidGame(g));
+          if (ghostGames.length > 0) {
+            yield* Effect.log(
+              `[matches] Skipping ${ghostGames.length} ghost game(s) for team ${teamId}: ${ghostGames.map((g) => `id=${g.id}`).join(", ")}`,
+            );
+          }
+          return data.content.filter(isValidGame).map(transformPsdGame);
         }),
 
       getNextMatches: () =>
@@ -553,6 +568,7 @@ export const FootbalistoServiceLive = Layer.effect(
                 ).pipe(
                   Effect.map((data) => {
                     const next = [...data.content]
+                      .filter(isValidGame)
                       .filter((m) => toMs(m) >= now)
                       .sort((a, b) => toMs(a) - toMs(b))[0];
                     return next
@@ -570,6 +586,7 @@ export const FootbalistoServiceLive = Layer.effect(
           );
 
           // Filter out nulls (team 23 is excluded before fetching)
+          // Games already passed isValidGame filter upstream
           return teamNextMatches
             .filter((m): m is PsdGame => m !== null)
             .map(transformPsdGame);

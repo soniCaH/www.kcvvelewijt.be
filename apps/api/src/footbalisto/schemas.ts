@@ -140,32 +140,50 @@ export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
   type: S.String, // "LEAGUE", "CUP", "FRIENDLY", etc.
 }) {}
 
-/**
- * Single game object from PSD `/games/team/{teamId}/seasons/{seasonId}`.
- * Field names differ from the old Footbalisto API:
- *  - competitionType is an object (not a string)
- *  - homeTeam/awayTeam are string team codes ("1", "A") — not used for IDs, use homeClub/awayClub
- *  - time is a separate field ("HH:MM"); date has "00:00" as its time component
- *  - no timestamp, no viewGameReport (use reportGeneral)
- */
-export class PsdGame extends S.Class<PsdGame>("PsdGame")({
+// ─── Shared game fields ─────────────────────────────────────────────────────
+// Field names differ from the old Footbalisto API:
+//  - competitionType is an object (not a string)
+//  - homeTeam/awayTeam are string team codes ("1", "A") — not used for IDs, use homeClub/awayClub
+//  - time is a separate field ("HH:MM"); date has "00:00" as its time component
+//  - no timestamp, no viewGameReport (use reportGeneral)
+
+const PsdGameBaseFields = {
   id: S.Number,
   status: S.Number,
   date: S.String, // "YYYY-MM-DD 00:00"
   time: S.optional(S.NullOr(S.String)), // "HH:MM" actual kickoff time
   goalsHomeTeam: S.NullOr(S.Number),
   goalsAwayTeam: S.NullOr(S.Number),
-  homeClub: FootbalistoClub,
-  awayClub: FootbalistoClub,
   competitionType: S.optional(S.NullOr(PsdCompetitionType)),
   reportGeneral: S.optional(S.NullOr(S.Boolean)),
   teamId: S.optional(S.NullOr(S.Number)),
   // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
   cancelled: S.optional(S.NullOr(S.Boolean)),
+};
+
+/**
+ * Raw game from PSD — external contract.
+ * Clubs are nullable because PSD returns null for "ghost" matches
+ * (opponent forfeited/removed from league).
+ */
+export class PsdRawGame extends S.Class<PsdRawGame>("PsdRawGame")({
+  ...PsdGameBaseFields,
+  homeClub: S.NullOr(FootbalistoClub),
+  awayClub: S.NullOr(FootbalistoClub),
+}) {}
+
+/**
+ * Validated game — internal contract.
+ * Both clubs guaranteed non-null; safe to use in transforms.
+ */
+export class PsdGame extends S.Class<PsdGame>("PsdGame")({
+  ...PsdGameBaseFields,
+  homeClub: FootbalistoClub,
+  awayClub: FootbalistoClub,
 }) {}
 
 export const PsdMatchListSchema = S.Struct({
-  content: S.Array(PsdGame),
+  content: S.Array(PsdRawGame),
 });
 
 export class PsdTeamStatsResponse extends S.Class<PsdTeamStatsResponse>(
