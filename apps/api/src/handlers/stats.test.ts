@@ -21,6 +21,10 @@ const mockServiceImpl: FootbalistoServiceInterface = {
       clean_sheets: 8,
       top_scorers: [],
     }),
+  getTeamMatches: () => Effect.die("not needed"),
+  getNextMatches: () => Effect.die("not needed"),
+  getMatchById: () => Effect.die("not needed"),
+  getMatchDetail: () => Effect.die("not needed"),
 };
 
 const cacheMock: KvCacheInterface = {

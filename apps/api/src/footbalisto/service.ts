@@ -1,9 +1,27 @@
 import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
-import { TeamStats, type TeamStats as TeamStatsType } from "@kcvv/api-contract";
-import { PsdSeason, PsdSeasonsSchema, PsdTeamStatsResponse } from "./schemas";
-import { transformPsdTeamStats } from "./transforms";
+import {
+  TeamStats,
+  type TeamStats as TeamStatsType,
+  type Match,
+  type MatchDetail,
+  PsdTeamsArray,
+} from "@kcvv/api-contract";
+import {
+  PsdSeason,
+  PsdSeasonsSchema,
+  PsdTeamStatsResponse,
+  PsdMatchListSchema,
+  FootbalistoMatchDetailResponse,
+  type PsdGame,
+} from "./schemas";
+import {
+  transformPsdTeamStats,
+  transformPsdGame,
+  transformFootbalistoMatchDetail,
+  matchDetailToMatch,
+} from "./transforms";
 
 export class FootbalistoServiceError extends Error {
   readonly _tag = "FootbalistoServiceError" as const;
@@ -21,6 +39,19 @@ export interface FootbalistoServiceInterface {
   readonly getTeamStats: (
     teamId: number,
   ) => Effect.Effect<TeamStatsType, FootbalistoServiceError>;
+  readonly getTeamMatches: (
+    teamId: number,
+  ) => Effect.Effect<readonly Match[], FootbalistoServiceError>;
+  readonly getNextMatches: () => Effect.Effect<
+    readonly Match[],
+    FootbalistoServiceError
+  >;
+  readonly getMatchById: (
+    matchId: number,
+  ) => Effect.Effect<Match, FootbalistoServiceError>;
+  readonly getMatchDetail: (
+    matchId: number,
+  ) => Effect.Effect<MatchDetail, FootbalistoServiceError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -138,6 +169,21 @@ export const FootbalistoServiceLive = Layer.effect(
         return current;
       });
 
+    /** Convert a PsdGame date + time fields to UTC milliseconds */
+    const toMs = (m: PsdGame): number => {
+      const datePart = m.date.split(" ")[0]!;
+      const timeStr = m.time ?? m.date.split(" ")[1] ?? "00:00";
+      const [year, month, day] = datePart.split("-").map(Number);
+      const [hour = 0, minute = 0] = timeStr.split(":").map(Number);
+      return Date.UTC(year!, month! - 1, day!, hour, minute);
+    };
+
+    const fetchRawMatchDetail = (matchId: number) =>
+      countedFetch(
+        `${base}/games/${matchId}/info`,
+        FootbalistoMatchDetailResponse,
+      );
+
     return {
       getTeamStats: (teamId: number) =>
         Effect.gen(function* () {
@@ -150,6 +196,66 @@ export const FootbalistoServiceLive = Layer.effect(
           );
           return transformPsdTeamStats(teamId, rawStats);
         }),
+
+      getTeamMatches: (teamId: number) =>
+        Effect.gen(function* () {
+          const season = yield* getCurrentSeason();
+          const data = yield* countedFetch(
+            `${base}/games/team/${teamId}/seasons/${season.id}`,
+            PsdMatchListSchema,
+          );
+          return data.content.map(transformPsdGame);
+        }),
+
+      getNextMatches: () =>
+        Effect.gen(function* () {
+          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
+          const season = yield* getCurrentSeason();
+          const now = Date.now();
+
+          const teamNextMatches = yield* Effect.all(
+            teams
+              .filter((t) => t.id !== 23)
+              .map((team) =>
+                countedFetch(
+                  `${base}/games/team/${team.id}/seasons/${season.id}`,
+                  PsdMatchListSchema,
+                ).pipe(
+                  Effect.map((data) => {
+                    const next = [...data.content]
+                      .filter((m) => toMs(m) >= now)
+                      .sort((a, b) => toMs(a) - toMs(b))[0];
+                    return next
+                      ? ({ ...next, teamId: team.id } as PsdGame)
+                      : null;
+                  }),
+                  Effect.catchAll((e) =>
+                    Effect.log(
+                      `getNextMatches: team ${team.id} failed: ${String(e)}`,
+                    ).pipe(Effect.as(null)),
+                  ),
+                ),
+              ),
+            { concurrency: 5 },
+          );
+
+          // Filter out nulls (team 23 is excluded before fetching)
+          return teamNextMatches
+            .filter((m): m is PsdGame => m !== null)
+            .map(transformPsdGame);
+        }),
+
+      getMatchById: (matchId: number) =>
+        fetchRawMatchDetail(matchId).pipe(
+          Effect.map((raw) =>
+            matchDetailToMatch(transformFootbalistoMatchDetail(raw)),
+          ),
+        ),
+
+      getMatchDetail: (matchId: number) =>
+        fetchRawMatchDetail(matchId).pipe(
+          Effect.map(transformFootbalistoMatchDetail),
+        ),
     };
   }),
 );

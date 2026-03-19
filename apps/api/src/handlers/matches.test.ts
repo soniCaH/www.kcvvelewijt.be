@@ -8,55 +8,52 @@ import {
 } from "./matches";
 import { TTL } from "../cache/kv-cache";
 import {
-  FootbalistoClient,
-  type FootbalistoClientInterface,
-} from "../footbalisto/client";
+  FootbalistoService,
+  FootbalistoServiceError,
+  type FootbalistoServiceInterface,
+} from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import type { Match, MatchDetail } from "@kcvv/api-contract";
 
-const EXCLUDED_TEAM_ID = 23; // Weitse Gans — uses KCVV pitch but is not KCVV
-
-const rawMatch = {
+const baseMatch: Match = {
   id: 1,
-  teamId: 1,
-  date: "2025-01-15 00:00",
+  date: new Date("2025-01-15T15:00:00.000Z"),
   time: "15:00",
-  homeClub: { id: 123, name: "KCVV Elewijt" },
-  awayClub: { id: 456, name: "Opponent FC" },
-  goalsHomeTeam: 3,
-  goalsAwayTeam: 1,
-  status: 0,
-  competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
-  reportGeneral: true,
-} as const;
+  home_team: { id: 123, name: "KCVV Elewijt", score: 3 },
+  away_team: { id: 456, name: "Opponent FC", score: 1 },
+  status: "finished",
+  competition: "LEAGUE",
+};
 
-const rawDetail = {
-  general: {
-    id: 99,
-    date: "2025-01-15 15:00",
-    homeClub: { id: 123, name: "KCVV Elewijt" },
-    awayClub: { id: 456, name: "Opponent FC" },
-    goalsHomeTeam: 2,
-    goalsAwayTeam: 0,
-    competitionType: "3de Nationale",
-    viewGameReport: true,
-    status: 0,
-  },
-} as const;
+const baseDetail: MatchDetail = {
+  id: 99,
+  date: new Date("2025-01-15T15:00:00.000Z"),
+  time: "15:00",
+  home_team: { id: 123, name: "KCVV Elewijt", score: 2 },
+  away_team: { id: 456, name: "Opponent FC", score: 0 },
+  status: "finished",
+  competition: "3de Nationale",
+  hasReport: true,
+};
 
-function makeClientMock(): FootbalistoClientInterface {
+const scheduledDetail: MatchDetail = {
+  id: 100,
+  date: new Date("2025-06-01T15:00:00.000Z"),
+  time: "15:00",
+  home_team: { id: 123, name: "KCVV Elewijt" },
+  away_team: { id: 456, name: "Opponent FC" },
+  status: "scheduled",
+  competition: "3de Nationale",
+  hasReport: false,
+};
+
+function makeServiceMock(): FootbalistoServiceInterface {
   return {
-    getRawMatches: (_teamId) => Effect.succeed([rawMatch]),
-    getRawNextMatches: () =>
-      Effect.succeed([
-        rawMatch,
-        { ...rawMatch, id: 2, teamId: EXCLUDED_TEAM_ID },
-      ]),
-    getRawMatchDetail: (_matchId) => Effect.succeed(rawDetail),
-    getRawRanking: () => Effect.succeed([]),
-    getRawTeamStats: () => Effect.fail(new Error("not needed") as never),
-    getRawTeams: () => Effect.succeed([]),
-    getRawMembers: () => Effect.succeed([]),
-    getRawStaff: () => Effect.succeed([]),
+    getTeamStats: () => Effect.die("not needed"),
+    getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
+    getNextMatches: () => Effect.succeed([baseMatch]),
+    getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
+    getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
   };
 }
 
@@ -68,17 +65,22 @@ function makeCacheMock(): KvCacheInterface {
   };
 }
 
-function provide<A, E>(
-  effect: Effect.Effect<A, E, FootbalistoClient | KvCacheService>,
+function provide<A>(
+  effect: Effect.Effect<
+    A,
+    FootbalistoServiceError,
+    FootbalistoService | KvCacheService
+  >,
 ) {
   return effect.pipe(
-    Effect.provide(Layer.succeed(FootbalistoClient, makeClientMock())),
+    Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
+    Effect.orDie,
   );
 }
 
 describe("getMatchesByTeamHandler", () => {
-  it("transforms raw matches", async () => {
+  it("returns matches from FootbalistoService", async () => {
     const result = await Effect.runPromise(provide(getMatchesByTeamHandler(1)));
     expect(result[0]?.id).toBe(1);
     expect(result[0]?.status).toBe("finished");
@@ -87,7 +89,7 @@ describe("getMatchesByTeamHandler", () => {
 });
 
 describe("getNextMatchesHandler", () => {
-  it(`filters out teamId ${EXCLUDED_TEAM_ID} (Weitse Gans)`, async () => {
+  it("returns next matches from FootbalistoService (team 23 filter is internal to service)", async () => {
     const result = await Effect.runPromise(provide(getNextMatchesHandler()));
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
@@ -106,7 +108,7 @@ describe("getMatchDetailHandler", () => {
 
     await Effect.runPromise(
       getMatchDetailHandler(99).pipe(
-        Effect.provide(Layer.succeed(FootbalistoClient, makeClientMock())),
+        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
         Effect.provide(
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(null),
@@ -117,6 +119,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.orDie,
       ),
     );
 
@@ -127,28 +130,14 @@ describe("getMatchDetailHandler", () => {
   });
 
   it("uses MATCH_DETAIL_LIVE TTL for scheduled matches", async () => {
-    const scheduledDetail = {
-      general: {
-        id: 100,
-        date: "2025-06-01 15:00",
-        homeClub: { id: 123, name: "KCVV Elewijt" },
-        awayClub: { id: 456, name: "Opponent FC" },
-        goalsHomeTeam: null,
-        goalsAwayTeam: null,
-        competitionType: "3de Nationale",
-        viewGameReport: false,
-        status: 0, // scheduled
-      },
-    } as const;
-
     const setCalls: Array<[string, string, number]> = [];
 
     await Effect.runPromise(
       getMatchDetailHandler(100).pipe(
         Effect.provide(
-          Layer.succeed(FootbalistoClient, {
-            ...makeClientMock(),
-            getRawMatchDetail: () => Effect.succeed(scheduledDetail),
+          Layer.succeed(FootbalistoService, {
+            ...makeServiceMock(),
+            getMatchDetail: () => Effect.succeed(scheduledDetail),
           }),
         ),
         Effect.provide(
@@ -161,6 +150,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.orDie,
       ),
     );
 
@@ -173,7 +163,12 @@ describe("getMatchDetailHandler", () => {
 
 describe("getMatchByIdHandler", () => {
   it("returns a basic Match (no lineup)", async () => {
-    const result = await Effect.runPromise(provide(getMatchByIdHandler(99)));
+    const result = await Effect.runPromise(
+      getMatchByIdHandler(99).pipe(
+        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+        Effect.orDie,
+      ),
+    );
     expect(result.id).toBe(99);
     expect("lineup" in result).toBe(false);
   });
