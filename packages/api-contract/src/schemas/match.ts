@@ -40,6 +40,8 @@ const BaseMatchFields = {
   status: MatchStatus,
   round: S.optional(S.String),
   competition: S.optional(S.String),
+  /** PSD team ID identifying which KCVV team plays (A-team, B-team, U21, etc.) */
+  kcvv_team_id: S.optional(S.Number),
 };
 
 /** Normalized match for UI consumption */

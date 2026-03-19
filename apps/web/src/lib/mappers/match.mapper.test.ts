@@ -139,6 +139,32 @@ describe("mapMatchToUpcomingMatch", () => {
     expect(result.status).toBe("postponed");
   });
 
+  it("should map kcvv_team_id to kcvvTeamId", () => {
+    const match: Match = {
+      id: 42,
+      date: new Date("2025-12-06T15:00:00"),
+      time: "15:00",
+      venue: undefined,
+      home_team: {
+        id: 1235,
+        name: "KCVV Elewijt",
+        logo: "https://example.com/logo.png",
+      },
+      away_team: {
+        id: 456,
+        name: "Opponent FC",
+        logo: "https://example.com/logo2.png",
+      },
+      status: "scheduled",
+      competition: "LEAGUE",
+      kcvv_team_id: 7,
+    };
+
+    const result = mapMatchToUpcomingMatch(match);
+
+    expect(result.kcvvTeamId).toBe(7);
+  });
+
   it("should handle stopped status", () => {
     const match: Match = {
       id: 13,

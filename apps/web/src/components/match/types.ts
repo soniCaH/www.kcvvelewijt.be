@@ -51,6 +51,8 @@ export interface UpcomingMatch {
    * Competition name (optional)
    */
   competition?: string;
+  /** PSD team ID identifying which KCVV team plays (A-team, U21, etc.) */
+  kcvvTeamId?: number;
   /** Optional team label for display (e.g. "A-Ploeg", "U21") — set by calling page */
   teamLabel?: string;
 }

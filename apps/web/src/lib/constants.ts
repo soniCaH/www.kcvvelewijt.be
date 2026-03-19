@@ -42,6 +42,23 @@ export const PAGINATION = {
   playersPerPage: 24,
 } as const;
 
+// TODO: load team label map from Sanity teams to avoid hardcoding PSD team IDs
+export const TEAM_LABELS: Record<number, string> = {
+  1: "A-Ploeg",
+  2: "B-Ploeg",
+  3: "U21",
+  4: "U17",
+  5: "U15",
+  6: "U13",
+  7: "U12",
+  8: "U11",
+  9: "U10",
+  10: "U9",
+  11: "U8",
+  12: "U7",
+  13: "U6",
+};
+
 // Image Aspect Ratios
 export const IMAGE_RATIOS = {
   article: 1.5, // 3:2

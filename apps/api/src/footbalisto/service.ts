@@ -103,10 +103,6 @@ function transformPsdGame(game: PsdGame): Match {
     game.cancelled,
   );
 
-  let roundLabel: string | undefined;
-  if (game.teamId === 1) roundLabel = "A-ploeg";
-  else if (game.teamId === 2) roundLabel = "B-ploeg";
-
   return {
     id: game.id,
     date: matchDate,
@@ -125,8 +121,8 @@ function transformPsdGame(game: PsdGame): Match {
       score: game.goalsAwayTeam ?? undefined,
     },
     status,
-    round: roundLabel,
     competition: game.competitionType?.type ?? "UNKNOWN",
+    kcvv_team_id: game.teamId ?? undefined,
   };
 }
 
@@ -278,6 +274,7 @@ function matchDetailToMatch(detail: MatchDetail): Match {
     status: detail.status,
     round: detail.round,
     competition: detail.competition,
+    kcvv_team_id: detail.kcvv_team_id,
   };
 }
 
