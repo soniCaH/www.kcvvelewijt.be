@@ -174,7 +174,9 @@ export function ResponsibilityFinder({
 
   // Handle onboarding hint click — sets role + result in one go
   const handleHintClick = (path: ResponsibilityPath) => {
-    setSelectedRole(path.role[0] as UserRole);
+    if (path.role.length > 0) {
+      setSelectedRole(path.role[0] as UserRole);
+    }
     setSelectedResult(path);
     setQuestionText(path.question);
     setShowSuggestions(false);
