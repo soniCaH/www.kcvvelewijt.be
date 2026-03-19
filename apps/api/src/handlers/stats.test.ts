@@ -25,6 +25,7 @@ const mockServiceImpl: FootbalistoServiceInterface = {
   getNextMatches: () => Effect.die("not needed"),
   getMatchById: () => Effect.die("not needed"),
   getMatchDetail: () => Effect.die("not needed"),
+  getRanking: () => Effect.die("not needed"),
 };
 
 const cacheMock: KvCacheInterface = {

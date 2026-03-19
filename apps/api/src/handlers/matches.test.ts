@@ -54,6 +54,7 @@ function makeServiceMock(): FootbalistoServiceInterface {
     getNextMatches: () => Effect.succeed([baseMatch]),
     getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
+    getRanking: () => Effect.die("not needed"),
   };
 }
 

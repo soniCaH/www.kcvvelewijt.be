@@ -374,6 +374,146 @@ describe("FootbalistoService.getMatchById", () => {
   });
 });
 
+const rawRankingCompetitions = [
+  {
+    name: "Beker van Brabant",
+    type: "CUP",
+    teams: [
+      {
+        id: 1,
+        rank: 1,
+        matchesPlayed: 3,
+        wins: 2,
+        draws: 1,
+        losses: 0,
+        goalsScored: 5,
+        goalsConceded: 2,
+        points: 7,
+        team: {
+          id: 10,
+          club: { id: 100, localName: "Cup Team", name: "Cup Team" },
+        },
+      },
+    ],
+  },
+  {
+    name: "3de Nationale",
+    type: "LEAGUE",
+    teams: [
+      {
+        id: 2,
+        rank: 1,
+        matchesPlayed: 20,
+        wins: 15,
+        draws: 3,
+        losses: 2,
+        goalsScored: 45,
+        goalsConceded: 12,
+        points: 48,
+        team: {
+          id: 20,
+          club: { id: 200, localName: "KCVV Elewijt", name: "KCVV" },
+        },
+      },
+      {
+        id: 3,
+        rank: 2,
+        matchesPlayed: 20,
+        wins: 12,
+        draws: 4,
+        losses: 4,
+        goalsScored: 38,
+        goalsConceded: 18,
+        points: 40,
+        team: {
+          id: 30,
+          club: { id: 300, localName: "Rival FC", name: "Rival" },
+        },
+      },
+    ],
+  },
+];
+
+describe("FootbalistoService.getRanking", () => {
+  it("prefers non-CUP, non-FRIENDLY competition and returns transformed RankingEntry[]", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawRankingCompetitions,
+    });
+
+    const result = await runService((svc) =>
+      svc.getRanking(1, "https://cdn.example.com"),
+    );
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right).toHaveLength(2);
+      expect(result.right[0]?.team_name).toBe("KCVV Elewijt");
+      expect(result.right[0]?.position).toBe(1);
+      expect(result.right[0]?.points).toBe(48);
+      expect(result.right[0]?.team_logo).toBe(
+        "https://cdn.example.com/extra_groot/200.png",
+      );
+    }
+  });
+  it("falls back to CUP competition when no LEAGUE/other exists", async () => {
+    const cupOnly = [
+      {
+        name: "Beker van Brabant",
+        type: "CUP",
+        teams: [
+          {
+            id: 1,
+            rank: 1,
+            matchesPlayed: 3,
+            wins: 2,
+            draws: 1,
+            losses: 0,
+            goalsScored: 5,
+            goalsConceded: 2,
+            points: 7,
+            team: {
+              id: 10,
+              club: { id: 100, localName: "Cup Team", name: "Cup Team" },
+            },
+          },
+        ],
+      },
+    ];
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => cupOnly,
+    });
+
+    const result = await runService((svc) =>
+      svc.getRanking(1, "https://cdn.example.com"),
+    );
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.team_name).toBe("Cup Team");
+    }
+  });
+
+  it("returns empty array when no competitions have teams", async () => {
+    const noTeams = [{ name: "Empty League", type: "LEAGUE", teams: [] }];
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => noTeams,
+    });
+
+    const result = await runService((svc) =>
+      svc.getRanking(1, "https://cdn.example.com"),
+    );
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right).toHaveLength(0);
+    }
+  });
+});
+
 describe("FootbalistoService.getMatchDetail", () => {
   it("returns normalized MatchDetail from mocked HTTP response", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
