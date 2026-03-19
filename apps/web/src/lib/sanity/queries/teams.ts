@@ -23,23 +23,23 @@ export type SeniorTeamNavItem = {
 export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | order(name asc) {
   _id, psdId, name, slug, age, gender, footbelId, leagueId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
-  "teamImageUrl": teamImage.asset->url,
+  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   trainingSchedule,
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-    "psdImageUrl": psdImage.asset->url, "transparentImageUrl": transparentImage.asset->url
+    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max", "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url }
+  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }
 }`;
 
 export const TEAM_BY_SLUG_QUERY = `*[_type == "team" && slug.current == $slug][0] {
   _id, psdId, name, slug, age, gender, footbelId, leagueId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
-  "teamImageUrl": teamImage.asset->url,
+  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   trainingSchedule,
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-    "psdImageUrl": psdImage.asset->url, "transparentImageUrl": transparentImage.asset->url
+    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max", "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url }
+  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }
 }`;
