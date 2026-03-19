@@ -6,16 +6,8 @@ import {
   MatchDetail,
   type Match,
 } from "@kcvv/api-contract";
-import {
-  FootbalistoClient,
-  type FootbalistoClientError,
-} from "../footbalisto/client";
+import { FootbalistoService } from "../footbalisto/service";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
-import {
-  transformPsdGame,
-  transformFootbalistoMatchDetail,
-  matchDetailToMatch,
-} from "../footbalisto/transforms";
 
 const matchesCache = TypedKvCache(MatchesArray);
 const matchDetailCache = TypedKvCache(MatchDetail);
@@ -24,65 +16,62 @@ export const getMatchesByTeamHandler = (
   teamId: number,
 ): Effect.Effect<
   readonly Match[],
-  FootbalistoClientError,
-  FootbalistoClient | KvCacheService
+  never,
+  FootbalistoService | KvCacheService
 > => {
   const cacheKey = `matches:team:${teamId}`;
   const fetchMatches = Effect.gen(function* () {
-    const client = yield* FootbalistoClient;
-    const rawMatches = yield* client.getRawMatches(teamId);
-    return rawMatches.map(transformPsdGame);
+    const service = yield* FootbalistoService;
+    return yield* service.getTeamMatches(teamId);
   });
 
-  return matchesCache.getOrFetch(cacheKey, fetchMatches, TTL.MATCHES_TEAM);
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, TTL.MATCHES_TEAM)
+    .pipe(Effect.orDie);
 };
 
 export const getNextMatchesHandler = (): Effect.Effect<
   readonly Match[],
-  FootbalistoClientError,
-  FootbalistoClient | KvCacheService
+  never,
+  FootbalistoService | KvCacheService
 > => {
   const cacheKey = "matches:next";
   const fetchMatches = Effect.gen(function* () {
-    const client = yield* FootbalistoClient;
-    const rawMatches = yield* client.getRawNextMatches();
-    // Filter out Weitse Gans (teamId 23) — not KCVV but plays on KCVV pitch
-    return rawMatches.filter((m) => m.teamId !== 23).map(transformPsdGame);
+    const service = yield* FootbalistoService;
+    return yield* service.getNextMatches();
   });
 
-  return matchesCache.getOrFetch(cacheKey, fetchMatches, TTL.NEXT_MATCHES);
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, TTL.NEXT_MATCHES)
+    .pipe(Effect.orDie);
 };
 
 export const getMatchByIdHandler = (
   matchId: number,
-): Effect.Effect<Match, FootbalistoClientError, FootbalistoClient> =>
+): Effect.Effect<Match, never, FootbalistoService> =>
   Effect.gen(function* () {
-    const client = yield* FootbalistoClient;
-    const rawDetail = yield* client.getRawMatchDetail(matchId);
-    return matchDetailToMatch(transformFootbalistoMatchDetail(rawDetail));
-  });
+    const service = yield* FootbalistoService;
+    return yield* service.getMatchById(matchId);
+  }).pipe(Effect.orDie);
 
 export const getMatchDetailHandler = (
   matchId: number,
-): Effect.Effect<
-  MatchDetail,
-  FootbalistoClientError,
-  FootbalistoClient | KvCacheService
-> => {
+): Effect.Effect<MatchDetail, never, FootbalistoService | KvCacheService> => {
   const cacheKey = `match:detail:${matchId}`;
   const fetchDetail = Effect.gen(function* () {
-    const client = yield* FootbalistoClient;
-    const rawDetail = yield* client.getRawMatchDetail(matchId);
-    return transformFootbalistoMatchDetail(rawDetail);
+    const service = yield* FootbalistoService;
+    return yield* service.getMatchDetail(matchId);
   });
 
   // Finished and forfeited matches are immutable — cache 7 days.
   // Postponed/stopped may be rescheduled; scheduled = upcoming. Cache 60s.
-  return matchDetailCache.getOrFetch(cacheKey, fetchDetail, (detail) =>
-    detail.status === "finished" || detail.status === "forfeited"
-      ? TTL.MATCH_DETAIL_PAST
-      : TTL.MATCH_DETAIL_LIVE,
-  );
+  return matchDetailCache
+    .getOrFetch(cacheKey, fetchDetail, (detail) =>
+      detail.status === "finished" || detail.status === "forfeited"
+        ? TTL.MATCH_DETAIL_PAST
+        : TTL.MATCH_DETAIL_LIVE,
+    )
+    .pipe(Effect.orDie);
 };
 
 export const MatchesApiLive = HttpApiBuilder.group(
@@ -91,15 +80,13 @@ export const MatchesApiLive = HttpApiBuilder.group(
   (handlers) =>
     handlers
       .handle("getMatchesByTeam", ({ path: { teamId } }) =>
-        getMatchesByTeamHandler(teamId).pipe(Effect.orDie),
+        getMatchesByTeamHandler(teamId),
       )
-      .handle("getNextMatches", () =>
-        getNextMatchesHandler().pipe(Effect.orDie),
-      )
+      .handle("getNextMatches", () => getNextMatchesHandler())
       .handle("getMatchById", ({ path: { matchId } }) =>
-        getMatchByIdHandler(matchId).pipe(Effect.orDie),
+        getMatchByIdHandler(matchId),
       )
       .handle("getMatchDetail", ({ path: { matchId } }) =>
-        getMatchDetailHandler(matchId).pipe(Effect.orDie),
+        getMatchDetailHandler(matchId),
       ),
 );
