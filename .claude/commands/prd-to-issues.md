@@ -63,15 +63,11 @@ Rules:
 
 ```bash
 # Create each issue and assign to the milestone in one step
-URL=$(gh issue create \
+gh issue create \
   --title "[type](scope): [description]" \
   --label "ready" \
   --milestone "$MILESTONE_TITLE" \
-  --body "[body from template]" \
-  --json url --jq '.url')
-
-# Add to GitHub Project board
-gh project item-add 2 --owner soniCaH --url "$URL"
+  --body "[body from template]"
 ```
 
 For blocked issues use `--label "blocked"` instead of `--label "ready"`.
