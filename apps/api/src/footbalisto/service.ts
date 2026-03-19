@@ -18,8 +18,7 @@ import {
   PsdMatchListSchema,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
-  type PsdRawGame,
-  type PsdGame,
+  PsdGame,
   type FootbalistoLineupPlayer,
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
@@ -91,14 +90,6 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
     date: new Date(Date.UTC(year!, month! - 1, day!, hour, minute)),
     time: timePart,
   };
-}
-
-/**
- * Type guard: narrows a PsdRawGame (external) to PsdGame (internal).
- * Rejects "ghost" matches where a club is null (opponent forfeited/removed from league).
- */
-function isValidGame(game: PsdRawGame): game is PsdGame {
-  return game.homeClub !== null && game.awayClub !== null;
 }
 
 function transformPsdGame(game: PsdGame): Match {
@@ -364,6 +355,15 @@ function transformFootbalistoRankingEntry(
   };
 }
 
+/** Safely extract an `id` field from an unknown item for logging. */
+function extractId(item: unknown): string | number {
+  if (typeof item === "object" && item !== null && "id" in item) {
+    const id = (item as Record<string, unknown>).id;
+    if (typeof id === "number" || typeof id === "string") return id;
+  }
+  return "unknown";
+}
+
 // ─── Service definition ────────────────────────────────────────────────────────
 
 export class FootbalistoServiceError extends Error {
@@ -551,21 +551,26 @@ export const FootbalistoServiceLive = Layer.effect(
             `${base}/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
           );
-          const ghostIds: number[] = [];
-          const matches: Array<ReturnType<typeof transformPsdGame>> = [];
-          for (const game of data.content) {
-            if (isValidGame(game)) {
-              matches.push(transformPsdGame(game));
-            } else {
-              ghostIds.push(game.id);
-            }
-          }
-          if (ghostIds.length > 0) {
+
+          const [errors, games] = yield* Effect.partition(
+            data.content,
+            (item) =>
+              S.decodeUnknown(PsdGame)(item).pipe(
+                Effect.mapError((parseError) => ({
+                  id: extractId(item),
+                  parseError,
+                })),
+              ),
+          );
+
+          if (errors.length > 0) {
+            const ids = errors.map((e) => e.id).join(", ");
             yield* Effect.log(
-              `[matches] Skipping ${ghostIds.length} ghost game(s) for team ${teamId}: ${ghostIds.map((id) => `id=${id}`).join(", ")}`,
+              `getTeamMatches(${teamId}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
             );
           }
-          return matches;
+
+          return games.map(transformPsdGame);
         }),
 
       getNextMatches: () =>
@@ -582,15 +587,34 @@ export const FootbalistoServiceLive = Layer.effect(
                   `${base}/games/team/${team.id}/seasons/${season.id}`,
                   PsdMatchListSchema,
                 ).pipe(
-                  Effect.map((data) => {
-                    const next = [...data.content]
-                      .filter(isValidGame)
-                      .filter((m) => toMs(m) >= now)
-                      .sort((a, b) => toMs(a) - toMs(b))[0];
-                    return next
-                      ? ({ ...next, teamId: team.id } as PsdGame)
-                      : null;
-                  }),
+                  Effect.flatMap((data) =>
+                    Effect.gen(function* () {
+                      const [errors, games] = yield* Effect.partition(
+                        data.content,
+                        (item) =>
+                          S.decodeUnknown(PsdGame)(item).pipe(
+                            Effect.mapError((parseError) => ({
+                              id: extractId(item),
+                              parseError,
+                            })),
+                          ),
+                      );
+
+                      if (errors.length > 0) {
+                        const ids = errors.map((e) => e.id).join(", ");
+                        yield* Effect.log(
+                          `getNextMatches(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
+                        );
+                      }
+
+                      const next = [...games]
+                        .filter((m) => toMs(m) >= now)
+                        .sort((a, b) => toMs(a) - toMs(b))[0];
+                      return next
+                        ? transformPsdGame({ ...next, teamId: team.id })
+                        : null;
+                    }),
+                  ),
                   Effect.catchAll((e) =>
                     Effect.log(
                       `getNextMatches: team ${team.id} failed: ${String(e)}`,
@@ -609,7 +633,7 @@ export const FootbalistoServiceLive = Layer.effect(
             if (game) {
               const team = filteredTeams[i]!;
               matches.push({
-                ...transformPsdGame(game),
+                ...game,
                 kcvv_team_label: derivePsdTeamLabel(team.name, team.age),
               });
             }
