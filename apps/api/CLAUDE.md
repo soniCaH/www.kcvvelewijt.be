@@ -59,15 +59,15 @@ wrangler secret put PSD_API_CLUB --env staging
 
 All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
 
-| Key pattern             | TTL                             |
-| ----------------------- | ------------------------------- |
-| `psd:current-season-id` | 24 h                            |
-| `matches:team:{id}`     | 6 h                             |
-| `matches:next`          | 4 h                             |
-| `match:detail:{id}`     | 60 s (live) / 7 days (finished) |
-| `ranking:team:{id}`     | 4 h                             |
-| `stats:team:{id}`       | 12 h                            |
-| `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter)   |
+| Key pattern             | TTL                                                 |
+| ----------------------- | --------------------------------------------------- |
+| `psd:current-season-id` | 24 h                                                |
+| `matches:team:{id}`     | 24 h                                                |
+| `matches:next`          | 4 h                                                 |
+| `match:detail:{id}`     | 7 days (finished ≥48h ago) / 24 h (all other cases) |
+| `ranking:team:{id}`     | 24 h                                                |
+| `stats:team:{id}`       | 24 h                                                |
+| `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter)                       |
 
 ## Rules
 
