@@ -171,6 +171,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
       standings={bffData?.standings.map(transformRankingToStandings) ?? []}
       highlightTeamId={bffData?.teamId}
       teamSlug={slug}
+      calendarUrl={
+        bffData ? `/api/calendar.ics?teamIds=${bffData.teamId}` : undefined
+      }
     />
   );
 }
