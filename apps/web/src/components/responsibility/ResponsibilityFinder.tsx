@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import type {
   UserRole,
@@ -19,6 +20,8 @@ import {
   X,
   User,
   ArrowRight,
+  ArrowLeft,
+  RotateCcw,
   Clipboard,
   ChevronDown,
   Check,
@@ -88,6 +91,13 @@ const categoryColors = {
   },
 } as const;
 
+const ONBOARDING_HINT_SLUGS = [
+  "inschrijving-nieuw-lid",
+  "ongeval-speler-training",
+  "mutualiteit-attest",
+  "wedstrijden-zoeken",
+] as const;
+
 /**
  * Render a UI for selecting a user role, composing a contextual question, viewing semantic autocomplete suggestions, and inspecting a selected responsibility path.
  *
@@ -113,6 +123,7 @@ export function ResponsibilityFinder({
   const [selectedResult, setSelectedResult] =
     useState<ResponsibilityPath | null>(null);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [activeDescendantIdx, setActiveDescendantIdx] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -161,11 +172,63 @@ export function ResponsibilityFinder({
     }, 100);
   };
 
+  // Handle onboarding hint click — sets role + result in one go
+  const handleHintClick = (path: ResponsibilityPath) => {
+    if (path.role.length > 0) {
+      setSelectedRole(path.role[0] as UserRole);
+    }
+    setSelectedResult(path);
+    setQuestionText(path.question);
+    setShowSuggestions(false);
+    setShowRoleDropdown(false);
+    if (onResultSelect) {
+      onResultSelect(path);
+    }
+  };
+
+  // Handle "Terug" — back to suggestion list
+  const handleBack = () => {
+    setSelectedResult(null);
+    setShowSuggestions(true);
+  };
+
+  // Handle "Opnieuw beginnen" — full reset
+  const handleReset = () => {
+    setSelectedRole("");
+    setSelectedResult(null);
+    setQuestionText("");
+    setShowSuggestions(false);
+    setShowRoleDropdown(false);
+    setActiveDescendantIdx(-1);
+  };
+
+  // Handle keyboard navigation in suggestion list
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveDescendantIdx((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : prev,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveDescendantIdx((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter" && activeDescendantIdx >= 0) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[activeDescendantIdx].path);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setActiveDescendantIdx(-1);
+    }
+  };
+
   // Handle suggestion click
   const handleSuggestionClick = (path: ResponsibilityPath) => {
     setQuestionText(path.question);
     setSelectedResult(path);
     setShowSuggestions(false);
+    setActiveDescendantIdx(-1);
     if (onResultSelect) {
       onResultSelect(path);
     }
@@ -176,6 +239,7 @@ export function ResponsibilityFinder({
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as Element).closest(".suggestions-container")) {
         setShowSuggestions(false);
+        setActiveDescendantIdx(-1);
       }
       if (
         dropdownRef.current &&
@@ -227,6 +291,17 @@ export function ResponsibilityFinder({
     }
   }, [initialPath, initialPathId, paths]);
 
+  // Resolve onboarding hints against available paths — derive display text from path data
+  const resolvedHints = ONBOARDING_HINT_SLUGS.map((slug) => ({
+    slug,
+    path: paths.find((p) => p.id === slug),
+  })).filter(
+    (h): h is typeof h & { path: ResponsibilityPath } => h.path != null,
+  );
+
+  const showOnboardingHints =
+    !selectedRole && !selectedResult && !initialPath && !initialPathId;
+
   return (
     <div className={`responsibility-finder ${compact ? "compact" : ""}`}>
       {/* Question Builder - Inline Sentence */}
@@ -244,7 +319,7 @@ export function ResponsibilityFinder({
           <div className="role-dropdown-container relative inline-block">
             <button
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="px-4 py-2 border-b-4 text-kcvv-gray-blue transition-all inline-flex items-center gap-2 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+              className="min-h-11 min-w-11 px-4 py-2 border-b-4 text-kcvv-gray-blue transition-all inline-flex items-center gap-2 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
               style={{
                 fontFamily: "Montserrat, sans-serif",
                 borderBottomColor: "var(--color-kcvv-green-bright)",
@@ -273,8 +348,9 @@ export function ResponsibilityFinder({
                       key={role.value}
                       onClick={() => handleRoleSelect(role.value)}
                       className={`
-                        w-full text-left px-4 py-3 text-lg font-medium transition-colors
+                        w-full text-left px-4 min-h-11 py-3 text-lg font-medium transition-colors
                         flex items-center justify-between
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-inset
                         ${isSelected ? "" : "hover:bg-gray-50"}
                         ${idx === ROLE_OPTIONS.length - 1 ? "rounded-b-lg" : ""}
                         ${idx === 0 ? "rounded-t-lg" : ""}
@@ -307,6 +383,26 @@ export function ResponsibilityFinder({
           </span>
         </div>
 
+        {/* Onboarding Hints — shown before role selection */}
+        {showOnboardingHints && resolvedHints.length > 0 && (
+          <div className="mb-8">
+            <p className="text-sm text-kcvv-gray mb-3">
+              Of klik op een veelgestelde vraag:
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {resolvedHints.map((hint) => (
+                <button
+                  key={hint.slug}
+                  onClick={() => handleHintClick(hint.path)}
+                  className="min-h-11 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-kcvv-green hover:text-kcvv-green transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                >
+                  {hint.path.question}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Question Input */}
         {selectedRole && (
           <div className="question-input suggestions-container relative">
@@ -329,13 +425,23 @@ export function ResponsibilityFinder({
               <input
                 ref={inputRef}
                 type="text"
+                role="combobox"
+                aria-expanded={showSuggestions && suggestions.length > 0}
+                aria-controls="suggestion-listbox"
+                aria-activedescendant={
+                  activeDescendantIdx >= 0
+                    ? `suggestion-${activeDescendantIdx}`
+                    : undefined
+                }
                 value={questionText}
                 onChange={(e) => {
                   setQuestionText(e.target.value);
                   setShowSuggestions(true);
                   setSelectedResult(null);
+                  setActiveDescendantIdx(-1);
                 }}
                 onFocus={() => setShowSuggestions(true)}
+                onKeyDown={handleInputKeyDown}
                 placeholder="typ je vraag..."
                 className="w-full text-xl md:text-2xl font-medium pl-14 py-4 pr-14 border-2 border-kcvv-gray-light rounded-lg focus:outline-none focus:border-kcvv-green focus:ring-2 focus:ring-kcvv-green/20 placeholder:text-kcvv-gray placeholder:font-normal transition-all duration-300 shadow-sm hover:shadow-md bg-white"
                 style={{ fontFamily: "Montserrat, sans-serif" }}
@@ -345,9 +451,10 @@ export function ResponsibilityFinder({
                 <button
                   onClick={() => {
                     setQuestionText("");
+                    setActiveDescendantIdx(-1);
                     inputRef.current?.focus();
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-kcvv-gray hover:text-white hover:bg-red-500 transition-all duration-200 rounded-full hover:scale-110"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-kcvv-gray hover:text-white hover:bg-red-500 transition-all duration-200 rounded-full hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green"
                   aria-label="Clear search"
                 >
                   <X size={20} />
@@ -379,34 +486,47 @@ export function ResponsibilityFinder({
 
               {/* Autocomplete Suggestions */}
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-y-auto animate-fadeIn">
+                <div
+                  id="suggestion-listbox"
+                  role="listbox"
+                  className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-y-auto animate-fadeIn"
+                >
                   {suggestions.map((suggestion, idx) => {
                     const colors =
                       categoryColors[
                         suggestion.path.category as keyof typeof categoryColors
                       ] ?? categoryColors.algemeen;
+                    const isActive = idx === activeDescendantIdx;
                     return (
-                      <button
+                      <div
                         key={suggestion.path.id}
+                        id={`suggestion-${idx}`}
+                        role="option"
+                        aria-selected={isActive}
                         onClick={() => handleSuggestionClick(suggestion.path)}
-                        aria-label={suggestion.path.question}
                         className={`
-                          w-full text-left px-5 py-4 transition-all duration-200
+                          w-full text-left px-5 min-h-11 py-4 transition-all duration-200 cursor-pointer
                           ${idx !== 0 ? "border-t border-gray-100" : ""}
-                          hover:bg-gray-50 group relative overflow-hidden
+                          ${isActive ? "bg-gray-100" : "hover:bg-gray-50"} group relative overflow-hidden
                           ${idx === 0 ? "rounded-t-xl" : ""} ${idx === suggestions.length - 1 ? "rounded-b-xl" : ""}
                         `}
                         style={{
-                          borderLeft: `3px solid transparent`,
+                          borderLeft: `3px solid ${isActive ? colors.accent : "transparent"}`,
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.borderLeftColor = colors.accent;
-                          e.currentTarget.style.backgroundColor =
-                            colors.accentLight;
+                          if (!isActive) {
+                            e.currentTarget.style.borderLeftColor =
+                              colors.accent;
+                            e.currentTarget.style.backgroundColor =
+                              colors.accentLight;
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.borderLeftColor = "transparent";
-                          e.currentTarget.style.backgroundColor = "";
+                          if (!isActive) {
+                            e.currentTarget.style.borderLeftColor =
+                              "transparent";
+                            e.currentTarget.style.backgroundColor = "";
+                          }
                         }}
                       >
                         <div className="flex items-start gap-4 ml-1">
@@ -451,7 +571,7 @@ export function ResponsibilityFinder({
                             <ArrowRight size={20} className="text-gray-400" />
                           </div>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -461,12 +581,53 @@ export function ResponsibilityFinder({
         )}
       </div>
 
-      {/* Selected Result */}
-      {selectedResult && (
-        <div className="mt-8 animate-fadeIn">
-          <ResultCard path={selectedResult} onMemberSelect={onMemberSelect} />
-        </div>
-      )}
+      {/* Selected Result with aria-live */}
+      <div aria-live="polite">
+        {selectedResult && (
+          <div className="mt-8 animate-fadeIn">
+            {/* Navigation Buttons */}
+            <div className="flex gap-3 mb-4">
+              <button
+                onClick={handleBack}
+                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+              >
+                <ArrowLeft size={16} />
+                Terug
+              </button>
+              <button
+                onClick={handleReset}
+                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+              >
+                <RotateCcw size={16} />
+                Opnieuw beginnen
+              </button>
+            </div>
+
+            <ResultCard path={selectedResult} onMemberSelect={onMemberSelect} />
+
+            {/* Fallback Contact Block */}
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-5">
+              <h4 className="font-bold text-gray-900 mb-3">
+                Staat jouw vraag er niet bij?
+              </h4>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/club/contact"
+                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                >
+                  Neem contact op
+                </Link>
+                <Link
+                  href="/club/organigram"
+                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                >
+                  Bekijk het organigram
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
