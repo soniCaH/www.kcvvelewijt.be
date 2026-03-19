@@ -309,6 +309,25 @@ describe("TypedKvCache", () => {
       expirationTtl: HARD_TTL_LONG,
     });
   });
+
+  it("CACHE_LONG_TTL 'false' does not override hardTtl", async () => {
+    const mockKv = makeMockKv();
+    const fetchEffect = Effect.succeed({ name: "test", value: 42 });
+
+    const typedCache = TypedKvCache(TestSchema);
+    await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv, { CACHE_LONG_TTL: "false" })),
+        ),
+    );
+
+    expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
+      expirationTtl: HARD_TTL_DEFAULT,
+    });
+  });
 });
 
 describe("KvCacheService", () => {

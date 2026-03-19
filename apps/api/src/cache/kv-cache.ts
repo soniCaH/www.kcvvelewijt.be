@@ -49,7 +49,8 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
       Effect.gen(function* () {
         const cache = yield* KvCacheService;
         const env = yield* WorkerEnvTag;
-        const effectiveHardTtl = env.CACHE_LONG_TTL ? HARD_TTL_LONG : hardTtl;
+        const effectiveHardTtl =
+          env.CACHE_LONG_TTL === "true" ? HARD_TTL_LONG : hardTtl;
         const cached = yield* cache.get(key);
 
         if (cached !== null) {
