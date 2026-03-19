@@ -141,10 +141,10 @@ No new endpoints. No new schemas. Phases 2–5 do not touch api-contract.
 
 ## 7. Open questions
 
-- [ ] **Sanity document type rename migration:** Renaming `responsibilityPath` → `responsibility` requires a data migration (Sanity doesn't support type renames natively). Needs investigation: custom migration script or export/reimport? — resolved during Phase 4
-- [ ] **Sanity field rename migration:** Renaming `positionTitle` → `roleLabel` and `positionShort` → `roleCode` — same migration concern. — resolved during Phase 3
-- [ ] **BFF reading Sanity for team visibility:** What's the caching strategy? Should the BFF cache visible team IDs in KV with a TTL, or fetch on every `getNextMatches` call? — resolved during Phase 5
-- [ ] **`divisionFull` editorial workflow:** Once `readOnly` is removed, how do editors know what to put there? Needs description/placeholder text in Studio. — resolved during Phase 2
+- [x] **Sanity document type rename migration:** Patch `_type` only, keep existing `_id` values (`responsibility-path-{slug}`) unchanged. `_id` is purely internal — never exposed in URLs. Migration: `client.patch(id).set({_type: "responsibility"})` per document. Deploy order: migration first, then code.
+- [x] **Sanity field rename migration:** Same PR (#909) includes PSD sync update (`apps/api`). Migration: `client.patch(id).set({roleLabel, roleCode}).unset(['positionTitle', 'positionShort'])` per staffMember. Deploy order: migration first, then code.
+- [x] **BFF reading Sanity for team visibility:** Option B — nightly sync writes `teams:visible` list to KV. `getNextMatches()` reads from KV instead of hardcoding `t.id !== 23`. No new Sanity dependency in request path. Visibility changes take effect within 24h (acceptable — toggles ~twice a year).
+- [x] **`divisionFull` editorial workflow:** Add `description` + `placeholder` to Sanity field definitions. `divisionFull`: placeholder `"3e Nationale A"`, description `"Volledige competitienaam. Wordt getoond als er geen tagline is ingesteld."`. `division`: placeholder `"3NA"`, description `"Korte competitiecode."`. No validation rules needed.
 
 ## 8. Discovered unknowns section (filled during implementation)
 
