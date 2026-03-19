@@ -6,7 +6,7 @@ import {
   getMatchByIdHandler,
   getMatchDetailHandler,
 } from "./matches";
-import { TTL } from "../cache/kv-cache";
+import { HARD_TTL_DEFAULT } from "../cache/kv-cache";
 import {
   FootbalistoService,
   FootbalistoServiceError,
@@ -34,17 +34,6 @@ const baseDetail: MatchDetail = {
   status: "finished",
   competition: "3de Nationale",
   hasReport: true,
-};
-
-const scheduledDetail: MatchDetail = {
-  id: 100,
-  date: new Date("2025-06-01T15:00:00.000Z"),
-  time: "15:00",
-  home_team: { id: 123, name: "KCVV Elewijt" },
-  away_team: { id: 456, name: "Opponent FC" },
-  status: "scheduled",
-  competition: "3de Nationale",
-  hasReport: false,
 };
 
 function makeServiceMock(): FootbalistoServiceInterface {
@@ -104,7 +93,7 @@ describe("getMatchDetailHandler", () => {
     expect(result.hasReport).toBe(true);
   });
 
-  it("uses MATCH_DETAIL_PAST TTL for finished matches ≥48h ago", async () => {
+  it("stores match detail with hardTtl (7 days)", async () => {
     const setCalls: Array<[string, string, number]> = [];
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
@@ -134,71 +123,7 @@ describe("getMatchDetailHandler", () => {
     const detailCall = setCalls.find(([key]) =>
       key.startsWith("match:detail:"),
     );
-    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_PAST);
-  });
-
-  it("uses MATCH_DETAIL_DEFAULT TTL for finished matches <48h ago", async () => {
-    const setCalls: Array<[string, string, number]> = [];
-    const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-
-    await Effect.runPromise(
-      getMatchDetailHandler(99).pipe(
-        Effect.provide(
-          Layer.succeed(FootbalistoService, {
-            ...makeServiceMock(),
-            getMatchDetail: () =>
-              Effect.succeed({ ...baseDetail, date: oneDayAgo }),
-          }),
-        ),
-        Effect.provide(
-          Layer.succeed(KvCacheService, {
-            get: () => Effect.succeed(null),
-            increment: () => Effect.succeed(undefined),
-            set: vi.fn((key, value, ttl) => {
-              setCalls.push([key, value, ttl]);
-              return Effect.succeed(undefined);
-            }),
-          }),
-        ),
-        Effect.orDie,
-      ),
-    );
-
-    const detailCall = setCalls.find(([key]) =>
-      key.startsWith("match:detail:"),
-    );
-    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_DEFAULT);
-  });
-
-  it("uses MATCH_DETAIL_DEFAULT TTL for scheduled matches", async () => {
-    const setCalls: Array<[string, string, number]> = [];
-
-    await Effect.runPromise(
-      getMatchDetailHandler(100).pipe(
-        Effect.provide(
-          Layer.succeed(FootbalistoService, {
-            ...makeServiceMock(),
-            getMatchDetail: () => Effect.succeed(scheduledDetail),
-          }),
-        ),
-        Effect.provide(
-          Layer.succeed(KvCacheService, {
-            get: () => Effect.succeed(null),
-            increment: () => Effect.succeed(undefined),
-            set: vi.fn((key, value, ttl) => {
-              setCalls.push([key, value, ttl]);
-              return Effect.succeed(undefined);
-            }),
-          }),
-        ),
-        Effect.orDie,
-      ),
-    );
-
-    const detailCall = setCalls.find(([key]) =>
-      key.startsWith("match:detail:"),
-    );
-    expect(detailCall?.[2]).toBe(TTL.MATCH_DETAIL_DEFAULT);
+    expect(detailCall?.[2]).toBe(HARD_TTL_DEFAULT);
   });
 });
 
