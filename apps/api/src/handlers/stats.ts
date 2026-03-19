@@ -10,6 +10,7 @@ import {
   type FootbalistoServiceError,
 } from "../footbalisto/service";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
+import { WorkerEnvTag } from "../env";
 
 const teamStatsCache = TypedKvCache(TeamStats);
 
@@ -18,7 +19,7 @@ export const getTeamStatsHandler = (
 ): Effect.Effect<
   TeamStatsType,
   FootbalistoServiceError,
-  FootbalistoService | KvCacheService
+  FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `stats:team:${teamId}`;
   const fetchStats = Effect.gen(function* () {

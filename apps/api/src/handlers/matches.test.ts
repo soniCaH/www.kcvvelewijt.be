@@ -13,6 +13,8 @@ import {
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { WorkerEnvTag } from "../env";
+import { testEnvLayer } from "../test-helpers/env-layer";
 import type { Match, MatchDetail } from "@kcvv/api-contract";
 
 const baseMatch: Match = {
@@ -59,12 +61,13 @@ function provide<A>(
   effect: Effect.Effect<
     A,
     FootbalistoServiceError,
-    FootbalistoService | KvCacheService
+    FootbalistoService | KvCacheService | WorkerEnvTag
   >,
 ) {
   return effect.pipe(
     Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
+    Effect.provide(testEnvLayer),
     Effect.orDie,
   );
 }
@@ -116,6 +119,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.provide(testEnvLayer),
         Effect.orDie,
       ),
     );

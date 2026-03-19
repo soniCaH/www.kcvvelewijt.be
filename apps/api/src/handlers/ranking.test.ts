@@ -6,6 +6,7 @@ import {
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { testEnvLayer } from "../test-helpers/env-layer";
 import type { RankingEntry } from "@kcvv/api-contract";
 
 const rankingEntries: readonly RankingEntry[] = [
@@ -52,6 +53,7 @@ describe("getRankingHandler", () => {
       getRankingHandler(1, "https://cdn.example.com").pipe(
         Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(testEnvLayer),
       ),
     );
     expect(result[0]?.position).toBe(1);
@@ -71,6 +73,7 @@ describe("getRankingHandler", () => {
           ),
         ),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(testEnvLayer),
       ),
     );
     expect(result).toHaveLength(0);

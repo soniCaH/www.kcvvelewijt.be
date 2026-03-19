@@ -6,6 +6,7 @@ import {
   TypedKvCache,
   TTL,
   HARD_TTL_DEFAULT,
+  HARD_TTL_LONG,
 } from "./kv-cache";
 import { WorkerEnvTag } from "../env";
 
@@ -20,7 +21,10 @@ function makeMockKv() {
   };
 }
 
-function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
+function makeEnvLayer(
+  mockKv: ReturnType<typeof makeMockKv>,
+  overrides: { CACHE_LONG_TTL?: string } = {},
+) {
   return Layer.succeed(WorkerEnvTag, {
     PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
     PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
@@ -34,6 +38,7 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
     SANITY_API_TOKEN: "test-token",
     AI: {} as Ai,
     SEARCH_INDEX: {} as VectorizeIndex,
+    ...overrides,
   });
 }
 
@@ -283,6 +288,44 @@ describe("TypedKvCache", () => {
 
     expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
       expirationTtl: customHardTtl,
+    });
+  });
+
+  it("CACHE_LONG_TTL overrides hardTtl to 365 days on cache miss", async () => {
+    const mockKv = makeMockKv();
+    const fetchEffect = Effect.succeed({ name: "test", value: 42 });
+
+    const typedCache = TypedKvCache(TestSchema);
+    await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv, { CACHE_LONG_TTL: "true" })),
+        ),
+    );
+
+    expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
+      expirationTtl: HARD_TTL_LONG,
+    });
+  });
+
+  it("CACHE_LONG_TTL 'false' does not override hardTtl", async () => {
+    const mockKv = makeMockKv();
+    const fetchEffect = Effect.succeed({ name: "test", value: 42 });
+
+    const typedCache = TypedKvCache(TestSchema);
+    await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv, { CACHE_LONG_TTL: "false" })),
+        ),
+    );
+
+    expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
+      expirationTtl: HARD_TTL_DEFAULT,
     });
   });
 });

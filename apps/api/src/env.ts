@@ -13,6 +13,7 @@ export interface WorkerEnv {
   readonly SANITY_API_TOKEN: string; // write token — wrangler secret
   readonly AI: Ai; // Workers AI binding
   readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
+  readonly CACHE_LONG_TTL?: string; // "true" on staging — overrides hardTtl to 365 days
 }
 
 export class WorkerEnvTag extends Context.Tag("WorkerEnv")<

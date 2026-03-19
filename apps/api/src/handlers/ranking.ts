@@ -16,7 +16,7 @@ export const getRankingHandler = (
 ): Effect.Effect<
   readonly RankingEntry[],
   FootbalistoServiceError,
-  FootbalistoService | KvCacheService
+  FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `ranking:team:${teamId}`;
   const fetchRanking = Effect.gen(function* () {

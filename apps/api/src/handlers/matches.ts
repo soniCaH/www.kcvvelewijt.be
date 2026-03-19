@@ -11,6 +11,7 @@ import {
   FootbalistoServiceError,
 } from "../footbalisto/service";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
+import { WorkerEnvTag } from "../env";
 
 const matchesCache = TypedKvCache(MatchesArray);
 const matchDetailCache = TypedKvCache(MatchDetail);
@@ -20,7 +21,7 @@ export const getMatchesByTeamHandler = (
 ): Effect.Effect<
   readonly Match[],
   FootbalistoServiceError,
-  FootbalistoService | KvCacheService
+  FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `matches:team:${teamId}`;
   const fetchMatches = Effect.gen(function* () {
@@ -34,7 +35,7 @@ export const getMatchesByTeamHandler = (
 export const getNextMatchesHandler = (): Effect.Effect<
   readonly Match[],
   FootbalistoServiceError,
-  FootbalistoService | KvCacheService
+  FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = "matches:next";
   const fetchMatches = Effect.gen(function* () {
@@ -58,7 +59,7 @@ export const getMatchDetailHandler = (
 ): Effect.Effect<
   MatchDetail,
   FootbalistoServiceError,
-  FootbalistoService | KvCacheService
+  FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `match:detail:${matchId}`;
   const fetchDetail = Effect.gen(function* () {

@@ -6,6 +6,7 @@ import {
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { testEnvLayer } from "../test-helpers/env-layer";
 
 const mockServiceImpl: FootbalistoServiceInterface = {
   getTeamStats: (_teamId) =>
@@ -40,6 +41,7 @@ describe("getTeamStatsHandler", () => {
       getTeamStatsHandler(1).pipe(
         Effect.provide(Layer.succeed(FootbalistoService, mockServiceImpl)),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(testEnvLayer),
       ),
     );
     expect(result.team_id).toBe(1);
