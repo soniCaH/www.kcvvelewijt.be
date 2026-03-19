@@ -44,15 +44,15 @@ No Sanity queries, no match API calls, no template picker, no mobile optimizatio
 
 ## 4. Phases
 
-### Phase 1: Tracer bullet — client-side image export proof
+### Phase 1: Tracer bullet — client-side image export proof (#919)
 
 Prove that a React component can be reliably exported as a 1080x1920 PNG in the browser, including on iOS Safari.
 
-### Phase 2: Template component library
+### Phase 2: Template component library (#920)
 
 Build all 9 template components as pure, presentational React components with Storybook stories. Each template accepts typed props and renders at 1080x1920. No data fetching — just visual composition. This is the phase where background assets get designed (by Kevin) against real Storybook layouts.
 
-### Phase 3: Share page — form and data fetching
+### Phase 3: Share page — form and data fetching (#921)
 
 Build the `/share` page with:
 
@@ -62,7 +62,7 @@ Build the `/share` page with:
 - Template-specific dynamic fields (score, minute, player, mood)
 - Session persistence (match + score persist across generations)
 
-### Phase 4: Image export and mobile UX
+### Phase 4: Image export and mobile UX (#922)
 
 Wire up the image generation pipeline:
 
