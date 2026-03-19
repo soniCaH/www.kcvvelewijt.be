@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
-import { KvCacheService, KvCacheLive, TypedKvCache } from "./kv-cache";
+import { KvCacheService, KvCacheLive, TypedKvCache, TTL } from "./kv-cache";
 import { WorkerEnvTag } from "../env";
 
 function makeMockKv() {
@@ -32,6 +32,12 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
 }
 
 const TestSchema = S.Struct({ name: S.String, value: S.Number });
+
+describe("TTL constants", () => {
+  it("NEXT_MATCHES is 4 hours", () => {
+    expect(TTL.NEXT_MATCHES).toBe(60 * 60 * 4);
+  });
+});
 
 describe("TypedKvCache", () => {
   it("cache miss: calls fetch, caches result, returns value", async () => {

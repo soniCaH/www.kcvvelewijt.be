@@ -63,7 +63,7 @@ All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
 | ----------------------- | ------------------------------- |
 | `psd:current-season-id` | 24 h                            |
 | `matches:team:{id}`     | 6 h                             |
-| `matches:next`          | 30 min                          |
+| `matches:next`          | 4 h                             |
 | `match:detail:{id}`     | 60 s (live) / 7 days (finished) |
 | `ranking:team:{id}`     | 4 h                             |
 | `stats:team:{id}`       | 12 h                            |
