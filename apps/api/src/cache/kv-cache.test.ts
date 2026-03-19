@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
-import { KvCacheService, KvCacheLive, TypedKvCache, TTL } from "./kv-cache";
+import {
+  KvCacheService,
+  KvCacheLive,
+  TypedKvCache,
+  TTL,
+  HARD_TTL_DEFAULT,
+} from "./kv-cache";
 import { WorkerEnvTag } from "../env";
 
 function makeMockKv() {
@@ -33,6 +39,11 @@ function makeEnvLayer(mockKv: ReturnType<typeof makeMockKv>) {
 
 const TestSchema = S.Struct({ name: S.String, value: S.Number });
 
+/** Helper to create a cached wrapper entry */
+function makeWrapper(value: unknown, ageMs: number) {
+  return JSON.stringify({ value, fetchedAt: Date.now() - ageMs });
+}
+
 describe("TTL constants", () => {
   it("NEXT_MATCHES is 4 hours", () => {
     expect(TTL.NEXT_MATCHES).toBe(60 * 60 * 4);
@@ -61,10 +72,39 @@ describe("TTL constants", () => {
   it("MATCH_DETAIL_PAST is 7 days (unchanged)", () => {
     expect(TTL.MATCH_DETAIL_PAST).toBe(60 * 60 * 24 * 7);
   });
+
+  it("HARD_TTL_DEFAULT is 7 days", () => {
+    expect(HARD_TTL_DEFAULT).toBe(60 * 60 * 24 * 7);
+  });
 });
 
 describe("TypedKvCache", () => {
-  it("cache miss: calls fetch, caches result, returns value", async () => {
+  it("fresh path: cached value within softTtl returns without fetch", async () => {
+    const mockKv = makeMockKv();
+    // Cached 10 seconds ago, softTtl is 60 seconds → fresh
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "cached", value: 99 }, 10_000),
+    );
+
+    const fetchEffect = Effect.fail(
+      new Error("fetch should not be called") as never,
+    );
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "cached", value: 99 });
+  });
+
+  it("cache miss: calls fetch, stores wrapper with hardTtl, returns value", async () => {
     const mockKv = makeMockKv();
     let fetchCalled = false;
     const fetchEffect = Effect.sync(() => {
@@ -84,20 +124,27 @@ describe("TypedKvCache", () => {
 
     expect(result).toEqual({ name: "test", value: 42 });
     expect(fetchCalled).toBe(true);
+    // Stored with hardTtl (default 7 days), not softTtl
     expect(mockKv.put).toHaveBeenCalledWith(
       "test-key",
-      JSON.stringify({ name: "test", value: 42 }),
-      { expirationTtl: 60 },
+      expect.stringContaining('"value":{"name":"test","value":42}'),
+      { expirationTtl: HARD_TTL_DEFAULT },
     );
+    // Verify wrapper contains fetchedAt
+    const stored = JSON.parse(mockKv.put.mock.calls[0]![1]);
+    expect(stored).toHaveProperty("fetchedAt");
+    expect(stored.value).toEqual({ name: "test", value: 42 });
   });
 
-  it("cache hit with valid data: returns decoded value, fetch not called", async () => {
+  it("stale + successful refresh: updates cache with fresh value", async () => {
     const mockKv = makeMockKv();
-    mockKv.store.set("test-key", JSON.stringify({ name: "cached", value: 99 }));
-
-    const fetchEffect = Effect.fail(
-      new Error("fetch should not be called") as never,
+    // Cached 2 hours ago, softTtl is 60 seconds → stale
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "old", value: 1 }, 2 * 60 * 60 * 1000),
     );
+
+    const fetchEffect = Effect.succeed({ name: "fresh", value: 42 });
 
     const typedCache = TypedKvCache(TestSchema);
     const result = await Effect.runPromise(
@@ -109,7 +156,35 @@ describe("TypedKvCache", () => {
         ),
     );
 
-    expect(result).toEqual({ name: "cached", value: 99 });
+    expect(result).toEqual({ name: "fresh", value: 42 });
+    // Cache should be updated with new wrapper
+    const stored = JSON.parse(mockKv.put.mock.calls[0]![1]);
+    expect(stored.value).toEqual({ name: "fresh", value: 42 });
+  });
+
+  it("stale-on-error: fetch fails, returns stale value", async () => {
+    const mockKv = makeMockKv();
+    // Cached 2 hours ago, softTtl is 60 seconds → stale
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 99 }, 2 * 60 * 60 * 1000),
+    );
+
+    const fetchEffect = Effect.fail(new Error("PSD 429") as never);
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "stale", value: 99 });
+    // Should NOT update cache on error
+    expect(mockKv.put).not.toHaveBeenCalled();
   });
 
   it("cache hit with corrupted JSON: logs warning, falls through to fetch", async () => {
@@ -136,10 +211,13 @@ describe("TypedKvCache", () => {
     expect(fetchCalled).toBe(true);
   });
 
-  it("cache hit with stale schema: logs warning, falls through to fetch", async () => {
+  it("cache hit with old format (no wrapper): logs warning, falls through to fetch", async () => {
     const mockKv = makeMockKv();
-    // Valid JSON but missing required 'value' field
-    mockKv.store.set("test-key", JSON.stringify({ name: "stale" }));
+    // Pre-Phase 3 format: raw value without wrapper
+    mockKv.store.set(
+      "test-key",
+      JSON.stringify({ name: "old-format", value: 5 }),
+    );
 
     let fetchCalled = false;
     const fetchEffect = Effect.sync(() => {
@@ -161,7 +239,7 @@ describe("TypedKvCache", () => {
     expect(fetchCalled).toBe(true);
   });
 
-  it("supports dynamic TTL function based on the fetched value", async () => {
+  it("supports dynamic softTtl function based on the fetched value", async () => {
     const mockKv = makeMockKv();
     const fetchEffect = Effect.succeed({ name: "test", value: 10 });
 
@@ -175,11 +253,32 @@ describe("TypedKvCache", () => {
         ),
     );
 
+    // Stored with hardTtl (default 7 days)
     expect(mockKv.put).toHaveBeenCalledWith(
       "test-key",
-      JSON.stringify({ name: "test", value: 10 }),
-      { expirationTtl: 600 },
+      expect.stringContaining('"value":{"name":"test","value":10}'),
+      { expirationTtl: HARD_TTL_DEFAULT },
     );
+  });
+
+  it("uses custom hardTtl when provided", async () => {
+    const mockKv = makeMockKv();
+    const fetchEffect = Effect.succeed({ name: "test", value: 10 });
+    const customHardTtl = 60 * 60 * 24 * 30; // 30 days
+
+    const typedCache = TypedKvCache(TestSchema);
+    await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60, customHardTtl)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
+      expirationTtl: customHardTtl,
+    });
   });
 });
 

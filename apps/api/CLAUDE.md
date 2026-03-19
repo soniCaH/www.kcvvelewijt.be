@@ -57,17 +57,22 @@ wrangler secret put PSD_API_CLUB --env staging
 
 ## Cache
 
-All cache keys use `KvCacheService`. TTLs are defined in `cache/kv-cache.ts`:
+`TypedKvCache` uses a two-TTL pattern (stale-on-error):
 
-| Key pattern             | TTL                                                 |
-| ----------------------- | --------------------------------------------------- |
-| `psd:current-season-id` | 24 h                                                |
-| `matches:team:{id}`     | 24 h                                                |
-| `matches:next`          | 4 h                                                 |
-| `match:detail:{id}`     | 7 days (finished ≥48h ago) / 24 h (all other cases) |
-| `ranking:team:{id}`     | 24 h                                                |
-| `stats:team:{id}`       | 24 h                                                |
-| `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter)                       |
+- **softTtl** — freshness threshold. If cached data is younger than softTtl, return it immediately.
+- **hardTtl** — KV storage TTL (default 7 days). If cached data is older than softTtl but younger than hardTtl, attempt refresh; on failure, serve stale data with a warning log.
+
+Values are stored as `{ value, fetchedAt }` wrappers. On deploy, existing cache entries without the wrapper trigger a one-time cold start.
+
+| Key pattern             | softTtl                                             | hardTtl |
+| ----------------------- | --------------------------------------------------- | ------- |
+| `psd:current-season-id` | 24 h                                                | 7 days  |
+| `matches:team:{id}`     | 24 h                                                | 7 days  |
+| `matches:next`          | 4 h                                                 | 7 days  |
+| `match:detail:{id}`     | 7 days (finished ≥48h ago) / 24 h (all other cases) | 7 days  |
+| `ranking:team:{id}`     | 24 h                                                | 7 days  |
+| `stats:team:{id}`       | 24 h                                                | 7 days  |
+| `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter, not via TypedKvCache) | —       |
 
 ## Rules
 
