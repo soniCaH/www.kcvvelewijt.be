@@ -65,7 +65,10 @@ const rawStats = {
   goalsAgainst: [],
 };
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  global.fetch = vi.fn();
+});
 
 const rawTeams = [
   {

@@ -172,7 +172,7 @@ export const FootbalistoServiceLive = Layer.effect(
     /** Convert a PsdGame date + time fields to UTC milliseconds */
     const toMs = (m: PsdGame): number => {
       const datePart = m.date.split(" ")[0]!;
-      const timeStr = m.time ?? "00:00";
+      const timeStr = m.time ?? m.date.split(" ")[1] ?? "00:00";
       const [year, month, day] = datePart.split("-").map(Number);
       const [hour = 0, minute = 0] = timeStr.split(":").map(Number);
       return Date.UTC(year!, month! - 1, day!, hour, minute);
@@ -208,32 +208,34 @@ export const FootbalistoServiceLive = Layer.effect(
           const now = Date.now();
 
           const teamNextMatches = yield* Effect.all(
-            teams.map((team) =>
-              countedFetch(
-                `${base}/games/team/${team.id}/seasons/${season.id}`,
-                PsdMatchListSchema,
-              ).pipe(
-                Effect.map((data) => {
-                  const next = [...data.content]
-                    .filter((m) => toMs(m) >= now)
-                    .sort((a, b) => toMs(a) - toMs(b))[0];
-                  return next
-                    ? ({ ...next, teamId: team.id } as PsdGame)
-                    : null;
-                }),
-                Effect.catchAll((e) =>
-                  Effect.log(
-                    `getNextMatches: team ${team.id} failed: ${String(e)}`,
-                  ).pipe(Effect.as(null)),
+            teams
+              .filter((t) => t.id !== 23)
+              .map((team) =>
+                countedFetch(
+                  `${base}/games/team/${team.id}/seasons/${season.id}`,
+                  PsdMatchListSchema,
+                ).pipe(
+                  Effect.map((data) => {
+                    const next = [...data.content]
+                      .filter((m) => toMs(m) >= now)
+                      .sort((a, b) => toMs(a) - toMs(b))[0];
+                    return next
+                      ? ({ ...next, teamId: team.id } as PsdGame)
+                      : null;
+                  }),
+                  Effect.catchAll((e) =>
+                    Effect.log(
+                      `getNextMatches: team ${team.id} failed: ${String(e)}`,
+                    ).pipe(Effect.as(null)),
+                  ),
                 ),
               ),
-            ),
             { concurrency: 5 },
           );
 
-          // Filter out nulls and Weitse Gans (teamId 23) — not KCVV but plays on KCVV pitch
+          // Filter out nulls (team 23 is excluded before fetching)
           return teamNextMatches
-            .filter((m): m is PsdGame => m !== null && m.teamId !== 23)
+            .filter((m): m is PsdGame => m !== null)
             .map(transformPsdGame);
         }),
 

@@ -9,6 +9,7 @@ import {
 import { TTL } from "../cache/kv-cache";
 import {
   FootbalistoService,
+  FootbalistoServiceError,
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -65,11 +66,16 @@ function makeCacheMock(): KvCacheInterface {
 }
 
 function provide<A>(
-  effect: Effect.Effect<A, never, FootbalistoService | KvCacheService>,
+  effect: Effect.Effect<
+    A,
+    FootbalistoServiceError,
+    FootbalistoService | KvCacheService
+  >,
 ) {
   return effect.pipe(
     Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
+    Effect.orDie,
   );
 }
 
@@ -113,6 +119,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.orDie,
       ),
     );
 
@@ -143,6 +150,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.orDie,
       ),
     );
 
@@ -158,6 +166,7 @@ describe("getMatchByIdHandler", () => {
     const result = await Effect.runPromise(
       getMatchByIdHandler(99).pipe(
         Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+        Effect.orDie,
       ),
     );
     expect(result.id).toBe(99);
