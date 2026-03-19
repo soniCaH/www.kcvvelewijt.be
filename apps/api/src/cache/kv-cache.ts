@@ -30,7 +30,7 @@ export class KvCacheService extends Context.Tag("KvCacheService")<
 /** Default hard TTL: 7 days — safety net for stale-on-error */
 export const HARD_TTL_DEFAULT = 60 * 60 * 24 * 7;
 
-export const TypedKvCache = <A>(schema: S.Schema<A, any>) => {
+export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
   const WrapperSchema = S.Struct({
     value: schema,
     fetchedAt: S.Number,
@@ -52,10 +52,27 @@ export const TypedKvCache = <A>(schema: S.Schema<A, any>) => {
             try: () => JSON.parse(cached),
             catch: (e) => new Error(String(e)),
           }).pipe(
-            Effect.flatMap(S.decodeUnknown(WrapperSchema)),
-            Effect.tapError((e) =>
-              Effect.logWarning(
-                `TypedKvCache: cache decode failed for key "${key}": ${String(e)}`,
+            Effect.flatMap((parsed) =>
+              S.decodeUnknown(WrapperSchema)(parsed).pipe(
+                Effect.catchAll(() =>
+                  // Legacy pre-wrapper format: try decoding raw value
+                  S.decodeUnknown(schema)(parsed).pipe(
+                    Effect.tap(() =>
+                      Effect.logDebug(
+                        `TypedKvCache: legacy cache entry for key "${key}" — will migrate on next fetch`,
+                      ),
+                    ),
+                    Effect.map((value) => ({ value, fetchedAt: 0 })),
+                    Effect.catchAll((legacyErr) =>
+                      Effect.zipRight(
+                        Effect.logWarning(
+                          `TypedKvCache: cache decode failed for key "${key}": ${String(legacyErr)}`,
+                        ),
+                        Effect.fail(legacyErr),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             Effect.option,
@@ -72,10 +89,10 @@ export const TypedKvCache = <A>(schema: S.Schema<A, any>) => {
             // Stale: attempt refresh, fall back to stale on error
             const refreshed = yield* fetch.pipe(
               Effect.map((freshValue) => ({ freshValue, ok: true as const })),
-              Effect.catchAll(() =>
+              Effect.catchAll((err) =>
                 Effect.gen(function* () {
                   yield* Effect.logWarning(
-                    `TypedKvCache: refresh failed for key "${key}", serving stale data (age: ${Math.round((Date.now() - fetchedAt) / 1000)}s)`,
+                    `TypedKvCache: refresh failed for key "${key}", serving stale data (age: ${Math.round((Date.now() - fetchedAt) / 1000)}s, error: ${String(err)})`,
                   );
                   return { freshValue: value, ok: false as const };
                 }),
