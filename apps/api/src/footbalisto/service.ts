@@ -543,13 +543,21 @@ export const FootbalistoServiceLive = Layer.effect(
             `${base}/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
           );
-          const ghostGames = data.content.filter((g) => !isValidGame(g));
-          if (ghostGames.length > 0) {
+          const ghostIds: number[] = [];
+          const matches: Array<ReturnType<typeof transformPsdGame>> = [];
+          for (const game of data.content) {
+            if (isValidGame(game)) {
+              matches.push(transformPsdGame(game));
+            } else {
+              ghostIds.push(game.id);
+            }
+          }
+          if (ghostIds.length > 0) {
             yield* Effect.log(
-              `[matches] Skipping ${ghostGames.length} ghost game(s) for team ${teamId}: ${ghostGames.map((g) => `id=${g.id}`).join(", ")}`,
+              `[matches] Skipping ${ghostIds.length} ghost game(s) for team ${teamId}: ${ghostIds.map((id) => `id=${id}`).join(", ")}`,
             );
           }
-          return data.content.filter(isValidGame).map(transformPsdGame);
+          return matches;
         }),
 
       getNextMatches: () =>
