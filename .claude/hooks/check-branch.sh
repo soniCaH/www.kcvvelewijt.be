@@ -6,9 +6,13 @@ INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | sed -n 's/.*"command" *: *"\([^"]*\)".*/\1/p')
 echo "$COMMAND" | grep -q 'git commit' || exit 0
 
-# In a worktree, git rev-parse --show-toplevel gives the worktree root.
-# git branch --show-current works correctly in both worktrees and main tree.
-BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+# If the command starts with "cd /some/path && ...", resolve the branch there.
+TARGET_DIR=$(echo "$COMMAND" | sed -n 's/^cd \([^ &]*\) &&.*/\1/p')
+if [ -n "$TARGET_DIR" ] && [ -d "$TARGET_DIR" ]; then
+  BRANCH=$(git -C "$TARGET_DIR" branch --show-current 2>/dev/null || echo "unknown")
+else
+  BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+fi
 
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
   cat <<EOF
