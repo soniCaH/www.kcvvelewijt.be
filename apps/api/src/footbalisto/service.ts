@@ -178,6 +178,12 @@ export const FootbalistoServiceLive = Layer.effect(
       return Date.UTC(year!, month! - 1, day!, hour, minute);
     };
 
+    const fetchRawMatchDetail = (matchId: number) =>
+      countedFetch(
+        `${base}/games/${matchId}/info`,
+        FootbalistoMatchDetailResponse,
+      );
+
     return {
       getTeamStats: (teamId: number) =>
         Effect.gen(function* () {
@@ -240,22 +246,16 @@ export const FootbalistoServiceLive = Layer.effect(
         }),
 
       getMatchById: (matchId: number) =>
-        Effect.gen(function* () {
-          const rawDetail = yield* countedFetch(
-            `${base}/games/${matchId}/info`,
-            FootbalistoMatchDetailResponse,
-          );
-          return matchDetailToMatch(transformFootbalistoMatchDetail(rawDetail));
-        }),
+        fetchRawMatchDetail(matchId).pipe(
+          Effect.map((raw) =>
+            matchDetailToMatch(transformFootbalistoMatchDetail(raw)),
+          ),
+        ),
 
       getMatchDetail: (matchId: number) =>
-        Effect.gen(function* () {
-          const rawDetail = yield* countedFetch(
-            `${base}/games/${matchId}/info`,
-            FootbalistoMatchDetailResponse,
-          );
-          return transformFootbalistoMatchDetail(rawDetail);
-        }),
+        fetchRawMatchDetail(matchId).pipe(
+          Effect.map(transformFootbalistoMatchDetail),
+        ),
     };
   }),
 );
