@@ -238,30 +238,9 @@ describe("ResponsibilityFinder", () => {
 
       await waitFor(
         () => {
-          const allButtons = screen.queryAllByRole("button");
-
-          // Filter to get only suggestion buttons
-          // Exclude: dropdown button and clear button
-          const suggestionButtons = allButtons.filter((button) => {
-            const label = button.getAttribute("aria-label") || "";
-            const text = button.textContent || "";
-
-            // Skip clear button (has "clear" in aria-label)
-            if (label.toLowerCase().includes("clear")) return false;
-
-            // Skip dropdown button (contains "een..." or a role name)
-            if (
-              text.includes("een...") ||
-              /speler|ouder|trainer|supporter|niet-lid/i.test(text)
-            ) {
-              return false;
-            }
-
-            return true;
-          });
-
-          expect(suggestionButtons.length).toBeGreaterThan(0);
-          expect(suggestionButtons.length).toBeLessThanOrEqual(6);
+          const options = screen.queryAllByRole("option");
+          expect(options.length).toBeGreaterThan(0);
+          expect(options.length).toBeLessThanOrEqual(6);
         },
         { timeout: 3000 },
       );
@@ -303,10 +282,8 @@ describe("ResponsibilityFinder", () => {
       // Verify suggestions are visible
       await waitFor(
         () => {
-          const suggestionButtons = screen.queryAllByRole("button", {
-            name: /ongeval/i,
-          });
-          expect(suggestionButtons.length).toBeGreaterThan(0);
+          const options = screen.queryAllByRole("option");
+          expect(options.length).toBeGreaterThan(0);
         },
         { timeout: 3000 },
       );
@@ -318,10 +295,8 @@ describe("ResponsibilityFinder", () => {
       // Wait for suggestions to disappear
       await waitFor(
         () => {
-          const suggestionButtons = screen.queryAllByRole("button", {
-            name: /ongeval/i,
-          });
-          expect(suggestionButtons).toHaveLength(0);
+          const options = screen.queryAllByRole("option");
+          expect(options).toHaveLength(0);
         },
         { timeout: 3000 },
       );
@@ -343,7 +318,7 @@ describe("ResponsibilityFinder", () => {
       await user.type(input, "ongeval");
 
       const suggestions = await screen.findAllByRole(
-        "button",
+        "option",
         { name: /ongeval/i },
         { timeout: 3000 },
       );
@@ -375,7 +350,7 @@ describe("ResponsibilityFinder", () => {
       await user.type(input, "ongeval");
 
       const suggestions = await screen.findAllByRole(
-        "button",
+        "option",
         { name: /ongeval/i },
         { timeout: 3000 },
       );
@@ -401,7 +376,7 @@ describe("ResponsibilityFinder", () => {
       await user.type(input, "ongeval");
 
       const suggestions = await screen.findAllByRole(
-        "button",
+        "option",
         { name: /ongeval/i },
         { timeout: 3000 },
       );
@@ -600,7 +575,7 @@ describe("ResponsibilityFinder", () => {
 
       // Click on the specific suggestion for this path
       const suggestion = await screen.findByRole(
-        "button",
+        "option",
         { name: new RegExp(pathWithMemberId!.question, "i") },
         { timeout: 3000 },
       );
@@ -644,7 +619,7 @@ describe("ResponsibilityFinder", () => {
 
       // Click on the suggestion
       const suggestions = await screen.findAllByRole(
-        "button",
+        "option",
         { name: /sponsor/i },
         { timeout: 3000 },
       );
@@ -673,7 +648,7 @@ describe("ResponsibilityFinder", () => {
 
       // Click suggestion
       const suggestions = await screen.findAllByRole(
-        "button",
+        "option",
         { name: /sponsor/i },
         { timeout: 3000 },
       );
@@ -785,34 +760,9 @@ describe("ResponsibilityFinder", () => {
         />,
       );
 
-      // Should not show the autocomplete dropdown
-      const buttons = screen.queryAllByRole("button");
-      const suggestionButtons = buttons.filter((button) => {
-        const label = button.getAttribute("aria-label") || "";
-        const text = button.textContent || "";
-
-        // Skip clear button (check both aria-label and textContent)
-        if (
-          label.toLowerCase().includes("clear") ||
-          text.toLowerCase().includes("clear")
-        )
-          return false;
-
-        // Skip dropdown button (check both textContent and aria-label)
-        if (
-          text.includes("een...") ||
-          label.includes("een...") ||
-          /speler|ouder|trainer|supporter|niet-lid/i.test(text) ||
-          /speler|ouder|trainer|supporter|niet-lid/i.test(label)
-        ) {
-          return false;
-        }
-
-        return true;
-      });
-
-      // Should only have role dropdown and clear buttons, no suggestions
-      expect(suggestionButtons.length).toBe(0);
+      // Should not show the autocomplete dropdown (options are suggestion items)
+      const options = screen.queryAllByRole("option");
+      expect(options.length).toBe(0);
     });
 
     it("does not call onResultSelect on mount when initialPath is provided", () => {
@@ -870,63 +820,298 @@ describe("ResponsibilityFinder", () => {
 
       // Should show suggestions for new search
       await waitFor(() => {
-        // Input value should be updated
         expect(input).toHaveValue("w");
-
-        // New suggestions should appear (broad search yields results)
-        const allButtons = screen.queryAllByRole("button");
-        const suggestionButtons = allButtons.filter((button) => {
-          const label = button.getAttribute("aria-label") || "";
-          const text = button.textContent || "";
-
-          // Skip clear button (check both aria-label and textContent)
-          if (
-            label.toLowerCase().includes("clear") ||
-            text.toLowerCase().includes("clear")
-          )
-            return false;
-
-          // Skip dropdown button (check both textContent and aria-label)
-          if (
-            text.includes("een...") ||
-            label.includes("een...") ||
-            /speler|ouder|trainer|supporter|niet-lid/i.test(text) ||
-            /speler|ouder|trainer|supporter|niet-lid/i.test(label)
-          ) {
-            return false;
-          }
-
-          return true;
-        });
-        expect(suggestionButtons.length).toBeGreaterThan(0);
+        const options = screen.queryAllByRole("option");
+        expect(options.length).toBeGreaterThan(0);
       });
 
       // Click on a new suggestion to change the selection
-      const allButtons = screen.queryAllByRole("button");
-      const suggestionButtons = allButtons.filter((button) => {
-        const label = button.getAttribute("aria-label") || "";
-        const text = button.textContent || "";
-        if (
-          label.toLowerCase().includes("clear") ||
-          text.toLowerCase().includes("clear")
-        )
-          return false;
-        if (
-          text.includes("een...") ||
-          label.includes("een...") ||
-          /speler|ouder|trainer|supporter|niet-lid/i.test(text) ||
-          /speler|ouder|trainer|supporter|niet-lid/i.test(label)
-        ) {
-          return false;
-        }
-        return true;
-      });
-      await user.click(suggestionButtons[0]);
+      const options = screen.queryAllByRole("option");
+      await user.click(options[0]);
 
       // After clicking new suggestion, the original result should be replaced
       await waitFor(() => {
         expect(screen.queryByText(testPath.question)).not.toBeInTheDocument();
         expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Onboarding Hints", () => {
+    it("shows example searches on empty state before role selection", () => {
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      // Should show hint buttons with hardcoded display text
+      expect(screen.getByText("Mijn kind wil inschrijven")).toBeInTheDocument();
+      expect(
+        screen.getByText("Geblesseerd tijdens training"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Ik ontvang geen mails meer"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Wedstrijden zoeken")).toBeInTheDocument();
+    });
+
+    it("does not show hints after role is selected", async () => {
+      const user = userEvent.setup();
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      expect(
+        screen.queryByText("Mijn kind wil inschrijven"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("clicking a hint sets role and shows result directly", async () => {
+      const user = userEvent.setup();
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      // Click the "Mijn kind wil inschrijven" hint
+      await user.click(screen.getByText("Mijn kind wil inschrijven"));
+
+      // Should show the result card directly (no intermediate suggestion list)
+      await waitFor(() => {
+        expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
+      });
+
+      // Role should be set to the path's first role
+      const inschrijvingPath = responsibilityPaths.find(
+        (p) => p.id === "inschrijving-nieuw-lid",
+      )!;
+      const expectedRole = inschrijvingPath.role[0];
+      expect(
+        screen.getByRole("button", { name: new RegExp(expectedRole, "i") }),
+      ).toBeInTheDocument();
+    });
+
+    it("stale hint slugs silently disappear", () => {
+      // Provide paths that don't include one of the hint slugs
+      const pathsWithoutWedstrijden = responsibilityPaths.filter(
+        (p) => p.id !== "wedstrijden-zoeken",
+      );
+
+      render(<ResponsibilityFinder paths={pathsWithoutWedstrijden} />);
+
+      // The hint for wedstrijden-zoeken should not appear
+      expect(screen.queryByText("Wedstrijden zoeken")).not.toBeInTheDocument();
+
+      // Other hints should still appear
+      expect(screen.getByText("Mijn kind wil inschrijven")).toBeInTheDocument();
+    });
+  });
+
+  describe("Fallback Contact Block", () => {
+    it("shows fallback block below every result card", async () => {
+      const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "ongeval");
+
+      const suggestions = await screen.findAllByRole(
+        "option",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
+      await user.click(suggestions[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Staat jouw vraag er niet bij?"),
+        ).toBeInTheDocument();
+        expect(screen.getByRole("link", { name: /contact/i })).toHaveAttribute(
+          "href",
+          "/contact",
+        );
+        expect(
+          screen.getByRole("link", { name: /organigram/i }),
+        ).toHaveAttribute("href", "/club/organigram");
+      });
+    });
+  });
+
+  describe("Navigation Buttons", () => {
+    it("shows 'Terug' button that returns to suggestion list", async () => {
+      const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "ongeval");
+
+      const suggestions = await screen.findAllByRole(
+        "option",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
+      await user.click(suggestions[0]);
+
+      // Result card should be visible
+      await waitFor(() => {
+        expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
+      });
+
+      // Click "Terug"
+      await user.click(screen.getByRole("button", { name: /terug/i }));
+
+      // Result card should be gone, suggestions should be visible again
+      await waitFor(() => {
+        expect(screen.queryByText(/Contactpersoon/i)).not.toBeInTheDocument();
+      });
+
+      // Search input should still be present with role selected
+      expect(screen.getByPlaceholderText(/typ je vraag/i)).toBeInTheDocument();
+    });
+
+    it("shows 'Opnieuw beginnen' button that resets to initial state", async () => {
+      const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "ongeval");
+
+      const suggestions = await screen.findAllByRole(
+        "option",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
+      await user.click(suggestions[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
+      });
+
+      // Click "Opnieuw beginnen"
+      await user.click(
+        screen.getByRole("button", { name: /opnieuw beginnen/i }),
+      );
+
+      // Should be back to initial state: no result, no role, hints visible
+      await waitFor(() => {
+        expect(screen.queryByText(/Contactpersoon/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByPlaceholderText(/typ je vraag/i),
+        ).not.toBeInTheDocument();
+        // Hints should be back
+        expect(
+          screen.getByText("Mijn kind wil inschrijven"),
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Accessibility Enhancements", () => {
+    it("suggestion list has listbox/option roles", async () => {
+      const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "ongeval");
+
+      await waitFor(
+        () => {
+          expect(screen.getByRole("listbox")).toBeInTheDocument();
+          expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+        },
+        { timeout: 3000 },
+      );
+    });
+
+    it("supports arrow-key navigation in suggestion list", async () => {
+      const user = userEvent.setup();
+      mockSearchReturning(responsibilityPaths.slice(0, 3));
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "test");
+
+      await waitFor(
+        () => {
+          expect(screen.getByRole("listbox")).toBeInTheDocument();
+        },
+        { timeout: 3000 },
+      );
+
+      // Press ArrowDown to move to first option
+      await user.keyboard("{ArrowDown}");
+
+      const combobox = screen.getByRole("combobox");
+      expect(combobox).toHaveAttribute("aria-activedescendant", "suggestion-0");
+    });
+
+    it("result area has aria-live region", async () => {
+      const user = userEvent.setup();
+      const ongevalPath = responsibilityPaths.find((p) =>
+        p.question.includes("ongeval"),
+      )!;
+      mockSearchReturning([ongevalPath]);
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      await selectRole(user, "speler");
+
+      const input = screen.getByPlaceholderText(/typ je vraag/i);
+      await user.type(input, "ongeval");
+
+      const suggestions = await screen.findAllByRole(
+        "option",
+        { name: /ongeval/i },
+        { timeout: 3000 },
+      );
+      await user.click(suggestions[0]);
+
+      await waitFor(() => {
+        const liveRegion = screen
+          .getByText(/Contactpersoon/i)
+          .closest("[aria-live]");
+        expect(liveRegion).toBeInTheDocument();
+        expect(liveRegion).toHaveAttribute("aria-live", "polite");
+      });
+    });
+
+    it("all interactive elements have visible focus styles", () => {
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      // Role dropdown button should have focus-visible styles
+      const dropdownButton = screen.getByRole("button", { name: /een\.\.\./i });
+      expect(dropdownButton.className).toMatch(/focus-visible/);
+    });
+
+    it("tap targets meet 44x44px minimum", async () => {
+      const user = userEvent.setup();
+      render(<ResponsibilityFinder paths={responsibilityPaths} />);
+
+      // Role dropdown options should have min tap target
+      await user.click(screen.getByRole("button", { name: /een\.\.\./i }));
+
+      await waitFor(() => {
+        const roleOption = screen.getByRole("button", { name: /speler/i });
+        expect(roleOption.className).toMatch(/min-h-\[44px\]|min-h-11/);
       });
     });
   });
