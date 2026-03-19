@@ -6,7 +6,7 @@ import type {
   SanityStaffDoc,
 } from "../sanity/client";
 import { SanityWriteClient } from "../sanity/client";
-import { FootbalistoClient } from "../footbalisto/client";
+import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
 
 /**
@@ -146,7 +146,7 @@ const CURSOR_KEY = "sync:team-cursor";
  * Only PSD-sourced fields are written — editorial fields are never touched.
  */
 export const runSync = Effect.gen(function* () {
-  const psd = yield* FootbalistoClient;
+  const psd = yield* PsdTeamClient;
   const sanity = yield* SanityWriteClient;
   const env = yield* WorkerEnvTag;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the

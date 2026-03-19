@@ -18,7 +18,7 @@ import {
 import { Effect, Layer } from "effect";
 import { PsdApi } from "@kcvv/api-contract";
 import { WorkerEnvTag, type WorkerEnv } from "./env";
-import { FootbalistoClientLive } from "./footbalisto/client";
+import { PsdTeamClientLive } from "./sync/psd-team-client";
 import { FootbalistoServiceLive } from "./footbalisto/service";
 import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
@@ -58,7 +58,6 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
     Layer.provide(FootbalistoServiceLive),
-    Layer.provide(FootbalistoClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
     Layer.provideMerge(WorkerPlatformLayer),
@@ -107,7 +106,7 @@ export default {
     } else if (event.cron === "0 2 * * *") {
       // PSD → Sanity player/team/staff sync
       const layer = Layer.mergeAll(
-        FootbalistoClientLive,
+        PsdTeamClientLive,
         SanityWriteClientLive,
         envLayer,
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
