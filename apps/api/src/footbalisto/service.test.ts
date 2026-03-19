@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Logger } from "effect";
 import {
   FootbalistoService,
   FootbalistoServiceError,
   FootbalistoServiceLive,
+  mapGameStatus,
 } from "./service";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -620,5 +621,69 @@ describe("FootbalistoService.getMatchDetail", () => {
       expect(result.left).toBeInstanceOf(FootbalistoServiceError);
       expect(result.left.status).toBe(500);
     }
+  });
+});
+
+describe("mapGameStatus", () => {
+  it("returns an Effect that resolves to the correct status", async () => {
+    const result = await Effect.runPromise(mapGameStatus(0, 3, 1));
+    expect(result).toBe("finished");
+  });
+
+  it("returns 'scheduled' for status 0 with no goals", async () => {
+    const result = await Effect.runPromise(mapGameStatus(0, null, null));
+    expect(result).toBe("scheduled");
+  });
+
+  it("returns 'forfeited' for status 1", async () => {
+    const result = await Effect.runPromise(mapGameStatus(1, null, null));
+    expect(result).toBe("forfeited");
+  });
+
+  it("returns 'postponed' for status 2", async () => {
+    const result = await Effect.runPromise(mapGameStatus(2, null, null));
+    expect(result).toBe("postponed");
+  });
+
+  it("returns 'stopped' for status 3", async () => {
+    const result = await Effect.runPromise(mapGameStatus(3, null, null));
+    expect(result).toBe("stopped");
+  });
+
+  it("returns 'postponed' when cancelled regardless of status", async () => {
+    const result = await Effect.runPromise(mapGameStatus(0, 3, 1, true));
+    expect(result).toBe("postponed");
+  });
+
+  it("logs a warning for unknown status code", async () => {
+    const messages: string[] = [];
+    const TestLogger = Logger.make(({ message }) => {
+      messages.push(String(message));
+    });
+
+    await Effect.runPromise(
+      mapGameStatus(99, null, null).pipe(
+        Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
+      ),
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toContain("Unknown PSD game status code: 99");
+  });
+
+  it("logs a warning for unknown status code when cancelled", async () => {
+    const messages: string[] = [];
+    const TestLogger = Logger.make(({ message }) => {
+      messages.push(String(message));
+    });
+
+    await Effect.runPromise(
+      mapGameStatus(99, null, null, true).pipe(
+        Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
+      ),
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toContain("Unknown PSD game status code: 99");
   });
 });

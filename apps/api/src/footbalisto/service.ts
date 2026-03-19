@@ -60,26 +60,31 @@ type MatchStatusType =
  * Any unknown code (when not cancelled) falls back to "scheduled" (safe default).
  * Unknown codes are logged so we can detect undocumented PSD values in production.
  */
-function mapGameStatus(
+export function mapGameStatus(
   status: number,
   goalsHome: number | null,
   goalsAway: number | null,
   cancelled?: boolean | null,
-): MatchStatusType {
+): Effect.Effect<MatchStatusType> {
+  const warnUnknown = Effect.logWarning(
+    `[transforms] Unknown PSD game status code: ${status}`,
+  );
+
   if (cancelled) {
     if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
-      console.warn(`[transforms] Unknown PSD game status code: ${status}`);
+      return Effect.as(warnUnknown, "postponed" as const);
     }
-    return "postponed";
+    return Effect.succeed("postponed" as const);
   }
-  if (status === 1) return "forfeited";
-  if (status === 2) return "postponed";
-  if (status === 3) return "stopped";
+  if (status === 1) return Effect.succeed("forfeited" as const);
+  if (status === 2) return Effect.succeed("postponed" as const);
+  if (status === 3) return Effect.succeed("stopped" as const);
   if (status === 0) {
-    return goalsHome !== null && goalsAway !== null ? "finished" : "scheduled";
+    return Effect.succeed(
+      goalsHome !== null && goalsAway !== null ? "finished" : "scheduled",
+    );
   }
-  console.warn(`[transforms] Unknown PSD game status code: ${status}`);
-  return "scheduled";
+  return Effect.as(warnUnknown, "scheduled" as const);
 }
 
 function parseDateString(dateStr: string): { date: Date; time: string } {
@@ -92,40 +97,41 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
   };
 }
 
-function transformPsdGame(game: PsdGame): Match {
+function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
   const { date: matchDate, time: timePart } = parseDateString(
     `${datePart} ${timeStr}`,
   );
-  const status = mapGameStatus(
+
+  return mapGameStatus(
     game.status,
     game.goalsHomeTeam,
     game.goalsAwayTeam,
     game.cancelled,
+  ).pipe(
+    Effect.map((status) => ({
+      id: game.id,
+      date: matchDate,
+      time: timePart,
+      venue: undefined,
+      home_team: {
+        id: game.homeClub.id,
+        name: game.homeClub.name,
+        logo: game.homeClub.logo ?? undefined,
+        score: game.goalsHomeTeam ?? undefined,
+      },
+      away_team: {
+        id: game.awayClub.id,
+        name: game.awayClub.name,
+        logo: game.awayClub.logo ?? undefined,
+        score: game.goalsAwayTeam ?? undefined,
+      },
+      status,
+      competition: game.competitionType?.type ?? "UNKNOWN",
+      kcvv_team_id: game.teamId ?? undefined,
+    })),
   );
-
-  return {
-    id: game.id,
-    date: matchDate,
-    time: timePart,
-    venue: undefined,
-    home_team: {
-      id: game.homeClub.id,
-      name: game.homeClub.name,
-      logo: game.homeClub.logo ?? undefined,
-      score: game.goalsHomeTeam ?? undefined,
-    },
-    away_team: {
-      id: game.awayClub.id,
-      name: game.awayClub.name,
-      logo: game.awayClub.logo ?? undefined,
-      score: game.goalsAwayTeam ?? undefined,
-    },
-    status,
-    competition: game.competitionType?.type ?? "UNKNOWN",
-    kcvv_team_id: game.teamId ?? undefined,
-  };
 }
 
 function transformLineupStatus(
@@ -205,15 +211,9 @@ function transformPlayerWithCard(
 
 function transformFootbalistoMatchDetail(
   response: RawDetailResponse,
-): MatchDetail {
+): Effect.Effect<MatchDetail> {
   const general = response.general;
   const { date: matchDate, time: timePart } = parseDateString(general.date);
-  const status = mapGameStatus(
-    general.status,
-    general.goalsHomeTeam,
-    general.goalsAwayTeam,
-    general.cancelled,
-  );
   const cardMap = response.events ? buildPlayerCardMap(response.events) : null;
 
   let lineup:
@@ -240,28 +240,35 @@ function transformFootbalistoMatchDetail(
     };
   }
 
-  return {
-    id: general.id,
-    date: matchDate,
-    time: timePart,
-    venue: undefined,
-    home_team: {
-      id: general.homeClub.id,
-      name: general.homeClub.name,
-      logo: general.homeClub.logo ?? undefined,
-      score: general.goalsHomeTeam ?? undefined,
-    },
-    away_team: {
-      id: general.awayClub.id,
-      name: general.awayClub.name,
-      logo: general.awayClub.logo ?? undefined,
-      score: general.goalsAwayTeam ?? undefined,
-    },
-    status,
-    competition: general.competitionType,
-    lineup,
-    hasReport: general.viewGameReport,
-  };
+  return mapGameStatus(
+    general.status,
+    general.goalsHomeTeam,
+    general.goalsAwayTeam,
+    general.cancelled,
+  ).pipe(
+    Effect.map((status) => ({
+      id: general.id,
+      date: matchDate,
+      time: timePart,
+      venue: undefined,
+      home_team: {
+        id: general.homeClub.id,
+        name: general.homeClub.name,
+        logo: general.homeClub.logo ?? undefined,
+        score: general.goalsHomeTeam ?? undefined,
+      },
+      away_team: {
+        id: general.awayClub.id,
+        name: general.awayClub.name,
+        logo: general.awayClub.logo ?? undefined,
+        score: general.goalsAwayTeam ?? undefined,
+      },
+      status,
+      competition: general.competitionType,
+      lineup,
+      hasReport: general.viewGameReport,
+    })),
+  );
 }
 
 /** Strip lineup from a MatchDetail to produce a basic Match */
@@ -570,7 +577,7 @@ export const FootbalistoServiceLive = Layer.effect(
             );
           }
 
-          return games.map(transformPsdGame);
+          return yield* Effect.forEach(games, transformPsdGame);
         }),
 
       getNextMatches: () =>
@@ -611,7 +618,7 @@ export const FootbalistoServiceLive = Layer.effect(
                         .filter((m) => toMs(m) >= now)
                         .sort((a, b) => toMs(a) - toMs(b))[0];
                       return next
-                        ? transformPsdGame({ ...next, teamId: team.id })
+                        ? yield* transformPsdGame({ ...next, teamId: team.id })
                         : null;
                     }),
                   ),
@@ -643,14 +650,13 @@ export const FootbalistoServiceLive = Layer.effect(
 
       getMatchById: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
-          Effect.map((raw) =>
-            matchDetailToMatch(transformFootbalistoMatchDetail(raw)),
-          ),
+          Effect.flatMap(transformFootbalistoMatchDetail),
+          Effect.map(matchDetailToMatch),
         ),
 
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
-          Effect.map(transformFootbalistoMatchDetail),
+          Effect.flatMap(transformFootbalistoMatchDetail),
         ),
 
       getRanking: (teamId: number, logoCdnUrl: string) =>

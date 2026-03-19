@@ -121,7 +121,9 @@ export default {
         }),
       );
     } else {
-      console.warn(`[scheduled] unknown cron expression: ${event.cron}`);
+      await Effect.runPromise(
+        Effect.logWarning(`[scheduled] unknown cron expression: ${event.cron}`),
+      );
     }
   },
 };
