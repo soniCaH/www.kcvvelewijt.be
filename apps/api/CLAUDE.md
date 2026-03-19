@@ -34,13 +34,14 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 
 ## Environment variables
 
-| Variable                   | Where set                            | Notes                  |
-| -------------------------- | ------------------------------------ | ---------------------- |
-| `PSD_API_BASE_URL`         | `wrangler.toml [vars]`               | Public, safe to commit |
-| `FOOTBALISTO_LOGO_CDN_URL` | `wrangler.toml [vars]`               | Public, safe to commit |
-| `PSD_API_KEY`              | `wrangler secret put` / CF dashboard | Never in toml          |
-| `PSD_API_AUTH`             | `wrangler secret put` / CF dashboard | Never in toml          |
-| `PSD_API_CLUB`             | `wrangler secret put` / CF dashboard | Never in toml          |
+| Variable                   | Where set                            | Notes                     |
+| -------------------------- | ------------------------------------ | ------------------------- |
+| `PSD_API_BASE_URL`         | `wrangler.toml [vars]`               | Public, safe to commit    |
+| `FOOTBALISTO_LOGO_CDN_URL` | `wrangler.toml [vars]`               | Public, safe to commit    |
+| `PSD_API_KEY`              | `wrangler secret put` / CF dashboard | Never in toml             |
+| `PSD_API_AUTH`             | `wrangler secret put` / CF dashboard | Never in toml             |
+| `CACHE_LONG_TTL`           | `wrangler.toml [env.staging.vars]`   | Overrides hardTtl to 365d |
+| `PSD_API_CLUB`             | `wrangler secret put` / CF dashboard | Never in toml             |
 
 ## Deployment
 
@@ -73,6 +74,21 @@ Values are stored as `{ value, fetchedAt }` wrappers. On deploy, existing cache 
 | `ranking:team:{id}`     | 24 h                                                | 7 days  |
 | `stats:team:{id}`       | 24 h                                                | 7 days  |
 | `psd:calls:YYYY-MM-DD`  | 48 h (daily PSD call counter, not via TypedKvCache) | —       |
+
+## Cache invalidation
+
+Staging uses `CACHE_LONG_TTL = "true"` (set in `wrangler.toml` `[env.staging.vars]`) which overrides the KV hard TTL to 365 days. This means each endpoint cold-starts once, then serves from cache for up to a year — minimizing PSD API quota usage on staging.
+
+To manually invalidate cached data on staging:
+
+```bash
+# Clear ALL cached keys on staging
+pnpm --filter @kcvv/api cache:clear:staging
+
+# Clear a single key on staging
+pnpm --filter @kcvv/api cache:clear:staging:key "matches:next"
+pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
+```
 
 ## Rules
 

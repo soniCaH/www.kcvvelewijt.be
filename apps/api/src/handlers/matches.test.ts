@@ -13,6 +13,7 @@ import {
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { WorkerEnvTag } from "../env";
 import type { Match, MatchDetail } from "@kcvv/api-contract";
 
 const baseMatch: Match = {
@@ -55,16 +56,32 @@ function makeCacheMock(): KvCacheInterface {
   };
 }
 
+const testEnvLayer = Layer.succeed(WorkerEnvTag, {
+  PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
+  PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
+  FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
+  PSD_API_KEY: "test-key",
+  PSD_API_CLUB: "test-club",
+  PSD_API_AUTH: "test-auth",
+  PSD_CACHE: {} as KVNamespace,
+  SANITY_PROJECT_ID: "test",
+  SANITY_DATASET: "test",
+  SANITY_API_TOKEN: "test-token",
+  AI: {} as Ai,
+  SEARCH_INDEX: {} as VectorizeIndex,
+});
+
 function provide<A>(
   effect: Effect.Effect<
     A,
     FootbalistoServiceError,
-    FootbalistoService | KvCacheService
+    FootbalistoService | KvCacheService | WorkerEnvTag
   >,
 ) {
   return effect.pipe(
     Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
+    Effect.provide(testEnvLayer),
     Effect.orDie,
   );
 }
@@ -116,6 +133,7 @@ describe("getMatchDetailHandler", () => {
             }),
           }),
         ),
+        Effect.provide(testEnvLayer),
         Effect.orDie,
       ),
     );

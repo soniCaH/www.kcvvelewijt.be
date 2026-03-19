@@ -30,6 +30,9 @@ export class KvCacheService extends Context.Tag("KvCacheService")<
 /** Default hard TTL: 7 days — safety net for stale-on-error */
 export const HARD_TTL_DEFAULT = 60 * 60 * 24 * 7;
 
+/** Long hard TTL: 365 days — used on staging to minimize PSD API quota usage */
+export const HARD_TTL_LONG = 60 * 60 * 24 * 365;
+
 export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
   const WrapperSchema = S.Struct({
     value: schema,
@@ -42,9 +45,11 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
       fetch: Effect.Effect<A, E, R>,
       softTtl: number | ((value: A) => number),
       hardTtl: number = HARD_TTL_DEFAULT,
-    ): Effect.Effect<A, E, R | KvCacheService> =>
+    ): Effect.Effect<A, E, R | KvCacheService | WorkerEnvTag> =>
       Effect.gen(function* () {
         const cache = yield* KvCacheService;
+        const env = yield* WorkerEnvTag;
+        const effectiveHardTtl = env.CACHE_LONG_TTL ? HARD_TTL_LONG : hardTtl;
         const cached = yield* cache.get(key);
 
         if (cached !== null) {
@@ -104,7 +109,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
                 value: refreshed.freshValue,
                 fetchedAt: Date.now(),
               });
-              yield* cache.set(key, wrapper, hardTtl);
+              yield* cache.set(key, wrapper, effectiveHardTtl);
             }
 
             return refreshed.freshValue;
@@ -114,7 +119,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
         // Cache miss: fetch, wrap, store
         const value = yield* fetch;
         const wrapper = JSON.stringify({ value, fetchedAt: Date.now() });
-        yield* cache.set(key, wrapper, hardTtl);
+        yield* cache.set(key, wrapper, effectiveHardTtl);
         return value;
       }),
   };
