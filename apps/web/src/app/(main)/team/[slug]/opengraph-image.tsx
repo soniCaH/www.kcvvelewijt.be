@@ -15,7 +15,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { getSanityAgeGroup, getSanityTeamTagline } from "./utils";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const size = {
   width: 1200,
