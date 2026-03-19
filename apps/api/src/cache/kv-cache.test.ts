@@ -237,6 +237,11 @@ describe("TypedKvCache", () => {
 
     expect(result).toEqual({ name: "fresh", value: 42 });
     expect(fetchCalled).toBe(true);
+
+    // Verify old-format entry was rewritten to new wrapper shape
+    const stored = JSON.parse(mockKv.store.get("test-key")!);
+    expect(stored).toHaveProperty("fetchedAt");
+    expect(stored.value).toEqual({ name: "fresh", value: 42 });
   });
 
   it("supports dynamic softTtl function based on the fetched value", async () => {
