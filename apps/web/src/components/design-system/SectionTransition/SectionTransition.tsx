@@ -43,6 +43,10 @@ const BG_COLOR: Record<SectionBg, string> = {
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
 
+// Tiny blur zone (1px) around the 50% boundary to anti-alias the diagonal edge.
+const STOP_BEFORE = "calc(50% - 0.5px)";
+const STOP_AFTER = "calc(50% + 0.5px)";
+
 export function SectionTransition({
   from,
   to,
@@ -91,7 +95,7 @@ export function SectionTransition({
           data-testid="st-sub"
           style={{
             height: DIAGONAL_HEIGHT,
-            background: `linear-gradient(to bottom ${direction}, ${fromColor} 50%, ${midColor} 50%)`,
+            background: `linear-gradient(to bottom ${direction}, ${fromColor} ${STOP_BEFORE}, ${midColor} ${STOP_AFTER})`,
           }}
         />
         {/* Second diagonal: via → to (opposite direction) */}
@@ -99,7 +103,7 @@ export function SectionTransition({
           data-testid="st-sub"
           style={{
             height: DIAGONAL_HEIGHT,
-            background: `linear-gradient(to bottom ${opposite}, ${midColor} 50%, ${BG_COLOR[to]} 50%)`,
+            background: `linear-gradient(to bottom ${opposite}, ${midColor} ${STOP_BEFORE}, ${BG_COLOR[to]} ${STOP_AFTER})`,
           }}
         />
       </div>
@@ -109,7 +113,7 @@ export function SectionTransition({
   const gradientStyle: React.CSSProperties = {
     height,
     marginTop,
-    background: `linear-gradient(to bottom ${direction}, ${fromColor} 50%, ${BG_COLOR[to]} 50%)`,
+    background: `linear-gradient(to bottom ${direction}, ${fromColor} ${STOP_BEFORE}, ${BG_COLOR[to]} ${STOP_AFTER})`,
   };
   if (zIndex) gradientStyle.zIndex = zIndex;
 
