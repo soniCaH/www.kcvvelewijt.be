@@ -8,13 +8,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
 import type { SanityArticle } from "@/lib/effect/services/SanityService";
-import type { PaginatedArticles } from "./utils";
-
-type FetchArticlesFn = (params: {
-  offset: number;
-  limit: number;
-  category?: string;
-}) => Promise<PaginatedArticles>;
 
 function makeMockArticle(
   id: number,
@@ -76,7 +69,7 @@ const extraBatch: SanityArticle[] = Array.from({ length: 6 }, (_, i) =>
   makeMockArticle(i + 10),
 );
 
-const noopFetch: FetchArticlesFn = fn()
+const noopFetch = fn()
   .mockName("fetchArticles")
   .mockResolvedValue({ articles: [], hasMore: false });
 
@@ -108,12 +101,9 @@ export const Default: Story = {
     initialArticles: gridArticles,
     categories: mockCategories,
     hasMore: true,
-    fetchArticles: (() => {
-      const mock: FetchArticlesFn = fn()
-        .mockName("fetchArticles")
-        .mockResolvedValue({ articles: extraBatch, hasMore: false });
-      return mock;
-    })(),
+    fetchArticles: fn()
+      .mockName("fetchArticles")
+      .mockResolvedValue({ articles: extraBatch, hasMore: false }),
   },
 };
 
@@ -154,7 +144,13 @@ export const FeaturedOnly: Story = {
 /** Mobile viewport */
 export const Mobile: Story = {
   args: {
-    ...Default.args,
+    featuredArticles,
+    initialArticles: gridArticles,
+    categories: mockCategories,
+    hasMore: true,
+    fetchArticles: fn()
+      .mockName("fetchArticles")
+      .mockResolvedValue({ articles: extraBatch, hasMore: false }),
   },
   globals: {
     viewport: { value: "mobile1" },
