@@ -72,7 +72,7 @@ function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
         tabIndex={0}
         className={cn(
           "overflow-x-auto",
-          "focus:outline-2 focus:outline-ring-kcvv-green focus:outline-offset-2",
+          "focus:outline-2 focus:outline-kcvv-green focus:outline-offset-2",
           "[&>table]:w-full [&>table]:border-collapse [&>table]:text-sm",
           "[&>table>thead]:bg-table-header-bg",
           "[&>table_th]:border [&>table_th]:border-table-border-header [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:font-semibold",
