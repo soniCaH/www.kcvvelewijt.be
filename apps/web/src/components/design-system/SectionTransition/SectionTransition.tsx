@@ -30,18 +30,9 @@ export interface SectionTransitionProps {
   className?: string;
 }
 
-const BG_CLASS: Record<SectionBg, string> = {
-  white: "bg-white",
-  "gray-100": "bg-gray-100",
-  "kcvv-black": "bg-kcvv-black",
-  "kcvv-green-dark": "bg-kcvv-green-dark",
-  transparent: "bg-transparent",
-};
-
-// Actual color values used in box-shadow seam fill. box-shadow paints outside
-// the element's bounds (unaffected by parent overflow:visible) and fills any
-// gap between the transition and its adjacent sections regardless of layout.
-const BG_SHADOW_COLOR: Record<SectionBg, string> = {
+// CSS color values for linear-gradient backgrounds. Using actual color values
+// (not Tailwind classes) because gradients require CSS color syntax.
+const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
   "gray-100": "#f3f4f6",
   "kcvv-black": "var(--color-kcvv-black)",
@@ -49,27 +40,8 @@ const BG_SHADOW_COLOR: Record<SectionBg, string> = {
   transparent: "transparent",
 };
 
-// TO color fills the lower triangle — FROM shows through the wrapper background.
-const CLIP_PATH_TO: Record<"left" | "right", string> = {
-  left: "polygon(100% 0, 100% 100%, 0 100%)", // lower-right — diagonal ↙
-  right: "polygon(0 0, 0 100%, 100% 100%)", //  lower-left  — diagonal ↘
-};
-
-// FROM color fills the upper triangle — only needed for the double-diagonal
-// inner halves where the wrapper is FROM but the first inner div background
-// must be explicitly FROM as well.
-const CLIP_PATH_FROM: Record<"left" | "right", string> = {
-  left: "polygon(0 0, 100% 0, 0 100%)", // upper-left
-  right: "polygon(0 0, 100% 0, 100% 100%)", // upper-right
-};
-
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
-
-// 2px overlap on every seam edge — eliminates rendering gaps at the top and
-// bottom boundaries of the transition element in all variants, zoom levels,
-// and device pixel ratios (covers fractional-pixel heights from clamp()).
-const SEAM = "2px";
 
 export function SectionTransition({
   from,
@@ -83,10 +55,7 @@ export function SectionTransition({
   const isDouble = type === "double-diagonal";
   const height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
 
-  // Always overlap 1px at the top into the preceding section (same FROM color,
-  // invisible) to close the top seam. For non-zero overlap modes the larger
-  // negative margin already subsumes this 1px.
-  let marginTop = `-${SEAM}`;
+  let marginTop = "0";
   let zIndex = "";
 
   if (overlap === "half") {
@@ -99,96 +68,58 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  const style: React.CSSProperties = {
-    height,
-    marginTop,
-    // Pull the following section up to overlap this element's bottom.
-    marginBottom: `-${SEAM}`,
-    // box-shadow paints the correct colors above and below this element,
-    // filling any remaining gap that layout-based overlap misses. Shadows are
-    // not clipped by parent elements (none of our wrappers use overflow:hidden)
-    // so they reach into any canvas-visible gap between block boundaries.
-    // In overlap mode the top seam must be transparent — the from-section
-    // content shows through rather than being hidden behind a solid shadow.
-    boxShadow: `0 -${SEAM} 0 0 ${overlap !== "none" ? "transparent" : BG_SHADOW_COLOR[from]}, 0 ${SEAM} 0 0 ${BG_SHADOW_COLOR[to]}`,
-  };
-  if (zIndex) style.zIndex = zIndex;
+  // In overlap mode, FROM areas are transparent so the section content
+  // (e.g. carousel) shows through.
+  const fromColor = overlap !== "none" ? "transparent" : BG_COLOR[from];
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
-    const midColor = via ?? to;
-    // When overlapping into the previous section the FROM areas must be
-    // transparent — the section content (e.g. carousel) shows through, and
-    // only the via/to shapes are painted on top.
-    const fromBg =
-      overlap !== "none" ? BG_CLASS["transparent"] : BG_CLASS[from];
+    const midColor = BG_COLOR[via ?? to];
+    const wrapperStyle: React.CSSProperties = { height, marginTop };
+    if (zIndex) wrapperStyle.zIndex = zIndex;
+
     return (
       <div
         aria-hidden="true"
         data-height={height}
         data-margin-top={marginTop}
-        // Transparent in overlap mode so the preceding section shows through.
-        // FROM color in non-overlap mode to continue the section boundary.
-        className={cn("relative w-full overflow-hidden", fromBg, className)}
-        style={style}
+        className={cn("w-full", className)}
+        style={wrapperStyle}
       >
         {/* First diagonal: from → via */}
         <div
           data-testid="st-sub"
-          className="relative w-full"
-          style={{ height: DIAGONAL_HEIGHT }}
-        >
-          <div
-            className={cn("absolute inset-0", fromBg)}
-            style={{ clipPath: CLIP_PATH_FROM[direction] }}
-          />
-          <div
-            data-testid="st-sub-overlay"
-            className={cn("absolute inset-0", BG_CLASS[midColor])}
-            style={{ clipPath: CLIP_PATH_TO[direction] }}
-          />
-        </div>
-        {/* Second diagonal: via → to (opposite direction).
-            Extra 1px height + -1px marginTop closes the mid-seam between the
-            two inner halves. overflow:hidden on the wrapper clips any excess. */}
+          style={{
+            height: DIAGONAL_HEIGHT,
+            background: `linear-gradient(to bottom ${direction}, ${fromColor} 50%, ${midColor} 50%)`,
+          }}
+        />
+        {/* Second diagonal: via → to (opposite direction) */}
         <div
           data-testid="st-sub"
-          className="relative w-full"
           style={{
-            height: `calc(${DIAGONAL_HEIGHT} + ${SEAM})`,
-            marginTop: `-${SEAM}`,
+            height: DIAGONAL_HEIGHT,
+            background: `linear-gradient(to bottom ${opposite}, ${midColor} 50%, ${BG_COLOR[to]} 50%)`,
           }}
-        >
-          <div
-            className={cn("absolute inset-0", BG_CLASS[midColor])}
-            style={{ clipPath: CLIP_PATH_FROM[opposite] }}
-          />
-          <div
-            data-testid="st-sub-overlay"
-            className={cn("absolute inset-0", BG_CLASS[to])}
-            style={{ clipPath: CLIP_PATH_TO[opposite] }}
-          />
-        </div>
+        />
       </div>
     );
   }
+
+  const gradientStyle: React.CSSProperties = {
+    height,
+    marginTop,
+    background: `linear-gradient(to bottom ${direction}, ${fromColor} 50%, ${BG_COLOR[to]} 50%)`,
+  };
+  if (zIndex) gradientStyle.zIndex = zIndex;
 
   return (
     <div
       aria-hidden="true"
       data-height={height}
       data-margin-top={marginTop}
-      // FROM color as wrapper background — top boundary continues the preceding
-      // FROM section seamlessly (both the 1px overlap and the upper triangle
-      // share the same color, so the seam is invisible).
-      className={cn("relative w-full", BG_CLASS[from], className)}
-      style={style}
-    >
-      <div
-        data-testid="st-overlay"
-        className={cn("absolute inset-0", BG_CLASS[to])}
-        style={{ clipPath: CLIP_PATH_TO[direction] }}
-      />
-    </div>
+      className={cn("w-full", className)}
+      style={gradientStyle}
+    />
   );
 }

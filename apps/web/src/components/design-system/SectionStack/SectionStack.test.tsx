@@ -157,7 +157,7 @@ describe("SectionStack", () => {
     expect(container.querySelector(".bg-kcvv-black")).not.toBeNull();
   });
 
-  it("applies -mt-px to section that follows a transition (seam fix)", () => {
+  it("does not apply -mt-px to any section (gradient eliminates seams)", () => {
     const { container } = render(
       <SectionStack
         sections={[
@@ -168,15 +168,6 @@ describe("SectionStack", () => {
           makeSection("gray-100", "B"),
         ]}
       />,
-    );
-    // The TO section wrapper should have -mt-px to cover the sub-pixel seam
-    const negMargin = container.querySelector(".-mt-px");
-    expect(negMargin).not.toBeNull();
-  });
-
-  it("does not apply -mt-px to the first section", () => {
-    const { container } = render(
-      <SectionStack sections={[makeSection("gray-100", "A")]} />,
     );
     expect(container.querySelector(".-mt-px")).toBeNull();
   });

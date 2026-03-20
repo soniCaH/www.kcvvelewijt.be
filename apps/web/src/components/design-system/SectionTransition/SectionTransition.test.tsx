@@ -32,7 +32,7 @@ describe("SectionTransition", () => {
       expect(el.getAttribute("data-height")).toBe("clamp(2rem, 6vw, 5rem)");
     });
 
-    it("renders clip-path overlay for direction=left", () => {
+    it("uses gradient background for direction=left (no clip-path)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -41,14 +41,14 @@ describe("SectionTransition", () => {
           direction="left"
         />,
       );
-      // st-overlay carries the TO (destination) color — CLIP_PATH_TO[left]
-      const overlay = container.querySelector(
-        "[data-testid='st-overlay']",
-      ) as HTMLElement;
-      expect(overlay.style.clipPath).toBe("polygon(100% 0, 100% 100%, 0 100%)");
+      const el = container.firstChild as HTMLElement;
+      // Single element with gradient — no clip-path children
+      expect(el.querySelector("[style*='clip-path']")).toBeNull();
+      expect(el.style.background).toContain("linear-gradient");
+      expect(el.style.background).toContain("to bottom left");
     });
 
-    it("renders clip-path overlay for direction=right", () => {
+    it("uses gradient background for direction=right (no clip-path)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -57,14 +57,13 @@ describe("SectionTransition", () => {
           direction="right"
         />,
       );
-      // st-overlay carries the TO (destination) color — CLIP_PATH_TO[right]
-      const overlay = container.querySelector(
-        "[data-testid='st-overlay']",
-      ) as HTMLElement;
-      expect(overlay.style.clipPath).toBe("polygon(0 0, 0 100%, 100% 100%)");
+      const el = container.firstChild as HTMLElement;
+      expect(el.querySelector("[style*='clip-path']")).toBeNull();
+      expect(el.style.background).toContain("linear-gradient");
+      expect(el.style.background).toContain("to bottom right");
     });
 
-    it("applies -2px margin-top for overlap=none (seam fix)", () => {
+    it("applies zero margin-top for overlap=none (gradient eliminates seam)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -75,21 +74,7 @@ describe("SectionTransition", () => {
         />,
       );
       const el = container.firstChild as HTMLElement;
-      expect(el.getAttribute("data-margin-top")).toBe("-2px");
-    });
-
-    it("applies -2px margin-bottom always (bottom seam fix)", () => {
-      const { container } = render(
-        <SectionTransition
-          from="kcvv-black"
-          to="gray-100"
-          type="diagonal"
-          direction="left"
-          overlap="none"
-        />,
-      );
-      const el = container.firstChild as HTMLElement;
-      expect(el.style.marginBottom).toBe("-2px");
+      expect(el.getAttribute("data-margin-top")).toBe("0");
     });
 
     it("applies negative margin-top for overlap=half (diagonal)", () => {
@@ -183,7 +168,7 @@ describe("SectionTransition", () => {
       expect(overlays).toHaveLength(2);
     });
 
-    it("second sub-divider has opposite direction from first", () => {
+    it("sub-dividers use gradients with opposite directions", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -193,17 +178,13 @@ describe("SectionTransition", () => {
           via="white"
         />,
       );
-      const overlays = container.querySelectorAll(
-        "[data-testid='st-sub-overlay']",
+      const subs = container.querySelectorAll(
+        "[data-testid='st-sub']",
       ) as NodeListOf<HTMLElement>;
-      // direction=right → TO (via) clip = CLIP_PATH_TO[right] = lower-left
-      expect(overlays[0].style.clipPath).toBe(
-        "polygon(0 0, 0 100%, 100% 100%)",
-      );
-      // opposite=left → TO (to) clip = CLIP_PATH_TO[left] = lower-right
-      expect(overlays[1].style.clipPath).toBe(
-        "polygon(100% 0, 100% 100%, 0 100%)",
-      );
+      // direction=right → first half gradient goes "to bottom right"
+      expect(subs[0].style.background).toContain("to bottom right");
+      // opposite=left → second half gradient goes "to bottom left"
+      expect(subs[1].style.background).toContain("to bottom left");
     });
 
     it("applies negative margin for overlap=half on double-diagonal", () => {
