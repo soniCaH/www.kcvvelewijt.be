@@ -541,7 +541,22 @@ export function HistoryContent() {
           </TimelineItem>
         </TimelineSection>
 
-        {/* TODO(#715): Add 2024-2025 championship photo */}
+        {/* Image: Kampioen 2024-2025 */}
+        <TimelineImage
+          src="/images/history/history-24-25.jpg"
+          alt="KCVV Elewijt kampioen 2024-2025 in eerste provinciale"
+          caption={
+            <>
+              <p className="font-semibold">
+                Figuur 8: KCVV Elewijt kampioen 2024-2025
+              </p>
+              <p>
+                Titel in eerste provinciale met 58 punten — 8 punten voorsprong
+                op eerste achtervolger OHR Huldenberg.
+              </p>
+            </>
+          }
+        />
 
         {/* 2025 - nationaal voetbal */}
         <TimelineSection>
