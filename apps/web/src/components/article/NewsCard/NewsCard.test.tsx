@@ -1,4 +1,4 @@
-// apps/web/src/components/home/LatestNews/NewsCard.test.tsx
+// apps/web/src/components/article/NewsCard/NewsCard.test.tsx
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { ImageProps } from "next/image";
@@ -181,6 +181,57 @@ describe("NewsCard", () => {
     it("renders as non-interactive div when no href", () => {
       render(<NewsCard title="Sponsorfeest" variant="featured" />);
       expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("listing variant", () => {
+    it("uses light background instead of dark overlay", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} variant="listing" />,
+      );
+      const article = container.querySelector("article");
+      expect(article).toHaveClass("bg-white");
+      expect(article).not.toHaveClass("bg-kcvv-black");
+    });
+
+    it("renders image in a non-absolute container (stacked layout)", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} variant="listing" imageUrl="/test.jpg" />,
+      );
+      // Image should be in a relative container, not fill the entire card
+      const imgContainer = container.querySelector(
+        "[data-testid='listing-image']",
+      );
+      expect(imgContainer).toBeInTheDocument();
+    });
+
+    it("renders fallback when no image provided", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} variant="listing" />,
+      );
+      const fallback = container.querySelector(
+        "[data-testid='listing-image-fallback']",
+      );
+      expect(fallback).toBeInTheDocument();
+    });
+
+    it("renders title with dark text", () => {
+      render(<NewsCard {...defaultProps} variant="listing" />);
+      const heading = screen.getByRole("heading", { level: 3 });
+      expect(heading).toHaveClass("text-kcvv-black!");
+    });
+
+    it("renders badge and date below image", () => {
+      render(
+        <NewsCard
+          {...defaultProps}
+          variant="listing"
+          badge="Clubnieuws"
+          date="5 mei 2025"
+        />,
+      );
+      expect(screen.getByText("Clubnieuws")).toBeInTheDocument();
+      expect(screen.getByText("5 mei 2025")).toBeInTheDocument();
     });
   });
 

@@ -1,9 +1,9 @@
-// apps/web/src/components/home/LatestNews/NewsCard.stories.tsx
+// apps/web/src/components/article/NewsCard/NewsCard.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NewsCard } from "./NewsCard";
 
 const meta = {
-  title: "Features/News/NewsCard",
+  title: "Features/Articles/NewsCard",
   component: NewsCard,
   tags: ["autodocs"],
   parameters: {
@@ -11,13 +11,16 @@ const meta = {
     docs: {
       description: {
         component:
-          "Full-bleed image-overlay card for news articles and future events. " +
-          "Reusable across any content type — passes title, href, badge, date as generic props.",
+          "Versatile news card with three variants: dark image-overlay (standard/featured) " +
+          "for homepage use, and a light stacked layout (listing) for dense archive grids.",
       },
     },
   },
   argTypes: {
-    variant: { control: "radio", options: ["standard", "featured"] },
+    variant: {
+      control: "radio",
+      options: ["standard", "featured", "listing"],
+    },
     badge: { control: "text" },
     date: { control: "text" },
     imageUrl: { control: "text" },
@@ -50,6 +53,75 @@ export const Featured: Story = {
     date: "14 maart 2026",
     variant: "featured",
   },
+};
+
+export const Listing: Story = {
+  args: {
+    title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
+    href: "/news/derby-overwinning",
+    imageUrl: "https://picsum.photos/800/500?random=7",
+    imageAlt: "Derby match",
+    badge: "Competitie",
+    date: "15 januari 2025",
+    variant: "listing",
+  },
+};
+
+export const ListingWithoutImage: Story = {
+  args: {
+    title: "Nieuwe trainingsschema seizoen 2025-2026 bekendgemaakt",
+    href: "/news/trainingsschema",
+    badge: "Club",
+    date: "12 januari 2025",
+    variant: "listing",
+  },
+};
+
+export const ListingLongTitle: Story = {
+  args: {
+    title:
+      "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
+    href: "/news/titel",
+    imageUrl: "https://picsum.photos/800/500?random=8",
+    imageAlt: "Championship celebration",
+    badge: "Clubnieuws",
+    date: "5 mei 2025",
+    variant: "listing",
+  },
+};
+
+export const ListingGrid: Story = {
+  args: {
+    title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
+    href: "/news/derby-overwinning",
+    imageUrl: "https://picsum.photos/800/500?random=9",
+    imageAlt: "Derby match",
+    badge: "Competitie",
+    date: "15 januari 2025",
+    variant: "listing",
+  },
+  decorators: [
+    (Story) => (
+      <div className="grid grid-cols-3 gap-6 max-w-5xl">
+        <Story />
+        <NewsCard
+          title="Spelersvoorstelling seizoen 2025-2026"
+          href="/news/spelersvoorstelling"
+          imageUrl="https://picsum.photos/800/500?random=10"
+          badge="Selectie"
+          date="14 maart 2026"
+          variant="listing"
+        />
+        <NewsCard
+          title="Nieuwe trainingsschema bekendgemaakt"
+          href="/news/trainingsschema"
+          badge="Club"
+          date="12 januari 2025"
+          variant="listing"
+        />
+      </div>
+    ),
+  ],
 };
 
 export const WithoutImage: Story = {
