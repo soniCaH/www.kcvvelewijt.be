@@ -183,7 +183,7 @@ export class PsdGame extends S.Class<PsdGame>("PsdGame")({
 }) {}
 
 export const PsdMatchListSchema = S.Struct({
-  content: S.Array(PsdRawGame),
+  content: S.Array(S.Unknown),
 });
 
 export class PsdTeamStatsResponse extends S.Class<PsdTeamStatsResponse>(

@@ -92,7 +92,7 @@ pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 
 ## Rules
 
-- No `S.Unknown` in PSD schemas — only declare fields actively used in transforms
+- No `S.Unknown` in PSD schemas — only declare fields actively used in transforms. Exception: wrapper schemas for resilient per-item decoding (e.g., `PsdMatchListSchema`) use `S.Array(S.Unknown)` so items can be decoded individually via `Effect.partition`
 - Secrets via `wrangler secret put`, never in `wrangler.toml`
 - `Effect.orDie` in HttpApiGroup handlers — errors become 500s; keep errors typed at handler level
 - After changing `@kcvv/api-contract`, run `pnpm turbo build --filter=@kcvv/api-contract` first

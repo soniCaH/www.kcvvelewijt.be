@@ -272,6 +272,36 @@ describe("FootbalistoService.getTeamMatches", () => {
     }
   });
 
+  it("filters invalid games and returns only valid ones", async () => {
+    const ghostGame = {
+      id: 999,
+      status: 0,
+      date: "2025-01-20 00:00",
+      time: "15:00",
+      homeClub: null, // ghost match — null club data
+      awayClub: null,
+      goalsHomeTeam: null,
+      goalsAwayTeam: null,
+      competitionType: null,
+    };
+    const mixedMatchList = {
+      content: [rawMatchList.content[0], ghostGame],
+    };
+
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({ ok: true, json: async () => mixedMatchList });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Should return only the valid game, ghost game filtered out
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.id).toBe(101);
+    }
+  });
+
   it("fails when season fetch fails", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
@@ -318,6 +348,46 @@ describe("FootbalistoService.getNextMatches", () => {
       expect(result.right[0]?.kcvv_team_id).toBe(1);
       // kcvv_team_label derived from team name/age
       expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
+    }
+  });
+
+  it("filters invalid games from team match lists", async () => {
+    const ghostGame = {
+      id: 888,
+      status: 0,
+      date: "2099-12-31 00:00",
+      time: "15:00",
+      homeClub: null,
+      awayClub: null,
+      goalsHomeTeam: null,
+      goalsAwayTeam: null,
+      competitionType: null,
+    };
+    const mixedFutureMatchList = {
+      content: [rawFutureGame, ghostGame],
+    };
+
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => mixedFutureMatchList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => seasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runService((svc) => svc.getNextMatches());
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Ghost game should be filtered, valid future game returned
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.id).toBe(102);
     }
   });
 
