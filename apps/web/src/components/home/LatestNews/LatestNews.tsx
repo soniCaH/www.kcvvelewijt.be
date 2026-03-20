@@ -1,6 +1,6 @@
 // apps/web/src/components/home/LatestNews/LatestNews.tsx
 import { SectionHeader } from "@/components/design-system";
-import { NewsCard } from "./NewsCard";
+import { NewsCard } from "@/components/article/NewsCard";
 
 export interface LatestNewsArticle {
   href: string;

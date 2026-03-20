@@ -11,8 +11,8 @@ export type {
   FeaturedEventStub,
 } from "./LatestNews";
 
-export { NewsCard } from "./LatestNews/NewsCard";
-export type { NewsCardProps } from "./LatestNews/NewsCard";
+export { NewsCard } from "@/components/article/NewsCard";
+export type { NewsCardProps } from "@/components/article/NewsCard";
 
 export { UpcomingMatches } from "./UpcomingMatches";
 export type { UpcomingMatchesProps, UpcomingMatch } from "./UpcomingMatches";

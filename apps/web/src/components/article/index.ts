@@ -14,3 +14,6 @@ export { CategoryFilters } from "./CategoryFilters";
 
 export { RelatedNews } from "./RelatedNews";
 export type { RelatedNewsProps } from "./RelatedNews";
+
+export { NewsCard } from "./NewsCard";
+export type { NewsCardProps } from "./NewsCard";

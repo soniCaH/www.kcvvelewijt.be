@@ -7,7 +7,7 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import type { SanityArticle } from "@/lib/effect/services/SanityService";
-import { ArticleCard, CategoryFilters } from "@/components/article";
+import { CategoryFilters, NewsCard } from "@/components/article";
 import { PageTitle } from "@/components/layout";
 import { formatArticleDate } from "@/lib/utils/dates";
 import type { Metadata } from "next";
@@ -101,20 +101,21 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         </section>
 
         {/* Articles grid */}
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 mb-6">
+        <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {articles.map((article) => (
-            <ArticleCard
+            <NewsCard
               key={article._id}
+              variant="listing"
               title={article.title}
               href={`/news/${article.slug.current}`}
               imageUrl={article.coverImageUrl ?? undefined}
               imageAlt={article.title}
+              badge={article.tags?.[0] ?? undefined}
               date={
                 article.publishAt
                   ? formatArticleDate(new Date(article.publishAt))
                   : undefined
               }
-              tags={(article.tags ?? []).map((name) => ({ name }))}
             />
           ))}
         </main>

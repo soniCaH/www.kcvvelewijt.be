@@ -1,4 +1,4 @@
-// apps/web/src/components/home/LatestNews/NewsCard.tsx
+// apps/web/src/components/article/NewsCard/NewsCard.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
@@ -20,7 +20,7 @@ export interface NewsCardProps {
   countdown?: string;
   /** When true, full-card link opens in new tab with ExternalLink indicator */
   isExternal?: boolean;
-  variant?: "standard" | "featured";
+  variant?: "standard" | "featured" | "listing";
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }
@@ -41,6 +41,83 @@ export const NewsCard = ({
   className,
 }: NewsCardProps) => {
   const isFeatured = variant === "featured";
+  const isListing = variant === "listing";
+
+  if (isListing) {
+    return (
+      <article
+        className={cn(
+          "relative group overflow-hidden rounded bg-white flex flex-col h-full",
+          href &&
+            "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+          className,
+        )}
+      >
+        {/* Green top-border: hidden by default, expands from center on hover */}
+        {href && (
+          <div
+            className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Full-card link */}
+        {href && (
+          <Link
+            href={href}
+            className="absolute inset-0 z-10"
+            aria-label={title}
+            {...(isExternal
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
+          />
+        )}
+
+        {/* Image area — stacked on top */}
+        {imageUrl ? (
+          <div
+            className="relative aspect-[3/2] overflow-hidden"
+            data-testid="listing-image"
+          >
+            <Image
+              src={imageUrl}
+              alt={imageAlt ?? title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          </div>
+        ) : (
+          <div
+            className="aspect-[3/2] bg-kcvv-green-dark"
+            aria-hidden="true"
+            data-testid="listing-image-fallback"
+          />
+        )}
+
+        {/* Content below image */}
+        <div className="p-4 pointer-events-none flex flex-col flex-1">
+          {badge && (
+            <span className="block border-l-2 border-kcvv-green-bright pl-2 text-kcvv-green-bright text-xs font-bold uppercase tracking-wider mb-2">
+              {badge}
+            </span>
+          )}
+
+          <div className="flex-1">
+            <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3 text-base!">
+              {title}
+            </Heading>
+          </div>
+
+          {date && (
+            <div className="border-t border-gray-200 mt-3 pt-3 text-gray-500 text-xs">
+              <time>{date}</time>
+            </div>
+          )}
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article
