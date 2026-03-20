@@ -40,7 +40,10 @@ export function NewsListingClient({
   const [gridArticles, setGridArticles] = useState(initialArticles);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    retry: () => void;
+  } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const categoryRequestId = useRef(0);
 
@@ -67,7 +70,14 @@ export function NewsListingClient({
       setHasMore(result.hasMore);
     } catch (err) {
       if (requestId !== categoryRequestId.current) return;
-      setError(err instanceof Error ? err.message : "Artikelen laden mislukt.");
+      console.error("[loadMore] Failed to load articles:", err);
+      setError({
+        message: "Artikelen laden mislukt.",
+        retry: () => {
+          setError(null);
+          loadMore();
+        },
+      });
     } finally {
       if (requestId === categoryRequestId.current) {
         setIsLoading(false);
@@ -137,9 +147,14 @@ export function NewsListingClient({
       } catch (err) {
         if (requestId !== categoryRequestId.current) return;
         setActiveCategory(prevCategory);
-        setError(
-          err instanceof Error ? err.message : "Artikelen laden mislukt.",
-        );
+        console.error("[handleCategoryChange] Failed to load articles:", err);
+        setError({
+          message: "Artikelen laden mislukt.",
+          retry: () => {
+            setError(null);
+            handleCategoryChange(category);
+          },
+        });
       } finally {
         if (requestId === categoryRequestId.current) {
           setIsLoading(false);
@@ -217,14 +232,11 @@ export function NewsListingClient({
         {/* Error state with retry */}
         {error && (
           <div className="text-center py-4">
-            <p className="text-red-400 mb-2">{error}</p>
+            <p className="text-red-400 mb-2">{error.message}</p>
             <button
               type="button"
               className="text-sm text-kcvv-green-bright underline hover:no-underline"
-              onClick={() => {
-                setError(null);
-                loadMore();
-              }}
+              onClick={error.retry}
             >
               Opnieuw proberen
             </button>
