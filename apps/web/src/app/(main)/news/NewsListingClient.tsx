@@ -173,14 +173,14 @@ export function NewsListingClient({
       <div className="max-w-inner-lg mx-auto px-3 lg:px-0 py-6">
         {/* Featured split: 2fr | 1fr */}
         {featuredArticles.length > 0 && (
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {/* Main featured article — 2fr */}
-            <div className="lg:col-span-2">
+            <div className="md:col-span-2">
               {featuredArticles[0] &&
                 renderCard(featuredArticles[0], "featured")}
             </div>
-            {/* Right stack — 1fr, 2 stacked standard cards */}
-            <div className="flex flex-col gap-4">
+            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height */}
+            <div className="flex flex-col gap-4 [&>article]:flex-1 [&>article]:aspect-auto">
               {featuredArticles
                 .slice(1, 3)
                 .map((article) => renderCard(article, "standard"))}
