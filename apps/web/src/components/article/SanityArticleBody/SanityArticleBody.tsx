@@ -58,21 +58,29 @@ const components: PortableTextComponents = {
     htmlTable: ({ value }: { value: HtmlTableValue }) => {
       if (!value.html) return null;
       return (
-        <div
-          className={cn(
-            "my-4 overflow-x-auto",
-            // Explicit table styling — prose :where() selectors lose to browser defaults
-            // on raw Drupal HTML. Arbitrary variants provide full specificity.
-            "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm",
-            "[&_thead]:bg-gray-100",
-            "[&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold",
-            "[&_td]:border [&_td]:border-gray-200 [&_td]:p-2 [&_td]:align-top",
-            "[&_tr:nth-child(even)_td]:bg-gray-50",
-          )}
-          dangerouslySetInnerHTML={{
-            __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
-          }}
-        />
+        <div className="relative my-4">
+          <div
+            className={cn(
+              "overflow-x-auto",
+              "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm",
+              "[&_thead]:bg-gray-100",
+              "[&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold",
+              "[&_td]:border [&_td]:border-gray-200 [&_td]:p-2 [&_td]:align-top",
+              "[&_tbody_tr:nth-child(odd)_td]:bg-white",
+              "[&_tbody_tr:nth-child(even)_td]:bg-gray-50",
+              "[&_td:first-child]:sticky [&_td:first-child]:left-0 [&_td:first-child]:z-10",
+              "[&_tbody_tr:nth-child(odd)_td:first-child]:bg-white",
+              "[&_tbody_tr:nth-child(even)_td:first-child]:bg-gray-50",
+              "[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-20 [&_th:first-child]:bg-gray-100",
+              "[&_td:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
+              "[&_th:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
+            )}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
+            }}
+          />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white/90 to-transparent" />
+        </div>
       );
     },
     image: ({
