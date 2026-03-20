@@ -25,6 +25,8 @@ describe("generateIcal", () => {
     expect(output).toContain("BEGIN:VCALENDAR");
     expect(output).toContain("KCVV Elewijt//Wedstrijdkalender//NL");
     expect(output).toContain("X-WR-CALNAME:KCVV Elewijt");
+    expect(output).toContain("BEGIN:VTIMEZONE");
+    expect(output).toContain("TZID:Europe/Brussels");
     expect(output).toContain("BEGIN:VEVENT");
     expect(output).toContain("SUMMARY:KCVV Elewijt - KFC Turnhout");
     expect(output).toContain("kcvv-match-12345@kcvvelewijt.be");
@@ -66,7 +68,7 @@ describe("generateIcal", () => {
     } as Partial<Match>);
     const output = generateIcal([match]);
 
-    expect(output).not.toContain("LOCATION");
+    expect(output).not.toMatch(/^LOCATION:/m);
   });
 
   it("filters by side=home", () => {
@@ -123,8 +125,8 @@ describe("generateIcal", () => {
       time: "15:00",
     });
     const output = generateIcal([match]);
-    // 15:00 CET = 14:00 UTC
-    expect(output).toContain("20250115T150000");
+    // 15:00 Brussels local time preserved with TZID
+    expect(output).toContain("DTSTART;TZID=Europe/Brussels:20250115T150000");
   });
 
   it("uses CEST offset (UTC+2) for summer dates", () => {
@@ -133,8 +135,8 @@ describe("generateIcal", () => {
       time: "15:00",
     });
     const output = generateIcal([match]);
-    // 15:00 CEST = 13:00 UTC → ical-generator converts back to Brussels local = 15:00
-    expect(output).toContain("20250715T150000");
+    // 15:00 Brussels local time preserved with TZID
+    expect(output).toContain("DTSTART;TZID=Europe/Brussels:20250715T150000");
   });
 
   it("sorts matches by date", () => {

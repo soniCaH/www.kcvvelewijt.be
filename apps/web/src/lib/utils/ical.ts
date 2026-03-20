@@ -1,4 +1,5 @@
 import ical from "ical-generator";
+import { getVtimezoneComponent } from "@touch4it/ical-timezones";
 import { DateTime } from "luxon";
 import type { Match } from "@kcvv/api-contract";
 
@@ -37,10 +38,10 @@ function buildLocation(match: Match): string | undefined {
   return undefined;
 }
 
-function buildStartDate(match: Match): Date {
+function buildStartDateTime(match: Match): DateTime {
+  const d = new Date(match.date);
   if (match.time) {
     const [hours, minutes] = match.time.split(":").map(Number);
-    const d = new Date(match.date);
     return DateTime.fromObject(
       {
         year: d.getUTCFullYear(),
@@ -50,9 +51,9 @@ function buildStartDate(match: Match): Date {
         minute: minutes,
       },
       { zone: TIMEZONE },
-    ).toJSDate();
+    );
   }
-  return new Date(match.date);
+  return DateTime.fromJSDate(d, { zone: TIMEZONE });
 }
 
 export function normalizeCacheKey(
@@ -79,7 +80,10 @@ export function generateIcal(
   const cal = ical({
     name: "KCVV Elewijt — Wedstrijden",
     prodId: "-//KCVV Elewijt//Wedstrijdkalender//NL",
-    timezone: TIMEZONE,
+    timezone: {
+      name: TIMEZONE,
+      generator: getVtimezoneComponent,
+    },
     x: {
       "X-WR-CALDESC": "Wedstrijdkalender van KCVV Elewijt",
       "X-WR-TIMEZONE": TIMEZONE,
@@ -108,8 +112,8 @@ export function generateIcal(
   );
 
   for (const match of sorted) {
-    const start = buildStartDate(match);
-    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+    const start = buildStartDateTime(match);
+    const end = start.plus({ hours: 2 });
     const location = buildLocation(match);
 
     cal.createEvent({

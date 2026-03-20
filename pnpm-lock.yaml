@@ -129,6 +129,9 @@ importers:
       "@tailwindcss/typography":
         specifier: 0.5.19
         version: 0.5.19(tailwindcss@4.2.2)
+      "@touch4it/ical-timezones":
+        specifier: ^1.9.0
+        version: 1.9.0
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -143,7 +146,7 @@ importers:
         version: 8.6.0(react@19.2.4)
       ical-generator:
         specifier: ^10.1.0
-        version: 10.1.0(@types/luxon@3.7.1)(@types/node@24.12.0)(luxon@3.7.2)
+        version: 10.1.0(@touch4it/ical-timezones@1.9.0)(@types/luxon@3.7.1)(@types/node@24.12.0)(luxon@3.7.2)
       isomorphic-dompurify:
         specifier: 3.5.1
         version: 3.5.1(@noble/hashes@2.0.1)
@@ -5019,6 +5022,13 @@ packages:
     peerDependenciesMeta:
       "@tmcp/auth":
         optional: true
+
+  "@touch4it/ical-timezones@1.9.0":
+    resolution:
+      {
+        integrity: sha512-UAiZMrFlgMdOIaJDPsKu5S7OecyMLr3GGALJTYkRgHmsHAA/8Ixm1qD09ELP2X7U1lqgrctEgvKj9GzMbczC+g==,
+      }
+    engines: { node: ">= 14.0.0" }
 
   "@turbo/darwin-64@2.8.20":
     resolution:
@@ -16745,6 +16755,8 @@ snapshots:
       esm-env: 1.2.2
       tmcp: 1.19.2(typescript@5.9.3)
 
+  "@touch4it/ical-timezones@1.9.0": {}
+
   "@turbo/darwin-64@2.8.20":
     optional: true
 
@@ -18933,8 +18945,9 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  ical-generator@10.1.0(@types/luxon@3.7.1)(@types/node@24.12.0)(luxon@3.7.2):
+  ical-generator@10.1.0(@touch4it/ical-timezones@1.9.0)(@types/luxon@3.7.1)(@types/node@24.12.0)(luxon@3.7.2):
     optionalDependencies:
+      "@touch4it/ical-timezones": 1.9.0
       "@types/luxon": 3.7.1
       "@types/node": 24.12.0
       luxon: 3.7.2
