@@ -6,6 +6,7 @@ import type {
   PortableTextComponents,
 } from "@portabletext/react";
 import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { cn } from "@/lib/utils/cn";
 
@@ -38,6 +39,66 @@ interface HtmlTableValue {
   html?: string;
 }
 
+function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showOverflowHint, setShowOverflowHint] = useState(false);
+
+  const checkOverflow = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setShowOverflowHint(el.scrollWidth > el.clientWidth);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    checkOverflow();
+
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(el);
+
+    return () => resizeObserver.disconnect();
+  }, [checkOverflow]);
+
+  if (!value.html) return null;
+
+  return (
+    <div className="relative my-4">
+      <div
+        ref={containerRef}
+        role="region"
+        aria-label="Scrollable table"
+        tabIndex={0}
+        className={cn(
+          "overflow-x-auto",
+          "focus:outline-2 focus:outline-kcvv-green focus:outline-offset-2",
+          "[&>table]:w-full [&>table]:border-collapse [&>table]:text-sm",
+          "[&>table>thead]:bg-table-header-bg",
+          "[&>table_th]:border [&>table_th]:border-table-border-header [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:font-semibold",
+          "[&>table_td]:border [&>table_td]:border-table-border [&>table_td]:p-2 [&>table_td]:align-top",
+          "[&>table>tbody>tr:nth-child(odd)_td]:bg-white",
+          "[&>table>tbody>tr:nth-child(even)_td]:bg-table-row-even",
+          showOverflowHint && [
+            "[&>table_td:first-child]:sticky [&>table_td:first-child]:left-0 [&>table_td:first-child]:z-10",
+            "[&>table>tbody>tr:nth-child(odd)>td:first-child]:bg-white",
+            "[&>table>tbody>tr:nth-child(even)>td:first-child]:bg-table-row-even",
+            "[&>table_th:first-child]:sticky [&>table_th:first-child]:left-0 [&>table_th:first-child]:z-20 [&>table_th:first-child]:bg-table-header-bg",
+            "[&>table_td:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
+            "[&>table_th:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
+          ],
+        )}
+        dangerouslySetInnerHTML={{
+          __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
+        }}
+      />
+      {showOverflowHint && (
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white/90 to-transparent" />
+      )}
+    </div>
+  );
+}
+
 const components: PortableTextComponents = {
   types: {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
@@ -55,26 +116,7 @@ const components: PortableTextComponents = {
         </div>
       );
     },
-    htmlTable: ({ value }: { value: HtmlTableValue }) => {
-      if (!value.html) return null;
-      return (
-        <div
-          className={cn(
-            "my-4 overflow-x-auto",
-            // Explicit table styling — prose :where() selectors lose to browser defaults
-            // on raw Drupal HTML. Arbitrary variants provide full specificity.
-            "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm",
-            "[&_thead]:bg-gray-100",
-            "[&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold",
-            "[&_td]:border [&_td]:border-gray-200 [&_td]:p-2 [&_td]:align-top",
-            "[&_tr:nth-child(even)_td]:bg-gray-50",
-          )}
-          dangerouslySetInnerHTML={{
-            __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
-          }}
-        />
-      );
-    },
+    htmlTable: HtmlTableBlock,
     image: ({
       value,
     }: {
@@ -141,7 +183,7 @@ export const SanityArticleBody = ({
         "prose-headings:font-bold prose-headings:text-gray-900",
         "prose-a:text-kcvv-green-bright prose-a:no-underline hover:prose-a:underline",
         "prose-blockquote:border-l-4 prose-blockquote:border-kcvv-green-bright prose-blockquote:not-italic prose-blockquote:text-gray-600",
-        "prose-table:w-full prose-th:bg-gray-100 prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-gray-200",
+        "prose-table:w-full prose-th:bg-table-header-bg prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-table-border",
         className,
       )}
     >

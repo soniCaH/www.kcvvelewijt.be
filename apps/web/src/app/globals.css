@@ -119,6 +119,12 @@
   /* Foundation Grays */
   --color-foundation-gray-light: #edeff4;
 
+  /* Table Colors */
+  --color-table-header-bg: #f3f4f6;
+  --color-table-border: #e5e7eb;
+  --color-table-border-header: #d1d5db;
+  --color-table-row-even: #f9fafb;
+
   /* Semantic Colors */
   --color-kcvv-success: #3adb76;
   --color-kcvv-warning: #ffae00;
