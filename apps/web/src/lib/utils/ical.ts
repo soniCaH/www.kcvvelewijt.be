@@ -1,4 +1,5 @@
 import ical from "ical-generator";
+import { DateTime } from "luxon";
 import type { Match } from "@kcvv/api-contract";
 
 const TIMEZONE = "Europe/Brussels";
@@ -9,7 +10,7 @@ export interface IcalOptions {
 }
 
 function isHomeMatch(match: Match): boolean {
-  return match.home_team.name.includes("Elewijt");
+  return match.home_team.name.toLowerCase().includes("elewijt");
 }
 
 function buildSummary(match: Match): string {
@@ -40,8 +41,16 @@ function buildStartDate(match: Match): Date {
   if (match.time) {
     const [hours, minutes] = match.time.split(":").map(Number);
     const d = new Date(match.date);
-    d.setUTCHours(hours - 1, minutes, 0, 0); // Brussels = UTC+1 (simplified)
-    return d;
+    return DateTime.fromObject(
+      {
+        year: d.getUTCFullYear(),
+        month: d.getUTCMonth() + 1,
+        day: d.getUTCDate(),
+        hour: hours,
+        minute: minutes,
+      },
+      { zone: TIMEZONE },
+    ).toJSDate();
   }
   return new Date(match.date);
 }

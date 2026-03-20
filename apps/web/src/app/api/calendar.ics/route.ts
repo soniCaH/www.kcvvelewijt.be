@@ -10,6 +10,8 @@ import { generateIcal, normalizeCacheKey } from "@/lib/utils/ical";
 export const runtime = "nodejs";
 
 const CACHE_MAX_AGE = 43200; // 12 hours
+const MAX_TEAM_IDS = 20;
+const FETCH_CONCURRENCY = 5;
 
 type Side = "home" | "away" | "all";
 
@@ -35,7 +37,7 @@ async function fetchMatches(
     const bff = yield* BffService;
     const results = yield* Effect.all(
       teamIds.map((id) => bff.getMatches(id)),
-      { concurrency: "unbounded" },
+      { concurrency: FETCH_CONCURRENCY },
     );
 
     return results.flat();
@@ -55,6 +57,7 @@ export async function GET(request: NextRequest) {
         .split(",")
         .map((s) => Number(s.trim()))
         .filter((n) => !isNaN(n) && n > 0)
+        .slice(0, MAX_TEAM_IDS)
     : null;
 
   try {

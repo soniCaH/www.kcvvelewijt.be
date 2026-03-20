@@ -201,6 +201,9 @@ export function TeamDetail({
                 <div className="mb-4 flex justify-end">
                   <a
                     href={calendarUrl}
+                    download="kcvv-wedstrijden.ics"
+                    aria-label={`Download kalender (.ics) voor ${header.name}`}
+                    rel="noopener"
                     className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
                   >
                     📅 Voeg toe aan kalender

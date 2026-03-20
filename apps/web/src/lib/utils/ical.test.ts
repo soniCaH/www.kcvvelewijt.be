@@ -117,6 +117,26 @@ describe("generateIcal", () => {
     expect(output).toContain("kcvv-match-2@kcvvelewijt.be");
   });
 
+  it("uses CET offset (UTC+1) for winter dates", () => {
+    const match = makeMatch({
+      date: new Date("2025-01-15T00:00:00.000Z"),
+      time: "15:00",
+    });
+    const output = generateIcal([match]);
+    // 15:00 CET = 14:00 UTC
+    expect(output).toContain("20250115T150000");
+  });
+
+  it("uses CEST offset (UTC+2) for summer dates", () => {
+    const match = makeMatch({
+      date: new Date("2025-07-15T00:00:00.000Z"),
+      time: "15:00",
+    });
+    const output = generateIcal([match]);
+    // 15:00 CEST = 13:00 UTC → ical-generator converts back to Brussels local = 15:00
+    expect(output).toContain("20250715T150000");
+  });
+
   it("sorts matches by date", () => {
     const earlier = makeMatch({
       id: 1,
