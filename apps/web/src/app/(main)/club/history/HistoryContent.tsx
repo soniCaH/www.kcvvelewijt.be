@@ -548,7 +548,7 @@ export function HistoryContent() {
           caption={
             <>
               <p className="font-semibold">
-                Figuur 7: KCVV Elewijt kampioen 2024-2025
+                Figuur 8: KCVV Elewijt kampioen 2024-2025
               </p>
               <p>
                 Titel in eerste provinciale met 58 punten — 8 punten voorsprong
