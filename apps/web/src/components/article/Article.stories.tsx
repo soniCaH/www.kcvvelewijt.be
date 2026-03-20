@@ -111,31 +111,19 @@ export const Default: Story = {
         imageAlt="Voetbalwedstrijd KCVV Elewijt"
       />
 
-      <main className="w-full max-w-inner-lg mx-auto px-0 lg:flex lg:flex-row-reverse">
-        {/* Metadata - First in HTML, displays on RIGHT on desktop */}
-        <aside className="lg:flex lg:flex-col lg:max-w-[20rem] lg:self-start">
-          <ArticleMetadata
-            author="Tom Redactie"
-            date="15 januari 2025"
-            tags={[
-              { name: "A-Ploeg", href: "/news?category=a-ploeg" },
-              {
-                name: "Wedstrijdverslag",
-                href: "/news?category=wedstrijdverslag",
-              },
-              { name: "Derby", href: "/news?category=derby" },
-            ]}
-            shareConfig={{
-              url: "https://kcvvelewijt.be/news/overwinning-derby",
-              title: "KCVV Elewijt wint met 3-1 in spannende derby",
-            }}
-          />
-        </aside>
+      <ArticleMetadata
+        author="Tom Redactie"
+        date="15 januari 2025"
+        category={{ name: "A-Ploeg", href: "/news?category=a-ploeg" }}
+        shareConfig={{
+          url: "https://kcvvelewijt.be/news/overwinning-derby",
+          title: "KCVV Elewijt wint met 3-1 in spannende derby",
+          hashtags: ["kcvv", "derby"],
+        }}
+      />
 
-        {/* Body - Second in HTML, displays on LEFT on desktop */}
-        <div className="flex-1">
-          <SanityArticleBody content={sampleArticleContent} />
-        </div>
+      <main className="w-full max-w-inner-lg mx-auto px-6">
+        <SanityArticleBody content={sampleArticleContent} />
       </main>
 
       <ArticleFooter
@@ -158,7 +146,6 @@ export const Default: Story = {
         ]}
       />
 
-      {/* Next section to show footer overlap */}
       <div className="bg-gray-100 pt-8 pb-16">
         <div className="max-w-inner-lg mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">Andere Artikelen</h2>
@@ -172,38 +159,25 @@ export const Default: Story = {
 };
 
 /**
- * Article without image - uses simple header
+ * Article without image — uses dark fallback header
  */
 export const WithoutImage: Story = {
   render: () => (
     <div className="min-h-screen bg-white">
-      <header className="bg-kcvv-green-bright px-3 pt-4 pb-4 xl:px-0">
-        <div className="w-full max-w-inner-lg mx-auto">
-          <h1 className="text-white text-[2.5rem] leading-[0.92] font-bold">
-            Trainingsschema aangepast voor winterstop
-          </h1>
-        </div>
-      </header>
+      <ArticleHeader title="Trainingsschema aangepast voor winterstop" />
 
-      <main className="w-full max-w-inner-lg mx-auto px-0 lg:flex lg:flex-row-reverse">
-        <aside className="lg:flex lg:flex-col lg:max-w-[20rem]">
-          <ArticleMetadata
-            author="Club Secretariaat"
-            date="20 december 2024"
-            tags={[
-              { name: "Training", href: "/news?category=training" },
-              { name: "Algemeen", href: "/news?category=algemeen" },
-            ]}
-            shareConfig={{
-              url: "https://kcvvelewijt.be/news/trainingsschema",
-              title: "Trainingsschema aangepast voor winterstop",
-            }}
-          />
-        </aside>
+      <ArticleMetadata
+        author="Club Secretariaat"
+        date="20 december 2024"
+        category={{ name: "Training", href: "/news?category=training" }}
+        shareConfig={{
+          url: "https://kcvvelewijt.be/news/trainingsschema",
+          title: "Trainingsschema aangepast voor winterstop",
+        }}
+      />
 
-        <div className="flex-1">
-          <SanityArticleBody content={sampleArticleContent} />
-        </div>
+      <main className="w-full max-w-inner-lg mx-auto px-6">
+        <SanityArticleBody content={sampleArticleContent} />
       </main>
 
       <ArticleFooter
@@ -236,30 +210,19 @@ export const LongArticle: Story = {
         imageAlt="KCVV Elewijt seizoen analyse"
       />
 
-      <main className="w-full max-w-inner-lg mx-auto px-0 lg:flex lg:flex-row-reverse">
-        <aside className="lg:flex lg:flex-col lg:max-w-[20rem]">
-          <ArticleMetadata
-            author="Marc Analyse"
-            date="18 december 2024"
-            tags={[
-              { name: "A-Ploeg", href: "/news?category=a-ploeg" },
-              { name: "Analyse", href: "/news?category=analyse" },
-              {
-                name: "Seizoen 2024-2025",
-                href: "/news?category=seizoen-2024-2025",
-              },
-            ]}
-            shareConfig={{
-              url: "https://kcvvelewijt.be/news/seizoensoverzicht",
-              title:
-                "Seizoensoverzicht 2024-2025: Een analyse van onze prestaties",
-            }}
-          />
-        </aside>
+      <ArticleMetadata
+        author="Marc Analyse"
+        date="18 december 2024"
+        category={{ name: "A-Ploeg", href: "/news?category=a-ploeg" }}
+        shareConfig={{
+          url: "https://kcvvelewijt.be/news/seizoensoverzicht",
+          title: "Seizoensoverzicht 2024-2025: Een analyse van onze prestaties",
+          hashtags: ["kcvv", "analyse", "seizoen"],
+        }}
+      />
 
-        <div className="flex-1">
-          <SanityArticleBody content={sampleArticleContent} />
-        </div>
+      <main className="w-full max-w-inner-lg mx-auto px-6">
+        <SanityArticleBody content={sampleArticleContent} />
       </main>
 
       <ArticleFooter

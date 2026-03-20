@@ -6,16 +6,31 @@ describe("ArticleMetadata", () => {
   const defaultProps = {
     author: "Jan Janssens",
     date: "15/01/2025",
+    category: { name: "Eerste ploeg", href: "/news?category=eerste-ploeg" },
+    shareConfig: {
+      url: "https://kcvvelewijt.be/news/test",
+      title: "Test Article",
+    },
   };
+
+  it("renders breadcrumb with News link and category", () => {
+    render(<ArticleMetadata {...defaultProps} />);
+    // "News" breadcrumb link
+    const newsLink = screen.getByRole("link", { name: "News" });
+    expect(newsLink).toHaveAttribute("href", "/news");
+    // Category breadcrumb link
+    const categoryLink = screen.getByRole("link", { name: "Eerste ploeg" });
+    expect(categoryLink).toHaveAttribute("href", "/news?category=eerste-ploeg");
+  });
+
+  it("renders breadcrumb separator between News and category", () => {
+    render(<ArticleMetadata {...defaultProps} />);
+    expect(screen.getByText("›")).toBeInTheDocument();
+  });
 
   it("renders the author name", () => {
     render(<ArticleMetadata {...defaultProps} />);
     expect(screen.getByText(/Jan Janssens/)).toBeInTheDocument();
-  });
-
-  it('renders "Geschreven door" text', () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    expect(screen.getByText(/Geschreven door/)).toBeInTheDocument();
   });
 
   it("renders the date", () => {
@@ -23,95 +38,57 @@ describe("ArticleMetadata", () => {
     expect(screen.getByText("15/01/2025")).toBeInTheDocument();
   });
 
-  it("renders clock icon for date", () => {
+  it("renders as a nav element for breadcrumb semantics", () => {
     const { container } = render(<ArticleMetadata {...defaultProps} />);
-    // Clock icon should be present via Icon component
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.querySelector("nav")).toBeInTheDocument();
   });
 
-  it("renders tags when provided", () => {
-    render(
-      <ArticleMetadata
-        {...defaultProps}
-        tags={[
-          { name: "voetbal", href: "/tags/voetbal" },
-          { name: "overwinning", href: "/tags/overwinning" },
-        ]}
-      />,
-    );
-    expect(screen.getByText("#voetbal")).toBeInTheDocument();
-    expect(screen.getByText("#overwinning")).toBeInTheDocument();
-  });
-
-  it("renders tags as links", () => {
-    render(
-      <ArticleMetadata
-        {...defaultProps}
-        tags={[{ name: "voetbal", href: "/tags/voetbal" }]}
-      />,
-    );
-    const link = screen.getByText("#voetbal");
-    expect(link.closest("a")).toHaveAttribute("href", "/tags/voetbal");
-  });
-
-  it("does not render tags section when empty", () => {
-    render(<ArticleMetadata {...defaultProps} tags={[]} />);
-    expect(screen.queryByText(/#/)).not.toBeInTheDocument();
-  });
-
-  it("renders share buttons when shareConfig provided", () => {
-    render(
-      <ArticleMetadata
-        {...defaultProps}
-        shareConfig={{
-          url: "https://kcvvelewijt.be/news/test",
-          title: "Test Article",
-          twitterHandle: "@kcvve",
-        }}
-      />,
-    );
-    expect(screen.getByText("Delen op:")).toBeInTheDocument();
-    expect(screen.getByText("Facebook")).toBeInTheDocument();
-    expect(screen.getByText("Twitter")).toBeInTheDocument();
-  });
-
-  it("does not render share buttons without shareConfig", () => {
+  it("renders share buttons as icon-only (no text labels)", () => {
     render(<ArticleMetadata {...defaultProps} />);
-    expect(screen.queryByText("Delen op:")).not.toBeInTheDocument();
+    // Should NOT have "Facebook" or "Twitter" text labels
+    expect(screen.queryByText("Facebook")).not.toBeInTheDocument();
+    expect(screen.queryByText("Twitter")).not.toBeInTheDocument();
+  });
+
+  it("renders share label visible on tablet+ (sr-only on mobile)", () => {
+    render(<ArticleMetadata {...defaultProps} />);
+    const shareLabel = screen.getByText("Delen:");
+    expect(shareLabel).toBeInTheDocument();
+    // Hidden on mobile, visible on md+
+    expect(shareLabel).toHaveClass("sr-only");
+    expect(shareLabel).toHaveClass("md:not-sr-only");
+  });
+
+  it("does not render share section without shareConfig", () => {
+    render(
+      <ArticleMetadata
+        author="Test"
+        date="01/01/2025"
+        category={defaultProps.category}
+      />,
+    );
+    expect(screen.queryByText("Delen:")).not.toBeInTheDocument();
+  });
+
+  it("renders breadcrumb-only when no category provided", () => {
+    render(<ArticleMetadata author="Test" date="01/01/2025" />);
+    const newsLink = screen.getByRole("link", { name: "News" });
+    expect(newsLink).toBeInTheDocument();
+    // No category link, no separator
+    expect(screen.queryByText("›")).not.toBeInTheDocument();
   });
 
   it("applies custom className", () => {
     const { container } = render(
       <ArticleMetadata {...defaultProps} className="custom-metadata" />,
     );
-    expect(container.querySelector("section")).toHaveClass("custom-metadata");
+    expect(container.querySelector("nav")).toHaveClass("custom-metadata");
   });
 
-  it("renders section element", () => {
+  it("does not use sidebar layout classes", () => {
     const { container } = render(<ArticleMetadata {...defaultProps} />);
-    expect(container.querySelector("section")).toBeInTheDocument();
-  });
-
-  it("handles multiple tags", () => {
-    render(
-      <ArticleMetadata
-        {...defaultProps}
-        tags={[
-          { name: "tag1", href: "/tags/tag1" },
-          { name: "tag2", href: "/tags/tag2" },
-          { name: "tag3", href: "/tags/tag3" },
-        ]}
-      />,
-    );
-    expect(screen.getByText("#tag1")).toBeInTheDocument();
-    expect(screen.getByText("#tag2")).toBeInTheDocument();
-    expect(screen.getByText("#tag3")).toBeInTheDocument();
-  });
-
-  it("formats author display correctly", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    // Should be "Geschreven door Jan Janssens."
-    const text = screen.getByText(/Geschreven door/);
-    expect(text.textContent).toMatch(/Geschreven door.*Jan Janssens\./);
+    const nav = container.querySelector("nav");
+    expect(nav).not.toHaveClass("lg:max-w-[20rem]");
+    expect(nav).not.toHaveClass("lg:border-l");
   });
 });

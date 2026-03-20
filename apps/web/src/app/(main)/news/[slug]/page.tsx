@@ -79,7 +79,8 @@ export async function generateMetadata({ params }: ArticlePageProps) {
 /**
  * Render the article detail page for the provided route slug.
  *
- * Fetches the article by slug and renders header, metadata, body, and related content; if the article cannot be found, triggers a 404 response.
+ * Fetches the article by slug and renders hero header, metadata bar, body, and related content.
+ * Single-column layout with no sidebar.
  *
  * @param params - Route parameters object whose `slug` resolves to the article's slug string
  * @returns A JSX element representing the complete article page (or causes a 404 when the article is missing)
@@ -96,15 +97,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   if (!article) notFound();
 
-  const tags = (article.tags ?? []).map((name) => ({
-    name,
-    href: `/news?category=${encodeURIComponent(name)}`,
-  }));
+  const tags = article.tags ?? [];
+  const primaryCategory = tags[0]
+    ? {
+        name: tags[0],
+        href: `/news?category=${encodeURIComponent(tags[0])}`,
+      }
+    : undefined;
 
   const shareConfig = {
     url: `https://kcvvelewijt.be/news/${article.slug.current}`,
     title: article.title,
-    hashtags: article.tags ?? [],
+    hashtags: tags,
   };
 
   const relatedContent: RelatedContent[] = (article.relatedArticles ?? [])
@@ -117,44 +121,28 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <>
-      {article.coverImageUrl ? (
-        <ArticleHeader
-          title={article.title}
-          imageUrl={article.coverImageUrl}
-          imageAlt={article.title}
-        />
-      ) : (
-        <header className="bg-kcvv-green-bright px-3 pt-4 pb-4 xl:px-0">
-          <div className="w-full max-w-inner-lg mx-auto">
-            <h1 className="text-white text-[2.5rem] leading-[0.92] font-bold">
-              {article.title}
-            </h1>
-          </div>
-        </header>
-      )}
+      <ArticleHeader
+        title={article.title}
+        imageUrl={article.coverImageUrl ?? undefined}
+        imageAlt={article.title}
+      />
+
+      <ArticleMetadata
+        author="KCVV Elewijt"
+        date={
+          article.publishAt
+            ? formatArticleDate(new Date(article.publishAt))
+            : ""
+        }
+        category={primaryCategory}
+        shareConfig={shareConfig}
+      />
 
       <div className="mb-6 lg:mb-10">
-        <main className="w-full max-w-inner-lg mx-auto px-0 lg:flex lg:flex-row-reverse">
-          <aside className="lg:flex lg:flex-col lg:w-[20rem] lg:shrink-0 lg:self-start">
-            <ArticleMetadata
-              author="KCVV Elewijt"
-              date={
-                article.publishAt
-                  ? formatArticleDate(new Date(article.publishAt))
-                  : ""
-              }
-              tags={tags}
-              shareConfig={shareConfig}
-            />
-          </aside>
-
-          <div className="flex-1 min-w-0">
-            {Array.isArray(article.body) && article.body.length > 0 && (
-              <SanityArticleBody
-                content={article.body as PortableTextBlock[]}
-              />
-            )}
-          </div>
+        <main className="w-full max-w-inner-lg mx-auto px-6">
+          {Array.isArray(article.body) && article.body.length > 0 && (
+            <SanityArticleBody content={article.body as PortableTextBlock[]} />
+          )}
         </main>
 
         {relatedContent.length > 0 && (

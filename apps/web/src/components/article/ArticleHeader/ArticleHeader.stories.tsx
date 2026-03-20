@@ -1,6 +1,6 @@
 /**
  * ArticleHeader Component Stories
- * Shows article title and hero image section
+ * Full-bleed hero image with dark gradient overlay and title
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Article header with green background title and hero image with blur effect on desktop.",
+          "Article header with full-bleed hero image, dark gradient overlay, and title text. Falls back to solid dark background when no image is provided.",
       },
     },
   },
@@ -22,11 +22,12 @@ const meta = {
   argTypes: {
     title: {
       control: "text",
-      description: "Article title displayed in white on green background",
+      description: "Article title displayed overlaid on the hero",
     },
     imageUrl: {
       control: "text",
-      description: "URL of the hero image",
+      description:
+        "URL of the hero image (optional — dark fallback when absent)",
     },
     imageAlt: {
       control: "text",
@@ -39,8 +40,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Default article header
- * Shows title on green background with hero image
+ * Default article header with hero image
  */
 export const Default: Story = {
   args: {
@@ -51,8 +51,7 @@ export const Default: Story = {
 };
 
 /**
- * Long title
- * Shows how the header handles longer article titles
+ * Long title — shows how title wraps over the gradient
  */
 export const LongTitle: Story = {
   args: {
@@ -75,8 +74,16 @@ export const ShortTitle: Story = {
 };
 
 /**
+ * No image — dark fallback background
+ */
+export const NoImage: Story = {
+  args: {
+    title: "Artikel zonder afbeelding",
+  },
+};
+
+/**
  * With page content below
- * Shows the header in context with article content
  */
 export const WithContent: Story = {
   args: {
@@ -92,11 +99,6 @@ export const WithContent: Story = {
           KCVV Elewijt heeft deze week twee nieuwe spelers aangetrokken voor het
           komende seizoen. De club is verheugd om deze nieuwe talenten te
           verwelkomen.
-        </p>
-        <p className="text-gray-700 mb-4">
-          De transfers worden gezien als een belangrijke versterking voor het
-          team en zullen helpen om de doelstellingen voor dit seizoen te
-          bereiken.
         </p>
         <p className="text-gray-700">
           Meer details over de nieuwe spelers worden binnenkort bekendgemaakt

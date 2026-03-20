@@ -9,18 +9,16 @@ describe("ArticleHeader", () => {
     imageAlt: "Test article image",
   };
 
-  it("renders the article title", () => {
+  it("renders the article title as h1", () => {
     render(<ArticleHeader {...defaultProps} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Test Article Title",
     );
   });
 
-  it("renders the hero image", () => {
-    render(<ArticleHeader {...defaultProps} />);
-    const images = screen.getAllByRole("img");
-    // Should have 2 images: blurred background + hero
-    expect(images.length).toBeGreaterThanOrEqual(1);
+  it("renders a header element", () => {
+    const { container } = render(<ArticleHeader {...defaultProps} />);
+    expect(container.querySelector("header")).toBeInTheDocument();
   });
 
   it("renders hero image with correct alt text", () => {
@@ -28,11 +26,39 @@ describe("ArticleHeader", () => {
     expect(screen.getByAltText("Test article image")).toBeInTheDocument();
   });
 
-  it("renders blurred background container on desktop", () => {
+  it("renders full-bleed hero with gradient overlay", () => {
     const { container } = render(<ArticleHeader {...defaultProps} />);
-    // Background blur is hidden on mobile, visible on desktop (lg:block)
-    const blurContainer = container.querySelector(".lg\\:block");
-    expect(blurContainer).toBeInTheDocument();
+    // Should have a gradient overlay div
+    const gradientOverlay = container.querySelector("[aria-hidden='true']");
+    expect(gradientOverlay).toBeInTheDocument();
+    expect(gradientOverlay).toHaveClass("bg-gradient-to-t");
+  });
+
+  it("renders title overlaid on the hero image (not in separate green section)", () => {
+    const { container } = render(<ArticleHeader {...defaultProps} />);
+    // Title should be inside the hero container, not in a separate green div
+    const header = container.querySelector("header");
+    // Should NOT have the old green background pattern
+    expect(header?.innerHTML).not.toContain("#4acf52");
+    expect(header?.innerHTML).not.toContain("header-pattern");
+  });
+
+  it("uses 3:2 aspect ratio", () => {
+    const { container } = render(<ArticleHeader {...defaultProps} />);
+    const aspectContainer = container.querySelector(".aspect-\\[3\\/2\\]");
+    expect(aspectContainer).toBeInTheDocument();
+  });
+
+  it("renders fallback with dark background when no image provided", () => {
+    const { container } = render(<ArticleHeader title="No Image Article" />);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "No Image Article",
+    );
+    // Should have dark background fallback
+    const fallback = container.querySelector(".bg-kcvv-black");
+    expect(fallback).toBeInTheDocument();
+    // Should NOT have green background
+    expect(container.innerHTML).not.toContain("#4acf52");
   });
 
   it("applies custom className", () => {
@@ -40,17 +66,6 @@ describe("ArticleHeader", () => {
       <ArticleHeader {...defaultProps} className="custom-header" />,
     );
     expect(container.querySelector("header")).toHaveClass("custom-header");
-  });
-
-  it("has correct heading structure", () => {
-    render(<ArticleHeader {...defaultProps} />);
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveClass("text-white", "leading-[0.92]", "m-0");
-  });
-
-  it("renders header element", () => {
-    const { container } = render(<ArticleHeader {...defaultProps} />);
-    expect(container.querySelector("header")).toBeInTheDocument();
   });
 
   it("handles long titles", () => {
@@ -67,9 +82,8 @@ describe("ArticleHeader", () => {
     ).toBeInTheDocument();
   });
 
-  it("handles missing image alt text", () => {
+  it("handles missing image alt text with fallback", () => {
     render(<ArticleHeader title="Test" imageUrl="/test.jpg" />);
-    // Should not crash and should use empty string as alt
     expect(screen.getByRole("heading")).toHaveTextContent("Test");
   });
 });
