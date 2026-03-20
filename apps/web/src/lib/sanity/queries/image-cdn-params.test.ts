@@ -7,7 +7,7 @@ import { SPONSORS_QUERY } from "./sponsors";
 import { STAFF_MEMBERS_QUERY } from "./staffMembers";
 import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "./teams";
 
-const CDN_SUFFIX = "?w=";
+const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp", "fit=max"];
 
 /**
  * Extracts all `"fieldName": ...asset->url` or `"url": url` projections from a GROQ query,
@@ -59,10 +59,12 @@ describe("Sanity image CDN optimization", () => {
       expect(projections.length).toBeGreaterThan(0);
 
       for (const { field, projection } of projections) {
-        expect(
-          projection,
-          `${name} field "${field}" should include CDN params`,
-        ).toContain(CDN_SUFFIX);
+        for (const param of REQUIRED_CDN_PARAMS) {
+          expect(
+            projection,
+            `${name} field "${field}" should include "${param}"`,
+          ).toContain(param);
+        }
       }
     });
   }
@@ -76,8 +78,8 @@ describe("Sanity image CDN optimization", () => {
       PAGE_BY_SLUG_QUERY,
     ];
     for (const query of queriesWithFiles) {
-      expect(query).toContain('"fileUrl": file.asset->url');
-      expect(query).not.toContain('"fileUrl": file.asset->url +');
+      expect(query).toMatch(/"fileUrl"\s*:\s*file\.asset->url/);
+      expect(query).not.toMatch(/"fileUrl"\s*:\s*file\.asset->url\s*\+/);
     }
   });
 });
