@@ -10,6 +10,7 @@ import { SanityService } from "@/lib/effect/services/SanityService";
 import type { Metadata } from "next";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
+import { INITIAL_TOTAL } from "./constants";
 
 interface NewsPageProps {
   searchParams: Promise<{ category?: string }>;
@@ -32,8 +33,6 @@ export async function generateMetadata({
   };
 }
 
-const INITIAL_TOTAL = 9; // 3 featured + 6 grid
-
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.category;
@@ -50,6 +49,9 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       offset: 0,
       limit: INITIAL_TOTAL,
       category: categorySlug,
+    }).catch((error) => {
+      console.error("[NewsPage] Failed to fetch initial articles:", error);
+      return { articles: [], hasMore: false } as const;
     }),
   ]);
 

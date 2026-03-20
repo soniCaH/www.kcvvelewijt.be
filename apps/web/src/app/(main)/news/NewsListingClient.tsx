@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { SanityArticle } from "@/lib/effect/services/SanityService";
+import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
 import { NewsCard, CategoryFilters } from "@/components/article";
 import { formatArticleDate } from "@/lib/utils/dates";
 import type { PaginatedArticles } from "./utils";
+import { BATCH_SIZE, INITIAL_TOTAL } from "./constants";
 
 interface Category {
   id: string;
@@ -12,8 +13,8 @@ interface Category {
 }
 
 interface NewsListingClientProps {
-  featuredArticles: SanityArticle[];
-  initialArticles: SanityArticle[];
+  featuredArticles: SanityArticleListItem[];
+  initialArticles: SanityArticleListItem[];
   categories: Category[];
   hasMore: boolean;
   initialCategory?: string;
@@ -23,8 +24,6 @@ interface NewsListingClientProps {
     category?: string;
   }) => Promise<PaginatedArticles>;
 }
-
-const BATCH_SIZE = 6;
 
 export function NewsListingClient({
   featuredArticles: initialFeatured,
@@ -41,11 +40,13 @@ export function NewsListingClient({
   const [gridArticles, setGridArticles] = useState(initialArticles);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
+    setError(null);
 
     try {
       const category = activeCategory === "all" ? undefined : activeCategory;
@@ -59,6 +60,8 @@ export function NewsListingClient({
 
       setGridArticles((prev) => [...prev, ...result.articles]);
       setHasMore(result.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Artikelen laden mislukt.");
     } finally {
       setIsLoading(false);
     }
@@ -94,21 +97,11 @@ export function NewsListingClient({
     async (category: string) => {
       setActiveCategory(category);
       setIsLoading(true);
-      setGridArticles([]);
-      setFeaturedArticles([]);
-      setHasMore(false);
+      setError(null);
 
       const categoryFilter = category === "all" ? undefined : category;
 
-      // Update URL without navigation
-      const url = categoryFilter
-        ? `/news?category=${encodeURIComponent(categoryFilter)}`
-        : "/news";
-      window.history.replaceState({}, "", url);
-
       try {
-        // Fetch initial batch for new category
-        const INITIAL_TOTAL = 9;
         const result = await fetchArticles({
           offset: 0,
           limit: INITIAL_TOTAL,
@@ -121,18 +114,26 @@ export function NewsListingClient({
         setFeaturedArticles(featured);
         setGridArticles(grid);
         setHasMore(result.hasMore);
+
+        // Update URL and scroll only after successful fetch
+        const url = categoryFilter
+          ? `/news?category=${encodeURIComponent(categoryFilter)}`
+          : "/news";
+        window.history.replaceState({}, "", url);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Artikelen laden mislukt.",
+        );
       } finally {
         setIsLoading(false);
       }
-
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [fetchArticles],
   );
 
   const renderCard = (
-    article: SanityArticle,
+    article: SanityArticleListItem,
     variant: "featured" | "standard" | "listing",
   ) => (
     <NewsCard
@@ -179,7 +180,8 @@ export function NewsListingClient({
               {featuredArticles[0] &&
                 renderCard(featuredArticles[0], "featured")}
             </div>
-            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height */}
+            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height.
+                [&>article] targets NewsCard's <article> root element. */}
             <div className="flex flex-col gap-4 [&>article]:flex-1 [&>article]:aspect-auto">
               {featuredArticles
                 .slice(1, 3)
@@ -195,8 +197,11 @@ export function NewsListingClient({
           </section>
         )}
 
+        {/* Error state */}
+        {error && <p className="text-center text-red-400 py-4">{error}</p>}
+
         {/* Empty state */}
-        {isEmpty && (
+        {isEmpty && !error && (
           <p className="text-center text-gray-400 py-12">
             Geen artikelen gevonden voor deze categorie.
           </p>

@@ -4,7 +4,7 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   SanityService,
-  type SanityArticle,
+  type SanityArticleListItem,
 } from "@/lib/effect/services/SanityService";
 import { paginateResults, type PaginatedArticles } from "./utils";
 
@@ -23,7 +23,12 @@ export async function fetchArticlesAction(params: {
         limit: limit + 1,
         category,
       });
-    }).pipe(Effect.catchAll(() => Effect.succeed([] as SanityArticle[]))),
+    }).pipe(
+      Effect.catchAll((error) => {
+        console.error("[fetchArticlesAction] Failed to fetch articles:", error);
+        return Effect.succeed([] as SanityArticleListItem[]);
+      }),
+    ),
   );
 
   return paginateResults(articles, limit);

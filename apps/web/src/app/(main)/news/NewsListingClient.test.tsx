@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ImageProps } from "next/image";
 import { NewsListingClient } from "./NewsListingClient";
-import type { SanityArticle } from "@/lib/effect/services/SanityService";
+import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
 
 vi.mock("next/image", () => ({
   default: ({ alt, src, ...props }: ImageProps) => {
@@ -13,7 +13,9 @@ vi.mock("next/image", () => ({
 
 const mockFetchArticles = vi.fn();
 
-function makeArticle(overrides: Partial<SanityArticle> = {}): SanityArticle {
+function makeArticle(
+  overrides: Partial<SanityArticleListItem> = {},
+): SanityArticleListItem {
   const id = overrides._id ?? `article-${Math.random().toString(36).slice(2)}`;
   return {
     _id: id,
@@ -25,7 +27,6 @@ function makeArticle(overrides: Partial<SanityArticle> = {}): SanityArticle {
     featured: false,
     tags: overrides.tags ?? [],
     coverImageUrl: null,
-    body: [],
     ...overrides,
   };
 }

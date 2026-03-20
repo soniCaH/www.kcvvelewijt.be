@@ -85,7 +85,7 @@ export interface SanityTeam {
   contactInfo: unknown;
 }
 
-export interface SanityArticle {
+export interface SanityArticleListItem {
   _id: string;
   title: string;
   slug: { current: string };
@@ -93,6 +93,9 @@ export interface SanityArticle {
   featured: boolean;
   tags: string[];
   coverImageUrl: string | null;
+}
+
+export interface SanityArticle extends SanityArticleListItem {
   body: unknown;
   relatedArticles?: SanityArticle[];
 }
@@ -192,7 +195,7 @@ export interface SanityServiceInterface {
     offset: number;
     limit: number;
     category?: string;
-  }) => Effect.Effect<SanityArticle[]>;
+  }) => Effect.Effect<SanityArticleListItem[]>;
   readonly getArticleBySlug: (
     slug: string,
   ) => Effect.Effect<SanityArticle | null>;
@@ -297,7 +300,7 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
   getArticles: () => fetchGroq<SanityArticle[]>(ARTICLES_QUERY),
   getArticleTags: () => fetchGroq<string[]>(ARTICLE_TAGS_QUERY),
   getArticlesPaginated: ({ offset, limit, category }) =>
-    fetchGroq<SanityArticle[]>(ARTICLES_PAGINATED_QUERY, {
+    fetchGroq<SanityArticleListItem[]>(ARTICLES_PAGINATED_QUERY, {
       offset,
       limit,
       category: category ?? "",

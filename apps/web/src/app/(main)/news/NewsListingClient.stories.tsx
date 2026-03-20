@@ -7,12 +7,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
-import type { SanityArticle } from "@/lib/effect/services/SanityService";
+import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
 
 function makeMockArticle(
   id: number,
-  overrides?: Partial<SanityArticle>,
-): SanityArticle {
+  overrides?: Partial<SanityArticleListItem>,
+): SanityArticleListItem {
   return {
     _id: `article-${id}`,
     title: `Artikeltitel nummer ${id}`,
@@ -21,7 +21,6 @@ function makeMockArticle(
     featured: id <= 3,
     tags: ["Clubnieuws"],
     coverImageUrl: `https://picsum.photos/seed/article${id}/800/500`,
-    body: null,
     ...overrides,
   };
 }
@@ -41,7 +40,7 @@ const mockCategories = [
   { id: "transfers", attributes: { name: "Transfers", slug: "transfers" } },
 ];
 
-const featuredArticles: SanityArticle[] = [
+const featuredArticles: SanityArticleListItem[] = [
   makeMockArticle(1, {
     title: "KCVV Elewijt wint belangrijke derby tegen rivaal",
     tags: ["Wedstrijdverslagen"],
@@ -56,16 +55,18 @@ const featuredArticles: SanityArticle[] = [
   }),
 ];
 
-const gridArticles: SanityArticle[] = Array.from({ length: 6 }, (_, i) =>
-  makeMockArticle(i + 4, {
-    tags: [
-      mockCategories[i % mockCategories.length]?.attributes.name ??
-        "Clubnieuws",
-    ],
-  }),
+const gridArticles: SanityArticleListItem[] = Array.from(
+  { length: 6 },
+  (_, i) =>
+    makeMockArticle(i + 4, {
+      tags: [
+        mockCategories[i % mockCategories.length]?.attributes.name ??
+          "Clubnieuws",
+      ],
+    }),
 );
 
-const extraBatch: SanityArticle[] = Array.from({ length: 6 }, (_, i) =>
+const extraBatch: SanityArticleListItem[] = Array.from({ length: 6 }, (_, i) =>
   makeMockArticle(i + 10),
 );
 

@@ -1,12 +1,12 @@
-import type { SanityArticle } from "@/lib/effect/services/SanityService";
+import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
 
 export interface PaginatedArticles {
-  articles: SanityArticle[];
+  articles: SanityArticleListItem[];
   hasMore: boolean;
 }
 
 export function paginateResults(
-  articles: SanityArticle[],
+  articles: SanityArticleListItem[],
   limit: number,
 ): PaginatedArticles {
   const hasMore = articles.length > limit;

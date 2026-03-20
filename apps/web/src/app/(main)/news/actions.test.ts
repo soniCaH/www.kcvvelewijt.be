@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { paginateResults } from "./utils";
-import type { SanityArticle } from "@/lib/effect/services/SanityService";
+import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
 
-function makeArticle(overrides: Partial<SanityArticle> = {}): SanityArticle {
+function makeArticle(
+  overrides: Partial<SanityArticleListItem> = {},
+): SanityArticleListItem {
   return {
     _id: `article-${Math.random().toString(36).slice(2)}`,
     title: "Test Article",
@@ -11,7 +13,6 @@ function makeArticle(overrides: Partial<SanityArticle> = {}): SanityArticle {
     featured: false,
     tags: [],
     coverImageUrl: null,
-    body: [],
     ...overrides,
   };
 }
