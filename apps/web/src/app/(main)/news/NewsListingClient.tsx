@@ -42,6 +42,7 @@ export function NewsListingClient({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const categoryRequestId = useRef(0);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
@@ -96,6 +97,7 @@ export function NewsListingClient({
   const handleCategoryChange = useCallback(
     async (category: string) => {
       const prevCategory = activeCategory;
+      const requestId = ++categoryRequestId.current;
       setActiveCategory(category);
       setIsLoading(true);
       setError(null);
@@ -108,6 +110,9 @@ export function NewsListingClient({
           limit: INITIAL_TOTAL,
           category: categoryFilter,
         });
+
+        // Ignore stale responses from superseded category switches
+        if (requestId !== categoryRequestId.current) return;
 
         const featured = result.articles.slice(0, 3);
         const grid = result.articles.slice(3);
@@ -123,12 +128,15 @@ export function NewsListingClient({
         window.history.replaceState({}, "", url);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (err) {
+        if (requestId !== categoryRequestId.current) return;
         setActiveCategory(prevCategory);
         setError(
           err instanceof Error ? err.message : "Artikelen laden mislukt.",
         );
       } finally {
-        setIsLoading(false);
+        if (requestId === categoryRequestId.current) {
+          setIsLoading(false);
+        }
       }
     },
     [activeCategory, fetchArticles],
