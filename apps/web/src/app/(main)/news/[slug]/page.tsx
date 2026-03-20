@@ -125,6 +125,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         title={article.title}
         imageUrl={article.coverImageUrl ?? undefined}
         imageAlt={article.title}
+        category={primaryCategory?.name}
+        date={
+          article.publishAt
+            ? formatArticleDate(new Date(article.publishAt))
+            : undefined
+        }
+        author="KCVV Elewijt"
       />
 
       <ArticleMetadata
