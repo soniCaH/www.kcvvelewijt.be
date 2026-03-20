@@ -47,7 +47,7 @@ export const NewsCard = ({
     return (
       <article
         className={cn(
-          "relative group overflow-hidden rounded bg-white",
+          "relative group overflow-hidden rounded bg-white flex flex-col h-full",
           href &&
             "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
           className,
@@ -96,16 +96,18 @@ export const NewsCard = ({
         )}
 
         {/* Content below image */}
-        <div className="p-4 pointer-events-none">
+        <div className="p-4 pointer-events-none flex flex-col flex-1">
           {badge && (
             <span className="block border-l-2 border-kcvv-green-bright pl-2 text-kcvv-green-bright text-xs font-bold uppercase tracking-wider mb-2">
               {badge}
             </span>
           )}
 
-          <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3 text-base!">
-            {title}
-          </Heading>
+          <div className="flex-1">
+            <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3 text-base!">
+              {title}
+            </Heading>
+          </div>
 
           {date && (
             <div className="border-t border-gray-200 mt-3 pt-3 text-gray-500 text-xs">
