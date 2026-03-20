@@ -25,7 +25,6 @@ import {
   mapSanityArticlesToHomepageArticles,
   mapMatchesToUpcomingMatches,
 } from "@/lib/mappers";
-import { TEAM_LABELS } from "@/lib/constants";
 import type { Metadata } from "next";
 
 /**
@@ -156,7 +155,7 @@ export default async function HomePage() {
 
   const sliderMatches = upcomingMatches.map((m) => ({
     ...m,
-    teamLabel: m.kcvvTeamId ? TEAM_LABELS[m.kcvvTeamId] : undefined,
+    teamLabel: m.kcvvTeamLabel,
   }));
 
   if (articles.length === 0 && matches.length === 0) {
@@ -197,14 +196,7 @@ export default async function HomePage() {
         key: "match-widget",
         bg: "kcvv-green-dark",
         content: (
-          <MatchWidget
-            match={nextMatch}
-            teamLabel={
-              nextMatch.kcvvTeamId
-                ? TEAM_LABELS[nextMatch.kcvvTeamId]
-                : undefined
-            }
-          />
+          <MatchWidget match={nextMatch} teamLabel={nextMatch.kcvvTeamLabel} />
         ),
         transition: { type: "diagonal", direction: "left" },
       }

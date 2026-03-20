@@ -316,6 +316,8 @@ describe("FootbalistoService.getNextMatches", () => {
       expect(result.right[0]?.status).toBe("scheduled");
       // kcvv_team_id should be the PSD team ID (1), not the club ID
       expect(result.right[0]?.kcvv_team_id).toBe(1);
+      // kcvv_team_label derived from team name/age
+      expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
     }
   });
 

@@ -139,7 +139,7 @@ describe("mapMatchToUpcomingMatch", () => {
     expect(result.status).toBe("postponed");
   });
 
-  it("should map kcvv_team_id to kcvvTeamId", () => {
+  it("should map kcvv_team_id and kcvv_team_label", () => {
     const match: Match = {
       id: 42,
       date: new Date("2025-12-06T15:00:00"),
@@ -158,11 +158,13 @@ describe("mapMatchToUpcomingMatch", () => {
       status: "scheduled",
       competition: "LEAGUE",
       kcvv_team_id: 7,
+      kcvv_team_label: "U21",
     };
 
     const result = mapMatchToUpcomingMatch(match);
 
     expect(result.kcvvTeamId).toBe(7);
+    expect(result.kcvvTeamLabel).toBe("U21");
   });
 
   it("should handle stopped status", () => {

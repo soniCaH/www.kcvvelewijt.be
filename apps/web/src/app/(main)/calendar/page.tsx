@@ -8,7 +8,6 @@ import { Suspense } from "react";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
-import { TEAM_LABELS } from "@/lib/constants";
 import { CalendarView } from "./CalendarView";
 import type { CalendarMatch } from "./CalendarView";
 import { Spinner } from "@/components/design-system";
@@ -64,7 +63,7 @@ async function fetchMatches(): Promise<CalendarMatch[]> {
     awayScore: m.away_team.score,
     status: m.status,
     competition: m.competition,
-    team: m.kcvv_team_id ? TEAM_LABELS[m.kcvv_team_id] : undefined,
+    team: m.kcvv_team_label,
   }));
 }
 

@@ -42,6 +42,8 @@ const BaseMatchFields = {
   competition: S.optional(S.String),
   /** PSD team ID identifying which KCVV team plays (A-team, B-team, U21, etc.) */
   kcvv_team_id: S.optional(S.Number),
+  /** Human-readable label for the KCVV team (e.g. "A-Ploeg", "U21") */
+  kcvv_team_label: S.optional(S.String),
 };
 
 /** Normalized match for UI consumption */
