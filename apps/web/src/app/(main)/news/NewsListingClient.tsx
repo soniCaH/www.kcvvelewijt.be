@@ -95,6 +95,7 @@ export function NewsListingClient({
   // Category change handler
   const handleCategoryChange = useCallback(
     async (category: string) => {
+      const prevCategory = activeCategory;
       setActiveCategory(category);
       setIsLoading(true);
       setError(null);
@@ -122,6 +123,7 @@ export function NewsListingClient({
         window.history.replaceState({}, "", url);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (err) {
+        setActiveCategory(prevCategory);
         setError(
           err instanceof Error ? err.message : "Artikelen laden mislukt.",
         );
@@ -129,7 +131,7 @@ export function NewsListingClient({
         setIsLoading(false);
       }
     },
-    [fetchArticles],
+    [activeCategory, fetchArticles],
   );
 
   const renderCard = (
