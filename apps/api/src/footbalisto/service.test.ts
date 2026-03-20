@@ -661,12 +661,13 @@ describe("mapGameStatus", () => {
       messages.push(String(message));
     });
 
-    await Effect.runPromise(
+    const result = await Effect.runPromise(
       mapGameStatus(99, null, null).pipe(
         Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
       ),
     );
 
+    expect(result).toBe("scheduled");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toContain("Unknown PSD game status code: 99");
   });
@@ -677,12 +678,13 @@ describe("mapGameStatus", () => {
       messages.push(String(message));
     });
 
-    await Effect.runPromise(
+    const result = await Effect.runPromise(
       mapGameStatus(99, null, null, true).pipe(
         Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
       ),
     );
 
+    expect(result).toBe("postponed");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toContain("Unknown PSD game status code: 99");
   });

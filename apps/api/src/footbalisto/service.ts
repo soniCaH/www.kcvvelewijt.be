@@ -39,13 +39,6 @@ function derivePsdTeamLabel(name: string, age: string): string {
   return name.endsWith(" B") ? "B-Ploeg" : "A-Ploeg";
 }
 
-type MatchStatusType =
-  | "scheduled"
-  | "finished"
-  | "forfeited"
-  | "postponed"
-  | "stopped";
-
 /**
  * Map PSD numeric game status + goal presence to a normalized MatchStatus.
  *
@@ -65,7 +58,7 @@ export function mapGameStatus(
   goalsHome: number | null,
   goalsAway: number | null,
   cancelled?: boolean | null,
-): Effect.Effect<MatchStatusType> {
+): Effect.Effect<Match["status"]> {
   const warnUnknown = Effect.logWarning(
     `[transforms] Unknown PSD game status code: ${status}`,
   );

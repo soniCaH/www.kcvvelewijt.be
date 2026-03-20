@@ -66,6 +66,8 @@ export const runSanityIndexSync = (fetchFn?: FetchFn) =>
       `[search-sync] Indexing ${docs.length} responsibility paths`,
     );
 
+    let successCount = 0;
+
     yield* Effect.forEach(
       docs,
       (doc) => {
@@ -85,6 +87,11 @@ export const runSanityIndexSync = (fetchFn?: FetchFn) =>
               },
             ]),
           ),
+          Effect.tap(() =>
+            Effect.sync(() => {
+              successCount++;
+            }),
+          ),
           Effect.catchAll((e) =>
             Effect.log(
               `[search-sync] skipped doc ${doc._id} (${doc.slug}): ${String(e)}`,
@@ -95,5 +102,7 @@ export const runSanityIndexSync = (fetchFn?: FetchFn) =>
       { concurrency: 5 },
     );
 
-    yield* Effect.log(`[search-sync] Indexed ${docs.length} documents`);
+    yield* Effect.log(
+      `[search-sync] Indexed ${successCount}/${docs.length} documents`,
+    );
   });
