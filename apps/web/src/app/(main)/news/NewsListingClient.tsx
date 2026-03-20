@@ -46,6 +46,7 @@ export function NewsListingClient({
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
+    const requestId = categoryRequestId.current;
     setIsLoading(true);
     setError(null);
 
@@ -59,12 +60,18 @@ export function NewsListingClient({
         category,
       });
 
+      // Discard if a category switch happened while loading
+      if (requestId !== categoryRequestId.current) return;
+
       setGridArticles((prev) => [...prev, ...result.articles]);
       setHasMore(result.hasMore);
     } catch (err) {
+      if (requestId !== categoryRequestId.current) return;
       setError(err instanceof Error ? err.message : "Artikelen laden mislukt.");
     } finally {
-      setIsLoading(false);
+      if (requestId === categoryRequestId.current) {
+        setIsLoading(false);
+      }
     }
   }, [
     isLoading,
@@ -207,8 +214,22 @@ export function NewsListingClient({
           </section>
         )}
 
-        {/* Error state */}
-        {error && <p className="text-center text-red-400 py-4">{error}</p>}
+        {/* Error state with retry */}
+        {error && (
+          <div className="text-center py-4">
+            <p className="text-red-400 mb-2">{error}</p>
+            <button
+              type="button"
+              className="text-sm text-kcvv-green-bright underline hover:no-underline"
+              onClick={() => {
+                setError(null);
+                loadMore();
+              }}
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        )}
 
         {/* Empty state */}
         {isEmpty && !error && (
@@ -226,7 +247,7 @@ export function NewsListingClient({
         )}
 
         {/* Intersection Observer sentinel */}
-        {hasMore && !isLoading && (
+        {hasMore && !isLoading && !error && (
           <div ref={sentinelRef} className="h-4" aria-hidden="true" />
         )}
       </div>
