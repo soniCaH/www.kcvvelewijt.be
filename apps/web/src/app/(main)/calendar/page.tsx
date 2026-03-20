@@ -63,7 +63,7 @@ async function fetchMatches(): Promise<CalendarMatch[]> {
     awayScore: m.away_team.score,
     status: m.status,
     competition: m.competition,
-    team: m.round, // "A-ploeg" | "B-ploeg" | "U15 A" | etc.
+    team: m.kcvv_team_label,
   }));
 }
 

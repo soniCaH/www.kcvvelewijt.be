@@ -29,6 +29,17 @@ import {
 
 // ─── Transform helpers (internal) ──────────────────────────────────────────────
 
+/**
+ * Derive a human-readable team label from PSD team name and age group.
+ *
+ * Youth teams (age !== "A"): use the age directly (e.g. "U21", "U17").
+ * Senior teams (age === "A"): check if name ends with " B" → "B-Ploeg", else "A-Ploeg".
+ */
+function derivePsdTeamLabel(name: string, age: string): string {
+  if (age !== "A") return age;
+  return name.endsWith(" B") ? "B-Ploeg" : "A-Ploeg";
+}
+
 type MatchStatusType =
   | "scheduled"
   | "finished"
@@ -103,10 +114,6 @@ function transformPsdGame(game: PsdGame): Match {
     game.cancelled,
   );
 
-  let roundLabel: string | undefined;
-  if (game.teamId === 1) roundLabel = "A-ploeg";
-  else if (game.teamId === 2) roundLabel = "B-ploeg";
-
   return {
     id: game.id,
     date: matchDate,
@@ -125,8 +132,8 @@ function transformPsdGame(game: PsdGame): Match {
       score: game.goalsAwayTeam ?? undefined,
     },
     status,
-    round: roundLabel,
     competition: game.competitionType?.type ?? "UNKNOWN",
+    kcvv_team_id: game.teamId ?? undefined,
   };
 }
 
@@ -278,6 +285,7 @@ function matchDetailToMatch(detail: MatchDetail): Match {
     status: detail.status,
     round: detail.round,
     competition: detail.competition,
+    kcvv_team_id: detail.kcvv_team_id,
   };
 }
 
@@ -593,11 +601,20 @@ export const FootbalistoServiceLive = Layer.effect(
             { concurrency: 5 },
           );
 
-          // Filter out nulls (team 23 is excluded before fetching)
-          // Games already passed isValidGame filter upstream
-          return teamNextMatches
-            .filter((m): m is PsdGame => m !== null)
-            .map(transformPsdGame);
+          // Pair each result with its team so we can derive the label
+          const filteredTeams = teams.filter((t) => t.id !== 23);
+          const matches: Match[] = [];
+          for (let i = 0; i < teamNextMatches.length; i++) {
+            const game = teamNextMatches[i];
+            if (game) {
+              const team = filteredTeams[i]!;
+              matches.push({
+                ...transformPsdGame(game),
+                kcvv_team_label: derivePsdTeamLabel(team.name, team.age),
+              });
+            }
+          }
+          return matches;
         }),
 
       getMatchById: (matchId: number) =>

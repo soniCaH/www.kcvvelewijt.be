@@ -90,11 +90,6 @@ function buildFeaturedEventStub(event: SanityEvent): FeaturedEventStub {
   };
 }
 
-// TODO: load team label map from Sanity teams to avoid hardcoding team IDs
-const TEAM_LABELS: Record<number, string> = {
-  1235: "A-Ploeg",
-};
-
 export default async function HomePage() {
   const [articlesResult, matchesResult, eventResult, bannersResult] =
     await Promise.all([
@@ -160,10 +155,7 @@ export default async function HomePage() {
 
   const sliderMatches = upcomingMatches.map((m) => ({
     ...m,
-    teamLabel:
-      TEAM_LABELS[m.homeTeam.id as number] ??
-      TEAM_LABELS[m.awayTeam.id as number] ??
-      undefined,
+    teamLabel: m.kcvvTeamLabel,
   }));
 
   if (articles.length === 0 && matches.length === 0) {
@@ -203,7 +195,9 @@ export default async function HomePage() {
     ? {
         key: "match-widget",
         bg: "kcvv-green-dark",
-        content: <MatchWidget match={nextMatch} teamLabel="A-Ploeg" />,
+        content: (
+          <MatchWidget match={nextMatch} teamLabel={nextMatch.kcvvTeamLabel} />
+        ),
         transition: { type: "diagonal", direction: "left" },
       }
     : null;
