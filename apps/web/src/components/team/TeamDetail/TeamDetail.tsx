@@ -50,6 +50,8 @@ export interface TeamDetailProps {
   highlightTeamId?: number;
   /** Team slug for back-navigation context on match detail page */
   teamSlug?: string;
+  /** URL to the iCal feed for this team */
+  calendarUrl?: string;
   /** Additional CSS classes for the root wrapper */
   className?: string;
 }
@@ -67,6 +69,7 @@ export function TeamDetail({
   standings = [],
   highlightTeamId,
   teamSlug,
+  calendarUrl,
   className,
 }: TeamDetailProps) {
   const hasPlayers = players.length > 0;
@@ -194,6 +197,19 @@ export function TeamDetail({
           {/* Matches Tab */}
           {hasMatches && (
             <Tabs.Content value="matches" className="focus:outline-none">
+              {calendarUrl && (
+                <div className="mb-4 flex justify-end">
+                  <a
+                    href={calendarUrl}
+                    download="kcvv-wedstrijden.ics"
+                    aria-label={`Download kalender (.ics) voor ${header.name}`}
+                    rel="noopener"
+                    className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
+                  >
+                    📅 Voeg toe aan kalender
+                  </a>
+                </div>
+              )}
               <TeamSchedule
                 matches={matches}
                 teamId={highlightTeamId}
