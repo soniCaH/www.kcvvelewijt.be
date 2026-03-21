@@ -31,7 +31,9 @@ describe("ArticleHeader", () => {
     // Should have a gradient overlay div
     const gradientOverlay = container.querySelector("[aria-hidden='true']");
     expect(gradientOverlay).toBeInTheDocument();
-    expect(gradientOverlay).toHaveClass("bg-gradient-to-t");
+    expect(gradientOverlay).toHaveClass(
+      "bg-[linear-gradient(to_right,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.7)_40%,rgba(0,0,0,0.25)_75%,rgba(0,0,0,0.1)_100%)]",
+    );
   });
 
   it("renders title overlaid on the hero image (not in separate green section)", () => {
