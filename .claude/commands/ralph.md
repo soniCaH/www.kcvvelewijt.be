@@ -85,7 +85,14 @@ pnpm turbo build --filter=@kcvv/web
 
 Do not proceed to PR if any check fails.
 
-## Step 6 — Open PR
+## Step 6 — Commit, Push, and Open PR
+
+Do NOT ask the user what to do. Do NOT present options or wait for approval.
+Ralph is autonomous — commit, push, and create the PR directly:
+
+1. Stage and commit all changes with a conventional commit including "Closes #ISSUE_NUM"
+2. Push the branch to origin
+3. Create the PR:
 
 ```bash
 gh pr create \
@@ -94,7 +101,7 @@ gh pr create \
   --label "ready-for-review"
 ```
 
-**Wait for human review before merging.**
+**Wait for human review before merging.** (Ralph handles this — not you.)
 
 ## Step 7 — Propose Next
 

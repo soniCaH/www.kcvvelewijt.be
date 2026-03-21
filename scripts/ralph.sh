@@ -133,7 +133,14 @@ Read the root CLAUDE.md for project-wide rules:
 ## Step 2 — Implement using TDD
 ${TDD_SKILL}
 
-## Step 3 — Open a PR when done
+## Step 3 — Commit, push, and open a PR when done
+
+IMPORTANT: You are running autonomously. Do NOT ask the user what to do.
+Do NOT present options. Do NOT wait for approval. Just do it:
+
+1. Stage and commit all changes with a conventional commit message that includes "Closes #${issue}"
+2. Push the branch to origin
+3. Create the PR:
   gh pr create \
     --title "[type](scope): description (#${issue})" \
     --body "Closes #${issue}
@@ -145,6 +152,7 @@ ${TDD_SKILL}
 - All checks pass: \`pnpm --filter @kcvv/web check-all\`
 - [any manual verification steps]"
 
+4. Add the label:
   gh pr edit --add-label "ready-for-review"
 
 Output the PR URL as the last line of your response.
