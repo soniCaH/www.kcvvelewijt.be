@@ -9,9 +9,9 @@ import {
 import { HARD_TTL_DEFAULT } from "../cache/kv-cache";
 import {
   FootbalistoService,
-  FootbalistoServiceError,
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
+import type { BffError } from "../footbalisto/errors";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -60,7 +60,7 @@ function makeCacheMock(): KvCacheInterface {
 function provide<A>(
   effect: Effect.Effect<
     A,
-    FootbalistoServiceError,
+    BffError,
     FootbalistoService | KvCacheService | WorkerEnvTag
   >,
 ) {

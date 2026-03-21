@@ -5,12 +5,11 @@ import {
   TeamStats,
   type TeamStats as TeamStatsType,
 } from "@kcvv/api-contract";
-import {
-  FootbalistoService,
-  type FootbalistoServiceError,
-} from "../footbalisto/service";
+import { FootbalistoService } from "../footbalisto/service";
+import { shouldServeStale, type BffError } from "../footbalisto/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
+import { withErrorMapping } from "./error-mapping";
 
 const teamStatsCache = TypedKvCache(TeamStats);
 
@@ -18,7 +17,7 @@ export const getTeamStatsHandler = (
   teamId: number,
 ): Effect.Effect<
   TeamStatsType,
-  FootbalistoServiceError,
+  BffError,
   FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `stats:team:${teamId}`;
@@ -27,11 +26,13 @@ export const getTeamStatsHandler = (
     return yield* service.getTeamStats(teamId);
   });
 
-  return teamStatsCache.getOrFetch(cacheKey, fetchStats, TTL.STATS);
+  return teamStatsCache.getOrFetch(cacheKey, fetchStats, TTL.STATS, undefined, {
+    shouldServeStale,
+  });
 };
 
 export const StatsApiLive = HttpApiBuilder.group(PsdApi, "stats", (handlers) =>
   handlers.handle("getTeamStats", ({ path: { teamId } }) =>
-    getTeamStatsHandler(teamId).pipe(Effect.orDie),
+    withErrorMapping(getTeamStatsHandler(teamId)),
   ),
 );

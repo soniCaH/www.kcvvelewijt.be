@@ -45,6 +45,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
       fetch: Effect.Effect<A, E, R>,
       softTtl: number | ((value: A) => number),
       hardTtl: number = HARD_TTL_DEFAULT,
+      options?: { shouldServeStale?: (error: E) => boolean },
     ): Effect.Effect<A, E, R | KvCacheService | WorkerEnvTag> =>
       Effect.gen(function* () {
         const cache = yield* KvCacheService;
@@ -93,16 +94,20 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
             if (isFresh) return value;
 
             // Stale: attempt refresh, fall back to stale on error
+            const shouldServeStale = options?.shouldServeStale ?? (() => true);
             const refreshed = yield* fetch.pipe(
               Effect.map((freshValue) => ({ freshValue, ok: true as const })),
-              Effect.catchAll((err) =>
-                Effect.gen(function* () {
+              Effect.catchAll((err) => {
+                if (!shouldServeStale(err)) {
+                  return Effect.fail(err);
+                }
+                return Effect.gen(function* () {
                   yield* Effect.logWarning(
                     `TypedKvCache: refresh failed for key "${key}", serving stale data (age: ${Math.round((Date.now() - fetchedAt) / 1000)}s, error: ${String(err)})`,
                   );
                   return { freshValue: value, ok: false as const };
-                }),
-              ),
+                });
+              }),
             );
 
             if (refreshed.ok) {

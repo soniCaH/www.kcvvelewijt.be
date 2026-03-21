@@ -1,12 +1,11 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RankingArray, type RankingEntry } from "@kcvv/api-contract";
-import {
-  FootbalistoService,
-  type FootbalistoServiceError,
-} from "../footbalisto/service";
+import { FootbalistoService } from "../footbalisto/service";
+import { shouldServeStale, type BffError } from "../footbalisto/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
+import { withErrorMapping } from "./error-mapping";
 
 const rankingCache = TypedKvCache(RankingArray);
 
@@ -15,7 +14,7 @@ export const getRankingHandler = (
   logoCdnUrl: string,
 ): Effect.Effect<
   readonly RankingEntry[],
-  FootbalistoServiceError,
+  BffError,
   FootbalistoService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `ranking:team:${teamId}`;
@@ -24,7 +23,13 @@ export const getRankingHandler = (
     return yield* service.getRanking(teamId, logoCdnUrl);
   });
 
-  return rankingCache.getOrFetch(cacheKey, fetchRanking, TTL.RANKING);
+  return rankingCache.getOrFetch(
+    cacheKey,
+    fetchRanking,
+    TTL.RANKING,
+    undefined,
+    { shouldServeStale },
+  );
 };
 
 export const RankingApiLive = HttpApiBuilder.group(
@@ -32,9 +37,11 @@ export const RankingApiLive = HttpApiBuilder.group(
   "ranking",
   (handlers) =>
     handlers.handle("getRanking", ({ path: { teamId } }) =>
-      Effect.gen(function* () {
-        const env = yield* WorkerEnvTag;
-        return yield* getRankingHandler(teamId, env.FOOTBALISTO_LOGO_CDN_URL);
-      }).pipe(Effect.orDie),
+      withErrorMapping(
+        Effect.gen(function* () {
+          const env = yield* WorkerEnvTag;
+          return yield* getRankingHandler(teamId, env.FOOTBALISTO_LOGO_CDN_URL);
+        }),
+      ),
     ),
 );

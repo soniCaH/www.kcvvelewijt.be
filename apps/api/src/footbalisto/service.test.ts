@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer, Logger } from "effect";
 import {
   FootbalistoService,
-  FootbalistoServiceError,
   FootbalistoServiceLive,
   mapGameStatus,
 } from "./service";
+import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 
@@ -137,7 +137,7 @@ const rawDetailResponse = {
 function runService<A>(
   fn: (
     svc: (typeof FootbalistoService)["Service"],
-  ) => Effect.Effect<A, FootbalistoServiceError>,
+  ) => Effect.Effect<A, BffError>,
 ) {
   const program = Effect.gen(function* () {
     const service = yield* FootbalistoService;
@@ -195,7 +195,7 @@ describe("FootbalistoService", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
+      expect(result.left._tag).toBe("UpstreamUnavailable");
     }
   });
 
@@ -210,8 +210,8 @@ describe("FootbalistoService", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
-      expect(result.left.status).toBe(500);
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+      expect((result.left as UpstreamUnavailableError).status).toBe(500);
     }
   });
 
@@ -233,7 +233,7 @@ describe("FootbalistoService", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
+      expect(result.left._tag).toBe("ResourceNotFound");
       expect(result.left.message).toBe("No active season found");
     }
   });
@@ -250,7 +250,7 @@ describe("FootbalistoService", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
+      expect(result.left._tag).toBe("UpstreamDecode");
       expect(result.left.message).toBe("Schema validation failed");
     }
   });
@@ -314,7 +314,7 @@ describe("FootbalistoService.getTeamMatches", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
+      expect(result.left._tag).toBe("UpstreamUnavailable");
     }
   });
 });
@@ -432,7 +432,7 @@ describe("FootbalistoService.getMatchById", () => {
     }
   });
 
-  it("fails when match detail fetch returns HTTP error", async () => {
+  it("fails with ResourceNotFoundError when match detail fetch returns HTTP 404", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
       status: 404,
@@ -443,8 +443,7 @@ describe("FootbalistoService.getMatchById", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
-      expect(result.left.status).toBe(404);
+      expect(result.left._tag).toBe("ResourceNotFound");
     }
   });
 });
@@ -607,7 +606,7 @@ describe("FootbalistoService.getMatchDetail", () => {
     }
   });
 
-  it("fails when match detail fetch returns HTTP error", async () => {
+  it("fails with UpstreamUnavailableError when match detail fetch returns HTTP 500", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
       status: 500,
@@ -618,8 +617,8 @@ describe("FootbalistoService.getMatchDetail", () => {
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
-      expect(result.left).toBeInstanceOf(FootbalistoServiceError);
-      expect(result.left.status).toBe(500);
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+      expect((result.left as UpstreamUnavailableError).status).toBe(500);
     }
   });
 });
