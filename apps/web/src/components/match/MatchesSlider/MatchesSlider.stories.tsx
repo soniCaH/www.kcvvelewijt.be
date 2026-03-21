@@ -10,7 +10,7 @@ import {
   mockScheduledMatchWithScores,
   mockFinishedMatch,
   mockMatches,
-} from "@/components/home/UpcomingMatches/UpcomingMatches.mocks";
+} from "@/components/match/match.mocks";
 
 const KCVV_ID = 1235;
 

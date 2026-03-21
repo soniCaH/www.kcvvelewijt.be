@@ -1,8 +1,7 @@
 /**
- * Mock data for UpcomingMatches component
- * Used in Storybook and as fallback data during development
+ * Shared mock data for match-related stories
  */
-import type { UpcomingMatch } from "./UpcomingMatches";
+import type { UpcomingMatch } from "./types";
 
 export const mockScheduledMatches: UpcomingMatch[] = [
   {
@@ -139,9 +138,6 @@ export const mockForfeitedMatch: UpcomingMatch = {
   competition: "Competitie",
 };
 
-/**
- * Combined mock data for various scenarios
- */
 export const mockMatches = {
   scheduled: mockScheduledMatches,
   scheduledWithScores: mockScheduledMatchWithScores,

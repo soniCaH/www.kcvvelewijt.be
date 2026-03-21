@@ -12,7 +12,7 @@ import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
 import { SectionStack, SectionHeader } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
-import { mockMatches } from "./UpcomingMatches/UpcomingMatches.mocks";
+import { mockMatches } from "@/components/match/match.mocks";
 
 const meta: Meta = {
   title: "Pages/Homepage",
