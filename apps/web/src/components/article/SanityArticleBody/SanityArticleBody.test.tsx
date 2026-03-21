@@ -325,24 +325,17 @@ function makeImageBlock(
 }
 
 describe("SanityArticleBody blockquote", () => {
-  it("renders blockquote with green accent border and background tint", () => {
+  it("renders blockquote styled by global CSS (no component-level overrides)", () => {
     const { container } = render(
       <SanityArticleBody content={[makeBlockquote("A wise quote")]} />,
     );
 
     const blockquote = container.querySelector("blockquote");
     expect(blockquote).toBeInTheDocument();
-    const classes = blockquote!.className;
+    expect(blockquote!.textContent).toContain("A wise quote");
 
-    // Uses design token green border
-    expect(classes).toContain("border-l-4");
-    expect(classes).toContain("border-kcvv-green");
-
-    // Has background tint
-    expect(classes).toContain("bg-kcvv-green-100");
-
-    // Does NOT use hardcoded green-bright
-    expect(classes).not.toContain("border-kcvv-green-bright");
+    // No component-level background tint — styled by global CSS with decorative quote mark
+    expect(blockquote!.className).not.toContain("bg-kcvv-green-100");
   });
 });
 

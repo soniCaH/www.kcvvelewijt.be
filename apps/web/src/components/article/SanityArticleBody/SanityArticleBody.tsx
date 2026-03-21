@@ -28,6 +28,36 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   },
 };
 
+interface ArticleImageValue {
+  asset?: { url?: string };
+  alt?: string;
+  width?: number;
+  height?: number;
+  fullBleed?: boolean;
+}
+
+function ArticleImageBlock({ value }: { value: ArticleImageValue }) {
+  if (!value.asset?.url) return null;
+  const isFullBleed = value.fullBleed === true;
+  return (
+    <figure
+      className={cn(
+        "my-8 overflow-hidden rounded-lg",
+        isFullBleed && "full-bleed rounded-none",
+      )}
+    >
+      <Image
+        src={value.asset.url}
+        alt={value.alt ?? ""}
+        width={value.width ?? 800}
+        height={value.height ?? 450}
+        className="h-auto w-full transition-transform duration-300 ease-in-out hover:scale-105"
+        sizes={isFullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}
+      />
+    </figure>
+  );
+}
+
 interface FileAttachmentValue {
   _type: "fileAttachment";
   label?: string;
@@ -117,46 +147,10 @@ const components: PortableTextComponents = {
       );
     },
     htmlTable: HtmlTableBlock,
-    image: ({
-      value,
-    }: {
-      value: {
-        asset?: { url?: string };
-        alt?: string;
-        width?: number;
-        height?: number;
-        fullBleed?: boolean;
-      };
-    }) => {
-      if (!value.asset?.url) return null;
-      const isFullBleed = value.fullBleed === true;
-      return (
-        <figure
-          className={cn(
-            "my-8 overflow-hidden rounded-lg",
-            isFullBleed &&
-              "full-bleed relative left-1/2 right-1/2 -mx-[50vw] w-screen rounded-none",
-          )}
-        >
-          <Image
-            src={value.asset.url}
-            alt={value.alt ?? ""}
-            width={value.width ?? 800}
-            height={value.height ?? 450}
-            className="h-auto w-full"
-            sizes={isFullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}
-          />
-        </figure>
-      );
-    },
+    image: ArticleImageBlock,
+    articleImage: ArticleImageBlock,
   },
-  block: {
-    blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-kcvv-green bg-kcvv-green-100 py-4 pl-6 pr-4 italic text-kcvv-gray">
-        {children}
-      </blockquote>
-    ),
-  },
+  block: {},
   marks: {
     link: ({ children, value }) => {
       const href: string = value?.href ?? "#";
@@ -192,7 +186,7 @@ export const SanityArticleBody = ({
         "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
         "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
-        "prose-blockquote:border-kcvv-green prose-blockquote:bg-kcvv-green-100 prose-blockquote:text-kcvv-gray",
+        "prose-blockquote:border-0 prose-blockquote:not-italic prose-blockquote:text-kcvv-gray-dark",
         "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",
         className,
       )}
