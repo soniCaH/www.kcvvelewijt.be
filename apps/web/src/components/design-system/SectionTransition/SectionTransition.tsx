@@ -30,18 +30,8 @@ export interface SectionTransitionProps {
   className?: string;
 }
 
-const BG_CLASS: Record<SectionBg, string> = {
-  white: "bg-white",
-  "gray-100": "bg-gray-100",
-  "kcvv-black": "bg-kcvv-black",
-  "kcvv-green-dark": "bg-kcvv-green-dark",
-  transparent: "bg-transparent",
-};
-
-// Actual color values used in box-shadow seam fill. box-shadow paints outside
-// the element's bounds (unaffected by parent overflow:visible) and fills any
-// gap between the transition and its adjacent sections regardless of layout.
-const BG_SHADOW_COLOR: Record<SectionBg, string> = {
+// CSS color values for SVG polygon fills.
+const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
   "gray-100": "#f3f4f6",
   "kcvv-black": "var(--color-kcvv-black)",
@@ -49,27 +39,36 @@ const BG_SHADOW_COLOR: Record<SectionBg, string> = {
   transparent: "transparent",
 };
 
-// TO color fills the lower triangle — FROM shows through the wrapper background.
-const CLIP_PATH_TO: Record<"left" | "right", string> = {
-  left: "polygon(100% 0, 100% 100%, 0 100%)", // lower-right — diagonal ↙
-  right: "polygon(0 0, 0 100%, 100% 100%)", //  lower-left  — diagonal ↘
+// SVG polygon points — exact same corners as the old clip-path polygons,
+// but rendered via SVG with shape-rendering="crispEdges" to eliminate
+// the anti-aliasing fringe that clip-path produces.
+// viewBox="0 0 100 100" + preserveAspectRatio="none" stretches to any aspect ratio.
+
+// TO color fills the lower triangle — FROM fills the upper triangle.
+const SVG_TO: Record<"left" | "right", string> = {
+  left: "100,0 100,100 0,100", // lower-right — diagonal ↙
+  right: "0,0 0,100 100,100", //  lower-left  — diagonal ↘
 };
 
-// FROM color fills the upper triangle — only needed for the double-diagonal
-// inner halves where the wrapper is FROM but the first inner div background
-// must be explicitly FROM as well.
-const CLIP_PATH_FROM: Record<"left" | "right", string> = {
-  left: "polygon(0 0, 100% 0, 0 100%)", // upper-left
-  right: "polygon(0 0, 100% 0, 100% 100%)", // upper-right
+// FROM color fills the upper triangle — needed for double-diagonal inner halves.
+const SVG_FROM: Record<"left" | "right", string> = {
+  left: "0,0 100,0 0,100", // upper-left
+  right: "0,0 100,0 100,100", // upper-right
 };
+
+/** Shift SVG polygon points vertically by `dy` (for double-diagonal lower half). */
+function shiftY(points: string, dy: number): string {
+  return points
+    .split(" ")
+    .map((p) => {
+      const [x, y] = p.split(",");
+      return `${x},${Number(y) + dy}`;
+    })
+    .join(" ");
+}
 
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
-
-// 2px overlap on every seam edge — eliminates rendering gaps at the top and
-// bottom boundaries of the transition element in all variants, zoom levels,
-// and device pixel ratios (covers fractional-pixel heights from clamp()).
-const SEAM = "2px";
 
 export function SectionTransition({
   from,
@@ -83,10 +82,7 @@ export function SectionTransition({
   const isDouble = type === "double-diagonal";
   const height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
 
-  // Always overlap 1px at the top into the preceding section (same FROM color,
-  // invisible) to close the top seam. For non-zero overlap modes the larger
-  // negative margin already subsumes this 1px.
-  let marginTop = `-${SEAM}`;
+  let marginTop = "0";
   let zIndex = "";
 
   if (overlap === "half") {
@@ -99,96 +95,93 @@ export function SectionTransition({
     zIndex = "10";
   }
 
+  // -1px bottom margin pulls the next section up to cover any sub-pixel gap
+  // caused by fractional pixel heights from clamp(). The overlap is invisible
+  // because both the SVG's bottom edge and the next section share the TO color.
   const style: React.CSSProperties = {
     height,
     marginTop,
-    // Pull the following section up to overlap this element's bottom.
-    marginBottom: `-${SEAM}`,
-    // box-shadow paints the correct colors above and below this element,
-    // filling any remaining gap that layout-based overlap misses. Shadows are
-    // not clipped by parent elements (none of our wrappers use overflow:hidden)
-    // so they reach into any canvas-visible gap between block boundaries.
-    // In overlap mode the top seam must be transparent — the from-section
-    // content shows through rather than being hidden behind a solid shadow.
-    boxShadow: `0 -${SEAM} 0 0 ${overlap !== "none" ? "transparent" : BG_SHADOW_COLOR[from]}, 0 ${SEAM} 0 0 ${BG_SHADOW_COLOR[to]}`,
+    marginBottom: "-1px",
   };
   if (zIndex) style.zIndex = zIndex;
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
     const midColor = via ?? to;
-    // When overlapping into the previous section the FROM areas must be
-    // transparent — the section content (e.g. carousel) shows through, and
-    // only the via/to shapes are painted on top.
-    const fromBg =
-      overlap !== "none" ? BG_CLASS["transparent"] : BG_CLASS[from];
+    const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
     return (
       <div
         aria-hidden="true"
         data-height={height}
         data-margin-top={marginTop}
-        // Transparent in overlap mode so the preceding section shows through.
-        // FROM color in non-overlap mode to continue the section boundary.
-        className={cn("relative w-full overflow-hidden", fromBg, className)}
+        className={cn("relative w-full", className)}
         style={style}
       >
-        {/* First diagonal: from → via */}
-        <div
-          data-testid="st-sub"
-          className="relative w-full"
-          style={{ height: DIAGONAL_HEIGHT }}
+        {/* Single SVG spans both halves — no mid-seam gap possible. */}
+        <svg
+          viewBox="0 0 100 200"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full"
         >
-          <div
-            className={cn("absolute inset-0", fromBg)}
-            style={{ clipPath: CLIP_PATH_FROM[direction] }}
+          {/* Upper half (y 0–100): from → via */}
+          <polygon
+            data-testid="st-upper-from"
+            points={SVG_FROM[direction]}
+            fill={fromFill}
+            shapeRendering="crispEdges"
           />
-          <div
-            data-testid="st-sub-overlay"
-            className={cn("absolute inset-0", BG_CLASS[midColor])}
-            style={{ clipPath: CLIP_PATH_TO[direction] }}
+          <polygon
+            data-testid="st-upper-to"
+            points={SVG_TO[direction]}
+            fill={BG_COLOR[midColor]}
+            shapeRendering="crispEdges"
           />
-        </div>
-        {/* Second diagonal: via → to (opposite direction).
-            Extra 1px height + -1px marginTop closes the mid-seam between the
-            two inner halves. overflow:hidden on the wrapper clips any excess. */}
-        <div
-          data-testid="st-sub"
-          className="relative w-full"
-          style={{
-            height: `calc(${DIAGONAL_HEIGHT} + ${SEAM})`,
-            marginTop: `-${SEAM}`,
-          }}
-        >
-          <div
-            className={cn("absolute inset-0", BG_CLASS[midColor])}
-            style={{ clipPath: CLIP_PATH_FROM[opposite] }}
+          {/* Lower half (y 100–200): via → to (opposite direction) */}
+          <polygon
+            data-testid="st-lower-from"
+            points={shiftY(SVG_FROM[opposite], 100)}
+            fill={BG_COLOR[midColor]}
+            shapeRendering="crispEdges"
           />
-          <div
-            data-testid="st-sub-overlay"
-            className={cn("absolute inset-0", BG_CLASS[to])}
-            style={{ clipPath: CLIP_PATH_TO[opposite] }}
+          <polygon
+            data-testid="st-lower-to"
+            points={shiftY(SVG_TO[opposite], 100)}
+            fill={BG_COLOR[to]}
+            shapeRendering="crispEdges"
           />
-        </div>
+        </svg>
       </div>
     );
   }
+
+  const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
 
   return (
     <div
       aria-hidden="true"
       data-height={height}
       data-margin-top={marginTop}
-      // FROM color as wrapper background — top boundary continues the preceding
-      // FROM section seamlessly (both the 1px overlap and the upper triangle
-      // share the same color, so the seam is invisible).
-      className={cn("relative w-full", BG_CLASS[from], className)}
+      className={cn("relative w-full", className)}
       style={style}
     >
-      <div
-        data-testid="st-overlay"
-        className={cn("absolute inset-0", BG_CLASS[to])}
-        style={{ clipPath: CLIP_PATH_TO[direction] }}
-      />
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="absolute inset-0 w-full h-full"
+      >
+        <polygon
+          data-testid="st-from"
+          points={SVG_FROM[direction]}
+          fill={fromFill}
+          shapeRendering="crispEdges"
+        />
+        <polygon
+          data-testid="st-to"
+          points={SVG_TO[direction]}
+          fill={BG_COLOR[to]}
+          shapeRendering="crispEdges"
+        />
+      </svg>
     </div>
   );
 }
