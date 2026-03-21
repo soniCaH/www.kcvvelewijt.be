@@ -169,10 +169,12 @@ export function NewsListingClient({
   const renderCard = (
     article: SanityArticleListItem,
     variant: "featured" | "standard" | "listing",
+    className?: string,
   ) => (
     <NewsCard
       key={article._id}
       variant={variant}
+      className={className}
       title={article.title}
       href={`/news/${article.slug.current}`}
       imageUrl={article.coverImageUrl ?? undefined}
@@ -214,12 +216,13 @@ export function NewsListingClient({
               {featuredArticles[0] &&
                 renderCard(featuredArticles[0], "featured")}
             </div>
-            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height.
-                [&>article] targets NewsCard's <article> root element. */}
-            <div className="flex flex-col gap-4 [&>article]:flex-1 [&>article]:aspect-auto">
+            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height */}
+            <div className="flex flex-col gap-4">
               {featuredArticles
                 .slice(1, 3)
-                .map((article) => renderCard(article, "standard"))}
+                .map((article) =>
+                  renderCard(article, "standard", "flex-1 aspect-auto"),
+                )}
             </div>
           </section>
         )}
