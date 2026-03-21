@@ -46,9 +46,11 @@ export function NewsListingClient({
   } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const categoryRequestId = useRef(0);
+  const isLoadingRef = useRef(false);
 
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore) return;
+    if (!hasMore || isLoadingRef.current) return;
+    isLoadingRef.current = true;
     const requestId = categoryRequestId.current;
     setIsLoading(true);
     setError(null);
@@ -79,12 +81,12 @@ export function NewsListingClient({
         },
       });
     } finally {
+      isLoadingRef.current = false;
       if (requestId === categoryRequestId.current) {
         setIsLoading(false);
       }
     }
   }, [
-    isLoading,
     hasMore,
     activeCategory,
     featuredArticles.length,
