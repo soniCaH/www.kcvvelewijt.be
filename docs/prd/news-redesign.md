@@ -120,3 +120,4 @@ None. All data flows (Sanity articles, tags) already exist. The infinite scroll 
 
 - [2026-03-20] Discovered: `paginateResults` helper cannot live in a `"use server"` file (all exports must be async). Moved to separate `utils.ts` → resolved inline
 - [2026-03-20] Discovered: GROQ category filter uses `select($category == "" => true, $category in tags)` pattern for optional filtering → resolved inline
+- [2026-03-21] Phase 5 cleanup complete: deleted ArticleCard, RelatedNews, NewsOverview.stories.tsx; updated barrel exports
