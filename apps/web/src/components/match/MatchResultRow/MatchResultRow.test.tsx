@@ -1,0 +1,255 @@
+/**
+ * MatchResultRow Component Tests
+ */
+
+import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { MatchResultRow } from "./MatchResultRow";
+import type { ScheduleMatch } from "../../team/TeamSchedule/TeamSchedule";
+
+// Mock next/image
+vi.mock("next/image", () => ({
+  default: ({ src, alt, ...props }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} {...props} />
+  ),
+}));
+
+// Mock next/link
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    className,
+  }: {
+    children: React.ReactNode;
+    href: string;
+    className?: string;
+  }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+describe("MatchResultRow", () => {
+  const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  const scheduledMatch: ScheduleMatch = {
+    id: 1001,
+    date: futureDate,
+    time: "15:00",
+    homeTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
+    awayTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
+    status: "scheduled",
+    competition: "3de Nationale",
+  };
+
+  const finishedMatch: ScheduleMatch = {
+    id: 1002,
+    date: pastDate,
+    time: "15:00",
+    homeTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
+    awayTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
+    homeScore: 3,
+    awayScore: 1,
+    status: "finished",
+    competition: "3de Nationale",
+  };
+
+  describe("upcoming match", () => {
+    it("renders VS placeholder for scheduled matches", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      expect(screen.getByText("VS")).toBeInTheDocument();
+    });
+
+    it("renders team names", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
+      expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
+    });
+
+    it("renders match time", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      expect(screen.getByText("15:00")).toBeInTheDocument();
+    });
+
+    it("links to match detail page", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute("href", "/game/1001");
+    });
+  });
+
+  describe("past match with scores", () => {
+    it("renders scores for finished matches", () => {
+      render(
+        <MatchResultRow
+          match={finishedMatch}
+          teamId={1235}
+          href="/game/1002"
+        />,
+      );
+      expect(screen.getByText("3")).toBeInTheDocument();
+    });
+
+    it("applies green border for wins", () => {
+      render(
+        <MatchResultRow
+          match={finishedMatch}
+          teamId={1235}
+          href="/game/1002"
+        />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("border-l-green-500");
+    });
+
+    it("applies red border for losses", () => {
+      const lossMatch: ScheduleMatch = {
+        ...finishedMatch,
+        homeScore: 0,
+        awayScore: 2,
+      };
+      render(
+        <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("border-l-red-500");
+    });
+
+    it("applies yellow border for draws", () => {
+      const drawMatch: ScheduleMatch = {
+        ...finishedMatch,
+        homeScore: 2,
+        awayScore: 2,
+      };
+      render(
+        <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("border-l-yellow-500");
+    });
+
+    it("highlights winning score with green color", () => {
+      render(
+        <MatchResultRow
+          match={finishedMatch}
+          teamId={1235}
+          href="/game/1002"
+        />,
+      );
+      const homeScore = screen.getByText("3");
+      expect(homeScore.className).toContain("text-kcvv-green-bright");
+    });
+  });
+
+  describe("status badges", () => {
+    it("shows postponed badge", () => {
+      const postponedMatch: ScheduleMatch = {
+        ...scheduledMatch,
+        status: "postponed",
+      };
+      render(<MatchResultRow match={postponedMatch} href="/game/1001" />);
+      expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
+    });
+
+    it("shows stopped badge", () => {
+      const stoppedMatch: ScheduleMatch = {
+        ...scheduledMatch,
+        status: "stopped",
+      };
+      render(<MatchResultRow match={stoppedMatch} href="/game/1001" />);
+      expect(screen.getByText("Gestopt")).toBeInTheDocument();
+    });
+
+    it("shows FF badge for forfeited matches", () => {
+      const forfeitedMatch: ScheduleMatch = {
+        ...finishedMatch,
+        status: "forfeited",
+      };
+      render(<MatchResultRow match={forfeitedMatch} href="/game/1001" />);
+      expect(screen.getByText("FF")).toBeInTheDocument();
+    });
+  });
+
+  describe("next match highlight", () => {
+    it("shows Volgende badge when isNext is true", () => {
+      render(
+        <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
+      );
+      expect(screen.getByText("Volgende")).toBeInTheDocument();
+    });
+
+    it("applies highlight ring when isNext is true", () => {
+      render(
+        <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("border-kcvv-green-bright");
+    });
+
+    it("does not show Volgende badge when isNext is false", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      expect(screen.queryByText("Volgende")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("without logos", () => {
+    it("renders placeholder initials when logos are missing", () => {
+      const noLogoMatch: ScheduleMatch = {
+        ...scheduledMatch,
+        homeTeam: { id: 1235, name: "KCVV Elewijt" },
+        awayTeam: { id: 59, name: "Opponent FC" },
+      };
+      render(<MatchResultRow match={noLogoMatch} href="/game/1001" />);
+      expect(screen.getByText("K")).toBeInTheDocument();
+      expect(screen.getByText("O")).toBeInTheDocument();
+    });
+  });
+
+  describe("home/away indication", () => {
+    it("bolds team name when teamId matches", () => {
+      render(
+        <MatchResultRow
+          match={scheduledMatch}
+          teamId={1235}
+          href="/game/1001"
+        />,
+      );
+      const kcvvText = screen.getByText("KCVV Elewijt");
+      expect(kcvvText).toHaveClass("font-semibold");
+    });
+
+    it("shows Thuis indicator on mobile when playing at home", () => {
+      render(
+        <MatchResultRow
+          match={scheduledMatch}
+          teamId={1235}
+          href="/game/1001"
+        />,
+      );
+      expect(screen.getByText(/Thuis/)).toBeInTheDocument();
+    });
+
+    it("shows Uit indicator on mobile when playing away", () => {
+      const awayMatch: ScheduleMatch = {
+        ...scheduledMatch,
+        homeTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
+        awayTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
+      };
+      render(
+        <MatchResultRow match={awayMatch} teamId={1235} href="/game/1001" />,
+      );
+      expect(screen.getByText(/Uit/)).toBeInTheDocument();
+    });
+  });
+
+  describe("competition", () => {
+    it("renders competition name", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      const competitions = screen.getAllByText("3de Nationale");
+      expect(competitions.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+});
