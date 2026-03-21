@@ -28,6 +28,36 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   },
 };
 
+interface ArticleImageValue {
+  asset?: { url?: string };
+  alt?: string;
+  width?: number;
+  height?: number;
+  fullBleed?: boolean;
+}
+
+function ArticleImageBlock({ value }: { value: ArticleImageValue }) {
+  if (!value.asset?.url) return null;
+  const isFullBleed = value.fullBleed === true;
+  return (
+    <figure
+      className={cn(
+        "my-8 overflow-hidden rounded-lg",
+        isFullBleed && "full-bleed rounded-none",
+      )}
+    >
+      <Image
+        src={value.asset.url}
+        alt={value.alt ?? ""}
+        width={value.width ?? 800}
+        height={value.height ?? 450}
+        className="h-auto w-full transition-transform duration-300 ease-in-out hover:scale-105"
+        sizes={isFullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}
+      />
+    </figure>
+  );
+}
+
 interface FileAttachmentValue {
   _type: "fileAttachment";
   label?: string;
@@ -104,12 +134,12 @@ const components: PortableTextComponents = {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
       if (!value.fileUrl) return null;
       return (
-        <div className="my-4">
+        <div className="my-6">
           <a
             href={value.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-kcvv-green-bright text-white rounded hover:bg-kcvv-green-darker transition-colors no-underline"
+            className="inline-flex items-center gap-2 rounded bg-kcvv-green-dark px-5 py-2.5 font-medium text-white no-underline transition-colors hover:bg-kcvv-green-hover-dark"
           >
             ↓ {value.label ?? "Download"}
           </a>
@@ -117,35 +147,13 @@ const components: PortableTextComponents = {
       );
     },
     htmlTable: HtmlTableBlock,
-    image: ({
-      value,
-    }: {
-      value: {
-        asset?: { url?: string };
-        alt?: string;
-        width?: number;
-        height?: number;
-      };
-    }) => {
-      if (!value.asset?.url) return null;
-      return (
-        <figure className="my-6 overflow-hidden rounded">
-          <Image
-            src={value.asset.url}
-            alt={value.alt ?? ""}
-            width={value.width ?? 800}
-            height={value.height ?? 450}
-            className="w-full h-auto rounded transition-transform duration-300 ease-in-out hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 720px"
-          />
-        </figure>
-      );
-    },
+    image: ArticleImageBlock,
+    articleImage: ArticleImageBlock,
   },
   block: {
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-kcvv-green-bright pl-4 my-4 italic text-gray-600 not-italic">
-        {children}
+      <blockquote>
+        <p>{children}</p>
       </blockquote>
     ),
   },
@@ -158,7 +166,7 @@ const components: PortableTextComponents = {
           href={href}
           target={isExternal ? "_blank" : undefined}
           rel={isExternal ? "noopener noreferrer" : undefined}
-          className="text-kcvv-green-bright hover:underline"
+          className="text-kcvv-green-dark underline decoration-kcvv-green/30 underline-offset-2 transition-colors hover:text-kcvv-green hover:decoration-kcvv-green"
         >
           {children}
         </a>
@@ -179,11 +187,13 @@ export const SanityArticleBody = ({
   return (
     <div
       className={cn(
-        "prose prose-lg max-w-none px-3 lg:px-0 py-3",
-        "prose-headings:font-bold prose-headings:text-gray-900",
-        "prose-a:text-kcvv-green-bright prose-a:no-underline hover:prose-a:underline",
-        "prose-blockquote:border-l-4 prose-blockquote:border-kcvv-green-bright prose-blockquote:not-italic prose-blockquote:text-gray-600",
-        "prose-table:w-full prose-th:bg-table-header-bg prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-table-border",
+        "prose prose-lg max-w-none px-3 py-3 lg:px-0",
+        "prose-headings:font-title prose-headings:font-bold prose-headings:text-kcvv-black",
+        "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
+        "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
+        "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
+        /* blockquote styles handled by .prose blockquote in globals.css */
+        "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",
         className,
       )}
     >

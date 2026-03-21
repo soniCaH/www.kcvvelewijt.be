@@ -298,9 +298,11 @@ nav a {
 }
 
 /* Blockquote Styles (from design system) */
-blockquote {
+/* Scoped to .prose to beat typography plugin's .prose :where(blockquote) specificity */
+.prose blockquote {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-medium);
+  font-style: normal;
   line-height: var(--line-height-snug);
   color: var(--color-kcvv-gray-dark);
   border: 0;
@@ -310,7 +312,11 @@ blockquote {
   position: relative;
 }
 
-blockquote::before {
+.prose blockquote > p:first-child {
+  margin-top: 0;
+}
+
+.prose blockquote::before {
   content: '\201C';
   color: var(--color-kcvv-green-bright);
   font-size: 15rem;
@@ -319,6 +325,16 @@ blockquote::before {
   margin-bottom: -6rem;
   margin-left: -6.5rem;
   overflow: hidden;
+}
+
+/* Full-bleed breakout utility — pulls an element to viewport width */
+.full-bleed {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
 }
 
 /* Utility Classes */
