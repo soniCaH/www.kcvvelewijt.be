@@ -16,7 +16,7 @@ describe("ArticleMetadata", () => {
   it("renders breadcrumb with News link and category", () => {
     render(<ArticleMetadata {...defaultProps} />);
     // "News" breadcrumb link
-    const newsLink = screen.getByRole("link", { name: "News" });
+    const newsLink = screen.getByRole("link", { name: "Nieuws" });
     expect(newsLink).toHaveAttribute("href", "/news");
     // Category breadcrumb link
     const categoryLink = screen.getByRole("link", { name: "Eerste ploeg" });
@@ -72,7 +72,7 @@ describe("ArticleMetadata", () => {
 
   it("renders breadcrumb-only when no category provided", () => {
     render(<ArticleMetadata author="Test" date="01/01/2025" />);
-    const newsLink = screen.getByRole("link", { name: "News" });
+    const newsLink = screen.getByRole("link", { name: "Nieuws" });
     expect(newsLink).toBeInTheDocument();
     // No category link, no separator
     expect(screen.queryByText("›")).not.toBeInTheDocument();

@@ -55,7 +55,7 @@ export const ArticleMetadata = ({
         {/* Breadcrumb — left */}
         <div className="flex items-center gap-1.5">
           <Link href="/news" className="text-kcvv-green-bright hover:underline">
-            News
+            Nieuws
           </Link>
           {category && (
             <>
