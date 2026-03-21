@@ -328,6 +328,65 @@ describe("TypedKvCache", () => {
       expirationTtl: HARD_TTL_DEFAULT,
     });
   });
+
+  it("stale-on-error: propagates error when shouldServeStale returns false", async () => {
+    const mockKv = makeMockKv();
+    // Cached 2 hours ago, softTtl is 60 seconds → stale
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 99 }, 2 * 60 * 60 * 1000),
+    );
+
+    const notFoundError = {
+      _tag: "ResourceNotFound" as const,
+      message: "gone",
+    };
+    const fetchEffect = Effect.fail(notFoundError);
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromiseExit(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60, undefined, {
+          shouldServeStale: (err) =>
+            (err as { _tag: string })._tag !== "ResourceNotFound",
+        })
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result._tag).toBe("Failure");
+  });
+
+  it("stale-on-error: serves stale when shouldServeStale returns true", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 99 }, 2 * 60 * 60 * 1000),
+    );
+
+    const unavailableError = {
+      _tag: "UpstreamUnavailable" as const,
+      message: "PSD 429",
+    };
+    const fetchEffect = Effect.fail(unavailableError);
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromise(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60, undefined, {
+          shouldServeStale: (err) =>
+            (err as { _tag: string })._tag !== "ResourceNotFound",
+        })
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result).toEqual({ name: "stale", value: 99 });
+  });
 });
 
 describe("KvCacheService", () => {

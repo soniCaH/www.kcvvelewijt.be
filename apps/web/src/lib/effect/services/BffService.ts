@@ -4,6 +4,9 @@ import type { HttpApiError, HttpClientError } from "@effect/platform";
 import type { ParseError } from "effect/ParseResult";
 import {
   PsdApi,
+  type HttpServiceUnavailable,
+  type HttpBadGateway,
+  type HttpNotFound,
   type Match,
   type MatchDetail,
   type RankingEntry,
@@ -14,7 +17,10 @@ export type BffError =
   | HttpClientError.HttpClientError
   | ParseError
   | HttpApiError.HttpApiDecodeError
-  | Cause.TimeoutException;
+  | Cause.TimeoutException
+  | HttpServiceUnavailable
+  | HttpBadGateway
+  | HttpNotFound;
 
 export class BffService extends Context.Tag("BffService")<
   BffService,

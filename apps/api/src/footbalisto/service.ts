@@ -2,6 +2,13 @@ import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import {
+  UpstreamUnavailableError,
+  UpstreamClientError,
+  UpstreamDecodeError,
+  ResourceNotFoundError,
+  type BffError,
+} from "./errors";
+import {
   TeamStats,
   type TeamStats as TeamStatsType,
   type Match,
@@ -366,39 +373,22 @@ function extractId(item: unknown): string | number {
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
-export class FootbalistoServiceError extends Error {
-  readonly _tag = "FootbalistoServiceError" as const;
-  constructor(
-    message: string,
-    readonly status?: number,
-    readonly cause?: unknown,
-  ) {
-    super(message);
-    this.name = "FootbalistoServiceError";
-  }
-}
-
 export interface FootbalistoServiceInterface {
   readonly getTeamStats: (
     teamId: number,
-  ) => Effect.Effect<TeamStatsType, FootbalistoServiceError>;
+  ) => Effect.Effect<TeamStatsType, BffError>;
   readonly getTeamMatches: (
     teamId: number,
-  ) => Effect.Effect<readonly Match[], FootbalistoServiceError>;
-  readonly getNextMatches: () => Effect.Effect<
-    readonly Match[],
-    FootbalistoServiceError
-  >;
-  readonly getMatchById: (
-    matchId: number,
-  ) => Effect.Effect<Match, FootbalistoServiceError>;
+  ) => Effect.Effect<readonly Match[], BffError>;
+  readonly getNextMatches: () => Effect.Effect<readonly Match[], BffError>;
+  readonly getMatchById: (matchId: number) => Effect.Effect<Match, BffError>;
   readonly getMatchDetail: (
     matchId: number,
-  ) => Effect.Effect<MatchDetail, FootbalistoServiceError>;
+  ) => Effect.Effect<MatchDetail, BffError>;
   readonly getRanking: (
     teamId: number,
     logoCdnUrl: string,
-  ) => Effect.Effect<readonly RankingEntry[], FootbalistoServiceError>;
+  ) => Effect.Effect<readonly RankingEntry[], BffError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -406,41 +396,65 @@ export class FootbalistoService extends Context.Tag("FootbalistoService")<
   FootbalistoServiceInterface
 >() {}
 
+function classifyHttpError(
+  url: string,
+  status: number,
+  statusText: string,
+): BffError {
+  if (status === 404) {
+    return new ResourceNotFoundError({
+      message: `HTTP 404: ${statusText}`,
+      resourceType: "psd-resource",
+      resourceId: url,
+    });
+  }
+  if (status === 429 || status >= 500) {
+    return new UpstreamUnavailableError({
+      message: `HTTP ${status}: ${statusText}`,
+      status,
+    });
+  }
+  return new UpstreamClientError({
+    message: `HTTP ${status}: ${statusText}`,
+    status,
+    url,
+  });
+}
+
 function fetchJson<A, I>(
   url: string,
   schema: S.Schema<A, I>,
   headers: Record<string, string>,
-): Effect.Effect<A, FootbalistoServiceError> {
+): Effect.Effect<A, BffError> {
   return Effect.gen(function* () {
     const response = yield* Effect.tryPromise({
       try: () => fetch(url, { headers }),
       catch: (cause) =>
-        new FootbalistoServiceError(`Failed to fetch ${url}`, undefined, cause),
+        new UpstreamUnavailableError({
+          message: `Failed to fetch ${url}`,
+          cause,
+        }),
     });
 
     if (!response.ok) {
       return yield* Effect.fail(
-        new FootbalistoServiceError(
-          `HTTP ${response.status}: ${response.statusText}`,
-          response.status,
-        ),
+        classifyHttpError(url, response.status, response.statusText),
       );
     }
 
     const json = yield* Effect.tryPromise({
       try: () => response.json(),
       catch: (cause) =>
-        new FootbalistoServiceError("Failed to parse JSON", undefined, cause),
+        new UpstreamDecodeError({ message: "Failed to parse JSON", cause }),
     });
 
     return yield* S.decodeUnknown(schema)(json).pipe(
       Effect.mapError(
         (cause) =>
-          new FootbalistoServiceError(
-            "Schema validation failed",
-            undefined,
+          new UpstreamDecodeError({
+            message: "Schema validation failed",
             cause,
-          ),
+          }),
       ),
     );
   });
@@ -483,10 +497,7 @@ export const FootbalistoServiceLive = Layer.effect(
         Effect.ensuring(cache.increment(todayKey())),
       );
 
-    const getCurrentSeason = (): Effect.Effect<
-      PsdSeason,
-      FootbalistoServiceError
-    > =>
+    const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
       Effect.gen(function* () {
         const cacheKey = "psd:current-season-id";
         const cached = yield* cache.get(cacheKey);
@@ -510,7 +521,11 @@ export const FootbalistoServiceLive = Layer.effect(
         );
         if (!current)
           return yield* Effect.fail(
-            new FootbalistoServiceError("No active season found"),
+            new ResourceNotFoundError({
+              message: "No active season found",
+              resourceType: "season",
+              resourceId: "current",
+            }),
           );
         yield* cache.set(cacheKey, JSON.stringify(current), 60 * 60 * 24);
         return current;
