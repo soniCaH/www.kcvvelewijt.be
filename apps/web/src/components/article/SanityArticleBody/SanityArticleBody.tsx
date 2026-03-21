@@ -150,7 +150,13 @@ const components: PortableTextComponents = {
     image: ArticleImageBlock,
     articleImage: ArticleImageBlock,
   },
-  block: {},
+  block: {
+    blockquote: ({ children }) => (
+      <blockquote>
+        <p>{children}</p>
+      </blockquote>
+    ),
+  },
   marks: {
     link: ({ children, value }) => {
       const href: string = value?.href ?? "#";
@@ -186,7 +192,7 @@ export const SanityArticleBody = ({
         "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
         "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
-        "prose-blockquote:border-0 prose-blockquote:not-italic prose-blockquote:text-kcvv-gray-dark",
+        /* blockquote styles handled by .prose blockquote in globals.css */
         "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",
         className,
       )}
