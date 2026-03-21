@@ -139,7 +139,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         date={
           article.publishAt
             ? formatArticleDate(new Date(article.publishAt))
-            : ""
+            : undefined
         }
         category={primaryCategory}
         shareConfig={shareConfig}

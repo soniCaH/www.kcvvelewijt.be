@@ -78,19 +78,19 @@ export const ArticleHeader = ({
         <div className="w-full max-w-inner-lg mx-auto">
           {/* Category badge */}
           {category && (
-            <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-[10px] font-bold uppercase tracking-widest px-[10px] py-[3px] rounded-sm mb-4">
+            <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-xs font-bold uppercase tracking-widest px-[10px] py-[3px] rounded-sm mb-4">
               {category}
             </span>
           )}
 
-          {/* Title — matching homepage hero typography */}
+          {/* Title — intentional responsive clamp override: fluid sizing between mobile (1.75rem) and desktop (4rem) to match homepage hero */}
           <h1 className="font-title text-white! text-[clamp(1.75rem,5.5vw,4rem)]! font-black! leading-[1.02]! tracking-tight m-0 max-w-[75%]">
             {title}
           </h1>
 
           {/* Date + Author */}
           {(date || author) && (
-            <div className="flex items-center gap-4 mt-5 text-[13px] text-white/60">
+            <div className="flex items-center gap-4 mt-5 text-sm text-white/60">
               {date && (
                 <span className="flex items-center gap-1.5">
                   <span

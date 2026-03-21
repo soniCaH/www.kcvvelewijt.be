@@ -15,7 +15,7 @@ export interface ArticleMetadataProps {
   /** Article author name */
   author: string;
   /** Publication date (formatted string) */
-  date: string;
+  date?: string;
   /** Primary category for breadcrumb */
   category?: {
     name: string;
@@ -74,8 +74,8 @@ export const ArticleMetadata = ({
 
         {/* Right side: date, author, share */}
         <div className="flex items-center gap-4 text-xs text-gray-500">
-          <span>{date}</span>
-          <span>{author}</span>
+          {date && <span>{date}</span>}
+          {author && <span>{author}</span>}
 
           {shareConfig && (
             <div className="flex items-center gap-2">
