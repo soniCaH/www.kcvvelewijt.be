@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchesSliderSection } from "./MatchesSliderSection";
-import { mockMatches } from "@/components/home/UpcomingMatches/UpcomingMatches.mocks";
+import { mockMatches } from "@/components/match/match.mocks";
 
 const meta = {
   title: "Features/Homepage/MatchesSliderSection",
