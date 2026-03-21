@@ -157,7 +157,7 @@ describe("SectionStack", () => {
     expect(container.querySelector(".bg-kcvv-black")).not.toBeNull();
   });
 
-  it("does not apply -mt-px to any section (gradient eliminates seams)", () => {
+  it("does not apply -mt-px (SVG crispEdges eliminates seam)", () => {
     const { container } = render(
       <SectionStack
         sections={[

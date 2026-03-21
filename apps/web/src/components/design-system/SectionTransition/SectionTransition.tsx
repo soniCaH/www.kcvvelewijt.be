@@ -30,8 +30,7 @@ export interface SectionTransitionProps {
   className?: string;
 }
 
-// CSS color values for linear-gradient backgrounds. Using actual color values
-// (not Tailwind classes) because gradients require CSS color syntax.
+// CSS color values for SVG polygon fills.
 const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
   "gray-100": "#f3f4f6",
@@ -40,12 +39,36 @@ const BG_COLOR: Record<SectionBg, string> = {
   transparent: "transparent",
 };
 
+// SVG polygon points — exact same corners as the old clip-path polygons,
+// but rendered via SVG with shape-rendering="crispEdges" to eliminate
+// the anti-aliasing fringe that clip-path produces.
+// viewBox="0 0 100 100" + preserveAspectRatio="none" stretches to any aspect ratio.
+
+// TO color fills the lower triangle — FROM fills the upper triangle.
+const SVG_TO: Record<"left" | "right", string> = {
+  left: "100,0 100,100 0,100", // lower-right — diagonal ↙
+  right: "0,0 0,100 100,100", //  lower-left  — diagonal ↘
+};
+
+// FROM color fills the upper triangle — needed for double-diagonal inner halves.
+const SVG_FROM: Record<"left" | "right", string> = {
+  left: "0,0 100,0 0,100", // upper-left
+  right: "0,0 100,0 100,100", // upper-right
+};
+
+/** Shift SVG polygon points vertically by `dy` (for double-diagonal lower half). */
+function shiftY(points: string, dy: number): string {
+  return points
+    .split(" ")
+    .map((p) => {
+      const [x, y] = p.split(",");
+      return `${x},${Number(y) + dy}`;
+    })
+    .join(" ");
+}
+
 const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
-
-// Tiny blur zone (1px) around the 50% boundary to anti-alias the diagonal edge.
-const STOP_BEFORE = "calc(50% - 0.5px)";
-const STOP_AFTER = "calc(50% + 0.5px)";
 
 export function SectionTransition({
   from,
@@ -72,58 +95,86 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  // In overlap mode, FROM areas are transparent so the section content
-  // (e.g. carousel) shows through.
-  const fromColor = overlap !== "none" ? "transparent" : BG_COLOR[from];
+  const style: React.CSSProperties = { height, marginTop };
+  if (zIndex) style.zIndex = zIndex;
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
-    const midColor = BG_COLOR[via ?? to];
-    const wrapperStyle: React.CSSProperties = { height, marginTop };
-    if (zIndex) wrapperStyle.zIndex = zIndex;
-
+    const midColor = via ?? to;
+    const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
     return (
       <div
         aria-hidden="true"
         data-height={height}
         data-margin-top={marginTop}
-        className={cn("w-full", className)}
-        style={wrapperStyle}
+        className={cn("relative w-full", className)}
+        style={style}
       >
-        {/* First diagonal: from → via */}
-        <div
-          data-testid="st-sub"
-          style={{
-            height: DIAGONAL_HEIGHT,
-            background: `linear-gradient(to bottom ${direction}, ${fromColor} ${STOP_BEFORE}, ${midColor} ${STOP_AFTER})`,
-          }}
-        />
-        {/* Second diagonal: via → to (opposite direction) */}
-        <div
-          data-testid="st-sub"
-          style={{
-            height: DIAGONAL_HEIGHT,
-            background: `linear-gradient(to bottom ${opposite}, ${midColor} ${STOP_BEFORE}, ${BG_COLOR[to]} ${STOP_AFTER})`,
-          }}
-        />
+        {/* Single SVG spans both halves — no mid-seam gap possible. */}
+        <svg
+          viewBox="0 0 100 200"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full"
+        >
+          {/* Upper half (y 0–100): from → via */}
+          <polygon
+            data-testid="st-upper-from"
+            points={SVG_FROM[direction]}
+            fill={fromFill}
+            shapeRendering="crispEdges"
+          />
+          <polygon
+            data-testid="st-upper-to"
+            points={SVG_TO[direction]}
+            fill={BG_COLOR[midColor]}
+            shapeRendering="crispEdges"
+          />
+          {/* Lower half (y 100–200): via → to (opposite direction) */}
+          <polygon
+            data-testid="st-lower-from"
+            points={shiftY(SVG_FROM[opposite], 100)}
+            fill={BG_COLOR[midColor]}
+            shapeRendering="crispEdges"
+          />
+          <polygon
+            data-testid="st-lower-to"
+            points={shiftY(SVG_TO[opposite], 100)}
+            fill={BG_COLOR[to]}
+            shapeRendering="crispEdges"
+          />
+        </svg>
       </div>
     );
   }
 
-  const gradientStyle: React.CSSProperties = {
-    height,
-    marginTop,
-    background: `linear-gradient(to bottom ${direction}, ${fromColor} ${STOP_BEFORE}, ${BG_COLOR[to]} ${STOP_AFTER})`,
-  };
-  if (zIndex) gradientStyle.zIndex = zIndex;
+  const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
 
   return (
     <div
       aria-hidden="true"
       data-height={height}
       data-margin-top={marginTop}
-      className={cn("w-full", className)}
-      style={gradientStyle}
-    />
+      className={cn("relative w-full", className)}
+      style={style}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="absolute inset-0 w-full h-full"
+      >
+        <polygon
+          data-testid="st-from"
+          points={SVG_FROM[direction]}
+          fill={fromFill}
+          shapeRendering="crispEdges"
+        />
+        <polygon
+          data-testid="st-to"
+          points={SVG_TO[direction]}
+          fill={BG_COLOR[to]}
+          shapeRendering="crispEdges"
+        />
+      </svg>
+    </div>
   );
 }

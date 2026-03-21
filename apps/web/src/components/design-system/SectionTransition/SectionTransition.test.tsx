@@ -32,7 +32,7 @@ describe("SectionTransition", () => {
       expect(el.getAttribute("data-height")).toBe("clamp(2rem, 6vw, 5rem)");
     });
 
-    it("uses gradient background for direction=left (no clip-path)", () => {
+    it("renders SVG with crispEdges for direction=left", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -41,14 +41,20 @@ describe("SectionTransition", () => {
           direction="left"
         />,
       );
-      const el = container.firstChild as HTMLElement;
-      // Single element with gradient — no clip-path children
-      expect(el.querySelector("[style*='clip-path']")).toBeNull();
-      expect(el.style.background).toContain("linear-gradient");
-      expect(el.style.background).toContain("to bottom left");
+      const svg = container.querySelector("svg") as SVGElement;
+      expect(svg).not.toBeNull();
+      expect(svg.getAttribute("viewBox")).toBe("0 0 100 100");
+      expect(svg.getAttribute("preserveAspectRatio")).toBe("none");
+      // TO polygon: lower-right triangle (↙ diagonal) — same as old
+      // CLIP_PATH_TO["left"] = polygon(100% 0, 100% 100%, 0 100%)
+      const toPolygon = svg.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(toPolygon.getAttribute("points")).toBe("100,0 100,100 0,100");
+      expect(toPolygon.getAttribute("shape-rendering")).toBe("crispEdges");
     });
 
-    it("uses gradient background for direction=right (no clip-path)", () => {
+    it("renders SVG with crispEdges for direction=right", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -57,13 +63,18 @@ describe("SectionTransition", () => {
           direction="right"
         />,
       );
-      const el = container.firstChild as HTMLElement;
-      expect(el.querySelector("[style*='clip-path']")).toBeNull();
-      expect(el.style.background).toContain("linear-gradient");
-      expect(el.style.background).toContain("to bottom right");
+      const svg = container.querySelector("svg") as SVGElement;
+      expect(svg).not.toBeNull();
+      // TO polygon: lower-left triangle (↘ diagonal) — same as old
+      // CLIP_PATH_TO["right"] = polygon(0 0, 0 100%, 100% 100%)
+      const toPolygon = svg.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(toPolygon.getAttribute("points")).toBe("0,0 0,100 100,100");
+      expect(toPolygon.getAttribute("shape-rendering")).toBe("crispEdges");
     });
 
-    it("applies zero margin-top for overlap=none (gradient eliminates seam)", () => {
+    it("applies zero margin-top for overlap=none (no seam hacks needed)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -154,7 +165,7 @@ describe("SectionTransition", () => {
       );
     });
 
-    it("renders two sub-dividers for double-diagonal", () => {
+    it("renders single SVG with four polygons (no mid-seam)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -164,11 +175,16 @@ describe("SectionTransition", () => {
           via="white"
         />,
       );
-      const overlays = container.querySelectorAll("[data-testid='st-sub']");
-      expect(overlays).toHaveLength(2);
+      // Single SVG eliminates mid-seam between the two halves
+      const svgs = container.querySelectorAll("svg");
+      expect(svgs).toHaveLength(1);
+      // viewBox spans both halves: 0 0 100 200
+      expect(svgs[0].getAttribute("viewBox")).toBe("0 0 100 200");
+      const polygons = svgs[0].querySelectorAll("polygon");
+      expect(polygons).toHaveLength(4);
     });
 
-    it("sub-dividers use gradients with opposite directions", () => {
+    it("SVG polygons have correct points for direction=right", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -178,13 +194,29 @@ describe("SectionTransition", () => {
           via="white"
         />,
       );
-      const subs = container.querySelectorAll(
-        "[data-testid='st-sub']",
-      ) as NodeListOf<HTMLElement>;
-      // direction=right → first half gradient goes "to bottom right"
-      expect(subs[0].style.background).toContain("to bottom right");
-      // opposite=left → second half gradient goes "to bottom left"
-      expect(subs[1].style.background).toContain("to bottom left");
+      const svg = container.querySelector("svg") as SVGElement;
+      // Upper half: direction=right
+      // FROM upper-right: 0,0 100,0 100,100 → shifted to top half (y 0-100)
+      const upperFrom = svg.querySelector(
+        "[data-testid='st-upper-from']",
+      ) as SVGPolygonElement;
+      expect(upperFrom.getAttribute("points")).toBe("0,0 100,0 100,100");
+      // TO lower-left: 0,0 0,100 100,100
+      const upperTo = svg.querySelector(
+        "[data-testid='st-upper-to']",
+      ) as SVGPolygonElement;
+      expect(upperTo.getAttribute("points")).toBe("0,0 0,100 100,100");
+      // Lower half: opposite=left, shifted to y 100-200
+      // FROM upper-left: 0,100 100,100 0,200
+      const lowerFrom = svg.querySelector(
+        "[data-testid='st-lower-from']",
+      ) as SVGPolygonElement;
+      expect(lowerFrom.getAttribute("points")).toBe("0,100 100,100 0,200");
+      // TO lower-right: 100,100 100,200 0,200
+      const lowerTo = svg.querySelector(
+        "[data-testid='st-lower-to']",
+      ) as SVGPolygonElement;
+      expect(lowerTo.getAttribute("points")).toBe("100,100 100,200 0,200");
     });
 
     it("applies negative margin for overlap=half on double-diagonal", () => {
