@@ -104,12 +104,12 @@ const components: PortableTextComponents = {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
       if (!value.fileUrl) return null;
       return (
-        <div className="my-4">
+        <div className="my-6">
           <a
             href={value.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-kcvv-green-bright text-white rounded hover:bg-kcvv-green-darker transition-colors no-underline"
+            className="inline-flex items-center gap-2 rounded bg-kcvv-green-dark px-5 py-2.5 font-medium text-white no-underline transition-colors hover:bg-kcvv-green-hover-dark"
           >
             ↓ {value.label ?? "Download"}
           </a>
@@ -125,18 +125,26 @@ const components: PortableTextComponents = {
         alt?: string;
         width?: number;
         height?: number;
+        fullBleed?: boolean;
       };
     }) => {
       if (!value.asset?.url) return null;
+      const isFullBleed = value.fullBleed === true;
       return (
-        <figure className="my-6 overflow-hidden rounded">
+        <figure
+          className={cn(
+            "my-8 overflow-hidden rounded-lg",
+            isFullBleed &&
+              "full-bleed relative left-1/2 right-1/2 -mx-[50vw] w-screen rounded-none",
+          )}
+        >
           <Image
             src={value.asset.url}
             alt={value.alt ?? ""}
             width={value.width ?? 800}
             height={value.height ?? 450}
-            className="w-full h-auto rounded transition-transform duration-300 ease-in-out hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 720px"
+            className="h-auto w-full"
+            sizes={isFullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}
           />
         </figure>
       );
@@ -144,7 +152,7 @@ const components: PortableTextComponents = {
   },
   block: {
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-kcvv-green-bright pl-4 my-4 italic text-gray-600 not-italic">
+      <blockquote className="my-6 border-l-4 border-kcvv-green bg-kcvv-green-100 py-4 pl-6 pr-4 italic text-kcvv-gray">
         {children}
       </blockquote>
     ),
@@ -158,7 +166,7 @@ const components: PortableTextComponents = {
           href={href}
           target={isExternal ? "_blank" : undefined}
           rel={isExternal ? "noopener noreferrer" : undefined}
-          className="text-kcvv-green-bright hover:underline"
+          className="text-kcvv-green-dark underline decoration-kcvv-green/30 underline-offset-2 transition-colors hover:text-kcvv-green hover:decoration-kcvv-green"
         >
           {children}
         </a>
@@ -179,11 +187,13 @@ export const SanityArticleBody = ({
   return (
     <div
       className={cn(
-        "prose prose-lg max-w-none px-3 lg:px-0 py-3",
-        "prose-headings:font-bold prose-headings:text-gray-900",
-        "prose-a:text-kcvv-green-bright prose-a:no-underline hover:prose-a:underline",
-        "prose-blockquote:border-l-4 prose-blockquote:border-kcvv-green-bright prose-blockquote:not-italic prose-blockquote:text-gray-600",
-        "prose-table:w-full prose-th:bg-table-header-bg prose-th:text-left prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-table-border",
+        "prose prose-lg max-w-none px-3 py-3 lg:px-0",
+        "prose-headings:font-title prose-headings:font-bold prose-headings:text-kcvv-black",
+        "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
+        "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
+        "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
+        "prose-blockquote:border-kcvv-green prose-blockquote:bg-kcvv-green-100 prose-blockquote:text-kcvv-gray",
+        "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",
         className,
       )}
     >

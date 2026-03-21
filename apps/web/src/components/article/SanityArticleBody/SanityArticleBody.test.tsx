@@ -253,7 +253,7 @@ describe("SanityArticleBody htmlTable", () => {
     expect(scrollable.querySelector("tbody th")).toBeInTheDocument();
   });
 
-  it("does not render gradient or sticky classes when table does not overflow", () => {
+  it("does NOT render gradient or sticky classes when table does not overflow", () => {
     const { container } = render(
       <SanityArticleBody content={[makeHtmlTableBlock(SIMPLE_TABLE_HTML)]} />,
     );
@@ -267,5 +267,219 @@ describe("SanityArticleBody htmlTable", () => {
     expect(scrollable.className).not.toContain(
       "[&>table_td:first-child]:sticky",
     );
+  });
+});
+
+function makeTextBlock(
+  text: string,
+  style: string = "normal",
+): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: `block-${Math.random().toString(36).slice(2, 8)}`,
+    style,
+    children: [{ _type: "span", _key: "s1", text, marks: [] }],
+    markDefs: [],
+  } as unknown as PortableTextBlock;
+}
+
+function makeBlockquote(text: string): PortableTextBlock {
+  return makeTextBlock(text, "blockquote");
+}
+
+function makeLinkBlock(text: string, href: string): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: `block-${Math.random().toString(36).slice(2, 8)}`,
+    style: "normal",
+    children: [{ _type: "span", _key: "s1", text, marks: ["link1"] }],
+    markDefs: [{ _key: "link1", _type: "link", href }],
+  } as unknown as PortableTextBlock;
+}
+
+function makeFileAttachmentBlock(
+  label: string,
+  fileUrl: string,
+): PortableTextBlock {
+  return {
+    _type: "fileAttachment",
+    _key: "file1",
+    label,
+    fileUrl,
+  } as unknown as PortableTextBlock;
+}
+
+function makeImageBlock(
+  url: string,
+  opts: { alt?: string; fullBleed?: boolean } = {},
+): PortableTextBlock {
+  return {
+    _type: "image",
+    _key: "img1",
+    asset: { url },
+    alt: opts.alt ?? "",
+    width: 800,
+    height: 450,
+    fullBleed: opts.fullBleed,
+  } as unknown as PortableTextBlock;
+}
+
+describe("SanityArticleBody blockquote", () => {
+  it("renders blockquote with green accent border and background tint", () => {
+    const { container } = render(
+      <SanityArticleBody content={[makeBlockquote("A wise quote")]} />,
+    );
+
+    const blockquote = container.querySelector("blockquote");
+    expect(blockquote).toBeInTheDocument();
+    const classes = blockquote!.className;
+
+    // Uses design token green border
+    expect(classes).toContain("border-l-4");
+    expect(classes).toContain("border-kcvv-green");
+
+    // Has background tint
+    expect(classes).toContain("bg-kcvv-green-100");
+
+    // Does NOT use hardcoded green-bright
+    expect(classes).not.toContain("border-kcvv-green-bright");
+  });
+});
+
+describe("SanityArticleBody links", () => {
+  it("renders external link with design token color and underline decoration", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeLinkBlock("Visit site", "https://example.com")]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("https://example.com");
+    expect(link!.getAttribute("target")).toBe("_blank");
+
+    const classes = link!.className;
+    expect(classes).toContain("text-kcvv-green-dark");
+    expect(classes).toContain("underline");
+  });
+
+  it("renders internal link without target=_blank", () => {
+    const { container } = render(
+      <SanityArticleBody content={[makeLinkBlock("Home", "/news")]} />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("target")).toBeNull();
+  });
+});
+
+describe("SanityArticleBody file attachment", () => {
+  it("renders download button with dark green styling", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeFileAttachmentBlock(
+            "Download PDF",
+            "https://example.com/file.pdf",
+          ),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector(
+      "a[href='https://example.com/file.pdf']",
+    );
+    expect(link).toBeInTheDocument();
+
+    const classes = link!.className;
+    expect(classes).toContain("bg-kcvv-green-dark");
+    expect(classes).toContain("text-white");
+    expect(link!.textContent).toContain("Download PDF");
+  });
+
+  it("does not render when fileUrl is missing", () => {
+    const block = {
+      _type: "fileAttachment",
+      _key: "file1",
+      label: "No URL",
+    } as unknown as PortableTextBlock;
+
+    const { container } = render(<SanityArticleBody content={[block]} />);
+
+    expect(container.querySelector("a")).not.toBeInTheDocument();
+  });
+});
+
+describe("SanityArticleBody images", () => {
+  it("renders image constrained to content column by default", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeImageBlock("https://example.com/photo.jpg")]}
+      />,
+    );
+
+    const figure = container.querySelector("figure");
+    expect(figure).toBeInTheDocument();
+
+    const img = figure!.querySelector("img");
+    expect(img).toBeInTheDocument();
+    expect(img!.getAttribute("src")).toBe("https://example.com/photo.jpg");
+
+    // Default: constrained within content column (no breakout classes)
+    const figureClasses = figure!.className;
+    expect(figureClasses).not.toContain("full-bleed");
+    expect(figureClasses).not.toContain("-mx-");
+  });
+
+  it("renders full-bleed image with viewport-width breakout", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeImageBlock("https://example.com/hero.jpg", { fullBleed: true }),
+        ]}
+      />,
+    );
+
+    const figure = container.querySelector("figure");
+    expect(figure).toBeInTheDocument();
+
+    // Full-bleed: breaks out of content column symmetrically
+    const figureClasses = figure!.className;
+    expect(figureClasses).toContain("full-bleed");
+  });
+
+  it("does not render when asset url is missing", () => {
+    const block = {
+      _type: "image",
+      _key: "img1",
+      asset: {},
+    } as unknown as PortableTextBlock;
+
+    const { container } = render(<SanityArticleBody content={[block]} />);
+
+    expect(container.querySelector("figure")).not.toBeInTheDocument();
+  });
+});
+
+describe("SanityArticleBody typography", () => {
+  it("applies reading-optimized prose styles to wrapper", () => {
+    const { container } = render(
+      <SanityArticleBody content={[makeTextBlock("Hello world")]} />,
+    );
+
+    const wrapper = container.firstElementChild as HTMLElement;
+    const classes = wrapper.className;
+
+    // Uses prose for typography
+    expect(classes).toContain("prose");
+    expect(classes).toContain("prose-lg");
+
+    // Heading styles use title font
+    expect(classes).toContain("prose-headings:font-title");
+
+    // Links use dark green design token
+    expect(classes).toContain("prose-a:text-kcvv-green-dark");
   });
 });
