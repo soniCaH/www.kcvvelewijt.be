@@ -1,20 +1,21 @@
 /**
  * ArticleMetadata Component Stories
- * Shows article sidebar with author, date, tags, and social share
+ * Inline horizontal bar with breadcrumb, date, author, and share icons
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArticleMetadata } from "./ArticleMetadata";
+import { ArticleHeader } from "../ArticleHeader";
 
 const meta = {
   title: "Features/Articles/ArticleMetadata",
   component: ArticleMetadata,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
     docs: {
       description: {
         component:
-          "Article metadata sidebar with author, date, tags, and social share buttons. Features gradient border.",
+          "Article metadata bar with breadcrumb navigation, date, author, and icon-only share buttons. Replaces the legacy sidebar layout.",
       },
     },
   },
@@ -35,33 +36,28 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Default metadata sidebar
- * Shows author, date, tags, and social share
+ * Default metadata bar with category and share buttons
  */
 export const Default: Story = {
   args: {
-    author: "Jan Janssens",
+    author: "KCVV Elewijt",
     date: "15/01/2025",
-    tags: [
-      { name: "voetbal", href: "/tags/voetbal" },
-      { name: "overwinning", href: "/tags/overwinning" },
-      { name: "aploeg", href: "/tags/aploeg" },
-    ],
+    category: { name: "Eerste ploeg", href: "/news?category=eerste-ploeg" },
     shareConfig: {
       url: "https://kcvvelewijt.be/news/belangrijke-overwinning",
       title: "KCVV Elewijt behaalt belangrijke overwinning",
       twitterHandle: "@kcvve",
+      hashtags: ["voetbal", "kcvv"],
     },
   },
 };
 
 /**
- * Without tags
- * Shows metadata without tags section
+ * Without category — breadcrumb shows "News" only
  */
-export const WithoutTags: Story = {
+export const WithoutCategory: Story = {
   args: {
-    author: "Piet Pieters",
+    author: "KCVV Elewijt",
     date: "12/01/2025",
     shareConfig: {
       url: "https://kcvvelewijt.be/news/test",
@@ -72,96 +68,59 @@ export const WithoutTags: Story = {
 
 /**
  * Without share buttons
- * Shows metadata without social share
  */
 export const WithoutShare: Story = {
   args: {
-    author: "Marie Maes",
+    author: "KCVV Elewijt",
     date: "10/01/2025",
-    tags: [
-      { name: "jeugd", href: "/tags/jeugd" },
-      { name: "training", href: "/tags/training" },
-    ],
+    category: { name: "Jeugd", href: "/news?category=jeugd" },
   },
 };
 
 /**
- * Minimal (author and date only)
+ * Minimal — author and date only
  */
 export const Minimal: Story = {
   args: {
-    author: "Koen Koens",
+    author: "KCVV Elewijt",
     date: "08/01/2025",
   },
 };
 
 /**
- * Many tags
- * Shows how the component handles multiple tags
- */
-export const ManyTags: Story = {
-  args: {
-    author: "Redactie",
-    date: "20/01/2025",
-    tags: [
-      { name: "voetbal", href: "/tags/voetbal" },
-      { name: "aploeg", href: "/tags/aploeg" },
-      { name: "competitie", href: "/tags/competitie" },
-      { name: "overwinning", href: "/tags/overwinning" },
-      { name: "elewijt", href: "/tags/elewijt" },
-      { name: "thuis", href: "/tags/thuis" },
-    ],
-    shareConfig: {
-      url: "https://kcvvelewijt.be/news/test",
-      title: "Test Article",
-    },
-  },
-};
-
-/**
- * In article context (desktop sidebar)
- * Shows the metadata as it appears in the article layout
+ * In context below hero header
  */
 export const InContext: Story = {
   args: {
-    author: "Tom Tomassen",
+    author: "KCVV Elewijt",
     date: "18/01/2025",
-    tags: [
-      { name: "transfer", href: "/tags/transfer" },
-      { name: "nieuws", href: "/tags/nieuws" },
-    ],
+    category: { name: "Transfer", href: "/news?category=transfer" },
     shareConfig: {
       url: "https://kcvvelewijt.be/news/nieuwe-speler",
       title: "Nieuwe speler aangekondigd",
       twitterHandle: "@kcvve",
+      hashtags: ["transfer", "kcvv"],
     },
   },
   render: (args) => (
-    <div className="max-w-inner-lg mx-auto">
-      <div className="flex flex-col lg:flex-row-reverse gap-4">
-        {/* Metadata Sidebar */}
-        <div className="lg:w-[20rem]">
-          <ArticleMetadata {...args} />
-        </div>
-
-        {/* Article Body (simulated) */}
-        <div className="flex-1 p-3">
-          <p className="text-sm mb-4">
-            KCVV Elewijt heeft vandaag een nieuwe speler aangekondigd voor het
-            komende seizoen. De transfer wordt gezien als een belangrijke
-            versterking voor het team.
-          </p>
-          <p className="text-sm mb-4">
-            De speler komt over van een andere club in de regio en heeft al
-            ervaring in de competitie. Meer details worden binnenkort
-            bekendgemaakt.
-          </p>
-          <p className="text-sm">
-            De club is verheugd om deze nieuwe aanwinst te verwelkomen en kijkt
-            uit naar de samenwerking.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white">
+      <ArticleHeader
+        title="Nieuwe speler aangekondigd"
+        imageUrl="https://picsum.photos/1120/560?random=6"
+        imageAlt="New player"
+      />
+      <ArticleMetadata {...args} />
+      <main className="max-w-inner-lg mx-auto px-6 py-8">
+        <p className="text-gray-700 mb-4">
+          KCVV Elewijt heeft vandaag een nieuwe speler aangekondigd voor het
+          komende seizoen. De transfer wordt gezien als een belangrijke
+          versterking voor het team.
+        </p>
+        <p className="text-gray-700">
+          De speler komt over van een andere club in de regio en heeft al
+          ervaring in de competitie.
+        </p>
+      </main>
     </div>
   ),
 };

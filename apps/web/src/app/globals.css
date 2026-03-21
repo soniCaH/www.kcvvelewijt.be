@@ -344,18 +344,6 @@ blockquote::before {
   content: '';
 }
 
-/* Article Metadata Border Gradient */
-.article-metadata-border {
-  border-width: 1px;
-  border-image-slice: 0 0 1 0;
-  border-image-source: linear-gradient(to right, rgba(74, 207, 82, 0.5), #FFF);
-}
-
-@media (min-width: 960px) {
-  .article-metadata-border {
-    border-image-slice: 0 0 1 1;
-  }
-}
 
 /* ===== Phase 4: Mobile Optimizations ===== */
 

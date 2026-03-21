@@ -2,133 +2,108 @@
 
 /**
  * ArticleMetadata Component
- * Sidebar with author, date, tags, and social share buttons
- * Matches Gatsby visual: gradient border, small font, desktop sidebar layout
+ * Inline horizontal bar with breadcrumb navigation, date, author, and share icons
  */
 
 import Link from "next/link";
 import { Icon } from "@/components/design-system";
-import { Clock, Tag, Facebook, Twitter } from "@/lib/icons";
+import { Facebook, Twitter } from "@/lib/icons";
 import { FacebookShareButton, TwitterShareButton } from "react-share";
 import { cn } from "@/lib/utils/cn";
 
 export interface ArticleMetadataProps {
-  /**
-   * Article author name
-   */
+  /** Article author name */
   author: string;
-  /**
-   * Publication date (formatted string)
-   */
-  date: string;
-  /**
-   * Article tags with links
-   */
-  tags?: Array<{
+  /** Publication date (formatted string) */
+  date?: string;
+  /** Primary category for breadcrumb */
+  category?: {
     name: string;
     href: string;
-  }>;
-  /**
-   * Share configuration
-   */
+  };
+  /** Share configuration */
   shareConfig?: {
     url: string;
     title: string;
     twitterHandle?: string;
+    hashtags?: string[];
   };
-  /**
-   * Additional CSS classes
-   */
+  /** Additional CSS classes */
   className?: string;
 }
 
 /**
- * Article metadata sidebar component
- *
- * Visual specifications (matching Gatsby):
- * - Font-size: 0.75rem (12px)
- * - Border: Gradient border-image from green to white
- * - Mobile: Bottom border only, full width
- * - Desktop: Left + bottom border, max-width 20rem, flex column
- * - Padding: 0.75rem (12px)
- * - Margin-top: 1rem
- * - Tags: Clickable with # prefix
- * - Social share: Facebook (blue) and Twitter (light blue)
+ * Article metadata bar — horizontal layout below the hero.
+ * Breadcrumb left, date + author + share icons right.
  */
 export const ArticleMetadata = ({
   author,
   date,
-  tags = [],
+  category,
   shareConfig,
   className,
 }: ArticleMetadataProps) => {
   return (
-    <section
+    <nav
+      aria-label="Article info"
       className={cn(
-        "article-metadata-border",
-        "relative w-full mt-4 mb-3 p-3 text-xs",
-        // Mobile: bottom border only
-        "border-b",
-        // Desktop: left + bottom border, max-width, flex column, no shrink, self-start
-        "lg:border-l lg:max-w-[20rem] lg:flex lg:flex-col lg:shrink-0 lg:self-start",
+        "w-full border-b border-gray-200 py-3 px-6 text-sm text-gray-600",
         className,
       )}
     >
-      {/* Author */}
-      <div className="mb-2">
-        Geschreven door <strong>{author}</strong>.
-      </div>
-
-      {/* Date and Tags */}
-      <div className="flex justify-between flex-wrap lg:flex-col">
-        {/* Date */}
-        <span className="flex items-center gap-1 mb-2">
-          <Icon icon={Clock} size="xs" />
-          {date}
-        </span>
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <span className="flex items-center gap-1 flex-wrap mb-2">
-            <Icon icon={Tag} size="xs" />
-            {tags.map((tag, i) => (
+      <div className="w-full max-w-inner-lg mx-auto flex flex-wrap items-center justify-between gap-y-2">
+        {/* Breadcrumb — left */}
+        <div className="flex items-center gap-1.5">
+          <Link href="/news" className="text-kcvv-green-bright hover:underline">
+            Nieuws
+          </Link>
+          {category && (
+            <>
+              <span className="text-gray-400" aria-hidden="true">
+                ›
+              </span>
               <Link
-                key={i}
-                href={tag.href}
-                className="text-kcvv-green-bright hover:underline no-underline"
+                href={category.href}
+                className="text-kcvv-green-bright hover:underline"
               >
-                #{tag.name}
+                {category.name}
               </Link>
-            ))}
-          </span>
-        )}
-      </div>
-
-      {/* Social Share */}
-      {shareConfig && (
-        <div className="mt-4 lg:mt-2">
-          <span className="block mb-2">Delen op:</span>
-          <div className="flex flex-col gap-2">
-            <FacebookShareButton
-              url={shareConfig.url}
-              className="flex items-center gap-2 px-3 py-2 border border-[#3b5998] rounded text-[#3b5998] hover:bg-[#3b5998] hover:text-white transition-colors text-xs font-bold uppercase"
-            >
-              <Icon icon={Facebook} size="xs" />
-              Facebook
-            </FacebookShareButton>
-            <TwitterShareButton
-              url={shareConfig.url}
-              title={shareConfig.title}
-              via={shareConfig.twitterHandle?.replace("@", "")}
-              hashtags={tags.map((tag) => tag.name)}
-              className="flex items-center gap-2 px-3 py-2 border border-[#1da1f2] rounded text-[#1da1f2] hover:bg-[#1da1f2] hover:text-white transition-colors text-xs font-bold uppercase"
-            >
-              <Icon icon={Twitter} size="xs" />
-              Twitter
-            </TwitterShareButton>
-          </div>
+            </>
+          )}
         </div>
-      )}
-    </section>
+
+        {/* Right side: date, author, share */}
+        <div className="flex items-center gap-4 text-xs text-gray-500">
+          {date && <span>{date}</span>}
+          {author && <span>{author}</span>}
+
+          {shareConfig && (
+            <div className="flex items-center gap-2">
+              <span className="sr-only md:not-sr-only text-gray-400">
+                Delen:
+              </span>
+              {/* Facebook brand blue #3b5998 — third-party brand color exception */}
+              <FacebookShareButton
+                url={shareConfig.url}
+                aria-label="Delen op Facebook"
+                className="text-gray-400 hover:text-[#3b5998] transition-colors"
+              >
+                <Icon icon={Facebook} size="xs" />
+              </FacebookShareButton>
+              <TwitterShareButton
+                url={shareConfig.url}
+                title={shareConfig.title}
+                via={shareConfig.twitterHandle?.replace("@", "")}
+                hashtags={shareConfig.hashtags}
+                aria-label="Delen op X"
+                className="text-gray-400 hover:text-kcvv-black transition-colors"
+              >
+                <Icon icon={Twitter} size="xs" />
+              </TwitterShareButton>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 };
