@@ -7,6 +7,8 @@ import {
 import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "../../sanity/queries/teams";
 import {
   ARTICLES_QUERY,
+  ARTICLE_TAGS_QUERY,
+  ARTICLES_PAGINATED_QUERY,
   ARTICLE_BY_SLUG_QUERY,
 } from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
@@ -83,7 +85,7 @@ export interface SanityTeam {
   contactInfo: unknown;
 }
 
-export interface SanityArticle {
+export interface SanityArticleListItem {
   _id: string;
   title: string;
   slug: { current: string };
@@ -91,6 +93,9 @@ export interface SanityArticle {
   featured: boolean;
   tags: string[];
   coverImageUrl: string | null;
+}
+
+export interface SanityArticle extends SanityArticleListItem {
   body: unknown;
   relatedArticles?: SanityArticle[];
 }
@@ -185,6 +190,12 @@ export interface SanityServiceInterface {
   readonly getTeams: () => Effect.Effect<SanityTeam[]>;
   readonly getTeamBySlug: (slug: string) => Effect.Effect<SanityTeam | null>;
   readonly getArticles: () => Effect.Effect<SanityArticle[]>;
+  readonly getArticleTags: () => Effect.Effect<string[]>;
+  readonly getArticlesPaginated: (params: {
+    offset: number;
+    limit: number;
+    category?: string;
+  }) => Effect.Effect<SanityArticleListItem[]>;
   readonly getArticleBySlug: (
     slug: string,
   ) => Effect.Effect<SanityArticle | null>;
@@ -287,6 +298,13 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
   getTeamBySlug: (slug) =>
     fetchGroq<SanityTeam | null>(TEAM_BY_SLUG_QUERY, { slug }),
   getArticles: () => fetchGroq<SanityArticle[]>(ARTICLES_QUERY),
+  getArticleTags: () => fetchGroq<string[]>(ARTICLE_TAGS_QUERY),
+  getArticlesPaginated: ({ offset, limit, category }) =>
+    fetchGroq<SanityArticleListItem[]>(ARTICLES_PAGINATED_QUERY, {
+      offset,
+      limit,
+      category: category ?? "",
+    }),
   getArticleBySlug: (slug) =>
     fetchGroq<SanityArticle | null>(ARTICLE_BY_SLUG_QUERY, { slug }),
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
