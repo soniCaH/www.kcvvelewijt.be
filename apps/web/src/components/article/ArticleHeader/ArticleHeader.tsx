@@ -76,9 +76,9 @@ export const ArticleHeader = ({
       {/* Content overlay */}
       <div className="absolute inset-0 flex flex-col justify-end pb-10 pt-6 px-6 md:px-10 lg:px-12">
         <div className="w-full max-w-inner-lg mx-auto">
-          {/* Category badge */}
+          {/* Category badge — px-2.5 (10px) matches token, py-[3px] sits between py-0.5 (2px) and py-1 (4px) for optical alignment */}
           {category && (
-            <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-xs font-bold uppercase tracking-widest px-[10px] py-[3px] rounded-sm mb-4">
+            <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-xs font-bold uppercase tracking-widest px-2.5 py-[3px] rounded-sm mb-4">
               {category}
             </span>
           )}

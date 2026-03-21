@@ -82,6 +82,7 @@ export const ArticleMetadata = ({
               <span className="sr-only md:not-sr-only text-gray-400">
                 Delen:
               </span>
+              {/* Facebook brand blue #3b5998 — third-party brand color exception */}
               <FacebookShareButton
                 url={shareConfig.url}
                 aria-label="Delen op Facebook"
