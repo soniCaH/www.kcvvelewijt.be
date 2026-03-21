@@ -24,26 +24,26 @@ export const getRankingHandler = (
   const cacheKey = `ranking:team:${teamId}`;
   const fetchRanking = Effect.gen(function* () {
     const service = yield* FootbalistoService;
-    return yield* service.getRanking(teamId, logoCdnUrl);
+    const entries = yield* service.getRanking(teamId, logoCdnUrl);
+    if (entries.length === 0) {
+      return yield* new ResourceNotFoundError({
+        message: "No ranking data found",
+        resourceType: "ranking",
+        resourceId: teamId,
+      });
+    }
+    return entries;
   });
 
-  return rankingCache
-    .getOrFetch(cacheKey, fetchRanking, TTL.RANKING, undefined, {
+  return rankingCache.getOrFetch(
+    cacheKey,
+    fetchRanking,
+    TTL.RANKING,
+    undefined,
+    {
       shouldServeStale,
-    })
-    .pipe(
-      Effect.flatMap((entries) =>
-        entries.length === 0
-          ? Effect.fail(
-              new ResourceNotFoundError({
-                message: "No ranking data found",
-                resourceType: "ranking",
-                resourceId: teamId,
-              }),
-            )
-          : Effect.succeed(entries),
-      ),
-    );
+    },
+  );
 };
 
 export const RankingApiLive = HttpApiBuilder.group(
