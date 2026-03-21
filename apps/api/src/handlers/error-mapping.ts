@@ -14,6 +14,8 @@ export function mapBffErrorToHttpError(error: BffError): HttpApiError {
       return new HttpServiceUnavailable({
         error: "Service temporarily unavailable",
       });
+    case "UpstreamClient":
+      return new HttpBadGateway({ error: "Bad gateway" });
     case "UpstreamDecode":
       return new HttpBadGateway({ error: "Bad gateway" });
     case "ResourceNotFound":

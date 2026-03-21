@@ -3,6 +3,7 @@ import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import {
   UpstreamUnavailableError,
+  UpstreamClientError,
   UpstreamDecodeError,
   ResourceNotFoundError,
   type BffError,
@@ -407,9 +408,16 @@ function classifyHttpError(
       resourceId: url,
     });
   }
-  return new UpstreamUnavailableError({
+  if (status === 429 || status >= 500) {
+    return new UpstreamUnavailableError({
+      message: `HTTP ${status}: ${statusText}`,
+      status,
+    });
+  }
+  return new UpstreamClientError({
     message: `HTTP ${status}: ${statusText}`,
     status,
+    url,
   });
 }
 
