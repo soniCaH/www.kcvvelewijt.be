@@ -95,7 +95,14 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  const style: React.CSSProperties = { height, marginTop };
+  // -1px bottom margin pulls the next section up to cover any sub-pixel gap
+  // caused by fractional pixel heights from clamp(). The overlap is invisible
+  // because both the SVG's bottom edge and the next section share the TO color.
+  const style: React.CSSProperties = {
+    height,
+    marginTop,
+    marginBottom: "-1px",
+  };
   if (zIndex) style.zIndex = zIndex;
 
   if (isDouble) {
