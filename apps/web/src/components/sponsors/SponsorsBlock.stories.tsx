@@ -7,7 +7,7 @@ import { Sponsors, type Sponsor } from "./Sponsors";
  * Sponsors component directly with representative fixture data.
  */
 const meta = {
-  title: "Features/Sponsors/SponsorsBlock",
+  title: "Features/Sponsors/Sponsors",
   component: Sponsors,
   tags: ["autodocs"],
   parameters: {
