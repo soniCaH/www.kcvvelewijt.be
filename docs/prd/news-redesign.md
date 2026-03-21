@@ -46,53 +46,53 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 
 ### Phase 1 — NewsCard relocation + listing variant
 
-- [ ] `NewsCard` moved from `src/components/home/LatestNews/NewsCard.tsx` to `src/components/article/NewsCard/NewsCard.tsx` with barrel export
-- [ ] Homepage `LatestNews` imports NewsCard from new location without breakage
-- [ ] New `variant: "listing"` — lighter card style (white/light background, image on top, title + date + badge below) suitable for dense archive grids
-- [ ] `listing` variant handles missing images gracefully (fallback pattern/color, not blank)
-- [ ] Storybook stories updated: title `Features/Articles/NewsCard`, all variants (standard, featured, listing) documented
-- [ ] NewsCard tests updated for new variant
-- [ ] `/news` page renders using NewsCard `listing` variant in simple 3-col grid (replacing ArticleCard)
-- [ ] `article/index.ts` barrel exports NewsCard
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [x] `NewsCard` moved from `src/components/home/LatestNews/NewsCard.tsx` to `src/components/article/NewsCard/NewsCard.tsx` with barrel export
+- [x] Homepage `LatestNews` imports NewsCard from new location without breakage
+- [x] New `variant: "listing"` — lighter card style (white/light background, image on top, title + date + badge below) suitable for dense archive grids
+- [x] `listing` variant handles missing images gracefully (fallback pattern/color, not blank)
+- [x] Storybook stories updated: title `Features/Articles/NewsCard`, all variants (standard, featured, listing) documented
+- [x] NewsCard tests updated for new variant
+- [x] `/news` page renders using NewsCard `listing` variant in simple 3-col grid (replacing ArticleCard)
+- [x] `article/index.ts` barrel exports NewsCard
+- [x] `pnpm --filter @kcvv/web check-all` passes
 
 ### Phase 2 — News listing page redesign
 
-- [ ] PageTitle removed from `/news`
-- [ ] Top section: `2fr | 1fr` featured split — article 1 as `featured` variant, articles 2–3 as `standard` variant stacked right (reusing homepage LatestNews grid pattern)
-- [ ] Below featured: 3-column grid of `listing` variant cards
-- [ ] Category filtering: pill-style tabs using existing `FilterTabs` + `CategoryFilters` components — dynamically derived from article tags (as today, editor controls tag list in Sanity)
-- [ ] Sticky filter bar: filter pills stick to top of viewport when scrolled past, with appropriate z-index and background
-- [ ] Infinite scroll: Intersection Observer triggers Next.js Server Action to fetch next batch
-- [ ] Initial server-rendered batch: 3 featured + 6 grid = 9 articles
-- [ ] Subsequent batches: 6 articles each, appended as uniform grid rows (no featured treatment)
-- [ ] Loading state: skeleton cards or spinner while fetching next batch
-- [ ] Empty state: message when no articles match selected category
-- [ ] Category changes reset scroll position and article list
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [x] PageTitle removed from `/news`
+- [x] Top section: `2fr | 1fr` featured split — article 1 as `featured` variant, articles 2–3 as `standard` variant stacked right (reusing homepage LatestNews grid pattern)
+- [x] Below featured: 3-column grid of `listing` variant cards
+- [x] Category filtering: pill-style tabs using existing `FilterTabs` + `CategoryFilters` components — dynamically derived from article tags (as today, editor controls tag list in Sanity)
+- [x] Sticky filter bar: filter pills stick to top of viewport when scrolled past, with appropriate z-index and background
+- [x] Infinite scroll: Intersection Observer triggers Next.js Server Action to fetch next batch
+- [x] Initial server-rendered batch: 3 featured + 6 grid = 9 articles
+- [x] Subsequent batches: 6 articles each, appended as uniform grid rows (no featured treatment)
+- [x] Loading state: skeleton cards or spinner while fetching next batch
+- [x] Empty state: message when no articles match selected category
+- [x] Category changes reset scroll position and article list
+- [x] `pnpm --filter @kcvv/web check-all` passes
 
 ### Phase 3 — Article detail page redesign
 
-- [ ] Full-bleed hero image with dark gradient overlay and title text (matching NewsCard `featured` aesthetic)
-- [ ] Hero fallback when no cover image: solid dark background with title (no green pattern)
-- [ ] Metadata bar below hero: breadcrumb ("News > {Category}") left-aligned, date + author + share icons right-aligned
-- [ ] Breadcrumb category links back to `/news?category={slug}`
-- [ ] No sidebar — single-column layout for article body
-- [ ] Share buttons restyled to match new design language
-- [ ] ArticleHeader component redesigned in-place (not new component)
-- [ ] ArticleMetadata redesigned as inline horizontal bar (not sidebar)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [x] Full-bleed hero image with dark gradient overlay and title text (matching NewsCard `featured` aesthetic)
+- [x] Hero fallback when no cover image: solid dark background with title (no green pattern)
+- [x] Metadata bar below hero: breadcrumb ("News > {Category}") left-aligned, date + author + share icons right-aligned
+- [x] Breadcrumb category links back to `/news?category={slug}`
+- [x] No sidebar — single-column layout for article body
+- [x] Share buttons restyled to match new design language
+- [x] ArticleHeader component redesigned in-place (not new component)
+- [x] ArticleMetadata redesigned as inline horizontal bar (not sidebar)
+- [x] `pnpm --filter @kcvv/web check-all` passes
 
 ### Phase 4 — Article body content restyling
 
-- [ ] `SanityArticleBody` Portable Text renderers updated to match new design language
-- [ ] Images: constrained to content column by default; optional full-bleed breakout (edge-to-edge viewport width) for editorial emphasis — replaces the old `-mr-80` sidebar-era hack
-- [ ] Blockquotes: restyle with design tokens (not hardcoded green border)
-- [ ] Tables: restyle with design tokens
-- [ ] Links: consistent styling with rest of site
-- [ ] File attachments: restyle download button
-- [ ] Typography: review heading hierarchy, paragraph spacing, line-height for reading comfort
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [x] `SanityArticleBody` Portable Text renderers updated to match new design language
+- [x] Images: constrained to content column by default; optional full-bleed breakout (edge-to-edge viewport width) for editorial emphasis — replaces the old `-mr-80` sidebar-era hack
+- [x] Blockquotes: restyle with design tokens (not hardcoded green border)
+- [x] Tables: restyle with design tokens
+- [x] Links: consistent styling with rest of site
+- [x] File attachments: restyle download button
+- [x] Typography: review heading hierarchy, paragraph spacing, line-height for reading comfort
+- [x] `pnpm --filter @kcvv/web check-all` passes
 
 ### Phase 5 — Cleanup
 
@@ -110,11 +110,11 @@ None. All data flows (Sanity articles, tags) already exist. The infinite scroll 
 
 ## 7. Open Questions
 
-- [ ] **Sanity query for paginated articles:** Current `getArticles()` fetches all articles at once and paginates in-memory. Infinite scroll needs cursor-based or offset/limit Sanity GROQ queries for efficiency. — Resolved during Phase 2 implementation.
+- [x] **Sanity query for paginated articles:** Current `getArticles()` fetches all articles at once and paginates in-memory. Infinite scroll needs cursor-based or offset/limit Sanity GROQ queries for efficiency. — **Resolved during Phase 2 implementation.**
 - [x] **Category list source:** Categories remain dynamically derived from article tags (as today). The editor controls which tags exist in Sanity; the filter pills show whatever tags articles have. The editor will reduce the tag list themselves. — **Resolved: keep dynamic, no code changes needed.**
-- [ ] **Listing card visual design:** The `listing` variant needs concrete visual specs (colors, spacing, typography). Use `/design-an-interface` during Phase 1 to finalize. — Resolved during Phase 1.
+- [x] **Listing card visual design:** The `listing` variant needs concrete visual specs (colors, spacing, typography). Use `/design-an-interface` during Phase 1 to finalize. — **Resolved during Phase 1.**
 - [x] **Body image treatment (Phase 4):** Constrain images to content column width by default. Add a full-viewport-width breakout option for editorial emphasis — images break out symmetrically to both left and right viewport margins, outside the article container. — **Resolved: constrain default + optional full-bleed breakout.**
-- [ ] **Article detail hero aspect ratio:** What aspect ratio for the full-bleed hero? 16:9? 21:9 (cinematic)? Match the NewsCard featured 3:2? — Resolved during Phase 3 implementation.
+- [x] **Article detail hero aspect ratio:** What aspect ratio for the full-bleed hero? 16:9? 21:9 (cinematic)? Match the NewsCard featured 3:2? — **Resolved during Phase 3 implementation.**
 
 ## 8. Discovered Unknowns (filled during implementation)
 
