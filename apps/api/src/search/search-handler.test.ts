@@ -1,9 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
 import { handleSearch, MIN_SCORE } from "./search-handler";
-import { EmbeddingService, type EmbeddingServiceInterface } from "./embedding";
+import {
+  EmbeddingService,
+  EmbeddingError,
+  type EmbeddingServiceInterface,
+} from "./embedding";
 import {
   VectorizeService,
+  VectorizeError,
   type VectorizeServiceInterface,
   type VectorizeMatch,
 } from "./vectorize";
@@ -132,6 +137,49 @@ describe("handleSearch", () => {
     expect(ids, `MIN_SCORE is ${MIN_SCORE}`).not.toContain("below");
     expect(ids, `MIN_SCORE is ${MIN_SCORE}`).toContain("at");
     expect(ids, `MIN_SCORE is ${MIN_SCORE}`).toContain("above");
+  });
+
+  it("propagates EmbeddingError when embed fails", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        handleSearch({ query: "test", limit: 5 }).pipe(
+          Effect.provide(
+            Layer.succeed(EmbeddingService, {
+              embed: () =>
+                Effect.fail(new EmbeddingError("AI service unavailable")),
+            }),
+          ),
+          Effect.provide(
+            Layer.succeed(VectorizeService, makeVectorizeMock([])),
+          ),
+        ),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("EmbeddingError");
+    }
+  });
+
+  it("propagates VectorizeError when query fails", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        handleSearch({ query: "test", limit: 5 }).pipe(
+          Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+          Effect.provide(
+            Layer.succeed(VectorizeService, {
+              upsert: () => Effect.succeed(undefined),
+              query: () =>
+                Effect.fail(new VectorizeError("Vectorize unavailable")),
+            }),
+          ),
+        ),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("VectorizeError");
+    }
   });
 
   it("passes type filter to Vectorize query", async () => {

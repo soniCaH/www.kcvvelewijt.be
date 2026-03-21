@@ -12,6 +12,10 @@ import {
   type FootbalistoServiceInterface,
 } from "../footbalisto/service";
 import type { BffError } from "../footbalisto/errors";
+import {
+  UpstreamUnavailableError,
+  ResourceNotFoundError,
+} from "../footbalisto/errors";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -38,7 +42,9 @@ const baseDetail: MatchDetail = {
   hasReport: true,
 };
 
-function makeServiceMock(): FootbalistoServiceInterface {
+function makeServiceMock(
+  overrides: Partial<FootbalistoServiceInterface> = {},
+): FootbalistoServiceInterface {
   return {
     getTeamStats: () => Effect.die("not needed"),
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
@@ -46,6 +52,7 @@ function makeServiceMock(): FootbalistoServiceInterface {
     getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
+    ...overrides,
   };
 }
 
@@ -63,12 +70,14 @@ function provide<A>(
     BffError,
     FootbalistoService | KvCacheService | WorkerEnvTag
   >,
+  overrides: Partial<FootbalistoServiceInterface> = {},
 ) {
   return effect.pipe(
-    Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+    Effect.provide(
+      Layer.succeed(FootbalistoService, makeServiceMock(overrides)),
+    ),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
     Effect.provide(testEnvLayer),
-    Effect.orDie,
   );
 }
 
@@ -79,6 +88,26 @@ describe("getMatchesByTeamHandler", () => {
     expect(result[0]?.status).toBe("finished");
     expect(result[0]?.home_team.name).toBe("KCVV Elewijt");
   });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getMatchesByTeamHandler(1), {
+          getTeamMatches: () =>
+            Effect.fail(
+              new UpstreamUnavailableError({
+                message: "PSD returned 503",
+                status: 503,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
 });
 
 describe("getNextMatchesHandler", () => {
@@ -86,6 +115,26 @@ describe("getNextMatchesHandler", () => {
     const result = await Effect.runPromise(provide(getNextMatchesHandler()));
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
+  });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getNextMatchesHandler(), {
+          getNextMatches: () =>
+            Effect.fail(
+              new UpstreamUnavailableError({
+                message: "All teams failed",
+                status: 503,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
   });
 });
 
@@ -129,6 +178,47 @@ describe("getMatchDetailHandler", () => {
     );
     expect(detailCall?.[2]).toBe(HARD_TTL_DEFAULT);
   });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getMatchDetailHandler(99), {
+          getMatchDetail: () =>
+            Effect.fail(
+              new UpstreamUnavailableError({
+                message: "PSD returned 503",
+                status: 503,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
+  it("propagates ResourceNotFoundError for unknown match", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getMatchDetailHandler(999), {
+          getMatchDetail: () =>
+            Effect.fail(
+              new ResourceNotFoundError({
+                message: "Match not found",
+                resourceType: "match",
+                resourceId: 999,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
 });
 
 describe("getMatchByIdHandler", () => {
@@ -136,7 +226,6 @@ describe("getMatchByIdHandler", () => {
     const result = await Effect.runPromise(
       getMatchByIdHandler(99).pipe(
         Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
-        Effect.orDie,
       ),
     );
     expect(result.id).toBe(99);

@@ -8,6 +8,7 @@ import {
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import type { RankingEntry } from "@kcvv/api-contract";
+import { UpstreamUnavailableError } from "../footbalisto/errors";
 
 const rankingEntries: readonly RankingEntry[] = [
   {
@@ -61,21 +62,55 @@ describe("getRankingHandler", () => {
     expect(result[0]?.points).toBe(48);
   });
 
-  it("returns empty array when service returns empty", async () => {
+  it("fails with ResourceNotFoundError when service returns empty ranking", async () => {
     const result = await Effect.runPromise(
-      getRankingHandler(1, "https://cdn.example.com").pipe(
-        Effect.provide(
-          Layer.succeed(
-            FootbalistoService,
-            makeServiceMock({
-              getRanking: () => Effect.succeed([]),
-            }),
+      Effect.either(
+        getRankingHandler(1, "https://cdn.example.com").pipe(
+          Effect.provide(
+            Layer.succeed(
+              FootbalistoService,
+              makeServiceMock({
+                getRanking: () => Effect.succeed([]),
+              }),
+            ),
           ),
+          Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+          Effect.provide(testEnvLayer),
         ),
-        Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
-        Effect.provide(testEnvLayer),
       ),
     );
-    expect(result).toHaveLength(0);
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        getRankingHandler(1, "https://cdn.example.com").pipe(
+          Effect.provide(
+            Layer.succeed(
+              FootbalistoService,
+              makeServiceMock({
+                getRanking: () =>
+                  Effect.fail(
+                    new UpstreamUnavailableError({
+                      message: "PSD returned 503",
+                      status: 503,
+                    }),
+                  ),
+              }),
+            ),
+          ),
+          Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+          Effect.provide(testEnvLayer),
+        ),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
   });
 });
