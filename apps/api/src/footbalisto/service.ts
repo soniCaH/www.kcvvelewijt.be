@@ -630,25 +630,38 @@ export const FootbalistoServiceLive = Layer.effect(
                         : null;
                     }),
                   ),
+                  Effect.map((match) => ({ _tag: "ok" as const, match })),
                   Effect.catchAll((e) =>
                     Effect.log(
                       `getNextMatches: team ${team.id} failed: ${String(e)}`,
-                    ).pipe(Effect.as(null)),
+                    ).pipe(Effect.as({ _tag: "failed" as const, match: null })),
                   ),
                 ),
               ),
             { concurrency: 5 },
           );
 
-          // Pair each result with its team so we can derive the label
           const filteredTeams = teams.filter((t) => t.id !== 23);
+          const allFailed =
+            filteredTeams.length > 0 &&
+            teamNextMatches.every((r) => r._tag === "failed");
+
+          if (allFailed) {
+            return yield* Effect.fail(
+              new UpstreamUnavailableError({
+                message: `getNextMatches: all ${filteredTeams.length} team fetches failed`,
+              }),
+            );
+          }
+
+          // Pair each result with its team so we can derive the label
           const matches: Match[] = [];
           for (let i = 0; i < teamNextMatches.length; i++) {
-            const game = teamNextMatches[i];
-            if (game) {
+            const entry = teamNextMatches[i]!;
+            if (entry._tag === "ok" && entry.match) {
               const team = filteredTeams[i]!;
               matches.push({
-                ...game,
+                ...entry.match,
                 kcvv_team_label: derivePsdTeamLabel(team.name, team.age),
               });
             }

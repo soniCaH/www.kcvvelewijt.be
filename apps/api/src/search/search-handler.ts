@@ -1,9 +1,11 @@
 import { Effect } from "effect";
 import type { SearchRequest, SearchResponse } from "@kcvv/api-contract";
-import { EmbeddingService } from "./embedding";
-import { VectorizeService } from "./vectorize";
+import { EmbeddingService, type EmbeddingError } from "./embedding";
+import { VectorizeService, type VectorizeError } from "./vectorize";
 
 export const MIN_SCORE = 0.35;
+
+export type SearchError = EmbeddingError | VectorizeError;
 
 const TYPE_FILTER: Record<string, string> = {
   responsibility: "responsibilityPath",
@@ -15,26 +17,24 @@ export const handleSearch = (
   request: typeof SearchRequest.Type,
 ): Effect.Effect<
   typeof SearchResponse.Type,
-  never,
+  SearchError,
   EmbeddingService | VectorizeService
 > =>
   Effect.gen(function* () {
     const embedding = yield* EmbeddingService;
     const vectorize = yield* VectorizeService;
 
-    const vector = yield* embedding.embed(request.query).pipe(Effect.orDie);
+    const vector = yield* embedding.embed(request.query);
 
     const filter = request.type
       ? { type: TYPE_FILTER[request.type] ?? request.type }
       : undefined;
 
-    const matches = yield* vectorize
-      .query(vector, {
-        topK: request.limit,
-        returnMetadata: "all",
-        ...(filter ? { filter } : {}),
-      })
-      .pipe(Effect.orDie);
+    const matches = yield* vectorize.query(vector, {
+      topK: request.limit,
+      returnMetadata: "all",
+      ...(filter ? { filter } : {}),
+    });
 
     const results = matches
       .filter((m) => m.score >= MIN_SCORE)

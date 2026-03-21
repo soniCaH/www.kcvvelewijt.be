@@ -392,6 +392,31 @@ describe("FootbalistoService.getNextMatches", () => {
     }
   });
 
+  it("fails with UpstreamUnavailableError when all team fetches fail", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: false,
+          status: 503,
+          statusText: "Service Unavailable",
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => seasons });
+      }
+      // /teams — only non-23 team
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runService((svc) => svc.getNextMatches());
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
   it("excludes teams with no future matches", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {

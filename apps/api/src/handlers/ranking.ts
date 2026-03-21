@@ -2,7 +2,11 @@ import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RankingArray, type RankingEntry } from "@kcvv/api-contract";
 import { FootbalistoService } from "../footbalisto/service";
-import { shouldServeStale, type BffError } from "../footbalisto/errors";
+import {
+  shouldServeStale,
+  ResourceNotFoundError,
+  type BffError,
+} from "../footbalisto/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { withErrorMapping } from "./error-mapping";
@@ -20,7 +24,15 @@ export const getRankingHandler = (
   const cacheKey = `ranking:team:${teamId}`;
   const fetchRanking = Effect.gen(function* () {
     const service = yield* FootbalistoService;
-    return yield* service.getRanking(teamId, logoCdnUrl);
+    const entries = yield* service.getRanking(teamId, logoCdnUrl);
+    if (entries.length === 0) {
+      return yield* new ResourceNotFoundError({
+        message: "No ranking data found",
+        resourceType: "ranking",
+        resourceId: teamId,
+      });
+    }
+    return entries;
   });
 
   return rankingCache.getOrFetch(
@@ -28,7 +40,9 @@ export const getRankingHandler = (
     fetchRanking,
     TTL.RANKING,
     undefined,
-    { shouldServeStale },
+    {
+      shouldServeStale,
+    },
   );
 };
 
