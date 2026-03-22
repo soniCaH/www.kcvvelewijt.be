@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ScreenReaderAnnouncer } from "./ScreenReaderAnnouncer";
 
-const meta: Meta<typeof ScreenReaderAnnouncer> = {
+const meta = {
   title: "Features/Organigram/ScreenReaderAnnouncer",
   component: ScreenReaderAnnouncer,
   parameters: {
@@ -14,10 +14,10 @@ const meta: Meta<typeof ScreenReaderAnnouncer> = {
     },
   },
   tags: ["autodocs"],
-};
+} satisfies Meta<typeof ScreenReaderAnnouncer>;
 
 export default meta;
-type Story = StoryObj<typeof ScreenReaderAnnouncer>;
+type Story = StoryObj<typeof meta>;
 
 /** Polite announcement — waits for screen reader to finish current speech. */
 export const Polite: Story = {

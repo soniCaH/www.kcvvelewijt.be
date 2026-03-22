@@ -14,12 +14,13 @@ import type { SectionConfig } from "@/components/design-system";
 import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
 import { mockMatches } from "@/components/match/match.mocks";
 
-const meta: Meta = {
+const meta = {
   title: "Pages/Homepage",
   parameters: {
     layout: "fullscreen",
   },
-};
+  tags: ["autodocs"],
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

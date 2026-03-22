@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MapEmbed } from "./MapEmbed";
 
-const meta: Meta<typeof MapEmbed> = {
+const meta = {
   title: "Features/Contact/MapEmbed",
   component: MapEmbed,
   parameters: {
@@ -14,10 +14,10 @@ const meta: Meta<typeof MapEmbed> = {
     },
   },
   tags: ["autodocs"],
-};
+} satisfies Meta<typeof MapEmbed>;
 
 export default meta;
-type Story = StoryObj<typeof MapEmbed>;
+type Story = StoryObj<typeof meta>;
 
 /**
  * Default state — privacy consent gate.

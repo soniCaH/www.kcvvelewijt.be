@@ -28,12 +28,12 @@ const mockEvents: EventsListItem[] = [
   },
 ];
 
-const meta: Meta<typeof EventsList> = {
+const meta = {
   title: "Features/Calendar/EventsList",
   component: EventsList,
   parameters: { layout: "padded" },
   tags: ["autodocs"],
-};
+} satisfies Meta<typeof EventsList>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

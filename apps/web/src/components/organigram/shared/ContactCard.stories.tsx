@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { ContactCard } from "./ContactCard";
 import type { OrgChartNode } from "@/types/organigram";
 
-const meta: Meta<typeof ContactCard> = {
+const meta = {
   title: "Features/Organigram/ContactCard",
   component: ContactCard,
   parameters: {
@@ -28,6 +29,10 @@ Provides consistent visual design following KCVV design system with:
     },
   },
   tags: ["autodocs"],
+  args: {
+    member: { id: "default", name: "Naam", title: "Titel" },
+    onClick: fn(),
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -50,12 +55,11 @@ Provides consistent visual design following KCVV design system with:
       control: "boolean",
       description: "Current expansion state",
     },
-    onClick: { action: "clicked" },
   },
-};
+} satisfies Meta<typeof ContactCard>;
 
 export default meta;
-type Story = StoryObj<typeof ContactCard>;
+type Story = StoryObj<typeof meta>;
 
 // Mock Data
 const mockMemberComplete: OrgChartNode = {
@@ -285,9 +289,6 @@ export const Clickable: Story = {
   args: {
     member: mockMemberComplete,
     variant: "detailed",
-    onClick: (member) => {
-      alert(`Clicked: ${member.name}`);
-    },
   },
 };
 
@@ -295,7 +296,6 @@ export const HoverState: Story = {
   args: {
     member: mockMemberComplete,
     variant: "detailed",
-    onClick: () => {},
   },
   parameters: {
     pseudo: { hover: true },
@@ -310,7 +310,6 @@ export const AccessibilityTest: Story = {
     variant: "detailed",
     showQuickActions: true,
     showDepartment: true,
-    onClick: () => {},
     testId: "contact-card-test",
   },
   parameters: {
