@@ -7,10 +7,10 @@ import { PageTitle } from "@/components/layout";
 import {
   SponsorsStats,
   SponsorsSpotlight,
-  SponsorsCallToAction,
+  SponsorCallToAction,
   SponsorsTier,
   TierDivider,
-  SponsorsEmptyState,
+  SponsorEmptyState,
 } from "@/components/sponsors";
 import type { Sponsor } from "../Sponsors";
 
@@ -81,9 +81,9 @@ export function SponsorsPage({
             sponsors={bronzeSponsors}
           />
 
-          {totalSponsors === 0 && <SponsorsEmptyState />}
+          {totalSponsors === 0 && <SponsorEmptyState />}
 
-          <SponsorsCallToAction />
+          <SponsorCallToAction />
         </div>
       </div>
     </div>

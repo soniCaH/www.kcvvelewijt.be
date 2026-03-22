@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SponsorsEmptyState } from "./SponsorsEmptyState";
+import { SponsorEmptyState } from "./SponsorEmptyState";
 
 const meta = {
-  title: "Features/Sponsors/SponsorsEmptyState",
-  component: SponsorsEmptyState,
+  title: "Features/Sponsors/SponsorEmptyState",
+  component: SponsorEmptyState,
   parameters: {
     layout: "padded",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof SponsorsEmptyState>;
+} satisfies Meta<typeof SponsorEmptyState>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

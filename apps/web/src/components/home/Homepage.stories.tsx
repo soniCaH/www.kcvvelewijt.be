@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
-import { LatestNews } from "./LatestNews";
-import type { FeaturedEventStub } from "./LatestNews";
+import { NewsGrid } from "./NewsGrid";
+import type { FeaturedEventStub } from "./NewsGrid";
 import { MatchWidget } from "./MatchWidget";
 import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
@@ -183,7 +183,7 @@ function buildSections(
       key: "latest-news",
       bg: "gray-100",
       content: (
-        <LatestNews
+        <NewsGrid
           articles={featuredEvent ? mockLatestNews.slice(0, 2) : mockLatestNews}
           featuredEvent={featuredEvent}
           title="Laatste nieuws"

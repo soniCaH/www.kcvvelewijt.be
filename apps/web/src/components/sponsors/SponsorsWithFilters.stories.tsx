@@ -32,7 +32,7 @@ export const GoldOnly: Story = {
   },
 };
 
-/** No sponsors at all — renders SponsorsEmptyState. */
+/** No sponsors at all — renders SponsorEmptyState. */
 export const Empty: Story = {
   args: {
     goldSponsors: [],

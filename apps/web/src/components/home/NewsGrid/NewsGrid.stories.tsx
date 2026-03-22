@@ -1,10 +1,10 @@
-// apps/web/src/components/home/LatestNews/LatestNews.stories.tsx
+// apps/web/src/components/home/NewsGrid/NewsGrid.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LatestNews } from "./LatestNews";
+import { NewsGrid } from "./NewsGrid";
 
 const meta = {
-  title: "Features/News/NewsGrid",
-  component: LatestNews,
+  title: "Features/Homepage/NewsGrid",
+  component: NewsGrid,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -17,7 +17,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof LatestNews>;
+} satisfies Meta<typeof NewsGrid>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

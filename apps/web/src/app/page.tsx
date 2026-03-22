@@ -11,7 +11,7 @@ import type { SanityEvent } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
   FeaturedArticles,
-  LatestNews,
+  NewsGrid,
   MatchWidget,
   BannerSlot,
   MatchesSliderSection,
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Builds the featured event stub for the LatestNews section.
+ * Builds the featured event stub for the NewsGrid section.
  * Same-day event: shows date + time range.
  * Multi-day event: shows "d MMM HH:mm – d MMM HH:mm" as single date string.
  */
@@ -141,7 +141,7 @@ export default async function HomePage() {
     articles.slice(0, 3),
     true,
   );
-  const latestNewsArticles = mapSanityArticlesToHomepageArticles(
+  const newsGridArticles = mapSanityArticlesToHomepageArticles(
     articles.slice(3, 9),
     false,
   );
@@ -220,13 +220,13 @@ export default async function HomePage() {
     : null;
 
   const latestNewsSection: SectionConfig | null =
-    latestNewsArticles.length > 0 || featuredEvent
+    newsGridArticles.length > 0 || featuredEvent
       ? {
           key: "latest-news",
           bg: "gray-100",
           content: (
-            <LatestNews
-              articles={latestNewsArticles}
+            <NewsGrid
+              articles={newsGridArticles}
               featuredEvent={featuredEvent}
               title="Laatste nieuws"
               showViewAll

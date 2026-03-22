@@ -10,7 +10,7 @@ import {
 } from "./MatchWidget.mocks";
 
 const meta = {
-  title: "Features/Home/MatchWidget",
+  title: "Features/Homepage/MatchWidget",
   component: MatchWidget,
   parameters: {
     layout: "fullscreen",
