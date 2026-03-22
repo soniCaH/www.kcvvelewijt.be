@@ -25,6 +25,8 @@ export interface SponsorGridProps {
   columns?: 2 | 3 | 4 | 5 | 6;
   /** Card size */
   size?: "sm" | "md" | "lg";
+  /** Theme variant */
+  variant?: "light" | "dark";
   /** Show sponsor names below logos */
   showNames?: boolean;
   /** Additional CSS classes */
@@ -35,6 +37,7 @@ export const SponsorGrid = ({
   sponsors,
   columns = 4,
   size = "md",
+  variant = "light",
   showNames = false,
   className,
 }: SponsorGridProps) => {
@@ -47,6 +50,7 @@ export const SponsorGrid = ({
           key={sponsor.id}
           sponsor={sponsor}
           size={size}
+          variant={variant}
           showName={showNames}
         />
       ))}
