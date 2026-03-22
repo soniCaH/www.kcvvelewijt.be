@@ -7,7 +7,7 @@
 
 "use client";
 
-import { HorizontalSlider } from "@/components/design-system/HorizontalSlider/HorizontalSlider";
+import { HorizontalSlider } from "@/components/design-system";
 import { MatchTeaser } from "../MatchTeaser/MatchTeaser";
 import type { UpcomingMatch } from "@/components/match/types";
 

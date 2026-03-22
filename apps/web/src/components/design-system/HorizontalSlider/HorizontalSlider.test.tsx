@@ -7,6 +7,52 @@ import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HorizontalSlider } from "./HorizontalSlider";
 
+function mockScrollDimensions(scrollWidth = 1000, clientWidth = 500) {
+  const originalScrollWidth = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "scrollWidth",
+  );
+  const originalClientWidth = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    "clientWidth",
+  );
+
+  Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+    configurable: true,
+    value: scrollWidth,
+  });
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    value: clientWidth,
+  });
+
+  return () => {
+    if (originalScrollWidth) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollWidth",
+        originalScrollWidth,
+      );
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (HTMLElement.prototype as any).scrollWidth;
+    }
+
+    if (originalClientWidth) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "clientWidth",
+        originalClientWidth,
+      );
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (HTMLElement.prototype as any).clientWidth;
+    }
+
+    vi.restoreAllMocks();
+  };
+}
+
 describe("HorizontalSlider", () => {
   describe("Rendering", () => {
     it("should render children", () => {
@@ -68,53 +114,14 @@ describe("HorizontalSlider", () => {
   });
 
   describe("Scroll Arrows", () => {
-    let originalScrollWidth: PropertyDescriptor | undefined;
-    let originalClientWidth: PropertyDescriptor | undefined;
+    let restoreScrollDimensions: () => void;
 
     beforeEach(() => {
-      originalScrollWidth = Object.getOwnPropertyDescriptor(
-        HTMLElement.prototype,
-        "scrollWidth",
-      );
-      originalClientWidth = Object.getOwnPropertyDescriptor(
-        HTMLElement.prototype,
-        "clientWidth",
-      );
-
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-        configurable: true,
-        value: 1000,
-      });
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-        configurable: true,
-        value: 500,
-      });
+      restoreScrollDimensions = mockScrollDimensions();
     });
 
     afterEach(() => {
-      if (originalScrollWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "scrollWidth",
-          originalScrollWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).scrollWidth;
-      }
-
-      if (originalClientWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "clientWidth",
-          originalClientWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).clientWidth;
-      }
-
-      vi.restoreAllMocks();
+      restoreScrollDimensions();
     });
 
     it("should show right arrow when content overflows", () => {
@@ -244,53 +251,14 @@ describe("HorizontalSlider", () => {
   });
 
   describe("Theme", () => {
-    let originalScrollWidth: PropertyDescriptor | undefined;
-    let originalClientWidth: PropertyDescriptor | undefined;
+    let restoreScrollDimensions: () => void;
 
     beforeEach(() => {
-      originalScrollWidth = Object.getOwnPropertyDescriptor(
-        HTMLElement.prototype,
-        "scrollWidth",
-      );
-      originalClientWidth = Object.getOwnPropertyDescriptor(
-        HTMLElement.prototype,
-        "clientWidth",
-      );
-
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-        configurable: true,
-        value: 1000,
-      });
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-        configurable: true,
-        value: 500,
-      });
+      restoreScrollDimensions = mockScrollDimensions();
     });
 
     afterEach(() => {
-      if (originalScrollWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "scrollWidth",
-          originalScrollWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).scrollWidth;
-      }
-
-      if (originalClientWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "clientWidth",
-          originalClientWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).clientWidth;
-      }
-
-      vi.restoreAllMocks();
+      restoreScrollDimensions();
     });
 
     it("should apply light theme styles to arrows by default", () => {

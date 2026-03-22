@@ -61,7 +61,14 @@ export const HorizontalSlider = ({
   return (
     <div className={cn("", className)}>
       {title && (
-        <h3 className="text-lg font-bold text-kcvv-black mb-3">{title}</h3>
+        <h3
+          className={cn(
+            "text-lg font-bold mb-3",
+            theme === "dark" ? "text-kcvv-white" : "text-kcvv-black",
+          )}
+        >
+          {title}
+        </h3>
       )}
 
       <div className="relative">

@@ -17,22 +17,22 @@ const SampleCard = ({ label, color }: { label: string; color: string }) => (
 
 const fewItems = (
   <>
-    <SampleCard label="Card 1" color="#1e3a5f" />
-    <SampleCard label="Card 2" color="#2d6a4f" />
-    <SampleCard label="Card 3" color="#6b21a8" />
+    <SampleCard label="Card 1" color="var(--color-kcvv-green-dark)" />
+    <SampleCard label="Card 2" color="var(--color-kcvv-black)" />
+    <SampleCard label="Card 3" color="var(--color-kcvv-gray-blue)" />
   </>
 );
 
 const manyItems = (
   <>
-    <SampleCard label="Card 1" color="#1e3a5f" />
-    <SampleCard label="Card 2" color="#2d6a4f" />
-    <SampleCard label="Card 3" color="#6b21a8" />
-    <SampleCard label="Card 4" color="#9a3412" />
-    <SampleCard label="Card 5" color="#166534" />
-    <SampleCard label="Card 6" color="#1e40af" />
-    <SampleCard label="Card 7" color="#7c2d12" />
-    <SampleCard label="Card 8" color="#064e3b" />
+    <SampleCard label="Card 1" color="var(--color-kcvv-green-dark)" />
+    <SampleCard label="Card 2" color="var(--color-kcvv-black)" />
+    <SampleCard label="Card 3" color="var(--color-kcvv-gray-blue)" />
+    <SampleCard label="Card 4" color="var(--color-kcvv-gray-dark)" />
+    <SampleCard label="Card 5" color="var(--color-kcvv-green-DEFAULT)" />
+    <SampleCard label="Card 6" color="var(--color-kcvv-green-hover-dark)" />
+    <SampleCard label="Card 7" color="var(--color-kcvv-gray-DEFAULT)" />
+    <SampleCard label="Card 8" color="var(--color-kcvv-green-hover)" />
   </>
 );
 
