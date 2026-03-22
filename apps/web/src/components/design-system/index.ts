@@ -79,3 +79,7 @@ export type { SectionStackProps, SectionConfig } from "./SectionStack";
 // SectionHeader
 export { SectionHeader } from "./SectionHeader";
 export type { SectionHeaderProps } from "./SectionHeader";
+
+// HorizontalSlider
+export { HorizontalSlider } from "./HorizontalSlider";
+export type { HorizontalSliderProps } from "./HorizontalSlider";
