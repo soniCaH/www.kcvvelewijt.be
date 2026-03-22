@@ -11,6 +11,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { FilterTabs, type FilterTab } from "@/components/design-system";
+import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
+import type { MatchStatus } from "@/components/match/types";
 
 export interface CalendarTeam {
   id: number;
@@ -26,7 +28,7 @@ export interface CalendarMatch {
   awayTeam: CalendarTeam;
   homeScore?: number;
   awayScore?: number;
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   competition?: string;
   team?: string; // "A-ploeg" | "B-ploeg" | "U15 A" | etc.
 }
@@ -36,31 +38,6 @@ function formatDayHeader(dateStr: string): string {
     { weekday: "long", day: "numeric", month: "long", year: "numeric" },
     { locale: "nl-BE" },
   );
-}
-
-function StatusBadge({ status }: { status: CalendarMatch["status"] }) {
-  if (status === "postponed") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-        Uitgesteld
-      </span>
-    );
-  }
-  if (status === "stopped") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-        Gestopt
-      </span>
-    );
-  }
-  if (status === "forfeited") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-        FF
-      </span>
-    );
-  }
-  return null;
 }
 
 function MatchRow({ match }: { match: CalendarMatch }) {
@@ -81,7 +58,7 @@ function MatchRow({ match }: { match: CalendarMatch }) {
           {match.competition && (
             <span className="hidden sm:inline">{match.competition}</span>
           )}
-          <StatusBadge status={match.status} />
+          <MatchStatusBadge status={match.status} />
         </div>
         {match.time && <span>{match.time}</span>}
       </div>

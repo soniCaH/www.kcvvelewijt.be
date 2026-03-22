@@ -8,6 +8,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { MatchStatusBadge } from "../MatchStatusBadge";
 import type { ScheduleMatch } from "../../team/TeamSchedule/TeamSchedule";
 
 export interface MatchResultRowProps {
@@ -30,34 +31,6 @@ function formatDate(date: Date): string {
     day: "numeric",
     month: "short",
   });
-}
-
-/**
- * Get status badge for match
- */
-function StatusBadge({ status }: { status: ScheduleMatch["status"] }) {
-  if (status === "postponed") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-        Uitgesteld
-      </span>
-    );
-  }
-  if (status === "stopped") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-        Gestopt
-      </span>
-    );
-  }
-  if (status === "forfeited") {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-        FF
-      </span>
-    );
-  }
-  return null;
 }
 
 export function MatchResultRow({
@@ -102,7 +75,7 @@ export function MatchResultRow({
             {formatDate(match.date)}
           </span>
           {match.time && <span className="text-gray-500">{match.time}</span>}
-          <StatusBadge status={match.status} />
+          <MatchStatusBadge status={match.status} />
           {isNext && (
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-kcvv-green-bright text-white">
               Volgende

@@ -4,6 +4,13 @@
  * React / component dependencies so it can be used anywhere in the app.
  */
 
+export type MatchStatus =
+  | "scheduled"
+  | "finished"
+  | "forfeited"
+  | "postponed"
+  | "stopped";
+
 export interface UpcomingMatch {
   /**
    * Match ID
@@ -42,7 +49,7 @@ export interface UpcomingMatch {
   /**
    * Match status
    */
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   /**
    * Round/matchday (optional)
    */

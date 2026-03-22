@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
+import { MatchStatusBadge } from "../MatchStatusBadge";
 
 export interface MatchTeaserTeam {
   /** Team ID for identification and highlighting */
@@ -250,7 +251,7 @@ export function MatchTeaser({
         {time && status !== "upcoming" && status !== "finished" && (
           <span aria-hidden="true">·</span>
         )}
-        <StatusBadge status={status} isDark={isDark} />
+        <MatchStatusBadge status={status} isDark={isDark} />
         {venue && status === "upcoming" && time && (
           <span aria-hidden="true">·</span>
         )}
@@ -285,7 +286,7 @@ export function MatchTeaser({
               {time}
             </span>
           )}
-          <StatusBadge status={status} isDark={isDark} />
+          <MatchStatusBadge status={status} isDark={isDark} />
         </div>
         {venue && (
           <span className="text-gray-500 text-xs hidden sm:block">{venue}</span>
@@ -408,59 +409,6 @@ function CompactLogo({
       {team.name.charAt(0).toUpperCase()}
     </div>
   );
-}
-
-/**
- * Renders status badge for match
- */
-function StatusBadge({
-  status,
-  isDark,
-}: {
-  status: MatchTeaserProps["status"];
-  isDark?: boolean;
-}) {
-  if (status === "postponed") {
-    return (
-      <span
-        className={cn(
-          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
-          isDark
-            ? "bg-orange-900/40 text-orange-300"
-            : "bg-orange-100 text-orange-800",
-        )}
-      >
-        Uitgesteld
-      </span>
-    );
-  }
-  if (status === "stopped") {
-    return (
-      <span
-        className={cn(
-          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
-          isDark
-            ? "bg-orange-900/40 text-orange-300"
-            : "bg-orange-100 text-orange-800",
-        )}
-      >
-        Gestopt
-      </span>
-    );
-  }
-  if (status === "forfeited") {
-    return (
-      <span
-        className={cn(
-          "inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium",
-          isDark ? "bg-white/10 text-white/60" : "bg-gray-100 text-gray-700",
-        )}
-      >
-        FF
-      </span>
-    );
-  }
-  return null;
 }
 
 /**

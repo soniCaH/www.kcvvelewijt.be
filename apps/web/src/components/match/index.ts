@@ -17,4 +17,7 @@ export type { MatchListProps } from "./MatchList/MatchList";
 export { MatchesSlider } from "./MatchesSlider/MatchesSlider";
 export type { MatchesSliderProps } from "./MatchesSlider/MatchesSlider";
 
-export type { UpcomingMatch } from "./types";
+export { MatchStatusBadge } from "./MatchStatusBadge";
+export type { MatchStatusBadgeProps } from "./MatchStatusBadge";
+
+export type { UpcomingMatch, MatchStatus } from "./types";
