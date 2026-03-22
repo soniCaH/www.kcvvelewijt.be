@@ -5,7 +5,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { MatchResultRow } from "./MatchResultRow";
-import type { ScheduleMatch } from "../../team/TeamSchedule/TeamSchedule";
+import type { ScheduleMatch } from "../types";
 
 // Mock next/image
 vi.mock("next/image", () => ({
@@ -102,7 +102,7 @@ describe("MatchResultRow", () => {
         />,
       );
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-green-500");
+      expect(link.className).toContain("border-l-kcvv-success");
     });
 
     it("applies red border for losses", () => {
@@ -115,7 +115,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
       );
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-red-500");
+      expect(link.className).toContain("border-l-kcvv-alert");
     });
 
     it("applies yellow border for draws", () => {
@@ -128,7 +128,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
       );
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-yellow-500");
+      expect(link.className).toContain("border-l-kcvv-warning");
     });
 
     it("highlights winning score with green color", () => {

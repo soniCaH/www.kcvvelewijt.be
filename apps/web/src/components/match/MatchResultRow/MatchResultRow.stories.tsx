@@ -6,7 +6,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchResultRow } from "./MatchResultRow";
-import type { ScheduleMatch } from "../../team/TeamSchedule/TeamSchedule";
+import type { ScheduleMatch } from "../types";
 
 const KCVV_LOGO =
   "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";

@@ -13,38 +13,10 @@
  */
 
 import { cn } from "@/lib/utils/cn";
-import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 import { MatchResultRow } from "../../match/MatchResultRow";
+import type { MatchStatus, ScheduleMatch } from "../../match/types";
 
-export interface ScheduleTeam {
-  /** Team ID */
-  id: number;
-  /** Team name */
-  name: string;
-  /** Team logo URL */
-  logo?: string;
-}
-
-export interface ScheduleMatch {
-  /** Match ID */
-  id: number;
-  /** Match date */
-  date: Date;
-  /** Match time (HH:MM) */
-  time?: string;
-  /** Home team */
-  homeTeam: ScheduleTeam;
-  /** Away team */
-  awayTeam: ScheduleTeam;
-  /** Home team score (for finished matches) */
-  homeScore?: number;
-  /** Away team score (for finished matches) */
-  awayScore?: number;
-  /** Match status */
-  status: MatchStatus;
-  /** Competition name */
-  competition?: string;
-}
+export type { ScheduleMatch, ScheduleTeam } from "../../match/types";
 
 export interface TeamScheduleProps {
   /** Array of matches */

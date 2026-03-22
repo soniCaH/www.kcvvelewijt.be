@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { MatchStatusBadge } from "../MatchStatusBadge";
-import type { ScheduleMatch } from "../../team/TeamSchedule/TeamSchedule";
+import type { ScheduleMatch } from "../types";
 
 export interface MatchResultRowProps {
   /** Match data */
@@ -39,21 +39,24 @@ export function MatchResultRow({
   isNext = false,
   href,
 }: MatchResultRowProps) {
-  const isHome = teamId !== undefined && match.homeTeam.id === teamId;
+  const isMember =
+    teamId !== undefined &&
+    (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
+  const isHome = isMember && match.homeTeam.id === teamId;
   const hasScore =
     typeof match.homeScore === "number" && typeof match.awayScore === "number";
 
   // Determine result for KCVV — only when we know which side is ours
   let resultClass = "";
-  if (hasScore && teamId !== undefined) {
+  if (hasScore && isMember) {
     const kcvvScore = isHome ? match.homeScore! : match.awayScore!;
     const oppScore = isHome ? match.awayScore! : match.homeScore!;
     if (kcvvScore > oppScore) {
-      resultClass = "border-l-4 border-l-green-500";
+      resultClass = "border-l-4 border-l-kcvv-success";
     } else if (kcvvScore < oppScore) {
-      resultClass = "border-l-4 border-l-red-500";
+      resultClass = "border-l-4 border-l-kcvv-alert";
     } else {
-      resultClass = "border-l-4 border-l-yellow-500";
+      resultClass = "border-l-4 border-l-kcvv-warning";
     }
   }
 
@@ -183,7 +186,7 @@ export function MatchResultRow({
 
       {/* Home/Away indicator for mobile */}
       <div className="mt-2 text-xs text-gray-500 sm:hidden">
-        {teamId !== undefined && `${isHome ? "Thuis" : "Uit"} • `}
+        {isMember && `${isHome ? "Thuis" : "Uit"} • `}
         {match.competition || "Competitie"}
       </div>
     </Link>

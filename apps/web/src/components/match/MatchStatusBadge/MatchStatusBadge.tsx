@@ -1,13 +1,17 @@
 import { Badge } from "@/components/design-system/Badge/Badge";
 import { cn } from "@/lib/utils/cn";
+import type { MatchStatus } from "../types";
+
+type BadgeStatus = Extract<MatchStatus, "postponed" | "stopped" | "forfeited">;
+
 export interface MatchStatusBadgeProps {
-  status: string;
+  status: MatchStatus | (string & {});
   /** Dark background variant (e.g. for dark match teasers) */
   isDark?: boolean;
 }
 
 const statusConfig: Record<
-  string,
+  BadgeStatus,
   { label: string; variant: "warning" | "default"; darkClass: string }
 > = {
   postponed: {
@@ -27,9 +31,14 @@ const statusConfig: Record<
   },
 };
 
+function isBadgeStatus(status: string): status is BadgeStatus {
+  return status in statusConfig;
+}
+
 export function MatchStatusBadge({ status, isDark }: MatchStatusBadgeProps) {
+  if (!isBadgeStatus(status)) return null;
+
   const config = statusConfig[status];
-  if (!config) return null;
 
   return (
     <Badge
