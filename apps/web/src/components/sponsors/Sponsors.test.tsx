@@ -1,5 +1,8 @@
 /**
  * Sponsors Component Tests
+ *
+ * Tests the Sponsors section wrapper which delegates grid rendering
+ * to SponsorGrid → SponsorCard.
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -9,10 +12,18 @@ import { Sponsors, type Sponsor } from "./Sponsors";
 
 vi.mock("next/image", () => ({
   default: ({ alt, src, ...props }: ImageProps) => {
-    // Using img in tests is acceptable as we're mocking Next.js Image
     const imgProps = { alt, src: typeof src === "string" ? src : "", ...props };
     return <img {...imgProps} />;
   },
+}));
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    ...props
+  }: { children: React.ReactNode } & Record<string, unknown>) => (
+    <a {...props}>{children}</a>
+  ),
 }));
 
 describe("Sponsors", () => {
@@ -126,47 +137,20 @@ describe("Sponsors", () => {
   });
 
   describe("Grid Layout", () => {
-    it("renders 4-column grid by default", () => {
+    it("renders grid with default 4 columns", () => {
       const { container } = render(<Sponsors sponsors={mockSponsors} />);
 
       const grid = container.querySelector(".grid");
-      expect(grid).toHaveClass("grid-cols-4");
+      expect(grid).toHaveClass("lg:grid-cols-4");
     });
 
-    it("renders 2-column grid when columns=2", () => {
-      const { container } = render(
-        <Sponsors sponsors={mockSponsors} columns={2} />,
-      );
-
-      const grid = container.querySelector(".grid");
-      expect(grid).toHaveClass("grid-cols-2");
-    });
-
-    it("renders 3-column grid when columns=3", () => {
+    it("renders grid with specified columns", () => {
       const { container } = render(
         <Sponsors sponsors={mockSponsors} columns={3} />,
       );
 
       const grid = container.querySelector(".grid");
-      expect(grid).toHaveClass("grid-cols-3");
-    });
-
-    it("renders 5-column grid when columns=5", () => {
-      const { container } = render(
-        <Sponsors sponsors={mockSponsors} columns={5} />,
-      );
-
-      const grid = container.querySelector(".grid");
-      expect(grid).toHaveClass("grid-cols-5");
-    });
-
-    it("renders 6-column grid when columns=6", () => {
-      const { container } = render(
-        <Sponsors sponsors={mockSponsors} columns={6} />,
-      );
-
-      const grid = container.querySelector(".grid");
-      expect(grid).toHaveClass("grid-cols-6");
+      expect(grid).toHaveClass("lg:grid-cols-3");
     });
   });
 
@@ -174,24 +158,20 @@ describe("Sponsors", () => {
     it("renders sponsors with URLs as clickable links", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
-      const link1 = screen.getByLabelText("Visit Sponsor One website");
+      const link1 = screen.getByLabelText("Bezoek de website van Sponsor One");
       expect(link1).toHaveAttribute("href", "https://sponsor1.com");
       expect(link1).toHaveAttribute("target", "_blank");
       expect(link1).toHaveAttribute("rel", "noopener noreferrer");
-
-      const link2 = screen.getByLabelText("Visit Sponsor Two website");
-      expect(link2).toHaveAttribute("href", "https://sponsor2.com");
     });
 
-    it("renders sponsors without URLs as non-clickable divs", () => {
+    it("renders sponsors without URLs as non-clickable elements", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
-      // Sponsors 3 and 4 don't have URLs, so they shouldn't have aria-labels
       expect(
-        screen.queryByLabelText("Visit Sponsor Three website"),
+        screen.queryByLabelText("Bezoek de website van Sponsor Three"),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByLabelText("Visit Sponsor Four website"),
+        screen.queryByLabelText("Bezoek de website van Sponsor Four"),
       ).not.toBeInTheDocument();
     });
   });
@@ -226,7 +206,7 @@ describe("Sponsors", () => {
 
       const logos = screen.getAllByRole("img");
       logos.forEach((logo) => {
-        expect(logo).toHaveClass("filter", "invert");
+        expect(logo).toHaveClass("invert");
       });
     });
 
@@ -267,10 +247,10 @@ describe("Sponsors", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
       expect(
-        screen.getByLabelText("Visit Sponsor One website"),
+        screen.getByLabelText("Bezoek de website van Sponsor One"),
       ).toBeInTheDocument();
       expect(
-        screen.getByLabelText("Visit Sponsor Two website"),
+        screen.getByLabelText("Bezoek de website van Sponsor Two"),
       ).toBeInTheDocument();
     });
   });

@@ -5,8 +5,8 @@
  */
 
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
+import { SponsorGrid } from "./SponsorGrid/SponsorGrid";
 
 export interface Sponsor {
   id: string;
@@ -56,25 +56,6 @@ export interface SponsorsProps {
   className?: string;
 }
 
-/**
- * Sponsors grid component
- *
- * Features:
- * - Responsive grid (2-6 columns)
- * - Hover opacity effect (0.5 → 1)
- * - Optional links to sponsor websites
- * - Light/dark theme variants
- * - Accessible with proper alt text
- *
- * @example
- * ```tsx
- * <Sponsors
- *   sponsors={sponsorData}
- *   columns={4}
- *   variant="dark"
- * />
- * ```
- */
 export const Sponsors = ({
   sponsors,
   title = "Onze sponsors",
@@ -88,14 +69,6 @@ export const Sponsors = ({
   if (sponsors.length === 0) {
     return null;
   }
-
-  const gridColsClass = {
-    2: "grid-cols-2",
-    3: "grid-cols-3",
-    4: "grid-cols-4",
-    5: "grid-cols-5",
-    6: "grid-cols-6",
-  }[columns];
 
   const textColorClass = variant === "dark" ? "text-white" : "text-gray-900";
   const descriptionColorClass =
@@ -115,49 +88,8 @@ export const Sponsors = ({
         )}
       </div>
 
-      {/* Sponsors Grid */}
-      <div className={cn("grid gap-3", gridColsClass)}>
-        {sponsors.map((sponsor) => {
-          const logoElement = (
-            <div
-              className={cn(
-                "aspect-[3/2] rounded flex items-center justify-center p-4",
-                "opacity-50 hover:opacity-100 transition-opacity duration-300",
-                variant === "dark" ? "bg-white/10" : "bg-gray-100",
-              )}
-            >
-              <Image
-                src={sponsor.logo}
-                alt={sponsor.name}
-                width={200}
-                height={133}
-                className={cn(
-                  "w-full h-full object-contain",
-                  variant === "dark" && "filter invert",
-                )}
-              />
-            </div>
-          );
-
-          // Wrap in link if URL is provided
-          if (sponsor.url) {
-            return (
-              <a
-                key={sponsor.id}
-                href={sponsor.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-                aria-label={`Visit ${sponsor.name} website`}
-              >
-                {logoElement}
-              </a>
-            );
-          }
-
-          return <div key={sponsor.id}>{logoElement}</div>;
-        })}
-      </div>
+      {/* Sponsors Grid — delegated to SponsorGrid */}
+      <SponsorGrid sponsors={sponsors} columns={columns} variant={variant} />
 
       {/* View All Link */}
       {showViewAll && (

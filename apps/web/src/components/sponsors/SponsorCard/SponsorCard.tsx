@@ -21,6 +21,8 @@ export interface SponsorCardProps {
   sponsor: Sponsor;
   /** Card size */
   size?: "sm" | "md" | "lg";
+  /** Theme variant */
+  variant?: "light" | "dark";
   /** Show sponsor name below the logo */
   showName?: boolean;
   /** Additional CSS classes */
@@ -30,6 +32,7 @@ export interface SponsorCardProps {
 export const SponsorCard = ({
   sponsor,
   size = "md",
+  variant = "light",
   showName = false,
   className,
 }: SponsorCardProps) => {
@@ -38,9 +41,10 @@ export const SponsorCard = ({
   const card = (
     <div
       className={cn(
-        "group relative aspect-[3/2] rounded bg-gray-100 flex items-center justify-center overflow-hidden",
+        "group relative aspect-[3/2] rounded flex items-center justify-center overflow-hidden",
         "opacity-70 hover:opacity-100 transition-opacity duration-300",
         "p-[8%]",
+        variant === "dark" ? "bg-white/10" : "bg-gray-100",
         className,
       )}
     >
@@ -49,7 +53,10 @@ export const SponsorCard = ({
         alt={sponsor.name}
         width={image.width}
         height={image.height}
-        className="w-full h-full object-contain"
+        className={cn(
+          "w-full h-full object-contain",
+          variant === "dark" && "filter invert",
+        )}
       />
 
       {/* Hover overlay */}
