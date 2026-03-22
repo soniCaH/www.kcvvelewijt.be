@@ -1,19 +1,19 @@
 /**
- * SponsorsEmptyState Component
+ * SponsorEmptyState Component
  * Displayed when no sponsors are available
  */
 
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
-export interface SponsorsEmptyStateProps {
+export interface SponsorEmptyStateProps {
   /**
    * Additional CSS classes
    */
   className?: string;
 }
 
-export const SponsorsEmptyState = ({ className }: SponsorsEmptyStateProps) => {
+export const SponsorEmptyState = ({ className }: SponsorEmptyStateProps) => {
   return (
     <div className={cn("text-center py-16 px-6", className)}>
       {/* Illustration */}

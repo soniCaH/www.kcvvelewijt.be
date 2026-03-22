@@ -4,12 +4,12 @@ export type {
   FeaturedArticle,
 } from "./FeaturedArticles";
 
-export { LatestNews } from "./LatestNews";
+export { NewsGrid } from "./NewsGrid";
 export type {
-  LatestNewsProps,
-  LatestNewsArticle,
+  NewsGridProps,
+  NewsGridArticle,
   FeaturedEventStub,
-} from "./LatestNews";
+} from "./NewsGrid";
 
 export { NewsCard } from "@/components/article/NewsCard";
 export type { NewsCardProps } from "@/components/article/NewsCard";

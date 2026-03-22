@@ -1,21 +1,21 @@
 /**
- * SponsorsCallToAction Component
+ * SponsorCallToAction Component
  * Encourages businesses to become sponsors with contact information
  */
 
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
-export interface SponsorsCallToActionProps {
+export interface SponsorCallToActionProps {
   /**
    * Additional CSS classes
    */
   className?: string;
 }
 
-export const SponsorsCallToAction = ({
+export const SponsorCallToAction = ({
   className,
-}: SponsorsCallToActionProps) => {
+}: SponsorCallToActionProps) => {
   return (
     <div
       className={cn(

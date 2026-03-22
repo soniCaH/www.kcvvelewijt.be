@@ -17,10 +17,10 @@ export type {
 } from "./SponsorsSpotlight";
 export { TierDivider } from "./TierDivider";
 export type { TierDividerProps } from "./TierDivider";
-export { SponsorsCallToAction } from "./SponsorsCallToAction";
-export type { SponsorsCallToActionProps } from "./SponsorsCallToAction";
-export { SponsorsEmptyState } from "./SponsorsEmptyState";
-export type { SponsorsEmptyStateProps } from "./SponsorsEmptyState";
+export { SponsorCallToAction } from "./SponsorCallToAction";
+export type { SponsorCallToActionProps } from "./SponsorCallToAction";
+export { SponsorEmptyState } from "./SponsorEmptyState";
+export type { SponsorEmptyStateProps } from "./SponsorEmptyState";
 export { SponsorsFilters } from "./SponsorsFilters";
 export type { SponsorsFiltersProps, FilterState } from "./SponsorsFilters";
 export { SponsorsWithFilters } from "./SponsorsWithFilters";

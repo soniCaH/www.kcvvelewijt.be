@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { SponsorsFilters, type FilterState } from "./SponsorsFilters";
 import { SponsorsTier, type SponsorTier } from "./SponsorsTier";
 import { TierDivider } from "./TierDivider";
-import { SponsorsEmptyState } from "./SponsorsEmptyState";
+import { SponsorEmptyState } from "./SponsorEmptyState";
 import type { Sponsor } from "./Sponsors";
 
 export interface SponsorsWithFiltersProps {
@@ -97,7 +97,7 @@ export const SponsorsWithFilters = ({
   const hasSponsors = totalCount > 0;
 
   if (!hasSponsors) {
-    return <SponsorsEmptyState />;
+    return <SponsorEmptyState />;
   }
 
   return (

@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SponsorsCallToAction } from "./SponsorsCallToAction";
+import { SponsorCallToAction } from "./SponsorCallToAction";
 
 const meta = {
-  title: "Features/Sponsors/SponsorsCallToAction",
-  component: SponsorsCallToAction,
+  title: "Features/Sponsors/SponsorCallToAction",
+  component: SponsorCallToAction,
   parameters: {
     layout: "padded",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof SponsorsCallToAction>;
+} satisfies Meta<typeof SponsorCallToAction>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

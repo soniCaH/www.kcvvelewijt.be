@@ -1,8 +1,8 @@
-// apps/web/src/components/home/LatestNews/LatestNews.tsx
+// apps/web/src/components/home/NewsGrid/NewsGrid.tsx
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
 
-export interface LatestNewsArticle {
+export interface NewsGridArticle {
   href: string;
   title: string;
   imageUrl?: string;
@@ -24,9 +24,9 @@ export interface FeaturedEventStub {
   isExternal?: boolean;
 }
 
-export interface LatestNewsProps {
+export interface NewsGridProps {
   /** 2–3 articles; first becomes featured when no featuredEvent */
-  articles: LatestNewsArticle[];
+  articles: NewsGridArticle[];
   /** When provided, fills the featured slot instead of articles[0]. #802 */
   featuredEvent?: FeaturedEventStub;
   title?: string;
@@ -35,14 +35,14 @@ export interface LatestNewsProps {
   className?: string;
 }
 
-export const LatestNews = ({
+export const NewsGrid = ({
   articles,
   featuredEvent,
   title = "Laatste nieuws",
   showViewAll = true,
   viewAllHref = "/news",
   className,
-}: LatestNewsProps) => {
+}: NewsGridProps) => {
   if (articles.length === 0 && !featuredEvent) {
     return null;
   }
