@@ -10,7 +10,7 @@ const tabs = [
   { value: "members", label: "Leden", icon: Users },
 ];
 
-const meta: Meta<typeof MobileBottomNav> = {
+const meta = {
   title: "Features/Organigram/MobileBottomNav",
   component: MobileBottomNav,
   parameters: {
@@ -23,7 +23,7 @@ const meta: Meta<typeof MobileBottomNav> = {
   args: {
     onChange: fn(),
   },
-};
+} satisfies Meta<typeof MobileBottomNav>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

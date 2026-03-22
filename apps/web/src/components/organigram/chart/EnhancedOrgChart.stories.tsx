@@ -5,7 +5,7 @@ import type { EnhancedOrgChartProps } from "./EnhancedOrgChart";
 import type { OrgChartNode } from "@/types/organigram";
 import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 
-const meta: Meta<typeof EnhancedOrgChart> = {
+const meta = {
   title: "Features/Organigram/InteractiveChart",
   component: EnhancedOrgChart,
   parameters: {
@@ -47,13 +47,16 @@ const meta: Meta<typeof EnhancedOrgChart> = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    members: clubStructure,
+  },
   argTypes: {
     isLoading: {
       control: "boolean",
       description: "Loading state",
     },
   },
-};
+} satisfies Meta<typeof EnhancedOrgChart>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

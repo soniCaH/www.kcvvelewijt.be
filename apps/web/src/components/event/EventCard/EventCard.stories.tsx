@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EventCard } from "./EventCard";
 
-const meta: Meta<typeof EventCard> = {
+const meta = {
   title: "Features/Calendar/EventCard",
   component: EventCard,
   parameters: { layout: "padded" },
@@ -12,7 +12,7 @@ const meta: Meta<typeof EventCard> = {
     date: new Date("2026-06-15T14:00:00"),
     location: "Sporthal Elewijt",
   },
-};
+} satisfies Meta<typeof EventCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

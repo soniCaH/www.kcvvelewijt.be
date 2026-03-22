@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ContactQuickActions } from "./ContactQuickActions";
 
-const meta: Meta<typeof ContactQuickActions> = {
+const meta = {
   title: "Features/Organigram/ContactQuickActions",
   component: ContactQuickActions,
   parameters: {
@@ -29,6 +29,9 @@ Provides quick access to contact methods:
     },
   },
   tags: ["autodocs"],
+  args: {
+    name: "Jan Janssen",
+  },
   argTypes: {
     email: {
       control: "text",
@@ -48,10 +51,10 @@ Provides quick access to contact methods:
       description: "Button size",
     },
   },
-};
+} satisfies Meta<typeof ContactQuickActions>;
 
 export default meta;
-type Story = StoryObj<typeof ContactQuickActions>;
+type Story = StoryObj<typeof meta>;
 
 // ==================== DEFAULT STORIES ====================
 

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { CategoryFilters } from "./CategoryFilters";
 
-const meta: Meta<typeof CategoryFilters> = {
+const meta = {
   title: "Features/Articles/CategoryFilters",
   component: CategoryFilters,
   parameters: {
@@ -19,10 +19,10 @@ const meta: Meta<typeof CategoryFilters> = {
       description: "Render as links (true) or buttons (false)",
     },
   },
-};
+} satisfies Meta<typeof CategoryFilters>;
 
 export default meta;
-type Story = StoryObj<typeof CategoryFilters>;
+type Story = StoryObj<typeof meta>;
 
 /**
  * Storybook wrapper that renders CategoryFilters with local, interactive category state.

@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { useState } from "react";
 import { DepartmentFilter } from "./DepartmentFilter";
 import type { DepartmentFilterProps } from "./types";
 import type { OrgChartNode } from "@/types/organigram";
 
-const meta: Meta<typeof DepartmentFilter> = {
+const meta = {
   title: "Features/Organigram/DepartmentFilter",
   component: DepartmentFilter,
   parameters: {
@@ -33,6 +34,11 @@ Inspired by CategoryFilters pattern with:
     },
   },
   tags: ["autodocs"],
+  args: {
+    value: "all",
+    onChange: fn(),
+    members: [],
+  },
   argTypes: {
     value: {
       control: "select",
@@ -49,10 +55,10 @@ Inspired by CategoryFilters pattern with:
       description: "Display style",
     },
   },
-};
+} satisfies Meta<typeof DepartmentFilter>;
 
 export default meta;
-type Story = StoryObj<typeof DepartmentFilter>;
+type Story = StoryObj<typeof meta>;
 
 // Mock Data
 const mockMembers: OrgChartNode[] = [

@@ -97,7 +97,7 @@ const mockPaths: ResponsibilityPath[] = [
   },
 ];
 
-const meta: Meta<typeof UnifiedSearchBar> = {
+const meta = {
   title: "Features/Organigram/UnifiedSearchBar",
   component: UnifiedSearchBar,
   parameters: { layout: "padded" },
@@ -107,10 +107,10 @@ const meta: Meta<typeof UnifiedSearchBar> = {
     onSelectMember: fn(),
     onSelectResponsibility: fn(),
   },
-};
+} satisfies Meta<typeof UnifiedSearchBar>;
 
 export default meta;
-type Story = StoryObj<typeof UnifiedSearchBar>;
+type Story = StoryObj<typeof meta>;
 
 const baseArgs = {
   members: mockMembers,

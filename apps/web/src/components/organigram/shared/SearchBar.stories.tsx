@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { useState } from "react";
 import { SearchBar } from "./SearchBar";
 import type { SearchBarProps } from "./types";
 import type { OrgChartNode } from "@/types/organigram";
 
-const meta: Meta<typeof SearchBar> = {
+const meta = {
   title: "Features/Organigram/SearchBar",
   component: SearchBar,
   parameters: {
@@ -38,6 +39,11 @@ const meta: Meta<typeof SearchBar> = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    value: "",
+    onChange: fn(),
+    members: [],
+  },
   argTypes: {
     value: {
       control: "text",
@@ -56,10 +62,10 @@ const meta: Meta<typeof SearchBar> = {
       description: "Max autocomplete results",
     },
   },
-};
+} satisfies Meta<typeof SearchBar>;
 
 export default meta;
-type Story = StoryObj<typeof SearchBar>;
+type Story = StoryObj<typeof meta>;
 
 // Mock Data
 const mockMembers: OrgChartNode[] = [

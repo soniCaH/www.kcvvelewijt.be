@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CalendarView, type CalendarMatch } from "./CalendarView";
 
-const meta: Meta<typeof CalendarView> = {
+const meta = {
   title: "Features/Calendar/CalendarView",
   component: CalendarView,
   parameters: {
@@ -11,10 +11,10 @@ const meta: Meta<typeof CalendarView> = {
     },
   },
   tags: ["autodocs"],
-};
+} satisfies Meta<typeof CalendarView>;
 
 export default meta;
-type Story = StoryObj<typeof CalendarView>;
+type Story = StoryObj<typeof meta>;
 
 // ---------------------------------------------------------------------------
 // Mock data

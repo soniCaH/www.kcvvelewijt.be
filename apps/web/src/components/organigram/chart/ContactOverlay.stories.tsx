@@ -10,7 +10,7 @@ const president = staffMembersFixture.find((n) => n.id === "president") ?? {
 };
 const minimal = { id: "x", name: "Jan Janssen", title: "Vrijwilliger" };
 
-const meta: Meta<typeof ContactOverlay> = {
+const meta = {
   title: "Features/Organigram/ContactOverlay",
   component: ContactOverlay,
   parameters: {
@@ -27,7 +27,7 @@ const meta: Meta<typeof ContactOverlay> = {
     onClose: fn(),
     onViewDetails: fn(),
   },
-};
+} satisfies Meta<typeof ContactOverlay>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

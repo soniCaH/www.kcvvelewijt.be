@@ -18,7 +18,7 @@ import { FilterTabs, type FilterTab, type FilterTabsProps } from "./FilterTabs";
  * - Accessible and keyboard navigable
  * - Consistent KCVV green styling
  */
-const meta: Meta<typeof FilterTabs> = {
+const meta = {
   title: "UI/FilterTabs",
   component: FilterTabs,
   parameters: {
@@ -46,7 +46,7 @@ const meta: Meta<typeof FilterTabs> = {
       description: "Render as links instead of buttons",
     },
   },
-};
+} satisfies Meta<typeof FilterTabs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

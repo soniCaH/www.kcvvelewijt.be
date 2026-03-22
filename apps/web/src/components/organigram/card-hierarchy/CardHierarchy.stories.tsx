@@ -52,7 +52,7 @@ const storyPaths: ResponsibilityPath[] = [
   },
 ];
 
-const meta: Meta<typeof CardHierarchy> = {
+const meta = {
   title: "Features/Organigram/CardHierarchy",
   component: CardHierarchy,
   parameters: {
@@ -92,6 +92,7 @@ const meta: Meta<typeof CardHierarchy> = {
   },
   tags: ["autodocs"],
   args: {
+    members: clubStructure,
     responsibilityPaths: storyPaths,
   },
   argTypes: {
@@ -108,7 +109,7 @@ const meta: Meta<typeof CardHierarchy> = {
       description: "Loading state",
     },
   },
-};
+} satisfies Meta<typeof CardHierarchy>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

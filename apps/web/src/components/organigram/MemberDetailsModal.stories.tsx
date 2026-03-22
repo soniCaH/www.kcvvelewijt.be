@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { MemberDetailsModal } from "./MemberDetailsModal";
 import type { OrgChartNode } from "@/types/organigram";
 
-const meta: Meta<typeof MemberDetailsModal> = {
+const meta = {
   title: "Features/Organigram/MemberDetailsModal",
   component: MemberDetailsModal,
   parameters: {
@@ -15,14 +16,16 @@ const meta: Meta<typeof MemberDetailsModal> = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    onClose: fn(),
+  },
   argTypes: {
-    onClose: { action: "closed" },
     isOpen: { control: "boolean" },
   },
-};
+} satisfies Meta<typeof MemberDetailsModal>;
 
 export default meta;
-type Story = StoryObj<typeof MemberDetailsModal>;
+type Story = StoryObj<typeof meta>;
 
 const mockMember: OrgChartNode = {
   id: "1",

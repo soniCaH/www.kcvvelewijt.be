@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SkipLink } from "./SkipLink";
 import type { ComponentProps } from "react";
 
-const meta: Meta<typeof SkipLink> = {
+const meta = {
   title: "Features/Organigram/SkipLink",
   component: SkipLink,
   parameters: {
@@ -15,10 +15,10 @@ const meta: Meta<typeof SkipLink> = {
     },
   },
   tags: ["autodocs"],
-};
+} satisfies Meta<typeof SkipLink>;
 
 export default meta;
-type Story = StoryObj<typeof SkipLink>;
+type Story = StoryObj<typeof meta>;
 
 function renderWithTarget(args: ComponentProps<typeof SkipLink>) {
   return (
