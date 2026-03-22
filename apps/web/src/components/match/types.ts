@@ -4,52 +4,68 @@
  * React / component dependencies so it can be used anywhere in the app.
  */
 
-export interface UpcomingMatch {
-  /**
-   * Match ID
-   */
+export type { MatchStatus } from "@kcvv/api-contract";
+
+import type { MatchStatus } from "@kcvv/api-contract";
+
+export interface ScheduleTeam {
+  /** Team ID */
   id: number;
-  /**
-   * Match date
-   */
+  /** Team name */
+  name: string;
+  /** Team logo URL */
+  logo?: string;
+}
+
+export interface ScheduleMatch {
+  /** Match ID */
+  id: number;
+  /** Match date */
   date: Date;
-  /**
-   * Match time (optional)
-   */
+  /** Match time (HH:MM) */
   time?: string;
-  /**
-   * Venue/location (optional)
-   */
+  /** Home team */
+  homeTeam: ScheduleTeam;
+  /** Away team */
+  awayTeam: ScheduleTeam;
+  /** Home team score (for finished matches) */
+  homeScore?: number;
+  /** Away team score (for finished matches) */
+  awayScore?: number;
+  /** Match status */
+  status: MatchStatus;
+  /** Competition name */
+  competition?: string;
+}
+
+export interface UpcomingMatch {
+  /** Match ID */
+  id: number;
+  /** Match date */
+  date: Date;
+  /** Match time (optional) */
+  time?: string;
+  /** Venue/location (optional) */
   venue?: string;
-  /**
-   * Home team
-   */
+  /** Home team */
   homeTeam: {
     id: number;
     name: string;
     logo?: string;
     score?: number;
   };
-  /**
-   * Away team
-   */
+  /** Away team */
   awayTeam: {
     id: number;
     name: string;
     logo?: string;
     score?: number;
   };
-  /**
-   * Match status
-   */
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
-  /**
-   * Round/matchday (optional)
-   */
+  /** Match status */
+  status: MatchStatus;
+  /** Round/matchday (optional) */
   round?: string;
-  /**
-   * Competition name (optional)
-   */
+  /** Competition name (optional) */
   competition?: string;
   /** PSD team ID identifying which KCVV team plays (A-team, U21, etc.) */
   kcvvTeamId?: number;

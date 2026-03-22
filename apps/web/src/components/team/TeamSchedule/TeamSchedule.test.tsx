@@ -242,7 +242,7 @@ describe("TeamSchedule", () => {
       };
       render(<TeamSchedule matches={[winMatch]} teamId={1235} />);
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-green-500");
+      expect(link.className).toContain("border-l-kcvv-success");
     });
 
     it("applies red border for losses", () => {
@@ -257,7 +257,7 @@ describe("TeamSchedule", () => {
       };
       render(<TeamSchedule matches={[lossMatch]} teamId={1235} />);
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-red-500");
+      expect(link.className).toContain("border-l-kcvv-alert");
     });
 
     it("applies yellow border for draws", () => {
@@ -272,7 +272,7 @@ describe("TeamSchedule", () => {
       };
       render(<TeamSchedule matches={[drawMatch]} teamId={1235} />);
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-yellow-500");
+      expect(link.className).toContain("border-l-kcvv-warning");
     });
   });
 
