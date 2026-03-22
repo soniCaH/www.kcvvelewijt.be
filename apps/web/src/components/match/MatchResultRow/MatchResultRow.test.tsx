@@ -91,6 +91,7 @@ describe("MatchResultRow", () => {
         />,
       );
       expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
     });
 
     it("applies green border for wins", () => {

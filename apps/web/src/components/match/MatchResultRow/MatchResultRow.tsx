@@ -114,7 +114,7 @@ export function MatchResultRow({
           <span
             className={cn(
               "truncate text-sm",
-              teamId !== undefined && match.homeTeam.id === teamId
+              isMember && match.homeTeam.id === teamId
                 ? "font-semibold"
                 : "text-gray-700",
             )}
@@ -159,7 +159,7 @@ export function MatchResultRow({
           <span
             className={cn(
               "truncate text-sm text-right",
-              teamId !== undefined && match.awayTeam.id === teamId
+              isMember && match.awayTeam.id === teamId
                 ? "font-semibold"
                 : "text-gray-700",
             )}
