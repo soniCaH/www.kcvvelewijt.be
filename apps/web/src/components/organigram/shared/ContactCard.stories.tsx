@@ -289,7 +289,6 @@ export const Clickable: Story = {
   args: {
     member: mockMemberComplete,
     variant: "detailed",
-    onClick: fn(),
   },
 };
 
@@ -297,7 +296,6 @@ export const HoverState: Story = {
   args: {
     member: mockMemberComplete,
     variant: "detailed",
-    onClick: fn(),
   },
   parameters: {
     pseudo: { hover: true },
@@ -312,7 +310,6 @@ export const AccessibilityTest: Story = {
     variant: "detailed",
     showQuickActions: true,
     showDepartment: true,
-    onClick: fn(),
     testId: "contact-card-test",
   },
   parameters: {

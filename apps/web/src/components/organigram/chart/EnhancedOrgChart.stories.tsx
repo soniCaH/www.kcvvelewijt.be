@@ -571,7 +571,13 @@ export const AccessibilityTest: Story = {
 export const SingleMember: Story = {
   render: EnhancedOrgChartWithState,
   args: {
-    members: [clubStructure[0]],
+    members: [
+      clubStructure[0] ?? {
+        id: "fallback",
+        name: "Naam",
+        title: "Functie",
+      },
+    ],
   },
   parameters: {
     docs: {

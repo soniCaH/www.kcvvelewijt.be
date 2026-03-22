@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import { fn } from "storybook/test";
 import { FilterTabs, type FilterTab, type FilterTabsProps } from "./FilterTabs";
 
 /**
@@ -31,6 +32,9 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    onChange: fn(),
+  },
   argTypes: {
     size: {
       control: "select",
