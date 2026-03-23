@@ -384,7 +384,7 @@ describe("SanityArticleBody links", () => {
 });
 
 describe("SanityArticleBody file attachment", () => {
-  it("renders download button with dark green styling", () => {
+  it("renders DownloadButton component for file attachments", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -400,10 +400,8 @@ describe("SanityArticleBody file attachment", () => {
       "a[href='https://example.com/file.pdf']",
     );
     expect(link).toBeInTheDocument();
-
-    const classes = link!.className;
-    expect(classes).toContain("bg-kcvv-green-dark");
-    expect(classes).toContain("text-white");
+    expect(link!.getAttribute("target")).toBe("_blank");
+    expect(link!.getAttribute("rel")).toBe("noopener noreferrer");
     expect(link!.textContent).toContain("Download PDF");
   });
 

@@ -83,3 +83,7 @@ export type { SectionHeaderProps } from "./SectionHeader";
 // HorizontalSlider
 export { HorizontalSlider } from "./HorizontalSlider";
 export type { HorizontalSliderProps } from "./HorizontalSlider";
+
+// DownloadButton
+export { DownloadButton } from "./DownloadButton";
+export type { DownloadButtonProps } from "./DownloadButton";
