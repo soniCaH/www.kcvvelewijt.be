@@ -497,15 +497,15 @@ export function ResponsibilityFinder({
                 semanticAnswer &&
                 !semanticLoading &&
                 !selectedResult && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-5 mt-3 mb-1">
-                    <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-green-700 uppercase tracking-wide">
+                  <div className="bg-kcvv-success/10 border border-kcvv-success/25 rounded-xl p-5 mt-3 mb-1">
+                    <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-kcvv-green-dark uppercase tracking-wide">
                       <Sparkles className="w-3 h-3" />
                       AI-antwoord
                     </div>
                     <p className="text-kcvv-gray-blue text-sm leading-relaxed">
                       {semanticAnswer}
                     </p>
-                    <p className="text-xs text-gray-400 mt-3">
+                    <p className="text-xs text-kcvv-gray mt-3">
                       Gegenereerd door AI · Controleer altijd bij de
                       contactpersoon
                     </p>

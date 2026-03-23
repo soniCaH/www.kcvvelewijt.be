@@ -56,11 +56,16 @@ export function useSemanticSearch(
       if (timerRef.current) clearTimeout(timerRef.current);
 
       if (!query.trim()) {
+        abortRef.current?.abort();
+        abortRef.current = null;
         setResults([]);
         setAnswer(undefined);
         setError(null);
+        setLoading(false);
         return;
       }
+
+      setAnswer(undefined);
 
       timerRef.current = setTimeout(async () => {
         abortRef.current?.abort();
@@ -83,8 +88,10 @@ export function useSemanticSearch(
             results: SemanticSearchResult[];
             answer?: string;
           };
-          setResults(data.results);
-          setAnswer(data.answer);
+          if (abortRef.current === controller) {
+            setResults(data.results);
+            setAnswer(data.answer);
+          }
         } catch (err) {
           if ((err as Error).name === "AbortError") return;
           setError((err as Error).message);
@@ -101,9 +108,13 @@ export function useSemanticSearch(
   );
 
   const clear = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    abortRef.current?.abort();
+    abortRef.current = null;
     setResults([]);
     setAnswer(undefined);
     setError(null);
+    setLoading(false);
   }, []);
 
   useEffect(() => {

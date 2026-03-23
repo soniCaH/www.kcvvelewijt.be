@@ -227,7 +227,10 @@ describe("handleSearch — LLM answer", () => {
       provideAllServices(
         handleSearch({ query: "wie regelt de kantine", limit: 5 }),
         {
-          matches: [makeHit("kantine", 0.55), makeHit("bar", 0.4)],
+          matches: [
+            makeHit("kantine", LLM_SCORE_THRESHOLD),
+            makeHit("bar", MIN_SCORE + 0.05),
+          ],
           aiService: { generateAnswer },
         },
       ),
@@ -250,7 +253,7 @@ describe("handleSearch — LLM answer", () => {
 
     const result = await Effect.runPromise(
       provideAllServices(handleSearch({ query: "vague question", limit: 5 }), {
-        matches: [makeHit("low", 0.45)],
+        matches: [makeHit("low", LLM_SCORE_THRESHOLD - 1e-6)],
         aiService: { generateAnswer },
       }),
     );
@@ -260,16 +263,19 @@ describe("handleSearch — LLM answer", () => {
   });
 
   it("returns results without answer when AI fails", async () => {
+    const generateAnswer = vi.fn(() =>
+      Effect.fail(new AiAnswerError("AI timeout")),
+    );
+
     const result = await Effect.runPromise(
       provideAllServices(handleSearch({ query: "kantine", limit: 5 }), {
-        matches: [makeHit("kantine", 0.55)],
-        aiService: {
-          generateAnswer: () => Effect.fail(new AiAnswerError("AI timeout")),
-        },
+        matches: [makeHit("kantine", LLM_SCORE_THRESHOLD)],
+        aiService: { generateAnswer },
       }),
     );
 
     expect(result.results).toHaveLength(1);
     expect(result.answer).toBeUndefined();
+    expect(generateAnswer).toHaveBeenCalledOnce();
   });
 });

@@ -58,7 +58,11 @@ export const AiAnswerServiceLive = Layer.effect(
             new AiAnswerError(`AI answer failed: ${String(cause)}`, cause),
         }).pipe(
           Effect.timeout("8 seconds"),
-          Effect.catchAll(() => Effect.succeed(undefined)),
+          Effect.catchAll((cause) =>
+            Effect.logWarning("[Workers AI] degraded — answer skipped", {
+              cause,
+            }).pipe(Effect.map(() => undefined)),
+          ),
         ),
     };
   }),
