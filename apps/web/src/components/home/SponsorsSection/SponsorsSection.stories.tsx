@@ -6,7 +6,7 @@ import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
 /**
  * SponsorsSection is an async server component (fetches from Sanity).
  * This story renders the visual composition using mock data with the
- * dark green background and semi-transparent white logo slots.
+ * dark green background with sponsor logos.
  */
 const meta = {
   title: "Features/Homepage/SponsorsSection",

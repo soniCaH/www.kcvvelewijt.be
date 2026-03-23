@@ -39,21 +39,21 @@ const sponsorNoUrl: Sponsor = {
 
 describe("SponsorCard", () => {
   describe("variant support", () => {
-    it("uses bg-white/15 background in dark variant", () => {
+    it("renders without background in dark variant", () => {
       const { container } = render(
         <SponsorCard sponsor={sponsorNoUrl} variant="dark" />,
       );
 
       const card = container.querySelector("[class*='aspect-']");
-      expect(card).toHaveClass("bg-white/15");
+      expect(card).not.toHaveClass("bg-white/15");
       expect(card).not.toHaveClass("bg-gray-100");
     });
 
-    it("uses bg-gray-100 background in light variant (default)", () => {
+    it("renders without background in light variant (default)", () => {
       const { container } = render(<SponsorCard sponsor={sponsorNoUrl} />);
 
       const card = container.querySelector("[class*='aspect-']");
-      expect(card).toHaveClass("bg-gray-100");
+      expect(card).not.toHaveClass("bg-gray-100");
     });
 
     it("does not invert logo in dark variant (shows original colors)", () => {

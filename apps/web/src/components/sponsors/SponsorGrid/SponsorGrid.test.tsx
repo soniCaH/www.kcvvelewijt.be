@@ -42,14 +42,15 @@ describe("SponsorGrid", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("passes variant to SponsorCard children", () => {
+  it("renders cards without background in dark variant", () => {
     const { container } = render(
       <SponsorGrid sponsors={sponsors} variant="dark" />,
     );
 
     const cards = container.querySelectorAll("[class*='aspect-']");
     cards.forEach((card) => {
-      expect(card).toHaveClass("bg-white/15");
+      expect(card).not.toHaveClass("bg-white/15");
+      expect(card).not.toHaveClass("bg-gray-100");
     });
   });
 

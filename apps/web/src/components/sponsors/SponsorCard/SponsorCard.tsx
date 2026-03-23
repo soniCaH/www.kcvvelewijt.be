@@ -2,7 +2,6 @@
  * SponsorCard Component
  *
  * Individual sponsor display with logo, optional name, and link to website.
- * Hover reveals a "Bezoek website" overlay matching the existing Sponsors pattern.
  */
 
 import Image from "next/image";
@@ -32,7 +31,7 @@ export interface SponsorCardProps {
 export const SponsorCard = ({
   sponsor,
   size = "md",
-  variant = "light",
+  variant: _variant = "light",
   showName = false,
   className,
 }: SponsorCardProps) => {
@@ -41,10 +40,8 @@ export const SponsorCard = ({
   const card = (
     <div
       className={cn(
-        "group relative aspect-[3/2] rounded flex items-center justify-center overflow-hidden",
-        "opacity-70 hover:opacity-100 transition-opacity duration-300",
+        "group relative aspect-[3/2] rounded-card flex items-center justify-center overflow-hidden",
         "p-[8%]",
-        variant === "dark" ? "bg-white/15" : "bg-gray-100",
         className,
       )}
     >
@@ -55,20 +52,6 @@ export const SponsorCard = ({
         height={image.height}
         className="w-full h-full object-contain"
       />
-
-      {/* Hover overlay */}
-      {sponsor.url && (
-        <div
-          className={cn(
-            "absolute inset-0 bg-black/60 flex items-center justify-center",
-            "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-          )}
-        >
-          <span className="text-white text-xs font-semibold uppercase tracking-wide">
-            Bezoek website
-          </span>
-        </div>
-      )}
     </div>
   );
 
