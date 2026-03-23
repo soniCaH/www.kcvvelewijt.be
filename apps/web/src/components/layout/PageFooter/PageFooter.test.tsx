@@ -22,8 +22,8 @@ describe("PageFooter", () => {
   });
 
   it("renders SectionTransition from gray-100 to kcvv-green-dark", () => {
-    const { container } = render(<PageFooter />);
-    const transition = container.querySelector("[aria-hidden='true']");
+    render(<PageFooter />);
+    const transition = screen.queryByTestId("section-transition");
     expect(transition).toBeInTheDocument();
   });
 

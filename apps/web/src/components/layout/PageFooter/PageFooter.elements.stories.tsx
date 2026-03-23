@@ -158,7 +158,7 @@ export const BottomBar: Story = {
   render: () => (
     <div className="bg-kcvv-black w-[800px]">
       <div className="border-t border-white/6 flex items-center justify-center gap-6 px-8 py-3.5 text-[0.6875rem] text-white/35 tracking-wide">
-        <span>© 2026 KCVV Elewijt</span>
+        <span>© {new Date().getFullYear()} KCVV Elewijt</span>
         <span className="text-white/12" aria-hidden="true">
           ·
         </span>

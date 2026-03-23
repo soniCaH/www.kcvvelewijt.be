@@ -112,6 +112,7 @@ export function SectionTransition({
     return (
       <div
         aria-hidden="true"
+        data-testid="section-transition"
         data-height={height}
         data-margin-top={marginTop}
         className={cn("relative w-full", className)}
@@ -159,6 +160,7 @@ export function SectionTransition({
   return (
     <div
       aria-hidden="true"
+      data-testid="section-transition"
       data-height={height}
       data-margin-top={marginTop}
       className={cn("relative w-full", className)}
