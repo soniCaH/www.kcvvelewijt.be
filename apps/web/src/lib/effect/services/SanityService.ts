@@ -95,9 +95,36 @@ export interface SanityArticleListItem {
   coverImageUrl: string | null;
 }
 
+export interface SanityMentionedPlayer {
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  position: string | null;
+  imageUrl: string | null;
+  psdId: string;
+}
+
+export interface SanityMentionedTeam {
+  _id: string;
+  name: string;
+  imageUrl: string | null;
+  slug: string;
+}
+
+export interface SanityMentionedStaffMember {
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  positionTitle: string | null;
+  imageUrl: string | null;
+}
+
 export interface SanityArticle extends SanityArticleListItem {
   body: unknown;
   relatedArticles?: SanityArticle[];
+  mentionedPlayers?: SanityMentionedPlayer[];
+  mentionedStaffMembers?: SanityMentionedStaffMember[];
+  mentionedTeams?: SanityMentionedTeam[];
 }
 
 export interface SanitySponsor {

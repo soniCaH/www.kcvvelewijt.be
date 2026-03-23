@@ -17,5 +17,19 @@ export const ARTICLE_BY_SLUG_QUERY = `*[_type == "article" && slug.current == $s
   _id, title, slug, publishAt, featured, tags,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   ${BODY_PROJECTION},
-  relatedArticles[]-> { _id, title, slug, publishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" }
+  relatedArticles[]-> { _id, title, slug, publishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
+    _id, firstName, lastName, position,
+    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    psdId
+  },
+  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {
+    _id, name,
+    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    "slug": slug.current
+  },
+  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
+    _id, firstName, lastName, positionTitle,
+    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"
+  }
 }`;
