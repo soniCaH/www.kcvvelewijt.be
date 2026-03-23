@@ -299,7 +299,7 @@ article a:hover,
   text-decoration-color: var(--color-kcvv-green-bright);
 }
 
-/* In-body article links: no underline by default, underline on hover (except content-links which use ::after) */
+/* In-body article links: no underline by default, underline on hover (except .content-link which uses native text-decoration with text-decoration-skip-ink) */
 .prose a:not(.content-link) {
   text-decoration: none;
 }

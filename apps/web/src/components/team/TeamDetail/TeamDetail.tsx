@@ -17,7 +17,14 @@ const PROSE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, "img"],
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
+    a: [...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []), "class"],
     img: ["src", "srcset", "alt", "title", "width", "height", "loading"],
+  },
+  transformTags: {
+    a: (tagName, attribs) => ({
+      tagName,
+      attribs: { ...attribs, class: "content-link" },
+    }),
   },
 };
 import { UrlTabs } from "@/components/ui/url-tabs";
