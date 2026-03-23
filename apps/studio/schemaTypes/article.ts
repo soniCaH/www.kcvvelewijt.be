@@ -70,6 +70,7 @@ export const article = defineType({
                     title: 'Reference',
                     type: 'reference',
                     to: [{type: 'player'}, {type: 'team'}, {type: 'article'}, {type: 'page'}],
+                    validation: (r) => r.required(),
                   },
                 ],
               },
