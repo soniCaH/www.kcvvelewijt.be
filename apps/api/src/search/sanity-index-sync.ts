@@ -79,13 +79,15 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     const embedding = yield* EmbeddingService;
     const vectorize = yield* VectorizeService;
 
-    const sanityClient = createClient({
-      projectId: env.SANITY_PROJECT_ID,
-      dataset: env.SANITY_DATASET,
-      apiVersion: "2024-01-01",
-      token: env.SANITY_API_TOKEN,
-      useCdn: false,
-    });
+    let _sanityClient: ReturnType<typeof createClient> | undefined;
+    const sanityClient = () =>
+      (_sanityClient ??= createClient({
+        projectId: env.SANITY_PROJECT_ID,
+        dataset: env.SANITY_DATASET,
+        apiVersion: "2024-01-01",
+        token: env.SANITY_API_TOKEN,
+        useCdn: false,
+      }));
 
     const indexDoc = (
       id: string,
@@ -109,7 +111,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     const fetchResponsibility =
       options?.fetchResponsibility ??
       (() =>
-        sanityClient.fetch<SanityResponsibilityDoc[]>(RESPONSIBILITY_QUERY));
+        sanityClient().fetch<SanityResponsibilityDoc[]>(RESPONSIBILITY_QUERY));
 
     const docs = yield* Effect.tryPromise({
       try: fetchResponsibility,
@@ -148,7 +150,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
 
     const fetchArticles =
       options?.fetchArticles ??
-      (() => sanityClient.fetch<SanityArticleDoc[]>(ARTICLE_QUERY));
+      (() => sanityClient().fetch<SanityArticleDoc[]>(ARTICLE_QUERY));
 
     const articleResult = yield* Effect.tryPromise({
       try: fetchArticles,
@@ -194,7 +196,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
 
     const fetchPages =
       options?.fetchPages ??
-      (() => sanityClient.fetch<SanityPageDoc[]>(PAGE_QUERY));
+      (() => sanityClient().fetch<SanityPageDoc[]>(PAGE_QUERY));
 
     const pageResult = yield* Effect.tryPromise({
       try: fetchPages,
