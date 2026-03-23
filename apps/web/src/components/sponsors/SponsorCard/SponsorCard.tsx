@@ -50,7 +50,7 @@ export const SponsorCard = ({
         alt={sponsor.name}
         width={image.width}
         height={image.height}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
       />
     </div>
   );

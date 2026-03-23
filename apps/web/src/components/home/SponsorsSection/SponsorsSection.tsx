@@ -8,7 +8,7 @@ export interface SponsorsSectionProps {
 
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
   return (
-    <section className={cn("bg-kcvv-green-dark py-12", className)}>
+    <section className={cn("py-6", className)}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <SectionHeader
           title="Onze sponsors"

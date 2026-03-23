@@ -18,7 +18,7 @@ const meta = {
     );
 
     return (
-      <section className="bg-kcvv-green-dark py-12">
+      <section className="bg-kcvv-green-dark py-6">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <SectionHeader
             title="Onze sponsors"
