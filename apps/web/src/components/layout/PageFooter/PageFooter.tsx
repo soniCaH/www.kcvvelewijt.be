@@ -58,12 +58,12 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             <h3 className="text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Club
             </h3>
-            <ul className="flex flex-col gap-[0.625rem]">
+            <ul className="flex flex-col gap-2.5">
               {clubLinks.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[0.8125rem] text-white/55 hover:text-kcvv-green-bright transition-colors"
+                    className="text-sm text-white/55 hover:text-kcvv-green-bright transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -77,18 +77,18 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             <h3 className="text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Contact
             </h3>
-            <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-4">
+            <p className="text-sm text-white/55 leading-relaxed mb-4">
               Driesstraat 32
               <br />
               1982 Elewijt
             </p>
             <a
               href="mailto:info@kcvvelewijt.be"
-              className="text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
+              className="text-sm font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
             >
               info@kcvvelewijt.be
             </a>
-            <div className="flex gap-[0.625rem] mt-5 max-md:justify-center">
+            <div className="flex gap-2.5 mt-5 max-md:justify-center">
               <a
                 href="https://facebook.com/KCVVElewijt/"
                 target="_blank"
