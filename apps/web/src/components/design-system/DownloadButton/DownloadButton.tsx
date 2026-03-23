@@ -77,13 +77,30 @@ function getExtension(str: string): string | undefined {
   return match?.[1]?.toLowerCase();
 }
 
+const SAFE_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+
+function isSafeHref(href: string): boolean {
+  try {
+    return SAFE_PROTOCOLS.has(new URL(href).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function normalizeMimeType(mimeType: string): string {
+  return mimeType.split(";")[0].trim().toLowerCase();
+}
+
 function detectFileType(
   mimeType?: string,
   href?: string,
   fileName?: string,
 ): FileTypeInfo {
-  if (mimeType && MIME_MAP[mimeType]) {
-    return FILE_TYPES[MIME_MAP[mimeType]];
+  if (mimeType) {
+    const normalized = normalizeMimeType(mimeType);
+    if (MIME_MAP[normalized]) {
+      return FILE_TYPES[MIME_MAP[normalized]];
+    }
   }
 
   const urlExt = href ? getExtension(href) : undefined;
@@ -135,20 +152,27 @@ export const DownloadButton = ({
   const fileType = detectFileType(mimeType, href, fileName);
   const IconComponent = fileType.icon;
   const displayLabel = label ?? extractLabelFromUrl(href) ?? fileType.subtitle;
+  const safeHref = isSafeHref(href) ? href : undefined;
 
   if (variant === "inline") {
     return (
       <a
-        href={href}
+        href={safeHref}
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          "inline-flex items-center gap-1.5 hover:text-kcvv-green-bright hover:underline",
+          "group inline-flex items-baseline gap-1.5 no-underline",
           className,
         )}
       >
-        <IconComponent size={16} style={{ color: fileType.color }} />
-        <span>{displayLabel}</span>
+        <IconComponent
+          size={16}
+          style={{ color: fileType.color }}
+          className="relative top-[2px] shrink-0"
+        />
+        <span className="underline decoration-gray-300 underline-offset-2 group-hover:decoration-current">
+          {displayLabel}
+        </span>
         {fileSize != null && (
           <>
             <span className="text-gray-400">&mdash;</span>
@@ -157,7 +181,10 @@ export const DownloadButton = ({
             </span>
           </>
         )}
-        <Download size={16} className="text-gray-400" />
+        <Download
+          size={16}
+          className="relative top-[2px] shrink-0 text-gray-400"
+        />
       </a>
     );
   }
@@ -169,7 +196,7 @@ export const DownloadButton = ({
       rel="noopener noreferrer"
       className={cn(
         "group flex items-center gap-4 rounded-lg border border-[#edeff4] bg-white shadow-sm",
-        "transition-all duration-200 hover:border-kcvv-green-bright hover:shadow-md",
+        "transition-all duration-300 hover:bg-gray-50 hover:shadow-lg hover:scale-[1.02]",
         "overflow-hidden no-underline",
         className,
       )}
@@ -204,10 +231,7 @@ export const DownloadButton = ({
             {formatFileSize(fileSize)}
           </span>
         )}
-        <Download
-          size={20}
-          className="text-gray-400 transition-colors group-hover:text-kcvv-green-bright"
-        />
+        <Download size={20} className="text-gray-400" />
       </div>
     </a>
   );
