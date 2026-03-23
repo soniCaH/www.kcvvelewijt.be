@@ -87,6 +87,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         apiVersion: "2024-01-01",
         token: env.SANITY_API_TOKEN,
         useCdn: false,
+        perspective: "published",
       }));
 
     const indexDoc = (
