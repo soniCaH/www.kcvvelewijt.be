@@ -19,6 +19,7 @@ interface UseSemanticSearchOptions {
 
 export interface UseSemanticSearchReturn {
   results: SemanticSearchResult[];
+  answer: string | undefined;
   loading: boolean;
   error: string | null;
   search: (query: string) => void;
@@ -44,6 +45,7 @@ export function useSemanticSearch(
 ): UseSemanticSearchReturn {
   const { type, limit = 5, debounceMs = 300 } = options;
   const [results, setResults] = useState<SemanticSearchResult[]>([]);
+  const [answer, setAnswer] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,10 +56,16 @@ export function useSemanticSearch(
       if (timerRef.current) clearTimeout(timerRef.current);
 
       if (!query.trim()) {
+        abortRef.current?.abort();
+        abortRef.current = null;
         setResults([]);
+        setAnswer(undefined);
         setError(null);
+        setLoading(false);
         return;
       }
+
+      setAnswer(undefined);
 
       timerRef.current = setTimeout(async () => {
         abortRef.current?.abort();
@@ -78,12 +86,17 @@ export function useSemanticSearch(
           if (!res.ok) throw new Error(`Search failed: ${res.status}`);
           const data = (await res.json()) as {
             results: SemanticSearchResult[];
+            answer?: string;
           };
-          setResults(data.results);
+          if (abortRef.current === controller) {
+            setResults(data.results);
+            setAnswer(data.answer);
+          }
         } catch (err) {
           if ((err as Error).name === "AbortError") return;
           setError((err as Error).message);
           setResults([]);
+          setAnswer(undefined);
         } finally {
           if (abortRef.current === controller) {
             setLoading(false);
@@ -95,8 +108,13 @@ export function useSemanticSearch(
   );
 
   const clear = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    abortRef.current?.abort();
+    abortRef.current = null;
     setResults([]);
+    setAnswer(undefined);
     setError(null);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -107,5 +125,5 @@ export function useSemanticSearch(
     };
   }, []);
 
-  return { results, loading, error, search, clear };
+  return { results, answer, loading, error, search, clear };
 }
