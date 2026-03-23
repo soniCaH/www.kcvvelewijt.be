@@ -6,15 +6,20 @@
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
+import { BffService } from "@/lib/effect/services/BffService";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { formatArticleDate } from "@/lib/utils/dates";
 import {
-  ArticleHeader,
-  ArticleMetadata,
-  ArticleFooter,
-} from "@/components/article";
+  mapEditorialArticles,
+  mapBffRelatedItems,
+  mapMentionedPlayers,
+  mapMentionedTeams,
+  mapMentionedStaff,
+} from "@/lib/utils/article-related-items";
+import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
-import { buildRelatedContent } from "@/lib/utils/related-content";
+import { RelatedContentSlider } from "@/components/related/RelatedContentSlider/RelatedContentSlider";
+import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
 
 interface ArticlePageProps {
@@ -111,12 +116,30 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     hashtags: tags,
   };
 
-  const relatedContent = buildRelatedContent({
-    relatedArticles: article.relatedArticles,
-    mentionedPlayers: article.mentionedPlayers,
-    mentionedStaffMembers: article.mentionedStaffMembers,
-    mentionedTeams: article.mentionedTeams,
-  });
+  const hasEditorialArticles =
+    article.relatedArticles && article.relatedArticles.length > 0;
+
+  let articleRelatedItems: RelatedContentItem[];
+  if (hasEditorialArticles) {
+    articleRelatedItems = mapEditorialArticles(article.relatedArticles);
+  } else {
+    articleRelatedItems = await runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getRelated(article._id);
+      }).pipe(
+        Effect.map(mapBffRelatedItems),
+        Effect.catchAll(() => Effect.succeed([])),
+      ),
+    );
+  }
+
+  const relatedItems: RelatedContentItem[] = [
+    ...articleRelatedItems,
+    ...mapMentionedPlayers(article.mentionedPlayers),
+    ...mapMentionedStaff(article.mentionedStaffMembers),
+    ...mapMentionedTeams(article.mentionedTeams),
+  ];
 
   return (
     <>
@@ -151,9 +174,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
         </main>
 
-        {relatedContent.length > 0 && (
-          <ArticleFooter relatedContent={relatedContent} />
-        )}
+        <RelatedContentSlider items={relatedItems} />
       </div>
     </>
   );

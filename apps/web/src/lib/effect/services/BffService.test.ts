@@ -196,6 +196,63 @@ describe("BffService", () => {
     expect(exit._tag).toBe("Failure");
   });
 
+  it("getRelated calls /related?id=xxx and returns decoded items", async () => {
+    const sampleRelated = [
+      {
+        id: "doc-1",
+        slug: "some-article",
+        type: "article",
+        score: 0.85,
+        title: "Related Article",
+        excerpt: "A related article excerpt",
+      },
+      {
+        id: "doc-2",
+        slug: "some-page",
+        type: "page",
+        score: 0.72,
+        title: "Related Page",
+        excerpt: "A related page excerpt",
+      },
+    ];
+    mockFetchWith(sampleRelated);
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getRelated("abc-123");
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining("/related"),
+      }),
+      expect.any(Object),
+    );
+    expect(result).toHaveLength(2);
+    expect(result[0]?.title).toBe("Related Article");
+    expect(result[1]?.type).toBe("page");
+  });
+
+  it("getRelated passes limit param", async () => {
+    mockFetchWith([]);
+
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getRelated("abc-123", 2);
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining("limit=2"),
+      }),
+      expect.any(Object),
+    );
+  });
+
   it("throws when KCVV_API_URL is missing", async () => {
     vi.stubEnv("KCVV_API_URL", "   ");
 

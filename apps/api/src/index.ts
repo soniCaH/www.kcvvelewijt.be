@@ -24,6 +24,7 @@ import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
 import { StatsApiLive } from "./handlers/stats";
+import { RelatedApiLive } from "./handlers/related";
 import { SearchApiLive } from "./handlers/search";
 import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
@@ -54,6 +55,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(MatchesApiLive),
     Layer.provide(RankingApiLive),
     Layer.provide(StatsApiLive),
+    Layer.provide(RelatedApiLive),
     Layer.provide(SearchApiLive),
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
