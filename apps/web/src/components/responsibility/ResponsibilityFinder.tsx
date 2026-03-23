@@ -26,6 +26,7 @@ import {
   Clipboard,
   ChevronDown,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { getIcon } from "@/lib/icons";
 
@@ -132,6 +133,7 @@ export function ResponsibilityFinder({
 
   const {
     results: semanticResults,
+    answer: semanticAnswer,
     loading: semanticLoading,
     search: semanticSearch,
   } = useSemanticSearch({ type: "responsibility", limit: 5 });
@@ -486,6 +488,26 @@ export function ResponsibilityFinder({
                     </h3>
                     <p className="text-sm text-kcvv-gray">
                       Probeer een andere zoekterm of selecteer een andere rol
+                    </p>
+                  </div>
+                )}
+
+              {/* AI Answer Card */}
+              {showSuggestions &&
+                semanticAnswer &&
+                !semanticLoading &&
+                !selectedResult && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-5 mt-3 mb-1">
+                    <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-green-700 uppercase tracking-wide">
+                      <Sparkles className="w-3 h-3" />
+                      AI-antwoord
+                    </div>
+                    <p className="text-kcvv-gray-blue text-sm leading-relaxed">
+                      {semanticAnswer}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-3">
+                      Gegenereerd door AI · Controleer altijd bij de
+                      contactpersoon
                     </p>
                   </div>
                 )}

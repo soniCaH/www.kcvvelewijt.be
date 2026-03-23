@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
-import { handleSearch, MIN_SCORE } from "./search-handler";
+import { handleSearch, MIN_SCORE, LLM_SCORE_THRESHOLD } from "./search-handler";
 import {
   EmbeddingService,
   EmbeddingError,
@@ -12,6 +12,11 @@ import {
   type VectorizeServiceInterface,
   type VectorizeMatch,
 } from "./vectorize";
+import {
+  AiAnswerService,
+  AiAnswerError,
+  type AiAnswerServiceInterface,
+} from "./ai-answer";
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
@@ -29,28 +34,69 @@ function makeVectorizeMock(
   };
 }
 
+function makeAiAnswerMock(answer?: string): AiAnswerServiceInterface {
+  return {
+    generateAnswer: () => Effect.succeed(answer),
+  };
+}
+
+function provideAllServices<A, E>(
+  effect: Effect.Effect<
+    A,
+    E,
+    EmbeddingService | VectorizeService | AiAnswerService
+  >,
+  opts: {
+    matches?: VectorizeMatch[];
+    aiAnswer?: string;
+    aiService?: AiAnswerServiceInterface;
+  } = {},
+) {
+  return effect.pipe(
+    Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+    Effect.provide(
+      Layer.succeed(VectorizeService, makeVectorizeMock(opts.matches ?? [])),
+    ),
+    Effect.provide(
+      Layer.succeed(
+        AiAnswerService,
+        opts.aiService ?? makeAiAnswerMock(opts.aiAnswer),
+      ),
+    ),
+  );
+}
+
+const makeHit = (id: string, score: number): VectorizeMatch => ({
+  id,
+  score,
+  metadata: {
+    slug: id,
+    type: "responsibilityPath",
+    title: id,
+    excerpt: `Excerpt for ${id}`,
+  },
+});
+
 describe("handleSearch", () => {
   it("returns ranked results", async () => {
     const result = await Effect.runPromise(
-      handleSearch({ query: "wie regelt de kantine", limit: 5 }).pipe(
-        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
-        Effect.provide(
-          Layer.succeed(
-            VectorizeService,
-            makeVectorizeMock([
-              {
-                id: "doc-abc",
-                score: 0.95,
-                metadata: {
-                  slug: "kantine-evenementen",
-                  type: "responsibilityPath",
-                  title: "Kantine",
-                  excerpt: "De kantine...",
-                },
+      provideAllServices(
+        handleSearch({ query: "wie regelt de kantine", limit: 5 }),
+        {
+          matches: [
+            {
+              id: "doc-abc",
+              score: 0.95,
+              metadata: {
+                slug: "kantine-evenementen",
+                type: "responsibilityPath",
+                title: "Kantine",
+                excerpt: "De kantine...",
               },
-            ]),
-          ),
-        ),
+            },
+          ],
+          aiAnswer: "De kantine wordt beheerd door...",
+        },
       ),
     );
 
@@ -61,46 +107,19 @@ describe("handleSearch", () => {
 
   it("returns empty results when no matches", async () => {
     const result = await Effect.runPromise(
-      handleSearch({ query: "unknown", limit: 5 }).pipe(
-        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
-        Effect.provide(Layer.succeed(VectorizeService, makeVectorizeMock([]))),
-      ),
+      provideAllServices(handleSearch({ query: "unknown", limit: 5 })),
     );
     expect(result.results).toHaveLength(0);
   });
 
   it(`filters results below MIN_SCORE (${MIN_SCORE})`, async () => {
     const result = await Effect.runPromise(
-      handleSearch({ query: "vague", limit: 5 }).pipe(
-        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
-        Effect.provide(
-          Layer.succeed(
-            VectorizeService,
-            makeVectorizeMock([
-              {
-                id: "low",
-                score: MIN_SCORE - 0.2,
-                metadata: {
-                  slug: "x",
-                  type: "responsibilityPath",
-                  title: "X",
-                  excerpt: "X",
-                },
-              },
-              {
-                id: "high",
-                score: MIN_SCORE + 0.3,
-                metadata: {
-                  slug: "y",
-                  type: "responsibilityPath",
-                  title: "Y",
-                  excerpt: "Y",
-                },
-              },
-            ]),
-          ),
-        ),
-      ),
+      provideAllServices(handleSearch({ query: "vague", limit: 5 }), {
+        matches: [
+          makeHit("low", MIN_SCORE - 0.2),
+          makeHit("high", MIN_SCORE + 0.3),
+        ],
+      }),
     );
 
     expect(result.results.map((r) => r.id)).not.toContain("low");
@@ -108,30 +127,14 @@ describe("handleSearch", () => {
   });
 
   it("applies exact MIN_SCORE boundary: excludes 0.349, includes 0.35 and 0.351", async () => {
-    const makeHit = (id: string, score: number): VectorizeMatch => ({
-      id,
-      score,
-      metadata: {
-        slug: id,
-        type: "responsibilityPath",
-        title: id,
-        excerpt: id,
-      },
-    });
     const result = await Effect.runPromise(
-      handleSearch({ query: "test", limit: 10 }).pipe(
-        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
-        Effect.provide(
-          Layer.succeed(
-            VectorizeService,
-            makeVectorizeMock([
-              makeHit("below", 0.349),
-              makeHit("at", 0.35),
-              makeHit("above", 0.351),
-            ]),
-          ),
-        ),
-      ),
+      provideAllServices(handleSearch({ query: "test", limit: 10 }), {
+        matches: [
+          makeHit("below", 0.349),
+          makeHit("at", 0.35),
+          makeHit("above", 0.351),
+        ],
+      }),
     );
 
     const ids = result.results.map((r) => r.id);
@@ -153,6 +156,7 @@ describe("handleSearch", () => {
           Effect.provide(
             Layer.succeed(VectorizeService, makeVectorizeMock([])),
           ),
+          Effect.provide(Layer.succeed(AiAnswerService, makeAiAnswerMock())),
         ),
       ),
     );
@@ -175,6 +179,7 @@ describe("handleSearch", () => {
               getByIds: () => Effect.succeed([]),
             }),
           ),
+          Effect.provide(Layer.succeed(AiAnswerService, makeAiAnswerMock())),
         ),
       ),
     );
@@ -200,9 +205,71 @@ describe("handleSearch", () => {
       handleSearch({ query: "test", type: "responsibility", limit: 5 }).pipe(
         Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
         Effect.provide(Layer.succeed(VectorizeService, capturingVectorize)),
+        Effect.provide(Layer.succeed(AiAnswerService, makeAiAnswerMock())),
       ),
     );
 
     expect(capturedFilter?.["type"]).toBe("responsibilityPath");
+  });
+});
+
+describe("handleSearch — LLM answer", () => {
+  it("includes answer when top score >= LLM_SCORE_THRESHOLD", async () => {
+    const generateAnswer = vi.fn(() =>
+      Effect.succeed(
+        "De kantine wordt beheerd door de kantineverantwoordelijke." as
+          | string
+          | undefined,
+      ),
+    );
+
+    const result = await Effect.runPromise(
+      provideAllServices(
+        handleSearch({ query: "wie regelt de kantine", limit: 5 }),
+        {
+          matches: [makeHit("kantine", 0.55), makeHit("bar", 0.4)],
+          aiService: { generateAnswer },
+        },
+      ),
+    );
+
+    expect(result.answer).toBe(
+      "De kantine wordt beheerd door de kantineverantwoordelijke.",
+    );
+    expect(generateAnswer).toHaveBeenCalledOnce();
+    expect(generateAnswer).toHaveBeenCalledWith(
+      "wie regelt de kantine",
+      expect.stringContaining("kantine"),
+    );
+  });
+
+  it("omits answer when top score < LLM_SCORE_THRESHOLD", async () => {
+    const generateAnswer = vi.fn(() =>
+      Effect.succeed("should not appear" as string | undefined),
+    );
+
+    const result = await Effect.runPromise(
+      provideAllServices(handleSearch({ query: "vague question", limit: 5 }), {
+        matches: [makeHit("low", 0.45)],
+        aiService: { generateAnswer },
+      }),
+    );
+
+    expect(result.answer).toBeUndefined();
+    expect(generateAnswer).not.toHaveBeenCalled();
+  });
+
+  it("returns results without answer when AI fails", async () => {
+    const result = await Effect.runPromise(
+      provideAllServices(handleSearch({ query: "kantine", limit: 5 }), {
+        matches: [makeHit("kantine", 0.55)],
+        aiService: {
+          generateAnswer: () => Effect.fail(new AiAnswerError("AI timeout")),
+        },
+      }),
+    );
+
+    expect(result.results).toHaveLength(1);
+    expect(result.answer).toBeUndefined();
   });
 });

@@ -31,4 +31,5 @@ export class SearchResult extends S.Class<SearchResult>("SearchResult")({
 
 export class SearchResponse extends S.Class<SearchResponse>("SearchResponse")({
   results: S.Array(SearchResult),
+  answer: S.optional(S.String),
 }) {}

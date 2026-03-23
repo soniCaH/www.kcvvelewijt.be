@@ -28,6 +28,7 @@ import { RelatedApiLive } from "./handlers/related";
 import { SearchApiLive } from "./handlers/search";
 import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
+import { AiAnswerServiceLive } from "./search/ai-answer";
 import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
 import { runSync } from "./sync/psd-sanity-sync";
@@ -59,6 +60,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(SearchApiLive),
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
+    Layer.provide(AiAnswerServiceLive),
     Layer.provide(FootbalistoServiceLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
