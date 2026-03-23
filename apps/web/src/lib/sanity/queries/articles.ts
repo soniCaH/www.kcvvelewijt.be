@@ -14,7 +14,7 @@ export const ARTICLES_PAGINATED_QUERY = `*[_type == "article" && publishAt <= no
 }`;
 
 export const RELATED_ARTICLES_QUERY = `*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
-  _id, title, slug, publishAt,
+  _id, title, slug, publishAt, featured, tags,
   "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
 }`;
 

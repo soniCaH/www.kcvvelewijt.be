@@ -187,7 +187,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
       <RelatedArticlesSection
         articles={relatedArticles}
-        className="max-w-inner-lg mx-auto px-4 py-8"
+        className="max-w-4xl mx-auto px-4 pb-8"
       />
     </>
   );
