@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { PlayerProfile, PlayerShare } from "@/components/player";
+import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -104,6 +105,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   if (!player) notFound();
 
+  const relatedArticles = await runPromise(
+    Effect.gen(function* () {
+      const sanity = yield* SanityService;
+      return yield* sanity.getRelatedArticles(player._id);
+    }),
+  );
+
   const firstName = player.firstName ?? "";
   const lastName = player.lastName ?? "";
   const fullName = `${firstName} ${lastName}`.trim() || "Speler";
@@ -134,6 +142,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           showQR
         />
       </section>
+
+      <RelatedArticlesSection
+        articles={relatedArticles}
+        className="max-w-4xl mx-auto px-4 pb-8"
+      />
     </>
   );
 }

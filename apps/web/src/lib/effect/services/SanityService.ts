@@ -10,6 +10,7 @@ import {
   ARTICLE_TAGS_QUERY,
   ARTICLES_PAGINATED_QUERY,
   ARTICLE_BY_SLUG_QUERY,
+  RELATED_ARTICLES_QUERY,
 } from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import {
@@ -232,6 +233,9 @@ export interface SanityServiceInterface {
   readonly getHomepageBanners: () => Effect.Effect<SanityHomepageBanners>;
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getStaffMembers: () => Effect.Effect<OrgChartNode[]>;
+  readonly getRelatedArticles: (
+    documentId: string,
+  ) => Effect.Effect<SanityArticleListItem[]>;
   readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
 }
 
@@ -355,5 +359,7 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityOrgMember[]>(STAFF_MEMBERS_QUERY).pipe(
       Effect.map((members) => [CLUB_ROOT_NODE, ...members.map(mapOrgMember)]),
     ),
+  getRelatedArticles: (documentId) =>
+    fetchGroq<SanityArticleListItem[]>(RELATED_ARTICLES_QUERY, { documentId }),
   getPage: (slug) => fetchGroq<SanityPage | null>(PAGE_BY_SLUG_QUERY, { slug }),
 });

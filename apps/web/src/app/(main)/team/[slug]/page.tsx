@@ -11,6 +11,7 @@ import { SanityService } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { TeamDetail } from "@/components/team/TeamDetail";
+import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import {
   transformSanityPlayerToRoster,
   transformSanityStaffToMember,
@@ -150,6 +151,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   if (!team) notFound();
 
+  const relatedArticles = await runPromise(
+    Effect.gen(function* () {
+      const sanity = yield* SanityService;
+      return yield* sanity.getRelatedArticles(team._id);
+    }),
+  );
+
   const psdTeamId = parseInt(team.psdId, 10);
   const bffData =
     Number.isFinite(psdTeamId) && psdTeamId > 0
@@ -157,24 +165,31 @@ export default async function TeamPage({ params }: TeamPageProps) {
       : null;
 
   return (
-    <TeamDetail
-      header={{
-        name: team.name,
-        imageUrl: team.teamImageUrl ?? undefined,
-        ageGroup: getSanityAgeGroup(team),
-        teamType: getSanityTeamType(team),
-        tagline: getSanityTeamTagline(team),
-      }}
-      players={(team.players ?? []).map(transformSanityPlayerToRoster)}
-      staff={(team.staff ?? []).map(transformSanityStaffToMember)}
-      matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
-      standings={bffData?.standings.map(transformRankingToStandings) ?? []}
-      highlightTeamId={bffData?.teamId}
-      teamSlug={slug}
-      calendarUrl={
-        bffData ? `/api/calendar.ics?teamIds=${bffData.teamId}` : undefined
-      }
-    />
+    <>
+      <TeamDetail
+        header={{
+          name: team.name,
+          imageUrl: team.teamImageUrl ?? undefined,
+          ageGroup: getSanityAgeGroup(team),
+          teamType: getSanityTeamType(team),
+          tagline: getSanityTeamTagline(team),
+        }}
+        players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+        staff={(team.staff ?? []).map(transformSanityStaffToMember)}
+        matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
+        standings={bffData?.standings.map(transformRankingToStandings) ?? []}
+        highlightTeamId={bffData?.teamId}
+        teamSlug={slug}
+        calendarUrl={
+          bffData ? `/api/calendar.ics?teamIds=${bffData.teamId}` : undefined
+        }
+      />
+
+      <RelatedArticlesSection
+        articles={relatedArticles}
+        className="max-w-4xl mx-auto px-4 pb-8"
+      />
+    </>
   );
 }
 

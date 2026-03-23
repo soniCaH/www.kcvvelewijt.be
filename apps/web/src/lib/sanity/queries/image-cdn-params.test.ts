@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ARTICLES_QUERY, ARTICLE_BY_SLUG_QUERY } from "./articles";
+import {
+  ARTICLES_QUERY,
+  ARTICLE_BY_SLUG_QUERY,
+  RELATED_ARTICLES_QUERY,
+} from "./articles";
 import { EVENTS_QUERY, NEXT_FEATURED_EVENT_QUERY } from "./events";
 import { PAGE_BY_SLUG_QUERY } from "./pages";
 import { PLAYERS_QUERY, PLAYER_BY_PSD_ID_QUERY } from "./players";
@@ -47,6 +51,7 @@ describe("Sanity image CDN optimization", () => {
     { name: "STAFF_MEMBERS_QUERY", query: STAFF_MEMBERS_QUERY },
     { name: "ARTICLES_QUERY", query: ARTICLES_QUERY },
     { name: "ARTICLE_BY_SLUG_QUERY", query: ARTICLE_BY_SLUG_QUERY },
+    { name: "RELATED_ARTICLES_QUERY", query: RELATED_ARTICLES_QUERY },
     { name: "EVENTS_QUERY", query: EVENTS_QUERY },
     { name: "NEXT_FEATURED_EVENT_QUERY", query: NEXT_FEATURED_EVENT_QUERY },
     { name: "SPONSORS_QUERY", query: SPONSORS_QUERY },
