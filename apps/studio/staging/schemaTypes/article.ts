@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {LinkIcon, UserIcon} from '@sanity/icons'
 
 export const article = defineType({
   name: 'article',
@@ -61,15 +62,31 @@ export const article = defineType({
           marks: {
             annotations: [
               {
+                name: 'link',
+                title: 'Link',
+                type: 'object',
+                icon: LinkIcon,
+                fields: [
+                  {
+                    name: 'href',
+                    title: 'URL',
+                    type: 'url',
+                    validation: (r) =>
+                      r.required().uri({allowRelative: true, scheme: ['http', 'https', 'mailto', 'tel']}),
+                  },
+                ],
+              },
+              {
                 name: 'internalLink',
                 title: 'Internal link',
                 type: 'object',
+                icon: UserIcon,
                 fields: [
                   {
                     name: 'reference',
                     title: 'Reference',
                     type: 'reference',
-                    to: [{type: 'player'}, {type: 'team'}, {type: 'article'}, {type: 'page'}],
+                    to: [{type: 'player'}, {type: 'staffMember'}, {type: 'team'}, {type: 'article'}, {type: 'page'}],
                     validation: (r) => r.required(),
                   },
                 ],

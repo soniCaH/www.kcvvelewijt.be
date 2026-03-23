@@ -80,6 +80,8 @@ function resolveInternalLinkHref(ref?: InternalLinkReference): string {
   switch (ref._type) {
     case "player":
       return ref.psdId ? `/players/${ref.psdId}` : "#";
+    case "staffMember":
+      return ref.psdId ? `/staff/${ref.psdId}` : "#";
     case "team":
       return ref.slug ? `/team/${ref.slug}` : "#";
     case "article":
