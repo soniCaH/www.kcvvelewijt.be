@@ -58,9 +58,9 @@ describe("MatchResultRow", () => {
   };
 
   describe("upcoming match", () => {
-    it("renders VS placeholder for scheduled matches", () => {
+    it("renders vs placeholder for scheduled matches", () => {
       render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
-      expect(screen.getByText("VS")).toBeInTheDocument();
+      expect(screen.getByText("vs")).toBeInTheDocument();
     });
 
     it("renders team names", () => {
@@ -69,7 +69,7 @@ describe("MatchResultRow", () => {
       expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
     });
 
-    it("renders match time", () => {
+    it("renders match time in result column for scheduled matches", () => {
       render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
       expect(screen.getByText("15:00")).toBeInTheDocument();
     });
@@ -82,7 +82,7 @@ describe("MatchResultRow", () => {
   });
 
   describe("past match with scores", () => {
-    it("renders scores for finished matches", () => {
+    it("renders combined score for finished matches", () => {
       render(
         <MatchResultRow
           match={finishedMatch}
@@ -90,11 +90,10 @@ describe("MatchResultRow", () => {
           href="/game/1002"
         />,
       );
-      expect(screen.getByText("3")).toBeInTheDocument();
-      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("3 – 1")).toBeInTheDocument();
     });
 
-    it("applies green border for wins", () => {
+    it("shows W badge for wins", () => {
       render(
         <MatchResultRow
           match={finishedMatch}
@@ -102,11 +101,10 @@ describe("MatchResultRow", () => {
           href="/game/1002"
         />,
       );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-success");
+      expect(screen.getByText("W")).toBeInTheDocument();
     });
 
-    it("applies red border for losses", () => {
+    it("shows L badge for losses", () => {
       const lossMatch: ScheduleMatch = {
         ...finishedMatch,
         homeScore: 0,
@@ -115,11 +113,10 @@ describe("MatchResultRow", () => {
       render(
         <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
       );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-alert");
+      expect(screen.getByText("L")).toBeInTheDocument();
     });
 
-    it("applies yellow border for draws", () => {
+    it("shows G badge for draws", () => {
       const drawMatch: ScheduleMatch = {
         ...finishedMatch,
         homeScore: 2,
@@ -128,11 +125,10 @@ describe("MatchResultRow", () => {
       render(
         <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
       );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-warning");
+      expect(screen.getByText("G")).toBeInTheDocument();
     });
 
-    it("highlights winning score with green color", () => {
+    it("applies green styling on W badge", () => {
       render(
         <MatchResultRow
           match={finishedMatch}
@@ -140,8 +136,34 @@ describe("MatchResultRow", () => {
           href="/game/1002"
         />,
       );
-      const homeScore = screen.getByText("3");
-      expect(homeScore.className).toContain("text-kcvv-green-bright");
+      const badge = screen.getByText("W");
+      expect(badge.className).toContain("text-kcvv-green-bright");
+    });
+
+    it("applies red styling on L badge", () => {
+      const lossMatch: ScheduleMatch = {
+        ...finishedMatch,
+        homeScore: 0,
+        awayScore: 2,
+      };
+      render(
+        <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
+      );
+      const badge = screen.getByText("L");
+      expect(badge.className).toContain("text-red-400");
+    });
+
+    it("applies yellow styling on G badge", () => {
+      const drawMatch: ScheduleMatch = {
+        ...finishedMatch,
+        homeScore: 2,
+        awayScore: 2,
+      };
+      render(
+        <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
+      );
+      const badge = screen.getByText("G");
+      expect(badge.className).toContain("text-yellow-400");
     });
   });
 
@@ -182,12 +204,12 @@ describe("MatchResultRow", () => {
       expect(screen.getByText("Volgende")).toBeInTheDocument();
     });
 
-    it("applies highlight ring when isNext is true", () => {
+    it("applies green border when isNext is true", () => {
       render(
         <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
       );
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-kcvv-green-bright");
+      expect(link.className).toContain("border-l-kcvv-green-bright");
     });
 
     it("does not show Volgende badge when isNext is false", () => {
@@ -210,7 +232,7 @@ describe("MatchResultRow", () => {
   });
 
   describe("home/away indication", () => {
-    it("bolds team name when teamId matches", () => {
+    it("highlights team name with text-white when teamId matches", () => {
       render(
         <MatchResultRow
           match={scheduledMatch}
@@ -219,7 +241,7 @@ describe("MatchResultRow", () => {
         />,
       );
       const kcvvText = screen.getByText("KCVV Elewijt");
-      expect(kcvvText).toHaveClass("font-semibold");
+      expect(kcvvText).toHaveClass("text-white");
     });
 
     it("shows Thuis indicator on mobile when playing at home", () => {
@@ -247,10 +269,15 @@ describe("MatchResultRow", () => {
   });
 
   describe("competition", () => {
-    it("renders competition name", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
-      const competitions = screen.getAllByText("3de Nationale");
-      expect(competitions.length).toBeGreaterThanOrEqual(1);
+    it("renders competition name in mobile row", () => {
+      render(
+        <MatchResultRow
+          match={scheduledMatch}
+          teamId={1235}
+          href="/game/1001"
+        />,
+      );
+      expect(screen.getByText(/3de Nationale/)).toBeInTheDocument();
     });
   });
 });

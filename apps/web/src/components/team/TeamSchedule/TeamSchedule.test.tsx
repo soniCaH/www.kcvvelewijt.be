@@ -83,28 +83,24 @@ describe("TeamSchedule", () => {
       expect(screen.getByText("SK Londerzeel")).toBeInTheDocument();
     });
 
-    it("renders match times", () => {
+    it("renders match time for scheduled matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("15:00")).toBeInTheDocument();
       expect(screen.getByText("14:30")).toBeInTheDocument();
     });
 
-    it("renders scores for finished matches", () => {
+    it("renders combined score for finished matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("3")).toBeInTheDocument();
-      // "1" appears in date formatting too, use getAllByText
-      const onesElements = screen.getAllByText("1");
-      expect(onesElements.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("3 – 1")).toBeInTheDocument();
     });
 
-    it("renders VS for scheduled matches", () => {
+    it("renders vs for scheduled matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("VS")).toBeInTheDocument();
+      expect(screen.getByText("vs")).toBeInTheDocument();
     });
 
-    it("renders competition names", () => {
+    it("renders competition names in mobile row", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      const competitions = screen.getAllByText("3de Nationale");
+      const competitions = screen.getAllByText(/3de Nationale/);
       expect(competitions.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -229,8 +225,8 @@ describe("TeamSchedule", () => {
     });
   });
 
-  describe("result highlighting", () => {
-    it("applies green border for wins", () => {
+  describe("result badges", () => {
+    it("shows W badge for wins", () => {
       const winMatch: ScheduleMatch = {
         id: 3001,
         date: pastDate,
@@ -241,11 +237,10 @@ describe("TeamSchedule", () => {
         status: "finished",
       };
       render(<TeamSchedule matches={[winMatch]} teamId={1235} />);
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-success");
+      expect(screen.getByText("W")).toBeInTheDocument();
     });
 
-    it("applies red border for losses", () => {
+    it("shows L badge for losses", () => {
       const lossMatch: ScheduleMatch = {
         id: 3002,
         date: pastDate,
@@ -256,11 +251,10 @@ describe("TeamSchedule", () => {
         status: "finished",
       };
       render(<TeamSchedule matches={[lossMatch]} teamId={1235} />);
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-alert");
+      expect(screen.getByText("L")).toBeInTheDocument();
     });
 
-    it("applies yellow border for draws", () => {
+    it("shows G badge for draws", () => {
       const drawMatch: ScheduleMatch = {
         id: 3003,
         date: pastDate,
@@ -271,8 +265,7 @@ describe("TeamSchedule", () => {
         status: "finished",
       };
       render(<TeamSchedule matches={[drawMatch]} teamId={1235} />);
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-warning");
+      expect(screen.getByText("G")).toBeInTheDocument();
     });
   });
 
@@ -300,7 +293,7 @@ describe("TeamSchedule", () => {
   });
 
   describe("home/away indication", () => {
-    it("highlights home team name when playing at home", () => {
+    it("highlights home team name with text-white when playing at home", () => {
       const homeMatch: ScheduleMatch = {
         id: 4001,
         date: futureDate,
@@ -310,7 +303,7 @@ describe("TeamSchedule", () => {
       };
       render(<TeamSchedule matches={[homeMatch]} teamId={1235} />);
       const kcvvText = screen.getByText("KCVV Elewijt");
-      expect(kcvvText).toHaveClass("font-semibold");
+      expect(kcvvText).toHaveClass("text-white");
     });
   });
 
@@ -337,9 +330,8 @@ describe("TeamSchedule", () => {
         status: "scheduled",
       };
       render(<TeamSchedule matches={[noLogoMatch]} teamId={1235} />);
-      // First letters should appear as placeholders
-      expect(screen.getByText("K")).toBeInTheDocument(); // KCVV
-      expect(screen.getByText("O")).toBeInTheDocument(); // Opponent
+      expect(screen.getByText("K")).toBeInTheDocument();
+      expect(screen.getByText("O")).toBeInTheDocument();
     });
   });
 });

@@ -1,8 +1,8 @@
 /**
  * MatchResultRow Component
  *
- * A single match row card displaying teams, scores, status badges,
- * and result highlighting. Used by TeamSchedule to render each match.
+ * A single match row for dark schedule sections. Grid layout with
+ * date, teams, score, and result badge (W/L/G).
  */
 
 import Image from "next/image";
@@ -23,7 +23,7 @@ export interface MatchResultRowProps {
 }
 
 /**
- * Format date in Dutch locale
+ * Format date in Dutch locale (short weekday + day + short month)
  */
 function formatDate(date: Date): string {
   return date.toLocaleDateString("nl-BE", {
@@ -32,6 +32,38 @@ function formatDate(date: Date): string {
     month: "short",
   });
 }
+
+type Result = "win" | "loss" | "draw" | null;
+
+function getResult(match: ScheduleMatch, teamId: number | undefined): Result {
+  const isMember =
+    teamId !== undefined &&
+    (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
+  const hasScore =
+    typeof match.homeScore === "number" && typeof match.awayScore === "number";
+
+  if (!hasScore || !isMember) return null;
+
+  const isHome = match.homeTeam.id === teamId;
+  const kcvvScore = isHome ? match.homeScore! : match.awayScore!;
+  const oppScore = isHome ? match.awayScore! : match.homeScore!;
+
+  if (kcvvScore > oppScore) return "win";
+  if (kcvvScore < oppScore) return "loss";
+  return "draw";
+}
+
+const resultBadgeConfig: Record<
+  "win" | "loss" | "draw",
+  { label: string; className: string }
+> = {
+  win: {
+    label: "W",
+    className: "bg-kcvv-green-bright/15 text-kcvv-green-bright",
+  },
+  loss: { label: "L", className: "bg-red-500/15 text-red-400" },
+  draw: { label: "G", className: "bg-yellow-500/15 text-yellow-400" },
+};
 
 export function MatchResultRow({
   match,
@@ -46,149 +78,118 @@ export function MatchResultRow({
   const hasScore =
     typeof match.homeScore === "number" && typeof match.awayScore === "number";
 
-  // Determine result for KCVV — only when we know which side is ours
-  let resultClass = "";
-  if (hasScore && isMember) {
-    const kcvvScore = isHome ? match.homeScore! : match.awayScore!;
-    const oppScore = isHome ? match.awayScore! : match.homeScore!;
-    if (kcvvScore > oppScore) {
-      resultClass = "border-l-4 border-l-kcvv-success";
-    } else if (kcvvScore < oppScore) {
-      resultClass = "border-l-4 border-l-kcvv-alert";
-    } else {
-      resultClass = "border-l-4 border-l-kcvv-warning";
-    }
-  }
+  const result = getResult(match, teamId);
 
   return (
     <Link
       href={href}
       className={cn(
-        "block bg-white border rounded-lg p-4 transition-shadow hover:shadow-md",
-        isNext
-          ? "border-kcvv-green-bright ring-2 ring-kcvv-green-bright/20"
-          : "border-gray-200",
-        resultClass,
+        "grid grid-cols-[140px_1fr_auto_1fr_80px] items-center gap-4 px-5 py-3.5 rounded-sm transition-colors",
+        "border-l-[3px] border-l-transparent",
+        "bg-white/[0.03]",
+        "hover:border-l-kcvv-green-bright hover:bg-white/[0.07]",
+        isNext && "bg-kcvv-green-bright/[0.07] border-l-kcvv-green-bright",
       )}
     >
-      {/* Header row: date, time, competition */}
-      <div className="flex items-center justify-between text-sm mb-3">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900">
-            {formatDate(match.date)}
-          </span>
-          {match.time && <span className="text-gray-500">{match.time}</span>}
-          <MatchStatusBadge status={match.status} />
-          {isNext && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-kcvv-green-bright text-white">
-              Volgende
-            </span>
-          )}
-        </div>
-        {match.competition && (
-          <span className="text-gray-500 text-xs hidden sm:block">
-            {match.competition}
+      {/* Date + next badge */}
+      <span className="text-[13px] font-semibold text-white/50">
+        {formatDate(match.date)}
+        <MatchStatusBadge status={match.status} isDark />
+        {isNext && (
+          <span className="ml-1.5 inline-block bg-kcvv-green-bright text-kcvv-black text-[9px] font-bold uppercase tracking-wider rounded-sm px-1.5 py-0.5">
+            Volgende
           </span>
         )}
-      </div>
+      </span>
 
-      {/* Match row: teams and score */}
-      <div className="flex items-center justify-between">
-        {/* Home team */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {match.homeTeam.logo ? (
-            <Image
-              src={match.homeTeam.logo}
-              alt={`${match.homeTeam.name} logo`}
-              width={32}
-              height={32}
-              className="object-contain flex-shrink-0"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-gray-500">
-                {match.homeTeam.name.charAt(0)}
-              </span>
-            </div>
+      {/* Home team */}
+      <span className="flex items-center gap-2 min-w-0">
+        {match.homeTeam.logo ? (
+          <Image
+            src={match.homeTeam.logo}
+            alt={`${match.homeTeam.name} logo`}
+            width={24}
+            height={24}
+            className="object-contain flex-shrink-0"
+          />
+        ) : (
+          <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-[10px] text-white/40">
+            {match.homeTeam.name.charAt(0)}
+          </span>
+        )}
+        <span
+          className={cn(
+            "truncate text-sm font-bold uppercase tracking-[0.02em]",
+            isMember && match.homeTeam.id === teamId
+              ? "text-white"
+              : "text-white/85",
           )}
+        >
+          {match.homeTeam.name}
+        </span>
+      </span>
+
+      {/* Score or VS */}
+      <span className="text-center min-w-[60px]">
+        {hasScore ? (
+          <span className="font-mono font-extrabold text-lg text-white tracking-widest">
+            {match.homeScore} – {match.awayScore}
+          </span>
+        ) : (
+          <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">
+            vs
+          </span>
+        )}
+      </span>
+
+      {/* Away team */}
+      <span className="flex items-center gap-2 min-w-0 justify-end">
+        <span
+          className={cn(
+            "truncate text-sm font-bold uppercase tracking-[0.02em] text-right",
+            isMember && match.awayTeam.id === teamId
+              ? "text-white"
+              : "text-white/85",
+          )}
+        >
+          {match.awayTeam.name}
+        </span>
+        {match.awayTeam.logo ? (
+          <Image
+            src={match.awayTeam.logo}
+            alt={`${match.awayTeam.name} logo`}
+            width={24}
+            height={24}
+            className="object-contain flex-shrink-0"
+          />
+        ) : (
+          <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-[10px] text-white/40">
+            {match.awayTeam.name.charAt(0)}
+          </span>
+        )}
+      </span>
+
+      {/* Result badge or time */}
+      <span className="text-right">
+        {result ? (
           <span
             className={cn(
-              "truncate text-sm",
-              isMember && match.homeTeam.id === teamId
-                ? "font-semibold"
-                : "text-gray-700",
+              "inline-block text-[11px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-sm",
+              resultBadgeConfig[result].className,
             )}
           >
-            {match.homeTeam.name}
+            {resultBadgeConfig[result].label}
           </span>
-        </div>
+        ) : (
+          <span className="text-white/30 text-sm">{match.time ?? ""}</span>
+        )}
+      </span>
 
-        {/* Score or VS */}
-        <div className="flex-shrink-0 px-4">
-          {hasScore ? (
-            <div className="flex items-center gap-2 font-mono font-bold text-lg">
-              <span
-                className={cn(
-                  teamId !== undefined &&
-                    match.homeTeam.id === teamId &&
-                    match.homeScore! > match.awayScore! &&
-                    "text-kcvv-green-bright",
-                )}
-              >
-                {match.homeScore}
-              </span>
-              <span className="text-gray-400">-</span>
-              <span
-                className={cn(
-                  teamId !== undefined &&
-                    match.awayTeam.id === teamId &&
-                    match.awayScore! > match.homeScore! &&
-                    "text-kcvv-green-bright",
-                )}
-              >
-                {match.awayScore}
-              </span>
-            </div>
-          ) : (
-            <span className="text-gray-400 font-medium">VS</span>
-          )}
-        </div>
-
-        {/* Away team */}
-        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-          <span
-            className={cn(
-              "truncate text-sm text-right",
-              isMember && match.awayTeam.id === teamId
-                ? "font-semibold"
-                : "text-gray-700",
-            )}
-          >
-            {match.awayTeam.name}
-          </span>
-          {match.awayTeam.logo ? (
-            <Image
-              src={match.awayTeam.logo}
-              alt={`${match.awayTeam.name} logo`}
-              width={32}
-              height={32}
-              className="object-contain flex-shrink-0"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-gray-500">
-                {match.awayTeam.name.charAt(0)}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Home/Away indicator for mobile */}
-      <div className="mt-2 text-xs text-gray-500 sm:hidden">
-        {isMember && `${isHome ? "Thuis" : "Uit"} • `}
-        {match.competition || "Competitie"}
-      </div>
+      {/* Mobile: home/away + competition */}
+      <span className="col-span-full text-xs text-white/40 sm:hidden -mt-2">
+        {isMember && `${isHome ? "Thuis" : "Uit"} · `}
+        {match.competition ?? "Competitie"}
+      </span>
     </Link>
   );
 }

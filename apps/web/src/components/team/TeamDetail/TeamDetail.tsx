@@ -197,26 +197,28 @@ export function TeamDetail({
           {/* Matches Tab */}
           {hasMatches && (
             <Tabs.Content value="matches" className="focus:outline-none">
-              {calendarUrl && (
-                <div className="mb-4 flex justify-end">
-                  <a
-                    href={calendarUrl}
-                    download="kcvv-wedstrijden.ics"
-                    aria-label={`Download kalender (.ics) voor ${header.name}`}
-                    rel="noopener"
-                    className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
-                  >
-                    📅 Voeg toe aan kalender
-                  </a>
-                </div>
-              )}
-              <TeamSchedule
-                matches={matches}
-                teamId={highlightTeamId}
-                teamSlug={teamSlug}
-                showPast={true}
-                highlightNext={true}
-              />
+              <div className="bg-kcvv-black rounded-lg p-6 -mx-4 sm:mx-0">
+                {calendarUrl && (
+                  <div className="mb-4 flex justify-end">
+                    <a
+                      href={calendarUrl}
+                      download="kcvv-wedstrijden.ics"
+                      aria-label={`Download kalender (.ics) voor ${header.name}`}
+                      rel="noopener"
+                      className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
+                    >
+                      📅 Voeg toe aan kalender
+                    </a>
+                  </div>
+                )}
+                <TeamSchedule
+                  matches={matches}
+                  teamId={highlightTeamId}
+                  teamSlug={teamSlug}
+                  showPast={true}
+                  highlightNext={true}
+                />
+              </div>
             </Tabs.Content>
           )}
 

@@ -1,9 +1,8 @@
 /**
  * TeamSchedule Component Stories
  *
- * Team match schedule with upcoming and past matches.
- *
- * Stories created BEFORE implementation (Storybook-first workflow).
+ * Dark section schedule with match rows, result badges (W/L/G),
+ * and next match highlighting.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -14,32 +13,45 @@ const meta = {
   component: TeamSchedule,
   parameters: {
     layout: "padded",
+    backgrounds: { default: "dark" },
     docs: {
       description: {
         component: `
-Team match schedule component.
+Dark schedule section with match rows.
 
 **Features:**
-- Upcoming matches highlighted
-- Past results with scores
-- Next match emphasized
-- Competition type labels
-- Home/Away indicators
-- Responsive design
-
-**Usage:**
-Used in team detail pages "Wedstrijden" tab.
+- W/L/G result badges with color coding
+- Next match highlighting with green border + "Volgende" badge
+- Hover state: green left border + subtle background
+- Score in monospace, white, bold
+- Dark theme throughout
         `,
       },
     },
   },
   tags: ["autodocs"],
+  decorators: [
+    (Story) => (
+      <div className="bg-kcvv-black p-8 -m-4 min-h-[400px]">
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
     matches: { control: "object", description: "Array of matches" },
-    teamId: { control: "number", description: "Team ID for home/away display" },
+    teamId: {
+      control: "number",
+      description: "Team ID for home/away display",
+    },
     showPast: { control: "boolean", description: "Show past results" },
-    highlightNext: { control: "boolean", description: "Highlight next match" },
-    limit: { control: "number", description: "Limit number of matches shown" },
+    highlightNext: {
+      control: "boolean",
+      description: "Highlight next match",
+    },
+    limit: {
+      control: "number",
+      description: "Limit number of matches shown",
+    },
     isLoading: { control: "boolean", description: "Loading state" },
     className: { control: "text", description: "Additional CSS classes" },
   },
@@ -48,7 +60,6 @@ Used in team detail pages "Wedstrijden" tab.
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Create dates relative to now for realistic stories
 const now = new Date("2025-11-01T12:00:00Z");
 const pastDate = (daysAgo: number) => {
   const d = new Date(now);
@@ -66,7 +77,6 @@ const KCVV_LOGO =
 const OPPONENT_LOGO =
   "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1";
 
-// Mock matches data
 const mockMatches: ScheduleMatch[] = [
   {
     id: 1001,
@@ -206,18 +216,6 @@ export const ResultsOnly: Story = {
     teamId: 1235,
     showPast: true,
     highlightNext: false,
-  },
-};
-
-/**
- * Next match highlighted
- */
-export const NextMatchHighlighted: Story = {
-  args: {
-    matches: mockMatches,
-    teamId: 1235,
-    showPast: true,
-    highlightNext: true,
   },
 };
 

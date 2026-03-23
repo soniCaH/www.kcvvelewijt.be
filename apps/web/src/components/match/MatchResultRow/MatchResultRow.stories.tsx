@@ -1,7 +1,7 @@
 /**
  * MatchResultRow Component Stories
  *
- * A single match row card used by TeamSchedule.
+ * Dark match row with result badges (W/L/G), used by TeamSchedule.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -36,21 +36,19 @@ const meta = {
   component: MatchResultRow,
   parameters: {
     layout: "padded",
+    backgrounds: { default: "dark" },
     docs: {
       description: {
         component: `
-A single match row card displaying teams, scores, status badges, and result highlighting.
+Dark match row for schedule sections.
 
 **Features:**
-- Upcoming match with VS placeholder
-- Past match with scores and win/loss/draw coloring
+- W/L/G result badges with color coding
+- Score in monospace white bold
+- "Volgende" badge for next match
+- Hover: green left border + subtle bg
 - Status badges (postponed, stopped, forfeited)
-- Next-match highlight
-- Home/away team bolding
 - Logo placeholders for teams without logos
-
-**Usage:**
-Used by \`TeamSchedule\` to render each individual match row.
         `,
       },
     },
@@ -58,7 +56,7 @@ Used by \`TeamSchedule\` to render each individual match row.
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <div className="max-w-2xl mx-auto">
+      <div className="bg-kcvv-black p-8 -m-4 max-w-4xl mx-auto">
         <Story />
       </div>
     ),
@@ -69,7 +67,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Upcoming match — shows VS placeholder
+ * Upcoming match — shows vs placeholder and time
  */
 export const Upcoming: Story = {
   args: {
@@ -80,7 +78,7 @@ export const Upcoming: Story = {
 };
 
 /**
- * Win — green left border, winning score highlighted
+ * Win — green W badge
  */
 export const Win: Story = {
   args: {
@@ -96,7 +94,7 @@ export const Win: Story = {
 };
 
 /**
- * Draw — yellow left border
+ * Draw — yellow G badge
  */
 export const Draw: Story = {
   args: {
@@ -112,7 +110,7 @@ export const Draw: Story = {
 };
 
 /**
- * Loss — red left border
+ * Loss — red L badge
  */
 export const Loss: Story = {
   args: {
@@ -142,7 +140,7 @@ export const Postponed: Story = {
 };
 
 /**
- * Next match — green border ring and "Volgende" badge
+ * Next match — green left border and "Volgende" badge
  */
 export const NextMatch: Story = {
   args: {

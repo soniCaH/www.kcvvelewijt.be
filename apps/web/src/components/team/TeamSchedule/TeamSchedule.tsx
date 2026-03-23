@@ -1,15 +1,8 @@
 /**
  * TeamSchedule Component
  *
- * Team match schedule with upcoming and past matches.
- *
- * Features:
- * - Upcoming matches highlighted
- * - Past results with scores
- * - Next match emphasized
- * - Competition type labels
- * - Home/Away indicators
- * - Responsive design
+ * Team match schedule for dark sections. Rows with result badges,
+ * next match highlighting, and hover effects.
  */
 
 import { cn } from "@/lib/utils/cn";
@@ -37,19 +30,6 @@ export interface TeamScheduleProps {
   className?: string;
 }
 
-/**
- * Render the team's match schedule with optional past results, next match highlighting, and limit.
- *
- * @param matches - Array of matches to display
- * @param teamId - Current team's ID (for home/away determination)
- * @param teamSlug - Team slug used to build back-navigation URLs on the match detail page
- * @param showPast - If true, includes finished matches
- * @param highlightNext - If true, highlights the next upcoming match
- * @param limit - Optional limit on number of matches shown
- * @param isLoading - If true, renders skeleton loader
- * @param className - Optional additional CSS classes for the root element
- * @returns The rendered schedule element
- */
 export function TeamSchedule({
   matches,
   teamId,
@@ -60,33 +40,25 @@ export function TeamSchedule({
   isLoading = false,
   className,
 }: TeamScheduleProps) {
-  // Loading skeleton
   if (isLoading) {
     return (
-      <div className={cn("space-y-3", className)}>
+      <div className={cn("flex flex-col gap-0.5", className)}>
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="bg-white border border-gray-200 rounded-lg p-4"
+            className="grid grid-cols-[140px_1fr_auto_1fr_80px] items-center gap-4 px-5 py-3.5 bg-white/[0.03] rounded-sm"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
-              </div>
-              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-20 bg-white/10 rounded animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 bg-white/10 rounded-full animate-pulse" />
+              <div className="h-4 w-28 bg-white/10 rounded animate-pulse" />
             </div>
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
-              </div>
-              <div className="h-6 w-16 bg-gray-200 rounded animate-pulse" />
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
-                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-              </div>
+            <div className="h-5 w-16 bg-white/10 rounded animate-pulse" />
+            <div className="flex items-center gap-2 justify-end">
+              <div className="h-4 w-28 bg-white/10 rounded animate-pulse" />
+              <div className="h-6 w-6 bg-white/10 rounded-full animate-pulse" />
             </div>
+            <div className="h-5 w-10 bg-white/10 rounded animate-pulse ml-auto" />
           </div>
         ))}
       </div>
@@ -95,33 +67,28 @@ export function TeamSchedule({
 
   const TERMINAL_STATUSES: MatchStatus[] = ["finished", "forfeited", "stopped"];
 
-  // Filter matches based on showPast
   let filteredMatches = showPast
     ? matches
     : matches.filter((m) => !TERMINAL_STATUSES.includes(m.status));
 
-  // Sort by date
   filteredMatches = [...filteredMatches].sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
 
-  // Apply limit if specified
   if (limit) {
     filteredMatches = filteredMatches.slice(0, limit);
   }
 
-  // Find next match for highlighting
   const now = new Date();
   const nextMatchIndex = highlightNext
     ? filteredMatches.findIndex((m) => m.date > now && m.status === "scheduled")
     : -1;
 
-  // Empty state
   if (filteredMatches.length === 0) {
     return (
       <div
         className={cn(
-          "text-center py-8 text-gray-500 bg-gray-50 rounded-lg",
+          "text-center py-8 text-white/40 bg-white/[0.03] rounded-sm",
           className,
         )}
       >
@@ -131,7 +98,7 @@ export function TeamSchedule({
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("flex flex-col gap-0.5", className)}>
       {filteredMatches.map((match, index) => {
         const matchHref = teamSlug
           ? `/game/${match.id}?from=/team/${encodeURIComponent(teamSlug)}&fromTab=matches`
