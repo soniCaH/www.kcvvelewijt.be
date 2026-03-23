@@ -6,6 +6,7 @@ import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
 import { ARTICLES_PAGINATED_QUERY } from "../../sanity/queries/articles";
+import { RELATED_ARTICLES_QUERY } from "../../sanity/queries/articles";
 
 vi.mock("../../sanity/client", () => ({
   sanityClient: {
@@ -292,6 +293,55 @@ describe("SanityService.getHomepageBanners", () => {
       bannerSlotB: null,
       bannerSlotC: null,
     });
+  });
+});
+
+describe("SanityService.getRelatedArticles", () => {
+  it("returns articles that reference a given document", async () => {
+    const mockArticles = [
+      {
+        _id: "article-1",
+        title: "Interview met Jan",
+        slug: { current: "interview-jan" },
+        publishAt: "2026-03-20T10:00:00Z",
+        coverImageUrl: "https://cdn.sanity.io/img1.jpg",
+      },
+      {
+        _id: "article-2",
+        title: "Wedstrijdverslag",
+        slug: { current: "wedstrijdverslag" },
+        publishAt: "2026-03-19T10:00:00Z",
+        coverImageUrl: null,
+      },
+    ];
+    mockFetch(mockArticles);
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getRelatedArticles("player-psd-42");
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+
+    expect(result).toHaveLength(2);
+    expect(result[0]?.title).toBe("Interview met Jan");
+    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
+      RELATED_ARTICLES_QUERY,
+      expect.objectContaining({ documentId: "player-psd-42" }),
+    );
+  });
+
+  it("returns empty array when no articles reference the document", async () => {
+    mockFetch([]);
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* SanityService;
+        return yield* svc.getRelatedArticles("unknown-id");
+      }).pipe(Effect.provide(SanityServiceLive)),
+    );
+
+    expect(result).toHaveLength(0);
   });
 });
 
