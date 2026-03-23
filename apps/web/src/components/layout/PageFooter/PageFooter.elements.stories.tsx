@@ -49,7 +49,7 @@ export const DiagonalTransition: Story = {
 
 /**
  * 02. Green Hero Zone
- * Bold display text in stenciletta, right-aligned
+ * Bold display text in font-title (quasimoda), right-aligned
  */
 export const GreenHeroZone: Story = {
   render: () => (
@@ -88,16 +88,16 @@ export const ClubCrestLogo: Story = {
 export const ClubLinksColumn: Story = {
   render: () => (
     <div className="bg-kcvv-black p-8 w-[300px]">
-      <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+      <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
         Club
-      </h3>
+      </p>
       <ul className="flex flex-col gap-2.5">
         {["Nieuws", "Kalender", "Ploegen", "Sponsors", "Bestuur"].map(
           (label) => (
             <li key={label}>
               <Link
                 href="#"
-                className="text-sm text-white/55 hover:text-kcvv-green-bright transition-colors"
+                className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
               >
                 {label}
               </Link>
@@ -116,17 +116,17 @@ export const ClubLinksColumn: Story = {
 export const ContactColumn: Story = {
   render: () => (
     <div className="bg-kcvv-black p-8 w-[300px]">
-      <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+      <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
         Contact
-      </h3>
-      <p className="text-sm text-white/55 leading-relaxed mb-4">
+      </p>
+      <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-4">
         Driesstraat 32
         <br />
         1982 Elewijt
       </p>
       <a
         href="mailto:info@kcvvelewijt.be"
-        className="text-sm font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
+        className="text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
       >
         info@kcvvelewijt.be
       </a>

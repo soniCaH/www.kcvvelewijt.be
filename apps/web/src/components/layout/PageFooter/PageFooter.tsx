@@ -55,15 +55,15 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
           {/* Col 2 — Club links */}
           <div className="max-md:text-center">
-            <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+            <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Club
-            </h3>
+            </p>
             <ul className="flex flex-col gap-2.5">
               {clubLinks.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-white/55 hover:text-kcvv-green-bright transition-colors"
+                    className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -74,17 +74,17 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
           {/* Col 3 — Contact */}
           <div className="max-md:text-center">
-            <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+            <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Contact
-            </h3>
-            <p className="text-sm text-white/55 leading-relaxed mb-4">
+            </p>
+            <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-4">
               Driesstraat 32
               <br />
               1982 Elewijt
             </p>
             <a
               href="mailto:info@kcvvelewijt.be"
-              className="text-sm font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
+              className="text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
             >
               info@kcvvelewijt.be
             </a>
