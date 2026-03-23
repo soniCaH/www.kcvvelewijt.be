@@ -165,6 +165,8 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
       `[search-sync] Indexing ${articleResult.length} articles`,
     );
 
+    let articleSuccessCount = 0;
+
     yield* Effect.forEach(
       articleResult,
       (doc) =>
@@ -173,8 +175,18 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           type: "article",
           title: doc.title,
           excerpt: (doc.bodyText ?? "").slice(0, 200),
-        }),
+        }).pipe(
+          Effect.tap((ok) =>
+            Effect.sync(() => {
+              if (ok) articleSuccessCount++;
+            }),
+          ),
+        ),
       { concurrency: 3 },
+    );
+
+    yield* Effect.log(
+      `[search-sync] Indexed ${articleSuccessCount}/${articleResult.length} articles`,
     );
 
     // ── Pages ─────────────────────────────────────────────────────────────
@@ -196,6 +208,8 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
 
     yield* Effect.log(`[search-sync] Indexing ${pageResult.length} pages`);
 
+    let pageSuccessCount = 0;
+
     yield* Effect.forEach(
       pageResult,
       (doc) =>
@@ -204,7 +218,17 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           type: "page",
           title: doc.title,
           excerpt: (doc.bodyText ?? "").slice(0, 200),
-        }),
+        }).pipe(
+          Effect.tap((ok) =>
+            Effect.sync(() => {
+              if (ok) pageSuccessCount++;
+            }),
+          ),
+        ),
       { concurrency: 3 },
+    );
+
+    yield* Effect.log(
+      `[search-sync] Indexed ${pageSuccessCount}/${pageResult.length} pages`,
     );
   });
