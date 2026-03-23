@@ -109,7 +109,9 @@ export const VectorizeServiceLive = Layer.effect(
             const results = await env.SEARCH_INDEX.getByIds(ids);
             return results.map((r) => ({
               id: r.id,
-              values: r.values as unknown as number[],
+              values: ArrayBuffer.isView(r.values)
+                ? Array.from(r.values as Float32Array)
+                : (r.values as number[]),
               metadata: (r.metadata ?? {}) as Record<string, string>,
             }));
           },

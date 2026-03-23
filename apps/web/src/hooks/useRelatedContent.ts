@@ -17,7 +17,9 @@ export function useRelatedContent(sanityId: string | null, limit = 3) {
         .then((data: SemanticSearchResult[]) => {
           setResults(Array.isArray(data) ? data : []);
         })
-        .catch(() => {
+        .catch((err: unknown) => {
+          if (err instanceof DOMException && err.name === "AbortError") return;
+          console.error("[useRelatedContent] fetch failed:", err);
           setResults([]);
         })
         .finally(() => {

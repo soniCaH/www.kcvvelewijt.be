@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
     );
     if (!res.ok) return NextResponse.json([]);
     return NextResponse.json(await res.json());
-  } catch {
+  } catch (err) {
+    console.error("[related] fetch failed:", err);
     return NextResponse.json([]);
   }
 }

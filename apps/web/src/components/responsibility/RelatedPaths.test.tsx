@@ -81,6 +81,27 @@ describe("RelatedPaths", () => {
     expect(link).toHaveAttribute("href", "/hulp?path=blessure-melden");
   });
 
+  it("links page items to /<slug> (default branch)", () => {
+    vi.mocked(useRelatedContent).mockReturnValue({
+      results: [
+        {
+          id: "doc-page",
+          slug: "over-ons",
+          type: "page",
+          score: 0.6,
+          title: "Over ons",
+          excerpt: "Info over de club",
+        },
+      ],
+      loading: false,
+    });
+
+    render(<RelatedPaths sanityId="doc-abc" />);
+
+    const link = screen.getByRole("link", { name: /Over ons/ });
+    expect(link).toHaveAttribute("href", "/over-ons");
+  });
+
   it("links article items to /news/<slug>", () => {
     vi.mocked(useRelatedContent).mockReturnValue({
       results: [
