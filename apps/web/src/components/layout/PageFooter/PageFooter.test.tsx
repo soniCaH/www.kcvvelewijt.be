@@ -18,7 +18,7 @@ describe("PageFooter", () => {
     render(<PageFooter />);
     const heroText = screen.getByText("KCVV Elewijt");
     expect(heroText).toBeInTheDocument();
-    expect(heroText.className).toMatch(/font-alt/);
+    expect(heroText.className).toMatch(/font-title/);
   });
 
   it("renders SectionTransition from gray-100 to kcvv-green-dark", () => {

@@ -33,7 +33,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
       {/* Zone 1 — Green hero */}
       <div className="bg-kcvv-green-dark">
         <div className="max-w-outer mx-auto px-10 pt-12 pb-10 text-right max-md:text-center max-md:px-6 max-md:pt-10 max-md:pb-8">
-          <p className="font-alt font-black text-kcvv-black uppercase leading-[0.9] tracking-tight text-[clamp(3rem,10vw,8rem)]">
+          <p className="font-title font-black text-kcvv-black uppercase leading-[0.9] tracking-tight text-[clamp(3rem,10vw,8rem)]">
             KCVV Elewijt
           </p>
         </div>
@@ -55,7 +55,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
           {/* Col 2 — Club links */}
           <div className="max-md:text-center">
-            <h3 className="text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+            <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Club
             </h3>
             <ul className="flex flex-col gap-2.5">
@@ -74,7 +74,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
           {/* Col 3 — Contact */}
           <div className="max-md:text-center">
-            <h3 className="text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+            <h3 className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Contact
             </h3>
             <p className="text-sm text-white/55 leading-relaxed mb-4">
