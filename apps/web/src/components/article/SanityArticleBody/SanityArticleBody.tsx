@@ -6,6 +6,7 @@ import type {
   PortableTextComponents,
 } from "@portabletext/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { cn } from "@/lib/utils/cn";
@@ -62,6 +63,34 @@ interface FileAttachmentValue {
   _type: "fileAttachment";
   label?: string;
   fileUrl?: string;
+}
+
+interface InternalLinkReference {
+  _type: string;
+  slug?: string;
+  psdId?: string;
+}
+
+interface InternalLinkValue {
+  reference?: InternalLinkReference;
+}
+
+function resolveInternalLinkHref(ref?: InternalLinkReference): string {
+  if (!ref) return "#";
+  switch (ref._type) {
+    case "player":
+      return ref.psdId ? `/players/${ref.psdId}` : "#";
+    case "staffMember":
+      return ref.psdId ? `/staff/${ref.psdId}` : "#";
+    case "team":
+      return ref.slug ? `/team/${ref.slug}` : "#";
+    case "article":
+      return ref.slug ? `/news/${ref.slug}` : "#";
+    case "page":
+      return ref.slug ? `/${ref.slug}` : "#";
+    default:
+      return "#";
+  }
 }
 
 interface HtmlTableValue {
@@ -170,6 +199,23 @@ const components: PortableTextComponents = {
         >
           {children}
         </a>
+      );
+    },
+    internalLink: ({
+      children,
+      value,
+    }: {
+      children: React.ReactNode;
+      value?: InternalLinkValue;
+    }) => {
+      const href = resolveInternalLinkHref(value?.reference);
+      return (
+        <Link
+          href={href}
+          className="text-kcvv-green-dark underline decoration-kcvv-green/30 underline-offset-2 transition-colors hover:text-kcvv-green hover:decoration-kcvv-green"
+        >
+          {children}
+        </Link>
       );
     },
   },
