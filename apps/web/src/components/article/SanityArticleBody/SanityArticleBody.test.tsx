@@ -11,6 +11,21 @@ vi.mock("next/image", () => ({
   },
 }));
 
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 let resizeCallback: ResizeObserverCallback;
 
 class MockResizeObserver {
@@ -453,6 +468,153 @@ describe("SanityArticleBody images", () => {
     const { container } = render(<SanityArticleBody content={[block]} />);
 
     expect(container.querySelector("figure")).not.toBeInTheDocument();
+  });
+});
+
+function makeInternalLinkBlock(
+  text: string,
+  reference: { _type: string; slug?: string; psdId?: string },
+): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: `block-${Math.random().toString(36).slice(2, 8)}`,
+    style: "normal",
+    children: [{ _type: "span", _key: "s1", text, marks: ["il1"] }],
+    markDefs: [
+      {
+        _key: "il1",
+        _type: "internalLink",
+        reference: {
+          _type: reference._type,
+          slug: reference.slug,
+          psdId: reference.psdId,
+        },
+      },
+    ],
+  } as unknown as PortableTextBlock;
+}
+
+describe("SanityArticleBody internalLink", () => {
+  it("renders player reference as link to /players/{psdId}", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("John Doe", {
+            _type: "player",
+            psdId: "12345",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("/players/12345");
+    expect(link!.textContent).toBe("John Doe");
+  });
+
+  it("renders team reference as link to /team/{slug}", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("First Team", {
+            _type: "team",
+            slug: "eerste-ploeg",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("/team/eerste-ploeg");
+  });
+
+  it("renders article reference as link to /news/{slug}", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("Related Article", {
+            _type: "article",
+            slug: "some-article",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("/news/some-article");
+  });
+
+  it("renders page reference as link to /{slug}", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("About Us", {
+            _type: "page",
+            slug: "about",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("/about");
+  });
+
+  it("renders with same styling as regular links", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("Styled Link", {
+            _type: "team",
+            slug: "eerste-ploeg",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.className).toContain("text-kcvv-green-dark");
+    expect(link!.className).toContain("underline");
+  });
+
+  it("does not set target=_blank for internal links", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[
+          makeInternalLinkBlock("Internal", {
+            _type: "article",
+            slug: "test",
+          }),
+        ]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("target")).toBeNull();
+  });
+
+  it("renders # href when reference data is missing", () => {
+    const block = {
+      _type: "block",
+      _key: "b1",
+      style: "normal",
+      children: [
+        { _type: "span", _key: "s1", text: "Broken link", marks: ["il1"] },
+      ],
+      markDefs: [{ _key: "il1", _type: "internalLink" }],
+    } as unknown as PortableTextBlock;
+
+    const { container } = render(<SanityArticleBody content={[block]} />);
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("#");
   });
 });
 

@@ -55,7 +55,31 @@ export const article = defineType({
       name: 'body',
       title: 'Body',
       type: 'array',
-      of: [{type: 'block'}, {type: 'articleImage'}, {type: 'fileAttachment'}, {type: 'htmlTable'}],
+      of: [
+        {
+          type: 'block',
+          marks: {
+            annotations: [
+              {
+                name: 'internalLink',
+                title: 'Internal link',
+                type: 'object',
+                fields: [
+                  {
+                    name: 'reference',
+                    title: 'Reference',
+                    type: 'reference',
+                    to: [{type: 'player'}, {type: 'team'}, {type: 'article'}, {type: 'page'}],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {type: 'articleImage'},
+        {type: 'fileAttachment'},
+        {type: 'htmlTable'},
+      ],
     }),
     defineField({
       name: 'relatedArticles',
