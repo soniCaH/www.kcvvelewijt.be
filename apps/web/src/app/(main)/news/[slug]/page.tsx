@@ -13,8 +13,8 @@ import {
   ArticleMetadata,
   ArticleFooter,
 } from "@/components/article";
-import type { RelatedContent } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { buildRelatedContent } from "@/lib/utils/related-content";
 import type { PortableTextBlock } from "@portabletext/react";
 
 interface ArticlePageProps {
@@ -111,13 +111,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     hashtags: tags,
   };
 
-  const relatedContent: RelatedContent[] = (article.relatedArticles ?? [])
-    .filter((related) => related?.slug?.current)
-    .map((related) => ({
-      title: related.title,
-      href: `/news/${related.slug.current}`,
-      type: "article" as const,
-    }));
+  const relatedContent = buildRelatedContent({
+    relatedArticles: article.relatedArticles,
+    mentionedPlayers: article.mentionedPlayers,
+    mentionedTeams: article.mentionedTeams,
+  });
 
   return (
     <>
