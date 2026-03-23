@@ -164,6 +164,26 @@ describe("mapMentionedTeams", () => {
 });
 
 describe("mapMentionedStaff", () => {
+  it("filters null entries and deduplicates", () => {
+    const staff = {
+      _id: "staff-1",
+      firstName: "John",
+      lastName: "Doe",
+      positionTitle: "Coach",
+      imageUrl: "https://example.com/photo.jpg",
+    };
+    const result = mapMentionedStaff([null, staff, staff]);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      type: "staff",
+      id: "staff-1",
+      firstName: "John",
+      lastName: "Doe",
+      role: "Coach",
+      imageUrl: "https://example.com/photo.jpg",
+    });
+  });
+
   it("maps Sanity mentioned staff to RelatedStaffItem[]", () => {
     const result = mapMentionedStaff([
       {

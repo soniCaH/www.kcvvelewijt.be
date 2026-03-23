@@ -247,7 +247,7 @@ describe("BffService", () => {
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
       expect.objectContaining({
-        href: expect.stringContaining("/related"),
+        href: expect.stringContaining("limit=2"),
       }),
       expect.any(Object),
     );
