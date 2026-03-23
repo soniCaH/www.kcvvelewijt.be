@@ -1,8 +1,7 @@
 /**
  * TeamSchedule Component Stories
  *
- * Dark section schedule with match rows, result badges (W/L/G),
- * and next match highlighting.
+ * Match schedule with result badges (W/L/G) and next match highlighting.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -13,30 +12,21 @@ const meta = {
   component: TeamSchedule,
   parameters: {
     layout: "padded",
-    backgrounds: { default: "dark" },
     docs: {
       description: {
         component: `
-Dark schedule section with match rows.
+Team match schedule using MatchResultRow cards.
 
 **Features:**
 - W/L/G result badges with color coding
-- Next match highlighting with green border + "Volgende" badge
-- Hover state: green left border + subtle background
-- Score in monospace, white, bold
-- Dark theme throughout
+- Next match highlighting with green ring + "Volgende" badge
+- Result-colored left border (green/red/yellow)
+- Loading skeleton and empty states
         `,
       },
     },
   },
   tags: ["autodocs"],
-  decorators: [
-    (Story) => (
-      <div className="bg-kcvv-black p-8 -m-4 min-h-[400px]">
-        <Story />
-      </div>
-    ),
-  ],
   argTypes: {
     matches: { control: "object", description: "Array of matches" },
     teamId: {

@@ -58,9 +58,9 @@ describe("MatchResultRow", () => {
   };
 
   describe("upcoming match", () => {
-    it("renders vs placeholder for scheduled matches", () => {
+    it("renders VS placeholder for scheduled matches", () => {
       render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
-      expect(screen.getByText("vs")).toBeInTheDocument();
+      expect(screen.getByText("VS")).toBeInTheDocument();
     });
 
     it("renders team names", () => {
@@ -69,7 +69,7 @@ describe("MatchResultRow", () => {
       expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
     });
 
-    it("renders match time in result column for scheduled matches", () => {
+    it("renders match time in header", () => {
       render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
       expect(screen.getByText("15:00")).toBeInTheDocument();
     });
@@ -82,7 +82,7 @@ describe("MatchResultRow", () => {
   });
 
   describe("past match with scores", () => {
-    it("renders combined score for finished matches", () => {
+    it("renders score for finished matches", () => {
       render(
         <MatchResultRow
           match={finishedMatch}
@@ -90,7 +90,8 @@ describe("MatchResultRow", () => {
           href="/game/1002"
         />,
       );
-      expect(screen.getByText("3 – 1")).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
     });
 
     it("shows W badge for wins", () => {
@@ -165,6 +166,18 @@ describe("MatchResultRow", () => {
       const badge = screen.getByText("G");
       expect(badge.className).toContain("text-yellow-400");
     });
+
+    it("applies result left border in light theme", () => {
+      render(
+        <MatchResultRow
+          match={finishedMatch}
+          teamId={1235}
+          href="/game/1002"
+        />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("border-l-kcvv-success");
+    });
   });
 
   describe("status badges", () => {
@@ -204,12 +217,12 @@ describe("MatchResultRow", () => {
       expect(screen.getByText("Volgende")).toBeInTheDocument();
     });
 
-    it("applies green border when isNext is true", () => {
+    it("applies green ring when isNext is true (light theme)", () => {
       render(
         <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
       );
       const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-green-bright");
+      expect(link.className).toContain("ring-kcvv-green-bright");
     });
 
     it("does not show Volgende badge when isNext is false", () => {
@@ -232,11 +245,24 @@ describe("MatchResultRow", () => {
   });
 
   describe("home/away indication", () => {
-    it("highlights team name with text-white when teamId matches", () => {
+    it("highlights team name with font-semibold when teamId matches (light)", () => {
       render(
         <MatchResultRow
           match={scheduledMatch}
           teamId={1235}
+          href="/game/1001"
+        />,
+      );
+      const kcvvText = screen.getByText("KCVV Elewijt");
+      expect(kcvvText).toHaveClass("font-semibold");
+    });
+
+    it("highlights team name with text-white when teamId matches (dark)", () => {
+      render(
+        <MatchResultRow
+          match={scheduledMatch}
+          teamId={1235}
+          theme="dark"
           href="/game/1001"
         />,
       );
@@ -277,7 +303,28 @@ describe("MatchResultRow", () => {
           href="/game/1001"
         />,
       );
-      expect(screen.getByText(/3de Nationale/)).toBeInTheDocument();
+      const competitions = screen.getAllByText(/3de Nationale/);
+      expect(competitions.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe("theme prop", () => {
+    it("defaults to light theme", () => {
+      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("bg-white");
+    });
+
+    it("applies dark theme classes when theme is dark", () => {
+      render(
+        <MatchResultRow
+          match={scheduledMatch}
+          theme="dark"
+          href="/game/1001"
+        />,
+      );
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("bg-white/[0.03]");
     });
   });
 });

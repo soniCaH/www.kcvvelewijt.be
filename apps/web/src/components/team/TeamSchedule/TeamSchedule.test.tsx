@@ -76,7 +76,6 @@ describe("TeamSchedule", () => {
   describe("rendering", () => {
     it("renders match list", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      // KCVV Elewijt appears in both matches
       const kcvvElements = screen.getAllByText("KCVV Elewijt");
       expect(kcvvElements.length).toBeGreaterThanOrEqual(2);
       expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
@@ -88,14 +87,15 @@ describe("TeamSchedule", () => {
       expect(screen.getByText("14:30")).toBeInTheDocument();
     });
 
-    it("renders combined score for finished matches", () => {
+    it("renders score for finished matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("3 – 1")).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
     });
 
-    it("renders vs for scheduled matches", () => {
+    it("renders VS for scheduled matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("vs")).toBeInTheDocument();
+      expect(screen.getByText("VS")).toBeInTheDocument();
     });
 
     it("renders competition names in mobile row", () => {
@@ -293,7 +293,7 @@ describe("TeamSchedule", () => {
   });
 
   describe("home/away indication", () => {
-    it("highlights home team name with text-white when playing at home", () => {
+    it("highlights home team name when playing at home", () => {
       const homeMatch: ScheduleMatch = {
         id: 4001,
         date: futureDate,
@@ -303,7 +303,7 @@ describe("TeamSchedule", () => {
       };
       render(<TeamSchedule matches={[homeMatch]} teamId={1235} />);
       const kcvvText = screen.getByText("KCVV Elewijt");
-      expect(kcvvText).toHaveClass("text-white");
+      expect(kcvvText).toHaveClass("font-semibold");
     });
   });
 

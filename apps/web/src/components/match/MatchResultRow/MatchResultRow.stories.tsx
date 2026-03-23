@@ -1,7 +1,8 @@
 /**
  * MatchResultRow Component Stories
  *
- * Dark match row with result badges (W/L/G), used by TeamSchedule.
+ * Match row card with result badges (W/L/G), used by TeamSchedule.
+ * Supports light and dark themes.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -36,38 +37,30 @@ const meta = {
   component: MatchResultRow,
   parameters: {
     layout: "padded",
-    backgrounds: { default: "dark" },
     docs: {
       description: {
         component: `
-Dark match row for schedule sections.
+Match row card for schedule sections. Supports light and dark themes.
 
 **Features:**
 - W/L/G result badges with color coding
-- Score in monospace white bold
 - "Volgende" badge for next match
-- Hover: green left border + subtle bg
 - Status badges (postponed, stopped, forfeited)
 - Logo placeholders for teams without logos
+- Light theme: white card with colored left border for results
+- Dark theme: dark bg with hover effects
         `,
       },
     },
   },
   tags: ["autodocs"],
-  decorators: [
-    (Story) => (
-      <div className="bg-kcvv-black p-8 -m-4 max-w-4xl mx-auto">
-        <Story />
-      </div>
-    ),
-  ],
 } satisfies Meta<typeof MatchResultRow>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Upcoming match — shows vs placeholder and time
+ * Upcoming match — shows VS placeholder and time
  */
 export const Upcoming: Story = {
   args: {
@@ -78,7 +71,7 @@ export const Upcoming: Story = {
 };
 
 /**
- * Win — green W badge
+ * Win — green W badge with green left border
  */
 export const Win: Story = {
   args: {
@@ -94,7 +87,7 @@ export const Win: Story = {
 };
 
 /**
- * Draw — yellow G badge
+ * Draw — yellow G badge with yellow left border
  */
 export const Draw: Story = {
   args: {
@@ -110,7 +103,7 @@ export const Draw: Story = {
 };
 
 /**
- * Loss — red L badge
+ * Loss — red L badge with red left border
  */
 export const Loss: Story = {
   args: {
@@ -140,7 +133,7 @@ export const Postponed: Story = {
 };
 
 /**
- * Next match — green left border and "Volgende" badge
+ * Next match — green ring and "Volgende" badge
  */
 export const NextMatch: Story = {
   args: {
@@ -164,4 +157,67 @@ export const WithoutLogos: Story = {
     teamId: 1235,
     href: "/game/1001",
   },
+};
+
+/**
+ * Dark theme — for use in dark background sections
+ */
+export const DarkTheme: Story = {
+  args: {
+    match: baseMatch,
+    teamId: 1235,
+    theme: "dark",
+    href: "/game/1001",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-kcvv-black p-8 -m-4">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+/**
+ * Dark theme with score — W badge on dark background
+ */
+export const DarkThemeWin: Story = {
+  args: {
+    match: {
+      ...baseMatch,
+      homeScore: 3,
+      awayScore: 1,
+      status: "finished",
+    },
+    teamId: 1235,
+    theme: "dark",
+    href: "/game/1001",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-kcvv-black p-8 -m-4">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+/**
+ * Dark theme next match
+ */
+export const DarkThemeNextMatch: Story = {
+  args: {
+    match: baseMatch,
+    teamId: 1235,
+    theme: "dark",
+    isNext: true,
+    href: "/game/1001",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-kcvv-black p-8 -m-4">
+        <Story />
+      </div>
+    ),
+  ],
 };
