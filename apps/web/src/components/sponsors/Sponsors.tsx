@@ -90,7 +90,7 @@ export const Sponsors = ({
       </div>
 
       {/* Sponsors Grid — delegated to SponsorGrid */}
-      <SponsorGrid sponsors={sponsors} columns={columns} variant={variant} />
+      <SponsorGrid sponsors={sponsors} columns={columns} />
 
       {/* View All Link */}
       {showViewAll && (

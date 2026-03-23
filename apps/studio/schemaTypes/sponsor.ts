@@ -21,6 +21,7 @@ export const sponsor = defineType({
     defineField({
       name: 'tier',
       title: 'Tier',
+      description: 'Selecteer het sponsorniveau. Bestaande sponsors zonder tier moeten bij bewerking een tier krijgen.',
       type: 'string',
       options: {
         list: [
@@ -29,7 +30,7 @@ export const sponsor = defineType({
           {title: 'Sympathisant', value: 'sympathisant'},
         ],
       },
-      validation: (r) => r.required(),
+      validation: (r) => r.warning('Gelieve een tier te selecteren'),
     }),
     defineField({
       name: 'featured',

@@ -42,18 +42,6 @@ describe("SponsorGrid", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders cards without background in dark variant", () => {
-    const { container } = render(
-      <SponsorGrid sponsors={sponsors} variant="dark" />,
-    );
-
-    const cards = container.querySelectorAll("[class*='aspect-']");
-    cards.forEach((card) => {
-      expect(card).not.toHaveClass("bg-white/15");
-      expect(card).not.toHaveClass("bg-gray-100");
-    });
-  });
-
   it("applies grid column classes", () => {
     const { container } = render(
       <SponsorGrid sponsors={sponsors} columns={3} />,

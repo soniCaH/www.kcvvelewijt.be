@@ -20,8 +20,6 @@ export interface SponsorCardProps {
   sponsor: Sponsor;
   /** Card size */
   size?: "sm" | "md" | "lg";
-  /** Theme variant */
-  variant?: "light" | "dark";
   /** Show sponsor name below the logo */
   showName?: boolean;
   /** Additional CSS classes */
@@ -31,7 +29,6 @@ export interface SponsorCardProps {
 export const SponsorCard = ({
   sponsor,
   size = "md",
-  variant: _variant = "light",
   showName = false,
   className,
 }: SponsorCardProps) => {

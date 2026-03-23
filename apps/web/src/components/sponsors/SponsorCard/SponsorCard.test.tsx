@@ -38,29 +38,20 @@ const sponsorNoUrl: Sponsor = {
 };
 
 describe("SponsorCard", () => {
-  describe("variant support", () => {
-    it("renders without background in dark variant", () => {
-      const { container } = render(
-        <SponsorCard sponsor={sponsorNoUrl} variant="dark" />,
-      );
+  describe("styling", () => {
+    it("renders logo with grayscale filter", () => {
+      render(<SponsorCard sponsor={sponsorNoUrl} />);
+
+      const img = screen.getByRole("img");
+      expect(img).toHaveClass("grayscale");
+    });
+
+    it("renders without background color", () => {
+      const { container } = render(<SponsorCard sponsor={sponsorNoUrl} />);
 
       const card = container.querySelector("[class*='aspect-']");
       expect(card).not.toHaveClass("bg-white/15");
       expect(card).not.toHaveClass("bg-gray-100");
-    });
-
-    it("renders without background in light variant (default)", () => {
-      const { container } = render(<SponsorCard sponsor={sponsorNoUrl} />);
-
-      const card = container.querySelector("[class*='aspect-']");
-      expect(card).not.toHaveClass("bg-gray-100");
-    });
-
-    it("does not invert logo in dark variant (shows original colors)", () => {
-      render(<SponsorCard sponsor={sponsorNoUrl} variant="dark" />);
-
-      const img = screen.getByRole("img");
-      expect(img).not.toHaveClass("invert");
     });
   });
 
