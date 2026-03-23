@@ -12,7 +12,7 @@ export function CookiePreferencesButton() {
           CookieConsent.showPreferences();
         }
       }}
-      className="text-kcvv-green-bright hover:underline cursor-pointer bg-transparent border-0 p-0 text-[0.875rem]"
+      className="text-[0.6875rem] text-white/35 hover:text-white/65 transition-colors cursor-pointer bg-transparent border-0 p-0"
     >
       Cookie-instellingen
     </button>
