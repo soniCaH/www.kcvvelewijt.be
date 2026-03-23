@@ -37,19 +37,6 @@ export interface TeamScheduleProps {
   className?: string;
 }
 
-/**
- * Render the team's match schedule with optional past results, next match highlighting, and limit.
- *
- * @param matches - Array of matches to display
- * @param teamId - Current team's ID (for home/away determination)
- * @param teamSlug - Team slug used to build back-navigation URLs on the match detail page
- * @param showPast - If true, includes finished matches
- * @param highlightNext - If true, highlights the next upcoming match
- * @param limit - Optional limit on number of matches shown
- * @param isLoading - If true, renders skeleton loader
- * @param className - Optional additional CSS classes for the root element
- * @returns The rendered schedule element
- */
 export function TeamSchedule({
   matches,
   teamId,

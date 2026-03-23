@@ -11,9 +11,6 @@ export type { MatchLineupProps, LineupPlayer } from "./MatchLineup";
 export { MatchDetailView } from "./MatchDetailView";
 export type { MatchDetailViewProps } from "./MatchDetailView";
 
-export { MatchList } from "./MatchList/MatchList";
-export type { MatchListProps } from "./MatchList/MatchList";
-
 export { MatchesSlider } from "./MatchesSlider/MatchesSlider";
 export type { MatchesSliderProps } from "./MatchesSlider/MatchesSlider";
 
