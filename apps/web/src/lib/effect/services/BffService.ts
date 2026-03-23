@@ -10,6 +10,7 @@ import {
   type Match,
   type MatchDetail,
   type RankingEntry,
+  type RelatedItem,
   type TeamStats,
 } from "@kcvv/api-contract";
 
@@ -33,6 +34,10 @@ export class BffService extends Context.Tag("BffService")<
       teamId: number,
     ) => Effect.Effect<readonly RankingEntry[], BffError>;
     getTeamStats: (teamId: number) => Effect.Effect<TeamStats, BffError>;
+    getRelated: (
+      id: string,
+      limit?: number,
+    ) => Effect.Effect<readonly RelatedItem[], BffError>;
   }
 >() {}
 
@@ -69,6 +74,10 @@ export const BffServiceLive = Layer.effect(
       getTeamStats: (teamId: number) =>
         client.stats
           .getTeamStats({ path: { teamId } })
+          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+      getRelated: (id: string, limit?: number) =>
+        client.related
+          .getRelated({ urlParams: { id, limit } })
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
     };
   }),
