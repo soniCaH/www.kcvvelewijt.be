@@ -109,6 +109,31 @@ describe("buildRelatedContent", () => {
     ]);
   });
 
+  it("filters out null entries from broken references", () => {
+    const result = buildRelatedContent({
+      mentionedPlayers: [
+        null as unknown as MentionedPlayer,
+        {
+          _id: "player-1",
+          firstName: "Jan",
+          lastName: "Janssens",
+          position: "Aanvaller",
+          imageUrl: null,
+          psdId: "123",
+        },
+      ],
+      mentionedTeams: [
+        null as unknown as MentionedTeam,
+        { _id: "team-1", name: "A-ploeg", imageUrl: null, slug: "a-ploeg" },
+      ],
+    });
+
+    expect(result).toEqual<RelatedContent[]>([
+      { title: "Jan Janssens", href: "/players/123", type: "player" },
+      { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
+    ]);
+  });
+
   it("filters out articles with missing slugs", () => {
     const result = buildRelatedContent({
       relatedArticles: [

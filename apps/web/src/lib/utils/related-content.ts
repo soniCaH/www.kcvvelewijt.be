@@ -18,8 +18,8 @@ export interface MentionedTeam {
 
 interface BuildRelatedContentInput {
   relatedArticles?: Array<{ title: string; slug: { current: string } }>;
-  mentionedPlayers?: MentionedPlayer[];
-  mentionedTeams?: MentionedTeam[];
+  mentionedPlayers?: Array<MentionedPlayer | null>;
+  mentionedTeams?: Array<MentionedTeam | null>;
 }
 
 function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
@@ -42,14 +42,20 @@ export function buildRelatedContent(
       type: "article" as const,
     }));
 
-  const uniquePlayers = deduplicateById(input.mentionedPlayers ?? []);
+  const uniquePlayers = deduplicateById(
+    (input.mentionedPlayers ?? []).filter(
+      (p): p is MentionedPlayer => p != null,
+    ),
+  );
   const players: RelatedContent[] = uniquePlayers.map((p) => ({
     title: [p.firstName, p.lastName].filter(Boolean).join(" "),
     href: `/players/${p.psdId}`,
     type: "player" as const,
   }));
 
-  const uniqueTeams = deduplicateById(input.mentionedTeams ?? []);
+  const uniqueTeams = deduplicateById(
+    (input.mentionedTeams ?? []).filter((t): t is MentionedTeam => t != null),
+  );
   const teams: RelatedContent[] = uniqueTeams.map((t) => ({
     title: t.name,
     href: `/team/${t.slug}`,
