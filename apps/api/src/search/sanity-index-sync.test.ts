@@ -21,6 +21,21 @@ const mockDoc = {
   category: "algemeen",
 };
 
+const mockArticle = {
+  _id: "article-001",
+  slug: "kcvv-wint-derby",
+  title: "KCVV wint derby",
+  tags: ["verslag", "derby"],
+  bodyText: "KCVV Elewijt won de derby met 3-1.",
+};
+
+const mockPage = {
+  _id: "page-001",
+  slug: "over-kcvv",
+  title: "Over KCVV Elewijt",
+  bodyText: "KCVV Elewijt is een voetbalclub uit Elewijt.",
+};
+
 function makeEnvLayer() {
   return Layer.succeed(WorkerEnvTag, {
     AI: {} as Ai,
@@ -42,23 +57,34 @@ function makeEmbeddingMock(): EmbeddingServiceInterface {
   return { embed: () => Effect.succeed(FAKE_VECTOR) };
 }
 
+function makeVectorizeCapture() {
+  const upsertCalls: VectorRecord[][] = [];
+  const mock: VectorizeServiceInterface = {
+    upsert: (vectors) =>
+      Effect.sync(() => {
+        upsertCalls.push(vectors);
+      }),
+    query: () => Effect.succeed([]),
+    getByIds: () => Effect.succeed([]),
+  };
+  return { upsertCalls, mock };
+}
+
+function noopFetch<T>(data: T[]) {
+  return async () => data;
+}
+
 describe("runSanityIndexSync", () => {
   it("embeds and upserts each responsibility path with correct metadata", async () => {
-    const upsertCalls: VectorRecord[][] = [];
-    const vectorizeMock: VectorizeServiceInterface = {
-      upsert: (vectors) =>
-        Effect.sync(() => {
-          upsertCalls.push(vectors);
-        }),
-      query: () => Effect.succeed([]),
-      getByIds: () => Effect.succeed([]),
-    };
+    const { upsertCalls, mock } = makeVectorizeCapture();
 
     await Effect.runPromise(
-      runSanityIndexSync(async () => [mockDoc]).pipe(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([mockDoc]),
+      }).pipe(
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
-        Effect.provide(Layer.succeed(VectorizeService, vectorizeMock)),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
       ),
     );
 
@@ -81,7 +107,9 @@ describe("runSanityIndexSync", () => {
     };
 
     await Effect.runPromise(
-      runSanityIndexSync(async () => [mockDoc]).pipe(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([mockDoc]),
+      }).pipe(
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(EmbeddingService, captureEmbed)),
         Effect.provide(
@@ -98,5 +126,123 @@ describe("runSanityIndexSync", () => {
     expect(text).toContain("Kantine");
     expect(text).toContain("wie regelt de kantine");
     expect(text).toContain("kantine bar evenementen");
+  });
+
+  it("indexes articles with correct metadata", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([mockArticle]),
+        fetchPages: noopFetch([]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    const doc = upserted.find((v) => v.id === "article-001");
+    expect(doc).toBeDefined();
+    expect(doc!.metadata["slug"]).toBe("kcvv-wint-derby");
+    expect(doc!.metadata["type"]).toBe("article");
+    expect(doc!.metadata["title"]).toBe("KCVV wint derby");
+    expect(doc!.metadata["excerpt"]).toBe("KCVV Elewijt won de derby met 3-1.");
+  });
+
+  it("indexes pages with correct metadata", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([]),
+        fetchPages: noopFetch([mockPage]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    const doc = upserted.find((v) => v.id === "page-001");
+    expect(doc).toBeDefined();
+    expect(doc!.metadata["slug"]).toBe("over-kcvv");
+    expect(doc!.metadata["type"]).toBe("page");
+    expect(doc!.metadata["title"]).toBe("Over KCVV Elewijt");
+  });
+
+  it("indexes articles with null body gracefully", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+    const articleNoBody = {
+      ...mockArticle,
+      _id: "article-no-body",
+      bodyText: null,
+    };
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([articleNoBody]),
+        fetchPages: noopFetch([]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    const doc = upserted.find((v) => v.id === "article-no-body");
+    expect(doc).toBeDefined();
+    expect(doc!.metadata["excerpt"]).toBe("");
+  });
+
+  it("continues indexing when article fetch fails", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([mockDoc]),
+        fetchArticles: async () => {
+          throw new Error("Sanity timeout");
+        },
+        fetchPages: noopFetch([mockPage]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    // Responsibility paths and pages should still be indexed
+    expect(upserted.find((v) => v.id === "sanity-abc-123")).toBeDefined();
+    expect(upserted.find((v) => v.id === "page-001")).toBeDefined();
+  });
+
+  it("continues indexing when page fetch fails", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([mockDoc]),
+        fetchArticles: noopFetch([mockArticle]),
+        fetchPages: async () => {
+          throw new Error("Sanity timeout");
+        },
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    expect(upserted.find((v) => v.id === "sanity-abc-123")).toBeDefined();
+    expect(upserted.find((v) => v.id === "article-001")).toBeDefined();
   });
 });
