@@ -32,7 +32,7 @@ export interface SponsorsWithFiltersProps {
   className?: string;
 }
 
-interface SponsorWithTier extends Sponsor {
+interface SponsorWithTier extends Omit<Sponsor, "tier"> {
   tier: SponsorTier;
 }
 

@@ -52,7 +52,12 @@ export const SectionHeader = ({
       {linkText && linkHref && (
         <Link
           href={linkHref}
-          className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-kcvv-green-dark transition-colors hover:text-kcvv-green-bright"
+          className={cn(
+            "group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] transition-colors",
+            isDark
+              ? "text-white/80 hover:text-white"
+              : "text-kcvv-green-dark hover:text-kcvv-green-bright",
+          )}
         >
           {linkText}
           <span

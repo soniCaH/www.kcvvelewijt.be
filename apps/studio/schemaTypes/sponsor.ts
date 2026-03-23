@@ -19,8 +19,29 @@ export const sponsor = defineType({
     }),
     defineField({name: 'url', title: 'Website', type: 'url'}),
     defineField({
+      name: 'tier',
+      title: 'Tier',
+      description: 'Selecteer het sponsorniveau. Bestaande sponsors zonder tier moeten bij bewerking een tier krijgen.',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Hoofdsponsor', value: 'hoofdsponsor'},
+          {title: 'Sponsor', value: 'sponsor'},
+          {title: 'Sympathisant', value: 'sympathisant'},
+        ],
+      },
+      validation: (r) => r.warning('Gelieve een tier te selecteren'),
+    }),
+    defineField({
+      name: 'featured',
+      title: 'Featured',
+      description: 'Highlight this sponsor in the spotlight section',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
       name: 'type',
-      title: 'Type',
+      title: 'Type (legacy)',
       type: 'string',
       options: {
         list: [
@@ -32,7 +53,7 @@ export const sponsor = defineType({
           {title: 'Other', value: 'other'},
         ],
       },
-      validation: (r) => r.required(),
+      hidden: true,
     }),
     defineField({
       name: 'active',
@@ -42,9 +63,9 @@ export const sponsor = defineType({
     }),
   ],
   preview: {
-    select: {title: 'name', media: 'logo', type: 'type'},
-    prepare({title, media, type}) {
-      return {title, subtitle: type, media}
+    select: {title: 'name', media: 'logo', tier: 'tier'},
+    prepare({title, media, tier}) {
+      return {title, subtitle: tier, media}
     },
   },
 })

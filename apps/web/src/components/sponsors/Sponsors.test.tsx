@@ -201,17 +201,8 @@ describe("Sponsors", () => {
       expect(description).toHaveClass("text-white/80");
     });
 
-    it("inverts logos in dark theme", () => {
+    it("shows logos in original colors in dark theme (no invert)", () => {
       render(<Sponsors sponsors={mockSponsors} variant="dark" />);
-
-      const logos = screen.getAllByRole("img");
-      logos.forEach((logo) => {
-        expect(logo).toHaveClass("invert");
-      });
-    });
-
-    it("does not invert logos in light theme", () => {
-      render(<Sponsors sponsors={mockSponsors} variant="light" />);
 
       const logos = screen.getAllByRole("img");
       logos.forEach((logo) => {

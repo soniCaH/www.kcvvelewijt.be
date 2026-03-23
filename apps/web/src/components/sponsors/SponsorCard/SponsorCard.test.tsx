@@ -38,36 +38,20 @@ const sponsorNoUrl: Sponsor = {
 };
 
 describe("SponsorCard", () => {
-  describe("variant support", () => {
-    it("uses bg-white/10 background in dark variant", () => {
-      const { container } = render(
-        <SponsorCard sponsor={sponsorNoUrl} variant="dark" />,
-      );
+  describe("styling", () => {
+    it("renders logo with grayscale filter", () => {
+      render(<SponsorCard sponsor={sponsorNoUrl} />);
 
-      const card = container.querySelector("[class*='aspect-']");
-      expect(card).toHaveClass("bg-white/10");
-      expect(card).not.toHaveClass("bg-gray-100");
+      const img = screen.getByRole("img");
+      expect(img).toHaveClass("grayscale");
     });
 
-    it("uses bg-gray-100 background in light variant (default)", () => {
+    it("renders without background color", () => {
       const { container } = render(<SponsorCard sponsor={sponsorNoUrl} />);
 
       const card = container.querySelector("[class*='aspect-']");
-      expect(card).toHaveClass("bg-gray-100");
-    });
-
-    it("inverts logo in dark variant", () => {
-      render(<SponsorCard sponsor={sponsorNoUrl} variant="dark" />);
-
-      const img = screen.getByRole("img");
-      expect(img).toHaveClass("invert");
-    });
-
-    it("does not invert logo in light variant", () => {
-      render(<SponsorCard sponsor={sponsorNoUrl} variant="light" />);
-
-      const img = screen.getByRole("img");
-      expect(img).not.toHaveClass("invert");
+      expect(card).not.toHaveClass("bg-white/15");
+      expect(card).not.toHaveClass("bg-gray-100");
     });
   });
 

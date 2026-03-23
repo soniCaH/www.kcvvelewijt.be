@@ -122,19 +122,20 @@ const mockBanner = {
 
 /** SponsorsSection is async — inline mock with same markup */
 const SponsorsSectionContent = () => (
-  <section>
+  <section className="py-6">
     <div className="max-w-7xl mx-auto px-4 md:px-8">
       <SectionHeader
-        title="Sponsors"
-        linkText="Word sponsor"
+        title="Onze sponsors"
+        linkText="Alle partners"
         linkHref="/sponsors"
+        variant="dark"
       />
       <Sponsors
         sponsors={mockSponsors}
         title=""
         description=""
         showViewAll={false}
-        variant="light"
+        variant="dark"
         columns={5}
         className="py-0"
       />
@@ -227,11 +228,22 @@ function buildSections(
       content: <BannerSlot {...mockBanner} />,
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
+      transition: { type: "diagonal", direction: "right" },
     },
     {
       key: "sponsors",
-      bg: "gray-100",
+      bg: "kcvv-green-dark",
       content: <SponsorsSectionContent />,
+      paddingTop: "pt-8",
+      paddingBottom: "pb-8",
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "pre-footer",
+      bg: "gray-100",
+      content: <></>,
+      paddingTop: "pt-12",
+      paddingBottom: "pb-12",
     },
   ];
 }

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils/cn";
 import { SectionHeader } from "@/components/design-system";
 import { SponsorsBlock } from "@/components/sponsors";
 
@@ -7,18 +8,19 @@ export interface SponsorsSectionProps {
 
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
   return (
-    <section className={className}>
+    <section className={cn("py-6", className)}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <SectionHeader
-          title="Sponsors"
-          linkText="Word sponsor"
+          title="Onze sponsors"
+          linkText="Alle partners"
           linkHref="/sponsors"
+          variant="dark"
         />
         <SponsorsBlock
           title=""
           description=""
           showViewAll={false}
-          variant="light"
+          variant="dark"
           columns={5}
           className="py-0"
         />

@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Responsive grid of SponsorCard items. Supports variable columns, card sizes, and light/dark theme variants.",
+          "Responsive grid of SponsorCard items. Supports variable columns and card sizes.",
       },
     },
   },
@@ -66,14 +66,17 @@ export const WithNames: Story = {
   },
 };
 
-export const DarkVariant: Story = {
+export const OnDarkBackground: Story = {
   args: {
     sponsors: mockSponsors,
-    variant: "dark",
   },
-  parameters: {
-    backgrounds: { default: "dark" },
-  },
+  decorators: [
+    (Story) => (
+      <div className="bg-kcvv-green-dark p-8">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const Empty: Story = {

@@ -13,6 +13,7 @@ export interface Sponsor {
   name: string;
   logo: string;
   url?: string;
+  tier?: "hoofdsponsor" | "sponsor" | "sympathisant";
 }
 
 export interface SponsorsProps {
@@ -89,7 +90,7 @@ export const Sponsors = ({
       </div>
 
       {/* Sponsors Grid — delegated to SponsorGrid */}
-      <SponsorGrid sponsors={sponsors} columns={columns} variant={variant} />
+      <SponsorGrid sponsors={sponsors} columns={columns} />
 
       {/* View All Link */}
       {showViewAll && (

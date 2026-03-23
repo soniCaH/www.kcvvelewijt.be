@@ -42,15 +42,6 @@ describe("SponsorGrid", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("passes variant to SponsorCard children", () => {
-    render(<SponsorGrid sponsors={sponsors} variant="dark" />);
-
-    const images = screen.getAllByRole("img");
-    images.forEach((img) => {
-      expect(img).toHaveClass("invert");
-    });
-  });
-
   it("applies grid column classes", () => {
     const { container } = render(
       <SponsorGrid sponsors={sponsors} columns={3} />,

@@ -28,7 +28,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Individual sponsor card with logo and optional hover overlay. Wraps in a link when a URL is provided. Hover to see the 'Bezoek website' overlay.",
+          "Individual sponsor card with logo. Wraps in a link when a URL is provided.",
       },
     },
   },
@@ -45,7 +45,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Default medium card with link — hover to reveal overlay. */
+/** Default medium card with link. */
 export const Default: Story = {
   args: {
     sponsor: withUrl,
@@ -62,7 +62,7 @@ export const WithName: Story = {
   },
 };
 
-/** No URL — hover overlay not shown, not wrapped in a link. */
+/** No URL — not wrapped in a link. */
 export const NoUrl: Story = {
   args: {
     sponsor: withoutUrl,
