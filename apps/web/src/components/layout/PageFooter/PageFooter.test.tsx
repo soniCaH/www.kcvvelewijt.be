@@ -9,67 +9,33 @@ vi.mock("./CookiePreferencesButton", () => ({
 }));
 
 describe("PageFooter", () => {
-  it("renders the footer", () => {
+  it("renders a footer element", () => {
     const { container } = render(<PageFooter />);
     expect(container.querySelector("footer")).toBeInTheDocument();
   });
 
-  it("renders KCVV logo", () => {
+  it("renders green hero zone with KCVV Elewijt display text", () => {
     render(<PageFooter />);
-    const logo = screen.getByAltText(/KCVV/i);
+    const heroText = screen.getByText("KCVV Elewijt");
+    expect(heroText).toBeInTheDocument();
+    expect(heroText.className).toMatch(/font-alt/);
+  });
+
+  it("renders SectionTransition from gray-100 to kcvv-green-dark", () => {
+    const { container } = render(<PageFooter />);
+    const transition = container.querySelector("[aria-hidden='true']");
+    expect(transition).toBeInTheDocument();
+  });
+
+  it("renders club crest logo", () => {
+    render(<PageFooter />);
+    const logo = screen.getByAltText("KCVV Elewijt");
     expect(logo).toBeInTheDocument();
   });
 
-  it("renders club address", () => {
+  it("renders Club heading with correct links", () => {
     render(<PageFooter />);
-    expect(screen.getByText(/Driesstraat 32/)).toBeInTheDocument();
-  });
-
-  it("renders club email", () => {
-    render(<PageFooter />);
-    const emailLink = screen.getByRole("link", {
-      name: /info@kcvvelewijt\.be/i,
-    });
-    expect(emailLink).toHaveAttribute("href", "mailto:info@kcvvelewijt.be");
-  });
-
-  it("renders Facebook link", () => {
-    render(<PageFooter />);
-    const fbLink = screen.getByRole("link", { name: /facebook/i });
-    expect(fbLink).toHaveAttribute("href", "https://facebook.com/KCVVElewijt/");
-  });
-
-  it("renders Instagram link", () => {
-    render(<PageFooter />);
-    const igLink = screen.getByRole("link", { name: /instagram/i });
-    expect(igLink).toHaveAttribute("href", "https://www.instagram.com/kcvve");
-  });
-
-  it("renders copyright text", () => {
-    render(<PageFooter />);
-    const year = new Date().getFullYear();
-    expect(screen.getByText(`© ${year} K.C.V.V. Elewijt`)).toBeInTheDocument();
-  });
-
-  it("renders privacy policy link", () => {
-    render(<PageFooter />);
-    const privacyLink = screen.getByRole("link", { name: "Privacyverklaring" });
-    expect(privacyLink).toHaveAttribute("href", "/privacy");
-  });
-
-  it("renders cookie preferences button", () => {
-    render(<PageFooter />);
-    const btn = screen.getByRole("button", { name: /cookie-instellingen/i });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("applies custom className", () => {
-    const { container } = render(<PageFooter className="custom-footer" />);
-    expect(container.querySelector("footer")).toHaveClass("custom-footer");
-  });
-
-  it("renders navigation links", () => {
-    render(<PageFooter />);
+    expect(screen.getByText("Club")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Nieuws" })).toHaveAttribute(
       "href",
       "/news",
@@ -78,9 +44,60 @@ describe("PageFooter", () => {
       "href",
       "/calendar",
     );
+    expect(screen.getByRole("link", { name: "Ploegen" })).toHaveAttribute(
+      "href",
+      "/teams",
+    );
     expect(screen.getByRole("link", { name: "Sponsors" })).toHaveAttribute(
       "href",
       "/sponsors",
     );
+    expect(screen.getByRole("link", { name: "Bestuur" })).toHaveAttribute(
+      "href",
+      "/club/organigram",
+    );
+  });
+
+  it("renders Contact heading with address and email", () => {
+    render(<PageFooter />);
+    expect(screen.getByText("Contact")).toBeInTheDocument();
+    expect(screen.getByText(/Driesstraat 32/)).toBeInTheDocument();
+    expect(screen.getByText(/1982 Elewijt/)).toBeInTheDocument();
+    const emailLink = screen.getByRole("link", {
+      name: /info@kcvvelewijt\.be/i,
+    });
+    expect(emailLink).toHaveAttribute("href", "mailto:info@kcvvelewijt.be");
+  });
+
+  it("renders social icons in contact section", () => {
+    render(<PageFooter />);
+    const fbLink = screen.getByRole("link", { name: /facebook/i });
+    expect(fbLink).toHaveAttribute("href", "https://facebook.com/KCVVElewijt/");
+    const igLink = screen.getByRole("link", { name: /instagram/i });
+    expect(igLink).toHaveAttribute("href", "https://www.instagram.com/kcvve");
+  });
+
+  it("renders copyright without dots in abbreviation", () => {
+    render(<PageFooter />);
+    const year = new Date().getFullYear();
+    expect(screen.getByText(`© ${year} KCVV Elewijt`)).toBeInTheDocument();
+  });
+
+  it("renders privacy link in bottom bar", () => {
+    render(<PageFooter />);
+    const privacyLink = screen.getByRole("link", { name: "Privacyverklaring" });
+    expect(privacyLink).toHaveAttribute("href", "/privacy");
+  });
+
+  it("renders cookie preferences button in bottom bar", () => {
+    render(<PageFooter />);
+    const btn = screen.getByRole("button", { name: /cookie-instellingen/i });
+    expect(btn).toBeInTheDocument();
+  });
+
+  it("applies custom className", () => {
+    const { container } = render(<PageFooter className="custom-footer" />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveClass("custom-footer");
   });
 });
