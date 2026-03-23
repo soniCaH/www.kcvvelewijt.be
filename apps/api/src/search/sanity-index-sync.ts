@@ -97,8 +97,11 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         Effect.flatMap((vector) =>
           vectorize.upsert([{ id, values: vector, metadata }]),
         ),
+        Effect.as(true),
         Effect.catchAll((e) =>
-          Effect.log(`[search-sync] skipped ${id}: ${String(e)}`),
+          Effect.log(`[search-sync] skipped ${id}: ${String(e)}`).pipe(
+            Effect.as(false),
+          ),
         ),
       );
 
@@ -128,9 +131,9 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           title: doc.title,
           excerpt: doc.summary.slice(0, 200),
         }).pipe(
-          Effect.tap(() =>
+          Effect.tap((ok) =>
             Effect.sync(() => {
-              successCount++;
+              if (ok) successCount++;
             }),
           ),
         ),
