@@ -50,7 +50,21 @@ export function BestuurPage({
             <div
               className="prose prose-gray"
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(description),
+                __html: sanitizeHtml(description, {
+                  allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    a: [
+                      ...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []),
+                      "class",
+                    ],
+                  },
+                  transformTags: {
+                    a: (tagName, attribs) => ({
+                      tagName,
+                      attribs: { ...attribs, class: "content-link" },
+                    }),
+                  },
+                }),
               }}
             />
           </section>

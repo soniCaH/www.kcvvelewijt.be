@@ -355,7 +355,19 @@ describe("SanityArticleBody blockquote", () => {
 });
 
 describe("SanityArticleBody links", () => {
-  it("renders external link with design token color and underline decoration", () => {
+  it("renders all inline links with content-link class", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeLinkBlock("Visit site", "https://example.com")]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.className).toContain("content-link");
+  });
+
+  it("renders external link with target=_blank and rel attributes", () => {
     const { container } = render(
       <SanityArticleBody
         content={[makeLinkBlock("Visit site", "https://example.com")]}
@@ -366,13 +378,27 @@ describe("SanityArticleBody links", () => {
     expect(link).toBeInTheDocument();
     expect(link!.getAttribute("href")).toBe("https://example.com");
     expect(link!.getAttribute("target")).toBe("_blank");
-
-    const classes = link!.className;
-    expect(classes).toContain("text-kcvv-green-dark");
-    expect(classes).toContain("underline");
+    expect(link!.getAttribute("rel")).toBe("noopener noreferrer");
   });
 
-  it("renders internal link without target=_blank", () => {
+  it("renders ExternalLink icon for http links", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeLinkBlock("Visit site", "https://example.com")]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    const icon = link!.querySelector("svg");
+    expect(icon).toBeInTheDocument();
+    expect(icon!.getAttribute("aria-hidden")).toBe("true");
+
+    const srOnly = link!.querySelector(".sr-only");
+    expect(srOnly).toBeInTheDocument();
+    expect(srOnly!.textContent).toContain("opens in new tab");
+  });
+
+  it("renders internal link without target=_blank and without icon", () => {
     const { container } = render(
       <SanityArticleBody content={[makeLinkBlock("Home", "/news")]} />,
     );
@@ -380,6 +406,35 @@ describe("SanityArticleBody links", () => {
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
     expect(link!.getAttribute("target")).toBeNull();
+    expect(link!.querySelector("svg")).not.toBeInTheDocument();
+  });
+
+  it("renders mailto link without icon and without target=_blank", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeLinkBlock("Email us", "mailto:info@kcvv.be")]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("mailto:info@kcvv.be");
+    expect(link!.getAttribute("target")).toBeNull();
+    expect(link!.querySelector("svg")).not.toBeInTheDocument();
+  });
+
+  it("renders tel link without icon and without target=_blank", () => {
+    const { container } = render(
+      <SanityArticleBody
+        content={[makeLinkBlock("Call us", "tel:+3215123456")]}
+      />,
+    );
+
+    const link = container.querySelector("a");
+    expect(link).toBeInTheDocument();
+    expect(link!.getAttribute("href")).toBe("tel:+3215123456");
+    expect(link!.getAttribute("target")).toBeNull();
+    expect(link!.querySelector("svg")).not.toBeInTheDocument();
   });
 });
 
@@ -564,7 +619,7 @@ describe("SanityArticleBody internalLink", () => {
     expect(link!.getAttribute("href")).toBe("/about");
   });
 
-  it("renders with same styling as regular links", () => {
+  it("renders with content-link class and no icon", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -578,8 +633,8 @@ describe("SanityArticleBody internalLink", () => {
 
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
-    expect(link!.className).toContain("text-kcvv-green-dark");
-    expect(link!.className).toContain("underline");
+    expect(link!.className).toContain("content-link");
+    expect(link!.querySelector("svg")).not.toBeInTheDocument();
   });
 
   it("does not set target=_blank for internal links", () => {

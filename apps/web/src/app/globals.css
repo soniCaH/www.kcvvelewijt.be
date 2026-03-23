@@ -283,12 +283,28 @@ article a:hover,
   color: var(--color-kcvv-green-hover);
 }
 
-/* In-body article links match footer link style: underline on hover only */
-.prose a {
+/* Content link — native underline with skip-ink for inline article links */
+.content-link {
+  color: var(--color-kcvv-green-dark);
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-kcvv-green-bright) 30%, transparent);
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  transition: color 0.3s ease, text-decoration-color 0.3s ease;
+}
+
+.content-link:hover {
+  color: var(--color-kcvv-green-bright);
+  text-decoration-color: var(--color-kcvv-green-bright);
+}
+
+/* In-body article links: no underline by default, underline on hover (except .content-link which uses native text-decoration with text-decoration-skip-ink) */
+.prose a:not(.content-link) {
   text-decoration: none;
 }
 
-.prose a:hover {
+.prose a:not(.content-link):hover {
   text-decoration: underline;
 }
 
