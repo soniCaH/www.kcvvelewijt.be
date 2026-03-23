@@ -191,7 +191,7 @@ export const DownloadButton = ({
 
   return (
     <a
-      href={href}
+      href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
