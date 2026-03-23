@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
+import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -195,9 +196,19 @@ const components: PortableTextComponents = {
           href={href}
           target={isExternal ? "_blank" : undefined}
           rel={isExternal ? "noopener noreferrer" : undefined}
-          className="text-kcvv-green-dark underline decoration-kcvv-green/30 underline-offset-2 transition-colors hover:text-kcvv-green hover:decoration-kcvv-green"
+          className="content-link"
         >
           {children}
+          {isExternal && (
+            <>
+              <ExternalLinkIcon
+                aria-hidden="true"
+                className="ml-0.5 inline-block align-baseline opacity-60"
+                size="0.75em"
+              />
+              <span className="sr-only"> (opens in new tab)</span>
+            </>
+          )}
         </a>
       );
     },
@@ -210,10 +221,7 @@ const components: PortableTextComponents = {
     }) => {
       const href = resolveInternalLinkHref(value?.reference);
       return (
-        <Link
-          href={href}
-          className="text-kcvv-green-dark underline decoration-kcvv-green/30 underline-offset-2 transition-colors hover:text-kcvv-green hover:decoration-kcvv-green"
-        >
+        <Link href={href} className="content-link">
           {children}
         </Link>
       );
@@ -237,6 +245,7 @@ export const SanityArticleBody = ({
         "prose-headings:font-title prose-headings:font-bold prose-headings:text-kcvv-black",
         "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
+        /* prose-a: fallback for <a> tags not rendered via marks (e.g. inside htmlTable raw HTML) */
         "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
         /* blockquote styles handled by .prose blockquote in globals.css */
         "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",

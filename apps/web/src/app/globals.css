@@ -283,6 +283,41 @@ article a:hover,
   color: var(--color-kcvv-green-hover);
 }
 
+/* Content link — slide-in underline animation for inline article links */
+.content-link {
+  color: var(--color-kcvv-green-dark);
+  text-decoration: none;
+  position: relative;
+  display: inline;
+  transition: color 0.3s ease;
+}
+
+.content-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-kcvv-green-bright);
+  opacity: 0.3;
+}
+
+.content-link:hover {
+  color: var(--color-kcvv-green-bright);
+}
+
+.content-link:hover::after {
+  width: 100%;
+  opacity: 1;
+  animation: content-link-slide 0.3s ease forwards;
+}
+
+@keyframes content-link-slide {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
 /* In-body article links match footer link style: underline on hover only */
 .prose a {
   text-decoration: none;

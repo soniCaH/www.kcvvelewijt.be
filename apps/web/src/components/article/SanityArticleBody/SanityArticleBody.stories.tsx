@@ -133,3 +133,125 @@ export const WithTableOnly: Story = {
     content: [heading("Klassement"), htmlTableBlock(sampleTableHtml)],
   },
 };
+
+const linkBlock = (
+  text: string,
+  href: string,
+  key = "link-1",
+): PortableTextBlock =>
+  ({
+    _type: "block",
+    _key: key,
+    style: "normal",
+    children: [{ _type: "span", _key: "s1", text, marks: ["l1"] }],
+    markDefs: [{ _key: "l1", _type: "link", href }],
+  }) as unknown as PortableTextBlock;
+
+const internalLinkBlock = (
+  text: string,
+  reference: { _type: string; slug?: string; psdId?: string },
+  key = "ilink-1",
+): PortableTextBlock =>
+  ({
+    _type: "block",
+    _key: key,
+    style: "normal",
+    children: [{ _type: "span", _key: "s1", text, marks: ["il1"] }],
+    markDefs: [{ _key: "il1", _type: "internalLink", reference }],
+  }) as unknown as PortableTextBlock;
+
+const mixedLinksParagraph: PortableTextBlock = {
+  _type: "block",
+  _key: "mixed-links",
+  style: "normal",
+  children: [
+    { _type: "span", _key: "s1", text: "Lees meer op ", marks: [] },
+    {
+      _type: "span",
+      _key: "s2",
+      text: "de KBVB website",
+      marks: ["ext1"],
+    },
+    { _type: "span", _key: "s3", text: " of bekijk ", marks: [] },
+    {
+      _type: "span",
+      _key: "s4",
+      text: "ons wedstrijdverslag",
+      marks: ["int1"],
+    },
+    { _type: "span", _key: "s5", text: ". Contacteer ons via ", marks: [] },
+    { _type: "span", _key: "s6", text: "e-mail", marks: ["mail1"] },
+    { _type: "span", _key: "s7", text: " of bel ", marks: [] },
+    { _type: "span", _key: "s8", text: "+32 15 12 34 56", marks: ["tel1"] },
+    { _type: "span", _key: "s9", text: ".", marks: [] },
+  ],
+  markDefs: [
+    { _key: "ext1", _type: "link", href: "https://www.rbfa.be" },
+    {
+      _key: "int1",
+      _type: "internalLink",
+      reference: { _type: "article", slug: "wedstrijdverslag" },
+    },
+    { _key: "mail1", _type: "link", href: "mailto:info@kcvv.be" },
+    { _key: "tel1", _type: "link", href: "tel:+3215123456" },
+  ],
+} as unknown as PortableTextBlock;
+
+/**
+ * External links with ExternalLink icon and target="_blank"
+ */
+export const ExternalLinks: Story = {
+  args: {
+    content: [
+      heading("Externe links"),
+      linkBlock("Bezoek de KBVB website", "https://www.rbfa.be", "ext-link-1"),
+      linkBlock(
+        "PSD API documentatie",
+        "https://clubapi.prosoccerdata.com",
+        "ext-link-2",
+      ),
+    ],
+  },
+};
+
+/**
+ * Internal links via internalLink mark — same tab, no icon
+ */
+export const InternalLinks: Story = {
+  args: {
+    content: [
+      heading("Interne links"),
+      internalLinkBlock("Eerste ploeg", {
+        _type: "team",
+        slug: "eerste-ploeg",
+      }),
+      internalLinkBlock(
+        "Lees het wedstrijdverslag",
+        { _type: "article", slug: "verslag-kcvv-vigor" },
+        "ilink-2",
+      ),
+    ],
+  },
+};
+
+/**
+ * Mixed content: external, internal, mailto, and tel links in a single paragraph
+ */
+export const MixedLinks: Story = {
+  args: {
+    content: [heading("Gemengde links"), mixedLinksParagraph],
+  },
+};
+
+/**
+ * Mailto and tel links — same tab, no icon
+ */
+export const MailtoAndTelLinks: Story = {
+  args: {
+    content: [
+      heading("Contact"),
+      linkBlock("info@kcvv.be", "mailto:info@kcvv.be", "mailto-1"),
+      linkBlock("+32 15 12 34 56", "tel:+3215123456", "tel-1"),
+    ],
+  },
+};
