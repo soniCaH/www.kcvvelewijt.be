@@ -39,18 +39,24 @@ function formatDate(date: Date): string {
 
 type Result = "win" | "loss" | "draw" | null;
 
+function hasScores(
+  match: ScheduleMatch,
+): match is ScheduleMatch & { homeScore: number; awayScore: number } {
+  return (
+    typeof match.homeScore === "number" && typeof match.awayScore === "number"
+  );
+}
+
 function getResult(match: ScheduleMatch, teamId: number | undefined): Result {
   const isMember =
     teamId !== undefined &&
     (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
-  const hasScore =
-    typeof match.homeScore === "number" && typeof match.awayScore === "number";
 
-  if (!hasScore || !isMember) return null;
+  if (!hasScores(match) || !isMember) return null;
 
   const isHome = match.homeTeam.id === teamId;
-  const kcvvScore = isHome ? match.homeScore! : match.awayScore!;
-  const oppScore = isHome ? match.awayScore! : match.homeScore!;
+  const kcvvScore = isHome ? match.homeScore : match.awayScore;
+  const oppScore = isHome ? match.awayScore : match.homeScore;
 
   if (kcvvScore > oppScore) return "win";
   if (kcvvScore < oppScore) return "loss";
@@ -88,8 +94,9 @@ export function MatchResultRow({
     teamId !== undefined &&
     (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
   const isHome = isMember && match.homeTeam.id === teamId;
-  const hasScore =
-    typeof match.homeScore === "number" && typeof match.awayScore === "number";
+  const scored = hasScores(match);
+  const homeScore = scored ? match.homeScore : undefined;
+  const awayScore = scored ? match.awayScore : undefined;
 
   const result = getResult(match, teamId);
 
@@ -201,18 +208,18 @@ export function MatchResultRow({
 
         {/* Score or VS */}
         <div className="flex-shrink-0 px-4">
-          {hasScore ? (
+          {homeScore !== undefined && awayScore !== undefined ? (
             <div className="flex items-center gap-2 font-mono font-bold text-lg">
               <span
                 className={cn(
                   isDark ? "text-white" : undefined,
                   teamId !== undefined &&
                     match.homeTeam.id === teamId &&
-                    match.homeScore! > match.awayScore! &&
+                    homeScore > awayScore &&
                     "text-kcvv-green-bright",
                 )}
               >
-                {match.homeScore}
+                {homeScore}
               </span>
               <span className={isDark ? "text-white/30" : "text-gray-400"}>
                 -
@@ -222,11 +229,11 @@ export function MatchResultRow({
                   isDark ? "text-white" : undefined,
                   teamId !== undefined &&
                     match.awayTeam.id === teamId &&
-                    match.awayScore! > match.homeScore! &&
+                    awayScore > homeScore &&
                     "text-kcvv-green-bright",
                 )}
               >
-                {match.awayScore}
+                {awayScore}
               </span>
             </div>
           ) : (

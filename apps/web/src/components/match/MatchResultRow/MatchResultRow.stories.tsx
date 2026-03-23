@@ -159,6 +159,12 @@ export const WithoutLogos: Story = {
   },
 };
 
+const darkBgDecorator = (Story: () => React.ReactNode) => (
+  <div className="bg-kcvv-black p-8 -m-4">
+    <Story />
+  </div>
+);
+
 /**
  * Dark theme — for use in dark background sections
  */
@@ -169,13 +175,7 @@ export const DarkTheme: Story = {
     theme: "dark",
     href: "/game/1001",
   },
-  decorators: [
-    (Story) => (
-      <div className="bg-kcvv-black p-8 -m-4">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [darkBgDecorator],
 };
 
 /**
@@ -193,13 +193,7 @@ export const DarkThemeWin: Story = {
     theme: "dark",
     href: "/game/1001",
   },
-  decorators: [
-    (Story) => (
-      <div className="bg-kcvv-black p-8 -m-4">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [darkBgDecorator],
 };
 
 /**
@@ -213,11 +207,5 @@ export const DarkThemeNextMatch: Story = {
     isNext: true,
     href: "/game/1001",
   },
-  decorators: [
-    (Story) => (
-      <div className="bg-kcvv-black p-8 -m-4">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [darkBgDecorator],
 };
