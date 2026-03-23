@@ -16,10 +16,19 @@ export interface MentionedTeam {
   slug: string;
 }
 
+export interface MentionedStaffMember {
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  positionTitle: string | null;
+  imageUrl: string | null;
+}
+
 interface BuildRelatedContentInput {
   relatedArticles?: Array<{ title: string; slug: { current: string } }>;
   mentionedPlayers?: Array<MentionedPlayer | null>;
   mentionedTeams?: Array<MentionedTeam | null>;
+  mentionedStaffMembers?: Array<MentionedStaffMember | null>;
 }
 
 function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
@@ -53,6 +62,17 @@ export function buildRelatedContent(
     type: "player" as const,
   }));
 
+  const uniqueStaff = deduplicateById(
+    (input.mentionedStaffMembers ?? []).filter(
+      (s): s is MentionedStaffMember => s != null,
+    ),
+  );
+  const staff: RelatedContent[] = uniqueStaff.map((s) => ({
+    title: [s.firstName, s.lastName].filter(Boolean).join(" "),
+    href: `/club/organigram?member=${s._id}`,
+    type: "staff" as const,
+  }));
+
   const uniqueTeams = deduplicateById(
     (input.mentionedTeams ?? []).filter((t): t is MentionedTeam => t != null),
   );
@@ -62,5 +82,5 @@ export function buildRelatedContent(
     type: "team" as const,
   }));
 
-  return [...articles, ...players, ...teams];
+  return [...articles, ...players, ...staff, ...teams];
 }

@@ -114,6 +114,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const relatedContent = buildRelatedContent({
     relatedArticles: article.relatedArticles,
     mentionedPlayers: article.mentionedPlayers,
+    mentionedStaffMembers: article.mentionedStaffMembers,
     mentionedTeams: article.mentionedTeams,
   });
 

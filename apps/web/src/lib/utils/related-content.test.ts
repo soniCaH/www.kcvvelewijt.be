@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildRelatedContent,
   type MentionedPlayer,
+  type MentionedStaffMember,
   type MentionedTeam,
 } from "./related-content";
 import type { RelatedContent } from "@/components/article";
@@ -23,6 +24,16 @@ describe("buildRelatedContent", () => {
     },
   ];
 
+  const mentionedStaffMembers: MentionedStaffMember[] = [
+    {
+      _id: "staff-1",
+      firstName: "Marc",
+      lastName: "De Trainer",
+      positionTitle: "Hoofdtrainer",
+      imageUrl: null,
+    },
+  ];
+
   const mentionedTeams: MentionedTeam[] = [
     {
       _id: "team-1",
@@ -32,10 +43,11 @@ describe("buildRelatedContent", () => {
     },
   ];
 
-  it("orders items as articles → players → teams", () => {
+  it("orders items as articles → players → staff → teams", () => {
     const result = buildRelatedContent({
       relatedArticles,
       mentionedPlayers,
+      mentionedStaffMembers,
       mentionedTeams,
     });
 
@@ -43,6 +55,11 @@ describe("buildRelatedContent", () => {
       { title: "Article One", href: "/news/article-one", type: "article" },
       { title: "Article Two", href: "/news/article-two", type: "article" },
       { title: "Jan Janssens", href: "/players/123", type: "player" },
+      {
+        title: "Marc De Trainer",
+        href: "/club/organigram?member=staff-1",
+        type: "staff",
+      },
       { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
     ]);
   });

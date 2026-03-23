@@ -111,10 +111,19 @@ export interface SanityMentionedTeam {
   slug: string;
 }
 
+export interface SanityMentionedStaffMember {
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  positionTitle: string | null;
+  imageUrl: string | null;
+}
+
 export interface SanityArticle extends SanityArticleListItem {
   body: unknown;
   relatedArticles?: SanityArticle[];
   mentionedPlayers?: SanityMentionedPlayer[];
+  mentionedStaffMembers?: SanityMentionedStaffMember[];
   mentionedTeams?: SanityMentionedTeam[];
 }
 

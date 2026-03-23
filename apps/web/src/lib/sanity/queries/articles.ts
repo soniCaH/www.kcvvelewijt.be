@@ -27,5 +27,9 @@ export const ARTICLE_BY_SLUG_QUERY = `*[_type == "article" && slug.current == $s
     _id, name,
     "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "slug": slug.current
+  },
+  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
+    _id, firstName, lastName, positionTitle,
+    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"
   }
 }`;
