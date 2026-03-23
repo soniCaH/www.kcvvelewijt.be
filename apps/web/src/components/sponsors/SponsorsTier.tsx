@@ -23,7 +23,7 @@ export interface SponsorsTierProps {
   /**
    * Sponsors to display
    */
-  sponsors: Sponsor[];
+  sponsors: Omit<Sponsor, "tier">[];
   /**
    * Show sponsor names below logos (default: true)
    */

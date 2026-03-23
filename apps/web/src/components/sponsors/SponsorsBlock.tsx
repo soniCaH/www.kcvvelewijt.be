@@ -45,13 +45,6 @@ export interface SponsorsBlockProps {
   className?: string;
 }
 
-/**
- * Fetches sponsors of types "crossing", "green", and "white" from the CMS and renders the Sponsors component with the resulting list.
- *
- * The function falls back to an empty sponsor list on error and forwards received display props (title, description, columns, variant, showViewAll, viewAllHref, className) to the rendered Sponsors component.
- *
- * @returns A JSX element rendering the Sponsors component populated with the fetched sponsor list
- */
 export async function SponsorsBlock({
   title = "Onze sponsors",
   description = "KCVV Elewijt wordt mede mogelijk gemaakt door onze trouwe sponsors.",
@@ -66,13 +59,20 @@ export async function SponsorsBlock({
       const sanity = yield* SanityService;
       const all = yield* sanity.getSponsors();
       return all
-        .filter((s) => ["crossing", "green", "white"].includes(s.type))
+        .filter(
+          (s) =>
+            s.tier === "hoofdsponsor" ||
+            s.tier === "sponsor" ||
+            // Backward compat: include legacy types until all sponsors are re-tagged
+            (!s.tier && ["crossing", "green", "white"].includes(s.type)),
+        )
         .map(
           (s): Sponsor => ({
             id: s._id,
             name: s.name,
             logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
             url: s.url ?? undefined,
+            tier: s.tier ?? undefined,
           }),
         );
     }).pipe(

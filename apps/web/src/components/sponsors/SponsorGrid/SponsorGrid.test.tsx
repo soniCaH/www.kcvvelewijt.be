@@ -43,11 +43,13 @@ describe("SponsorGrid", () => {
   });
 
   it("passes variant to SponsorCard children", () => {
-    render(<SponsorGrid sponsors={sponsors} variant="dark" />);
+    const { container } = render(
+      <SponsorGrid sponsors={sponsors} variant="dark" />,
+    );
 
-    const images = screen.getAllByRole("img");
-    images.forEach((img) => {
-      expect(img).toHaveClass("invert");
+    const cards = container.querySelectorAll("[class*='aspect-']");
+    cards.forEach((card) => {
+      expect(card).toHaveClass("bg-white/15");
     });
   });
 

@@ -133,6 +133,8 @@ export interface SanitySponsor {
   name: string;
   url: string | null;
   type: string;
+  tier: "hoofdsponsor" | "sponsor" | "sympathisant" | null;
+  featured: boolean;
   logoUrl: string | null;
 }
 

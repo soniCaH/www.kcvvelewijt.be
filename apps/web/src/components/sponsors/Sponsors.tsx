@@ -13,6 +13,7 @@ export interface Sponsor {
   name: string;
   logo: string;
   url?: string;
+  tier?: "hoofdsponsor" | "sponsor" | "sympathisant";
 }
 
 export interface SponsorsProps {

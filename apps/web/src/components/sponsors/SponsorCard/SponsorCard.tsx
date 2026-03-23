@@ -44,7 +44,7 @@ export const SponsorCard = ({
         "group relative aspect-[3/2] rounded flex items-center justify-center overflow-hidden",
         "opacity-70 hover:opacity-100 transition-opacity duration-300",
         "p-[8%]",
-        variant === "dark" ? "bg-white/10" : "bg-gray-100",
+        variant === "dark" ? "bg-white/15" : "bg-gray-100",
         className,
       )}
     >
@@ -53,10 +53,7 @@ export const SponsorCard = ({
         alt={sponsor.name}
         width={image.width}
         height={image.height}
-        className={cn(
-          "w-full h-full object-contain",
-          variant === "dark" && "filter invert",
-        )}
+        className="w-full h-full object-contain"
       />
 
       {/* Hover overlay */}
