@@ -7,8 +7,8 @@ export class RelatedApi extends HttpApiGroup.make("related").add(
   HttpApiEndpoint.get("getRelated", "/related")
     .setUrlParams(
       S.Struct({
-        id: S.String,
-        limit: S.optional(S.NumberFromString),
+        id: S.String.pipe(S.minLength(1)),
+        limit: S.optional(S.NumberFromString.pipe(S.int(), S.between(1, 5))),
       }),
     )
     .addSuccess(S.Array(RelatedItem))

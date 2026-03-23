@@ -51,6 +51,7 @@ describe("runSanityIndexSync", () => {
           upsertCalls.push(vectors);
         }),
       query: () => Effect.succeed([]),
+      getByIds: () => Effect.succeed([]),
     };
 
     await Effect.runPromise(
@@ -87,6 +88,7 @@ describe("runSanityIndexSync", () => {
           Layer.succeed(VectorizeService, {
             upsert: () => Effect.succeed(undefined),
             query: () => Effect.succeed([]),
+            getByIds: () => Effect.succeed([]),
           }),
         ),
       ),

@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { RelatedPaths } from "./RelatedPaths";
 import type {
   UserRole,
   ResponsibilityPath,
@@ -124,6 +125,7 @@ export function ResponsibilityFinder({
     useState<ResponsibilityPath | null>(null);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [activeDescendantIdx, setActiveDescendantIdx] = useState(-1);
+  const [selectedVectorId, setSelectedVectorId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -189,6 +191,7 @@ export function ResponsibilityFinder({
   // Handle "Terug" — back to suggestion list
   const handleBack = () => {
     setSelectedResult(null);
+    setSelectedVectorId(null);
     setShowSuggestions(true);
   };
 
@@ -196,6 +199,7 @@ export function ResponsibilityFinder({
   const handleReset = () => {
     setSelectedRole("");
     setSelectedResult(null);
+    setSelectedVectorId(null);
     setQuestionText("");
     setShowSuggestions(false);
     setShowRoleDropdown(false);
@@ -225,6 +229,8 @@ export function ResponsibilityFinder({
 
   // Handle suggestion click
   const handleSuggestionClick = (path: ResponsibilityPath) => {
+    const semanticResult = semanticResults.find((r) => r.slug === path.id);
+    setSelectedVectorId(semanticResult?.id ?? null);
     setQuestionText(path.question);
     setSelectedResult(path);
     setShowSuggestions(false);
@@ -604,6 +610,8 @@ export function ResponsibilityFinder({
             </div>
 
             <ResultCard path={selectedResult} onMemberSelect={onMemberSelect} />
+
+            {selectedVectorId && <RelatedPaths sanityId={selectedVectorId} />}
 
             {/* Fallback Contact Block */}
             <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-5">

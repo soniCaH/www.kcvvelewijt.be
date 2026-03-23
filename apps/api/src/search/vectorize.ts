@@ -35,6 +35,9 @@ export interface VectorizeServiceInterface {
       filter?: Record<string, string>;
     },
   ) => Effect.Effect<VectorizeMatch[], VectorizeError>;
+  readonly getByIds: (
+    ids: string[],
+  ) => Effect.Effect<VectorRecord[], VectorizeError>;
 }
 
 export class VectorizeService extends Context.Tag("VectorizeService")<
@@ -96,6 +99,25 @@ export const VectorizeServiceLive = Layer.effect(
           catch: (cause) =>
             new VectorizeError(
               `Vectorize query failed: ${String(cause)}`,
+              cause,
+            ),
+        }),
+
+      getByIds: (ids) =>
+        Effect.tryPromise({
+          try: async () => {
+            const results = await env.SEARCH_INDEX.getByIds(ids);
+            return results.map((r) => ({
+              id: r.id,
+              values: ArrayBuffer.isView(r.values)
+                ? Array.from(r.values as Float32Array)
+                : (r.values as number[]),
+              metadata: (r.metadata ?? {}) as Record<string, string>,
+            }));
+          },
+          catch: (cause) =>
+            new VectorizeError(
+              `Vectorize getByIds failed: ${String(cause)}`,
               cause,
             ),
         }),
