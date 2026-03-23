@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { DownloadButton } from "@/components/design-system/DownloadButton";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -64,6 +65,9 @@ interface FileAttachmentValue {
   _type: "fileAttachment";
   label?: string;
   fileUrl?: string;
+  fileSize?: number;
+  fileMimeType?: string;
+  fileOriginalFilename?: string;
 }
 
 interface InternalLinkReference {
@@ -164,15 +168,14 @@ const components: PortableTextComponents = {
     fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
       if (!value.fileUrl) return null;
       return (
-        <div className="my-6">
-          <a
+        <div className="my-4">
+          <DownloadButton
             href={value.fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded bg-kcvv-green-dark px-5 py-2.5 font-medium text-white no-underline transition-colors hover:bg-kcvv-green-hover-dark"
-          >
-            ↓ {value.label ?? "Download"}
-          </a>
+            label={value.label}
+            mimeType={value.fileMimeType}
+            fileSize={value.fileSize}
+            fileName={value.fileOriginalFilename}
+          />
         </div>
       );
     },
