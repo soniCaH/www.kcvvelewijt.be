@@ -25,6 +25,7 @@ function makeVectorizeMock(
   return {
     upsert: () => Effect.succeed(undefined),
     query: () => Effect.succeed(matches),
+    getByIds: () => Effect.succeed([]),
   };
 }
 
@@ -171,6 +172,7 @@ describe("handleSearch", () => {
               upsert: () => Effect.succeed(undefined),
               query: () =>
                 Effect.fail(new VectorizeError("Vectorize unavailable")),
+              getByIds: () => Effect.succeed([]),
             }),
           ),
         ),
@@ -191,6 +193,7 @@ describe("handleSearch", () => {
           capturedFilter = opts.filter;
           return [];
         }),
+      getByIds: () => Effect.succeed([]),
     };
 
     await Effect.runPromise(

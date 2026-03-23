@@ -125,6 +125,81 @@ describe("VectorizeService", () => {
     ).toBeInstanceOf(VectorizeError);
   });
 
+  it("returns stored vectors by id", async () => {
+    const mockIndex = makeVectorizeMock({
+      getByIds: async () => [
+        {
+          id: "doc-abc",
+          values: Array(1024).fill(0.1),
+          metadata: {
+            slug: "kantine",
+            type: "responsibilityPath",
+            title: "Kantine",
+            excerpt: "De kantine...",
+          },
+        },
+      ],
+    });
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    const records = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.getByIds(["doc-abc"]);
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(records).toHaveLength(1);
+    expect(records[0]!.id).toBe("doc-abc");
+    expect(records[0]!.values).toHaveLength(1024);
+  });
+
+  it("returns empty array when getByIds finds nothing", async () => {
+    const mockIndex = makeVectorizeMock({
+      getByIds: async () => [],
+    });
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    const records = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.getByIds(["nonexistent"]);
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(records).toHaveLength(0);
+  });
+
+  it("fails with VectorizeError when getByIds throws", async () => {
+    const failIndex = makeVectorizeMock({
+      getByIds: async () => {
+        throw new Error("Vectorize unavailable");
+      },
+    });
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(failIndex)),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.getByIds(["doc-abc"]).pipe(Effect.either);
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(result._tag).toBe("Left");
+    expect(
+      (result as Extract<typeof result, { _tag: "Left" }>).left,
+    ).toBeInstanceOf(VectorizeError);
+  });
+
   it("fails with VectorizeError when query throws", async () => {
     const failIndex = {
       upsert: makeVectorizeMock().upsert,
