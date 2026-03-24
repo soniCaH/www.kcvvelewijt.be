@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCVV Elewijt — Club (Variant C: Scroll Storytelling)</title>
+<link rel="preconnect" href="https://use.typekit.net">
+<style>
+  @import url('https://use.typekit.net/yfz0hre.css');
+
+  :root {
+    --kcvv-green-bright: #4acf52;
+    --kcvv-green-dark: #008755;
+    --kcvv-black: #1E2024;
+    --kcvv-gray-blue: #31404b;
+    --kcvv-gray: #62656A;
+    --kcvv-white: #fefefe;
+    --gray-100: #f3f4f6;
+    --foundation-gray: #edeff4;
+    --font-title: quasimoda, acumin-pro, Montserrat, Verdana, sans-serif;
+    --font-body: montserrat, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ibm-plex-mono, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--kcvv-gray-blue);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========================================
+     HERO — Timeline-inspired, vertical emphasis
+     ======================================== */
+  .hero {
+    position: relative;
+    min-height: 50vh;
+    background: var(--kcvv-black);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=1600&q=80') center 40%/cover no-repeat;
+    filter: brightness(0.2) saturate(0.6);
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 4rem 2.5rem;
+    width: 100%;
+  }
+
+  .hero__year {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--kcvv-green-bright);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+
+  .hero__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 0.9;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .hero__title span {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__subtitle {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    max-width: 28rem;
+    line-height: 1.6;
+  }
+
+  /* ========================================
+     DIAGONAL TRANSITIONS
+     ======================================== */
+  .diagonal {
+    position: relative;
+    width: 100%;
+    height: clamp(2rem, 6vw, 5rem);
+    margin-bottom: -1px;
+  }
+
+  .diagonal svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ========================================
+     SECTION BLOCKS — Alternating full-width story sections
+     ======================================== */
+
+  /* --- Geschiedenis (dark) --- */
+  .story-section {
+    padding: 5rem 2.5rem;
+  }
+
+  .story-section--dark {
+    background: var(--kcvv-black);
+  }
+
+  .story-section--light {
+    background: var(--gray-100);
+  }
+
+  .story-section--green {
+    background: var(--kcvv-green-dark);
+  }
+
+  .story-section__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .story-section__inner--reverse {
+    direction: rtl;
+  }
+
+  .story-section__inner--reverse > * {
+    direction: ltr;
+  }
+
+  .story-section__image {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+  }
+
+  .story-section__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .story-section__image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .story-section__content {}
+
+  .story-section__number {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+
+  .story-section--dark .story-section__number,
+  .story-section--green .story-section__number {
+    color: var(--kcvv-green-bright);
+  }
+
+  .story-section--light .story-section__number {
+    color: var(--kcvv-green-dark);
+  }
+
+  .story-section__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .story-section--dark .story-section__title,
+  .story-section--green .story-section__title {
+    color: white;
+  }
+
+  .story-section--light .story-section__title {
+    color: var(--kcvv-gray-blue);
+  }
+
+  .story-section__desc {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .story-section--dark .story-section__desc,
+  .story-section--green .story-section__desc {
+    color: rgba(255,255,255,0.55);
+  }
+
+  .story-section--light .story-section__desc {
+    color: var(--kcvv-gray);
+  }
+
+  .story-section__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .story-section__cta--dark {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .story-section__cta--dark:hover {
+    background: var(--kcvv-green-bright);
+    color: var(--kcvv-black);
+    border-color: var(--kcvv-green-bright);
+  }
+
+  .story-section__cta--light {
+    background: var(--kcvv-black);
+    color: white;
+  }
+
+  .story-section__cta--light:hover {
+    background: var(--kcvv-green-dark);
+  }
+
+  .story-section__cta--green {
+    background: white;
+    color: var(--kcvv-black);
+  }
+
+  .story-section__cta--green:hover {
+    background: var(--kcvv-green-bright);
+  }
+
+  /* ========================================
+     QUICK LINKS BAR — Horizontal, sticky-feeling
+     ======================================== */
+  .quick-links {
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 0;
+  }
+
+  .quick-links__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .quick-links__item {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    text-decoration: none;
+    color: var(--kcvv-gray);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .quick-links__item:hover {
+    color: var(--kcvv-green-dark);
+    border-bottom-color: var(--kcvv-green-bright);
+    background: rgba(74,207,82,0.04);
+  }
+
+  .quick-links__item svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ========================================
+     JOIN CTA — Full-width cinematic
+     ======================================== */
+  .join-cta {
+    position: relative;
+    padding: 6rem 2.5rem;
+    background: var(--kcvv-black);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .join-cta__bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1600&q=80') center/cover no-repeat;
+    filter: brightness(0.15);
+  }
+
+  .join-cta__inner {
+    position: relative;
+    z-index: 2;
+    max-width: 40rem;
+    margin: 0 auto;
+  }
+
+  .join-cta__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .join-cta__text {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .join-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2.5rem;
+    background: var(--kcvv-green-bright);
+    color: var(--kcvv-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .join-cta__btn:hover {
+    background: #41b147;
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 960px) {
+    .story-section__inner,
+    .story-section__inner--reverse {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      direction: ltr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero { min-height: 40vh; }
+    .hero__content { padding: 3rem 1rem; }
+    .story-section { padding: 3rem 1rem; }
+    .quick-links__item { padding: 1rem 0.75rem; font-size: 0.6875rem; }
+    .join-cta { padding: 4rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO ====== -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__content">
+    <div class="hero__year">SINDS 1948</div>
+    <h1 class="hero__title">KCVV<br><span>Elewijt</span></h1>
+    <p class="hero__subtitle">
+      Het kloppend hart van het Elewijtse voetbal.
+      Ontdek alles over onze club.
+    </p>
+  </div>
+</section>
+
+<!-- ====== QUICK LINKS BAR ====== -->
+<nav class="quick-links">
+  <div class="quick-links__inner">
+    <a href="/club/geschiedenis" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Geschiedenis
+    </a>
+    <a href="/club/bestuur" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Bestuur
+    </a>
+    <a href="/club/organigram" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="8" y="14" width="8" height="7" rx="1"/><path d="M6.5 10v1.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"/><path d="M12 12.5V14"/></svg>
+      Organigram
+    </a>
+    <a href="/club/ultras" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+      Ultras
+    </a>
+    <a href="/club/angels" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Angels
+    </a>
+    <a href="/club/contact" class="quick-links__item">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Contact
+    </a>
+  </div>
+</nav>
+
+<!-- ====== STORY: Geschiedenis ====== -->
+<section class="story-section story-section--dark">
+  <div class="story-section__inner">
+    <div class="story-section__image">
+      <img src="https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=700&q=80" alt="Historische foto">
+    </div>
+    <div class="story-section__content">
+      <div class="story-section__number">01 — GESCHIEDENIS</div>
+      <h2 class="story-section__title">75 jaar passie<br>op het veld</h2>
+      <p class="story-section__desc">
+        Al sinds 1948 is KCVV Elewijt de thuishaven voor voetballiefhebbers
+        in de regio. Van bescheiden beginjaren tot een bloeiende club met
+        meer dan 400 leden — ons verhaal is er een van doorzetting en gemeenschap.
+      </p>
+      <a href="/club/geschiedenis" class="story-section__cta story-section__cta--dark">
+        Lees ons verhaal <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-black → gray-100 -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 0,100" fill="#1E2024" shape-rendering="crispEdges"/>
+    <polygon points="100,0 100,100 0,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== STORY: Bestuur ====== -->
+<section class="story-section story-section--light">
+  <div class="story-section__inner story-section__inner--reverse">
+    <div class="story-section__image">
+      <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=700&q=80" alt="Bestuursvergadering">
+    </div>
+    <div class="story-section__content">
+      <div class="story-section__number">02 — BESTUUR</div>
+      <h2 class="story-section__title">Het team achter<br>het team</h2>
+      <p class="story-section__desc">
+        Vrijwilligers met hart en ziel. Ons bestuur zorgt ervoor dat alles
+        op en naast het veld vlot verloopt — van competitiebeheer tot
+        infrastructuur.
+      </p>
+      <a href="/club/bestuur" class="story-section__cta story-section__cta--light">
+        Maak kennis <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: gray-100 → kcvv-green-dark -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#008755" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== STORY: Organigram ====== -->
+<section class="story-section story-section--green">
+  <div class="story-section__inner">
+    <div class="story-section__image">
+      <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=700&q=80" alt="Teamwerk">
+    </div>
+    <div class="story-section__content">
+      <div class="story-section__number">03 — ORGANIGRAM</div>
+      <h2 class="story-section__title">Onze structuur</h2>
+      <p class="story-section__desc">
+        Een overzicht van wie wat doet bij KCVV. Van voorzitter tot
+        terreinverzorger, van jeugdcoördinator tot cafetariaverantwoordelijke.
+      </p>
+      <a href="/club/organigram" class="story-section__cta story-section__cta--green">
+        Bekijk organigram <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-green-dark → gray-100 -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 0,100" fill="#008755" shape-rendering="crispEdges"/>
+    <polygon points="100,0 100,100 0,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== STORY: Ultras & Angels combined ====== -->
+<section class="story-section story-section--light">
+  <div class="story-section__inner">
+    <div style="display: grid; gap: 1.25rem;">
+      <!-- Ultras card -->
+      <a href="/club/ultras" style="display: grid; grid-template-columns: 5rem 1fr; gap: 1.25rem; padding: 1.5rem; background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.12)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 5px rgba(0,0,0,0.08)'">
+        <div style="width: 5rem; height: 5rem; background: rgba(74,207,82,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4acf52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <div>
+          <div style="font-family: var(--font-title); font-weight: 800; font-size: 1.125rem; color: var(--kcvv-gray-blue); text-transform: uppercase; margin-bottom: 0.25rem;">Ultras</div>
+          <div style="font-size: 0.8125rem; color: var(--kcvv-gray); line-height: 1.5;">De 12de man. Onze trouwste supporters die er altijd staan.</div>
+        </div>
+      </a>
+      <!-- Angels card -->
+      <a href="/club/angels" style="display: grid; grid-template-columns: 5rem 1fr; gap: 1.25rem; padding: 1.5rem; background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.12)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 5px rgba(0,0,0,0.08)'">
+        <div style="width: 5rem; height: 5rem; background: rgba(74,207,82,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4acf52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div>
+          <div style="font-family: var(--font-title); font-weight: 800; font-size: 1.125rem; color: var(--kcvv-gray-blue); text-transform: uppercase; margin-bottom: 0.25rem;">Angels</div>
+          <div style="font-size: 0.8125rem; color: var(--kcvv-gray); line-height: 1.5;">Onze engelen. Vrijwilligers die het verschil maken naast het veld.</div>
+        </div>
+      </a>
+    </div>
+    <div class="story-section__content">
+      <div class="story-section__number">04 — GEMEENSCHAP</div>
+      <h2 class="story-section__title">Meer dan voetbal</h2>
+      <p class="story-section__desc">
+        KCVV is een gemeenschap. Van onze fanatieke Ultras-kern tot de
+        onvermoeibare Angels-vrijwilligers — het zijn de mensen naast het
+        veld die deze club bijzonder maken.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: gray-100 → kcvv-black -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== JOIN CTA ====== -->
+<section class="join-cta">
+  <div class="join-cta__bg"></div>
+  <div class="join-cta__inner">
+    <h2 class="join-cta__title">Word deel van<br>de KCVV-familie</h2>
+    <p class="join-cta__text">
+      Of je nu 5 of 55 bent, speler of supporter — er is altijd een plek
+      voor jou op Sportpark Elewijt.
+    </p>
+    <a href="/club/aansluiten" class="join-cta__btn">
+      Sluit je aan <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+</body>
+</html>

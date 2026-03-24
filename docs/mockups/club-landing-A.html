@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCVV Elewijt — Club (Variant A: Editorial Magazine)</title>
+<link rel="preconnect" href="https://use.typekit.net">
+<style>
+  @import url('https://use.typekit.net/yfz0hre.css');
+
+  :root {
+    --kcvv-green-bright: #4acf52;
+    --kcvv-green-dark: #008755;
+    --kcvv-black: #1E2024;
+    --kcvv-gray-blue: #31404b;
+    --kcvv-gray: #62656A;
+    --kcvv-white: #fefefe;
+    --gray-100: #f3f4f6;
+    --foundation-gray: #edeff4;
+    --font-title: quasimoda, acumin-pro, Montserrat, Verdana, sans-serif;
+    --font-body: montserrat, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--kcvv-gray-blue);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========================================
+     HERO — Atmospheric club identity
+     ======================================== */
+  .hero {
+    position: relative;
+    min-height: 65vh;
+    background: var(--kcvv-black);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=1600&q=80') center 30%/cover no-repeat;
+    filter: brightness(0.25) saturate(0.7);
+  }
+
+  .hero__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(0,135,85,0.3) 0%,
+      rgba(30,32,36,0.6) 50%,
+      rgba(30,32,36,0.95) 100%
+    );
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 6rem 2.5rem;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .hero__text-side {}
+
+  .hero__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .hero__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 0.95;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__title span {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__subtitle {
+    font-size: 1.0625rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 32rem;
+  }
+
+  .hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .hero__stat {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+  }
+
+  .hero__stat-number {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: 2.5rem;
+    color: var(--kcvv-green-bright);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero__stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* ========================================
+     DIAGONAL TRANSITIONS
+     ======================================== */
+  .diagonal {
+    position: relative;
+    width: 100%;
+    height: clamp(2rem, 6vw, 5rem);
+    margin-bottom: -1px;
+  }
+
+  .diagonal svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ========================================
+     EDITORIAL GRID — Main navigation cards
+     ======================================== */
+  .editorial {
+    background: var(--gray-100);
+    padding: 5rem 2.5rem;
+  }
+
+  .editorial__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+  }
+
+  .editorial__header {
+    margin-bottom: 3rem;
+  }
+
+  .editorial__header-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-gray);
+    margin-bottom: 0.75rem;
+  }
+
+  .editorial__header-label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .editorial__header-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--kcvv-gray-blue);
+  }
+
+  /* Magazine-style asymmetric grid */
+  .editorial__grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 1.25rem;
+  }
+
+  .editorial__card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 280px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .editorial__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  }
+
+  /* Card sizing — magazine layout */
+  .editorial__card--featured {
+    grid-column: 1 / 8;
+    grid-row: 1 / 3;
+    min-height: 520px;
+  }
+
+  .editorial__card--medium-1 {
+    grid-column: 8 / 13;
+    grid-row: 1 / 2;
+  }
+
+  .editorial__card--medium-2 {
+    grid-column: 8 / 13;
+    grid-row: 2 / 3;
+  }
+
+  .editorial__card--third-1 {
+    grid-column: 1 / 5;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card--third-2 {
+    grid-column: 5 / 9;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card--third-3 {
+    grid-column: 9 / 13;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+  }
+
+  .editorial__card:hover .editorial__card-bg {
+    transform: scale(1.05);
+  }
+
+  .editorial__card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(30,32,36,0.95) 0%,
+      rgba(30,32,36,0.5) 40%,
+      rgba(30,32,36,0.1) 100%
+    );
+  }
+
+  .editorial__card-content {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem;
+  }
+
+  .editorial__card--featured .editorial__card-content {
+    padding: 2.5rem;
+  }
+
+  .editorial__card-tag {
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-green-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .editorial__card-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: white;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .editorial__card--featured .editorial__card-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .editorial__card-desc {
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+  }
+
+  .editorial__card-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--kcvv-green-bright);
+    margin-top: 0.75rem;
+    transition: gap 0.2s;
+  }
+
+  .editorial__card:hover .editorial__card-arrow {
+    gap: 0.625rem;
+  }
+
+  /* ========================================
+     QUOTE / MISSION BANNER
+     ======================================== */
+  .mission {
+    background: var(--kcvv-green-dark);
+    padding: 5rem 2.5rem;
+    text-align: center;
+  }
+
+  .mission__inner {
+    max-width: 50rem;
+    margin: 0 auto;
+  }
+
+  .mission__icon {
+    font-size: 3rem;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 1.5rem;
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  .mission__quote {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    color: white;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .mission__attribution {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ========================================
+     CONTACT CTA
+     ======================================== */
+  .contact-cta {
+    background: var(--kcvv-black);
+    padding: 4rem 2.5rem;
+  }
+
+  .contact-cta__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .contact-cta__text h3 {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-cta__text p {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .contact-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: var(--kcvv-green-bright);
+    color: var(--kcvv-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .contact-cta__btn:hover {
+    background: #41b147;
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 960px) {
+    .hero__content {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 4rem 2.5rem;
+    }
+    .hero__stats {
+      max-width: 24rem;
+    }
+    .editorial__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+    }
+    .editorial__card--featured,
+    .editorial__card--medium-1,
+    .editorial__card--medium-2,
+    .editorial__card--third-1,
+    .editorial__card--third-2,
+    .editorial__card--third-3 {
+      grid-column: auto;
+      grid-row: auto;
+      min-height: 260px;
+    }
+    .editorial__card--featured {
+      grid-column: 1 / -1;
+      min-height: 320px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero { min-height: 50vh; }
+    .hero__content { padding: 3rem 1rem; }
+    .hero__stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .hero__stat { padding: 1rem; }
+    .hero__stat-number { font-size: 1.75rem; }
+    .editorial { padding: 3rem 1rem; }
+    .editorial__grid { grid-template-columns: 1fr; }
+    .editorial__card--featured { min-height: 280px; }
+    .mission { padding: 3rem 1rem; }
+    .contact-cta { padding: 3rem 1rem; }
+    .contact-cta__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO: Club Identity ====== -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__gradient"></div>
+  <div class="hero__content">
+    <div class="hero__text-side">
+      <div class="hero__label">Onze club</div>
+      <h1 class="hero__title">Meer dan<br>een <span>club</span></h1>
+      <p class="hero__subtitle">
+        Al meer dan 75 jaar het kloppend hart van het Elewijtse voetbal.
+        Van de allerkleinsten tot de eerste ploeg — samen maken we KCVV.
+      </p>
+    </div>
+    <div class="hero__stats">
+      <div class="hero__stat">
+        <div class="hero__stat-number">1948</div>
+        <div class="hero__stat-label">Opgericht</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-number">20+</div>
+        <div class="hero__stat-label">Ploegen</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-number">400+</div>
+        <div class="hero__stat-label">Leden</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-number">75+</div>
+        <div class="hero__stat-label">Jaar</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-black → gray-100 -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== EDITORIAL GRID ====== -->
+<section class="editorial">
+  <div class="editorial__inner">
+    <div class="editorial__header">
+      <div class="editorial__header-label">Ontdek KCVV Elewijt</div>
+      <h2 class="editorial__header-title">Alles over onze club</h2>
+    </div>
+
+    <div class="editorial__grid">
+      <!-- Featured: Geschiedenis -->
+      <a href="/club/geschiedenis" class="editorial__card editorial__card--featured">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=900&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Geschiedenis</div>
+          <h3 class="editorial__card-title">75 jaar voetbalpassie in Elewijt</h3>
+          <p class="editorial__card-desc">Van een bescheiden begin op een modderig veld tot een bruisende club met honderden leden. Ontdek het verhaal van KCVV.</p>
+          <div class="editorial__card-arrow">Lees meer <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Medium: Bestuur -->
+      <a href="/club/bestuur" class="editorial__card editorial__card--medium-1">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Bestuur</div>
+          <h3 class="editorial__card-title">Het team achter het team</h3>
+          <p class="editorial__card-desc">Maak kennis met het bestuur dat de club draaiende houdt.</p>
+          <div class="editorial__card-arrow">Ontdek <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Medium: Organigram -->
+      <a href="/club/organigram" class="editorial__card editorial__card--medium-2">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Organigram</div>
+          <h3 class="editorial__card-title">Onze structuur</h3>
+          <p class="editorial__card-desc">Van voorzitter tot jeugdcoördinator — wie doet wat?</p>
+          <div class="editorial__card-arrow">Bekijk <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Third: Ultras -->
+      <a href="/club/ultras" class="editorial__card editorial__card--third-1">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1459865264687-595d652de67e?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Ultras</div>
+          <h3 class="editorial__card-title">De 12de man</h3>
+          <div class="editorial__card-arrow">Meer info <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Third: Angels -->
+      <a href="/club/angels" class="editorial__card editorial__card--third-2">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Angels</div>
+          <h3 class="editorial__card-title">Onze engelen</h3>
+          <div class="editorial__card-arrow">Meer info <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Third: Aansluiten -->
+      <a href="/club/aansluiten" class="editorial__card editorial__card--third-3">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Aansluiten</div>
+          <h3 class="editorial__card-title">Word lid</h3>
+          <div class="editorial__card-arrow">Schrijf je in <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: gray-100 → kcvv-green-dark -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 0,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    <polygon points="100,0 100,100 0,100" fill="#008755" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== MISSION QUOTE ====== -->
+<section class="mission">
+  <div class="mission__inner">
+    <div class="mission__icon">"</div>
+    <p class="mission__quote">
+      Wij zijn KCVV Elewijt. Een plek waar jong en oud samenkomen,
+      waar passie voor voetbal het hele dorp verbindt.
+    </p>
+    <div class="mission__attribution">— Sportpark Elewijt, sinds 1948</div>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-green-dark → kcvv-black -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#008755" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== CONTACT CTA ====== -->
+<section class="contact-cta">
+  <div class="contact-cta__inner">
+    <div class="contact-cta__text">
+      <h3>Vragen over de club?</h3>
+      <p>Neem contact op — we helpen je graag verder.</p>
+    </div>
+    <a href="/club/contact" class="contact-cta__btn">
+      Contacteer ons
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+</body>
+</html>

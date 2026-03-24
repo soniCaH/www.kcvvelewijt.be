@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCVV Elewijt — Club (Variant B: Bold Grid Hub)</title>
+<link rel="preconnect" href="https://use.typekit.net">
+<style>
+  @import url('https://use.typekit.net/yfz0hre.css');
+
+  :root {
+    --kcvv-green-bright: #4acf52;
+    --kcvv-green-dark: #008755;
+    --kcvv-black: #1E2024;
+    --kcvv-gray-blue: #31404b;
+    --kcvv-gray: #62656A;
+    --kcvv-white: #fefefe;
+    --gray-100: #f3f4f6;
+    --foundation-gray: #edeff4;
+    --font-title: quasimoda, acumin-pro, Montserrat, Verdana, sans-serif;
+    --font-body: montserrat, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--kcvv-gray-blue);
+    background: var(--kcvv-black);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========================================
+     COMPACT HERO — Text-only, punchy
+     ======================================== */
+  .hero {
+    background: var(--kcvv-black);
+    padding: 6rem 2.5rem 2rem;
+  }
+
+  .hero__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+  }
+
+  .hero__breadcrumb {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 2rem;
+  }
+
+  .hero__breadcrumb a {
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+  }
+
+  .hero__breadcrumb a:hover {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__breadcrumb span {
+    margin: 0 0.5rem;
+  }
+
+  .hero__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.9;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__title span {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__desc {
+    font-size: 1.0625rem;
+    color: rgba(255,255,255,0.5);
+    max-width: 36rem;
+    line-height: 1.7;
+  }
+
+  /* ========================================
+     GRID HUB — Large icon+text cards
+     ======================================== */
+  .hub {
+    background: var(--kcvv-black);
+    padding: 3rem 2.5rem 6rem;
+  }
+
+  .hub__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+  }
+
+  .hub__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .hub__card {
+    position: relative;
+    padding: 2.5rem 2rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .hub__card::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--kcvv-green-bright);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .hub__card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-2px);
+  }
+
+  .hub__card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .hub__card-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74,207,82,0.1);
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+  }
+
+  .hub__card-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke: var(--kcvv-green-bright);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hub__card-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 0.625rem;
+  }
+
+  .hub__card-desc {
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .hub__card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--kcvv-green-bright);
+    transition: gap 0.2s;
+  }
+
+  .hub__card:hover .hub__card-link {
+    gap: 0.625rem;
+  }
+
+  /* Featured card — spans 2 columns, horizontal layout */
+  .hub__card--featured {
+    grid-column: 1 / 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+
+  .hub__card--featured::before {
+    display: none;
+  }
+
+  .hub__card--featured:hover {
+    background: transparent;
+    transform: none;
+  }
+
+  .hub__card--featured-image {
+    position: relative;
+    min-height: 300px;
+    background: url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=700&q=80') center/cover no-repeat;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .hub__card--featured-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,135,85,0.25), transparent);
+  }
+
+  .hub__card--featured-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .hub__card--featured-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-green-bright);
+    margin-bottom: 1rem;
+  }
+
+  .hub__card--featured-tag::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .hub__card--featured-title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    color: white;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .hub__card--featured-desc {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .hub__card--featured-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--kcvv-green-bright);
+    color: var(--kcvv-black);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    width: fit-content;
+    transition: background 0.2s;
+  }
+
+  .hub__card--featured-btn:hover {
+    background: #41b147;
+  }
+
+  /* Info strip at bottom */
+  .info-strip {
+    background: var(--kcvv-green-dark);
+    padding: 0;
+  }
+
+  .info-strip__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .info-strip__item {
+    padding: 2.5rem 2rem;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .info-strip__item:last-child {
+    border-right: none;
+  }
+
+  .info-strip__item:hover {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .info-strip__icon {
+    margin-bottom: 0.75rem;
+  }
+
+  .info-strip__icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke: var(--kcvv-green-bright);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .info-strip__label {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .info-strip__meta {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 960px) {
+    .hub__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .hub__card--featured {
+      grid-column: 1 / -1;
+    }
+    .info-strip__inner {
+      grid-template-columns: 1fr;
+    }
+    .info-strip__item {
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .info-strip__item:last-child {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 4rem 1rem 1.5rem; }
+    .hub { padding: 1.5rem 1rem 4rem; }
+    .hub__grid { grid-template-columns: 1fr; }
+    .hub__card--featured {
+      grid-template-columns: 1fr;
+    }
+    .hub__card--featured-image {
+      min-height: 200px;
+      border-radius: 4px;
+    }
+    .hub__card--featured-content {
+      padding: 1rem 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== COMPACT HERO ====== -->
+<section class="hero">
+  <div class="hero__inner">
+    <div class="hero__breadcrumb">
+      <a href="/">Home</a>
+      <span>/</span>
+      Club
+    </div>
+    <h1 class="hero__title">Onze<br><span>Club</span></h1>
+    <p class="hero__desc">
+      Alles wat je wil weten over KCVV Elewijt — van ons bestuur en
+      onze geschiedenis tot hoe je kan aansluiten.
+    </p>
+  </div>
+</section>
+
+<!-- ====== GRID HUB ====== -->
+<section class="hub">
+  <div class="hub__inner">
+    <div class="hub__grid">
+
+      <!-- Featured: Geschiedenis -->
+      <a href="/club/geschiedenis" class="hub__card hub__card--featured">
+        <div class="hub__card--featured-image"></div>
+        <div class="hub__card--featured-content">
+          <div class="hub__card--featured-tag">Geschiedenis</div>
+          <h2 class="hub__card--featured-title">75 jaar voetbal-<br>passie</h2>
+          <p class="hub__card--featured-desc">
+            Van de allereerste schop op een Elewijs grasveld tot een bloeiende
+            club met meer dan 400 leden. Ontdek hoe KCVV groeide tot wat het vandaag is.
+          </p>
+          <span class="hub__card--featured-btn">
+            Ontdek ons verhaal <span aria-hidden="true">→</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- Card: Bestuur -->
+      <a href="/club/bestuur" class="hub__card">
+        <div class="hub__card-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="hub__card-title">Bestuur</h3>
+        <p class="hub__card-desc">
+          Het team achter het team. Maak kennis met de mensen die de club
+          dag na dag draaiende houden.
+        </p>
+        <span class="hub__card-link">Bekijk bestuur <span aria-hidden="true">→</span></span>
+      </a>
+
+      <!-- Card: Organigram -->
+      <a href="/club/organigram" class="hub__card">
+        <div class="hub__card-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="8" y="14" width="8" height="7" rx="1"/><path d="M6.5 10v1.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"/><path d="M12 12.5V14"/></svg>
+        </div>
+        <h3 class="hub__card-title">Organigram</h3>
+        <p class="hub__card-desc">
+          Wie doet wat bij KCVV? Van voorzitter tot jeugdcoördinator —
+          onze volledige clubstructuur op een rij.
+        </p>
+        <span class="hub__card-link">Bekijk structuur <span aria-hidden="true">→</span></span>
+      </a>
+
+      <!-- Card: Ultras -->
+      <a href="/club/ultras" class="hub__card">
+        <div class="hub__card-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <h3 class="hub__card-title">Ultras</h3>
+        <p class="hub__card-desc">
+          De 12de man van KCVV. Onze trouwste fans die het team
+          onvoorwaardelijk steunen, thuis en uit.
+        </p>
+        <span class="hub__card-link">Meer info <span aria-hidden="true">→</span></span>
+      </a>
+
+      <!-- Card: Angels -->
+      <a href="/club/angels" class="hub__card">
+        <div class="hub__card-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3 class="hub__card-title">Angels</h3>
+        <p class="hub__card-desc">
+          Onze engelen staan klaar als het ertoe doet. Vrijwilligers
+          die het verschil maken naast het veld.
+        </p>
+        <span class="hub__card-link">Meer info <span aria-hidden="true">→</span></span>
+      </a>
+
+      <!-- Card: Aansluiten -->
+      <a href="/club/aansluiten" class="hub__card">
+        <div class="hub__card-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <h3 class="hub__card-title">Aansluiten</h3>
+        <p class="hub__card-desc">
+          Word deel van de KCVV-familie. Van de kleinste duiveltjes
+          tot ervaren spelers — iedereen is welkom.
+        </p>
+        <span class="hub__card-link">Schrijf je in <span aria-hidden="true">→</span></span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====== INFO STRIP ====== -->
+<section class="info-strip">
+  <div class="info-strip__inner">
+    <a href="/club/contact" class="info-strip__item">
+      <div class="info-strip__icon">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="info-strip__label">Sportpark Elewijt</div>
+      <div class="info-strip__meta">Tervuursesteenweg 252, 1982 Elewijt</div>
+    </a>
+    <a href="/club/contact" class="info-strip__item">
+      <div class="info-strip__icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div class="info-strip__label">Contacteer ons</div>
+      <div class="info-strip__meta">info@kcvvelewijt.be</div>
+    </a>
+    <a href="/club/contact" class="info-strip__item">
+      <div class="info-strip__icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="info-strip__label">Trainingen</div>
+      <div class="info-strip__meta">Ma–Vr, 18:00 – 21:00</div>
+    </a>
+  </div>
+</section>
+
+</body>
+</html>
