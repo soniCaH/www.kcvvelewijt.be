@@ -8,6 +8,8 @@ import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
+import { PlayerRepository } from "@/lib/repositories/player.repository";
+import type { PlayerVM } from "@/lib/repositories/player.repository";
 import type { SearchResult } from "@/types/search";
 
 export const runtime = "nodejs";
@@ -72,8 +74,8 @@ const getAllPlayers = unstable_cache(
   async () => {
     const players = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getPlayers();
+        const repo = yield* PlayerRepository;
+        return yield* repo.findAll();
       }),
     );
     debugLog(`[Search API] Fetched ${players.length} players`);
@@ -95,30 +97,26 @@ const searchPlayers = (query: string) =>
 
     const queryLower = query.toLowerCase();
 
-    const filtered = allPlayers.filter((player) => {
-      const firstName = player.firstName ?? "";
-      const lastName = player.lastName ?? "";
-      const fullName = `${firstName} ${lastName}`.toLowerCase().trim();
+    const filtered = allPlayers.filter((player: PlayerVM) => {
+      const fullName = `${player.firstName} ${player.lastName}`
+        .toLowerCase()
+        .trim();
       return fullName.includes(queryLower);
     });
 
     debugLog(`[Search API] Found ${filtered.length} player matches`);
 
-    return filtered.map((player): SearchResult => {
-      const firstName = player.firstName ?? "";
-      const lastName = player.lastName ?? "";
-      const fullName = `${firstName} ${lastName}`.trim() || player._id;
-      const position = player.keeper
-        ? "Keeper"
-        : (player.position ?? player.positionPsd ?? undefined);
+    return filtered.map((player: PlayerVM): SearchResult => {
+      const fullName =
+        `${player.firstName} ${player.lastName}`.trim() || player.id;
 
       return {
-        id: player._id,
+        id: player.id,
         type: "player",
         title: fullName,
-        description: position,
-        url: `/players/${player.psdId}`,
-        imageUrl: player.transparentImageUrl ?? player.psdImageUrl ?? undefined,
+        description: player.position || undefined,
+        url: player.href,
+        imageUrl: player.imageUrl,
       };
     });
   });

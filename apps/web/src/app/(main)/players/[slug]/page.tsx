@@ -7,6 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
+import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { PlayerProfile, PlayerShare } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
@@ -24,11 +25,13 @@ export async function generateStaticParams() {
   try {
     const players = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getPlayers();
+        const repo = yield* PlayerRepository;
+        return yield* repo.findAll();
       }),
     );
-    return players.map((p) => ({ slug: p.psdId }));
+    return players
+      .filter((p) => p.href !== "/players/null")
+      .map((p) => ({ slug: p.href.replace("/players/", "") }));
   } catch {
     return [];
   }
@@ -36,9 +39,6 @@ export async function generateStaticParams() {
 
 /**
  * Build page and Open Graph metadata for a player identified by the provided slug.
- *
- * Fetches the player by its `psdId` and constructs a localized title, description,
- * and `openGraph` information including profile fields and an image when available.
  *
  * @param params - An object whose `slug` promise resolves to the player's `psdId`
  * @returns A Metadata object containing the page title, description, and `openGraph`
@@ -52,30 +52,26 @@ export async function generateMetadata({
   try {
     const player = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getPlayerByPsdId(slug);
+        const repo = yield* PlayerRepository;
+        return yield* repo.findByPsdId(slug);
       }),
     );
     if (!player) return { title: "Speler niet gevonden | KCVV Elewijt" };
 
-    const firstName = player.firstName ?? "";
-    const lastName = player.lastName ?? "";
-    const fullName = `${firstName} ${lastName}`.trim() || "Speler";
-    const position = player.keeper
-      ? "Keeper"
-      : (player.position ?? player.positionPsd ?? "Speler");
+    const fullName =
+      `${player.firstName} ${player.lastName}`.trim() || "Speler";
 
     return {
       title: `${fullName} | KCVV Elewijt`,
-      description: `${position} bij KCVV Elewijt`,
+      description: `${player.position} bij KCVV Elewijt`,
       openGraph: {
         title: fullName,
-        description: `${position} bij KCVV Elewijt`,
+        description: `${player.position} bij KCVV Elewijt`,
         type: "profile",
-        firstName,
-        lastName,
-        images: player.psdImageUrl
-          ? [{ url: player.psdImageUrl, alt: fullName }]
+        firstName: player.firstName,
+        lastName: player.lastName,
+        images: player.imageUrl
+          ? [{ url: player.imageUrl, alt: fullName }]
           : undefined,
       },
     };
@@ -98,8 +94,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const player = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getPlayerByPsdId(slug);
+      const repo = yield* PlayerRepository;
+      return yield* repo.findByPsdId(slug);
     }),
   );
 
@@ -108,30 +104,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const relatedArticles = await runPromise(
     Effect.gen(function* () {
       const sanity = yield* SanityService;
-      return yield* sanity.getRelatedArticles(player._id);
+      return yield* sanity.getRelatedArticles(player.id);
     }),
   );
 
-  const firstName = player.firstName ?? "";
-  const lastName = player.lastName ?? "";
-  const fullName = `${firstName} ${lastName}`.trim() || "Speler";
-  const position = player.keeper
-    ? "Keeper"
-    : (player.position ?? player.positionPsd ?? "Speler");
-  const number = player.jerseyNumber ?? undefined;
-  const imageUrl =
-    player.transparentImageUrl ?? player.psdImageUrl ?? undefined;
+  const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
 
   return (
     <>
       <PlayerProfile
-        firstName={firstName}
-        lastName={lastName}
-        position={position}
-        number={number}
-        imageUrl={imageUrl}
+        firstName={player.firstName}
+        lastName={player.lastName}
+        position={player.position}
+        number={player.number}
+        imageUrl={player.imageUrl}
         teamName="KCVV Elewijt"
-        birthDate={player.birthDate ?? undefined}
+        birthDate={player.birthDate}
       />
 
       <section className="max-w-4xl mx-auto px-4 pb-8">

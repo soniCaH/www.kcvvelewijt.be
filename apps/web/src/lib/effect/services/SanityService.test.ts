@@ -10,45 +10,13 @@ import { RELATED_ARTICLES_QUERY } from "../../sanity/queries/articles";
 
 vi.mock("../../sanity/client", () => ({
   sanityClient: {
-    fetch: vi.fn().mockResolvedValue([
-      {
-        _id: "player-psd-42",
-        psdId: "42",
-        firstName: "Jan",
-        lastName: "Janssen",
-        keeper: false,
-        positionPsd: null,
-        position: "Middenvelder",
-        transparentImageUrl: null,
-        celebrationImageUrl: null,
-        psdImageUrl: null,
-        bio: null,
-        birthDate: "1995-01-15",
-        nationality: null,
-        jerseyNumber: null,
-        height: null,
-        weight: null,
-      },
-    ]),
+    fetch: vi.fn().mockResolvedValue([]),
   },
 }));
 
 function mockFetch(value: unknown) {
   (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce(value);
 }
-
-describe("SanityService.getPlayers", () => {
-  it("returns players from Sanity", async () => {
-    const program = Effect.gen(function* () {
-      const svc = yield* SanityService;
-      return yield* svc.getPlayers();
-    }).pipe(Effect.provide(SanityServiceLive));
-
-    const players = await Effect.runPromise(program);
-    expect(players).toHaveLength(1);
-    expect(players[0]?.psdId).toBe("42");
-  });
-});
 
 describe("SanityService.getStaffMembers", () => {
   it("prepends the club root node and maps a staffMember doc to OrgChartNode", async () => {

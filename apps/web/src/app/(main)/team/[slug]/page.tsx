@@ -12,8 +12,8 @@ import { BffService } from "@/lib/effect/services/BffService";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { toPlayerVM } from "@/lib/repositories/player.repository";
 import {
-  transformSanityPlayerToRoster,
   transformSanityStaffToMember,
   getSanityTeamTagline,
   getSanityTeamType,
@@ -174,7 +174,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
           teamType: getSanityTeamType(team),
           tagline: getSanityTeamTagline(team),
         }}
-        players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+        players={(team.players ?? []).map(toPlayerVM)}
         staff={(team.staff ?? []).map(transformSanityStaffToMember)}
         matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
         standings={bffData?.standings.map(transformRankingToStandings) ?? []}

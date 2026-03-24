@@ -12,7 +12,7 @@
 import { ImageResponse } from "next/og";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { PlayerRepository } from "@/lib/repositories/player.repository";
 
 export const runtime = "nodejs";
 
@@ -46,18 +46,16 @@ export default async function Image({ params }: ImageProps) {
   try {
     const player = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getPlayerByPsdId(slug);
+        const repo = yield* PlayerRepository;
+        return yield* repo.findByPsdId(slug);
       }),
     );
 
     if (player) {
-      firstName = player.firstName ?? "";
-      lastName = player.lastName ?? "";
-      position = player.keeper
-        ? "Keeper"
-        : (player.position ?? player.positionPsd ?? "");
-      number = player.jerseyNumber ?? undefined;
+      firstName = player.firstName;
+      lastName = player.lastName;
+      position = player.position;
+      number = player.number;
       teamName = "KCVV Elewijt";
     }
   } catch {
