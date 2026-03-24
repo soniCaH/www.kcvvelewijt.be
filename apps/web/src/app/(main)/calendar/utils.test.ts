@@ -33,6 +33,7 @@ describe("transformMatchToCalendar", () => {
       awayTeam: { id: 2, name: "KFC Turnhout", logo: "/kfc.png" },
       homeScore: 2,
       awayScore: 1,
+      scoreDisplay: { type: "score", home: 2, away: 1 },
       status: "finished",
       competition: "2e Nationale",
       team: "A-Ploeg",
@@ -65,5 +66,6 @@ describe("transformMatchToCalendar", () => {
 
     expect(result.homeScore).toBeUndefined();
     expect(result.awayScore).toBeUndefined();
+    expect(result.scoreDisplay).toEqual({ type: "vs" });
   });
 });

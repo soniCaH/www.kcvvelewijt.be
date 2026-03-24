@@ -6,6 +6,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarView } from "./CalendarView";
 import type { CalendarMatch } from "./utils";
+import { getScoreDisplay } from "@/lib/utils/match-display";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -51,13 +52,23 @@ const opponent: CalendarMatch["homeTeam"] = { id: 2, name: "Racing Mechelen" };
 function makeMatch(
   overrides: Partial<CalendarMatch> & { id: number },
 ): CalendarMatch {
-  return {
+  const merged = {
     date: "2026-03-15T15:00:00",
     homeTeam: kcvv,
     awayTeam: opponent,
-    status: "scheduled",
+    status: "scheduled" as CalendarMatch["status"],
     team: "A-ploeg",
     ...overrides,
+  };
+  return {
+    ...merged,
+    scoreDisplay:
+      merged.scoreDisplay ??
+      getScoreDisplay({
+        home_team: { score: merged.homeScore },
+        away_team: { score: merged.awayScore },
+        status: merged.status,
+      }),
   };
 }
 

@@ -22,9 +22,6 @@ function formatDayHeader(dateStr: string): string {
 }
 
 function MatchRow({ match }: { match: CalendarMatch }) {
-  const hasScore =
-    typeof match.homeScore === "number" && typeof match.awayScore === "number";
-
   return (
     <Link
       href={`/game/${match.id}`}
@@ -70,9 +67,9 @@ function MatchRow({ match }: { match: CalendarMatch }) {
 
         {/* Score / VS */}
         <div className="shrink-0 px-3 text-center">
-          {hasScore ? (
+          {match.scoreDisplay.type === "score" ? (
             <span className="font-mono font-bold text-lg tabular-nums">
-              {match.homeScore} - {match.awayScore}
+              {match.scoreDisplay.home} - {match.scoreDisplay.away}
             </span>
           ) : (
             <span className="text-gray-400 font-medium text-sm">VS</span>
