@@ -4,7 +4,11 @@ import {
   PLAYERS_QUERY,
   PLAYER_BY_PSD_ID_QUERY,
 } from "../../sanity/queries/players";
-import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "../../sanity/queries/teams";
+import {
+  TEAMS_QUERY,
+  TEAMS_LANDING_QUERY,
+  TEAM_BY_SLUG_QUERY,
+} from "../../sanity/queries/teams";
 import {
   ARTICLES_QUERY,
   ARTICLE_TAGS_QUERY,
@@ -21,6 +25,7 @@ import { HOMEPAGE_BANNERS_QUERY } from "../../sanity/queries/homePage";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
+import type { TeamLandingItem } from "../../utils/group-teams";
 import type { PortableTextBlock } from "@portabletext/react";
 import type {
   ResponsibilityPath,
@@ -218,6 +223,7 @@ export interface SanityServiceInterface {
     psdId: string,
   ) => Effect.Effect<SanityPlayer | null>;
   readonly getTeams: () => Effect.Effect<SanityTeam[]>;
+  readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
   readonly getTeamBySlug: (slug: string) => Effect.Effect<SanityTeam | null>;
   readonly getArticles: () => Effect.Effect<SanityArticle[]>;
   readonly getArticleTags: () => Effect.Effect<string[]>;
@@ -328,6 +334,7 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
   getPlayerByPsdId: (psdId) =>
     fetchGroq<SanityPlayer | null>(PLAYER_BY_PSD_ID_QUERY, { psdId }),
   getTeams: () => fetchGroq<SanityTeam[]>(TEAMS_QUERY),
+  getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
   getTeamBySlug: (slug) =>
     fetchGroq<SanityTeam | null>(TEAM_BY_SLUG_QUERY, { slug }),
   getArticles: () => fetchGroq<SanityArticle[]>(ARTICLES_QUERY),
