@@ -8,6 +8,7 @@ import type {
 import { SanityWriteClient } from "../sanity/client";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
+import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
 
 /**
  * Convert a PSD member record into a Sanity-compatible player document and include the PSD image URL when present.
@@ -37,19 +38,7 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
-    // Stable URL used for dedup comparison across syncs.
-    // Includes ?v=N (PSD photo version) so that a player uploading a new photo
-    // to PSD (v increments) triggers a fresh upload on the next sync cycle.
-    // profileAccessKey is stripped — it is ephemeral and changes each sync.
-    _psdImageUrl: psd.profilePictureURL
-      ? (() => {
-          const path = psd.profilePictureURL!.split("?")[0];
-          const v = new URLSearchParams(
-            psd.profilePictureURL!.split("?")[1] ?? "",
-          ).get("v");
-          return v !== null ? `${baseUrl}${path}?v=${v}` : `${baseUrl}${path}`;
-        })()
-      : null,
+    _psdImageUrl: extractStableImageUrl(psd.profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.
     _psdImageFetchUrl: psd.profilePictureURL
       ? `${baseUrl}${psd.profilePictureURL}`
@@ -219,10 +208,12 @@ export const runSync = Effect.gen(function* () {
         }
 
         const existing = imageState.get(doc.psdId);
-        const needsUpload =
-          !existing?.hasPsdImage || existing.psdImageUrl !== stableImageUrl;
+        const shouldUpload = needsUpload(
+          stableImageUrl,
+          existing?.hasPsdImage ? existing.psdImageUrl : null,
+        );
 
-        if (!needsUpload) {
+        if (!shouldUpload) {
           yield* Effect.log(
             `player ${doc.psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
           );
