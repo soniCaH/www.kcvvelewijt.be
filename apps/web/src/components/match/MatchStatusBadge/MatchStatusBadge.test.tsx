@@ -32,6 +32,11 @@ describe("MatchStatusBadge", () => {
     expect(container.innerHTML).toBe("");
   });
 
+  it("renders nothing for unknown string status", () => {
+    const { container } = render(<MatchStatusBadge status="toString" />);
+    expect(container.innerHTML).toBe("");
+  });
+
   it("uses getStatusColor to determine badge variant", () => {
     // postponed → orange → warning variant
     const { container } = render(<MatchStatusBadge status="postponed" />);

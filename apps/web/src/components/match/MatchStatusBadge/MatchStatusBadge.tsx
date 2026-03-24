@@ -31,7 +31,7 @@ const darkClasses: Record<string, string> = {
 };
 
 function isBadgeStatus(status: string): status is BadgeStatus {
-  return status in statusLabels;
+  return Object.hasOwn(statusLabels, status);
 }
 
 export function MatchStatusBadge({
