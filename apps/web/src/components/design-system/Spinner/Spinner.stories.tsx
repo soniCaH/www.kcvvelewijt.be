@@ -6,7 +6,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Spinner, FullPageSpinner } from "./Spinner";
 import { Button } from "../Button";
-import { Card, CardContent } from "../Card";
 
 const meta = {
   title: "UI/Spinner",
@@ -108,14 +107,12 @@ export const InButton: Story = {
  */
 export const InCard: Story = {
   render: () => (
-    <Card className="w-64">
-      <CardContent>
-        <div className="flex flex-col items-center justify-center py-8">
-          <Spinner size="lg" />
-          <p className="mt-4 text-gray-600">Loading articles...</p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-64 rounded border border-gray-200 p-4">
+      <div className="flex flex-col items-center justify-center py-8">
+        <Spinner size="lg" />
+        <p className="mt-4 text-gray-600">Loading articles...</p>
+      </div>
+    </div>
   ),
 };
 
@@ -161,37 +158,31 @@ export const FullPage: Story = {
 export const LoadingStates: Story = {
   render: () => (
     <div className="space-y-4">
-      <Card>
-        <CardContent>
-          <div className="flex items-center gap-3">
+      <div className="rounded border border-gray-200 p-4">
+        <div className="flex items-center gap-3">
+          <Spinner size="sm" />
+          <span className="text-sm">Inline loading state</span>
+        </div>
+      </div>
+
+      <div className="rounded border border-gray-200 p-4">
+        <div className="flex flex-col items-center py-8 gap-3">
+          <Spinner size="md" />
+          <span className="text-sm text-gray-600">Center loading state</span>
+        </div>
+      </div>
+
+      <div className="rounded border border-gray-200 p-4">
+        <div className="space-y-3">
+          <div className="h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5" />
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/5" />
+          <div className="flex items-center gap-2 mt-4">
             <Spinner size="sm" />
-            <span className="text-sm">Inline loading state</span>
+            <span className="text-sm text-gray-600">Loading more...</span>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <div className="flex flex-col items-center py-8 gap-3">
-            <Spinner size="md" />
-            <span className="text-sm text-gray-600">Center loading state</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="h-4 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5" />
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/5" />
-            <div className="flex items-center gap-2 mt-4">
-              <Spinner size="sm" />
-              <span className="text-sm text-gray-600">Loading more...</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   ),
 };

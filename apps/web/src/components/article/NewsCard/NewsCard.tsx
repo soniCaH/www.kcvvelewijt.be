@@ -47,9 +47,9 @@ export const NewsCard = ({
     return (
       <article
         className={cn(
-          "relative group overflow-hidden rounded bg-white flex flex-col h-full",
+          "relative group overflow-hidden rounded-card bg-white flex flex-col h-full",
           href &&
-            "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+            "transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover",
           className,
         )}
       >
@@ -122,9 +122,9 @@ export const NewsCard = ({
   return (
     <article
       className={cn(
-        "relative group overflow-hidden rounded bg-kcvv-black",
+        "relative group overflow-hidden rounded-card bg-kcvv-black",
         href &&
-          "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+          "transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover",
         "aspect-[3/2]",
         className,
       )}

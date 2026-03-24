@@ -156,7 +156,7 @@ describe("PlayerCard", () => {
     it("should have card styling when loading", () => {
       const { container } = render(<PlayerCard {...defaultProps} isLoading />);
       expect(container.firstChild).toHaveClass("bg-white");
-      expect(container.firstChild).toHaveClass("rounded-sm");
+      expect(container.firstChild).toHaveClass("rounded-card");
       // Border is applied via Tailwind class with color from tokens
       expect(container.firstChild).toHaveClass("border");
     });

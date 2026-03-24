@@ -278,7 +278,7 @@ export function TeamRoster({
                 className={cn(
                   "relative flex flex-col overflow-hidden rounded-sm h-full",
                   "bg-white",
-                  "border border-[#edeff4]",
+                  "border border-foundation-gray-light",
                   "shadow-sm",
                   "transition-shadow duration-200 ease-out",
                   "hover:shadow-lg",

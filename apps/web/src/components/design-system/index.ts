@@ -7,17 +7,6 @@
 export { Button } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
 
-// Card
-export { Card, CardHeader, CardContent, CardFooter, CardImage } from "./Card";
-export type {
-  CardProps,
-  CardVariant,
-  CardHeaderProps,
-  CardContentProps,
-  CardFooterProps,
-  CardImageProps,
-} from "./Card";
-
 // Icon
 export { Icon } from "./Icon";
 export type { IconProps, IconSize, IconColor } from "./Icon";

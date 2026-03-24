@@ -100,7 +100,7 @@ export function MatchResultRow({
     <Link
       href={href}
       className={cn(
-        "block rounded-lg p-4 transition-shadow",
+        "block rounded-card p-4 transition-shadow",
         isDark
           ? cn(
               "bg-white/[0.03] hover:bg-white/[0.07]",

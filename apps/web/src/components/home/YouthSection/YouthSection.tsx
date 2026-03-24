@@ -35,7 +35,7 @@ export const YouthSection = ({ className }: YouthSectionProps) => {
       <div className="relative z-10">
         {/* Section label */}
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 mb-6">
-          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-label text-white/50">
             <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
             Jeugdwerking
           </p>

@@ -199,8 +199,8 @@ describe("SponsorsTier", () => {
       );
 
       const card = container.querySelector(".bg-white");
-      expect(card?.className).toContain("hover:shadow-xl");
-      expect(card?.className).toContain("hover:scale-105");
+      expect(card?.className).toContain("hover:shadow-card-hover");
+      expect(card?.className).toContain("hover:-translate-y-1");
       expect(card?.className).toContain("transition-all");
     });
   });

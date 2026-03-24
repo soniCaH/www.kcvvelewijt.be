@@ -96,10 +96,10 @@ export const SponsorsTier = ({
             <div className="group">
               <div
                 className={cn(
-                  "relative bg-white rounded border border-gray-200 p-4",
+                  "relative bg-white rounded-card border border-gray-200 p-4",
                   "flex items-center justify-center aspect-[3/2]",
                   "transition-all duration-300 ease-out",
-                  "hover:shadow-xl hover:scale-105 hover:-translate-y-1",
+                  "hover:shadow-card-hover hover:-translate-y-1",
                   "animate-in fade-in slide-in-from-bottom-4",
                   "overflow-hidden",
                 )}
@@ -108,6 +108,10 @@ export const SponsorsTier = ({
                   animationFillMode: "backwards",
                 }}
               >
+                <div
+                  className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+                  aria-hidden="true"
+                />
                 <Image
                   src={sponsor.logo}
                   alt={sponsor.name}

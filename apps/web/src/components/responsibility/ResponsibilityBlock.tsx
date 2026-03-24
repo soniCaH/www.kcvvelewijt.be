@@ -60,8 +60,12 @@ export function ResponsibilityBlock({
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             href="/club/organigram"
-            className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow group"
+            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
           >
+            <div
+              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              aria-hidden="true"
+            />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
                 <Users size={20} />
@@ -79,8 +83,12 @@ export function ResponsibilityBlock({
 
           <Link
             href="/club/contact"
-            className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow group"
+            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
           >
+            <div
+              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              aria-hidden="true"
+            />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
                 <Mail size={20} />
@@ -96,8 +104,12 @@ export function ResponsibilityBlock({
 
           <Link
             href="/club/register"
-            className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow group"
+            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
           >
+            <div
+              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              aria-hidden="true"
+            />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
                 <UserPlus size={20} />
