@@ -1,0 +1,181 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundation/Card Interactions" />
+
+export const CardDemo = ({ label, hasAccent, children }) => (
+  <div className="group relative overflow-hidden rounded-card bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover cursor-pointer" style={{ width: '200px', height: '120px' }}>
+    {hasAccent && (
+      <div className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out" aria-hidden="true" />
+    )}
+    <div className="p-4">
+      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9a9da2', marginBottom: '8px' }}>{label}</div>
+      {children}
+    </div>
+  </div>
+);
+
+export const RowDemo = ({ label }) => (
+  <div className="group relative overflow-hidden rounded-card bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer" style={{ width: '420px', padding: '10px 16px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9a9da2' }}>{label}</div>
+      <div style={{ fontSize: '12px', color: '#31404b' }}>radius only, subtle shadow</div>
+    </div>
+  </div>
+);
+
+# Card Interactions
+
+All cards across the site share a common set of interaction tokens to create a consistent, tactile feel. Hover any demo below to see the effect in action.
+
+---
+
+## Token Reference
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Class</th>
+      <th>Value</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Border radius</td>
+      <td><code>rounded-card</code></td>
+      <td>4px</td>
+      <td>All cards</td>
+    </tr>
+    <tr>
+      <td>Hover shadow</td>
+      <td><code>hover:shadow-card-hover</code></td>
+      <td><code>0 12px 32px rgba(0,0,0,0.15)</code></td>
+      <td>Soft elevation on hover</td>
+    </tr>
+    <tr>
+      <td>Hover lift</td>
+      <td><code>hover:-translate-y-1</code></td>
+      <td>-4px translateY</td>
+      <td>Subtle upward lift</td>
+    </tr>
+    <tr>
+      <td>Transition</td>
+      <td><code>transition-all duration-300</code></td>
+      <td>300ms all properties</td>
+      <td>Consistent timing</td>
+    </tr>
+    <tr>
+      <td>Image zoom</td>
+      <td><code>group-hover:scale-105 duration-500</code></td>
+      <td>1.05x scale, 500ms</td>
+      <td>Background/cover images</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Green Accent Bar
+
+Navigation cards display a green accent bar that expands from center on hover using a `clip-path` animation. The bar sits at the top of the card and is purely decorative.
+
+**Markup:**
+
+```html
+<div
+  className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20
+    pointer-events-none [clip-path:inset(0_50%)]
+    group-hover:[clip-path:inset(0_0%)] transition-[clip-path]
+    duration-300 ease-out"
+  aria-hidden="true"
+/>
+```
+
+The parent card must have `group` and `relative overflow-hidden` for this to work. At rest the bar is clipped to zero width (`inset(0 50%)`); on hover it expands to full width (`inset(0 0%)`).
+
+---
+
+## Card Catalogue
+
+Hover any card below to see the interaction tokens in action.
+
+### Navigation Cards (with accent bar)
+
+These cards navigate the user to a detail page. They use the full interaction set: lift, shadow, and accent bar.
+
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px', marginBottom: '32px' }}>
+  <CardDemo label="NewsCard" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Article teaser</div>
+  </CardDemo>
+  <CardDemo label="EditorialCard" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Editorial block</div>
+  </CardDemo>
+  <CardDemo label="PlayerCard" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Player profile</div>
+  </CardDemo>
+  <CardDemo label="TeamCard" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Team overview</div>
+  </CardDemo>
+  <CardDemo label="EventCard" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Calendar event</div>
+  </CardDemo>
+  <CardDemo label="SearchResult" hasAccent>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Search hit</div>
+  </CardDemo>
+</div>
+
+### Info Cards (no accent bar)
+
+These cards present information but are not primary navigation targets. They use lift and shadow but no accent bar.
+
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px', marginBottom: '32px' }}>
+  <CardDemo label="ContactCard" hasAccent={false}>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Contact info</div>
+  </CardDemo>
+  <CardDemo label="SponsorsTier" hasAccent={false}>
+    <div style={{ fontSize: '13px', color: '#31404b' }}>Sponsor group</div>
+  </CardDemo>
+</div>
+
+### Row Items (radius only)
+
+Compact row-style components that only use `rounded-card` and a subtle `hover:shadow-md`. No lift or accent bar.
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', marginBottom: '32px' }}>
+  <RowDemo label="MatchTeaser" />
+  <RowDemo label="MatchResultRow" />
+</div>
+
+---
+
+## Exceptions
+
+Not every card follows the standard recipe. These are the documented deviations:
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Deviation</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>MatchTeaser</code> / <code>MatchResultRow</code></td>
+      <td>Radius only, subtle <code>hover:shadow-md</code> — no lift, no accent bar</td>
+      <td>Compact rows where lift would feel excessive; these sit in tight vertical lists</td>
+    </tr>
+    <tr>
+      <td><code>SponsorCard</code></td>
+      <td>Grayscale toggle on hover — no shadow, no lift</td>
+      <td>Sponsor logos use a grayscale-to-color treatment as their primary interaction</td>
+    </tr>
+    <tr>
+      <td><code>ContactCard</code></td>
+      <td>No accent bar</td>
+      <td>Information card, not a navigation target — accent bar reserved for navigational cards</td>
+    </tr>
+  </tbody>
+</table>
