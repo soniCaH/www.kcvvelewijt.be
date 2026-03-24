@@ -4,7 +4,6 @@
 
 import type { Match, RankingEntry } from "@/lib/effect/schemas";
 import type {
-  SanityPlayer,
   SanityStaffMember,
   SanityTeam,
 } from "@/lib/effect/services/SanityService";
@@ -13,7 +12,7 @@ import type {
   ScheduleTeam,
 } from "@/components/team/TeamSchedule";
 import type { StandingsEntry } from "@/components/team/TeamStandings";
-import type { RosterPlayer, StaffMember } from "@/components/team/TeamRoster";
+import type { StaffMember } from "@/components/team/TeamRoster";
 
 /**
  * Transform Footbalisto Match to ScheduleMatch for TeamSchedule component
@@ -67,31 +66,6 @@ export function transformRankingToStandings(
 }
 
 // ─── Sanity transform functions ──────────────────────────────────────────────
-
-/**
- * Convert a SanityPlayer record into a RosterPlayer suitable for the TeamRoster component.
- *
- * Maps player identifiers, names, jersey number, position, image URL, and player link. Position will be `"Keeper"` when `player.keeper` is true; otherwise it uses `player.position`, then `player.positionPsd`, and falls back to `"Speler"`. Image URL prefers `transparentImageUrl` and falls back to `psdImageUrl`. The player link is built from `player.psdId`.
- *
- * @param player - The SanityPlayer object to transform
- * @returns A RosterPlayer with fields: `id`, `firstName`, `lastName`, `position`, `number`, `imageUrl`, and `href`
- */
-export function transformSanityPlayerToRoster(
-  player: SanityPlayer,
-): RosterPlayer {
-  const position = player.keeper
-    ? "Keeper"
-    : (player.position ?? player.positionPsd ?? "Speler");
-  return {
-    id: player._id,
-    firstName: player.firstName ?? "",
-    lastName: player.lastName ?? "",
-    position,
-    number: player.jerseyNumber ?? undefined,
-    imageUrl: player.transparentImageUrl ?? player.psdImageUrl ?? undefined,
-    href: `/players/${player.psdId}`,
-  };
-}
 
 /**
  * Convert a Sanity staff member document into a StaffMember suitable for the team roster.

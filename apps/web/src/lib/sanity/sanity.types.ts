@@ -775,10 +775,56 @@ export type PLAYERS_QUERY_RESULT = Array<{
   }> | null;
 }>;
 
+// Source: ../web/src/lib/sanity/queries/players.ts
+// Variable: PLAYER_BY_PSD_ID_QUERY
+// Query: *[_type == "player" && psdId == $psdId][0] {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
+export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
+  _id: string;
+  psdId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  jerseyNumber: number | null;
+  keeper: boolean | null;
+  positionPsd: string | null;
+  position:
+    | "Aanvaller"
+    | "Keeper"
+    | "Middenvelder"
+    | "Speler"
+    | "Verdediger"
+    | null;
+  birthDate: string | null;
+  nationality: string | null;
+  height: number | null;
+  weight: number | null;
+  psdImageUrl: string | null;
+  transparentImageUrl: string | null;
+  celebrationImageUrl: string | null;
+  bio: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '*[_type == "player"] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
+    '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
   }
 }

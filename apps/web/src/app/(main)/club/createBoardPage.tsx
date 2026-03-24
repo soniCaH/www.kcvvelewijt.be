@@ -12,7 +12,10 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
 import {
-  transformSanityPlayerToRoster,
+  toPlayerVM,
+  type RoutablePlayerVM,
+} from "@/lib/repositories/player.repository";
+import {
   transformSanityStaffToMember,
   getSanityTeamTagline,
 } from "@/app/(main)/team/[slug]/utils";
@@ -108,7 +111,11 @@ export function createBoardPage({
           tagline: getSanityTeamTagline(team),
           teamType: "club",
         }}
-        players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+        players={
+          (team.players ?? [])
+            .filter((p) => p.psdId)
+            .map(toPlayerVM) as RoutablePlayerVM[]
+        }
         staff={(team.staff ?? []).map(transformSanityStaffToMember)}
       />
     );

@@ -1,9 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
-import {
-  PLAYERS_QUERY,
-  PLAYER_BY_PSD_ID_QUERY,
-} from "../../sanity/queries/players";
+import type { SanityPlayerBase } from "../../sanity/types";
 import {
   TEAMS_QUERY,
   TEAMS_LANDING_QUERY,
@@ -37,25 +34,6 @@ import type { OrgChartNode } from "../../../types/organigram";
 // Simple interfaces — no Effect Schema validation yet.
 // Add per content type as pages are cut over from DrupalService.
 
-export interface SanityPlayer {
-  _id: string;
-  psdId: string;
-  firstName: string | null;
-  lastName: string | null;
-  jerseyNumber: number | null;
-  keeper: boolean;
-  positionPsd: string | null;
-  position: string | null;
-  transparentImageUrl: string | null;
-  celebrationImageUrl: string | null;
-  psdImageUrl: string | null;
-  bio: unknown;
-  birthDate: string | null;
-  nationality: string | null;
-  height: number | null;
-  weight: number | null;
-}
-
 export interface SanityTrainingSession {
   day: string;
   time: string;
@@ -85,7 +63,7 @@ export interface SanityTeam {
   tagline: string | null;
   teamImageUrl: string | null;
   trainingSchedule: SanityTrainingSession[];
-  players: SanityPlayer[];
+  players: SanityPlayerBase[];
   staff: SanityStaffMember[];
   body: unknown;
   contactInfo: unknown;
@@ -218,10 +196,6 @@ export interface SanityPage {
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
-  readonly getPlayers: () => Effect.Effect<SanityPlayer[]>;
-  readonly getPlayerByPsdId: (
-    psdId: string,
-  ) => Effect.Effect<SanityPlayer | null>;
   readonly getTeams: () => Effect.Effect<SanityTeam[]>;
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
   readonly getTeamBySlug: (slug: string) => Effect.Effect<SanityTeam | null>;
@@ -330,9 +304,6 @@ const mapOrgMember = (m: SanityOrgMember): OrgChartNode => ({
 });
 
 export const SanityServiceLive = Layer.succeed(SanityService, {
-  getPlayers: () => fetchGroq<SanityPlayer[]>(PLAYERS_QUERY),
-  getPlayerByPsdId: (psdId) =>
-    fetchGroq<SanityPlayer | null>(PLAYER_BY_PSD_ID_QUERY, { psdId }),
   getTeams: () => fetchGroq<SanityTeam[]>(TEAMS_QUERY),
   getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
   getTeamBySlug: (slug) =>

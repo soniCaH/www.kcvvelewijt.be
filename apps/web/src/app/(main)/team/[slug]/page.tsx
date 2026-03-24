@@ -13,7 +13,10 @@ import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import {
-  transformSanityPlayerToRoster,
+  toPlayerVM,
+  type RoutablePlayerVM,
+} from "@/lib/repositories/player.repository";
+import {
   transformSanityStaffToMember,
   getSanityTeamTagline,
   getSanityTeamType,
@@ -174,7 +177,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
           teamType: getSanityTeamType(team),
           tagline: getSanityTeamTagline(team),
         }}
-        players={(team.players ?? []).map(transformSanityPlayerToRoster)}
+        players={
+          (team.players ?? [])
+            .filter((p) => p.psdId)
+            .map(toPlayerVM) as RoutablePlayerVM[]
+        }
         staff={(team.staff ?? []).map(transformSanityStaffToMember)}
         matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
         standings={bffData?.standings.map(transformRankingToStandings) ?? []}
