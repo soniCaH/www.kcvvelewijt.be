@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CalendarView, type CalendarMatch } from "./CalendarView";
+import { CalendarView } from "./CalendarView";
+import type { CalendarMatch } from "./utils";
 
 const meta = {
   title: "Features/Calendar/CalendarView",
