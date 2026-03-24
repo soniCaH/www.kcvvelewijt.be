@@ -1,0 +1,99 @@
+import { EditorialCard } from "../EditorialCard/EditorialCard";
+
+interface CardData {
+  href: string;
+  tag: string;
+  title: string;
+  description?: string;
+  arrowText: string;
+  featured?: boolean;
+}
+
+const cards: CardData[] = [
+  {
+    href: "/club/geschiedenis",
+    tag: "Geschiedenis",
+    title: "75 jaar voetbalpassie in Elewijt",
+    description:
+      "Van een bescheiden begin op een modderig veld tot een bruisende club met honderden leden. Ontdek het verhaal van KCVV.",
+    arrowText: "Lees meer",
+    featured: true,
+  },
+  {
+    href: "/club/bestuur",
+    tag: "Bestuur",
+    title: "Het team achter het team",
+    description: "Maak kennis met het bestuur dat de club draaiende houdt.",
+    arrowText: "Ontdek",
+  },
+  {
+    href: "/club/organigram",
+    tag: "Organigram",
+    title: "Onze structuur",
+    description: "Van voorzitter tot jeugdcoördinator — wie doet wat?",
+    arrowText: "Bekijk",
+  },
+  {
+    href: "/club/ultras",
+    tag: "Ultras",
+    title: "De 12de man",
+    arrowText: "Meer info",
+  },
+  {
+    href: "/club/angels",
+    tag: "Angels",
+    title: "Onze engelen",
+    arrowText: "Meer info",
+  },
+  {
+    href: "/club/aansluiten",
+    tag: "Aansluiten",
+    title: "Word lid",
+    arrowText: "Schrijf je in",
+  },
+];
+
+const gridPositions = [
+  "col-span-7 row-span-2 min-h-[520px] max-[960px]:col-span-full max-[960px]:row-span-1 max-[960px]:min-h-[320px] max-[640px]:min-h-[280px]",
+  "col-start-8 col-span-5 row-start-1 min-h-[280px] max-[960px]:col-auto max-[960px]:row-auto max-[960px]:min-h-[260px]",
+  "col-start-8 col-span-5 row-start-2 min-h-[280px] max-[960px]:col-auto max-[960px]:row-auto max-[960px]:min-h-[260px]",
+  "col-span-4 row-start-3 min-h-[280px] max-[960px]:col-auto max-[960px]:row-auto max-[960px]:min-h-[260px]",
+  "col-span-4 row-start-3 min-h-[280px] max-[960px]:col-auto max-[960px]:row-auto max-[960px]:min-h-[260px]",
+  "col-span-4 row-start-3 min-h-[280px] max-[960px]:col-auto max-[960px]:row-auto max-[960px]:min-h-[260px]",
+];
+
+export function ClubEditorialGrid() {
+  return (
+    <div className="max-w-[70rem] mx-auto px-4 md:px-10">
+      <div className="mb-12">
+        <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-kcvv-gray mb-3">
+          <span className="block w-5 h-0.5 bg-kcvv-green" />
+          Ontdek onze club
+        </div>
+        <h2
+          className="font-title font-extrabold text-kcvv-gray-blue"
+          style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}
+        >
+          Meer dan een voetbalclub
+        </h2>
+      </div>
+      <div
+        data-testid="editorial-grid"
+        className="grid grid-cols-12 gap-5 grid-rows-[auto_auto_auto] max-[960px]:grid-cols-2 max-[640px]:grid-cols-1"
+      >
+        {cards.map((card, index) => (
+          <div key={card.href} className={gridPositions[index]}>
+            <EditorialCard
+              href={card.href}
+              tag={card.tag}
+              title={card.title}
+              description={card.description}
+              arrowText={`${card.arrowText} →`}
+              featured={card.featured}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
