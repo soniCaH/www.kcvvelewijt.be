@@ -48,7 +48,8 @@ function EditorialCard({
           </span>
         )}
         <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em] text-kcvv-green mt-3 transition-[gap] duration-200 group-hover:gap-2.5">
-          {arrowText}
+          <span>{arrowText}</span>
+          <span aria-hidden="true">→</span>
         </span>
       </div>
     </Link>
@@ -89,7 +90,7 @@ const editorialSection: SectionConfig = {
         tag="Bestuur"
         title="Het team achter het team"
         description="Maak kennis met het bestuur dat de club draaiende houdt."
-        arrowText="Ontdek →"
+        arrowText="Ontdek"
       />
     </div>
   ),
