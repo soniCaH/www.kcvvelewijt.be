@@ -9,16 +9,9 @@ import type { Metadata } from "next";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
-import {
-  toPlayerVM,
-  type RoutablePlayerVM,
-} from "@/lib/repositories/player.repository";
-import {
-  transformSanityStaffToMember,
-  getSanityTeamTagline,
-} from "@/app/(main)/team/[slug]/utils";
+import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 
 interface BoardPageConfig {
   /** Sanity team slug (e.g. "bestuur", "jeugdbestuur") */
@@ -40,8 +33,8 @@ interface BoardPageConfig {
 async function fetchBoardTeamOrNotFound(slug: string) {
   const team = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getTeamBySlug(slug);
+      const repo = yield* TeamRepository;
+      return yield* repo.findBySlug(slug);
     }),
   );
 
@@ -67,9 +60,8 @@ export function createBoardPage({
   async function generateMetadata(): Promise<Metadata> {
     try {
       const team = await fetchBoardTeamOrNotFound(slug);
-      const tagline = getSanityTeamTagline(team);
-      const description = tagline
-        ? `${team.name} — ${tagline}`
+      const description = team.tagline
+        ? `${team.name} — ${team.tagline}`
         : fallbackDescription;
 
       return {
@@ -108,15 +100,13 @@ export function createBoardPage({
         header={{
           name: team.name,
           imageUrl: team.teamImageUrl ?? undefined,
-          tagline: getSanityTeamTagline(team),
+          tagline: team.tagline,
           teamType: "club",
         }}
-        players={
-          (team.players ?? [])
-            .filter((p) => p.psdId)
-            .map(toPlayerVM) as RoutablePlayerVM[]
-        }
-        staff={(team.staff ?? []).map(transformSanityStaffToMember)}
+        players={team.players.filter(
+          (p): p is RoutablePlayerVM => p.href !== undefined,
+        )}
+        staff={team.staff}
       />
     );
   }

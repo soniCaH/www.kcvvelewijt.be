@@ -6,13 +6,11 @@
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
-import type { SanityTeam } from "@/lib/effect/services/SanityService";
-import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
 import {
-  getSanityAgeGroup,
-  getSanityTeamTagline,
-} from "@/app/(main)/team/[slug]/utils";
+  TeamRepository,
+  type TeamNavVM,
+} from "@/lib/repositories/team.repository";
+import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
 
 export const metadata: Metadata = {
   title: "Jeugdploegen | KCVV Elewijt",
@@ -27,41 +25,37 @@ export const metadata: Metadata = {
 };
 
 /**
- * Convert a Sanity team object into a TeamData object suitable for the TeamOverview component.
+ * Convert a TeamNavVM into a TeamData object suitable for the TeamOverview component.
  *
- * @param team - The Sanity team object to transform.
- * @returns A `TeamData` object with id, name, href, ageGroup, teamType, and tagline, or `null` if the team's age group cannot be determined or `slug.current` is missing.
+ * @param team - The team nav view model to transform.
+ * @returns A `TeamData` object, or `null` if the team has no U-age group or no slug.
  */
-function transformTeamToData(team: SanityTeam): TeamData | null {
-  const ageGroup = getSanityAgeGroup(team);
+function transformTeamToData(team: TeamNavVM): TeamData | null {
+  if (!team.age) return null;
+  const match = team.age.match(/U\d{1,2}[A-Z]?/i);
+  const ageGroup = match ? match[0].toUpperCase() : null;
 
-  // Only include youth teams with a valid slug
-  if (!ageGroup || !team.slug?.current) return null;
+  if (!ageGroup || !team.slug) return null;
 
   return {
-    id: team._id,
+    id: team.id,
     name: team.name,
-    href: `/team/${team.slug.current}`,
+    href: `/team/${team.slug}`,
     ageGroup,
     teamType: "youth",
-    tagline: getSanityTeamTagline(team),
+    tagline: team.tagline ?? team.divisionFull ?? team.division ?? undefined,
   };
 }
 
 /**
- * Retrieve youth teams from Sanity and convert them into data objects for the UI.
- *
- * Fetches teams from the Sanity service, transforms valid entries into `TeamData`,
- * and excludes invalid or incomplete teams.
- *
- * @returns An array of `TeamData` objects for valid youth teams; an empty array if fetching fails or no valid teams are found.
+ * Retrieve youth teams and convert them into data objects for the UI.
  */
 async function fetchYouthTeams(): Promise<TeamData[]> {
   try {
     const teams = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getTeams();
+        const repo = yield* TeamRepository;
+        return yield* repo.findAll();
       }),
     );
 

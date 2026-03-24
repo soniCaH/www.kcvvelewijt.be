@@ -1,0 +1,321 @@
+import { describe, expect, it, vi } from "vitest";
+import { Effect } from "effect";
+import type {
+  TEAMS_QUERY_RESULT,
+  TEAM_BY_SLUG_QUERY_RESULT,
+} from "../sanity/sanity.types";
+
+// Mock the sanity client before importing the repository
+vi.mock("../sanity/client", () => ({
+  sanityClient: {
+    fetch: vi.fn(),
+  },
+}));
+
+import { sanityClient } from "../sanity/client";
+import {
+  TeamRepository,
+  TeamRepositoryLive,
+  type TeamNavVM,
+  type StaffMemberVM,
+} from "./team.repository";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
+
+function runWithRepo<A>(effect: Effect.Effect<A, never, TeamRepository>) {
+  return Effect.runPromise(Effect.provide(effect, TeamRepositoryLive));
+}
+
+// Fixture: a team row as returned by TEAMS_QUERY
+function makeTeamRow(
+  overrides: Partial<TEAMS_QUERY_RESULT[number]> = {},
+): TEAMS_QUERY_RESULT[number] {
+  return {
+    _id: "team-1",
+    psdId: "100",
+    name: "Eerste Elftallen A",
+    slug: "eerste-elftallen-a",
+    age: "A",
+    gender: "male",
+    footbelId: 12345,
+    leagueId: 678,
+    division: "3de Afdeling",
+    divisionFull: "3de Afdeling VFV A",
+    tagline: "Er is maar één plezante compagnie",
+    teamImageUrl: "https://cdn.sanity.io/team.webp",
+    ...overrides,
+  };
+}
+
+describe("TeamRepository", () => {
+  describe("findAll", () => {
+    it("maps all TeamNavVM fields correctly from GROQ result", async () => {
+      const row = makeTeamRow();
+      mockFetch.mockResolvedValueOnce([row]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(teams).toHaveLength(1);
+      const t = teams[0];
+      expect(t).toEqual<TeamNavVM>({
+        id: "team-1",
+        name: "Eerste Elftallen A",
+        slug: "eerste-elftallen-a",
+        age: "A",
+        psdId: "100",
+        division: "3de Afdeling",
+        divisionFull: "3de Afdeling VFV A",
+        tagline: "Er is maar één plezante compagnie",
+        teamImageUrl: "https://cdn.sanity.io/team.webp",
+      });
+    });
+
+    it("handles null fields gracefully", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeTeamRow({
+          name: null,
+          slug: null,
+          age: null,
+          psdId: null,
+          division: null,
+          divisionFull: null,
+          tagline: null,
+          teamImageUrl: null,
+        }),
+      ]);
+
+      const [t] = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(t.name).toBe("");
+      expect(t.slug).toBe("");
+      expect(t.age).toBeNull();
+      expect(t.psdId).toBeNull();
+      expect(t.division).toBeNull();
+      expect(t.divisionFull).toBeNull();
+      expect(t.tagline).toBeNull();
+      expect(t.teamImageUrl).toBeNull();
+    });
+  });
+
+  describe("findBySlug", () => {
+    // The generated type is `{ ... } | null`, so we need the non-null shape
+    type TeamDetailRow = Exclude<TEAM_BY_SLUG_QUERY_RESULT, null>;
+
+    function makeDetailRow(
+      overrides: Partial<TeamDetailRow> = {},
+    ): TeamDetailRow {
+      return {
+        _id: "team-1",
+        psdId: "100",
+        name: "Eerste Elftallen A",
+        slug: "eerste-elftallen-a",
+        age: "A",
+        gender: "male",
+        footbelId: 12345,
+        leagueId: 678,
+        division: "3de Afdeling",
+        divisionFull: "3de Afdeling VFV A",
+        tagline: "Er is maar één plezante compagnie",
+        teamImageUrl: "https://cdn.sanity.io/team.webp",
+        body: null,
+        contactInfo: null,
+        trainingSchedule: null,
+        players: [
+          {
+            _id: "player-1",
+            psdId: "42",
+            firstName: "Jan",
+            lastName: "Janssens",
+            jerseyNumber: 7,
+            keeper: false,
+            positionPsd: "Middenvelder",
+            position: "Aanvaller",
+            psdImageUrl: "https://cdn.sanity.io/psd.webp",
+            transparentImageUrl: "https://cdn.sanity.io/transparent.webp",
+          },
+        ],
+        staff: [
+          {
+            _id: "staff-1",
+            firstName: "Piet",
+            lastName: "Pieters",
+            role: "hoofdtrainer",
+            photoUrl: "https://cdn.sanity.io/photo.webp",
+          },
+        ],
+        ...overrides,
+      };
+    }
+
+    it("maps TeamDetailVM fields correctly from GROQ result", async () => {
+      mockFetch.mockResolvedValueOnce(makeDetailRow());
+
+      const team = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("eerste-elftallen-a");
+        }),
+      );
+
+      expect(team).not.toBeNull();
+      const t = team!;
+
+      // Core fields
+      expect(t.id).toBe("team-1");
+      expect(t.name).toBe("Eerste Elftallen A");
+      expect(t.slug).toBe("eerste-elftallen-a");
+      expect(t.psdId).toBe("100");
+      expect(t.teamImageUrl).toBe("https://cdn.sanity.io/team.webp");
+
+      // Computed fields (absorbed from utils.ts)
+      expect(t.tagline).toBe("Er is maar één plezante compagnie");
+      expect(t.teamType).toBe("senior");
+      expect(t.ageGroup).toBeUndefined(); // "A" doesn't match U-pattern
+
+      // Players transformed to PlayerVM
+      expect(t.players).toHaveLength(1);
+      expect(t.players[0].firstName).toBe("Jan");
+      expect(t.players[0].position).toBe("Aanvaller");
+      expect(t.players[0].imageUrl).toBe(
+        "https://cdn.sanity.io/transparent.webp",
+      );
+      expect(t.players[0].href).toBe("/players/42");
+
+      // Staff transformed to StaffMemberVM
+      expect(t.staff).toHaveLength(1);
+      expect(t.staff[0]).toEqual<StaffMemberVM>({
+        id: "staff-1",
+        firstName: "Piet",
+        lastName: "Pieters",
+        role: "hoofdtrainer",
+        imageUrl: "https://cdn.sanity.io/photo.webp",
+      });
+    });
+
+    it("computes tagline fallback: tagline → divisionFull → division", async () => {
+      // tagline null → falls back to divisionFull
+      mockFetch.mockResolvedValueOnce(makeDetailRow({ tagline: null }));
+      const t1 = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+      expect(t1!.tagline).toBe("3de Afdeling VFV A");
+
+      // tagline + divisionFull null → falls back to division
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({ tagline: null, divisionFull: null }),
+      );
+      const t2 = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+      expect(t2!.tagline).toBe("3de Afdeling");
+
+      // all null → undefined
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          tagline: null,
+          divisionFull: null,
+          division: null,
+        }),
+      );
+      const t3 = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+      expect(t3!.tagline).toBeUndefined();
+    });
+
+    it("computes teamType: youth for U-ages, senior otherwise", async () => {
+      mockFetch.mockResolvedValueOnce(makeDetailRow({ age: "U15" }));
+      const t1 = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+      expect(t1!.teamType).toBe("youth");
+      expect(t1!.ageGroup).toBe("U15");
+
+      mockFetch.mockResolvedValueOnce(makeDetailRow({ age: "A" }));
+      const t2 = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+      expect(t2!.teamType).toBe("senior");
+    });
+
+    it("handles null players and staff arrays", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({ players: null, staff: null }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.players).toEqual([]);
+      expect(t!.staff).toEqual([]);
+    });
+
+    it("staff with null photoUrl gets undefined imageUrl", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              _id: "s1",
+              firstName: "A",
+              lastName: "B",
+              role: "coach",
+              photoUrl: null,
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff[0].imageUrl).toBeUndefined();
+    });
+
+    it("returns null for unknown slug", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("unknown-slug");
+        }),
+      );
+
+      expect(result).toBeNull();
+    });
+  });
+});

@@ -12,10 +12,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Icon, SocialLinks } from "@/components/design-system";
 import { X, ChevronDown, Search } from "@/lib/icons";
-import type {
-  YouthTeamNavItem,
-  SeniorTeamNavItem,
-} from "@/lib/sanity/queries/teams";
+import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
 export interface MobileMenuProps {
   /**
@@ -26,8 +23,8 @@ export interface MobileMenuProps {
    * Callback when the menu should close
    */
   onClose: () => void;
-  youthTeams?: YouthTeamNavItem[];
-  seniorTeams?: SeniorTeamNavItem[];
+  youthTeams?: TeamNavVM[];
+  seniorTeams?: TeamNavVM[];
   /**
    * Additional CSS classes
    */
@@ -81,7 +78,7 @@ const staticMenuItems: MenuItem[] = [
  * - Submenu: darker background with inset shadows
  */
 const buildSeniorMenuItem = (
-  team: SeniorTeamNavItem | undefined,
+  team: TeamNavVM | undefined,
   label: string,
 ): MenuItem | null => {
   if (!team?.slug) return null;
@@ -117,10 +114,12 @@ export const MobileMenu = ({
   const jeugdItem: MenuItem = {
     label: "Jeugd",
     href: "/jeugd",
-    children: youthTeams?.map((t) => ({
-      label: t.age,
-      href: `/team/${t.slug}`,
-    })),
+    children: youthTeams
+      ?.filter((t) => t.age != null)
+      .map((t) => ({
+        label: t.age!,
+        href: `/team/${t.slug}`,
+      })),
   };
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>

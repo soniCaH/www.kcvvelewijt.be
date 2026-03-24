@@ -12,8 +12,7 @@
 import { ImageResponse } from "next/og";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
-import { getSanityAgeGroup, getSanityTeamTagline } from "./utils";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 
 export const runtime = "nodejs";
 
@@ -45,15 +44,15 @@ export default async function Image({ params }: ImageProps) {
   try {
     const team = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getTeamBySlug(slug);
+        const repo = yield* TeamRepository;
+        return yield* repo.findBySlug(slug);
       }),
     );
 
     if (team) {
       teamName = team.name;
-      ageGroup = getSanityAgeGroup(team);
-      tagline = getSanityTeamTagline(team);
+      ageGroup = team.ageGroup;
+      tagline = team.tagline;
     }
   } catch {
     // Use fallback values if team not found

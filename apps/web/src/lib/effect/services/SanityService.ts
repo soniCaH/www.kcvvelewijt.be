@@ -1,11 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
-import type { SanityPlayerBase } from "../../sanity/types";
-import {
-  TEAMS_QUERY,
-  TEAMS_LANDING_QUERY,
-  TEAM_BY_SLUG_QUERY,
-} from "../../sanity/queries/teams";
+import { TEAMS_LANDING_QUERY } from "../../sanity/queries/teams";
 import {
   ARTICLES_QUERY,
   ARTICLE_TAGS_QUERY,
@@ -33,41 +28,6 @@ import type { OrgChartNode } from "../../../types/organigram";
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
 // Add per content type as pages are cut over from DrupalService.
-
-export interface SanityTrainingSession {
-  day: string;
-  time: string;
-  location: string;
-  type: string;
-}
-
-export interface SanityStaffMember {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  photoUrl: string | null;
-}
-
-export interface SanityTeam {
-  _id: string;
-  psdId: string;
-  name: string;
-  slug: { current: string };
-  age: string;
-  gender: string;
-  footbelId: number | null;
-  leagueId: number | null;
-  division: string | null;
-  divisionFull: string | null;
-  tagline: string | null;
-  teamImageUrl: string | null;
-  trainingSchedule: SanityTrainingSession[];
-  players: SanityPlayerBase[];
-  staff: SanityStaffMember[];
-  body: unknown;
-  contactInfo: unknown;
-}
 
 export interface SanityArticleListItem {
   _id: string;
@@ -196,9 +156,7 @@ export interface SanityPage {
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityServiceInterface {
-  readonly getTeams: () => Effect.Effect<SanityTeam[]>;
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
-  readonly getTeamBySlug: (slug: string) => Effect.Effect<SanityTeam | null>;
   readonly getArticles: () => Effect.Effect<SanityArticle[]>;
   readonly getArticleTags: () => Effect.Effect<string[]>;
   readonly getArticlesPaginated: (params: {
@@ -304,10 +262,7 @@ const mapOrgMember = (m: SanityOrgMember): OrgChartNode => ({
 });
 
 export const SanityServiceLive = Layer.succeed(SanityService, {
-  getTeams: () => fetchGroq<SanityTeam[]>(TEAMS_QUERY),
   getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
-  getTeamBySlug: (slug) =>
-    fetchGroq<SanityTeam | null>(TEAM_BY_SLUG_QUERY, { slug }),
   getArticles: () => fetchGroq<SanityArticle[]>(ARTICLES_QUERY),
   getArticleTags: () => fetchGroq<string[]>(ARTICLE_TAGS_QUERY),
   getArticlesPaginated: ({ offset, limit, category }) =>

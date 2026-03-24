@@ -10,14 +10,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import type {
-  YouthTeamNavItem,
-  SeniorTeamNavItem,
-} from "@/lib/sanity/queries/teams";
+import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
 export interface NavigationProps {
-  youthTeams?: YouthTeamNavItem[];
-  seniorTeams?: SeniorTeamNavItem[];
+  youthTeams?: TeamNavVM[];
+  seniorTeams?: TeamNavVM[];
   /**
    * Additional CSS classes
    */
@@ -69,7 +66,7 @@ const staticMenuItems: MenuItem[] = [
  * - Dropdown font-size: 0.6875rem (11px)
  */
 const buildSeniorMenuItem = (
-  team: SeniorTeamNavItem | undefined,
+  team: TeamNavVM | undefined,
   label: string,
 ): MenuItem | null => {
   if (!team?.slug) return null;
@@ -103,10 +100,12 @@ export const Navigation = ({
   const jeugdItem: MenuItem = {
     label: "Jeugd",
     href: "/jeugd",
-    children: youthTeams?.map((t) => ({
-      label: t.age,
-      href: `/team/${t.slug}`,
-    })),
+    children: youthTeams
+      ?.filter((t) => t.age != null)
+      .map((t) => ({
+        label: t.age!,
+        href: `/team/${t.slug}`,
+      })),
   };
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>
