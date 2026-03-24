@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
-import type { SanityPlayerBase } from "../../repositories/player.repository";
+import type { SanityPlayerBase } from "../../sanity/types";
 import {
   TEAMS_QUERY,
   TEAMS_LANDING_QUERY,

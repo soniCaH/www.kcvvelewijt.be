@@ -8,6 +8,7 @@ import type {
   PLAYERS_QUERY_RESULT,
   PLAYER_BY_PSD_ID_QUERY_RESULT,
 } from "../sanity/sanity.types";
+import type { SanityPlayerBase } from "../sanity/types";
 
 export interface PlayerVM {
   id: string;
@@ -16,7 +17,7 @@ export interface PlayerVM {
   position: string;
   number?: number;
   imageUrl?: string;
-  href: string;
+  href?: string;
   bio?: PLAYERS_QUERY_RESULT[number]["bio"];
   birthDate?: string;
   nationality?: string;
@@ -24,19 +25,8 @@ export interface PlayerVM {
   weight?: number;
 }
 
-/** Core player fields present in both standalone and team-embedded GROQ projections */
-export interface SanityPlayerBase {
-  _id: string;
-  psdId: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  jerseyNumber: number | null;
-  keeper: boolean | null;
-  positionPsd: string | null;
-  position: string | null;
-  psdImageUrl: string | null;
-  transparentImageUrl: string | null;
-}
+/** A PlayerVM that has a valid href (i.e. has a psdId) */
+export type RoutablePlayerVM = PlayerVM & { href: string };
 
 export function toPlayerVM(
   row: SanityPlayerBase & {
@@ -58,7 +48,7 @@ export function toPlayerVM(
     position,
     number: row.jerseyNumber ?? undefined,
     imageUrl: row.transparentImageUrl ?? row.psdImageUrl ?? undefined,
-    href: `/players/${row.psdId}`,
+    href: row.psdId ? `/players/${row.psdId}` : undefined,
     bio: row.bio ?? undefined,
     birthDate: row.birthDate ?? undefined,
     nationality: row.nationality ?? undefined,

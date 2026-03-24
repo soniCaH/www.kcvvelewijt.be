@@ -30,7 +30,7 @@ export async function generateStaticParams() {
       }),
     );
     return players
-      .filter((p) => p.href !== "/players/null")
+      .filter((p): p is typeof p & { href: string } => !!p.href)
       .map((p) => ({ slug: p.href.replace("/players/", "") }));
   } catch {
     return [];

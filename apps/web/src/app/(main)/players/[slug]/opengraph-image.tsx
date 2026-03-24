@@ -57,6 +57,9 @@ export default async function Image({ params }: ImageProps) {
       position = player.position;
       number = player.number;
       teamName = "KCVV Elewijt";
+    } else {
+      firstName = "KCVV";
+      lastName = "Elewijt";
     }
   } catch {
     // Use fallback values if player not found

@@ -232,7 +232,7 @@ describe("PlayerRepository", () => {
       expect(p.bio).toBeUndefined();
     });
 
-    it("player with null psdId gets href /players/null", async () => {
+    it("player with null psdId has undefined href", async () => {
       mockFetch.mockResolvedValueOnce([makePlayerRow({ psdId: null })]);
 
       const [p] = await runWithRepo(
@@ -241,7 +241,7 @@ describe("PlayerRepository", () => {
           return yield* repo.findAll();
         }),
       );
-      expect(p.href).toBe("/players/null");
+      expect(p.href).toBeUndefined();
     });
   });
 

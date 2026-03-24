@@ -97,7 +97,11 @@ const searchPlayers = (query: string) =>
 
     const queryLower = query.toLowerCase();
 
-    const filtered = allPlayers.filter((player: PlayerVM) => {
+    const routablePlayers = allPlayers.filter(
+      (p): p is PlayerVM & { href: string } => !!p.href,
+    );
+
+    const filtered = routablePlayers.filter((player) => {
       const fullName = `${player.firstName} ${player.lastName}`
         .toLowerCase()
         .trim();
@@ -106,7 +110,7 @@ const searchPlayers = (query: string) =>
 
     debugLog(`[Search API] Found ${filtered.length} player matches`);
 
-    return filtered.map((player: PlayerVM): SearchResult => {
+    return filtered.map((player): SearchResult => {
       const fullName =
         `${player.firstName} ${player.lastName}`.trim() || player.id;
 
