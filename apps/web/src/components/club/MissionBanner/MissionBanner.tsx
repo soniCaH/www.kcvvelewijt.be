@@ -11,7 +11,7 @@ export function MissionBanner() {
         Wij zijn KCVV Elewijt. Een plek waar jong en oud samenkomen, waar passie
         voor voetbal het hele dorp verbindt.
       </p>
-      <p className="text-sm font-semibold text-white/50 uppercase tracking-[0.08em]">
+      <p className="text-sm font-semibold text-white/50 uppercase tracking-caps">
         — Sportpark Elewijt, sinds 1948
       </p>
     </div>

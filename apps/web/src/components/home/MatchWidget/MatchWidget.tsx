@@ -44,7 +44,7 @@ export function MatchWidget({
     >
       <div className="px-4 md:px-8 max-w-7xl mx-auto">
         {/* Overline — left-aligned, single leading rule */}
-        <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
+        <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-label text-white/50">
           <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
           VOLGENDE WEDSTRIJD · {teamLabel}
         </p>

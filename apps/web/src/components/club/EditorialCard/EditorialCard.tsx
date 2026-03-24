@@ -22,7 +22,7 @@ export function EditorialCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-sm flex flex-col justify-end transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.15)] bg-kcvv-black h-full"
+      className="group relative overflow-hidden rounded-sm flex flex-col justify-end transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover bg-kcvv-black h-full"
     >
       {backgroundImage && (
         <div
@@ -42,7 +42,7 @@ export function EditorialCard({
         data-testid="card-content"
         className={`relative z-10 ${featured ? "p-10" : "p-6"}`}
       >
-        <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-kcvv-green mb-2 block">
+        <span className="text-xs font-extrabold uppercase tracking-label text-kcvv-green mb-2 block">
           {tag}
         </span>
         <span
@@ -58,7 +58,7 @@ export function EditorialCard({
             {description}
           </span>
         )}
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em] text-kcvv-green mt-3 transition-[gap] duration-200 group-hover:gap-2.5">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-caps text-kcvv-green mt-3 transition-[gap] duration-200 group-hover:gap-2.5">
           <span>{arrowText}</span>
           <span aria-hidden="true">→</span>
         </span>

@@ -70,7 +70,7 @@ export function ClubEditorialGrid() {
   return (
     <div className="max-w-inner-lg mx-auto px-4 md:px-10">
       <div className="mb-12">
-        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-kcvv-gray mb-3">
+        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-kcvv-gray mb-3">
           <span className="block w-5 h-0.5 bg-kcvv-green" />
           Ontdek onze club
         </div>

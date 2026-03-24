@@ -157,7 +157,7 @@ export function MatchTeaser({
         {teamLabel ? (
           <span
             data-testid="team-label"
-            className="text-xs font-bold uppercase tracking-[0.14em] text-kcvv-green-bright"
+            className="text-xs font-bold uppercase tracking-label text-kcvv-green-bright"
           >
             {teamLabel}
           </span>
