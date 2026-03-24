@@ -162,7 +162,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           <h3 className="text-xl font-semibold text-kcvv-gray-dark mb-1">
             {playerName}
           </h3>
-          <p className="text-sm text-kcvv-gray-DEFAULT mb-4">{teamName}</p>
+          <p className="text-sm text-kcvv-gray mb-4">{teamName}</p>
 
           {showQR && (
             <div ref={qrRef} className="inline-block mb-4">
@@ -177,9 +177,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
             </div>
           )}
 
-          <p className="text-xs text-kcvv-gray-DEFAULT break-all">
-            {profileUrl}
-          </p>
+          <p className="text-xs text-kcvv-gray break-all">{profileUrl}</p>
         </div>
       );
     }
@@ -292,7 +290,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
         <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-1">
           Deel dit profiel
         </h3>
-        <p className="text-sm text-kcvv-gray-DEFAULT mb-4">
+        <p className="text-sm text-kcvv-gray mb-4">
           {playerName} • {teamName}
         </p>
 

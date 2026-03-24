@@ -29,9 +29,9 @@ const manyItems = (
     <SampleCard label="Card 2" color="var(--color-kcvv-black)" />
     <SampleCard label="Card 3" color="var(--color-kcvv-gray-blue)" />
     <SampleCard label="Card 4" color="var(--color-kcvv-gray-dark)" />
-    <SampleCard label="Card 5" color="var(--color-kcvv-green-DEFAULT)" />
+    <SampleCard label="Card 5" color="var(--color-kcvv-green)" />
     <SampleCard label="Card 6" color="var(--color-kcvv-green-hover-dark)" />
-    <SampleCard label="Card 7" color="var(--color-kcvv-gray-DEFAULT)" />
+    <SampleCard label="Card 7" color="var(--color-kcvv-gray)" />
     <SampleCard label="Card 8" color="var(--color-kcvv-green-hover)" />
   </>
 );

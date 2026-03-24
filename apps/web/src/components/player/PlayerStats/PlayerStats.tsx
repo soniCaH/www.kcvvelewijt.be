@@ -125,7 +125,7 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
           <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
             Statistieken
           </h3>
-          <p className="text-kcvv-gray-DEFAULT text-sm">
+          <p className="text-kcvv-gray text-sm">
             Geen statistieken beschikbaar.
           </p>
         </div>
@@ -184,22 +184,22 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
                       <td className="py-3 pr-4 font-medium text-kcvv-gray-dark">
                         {stat.season}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                      <td className="py-3 px-2 text-center text-kcvv-gray">
                         {stat.matches}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                      <td className="py-3 px-2 text-center text-kcvv-gray">
                         {outfieldStat.goals}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                      <td className="py-3 px-2 text-center text-kcvv-gray">
                         {outfieldStat.assists}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                      <td className="py-3 px-2 text-center text-kcvv-gray">
                         {stat.yellowCards}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                      <td className="py-3 px-2 text-center text-kcvv-gray">
                         {stat.redCards}
                       </td>
-                      <td className="py-3 pl-2 text-right text-kcvv-gray-DEFAULT">
+                      <td className="py-3 pl-2 text-right text-kcvv-gray">
                         {formatMinutes(stat.minutesPlayed)}
                       </td>
                     </tr>
@@ -265,25 +265,25 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
                     <td className="py-3 pr-4 font-medium text-kcvv-gray-dark">
                       {stat.season}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.matches}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.cleanSheets}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.goalsConceded}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.saves}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.yellowCards}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray-DEFAULT">
+                    <td className="py-3 px-2 text-center text-kcvv-gray">
                       {stat.redCards}
                     </td>
-                    <td className="py-3 pl-2 text-right text-kcvv-gray-DEFAULT">
+                    <td className="py-3 pl-2 text-right text-kcvv-gray">
                       {formatMinutes(stat.minutesPlayed)}
                     </td>
                   </tr>

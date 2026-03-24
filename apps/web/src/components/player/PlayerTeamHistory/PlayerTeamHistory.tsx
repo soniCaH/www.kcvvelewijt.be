@@ -101,7 +101,7 @@ export const PlayerTeamHistory = forwardRef<
         <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
           Teamgeschiedenis
         </h3>
-        <p className="text-kcvv-gray-DEFAULT text-sm">
+        <p className="text-kcvv-gray text-sm">
           Geen teamgeschiedenis beschikbaar.
         </p>
       </div>
@@ -150,7 +150,7 @@ export const PlayerTeamHistory = forwardRef<
                 >
                   {entry.teamName}
                 </Link>
-                <p className="text-sm text-kcvv-gray-DEFAULT">
+                <p className="text-sm text-kcvv-gray">
                   {formatDateRange(entry.startDate, entry.endDate)}
                 </p>
                 {entry.isCurrent && index === 0 && (

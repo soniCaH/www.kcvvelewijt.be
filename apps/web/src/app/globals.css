@@ -98,7 +98,7 @@
   /* ===== Color Palette ===== */
 
   /* KCVV Brand Colors */
-  --color-kcvv-green-DEFAULT: #4acf52;
+  --color-kcvv-green: #4acf52;
   --color-kcvv-green-bright: #4acf52;
   --color-kcvv-green-dark: #008755;
   --color-kcvv-green-hover: #41b147;
@@ -112,7 +112,7 @@
   --color-kcvv-black: #1E2024;
   --color-kcvv-gray-blue: #31404b;
   --color-kcvv-gray-dark: #292c31;
-  --color-kcvv-gray-DEFAULT: #62656A;
+  --color-kcvv-gray: #62656A;
   --color-kcvv-gray-light: #CCC;
   --color-kcvv-white: #fefefe;
 

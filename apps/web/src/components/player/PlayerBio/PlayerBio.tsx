@@ -81,7 +81,7 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
         <div
           ref={ref}
           className={cn(
-            "bg-foundation-gray-light rounded-lg p-6 text-center text-kcvv-gray-DEFAULT",
+            "bg-foundation-gray-light rounded-lg p-6 text-center text-kcvv-gray",
             className,
           )}
           {...props}
@@ -101,7 +101,7 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
               <div className="bg-white border border-foundation-gray-light rounded-lg p-4">
                 <div className="flex items-center gap-2 text-kcvv-green-bright mb-1">
                   <Calendar size={16} />
-                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray-DEFAULT">
+                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray">
                     Geboortedatum
                   </span>
                 </div>
@@ -109,9 +109,7 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
                   {formattedBirthDate}
                 </div>
                 {age !== null && (
-                  <div className="text-sm text-kcvv-gray-DEFAULT">
-                    {age} jaar
-                  </div>
+                  <div className="text-sm text-kcvv-gray">{age} jaar</div>
                 )}
               </div>
             )}
@@ -135,14 +133,14 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray-DEFAULT">
+                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray">
                     {isCurrentPlayer ? "Bij KCVV sinds" : "Periode bij KCVV"}
                   </span>
                 </div>
                 <div className="font-semibold text-kcvv-gray-dark">
                   {formattedJoinDate}
                   {!isCurrentPlayer && formattedLeaveDate && (
-                    <span className="font-normal text-kcvv-gray-DEFAULT">
+                    <span className="font-normal text-kcvv-gray">
                       {" — "}
                       {formattedLeaveDate}
                     </span>

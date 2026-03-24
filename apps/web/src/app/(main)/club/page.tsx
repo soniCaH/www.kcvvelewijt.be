@@ -43,7 +43,7 @@ function EditorialCard({
           {title}
         </span>
         {description && (
-          <span className="text-[0.8125rem] text-white/55 leading-normal block mb-2">
+          <span className="text-[0.8125rem] text-white/70 leading-normal block mb-2">
             {description}
           </span>
         )}
