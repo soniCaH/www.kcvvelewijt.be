@@ -114,10 +114,12 @@ export const MobileMenu = ({
   const jeugdItem: MenuItem = {
     label: "Jeugd",
     href: "/jeugd",
-    children: youthTeams?.map((t) => ({
-      label: t.age ?? "",
-      href: `/team/${t.slug}`,
-    })),
+    children: youthTeams
+      ?.filter((t) => t.age != null)
+      .map((t) => ({
+        label: t.age!,
+        href: `/team/${t.slug}`,
+      })),
   };
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>

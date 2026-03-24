@@ -31,7 +31,10 @@ async function fetchMatches(
     } else {
       const repo = yield* TeamRepository;
       const teams = yield* repo.findAll();
-      teamIds = teams.map((t) => Number(t.psdId)).filter((id) => !isNaN(id));
+      teamIds = teams
+        .filter((t) => t.psdId != null)
+        .map((t) => Number(t.psdId))
+        .filter((id) => !isNaN(id) && id > 0);
     }
 
     const bff = yield* BffService;

@@ -64,10 +64,12 @@ export default async function RootLayout({
     allTeams = [];
   }
 
-  const seniorTeams = allTeams.filter((t) => t.age === "A");
+  const isYouthAge = (age: string | null): age is string =>
+    age != null && age.startsWith("U");
+  const seniorTeams = allTeams.filter((t) => !isYouthAge(t.age));
   const parseAge = (age: string) => parseInt(age.replace(/\D/g, "")) || 0;
   const youthTeams = allTeams
-    .filter((t) => t.age != null && t.age !== "A" && t.age !== "B")
+    .filter((t) => isYouthAge(t.age))
     .sort((a, b) => parseAge(b.age!) - parseAge(a.age!));
 
   return (
