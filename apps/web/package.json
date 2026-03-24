@@ -79,7 +79,7 @@
     "eslint-config-next": "16.2.1",
     "eslint-plugin-storybook": "10.3.3",
     "gray-matter": "4.0.3",
-    "happy-dom": "20.8.4",
+    "happy-dom": "20.8.7",
     "prettier": "3.8.1",
     "prettier-plugin-tailwindcss": "0.7.2",
     "remark": "15.0.1",
