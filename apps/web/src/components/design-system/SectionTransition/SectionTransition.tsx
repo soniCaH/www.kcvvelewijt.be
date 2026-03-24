@@ -33,7 +33,7 @@ export interface SectionTransitionProps {
 // CSS color values for SVG polygon fills.
 const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
-  "gray-100": "#f3f4f6",
+  "gray-100": "var(--color-gray-100)",
   "kcvv-black": "var(--color-kcvv-black)",
   "kcvv-green-dark": "var(--color-kcvv-green-dark)",
   transparent: "transparent",

@@ -20,7 +20,7 @@ export default function PlayerNotFound() {
         {/* Icon */}
         <div className="mb-6">
           <svg
-            className="w-24 h-24 mx-auto text-kcvv-gray-DEFAULT opacity-50"
+            className="w-24 h-24 mx-auto text-kcvv-gray opacity-50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -41,7 +41,7 @@ export default function PlayerNotFound() {
         </h1>
 
         {/* Description */}
-        <p className="text-kcvv-gray-DEFAULT mb-8">
+        <p className="text-kcvv-gray mb-8">
           De speler die je zoekt bestaat niet of is niet langer beschikbaar.
           Bekijk onze teams om andere spelers te ontdekken.
         </p>
@@ -50,7 +50,7 @@ export default function PlayerNotFound() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/teams"
-            className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green-DEFAULT transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
           >
             <svg
               className="w-5 h-5 mr-2"

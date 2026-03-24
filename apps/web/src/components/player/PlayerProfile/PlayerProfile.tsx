@@ -155,7 +155,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
           {onRetry && (
             <button
               onClick={onRetry}
-              className="px-6 py-2 bg-kcvv-green-bright text-white rounded-lg hover:bg-kcvv-green-DEFAULT transition-colors"
+              className="px-6 py-2 bg-kcvv-green-bright text-white rounded-lg hover:bg-kcvv-green transition-colors"
             >
               Opnieuw proberen
             </button>
@@ -226,7 +226,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                 </h1>
 
                 {/* Position and team */}
-                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-2 text-kcvv-gray-DEFAULT">
+                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-2 text-kcvv-gray">
                   <span className="font-medium">{position}</span>
                   <span className="hidden sm:inline" aria-hidden="true">
                     •
