@@ -17,6 +17,9 @@ describe("typegen compatibility", () => {
     // Skipped here; will be resolved in Phase 1 (PlayerRepository).
     // keeper: same situation — generated is `boolean | null`.
     // position: generated is enum union, hand-maintained is `string | null` — compatible.
+    expectTypeOf<GeneratedPlayer["position"]>().toMatchTypeOf<
+      SanityPlayer["position"]
+    >();
     expectTypeOf<GeneratedPlayer["firstName"]>().toMatchTypeOf<
       SanityPlayer["firstName"]
     >();
@@ -61,7 +64,7 @@ describe("typegen compatibility", () => {
     type SanityPlayerKeys = keyof SanityPlayer;
     type GeneratedPlayerKeys = keyof GeneratedPlayer;
 
-    // Every key from SanityPlayer must exist in the generated type
-    expectTypeOf<SanityPlayerKeys>().toMatchTypeOf<GeneratedPlayerKeys>();
+    // Bidirectional: every key from SanityPlayer must exist in the generated type and vice versa
+    expectTypeOf<SanityPlayerKeys>().toEqualTypeOf<GeneratedPlayerKeys>();
   });
 });
