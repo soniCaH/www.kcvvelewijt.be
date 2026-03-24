@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarView } from "./CalendarView";
-import type { CalendarMatch } from "./utils";
+import type { CalendarMatch, ScoreDisplay } from "./utils";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -48,16 +48,37 @@ const kcvv: CalendarMatch["homeTeam"] = {
 };
 const opponent: CalendarMatch["homeTeam"] = { id: 2, name: "Racing Mechelen" };
 
+function computeScoreDisplay(
+  homeScore?: number,
+  awayScore?: number,
+  status: CalendarMatch["status"] = "scheduled",
+): ScoreDisplay {
+  if (
+    (status === "finished" || status === "forfeited") &&
+    typeof homeScore === "number" &&
+    typeof awayScore === "number"
+  ) {
+    return { type: "score", home: homeScore, away: awayScore };
+  }
+  return { type: "vs" };
+}
+
 function makeMatch(
   overrides: Partial<CalendarMatch> & { id: number },
 ): CalendarMatch {
-  return {
+  const merged = {
     date: "2026-03-15T15:00:00",
     homeTeam: kcvv,
     awayTeam: opponent,
-    status: "scheduled",
+    status: "scheduled" as CalendarMatch["status"],
     team: "A-ploeg",
     ...overrides,
+  };
+  return {
+    ...merged,
+    scoreDisplay:
+      merged.scoreDisplay ??
+      computeScoreDisplay(merged.homeScore, merged.awayScore, merged.status),
   };
 }
 

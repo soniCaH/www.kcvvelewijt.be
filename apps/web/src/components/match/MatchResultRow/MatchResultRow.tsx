@@ -10,6 +10,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { getResultColor } from "@/lib/utils/match-display";
 import { MatchStatusBadge } from "../MatchStatusBadge";
 import type { ScheduleMatch } from "../types";
 
@@ -55,12 +56,7 @@ function getResult(match: ScheduleMatch, teamId: number | undefined): Result {
   if (!hasScores(match) || !isMember) return null;
 
   const isHome = match.homeTeam.id === teamId;
-  const kcvvScore = isHome ? match.homeScore : match.awayScore;
-  const oppScore = isHome ? match.awayScore : match.homeScore;
-
-  if (kcvvScore > oppScore) return "win";
-  if (kcvvScore < oppScore) return "loss";
-  return "draw";
+  return getResultColor(match.homeScore, match.awayScore, isHome);
 }
 
 const resultBadgeConfig: Record<

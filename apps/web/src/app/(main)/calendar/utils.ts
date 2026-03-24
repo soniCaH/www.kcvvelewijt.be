@@ -4,12 +4,17 @@
 
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import type { MatchStatus } from "@/components/match/types";
+import { getScoreDisplay } from "@/lib/utils/match-display";
 
 export interface CalendarTeam {
   id: number;
   name: string;
   logo?: string;
 }
+
+export type ScoreDisplay =
+  | { type: "score"; home: number; away: number }
+  | { type: "vs" };
 
 export interface CalendarMatch {
   id: number;
@@ -19,6 +24,7 @@ export interface CalendarMatch {
   awayTeam: CalendarTeam;
   homeScore?: number;
   awayScore?: number;
+  scoreDisplay: ScoreDisplay;
   status: MatchStatus;
   competition?: string;
   team?: string;
@@ -41,6 +47,7 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     },
     homeScore: match.home_team.score,
     awayScore: match.away_team.score,
+    scoreDisplay: getScoreDisplay(match),
     status: match.status,
     competition: match.competition,
     team: match.kcvv_team_label,
