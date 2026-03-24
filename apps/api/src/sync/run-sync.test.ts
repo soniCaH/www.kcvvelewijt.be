@@ -115,6 +115,7 @@ describe("runSync", () => {
       upsertPlayer,
       upsertTeam,
       upsertStaff,
+      uploadPlayerImage,
       mock: sanityMock,
     } = makeSanityWriteClientMock();
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
@@ -141,5 +142,8 @@ describe("runSync", () => {
 
     // upsertStaff not called (no staff members)
     expect(upsertStaff).not.toHaveBeenCalled();
+
+    // uploadPlayerImage not called (profilePictureURL is null)
+    expect(uploadPlayerImage).not.toHaveBeenCalled();
   });
 });
