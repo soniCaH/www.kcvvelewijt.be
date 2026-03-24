@@ -5,7 +5,12 @@ import {
   FootbalistoServiceLive,
   mapGameStatus,
 } from "./service";
-import { Match } from "@kcvv/api-contract";
+import {
+  Match,
+  MatchDetail,
+  RankingEntry,
+  TeamStats,
+} from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -184,6 +189,8 @@ describe("FootbalistoService", () => {
       expect(result.right.team_id).toBe(1);
       expect(result.right.team_name).toBe("KCVV Elewijt A");
       expect(result.right.wins).toBe(18);
+      // Contract boundary: validate transform output against api-contract schema
+      expect(() => S.decodeUnknownSync(TeamStats)(result.right)).not.toThrow();
     }
   });
 
@@ -457,6 +464,8 @@ describe("FootbalistoService.getMatchById", () => {
       expect(result.right.status).toBe("finished");
       expect(result.right.home_team.name).toBe("KCVV Elewijt");
       expect("lineup" in result.right).toBe(false);
+      // Contract boundary: validate transform output against api-contract schema
+      expect(() => S.decodeUnknownSync(Match)(result.right)).not.toThrow();
     }
   });
 
@@ -556,6 +565,10 @@ describe("FootbalistoService.getRanking", () => {
       expect(result.right[0]?.team_logo).toBe(
         "https://cdn.example.com/extra_groot/200.png",
       );
+      // Contract boundary: validate transform output against api-contract schema
+      expect(() =>
+        S.decodeUnknownSync(RankingEntry)(result.right[0]),
+      ).not.toThrow();
     }
   });
   it("falls back to CUP competition when no LEAGUE/other exists", async () => {
@@ -631,6 +644,10 @@ describe("FootbalistoService.getMatchDetail", () => {
       expect(result.right.hasReport).toBe(true);
       expect(result.right.status).toBe("finished");
       expect(result.right.home_team.score).toBe(2);
+      // Contract boundary: validate transform output against api-contract schema
+      expect(() =>
+        S.decodeUnknownSync(MatchDetail)(result.right),
+      ).not.toThrow();
     }
   });
 
