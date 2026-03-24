@@ -89,7 +89,7 @@ export function ClubEditorialGrid() {
               tag={card.tag}
               title={card.title}
               description={card.description}
-              arrowText={`${card.arrowText} →`}
+              arrowText={card.arrowText}
               featured={card.featured}
               backgroundImage={card.backgroundImage}
             />
