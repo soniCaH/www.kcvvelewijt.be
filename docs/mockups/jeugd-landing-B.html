@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCVV Elewijt — Jeugd (Mockup B: Hub page)</title>
+<link rel="preconnect" href="https://use.typekit.net">
+<style>
+  @import url('https://use.typekit.net/yfz0hre.css');
+
+  :root {
+    --kcvv-green-bright: #4acf52;
+    --kcvv-green-dark: #008755;
+    --kcvv-black: #1E2024;
+    --kcvv-gray-blue: #31404b;
+    --kcvv-gray: #62656A;
+    --gray-100: #f3f4f6;
+    --font-title: quasimoda, acumin-pro, Montserrat, Verdana, sans-serif;
+    --font-body: montserrat, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--kcvv-gray-blue);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========================================
+     HERO — Full-bleed image with bleed-through diagonal
+     ======================================== */
+  .hero-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-wrapper__bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=1600&q=80') center 40%/cover no-repeat;
+    filter: brightness(0.25) saturate(0.7);
+  }
+
+  .hero-wrapper__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(30,32,36,0.2) 0%,
+      rgba(30,32,36,0.4) 40%,
+      rgba(0,135,85,0.25) 70%,
+      rgba(30,32,36,0.85) 100%
+    );
+  }
+
+  .hero {
+    position: relative;
+    z-index: 2;
+    min-height: 60vh;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero__content {
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 4rem 2.5rem;
+    width: 100%;
+  }
+
+  .hero__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .hero__title {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: 0.9;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__title span {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__subtitle {
+    font-size: 1.0625rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 32rem;
+  }
+
+  /* Diagonal inside the wrapper — bg image shows through */
+  .hero-wrapper__diagonal {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: clamp(3rem, 8vw, 7rem);
+  }
+
+  .hero-wrapper__diagonal svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ========================================
+     DIAGONAL TRANSITIONS
+     ======================================== */
+  .diagonal {
+    position: relative;
+    width: 100%;
+    height: clamp(2rem, 6vw, 5rem);
+    margin-bottom: -1px;
+  }
+
+  .diagonal svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ========================================
+     EDITORIAL GRID — Mixed navigation + news cards
+     ======================================== */
+  .editorial {
+    background: var(--gray-100);
+    padding: 5rem 2.5rem;
+  }
+
+  .editorial__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+  }
+
+  .editorial__header {
+    margin-bottom: 3rem;
+  }
+
+  .editorial__header-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-gray);
+    margin-bottom: 0.75rem;
+  }
+
+  .editorial__header-label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .editorial__header-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--kcvv-gray-blue);
+  }
+
+  /* Magazine-style asymmetric grid */
+  .editorial__grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto auto auto auto;
+    gap: 1.25rem;
+  }
+
+  .editorial__card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 280px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .editorial__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  }
+
+  /* Card sizing — magazine layout (7/5/5/4/4/4) */
+  .editorial__card--featured {
+    grid-column: 1 / 8;
+    grid-row: 1 / 3;
+    min-height: 520px;
+  }
+
+  .editorial__card--medium-1 {
+    grid-column: 8 / 13;
+    grid-row: 1 / 2;
+  }
+
+  .editorial__card--medium-2 {
+    grid-column: 8 / 13;
+    grid-row: 2 / 3;
+  }
+
+  .editorial__card--third-1 {
+    grid-column: 1 / 5;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card--third-2 {
+    grid-column: 5 / 9;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card--third-3 {
+    grid-column: 9 / 13;
+    grid-row: 3 / 4;
+  }
+
+  .editorial__card--third-4 {
+    grid-column: 1 / 5;
+    grid-row: 4 / 5;
+  }
+
+  .editorial__card--third-5 {
+    grid-column: 5 / 9;
+    grid-row: 4 / 5;
+  }
+
+  .editorial__card--third-6 {
+    grid-column: 9 / 13;
+    grid-row: 4 / 5;
+  }
+
+  .editorial__card-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+  }
+
+  .editorial__card:hover .editorial__card-bg {
+    transform: scale(1.05);
+  }
+
+  /* News article card overlay — standard dark gradient */
+  .editorial__card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(30,32,36,0.95) 0%,
+      rgba(30,32,36,0.5) 40%,
+      rgba(30,32,36,0.1) 100%
+    );
+  }
+
+  /* Navigation card overlay — blue-ish tint to differentiate */
+  .editorial__card--nav .editorial__card-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(30,32,36,0.95) 0%,
+      rgba(30,40,54,0.6) 40%,
+      rgba(30,40,54,0.2) 100%
+    );
+  }
+
+  .editorial__card-content {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem;
+  }
+
+  .editorial__card--featured .editorial__card-content {
+    padding: 2.5rem;
+  }
+
+  .editorial__card-tag {
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-green-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .editorial__card-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: white;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .editorial__card--featured .editorial__card-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .editorial__card-desc {
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+  }
+
+  .editorial__card-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--kcvv-green-bright);
+    margin-top: 0.75rem;
+    transition: gap 0.2s;
+  }
+
+  .editorial__card:hover .editorial__card-arrow {
+    gap: 0.625rem;
+  }
+
+  /* ========================================
+     YOUTH SECTION — Compact cards with age grouping
+     ======================================== */
+  .youth-section {
+    background: var(--kcvv-black);
+    padding: 5rem 2.5rem;
+    position: relative;
+  }
+
+  .youth-section__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+  }
+
+  .section-header-teams__title-group {
+    border-left: 4px solid var(--kcvv-green-bright);
+    padding-left: 1rem;
+  }
+
+  .section-header-teams__title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: white;
+  }
+
+  .age-group {
+    margin-bottom: 2.5rem;
+  }
+
+  .age-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .age-group__title {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .age-group__title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .age-group__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .youth-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .youth-card:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .youth-card__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: rgba(74,207,82,0.15);
+    border-radius: 50%;
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: 0.875rem;
+    color: var(--kcvv-green-bright);
+    flex-shrink: 0;
+  }
+
+  .youth-card__info {
+    min-width: 0;
+  }
+
+  .youth-card__name {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .youth-card__meta {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 0.125rem;
+  }
+
+  /* ========================================
+     QUOTE / MISSION BANNER
+     ======================================== */
+  .mission {
+    background: var(--kcvv-green-dark);
+    padding: 5rem 2.5rem;
+    text-align: center;
+  }
+
+  .mission__inner {
+    max-width: 50rem;
+    margin: 0 auto;
+  }
+
+  .mission__icon {
+    font-size: 3rem;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 1.5rem;
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  .mission__quote {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    color: white;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .mission__attribution {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 960px) {
+    .editorial__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+    }
+    .editorial__card--featured,
+    .editorial__card--medium-1,
+    .editorial__card--medium-2,
+    .editorial__card--third-1,
+    .editorial__card--third-2,
+    .editorial__card--third-3,
+    .editorial__card--third-4,
+    .editorial__card--third-5,
+    .editorial__card--third-6 {
+      grid-column: auto;
+      grid-row: auto;
+      min-height: 260px;
+    }
+    .editorial__card--featured {
+      grid-column: 1 / -1;
+      min-height: 320px;
+    }
+
+    /* Youth cards responsive */
+    .age-group__grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero { min-height: 50vh; }
+    .hero__content { padding: 3rem 1rem; }
+
+    .editorial { padding: 3rem 1rem; }
+    .editorial__grid { grid-template-columns: 1fr; }
+    .editorial__card--featured { min-height: 280px; }
+
+    .youth-section { padding: 3rem 1rem; }
+    .age-group__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mission { padding: 3rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== SECTION 1: HERO + DIAGONAL ====== -->
+<div class="hero-wrapper">
+  <div class="hero-wrapper__bg"></div>
+  <div class="hero-wrapper__gradient"></div>
+
+  <section class="hero">
+    <div class="hero__content">
+      <div class="hero__label">Jeugdopleiding</div>
+      <h1 class="hero__title">De toekomst<br>van <span>Elewijt</span></h1>
+      <p class="hero__subtitle">
+        Meer dan 200 jonge voetballers. Gediplomeerde trainers. Eén missie: plezier, techniek en teamspirit.
+      </p>
+    </div>
+  </section>
+
+  <!-- Diagonal: bleed-through to gray-100 (direction: right) -->
+  <div class="hero-wrapper__diagonal">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+      <polygon points="0,0 100,0 100,100" fill="transparent"/>
+      <polygon points="0,0 0,100 100,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ====== SECTION 2: EDITORIAL GRID ====== -->
+<section class="editorial">
+  <div class="editorial__inner">
+    <div class="editorial__header">
+      <div class="editorial__header-label">Ontdek onze jeugd</div>
+      <h2 class="editorial__header-title">Alles op één plek</h2>
+    </div>
+
+    <div class="editorial__grid">
+      <!-- Card 1 — Featured: Latest jeugd article (col 1-7, row 1-2) -->
+      <a href="/news/u15-kampioen" class="editorial__card editorial__card--featured">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=900&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Jeugd</div>
+          <h3 class="editorial__card-title">U15 kroont zich tot provinciaal kampioen</h3>
+          <p class="editorial__card-desc">Na een spannend seizoen met slechts één nederlaag pakte onze U15A de provinciale titel. Een geweldige prestatie van spelers én staf.</p>
+          <div class="editorial__card-arrow">Lees meer <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 2 — Medium 1: Inschrijven nav card (col 8-12, row 1) -->
+      <a href="/club/register" class="editorial__card editorial__card--medium-1 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Aansluiten</div>
+          <h3 class="editorial__card-title">Word lid van KCVV</h3>
+          <p class="editorial__card-desc">Nieuwe spelers zijn altijd welkom — van U6 tot U21.</p>
+          <div class="editorial__card-arrow">Schrijf je in <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 3 — Medium 2: Paasstage article (col 8-12, row 2) -->
+      <a href="/news/paasstage-2026" class="editorial__card editorial__card--medium-2">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Training</div>
+          <h3 class="editorial__card-title">Paasstage voor U6 tot U13</h3>
+          <div class="editorial__card-arrow">Lees meer <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 4 — Third 1: Visie nav card (col 1-4, row 3) -->
+      <a href="/jeugd/visie" class="editorial__card editorial__card--third-1 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1544698310-73f4c1bbd9b0?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Visie</div>
+          <h3 class="editorial__card-title">Onze jeugdvisie</h3>
+          <div class="editorial__card-arrow">Ontdek <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 5 — Third 2: Jeugdcoördinator article (col 5-8, row 3) -->
+      <a href="/news/jeugdcoordinator" class="editorial__card editorial__card--third-2">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Jeugd</div>
+          <h3 class="editorial__card-title">Nieuwe jeugdcoördinator stelt zich voor</h3>
+          <div class="editorial__card-arrow">Lees meer <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 6 — Third 3: ProSoccerData nav card (col 9-12, row 3) -->
+      <a href="/news/prosoccerdata" class="editorial__card editorial__card--third-3 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Praktisch</div>
+          <h3 class="editorial__card-title">Trainingen & ProSoccerData</h3>
+          <div class="editorial__card-arrow">Meer info <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 7 — Third 4: Organigram nav card (col 1-4, row 4) -->
+      <a href="/club/organigram" class="editorial__card editorial__card--third-4 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Structuur</div>
+          <h3 class="editorial__card-title">Organigram</h3>
+          <div class="editorial__card-arrow">Bekijk <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 8 — Third 5: Wie contacteer ik? nav card (col 5-8, row 4) -->
+      <a href="/hulp" class="editorial__card editorial__card--third-5 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Hulp</div>
+          <h3 class="editorial__card-title">Wie contacteer ik?</h3>
+          <div class="editorial__card-arrow">Zoek het op <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+
+      <!-- Card 9 — Third 6: Medische info nav card (col 9-12, row 4) -->
+      <a href="/jeugd/medisch" class="editorial__card editorial__card--third-6 editorial__card--nav">
+        <div class="editorial__card-bg" style="background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80')"></div>
+        <div class="editorial__card-overlay"></div>
+        <div class="editorial__card-content">
+          <div class="editorial__card-tag">Medisch</div>
+          <h3 class="editorial__card-title">Blessure of afmelding?</h3>
+          <div class="editorial__card-arrow">Lees meer <span aria-hidden="true">→</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: gray-100 → kcvv-black (direction: left) -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 0,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    <polygon points="100,0 100,100 0,100" fill="#1E2024" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== SECTION 3: YOUTH TEAMS ====== -->
+<section class="youth-section">
+  <div class="youth-section__inner">
+    <div class="section-header-teams">
+      <div class="section-header-teams__title-group">
+        <h2 class="section-header-teams__title">Jeugdploegen</h2>
+      </div>
+    </div>
+
+    <!-- Bovenbouw (U14–U21) -->
+    <div class="age-group">
+      <div class="age-group__title">Bovenbouw (U14–U21)</div>
+      <div class="age-group__grid">
+        <a href="/team/u21" class="youth-card">
+          <div class="youth-card__badge">U21</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U21</div>
+            <div class="youth-card__meta">Beloften</div>
+          </div>
+        </a>
+        <a href="/team/u17a" class="youth-card">
+          <div class="youth-card__badge">U17</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U17A</div>
+          </div>
+        </a>
+        <a href="/team/u17b" class="youth-card">
+          <div class="youth-card__badge">U17</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U17B</div>
+          </div>
+        </a>
+        <a href="/team/u15a" class="youth-card">
+          <div class="youth-card__badge">U15</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U15A</div>
+          </div>
+        </a>
+        <a href="/team/u15b" class="youth-card">
+          <div class="youth-card__badge">U15</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U15B</div>
+          </div>
+        </a>
+        <a href="/team/u14" class="youth-card">
+          <div class="youth-card__badge">U14</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U14</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Middenbouw (U10–U13) -->
+    <div class="age-group">
+      <div class="age-group__title">Middenbouw (U10–U13)</div>
+      <div class="age-group__grid">
+        <a href="/team/u13a" class="youth-card">
+          <div class="youth-card__badge">U13</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U13A</div>
+          </div>
+        </a>
+        <a href="/team/u13b" class="youth-card">
+          <div class="youth-card__badge">U13</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U13B</div>
+          </div>
+        </a>
+        <a href="/team/u12" class="youth-card">
+          <div class="youth-card__badge">U12</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U12</div>
+          </div>
+        </a>
+        <a href="/team/u11" class="youth-card">
+          <div class="youth-card__badge">U11</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U11</div>
+          </div>
+        </a>
+        <a href="/team/u10" class="youth-card">
+          <div class="youth-card__badge">U10</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U10</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Onderbouw (U6–U9) -->
+    <div class="age-group">
+      <div class="age-group__title">Onderbouw (U6–U9)</div>
+      <div class="age-group__grid">
+        <a href="/team/u9" class="youth-card">
+          <div class="youth-card__badge">U9</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U9</div>
+          </div>
+        </a>
+        <a href="/team/u8" class="youth-card">
+          <div class="youth-card__badge">U8</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U8</div>
+          </div>
+        </a>
+        <a href="/team/u7" class="youth-card">
+          <div class="youth-card__badge">U7</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U7</div>
+          </div>
+        </a>
+        <a href="/team/u6" class="youth-card">
+          <div class="youth-card__badge">U6</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U6</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-black → kcvv-green-dark (direction: right) -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#008755" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== SECTION 4: YOUTH PHILOSOPHY QUOTE ====== -->
+<section class="mission">
+  <div class="mission__inner">
+    <div class="mission__icon">"</div>
+    <p class="mission__quote">
+      Bij KCVV Elewijt staat plezier op één. We geloven dat spelplezier de beste basis is voor sportieve groei.
+    </p>
+    <div class="mission__attribution">— Jeugdopleiding KCVV Elewijt</div>
+  </div>
+</section>
+
+</body>
+</html>
