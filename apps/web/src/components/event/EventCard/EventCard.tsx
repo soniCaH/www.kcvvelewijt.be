@@ -43,7 +43,7 @@ export function EventCard({
       href={href}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-card bg-white",
-        "border border-[#edeff4] shadow-sm",
+        "border border-foundation-gray-light shadow-sm",
         "transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1",
         className,
       )}

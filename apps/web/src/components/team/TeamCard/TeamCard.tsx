@@ -84,7 +84,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
         <div
           ref={ref as Ref<HTMLDivElement>}
           className={cn(
-            "relative overflow-hidden bg-white rounded-card border border-[#edeff4] shadow-sm animate-pulse",
+            "relative overflow-hidden bg-white rounded-card border border-foundation-gray-light shadow-sm animate-pulse",
             isCompact ? "h-[200px]" : "h-[280px]",
             className,
           )}
@@ -132,7 +132,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
             "relative flex flex-col overflow-hidden rounded-card h-full",
             "no-underline text-inherit",
             "bg-white",
-            "border border-[#edeff4]",
+            "border border-foundation-gray-light",
             "shadow-sm",
             "transition-all duration-300",
             "hover:shadow-card-hover hover:-translate-y-1",

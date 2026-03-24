@@ -12,7 +12,7 @@ export interface EventsListProps {
 
 function EventCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-sm bg-white border border-[#edeff4] shadow-sm animate-pulse">
+    <div className="flex flex-col overflow-hidden rounded-sm bg-white border border-foundation-gray-light shadow-sm animate-pulse">
       <div className="h-48 bg-gray-200" />
       <div className="p-4 space-y-2">
         <div className="h-3 bg-gray-200 rounded w-2/3" />

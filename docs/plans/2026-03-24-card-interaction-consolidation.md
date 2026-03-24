@@ -14,7 +14,7 @@
 
 Every hoverable card MUST use these classes (or the subset appropriate to its context):
 
-```
+```text
 rounded-card                                    /* 4px — already a token */
 transition-all duration-300                     /* consistent timing */
 hover:-translate-y-1                            /* lift */
@@ -34,7 +34,7 @@ Every hoverable card with a link SHOULD include the green top-border accent:
 
 Image hover zoom (where applicable):
 
-```
+```text
 transition-transform duration-500 group-hover:scale-105
 ```
 
@@ -96,7 +96,7 @@ Expected: All pass
 
 **Step 6: Commit**
 
-```
+```text
 feat(ui): delete unused design-system Card component (#1031)
 ```
 
@@ -142,7 +142,7 @@ Run: `npx storybook build --quiet 2>&1 | tail -5` (or just check no syntax error
 
 **Step 4: Commit**
 
-```
+```text
 docs(ui): add shadow-card-hover and tracking tokens to Foundation stories (#1031)
 ```
 
@@ -182,7 +182,7 @@ Expected: All pass
 
 **Step 4: Commit**
 
-```
+```text
 refactor(ui): standardize NewsCard hover to card tokens (#1031)
 ```
 
@@ -221,7 +221,7 @@ Expected: All pass
 
 **Step 4: Commit**
 
-```
+```text
 refactor(ui): standardize EditorialCard hover to card tokens (#1031)
 ```
 
@@ -267,7 +267,7 @@ Expected: All pass
 
 **Step 4: Commit**
 
-```
+```text
 refactor(ui): standardize PlayerCard + TeamCard hover to card tokens (#1031)
 ```
 
@@ -306,7 +306,7 @@ Expected: All pass
 
 **Step 3: Commit**
 
-```
+```text
 refactor(ui): standardize EventCard hover to card tokens (#1031)
 ```
 
@@ -335,7 +335,7 @@ Expected: All pass
 
 **Step 3: Commit**
 
-```
+```text
 refactor(ui): standardize SponsorsTier cards to card tokens (#1031)
 ```
 
@@ -369,7 +369,7 @@ Expected: All pass
 
 **Step 3: Commit**
 
-```
+```text
 refactor(ui): standardize ContactCard radius and shadow to card tokens (#1031)
 ```
 
@@ -403,7 +403,7 @@ Expected: All pass
 
 **Step 4: Commit**
 
-```
+```text
 refactor(ui): standardize SearchResult + ResponsibilityBlock cards (#1031)
 ```
 
@@ -431,7 +431,7 @@ Expected: All pass
 
 **Step 3: Commit**
 
-```
+```text
 refactor(ui): standardize RelatedContentCard to card tokens (#1031)
 ```
 
@@ -461,7 +461,7 @@ Expected: All pass
 
 **Step 4: Commit**
 
-```
+```text
 refactor(ui): standardize match row radius to card token (#1031)
 ```
 
@@ -490,7 +490,7 @@ Run dev server or build and check `Foundation/Card Interactions` shows up.
 
 **Step 3: Commit**
 
-```
+```text
 docs(ui): add Foundation/Card Interactions Storybook page (#1031)
 ```
 
