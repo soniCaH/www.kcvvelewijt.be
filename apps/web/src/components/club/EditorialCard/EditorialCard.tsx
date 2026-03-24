@@ -22,7 +22,7 @@ export function EditorialCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-sm flex flex-col justify-end transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover bg-kcvv-black h-full"
+      className="group relative overflow-hidden rounded-card flex flex-col justify-end transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover bg-kcvv-black h-full"
     >
       {backgroundImage && (
         <div
@@ -37,6 +37,10 @@ export function EditorialCard({
           background:
             "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%)",
         }}
+      />
+      <div
+        className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+        aria-hidden="true"
       />
       <div
         data-testid="card-content"

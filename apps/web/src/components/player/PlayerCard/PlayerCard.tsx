@@ -71,7 +71,7 @@ export const PlayerCard = forwardRef<HTMLElement, PlayerCardProps>(
         <div
           ref={ref as Ref<HTMLDivElement>}
           className={cn(
-            "relative overflow-hidden bg-white rounded-sm shadow-sm animate-pulse border",
+            "relative overflow-hidden bg-white rounded-card shadow-sm animate-pulse border",
             isCompact ? "h-[280px]" : "",
             className,
           )}
@@ -111,16 +111,20 @@ export const PlayerCard = forwardRef<HTMLElement, PlayerCardProps>(
         <Link
           href={href}
           className={cn(
-            "relative flex flex-col overflow-hidden rounded-sm h-full",
+            "relative flex flex-col overflow-hidden rounded-card h-full",
             "no-underline text-inherit",
             "bg-white border shadow-sm",
-            "transition-shadow duration-200 ease-out",
-            "hover:shadow-lg",
+            "transition-all duration-300",
+            "hover:shadow-card-hover hover:-translate-y-1",
           )}
           style={{ borderColor: CARD_COLORS.border.default }}
           title={`${position} - ${fullName}`}
           aria-label={`Bekijk profiel van ${fullName}, ${position}${number !== undefined ? `, nummer ${number}` : ""}`}
         >
+          <div
+            className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+            aria-hidden="true"
+          />
           {/* Image Section - fixed height with contained image */}
           <div
             className={cn(

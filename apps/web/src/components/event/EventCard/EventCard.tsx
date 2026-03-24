@@ -42,12 +42,16 @@ export function EventCard({
     <Link
       href={href}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-sm bg-white",
+        "group relative flex flex-col overflow-hidden rounded-card bg-white",
         "border border-[#edeff4] shadow-sm",
-        "transition-shadow duration-200 hover:shadow-lg",
+        "transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1",
         className,
       )}
     >
+      <div
+        className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+        aria-hidden="true"
+      />
       {/* Image */}
       <div className="relative h-48 overflow-hidden bg-[#edeff4] flex-shrink-0">
         {imageUrl ? (
