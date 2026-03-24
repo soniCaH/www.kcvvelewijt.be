@@ -40,7 +40,7 @@ describe("transformMatchToCalendar", () => {
   });
 
   it("renames kcvv_team_label to team", () => {
-    const match = createMatch({ kcvv_team_label: "U21" } as Partial<Match>);
+    const match = createMatch({ kcvv_team_label: "U21" });
     const result = transformMatchToCalendar(match);
 
     expect(result.team).toBe("U21");
@@ -49,7 +49,7 @@ describe("transformMatchToCalendar", () => {
   it("serializes date to ISO string", () => {
     const match = createMatch({
       date: new Date("2026-06-15T18:30:00Z"),
-    } as Partial<Match>);
+    });
     const result = transformMatchToCalendar(match);
 
     expect(result.date).toBe("2026-06-15T18:30:00.000Z");
@@ -60,7 +60,7 @@ describe("transformMatchToCalendar", () => {
       home_team: { id: 1, name: "KCVV Elewijt" },
       away_team: { id: 2, name: "KFC Turnhout" },
       status: "scheduled",
-    } as Partial<Match>);
+    });
     const result = transformMatchToCalendar(match);
 
     expect(result.homeScore).toBeUndefined();
