@@ -204,113 +204,119 @@
 }
 
 /* ===== Global Styles ===== */
+/* Wrapped in @layer base so Tailwind utility classes (which live in
+   @layer utilities) can override these defaults when explicitly applied. */
 
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  background: var(--color-kcvv-white);
-  color: var(--color-kcvv-gray-dark);
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-loose);
-}
+  body {
+    background: var(--color-kcvv-white);
+    color: var(--color-kcvv-gray-dark);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-loose);
+  }
 
-/* Heading Styles */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-title);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-kcvv-gray-blue);
-  line-height: var(--line-height-tight);
-  margin-bottom: 1em;
-}
+  /* Heading Styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-title);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-kcvv-gray-blue);
+    line-height: var(--line-height-tight);
+    margin-bottom: 1em;
+  }
 
-/* Mobile Heading Sizes */
-h1 { font-size: var(--font-size-4xl); }  /* 28px */
-h2 { font-size: var(--font-size-2xl); }  /* 22px */
-h3 { font-size: var(--font-size-xl); }   /* 20px */
-h4 { font-size: var(--font-size-lg); }   /* 18px */
-h5 { font-size: var(--font-size-base); } /* 16px */
-h6 { font-size: var(--font-size-sm); }   /* 14px */
-
-/* Desktop Heading Sizes */
-@media (min-width: 768px) {
-  h1 { font-size: var(--font-size-6xl); } /* 48px */
-  h2 { font-size: var(--font-size-5xl); } /* 32px */
-  h3 { font-size: var(--font-size-3xl); } /* 24px */
-  h4 { font-size: var(--font-size-2xl); } /* 22px */
+  /* Mobile Heading Sizes */
+  h1 { font-size: var(--font-size-4xl); }  /* 28px */
+  h2 { font-size: var(--font-size-2xl); }  /* 22px */
+  h3 { font-size: var(--font-size-xl); }   /* 20px */
+  h4 { font-size: var(--font-size-lg); }   /* 18px */
   h5 { font-size: var(--font-size-base); } /* 16px */
   h6 { font-size: var(--font-size-sm); }   /* 14px */
+
+  /* Desktop Heading Sizes */
+  @media (min-width: 768px) {
+    h1 { font-size: var(--font-size-6xl); } /* 48px */
+    h2 { font-size: var(--font-size-5xl); } /* 32px */
+    h3 { font-size: var(--font-size-3xl); } /* 24px */
+    h4 { font-size: var(--font-size-2xl); } /* 22px */
+    h5 { font-size: var(--font-size-base); } /* 16px */
+    h6 { font-size: var(--font-size-sm); }   /* 14px */
+  }
+
+  /* Font Family Utilities */
+  .font-title {
+    font-family: var(--font-family-title);
+  }
+
+  .font-body {
+    font-family: var(--font-family-body);
+  }
+
+  .font-alt {
+    font-family: var(--font-family-alt);
+  }
+
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+
+  /* Paragraph Styles */
+  p {
+    margin-bottom: 1rem;
+  }
+
+  /* Link Styles */
+  /* Apply green link color only to content links, not navigation */
+  main a,
+  article a,
+  .content a {
+    color: var(--color-kcvv-green-bright);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  main a:hover,
+  article a:hover,
+  .content a:hover {
+    color: var(--color-kcvv-green-hover);
+  }
+
+  /* Content link — native underline with skip-ink for inline article links */
+  .content-link {
+    color: var(--color-kcvv-green-dark);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-kcvv-green-bright) 30%, transparent);
+    text-decoration-skip-ink: auto;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    transition: color 0.3s ease, text-decoration-color 0.3s ease;
+  }
+
+  .content-link:hover {
+    color: var(--color-kcvv-green-bright);
+    text-decoration-color: var(--color-kcvv-green-bright);
+  }
+
+  /* Ensure navigation links stay white (override any default link styles) */
+  nav a {
+    text-decoration: none;
+  }
 }
 
-/* Font Family Utilities */
-.font-title {
-  font-family: var(--font-family-title);
-}
-
-.font-body {
-  font-family: var(--font-family-body);
-}
-
-.font-alt {
-  font-family: var(--font-family-alt);
-}
-
-.font-mono {
-  font-family: var(--font-family-mono);
-}
-
-/* Paragraph Styles */
-p {
-  margin-bottom: 1rem;
-}
-
-/* Link Styles */
-/* Apply green link color only to content links, not navigation */
-main a,
-article a,
-.content a {
-  color: var(--color-kcvv-green-bright);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-main a:hover,
-article a:hover,
-.content a:hover {
-  color: var(--color-kcvv-green-hover);
-}
-
-/* Content link — native underline with skip-ink for inline article links */
-.content-link {
-  color: var(--color-kcvv-green-dark);
-  text-decoration-line: underline;
-  text-decoration-color: color-mix(in srgb, var(--color-kcvv-green-bright) 30%, transparent);
-  text-decoration-skip-ink: auto;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-  transition: color 0.3s ease, text-decoration-color 0.3s ease;
-}
-
-.content-link:hover {
-  color: var(--color-kcvv-green-bright);
-  text-decoration-color: var(--color-kcvv-green-bright);
-}
-
-/* In-body article links: no underline by default, underline on hover (except .content-link which uses native text-decoration with text-decoration-skip-ink) */
+/* In-body article links: no underline by default, underline on hover
+   (except .content-link which uses native text-decoration with
+   text-decoration-skip-ink). Kept unlayered so it beats @tailwindcss/typography. */
 .prose a:not(.content-link) {
   text-decoration: none;
 }
 
 .prose a:not(.content-link):hover {
   text-decoration: underline;
-}
-
-/* Ensure navigation links stay white (override any default link styles) */
-nav a {
-  text-decoration: none;
 }
 
 /* Blockquote Styles (from design system) */
