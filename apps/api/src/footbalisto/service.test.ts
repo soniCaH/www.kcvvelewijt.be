@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Effect, Layer, Logger } from "effect";
+import { Effect, Layer, Logger, Schema as S } from "effect";
 import {
   FootbalistoService,
   FootbalistoServiceLive,
   mapGameStatus,
 } from "./service";
+import { Match } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -270,6 +271,8 @@ describe("FootbalistoService.getTeamMatches", () => {
       expect(result.right[0]?.id).toBe(101);
       expect(result.right[0]?.status).toBe("finished");
       expect(result.right[0]?.home_team.name).toBe("KCVV Elewijt");
+      // Contract boundary: validate transform output against api-contract schema
+      expect(() => S.decodeUnknownSync(Match)(result.right[0])).not.toThrow();
     }
   });
 
