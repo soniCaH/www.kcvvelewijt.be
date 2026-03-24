@@ -9,7 +9,8 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { CalendarView } from "./CalendarView";
-import type { CalendarMatch } from "./CalendarView";
+import { transformMatchToCalendar } from "./utils";
+import type { CalendarMatch } from "./utils";
 import { Spinner } from "@/components/design-system";
 
 export const metadata: Metadata = {
@@ -45,26 +46,7 @@ async function fetchMatches(): Promise<CalendarMatch[]> {
     ),
   );
 
-  return matches.map((m) => ({
-    id: m.id,
-    date: m.date.toISOString(),
-    time: m.time,
-    homeTeam: {
-      id: m.home_team.id,
-      name: m.home_team.name,
-      logo: m.home_team.logo,
-    },
-    awayTeam: {
-      id: m.away_team.id,
-      name: m.away_team.name,
-      logo: m.away_team.logo,
-    },
-    homeScore: m.home_team.score,
-    awayScore: m.away_team.score,
-    status: m.status,
-    competition: m.competition,
-    team: m.kcvv_team_label,
-  }));
+  return matches.map(transformMatchToCalendar);
 }
 
 export default async function CalendarPage() {

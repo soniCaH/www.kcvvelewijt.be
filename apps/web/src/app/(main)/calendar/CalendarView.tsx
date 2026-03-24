@@ -12,26 +12,7 @@ import Link from "next/link";
 import { DateTime } from "luxon";
 import { FilterTabs, type FilterTab } from "@/components/design-system";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
-import type { MatchStatus } from "@/components/match/types";
-
-export interface CalendarTeam {
-  id: number;
-  name: string;
-  logo?: string;
-}
-
-export interface CalendarMatch {
-  id: number;
-  date: string; // ISO string
-  time?: string;
-  homeTeam: CalendarTeam;
-  awayTeam: CalendarTeam;
-  homeScore?: number;
-  awayScore?: number;
-  status: MatchStatus;
-  competition?: string;
-  team?: string; // "A-ploeg" | "B-ploeg" | "U15 A" | etc.
-}
+import type { CalendarMatch } from "./utils";
 
 function formatDayHeader(dateStr: string): string {
   return DateTime.fromISO(dateStr).toLocaleString(
