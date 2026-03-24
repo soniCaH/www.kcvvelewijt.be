@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCVV Elewijt — Ploegen</title>
+<link rel="preconnect" href="https://use.typekit.net">
+<style>
+  @import url('https://use.typekit.net/yfz0hre.css');
+
+  :root {
+    --kcvv-green-bright: #4acf52;
+    --kcvv-green-dark: #008755;
+    --kcvv-black: #1E2024;
+    --kcvv-gray-blue: #31404b;
+    --kcvv-gray: #62656A;
+    --kcvv-white: #fefefe;
+    --gray-100: #f3f4f6;
+    --font-title: quasimoda, acumin-pro, Montserrat, Verdana, sans-serif;
+    --font-body: montserrat, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--kcvv-gray-blue);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========================================
+     CINEMATIC A-TEAM HERO
+     ======================================== */
+  .hero {
+    position: relative;
+    min-height: 70vh;
+    background: var(--kcvv-black);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1600&q=80') center/cover no-repeat;
+    filter: brightness(0.4);
+  }
+
+  .hero__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--kcvv-black) 0%,
+      rgba(30,32,36,0.85) 25%,
+      rgba(30,32,36,0.4) 60%,
+      rgba(30,32,36,0.2) 100%
+    );
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 4rem 2.5rem;
+    width: 100%;
+  }
+
+  .hero__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .hero__team-name {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.9;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero__team-name span {
+    color: var(--kcvv-green-bright);
+  }
+
+  .hero__division {
+    font-family: var(--font-title);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 2.5rem;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: var(--kcvv-green-bright);
+    color: var(--kcvv-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .hero__cta:hover {
+    background: #41b147;
+  }
+
+  /* ========================================
+     DIAGONAL TRANSITIONS (SVG-based)
+     ======================================== */
+  .diagonal {
+    position: relative;
+    width: 100%;
+    height: clamp(2rem, 6vw, 5rem);
+    margin-bottom: -1px;
+  }
+
+  .diagonal svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ========================================
+     B-TEAM FEATURED CARD
+     ======================================== */
+  .b-team-section {
+    background: var(--gray-100);
+    padding: 5rem 2.5rem;
+  }
+
+  .b-team-section__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.16);
+  }
+
+  .b-team__image {
+    position: relative;
+    min-height: 340px;
+    background: url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80') center/cover no-repeat;
+  }
+
+  .b-team__image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,135,85,0.3), transparent);
+  }
+
+  .b-team__content {
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .b-team__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kcvv-gray);
+    margin-bottom: 1rem;
+  }
+
+  .b-team__label::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    background: var(--kcvv-green-bright);
+  }
+
+  .b-team__name {
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: var(--kcvv-gray-blue);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .b-team__division {
+    font-size: 0.9375rem;
+    color: var(--kcvv-gray);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .b-team__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--kcvv-black);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+
+  .b-team__cta:hover {
+    background: var(--kcvv-green-dark);
+  }
+
+  /* ========================================
+     YOUTH SECTION
+     ======================================== */
+  .youth-section {
+    background: var(--kcvv-green-dark);
+    padding: 5rem 2.5rem;
+    position: relative;
+  }
+
+  .youth-section__inner {
+    max-width: 70rem;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+  }
+
+  .section-header__title-group {
+    border-left: 4px solid var(--kcvv-green-bright);
+    padding-left: 1rem;
+  }
+
+  .section-header__title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: white;
+  }
+
+  .section-header__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .section-header__link:hover {
+    color: var(--kcvv-green-bright);
+  }
+
+  /* Age group section */
+  .age-group {
+    margin-bottom: 2.5rem;
+  }
+
+  .age-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .age-group__title {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .age-group__title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .age-group__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Youth team card (dark variant) */
+  .youth-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .youth-card:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .youth-card__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: rgba(74,207,82,0.15);
+    border-radius: 50%;
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: 0.875rem;
+    color: var(--kcvv-green-bright);
+    flex-shrink: 0;
+  }
+
+  .youth-card__info {
+    min-width: 0;
+  }
+
+  .youth-card__name {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .youth-card__meta {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 0.125rem;
+  }
+
+  /* ========================================
+     CTA BANNER (dark, contrasting youth)
+     ======================================== */
+  .cta-banner {
+    background: var(--kcvv-black);
+    padding: 4rem 2.5rem;
+    text-align: center;
+  }
+
+  .cta-banner__inner {
+    max-width: 40rem;
+    margin: 0 auto;
+  }
+
+  .cta-banner__title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .cta-banner__text {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .cta-banner__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: white;
+    color: var(--kcvv-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .cta-banner__btn:hover {
+    background: var(--kcvv-green-bright);
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 768px) {
+    .hero { min-height: 55vh; }
+    .hero__content { padding: 2rem 1rem; }
+    .b-team-section { padding: 3rem 1rem; }
+    .b-team-section__inner { grid-template-columns: 1fr; }
+    .b-team__image { min-height: 220px; }
+    .b-team__content { padding: 2rem; }
+    .youth-section { padding: 3rem 1rem; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .cta-banner { padding: 3rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO: A-TEAM ====== -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__gradient"></div>
+  <div class="hero__content">
+    <div class="hero__label">Eerste ploeg</div>
+    <h1 class="hero__team-name">KCVV<br><span>Elewijt</span> A</h1>
+    <p class="hero__division">3de Provinciale B</p>
+    <a href="/team/a-ploeg" class="hero__cta">
+      Bekijk de A-ploeg
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-black → gray-100, direction right -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== B-TEAM FEATURED CARD ====== -->
+<section class="b-team-section">
+  <div class="b-team-section__inner">
+    <div class="b-team__image"></div>
+    <div class="b-team__content">
+      <div class="b-team__label">Tweede ploeg</div>
+      <h2 class="b-team__name">KCVV Elewijt B</h2>
+      <p class="b-team__division">4de Provinciale C</p>
+      <a href="/team/b-ploeg" class="b-team__cta">
+        Bekijk de B-ploeg
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Diagonal: gray-100 → kcvv-green-dark, direction left -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 0,100" fill="#f3f4f6" shape-rendering="crispEdges"/>
+    <polygon points="100,0 100,100 0,100" fill="#008755" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== YOUTH SECTION ====== -->
+<section class="youth-section">
+  <div class="youth-section__inner">
+
+    <div class="section-header">
+      <div class="section-header__title-group">
+        <h2 class="section-header__title">Jeugdploegen</h2>
+      </div>
+      <a href="/jeugd" class="section-header__link">
+        Jeugdwerking
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <!-- Bovenbouw (U14–U21) -->
+    <div class="age-group">
+      <div class="age-group__title">Bovenbouw (U14–U21)</div>
+      <div class="age-group__grid">
+        <a href="/team/u21" class="youth-card">
+          <div class="youth-card__badge">U21</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U21</div>
+            <div class="youth-card__meta">Beloften</div>
+          </div>
+        </a>
+        <a href="/team/u17a" class="youth-card">
+          <div class="youth-card__badge">U17</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U17A</div>
+          </div>
+        </a>
+        <a href="/team/u17b" class="youth-card">
+          <div class="youth-card__badge">U17</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U17B</div>
+          </div>
+        </a>
+        <a href="/team/u15a" class="youth-card">
+          <div class="youth-card__badge">U15</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U15A</div>
+          </div>
+        </a>
+        <a href="/team/u15b" class="youth-card">
+          <div class="youth-card__badge">U15</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U15B</div>
+          </div>
+        </a>
+        <a href="/team/u14" class="youth-card">
+          <div class="youth-card__badge">U14</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U14</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Middenbouw (U10–U13) -->
+    <div class="age-group">
+      <div class="age-group__title">Middenbouw (U10–U13)</div>
+      <div class="age-group__grid">
+        <a href="/team/u13a" class="youth-card">
+          <div class="youth-card__badge">U13</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U13A</div>
+          </div>
+        </a>
+        <a href="/team/u13b" class="youth-card">
+          <div class="youth-card__badge">U13</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U13B</div>
+          </div>
+        </a>
+        <a href="/team/u12" class="youth-card">
+          <div class="youth-card__badge">U12</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U12</div>
+          </div>
+        </a>
+        <a href="/team/u11" class="youth-card">
+          <div class="youth-card__badge">U11</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U11</div>
+          </div>
+        </a>
+        <a href="/team/u10" class="youth-card">
+          <div class="youth-card__badge">U10</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U10</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Onderbouw (U6–U9) -->
+    <div class="age-group">
+      <div class="age-group__title">Onderbouw (U6–U9)</div>
+      <div class="age-group__grid">
+        <a href="/team/u9" class="youth-card">
+          <div class="youth-card__badge">U9</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U9</div>
+          </div>
+        </a>
+        <a href="/team/u8" class="youth-card">
+          <div class="youth-card__badge">U8</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U8</div>
+          </div>
+        </a>
+        <a href="/team/u7" class="youth-card">
+          <div class="youth-card__badge">U7</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U7</div>
+          </div>
+        </a>
+        <a href="/team/u6" class="youth-card">
+          <div class="youth-card__badge">U6</div>
+          <div class="youth-card__info">
+            <div class="youth-card__name">KCVV Elewijt U6</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Diagonal: kcvv-green-dark → kcvv-black, direction right -->
+<div class="diagonal">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon points="0,0 100,0 100,100" fill="#008755" shape-rendering="crispEdges"/>
+    <polygon points="0,0 0,100 100,100" fill="#1E2024" shape-rendering="crispEdges"/>
+  </svg>
+</div>
+
+<!-- ====== CTA BANNER ====== -->
+<section class="cta-banner">
+  <div class="cta-banner__inner">
+    <h2 class="cta-banner__title">Aansluiten bij KCVV Elewijt?</h2>
+    <p class="cta-banner__text">
+      Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt.
+    </p>
+    <a href="/club/aansluiten" class="cta-banner__btn">
+      Meer info
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+</body>
+</html>
