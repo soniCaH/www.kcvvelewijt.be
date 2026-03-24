@@ -50,7 +50,7 @@ const missionSection: SectionConfig = {
 };
 
 const contactSection: SectionConfig = {
-  bg: "kcvv-black",
+  bg: "gray-100",
   content: <ClubContactCta />,
   paddingTop: "pt-16",
   paddingBottom: "pb-16",

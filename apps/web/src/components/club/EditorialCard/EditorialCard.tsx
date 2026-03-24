@@ -42,23 +42,18 @@ export function EditorialCard({
         data-testid="card-content"
         className={`relative z-10 ${featured ? "p-10" : "p-6"}`}
       >
-        <span className="text-[0.625rem] font-extrabold uppercase tracking-[0.14em] text-kcvv-green mb-2 block">
+        <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-kcvv-green mb-2 block">
           {tag}
         </span>
         <span
-          className="font-title font-extrabold text-white uppercase leading-[1.1] mb-2 block"
-          style={
-            featured
-              ? { fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }
-              : { fontSize: "1.25rem" }
-          }
+          className={`font-title font-extrabold text-white uppercase leading-tight mb-2 block ${featured ? "text-3xl md:text-stat" : "text-xl"}`}
         >
           {title}
         </span>
         {description && (
           <span
             data-testid="card-description"
-            className="text-[0.8125rem] text-white/55 leading-normal block mb-2"
+            className="text-sm text-white/55 leading-normal block mb-2"
           >
             {description}
           </span>
