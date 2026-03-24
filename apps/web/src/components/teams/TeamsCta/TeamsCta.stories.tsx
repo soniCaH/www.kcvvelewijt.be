@@ -7,11 +7,10 @@ const meta = {
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
-    backgrounds: { default: "dark" },
   },
   decorators: [
     (Story) => (
-      <div className="bg-kcvv-black py-16">
+      <div className="bg-gray-100 py-16">
         <Story />
       </div>
     ),

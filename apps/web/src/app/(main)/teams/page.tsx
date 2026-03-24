@@ -64,7 +64,7 @@ export default async function TeamsPage() {
           },
         },
         {
-          bg: "kcvv-black",
+          bg: "gray-100",
           paddingTop: "pt-16",
           paddingBottom: "pb-16",
           content: <TeamsCta />,
