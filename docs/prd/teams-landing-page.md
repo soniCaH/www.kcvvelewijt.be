@@ -51,32 +51,15 @@ type TeamLandingItem = {
 
 Split the query results into three buckets in the page component:
 
+Use the `groupTeamsForLanding(teams)` helper from `src/lib/utils/group-teams.ts`:
+
 ```typescript
-const aTeam = teams.find((t) => t.age === "A");
-const bTeam = teams.find((t) => t.age === "B");
+import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 
-const BOVENBOUW = ["U21", "U17", "U15", "U14"];
-const MIDDENBOUW = ["U13", "U12", "U11", "U10"];
-const ONDERBOUW = ["U9", "U8", "U7", "U6"];
-
-const youthByDivision = [
-  {
-    label: "Bovenbouw",
-    range: "U14–U21",
-    teams: teams.filter((t) => BOVENBOUW.includes(t.age)),
-  },
-  {
-    label: "Middenbouw",
-    range: "U10–U13",
-    teams: teams.filter((t) => MIDDENBOUW.includes(t.age)),
-  },
-  {
-    label: "Onderbouw",
-    range: "U6–U9",
-    teams: teams.filter((t) => ONDERBOUW.includes(t.age)),
-  },
-];
+const { aTeam, bTeam, youthByDivision } = groupTeamsForLanding(teams);
 ```
+
+The helper groups youth teams into Bovenbouw (U14–U21), Middenbouw (U10–U13), and Onderbouw (U6–U9), sorted by descending age within each bucket (matching the mockup's visual flow).
 
 ## Page Structure (SectionStack)
 
@@ -198,15 +181,15 @@ No meta text below team name — just name.
 
 Inside `max-w-[40rem] mx-auto px-4 md:px-10 text-center`:
 
-| Element    | Tailwind classes                                                                                                                                                                                                           |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Title      | `font-title font-extrabold text-white mb-3` at `style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}` — "Aansluiten bij KCVV Elewijt?"                                                                                         |
-| Body text  | `text-[0.9375rem] text-white/55 mb-8 leading-relaxed` — "Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."                                                                           |
-| CTA button | `inline-flex items-center gap-2 px-8 py-3.5 bg-white text-kcvv-black font-bold text-sm uppercase tracking-[0.06em] rounded-sm transition-colors hover:bg-kcvv-green` — "Meer info →", links to `/club/aansluiten` (or TBD) |
+| Element    | Tailwind classes                                                                                                                                                                                               |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title      | `font-title font-extrabold text-white mb-3` at `style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}` — "Aansluiten bij KCVV Elewijt?"                                                                             |
+| Body text  | `text-[0.9375rem] text-white/55 mb-8 leading-relaxed` — "Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."                                                               |
+| CTA button | `inline-flex items-center gap-2 px-8 py-3.5 bg-white text-kcvv-black font-bold text-sm uppercase tracking-wider rounded-sm transition-colors hover:bg-kcvv-green` — "Meer info →", links to `/club/aansluiten` |
 
 ## Component File Structure
 
-```
+```text
 apps/web/src/
 ├── app/(main)/teams/
 │   └── page.tsx                          # Server component, data fetching, SectionStack

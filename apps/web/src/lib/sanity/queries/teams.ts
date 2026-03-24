@@ -38,6 +38,13 @@ export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | or
   staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "${SMALL_IMG_SUFFIX}" }
 }`;
 
+export const TEAMS_LANDING_QUERY = `*[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {
+  _id, name, "slug": slug.current, age,
+  division, divisionFull, tagline,
+  "teamImageUrl": teamImage.asset->url + "${TEAM_IMG_SUFFIX}",
+  staff[]-> { firstName, lastName, role }
+}`;
+
 export const TEAM_BY_SLUG_QUERY = `*[_type == "team" && slug.current == $slug][0] {
   _id, psdId, name, slug, age, gender, footbelId, leagueId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
