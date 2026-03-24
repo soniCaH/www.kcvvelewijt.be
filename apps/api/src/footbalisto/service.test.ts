@@ -359,6 +359,10 @@ describe("FootbalistoService.getNextMatches", () => {
       expect(result.right[0]?.kcvv_team_id).toBe(1);
       // kcvv_team_label derived from team name/age
       expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
+      // Contract boundary: validate transform output against api-contract schema
+      for (const match of result.right) {
+        expect(() => S.decodeUnknownSync(Match)(match)).not.toThrow();
+      }
     }
   });
 
@@ -566,9 +570,9 @@ describe("FootbalistoService.getRanking", () => {
         "https://cdn.example.com/extra_groot/200.png",
       );
       // Contract boundary: validate transform output against api-contract schema
-      expect(() =>
-        S.decodeUnknownSync(RankingEntry)(result.right[0]),
-      ).not.toThrow();
+      for (const entry of result.right) {
+        expect(() => S.decodeUnknownSync(RankingEntry)(entry)).not.toThrow();
+      }
     }
   });
   it("falls back to CUP competition when no LEAGUE/other exists", async () => {
