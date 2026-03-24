@@ -40,9 +40,20 @@ export function TeamsHero({ team }: TeamsHeroProps) {
           className="font-title font-black text-white uppercase leading-[0.9] mb-3"
           style={{ fontSize: "clamp(3rem, 8vw, 6rem)" }}
         >
-          KCVV
-          <br />
-          <span className="text-kcvv-green">Elewijt</span> A
+          {(() => {
+            const parts = team.name.split(/\s+/);
+            if (parts.length >= 2) {
+              return (
+                <>
+                  {parts[0]}
+                  <br />
+                  <span className="text-kcvv-green">{parts[1]}</span>
+                  {parts.length > 2 ? ` ${parts.slice(2).join(" ")}` : ""}
+                </>
+              );
+            }
+            return team.name;
+          })()}
         </h1>
 
         {/* Division */}

@@ -10,14 +10,14 @@ export function TeamsCta() {
         Aansluiten bij KCVV Elewijt?
       </h2>
 
-      <p className="text-[0.9375rem] text-white/55 mb-8 leading-relaxed">
+      <p className="text-sm text-white/60 mb-8 leading-relaxed">
         Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op
         Sportpark Elewijt.
       </p>
 
       <Link
         href="/club/aansluiten"
-        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-kcvv-black font-bold text-sm uppercase tracking-[0.06em] rounded-sm transition-colors hover:bg-kcvv-green"
+        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-kcvv-black font-bold text-sm uppercase tracking-wider rounded-sm transition-colors hover:bg-kcvv-green"
       >
         Meer info →
       </Link>

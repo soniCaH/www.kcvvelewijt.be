@@ -38,7 +38,7 @@ export const TEAMS_QUERY = `*[_type == "team" && showInNavigation != false] | or
   staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "${SMALL_IMG_SUFFIX}" }
 }`;
 
-export const TEAMS_LANDING_QUERY = `*[_type == "team" && showInNavigation != false] | order(name asc) {
+export const TEAMS_LANDING_QUERY = `*[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {
   _id, name, "slug": slug.current, age,
   division, divisionFull, tagline,
   "teamImageUrl": teamImage.asset->url + "${TEAM_IMG_SUFFIX}",

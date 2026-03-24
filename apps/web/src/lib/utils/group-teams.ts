@@ -26,6 +26,11 @@ const BOVENBOUW = ["U21", "U17", "U15", "U14"];
 const MIDDENBOUW = ["U13", "U12", "U11", "U10"];
 const ONDERBOUW = ["U9", "U8", "U7", "U6"];
 
+function sortByAgeDesc(ageOrder: string[]) {
+  return (a: TeamLandingItem, b: TeamLandingItem) =>
+    ageOrder.indexOf(a.age) - ageOrder.indexOf(b.age);
+}
+
 export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
   return {
     aTeam: teams.find((t) => t.age === "A"),
@@ -34,17 +39,23 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
       {
         label: "Bovenbouw",
         range: "U14–U21",
-        teams: teams.filter((t) => BOVENBOUW.includes(t.age)),
+        teams: teams
+          .filter((t) => BOVENBOUW.includes(t.age))
+          .sort(sortByAgeDesc(BOVENBOUW)),
       },
       {
         label: "Middenbouw",
         range: "U10–U13",
-        teams: teams.filter((t) => MIDDENBOUW.includes(t.age)),
+        teams: teams
+          .filter((t) => MIDDENBOUW.includes(t.age))
+          .sort(sortByAgeDesc(MIDDENBOUW)),
       },
       {
         label: "Onderbouw",
         range: "U6–U9",
-        teams: teams.filter((t) => ONDERBOUW.includes(t.age)),
+        teams: teams
+          .filter((t) => ONDERBOUW.includes(t.age))
+          .sort(sortByAgeDesc(ONDERBOUW)),
       },
     ],
   };

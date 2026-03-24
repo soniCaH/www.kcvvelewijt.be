@@ -72,6 +72,26 @@ describe("groupTeamsForLanding", () => {
     expect(result.bTeam).toBeUndefined();
   });
 
+  it("should sort youth teams by descending age even when input is name-sorted", () => {
+    const teams = [
+      makeTeam({ _id: "u14", age: "U14", name: "KCVV Elewijt U14" }),
+      makeTeam({ _id: "u15a", age: "U15", name: "KCVV Elewijt U15A" }),
+      makeTeam({ _id: "u15b", age: "U15", name: "KCVV Elewijt U15B" }),
+      makeTeam({ _id: "u17", age: "U17", name: "KCVV Elewijt U17" }),
+      makeTeam({ _id: "u21", age: "U21", name: "KCVV Elewijt U21" }),
+    ];
+
+    const result = groupTeamsForLanding(teams);
+
+    expect(result.youthByDivision[0].teams.map((t) => t.age)).toEqual([
+      "U21",
+      "U17",
+      "U15",
+      "U15",
+      "U14",
+    ]);
+  });
+
   it("should return empty arrays for divisions with no teams", () => {
     const teams = [makeTeam({ age: "A" }), makeTeam({ age: "U15" })];
     const result = groupTeamsForLanding(teams);
