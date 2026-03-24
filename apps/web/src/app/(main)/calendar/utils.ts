@@ -4,17 +4,14 @@
 
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import type { MatchStatus } from "@/components/match/types";
-import { getScoreDisplay } from "@/lib/utils/match-display";
+import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
+export type { ScoreDisplay } from "@/lib/utils/match-display";
 
 export interface CalendarTeam {
   id: number;
   name: string;
   logo?: string;
 }
-
-export type ScoreDisplay =
-  | { type: "score"; home: number; away: number }
-  | { type: "vs" };
 
 export interface CalendarMatch {
   id: number;

@@ -5,7 +5,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarView } from "./CalendarView";
-import type { CalendarMatch, ScoreDisplay } from "./utils";
+import type { CalendarMatch } from "./utils";
+import { getScoreDisplay } from "@/lib/utils/match-display";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -48,21 +49,6 @@ const kcvv: CalendarMatch["homeTeam"] = {
 };
 const opponent: CalendarMatch["homeTeam"] = { id: 2, name: "Racing Mechelen" };
 
-function computeScoreDisplay(
-  homeScore?: number,
-  awayScore?: number,
-  status: CalendarMatch["status"] = "scheduled",
-): ScoreDisplay {
-  if (
-    (status === "finished" || status === "forfeited") &&
-    typeof homeScore === "number" &&
-    typeof awayScore === "number"
-  ) {
-    return { type: "score", home: homeScore, away: awayScore };
-  }
-  return { type: "vs" };
-}
-
 function makeMatch(
   overrides: Partial<CalendarMatch> & { id: number },
 ): CalendarMatch {
@@ -78,7 +64,11 @@ function makeMatch(
     ...merged,
     scoreDisplay:
       merged.scoreDisplay ??
-      computeScoreDisplay(merged.homeScore, merged.awayScore, merged.status),
+      getScoreDisplay({
+        home_team: { score: merged.homeScore },
+        away_team: { score: merged.awayScore },
+        status: merged.status,
+      }),
   };
 }
 

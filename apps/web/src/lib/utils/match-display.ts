@@ -6,7 +6,15 @@ interface HasScoreMatch {
   status: MatchStatus;
 }
 
-export function hasScore(match: HasScoreMatch): boolean {
+interface HasScoreNarrowed {
+  home_team: { score: number };
+  away_team: { score: number };
+  status: MatchStatus;
+}
+
+export function hasScore(
+  match: HasScoreMatch,
+): match is HasScoreMatch & HasScoreNarrowed {
   return (
     (match.status === "finished" || match.status === "forfeited") &&
     typeof match.home_team.score === "number" &&
@@ -14,16 +22,12 @@ export function hasScore(match: HasScoreMatch): boolean {
   );
 }
 
-type ScoreDisplay =
+export type ScoreDisplay =
   | { type: "score"; home: number; away: number }
   | { type: "vs" };
 
 export function getScoreDisplay(match: HasScoreMatch): ScoreDisplay {
-  if (
-    hasScore(match) &&
-    typeof match.home_team.score === "number" &&
-    typeof match.away_team.score === "number"
-  ) {
+  if (hasScore(match)) {
     return {
       type: "score",
       home: match.home_team.score,
