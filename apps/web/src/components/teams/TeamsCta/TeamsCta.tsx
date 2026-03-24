@@ -18,7 +18,7 @@ export function TeamsCta() {
 
       <Link
         href="/club/aansluiten"
-        className="group inline-flex items-center justify-center gap-2 font-medium transition-all duration-300 bg-kcvv-green-bright text-white hover:bg-kcvv-green-bright/50 text-base px-8 py-3 rounded-[0.25em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+        className="group inline-flex items-center justify-center gap-2 font-medium transition-all duration-300 bg-kcvv-green-bright text-white hover:bg-kcvv-green-bright/50 text-base px-8 py-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
       >
         Meer info
         <ArrowRight
