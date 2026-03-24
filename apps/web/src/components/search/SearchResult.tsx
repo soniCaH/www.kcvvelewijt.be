@@ -36,8 +36,12 @@ export const SearchResult = ({ result }: SearchResultProps) => {
   return (
     <Link
       href={result.url}
-      className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border border-gray-100 hover:border-green-main group"
+      className="group relative overflow-hidden block bg-white rounded-card shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-4 border border-gray-100 hover:border-green-main"
     >
+      <div
+        className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+        aria-hidden="true"
+      />
       <div className="flex gap-4">
         {/* Image */}
         {result.imageUrl && (

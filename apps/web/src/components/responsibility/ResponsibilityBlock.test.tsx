@@ -171,7 +171,9 @@ describe("ResponsibilityBlock", () => {
     it("quick links have hover effects", () => {
       const { container } = render(<ResponsibilityBlock paths={[]} />);
 
-      const quickLinks = container.querySelectorAll("a.hover\\:shadow-md");
+      const quickLinks = container.querySelectorAll(
+        "a.hover\\:shadow-card-hover",
+      );
       expect(quickLinks.length).toBeGreaterThan(0);
     });
 

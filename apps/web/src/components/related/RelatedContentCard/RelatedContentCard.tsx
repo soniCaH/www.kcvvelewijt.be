@@ -134,8 +134,10 @@ export const RelatedContentCard = ({
   const imageAlt = getImageAlt(item);
 
   const cardClasses = cn(
-    "w-64 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 flex flex-col",
-    href && "group hover:border-kcvv-green-bright transition-colors",
+    "w-64 flex-shrink-0 overflow-hidden rounded-card border border-gray-200 flex flex-col",
+    href &&
+      "group hover:border-kcvv-green-bright hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300",
+    !href && "transition-colors",
     className,
   );
 
@@ -155,7 +157,15 @@ export const RelatedContentCard = ({
 
   if (href) {
     return (
-      <Link href={href} className={cardClasses} data-related-card={item.type}>
+      <Link
+        href={href}
+        className={cn(cardClasses, "relative")}
+        data-related-card={item.type}
+      >
+        <div
+          className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+          aria-hidden="true"
+        />
         {imageBlock}
         <CardContent item={item} />
       </Link>

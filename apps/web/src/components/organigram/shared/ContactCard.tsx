@@ -64,8 +64,8 @@ export function ContactCard({
     <div
       className={`
         relative overflow-hidden
-        bg-white rounded-xl border-2 border-gray-200
-        shadow-sm hover:shadow-md
+        bg-white rounded-card border-2 border-gray-200
+        shadow-sm ${onClick ? "hover:shadow-card-hover" : "hover:shadow-md"}
         transition-all duration-300 ease-in-out
         ${onClick ? "cursor-pointer hover:border-kcvv-green hover:-translate-y-1" : ""}
         ${variantClasses[variant]}

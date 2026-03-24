@@ -141,7 +141,7 @@ export function MatchTeaser({
   }
 
   const containerClasses = cn(
-    "block border rounded transition-shadow",
+    "block border rounded-card transition-shadow",
     isDark
       ? "bg-white/8 border-white/8 hover:border-white/20"
       : "bg-white border-gray-200 hover:shadow-md",
