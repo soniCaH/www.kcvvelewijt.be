@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import { getRankingHandler } from "./ranking";
 import {
   FootbalistoService,
@@ -7,7 +7,7 @@ import {
 } from "../footbalisto/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { testEnvLayer } from "../test-helpers/env-layer";
-import type { RankingEntry } from "@kcvv/api-contract";
+import { RankingArray, type RankingEntry } from "@kcvv/api-contract";
 import { UpstreamUnavailableError } from "../footbalisto/errors";
 
 const rankingEntries: readonly RankingEntry[] = [
@@ -60,6 +60,7 @@ describe("getRankingHandler", () => {
     expect(result[0]?.position).toBe(1);
     expect(result[0]?.team_name).toBe("KCVV Elewijt");
     expect(result[0]?.points).toBe(48);
+    expect(() => S.decodeUnknownSync(RankingArray)(result)).not.toThrow();
   });
 
   it("fails with ResourceNotFoundError when service returns empty ranking", async () => {

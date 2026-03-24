@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import {
   getMatchesByTeamHandler,
   getNextMatchesHandler,
@@ -19,9 +19,15 @@ import {
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
-import type { Match, MatchDetail } from "@kcvv/api-contract";
+import {
+  Match,
+  MatchesArray,
+  MatchDetail,
+  type Match as MatchType,
+  type MatchDetail as MatchDetailType,
+} from "@kcvv/api-contract";
 
-const baseMatch: Match = {
+const baseMatch: MatchType = {
   id: 1,
   date: new Date("2025-01-15T15:00:00.000Z"),
   time: "15:00",
@@ -31,7 +37,7 @@ const baseMatch: Match = {
   competition: "LEAGUE",
 };
 
-const baseDetail: MatchDetail = {
+const baseDetail: MatchDetailType = {
   id: 99,
   date: new Date("2025-01-15T15:00:00.000Z"),
   time: "15:00",
@@ -87,6 +93,7 @@ describe("getMatchesByTeamHandler", () => {
     expect(result[0]?.id).toBe(1);
     expect(result[0]?.status).toBe("finished");
     expect(result[0]?.home_team.name).toBe("KCVV Elewijt");
+    expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
@@ -115,6 +122,7 @@ describe("getNextMatchesHandler", () => {
     const result = await Effect.runPromise(provide(getNextMatchesHandler()));
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
+    expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
@@ -143,6 +151,7 @@ describe("getMatchDetailHandler", () => {
     const result = await Effect.runPromise(provide(getMatchDetailHandler(99)));
     expect(result.id).toBe(99);
     expect(result.hasReport).toBe(true);
+    expect(() => S.decodeUnknownSync(MatchDetail)(result)).not.toThrow();
   });
 
   it("stores match detail with hardTtl (7 days)", async () => {
@@ -230,5 +239,6 @@ describe("getMatchByIdHandler", () => {
     );
     expect(result.id).toBe(99);
     expect("lineup" in result).toBe(false);
+    expect(() => S.decodeUnknownSync(Match)(result)).not.toThrow();
   });
 });

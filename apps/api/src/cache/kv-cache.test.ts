@@ -387,6 +387,55 @@ describe("TypedKvCache", () => {
 
     expect(result).toEqual({ name: "stale", value: 99 });
   });
+
+  it("cache miss: dies when fetch returns schema-invalid data", async () => {
+    const mockKv = makeMockKv();
+    // Fetch returns data that doesn't match TestSchema (value should be number, not string)
+    const fetchEffect = Effect.succeed({
+      name: "test",
+      value: "not-a-number",
+    } as never);
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromiseExit(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result._tag).toBe("Failure");
+    // Should NOT cache invalid data
+    expect(mockKv.put).not.toHaveBeenCalled();
+  });
+
+  it("stale + refresh: dies when refresh returns schema-invalid data", async () => {
+    const mockKv = makeMockKv();
+    // Cached 2 hours ago → stale
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "old", value: 1 }, 2 * 60 * 60 * 1000),
+    );
+
+    // Refresh returns schema-invalid data
+    const fetchEffect = Effect.succeed({ name: 123, value: "bad" } as never);
+
+    const typedCache = TypedKvCache(TestSchema);
+    const result = await Effect.runPromiseExit(
+      typedCache
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result._tag).toBe("Failure");
+    // Should NOT cache invalid data
+    expect(mockKv.put).not.toHaveBeenCalled();
+  });
 });
 
 describe("KvCacheService", () => {

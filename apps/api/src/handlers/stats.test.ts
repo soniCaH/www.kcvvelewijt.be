@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import { getTeamStatsHandler } from "./stats";
 import {
   FootbalistoService,
@@ -11,6 +11,7 @@ import {
   UpstreamUnavailableError,
   ResourceNotFoundError,
 } from "../footbalisto/errors";
+import { TeamStats } from "@kcvv/api-contract";
 
 const mockServiceImpl: FootbalistoServiceInterface = {
   getTeamStats: (_teamId) =>
@@ -66,6 +67,7 @@ describe("getTeamStatsHandler", () => {
       expect(result.right.team_id).toBe(1);
       expect(result.right.team_name).toBe("KCVV Elewijt A");
       expect(result.right.wins).toBe(18);
+      expect(() => S.decodeUnknownSync(TeamStats)(result.right)).not.toThrow();
     }
   });
 

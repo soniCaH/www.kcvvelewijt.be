@@ -111,6 +111,9 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
             );
 
             if (refreshed.ok) {
+              yield* S.decodeUnknown(schema)(refreshed.freshValue).pipe(
+                Effect.orDie,
+              );
               const wrapper = JSON.stringify({
                 value: refreshed.freshValue,
                 fetchedAt: Date.now(),
@@ -122,8 +125,9 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
           }
         }
 
-        // Cache miss: fetch, wrap, store
+        // Cache miss: fetch, validate, wrap, store
         const value = yield* fetch;
+        yield* S.decodeUnknown(schema)(value).pipe(Effect.orDie);
         const wrapper = JSON.stringify({ value, fetchedAt: Date.now() });
         yield* cache.set(key, wrapper, effectiveHardTtl);
         return value;
