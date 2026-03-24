@@ -31,10 +31,20 @@ function sortByAgeDesc(ageOrder: string[]) {
     ageOrder.indexOf(a.age) - ageOrder.indexOf(b.age);
 }
 
+/** Extract the trailing single letter from a team name, e.g. "Eerste Elftallen A" → "A" */
+function nameSuffix(name: string): string {
+  return name.trim().split(/\s+/).at(-1) ?? "";
+}
+
+function isSenior(t: TeamLandingItem): boolean {
+  return t.age === "A";
+}
+
 export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
+  const seniors = teams.filter(isSenior);
   return {
-    aTeam: teams.find((t) => t.age === "A"),
-    bTeam: teams.find((t) => t.age === "B"),
+    aTeam: seniors.find((t) => nameSuffix(t.name) === "A"),
+    bTeam: seniors.find((t) => nameSuffix(t.name) === "B"),
     youthByDivision: [
       {
         label: "Bovenbouw",

@@ -16,27 +16,27 @@ const makeTeam = (
 });
 
 describe("groupTeamsForLanding", () => {
-  it("should extract A-team and B-team from the list", () => {
+  it("should extract A-team and B-team by name suffix (both have age 'A')", () => {
     const teams = [
-      makeTeam({ _id: "a", age: "A", name: "KCVV Elewijt A" }),
-      makeTeam({ _id: "b", age: "B", name: "KCVV Elewijt B" }),
-      makeTeam({ _id: "u15", age: "U15", name: "U15" }),
+      makeTeam({ _id: "a", age: "A", name: "Eerste Elftallen A" }),
+      makeTeam({ _id: "b", age: "A", name: "Eerste Elftallen B" }),
+      makeTeam({ _id: "u15", age: "U15", name: "KCVV Elewijt U15" }),
     ];
 
     const result = groupTeamsForLanding(teams);
 
-    expect(result.aTeam?.name).toBe("KCVV Elewijt A");
-    expect(result.bTeam?.name).toBe("KCVV Elewijt B");
+    expect(result.aTeam?.name).toBe("Eerste Elftallen A");
+    expect(result.bTeam?.name).toBe("Eerste Elftallen B");
   });
 
   it("should group youth teams into Bovenbouw, Middenbouw, Onderbouw", () => {
     const teams = [
-      makeTeam({ _id: "u21", age: "U21", name: "U21" }),
-      makeTeam({ _id: "u17", age: "U17", name: "U17" }),
-      makeTeam({ _id: "u13", age: "U13", name: "U13" }),
-      makeTeam({ _id: "u10", age: "U10", name: "U10" }),
-      makeTeam({ _id: "u9", age: "U9", name: "U9" }),
-      makeTeam({ _id: "u6", age: "U6", name: "U6" }),
+      makeTeam({ _id: "u21", age: "U21", name: "KCVV Elewijt U21" }),
+      makeTeam({ _id: "u17", age: "U17", name: "KCVV Elewijt U17" }),
+      makeTeam({ _id: "u13", age: "U13", name: "KCVV Elewijt U13" }),
+      makeTeam({ _id: "u10", age: "U10", name: "KCVV Elewijt U10" }),
+      makeTeam({ _id: "u9", age: "U9", name: "KCVV Elewijt U9" }),
+      makeTeam({ _id: "u6", age: "U6", name: "KCVV Elewijt U6" }),
     ];
 
     const result = groupTeamsForLanding(teams);
@@ -65,7 +65,7 @@ describe("groupTeamsForLanding", () => {
   });
 
   it("should return undefined for missing A-team or B-team", () => {
-    const teams = [makeTeam({ age: "U15" })];
+    const teams = [makeTeam({ age: "U15", name: "KCVV Elewijt U15" })];
     const result = groupTeamsForLanding(teams);
 
     expect(result.aTeam).toBeUndefined();
@@ -93,11 +93,28 @@ describe("groupTeamsForLanding", () => {
   });
 
   it("should return empty arrays for divisions with no teams", () => {
-    const teams = [makeTeam({ age: "A" }), makeTeam({ age: "U15" })];
+    const teams = [
+      makeTeam({ age: "A", name: "Eerste Elftallen A" }),
+      makeTeam({ age: "U15", name: "KCVV Elewijt U15" }),
+    ];
     const result = groupTeamsForLanding(teams);
 
     expect(result.youthByDivision[0].teams).toHaveLength(1); // Bovenbouw: U15
     expect(result.youthByDivision[1].teams).toHaveLength(0); // Middenbouw: empty
     expect(result.youthByDivision[2].teams).toHaveLength(0); // Onderbouw: empty
+  });
+
+  it("should not include senior teams in youth divisions", () => {
+    const teams = [
+      makeTeam({ _id: "a", age: "A", name: "Eerste Elftallen A" }),
+      makeTeam({ _id: "b", age: "A", name: "Eerste Elftallen B" }),
+      makeTeam({ _id: "u15", age: "U15", name: "KCVV Elewijt U15" }),
+    ];
+
+    const result = groupTeamsForLanding(teams);
+    const allYouth = result.youthByDivision.flatMap((d) => d.teams);
+
+    expect(allYouth).toHaveLength(1);
+    expect(allYouth[0].age).toBe("U15");
   });
 });
