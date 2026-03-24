@@ -63,7 +63,7 @@ export function ClubHero() {
           />
           <polygon
             points="0,0 0,100 100,100"
-            fill="#f3f4f6"
+            fill="var(--color-gray-100)"
             shapeRendering="crispEdges"
           />
         </svg>

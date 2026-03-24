@@ -30,7 +30,7 @@ describe("ClubHero", () => {
     expect(polygons.length).toBeGreaterThanOrEqual(2);
 
     const grayPolygon = Array.from(polygons).find(
-      (p) => p.getAttribute("fill") === "#f3f4f6",
+      (p) => p.getAttribute("fill") === "var(--color-gray-100)",
     );
     expect(grayPolygon).toBeInTheDocument();
   });
