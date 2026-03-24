@@ -5,20 +5,33 @@ import {
   PlayerRepository,
   PlayerRepositoryLive,
 } from "../repositories/player.repository";
+import {
+  TeamRepository,
+  TeamRepositoryLive,
+} from "../repositories/team.repository";
 
 export const AppLayer = Layer.mergeAll(
   BffServiceLive,
   SanityServiceLive,
   PlayerRepositoryLive,
+  TeamRepositoryLive,
 );
 export const runtime = ManagedRuntime.make(AppLayer);
 
 export const runPromise = <A, E>(
-  effect: Effect.Effect<A, E, BffService | SanityService | PlayerRepository>,
+  effect: Effect.Effect<
+    A,
+    E,
+    BffService | SanityService | PlayerRepository | TeamRepository
+  >,
 ) => runtime.runPromise(effect);
 
 export const runPromiseWithLogging = <A, E>(
-  effect: Effect.Effect<A, E, BffService | SanityService | PlayerRepository>,
+  effect: Effect.Effect<
+    A,
+    E,
+    BffService | SanityService | PlayerRepository | TeamRepository
+  >,
 ) =>
   runtime.runPromise(
     effect.pipe(
@@ -33,4 +46,4 @@ export const runPromiseWithLogging = <A, E>(
 export const provideServices = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
   Effect.provide(effect, AppLayer);
 
-export { BffService, SanityService, PlayerRepository };
+export { BffService, SanityService, PlayerRepository, TeamRepository };

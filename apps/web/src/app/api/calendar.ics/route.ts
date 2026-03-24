@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { Match } from "@kcvv/api-contract";
 import { generateIcal, normalizeCacheKey } from "@/lib/utils/ical";
 
@@ -29,8 +29,8 @@ async function fetchMatches(
     if (teamIdParams && teamIdParams.length > 0) {
       teamIds = teamIdParams;
     } else {
-      const sanity = yield* SanityService;
-      const teams = yield* sanity.getTeams();
+      const repo = yield* TeamRepository;
+      const teams = yield* repo.findAll();
       teamIds = teams.map((t) => Number(t.psdId)).filter((id) => !isNaN(id));
     }
 

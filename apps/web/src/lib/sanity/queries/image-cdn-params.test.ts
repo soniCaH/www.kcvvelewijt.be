@@ -76,7 +76,6 @@ describe("Sanity image CDN optimization", () => {
 
   it("fileUrl fields are NOT modified", () => {
     const queriesWithFiles = [
-      TEAMS_QUERY,
       TEAM_BY_SLUG_QUERY,
       ARTICLES_QUERY,
       ARTICLE_BY_SLUG_QUERY,

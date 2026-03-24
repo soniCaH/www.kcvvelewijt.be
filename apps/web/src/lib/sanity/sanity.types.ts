@@ -820,11 +820,184 @@ export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
   }> | null;
 } | null;
 
+// Source: ../web/src/lib/sanity/queries/teams.ts
+// Variable: TEAMS_QUERY
+// Query: *[_type == "team" && showInNavigation != false] | order(name asc) {  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,  tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
+export type TEAMS_QUERY_RESULT = Array<{
+  _id: string;
+  psdId: string | null;
+  name: string | null;
+  slug: string | null;
+  age: string | null;
+  gender: string | null;
+  footbelId: number | null;
+  leagueId: number | null;
+  division: string | null;
+  divisionFull: string | null;
+  tagline: string | null;
+  teamImageUrl: string | null;
+}>;
+
+// Source: ../web/src/lib/sanity/queries/teams.ts
+// Variable: TEAM_BY_SLUG_QUERY
+// Query: *[_type == "team" && slug.current == $slug][0] {  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  trainingSchedule,  players[]-> {    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }}
+export type TEAM_BY_SLUG_QUERY_RESULT = {
+  _id: string;
+  psdId: string | null;
+  name: string | null;
+  slug: string | null;
+  age: string | null;
+  gender: string | null;
+  footbelId: number | null;
+  leagueId: number | null;
+  division: string | null;
+  divisionFull: string | null;
+  tagline: string | null;
+  body: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+    fileUrl: null;
+  }> | null;
+  contactInfo: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  teamImageUrl: string | null;
+  trainingSchedule: Array<
+    {
+      _key: string;
+    } & TrainingSession
+  > | null;
+  players: Array<{
+    _id: string;
+    psdId: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    jerseyNumber: number | null;
+    keeper: boolean | null;
+    positionPsd: string | null;
+    position:
+      | "Aanvaller"
+      | "Keeper"
+      | "Middenvelder"
+      | "Speler"
+      | "Verdediger"
+      | null;
+    psdImageUrl: string | null;
+    transparentImageUrl: string | null;
+  }> | null;
+  staff: Array<{
+    _id: string;
+    firstName: string | null;
+    lastName: string | null;
+    role:
+      | "afgevaardigde"
+      | "assistent"
+      | "bestuur"
+      | "coach"
+      | "evenementen-coordinator"
+      | "hoofdtrainer"
+      | "jeugdcoordinator"
+      | "jeugdsecretaris"
+      | "kantine-verantwoordelijke"
+      | "keeperstrainer"
+      | "ondervoorzitter"
+      | "other"
+      | "penningmeester"
+      | "ploegdelegatie"
+      | "pr-verantwoordelijke"
+      | "secretaris"
+      | "sponsoring-verantwoordelijke"
+      | "sportief-verantwoordelijke"
+      | "technisch-coordinator"
+      | "tvjo"
+      | "verzekering-verantwoordelijke"
+      | "voorzitter"
+      | "webmaster"
+      | null;
+    photoUrl: string | null;
+  }> | null;
+} | null;
+
+// Source: ../web/src/lib/sanity/queries/teams.ts
+// Variable: TEAMS_LANDING_QUERY
+// Query: *[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {  _id, name, "slug": slug.current, age,  division, divisionFull, tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  staff[]-> { firstName, lastName, role }}
+export type TEAMS_LANDING_QUERY_RESULT = Array<{
+  _id: string;
+  name: string | null;
+  slug: string | null;
+  age: string | null;
+  division: string | null;
+  divisionFull: string | null;
+  tagline: string | null;
+  teamImageUrl: string | null;
+  staff: Array<{
+    firstName: string | null;
+    lastName: string | null;
+    role:
+      | "afgevaardigde"
+      | "assistent"
+      | "bestuur"
+      | "coach"
+      | "evenementen-coordinator"
+      | "hoofdtrainer"
+      | "jeugdcoordinator"
+      | "jeugdsecretaris"
+      | "kantine-verantwoordelijke"
+      | "keeperstrainer"
+      | "ondervoorzitter"
+      | "other"
+      | "penningmeester"
+      | "ploegdelegatie"
+      | "pr-verantwoordelijke"
+      | "secretaris"
+      | "sponsoring-verantwoordelijke"
+      | "sportief-verantwoordelijke"
+      | "technisch-coordinator"
+      | "tvjo"
+      | "verzekering-verantwoordelijke"
+      | "voorzitter"
+      | "webmaster"
+      | null;
+  }> | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '*[_type == "player"] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "team" && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
+    '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;
+    '*[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;
   }
 }

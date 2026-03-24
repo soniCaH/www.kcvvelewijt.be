@@ -5,13 +5,12 @@ import { AccentStrip } from "@/components/layout/AccentStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageFooter } from "@/components/layout/PageFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
-import { sanityClient } from "@/lib/sanity/client";
+import { Effect } from "effect";
+import { runPromise } from "@/lib/effect/runtime";
 import {
-  YOUTH_TEAMS_NAV_QUERY,
-  type YouthTeamNavItem,
-  SENIOR_TEAMS_NAV_QUERY,
-  type SeniorTeamNavItem,
-} from "@/lib/sanity/queries/teams";
+  TeamRepository,
+  type TeamNavVM,
+} from "@/lib/repositories/team.repository";
 import { BRAND } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -53,21 +52,23 @@ export default async function RootLayout({
 }>) {
   const typekitId = process.env.NEXT_PUBLIC_TYPEKIT_ID;
 
-  const [youthTeams, seniorTeams] = await Promise.all([
-    sanityClient
-      .fetch<
-        YouthTeamNavItem[]
-      >(YOUTH_TEAMS_NAV_QUERY, {}, { next: { revalidate: 3600 } })
-      .catch(() => [] as YouthTeamNavItem[]),
-    sanityClient
-      .fetch<
-        SeniorTeamNavItem[]
-      >(SENIOR_TEAMS_NAV_QUERY, {}, { next: { revalidate: 3600 } })
-      .catch(() => [] as SeniorTeamNavItem[]),
-  ]);
+  let allTeams: TeamNavVM[] = [];
+  try {
+    allTeams = await runPromise(
+      Effect.gen(function* () {
+        const repo = yield* TeamRepository;
+        return yield* repo.findAll();
+      }),
+    );
+  } catch {
+    allTeams = [];
+  }
 
+  const seniorTeams = allTeams.filter((t) => t.age === "A");
   const parseAge = (age: string) => parseInt(age.replace(/\D/g, "")) || 0;
-  youthTeams.sort((a, b) => parseAge(b.age) - parseAge(a.age));
+  const youthTeams = allTeams
+    .filter((t) => t.age != null && t.age !== "A" && t.age !== "B")
+    .sort((a, b) => parseAge(b.age!) - parseAge(a.age!));
 
   return (
     <html lang="nl" suppressHydrationWarning>

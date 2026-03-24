@@ -12,18 +12,9 @@ import { BffService } from "@/lib/effect/services/BffService";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
-import {
-  toPlayerVM,
-  type RoutablePlayerVM,
-} from "@/lib/repositories/player.repository";
-import {
-  transformSanityStaffToMember,
-  getSanityTeamTagline,
-  getSanityTeamType,
-  getSanityAgeGroup,
-  transformMatchToSchedule,
-  transformRankingToStandings,
-} from "./utils";
+import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
+import { TeamRepository } from "@/lib/repositories/team.repository";
+import { transformMatchToSchedule, transformRankingToStandings } from "./utils";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -38,11 +29,11 @@ export async function generateStaticParams() {
   try {
     const teams = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getTeams();
+        const repo = yield* TeamRepository;
+        return yield* repo.findAll();
       }),
     );
-    return teams.map((team) => ({ slug: team.slug.current }));
+    return teams.map((team) => ({ slug: team.slug }));
   } catch {
     return [];
   }
@@ -61,17 +52,15 @@ export async function generateMetadata({
   try {
     const team = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getTeamBySlug(slug);
+        const repo = yield* TeamRepository;
+        return yield* repo.findBySlug(slug);
       }),
     );
     if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
 
-    const tagline = getSanityTeamTagline(team);
-    const teamType = getSanityTeamType(team);
-    const typeLabel = teamType === "youth" ? "Jeugdploeg" : "Ploeg";
-    const description = tagline
-      ? `${team.name} - ${tagline}`
+    const typeLabel = team.teamType === "youth" ? "Jeugdploeg" : "Ploeg";
+    const description = team.tagline
+      ? `${team.name} - ${team.tagline}`
       : `${team.name} - KCVV Elewijt ${typeLabel}`;
 
     return {
@@ -147,8 +136,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const team = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getTeamBySlug(slug);
+      const repo = yield* TeamRepository;
+      return yield* repo.findBySlug(slug);
     }),
   );
 
@@ -157,11 +146,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const relatedArticles = await runPromise(
     Effect.gen(function* () {
       const sanity = yield* SanityService;
-      return yield* sanity.getRelatedArticles(team._id);
+      return yield* sanity.getRelatedArticles(team.id);
     }),
   );
 
-  const psdTeamId = parseInt(team.psdId, 10);
+  const psdTeamId = team.psdId ? parseInt(team.psdId, 10) : NaN;
   const bffData =
     Number.isFinite(psdTeamId) && psdTeamId > 0
       ? await fetchBffData(psdTeamId)
@@ -173,16 +162,14 @@ export default async function TeamPage({ params }: TeamPageProps) {
         header={{
           name: team.name,
           imageUrl: team.teamImageUrl ?? undefined,
-          ageGroup: getSanityAgeGroup(team),
-          teamType: getSanityTeamType(team),
-          tagline: getSanityTeamTagline(team),
+          ageGroup: team.ageGroup,
+          teamType: team.teamType,
+          tagline: team.tagline,
         }}
-        players={
-          (team.players ?? [])
-            .filter((p) => p.psdId)
-            .map(toPlayerVM) as RoutablePlayerVM[]
-        }
-        staff={(team.staff ?? []).map(transformSanityStaffToMember)}
+        players={team.players.filter(
+          (p): p is RoutablePlayerVM => p.href !== undefined,
+        )}
+        staff={team.staff}
         matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
         standings={bffData?.standings.map(transformRankingToStandings) ?? []}
         highlightTeamId={bffData?.teamId}

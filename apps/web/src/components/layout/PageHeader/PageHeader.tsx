@@ -13,14 +13,11 @@ import { cn } from "@/lib/utils/cn";
 import { Search, Menu } from "@/lib/icons";
 import { Navigation } from "../Navigation";
 import { MobileMenu } from "../MobileMenu";
-import type {
-  YouthTeamNavItem,
-  SeniorTeamNavItem,
-} from "@/lib/sanity/queries/teams";
+import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
 export interface PageHeaderProps {
-  youthTeams?: YouthTeamNavItem[];
-  seniorTeams?: SeniorTeamNavItem[];
+  youthTeams?: TeamNavVM[];
+  seniorTeams?: TeamNavVM[];
   /**
    * Additional CSS classes
    */

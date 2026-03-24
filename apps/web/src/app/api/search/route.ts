@@ -9,6 +9,7 @@ import { unstable_cache } from "next/cache";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
 import type { SearchResult } from "@/types/search";
 
@@ -130,8 +131,8 @@ const searchPlayers = (query: string) =>
  */
 const searchTeams = (query: string) =>
   Effect.gen(function* () {
-    const sanity = yield* SanityService;
-    const teams = yield* sanity.getTeams();
+    const repo = yield* TeamRepository;
+    const teams = yield* repo.findAll();
 
     const queryLower = query.toLowerCase();
 
@@ -139,11 +140,11 @@ const searchTeams = (query: string) =>
       .filter((team) => team.name.toLowerCase().includes(queryLower))
       .map(
         (team): SearchResult => ({
-          id: team._id,
+          id: team.id,
           type: "team",
           title: team.name,
           description: team.divisionFull ?? team.division ?? undefined,
-          url: `/team/${team.slug.current}`,
+          url: `/team/${team.slug}`,
           imageUrl: team.teamImageUrl ?? undefined,
         }),
       );
