@@ -166,11 +166,16 @@ None. All changes are within `apps/web` and `apps/studio`.
 
 ## 7. Open Questions
 
-- `[ ]` **Generated types file location**: `sanity typegen generate` defaults to generating types in the studio directory. In this monorepo, determine whether `apps/web` imports from `apps/studio` (workspace dep) or whether types are generated directly into `apps/web/src/lib/sanity/`. Resolve during Phase 0.
+- `[x]` **Generated types file location**: Resolved — types output to `apps/web/src/lib/sanity/sanity.types.ts`. Config in `apps/studio/sanity.cli.ts` `typegen.generates` points to `../web/src/lib/sanity/sanity.types.ts`. No cross-workspace dependency needed.
 - `[ ]` **PlayerVM scope**: Does `players/[slug]/page.tsx` currently render bio (PortableText), birthDate, nationality, height, weight? These exist in `SanityPlayer` but are not used in `transformSanityPlayerToRoster`. Verify during Phase 1 before finalising `PlayerVM` shape.
 - `[ ]` **TeamDetailVM vs. separate queries**: `findBySlug()` currently returns data for roster, staff, schedule, standings, tagline in one GROQ query. Determine whether `TeamDetailVM` is one flat object or whether the repository should expose separate fine-grained methods. Resolve during Phase 2 design.
 - `[ ]` **SanityTrainingSession**: Used in `SanityTeam` for training schedule display. Verify it should be absorbed into `TeamDetailVM` or kept as a sub-type inside the repository file.
 
 ## 8. Discovered Unknowns
 
-_Filled during implementation._
+- [2026-03-24] Phase 0: `SanityPlayer.psdId` is typed as `string` (non-nullable) but typegen generates `string | null` — the Sanity schema allows null. Hand-maintained type is inaccurate. → resolved in Phase 1 when PlayerRepository replaces SanityPlayer with generated type.
+- [2026-03-24] Phase 0: `SanityPlayer.keeper` is typed as `boolean` (non-nullable) but typegen generates `boolean | null` — same root cause. → resolved in Phase 1.
+- [2026-03-24] Phase 0: `SanityPlayer.position` is typed as `string | null` but typegen generates a precise enum union (`"Keeper" | "Verdediger" | "Middenvelder" | "Aanvaller" | "Speler" | null`). → Phase 1 should use the generated enum type.
+- [2026-03-24] Phase 0: `SanityPlayer.bio` is typed as `unknown` but typegen generates a full Portable Text array type. → Phase 1 should use the generated type.
+- [2026-03-24] Phase 0: Deprecated `sanity-typegen.json` config file format. Migrated to `typegen` key in `sanity.cli.ts` instead. → resolved inline.
+- [2026-03-24] Phase 0: Generated types file location resolved — types output to `apps/web/src/lib/sanity/sanity.types.ts` directly. No cross-workspace dependency needed. `apps/web` imports from its own `lib/sanity/` directory.

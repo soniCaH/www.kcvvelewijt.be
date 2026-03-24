@@ -29,6 +29,27 @@
     "type-check": {
       "dependsOn": ["^build"]
     },
+    "@kcvv/studio#typegen": {
+      "outputs": ["../web/src/lib/sanity/sanity.types.ts", "schema.json"],
+      "inputs": [
+        "schemaTypes/**",
+        "sanity.cli.ts",
+        "../web/src/lib/sanity/queries/**/*.ts"
+      ]
+    },
+    "@kcvv/web#build": {
+      "dependsOn": ["^build", "@kcvv/studio#typegen"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DRUPAL_API_URL",
+        "REVALIDATION_SECRET",
+        "KCVV_API_URL",
+        "FOOTBALISTO_API_URL",
+        "NEXT_PUBLIC_SANITY_PROJECT_ID",
+        "NEXT_PUBLIC_SANITY_DATASET",
+        "SANITY_API_READ_TOKEN"
+      ]
+    },
     "@kcvv/studio#deploy": {
       "dependsOn": ["build"],
       "cache": false
