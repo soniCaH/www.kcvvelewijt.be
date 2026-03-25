@@ -54,7 +54,7 @@ pick_next_issue() {
   local filtered=""
   for num in $candidates; do
     local is_skipped=false
-    for s in "${SKIPPED_ISSUES[@]}"; do
+    for s in ${SKIPPED_ISSUES[@]+"${SKIPPED_ISSUES[@]}"}; do
       if [ "$num" = "$s" ]; then is_skipped=true; break; fi
     done
     if [ "$is_skipped" = false ]; then
