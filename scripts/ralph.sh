@@ -306,7 +306,7 @@ while [ $i -lt $MAX ]; do
   fi
 
   # PR opened
-  PR_URL=$(echo "$OUTPUT" | grep -o "https://github.com[^ ]*pull[^ ]*" | tail -1)
+  PR_URL=$(echo "$OUTPUT" | grep -o "https://github.com[^ ]*pull[^ ]*" | tail -1 || true)
   echo "✅ Issue #${ISSUE} complete. PR opened."
   if [ -n "$PR_URL" ]; then
     echo "   $PR_URL"
