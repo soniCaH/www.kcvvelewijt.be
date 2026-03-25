@@ -1,4 +1,16 @@
-export function MissionBanner() {
+interface MissionBannerProps {
+  quote?: string;
+  attribution?: string;
+}
+
+const DEFAULT_QUOTE =
+  "Wij zijn KCVV Elewijt. Een plek waar jong en oud samenkomen, waar passie voor voetbal het hele dorp verbindt.";
+const DEFAULT_ATTRIBUTION = "— Sportpark Elewijt, sinds 1948";
+
+export function MissionBanner({
+  quote = DEFAULT_QUOTE,
+  attribution = DEFAULT_ATTRIBUTION,
+}: MissionBannerProps = {}) {
   return (
     <div className="max-w-inner mx-auto px-4 md:px-10 text-center">
       <div
@@ -8,11 +20,10 @@ export function MissionBanner() {
         {"\u201C"}
       </div>
       <p className="font-title font-bold text-white leading-normal text-xl md:text-4xl mb-6">
-        Wij zijn KCVV Elewijt. Een plek waar jong en oud samenkomen, waar passie
-        voor voetbal het hele dorp verbindt.
+        {quote}
       </p>
       <p className="text-sm font-semibold text-white/50 uppercase tracking-caps">
-        — Sportpark Elewijt, sinds 1948
+        {attribution}
       </p>
     </div>
   );

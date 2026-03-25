@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import {
@@ -15,7 +14,9 @@ import { SectionStack } from "@/components/design-system/SectionStack/SectionSta
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
+import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
 import { ArrowRight } from "@/lib/icons";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Jeugdopleiding | KCVV Elewijt",
@@ -146,23 +147,12 @@ export default async function JeugdPage() {
   };
 
   const quoteSection: SectionConfig = {
-    bg: "gray-100",
+    bg: "kcvv-green-dark",
     content: (
-      <div className="max-w-inner mx-auto px-4 md:px-10 text-center">
-        <div
-          className="text-5xl text-kcvv-gray-blue/20 mb-6 leading-none font-title"
-          aria-hidden="true"
-        >
-          {"\u201C"}
-        </div>
-        <p className="font-title font-bold text-kcvv-gray-blue leading-normal text-xl md:text-4xl mb-6">
-          Bij KCVV Elewijt staat plezier op één. We geloven dat spelplezier de
-          beste basis is voor sportieve groei.
-        </p>
-        <p className="text-sm font-semibold text-kcvv-gray uppercase tracking-caps">
-          — Jeugdopleiding KCVV Elewijt
-        </p>
-      </div>
+      <MissionBanner
+        quote="Bij KCVV Elewijt staat plezier op één. We geloven dat spelplezier de beste basis is voor sportieve groei."
+        attribution="— Jeugdopleiding KCVV Elewijt"
+      />
     ),
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
@@ -170,7 +160,7 @@ export default async function JeugdPage() {
   };
 
   const ctaSection: SectionConfig = {
-    bg: "gray-100",
+    bg: "white",
     content: (
       <div className="max-w-inner-lg mx-auto px-4 md:px-10">
         <div className="grid grid-cols-[1fr_auto] items-center gap-8 max-sm:grid-cols-1 max-sm:text-center">
