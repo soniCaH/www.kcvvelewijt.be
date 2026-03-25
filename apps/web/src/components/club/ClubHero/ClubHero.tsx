@@ -25,20 +25,17 @@ export function ClubHero() {
 
       {/* Content */}
       <div className="relative z-10 min-h-[60vh] flex items-end">
-        <div className="max-w-[70rem] mx-auto px-4 md:px-10 py-10 md:py-16 w-full">
-          <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-label text-white/50 mb-6">
+        <div className="max-w-inner-lg mx-auto px-4 md:px-10 py-10 md:py-16 w-full">
+          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-white/50 mb-6">
             <span className="block w-5 h-0.5 bg-kcvv-green" />
             Onze club
           </div>
-          <h1
-            className="font-title font-black text-white uppercase leading-[0.9] mb-6"
-            style={{ fontSize: "clamp(3rem, 7vw, 5.5rem)" }}
-          >
+          <h1 className="font-title font-black text-white uppercase leading-hero mb-6 text-hero">
             De plezantste
             <br />
             <span className="text-kcvv-green">compagnie</span>
           </h1>
-          <p className="text-[1.0625rem] text-white/60 leading-[1.7] max-w-[32rem]">
+          <p className="text-lg text-white/60 leading-loose max-w-lg">
             Al meer dan 75 jaar de thuishaven voor voetballiefhebbers in
             Elewijt. Van de allerkleinsten tot het eerste elftal — bij KCVV is
             iedereen welkom.
@@ -55,6 +52,9 @@ export function ClubHero() {
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full"
+          aria-hidden="true"
+          role="presentation"
+          focusable="false"
         >
           <polygon
             points="0,0 100,0 100,100"

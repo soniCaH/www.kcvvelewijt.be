@@ -91,10 +91,6 @@
 
 /* Tailwind v4 Theme Configuration */
 @theme {
-  /* ===== Breakpoints (Custom) ===== */
-  /* Override default Tailwind breakpoints to match Gatsby */
-  --breakpoint-lg: 960px;   /* Gatsby desktop breakpoint (60rem) - matches @media screen and (min-width: 60rem) */
-
   /* ===== Color Palette ===== */
 
   /* KCVV Brand Colors */
@@ -151,9 +147,11 @@
   --font-size-4xl: 1.75rem;     /* 28px */
   --font-size-5xl: 2rem;        /* 32px */
   --font-size-6xl: 3rem;        /* 48px */
+  --font-size-hero: clamp(3rem, 7vw, 5.5rem);  /* 48px → 88px, responsive hero heading */
   --font-size-stat: 2.5rem;     /* 40px */
 
   /* Line Heights */
+  --line-height-hero: 0.9;      /* hero headings — tight stacking for large type */
   --line-height-tight: 1.2;
   --line-height-snug: 1.25;
   --line-height-normal: 1.5;
@@ -356,8 +354,10 @@
   overflow: hidden;
 }
 
-/* Editorial card overlay gradients — reference design tokens for consistency */
+/* Editorial card overlay gradients — reference design tokens for consistency.
+   Fallback rgba() line for browsers without relative color syntax support. */
 .editorial-card-overlay--default {
+  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%);
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
@@ -367,6 +367,7 @@
 }
 
 .editorial-card-overlay--nav {
+  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%);
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,

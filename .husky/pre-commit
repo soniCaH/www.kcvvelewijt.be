@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-# Load nvm so hooks use the project's Node version (.nvmrc)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+# Activate Node version from .nvmrc without sourcing full nvm.sh
+# This is fast (~0ms) vs sourcing nvm.sh (~200-500ms)
+if [ -f ".nvmrc" ] && [ -d "${NVM_DIR:-$HOME/.nvm}/versions/node" ]; then
+  NODE_VERSION=$(cat .nvmrc)
+  NODE_PATH="${NVM_DIR:-$HOME/.nvm}/versions/node/v${NODE_VERSION}/bin"
+  [ -d "$NODE_PATH" ] && export PATH="$NODE_PATH:$PATH"
+fi
 
 echo "🔍 Running pre-commit checks..."
 
