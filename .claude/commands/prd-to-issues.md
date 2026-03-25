@@ -72,13 +72,28 @@ gh issue create \
 
 For blocked issues use `--label "blocked"` instead of `--label "ready"`.
 
-## Step 4 — Wire dependencies
+## Step 4 — Wire dependencies via Sub-issues API
 
-Add `blocked-by` comments to dependent issues:
+For each issue that has a `## Blocked by` section listing other issues, create a Sub-issues relationship via the GitHub API. This makes dependencies machine-readable and visible in the GitHub UI.
+
+The relationship model: the **blocked** issue is the parent, and each **blocker** is added as a sub-issue. This matches how `ralph.sh` queries blockers.
 
 ```bash
-gh issue comment <blocked-issue> --body "Blocked by #<dependency>"
+# For each blocked issue, set up Sub-issues relationships:
+
+# 1. Get the integer id of the blocker issue (required by the API — not node_id)
+BLOCKER_ID=$(gh api /repos/{owner}/{repo}/issues/<blocker-number> --jq '.id')
+
+# 2. Add the blocker as a sub-issue of the blocked issue
+gh api /repos/{owner}/{repo}/issues/<blocked-number>/sub_issues \
+  --method POST -F sub_issue_id="$BLOCKER_ID"
 ```
+
+Repeat for every blocker listed in the `## Blocked by` section.
+
+If the API call fails, log a warning and continue — the `## Blocked by` markdown in the body still serves as a fallback.
+
+**Note:** The `## Blocked by` markdown is still written in issue bodies for human readability (transitional). Both the API relationship and the markdown must be present.
 
 ## Step 5 — Update the PRD with issue numbers
 

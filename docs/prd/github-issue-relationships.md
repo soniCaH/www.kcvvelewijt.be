@@ -19,7 +19,7 @@ GitHub's native Sub-issues API (`/repos/{owner}/{repo}/issues/{number}/sub_issue
 
 - `scripts/ralph.sh` — replace sed-based blocker extraction with API calls
 - `.claude/commands/ralph.md` — update guidance for setting/checking blocked status
-- `.claude/skills/prd-to-issues/` — set relationships via API when creating issues from a PRD
+- `.claude/commands/prd-to-issues.md` — set relationships via API when creating issues from a PRD
 - `docs/prd/` — update PRD template to remove `## Blocked by` markdown convention
 
 **Out of scope:**
@@ -96,7 +96,7 @@ None. This is entirely tooling and workflow.
 
 - [x] Does the Sub-issues API support "blocked by" as a relationship type, or only parent/child? — **Parent/child only.** No native "blocked by" semantics. We model blocking as: blocked issue = parent, blockers = sub-issues (children). When all sub-issues are closed, the parent is unblocked. Confirmed 2026-03-25.
 - [x] Is the Sub-issues API available on our GitHub plan? — **Yes**, confirmed 2026-03-25. Both read (`/issues/{n}/sub_issues`) and `sub_issues_summary` field work. Write requires integer `id` (not `node_id` or issue number) for the `sub_issue_id` param.
-- [ ] Should Phase 2 write both API relationships AND markdown (transitional), or API-only from the start? — decision needed before Phase 2
+- [x] Should Phase 2 write both API relationships AND markdown (transitional), or API-only from the start? — **Both (transitional).** API relationships for machine-readable dependencies, `## Blocked by` markdown retained for human readability. Markdown will be removed in Phase 4. Decided 2026-03-25.
 - [x] Do GitHub Actions or third-party bots interact with these relationships in ways we should be aware of? — No interactions observed. Sub-issues are a native GitHub feature; no third-party bot interference detected during tracer bullet testing. Confirmed 2026-03-25.
 
 ## 8. Discovered Unknowns
