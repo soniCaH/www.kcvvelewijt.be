@@ -13,11 +13,11 @@ export interface RelatedContentCardProps {
 function getHref(item: RelatedContentItem): string | null {
   switch (item.type) {
     case "article":
-      return `/news/${item.slug}`;
+      return `/nieuws/${item.slug}`;
     case "page":
       return `/${item.slug}`;
     case "player":
-      return `/players/${item.psdId}`;
+      return `/spelers/${item.psdId}`;
     case "team":
       return `/team/${item.slug}`;
     case "staff":

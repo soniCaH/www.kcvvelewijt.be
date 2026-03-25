@@ -14,7 +14,7 @@ vi.mock("next/image", () => ({
 describe("NewsGrid", () => {
   const mockArticles: NewsGridArticle[] = [
     {
-      href: "/news/article-1",
+      href: "/nieuws/article-1",
       title: "First News Article",
       imageUrl: "/images/article-1.jpg",
       imageAlt: "Article 1 image",
@@ -22,7 +22,7 @@ describe("NewsGrid", () => {
       tags: [{ name: "Ploeg" }],
     },
     {
-      href: "/news/article-2",
+      href: "/nieuws/article-2",
       title: "Second News Article",
       imageUrl: "/images/article-2.jpg",
       imageAlt: "Article 2 image",
@@ -30,7 +30,7 @@ describe("NewsGrid", () => {
       tags: [{ name: "Jeugd" }],
     },
     {
-      href: "/news/article-3",
+      href: "/nieuws/article-3",
       title: "Third News Article",
       imageUrl: "/images/article-3.jpg",
       imageAlt: "Article 3 image",
@@ -67,7 +67,7 @@ describe("NewsGrid", () => {
       render(<NewsGrid articles={mockArticles} />);
       const link = screen.getByRole("link", { name: /Alle berichten/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/news");
+      expect(link).toHaveAttribute("href", "/nieuws");
     });
 
     it("hides view all link when showViewAll is false", () => {

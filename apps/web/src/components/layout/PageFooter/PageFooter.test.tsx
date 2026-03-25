@@ -38,7 +38,7 @@ describe("PageFooter", () => {
     expect(screen.getByText("Club")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Nieuws" })).toHaveAttribute(
       "href",
-      "/news",
+      "/nieuws",
     );
     expect(screen.getByRole("link", { name: "Kalender" })).toHaveAttribute(
       "href",

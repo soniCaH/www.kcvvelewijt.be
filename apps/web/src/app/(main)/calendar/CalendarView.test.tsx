@@ -168,7 +168,7 @@ describe("CalendarView", () => {
     it("renders a link to the match detail page", () => {
       render(<CalendarView matches={[makeMatch({ id: 42 })]} />);
       const links = screen.getAllByRole("link");
-      expect(links[0]).toHaveAttribute("href", "/game/42");
+      expect(links[0]).toHaveAttribute("href", "/wedstrijd/42");
     });
 
     it("renders the day header with the formatted date", () => {
@@ -299,7 +299,10 @@ describe("CalendarView", () => {
       render(<CalendarView matches={matches} />);
       // 1 match link + 1 scheurkalender link
       expect(screen.getAllByRole("link")).toHaveLength(2);
-      expect(screen.getAllByRole("link")[0]).toHaveAttribute("href", "/game/2");
+      expect(screen.getAllByRole("link")[0]).toHaveAttribute(
+        "href",
+        "/wedstrijd/2",
+      );
     });
 
     it("shows empty state when filter yields no matches", () => {

@@ -50,7 +50,7 @@ export const Upcoming: Story = {
     time: "15:00",
     venue: "Sportpark Elewijt",
     status: "upcoming",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -65,7 +65,7 @@ export const Forfeited: Story = {
     time: "15:00",
     score: { home: 3, away: 0 },
     status: "forfeited",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -80,7 +80,7 @@ export const Finished: Story = {
     time: "15:00",
     score: { home: 3, away: 1 },
     status: "finished",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -94,7 +94,7 @@ export const Postponed: Story = {
     date: "2024-02-15",
     time: "15:00",
     status: "postponed",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -108,7 +108,7 @@ export const Stopped: Story = {
     date: "2024-02-15",
     time: "15:00",
     status: "stopped",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -123,7 +123,7 @@ export const Home: Story = {
     time: "15:00",
     venue: "Sportpark Elewijt",
     status: "upcoming",
-    href: "/game/123",
+    href: "/wedstrijd/123",
     highlightTeamId: 1235,
   },
 };
@@ -139,7 +139,7 @@ export const Away: Story = {
     time: "15:00",
     venue: "De Stadsblokken",
     status: "upcoming",
-    href: "/game/123",
+    href: "/wedstrijd/123",
     highlightTeamId: 1235,
   },
 };
@@ -154,7 +154,7 @@ export const WithLogos: Story = {
     date: "2024-02-15",
     time: "15:00",
     status: "upcoming",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -168,7 +168,7 @@ export const WithoutLogos: Story = {
     date: "2024-02-15",
     time: "15:00",
     status: "upcoming",
-    href: "/game/123",
+    href: "/wedstrijd/123",
   },
 };
 
@@ -244,7 +244,7 @@ export const List: StoryObj<typeof MatchTeaser> = {
         time="15:00"
         score={{ home: 3, away: 1 }}
         status="finished"
-        href="/game/121"
+        href="/wedstrijd/121"
       />
       <MatchTeaser
         homeTeam={{ name: "SK Londerzeel" }}
@@ -252,7 +252,7 @@ export const List: StoryObj<typeof MatchTeaser> = {
         date="2024-02-22"
         time="15:00"
         status="upcoming"
-        href="/game/122"
+        href="/wedstrijd/122"
       />
       <MatchTeaser
         homeTeam={kcvv}
@@ -260,7 +260,7 @@ export const List: StoryObj<typeof MatchTeaser> = {
         date="2024-02-29"
         time="14:30"
         status="postponed"
-        href="/game/123"
+        href="/wedstrijd/123"
       />
     </div>
   ),

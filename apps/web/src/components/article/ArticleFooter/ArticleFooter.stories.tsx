@@ -28,7 +28,7 @@ type Story = StoryObj<typeof meta>;
 const sampleRelatedContent: RelatedContent[] = [
   {
     title: "A-Ploeg behaalt belangrijke overwinning",
-    href: "/news/overwinning",
+    href: "/nieuws/overwinning",
     type: "article",
   },
   {
@@ -62,12 +62,12 @@ export const ManyItems: Story = {
     relatedContent: [
       {
         title: "Nieuw seizoen begint met overwinning",
-        href: "/news/seizoen-start",
+        href: "/nieuws/seizoen-start",
         type: "article",
       },
       {
         title: "Piet Pieters verlengt contract",
-        href: "/news/contract",
+        href: "/nieuws/contract",
         type: "article",
       },
       {
@@ -119,7 +119,7 @@ export const AllContentTypes: Story = {
     relatedContent: [
       {
         title: "Nieuws artikel over de wedstrijd",
-        href: "/news/wedstrijd",
+        href: "/nieuws/wedstrijd",
         type: "article",
       },
       {

@@ -24,7 +24,7 @@ const mockResults = [
     title: "KCVV Elewijt wint belangrijke wedstrijd",
     description:
       "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen.",
-    url: "/news/kcvv-elewijt-wint",
+    url: "/nieuws/kcvv-elewijt-wint",
     imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match",
     tags: ["A-ploeg", "Wedstrijdverslag"],
     date: "2026-01-15T10:00:00Z",
@@ -34,7 +34,7 @@ const mockResults = [
     type: "player" as const,
     title: "John De Ron",
     description: "Doelman",
-    url: "/players/john-de-ron",
+    url: "/spelers/john-de-ron",
     imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JDR",
   },
   {

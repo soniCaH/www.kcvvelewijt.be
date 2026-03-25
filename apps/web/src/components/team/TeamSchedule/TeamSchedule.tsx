@@ -121,8 +121,8 @@ export function TeamSchedule({
     <div className={cn("space-y-3", className)}>
       {filteredMatches.map((match, index) => {
         const matchHref = teamSlug
-          ? `/game/${match.id}?from=/team/${encodeURIComponent(teamSlug)}&fromTab=matches`
-          : `/game/${match.id}`;
+          ? `/wedstrijd/${match.id}?from=/team/${encodeURIComponent(teamSlug)}&fromTab=matches`
+          : `/wedstrijd/${match.id}`;
 
         return (
           <MatchResultRow

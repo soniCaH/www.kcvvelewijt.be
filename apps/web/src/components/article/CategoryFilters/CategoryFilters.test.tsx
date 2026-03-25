@@ -94,17 +94,17 @@ describe("CategoryFilters", () => {
       render(<CategoryFilters categories={mockCategories} />);
 
       const allTab = screen.getByRole("tab", { name: /alles/i });
-      expect(allTab).toHaveAttribute("href", "/news");
+      expect(allTab).toHaveAttribute("href", "/nieuws");
     });
 
     it("should set correct href for category tabs", () => {
       render(<CategoryFilters categories={mockCategories} />);
 
       const nieuwsTab = screen.getByRole("tab", { name: /nieuws/i });
-      expect(nieuwsTab).toHaveAttribute("href", "/news?category=nieuws");
+      expect(nieuwsTab).toHaveAttribute("href", "/nieuws?category=nieuws");
 
       const jeugdTab = screen.getByRole("tab", { name: /jeugd/i });
-      expect(jeugdTab).toHaveAttribute("href", "/news?category=jeugd");
+      expect(jeugdTab).toHaveAttribute("href", "/nieuws?category=jeugd");
     });
 
     it("should encode category slugs in URLs", () => {
@@ -121,7 +121,7 @@ describe("CategoryFilters", () => {
       render(<CategoryFilters categories={specialCategories} />);
 
       const tab = screen.getByRole("tab", { name: /test & demo/i });
-      expect(tab).toHaveAttribute("href", "/news?category=test%26demo");
+      expect(tab).toHaveAttribute("href", "/nieuws?category=test%26demo");
     });
   });
 

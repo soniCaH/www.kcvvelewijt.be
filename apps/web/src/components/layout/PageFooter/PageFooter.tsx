@@ -10,7 +10,7 @@ export interface PageFooterProps {
 }
 
 const clubLinks = [
-  { href: "/news", label: "Nieuws" },
+  { href: "/nieuws", label: "Nieuws" },
   { href: "/calendar", label: "Kalender" },
   { href: "/teams", label: "Ploegen" },
   { href: "/sponsors", label: "Sponsors" },

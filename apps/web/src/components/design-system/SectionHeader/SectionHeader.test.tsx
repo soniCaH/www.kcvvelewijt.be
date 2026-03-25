@@ -34,16 +34,16 @@ describe("SectionHeader", () => {
         <SectionHeader
           title="Nieuws"
           linkText="Alle berichten"
-          linkHref="/news"
+          linkHref="/nieuws"
         />,
       );
       const link = screen.getByRole("link", { name: /Alle berichten/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/news");
+      expect(link).toHaveAttribute("href", "/nieuws");
     });
 
     it("does not render link when linkText is omitted", () => {
-      render(<SectionHeader title="Nieuws" linkHref="/news" />);
+      render(<SectionHeader title="Nieuws" linkHref="/nieuws" />);
       expect(screen.queryByRole("link")).not.toBeInTheDocument();
     });
 

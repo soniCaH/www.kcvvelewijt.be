@@ -5,7 +5,7 @@ import { FeaturedArticles, type FeaturedArticle } from "./FeaturedArticles";
 describe("FeaturedArticles", () => {
   const mockArticles: FeaturedArticle[] = [
     {
-      href: "/news/article-1",
+      href: "/nieuws/article-1",
       title: "First Featured Article",
       description: "This is the first featured article description",
       imageUrl: "/images/article-1.jpg",
@@ -14,7 +14,7 @@ describe("FeaturedArticles", () => {
       tags: [{ name: "Ploeg" }, { name: "Nieuws" }],
     },
     {
-      href: "/news/article-2",
+      href: "/nieuws/article-2",
       title: "Second Featured Article",
       description: "This is the second featured article description",
       imageUrl: "/images/article-2.jpg",
@@ -23,7 +23,7 @@ describe("FeaturedArticles", () => {
       tags: [{ name: "Jeugd" }],
     },
     {
-      href: "/news/article-3",
+      href: "/nieuws/article-3",
       title: "Third Featured Article",
       imageUrl: "/images/article-3.jpg",
       imageAlt: "Article 3 image",
@@ -292,7 +292,7 @@ describe("FeaturedArticles", () => {
     render(<FeaturedArticles articles={mockArticles} />);
 
     const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", "/news/article-1");
+    expect(link).toHaveAttribute("href", "/nieuws/article-1");
   });
 
   it("marks the current article dot as active via aria-current", () => {

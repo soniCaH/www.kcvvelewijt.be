@@ -68,7 +68,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Vermeersch",
     position: "Keeper",
     number: 1,
-    href: "/players/thomas-vermeersch",
+    href: "/spelers/thomas-vermeersch",
     imageUrl: PLAYER_IMAGES.louie,
   },
   {
@@ -77,7 +77,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Willems",
     position: "Verdediger",
     number: 4,
-    href: "/players/jef-willems",
+    href: "/spelers/jef-willems",
   },
   {
     id: "player-3",
@@ -85,7 +85,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Claes",
     position: "Verdediger",
     number: 5,
-    href: "/players/arne-claes",
+    href: "/spelers/arne-claes",
     imageUrl: PLAYER_IMAGES.chiel,
   },
   {
@@ -94,7 +94,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Mertens",
     position: "Middenvelder",
     number: 8,
-    href: "/players/lucas-mertens",
+    href: "/spelers/lucas-mertens",
     imageUrl: PLAYER_IMAGES.yoran,
   },
   {
@@ -103,7 +103,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Jacobs",
     position: "Middenvelder",
     number: 10,
-    href: "/players/ruben-jacobs",
+    href: "/spelers/ruben-jacobs",
   },
   {
     id: "player-6",
@@ -111,7 +111,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Van den Berg",
     position: "Aanvaller",
     number: 9,
-    href: "/players/stef-van-den-berg",
+    href: "/spelers/stef-van-den-berg",
     imageUrl: PLAYER_IMAGES.jarne,
   },
   {
@@ -120,7 +120,7 @@ const mockPlayers: RosterPlayer[] = [
     lastName: "Wouters",
     position: "Aanvaller",
     number: 11,
-    href: "/players/dries-wouters",
+    href: "/spelers/dries-wouters",
   },
 ];
 

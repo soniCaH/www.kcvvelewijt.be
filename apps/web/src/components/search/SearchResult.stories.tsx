@@ -28,7 +28,7 @@ export const Article: Story = {
       title: "KCVV Elewijt wint belangrijke wedstrijd",
       description:
         "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen van de tegenstander. De goals kwamen van De Bruyne, Lukaku en Hazard.",
-      url: "/news/kcvv-elewijt-wint-belangrijke-wedstrijd",
+      url: "/nieuws/kcvv-elewijt-wint-belangrijke-wedstrijd",
       imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match+Win",
       tags: ["A-ploeg", "Wedstrijdverslag", "Overwinning"],
       date: "2026-01-15T10:00:00Z",
@@ -47,7 +47,7 @@ export const ArticleNoImage: Story = {
       title: "Trainingsschema aangepast voor winterperiode",
       description:
         "Wegens de koude temperaturen is het trainingsschema aangepast. Alle teams trainen nu binnen.",
-      url: "/news/trainingsschema-aangepast",
+      url: "/nieuws/trainingsschema-aangepast",
       tags: ["Training", "Algemeen"],
       date: "2026-01-10T14:30:00Z",
     },
@@ -64,7 +64,7 @@ export const Player: Story = {
       type: "player",
       title: "John De Ron",
       description: "Doelman",
-      url: "/players/john-de-ron",
+      url: "/spelers/john-de-ron",
       imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JDR",
     },
   },
@@ -80,7 +80,7 @@ export const PlayerNoImage: Story = {
       type: "player",
       title: "Kevin Van Ransbeeck",
       description: "Verdediger",
-      url: "/players/kevin-van-ransbeeck",
+      url: "/spelers/kevin-van-ransbeeck",
     },
   },
 };

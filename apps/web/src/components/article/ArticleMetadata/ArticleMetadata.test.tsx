@@ -6,9 +6,9 @@ describe("ArticleMetadata", () => {
   const defaultProps = {
     author: "Jan Janssens",
     date: "15/01/2025",
-    category: { name: "Eerste ploeg", href: "/news?category=eerste-ploeg" },
+    category: { name: "Eerste ploeg", href: "/nieuws?category=eerste-ploeg" },
     shareConfig: {
-      url: "https://kcvvelewijt.be/news/test",
+      url: "https://kcvvelewijt.be/nieuws/test",
       title: "Test Article",
     },
   };
@@ -17,10 +17,13 @@ describe("ArticleMetadata", () => {
     render(<ArticleMetadata {...defaultProps} />);
     // "News" breadcrumb link
     const newsLink = screen.getByRole("link", { name: "Nieuws" });
-    expect(newsLink).toHaveAttribute("href", "/news");
+    expect(newsLink).toHaveAttribute("href", "/nieuws");
     // Category breadcrumb link
     const categoryLink = screen.getByRole("link", { name: "Eerste ploeg" });
-    expect(categoryLink).toHaveAttribute("href", "/news?category=eerste-ploeg");
+    expect(categoryLink).toHaveAttribute(
+      "href",
+      "/nieuws?category=eerste-ploeg",
+    );
   });
 
   it("renders breadcrumb separator between News and category", () => {

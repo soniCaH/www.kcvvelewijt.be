@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 const mockArticles = [
   {
-    href: "/news/2025-06-20-definitieve-reeksindeling-3e-nationale-bis",
+    href: "/nieuws/2025-06-20-definitieve-reeksindeling-3e-nationale-bis",
     title: "Definitieve reeksindeling 3e Nationale BIS",
     description:
       "De reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is bekend. KCVV Elewijt komt uit in reeks A.",
@@ -35,7 +35,7 @@ const mockArticles = [
     tags: [{ name: "Ploeg" }, { name: "Competitie" }],
   },
   {
-    href: "/news/2025-03-25-overlijden-jean-lepage",
+    href: "/nieuws/2025-03-25-overlijden-jean-lepage",
     title: "Overlijden Jean Lepage",
     description:
       "Met diepe droefheid hebben we vernomen dat Jean Lepage op 82-jarige leeftijd is overleden. Jean was jarenlang een trouwe supporter en vrijwilliger van KCVV Elewijt.",
@@ -45,7 +45,7 @@ const mockArticles = [
     tags: [{ name: "In Memoriam" }],
   },
   {
-    href: "/news/2025-01-15-winterstage-spanje",
+    href: "/nieuws/2025-01-15-winterstage-spanje",
     title: "Winterstage in Spanje: voorbereiding op play-offs",
     description:
       "De A-ploeg vertrekt volgende week naar Spanje voor een intensieve winterstage. Coach Deferm wil zijn spelers optimaal voorbereiden op de cruciale play-off wedstrijden.",

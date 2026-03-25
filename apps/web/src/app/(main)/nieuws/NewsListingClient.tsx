@@ -142,8 +142,8 @@ export function NewsListingClient({
 
         // Update URL and scroll only after successful fetch
         const url = categoryFilter
-          ? `/news?category=${encodeURIComponent(categoryFilter)}`
-          : "/news";
+          ? `/nieuws?category=${encodeURIComponent(categoryFilter)}`
+          : "/nieuws";
         window.history.replaceState({}, "", url);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (err) {
@@ -176,7 +176,7 @@ export function NewsListingClient({
       variant={variant}
       className={className}
       title={article.title}
-      href={`/news/${article.slug}`}
+      href={`/nieuws/${article.slug}`}
       imageUrl={article.coverImageUrl}
       imageAlt={article.title}
       badge={article.tags[0] ?? undefined}

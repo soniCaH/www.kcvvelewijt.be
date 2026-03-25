@@ -42,9 +42,9 @@ export const Default: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "15/01/2025",
-    category: { name: "Eerste ploeg", href: "/news?category=eerste-ploeg" },
+    category: { name: "Eerste ploeg", href: "/nieuws?category=eerste-ploeg" },
     shareConfig: {
-      url: "https://kcvvelewijt.be/news/belangrijke-overwinning",
+      url: "https://kcvvelewijt.be/nieuws/belangrijke-overwinning",
       title: "KCVV Elewijt behaalt belangrijke overwinning",
       twitterHandle: "@kcvve",
       hashtags: ["voetbal", "kcvv"],
@@ -60,7 +60,7 @@ export const WithoutCategory: Story = {
     author: "KCVV Elewijt",
     date: "12/01/2025",
     shareConfig: {
-      url: "https://kcvvelewijt.be/news/test",
+      url: "https://kcvvelewijt.be/nieuws/test",
       title: "Test Article",
     },
   },
@@ -73,7 +73,7 @@ export const WithoutShare: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "10/01/2025",
-    category: { name: "Jeugd", href: "/news?category=jeugd" },
+    category: { name: "Jeugd", href: "/nieuws?category=jeugd" },
   },
 };
 
@@ -94,9 +94,9 @@ export const InContext: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "18/01/2025",
-    category: { name: "Transfer", href: "/news?category=transfer" },
+    category: { name: "Transfer", href: "/nieuws?category=transfer" },
     shareConfig: {
-      url: "https://kcvvelewijt.be/news/nieuwe-speler",
+      url: "https://kcvvelewijt.be/nieuws/nieuwe-speler",
       title: "Nieuwe speler aangekondigd",
       twitterHandle: "@kcvve",
       hashtags: ["transfer", "kcvv"],

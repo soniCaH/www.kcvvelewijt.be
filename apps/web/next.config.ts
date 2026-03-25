@@ -12,6 +12,32 @@ const nextConfig: NextConfig = {
         destination: "/team/:slug",
         permanent: true, // 308 redirect for SEO
       },
+      // #819 — Dutch URL renames
+      {
+        source: "/players/:slug",
+        destination: "/spelers/:slug",
+        permanent: true,
+      },
+      {
+        source: "/news",
+        destination: "/nieuws",
+        permanent: true,
+      },
+      {
+        source: "/news/:slug",
+        destination: "/nieuws/:slug",
+        permanent: true,
+      },
+      {
+        source: "/game/:matchId",
+        destination: "/wedstrijd/:matchId",
+        permanent: true,
+      },
+      {
+        source: "/search",
+        destination: "/zoeken",
+        permanent: true,
+      },
     ];
   },
 

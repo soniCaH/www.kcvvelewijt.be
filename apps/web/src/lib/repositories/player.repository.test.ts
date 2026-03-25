@@ -77,7 +77,7 @@ describe("PlayerRepository", () => {
         position: "Aanvaller",
         number: 7,
         imageUrl: "https://cdn.sanity.io/transparent.webp",
-        href: "/players/12345",
+        href: "/spelers/12345",
         bio: row.bio,
         birthDate: "1995-03-15",
         nationality: "Belgisch",
@@ -257,7 +257,7 @@ describe("PlayerRepository", () => {
       );
 
       expect(result).not.toBeNull();
-      expect(result!.href).toBe("/players/99");
+      expect(result!.href).toBe("/spelers/99");
     });
 
     it("returns null for unknown psdId", async () => {

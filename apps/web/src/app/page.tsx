@@ -229,7 +229,7 @@ export default async function HomePage() {
               featuredEvent={featuredEvent}
               title="Laatste nieuws"
               showViewAll
-              viewAllHref="/news"
+              viewAllHref="/nieuws"
             />
           ),
           transition: { type: "diagonal", direction: "left" },

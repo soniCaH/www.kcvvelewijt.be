@@ -140,7 +140,7 @@ export const SearchInterface = ({
         params.set("type", activeType);
       }
 
-      router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
+      router.push(`/zoeken${params.toString() ? `?${params.toString()}` : ""}`);
 
       // Perform search
       performSearch(searchQuery);
@@ -165,7 +165,7 @@ export const SearchInterface = ({
         params.set("type", type);
       }
 
-      router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
+      router.push(`/zoeken${params.toString() ? `?${params.toString()}` : ""}`);
 
       // No need to re-fetch: SearchResults handles client-side filtering
     },

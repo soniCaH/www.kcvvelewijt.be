@@ -102,7 +102,7 @@ describe("RelatedPaths", () => {
     expect(link).toHaveAttribute("href", "/over-ons");
   });
 
-  it("links article items to /news/<slug>", () => {
+  it("links article items to /nieuws/<slug>", () => {
     vi.mocked(useRelatedContent).mockReturnValue({
       results: [
         {
@@ -120,6 +120,6 @@ describe("RelatedPaths", () => {
     render(<RelatedPaths sanityId="doc-abc" />);
 
     const link = screen.getByRole("link", { name: /Nieuws artikel/ });
-    expect(link).toHaveAttribute("href", "/news/nieuws-artikel");
+    expect(link).toHaveAttribute("href", "/nieuws/nieuws-artikel");
   });
 });

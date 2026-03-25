@@ -52,9 +52,9 @@ describe("buildRelatedContent", () => {
     });
 
     expect(result).toEqual<RelatedContent[]>([
-      { title: "Article One", href: "/news/article-one", type: "article" },
-      { title: "Article Two", href: "/news/article-two", type: "article" },
-      { title: "Jan Janssens", href: "/players/123", type: "player" },
+      { title: "Article One", href: "/nieuws/article-one", type: "article" },
+      { title: "Article Two", href: "/nieuws/article-two", type: "article" },
+      { title: "Jan Janssens", href: "/spelers/123", type: "player" },
       {
         title: "Marc De Trainer",
         href: "/club/organigram?member=staff-1",
@@ -102,8 +102,8 @@ describe("buildRelatedContent", () => {
     });
 
     expect(result).toEqual<RelatedContent[]>([
-      { title: "Jan Janssens", href: "/players/123", type: "player" },
-      { title: "Piet Pieters", href: "/players/456", type: "player" },
+      { title: "Jan Janssens", href: "/spelers/123", type: "player" },
+      { title: "Piet Pieters", href: "/spelers/456", type: "player" },
       { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
     ]);
   });
@@ -121,8 +121,8 @@ describe("buildRelatedContent", () => {
     });
 
     expect(result).toEqual<RelatedContent[]>([
-      { title: "Article One", href: "/news/article-one", type: "article" },
-      { title: "Article Two", href: "/news/article-two", type: "article" },
+      { title: "Article One", href: "/nieuws/article-one", type: "article" },
+      { title: "Article Two", href: "/nieuws/article-two", type: "article" },
     ]);
   });
 
@@ -146,7 +146,7 @@ describe("buildRelatedContent", () => {
     });
 
     expect(result).toEqual<RelatedContent[]>([
-      { title: "Jan Janssens", href: "/players/123", type: "player" },
+      { title: "Jan Janssens", href: "/spelers/123", type: "player" },
       { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
     ]);
   });
@@ -160,7 +160,7 @@ describe("buildRelatedContent", () => {
     });
 
     expect(result).toEqual<RelatedContent[]>([
-      { title: "Good", href: "/news/good", type: "article" },
+      { title: "Good", href: "/nieuws/good", type: "article" },
     ]);
   });
 });

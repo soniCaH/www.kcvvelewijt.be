@@ -20,7 +20,7 @@ export const RelatedArticlesSection = ({
         {articles.map((article) => (
           <Link
             key={article.id}
-            href={`/news/${article.slug}`}
+            href={`/nieuws/${article.slug}`}
             className="group block overflow-hidden rounded-lg border border-gray-200 hover:border-kcvv-green-bright transition-colors"
           >
             {article.coverImageUrl && (

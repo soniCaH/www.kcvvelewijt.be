@@ -30,7 +30,7 @@ describe("generateIcal", () => {
     expect(output).toContain("BEGIN:VEVENT");
     expect(output).toContain("SUMMARY:KCVV Elewijt - KFC Turnhout");
     expect(output).toContain("kcvv-match-12345@kcvvelewijt.be");
-    expect(output).toContain("https://www.kcvvelewijt.be/game/12345");
+    expect(output).toContain("https://www.kcvvelewijt.be/wedstrijd/12345");
     expect(output).toContain("2e Nationale — Speeldag 20");
     expect(output).toContain("END:VCALENDAR");
   });

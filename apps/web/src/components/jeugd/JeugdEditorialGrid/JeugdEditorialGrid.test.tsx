@@ -42,7 +42,7 @@ describe("JeugdEditorialGrid", () => {
 
     expect(hrefs).toContain("/club/register");
     expect(hrefs).toContain("/jeugd/visie");
-    expect(hrefs).toContain("/news/prosoccerdata");
+    expect(hrefs).toContain("/nieuws/prosoccerdata");
     expect(hrefs).toContain("/club/organigram");
     expect(hrefs).toContain("/hulp");
     expect(hrefs).toContain("/jeugd/medisch");
@@ -63,9 +63,9 @@ describe("JeugdEditorialGrid", () => {
 
     const links = screen.getAllByRole("link");
     const hrefs = links.map((link) => link.getAttribute("href"));
-    expect(hrefs).toContain("/news/article-one");
-    expect(hrefs).toContain("/news/article-two");
-    expect(hrefs).toContain("/news/article-three");
+    expect(hrefs).toContain("/nieuws/article-one");
+    expect(hrefs).toContain("/nieuws/article-two");
+    expect(hrefs).toContain("/nieuws/article-three");
   });
 
   it("renders 9 total cards when 3 articles provided", () => {

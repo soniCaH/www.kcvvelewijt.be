@@ -9,7 +9,7 @@ function getHref(item: SemanticSearchResult): string {
     case "responsibilityPath":
       return `/hulp?path=${item.slug}`;
     case "article":
-      return `/news/${item.slug}`;
+      return `/nieuws/${item.slug}`;
     default:
       return `/${item.slug}`;
   }

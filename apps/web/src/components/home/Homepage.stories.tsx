@@ -27,7 +27,7 @@ type Story = StoryObj<typeof meta>;
 
 const mockFeaturedArticles = [
   {
-    href: "/news/2025-06-20-definitieve-reeksindeling-3e-nationale-bis",
+    href: "/nieuws/2025-06-20-definitieve-reeksindeling-3e-nationale-bis",
     title: "Definitieve reeksindeling 3e Nationale BIS",
     description:
       "De reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is bekend. KCVV Elewijt komt uit in reeks A.",
@@ -37,7 +37,7 @@ const mockFeaturedArticles = [
     tags: [{ name: "Ploeg" }, { name: "Competitie" }],
   },
   {
-    href: "/news/2025-03-25-overlijden-jean-lepage",
+    href: "/nieuws/2025-03-25-overlijden-jean-lepage",
     title: "Overlijden Jean Lepage",
     description:
       "Met diepe droefheid hebben we vernomen dat Jean Lepage op 82-jarige leeftijd is overleden. Jean was jarenlang een trouwe supporter en vrijwilliger van KCVV Elewijt.",
@@ -47,7 +47,7 @@ const mockFeaturedArticles = [
     tags: [{ name: "In Memoriam" }],
   },
   {
-    href: "/news/2025-01-15-winterstage-spanje",
+    href: "/nieuws/2025-01-15-winterstage-spanje",
     title: "Winterstage in Spanje: voorbereiding op play-offs",
     description:
       "De A-ploeg vertrekt volgende week naar Spanje voor een intensieve winterstage. Coach Deferm wil zijn spelers optimaal voorbereiden op de cruciale play-off wedstrijden.",
@@ -60,7 +60,7 @@ const mockFeaturedArticles = [
 
 const mockLatestNews = [
   {
-    href: "/news/2025-01-10-jeugdwerking-uitbreiding",
+    href: "/nieuws/2025-01-10-jeugdwerking-uitbreiding",
     title: "Jeugdwerking breidt uit met nieuwe trainers",
     imageUrl: "https://placehold.co/600x400/ffd700/000?text=Jeugd",
     imageAlt: "Jeugdtraining",
@@ -68,7 +68,7 @@ const mockLatestNews = [
     tags: [{ name: "Jeugd" }],
   },
   {
-    href: "/news/2025-01-05-nieuwe-sponsor",
+    href: "/nieuws/2025-01-05-nieuwe-sponsor",
     title: "Nieuwe hoofdsponsor voor seizoen 2025-2026",
     imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Sponsor",
     imageAlt: "Sponsorcontract ondertekening",
@@ -76,7 +76,7 @@ const mockLatestNews = [
     tags: [{ name: "Sponsoring" }],
   },
   {
-    href: "/news/2024-12-20-kersttoernooi",
+    href: "/nieuws/2024-12-20-kersttoernooi",
     title: "Kersttoernooi groot succes",
     imageUrl: "https://placehold.co/600x400/ff0000/fff?text=Kerst",
     imageAlt: "Kersttoernooi",
@@ -84,7 +84,7 @@ const mockLatestNews = [
     tags: [{ name: "Evenement" }, { name: "Jeugd" }],
   },
   {
-    href: "/news/2024-12-15-algemene-vergadering",
+    href: "/nieuws/2024-12-15-algemene-vergadering",
     title: "Algemene vergadering uitnodiging",
     imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Vergadering",
     imageAlt: "Algemene vergadering",
@@ -92,7 +92,7 @@ const mockLatestNews = [
     tags: [{ name: "Bestuur" }],
   },
   {
-    href: "/news/2024-12-10-spelersvoorstelling",
+    href: "/nieuws/2024-12-10-spelersvoorstelling",
     title: "Spelersvoorstelling seizoen 2024-2025",
     imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Spelers",
     imageAlt: "Spelersvoorstelling",
@@ -100,7 +100,7 @@ const mockLatestNews = [
     tags: [{ name: "Ploeg" }, { name: "Evenement" }],
   },
   {
-    href: "/news/2024-12-05-clubkampioenschap",
+    href: "/nieuws/2024-12-05-clubkampioenschap",
     title: "Clubkampioenschap jeugd 2024",
     imageUrl: "https://placehold.co/600x400/ffd700/000?text=Kampioen",
     imageAlt: "Clubkampioenschap",
@@ -190,7 +190,7 @@ function buildSections(
           featuredEvent={featuredEvent}
           title="Laatste nieuws"
           showViewAll
-          viewAllHref="/news"
+          viewAllHref="/nieuws"
         />
       ),
       transition: { type: "diagonal", direction: "left" },

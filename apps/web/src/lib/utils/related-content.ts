@@ -47,7 +47,7 @@ export function buildRelatedContent(
     .filter((a) => a?.slug?.current)
     .map((a) => ({
       title: a.title,
-      href: `/news/${a.slug.current}`,
+      href: `/nieuws/${a.slug.current}`,
       type: "article" as const,
     }));
 
@@ -58,7 +58,7 @@ export function buildRelatedContent(
   );
   const players: RelatedContent[] = uniquePlayers.map((p) => ({
     title: [p.firstName, p.lastName].filter(Boolean).join(" "),
-    href: `/players/${p.psdId}`,
+    href: `/spelers/${p.psdId}`,
     type: "player" as const,
   }));
 

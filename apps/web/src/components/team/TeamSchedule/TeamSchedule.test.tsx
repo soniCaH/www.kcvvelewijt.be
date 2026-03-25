@@ -113,7 +113,7 @@ describe("TeamSchedule", () => {
     it("links to match detail page", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
       const links = screen.getAllByRole("link");
-      expect(links[0]).toHaveAttribute("href", "/game/1001");
+      expect(links[0]).toHaveAttribute("href", "/wedstrijd/1001");
     });
 
     it("includes back-navigation params in href when teamSlug is provided", () => {
@@ -127,7 +127,7 @@ describe("TeamSchedule", () => {
       const links = screen.getAllByRole("link");
       expect(links[0]).toHaveAttribute(
         "href",
-        "/game/1001?from=/team/kcvv-elewijt-a&fromTab=matches",
+        "/wedstrijd/1001?from=/team/kcvv-elewijt-a&fromTab=matches",
       );
     });
   });
