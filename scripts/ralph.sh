@@ -40,9 +40,18 @@ pick_next_issue() {
   fi
 
   local candidates
-  candidates=$(gh issue list "${args[@]}" 2>/dev/null || echo "")
+  if ! candidates=$(gh issue list "${args[@]}" 2>&1); then
+    echo "❌ gh issue list failed: ${candidates}" >&2
+    return 1
+  fi
+
+  if [ -z "$candidates" ]; then
+    echo ""
+    return
+  fi
 
   # Filter out issues with open blockers (checked via GraphQL blockedBy)
+  local any_graphql_failed=false
   for num in $candidates; do
     local open_blockers
     if ! open_blockers=$(gh api graphql -f query="
@@ -56,6 +65,7 @@ pick_next_issue() {
         }
       }" --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length' 2>&1); then
       echo "⚠️  Warning: blockedBy query failed for issue #${num}, skipping: ${open_blockers}" >&2
+      any_graphql_failed=true
       continue
     fi
 
@@ -64,6 +74,11 @@ pick_next_issue() {
       return
     fi
   done
+
+  if [ "$any_graphql_failed" = true ]; then
+    echo "❌ One or more blockedBy GraphQL queries failed — cannot reliably determine ready issues." >&2
+    return 1
+  fi
 
   echo ""
 }
@@ -194,7 +209,7 @@ Output the PR URL as the last line of your response.
   ISSUE_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/${issue}" --jq '.node_id')
   BLOCKER_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/\${BLOCKER_NUM}" --jq '.node_id')
   if gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>&1; then
-    gh issue edit ${issue} --remove-label "in-progress"
+    gh issue edit ${issue} --remove-label "in-progress" --add-label "ready"
     gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Blocking relationship set via API."
   else
     echo "⚠️  Warning: failed to set blockedBy relationship (issue node: \${ISSUE_NODE_ID}, blocker #\${BLOCKER_NUM}). Restoring in-progress label." >&2
@@ -230,7 +245,10 @@ i=0
 while [ $i -lt $MAX ]; do
   i=$((i + 1))
 
-  ISSUE=$(pick_next_issue)
+  if ! ISSUE=$(pick_next_issue); then
+    echo "❌ Failed to fetch issue queue. Aborting."
+    exit 1
+  fi
 
   if [ -z "$ISSUE" ] || [ "$ISSUE" = "null" ]; then
     if [ -n "$MILESTONE" ]; then
