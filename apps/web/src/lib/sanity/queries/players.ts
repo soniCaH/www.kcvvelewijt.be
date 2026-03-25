@@ -1,7 +1,7 @@
 import { defineQuery } from "groq";
 
 export const PLAYERS_QUERY =
-  defineQuery(`*[_type == "player"] | order(lastName asc) {
+  defineQuery(`*[_type == "player" && archived != true] | order(lastName asc) {
   _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
   birthDate, nationality, height, weight,
   "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
