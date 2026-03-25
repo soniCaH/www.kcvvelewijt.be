@@ -38,6 +38,8 @@ export interface TeamOverviewProps {
   emptyMessage?: string;
   /** Show filter buttons */
   showFilters?: boolean;
+  /** Color scheme for rendering on dark backgrounds */
+  colorScheme?: "light" | "dark";
   /** Additional CSS classes */
   className?: string;
 }
@@ -55,22 +57,17 @@ function parseAgeGroup(ageGroup: string | undefined): number {
 }
 
 /**
- * Map an age-group identifier to its human-readable age category label.
+ * Map an age-group identifier to its 3-tier category label.
  *
  * @param ageGroup - Age group string such as `"U15"`, or `undefined` when not available.
- * @returns One of: `"Kleuters (U6-U7)"`, `"Duiveltjes (U8-U9)"`, `"Preminiemen (U10-U11)"`,
- * `"Miniemen (U12-U13)"`, `"Kadetten (U14-U15)"`, `"Scholieren (U16-U17)"`,
- * `"Beloften (U21)"`, or `"Overig"` depending on the parsed age.
+ * @returns One of: `"Onderbouw (U6–U9)"`, `"Middenbouw (U10–U13)"`,
+ * `"Bovenbouw (U14–U21)"`, or `"Overig"` depending on the parsed age.
  */
 function getAgeCategory(ageGroup: string | undefined): string {
   const age = parseAgeGroup(ageGroup);
-  if (age <= 7) return "Kleuters (U6-U7)";
-  if (age <= 9) return "Duiveltjes (U8-U9)";
-  if (age <= 11) return "Preminiemen (U10-U11)";
-  if (age <= 13) return "Miniemen (U12-U13)";
-  if (age <= 15) return "Kadetten (U14-U15)";
-  if (age <= 17) return "Scholieren (U16-U17)";
-  if (age <= 21) return "Beloften (U21)";
+  if (age >= 6 && age <= 9) return "Onderbouw (U6–U9)";
+  if (age >= 10 && age <= 13) return "Middenbouw (U10–U13)";
+  if (age >= 14 && age <= 21) return "Bovenbouw (U14–U21)";
   return "Overig";
 }
 
@@ -95,6 +92,7 @@ export function TeamOverview({
   isLoading = false,
   emptyMessage = "Geen teams gevonden",
   showFilters = false,
+  colorScheme = "light",
   className,
 }: TeamOverviewProps) {
   const [activeFilter, setActiveFilter] = useState<
@@ -135,27 +133,39 @@ export function TeamOverview({
     });
   }, [filteredTeams]);
 
-  // Group teams by age category if enabled
+  // Group teams by age category if enabled, ordered Bovenbouw → Middenbouw → Onderbouw
   const groupedTeams = useMemo(() => {
     if (!groupByAge) return null;
 
+    const tierOrder = [
+      "Bovenbouw (U14–U21)",
+      "Middenbouw (U10–U13)",
+      "Onderbouw (U6–U9)",
+      "Overig",
+    ];
+
     const groups: Record<string, TeamData[]> = {};
     sortedTeams.forEach((team) => {
-      if (team.teamType === "youth") {
-        const category = getAgeCategory(team.ageGroup);
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(team);
-      } else {
-        // Non-youth teams go into "Overig" category
-        const category = "Overig";
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(team);
-      }
+      const category =
+        team.teamType === "youth" ? getAgeCategory(team.ageGroup) : "Overig";
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(team);
     });
-    return groups;
+
+    // Return ordered map
+    const ordered: Record<string, TeamData[]> = {};
+    for (const tier of tierOrder) {
+      if (groups[tier]) ordered[tier] = groups[tier];
+    }
+    // Add any unexpected categories
+    for (const key of Object.keys(groups)) {
+      if (!ordered[key]) ordered[key] = groups[key];
+    }
+    return ordered;
   }, [sortedTeams, groupByAge]);
 
   const isCompact = variant === "compact";
+  const isDark = colorScheme === "dark";
 
   // Loading skeleton
   if (isLoading) {
@@ -189,7 +199,7 @@ export function TeamOverview({
       <div
         className={cn(
           "flex items-center justify-center py-12",
-          "text-gray-500 text-center",
+          isDark ? "text-white/60 text-center" : "text-gray-500 text-center",
           className,
         )}
       >
@@ -229,7 +239,12 @@ export function TeamOverview({
         <div className="space-y-8">
           {Object.entries(groupedTeams).map(([category, categoryTeams]) => (
             <section key={category}>
-              <h3 className="text-lg font-bold text-gray-900 mb-4 font-title">
+              <h3
+                className={cn(
+                  "text-lg font-bold mb-4 font-title",
+                  isDark ? "text-white" : "text-gray-900",
+                )}
+              >
                 {category}
               </h3>
               <div

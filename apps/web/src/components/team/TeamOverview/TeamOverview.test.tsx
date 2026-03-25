@@ -130,8 +130,8 @@ describe("TeamOverview", () => {
   });
 
   describe("Grouping", () => {
-    it("should group youth teams by age category when groupByAge is true", () => {
-      const teamsWithDuplicateCategory = [
+    it("should group youth teams into 3 tiers when groupByAge is true", () => {
+      const teamsWithVariousAges = [
         ...mockYouthTeams,
         { name: "U15B", href: "/u15b", ageGroup: "U15", teamType: "youth" },
         { name: "U8", href: "/u8", ageGroup: "U8", teamType: "youth" },
@@ -140,33 +140,61 @@ describe("TeamOverview", () => {
 
       render(
         <TeamOverview
-          teams={teamsWithDuplicateCategory}
+          teams={teamsWithVariousAges}
           groupByAge
           teamType="youth"
         />,
       );
-      // Should have section headings
-      expect(screen.getByText("Kleuters (U6-U7)")).toBeInTheDocument();
-      expect(screen.getByText("Duiveltjes (U8-U9)")).toBeInTheDocument();
-      expect(screen.getByText("Preminiemen (U10-U11)")).toBeInTheDocument();
-      expect(screen.getByText("Miniemen (U12-U13)")).toBeInTheDocument();
-      expect(screen.getByText("Kadetten (U14-U15)")).toBeInTheDocument();
-      expect(screen.getByText("Scholieren (U16-U17)")).toBeInTheDocument();
+      // Should have 3-tier section headings
+      expect(screen.getByText("Onderbouw (U6–U9)")).toBeInTheDocument();
+      expect(screen.getByText("Middenbouw (U10–U13)")).toBeInTheDocument();
+      expect(screen.getByText("Bovenbouw (U14–U21)")).toBeInTheDocument();
 
-      // Kadetten should have 2 teams
-      const kadetten = screen
-        .getByText("Kadetten (U14-U15)")
+      // Old 7-category headings should NOT appear
+      expect(screen.queryByText("Kleuters (U6-U7)")).not.toBeInTheDocument();
+      expect(screen.queryByText("Duiveltjes (U8-U9)")).not.toBeInTheDocument();
+      expect(screen.queryByText("Kadetten (U14-U15)")).not.toBeInTheDocument();
+
+      // Bovenbouw should have U15, U15B, U17 = 3 teams
+      const bovenbouw = screen
+        .getByText("Bovenbouw (U14–U21)")
         .closest("section");
-      expect(within(kadetten!).getAllByRole("article").length).toBe(2);
+      expect(within(bovenbouw!).getAllByRole("article").length).toBe(3);
     });
 
-    it("should group U21 teams in Beloften category", () => {
+    it("should group U21 teams in Bovenbouw tier", () => {
       const teamsWithU21: TeamData[] = [
         ...mockYouthTeams,
         { name: "U21", href: "/team/u21", ageGroup: "U21", teamType: "youth" },
       ];
       render(<TeamOverview teams={teamsWithU21} groupByAge teamType="youth" />);
-      expect(screen.getByText("Beloften (U21)")).toBeInTheDocument();
+      const bovenbouwHeading = screen.getByText("Bovenbouw (U14–U21)");
+      expect(bovenbouwHeading).toBeInTheDocument();
+      const bovenbouwSection = bovenbouwHeading.closest("section")!;
+      expect(
+        within(bovenbouwSection).getAllByText("U21").length,
+      ).toBeGreaterThan(0);
+    });
+
+    it("should order tiers Bovenbouw first, then Middenbouw, then Onderbouw", () => {
+      const teams: TeamData[] = [
+        { name: "U6", href: "/u6", ageGroup: "U6", teamType: "youth" },
+        { name: "U12", href: "/u12", ageGroup: "U12", teamType: "youth" },
+        { name: "U17", href: "/u17", ageGroup: "U17", teamType: "youth" },
+      ];
+      const { container } = render(
+        <TeamOverview teams={teams} groupByAge teamType="youth" />,
+      );
+      // Get only the direct section headings, not TeamCard h3s
+      const sections = container.querySelectorAll("section");
+      const tierNames = Array.from(sections).map(
+        (s) => s.querySelector("h3")?.textContent,
+      );
+      expect(tierNames).toEqual([
+        "Bovenbouw (U14–U21)",
+        "Middenbouw (U10–U13)",
+        "Onderbouw (U6–U9)",
+      ]);
     });
 
     it("should group non-youth teams in Overig category when groupByAge is true", () => {
@@ -177,7 +205,8 @@ describe("TeamOverview", () => {
 
     it("should not group when groupByAge is false", () => {
       render(<TeamOverview teams={mockYouthTeams} teamType="youth" />);
-      expect(screen.queryByText("Kleuters (U6-U7)")).not.toBeInTheDocument();
+      expect(screen.queryByText("Onderbouw (U6–U9)")).not.toBeInTheDocument();
+      expect(screen.queryByText("Bovenbouw (U14–U21)")).not.toBeInTheDocument();
     });
   });
 
@@ -384,6 +413,38 @@ describe("TeamOverview", () => {
       const grid = screen.getByLabelText("Teams laden...");
       expect(grid).toHaveClass("grid-cols-2");
       expect(grid).toHaveClass("lg:grid-cols-4");
+    });
+  });
+
+  describe("Color Scheme", () => {
+    it("should use dark text for group headings by default (light scheme)", () => {
+      render(
+        <TeamOverview teams={mockYouthTeams} groupByAge teamType="youth" />,
+      );
+      const heading = screen.getByText("Onderbouw (U6–U9)");
+      expect(heading.className).toContain("text-gray-900");
+    });
+
+    it("should use white text for group headings when colorScheme is dark", () => {
+      render(
+        <TeamOverview
+          teams={mockYouthTeams}
+          groupByAge
+          teamType="youth"
+          colorScheme="dark"
+        />,
+      );
+      const heading = screen.getByText("Onderbouw (U6–U9)");
+      expect(heading.className).toContain("text-white");
+      expect(heading.className).not.toContain("text-gray-900");
+    });
+
+    it("should use muted white text for empty state when colorScheme is dark", () => {
+      render(<TeamOverview teams={[]} colorScheme="dark" />);
+      const emptyMsg = screen.getByText("Geen teams gevonden");
+      const parent = emptyMsg.closest("div");
+      expect(parent).not.toBeNull();
+      expect(parent!.className).toContain("text-white/60");
     });
   });
 });
