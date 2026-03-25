@@ -45,6 +45,8 @@ function makeSanityWriteClientMock() {
       new Map<string, { psdImageUrl: string | null; hasPsdImage: boolean }>(),
     ),
   );
+  const getActivePlayerPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
 
   const mock: SanityWriteClientInterface = {
     upsertPlayer,
@@ -52,6 +54,8 @@ function makeSanityWriteClientMock() {
     upsertStaff,
     uploadPlayerImage,
     getPlayersImageState,
+    getActivePlayerPsdIds,
+    archivePlayers,
   };
 
   return {
@@ -60,6 +64,8 @@ function makeSanityWriteClientMock() {
     upsertStaff,
     uploadPlayerImage,
     getPlayersImageState,
+    getActivePlayerPsdIds,
+    archivePlayers,
     mock,
   };
 }
@@ -328,6 +334,8 @@ describe("runSync", () => {
           >(),
         ),
       ),
+      getActivePlayerPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],
