@@ -91,6 +91,10 @@ function makeKvStub() {
       store.set(key, value);
       return Promise.resolve();
     }),
+    delete: vi.fn((key: string) => {
+      store.delete(key);
+      return Promise.resolve();
+    }),
     store,
   } as unknown as KVNamespace;
 }
@@ -451,5 +455,112 @@ describe("runSync", () => {
     // With 1 team: nextCursor = (0 + 1) % 1 = 0
     const kvPut = kvStub.put as ReturnType<typeof vi.fn>;
     expect(kvPut).toHaveBeenCalledWith("sync:team-cursor", "0");
+  });
+
+  it("archives orphan player when cycle completes (3 in Sanity, 2 in PSD)", async () => {
+    const kvStub = makeKvStub();
+
+    // PSD returns only 2 players for the single team
+    const psdPlayers: PsdMember[] = [
+      { ...ONE_PLAYER, id: 100 },
+      { ...ONE_PLAYER, id: 200 },
+    ];
+
+    const {
+      getActivePlayerPsdIds,
+      archivePlayers,
+      mock: sanityMock,
+    } = makeSanityWriteClientMock();
+
+    // Sanity has 3 active players — player 300 is the orphan
+    getActivePlayerPsdIds.mockReturnValue(
+      Effect.succeed(["100", "200", "300"]),
+    );
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], psdPlayers);
+
+    await Effect.runPromise(
+      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+    );
+
+    // With 1 team, cursor wraps to 0 immediately → reconciliation runs
+    expect(archivePlayers).toHaveBeenCalledOnce();
+    expect(archivePlayers).toHaveBeenCalledWith(["300"]);
+  });
+
+  it("does not reconcile mid-cycle (cursor not at 0)", async () => {
+    const kvStub = makeKvStub();
+
+    const TWO_TEAMS: PsdTeam[] = [
+      { ...ONE_TEAM, id: 1, name: "Team A" },
+      { ...ONE_TEAM, id: 2, name: "Team B" },
+    ];
+
+    const { archivePlayers, mock: sanityMock } = makeSanityWriteClientMock();
+    const psdMock = makePsdTeamClientMock(TWO_TEAMS, [ONE_PLAYER]);
+
+    // Run 1: processes Team A (cursor 0 → 1), not at end of cycle
+    await Effect.runPromise(
+      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+    );
+
+    expect(archivePlayers).not.toHaveBeenCalled();
+  });
+
+  it("accumulates player IDs across teams and reconciles at cycle end", async () => {
+    const kvStub = makeKvStub();
+
+    const TWO_TEAMS: PsdTeam[] = [
+      { ...ONE_TEAM, id: 1, name: "Team A" },
+      { ...ONE_TEAM, id: 2, name: "Team B" },
+    ];
+
+    // Team A has players 100, 200. Team B has players 200, 300.
+    const psdMock: PsdTeamClientInterface = {
+      getRawTeams: () => Effect.succeed(TWO_TEAMS),
+      getRawMembers: (teamId) =>
+        Effect.succeed(
+          teamId === 1
+            ? [
+                { ...ONE_PLAYER, id: 100 },
+                { ...ONE_PLAYER, id: 200 },
+              ]
+            : [
+                { ...ONE_PLAYER, id: 200 },
+                { ...ONE_PLAYER, id: 300 },
+              ],
+        ),
+      getRawStaff: () => Effect.succeed([]),
+    };
+
+    // Run 1: processes Team A (cursor 0 → 1)
+    const sanity1 = makeSanityWriteClientMock();
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, sanity1.mock, psdMock)),
+      ),
+    );
+    expect(sanity1.archivePlayers).not.toHaveBeenCalled();
+
+    // Run 2: processes Team B (cursor 1 → 0, cycle complete)
+    const sanity2 = makeSanityWriteClientMock();
+    // Sanity has 4 active players — player 400 is the orphan
+    sanity2.getActivePlayerPsdIds.mockReturnValue(
+      Effect.succeed(["100", "200", "300", "400"]),
+    );
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, sanity2.mock, psdMock)),
+      ),
+    );
+
+    // Reconciliation should archive player 400
+    expect(sanity2.archivePlayers).toHaveBeenCalledOnce();
+    expect(sanity2.archivePlayers).toHaveBeenCalledWith(["400"]);
+
+    // KV accumulation key should be cleared after reconciliation
+    const accumulatedIds = await kvStub.get("sync:cycle-player-ids");
+    expect(accumulatedIds).toBeNull();
   });
 });
