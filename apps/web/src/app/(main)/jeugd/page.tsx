@@ -72,7 +72,7 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
         return yield* repo.findPaginated({
           offset: 0,
           limit: 3,
-          category: "jeugd",
+          category: "Jeugd",
         });
       }),
     );
