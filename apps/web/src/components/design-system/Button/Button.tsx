@@ -8,6 +8,7 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { ArrowRight } from "@/lib/icons";
+import { getButtonClasses } from "./button-styles";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "link";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -76,32 +77,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled}
         className={cn(
-          // Base styles
-          "group inline-flex items-center justify-center gap-2",
-          "font-medium transition-all duration-300",
-          "cursor-pointer",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2",
+          getButtonClasses({ variant, size, fullWidth, className }),
           "disabled:opacity-50 disabled:cursor-not-allowed",
-
-          // Variant styles
-          {
-            // Primary: Bright KCVV green
-            "bg-kcvv-green-bright text-white hover:bg-kcvv-green-bright/50":
-              variant === "primary",
-
-            // Secondary: Gray alternative
-            "bg-gray-600 text-white hover:bg-gray-800": variant === "secondary",
-
-            // Ghost: Transparent with border
-            "border-2 border-kcvv-green-bright text-kcvv-green-bright hover:bg-kcvv-green-bright hover:text-white":
-              variant === "ghost",
-
-            // Link: Text only with underline on hover (including arrow)
-            "text-kcvv-green-bright underline-offset-4 hover:underline":
-              variant === "link",
-          },
-
-          // Disabled: prevent hover effects
           {
             "disabled:hover:bg-kcvv-green-bright": variant === "primary",
             "disabled:hover:bg-gray-600": variant === "secondary",
@@ -109,20 +86,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
               variant === "ghost",
             "disabled:hover:no-underline": variant === "link",
           },
-
-          // Size styles
-          {
-            "text-sm px-6 py-2 rounded-[0.25em]": size === "sm",
-            "text-base px-8 py-3 rounded-[0.25em]": size === "md",
-            "text-lg px-10 py-4 rounded-[0.25em]": size === "lg",
-          },
-
-          // Full width
-          {
-            "w-full": fullWidth,
-          },
-
-          className,
         )}
         {...props}
       >
