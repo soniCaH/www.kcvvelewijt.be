@@ -72,6 +72,7 @@ function makeArticleDetailRow(
         title: "Related Article",
         slug: { _type: "slug", current: "related-article" },
         publishAt: "2026-03-19T10:00:00Z",
+        unpublishAt: null,
         coverImageUrl: "https://cdn.sanity.io/related.webp",
       },
     ],
@@ -187,7 +188,7 @@ describe("ArticleRepository", () => {
   });
 
   describe("toHomepageArticle", () => {
-    it("maps fields correctly without description", async () => {
+    it("maps fields correctly", async () => {
       mockFetch.mockResolvedValueOnce([makeArticleListRow()]);
 
       const articles = await runWithRepo(
@@ -198,7 +199,7 @@ describe("ArticleRepository", () => {
       );
 
       const { toHomepageArticle } = await import("./article.repository");
-      const hp = toHomepageArticle(articles[0], false);
+      const hp = toHomepageArticle(articles[0]);
 
       expect(hp.href).toBe("/news/test-article");
       expect(hp.title).toBe("Test Article");
@@ -208,24 +209,6 @@ describe("ArticleRepository", () => {
         { name: "Eerste ploeg" },
         { name: "Wedstrijdverslag" },
       ]);
-      expect(hp).not.toHaveProperty("description");
-    });
-
-    it("includes description property when includeDescription is true", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow()]);
-
-      const articles = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-      );
-
-      const { toHomepageArticle } = await import("./article.repository");
-      const hp = toHomepageArticle(articles[0], true);
-
-      expect(hp).toHaveProperty("description");
-      expect(hp.description).toBeUndefined();
     });
 
     it("handles null coverImageUrl", async () => {
@@ -241,7 +224,7 @@ describe("ArticleRepository", () => {
       );
 
       const { toHomepageArticle } = await import("./article.repository");
-      const hp = toHomepageArticle(articles[0], false);
+      const hp = toHomepageArticle(articles[0]);
 
       expect(hp.imageUrl).toBeUndefined();
     });
@@ -257,7 +240,7 @@ describe("ArticleRepository", () => {
       );
 
       const { toHomepageArticle } = await import("./article.repository");
-      const hp = toHomepageArticle(articles[0], false);
+      const hp = toHomepageArticle(articles[0]);
 
       expect(hp.tags).toEqual([]);
     });

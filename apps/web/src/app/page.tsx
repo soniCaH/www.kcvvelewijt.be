@@ -138,8 +138,8 @@ export default async function HomePage() {
   const matches = matchesResult;
   const banners = bannersResult;
 
-  const featuredArticles = toHomepageArticles(articles.slice(0, 3), true);
-  const newsGridArticles = toHomepageArticles(articles.slice(3, 9), false);
+  const featuredArticles = toHomepageArticles(articles.slice(0, 3));
+  const newsGridArticles = toHomepageArticles(articles.slice(3, 9));
 
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const nextMatch = upcomingMatches[0];

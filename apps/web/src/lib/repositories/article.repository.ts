@@ -81,27 +81,30 @@ function toArticleDetailVM(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
     tags: row.tags ?? [],
     body: row.body,
     relatedArticles:
-      row.relatedArticles?.map((a) => ({
-        id: a._id,
-        title: a.title ?? "",
-        slug: a.slug?.current ?? "",
-        publishedAt: a.publishAt,
-        coverImageUrl: a.coverImageUrl,
-      })) ?? undefined,
+      row.relatedArticles
+        ?.filter((a) => {
+          const now = new Date().toISOString();
+          if (a.publishAt && a.publishAt > now) return false;
+          if (a.unpublishAt && a.unpublishAt <= now) return false;
+          return true;
+        })
+        .map((a) => ({
+          id: a._id,
+          title: a.title ?? "",
+          slug: a.slug?.current ?? "",
+          publishedAt: a.publishAt,
+          coverImageUrl: a.coverImageUrl,
+        })) ?? undefined,
     mentionedPlayers: row.mentionedPlayers ?? undefined,
     mentionedTeams: row.mentionedTeams ?? undefined,
     mentionedStaffMembers: row.mentionedStaffMembers ?? undefined,
   };
 }
 
-export function toHomepageArticle(
-  article: ArticleVM,
-  includeDescription = false,
-): HomepageArticle {
+export function toHomepageArticle(article: ArticleVM): HomepageArticle {
   return {
     href: `/news/${article.slug}`,
     title: article.title,
-    ...(includeDescription && { description: undefined }),
     imageUrl: article.coverImageUrl,
     imageAlt: article.title,
     date: article.publishedAt ? formatArticleDate(article.publishedAt) : "",
@@ -112,9 +115,8 @@ export function toHomepageArticle(
 
 export function toHomepageArticles(
   articles: readonly ArticleVM[],
-  includeDescription = false,
 ): HomepageArticle[] {
-  return articles.map((a) => toHomepageArticle(a, includeDescription));
+  return articles.map((a) => toHomepageArticle(a));
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────

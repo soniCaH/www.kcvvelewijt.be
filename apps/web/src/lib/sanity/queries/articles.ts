@@ -14,7 +14,7 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$offset + $limit] {
   _id, title, slug, publishAt, featured, tags,
-  "coverImageUrl": coverImage.asset->url
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 export const RELATED_ARTICLES_QUERY =
@@ -28,7 +28,7 @@ export const ARTICLE_BY_SLUG_QUERY =
   _id, title, slug, publishAt, featured, tags,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
-  relatedArticles[]-> { _id, title, slug, publishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
     _id, firstName, lastName, position,
     "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
