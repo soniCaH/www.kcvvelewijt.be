@@ -1,7 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
 import { TEAMS_LANDING_QUERY } from "../../sanity/queries/teams";
-import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import {
   EVENTS_QUERY,
   NEXT_FEATURED_EVENT_QUERY,
@@ -21,16 +20,6 @@ import type { OrgChartNode } from "../../../types/organigram";
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
 // Add per content type as pages are cut over from DrupalService.
-
-export interface SanitySponsor {
-  _id: string;
-  name: string;
-  url: string | null;
-  type: string;
-  tier: "hoofdsponsor" | "sponsor" | "sympathisant" | null;
-  featured: boolean;
-  logoUrl: string | null;
-}
 
 export interface SanityEvent {
   _id: string;
@@ -108,7 +97,6 @@ export interface SanityPage {
 
 export interface SanityServiceInterface {
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
-  readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
   readonly getNextFeaturedEvent: () => Effect.Effect<SanityEvent | null>;
   readonly getHomepageBanners: () => Effect.Effect<SanityHomepageBanners>;
@@ -201,7 +189,6 @@ const mapOrgMember = (m: SanityOrgMember): OrgChartNode => ({
 
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
-  getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
   getNextFeaturedEvent: () =>
     fetchGroq<SanityEvent | null>(NEXT_FEATURED_EVENT_QUERY, {
