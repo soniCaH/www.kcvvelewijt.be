@@ -1099,6 +1099,37 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
   > | null;
 } | null;
 
+// Source: ../web/src/lib/sanity/queries/events.ts
+// Variable: EVENTS_QUERY
+// Query: *[_type == "event"] | order(dateStart asc) {  _id, title, dateStart, dateEnd, externalLink,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
+export type EVENTS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string | null;
+  dateStart: string | null;
+  dateEnd: string | null;
+  externalLink: {
+    url?: string;
+    label?: string;
+  } | null;
+  coverImageUrl: string | null;
+}>;
+
+// Source: ../web/src/lib/sanity/queries/events.ts
+// Variable: NEXT_FEATURED_EVENT_QUERY
+// Query: coalesce(    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    },    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    }  )
+export type NEXT_FEATURED_EVENT_QUERY_RESULT = {
+  _id: string;
+  title: string | null;
+  dateStart: string | null;
+  dateEnd: string | null;
+  featuredOnHome: boolean | null;
+  externalLink: {
+    url?: string;
+    label?: string;
+  } | null;
+  coverImageUrl: string | null;
+} | null;
+
 // Source: ../web/src/lib/sanity/queries/homePage.ts
 // Variable: HOMEPAGE_BANNERS_QUERY
 // Query: *[_type == "homePage"][0] {    "bannerSlotA": bannerSlotA-> {      _id,      "imageUrl": image.asset->url,      alt,      href    },    "bannerSlotB": bannerSlotB-> {      _id,      "imageUrl": image.asset->url,      alt,      href    },    "bannerSlotC": bannerSlotC-> {      _id,      "imageUrl": image.asset->url,      alt,      href    }  }
@@ -1421,6 +1452,8 @@ declare module "@sanity/client" {
     'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
     '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, positionTitle,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "event"] | order(dateStart asc) {\n  _id, title, dateStart, dateEnd, externalLink,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
+    '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;

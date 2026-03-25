@@ -1,10 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
 import { TEAMS_LANDING_QUERY } from "../../sanity/queries/teams";
-import {
-  EVENTS_QUERY,
-  NEXT_FEATURED_EVENT_QUERY,
-} from "../../sanity/queries/events";
 
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
@@ -17,16 +13,6 @@ import type {
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
 // Add per content type as pages are cut over from DrupalService.
-
-export interface SanityEvent {
-  _id: string;
-  title: string;
-  dateStart: string;
-  dateEnd: string | null;
-  externalLink: { url: string; label: string } | null;
-  coverImageUrl: string | null;
-  featuredOnHome?: boolean;
-}
 
 export interface SanityResponsibilityContact {
   role: string | null;
@@ -67,8 +53,6 @@ export interface SanityPage {
 
 export interface SanityServiceInterface {
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
-  readonly getEvents: () => Effect.Effect<SanityEvent[]>;
-  readonly getNextFeaturedEvent: () => Effect.Effect<SanityEvent | null>;
 
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
@@ -136,11 +120,6 @@ function mapResponsibilityPath(
 
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
-  getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
-  getNextFeaturedEvent: () =>
-    fetchGroq<SanityEvent | null>(NEXT_FEATURED_EVENT_QUERY, {
-      now: new Date().toISOString(),
-    }),
 
   getResponsibilityPaths: () =>
     fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(

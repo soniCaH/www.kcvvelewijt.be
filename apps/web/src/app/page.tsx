@@ -6,12 +6,14 @@
 import { Effect } from "effect";
 import { DateTime } from "luxon";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
-import type { SanityEvent } from "@/lib/effect/services/SanityService";
 import {
   ArticleRepository,
   toHomepageArticles,
 } from "@/lib/repositories/article.repository";
+import {
+  EventRepository,
+  type EventVM,
+} from "@/lib/repositories/event.repository";
 import { HomepageRepository } from "@/lib/repositories/homepage.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
@@ -48,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Same-day event: shows date + time range.
  * Multi-day event: shows "d MMM HH:mm – d MMM HH:mm" as single date string.
  */
-function buildFeaturedEventStub(event: SanityEvent): FeaturedEventStub {
+function buildFeaturedEventStub(event: EventVM): FeaturedEventStub {
   const start = DateTime.fromISO(event.dateStart).setLocale("nl");
   const end = event.dateEnd
     ? DateTime.fromISO(event.dateEnd).setLocale("nl")
@@ -80,15 +82,16 @@ function buildFeaturedEventStub(event: SanityEvent): FeaturedEventStub {
           : undefined;
   }
 
+  const isExternal = event.href !== "#";
   return {
     title: event.title,
-    href: event.externalLink?.url,
-    imageUrl: event.coverImageUrl ?? undefined,
+    href: isExternal ? event.href : undefined,
+    imageUrl: event.coverImageUrl,
     badge: "EVENEMENT",
     date: eventDate,
     time: eventTime,
     countdown,
-    isExternal: !!event.externalLink?.url,
+    isExternal,
   };
 }
 
@@ -115,8 +118,8 @@ export default async function HomePage() {
       ),
       runPromise(
         Effect.gen(function* () {
-          const sanity = yield* SanityService;
-          return yield* sanity.getNextFeaturedEvent();
+          const repo = yield* EventRepository;
+          return yield* repo.findNextFeatured();
         }).pipe(Effect.catchAll(() => Effect.succeed(null))),
       ),
       runPromise(

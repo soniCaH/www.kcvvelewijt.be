@@ -6,8 +6,10 @@
 import type { Metadata } from "next";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
-import type { SanityEvent } from "@/lib/effect/services/SanityService";
+import {
+  EventRepository,
+  type EventVM,
+} from "@/lib/repositories/event.repository";
 import { EventsList, type EventsListItem } from "@/components/event/EventsList";
 
 export const metadata: Metadata = {
@@ -24,45 +26,32 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-/**
- * Convert a SanityEvent into an EventsListItem suitable for rendering in the UI.
- *
- * @param event - The SanityEvent to convert; uses `title`, `dateStart`, `dateEnd`, `coverImageUrl`, and `externalLink?.url`.
- * @returns An EventsListItem with `title`, `href` (uses `externalLink.url` or `"#"`), `date` from `dateStart`, optional `endDate` from `dateEnd`, and optional `imageUrl` from `coverImageUrl`.
- */
-function transformEvent(event: SanityEvent): EventsListItem {
+function toEventsListItem(event: EventVM): EventsListItem {
   return {
     title: event.title,
-    href: event.externalLink?.url ?? "#",
+    href: event.href,
     date: new Date(event.dateStart),
     endDate: event.dateEnd ? new Date(event.dateEnd) : undefined,
-    imageUrl: event.coverImageUrl ?? undefined,
+    imageUrl: event.coverImageUrl,
   };
 }
 
-/**
- * Renders the events page: fetches events from Sanity, selects upcoming events, transforms them for display, and returns the page UI.
- *
- * Fetch errors are logged and treated as an empty events list.
- *
- * @returns The React element for the events page containing a hero section and an EventsList populated with upcoming events.
- */
 export default async function EventsPage() {
   const events = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getEvents();
+      const repo = yield* EventRepository;
+      return yield* repo.findAll();
     }).pipe(
       Effect.catchAll((error) => {
         console.error("[Events] Failed to fetch events:", error);
-        return Effect.succeed([] as SanityEvent[]);
+        return Effect.succeed([] as EventVM[]);
       }),
     ),
   );
 
   const upcomingEvents = events
     .filter((e) => new Date(e.dateStart) >= new Date())
-    .map(transformEvent);
+    .map(toEventsListItem);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
