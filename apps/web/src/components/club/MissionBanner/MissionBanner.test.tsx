@@ -21,4 +21,22 @@ describe("MissionBanner", () => {
 
     expect(screen.getByText("\u201C")).toBeInTheDocument();
   });
+
+  it("renders custom quote and attribution when props are given", () => {
+    render(
+      <MissionBanner
+        quote="Bij KCVV Elewijt staat plezier op één."
+        attribution="— Jeugdopleiding KCVV Elewijt"
+      />,
+    );
+
+    expect(
+      screen.getByText("Bij KCVV Elewijt staat plezier op één."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("— Jeugdopleiding KCVV Elewijt"),
+    ).toBeInTheDocument();
+    // Default club content should not be present
+    expect(screen.queryByText(/Wij zijn KCVV Elewijt/)).not.toBeInTheDocument();
+  });
 });
