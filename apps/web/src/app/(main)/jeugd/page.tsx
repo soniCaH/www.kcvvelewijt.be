@@ -12,7 +12,7 @@ import {
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
-import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
+import { PageHero } from "@/components/design-system/PageHero";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
 import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
@@ -90,7 +90,20 @@ export default async function JeugdPage() {
 
   const heroSection: SectionConfig = {
     bg: "kcvv-black",
-    content: <JeugdHero />,
+    content: (
+      <PageHero
+        image="/images/hero-jeugd.jpg"
+        label="Jeugdopleiding"
+        headline={
+          <>
+            De toekomst
+            <br />
+            van <span className="text-kcvv-green">Elewijt</span>
+          </>
+        }
+        body="Meer dan 200 jonge voetballers. Gediplomeerde trainers. Eén missie: plezier, techniek en teamspirit."
+      />
+    ),
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
     transition: {

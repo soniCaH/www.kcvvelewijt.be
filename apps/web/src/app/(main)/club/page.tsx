@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
-import { ClubHero } from "@/components/club/ClubHero/ClubHero";
+import { PageHero } from "@/components/design-system/PageHero";
 import { ClubEditorialGrid } from "@/components/club/ClubEditorialGrid/ClubEditorialGrid";
 import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
@@ -14,7 +14,20 @@ export const metadata: Metadata = {
 
 const heroSection: SectionConfig = {
   bg: "kcvv-black",
-  content: <ClubHero />,
+  content: (
+    <PageHero
+      image="/images/hero-club.jpg"
+      label="Onze club"
+      headline={
+        <>
+          De plezantste
+          <br />
+          <span className="text-kcvv-green">compagnie</span>
+        </>
+      }
+      body="Al meer dan 75 jaar de thuishaven voor voetballiefhebbers in Elewijt. Van de allerkleinsten tot het eerste elftal — bij KCVV is iedereen welkom."
+    />
+  ),
   paddingTop: "pt-0",
   paddingBottom: "pb-0",
   transition: {
