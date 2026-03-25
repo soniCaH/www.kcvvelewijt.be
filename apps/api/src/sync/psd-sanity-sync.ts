@@ -38,6 +38,7 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
+    archived: false,
     _psdImageUrl: extractStableImageUrl(psd.profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.
     _psdImageFetchUrl: psd.profilePictureURL

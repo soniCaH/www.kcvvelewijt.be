@@ -12,6 +12,7 @@ export interface SanityPlayerDoc {
   nationality: string | null;
   keeper: boolean;
   positionPsd: string | null; // from PSD bestPosition — null until KCVV populates
+  archived?: boolean; // sync-owned: false on upsert, true on reconciliation
 }
 
 export interface SanityTeamDoc {
@@ -131,6 +132,7 @@ export const SanityWriteClientLive = Layer.effect(
           nationality: doc.nationality,
           keeper: doc.keeper,
           positionPsd: doc.positionPsd,
+          archived: doc.archived ?? false,
         }),
 
       getPlayersImageState: () =>
