@@ -78,4 +78,26 @@ describe("EditorialCard", () => {
       backgroundImage: 'url("/images/club/bestuur.jpg")',
     });
   });
+
+  it("applies blue-ish nav gradient when variant is nav", () => {
+    render(<EditorialCard {...defaultProps} variant="nav" />);
+
+    const link = screen.getByRole("link");
+    const overlay = link.querySelector(
+      "[data-testid='card-overlay']",
+    ) as HTMLElement;
+    expect(overlay).toBeInTheDocument();
+    expect(overlay.style.background).toContain("rgba(30,40,54");
+  });
+
+  it("applies default gradient when variant is not set", () => {
+    render(<EditorialCard {...defaultProps} />);
+
+    const link = screen.getByRole("link");
+    const overlay = link.querySelector(
+      "[data-testid='card-overlay']",
+    ) as HTMLElement;
+    expect(overlay).toBeInTheDocument();
+    expect(overlay.style.background).toContain("rgba(30,32,36");
+  });
 });

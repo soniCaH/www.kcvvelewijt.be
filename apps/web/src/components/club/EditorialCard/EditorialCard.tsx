@@ -8,7 +8,13 @@ interface EditorialCardProps {
   arrowText: string;
   featured?: boolean;
   backgroundImage?: string;
+  variant?: "default" | "nav";
 }
+
+const GRADIENT_DEFAULT =
+  "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%)";
+const GRADIENT_NAV =
+  "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%)";
 
 export function EditorialCard({
   href,
@@ -18,6 +24,7 @@ export function EditorialCard({
   arrowText,
   featured,
   backgroundImage,
+  variant = "default",
 }: EditorialCardProps) {
   return (
     <Link
@@ -32,10 +39,10 @@ export function EditorialCard({
         />
       )}
       <div
+        data-testid="card-overlay"
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%)",
+          background: variant === "nav" ? GRADIENT_NAV : GRADIENT_DEFAULT,
         }}
       />
       <div
