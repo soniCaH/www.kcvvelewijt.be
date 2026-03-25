@@ -1,1 +1,0 @@
-export { TeamsCta } from "./TeamsCta";

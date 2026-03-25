@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import ClubPage from "./page";
 
 describe("/club page", () => {
-  it("renders ClubHero inside the page", () => {
+  it("renders PageHero inside the page", () => {
     render(<ClubPage />);
 
     // Hero content is present
