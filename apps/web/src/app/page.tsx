@@ -8,6 +8,10 @@ import { DateTime } from "luxon";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import type { SanityEvent } from "@/lib/effect/services/SanityService";
+import {
+  ArticleRepository,
+  toHomepageArticles,
+} from "@/lib/repositories/article.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
   FeaturedArticles,
@@ -21,10 +25,7 @@ import {
 import type { FeaturedEventStub } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
-import {
-  mapSanityArticlesToHomepageArticles,
-  mapMatchesToUpcomingMatches,
-} from "@/lib/mappers";
+import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import type { Metadata } from "next";
 
 /**
@@ -95,8 +96,8 @@ export default async function HomePage() {
     await Promise.all([
       runPromise(
         Effect.gen(function* () {
-          const sanity = yield* SanityService;
-          const all = yield* sanity.getArticles();
+          const repo = yield* ArticleRepository;
+          const all = yield* repo.findAll();
           return all.slice(0, 9);
         }).pipe(Effect.catchAll(() => Effect.succeed([]))),
       ),
@@ -137,14 +138,8 @@ export default async function HomePage() {
   const matches = matchesResult;
   const banners = bannersResult;
 
-  const featuredArticles = mapSanityArticlesToHomepageArticles(
-    articles.slice(0, 3),
-    true,
-  );
-  const newsGridArticles = mapSanityArticlesToHomepageArticles(
-    articles.slice(3, 9),
-    false,
-  );
+  const featuredArticles = toHomepageArticles(articles.slice(0, 3), true);
+  const newsGridArticles = toHomepageArticles(articles.slice(3, 9), false);
 
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const nextMatch = upcomingMatches[0];

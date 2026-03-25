@@ -730,6 +730,371 @@ export type AllSanitySchemaTypes =
   | SanityImageAsset
   | Geopoint;
 
+// Source: ../web/src/lib/sanity/queries/articles.ts
+// Variable: ARTICLES_QUERY
+// Query: *[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }}
+export type ARTICLES_QUERY_RESULT = Array<{
+  _id: string;
+  title: string | null;
+  slug: Slug | null;
+  publishAt: string | null;
+  featured: boolean | null;
+  tags: Array<string> | null;
+  coverImageUrl: string | null;
+  body: Array<
+    | {
+        _key: string;
+        _type: "articleImage";
+        image?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+        alt?: string;
+        fullBleed?: boolean;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: {
+          url: string | null;
+        } | null;
+        markDefs: null;
+      }
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?:
+          | "blockquote"
+          | "h1"
+          | "h2"
+          | "h3"
+          | "h4"
+          | "h5"
+          | "h6"
+          | "normal";
+        listItem?: "bullet" | "number";
+        markDefs: Array<
+          | {
+              reference:
+                | {
+                    _type: "article";
+                    slug: string | null;
+                    psdId: null;
+                  }
+                | {
+                    _type: "page";
+                    slug: string | null;
+                    psdId: null;
+                  }
+                | {
+                    _type: "player";
+                    slug: null;
+                    psdId: string | null;
+                  }
+                | {
+                    _type: "staffMember";
+                    slug: null;
+                    psdId: string | null;
+                  }
+                | {
+                    _type: "team";
+                    slug: string | null;
+                    psdId: string | null;
+                  }
+                | null;
+              _type: "internalLink";
+              _key: string;
+            }
+          | {
+              href?: string;
+              _type: "link";
+              _key: string;
+            }
+        > | null;
+        level?: number;
+        _type: "block";
+        _key: string;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+      }
+    | {
+        _key: string;
+        _type: "fileAttachment";
+        file?: {
+          asset?: SanityFileAssetReference;
+          media?: unknown;
+          _type: "file";
+        };
+        label?: string;
+        fileUrl: string | null;
+        fileSize: number | null;
+        fileMimeType: string | null;
+        fileOriginalFilename: string | null;
+        asset: null;
+        markDefs: null;
+      }
+    | {
+        _key: string;
+        _type: "htmlTable";
+        html?: string;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        markDefs: null;
+      }
+  > | null;
+}>;
+
+// Source: ../web/src/lib/sanity/queries/articles.ts
+// Variable: ARTICLE_TAGS_QUERY
+// Query: array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])
+export type ARTICLE_TAGS_QUERY_RESULT = Array<string | null>;
+
+// Source: ../web/src/lib/sanity/queries/articles.ts
+// Variable: RELATED_ARTICLES_QUERY
+// Query: *[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"}
+export type RELATED_ARTICLES_QUERY_RESULT = Array<{
+  _id: string;
+  title: string | null;
+  slug: Slug | null;
+  publishAt: string | null;
+  featured: boolean | null;
+  tags: Array<string> | null;
+  coverImageUrl: string | null;
+}>;
+
+// Source: ../web/src/lib/sanity/queries/articles.ts
+// Variable: ARTICLE_BY_SLUG_QUERY
+// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { _id, title, slug, publishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName, positionTitle,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
+export type ARTICLE_BY_SLUG_QUERY_RESULT = {
+  _id: string;
+  title: string | null;
+  slug: Slug | null;
+  publishAt: string | null;
+  featured: boolean | null;
+  tags: Array<string> | null;
+  coverImageUrl: string | null;
+  body: Array<
+    | {
+        _key: string;
+        _type: "articleImage";
+        image?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+        alt?: string;
+        fullBleed?: boolean;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: {
+          url: string | null;
+        } | null;
+        markDefs: null;
+      }
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?:
+          | "blockquote"
+          | "h1"
+          | "h2"
+          | "h3"
+          | "h4"
+          | "h5"
+          | "h6"
+          | "normal";
+        listItem?: "bullet" | "number";
+        markDefs: Array<
+          | {
+              reference:
+                | {
+                    _type: "article";
+                    slug: string | null;
+                    psdId: null;
+                  }
+                | {
+                    _type: "page";
+                    slug: string | null;
+                    psdId: null;
+                  }
+                | {
+                    _type: "player";
+                    slug: null;
+                    psdId: string | null;
+                  }
+                | {
+                    _type: "staffMember";
+                    slug: null;
+                    psdId: string | null;
+                  }
+                | {
+                    _type: "team";
+                    slug: string | null;
+                    psdId: string | null;
+                  }
+                | null;
+              _type: "internalLink";
+              _key: string;
+            }
+          | {
+              href?: string;
+              _type: "link";
+              _key: string;
+            }
+        > | null;
+        level?: number;
+        _type: "block";
+        _key: string;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+      }
+    | {
+        _key: string;
+        _type: "fileAttachment";
+        file?: {
+          asset?: SanityFileAssetReference;
+          media?: unknown;
+          _type: "file";
+        };
+        label?: string;
+        fileUrl: string | null;
+        fileSize: number | null;
+        fileMimeType: string | null;
+        fileOriginalFilename: string | null;
+        asset: null;
+        markDefs: null;
+      }
+    | {
+        _key: string;
+        _type: "htmlTable";
+        html?: string;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        markDefs: null;
+      }
+  > | null;
+  relatedArticles: Array<{
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+    publishAt: string | null;
+    coverImageUrl: string | null;
+  }> | null;
+  mentionedPlayers: Array<
+    | {
+        _id: string;
+        firstName: null;
+        lastName: null;
+        position: null;
+        imageUrl: null;
+        psdId: null;
+      }
+    | {
+        _id: string;
+        firstName: null;
+        lastName: null;
+        position: null;
+        imageUrl: null;
+        psdId: string | null;
+      }
+    | {
+        _id: string;
+        firstName: string | null;
+        lastName: string | null;
+        position: null;
+        imageUrl: null;
+        psdId: string | null;
+      }
+    | {
+        _id: string;
+        firstName: string | null;
+        lastName: string | null;
+        position:
+          | "Aanvaller"
+          | "Keeper"
+          | "Middenvelder"
+          | "Speler"
+          | "Verdediger"
+          | null;
+        imageUrl: string | null;
+        psdId: string | null;
+      }
+    | null
+  > | null;
+  mentionedTeams: Array<
+    | {
+        _id: string;
+        name: null;
+        imageUrl: null;
+        slug: null;
+      }
+    | {
+        _id: string;
+        name: null;
+        imageUrl: null;
+        slug: string | null;
+      }
+    | {
+        _id: string;
+        name: string | null;
+        imageUrl: string | null;
+        slug: string | null;
+      }
+    | null
+  > | null;
+  mentionedStaffMembers: Array<
+    | {
+        _id: string;
+        firstName: null;
+        lastName: null;
+        positionTitle: null;
+        imageUrl: null;
+      }
+    | {
+        _id: string;
+        firstName: string | null;
+        lastName: string | null;
+        positionTitle: null;
+        imageUrl: null;
+      }
+    | {
+        _id: string;
+        firstName: string | null;
+        lastName: string | null;
+        positionTitle: string | null;
+        imageUrl: string | null;
+      }
+    | null
+  > | null;
+} | null;
+
 // Source: ../web/src/lib/sanity/queries/players.ts
 // Variable: PLAYERS_QUERY
 // Query: *[_type == "player"] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
@@ -994,6 +1359,10 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }\n}': ARTICLES_QUERY_RESULT;
+    'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
+    '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
+    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, positionTitle,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "player"] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "team" && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;

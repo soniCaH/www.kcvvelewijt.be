@@ -5,18 +5,21 @@ import { RelatedArticlesSection } from "./RelatedArticlesSection";
 describe("RelatedArticlesSection", () => {
   const mockArticles = [
     {
-      _id: "article-1",
+      id: "article-1",
       title: "Interview met Jan",
-      slug: { current: "interview-jan" },
-      publishAt: "2026-03-20T10:00:00Z",
+      slug: "interview-jan",
+      publishedAt: "2026-03-20T10:00:00Z",
+      featured: false,
       coverImageUrl: "https://cdn.sanity.io/img1.jpg",
+      tags: [],
     },
     {
-      _id: "article-2",
+      id: "article-2",
       title: "Wedstrijdverslag",
-      slug: { current: "wedstrijdverslag" },
-      publishAt: "2026-03-19T10:00:00Z",
-      coverImageUrl: null,
+      slug: "wedstrijdverslag",
+      publishedAt: "2026-03-19T10:00:00Z",
+      featured: false,
+      tags: [],
     },
   ];
 

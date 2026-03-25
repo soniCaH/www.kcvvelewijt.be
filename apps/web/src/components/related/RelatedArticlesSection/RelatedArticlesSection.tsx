@@ -1,12 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
 
 export interface RelatedArticlesSectionProps {
-  articles: Pick<
-    SanityArticleListItem,
-    "_id" | "title" | "slug" | "publishAt" | "coverImageUrl"
-  >[];
+  articles: ArticleVM[];
   className?: string;
 }
 
@@ -22,8 +19,8 @@ export const RelatedArticlesSection = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {articles.map((article) => (
           <Link
-            key={article._id}
-            href={`/news/${article.slug.current}`}
+            key={article.id}
+            href={`/news/${article.slug}`}
             className="group block overflow-hidden rounded-lg border border-gray-200 hover:border-kcvv-green-bright transition-colors"
           >
             {article.coverImageUrl && (
@@ -41,12 +38,12 @@ export const RelatedArticlesSection = ({
               <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-kcvv-green-dark transition-colors">
                 {article.title}
               </h4>
-              {article.publishAt && (
+              {article.publishedAt && (
                 <time
                   className="text-xs text-gray-500 mt-1 block"
-                  dateTime={article.publishAt}
+                  dateTime={article.publishedAt}
                 >
-                  {new Date(article.publishAt).toLocaleDateString("nl-BE", {
+                  {new Date(article.publishedAt).toLocaleDateString("nl-BE", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",

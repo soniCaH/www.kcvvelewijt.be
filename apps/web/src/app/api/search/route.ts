@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
@@ -33,8 +33,8 @@ const debugLog = (...args: unknown[]) => {
  */
 const searchArticles = (query: string) =>
   Effect.gen(function* () {
-    const sanity = yield* SanityService;
-    const allArticles = yield* sanity.getArticles();
+    const repo = yield* ArticleRepository;
+    const allArticles = yield* repo.findAll();
 
     debugLog(`[Search API] Total articles fetched: ${allArticles.length}`);
 
@@ -43,26 +43,21 @@ const searchArticles = (query: string) =>
     return allArticles
       .filter((article) => {
         const titleMatch = article.title.toLowerCase().includes(queryLower);
-        const tagMatch = (article.tags ?? []).some((tag) =>
+        const tagMatch = article.tags.some((tag) =>
           tag.toLowerCase().includes(queryLower),
         );
-        // Search body via JSON stringification of Portable Text
-        const bodyMatch = JSON.stringify(article.body ?? "")
-          .toLowerCase()
-          .includes(queryLower);
-
-        return titleMatch || tagMatch || bodyMatch;
+        return titleMatch || tagMatch;
       })
       .map(
         (article): SearchResult => ({
-          id: article._id,
+          id: article.id,
           type: "article",
           title: article.title,
           description: undefined,
-          url: `/news/${article.slug.current}`,
-          imageUrl: article.coverImageUrl ?? undefined,
-          tags: article.tags ?? [],
-          date: article.publishAt ?? "",
+          url: `/news/${article.slug}`,
+          imageUrl: article.coverImageUrl,
+          tags: article.tags,
+          date: article.publishedAt ?? "",
         }),
       );
   });

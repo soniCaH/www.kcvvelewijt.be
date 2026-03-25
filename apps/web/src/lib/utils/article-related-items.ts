@@ -7,11 +7,9 @@ import type {
   RelatedContentItem,
 } from "@/components/related/types";
 import type {
-  SanityArticle,
-  SanityMentionedPlayer,
-  SanityMentionedTeam,
-  SanityMentionedStaffMember,
-} from "@/lib/effect/services/SanityService";
+  RelatedArticleRef,
+  ArticleDetailVM,
+} from "@/lib/repositories/article.repository";
 import type { RelatedItem } from "@kcvv/api-contract";
 
 function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
@@ -24,16 +22,16 @@ function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
 }
 
 export function mapEditorialArticles(
-  articles?: SanityArticle[],
+  articles?: RelatedArticleRef[],
 ): RelatedArticleItem[] {
   if (!articles?.length) return [];
   return articles.map((a) => ({
     type: "article" as const,
-    id: a._id,
+    id: a.id,
     title: a.title,
-    slug: a.slug.current,
+    slug: a.slug,
     imageUrl: a.coverImageUrl,
-    date: a.publishAt,
+    date: a.publishedAt,
     excerpt: null,
   }));
 }
@@ -64,45 +62,53 @@ export function mapBffRelatedItems(
   });
 }
 
+type MentionedPlayer = NonNullable<
+  NonNullable<ArticleDetailVM["mentionedPlayers"]>[number]
+>;
+type MentionedTeam = NonNullable<
+  NonNullable<ArticleDetailVM["mentionedTeams"]>[number]
+>;
+type MentionedStaff = NonNullable<
+  NonNullable<ArticleDetailVM["mentionedStaffMembers"]>[number]
+>;
+
 export function mapMentionedPlayers(
-  players?: Array<SanityMentionedPlayer | null>,
+  players?: ArticleDetailVM["mentionedPlayers"],
 ): RelatedPlayerItem[] {
-  const valid = (players ?? []).filter(
-    (p): p is SanityMentionedPlayer => p != null,
-  );
-  return deduplicateById(valid).map((p) => ({
-    type: "player" as const,
-    id: p._id,
-    firstName: p.firstName,
-    lastName: p.lastName,
-    position: p.position,
-    imageUrl: p.imageUrl,
-    psdId: p.psdId,
-  }));
+  const valid = (players ?? []).filter((p): p is MentionedPlayer => p != null);
+  return deduplicateById(valid)
+    .filter((p) => p.psdId != null)
+    .map((p) => ({
+      type: "player" as const,
+      id: p._id,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      position: p.position,
+      imageUrl: p.imageUrl,
+      psdId: p.psdId!,
+    }));
 }
 
 export function mapMentionedTeams(
-  teams?: Array<SanityMentionedTeam | null>,
+  teams?: ArticleDetailVM["mentionedTeams"],
 ): RelatedTeamItem[] {
-  const valid = (teams ?? []).filter(
-    (t): t is SanityMentionedTeam => t != null,
-  );
-  return deduplicateById(valid).map((t) => ({
-    type: "team" as const,
-    id: t._id,
-    name: t.name,
-    slug: t.slug,
-    imageUrl: t.imageUrl,
-    tagline: null,
-  }));
+  const valid = (teams ?? []).filter((t): t is MentionedTeam => t != null);
+  return deduplicateById(valid)
+    .filter((t) => t.name != null && t.slug != null)
+    .map((t) => ({
+      type: "team" as const,
+      id: t._id,
+      name: t.name!,
+      slug: t.slug!,
+      imageUrl: t.imageUrl,
+      tagline: null,
+    }));
 }
 
 export function mapMentionedStaff(
-  staff?: Array<SanityMentionedStaffMember | null>,
+  staff?: ArticleDetailVM["mentionedStaffMembers"],
 ): RelatedStaffItem[] {
-  const valid = (staff ?? []).filter(
-    (s): s is SanityMentionedStaffMember => s != null,
-  );
+  const valid = (staff ?? []).filter((s): s is MentionedStaff => s != null);
   return deduplicateById(valid).map((s) => ({
     type: "staff" as const,
     id: s._id,
