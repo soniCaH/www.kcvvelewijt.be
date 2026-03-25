@@ -7,7 +7,6 @@ import { SectionStack } from "@/components/design-system/SectionStack/SectionSta
 import { PageHero } from "@/components/design-system/PageHero";
 import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
 import { YouthTeamsDirectory } from "@/components/teams/YouthTeamsDirectory";
-import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 
 export const metadata: Metadata = {
@@ -82,16 +81,6 @@ export default async function TeamsPage() {
           paddingTop: "pt-20",
           paddingBottom: "pb-20",
           content: <YouthTeamsDirectory divisions={youthByDivision} />,
-          transition: {
-            type: "diagonal" as const,
-            direction: "right" as const,
-          },
-        },
-        {
-          bg: "kcvv-green-dark",
-          paddingTop: "pt-20",
-          paddingBottom: "pb-20",
-          content: <MissionBanner />,
           transition: {
             type: "diagonal" as const,
             direction: "right" as const,
