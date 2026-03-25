@@ -51,6 +51,14 @@ export const player = defineType({
       description:
         'Synced from PSD bestPosition — null until the club populates positions in PSD. Use position field as fallback.',
     }),
+    defineField({
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      description: 'Set automatically by sync when member is no longer in PSD. Do not edit manually.',
+      readOnly: true,
+      hidden: true,
+    }),
     // Editorial — not available from PSD for KCVV
     defineField({
       name: 'jerseyNumber',

@@ -68,6 +68,15 @@ export interface SanityWriteClientInterface {
     Map<string, PlayerImageState>,
     SanityWriteError
   >;
+  /** Fetch PSD IDs of all non-archived players. */
+  readonly getActivePlayerPsdIds: () => Effect.Effect<
+    string[],
+    SanityWriteError
+  >;
+  /** Set archived: true on players with these PSD IDs. */
+  readonly archivePlayers: (
+    psdIds: string[],
+  ) => Effect.Effect<void, SanityWriteError>;
   /** Download image from fetchUrl and upload to Sanity, patching psdImage + psdImageUrl.
    * stableUrl is persisted as psdImageUrl for dedup on future syncs — must match
    * the value produced by transformMember._psdImageUrl (includes ?v=N if present). */
@@ -131,6 +140,7 @@ export const SanityWriteClientLive = Layer.effect(
           nationality: doc.nationality,
           keeper: doc.keeper,
           positionPsd: doc.positionPsd,
+          archived: false,
         }),
 
       getPlayersImageState: () =>
@@ -317,6 +327,37 @@ export const SanityWriteClientLive = Layer.effect(
           yield* Effect.log(
             `[uploadPlayerImage] player=${psdId} patch committed — image upload complete`,
           );
+        }).pipe(Effect.asVoid),
+
+      getActivePlayerPsdIds: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<{ psdId: string }>>(
+              `*[_type == "player" && archived != true] { psdId }`,
+            );
+            return rows.map((r) => r.psdId);
+          },
+          catch: (cause) =>
+            new SanityWriteError(
+              "Failed to fetch active player PSD IDs",
+              cause,
+            ),
+        }),
+
+      archivePlayers: (psdIds) =>
+        Effect.tryPromise({
+          try: async () => {
+            if (psdIds.length === 0) return;
+            let tx = client.transaction();
+            for (const psdId of psdIds) {
+              tx = tx.patch(`player-psd-${psdId}`, (p) =>
+                p.set({ archived: true }),
+              );
+            }
+            await tx.commit();
+          },
+          catch: (cause) =>
+            new SanityWriteError("Failed to archive players", cause),
         }).pipe(Effect.asVoid),
 
       upsertTeam: (doc) =>

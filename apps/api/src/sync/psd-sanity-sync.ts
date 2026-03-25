@@ -125,6 +125,7 @@ export function partitionMembers(members: readonly PsdMember[]): {
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
 const CURSOR_KEY = "sync:team-cursor";
+const CYCLE_PLAYER_IDS_KEY = "sync:cycle-player-ids";
 
 /**
  * Fetches all club teams from PSD and upserts ONE team per invocation using a
@@ -247,8 +248,57 @@ export const runSync = Effect.gen(function* () {
   yield* sanity.upsertTeam(transformTeam(team, playerPsdIds, staffPsdIds));
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
-  // Advance cursor for next invocation (wraps at end of team list)
+  // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
+  const existingIds = yield* Effect.tryPromise({
+    try: async () => {
+      const json = await env.PSD_CACHE.get(CYCLE_PLAYER_IDS_KEY);
+      if (json === null) return [] as string[];
+      return JSON.parse(json) as string[];
+    },
+    catch: (cause) =>
+      new Error(
+        `KV read/parse failed for ${CYCLE_PLAYER_IDS_KEY}: ${String(cause)}`,
+      ),
+  });
+
+  const accumulatedIds = new Set<string>(existingIds);
+  for (const id of playerPsdIds) accumulatedIds.add(id);
+
+  yield* Effect.tryPromise({
+    try: () =>
+      env.PSD_CACHE.put(
+        CYCLE_PLAYER_IDS_KEY,
+        JSON.stringify([...accumulatedIds]),
+      ),
+    catch: () => new Error("KV write failed"),
+  });
+
+  // Compute next cursor (wraps at end of team list)
   const nextCursor = (teamIndex + 1) % teams.length;
+
+  // ─── Reconciliation at cycle end ─────────────────────────────────────
+  if (nextCursor === 0) {
+    yield* Effect.log("cycle complete — running player reconciliation");
+    const activeInSanity = yield* sanity.getActivePlayerPsdIds();
+    const orphanIds = activeInSanity.filter((id) => !accumulatedIds.has(id));
+
+    if (orphanIds.length > 0) {
+      yield* sanity.archivePlayers(orphanIds);
+      yield* Effect.log(
+        `reconciliation: archived ${orphanIds.length} players: ${orphanIds.join(", ")}`,
+      );
+    } else {
+      yield* Effect.log("reconciliation: no orphan players found");
+    }
+
+    // Clear accumulation key for next cycle
+    yield* Effect.tryPromise({
+      try: () => env.PSD_CACHE.delete(CYCLE_PLAYER_IDS_KEY),
+      catch: () => new Error("KV delete failed"),
+    });
+  }
+
+  // Advance cursor only after reconciliation succeeds (if applicable)
   yield* Effect.tryPromise({
     try: () => env.PSD_CACHE.put(CURSOR_KEY, String(nextCursor)),
     catch: () => new Error("KV cursor write failed"),
