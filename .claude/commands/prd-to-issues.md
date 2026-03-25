@@ -53,10 +53,6 @@ Rules:
 
 [Any unresolved questions from the PRD that affect this issue]
 [If none: "None — ready to implement"]
-
-## Blocked by
-
-[#issue or "nothing"]
 ```
 
 ## Step 3 — Create issues and assign to milestone
@@ -74,10 +70,10 @@ ALL well-specified issues get the `ready` label, even blocked ones. `ready` mean
 
 ## Step 4 — Wire dependencies via GraphQL blockedBy API
 
-For each issue that has a `## Blocked by` section listing other issues, create a blocking relationship via the GraphQL API. This makes dependencies machine-readable and visible in the GitHub UI.
+For each issue that depends on another, create a blocking relationship via the GraphQL API. Dependencies are identified from the PRD phase ordering (e.g., Phase 2 blocked by Phase 1's tracer bullet).
 
 ```bash
-# For each blocked issue, set up blockedBy relationships:
+# For each dependency, set up a blockedBy relationship:
 
 # 1. Get node_ids for both issues
 BLOCKED_NODE_ID=$(gh api /repos/{owner}/{repo}/issues/<blocked-number> --jq '.node_id')
@@ -93,11 +89,7 @@ gh api graphql -f query="
   }"
 ```
 
-Repeat for every blocker listed in the `## Blocked by` section.
-
-If the API call fails, log a warning and continue — the `## Blocked by` markdown in the body still serves as a fallback.
-
-**Note:** The `## Blocked by` markdown is still written in issue bodies for human readability (transitional). Both the API relationship and the markdown must be present.
+Repeat for every dependency. Do NOT write `## Blocked by` markdown in issue bodies — the GraphQL relationship is the single source of truth.
 
 ## Step 5 — Update the PRD with issue numbers
 
@@ -120,12 +112,6 @@ Run Ralph for this milestone:
   ./scripts/ralph.sh --milestone [milestone-title]
 ```
 
-## Unblocking flow (for Claude running inside a worktree)
+## Unblocking flow
 
-When a blocking issue is merged, Ralph handles unblocking automatically.
-If doing it manually:
-
-```bash
-gh issue edit <blocked-issue> --remove-label "blocked" --add-label "ready"
-gh issue comment <blocked-issue> --body "Unblocked by merge of #<dependency>."
-```
+Unblocking is automatic — when a blocking issue's PR is merged and the issue is closed, GitHub marks the blockedBy relationship as resolved. Ralph's `pick_next_issue` checks blockers on each iteration, so newly-unblocked `ready` issues are picked up automatically.
