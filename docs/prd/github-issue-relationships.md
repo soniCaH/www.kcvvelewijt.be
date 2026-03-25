@@ -36,7 +36,7 @@ Manually set a blocking relationship between two test issues via `gh api`, then 
 ```bash
 # Create relationship
 gh api /repos/{owner}/{repo}/issues/{child}/sub_issues \
-  --method POST -f sub_issue_id={parent_issue_node_id}
+  --method POST -F sub_issue_id={parent_issue_id}
 
 # Query blockers for an issue
 gh api /repos/{owner}/{repo}/issues/{number}/sub_issues

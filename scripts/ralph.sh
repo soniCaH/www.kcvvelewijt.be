@@ -269,17 +269,20 @@ while [ $i -lt $MAX ]; do
   if [ -n "$BLOCKED_ISSUES" ]; then
     for CANDIDATE_NUM in $BLOCKED_ISSUES; do
       # Query sub-issues (blockers) for this candidate via GitHub Sub-issues API
+      SUB_ISSUES_ERR=$(mktemp)
       SUB_ISSUES_JSON=$(gh api "/repos/{owner}/{repo}/issues/${CANDIDATE_NUM}/sub_issues" \
-        --jq '[.[] | {number, state}]' 2>&1)
+        --jq '[.[] | {number, state}]' 2>"$SUB_ISSUES_ERR")
       API_EXIT=$?
 
       if [ $API_EXIT -ne 0 ]; then
-        echo "  ⚠️  Sub-issues API failed for #${CANDIDATE_NUM} — skipping (fallback)"
+        echo "  ⚠️  Sub-issues API failed for #${CANDIDATE_NUM} — skipping ($(cat "$SUB_ISSUES_ERR"))"
+        rm -f "$SUB_ISSUES_ERR"
         continue
       fi
+      rm -f "$SUB_ISSUES_ERR"
 
-      if [ -z "$SUB_ISSUES_JSON" ] || [ "$SUB_ISSUES_JSON" = "null" ] || [ "$SUB_ISSUES_JSON" = "[]" ]; then
-        # No sub-issues set on this issue
+      if ! echo "$SUB_ISSUES_JSON" | jq -e 'type=="array" and length>0' >/dev/null 2>&1; then
+        # No sub-issues or invalid response
         continue
       fi
 
