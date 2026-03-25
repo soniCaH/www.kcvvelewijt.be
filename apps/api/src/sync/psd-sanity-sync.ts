@@ -38,7 +38,6 @@ export function transformMember(
         : psd.bestPosition !== null
           ? psd.bestPosition.type.name
           : null,
-    archived: false,
     _psdImageUrl: extractStableImageUrl(psd.profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.
     _psdImageFetchUrl: psd.profilePictureURL
@@ -250,14 +249,19 @@ export const runSync = Effect.gen(function* () {
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
-  const existingIdsJson = yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.get(CYCLE_PLAYER_IDS_KEY),
-    catch: () => new Error("KV read failed"),
-  }).pipe(Effect.orElseSucceed(() => null));
+  const existingIds = yield* Effect.tryPromise({
+    try: async () => {
+      const json = await env.PSD_CACHE.get(CYCLE_PLAYER_IDS_KEY);
+      if (json === null) return [] as string[];
+      return JSON.parse(json) as string[];
+    },
+    catch: (cause) =>
+      new Error(
+        `KV read/parse failed for ${CYCLE_PLAYER_IDS_KEY}: ${String(cause)}`,
+      ),
+  });
 
-  const accumulatedIds = new Set<string>(
-    existingIdsJson ? (JSON.parse(existingIdsJson) as string[]) : [],
-  );
+  const accumulatedIds = new Set<string>(existingIds);
   for (const id of playerPsdIds) accumulatedIds.add(id);
 
   yield* Effect.tryPromise({
@@ -269,18 +273,8 @@ export const runSync = Effect.gen(function* () {
     catch: () => new Error("KV write failed"),
   });
 
-  // Advance cursor for next invocation (wraps at end of team list)
+  // Compute next cursor (wraps at end of team list)
   const nextCursor = (teamIndex + 1) % teams.length;
-  yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.put(CURSOR_KEY, String(nextCursor)),
-    catch: () => new Error("KV cursor write failed"),
-  }).pipe(
-    Effect.catchAll((e) =>
-      Effect.log(
-        `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
-      ),
-    ),
-  );
 
   // ─── Reconciliation at cycle end ─────────────────────────────────────
   if (nextCursor === 0) {
@@ -301,8 +295,20 @@ export const runSync = Effect.gen(function* () {
     yield* Effect.tryPromise({
       try: () => env.PSD_CACHE.delete(CYCLE_PLAYER_IDS_KEY),
       catch: () => new Error("KV delete failed"),
-    }).pipe(Effect.orElseSucceed(() => undefined));
+    });
   }
+
+  // Advance cursor only after reconciliation succeeds (if applicable)
+  yield* Effect.tryPromise({
+    try: () => env.PSD_CACHE.put(CURSOR_KEY, String(nextCursor)),
+    catch: () => new Error("KV cursor write failed"),
+  }).pipe(
+    Effect.catchAll((e) =>
+      Effect.log(
+        `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+      ),
+    ),
+  );
 
   yield* Effect.log(
     `sync completed — cursor advanced to ${nextCursor} (next: team index ${nextCursor})`,
