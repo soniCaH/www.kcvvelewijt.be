@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ImageProps } from "next/image";
 import { NewsListingClient } from "./NewsListingClient";
-import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
 
 vi.mock("next/image", () => ({
   default: ({ alt, src, ...props }: ImageProps) => {
@@ -13,20 +13,15 @@ vi.mock("next/image", () => ({
 
 const mockFetchArticles = vi.fn();
 
-function makeArticle(
-  overrides: Partial<SanityArticleListItem> = {},
-): SanityArticleListItem {
-  const id = overrides._id ?? `article-${Math.random().toString(36).slice(2)}`;
+function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
+  const id = overrides.id ?? `article-${Math.random().toString(36).slice(2)}`;
   return {
-    _id: id,
+    id,
     title: overrides.title ?? "Test Article",
-    slug: {
-      current: overrides.title?.toLowerCase().replace(/\s/g, "-") ?? "test",
-    },
-    publishAt: "2026-03-15T10:00:00Z",
+    slug: overrides.title?.toLowerCase().replace(/\s/g, "-") ?? "test",
+    publishedAt: "2026-03-15T10:00:00Z",
     featured: false,
     tags: overrides.tags ?? [],
-    coverImageUrl: null,
     ...overrides,
   };
 }
@@ -64,11 +59,11 @@ describe("NewsListingClient", () => {
 
   it("renders featured articles in the top section", () => {
     const featuredArticles = [
-      makeArticle({ _id: "f1", title: "Featured One" }),
-      makeArticle({ _id: "f2", title: "Featured Two" }),
-      makeArticle({ _id: "f3", title: "Featured Three" }),
+      makeArticle({ id: "f1", title: "Featured One" }),
+      makeArticle({ id: "f2", title: "Featured Two" }),
+      makeArticle({ id: "f3", title: "Featured Three" }),
     ];
-    const gridArticles = [makeArticle({ _id: "g1", title: "Grid One" })];
+    const gridArticles = [makeArticle({ id: "g1", title: "Grid One" })];
 
     render(
       <NewsListingClient
@@ -137,7 +132,7 @@ describe("NewsListingClient", () => {
     render(
       <NewsListingClient
         featuredArticles={[makeArticle()]}
-        initialArticles={[makeArticle({ _id: "g1" })]}
+        initialArticles={[makeArticle({ id: "g1" })]}
         categories={categories}
         hasMore={true}
         fetchArticles={mockFetchArticles}

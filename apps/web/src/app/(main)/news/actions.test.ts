@@ -1,18 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { paginateResults } from "./utils";
-import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
 
-function makeArticle(
-  overrides: Partial<SanityArticleListItem> = {},
-): SanityArticleListItem {
+function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
   return {
-    _id: `article-${Math.random().toString(36).slice(2)}`,
+    id: `article-${Math.random().toString(36).slice(2)}`,
     title: "Test Article",
-    slug: { current: "test-article" },
-    publishAt: "2026-03-15T10:00:00Z",
+    slug: "test-article",
+    publishedAt: "2026-03-15T10:00:00Z",
     featured: false,
     tags: [],
-    coverImageUrl: null,
     ...overrides,
   };
 }
@@ -20,7 +17,7 @@ function makeArticle(
 describe("paginateResults", () => {
   it("returns hasMore=true and trims to limit when more results exist", () => {
     const articles = Array.from({ length: 7 }, (_, i) =>
-      makeArticle({ _id: `a-${i}`, title: `Article ${i}` }),
+      makeArticle({ id: `a-${i}`, title: `Article ${i}` }),
     );
 
     const result = paginateResults(articles, 6);
@@ -31,7 +28,7 @@ describe("paginateResults", () => {
 
   it("returns hasMore=false when results equal limit", () => {
     const articles = Array.from({ length: 6 }, (_, i) =>
-      makeArticle({ _id: `a-${i}` }),
+      makeArticle({ id: `a-${i}` }),
     );
 
     const result = paginateResults(articles, 6);
@@ -42,7 +39,7 @@ describe("paginateResults", () => {
 
   it("returns hasMore=false when fewer results than limit", () => {
     const articles = Array.from({ length: 3 }, (_, i) =>
-      makeArticle({ _id: `a-${i}` }),
+      makeArticle({ id: `a-${i}` }),
     );
 
     const result = paginateResults(articles, 6);

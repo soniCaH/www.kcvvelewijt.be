@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
 import { formatArticleDate } from "@/lib/utils/dates";
 import type { PaginatedArticles } from "./utils";
@@ -13,8 +13,8 @@ interface Category {
 }
 
 interface NewsListingClientProps {
-  featuredArticles: SanityArticleListItem[];
-  initialArticles: SanityArticleListItem[];
+  featuredArticles: ArticleVM[];
+  initialArticles: ArticleVM[];
   categories: Category[];
   hasMore: boolean;
   initialCategory?: string;
@@ -167,22 +167,22 @@ export function NewsListingClient({
   );
 
   const renderCard = (
-    article: SanityArticleListItem,
+    article: ArticleVM,
     variant: "featured" | "standard" | "listing",
     className?: string,
   ) => (
     <NewsCard
-      key={article._id}
+      key={article.id}
       variant={variant}
       className={className}
       title={article.title}
-      href={`/news/${article.slug.current}`}
-      imageUrl={article.coverImageUrl ?? undefined}
+      href={`/news/${article.slug}`}
+      imageUrl={article.coverImageUrl}
       imageAlt={article.title}
-      badge={article.tags?.[0] ?? undefined}
+      badge={article.tags[0] ?? undefined}
       date={
-        article.publishAt
-          ? formatArticleDate(new Date(article.publishAt))
+        article.publishedAt
+          ? formatArticleDate(new Date(article.publishedAt))
           : undefined
       }
     />

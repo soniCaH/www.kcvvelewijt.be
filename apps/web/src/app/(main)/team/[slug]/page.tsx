@@ -7,8 +7,8 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
 import { BffService } from "@/lib/effect/services/BffService";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
@@ -147,8 +147,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const relatedArticles = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getRelatedArticles(team.id);
+      const repo = yield* ArticleRepository;
+      return yield* repo.findRelated(team.id);
     }),
   );
 

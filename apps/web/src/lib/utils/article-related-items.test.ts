@@ -8,17 +8,14 @@ import {
 } from "./article-related-items";
 
 describe("mapEditorialArticles", () => {
-  it("maps Sanity relatedArticles to RelatedArticleItem[]", () => {
+  it("maps RelatedArticleRef[] to RelatedArticleItem[]", () => {
     const result = mapEditorialArticles([
       {
-        _id: "art-1",
+        id: "art-1",
         title: "Test Article",
-        slug: { current: "test-article" },
-        publishAt: "2025-03-01T12:00:00Z",
+        slug: "test-article",
+        publishedAt: "2025-03-01T12:00:00Z",
         coverImageUrl: "https://cdn.example.com/img.jpg",
-        featured: false,
-        tags: [],
-        body: [],
       },
     ]);
 
@@ -95,7 +92,7 @@ describe("mapMentionedPlayers", () => {
         _id: "player-1",
         firstName: "Kevin",
         lastName: "De Bruyne",
-        position: "Midfielder",
+        position: "Middenvelder" as const,
         imageUrl: "https://cdn.example.com/kevin.jpg",
         psdId: "12345",
       },
@@ -107,7 +104,7 @@ describe("mapMentionedPlayers", () => {
         id: "player-1",
         firstName: "Kevin",
         lastName: "De Bruyne",
-        position: "Midfielder",
+        position: "Middenvelder",
         imageUrl: "https://cdn.example.com/kevin.jpg",
         psdId: "12345",
       },
@@ -119,7 +116,7 @@ describe("mapMentionedPlayers", () => {
       _id: "player-1",
       firstName: "Kevin",
       lastName: "De Bruyne",
-      position: "Midfielder",
+      position: "Middenvelder" as const,
       imageUrl: null,
       psdId: "12345",
     };

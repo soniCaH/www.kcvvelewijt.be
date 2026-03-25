@@ -1,13 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { sanityClient } from "../../sanity/client";
 import { TEAMS_LANDING_QUERY } from "../../sanity/queries/teams";
-import {
-  ARTICLES_QUERY,
-  ARTICLE_TAGS_QUERY,
-  ARTICLES_PAGINATED_QUERY,
-  ARTICLE_BY_SLUG_QUERY,
-  RELATED_ARTICLES_QUERY,
-} from "../../sanity/queries/articles";
 import { SPONSORS_QUERY } from "../../sanity/queries/sponsors";
 import {
   EVENTS_QUERY,
@@ -28,48 +21,6 @@ import type { OrgChartNode } from "../../../types/organigram";
 // ─── Types ────────────────────────────────────────────────────────────────────
 // Simple interfaces — no Effect Schema validation yet.
 // Add per content type as pages are cut over from DrupalService.
-
-export interface SanityArticleListItem {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  publishAt: string | null;
-  featured: boolean;
-  tags: string[];
-  coverImageUrl: string | null;
-}
-
-export interface SanityMentionedPlayer {
-  _id: string;
-  firstName: string | null;
-  lastName: string | null;
-  position: string | null;
-  imageUrl: string | null;
-  psdId: string;
-}
-
-export interface SanityMentionedTeam {
-  _id: string;
-  name: string;
-  imageUrl: string | null;
-  slug: string;
-}
-
-export interface SanityMentionedStaffMember {
-  _id: string;
-  firstName: string | null;
-  lastName: string | null;
-  positionTitle: string | null;
-  imageUrl: string | null;
-}
-
-export interface SanityArticle extends SanityArticleListItem {
-  body: unknown;
-  relatedArticles?: SanityArticle[];
-  mentionedPlayers?: SanityMentionedPlayer[];
-  mentionedStaffMembers?: SanityMentionedStaffMember[];
-  mentionedTeams?: SanityMentionedTeam[];
-}
 
 export interface SanitySponsor {
   _id: string;
@@ -157,25 +108,12 @@ export interface SanityPage {
 
 export interface SanityServiceInterface {
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
-  readonly getArticles: () => Effect.Effect<SanityArticle[]>;
-  readonly getArticleTags: () => Effect.Effect<string[]>;
-  readonly getArticlesPaginated: (params: {
-    offset: number;
-    limit: number;
-    category?: string;
-  }) => Effect.Effect<SanityArticleListItem[]>;
-  readonly getArticleBySlug: (
-    slug: string,
-  ) => Effect.Effect<SanityArticle | null>;
   readonly getSponsors: () => Effect.Effect<SanitySponsor[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
   readonly getNextFeaturedEvent: () => Effect.Effect<SanityEvent | null>;
   readonly getHomepageBanners: () => Effect.Effect<SanityHomepageBanners>;
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getStaffMembers: () => Effect.Effect<OrgChartNode[]>;
-  readonly getRelatedArticles: (
-    documentId: string,
-  ) => Effect.Effect<SanityArticleListItem[]>;
   readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
 }
 
@@ -263,16 +201,6 @@ const mapOrgMember = (m: SanityOrgMember): OrgChartNode => ({
 
 export const SanityServiceLive = Layer.succeed(SanityService, {
   getTeamsLanding: () => fetchGroq<TeamLandingItem[]>(TEAMS_LANDING_QUERY),
-  getArticles: () => fetchGroq<SanityArticle[]>(ARTICLES_QUERY),
-  getArticleTags: () => fetchGroq<string[]>(ARTICLE_TAGS_QUERY),
-  getArticlesPaginated: ({ offset, limit, category }) =>
-    fetchGroq<SanityArticleListItem[]>(ARTICLES_PAGINATED_QUERY, {
-      offset,
-      limit,
-      category: category ?? "",
-    }),
-  getArticleBySlug: (slug) =>
-    fetchGroq<SanityArticle | null>(ARTICLE_BY_SLUG_QUERY, { slug }),
   getSponsors: () => fetchGroq<SanitySponsor[]>(SPONSORS_QUERY),
   getEvents: () => fetchGroq<SanityEvent[]>(EVENTS_QUERY),
   getNextFeaturedEvent: () =>
@@ -294,7 +222,5 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityOrgMember[]>(STAFF_MEMBERS_QUERY).pipe(
       Effect.map((members) => [CLUB_ROOT_NODE, ...members.map(mapOrgMember)]),
     ),
-  getRelatedArticles: (documentId) =>
-    fetchGroq<SanityArticleListItem[]>(RELATED_ARTICLES_QUERY, { documentId }),
   getPage: (slug) => fetchGroq<SanityPage | null>(PAGE_BY_SLUG_QUERY, { slug }),
 });

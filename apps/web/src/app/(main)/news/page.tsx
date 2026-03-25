@@ -6,7 +6,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Metadata } from "next";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
@@ -41,8 +41,9 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const [allTags, initialBatch] = await Promise.all([
     runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getArticleTags();
+        const repo = yield* ArticleRepository;
+        const tags = yield* repo.findTags();
+        return tags.filter((t): t is string => t != null);
       }).pipe(Effect.catchAll(() => Effect.succeed([] as string[]))),
     ),
     fetchArticlesAction({

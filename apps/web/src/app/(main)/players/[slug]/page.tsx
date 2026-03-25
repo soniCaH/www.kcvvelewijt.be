@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerProfile, PlayerShare } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 
@@ -103,8 +103,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const relatedArticles = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getRelatedArticles(player.id);
+      const repo = yield* ArticleRepository;
+      return yield* repo.findRelated(player.id);
     }),
   );
 

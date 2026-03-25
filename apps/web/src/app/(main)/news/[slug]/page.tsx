@@ -7,7 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 import {
   mapEditorialArticles,
@@ -37,11 +37,11 @@ export async function generateStaticParams() {
   try {
     const articles = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getArticles();
+        const repo = yield* ArticleRepository;
+        return yield* repo.findAll();
       }),
     );
-    return articles.map((a) => ({ slug: a.slug.current }));
+    return articles.map((a) => ({ slug: a.slug }));
   } catch {
     return [];
   }
@@ -58,8 +58,8 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   try {
     const article = await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getArticleBySlug(slug);
+        const repo = yield* ArticleRepository;
+        return yield* repo.findBySlug(slug);
       }),
     );
     if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       openGraph: {
         title: article.title,
         type: "article" as const,
-        publishedTime: article.publishAt ?? undefined,
+        publishedTime: article.publishedAt ?? undefined,
         authors: ["KCVV Elewijt"],
         images: article.coverImageUrl
           ? [{ url: article.coverImageUrl, alt: article.title }]
@@ -95,14 +95,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const article = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getArticleBySlug(slug);
+      const repo = yield* ArticleRepository;
+      return yield* repo.findBySlug(slug);
     }),
   );
 
   if (!article) notFound();
 
-  const tags = article.tags ?? [];
+  const tags = article.tags;
   const primaryCategory = tags[0]
     ? {
         name: tags[0],
@@ -111,7 +111,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     : undefined;
 
   const shareConfig = {
-    url: `https://kcvvelewijt.be/news/${article.slug.current}`,
+    url: `https://kcvvelewijt.be/news/${article.slug}`,
     title: article.title,
     hashtags: tags,
   };
@@ -126,7 +126,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     articleRelatedItems = await runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
-        return yield* bff.getRelated(article._id);
+        return yield* bff.getRelated(article.id);
       }).pipe(
         Effect.map(mapBffRelatedItems),
         Effect.catchAll(() => Effect.succeed([])),
@@ -145,12 +145,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <>
       <ArticleHeader
         title={article.title}
-        imageUrl={article.coverImageUrl ?? undefined}
+        imageUrl={article.coverImageUrl}
         imageAlt={article.title}
         category={primaryCategory?.name}
         date={
-          article.publishAt
-            ? formatArticleDate(new Date(article.publishAt))
+          article.publishedAt
+            ? formatArticleDate(new Date(article.publishedAt))
             : undefined
         }
         author="KCVV Elewijt"
@@ -159,8 +159,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <ArticleMetadata
         author="KCVV Elewijt"
         date={
-          article.publishAt
-            ? formatArticleDate(new Date(article.publishAt))
+          article.publishedAt
+            ? formatArticleDate(new Date(article.publishedAt))
             : undefined
         }
         category={primaryCategory}

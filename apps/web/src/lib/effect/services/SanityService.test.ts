@@ -5,8 +5,6 @@ import { sanityClient } from "../../sanity/client";
 import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
-import { ARTICLES_PAGINATED_QUERY } from "../../sanity/queries/articles";
-import { RELATED_ARTICLES_QUERY } from "../../sanity/queries/articles";
 
 vi.mock("../../sanity/client", () => ({
   sanityClient: {
@@ -261,116 +259,5 @@ describe("SanityService.getHomepageBanners", () => {
       bannerSlotB: null,
       bannerSlotC: null,
     });
-  });
-});
-
-describe("SanityService.getRelatedArticles", () => {
-  it("returns articles that reference a given document", async () => {
-    const mockArticles = [
-      {
-        _id: "article-1",
-        title: "Interview met Jan",
-        slug: { current: "interview-jan" },
-        publishAt: "2026-03-20T10:00:00Z",
-        coverImageUrl: "https://cdn.sanity.io/img1.jpg",
-      },
-      {
-        _id: "article-2",
-        title: "Wedstrijdverslag",
-        slug: { current: "wedstrijdverslag" },
-        publishAt: "2026-03-19T10:00:00Z",
-        coverImageUrl: null,
-      },
-    ];
-    mockFetch(mockArticles);
-
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const svc = yield* SanityService;
-        return yield* svc.getRelatedArticles("player-psd-42");
-      }).pipe(Effect.provide(SanityServiceLive)),
-    );
-
-    expect(result).toHaveLength(2);
-    expect(result[0]?.title).toBe("Interview met Jan");
-    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
-      RELATED_ARTICLES_QUERY,
-      expect.objectContaining({ documentId: "player-psd-42" }),
-    );
-  });
-
-  it("returns empty array when no articles reference the document", async () => {
-    mockFetch([]);
-
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const svc = yield* SanityService;
-        return yield* svc.getRelatedArticles("unknown-id");
-      }).pipe(Effect.provide(SanityServiceLive)),
-    );
-
-    expect(result).toHaveLength(0);
-  });
-});
-
-describe("SanityService.getArticlesPaginated", () => {
-  it("returns articles with offset and limit", async () => {
-    const mockArticles = [
-      {
-        _id: "article-1",
-        title: "First Article",
-        slug: { current: "first-article" },
-        publishAt: "2026-03-15T10:00:00Z",
-        featured: false,
-        tags: ["Eerste ploeg"],
-        coverImageUrl: "https://cdn.sanity.io/img1.jpg",
-        body: [],
-      },
-      {
-        _id: "article-2",
-        title: "Second Article",
-        slug: { current: "second-article" },
-        publishAt: "2026-03-14T10:00:00Z",
-        featured: false,
-        tags: ["Jeugd"],
-        coverImageUrl: null,
-        body: [],
-      },
-    ];
-    mockFetch(mockArticles);
-
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const svc = yield* SanityService;
-        return yield* svc.getArticlesPaginated({ offset: 0, limit: 6 });
-      }).pipe(Effect.provide(SanityServiceLive)),
-    );
-
-    expect(result).toHaveLength(2);
-    expect(result[0]?.title).toBe("First Article");
-    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
-      ARTICLES_PAGINATED_QUERY,
-      expect.objectContaining({ offset: 0, limit: 6 }),
-    );
-  });
-
-  it("passes category filter to GROQ query", async () => {
-    mockFetch([]);
-
-    await Effect.runPromise(
-      Effect.gen(function* () {
-        const svc = yield* SanityService;
-        return yield* svc.getArticlesPaginated({
-          offset: 0,
-          limit: 6,
-          category: "Jeugd",
-        });
-      }).pipe(Effect.provide(SanityServiceLive)),
-    );
-
-    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
-      ARTICLES_PAGINATED_QUERY,
-      expect.objectContaining({ offset: 0, limit: 6, category: "Jeugd" }),
-    );
   });
 });

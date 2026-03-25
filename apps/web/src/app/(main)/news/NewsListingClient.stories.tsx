@@ -7,17 +7,17 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
-import type { SanityArticleListItem } from "@/lib/effect/services/SanityService";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
 
 function makeMockArticle(
   id: number,
-  overrides?: Partial<SanityArticleListItem>,
-): SanityArticleListItem {
+  overrides?: Partial<ArticleVM>,
+): ArticleVM {
   return {
-    _id: `article-${id}`,
+    id: `article-${id}`,
     title: `Artikeltitel nummer ${id}`,
-    slug: { current: `artikel-${id}` },
-    publishAt: `2025-01-${String(20 - id).padStart(2, "0")}T12:00:00Z`,
+    slug: `artikel-${id}`,
+    publishedAt: `2025-01-${String(20 - id).padStart(2, "0")}T12:00:00Z`,
     featured: id <= 3,
     tags: ["Clubnieuws"],
     coverImageUrl: `https://picsum.photos/seed/article${id}/800/500`,
@@ -40,7 +40,7 @@ const mockCategories = [
   { id: "transfers", attributes: { name: "Transfers", slug: "transfers" } },
 ];
 
-const featuredArticles: SanityArticleListItem[] = [
+const featuredArticles: ArticleVM[] = [
   makeMockArticle(1, {
     title: "KCVV Elewijt wint belangrijke derby tegen rivaal",
     tags: ["Wedstrijdverslagen"],
@@ -55,18 +55,16 @@ const featuredArticles: SanityArticleListItem[] = [
   }),
 ];
 
-const gridArticles: SanityArticleListItem[] = Array.from(
-  { length: 6 },
-  (_, i) =>
-    makeMockArticle(i + 4, {
-      tags: [
-        mockCategories[i % mockCategories.length]?.attributes.name ??
-          "Clubnieuws",
-      ],
-    }),
+const gridArticles: ArticleVM[] = Array.from({ length: 6 }, (_, i) =>
+  makeMockArticle(i + 4, {
+    tags: [
+      mockCategories[i % mockCategories.length]?.attributes.name ??
+        "Clubnieuws",
+    ],
+  }),
 );
 
-const extraBatch: SanityArticleListItem[] = Array.from({ length: 6 }, (_, i) =>
+const extraBatch: ArticleVM[] = Array.from({ length: 6 }, (_, i) =>
   makeMockArticle(i + 10),
 );
 
