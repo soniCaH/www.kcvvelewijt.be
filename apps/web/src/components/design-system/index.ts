@@ -84,3 +84,7 @@ export type { LinkButtonProps } from "./LinkButton";
 // SectionCta
 export { SectionCta } from "./SectionCta";
 export type { SectionCtaProps } from "./SectionCta";
+
+// PageHero
+export { PageHero } from "./PageHero";
+export type { PageHeroProps } from "./PageHero";

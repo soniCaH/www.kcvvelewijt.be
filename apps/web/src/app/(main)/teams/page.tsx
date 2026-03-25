@@ -4,7 +4,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
-import { TeamsHero } from "@/components/teams/TeamsHero";
+import { PageHero } from "@/components/design-system/PageHero";
 import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
 import { YouthTeamsDirectory } from "@/components/teams/YouthTeamsDirectory";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
@@ -40,7 +40,29 @@ export default async function TeamsPage() {
           bg: "kcvv-black",
           paddingTop: "pt-0",
           paddingBottom: "pb-0",
-          content: <TeamsHero team={aTeam} />,
+          content: (
+            <PageHero
+              image={aTeam.teamImageUrl ?? "/images/hero-club.jpg"}
+              imageAlt={`Team foto ${aTeam.name}`}
+              label="Eerste ploeg"
+              headline={(() => {
+                const parts = aTeam.name.split(/\s+/);
+                if (parts.length >= 2) {
+                  return (
+                    <>
+                      {parts[0]}
+                      <br />
+                      <span className="text-kcvv-green">{parts[1]}</span>
+                      {parts.length > 2 ? ` ${parts.slice(2).join(" ")}` : ""}
+                    </>
+                  );
+                }
+                return aTeam.name;
+              })()}
+              body={aTeam.divisionFull ?? ""}
+              cta={{ label: "Bekijk de A-ploeg", href: `/team/${aTeam.slug}` }}
+            />
+          ),
           transition: {
             type: "diagonal" as const,
             direction: "right" as const,
