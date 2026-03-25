@@ -5,7 +5,7 @@ import {
   EVENTS_QUERY,
   NEXT_FEATURED_EVENT_QUERY,
 } from "../../sanity/queries/events";
-import { HOMEPAGE_BANNERS_QUERY } from "../../sanity/queries/homePage";
+
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
 import type { TeamLandingItem } from "../../utils/group-teams";
@@ -26,19 +26,6 @@ export interface SanityEvent {
   externalLink: { url: string; label: string } | null;
   coverImageUrl: string | null;
   featuredOnHome?: boolean;
-}
-
-export interface SanityBannerSlot {
-  _id: string;
-  imageUrl: string;
-  alt: string;
-  href: string | null;
-}
-
-export interface SanityHomepageBanners {
-  bannerSlotA: SanityBannerSlot | null;
-  bannerSlotB: SanityBannerSlot | null;
-  bannerSlotC: SanityBannerSlot | null;
 }
 
 export interface SanityResponsibilityContact {
@@ -82,7 +69,7 @@ export interface SanityServiceInterface {
   readonly getTeamsLanding: () => Effect.Effect<TeamLandingItem[]>;
   readonly getEvents: () => Effect.Effect<SanityEvent[]>;
   readonly getNextFeaturedEvent: () => Effect.Effect<SanityEvent | null>;
-  readonly getHomepageBanners: () => Effect.Effect<SanityHomepageBanners>;
+
   readonly getResponsibilityPaths: () => Effect.Effect<ResponsibilityPath[]>;
   readonly getPage: (slug: string) => Effect.Effect<SanityPage | null>;
 }
@@ -154,13 +141,7 @@ export const SanityServiceLive = Layer.succeed(SanityService, {
     fetchGroq<SanityEvent | null>(NEXT_FEATURED_EVENT_QUERY, {
       now: new Date().toISOString(),
     }),
-  getHomepageBanners: () =>
-    fetchGroq<SanityHomepageBanners | null>(HOMEPAGE_BANNERS_QUERY).pipe(
-      Effect.map(
-        (data) =>
-          data ?? { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
-      ),
-    ),
+
   getResponsibilityPaths: () =>
     fetchGroq<SanityResponsibilityPath[]>(RESPONSIBILITY_PATHS_QUERY).pipe(
       Effect.map((paths) => paths.map(mapResponsibilityPath)),

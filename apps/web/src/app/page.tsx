@@ -12,6 +12,7 @@ import {
   ArticleRepository,
   toHomepageArticles,
 } from "@/lib/repositories/article.repository";
+import { HomepageRepository } from "@/lib/repositories/homepage.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
   FeaturedArticles,
@@ -120,8 +121,8 @@ export default async function HomePage() {
       ),
       runPromise(
         Effect.gen(function* () {
-          const sanity = yield* SanityService;
-          return yield* sanity.getHomepageBanners();
+          const repo = yield* HomepageRepository;
+          return yield* repo.getBanners();
         }).pipe(
           Effect.catchAll(() =>
             Effect.succeed({
@@ -205,7 +206,7 @@ export default async function HomePage() {
           <BannerSlot
             image={banners.bannerSlotA.imageUrl}
             alt={banners.bannerSlotA.alt}
-            href={banners.bannerSlotA.href ?? undefined}
+            href={banners.bannerSlotA.href}
           />
         ),
         paddingTop: "pt-0",
@@ -240,7 +241,7 @@ export default async function HomePage() {
           <BannerSlot
             image={banners.bannerSlotB.imageUrl}
             alt={banners.bannerSlotB.alt}
-            href={banners.bannerSlotB.href ?? undefined}
+            href={banners.bannerSlotB.href}
           />
         ),
         paddingTop: "pt-0",
@@ -275,7 +276,7 @@ export default async function HomePage() {
           <BannerSlot
             image={banners.bannerSlotC.imageUrl}
             alt={banners.bannerSlotC.alt}
-            href={banners.bannerSlotC.href ?? undefined}
+            href={banners.bannerSlotC.href}
           />
         ),
         paddingTop: "pt-0",

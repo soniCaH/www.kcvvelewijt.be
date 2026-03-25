@@ -1,5 +1,6 @@
-export const HOMEPAGE_BANNERS_QUERY = `
-  *[_type == "homePage"][0] {
+import { defineQuery } from "groq";
+
+export const HOMEPAGE_BANNERS_QUERY = defineQuery(`*[_type == "homePage"][0] {
     "bannerSlotA": bannerSlotA-> {
       _id,
       "imageUrl": image.asset->url,
@@ -18,5 +19,4 @@ export const HOMEPAGE_BANNERS_QUERY = `
       alt,
       href
     }
-  }
-`;
+  }`);
