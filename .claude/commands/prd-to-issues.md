@@ -26,7 +26,7 @@ Rules:
 
 - One issue = one worktree = one PR
 - The tracer bullet from the PRD is ALWAYS issue #1 — labeled `tracer-bullet` + `ready`
-- Issues with unresolved open questions get labeled `blocked`, not `ready`
+- ALL well-specified issues get the `ready` label — even blocked ones (`ready` = specs are clear; blocking is tracked separately via GitHub blockedBy relationships)
 - Every issue body must reference its PRD phase and milestone
 
 ## Issue body template
@@ -53,10 +53,6 @@ Rules:
 
 [Any unresolved questions from the PRD that affect this issue]
 [If none: "None — ready to implement"]
-
-## Blocked by
-
-[#issue or "nothing"]
 ```
 
 ## Step 3 — Create issues and assign to milestone
@@ -70,30 +66,30 @@ gh issue create \
   --body "[body from template]"
 ```
 
-For blocked issues use `--label "blocked"` instead of `--label "ready"`.
+ALL well-specified issues get the `ready` label, even blocked ones. `ready` means "specs are clear" — blocking is a separate concern tracked via GitHub's blockedBy relationships. Ralph checks both before picking up an issue.
 
-## Step 4 — Wire dependencies via Sub-issues API
+## Step 4 — Wire dependencies via GraphQL blockedBy API
 
-For each issue that has a `## Blocked by` section listing other issues, create a Sub-issues relationship via the GitHub API. This makes dependencies machine-readable and visible in the GitHub UI.
-
-The relationship model: the **blocked** issue is the parent, and each **blocker** is added as a sub-issue. This matches how `ralph.sh` queries blockers.
+For each issue that depends on another, create a blocking relationship via the GraphQL API. Dependencies are identified from the PRD phase ordering (e.g., Phase 2 blocked by Phase 1's tracer bullet).
 
 ```bash
-# For each blocked issue, set up Sub-issues relationships:
+# For each dependency, set up a blockedBy relationship:
 
-# 1. Get the integer id of the blocker issue (required by the API — not node_id)
-BLOCKER_ID=$(gh api /repos/{owner}/{repo}/issues/<blocker-number> --jq '.id')
+# 1. Get node_ids for both issues
+BLOCKED_NODE_ID=$(gh api /repos/{owner}/{repo}/issues/<blocked-number> --jq '.node_id')
+BLOCKER_NODE_ID=$(gh api /repos/{owner}/{repo}/issues/<blocker-number> --jq '.node_id')
 
-# 2. Add the blocker as a sub-issue of the blocked issue
-gh api /repos/{owner}/{repo}/issues/<blocked-number>/sub_issues \
-  --method POST -F sub_issue_id="$BLOCKER_ID"
+# 2. Set the blockedBy relationship
+gh api graphql -f query="
+  mutation {
+    addBlockedBy(input: {
+      issueId: \"${BLOCKED_NODE_ID}\",
+      blockingIssueId: \"${BLOCKER_NODE_ID}\"
+    }) { issue { number } }
+  }"
 ```
 
-Repeat for every blocker listed in the `## Blocked by` section.
-
-If the API call fails, log a warning and continue — the `## Blocked by` markdown in the body still serves as a fallback.
-
-**Note:** The `## Blocked by` markdown is still written in issue bodies for human readability (transitional). Both the API relationship and the markdown must be present.
+Repeat for every dependency. Do NOT write `## Blocked by` markdown in issue bodies — the GraphQL relationship is the single source of truth.
 
 ## Step 5 — Update the PRD with issue numbers
 
@@ -116,12 +112,6 @@ Run Ralph for this milestone:
   ./scripts/ralph.sh --milestone [milestone-title]
 ```
 
-## Unblocking flow (for Claude running inside a worktree)
+## Unblocking flow
 
-When a blocking issue is merged, Ralph handles unblocking automatically.
-If doing it manually:
-
-```bash
-gh issue edit <blocked-issue> --remove-label "blocked" --add-label "ready"
-gh issue comment <blocked-issue> --body "Unblocked by merge of #<dependency>."
-```
+Unblocking is automatic — when a blocking issue's PR is merged and the issue is closed, GitHub marks the blockedBy relationship as resolved. Ralph's `pick_next_issue` checks blockers on each iteration, so newly-unblocked `ready` issues are picked up automatically.

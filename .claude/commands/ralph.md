@@ -34,12 +34,18 @@ gh issue list --label ready --state open --json number,title,labels,body \
   --jq '.[] | "\(.number): \(.title)"' | head -10
 ```
 
-Check for blocking relationships before ranking. An issue with unresolved sub-issues (blockers) should not be picked up:
+Check for blocking relationships before ranking. An issue with unresolved blockers should not be picked up:
 
 ```bash
-# For each candidate, check if it has open sub-issues (blockers)
-gh api "/repos/{owner}/{repo}/issues/${CANDIDATE}/sub_issues" \
-  --jq '[.[] | select(.state != "closed")] | length'
+# For each candidate, check if it has open blockers via GraphQL
+gh api graphql -f query='
+  query {
+    repository(owner: "soniCaH", name: "www.kcvvelewijt.be") {
+      issue(number: '"${CANDIDATE}"') {
+        blockedBy(first: 50) { nodes { number state } }
+      }
+    }
+  }' --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length'
 # 0 = no open blockers → safe to pick up
 ```
 
@@ -125,47 +131,65 @@ git branch -d "$BRANCH"
 
 ## If Blocked
 
-When an issue is blocked by another issue, set the relationship via the Sub-issues API so `ralph.sh` can automatically unblock it later:
+When an issue is blocked by another issue, set the relationship via the GraphQL `addBlockedBy` mutation so `ralph.sh` can automatically unblock it later:
 
 ```bash
-# 1. Get the node_id of the blocking issue
+# 1. Get node_ids for both issues
 BLOCKER_NUM=<blocking-issue-number>
+ISSUE_NODE_ID=$(gh api "/repos/{owner}/{repo}/issues/${ISSUE_NUM}" --jq '.node_id')
 BLOCKER_NODE_ID=$(gh api "/repos/{owner}/{repo}/issues/${BLOCKER_NUM}" --jq '.node_id')
 
-# 2. Add the blocking issue as a sub-issue of the blocked issue
-gh api "/repos/{owner}/{repo}/issues/${ISSUE_NUM}/sub_issues" \
-  --method POST \
-  -f sub_issue_id="$BLOCKER_NODE_ID"
+# 2. Set the blockedBy relationship
+gh api graphql -f query="
+  mutation {
+    addBlockedBy(input: {
+      issueId: \"${ISSUE_NODE_ID}\",
+      blockingIssueId: \"${BLOCKER_NODE_ID}\"
+    }) { issue { number } }
+  }"
 
-# 3. Label the blocked issue
-gh issue edit $ISSUE_NUM --add-label "blocked" --remove-label "ready"
+# 3. Keep the ready label (specs are still clear — blockedBy is the gate)
 
 # 4. Comment with context
-gh issue comment $ISSUE_NUM --body "Blocked by #${BLOCKER_NUM}. Sub-issue relationship set via API."
+gh issue comment $ISSUE_NUM --body "Blocked by #${BLOCKER_NUM}. Blocking relationship set via API."
 ```
 
-When checking if an issue is still blocked, query its sub-issues:
+When checking if an issue is still blocked, query its blockedBy relationships:
 
 ```bash
-# List sub-issues (blockers) and their state
-gh api "/repos/{owner}/{repo}/issues/${ISSUE_NUM}/sub_issues" \
-  --jq '.[] | "\(.number) \(.state)"'
+# List blockers and their state
+gh api graphql -f query='
+  query {
+    repository(owner: "soniCaH", name: "www.kcvvelewijt.be") {
+      issue(number: '"${ISSUE_NUM}"') {
+        blockedBy(first: 50) { nodes { number state } }
+      }
+    }
+  }' --jq '.data.repository.issue.blockedBy.nodes[] | "\(.number) \(.state)"'
 ```
 
-An issue is unblocked when all its sub-issues are in `closed` state. The automated `ralph.sh` script handles unblocking automatically after each PR merge.
+An issue is unblocked when all its blockers are in `CLOSED` state. Ralph automatically picks it up on the next iteration if it also has the `ready` label — no label changes needed.
 
 ## Labels Convention
 
-| Label              | Meaning                           |
-| ------------------ | --------------------------------- |
-| `ready`            | Fully specified, can be picked up |
-| `in-progress`      | Worktree active                   |
-| `blocked`          | Waiting on dependency or decision |
-| `ready-for-review` | PR open, awaiting human review    |
+| Label              | Meaning                                                |
+| ------------------ | ------------------------------------------------------ |
+| `ready`            | Specs are 200% clear — Ralph can work on this          |
+| `in-progress`      | Worktree active                                        |
+| `ready-for-review` | PR open, awaiting human review                         |
+| _(no label)_       | Not yet specified — needs `/spec` before Ralph can use |
+
+**Blocking** is tracked via GitHub's native `blockedBy` relationships, not labels.
+An issue can be `ready` (well-specified) AND blocked — Ralph checks both:
+
+1. Has `ready` label? (specs are clear)
+2. Has no open blockers? (via GraphQL `blockedBy` query)
+
+Both must be true for Ralph to pick it up. Use `/spec` to refine underspecified issues.
 
 ## Rules
 
 - Never start a second issue before the current PR is open
 - Never commit directly to main
 - Never skip the quality gate
-- If blocked, set the sub-issue relationship via API (see "If Blocked" above) and propose the next issue
+- If blocked, set the blockedBy relationship via GraphQL (see "If Blocked" above) and propose the next issue

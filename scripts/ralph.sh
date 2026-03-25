@@ -34,12 +34,53 @@ pick_next_issue() {
     return
   fi
 
-  local args=(--label "ready" --state open --json number --jq 'sort_by(.number) | first | .number')
+  local args=(--label "ready" --state open --json number --jq 'sort_by(.number) | .[].number')
   if [ -n "$MILESTONE" ]; then
     args+=(--milestone "$MILESTONE")
   fi
 
-  gh issue list "${args[@]}" 2>/dev/null || echo ""
+  local candidates
+  if ! candidates=$(gh issue list "${args[@]}" 2>&1); then
+    echo "❌ gh issue list failed: ${candidates}" >&2
+    return 1
+  fi
+
+  if [ -z "$candidates" ]; then
+    echo ""
+    return
+  fi
+
+  # Filter out issues with open blockers (checked via GraphQL blockedBy)
+  local any_graphql_failed=false
+  for num in $candidates; do
+    local open_blockers
+    if ! open_blockers=$(gh api graphql -f query="
+      query {
+        repository(owner: \"soniCaH\", name: \"www.kcvvelewijt.be\") {
+          issue(number: ${num}) {
+            blockedBy(first: 50) {
+              nodes { state }
+            }
+          }
+        }
+      }" --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length' 2>&1); then
+      echo "⚠️  Warning: blockedBy query failed for issue #${num}, skipping: ${open_blockers}" >&2
+      any_graphql_failed=true
+      continue
+    fi
+
+    if [ "$open_blockers" = "0" ]; then
+      echo "$num"
+      return
+    fi
+  done
+
+  if [ "$any_graphql_failed" = true ]; then
+    echo "❌ One or more blockedBy GraphQL queries failed — cannot reliably determine ready issues." >&2
+    return 1
+  fi
+
+  echo ""
 }
 
 count_ready() {
@@ -158,19 +199,22 @@ Do NOT present options. Do NOT wait for approval. Just do it:
 Output the PR URL as the last line of your response.
 
 ## If blocked mid-implementation
-  gh issue edit ${issue} --add-label "blocked" --remove-label "in-progress"
   BLOCKER_ISSUE=\$(gh issue create \
     --title "[type](scope): [blocker]" \
     --label "ready" \
     --body "Discovered during #${issue}.\n\n[description]")
   BLOCKER_NUM=\$(echo "\$BLOCKER_ISSUE" | grep -o '[0-9]*$')
 
-  # Set sub-issue relationship so ralph.sh can auto-unblock later
+  # Set blockedBy relationship via GraphQL (ready label stays — specs are still clear)
+  ISSUE_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/${issue}" --jq '.node_id')
   BLOCKER_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/\${BLOCKER_NUM}" --jq '.node_id')
-  gh api "/repos/{owner}/{repo}/issues/${issue}/sub_issues" \
-    --method POST -f sub_issue_id="\$BLOCKER_NODE_ID" 2>/dev/null || true
-
-  gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Sub-issue relationship set via API."
+  if gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>&1; then
+    gh issue edit ${issue} --remove-label "in-progress" --add-label "ready"
+    gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Blocking relationship set via API."
+  else
+    echo "⚠️  Warning: failed to set blockedBy relationship (issue node: \${ISSUE_NODE_ID}, blocker #\${BLOCKER_NUM}). Restoring in-progress label." >&2
+    gh issue edit ${issue} --add-label "in-progress"
+  fi
 
 Output on its own line: RALPH_BLOCKED: [one-line reason]
 
@@ -201,7 +245,10 @@ i=0
 while [ $i -lt $MAX ]; do
   i=$((i + 1))
 
-  ISSUE=$(pick_next_issue)
+  if ! ISSUE=$(pick_next_issue); then
+    echo "❌ Failed to fetch issue queue. Aborting."
+    exit 1
+  fi
 
   if [ -z "$ISSUE" ] || [ "$ISSUE" = "null" ]; then
     if [ -n "$MILESTONE" ]; then
@@ -265,63 +312,6 @@ while [ $i -lt $MAX ]; do
     echo "   $PR_URL"
   fi
   echo ""
-
-  # Unblock dependent issues via Sub-issues API (only if ALL sub-issues are resolved)
-  BLOCKED_ISSUES=$(gh issue list \
-    --label "blocked" \
-    --state open \
-    --json number \
-    --jq '.[].number' 2>/dev/null || echo "")
-
-  if [ -n "$BLOCKED_ISSUES" ]; then
-    for CANDIDATE_NUM in $BLOCKED_ISSUES; do
-      # Query sub-issues (blockers) for this candidate via GitHub Sub-issues API
-      SUB_ISSUES_ERR=$(mktemp)
-      SUB_ISSUES_JSON=$(gh api "/repos/{owner}/{repo}/issues/${CANDIDATE_NUM}/sub_issues" \
-        --jq '[.[] | {number, state}]' 2>"$SUB_ISSUES_ERR")
-      API_EXIT=$?
-
-      if [ $API_EXIT -ne 0 ]; then
-        echo "  ⚠️  Sub-issues API failed for #${CANDIDATE_NUM} — skipping ($(cat "$SUB_ISSUES_ERR"))"
-        rm -f "$SUB_ISSUES_ERR"
-        continue
-      fi
-      rm -f "$SUB_ISSUES_ERR"
-
-      if ! echo "$SUB_ISSUES_JSON" | jq -e 'type=="array" and length>0' >/dev/null 2>&1; then
-        # No sub-issues or invalid response
-        continue
-      fi
-
-      # Check if the completed issue is a sub-issue (blocker) of this candidate
-      IS_BLOCKER=$(echo "$SUB_ISSUES_JSON" | jq -r --argjson n "${ISSUE}" '.[] | select(.number == $n) | .number' 2>/dev/null || echo "")
-
-      if [ -z "$IS_BLOCKER" ]; then
-        # Completed issue is not a blocker of this candidate
-        continue
-      fi
-
-      # Check if all other sub-issues (blockers) are closed
-      # Note: use "== $n | not" instead of "!=" to avoid zsh history expansion issues with "!"
-      STILL_OPEN_NUMS=$(echo "$SUB_ISSUES_JSON" | jq -r --argjson n "${ISSUE}" '.[] | select(.number == $n | not) | select(.state == "closed" | not) | .number' 2>/dev/null || echo "")
-
-      if [ -z "$STILL_OPEN_NUMS" ]; then
-        gh issue edit "$CANDIDATE_NUM" --remove-label "blocked" --add-label "ready" 2>/dev/null || true
-        gh issue comment "$CANDIDATE_NUM" \
-          --body "All blockers resolved (last: #${ISSUE}). Ready to pick up." 2>/dev/null || true
-        echo "  Unblocked: #${CANDIDATE_NUM}"
-      else
-        STILL_OPEN=""
-        for NUM in $STILL_OPEN_NUMS; do
-          STILL_OPEN="${STILL_OPEN} #${NUM}"
-        done
-        gh issue comment "$CANDIDATE_NUM" \
-          --body "#${ISSUE} resolved. Still blocked by:${STILL_OPEN}" 2>/dev/null || true
-        echo "  #${CANDIDATE_NUM} still blocked by:${STILL_OPEN}"
-      fi
-    done
-    echo ""
-  fi
 
   # Single-issue mode exits here
   if [ -n "$SPECIFIC_ISSUE" ]; then
