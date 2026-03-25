@@ -414,7 +414,7 @@ export const SanityWriteClientLive = Layer.effect(
         Effect.tryPromise({
           try: async () => {
             const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "staffMember" && archived != true] { psdId }`,
+              `*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
           },
@@ -442,7 +442,7 @@ export const SanityWriteClientLive = Layer.effect(
         Effect.tryPromise({
           try: async () => {
             const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "team" && archived != true] { psdId }`,
+              `*[_type == "team" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
           },
