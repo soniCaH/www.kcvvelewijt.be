@@ -5,7 +5,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { SponsorRepository } from "@/lib/repositories/sponsor.repository";
 import { Sponsors, type Sponsor } from "./Sponsors";
 
 export interface SponsorsBlockProps {
@@ -56,23 +56,25 @@ export async function SponsorsBlock({
 }: SponsorsBlockProps) {
   const sponsors = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      const all = yield* sanity.getSponsors();
+      const repo = yield* SponsorRepository;
+      const all = yield* repo.findAll();
       return all
         .filter(
           (s) =>
             s.tier === "hoofdsponsor" ||
             s.tier === "sponsor" ||
             // Backward compat: include legacy types until all sponsors are re-tagged
-            (!s.tier && ["crossing", "green", "white"].includes(s.type)),
+            (!s.tier &&
+              s.type &&
+              ["crossing", "green", "white"].includes(s.type)),
         )
         .map(
           (s): Sponsor => ({
-            id: s._id,
+            id: s.id,
             name: s.name,
             logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
-            url: s.url ?? undefined,
-            tier: s.tier ?? undefined,
+            url: s.url,
+            tier: s.tier,
           }),
         );
     }).pipe(
