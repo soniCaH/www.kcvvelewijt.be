@@ -26,7 +26,7 @@ Rules:
 
 - One issue = one worktree = one PR
 - The tracer bullet from the PRD is ALWAYS issue #1 — labeled `tracer-bullet` + `ready`
-- Issues with unresolved open questions get labeled `blocked`, not `ready`
+- ALL well-specified issues get the `ready` label — even blocked ones (`ready` = specs are clear; blocking is tracked separately via GitHub blockedBy relationships)
 - Every issue body must reference its PRD phase and milestone
 
 ## Issue body template
@@ -70,23 +70,27 @@ gh issue create \
   --body "[body from template]"
 ```
 
-For blocked issues use `--label "blocked"` instead of `--label "ready"`.
+ALL well-specified issues get the `ready` label, even blocked ones. `ready` means "specs are clear" — blocking is a separate concern tracked via GitHub's blockedBy relationships. Ralph checks both before picking up an issue.
 
-## Step 4 — Wire dependencies via Sub-issues API
+## Step 4 — Wire dependencies via GraphQL blockedBy API
 
-For each issue that has a `## Blocked by` section listing other issues, create a Sub-issues relationship via the GitHub API. This makes dependencies machine-readable and visible in the GitHub UI.
-
-The relationship model: the **blocked** issue is the parent, and each **blocker** is added as a sub-issue. This matches how `ralph.sh` queries blockers.
+For each issue that has a `## Blocked by` section listing other issues, create a blocking relationship via the GraphQL API. This makes dependencies machine-readable and visible in the GitHub UI.
 
 ```bash
-# For each blocked issue, set up Sub-issues relationships:
+# For each blocked issue, set up blockedBy relationships:
 
-# 1. Get the integer id of the blocker issue (required by the API — not node_id)
-BLOCKER_ID=$(gh api /repos/{owner}/{repo}/issues/<blocker-number> --jq '.id')
+# 1. Get node_ids for both issues
+BLOCKED_NODE_ID=$(gh api /repos/{owner}/{repo}/issues/<blocked-number> --jq '.node_id')
+BLOCKER_NODE_ID=$(gh api /repos/{owner}/{repo}/issues/<blocker-number> --jq '.node_id')
 
-# 2. Add the blocker as a sub-issue of the blocked issue
-gh api /repos/{owner}/{repo}/issues/<blocked-number>/sub_issues \
-  --method POST -F sub_issue_id="$BLOCKER_ID"
+# 2. Set the blockedBy relationship
+gh api graphql -f query="
+  mutation {
+    addBlockedBy(input: {
+      issueId: \"${BLOCKED_NODE_ID}\",
+      blockingIssueId: \"${BLOCKER_NODE_ID}\"
+    }) { issue { number } }
+  }"
 ```
 
 Repeat for every blocker listed in the `## Blocked by` section.
