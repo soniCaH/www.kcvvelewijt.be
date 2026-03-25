@@ -11,11 +11,6 @@ interface EditorialCardProps {
   variant?: "default" | "nav";
 }
 
-const GRADIENT_DEFAULT =
-  "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%)";
-const GRADIENT_NAV =
-  "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%)";
-
 export function EditorialCard({
   href,
   tag,
@@ -40,10 +35,7 @@ export function EditorialCard({
       )}
       <div
         data-testid="card-overlay"
-        className="absolute inset-0"
-        style={{
-          background: variant === "nav" ? GRADIENT_NAV : GRADIENT_DEFAULT,
-        }}
+        className={`absolute inset-0 ${variant === "nav" ? "editorial-card-overlay--nav" : "editorial-card-overlay--default"}`}
       />
       <div
         className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"

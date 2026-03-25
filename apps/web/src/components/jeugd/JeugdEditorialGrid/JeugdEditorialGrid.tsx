@@ -73,17 +73,35 @@ interface JeugdEditorialGridProps {
 export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
   const [article0, article1, article2] = articles;
 
-  // Build ordered card list: interleave articles and nav cards at the correct grid positions
   type GridItem = {
     key: string;
     position: string;
     element: React.ReactNode;
   };
 
+  const THIRD =
+    "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
+
+  function renderNavCard(nav: NavCardConfig): React.ReactNode {
+    return (
+      <EditorialCard
+        href={nav.href}
+        tag={nav.tag}
+        title={nav.title}
+        description={nav.description}
+        arrowText={nav.arrowText}
+        variant="nav"
+        backgroundImage={nav.imageUrl}
+      />
+    );
+  }
+
   const items: GridItem[] = [];
 
-  // Position 1: Featured article (col 1-7, row 1-2)
   if (article0) {
+    // Full magazine layout: articles interleaved with nav cards
+
+    // Position 1: Featured article (col 1-7, row 1-2)
     items.push({
       key: `article-${article0.id}`,
       position:
@@ -99,114 +117,82 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
         />
       ),
     });
-  }
 
-  // Position 2: Nav card — Aansluiten (col 8-12, row 1)
-  items.push({
-    key: "nav-aansluiten",
-    position:
-      "col-start-8 col-span-5 row-start-1 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-    element: (
-      <EditorialCard
-        href={NAV_CARDS[0].href}
-        tag={NAV_CARDS[0].tag}
-        title={NAV_CARDS[0].title}
-        description={NAV_CARDS[0].description}
-        arrowText={NAV_CARDS[0].arrowText}
-        variant="nav"
-        backgroundImage={NAV_CARDS[0].imageUrl}
-      />
-    ),
-  });
-
-  // Position 3: Article 2 (col 8-12, row 2)
-  if (article1) {
+    // Position 2: Nav card — Aansluiten (col 8-12, row 1)
     items.push({
-      key: `article-${article1.id}`,
+      key: "nav-aansluiten",
       position:
-        "col-start-8 col-span-5 row-start-2 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-      element: (
-        <EditorialCard
-          href={`/news/${article1.slug}`}
-          tag={article1.tags[0] ?? "Jeugd"}
-          title={article1.title}
-          arrowText="Lees meer"
-          backgroundImage={article1.coverImageUrl}
-        />
-      ),
+        "col-start-8 col-span-5 row-start-1 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
+      element: renderNavCard(NAV_CARDS[0]),
     });
-  }
 
-  // Position 4: Nav card — Visie (col 1-4, row 3)
-  items.push({
-    key: "nav-visie",
-    position:
-      "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-    element: (
-      <EditorialCard
-        href={NAV_CARDS[1].href}
-        tag={NAV_CARDS[1].tag}
-        title={NAV_CARDS[1].title}
-        arrowText={NAV_CARDS[1].arrowText}
-        variant="nav"
-        backgroundImage={NAV_CARDS[1].imageUrl}
-      />
-    ),
-  });
+    // Position 3: Article 2 (col 8-12, row 2)
+    if (article1) {
+      items.push({
+        key: `article-${article1.id}`,
+        position:
+          "col-start-8 col-span-5 row-start-2 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
+        element: (
+          <EditorialCard
+            href={`/news/${article1.slug}`}
+            tag={article1.tags[0] ?? "Jeugd"}
+            title={article1.title}
+            arrowText="Lees meer"
+            backgroundImage={article1.coverImageUrl}
+          />
+        ),
+      });
+    }
 
-  // Position 5: Article 3 (col 5-8, row 3)
-  if (article2) {
+    // Position 4: Nav card — Visie (col 1-4, row 3)
     items.push({
-      key: `article-${article2.id}`,
-      position:
-        "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-      element: (
-        <EditorialCard
-          href={`/news/${article2.slug}`}
-          tag={article2.tags[0] ?? "Jeugd"}
-          title={article2.title}
-          arrowText="Lees meer"
-          backgroundImage={article2.coverImageUrl}
-        />
-      ),
+      key: "nav-visie",
+      position: THIRD,
+      element: renderNavCard(NAV_CARDS[1]),
     });
-  }
 
-  // Position 6: Nav card — Praktisch (col 9-12, row 3)
-  items.push({
-    key: "nav-praktisch",
-    position:
-      "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-    element: (
-      <EditorialCard
-        href={NAV_CARDS[2].href}
-        tag={NAV_CARDS[2].tag}
-        title={NAV_CARDS[2].title}
-        arrowText={NAV_CARDS[2].arrowText}
-        variant="nav"
-        backgroundImage={NAV_CARDS[2].imageUrl}
-      />
-    ),
-  });
+    // Position 5: Article 3 (col 5-8, row 3)
+    if (article2) {
+      items.push({
+        key: `article-${article2.id}`,
+        position: THIRD,
+        element: (
+          <EditorialCard
+            href={`/news/${article2.slug}`}
+            tag={article2.tags[0] ?? "Jeugd"}
+            title={article2.title}
+            arrowText="Lees meer"
+            backgroundImage={article2.coverImageUrl}
+          />
+        ),
+      });
+    }
 
-  // Row 4: Nav cards — Structuur, Hulp, Medisch
-  for (let i = 3; i < NAV_CARDS.length; i++) {
-    const nav = NAV_CARDS[i];
+    // Position 6: Nav card — Praktisch (col 9-12, row 3)
     items.push({
-      key: `nav-${nav.tag.toLowerCase()}`,
-      position:
-        "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
-      element: (
-        <EditorialCard
-          href={nav.href}
-          tag={nav.tag}
-          title={nav.title}
-          arrowText={nav.arrowText}
-          variant="nav"
-          backgroundImage={nav.imageUrl}
-        />
-      ),
+      key: "nav-praktisch",
+      position: THIRD,
+      element: renderNavCard(NAV_CARDS[2]),
     });
+
+    // Row 4: Nav cards — Structuur, Hulp, Medisch
+    for (let i = 3; i < NAV_CARDS.length; i++) {
+      const nav = NAV_CARDS[i];
+      items.push({
+        key: `nav-${nav.tag.toLowerCase()}`,
+        position: THIRD,
+        element: renderNavCard(nav),
+      });
+    }
+  } else {
+    // No articles: simple 3×2 grid of nav cards without absolute positioning
+    for (const nav of NAV_CARDS) {
+      items.push({
+        key: `nav-${nav.tag.toLowerCase()}`,
+        position: THIRD,
+        element: renderNavCard(nav),
+      });
+    }
   }
 
   return (

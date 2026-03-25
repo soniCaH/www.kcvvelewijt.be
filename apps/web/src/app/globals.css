@@ -110,6 +110,7 @@
 
   /* Neutral Colors */
   --color-kcvv-black: #1E2024;
+  --color-kcvv-dark-blue: #1E2836;
   --color-kcvv-gray-blue: #31404b;
   --color-kcvv-gray-dark: #292c31;
   --color-kcvv-gray: #62656A;
@@ -353,6 +354,25 @@
   margin-bottom: -6rem;
   margin-left: -6.5rem;
   overflow: hidden;
+}
+
+/* Editorial card overlay gradients — reference design tokens for consistency */
+.editorial-card-overlay--default {
+  background: linear-gradient(
+    to top,
+    rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
+    rgb(from var(--color-kcvv-black) r g b / 0.5) 40%,
+    rgb(from var(--color-kcvv-black) r g b / 0.1) 100%
+  );
+}
+
+.editorial-card-overlay--nav {
+  background: linear-gradient(
+    to top,
+    rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
+    rgb(from var(--color-kcvv-dark-blue) r g b / 0.6) 40%,
+    rgb(from var(--color-kcvv-dark-blue) r g b / 0.2) 100%
+  );
 }
 
 /* Full-bleed breakout utility — pulls an element to viewport width */

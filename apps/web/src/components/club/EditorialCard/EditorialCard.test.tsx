@@ -87,7 +87,7 @@ describe("EditorialCard", () => {
       "[data-testid='card-overlay']",
     ) as HTMLElement;
     expect(overlay).toBeInTheDocument();
-    expect(overlay.style.background).toContain("rgba(30,40,54");
+    expect(overlay.className).toContain("editorial-card-overlay--nav");
   });
 
   it("applies default gradient when variant is not set", () => {
@@ -98,6 +98,6 @@ describe("EditorialCard", () => {
       "[data-testid='card-overlay']",
     ) as HTMLElement;
     expect(overlay).toBeInTheDocument();
-    expect(overlay.style.background).toContain("rgba(30,32,36");
+    expect(overlay.className).toContain("editorial-card-overlay--default");
   });
 });

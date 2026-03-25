@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import {
@@ -14,6 +15,7 @@ import { SectionStack } from "@/components/design-system/SectionStack/SectionSta
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
+import { ArrowRight } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Jeugdopleiding | KCVV Elewijt",
@@ -136,11 +138,79 @@ export default async function JeugdPage() {
     ),
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
+    transition: {
+      type: "diagonal",
+      direction: "right",
+    },
     key: "teams",
   };
 
+  const quoteSection: SectionConfig = {
+    bg: "gray-100",
+    content: (
+      <div className="max-w-inner mx-auto px-4 md:px-10 text-center">
+        <div
+          className="text-5xl text-kcvv-gray-blue/20 mb-6 leading-none font-title"
+          aria-hidden="true"
+        >
+          {"\u201C"}
+        </div>
+        <p className="font-title font-bold text-kcvv-gray-blue leading-normal text-xl md:text-4xl mb-6">
+          Bij KCVV Elewijt staat plezier op één. We geloven dat spelplezier de
+          beste basis is voor sportieve groei.
+        </p>
+        <p className="text-sm font-semibold text-kcvv-gray uppercase tracking-caps">
+          — Jeugdopleiding KCVV Elewijt
+        </p>
+      </div>
+    ),
+    paddingTop: "pt-20",
+    paddingBottom: "pb-20",
+    key: "quote",
+  };
+
+  const ctaSection: SectionConfig = {
+    bg: "gray-100",
+    content: (
+      <div className="max-w-inner-lg mx-auto px-4 md:px-10">
+        <div className="grid grid-cols-[1fr_auto] items-center gap-8 max-sm:grid-cols-1 max-sm:text-center">
+          <div>
+            <h2 className="font-title font-extrabold text-kcvv-gray-blue text-xl md:text-4xl mb-2">
+              Interesse in onze jeugd?
+            </h2>
+            <p className="text-sm text-kcvv-gray">
+              Nieuwe spelers zijn altijd welkom — van U6 tot U21.
+            </p>
+          </div>
+          <Link
+            href="/club/register"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 bg-kcvv-green text-kcvv-black font-bold text-sm uppercase tracking-[0.06em] rounded-sm whitespace-nowrap transition-colors hover:bg-kcvv-green-hover"
+          >
+            Word ook lid
+            <ArrowRight
+              size={16}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        </div>
+      </div>
+    ),
+    paddingTop: "pt-16",
+    paddingBottom: "pb-16",
+    key: "cta",
+  };
+
   return (
-    <SectionStack sections={[heroSection, editorialSection, teamsSection]} />
+    <SectionStack
+      sections={[
+        heroSection,
+        editorialSection,
+        teamsSection,
+        quoteSection,
+        ctaSection,
+      ]}
+    />
   );
 }
 
