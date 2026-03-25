@@ -159,11 +159,18 @@ Output the PR URL as the last line of your response.
 
 ## If blocked mid-implementation
   gh issue edit ${issue} --add-label "blocked" --remove-label "in-progress"
-  gh issue create \
+  BLOCKER_ISSUE=\$(gh issue create \
     --title "[type](scope): [blocker]" \
     --label "ready" \
-    --body "Discovered during #${issue}.\n\n[description]"
-  gh issue comment ${issue} --body "Blocked by [reason]. Created #[N] to resolve."
+    --body "Discovered during #${issue}.\n\n[description]")
+  BLOCKER_NUM=\$(echo "\$BLOCKER_ISSUE" | grep -o '[0-9]*$')
+
+  # Set sub-issue relationship so ralph.sh can auto-unblock later
+  BLOCKER_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/\${BLOCKER_NUM}" --jq '.node_id')
+  gh api "/repos/{owner}/{repo}/issues/${issue}/sub_issues" \
+    --method POST -f sub_issue_id="\$BLOCKER_NODE_ID" 2>/dev/null || true
+
+  gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Sub-issue relationship set via API."
 
 Output on its own line: RALPH_BLOCKED: [one-line reason]
 
