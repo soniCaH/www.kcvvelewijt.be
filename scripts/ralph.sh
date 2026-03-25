@@ -50,6 +50,24 @@ pick_next_issue() {
     return
   fi
 
+  # Filter out skipped issues
+  local filtered=""
+  for num in $candidates; do
+    local is_skipped=false
+    for s in "${SKIPPED_ISSUES[@]}"; do
+      if [ "$num" = "$s" ]; then is_skipped=true; break; fi
+    done
+    if [ "$is_skipped" = false ]; then
+      filtered="${filtered:+$filtered$'\n'}$num"
+    fi
+  done
+  candidates="$filtered"
+
+  if [ -z "$candidates" ]; then
+    echo ""
+    return
+  fi
+
   # Filter out issues with open blockers (checked via GraphQL blockedBy)
   local any_graphql_failed=false
   for num in $candidates; do
@@ -241,6 +259,7 @@ echo ""
 
 MAX=20
 i=0
+SKIPPED_ISSUES=()  # Track issues skipped in this session
 
 while [ $i -lt $MAX ]; do
   i=$((i + 1))
@@ -275,9 +294,9 @@ while [ $i -lt $MAX ]; do
     echo ""
     read -r -p "  Proceed with #${ISSUE}? [Y/n/skip/quit] " choice
     case "$choice" in
-      n|N) echo "Skipped."; continue ;;
+      n|N) echo "Skipped."; SKIPPED_ISSUES+=("$ISSUE"); continue ;;
       q|quit|Q) echo "Quit."; exit 0 ;;
-      s|skip|S) echo "Skipped."; continue ;;
+      s|skip|S) echo "Skipped."; SKIPPED_ISSUES+=("$ISSUE"); continue ;;
     esac
   fi
 
