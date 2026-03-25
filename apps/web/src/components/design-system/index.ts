@@ -76,3 +76,7 @@ export type { HorizontalSliderProps } from "./HorizontalSlider";
 // DownloadButton
 export { DownloadButton } from "./DownloadButton";
 export type { DownloadButtonProps } from "./DownloadButton";
+
+// LinkButton
+export { LinkButton } from "./LinkButton";
+export type { LinkButtonProps } from "./LinkButton";
