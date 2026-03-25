@@ -126,6 +126,8 @@ export function partitionMembers(members: readonly PsdMember[]): {
 
 const CURSOR_KEY = "sync:team-cursor";
 const CYCLE_PLAYER_IDS_KEY = "sync:cycle-player-ids";
+const CYCLE_STAFF_IDS_KEY = "sync:cycle-staff-ids";
+const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
 
 /**
  * Fetches all club teams from PSD and upserts ONE team per invocation using a
@@ -273,6 +275,56 @@ export const runSync = Effect.gen(function* () {
     catch: () => new Error("KV write failed"),
   });
 
+  // ─── Accumulate staff PSD IDs in KV ─────────────────────────────────
+  const existingStaffIds = yield* Effect.tryPromise({
+    try: async () => {
+      const json = await env.PSD_CACHE.get(CYCLE_STAFF_IDS_KEY);
+      if (json === null) return [] as string[];
+      return JSON.parse(json) as string[];
+    },
+    catch: (cause) =>
+      new Error(
+        `KV read/parse failed for ${CYCLE_STAFF_IDS_KEY}: ${String(cause)}`,
+      ),
+  });
+
+  const accumulatedStaffIds = new Set<string>(existingStaffIds);
+  for (const id of staffPsdIds) accumulatedStaffIds.add(id);
+
+  yield* Effect.tryPromise({
+    try: () =>
+      env.PSD_CACHE.put(
+        CYCLE_STAFF_IDS_KEY,
+        JSON.stringify([...accumulatedStaffIds]),
+      ),
+    catch: () => new Error("KV write failed"),
+  });
+
+  // ─── Accumulate team PSD IDs in KV ──────────────────────────────────
+  const existingTeamIds = yield* Effect.tryPromise({
+    try: async () => {
+      const json = await env.PSD_CACHE.get(CYCLE_TEAM_IDS_KEY);
+      if (json === null) return [] as string[];
+      return JSON.parse(json) as string[];
+    },
+    catch: (cause) =>
+      new Error(
+        `KV read/parse failed for ${CYCLE_TEAM_IDS_KEY}: ${String(cause)}`,
+      ),
+  });
+
+  const accumulatedTeamIds = new Set<string>(existingTeamIds);
+  accumulatedTeamIds.add(String(team.id));
+
+  yield* Effect.tryPromise({
+    try: () =>
+      env.PSD_CACHE.put(
+        CYCLE_TEAM_IDS_KEY,
+        JSON.stringify([...accumulatedTeamIds]),
+      ),
+    catch: () => new Error("KV write failed"),
+  });
+
   // Compute next cursor (wraps at end of team list)
   const nextCursor = (teamIndex + 1) % teams.length;
 
@@ -291,9 +343,46 @@ export const runSync = Effect.gen(function* () {
       yield* Effect.log("reconciliation: no orphan players found");
     }
 
-    // Clear accumulation key for next cycle
+    // ─── Staff reconciliation ─────────────────────────────────────────
+    yield* Effect.log("running staff reconciliation");
+    const activeStaffInSanity = yield* sanity.getActiveStaffPsdIds();
+    const orphanStaffIds = activeStaffInSanity.filter(
+      (id) => !accumulatedStaffIds.has(id),
+    );
+
+    if (orphanStaffIds.length > 0) {
+      yield* sanity.archiveStaff(orphanStaffIds);
+      yield* Effect.log(
+        `reconciliation: archived ${orphanStaffIds.length} staff: ${orphanStaffIds.join(", ")}`,
+      );
+    } else {
+      yield* Effect.log("reconciliation: no orphan staff found");
+    }
+
+    // ─── Team reconciliation ──────────────────────────────────────────
+    yield* Effect.log("running team reconciliation");
+    const activeTeamsInSanity = yield* sanity.getActiveTeamPsdIds();
+    const orphanTeamIds = activeTeamsInSanity.filter(
+      (id) => !accumulatedTeamIds.has(id),
+    );
+
+    if (orphanTeamIds.length > 0) {
+      yield* sanity.archiveTeams(orphanTeamIds);
+      yield* Effect.log(
+        `reconciliation: archived ${orphanTeamIds.length} teams: ${orphanTeamIds.join(", ")}`,
+      );
+    } else {
+      yield* Effect.log("reconciliation: no orphan teams found");
+    }
+
+    // Clear accumulation keys for next cycle
     yield* Effect.tryPromise({
-      try: () => env.PSD_CACHE.delete(CYCLE_PLAYER_IDS_KEY),
+      try: () =>
+        Promise.all([
+          env.PSD_CACHE.delete(CYCLE_PLAYER_IDS_KEY),
+          env.PSD_CACHE.delete(CYCLE_STAFF_IDS_KEY),
+          env.PSD_CACHE.delete(CYCLE_TEAM_IDS_KEY),
+        ]),
       catch: () => new Error("KV delete failed"),
     });
   }

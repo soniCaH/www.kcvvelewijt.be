@@ -47,6 +47,10 @@ function makeSanityWriteClientMock() {
   );
   const getActivePlayerPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
+  const getActiveStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
+  const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
 
   const mock: SanityWriteClientInterface = {
     upsertPlayer,
@@ -56,6 +60,10 @@ function makeSanityWriteClientMock() {
     getPlayersImageState,
     getActivePlayerPsdIds,
     archivePlayers,
+    getActiveStaffPsdIds,
+    archiveStaff,
+    getActiveTeamPsdIds,
+    archiveTeams,
   };
 
   return {
@@ -66,6 +74,10 @@ function makeSanityWriteClientMock() {
     getPlayersImageState,
     getActivePlayerPsdIds,
     archivePlayers,
+    getActiveStaffPsdIds,
+    archiveStaff,
+    getActiveTeamPsdIds,
+    archiveTeams,
     mock,
   };
 }
@@ -340,6 +352,10 @@ describe("runSync", () => {
       ),
       getActivePlayerPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
+      getActiveStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
+      getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],
@@ -562,5 +578,136 @@ describe("runSync", () => {
     // KV accumulation key should be cleared after reconciliation
     const accumulatedIds = await kvStub.get("sync:cycle-player-ids");
     expect(accumulatedIds).toBeNull();
+  });
+
+  it("archives orphan staff when cycle completes (3 in Sanity, 2 in PSD)", async () => {
+    const kvStub = makeKvStub();
+
+    // PSD returns 2 staff members for the single team
+    const psdStaff: PsdMember[] = [
+      { ...ONE_STAFF, id: 500 },
+      { ...ONE_STAFF, id: 600 },
+    ];
+
+    const {
+      getActiveStaffPsdIds,
+      archiveStaff,
+      mock: sanityMock,
+    } = makeSanityWriteClientMock();
+
+    // Sanity has 3 active staff — staff 700 is the orphan
+    getActiveStaffPsdIds.mockReturnValue(Effect.succeed(["500", "600", "700"]));
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER], psdStaff);
+
+    await Effect.runPromise(
+      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+    );
+
+    // With 1 team, cursor wraps to 0 immediately → reconciliation runs
+    expect(archiveStaff).toHaveBeenCalledOnce();
+    expect(archiveStaff).toHaveBeenCalledWith(["700"]);
+  });
+
+  it("archives orphan team when cycle completes (team disappears from PSD)", async () => {
+    const kvStub = makeKvStub();
+
+    const {
+      getActiveTeamPsdIds,
+      archiveTeams,
+      mock: sanityMock,
+    } = makeSanityWriteClientMock();
+
+    // Sanity has 2 active teams — team 99 is in PSD, team 77 is the orphan
+    getActiveTeamPsdIds.mockReturnValue(Effect.succeed(["42", "77"]));
+
+    // PSD returns only 1 team (ONE_TEAM with id 42)
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+    await Effect.runPromise(
+      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+    );
+
+    // With 1 team, cursor wraps to 0 → reconciliation runs
+    expect(archiveTeams).toHaveBeenCalledOnce();
+    expect(archiveTeams).toHaveBeenCalledWith(["77"]);
+  });
+
+  it("accumulates staff IDs across teams and reconciles at cycle end", async () => {
+    const kvStub = makeKvStub();
+
+    const TWO_TEAMS: PsdTeam[] = [
+      { ...ONE_TEAM, id: 1, name: "Team A" },
+      { ...ONE_TEAM, id: 2, name: "Team B" },
+    ];
+
+    // Team A has staff 500. Team B has staff 500, 600 (500 shared).
+    const psdMock: PsdTeamClientInterface = {
+      getRawTeams: () => Effect.succeed(TWO_TEAMS),
+      getRawMembers: () => Effect.succeed([ONE_PLAYER]),
+      getRawStaff: (teamId) =>
+        Effect.succeed(
+          teamId === 1
+            ? [{ ...ONE_STAFF, id: 500 }]
+            : [
+                { ...ONE_STAFF, id: 500 },
+                { ...ONE_STAFF, id: 600 },
+              ],
+        ),
+    };
+
+    // Run 1: processes Team A (cursor 0 → 1)
+    const sanity1 = makeSanityWriteClientMock();
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, sanity1.mock, psdMock)),
+      ),
+    );
+    expect(sanity1.archiveStaff).not.toHaveBeenCalled();
+
+    // Run 2: processes Team B (cursor 1 → 0, cycle complete)
+    const sanity2 = makeSanityWriteClientMock();
+    // Sanity has 3 active staff — staff 700 is the orphan
+    sanity2.getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["500", "600", "700"]),
+    );
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, sanity2.mock, psdMock)),
+      ),
+    );
+
+    // Reconciliation should archive staff 700
+    expect(sanity2.archiveStaff).toHaveBeenCalledOnce();
+    expect(sanity2.archiveStaff).toHaveBeenCalledWith(["700"]);
+
+    // KV accumulation key should be cleared after reconciliation
+    const accumulatedStaffIds = await kvStub.get("sync:cycle-staff-ids");
+    expect(accumulatedStaffIds).toBeNull();
+  });
+
+  it("does not reconcile staff or teams mid-cycle", async () => {
+    const kvStub = makeKvStub();
+
+    const TWO_TEAMS: PsdTeam[] = [
+      { ...ONE_TEAM, id: 1, name: "Team A" },
+      { ...ONE_TEAM, id: 2, name: "Team B" },
+    ];
+
+    const {
+      archiveStaff,
+      archiveTeams,
+      mock: sanityMock,
+    } = makeSanityWriteClientMock();
+    const psdMock = makePsdTeamClientMock(TWO_TEAMS, [ONE_PLAYER], [ONE_STAFF]);
+
+    // Run 1: processes Team A (cursor 0 → 1), not at end of cycle
+    await Effect.runPromise(
+      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+    );
+
+    expect(archiveStaff).not.toHaveBeenCalled();
+    expect(archiveTeams).not.toHaveBeenCalled();
   });
 });
