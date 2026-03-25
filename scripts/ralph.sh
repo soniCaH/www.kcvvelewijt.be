@@ -45,7 +45,7 @@ pick_next_issue() {
   # Filter out issues with open blockers (checked via GraphQL blockedBy)
   for num in $candidates; do
     local open_blockers
-    open_blockers=$(gh api graphql -f query="
+    if ! open_blockers=$(gh api graphql -f query="
       query {
         repository(owner: \"soniCaH\", name: \"www.kcvvelewijt.be\") {
           issue(number: ${num}) {
@@ -54,7 +54,10 @@ pick_next_issue() {
             }
           }
         }
-      }" --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length' 2>/dev/null || echo "0")
+      }" --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length' 2>&1); then
+      echo "⚠️  Warning: blockedBy query failed for issue #${num}, skipping: ${open_blockers}" >&2
+      continue
+    fi
 
     if [ "$open_blockers" = "0" ]; then
       echo "$num"
@@ -181,7 +184,6 @@ Do NOT present options. Do NOT wait for approval. Just do it:
 Output the PR URL as the last line of your response.
 
 ## If blocked mid-implementation
-  gh issue edit ${issue} --remove-label "in-progress"
   BLOCKER_ISSUE=\$(gh issue create \
     --title "[type](scope): [blocker]" \
     --label "ready" \
@@ -191,11 +193,13 @@ Output the PR URL as the last line of your response.
   # Set blockedBy relationship via GraphQL (ready label stays — specs are still clear)
   ISSUE_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/${issue}" --jq '.node_id')
   BLOCKER_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/\${BLOCKER_NUM}" --jq '.node_id')
-  if ! gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>&1; then
-    echo "⚠️  Warning: failed to set blockedBy relationship (issue node: \${ISSUE_NODE_ID}, blocker node: \${BLOCKER_NODE_ID}). Skipping." >&2
+  if gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>&1; then
+    gh issue edit ${issue} --remove-label "in-progress"
+    gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Blocking relationship set via API."
+  else
+    echo "⚠️  Warning: failed to set blockedBy relationship (issue node: \${ISSUE_NODE_ID}, blocker #\${BLOCKER_NUM}). Restoring in-progress label." >&2
+    gh issue edit ${issue} --add-label "in-progress"
   fi
-
-  gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Blocking relationship set via API."
 
 Output on its own line: RALPH_BLOCKED: [one-line reason]
 
