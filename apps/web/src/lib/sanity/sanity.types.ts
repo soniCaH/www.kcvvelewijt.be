@@ -442,6 +442,7 @@ export type StaffMember = {
   positionShort?: string;
   responsibilities?: string;
   psdId?: string;
+  archived?: boolean;
 };
 
 export type TrainingSession = {
@@ -536,6 +537,7 @@ export type Team = {
       _key: string;
     } & StaffMemberReference
   >;
+  archived?: boolean;
 };
 
 export type Player = {
@@ -551,6 +553,7 @@ export type Player = {
   nationality?: string;
   keeper?: boolean;
   positionPsd?: string;
+  archived?: boolean;
   jerseyNumber?: number;
   height?: number;
   weight?: number;
@@ -1098,7 +1101,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
 
 // Source: ../web/src/lib/sanity/queries/players.ts
 // Variable: PLAYERS_QUERY
-// Query: *[_type == "player"] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
+// Query: *[_type == "player" && archived != true] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
 export type PLAYERS_QUERY_RESULT = Array<{
   _id: string;
   psdId: string | null;
@@ -1199,9 +1202,26 @@ export type SPONSORS_QUERY_RESULT = Array<{
   logoUrl: string | null;
 }>;
 
+// Source: ../web/src/lib/sanity/queries/staffMembers.ts
+// Variable: STAFF_MEMBERS_QUERY
+// Query: *[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {  _id,  firstName,  lastName,  positionTitle,  positionShort,  department,  email,  phone,  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",  responsibilities,  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)}
+export type STAFF_MEMBERS_QUERY_RESULT = Array<{
+  _id: string;
+  firstName: string | null;
+  lastName: string | null;
+  positionTitle: string | null;
+  positionShort: string | null;
+  department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+  email: string | null;
+  phone: string | null;
+  photoUrl: string | null;
+  responsibilities: string | null;
+  parentId: string | null;
+}>;
+
 // Source: ../web/src/lib/sanity/queries/teams.ts
 // Variable: TEAMS_QUERY
-// Query: *[_type == "team" && showInNavigation != false] | order(name asc) {  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,  tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
+// Query: *[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,  tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
 export type TEAMS_QUERY_RESULT = Array<{
   _id: string;
   psdId: string | null;
@@ -1328,7 +1348,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
 
 // Source: ../web/src/lib/sanity/queries/teams.ts
 // Variable: TEAMS_LANDING_QUERY
-// Query: *[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {  _id, name, "slug": slug.current, age,  division, divisionFull, tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  staff[]-> { firstName, lastName, role }}
+// Query: *[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {  _id, name, "slug": slug.current, age,  division, divisionFull, tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  staff[]-> { firstName, lastName, role }}
 export type TEAMS_LANDING_QUERY_RESULT = Array<{
   _id: string;
   name: string | null;
@@ -1377,11 +1397,12 @@ declare module "@sanity/client" {
     'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
     '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, positionTitle,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
-    '*[_type == "player"] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
+    '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
-    '*[_type == "team" && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
+    '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  positionTitle,\n  positionShort,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
+    '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;
-    '*[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;
+    '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;
   }
 }
