@@ -17,6 +17,10 @@ import {
   SponsorRepository,
   SponsorRepositoryLive,
 } from "../repositories/sponsor.repository";
+import {
+  StaffRepository,
+  StaffRepositoryLive,
+} from "../repositories/staff.repository";
 
 export const AppLayer = Layer.mergeAll(
   BffServiceLive,
@@ -25,6 +29,7 @@ export const AppLayer = Layer.mergeAll(
   TeamRepositoryLive,
   ArticleRepositoryLive,
   SponsorRepositoryLive,
+  StaffRepositoryLive,
 );
 export const runtime = ManagedRuntime.make(AppLayer);
 
@@ -38,6 +43,7 @@ export const runPromise = <A, E>(
     | TeamRepository
     | ArticleRepository
     | SponsorRepository
+    | StaffRepository
   >,
 ) => runtime.runPromise(effect);
 
@@ -51,6 +57,7 @@ export const runPromiseWithLogging = <A, E>(
     | TeamRepository
     | ArticleRepository
     | SponsorRepository
+    | StaffRepository
   >,
 ) =>
   runtime.runPromise(
@@ -73,4 +80,5 @@ export {
   TeamRepository,
   ArticleRepository,
   SponsorRepository,
+  StaffRepository,
 };

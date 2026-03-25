@@ -2,7 +2,7 @@ import type { OrgChartNode } from "@/types/organigram";
 
 /**
  * Fixture data for Storybook stories — mirrors the shape returned by
- * SanityService.getStaffMembers() so stories stay realistic.
+ * StaffRepository.findAll() so stories stay realistic.
  */
 export const staffMembersFixture: OrgChartNode[] = [
   // Root

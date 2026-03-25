@@ -13,6 +13,7 @@ import { Effect } from "effect";
 import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
 import { SanityService } from "@/lib/effect/services/SanityService";
+import { StaffRepository } from "@/lib/repositories/staff.repository";
 
 export const metadata: Metadata = {
   title: "Organigram & Hulp | KCVV Elewijt",
@@ -47,9 +48,10 @@ export const metadata: Metadata = {
 export default async function OrganigramPage() {
   const [members, responsibilityPaths] = await runPromise(
     Effect.gen(function* () {
+      const staffRepo = yield* StaffRepository;
       const sanity = yield* SanityService;
       return yield* Effect.all(
-        [sanity.getStaffMembers(), sanity.getResponsibilityPaths()],
+        [staffRepo.findAll(), sanity.getResponsibilityPaths()],
         { concurrency: 2 },
       );
     }),

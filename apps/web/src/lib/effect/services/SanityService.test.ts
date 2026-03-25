@@ -2,7 +2,6 @@ import { describe, it, expect, vi, type Mock } from "vitest";
 import { Effect } from "effect";
 import { SanityService, SanityServiceLive } from "./SanityService";
 import { sanityClient } from "../../sanity/client";
-import { STAFF_MEMBERS_QUERY } from "../../sanity/queries/staffMembers";
 import { RESPONSIBILITY_PATHS_QUERY } from "../../sanity/queries/responsibilityPaths";
 import { PAGE_BY_SLUG_QUERY } from "../../sanity/queries/pages";
 
@@ -15,100 +14,6 @@ vi.mock("../../sanity/client", () => ({
 function mockFetch(value: unknown) {
   (vi.mocked(sanityClient.fetch) as Mock).mockResolvedValueOnce(value);
 }
-
-describe("SanityService.getStaffMembers", () => {
-  it("prepends the club root node and maps a staffMember doc to OrgChartNode", async () => {
-    mockFetch([
-      {
-        _id: "staffMember-psd-42",
-        firstName: "Jan",
-        lastName: "Smeets",
-        positionTitle: "Jeugdcoördinator",
-        positionShort: "JC",
-        department: "jeugdbestuur",
-        email: "jeugd@kcvvelewijt.be",
-        phone: null,
-        photoUrl: "https://cdn.sanity.io/images/test/photo.jpg",
-        responsibilities: "Coördinatie jeugdwerking",
-        parentId: null,
-      },
-    ]);
-
-    const program = Effect.gen(function* () {
-      const svc = yield* SanityService;
-      return yield* svc.getStaffMembers();
-    }).pipe(Effect.provide(SanityServiceLive));
-
-    const nodes = await Effect.runPromise(program);
-
-    expect(vi.mocked(sanityClient.fetch)).toHaveBeenCalledWith(
-      STAFF_MEMBERS_QUERY,
-      expect.any(Object),
-    );
-
-    expect(nodes[0]).toEqual({
-      id: "club",
-      name: "KCVV Elewijt",
-      title: "Voetbalclub",
-      imageUrl: "/images/logo-flat.png",
-      department: "algemeen",
-      parentId: null,
-    });
-
-    expect(nodes[1]).toEqual({
-      id: "staffMember-psd-42",
-      name: "Jan Smeets",
-      title: "Jeugdcoördinator",
-      positionShort: "JC",
-      imageUrl: "https://cdn.sanity.io/images/test/photo.jpg",
-      email: "jeugd@kcvvelewijt.be",
-      phone: undefined,
-      responsibilities: "Coördinatie jeugdwerking",
-      department: "jeugdbestuur",
-      parentId: "club", // null parentId → root → "club"
-    });
-  });
-
-  it("preserves parentId when parentMember is set", async () => {
-    mockFetch([
-      {
-        _id: "staffMember-psd-1",
-        firstName: "Root",
-        lastName: "Person",
-        positionTitle: "Voorzitter",
-        positionShort: "PRES",
-        department: "hoofdbestuur",
-        email: null,
-        phone: null,
-        photoUrl: null,
-        responsibilities: null,
-        parentId: null,
-      },
-      {
-        _id: "staffMember-psd-2",
-        firstName: "Child",
-        lastName: "Person",
-        positionTitle: "Secretaris",
-        positionShort: "SEC",
-        department: "hoofdbestuur",
-        email: null,
-        phone: null,
-        photoUrl: null,
-        responsibilities: null,
-        parentId: "staffMember-psd-1",
-      },
-    ]);
-
-    const program = Effect.gen(function* () {
-      const svc = yield* SanityService;
-      return yield* svc.getStaffMembers();
-    }).pipe(Effect.provide(SanityServiceLive));
-
-    const nodes = await Effect.runPromise(program);
-    // nodes[0]=club root, nodes[1]=Root Person, nodes[2]=Child Person
-    expect(nodes[2]?.parentId).toBe("staffMember-psd-1");
-  });
-});
 
 describe("SanityService.getResponsibilityPaths — memberId", () => {
   it("forwards memberId from staffMember reference", async () => {
