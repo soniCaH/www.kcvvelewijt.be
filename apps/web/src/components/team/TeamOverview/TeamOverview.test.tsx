@@ -442,7 +442,9 @@ describe("TeamOverview", () => {
     it("should use muted white text for empty state when colorScheme is dark", () => {
       render(<TeamOverview teams={[]} colorScheme="dark" />);
       const emptyMsg = screen.getByText("Geen teams gevonden");
-      expect(emptyMsg.closest("div")?.className).toContain("text-white/60");
+      const parent = emptyMsg.closest("div");
+      expect(parent).not.toBeNull();
+      expect(parent!.className).toContain("text-white/60");
     });
   });
 });
