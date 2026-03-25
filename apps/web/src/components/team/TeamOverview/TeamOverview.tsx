@@ -65,9 +65,9 @@ function parseAgeGroup(ageGroup: string | undefined): number {
  */
 function getAgeCategory(ageGroup: string | undefined): string {
   const age = parseAgeGroup(ageGroup);
-  if (age <= 9) return "Onderbouw (U6–U9)";
-  if (age <= 13) return "Middenbouw (U10–U13)";
-  if (age <= 21) return "Bovenbouw (U14–U21)";
+  if (age >= 6 && age <= 9) return "Onderbouw (U6–U9)";
+  if (age >= 10 && age <= 13) return "Middenbouw (U10–U13)";
+  if (age >= 14 && age <= 21) return "Bovenbouw (U14–U21)";
   return "Overig";
 }
 

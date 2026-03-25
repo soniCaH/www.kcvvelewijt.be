@@ -168,7 +168,12 @@ describe("TeamOverview", () => {
         { name: "U21", href: "/team/u21", ageGroup: "U21", teamType: "youth" },
       ];
       render(<TeamOverview teams={teamsWithU21} groupByAge teamType="youth" />);
-      expect(screen.getByText("Bovenbouw (U14–U21)")).toBeInTheDocument();
+      const bovenbouwHeading = screen.getByText("Bovenbouw (U14–U21)");
+      expect(bovenbouwHeading).toBeInTheDocument();
+      const bovenbouwSection = bovenbouwHeading.closest("section")!;
+      expect(
+        within(bovenbouwSection).getAllByText("U21").length,
+      ).toBeGreaterThan(0);
     });
 
     it("should order tiers Bovenbouw first, then Middenbouw, then Onderbouw", () => {
