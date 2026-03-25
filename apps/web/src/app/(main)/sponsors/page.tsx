@@ -44,16 +44,26 @@ export default async function SponsorsPageRoute() {
   );
 
   const goldSponsors = sponsors
-    .filter((s) => s.type && GOLD_TYPES.includes(s.type))
+    .filter(
+      (s) =>
+        s.tier === "hoofdsponsor" ||
+        (!s.tier && s.type && GOLD_TYPES.includes(s.type)),
+    )
     .map(mapToSponsor);
   const silverSponsors = sponsors
-    .filter((s) => s.type && SILVER_TYPES.includes(s.type))
+    .filter(
+      (s) =>
+        s.tier === "sponsor" ||
+        (!s.tier && s.type && SILVER_TYPES.includes(s.type)),
+    )
     .map(mapToSponsor);
   const bronzeSponsors = sponsors
     .filter(
       (s) =>
-        !s.type ||
-        (!GOLD_TYPES.includes(s.type) && !SILVER_TYPES.includes(s.type)),
+        s.tier === "sympathisant" ||
+        (!s.tier &&
+          (!s.type ||
+            (!GOLD_TYPES.includes(s.type) && !SILVER_TYPES.includes(s.type)))),
     )
     .map(mapToSponsor);
 

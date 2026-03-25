@@ -26,7 +26,7 @@ export function toSponsorVM(row: SPONSORS_QUERY_RESULT[number]): SponsorVM {
 }
 
 export interface SponsorRepositoryInterface {
-  readonly findAll: () => Effect.Effect<SponsorVM[]>;
+  readonly findAll: () => Effect.Effect<SponsorVM[], Error>;
 }
 
 export class SponsorRepository extends Context.Tag("SponsorRepository")<
@@ -38,7 +38,7 @@ const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
   Effect.tryPromise({
     try: () => sanityClient.fetch<T>(query, params ?? {}),
     catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
+  });
 
 export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
   findAll: () =>

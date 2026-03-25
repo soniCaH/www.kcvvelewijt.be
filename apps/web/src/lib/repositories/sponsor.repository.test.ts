@@ -19,7 +19,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(effect: Effect.Effect<A, never, SponsorRepository>) {
+function runWithRepo<A>(effect: Effect.Effect<A, Error, SponsorRepository>) {
   return Effect.runPromise(Effect.provide(effect, SponsorRepositoryLive));
 }
 
