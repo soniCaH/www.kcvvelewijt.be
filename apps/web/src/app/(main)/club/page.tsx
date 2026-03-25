@@ -4,7 +4,7 @@ import type { SectionConfig } from "@/components/design-system/SectionStack/Sect
 import { ClubHero } from "@/components/club/ClubHero/ClubHero";
 import { ClubEditorialGrid } from "@/components/club/ClubEditorialGrid/ClubEditorialGrid";
 import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
-import { ClubContactCta } from "@/components/club/ClubContactCta/ClubContactCta";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 
 export const metadata: Metadata = {
   title: "Onze club | KCVV Elewijt",
@@ -51,7 +51,14 @@ const missionSection: SectionConfig = {
 
 const contactSection: SectionConfig = {
   bg: "gray-100",
-  content: <ClubContactCta />,
+  content: (
+    <SectionCta
+      heading="Vragen over de club?"
+      body="Neem contact op — we helpen je graag verder."
+      buttonLabel="Contacteer ons"
+      buttonHref="/club/contact"
+    />
+  ),
   paddingTop: "pt-16",
   paddingBottom: "pb-16",
   key: "contact",
