@@ -76,17 +76,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled}
-        className={cn(
-          getButtonClasses({ variant, size, fullWidth, className }),
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          {
-            "disabled:hover:bg-kcvv-green-bright": variant === "primary",
-            "disabled:hover:bg-gray-600": variant === "secondary",
-            "disabled:hover:bg-transparent disabled:hover:text-kcvv-green-bright":
-              variant === "ghost",
-            "disabled:hover:no-underline": variant === "link",
-          },
-        )}
+        className={getButtonClasses({
+          variant,
+          size,
+          fullWidth,
+          disabled,
+          className,
+        })}
         {...props}
       >
         {children}

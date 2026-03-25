@@ -33,7 +33,7 @@ describe("Button", () => {
     it("should render secondary variant", () => {
       render(<Button variant="secondary">Secondary</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-gray-600");
+      expect(button).toHaveClass("bg-kcvv-gray");
     });
 
     it("should render ghost variant", () => {
@@ -107,8 +107,8 @@ describe("Button", () => {
       render(<Button disabled>Disabled</Button>);
       const button = screen.getByRole("button", { name: /disabled/i });
       expect(button).toBeDisabled();
-      expect(button).toHaveClass("disabled:opacity-50");
-      expect(button).toHaveClass("disabled:cursor-not-allowed");
+      expect(button).toHaveClass("opacity-50");
+      expect(button).toHaveClass("cursor-not-allowed");
     });
 
     it("should not call onClick when disabled", async () => {
@@ -232,7 +232,7 @@ describe("Button", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-gray-600"); // secondary
+      expect(button).toHaveClass("bg-kcvv-gray"); // secondary
       expect(button).toHaveClass("text-lg"); // large
       expect(button.querySelector("svg")).toBeInTheDocument(); // arrow
     });

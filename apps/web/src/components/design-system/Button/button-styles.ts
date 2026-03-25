@@ -27,7 +27,8 @@ export function getButtonClasses({
     {
       "bg-kcvv-green-bright text-white hover:bg-kcvv-green-bright/50":
         variant === "primary",
-      "bg-gray-600 text-white hover:bg-gray-800": variant === "secondary",
+      "bg-kcvv-gray text-white hover:bg-kcvv-gray-dark":
+        variant === "secondary",
       "border-2 border-kcvv-green-bright text-kcvv-green-bright hover:bg-kcvv-green-bright hover:text-white":
         variant === "ghost",
       "text-kcvv-green-bright underline-offset-4 hover:underline":
@@ -38,16 +39,16 @@ export function getButtonClasses({
     disabled && "opacity-50 cursor-not-allowed",
     disabled && {
       "hover:bg-kcvv-green-bright": variant === "primary",
-      "hover:bg-gray-600": variant === "secondary",
+      "hover:bg-kcvv-gray": variant === "secondary",
       "hover:bg-transparent hover:text-kcvv-green-bright": variant === "ghost",
       "hover:no-underline": variant === "link",
     },
 
     // Size styles
     {
-      "text-sm px-6 py-2 rounded-[0.25em]": size === "sm",
-      "text-base px-8 py-3 rounded-[0.25em]": size === "md",
-      "text-lg px-10 py-4 rounded-[0.25em]": size === "lg",
+      "text-sm px-6 py-2 rounded": size === "sm",
+      "text-base px-8 py-3 rounded": size === "md",
+      "text-lg px-10 py-4 rounded": size === "lg",
     },
 
     // Full width

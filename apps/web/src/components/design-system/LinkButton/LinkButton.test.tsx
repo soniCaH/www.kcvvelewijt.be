@@ -26,7 +26,7 @@ describe("LinkButton", () => {
         </LinkButton>,
       );
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-gray-600");
+      expect(link).toHaveClass("bg-kcvv-gray");
     });
 
     it("should render ghost variant", () => {
@@ -147,7 +147,7 @@ describe("LinkButton", () => {
       );
 
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-gray-600");
+      expect(link).toHaveClass("bg-kcvv-gray");
       expect(link).toHaveClass("text-lg");
       expect(link.querySelector("svg")).toBeInTheDocument();
     });
