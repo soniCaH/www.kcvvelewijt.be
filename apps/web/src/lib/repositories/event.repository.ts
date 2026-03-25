@@ -19,7 +19,17 @@ export interface EventVM {
   featuredOnHome: boolean;
 }
 
-export function toEventVM(row: EVENTS_QUERY_RESULT[number]): EventVM {
+interface EventRow {
+  _id: string;
+  title: string | null;
+  dateStart: string | null;
+  dateEnd?: string | null;
+  externalLink?: { url?: string | null } | null;
+  coverImageUrl?: string | null;
+  featuredOnHome?: boolean | null;
+}
+
+function mapEventRowToVM(row: EventRow, featuredOnHome?: boolean): EventVM {
   return {
     id: row._id,
     title: row.title ?? "",
@@ -27,22 +37,18 @@ export function toEventVM(row: EVENTS_QUERY_RESULT[number]): EventVM {
     dateEnd: row.dateEnd ?? undefined,
     href: row.externalLink?.url ?? "#",
     coverImageUrl: row.coverImageUrl ?? undefined,
-    featuredOnHome: false,
+    featuredOnHome: featuredOnHome ?? row.featuredOnHome ?? false,
   };
+}
+
+export function toEventVM(row: EVENTS_QUERY_RESULT[number]): EventVM {
+  return mapEventRowToVM(row, false);
 }
 
 export function toFeaturedEventVM(
   row: NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT>,
 ): EventVM {
-  return {
-    id: row._id,
-    title: row.title ?? "",
-    dateStart: row.dateStart ?? "",
-    dateEnd: row.dateEnd ?? undefined,
-    href: row.externalLink?.url ?? "#",
-    coverImageUrl: row.coverImageUrl ?? undefined,
-    featuredOnHome: row.featuredOnHome ?? false,
-  };
+  return mapEventRowToVM(row);
 }
 
 export interface EventRepositoryInterface {
