@@ -1,15 +1,21 @@
 import { Effect } from "effect";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   TeamRepository,
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
+import {
+  ArticleRepository,
+  type ArticleVM,
+} from "@/lib/repositories/article.repository";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
-import { EditorialCard } from "@/components/club/EditorialCard/EditorialCard";
+import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
+import { ArrowRight } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Jeugdopleiding | KCVV Elewijt",
@@ -58,34 +64,29 @@ async function fetchYouthTeams(): Promise<TeamData[]> {
   }
 }
 
-function EditorialSection() {
-  return (
-    <div className="max-w-[70rem] mx-auto px-4 md:px-10">
-      <div className="mb-10">
-        <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-label text-kcvv-gray mb-3">
-          <span className="block w-5 h-0.5 bg-kcvv-green" />
-          Ontdek onze jeugd
-        </div>
-        <h2 className="font-title font-extrabold text-kcvv-black text-3xl md:text-4xl uppercase leading-tight">
-          Alles op één plek
-        </h2>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <EditorialCard
-          href="/club/organigram"
-          tag="Structuur"
-          title="Organigram"
-          description="Ontdek wie er achter de schermen van onze jeugdopleiding staat."
-          arrowText="Bekijk"
-          backgroundImage="/images/club/organigram.jpg"
-        />
-      </div>
-    </div>
-  );
+async function fetchJeugdArticles(): Promise<ArticleVM[]> {
+  try {
+    return await runPromise(
+      Effect.gen(function* () {
+        const repo = yield* ArticleRepository;
+        return yield* repo.findPaginated({
+          offset: 0,
+          limit: 3,
+          category: "Jeugd",
+        });
+      }),
+    );
+  } catch (error) {
+    console.error("Failed to fetch jeugd articles:", error);
+    return [];
+  }
 }
 
 export default async function JeugdPage() {
-  const teams = await fetchYouthTeams();
+  const [teams, articles] = await Promise.all([
+    fetchYouthTeams(),
+    fetchJeugdArticles(),
+  ]);
 
   const heroSection: SectionConfig = {
     bg: "kcvv-black",
@@ -102,7 +103,7 @@ export default async function JeugdPage() {
 
   const editorialSection: SectionConfig = {
     bg: "gray-100",
-    content: <EditorialSection />,
+    content: <JeugdEditorialGrid articles={articles} />,
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
     transition: {
@@ -137,11 +138,79 @@ export default async function JeugdPage() {
     ),
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
+    transition: {
+      type: "diagonal",
+      direction: "right",
+    },
     key: "teams",
   };
 
+  const quoteSection: SectionConfig = {
+    bg: "gray-100",
+    content: (
+      <div className="max-w-inner mx-auto px-4 md:px-10 text-center">
+        <div
+          className="text-5xl text-kcvv-gray-blue/20 mb-6 leading-none font-title"
+          aria-hidden="true"
+        >
+          {"\u201C"}
+        </div>
+        <p className="font-title font-bold text-kcvv-gray-blue leading-normal text-xl md:text-4xl mb-6">
+          Bij KCVV Elewijt staat plezier op één. We geloven dat spelplezier de
+          beste basis is voor sportieve groei.
+        </p>
+        <p className="text-sm font-semibold text-kcvv-gray uppercase tracking-caps">
+          — Jeugdopleiding KCVV Elewijt
+        </p>
+      </div>
+    ),
+    paddingTop: "pt-20",
+    paddingBottom: "pb-20",
+    key: "quote",
+  };
+
+  const ctaSection: SectionConfig = {
+    bg: "gray-100",
+    content: (
+      <div className="max-w-inner-lg mx-auto px-4 md:px-10">
+        <div className="grid grid-cols-[1fr_auto] items-center gap-8 max-sm:grid-cols-1 max-sm:text-center">
+          <div>
+            <h2 className="font-title font-extrabold text-kcvv-gray-blue text-xl md:text-4xl mb-2">
+              Interesse in onze jeugd?
+            </h2>
+            <p className="text-sm text-kcvv-gray">
+              Nieuwe spelers zijn altijd welkom — van U6 tot U21.
+            </p>
+          </div>
+          <Link
+            href="/club/register"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 bg-kcvv-green text-kcvv-black font-bold text-sm uppercase tracking-[0.06em] rounded-sm whitespace-nowrap transition-colors hover:bg-kcvv-green-hover"
+          >
+            Word ook lid
+            <ArrowRight
+              size={16}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        </div>
+      </div>
+    ),
+    paddingTop: "pt-16",
+    paddingBottom: "pb-16",
+    key: "cta",
+  };
+
   return (
-    <SectionStack sections={[heroSection, editorialSection, teamsSection]} />
+    <SectionStack
+      sections={[
+        heroSection,
+        editorialSection,
+        teamsSection,
+        quoteSection,
+        ctaSection,
+      ]}
+    />
   );
 }
 

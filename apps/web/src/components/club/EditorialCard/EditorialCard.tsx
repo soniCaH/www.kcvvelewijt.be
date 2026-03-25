@@ -8,6 +8,7 @@ interface EditorialCardProps {
   arrowText: string;
   featured?: boolean;
   backgroundImage?: string;
+  variant?: "default" | "nav";
 }
 
 export function EditorialCard({
@@ -18,6 +19,7 @@ export function EditorialCard({
   arrowText,
   featured,
   backgroundImage,
+  variant = "default",
 }: EditorialCardProps) {
   return (
     <Link
@@ -32,11 +34,8 @@ export function EditorialCard({
         />
       )}
       <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%)",
-        }}
+        data-testid="card-overlay"
+        className={`absolute inset-0 ${variant === "nav" ? "editorial-card-overlay--nav" : "editorial-card-overlay--default"}`}
       />
       <div
         className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
