@@ -77,6 +77,21 @@ export interface SanityWriteClientInterface {
   readonly archivePlayers: (
     psdIds: string[],
   ) => Effect.Effect<void, SanityWriteError>;
+  /** Fetch PSD IDs of all non-archived staff members. */
+  readonly getActiveStaffPsdIds: () => Effect.Effect<
+    string[],
+    SanityWriteError
+  >;
+  /** Set archived: true on staff members with these PSD IDs. */
+  readonly archiveStaff: (
+    psdIds: string[],
+  ) => Effect.Effect<void, SanityWriteError>;
+  /** Fetch PSD IDs of all non-archived teams. */
+  readonly getActiveTeamPsdIds: () => Effect.Effect<string[], SanityWriteError>;
+  /** Set archived: true on teams with these PSD IDs. */
+  readonly archiveTeams: (
+    psdIds: string[],
+  ) => Effect.Effect<void, SanityWriteError>;
   /** Download image from fetchUrl and upload to Sanity, patching psdImage + psdImageUrl.
    * stableUrl is persisted as psdImageUrl for dedup on future syncs — must match
    * the value produced by transformMember._psdImageUrl (includes ?v=N if present). */
@@ -113,6 +128,20 @@ export const SanityWriteClientLive = Layer.effect(
     });
 
     const docId = (type: string, psdId: string) => `${type}-psd-${psdId}`;
+
+    const archiveByPsdIds = (type: string, psdIds: string[]) =>
+      Effect.tryPromise({
+        try: async () => {
+          if (psdIds.length === 0) return;
+          let tx = client.transaction();
+          for (const psdId of psdIds) {
+            tx = tx.patch(docId(type, psdId), (p) => p.set({ archived: true }));
+          }
+          await tx.commit();
+        },
+        catch: (cause) =>
+          new SanityWriteError(`Failed to archive ${type} documents`, cause),
+      }).pipe(Effect.asVoid);
 
     const upsert = <T extends Record<string, unknown>>(
       type: string,
@@ -344,21 +373,7 @@ export const SanityWriteClientLive = Layer.effect(
             ),
         }),
 
-      archivePlayers: (psdIds) =>
-        Effect.tryPromise({
-          try: async () => {
-            if (psdIds.length === 0) return;
-            let tx = client.transaction();
-            for (const psdId of psdIds) {
-              tx = tx.patch(`player-psd-${psdId}`, (p) =>
-                p.set({ archived: true }),
-              );
-            }
-            await tx.commit();
-          },
-          catch: (cause) =>
-            new SanityWriteError("Failed to archive players", cause),
-        }).pipe(Effect.asVoid),
+      archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
       upsertTeam: (doc) =>
         upsert("team", doc.psdId, {
@@ -378,6 +393,7 @@ export const SanityWriteClientLive = Layer.effect(
             _ref: `staffMember-psd-${id}`,
             _key: id,
           })),
+          archived: false,
         }),
 
       upsertStaff: (doc) => {
@@ -386,12 +402,41 @@ export const SanityWriteClientLive = Layer.effect(
           firstName: doc.firstName,
           lastName: doc.lastName,
           birthDate: doc.birthDate,
+          archived: false,
         };
         if (doc.positionShort !== undefined) {
           fields["positionShort"] = doc.positionShort;
         }
         return upsert("staffMember", doc.psdId, fields);
       },
+
+      getActiveStaffPsdIds: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<{ psdId: string }>>(
+              `*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
+            );
+            return rows.map((r) => r.psdId);
+          },
+          catch: (cause) =>
+            new SanityWriteError("Failed to fetch active staff PSD IDs", cause),
+        }),
+
+      archiveStaff: (psdIds) => archiveByPsdIds("staffMember", psdIds),
+
+      getActiveTeamPsdIds: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<{ psdId: string }>>(
+              `*[_type == "team" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
+            );
+            return rows.map((r) => r.psdId);
+          },
+          catch: (cause) =>
+            new SanityWriteError("Failed to fetch active team PSD IDs", cause),
+        }),
+
+      archiveTeams: (psdIds) => archiveByPsdIds("team", psdIds),
     };
   }),
 );

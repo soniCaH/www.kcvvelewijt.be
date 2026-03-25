@@ -1,7 +1,7 @@
 import { defineQuery } from "groq";
 
 export const TEAMS_QUERY =
-  defineQuery(`*[_type == "team" && showInNavigation != false] | order(name asc) {
+  defineQuery(`*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {
   _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,
   tagline,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
@@ -22,7 +22,7 @@ export const TEAM_BY_SLUG_QUERY =
 }`);
 
 export const TEAMS_LANDING_QUERY =
-  defineQuery(`*[_type == "team" && showInNavigation != false && defined(age)] | order(name asc) {
+  defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {
   _id, name, "slug": slug.current, age,
   division, divisionFull, tagline,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",

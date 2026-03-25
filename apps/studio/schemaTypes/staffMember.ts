@@ -122,6 +122,15 @@ export const staffMember = defineType({
       description:
         'Set by PSD sync (GET /teams/{id}/staff). When synced, role is mapped from PSD functionTitle (free-text, e.g. "Keeperstrainer", "T2").',
     }),
+    defineField({
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      description:
+        'Set automatically by sync when member is no longer in PSD. Do not edit manually.',
+      readOnly: true,
+      hidden: true,
+    }),
   ],
   preview: {
     select: {
