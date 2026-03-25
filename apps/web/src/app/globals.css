@@ -91,10 +91,6 @@
 
 /* Tailwind v4 Theme Configuration */
 @theme {
-  /* ===== Breakpoints (Custom) ===== */
-  /* Override default Tailwind breakpoints to match Gatsby */
-  --breakpoint-lg: 960px;   /* Gatsby desktop breakpoint (60rem) - matches @media screen and (min-width: 60rem) */
-
   /* ===== Color Palette ===== */
 
   /* KCVV Brand Colors */
@@ -151,9 +147,11 @@
   --font-size-4xl: 1.75rem;     /* 28px */
   --font-size-5xl: 2rem;        /* 32px */
   --font-size-6xl: 3rem;        /* 48px */
+  --font-size-hero: clamp(3rem, 7vw, 5.5rem);  /* 48px → 88px, responsive hero heading */
   --font-size-stat: 2.5rem;     /* 40px */
 
   /* Line Heights */
+  --line-height-hero: 0.9;      /* hero headings — tight stacking for large type */
   --line-height-tight: 1.2;
   --line-height-snug: 1.25;
   --line-height-normal: 1.5;

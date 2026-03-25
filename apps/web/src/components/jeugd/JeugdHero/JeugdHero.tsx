@@ -30,12 +30,12 @@ export function JeugdHero() {
             <span className="block w-5 h-0.5 bg-kcvv-green" />
             Jeugdopleiding
           </div>
-          <h1 className="font-title font-black text-white uppercase leading-[0.9] mb-6 text-6xl">
+          <h1 className="font-title font-black text-white uppercase leading-hero mb-6 text-hero">
             De toekomst
             <br />
             van <span className="text-kcvv-green">Elewijt</span>
           </h1>
-          <p className="text-lg text-white/60 leading-[1.7] max-w-lg">
+          <p className="text-lg text-white/60 leading-loose max-w-lg">
             Meer dan 200 jonge voetballers. Gediplomeerde trainers. Eén missie:
             plezier, techniek en teamspirit.
           </p>
