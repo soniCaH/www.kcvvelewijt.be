@@ -259,19 +259,48 @@ while [ $i -lt $MAX ]; do
   fi
   echo ""
 
-  # Unblock dependent issues
-  UNBLOCKED=$(gh issue list \
+  # Unblock dependent issues (only if ALL blockers are resolved)
+  CANDIDATES=$(gh issue list \
     --label "blocked" \
     --state open \
     --json number,body \
     --jq ".[] | select(.body | contains(\"#${ISSUE}\")) | .number" 2>/dev/null || echo "")
 
-  if [ -n "$UNBLOCKED" ]; then
-    for UNBLOCK_NUM in $UNBLOCKED; do
-      gh issue edit "$UNBLOCK_NUM" --remove-label "blocked" --add-label "ready" 2>/dev/null || true
-      gh issue comment "$UNBLOCK_NUM" \
-        --body "Unblocked by completion of #${ISSUE}. Ready to pick up." 2>/dev/null || true
-      echo "  Unblocked: #${UNBLOCK_NUM}"
+  if [ -n "$CANDIDATES" ]; then
+    for CANDIDATE_NUM in $CANDIDATES; do
+      # Extract all issue numbers from "Blocked by #NNN" patterns in the body
+      BODY=$(gh issue view "$CANDIDATE_NUM" --json body --jq '.body' 2>/dev/null || echo "")
+      BLOCKERS=$(echo "$BODY" | grep -oi 'blocked by[^.]*' | grep -o '#[0-9]\+' | tr -d '#' || echo "")
+
+      if [ -z "$BLOCKERS" ]; then
+        # No structured "Blocked by" found — skip to be safe
+        echo "  ⚠️  #${CANDIDATE_NUM} mentions #${ISSUE} but has no 'Blocked by' list — skipping"
+        continue
+      fi
+
+      ALL_RESOLVED=true
+      STILL_OPEN=""
+      for BLOCKER in $BLOCKERS; do
+        if [ "$BLOCKER" = "$ISSUE" ]; then
+          continue  # This one is being completed now
+        fi
+        BLOCKER_STATE=$(gh issue view "$BLOCKER" --json state --jq '.state' 2>/dev/null || echo "OPEN")
+        if [ "$BLOCKER_STATE" != "CLOSED" ]; then
+          ALL_RESOLVED=false
+          STILL_OPEN="${STILL_OPEN} #${BLOCKER}"
+        fi
+      done
+
+      if [ "$ALL_RESOLVED" = true ]; then
+        gh issue edit "$CANDIDATE_NUM" --remove-label "blocked" --add-label "ready" 2>/dev/null || true
+        gh issue comment "$CANDIDATE_NUM" \
+          --body "All blockers resolved (last: #${ISSUE}). Ready to pick up." 2>/dev/null || true
+        echo "  Unblocked: #${CANDIDATE_NUM}"
+      else
+        gh issue comment "$CANDIDATE_NUM" \
+          --body "#${ISSUE} resolved. Still blocked by:${STILL_OPEN}" 2>/dev/null || true
+        echo "  #${CANDIDATE_NUM} still blocked by:${STILL_OPEN}"
+      fi
     done
     echo ""
   fi
