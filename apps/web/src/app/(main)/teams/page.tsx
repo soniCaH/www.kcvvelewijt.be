@@ -66,6 +66,7 @@ export default async function TeamsPage() {
           transition: {
             type: "diagonal" as const,
             direction: "right" as const,
+            overlap: "full" as const,
           },
         },
         bTeam && {
@@ -76,7 +77,7 @@ export default async function TeamsPage() {
           transition: { type: "diagonal" as const, direction: "left" as const },
         },
         {
-          bg: "kcvv-green-dark",
+          bg: "kcvv-black",
           paddingTop: "pt-20",
           paddingBottom: "pb-20",
           content: <YouthTeamsDirectory divisions={youthByDivision} />,

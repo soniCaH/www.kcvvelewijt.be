@@ -168,11 +168,15 @@ export default async function JeugdPage() {
     ),
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
+    transition: {
+      type: "diagonal",
+      direction: "right",
+    },
     key: "quote",
   };
 
   const ctaSection: SectionConfig = {
-    bg: "white",
+    bg: "gray-100",
     content: (
       <SectionCta
         heading="Interesse in onze jeugd?"

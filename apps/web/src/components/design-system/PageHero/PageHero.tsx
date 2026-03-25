@@ -43,7 +43,7 @@ export function PageHero({
 
       {/* Content */}
       <div className="relative z-10 min-h-[60vh] flex items-end">
-        <div className="max-w-inner-lg mx-auto px-4 md:px-10 py-10 md:py-16 w-full">
+        <div className="max-w-inner-lg mx-auto px-4 md:px-10 pt-10 pb-16 md:pt-16 md:pb-24 w-full">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-white/50 mb-6">
             <span className="block w-5 h-0.5 bg-kcvv-green" />
             {label}
