@@ -354,8 +354,10 @@
   overflow: hidden;
 }
 
-/* Editorial card overlay gradients — reference design tokens for consistency */
+/* Editorial card overlay gradients — reference design tokens for consistency.
+   Fallback rgba() line for browsers without relative color syntax support. */
 .editorial-card-overlay--default {
+  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%);
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
@@ -365,6 +367,7 @@
 }
 
 .editorial-card-overlay--nav {
+  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%);
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,

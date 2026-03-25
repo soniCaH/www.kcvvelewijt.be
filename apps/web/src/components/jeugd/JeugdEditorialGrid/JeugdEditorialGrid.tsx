@@ -15,46 +15,69 @@ const NAV_CARDS: NavCardConfig[] = [
     tag: "Aansluiten",
     title: "Word lid van KCVV",
     description: "Nieuwe spelers zijn altijd welkom — van U6 tot U21.",
-    arrowText: "Schrijf je in →",
+    arrowText: "Schrijf je in",
     href: "/club/register",
     imageUrl: "/images/jeugd/inschrijven.jpg",
   },
   {
     tag: "Visie",
     title: "Onze jeugdvisie",
-    arrowText: "Ontdek →",
+    arrowText: "Ontdek",
     href: "/jeugd/visie",
     imageUrl: "/images/jeugd/visie.jpg",
   },
   {
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
-    arrowText: "Meer info →",
+    arrowText: "Meer info",
     href: "/news/prosoccerdata",
     imageUrl: "/images/jeugd/prosoccerdata.jpg",
   },
   {
     tag: "Structuur",
     title: "Organigram",
-    arrowText: "Bekijk →",
+    arrowText: "Bekijk",
     href: "/club/organigram",
     imageUrl: "/images/jeugd/organigram.jpg",
   },
   {
     tag: "Hulp",
     title: "Wie contacteer ik?",
-    arrowText: "Zoek het op →",
+    arrowText: "Zoek het op",
     href: "/hulp",
     imageUrl: "/images/jeugd/hulp.jpg",
   },
   {
     tag: "Medisch",
     title: "Blessure of afmelding?",
-    arrowText: "Lees meer →",
+    arrowText: "Lees meer",
     href: "/jeugd/medisch",
     imageUrl: "/images/jeugd/medisch.jpg",
   },
 ];
+
+type GridItem = {
+  key: string;
+  position: string;
+  element: React.ReactNode;
+};
+
+const THIRD =
+  "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
+
+function renderNavCard(nav: NavCardConfig): React.ReactNode {
+  return (
+    <EditorialCard
+      href={nav.href}
+      tag={nav.tag}
+      title={nav.title}
+      description={nav.description}
+      arrowText={nav.arrowText}
+      variant="nav"
+      backgroundImage={nav.imageUrl}
+    />
+  );
+}
 
 interface JeugdEditorialGridProps {
   articles: ArticleVM[];
@@ -68,33 +91,11 @@ interface JeugdEditorialGridProps {
  *   Row 3:   Nav card 1 (col 1-4) | Article 2 (col 5-8) | Nav card 2 (col 9-12)
  *   Row 4:   Nav card 3 (col 1-4) | Nav card 4 (col 5-8) | Nav card 5 (col 9-12)
  *
- * When fewer than 3 articles are available, article slots are simply omitted.
+ * When no articles are available, the grid falls back to a simple 3×2 nav card layout.
+ * When 1-2 articles are available, missing article slots are omitted from the magazine layout.
  */
 export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
   const [article0, article1, article2] = articles;
-
-  type GridItem = {
-    key: string;
-    position: string;
-    element: React.ReactNode;
-  };
-
-  const THIRD =
-    "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
-
-  function renderNavCard(nav: NavCardConfig): React.ReactNode {
-    return (
-      <EditorialCard
-        href={nav.href}
-        tag={nav.tag}
-        title={nav.title}
-        description={nav.description}
-        arrowText={nav.arrowText}
-        variant="nav"
-        backgroundImage={nav.imageUrl}
-      />
-    );
-  }
 
   const items: GridItem[] = [];
 
