@@ -34,6 +34,15 @@ gh issue list --label ready --state open --json number,title,labels,body \
   --jq '.[] | "\(.number): \(.title)"' | head -10
 ```
 
+Check for blocking relationships before ranking. An issue with unresolved sub-issues (blockers) should not be picked up:
+
+```bash
+# For each candidate, check if it has open sub-issues (blockers)
+gh api "/repos/{owner}/{repo}/issues/${CANDIDATE}/sub_issues" \
+  --jq '[.[] | select(.state != "closed")] | length'
+# 0 = no open blockers → safe to pick up
+```
+
 Present the top candidates ranked by: dependencies resolved → smallest scope → label priority.
 
 **Wait for human approval before proceeding.**
@@ -114,6 +123,37 @@ git worktree remove "../kcvv-issue-${ISSUE_NUM}" --force
 git branch -d "$BRANCH"
 ```
 
+## If Blocked
+
+When an issue is blocked by another issue, set the relationship via the Sub-issues API so `ralph.sh` can automatically unblock it later:
+
+```bash
+# 1. Get the node_id of the blocking issue
+BLOCKER_NUM=<blocking-issue-number>
+BLOCKER_NODE_ID=$(gh api "/repos/{owner}/{repo}/issues/${BLOCKER_NUM}" --jq '.node_id')
+
+# 2. Add the blocking issue as a sub-issue of the blocked issue
+gh api "/repos/{owner}/{repo}/issues/${ISSUE_NUM}/sub_issues" \
+  --method POST \
+  -f sub_issue_id="$BLOCKER_NODE_ID"
+
+# 3. Label the blocked issue
+gh issue edit $ISSUE_NUM --add-label "blocked" --remove-label "ready"
+
+# 4. Comment with context
+gh issue comment $ISSUE_NUM --body "Blocked by #${BLOCKER_NUM}. Sub-issue relationship set via API."
+```
+
+When checking if an issue is still blocked, query its sub-issues:
+
+```bash
+# List sub-issues (blockers) and their state
+gh api "/repos/{owner}/{repo}/issues/${ISSUE_NUM}/sub_issues" \
+  --jq '.[] | "\(.number) \(.state)"'
+```
+
+An issue is unblocked when all its sub-issues are in `closed` state. The automated `ralph.sh` script handles unblocking automatically after each PR merge.
+
 ## Labels Convention
 
 | Label              | Meaning                           |
@@ -128,4 +168,4 @@ git branch -d "$BRANCH"
 - Never start a second issue before the current PR is open
 - Never commit directly to main
 - Never skip the quality gate
-- If blocked, comment on the issue with the blocker and propose the next one
+- If blocked, set the sub-issue relationship via API (see "If Blocked" above) and propose the next issue
