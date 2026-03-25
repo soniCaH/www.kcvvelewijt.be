@@ -80,21 +80,24 @@ function toArticleDetailVM(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
     coverImageUrl: row.coverImageUrl ?? undefined,
     tags: row.tags ?? [],
     body: row.body,
-    relatedArticles:
-      row.relatedArticles
-        ?.filter((a) => {
-          const now = new Date().toISOString();
-          if (a.publishAt && a.publishAt > now) return false;
-          if (a.unpublishAt && a.unpublishAt <= now) return false;
-          return true;
-        })
-        .map((a) => ({
-          id: a._id,
-          title: a.title ?? "",
-          slug: a.slug?.current ?? "",
-          publishedAt: a.publishAt,
-          coverImageUrl: a.coverImageUrl,
-        })) ?? undefined,
+    relatedArticles: (() => {
+      const now = new Date().toISOString();
+      return (
+        row.relatedArticles
+          ?.filter((a) => {
+            if (a.publishAt && a.publishAt > now) return false;
+            if (a.unpublishAt && a.unpublishAt <= now) return false;
+            return true;
+          })
+          .map((a) => ({
+            id: a._id,
+            title: a.title ?? "",
+            slug: a.slug?.current ?? "",
+            publishedAt: a.publishAt,
+            coverImageUrl: a.coverImageUrl,
+          })) ?? undefined
+      );
+    })(),
     mentionedPlayers: row.mentionedPlayers ?? undefined,
     mentionedTeams: row.mentionedTeams ?? undefined,
     mentionedStaffMembers: row.mentionedStaffMembers ?? undefined,
