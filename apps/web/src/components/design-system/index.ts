@@ -80,3 +80,7 @@ export type { DownloadButtonProps } from "./DownloadButton";
 // LinkButton
 export { LinkButton } from "./LinkButton";
 export type { LinkButtonProps } from "./LinkButton";
+
+// SectionCta
+export { SectionCta } from "./SectionCta";
+export type { SectionCtaProps } from "./SectionCta";

@@ -7,7 +7,7 @@ import { SectionStack } from "@/components/design-system/SectionStack/SectionSta
 import { TeamsHero } from "@/components/teams/TeamsHero";
 import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
 import { YouthTeamsDirectory } from "@/components/teams/YouthTeamsDirectory";
-import { TeamsCta } from "@/components/teams/TeamsCta";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 
 export const metadata: Metadata = {
   title: "Onze ploegen | KCVV Elewijt",
@@ -67,7 +67,14 @@ export default async function TeamsPage() {
           bg: "gray-100",
           paddingTop: "pt-16",
           paddingBottom: "pb-16",
-          content: <TeamsCta />,
+          content: (
+            <SectionCta
+              heading="Aansluiten bij KCVV Elewijt?"
+              body="Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."
+              buttonLabel="Meer info"
+              buttonHref="/club/aansluiten"
+            />
+          ),
         },
       ]}
     />

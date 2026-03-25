@@ -15,8 +15,7 @@ import type { SectionConfig } from "@/components/design-system/SectionStack/Sect
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
 import { MissionBanner } from "@/components/club/MissionBanner/MissionBanner";
-import { ArrowRight } from "@/lib/icons";
-import Link from "next/link";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 
 export const metadata: Metadata = {
   title: "Jeugdopleiding | KCVV Elewijt",
@@ -162,29 +161,12 @@ export default async function JeugdPage() {
   const ctaSection: SectionConfig = {
     bg: "white",
     content: (
-      <div className="max-w-inner-lg mx-auto px-4 md:px-10">
-        <div className="grid grid-cols-[1fr_auto] items-center gap-8 max-sm:grid-cols-1 max-sm:text-center">
-          <div>
-            <h2 className="font-title font-extrabold text-kcvv-gray-blue text-xl md:text-4xl mb-2">
-              Interesse in onze jeugd?
-            </h2>
-            <p className="text-sm text-kcvv-gray">
-              Nieuwe spelers zijn altijd welkom — van U6 tot U21.
-            </p>
-          </div>
-          <Link
-            href="/club/register"
-            className="group inline-flex items-center gap-2 px-8 py-3.5 bg-kcvv-green text-kcvv-black font-bold text-sm uppercase tracking-[0.06em] rounded-sm whitespace-nowrap transition-colors hover:bg-kcvv-green-hover"
-          >
-            Word ook lid
-            <ArrowRight
-              size={16}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-              aria-hidden="true"
-            />
-          </Link>
-        </div>
-      </div>
+      <SectionCta
+        heading="Interesse in onze jeugd?"
+        body="Nieuwe spelers zijn altijd welkom — van U6 tot U21."
+        buttonLabel="Word ook lid"
+        buttonHref="/club/register"
+      />
     ),
     paddingTop: "pt-16",
     paddingBottom: "pb-16",
