@@ -11,13 +11,13 @@ Refine underspecified issues until they're implementation-ready. Human-in-the-lo
 
 ## Starting Spec
 
-```
+```text
 /spec
 ```
 
 Or target a specific issue or milestone:
 
-```
+```text
 /spec 742
 /spec --milestone sponsors-redesign
 ```
@@ -97,7 +97,7 @@ gh issue comment $ISSUE_NUM --body "Spec complete. Ready for implementation."
 
 ## Step 5 — Next Candidate
 
-Propose the next unready, unblocked issue. Repeat from Step 1.
+Propose the next unready issue. Repeat from Step 1.
 
 ## Rules
 

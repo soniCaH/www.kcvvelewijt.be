@@ -45,7 +45,7 @@ gh api graphql -f query='
         blockedBy(first: 50) { nodes { number state } }
       }
     }
-  }' --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state != "CLOSED")] | length'
+  }' --jq '[.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")] | length'
 # 0 = no open blockers → safe to pick up
 ```
 

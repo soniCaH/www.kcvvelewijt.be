@@ -88,9 +88,9 @@ Remove `## Blocked by` from the PRD issue template. Update existing PRD template
 ### Phase 1
 
 - [ ] `ralph.sh` unblock logic queries GraphQL `blockedBy` instead of parsing body text
-- [ ] Completing one blocker of a multi-blocked issue does NOT remove the `blocked` label
-- [ ] Completing the last blocker correctly unblocks the issue
-- [ ] Fallback: if API returns an error, log a warning and skip (don't crash the loop)
+- [ ] Completing one blocker of a multi-blocked issue does NOT unblock the issue (remaining `blockedBy` relationships still apply)
+- [ ] Completing the last blocker correctly unblocks the issue (no open `blockedBy` nodes remain)
+- [ ] Fallback: if GraphQL `blockedBy` query returns an error, `ralph.sh` logs a warning and skips (don't crash the loop)
 - [ ] Tested manually against a real pair of test issues
 
 ### Phase 2

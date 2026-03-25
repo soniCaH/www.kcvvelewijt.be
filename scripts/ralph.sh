@@ -191,7 +191,9 @@ Output the PR URL as the last line of your response.
   # Set blockedBy relationship via GraphQL (ready label stays — specs are still clear)
   ISSUE_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/${issue}" --jq '.node_id')
   BLOCKER_NODE_ID=\$(gh api "/repos/{owner}/{repo}/issues/\${BLOCKER_NUM}" --jq '.node_id')
-  gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>/dev/null || true
+  if ! gh api graphql -f query="mutation { addBlockedBy(input: { issueId: \\\"\${ISSUE_NODE_ID}\\\", blockingIssueId: \\\"\${BLOCKER_NODE_ID}\\\" }) { issue { number } } }" 2>&1; then
+    echo "⚠️  Warning: failed to set blockedBy relationship (issue node: \${ISSUE_NODE_ID}, blocker node: \${BLOCKER_NODE_ID}). Skipping." >&2
+  fi
 
   gh issue comment ${issue} --body "Blocked by #\${BLOCKER_NUM}. Blocking relationship set via API."
 
