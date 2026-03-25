@@ -94,11 +94,13 @@ None. This is entirely tooling and workflow.
 
 ## 7. Open Questions
 
-- [ ] Does the Sub-issues API support "blocked by" as a relationship type, or only parent/child? — answered by tracer bullet
-- [x] Is the Sub-issues API available on our GitHub plan? — **Yes**, confirmed 2026-03-25. Both read (`/issues/{n}/sub_issues`) and `sub_issues_summary` field work. Write requires `node_id` (not issue number) for the `sub_issue_id` param.
+- [x] Does the Sub-issues API support "blocked by" as a relationship type, or only parent/child? — **Parent/child only.** No native "blocked by" semantics. We model blocking as: blocked issue = parent, blockers = sub-issues (children). When all sub-issues are closed, the parent is unblocked. Confirmed 2026-03-25.
+- [x] Is the Sub-issues API available on our GitHub plan? — **Yes**, confirmed 2026-03-25. Both read (`/issues/{n}/sub_issues`) and `sub_issues_summary` field work. Write requires integer `id` (not `node_id` or issue number) for the `sub_issue_id` param.
 - [ ] Should Phase 2 write both API relationships AND markdown (transitional), or API-only from the start? — decision needed before Phase 2
-- [ ] Do GitHub Actions or third-party bots interact with these relationships in ways we should be aware of? — research during Phase 1
+- [x] Do GitHub Actions or third-party bots interact with these relationships in ways we should be aware of? — No interactions observed. Sub-issues are a native GitHub feature; no third-party bot interference detected during tracer bullet testing. Confirmed 2026-03-25.
 
 ## 8. Discovered Unknowns
 
-_(filled during implementation)_
+- [2026-03-25] `sub_issue_id` for the write endpoint requires the integer database `id` field (from `GET /issues/{n}`), not `node_id` (string). The PRD originally said `node_id` — corrected.
+- [2026-03-25] jq `!=` operator causes issues in zsh due to history expansion of `!`. Use `select(.x == $v | not)` pattern instead.
+- [2026-03-25] `DELETE /repos/{owner}/{repo}/issues/{n}/sub_issue` (singular) with `-F sub_issue_id=<id>` removes a sub-issue. The plural `/sub_issues/{id}` endpoint does not exist for deletion.

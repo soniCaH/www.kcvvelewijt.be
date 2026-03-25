@@ -259,44 +259,52 @@ while [ $i -lt $MAX ]; do
   fi
   echo ""
 
-  # Unblock dependent issues (only if ALL blockers are resolved)
-  CANDIDATES=$(gh issue list \
+  # Unblock dependent issues via Sub-issues API (only if ALL sub-issues are resolved)
+  BLOCKED_ISSUES=$(gh issue list \
     --label "blocked" \
     --state open \
-    --json number,body \
-    --jq ".[] | select(.body | contains(\"#${ISSUE}\")) | .number" 2>/dev/null || echo "")
+    --json number \
+    --jq '.[].number' 2>/dev/null || echo "")
 
-  if [ -n "$CANDIDATES" ]; then
-    for CANDIDATE_NUM in $CANDIDATES; do
-      # Extract all issue numbers from the "Blocked by" section to end of body
-      BODY=$(gh issue view "$CANDIDATE_NUM" --json body --jq '.body' 2>/dev/null || echo "")
-      BLOCKERS=$(echo "$BODY" | sed -n '/[Bb]locked [Bb]y/,$p' | grep -o '#[0-9]\+' | tr -d '#' || echo "")
+  if [ -n "$BLOCKED_ISSUES" ]; then
+    for CANDIDATE_NUM in $BLOCKED_ISSUES; do
+      # Query sub-issues (blockers) for this candidate via GitHub Sub-issues API
+      SUB_ISSUES_JSON=$(gh api "/repos/{owner}/{repo}/issues/${CANDIDATE_NUM}/sub_issues" \
+        --jq '[.[] | {number, state}]' 2>&1)
+      API_EXIT=$?
 
-      if [ -z "$BLOCKERS" ]; then
-        # No structured "Blocked by" found — skip to be safe
-        echo "  ⚠️  #${CANDIDATE_NUM} mentions #${ISSUE} but has no 'Blocked by' list — skipping"
+      if [ $API_EXIT -ne 0 ]; then
+        echo "  ⚠️  Sub-issues API failed for #${CANDIDATE_NUM} — skipping (fallback)"
         continue
       fi
 
-      ALL_RESOLVED=true
-      STILL_OPEN=""
-      for BLOCKER in $BLOCKERS; do
-        if [ "$BLOCKER" = "$ISSUE" ]; then
-          continue  # This one is being completed now
-        fi
-        BLOCKER_STATE=$(gh issue view "$BLOCKER" --json state --jq '.state' 2>/dev/null || echo "OPEN")
-        if [ "$BLOCKER_STATE" != "CLOSED" ]; then
-          ALL_RESOLVED=false
-          STILL_OPEN="${STILL_OPEN} #${BLOCKER}"
-        fi
-      done
+      if [ -z "$SUB_ISSUES_JSON" ] || [ "$SUB_ISSUES_JSON" = "null" ] || [ "$SUB_ISSUES_JSON" = "[]" ]; then
+        # No sub-issues set on this issue
+        continue
+      fi
 
-      if [ "$ALL_RESOLVED" = true ]; then
+      # Check if the completed issue is a sub-issue (blocker) of this candidate
+      IS_BLOCKER=$(echo "$SUB_ISSUES_JSON" | jq -r --argjson n "${ISSUE}" '.[] | select(.number == $n) | .number' 2>/dev/null || echo "")
+
+      if [ -z "$IS_BLOCKER" ]; then
+        # Completed issue is not a blocker of this candidate
+        continue
+      fi
+
+      # Check if all other sub-issues (blockers) are closed
+      # Note: use "== $n | not" instead of "!=" to avoid zsh history expansion issues with "!"
+      STILL_OPEN_NUMS=$(echo "$SUB_ISSUES_JSON" | jq -r --argjson n "${ISSUE}" '.[] | select(.number == $n | not) | select(.state == "closed" | not) | .number' 2>/dev/null || echo "")
+
+      if [ -z "$STILL_OPEN_NUMS" ]; then
         gh issue edit "$CANDIDATE_NUM" --remove-label "blocked" --add-label "ready" 2>/dev/null || true
         gh issue comment "$CANDIDATE_NUM" \
           --body "All blockers resolved (last: #${ISSUE}). Ready to pick up." 2>/dev/null || true
         echo "  Unblocked: #${CANDIDATE_NUM}"
       else
+        STILL_OPEN=""
+        for NUM in $STILL_OPEN_NUMS; do
+          STILL_OPEN="${STILL_OPEN} #${NUM}"
+        done
         gh issue comment "$CANDIDATE_NUM" \
           --body "#${ISSUE} resolved. Still blocked by:${STILL_OPEN}" 2>/dev/null || true
         echo "  #${CANDIDATE_NUM} still blocked by:${STILL_OPEN}"
