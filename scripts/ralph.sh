@@ -268,9 +268,9 @@ while [ $i -lt $MAX ]; do
 
   if [ -n "$CANDIDATES" ]; then
     for CANDIDATE_NUM in $CANDIDATES; do
-      # Extract all issue numbers from "Blocked by #NNN" patterns in the body
+      # Extract all issue numbers from the "Blocked by" section to end of body
       BODY=$(gh issue view "$CANDIDATE_NUM" --json body --jq '.body' 2>/dev/null || echo "")
-      BLOCKERS=$(echo "$BODY" | grep -oi 'blocked by[^.]*' | grep -o '#[0-9]\+' | tr -d '#' || echo "")
+      BLOCKERS=$(echo "$BODY" | sed -n '/[Bb]locked [Bb]y/,$p' | grep -o '#[0-9]\+' | tr -d '#' || echo "")
 
       if [ -z "$BLOCKERS" ]; then
         # No structured "Blocked by" found — skip to be safe
