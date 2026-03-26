@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   const bffUrl = process.env.KCVV_API_URL;
   if (!bffUrl) {
     return NextResponse.json(
-      { error: "Feedback service not configured" },
+      { ok: false, error: "Feedback service not configured" },
       { status: 503 },
     );
   }
@@ -20,6 +20,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: res.ok }, { status: res.status });
   } catch (error) {
     console.error("[Feedback API] Proxy error:", error);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Failed to submit feedback" },
+      { status: 500 },
+    );
   }
 }
