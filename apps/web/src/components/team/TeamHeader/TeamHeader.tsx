@@ -2,20 +2,19 @@
  * TeamHeader Component
  *
  * Hero section for team detail pages.
- * Displays team name, photo, and optional stats/coach info.
+ * Displays team name, photo, and optional coach info.
  *
  * Features:
  * - Team name with optional tagline
  * - Team/group photo banner
  * - Age group badge for youth teams
  * - Optional coach info display
- * - Optional season statistics
  * - Loading skeleton state
  */
 
 import { forwardRef, type HTMLAttributes, type Ref } from "react";
 import Image from "next/image";
-import { Trophy, Target, Shield, User } from "lucide-react";
+import { User } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export interface TeamHeaderProps extends Omit<
@@ -38,15 +37,6 @@ export interface TeamHeaderProps extends Omit<
     role?: string;
     imageUrl?: string;
   };
-  /** Season statistics */
-  stats?: {
-    wins: number;
-    draws: number;
-    losses: number;
-    goalsFor?: number;
-    goalsAgainst?: number;
-    position?: number;
-  };
   /** Loading state */
   isLoading?: boolean;
 }
@@ -60,7 +50,6 @@ export const TeamHeader = forwardRef<HTMLElement, TeamHeaderProps>(
       ageGroup,
       teamType = "senior",
       coach,
-      stats,
       isLoading = false,
       className,
       ...props
@@ -91,16 +80,9 @@ export const TeamHeader = forwardRef<HTMLElement, TeamHeaderProps>(
           {/* Content skeleton */}
           <div className="container mx-auto px-4 -mt-16 relative z-10">
             <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-              <div className="flex flex-col md:flex-row md:items-center gap-6">
-                <div className="flex-1 space-y-3">
-                  <div className="h-10 bg-gray-200 rounded w-48 animate-pulse" />
-                  <div className="h-5 bg-gray-200 rounded w-64 animate-pulse" />
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-16 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-16 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-16 w-20 bg-gray-200 rounded animate-pulse" />
-                </div>
+              <div className="space-y-3">
+                <div className="h-10 bg-gray-200 rounded w-48 animate-pulse" />
+                <div className="h-5 bg-gray-200 rounded w-64 animate-pulse" />
               </div>
             </div>
           </div>
@@ -212,90 +194,6 @@ export const TeamHeader = forwardRef<HTMLElement, TeamHeaderProps>(
                   </div>
                 )}
               </div>
-
-              {/* Season Stats */}
-              {stats && (
-                <div className="flex flex-wrap gap-4 lg:gap-6">
-                  {/* Position */}
-                  {stats.position !== undefined && (
-                    <div className="text-center px-4 py-2">
-                      <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
-                        <Trophy className="w-5 h-5" />
-                      </div>
-                      <p className="text-2xl md:text-3xl font-bold text-gray-900">
-                        {stats.position}
-                        <span className="text-sm font-normal text-gray-500">
-                          {stats.position === 1 ? "ste" : "de"}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Positie
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Win/Draw/Loss */}
-                  <div className="flex gap-3">
-                    <div className="text-center px-3 py-2">
-                      <p className="text-2xl md:text-3xl font-bold text-green-600">
-                        {stats.wins}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Winst
-                      </p>
-                    </div>
-                    <div className="text-center px-3 py-2">
-                      <p className="text-2xl md:text-3xl font-bold text-gray-500">
-                        {stats.draws}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Gelijk
-                      </p>
-                    </div>
-                    <div className="text-center px-3 py-2">
-                      <p className="text-2xl md:text-3xl font-bold text-red-500">
-                        {stats.losses}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Verlies
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Goals */}
-                  {(stats.goalsFor !== undefined ||
-                    stats.goalsAgainst !== undefined) && (
-                    <div className="flex gap-3 border-l border-gray-200 pl-4">
-                      {stats.goalsFor !== undefined && (
-                        <div className="text-center px-3 py-2">
-                          <div className="flex items-center justify-center gap-1 text-green-500 mb-1">
-                            <Target className="w-4 h-4" />
-                          </div>
-                          <p className="text-2xl md:text-3xl font-bold text-gray-900">
-                            {stats.goalsFor}
-                          </p>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Voor
-                          </p>
-                        </div>
-                      )}
-                      {stats.goalsAgainst !== undefined && (
-                        <div className="text-center px-3 py-2">
-                          <div className="flex items-center justify-center gap-1 text-red-400 mb-1">
-                            <Shield className="w-4 h-4" />
-                          </div>
-                          <p className="text-2xl md:text-3xl font-bold text-gray-900">
-                            {stats.goalsAgainst}
-                          </p>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Tegen
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>

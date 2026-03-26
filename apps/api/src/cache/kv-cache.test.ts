@@ -63,10 +63,6 @@ describe("TTL constants", () => {
     expect(TTL.RANKING).toBe(60 * 60 * 24);
   });
 
-  it("STATS is 24 hours", () => {
-    expect(TTL.STATS).toBe(60 * 60 * 24);
-  });
-
   it("MATCH_DETAIL_LIVE does not exist", () => {
     expect("MATCH_DETAIL_LIVE" in TTL).toBe(false);
   });

@@ -185,28 +185,3 @@ export class PsdGame extends S.Class<PsdGame>("PsdGame")({
 export const PsdMatchListSchema = S.Struct({
   content: S.Array(S.Unknown),
 });
-
-export class PsdTeamStatsResponse extends S.Class<PsdTeamStatsResponse>(
-  "PsdTeamStatsResponse",
-)({
-  squadPlayerStatistics: S.Array(
-    S.Struct({
-      playerId: S.Number,
-      firstName: S.String,
-      lastName: S.String,
-      team: S.optional(S.NullOr(S.String)),
-      gamesPlayed: S.Number,
-      gamesWon: S.Number,
-      gamesLost: S.Number,
-      gamesEqual: S.Number,
-      cleanSheets: S.Number,
-      minutes: S.NullOr(S.Number),
-      goals: S.Number,
-      assists: S.NullOr(S.Number),
-      yellowCards: S.Number,
-      redCards: S.Number,
-    }),
-  ),
-  goalsScored: S.Array(S.Struct({ goal: S.Struct({ id: S.Number }) })),
-  goalsAgainst: S.Array(S.Struct({ goal: S.Struct({ id: S.Number }) })),
-}) {}

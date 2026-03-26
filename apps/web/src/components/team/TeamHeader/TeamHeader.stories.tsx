@@ -2,7 +2,7 @@
  * TeamHeader Component Stories
  *
  * Hero section for team detail pages.
- * Displays team name, photo, and optional stats/coach info.
+ * Displays team name, photo, and optional coach info.
  *
  * Stories created BEFORE implementation (Storybook-first workflow).
  */
@@ -25,7 +25,6 @@ Hero section for team detail pages.
 - Team/group photo banner
 - Age group badge for youth teams
 - Optional coach info display
-- Optional season statistics
 - Responsive layout (stacked on mobile)
 
 **Usage:**
@@ -46,7 +45,6 @@ Used at the top of team detail pages (/team/[slug], /jeugd/[slug]).
       description: "Team type for styling",
     },
     coach: { control: "object", description: "Coach information" },
-    stats: { control: "object", description: "Season statistics" },
     isLoading: { control: "boolean", description: "Loading state" },
   },
 } satisfies Meta<typeof TeamHeader>;
@@ -63,26 +61,6 @@ export const Default: Story = {
     tagline: "Eerste elftal van KCVV Elewijt",
     imageUrl: "https://picsum.photos/seed/team-header/1200/400",
     teamType: "senior",
-  },
-};
-
-/**
- * With season statistics
- */
-export const WithStats: Story = {
-  args: {
-    name: "A-Ploeg",
-    tagline: "Eerste elftal van KCVV Elewijt",
-    imageUrl: "https://picsum.photos/seed/team-stats/1200/400",
-    teamType: "senior",
-    stats: {
-      wins: 12,
-      draws: 5,
-      losses: 3,
-      goalsFor: 42,
-      goalsAgainst: 18,
-      position: 2,
-    },
   },
 };
 
@@ -135,14 +113,6 @@ export const Senior: Story = {
       role: "Hoofdtrainer",
       imageUrl:
         "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
-    },
-    stats: {
-      wins: 12,
-      draws: 5,
-      losses: 3,
-      goalsFor: 42,
-      goalsAgainst: 18,
-      position: 2,
     },
   },
 };

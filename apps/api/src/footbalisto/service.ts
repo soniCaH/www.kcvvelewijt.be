@@ -9,8 +9,6 @@ import {
   type BffError,
 } from "./errors";
 import {
-  TeamStats,
-  type TeamStats as TeamStatsType,
   type Match,
   type MatchDetail,
   type MatchLineupPlayer,
@@ -21,7 +19,6 @@ import {
 import {
   PsdSeason,
   PsdSeasonsSchema,
-  PsdTeamStatsResponse,
   PsdMatchListSchema,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
@@ -30,7 +27,6 @@ import {
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
   type FootbalistoRankingEntry,
-  type PsdTeamStatsResponse as RawTeamStatsResponse,
 } from "./schemas";
 
 // ─── Transform helpers (internal) ──────────────────────────────────────────────
@@ -287,57 +283,6 @@ function matchDetailToMatch(detail: MatchDetail): Match {
   };
 }
 
-/**
- * Transform PSD /statistics/team response to normalized TeamStats.
- * Team totals (wins/draws/losses) are derived from the player with the most
- * gamesPlayed — they represent the team's full season record.
- * goalsScored/goalsAgainst are arrays of goal events; use .length for totals.
- */
-function transformPsdTeamStats(
-  teamId: number,
-  response: RawTeamStatsResponse,
-): typeof TeamStats.Type {
-  const players = response.squadPlayerStatistics;
-
-  const representative =
-    players.length > 0
-      ? players.reduce((best, p) =>
-          p.gamesPlayed > best.gamesPlayed ? p : best,
-        )
-      : undefined;
-
-  const cleanSheets =
-    players.length > 0 ? Math.max(...players.map((p) => p.cleanSheets)) : 0;
-
-  const topScorers = players
-    .filter((p) => p.goals > 0)
-    .sort((a, b) => b.goals - a.goals)
-    .map((p) => ({
-      player_id: p.playerId,
-      player_name: `${p.firstName} ${p.lastName}`,
-      team_id: teamId,
-      matches_played: p.gamesPlayed,
-      goals: p.goals,
-      assists: p.assists ?? undefined,
-      yellow_cards: p.yellowCards,
-      red_cards: p.redCards,
-      minutes_played: p.minutes ?? undefined,
-    }));
-
-  return {
-    team_id: teamId,
-    team_name: representative?.team ?? "KCVV",
-    total_matches: representative?.gamesPlayed ?? 0,
-    wins: representative?.gamesWon ?? 0,
-    draws: representative?.gamesEqual ?? 0,
-    losses: representative?.gamesLost ?? 0,
-    goals_scored: response.goalsScored.length,
-    goals_conceded: response.goalsAgainst.length,
-    clean_sheets: cleanSheets > 0 ? cleanSheets : undefined,
-    top_scorers: topScorers.length > 0 ? topScorers : undefined,
-  };
-}
-
 function transformFootbalistoRankingEntry(
   entry: FootbalistoRankingEntry,
   logoCdnUrl: string,
@@ -374,9 +319,6 @@ function extractId(item: unknown): string | number {
 // ─── Service definition ────────────────────────────────────────────────────────
 
 export interface FootbalistoServiceInterface {
-  readonly getTeamStats: (
-    teamId: number,
-  ) => Effect.Effect<TeamStatsType, BffError>;
   readonly getTeamMatches: (
     teamId: number,
   ) => Effect.Effect<readonly Match[], BffError>;
@@ -460,18 +402,6 @@ function fetchJson<A, I>(
   });
 }
 
-/** Format an ISO date string as DDMMYYYY for PSD stat endpoint URLs */
-function formatPsdDate(isoDate: string): string {
-  const datePart = isoDate.split("T")[0] ?? "";
-  const [year, month, day] = datePart.split("-");
-  if (!year || !month || !day) {
-    throw new Error(
-      `formatPsdDate: expected ISO date string, got "${isoDate}"`,
-    );
-  }
-  return `${day}${month}${year}`;
-}
-
 export const FootbalistoServiceLive = Layer.effect(
   FootbalistoService,
   Effect.gen(function* () {
@@ -547,18 +477,6 @@ export const FootbalistoServiceLive = Layer.effect(
       );
 
     return {
-      getTeamStats: (teamId: number) =>
-        Effect.gen(function* () {
-          const season = yield* getCurrentSeason();
-          const from = formatPsdDate(season.start);
-          const to = formatPsdDate(season.end);
-          const rawStats = yield* countedFetch(
-            `${base}/statistics/team/${teamId}/from/${from}/to/${to}`,
-            PsdTeamStatsResponse,
-          );
-          return transformPsdTeamStats(teamId, rawStats);
-        }),
-
       getTeamMatches: (teamId: number) =>
         Effect.gen(function* () {
           const season = yield* getCurrentSeason();

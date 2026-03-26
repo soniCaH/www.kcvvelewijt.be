@@ -8,7 +8,6 @@ export const TTL = {
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
   MATCH_DETAIL_DEFAULT: 60 * 60 * 24, // 24 hours — upcoming/recent matches
   RANKING: 60 * 60 * 24, // 24 hours — updates only after a match day
-  STATS: 60 * 60 * 24, // 24 hours — season stats updated weekly at most
 } as const;
 
 export interface KvCacheInterface {

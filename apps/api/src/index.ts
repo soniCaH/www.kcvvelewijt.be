@@ -23,7 +23,6 @@ import { FootbalistoServiceLive } from "./footbalisto/service";
 import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { RankingApiLive } from "./handlers/ranking";
-import { StatsApiLive } from "./handlers/stats";
 import { RelatedApiLive } from "./handlers/related";
 import { SearchApiLive } from "./handlers/search";
 import { EmbeddingServiceLive } from "./search/embedding";
@@ -50,13 +49,12 @@ const WorkerPlatformLayer = Layer.mergeAll(
  * Creates an application layer that builds the PsdApi runtime wired with live service implementations and the provided worker environment.
  *
  * @param env - The Worker environment (bindings such as KV namespaces and secrets) to supply to the runtime
- * @returns A Layer supplying the PsdApi implementation composed with live services (matches, ranking, stats, search, embedding, vectorization, HTTP client, KV cache) and required platform services
+ * @returns A Layer supplying the PsdApi implementation composed with live services (matches, ranking, search, embedding, vectorization, HTTP client, KV cache) and required platform services
  */
 function buildAppLayer(env: WorkerEnv) {
   return HttpApiBuilder.api(PsdApi).pipe(
     Layer.provide(MatchesApiLive),
     Layer.provide(RankingApiLive),
-    Layer.provide(StatsApiLive),
     Layer.provide(RelatedApiLive),
     Layer.provide(SearchApiLive),
     Layer.provide(SanityWriteClientLive),
