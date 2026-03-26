@@ -6,7 +6,7 @@
 
 **Architecture:** Four new client components under `src/components/calendar/`: CalendarMonth (grid + day panel), CalendarWeek (7-day columns), CalendarSubscribePanel (iCal builder), CalendarWidget (toolbar + view orchestrator). The existing CalendarView becomes the "list" tab. The server page fetches full-season matches for all teams + events + team metadata, passing everything as props. Zero extra API calls from widgets.
 
-**Tech Stack:** React 19, Next.js 15, Luxon (dates), qrcode.react (QR), Tailwind v4, Vitest + Testing Library, Storybook 10.
+**Tech Stack:** React 19, Next.js 16.2.1, Luxon (dates), qrcode.react (QR), Tailwind v4, Vitest + Testing Library, Storybook 10.
 
 ---
 
@@ -34,12 +34,10 @@ export interface CalendarTeamInfo {
   label: string; // display label like "A-ploeg" from match data
 }
 
-// New — helper to determine if match is home
-export function isHomeMatch(match: CalendarMatch): boolean {
-  // KCVV is always one of the teams; check if home team is KCVV
-  // We detect "home" by whether kcvv_team_label exists AND homeTeam matches
-  return true; // All matches from our API are "our" matches, use homeTeam.id to compare
-}
+// Implemented as getMatchDotType in utils.ts — compares CalendarMatch.kcvvTeamId
+// to homeTeam.id to decide "home" vs "away"; falls back to string matching on
+// homeTeam.name when kcvvTeamId is absent.
+export function getMatchDotType(match: CalendarMatch): "home" | "away";
 ```
 
 ---

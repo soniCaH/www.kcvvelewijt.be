@@ -12,8 +12,8 @@ export interface CalendarSubscribePanelProps {
 
 type Side = "all" | "home" | "away";
 
-function buildWebcalUrl(teamIds: number[], side: Side): string {
-  return `webcal://kcvvelewijt.be/api/calendar.ics?teamIds=${teamIds.join(",")}&side=${side}`;
+function buildWebcalUrl(teamIds: number[], side: Side, host: string): string {
+  return `webcal://${host}/api/calendar.ics?teamIds=${teamIds.join(",")}&side=${side}`;
 }
 
 function computeInitialSelection(
@@ -39,11 +39,16 @@ export function CalendarSubscribePanel({
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
+  const host =
+    typeof window !== "undefined"
+      ? window.location.host
+      : (process.env.NEXT_PUBLIC_HOST ?? "kcvvelewijt.be");
+
   const selectedPsdIds = teams
     .filter((t) => selectedTeamIds.has(t.id))
     .map((t) => t.psdId);
 
-  const webcalUrl = buildWebcalUrl(selectedPsdIds, side);
+  const webcalUrl = buildWebcalUrl(selectedPsdIds, side, host);
 
   function removeTeam(teamId: string) {
     setSelectedTeamIds((prev) => {
@@ -58,9 +63,13 @@ export function CalendarSubscribePanel({
   }
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(webcalUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(webcalUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+    }
   }
 
   if (!isOpen) return null;

@@ -8,7 +8,6 @@ import { FilterTabs, type FilterTab } from "@/components/design-system";
 import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
 import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
-import { CalendarListView } from "./CalendarListView";
 import type {
   CalendarMatch,
   CalendarEvent,
@@ -22,13 +21,12 @@ export interface CalendarWidgetProps {
   activeTeamFilter: string;
 }
 
-type ViewMode = "month" | "week" | "list";
+type ViewMode = "month" | "week";
 
 const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
   [
     { value: "month", label: "Maand" },
     { value: "week", label: "Week", mobileHidden: true },
-    { value: "list", label: "Lijst" },
   ];
 
 export function CalendarWidget({
@@ -126,18 +124,18 @@ export function CalendarWidget({
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-2">
-        {/* View tabs */}
-        <div className="flex gap-1">
+        {/* View tabs — segmented control */}
+        <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
           {VIEW_TABS.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setView(tab.value)}
               className={cn(
-                "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                "px-4 py-2 text-sm font-medium transition-colors",
                 tab.mobileHidden && "hidden md:inline-flex",
                 view === tab.value
-                  ? "bg-kcvv-green-bright text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50",
+                  ? "bg-gray-900 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50",
               )}
             >
               {tab.label}
@@ -148,15 +146,32 @@ export function CalendarWidget({
         {/* Subscribe button */}
         <button
           onClick={() => setSubscribePanelOpen((prev) => !prev)}
+          aria-expanded={subscribePanelOpen}
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors border",
             subscribePanelOpen
-              ? "bg-kcvv-green-bright text-white"
-              : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50",
+              ? "bg-gray-50 border-gray-400 text-gray-900"
+              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50",
           )}
         >
-          <span aria-hidden="true">📅</span>
           Abonneer
+          <svg
+            className={cn(
+              "w-4 h-4 transition-transform",
+              subscribePanelOpen && "rotate-180",
+            )}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
         </button>
       </div>
 
@@ -206,8 +221,6 @@ export function CalendarWidget({
           onNextWeek={handleNextWeek}
         />
       )}
-
-      {view === "list" && <CalendarListView matches={filteredMatches} />}
     </div>
   );
 }

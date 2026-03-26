@@ -45,6 +45,7 @@ describe("transformMatchToCalendar", () => {
       status: "finished",
       competition: "2e Nationale",
       team: "A-Ploeg",
+      kcvvTeamId: undefined,
     });
   });
 
@@ -194,21 +195,32 @@ describe("getDaysInWeek", () => {
 // ── getMatchDotType ───────────────────────────────────────────────────────
 
 describe("getMatchDotType", () => {
-  it("returns 'home' when KCVV is home team (team label present + homeTeam name contains KCVV)", () => {
+  it("returns 'home' when kcvvTeamId matches homeTeam.id", () => {
     const match = makeCalendarMatch({
       id: 1,
+      kcvvTeamId: 1,
       homeTeam: { id: 1, name: "KCVV Elewijt A" },
       awayTeam: { id: 2, name: "Racing Mechelen" },
     });
     expect(getMatchDotType(match)).toBe("home");
   });
 
-  it("returns 'away' when KCVV is away team", () => {
+  it("returns 'away' when kcvvTeamId matches awayTeam.id", () => {
     const match = makeCalendarMatch({
       id: 1,
+      kcvvTeamId: 1,
       homeTeam: { id: 2, name: "Racing Mechelen" },
       awayTeam: { id: 1, name: "KCVV Elewijt A" },
     });
     expect(getMatchDotType(match)).toBe("away");
+  });
+
+  it("falls back to name matching when kcvvTeamId is absent", () => {
+    const match = makeCalendarMatch({
+      id: 1,
+      homeTeam: { id: 1, name: "KCVV Elewijt A" },
+      awayTeam: { id: 2, name: "Racing Mechelen" },
+    });
+    expect(getMatchDotType(match)).toBe("home");
   });
 });

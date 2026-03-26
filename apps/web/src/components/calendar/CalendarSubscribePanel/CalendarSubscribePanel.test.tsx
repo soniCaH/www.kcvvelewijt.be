@@ -116,7 +116,7 @@ describe("CalendarSubscribePanel", () => {
       render(<CalendarSubscribePanel {...defaultProps} />);
       const urlInput = screen.getByTestId("webcal-url");
       expect(urlInput).toHaveValue(
-        "webcal://kcvvelewijt.be/api/calendar.ics?teamIds=101,102,103&side=all",
+        "webcal://localhost:3000/api/calendar.ics?teamIds=101,102,103&side=all",
       );
     });
 
@@ -128,7 +128,7 @@ describe("CalendarSubscribePanel", () => {
 
       const urlInput = screen.getByTestId("webcal-url");
       expect(urlInput).toHaveValue(
-        "webcal://kcvvelewijt.be/api/calendar.ics?teamIds=101,102,103&side=home",
+        "webcal://localhost:3000/api/calendar.ics?teamIds=101,102,103&side=home",
       );
     });
 
@@ -142,7 +142,7 @@ describe("CalendarSubscribePanel", () => {
 
       const urlInput = screen.getByTestId("webcal-url");
       expect(urlInput).toHaveValue(
-        "webcal://kcvvelewijt.be/api/calendar.ics?teamIds=102,103&side=all",
+        "webcal://localhost:3000/api/calendar.ics?teamIds=102,103&side=all",
       );
     });
   });
@@ -154,7 +154,7 @@ describe("CalendarSubscribePanel", () => {
 
       await user.click(screen.getByText("Kopieer link"));
       expect(mockWriteText).toHaveBeenCalledWith(
-        "webcal://kcvvelewijt.be/api/calendar.ics?teamIds=101,102,103&side=all",
+        "webcal://localhost:3000/api/calendar.ics?teamIds=101,102,103&side=all",
       );
     });
 

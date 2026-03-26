@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, userEvent } from "storybook/test";
 import { CalendarSubscribePanel } from "./CalendarSubscribePanel";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
@@ -36,33 +37,19 @@ export const PrefilledSingleTeam: Story = {
 };
 
 export const WithQRCodeOpen: Story = {
-  render: (args) => {
-    function Wrapper() {
-      return (
-        <div>
-          <CalendarSubscribePanel {...args} />
-          <p className="text-sm text-gray-500 mt-2">
-            Click &quot;Toon QR-code&quot; to see the QR code.
-          </p>
-        </div>
-      );
-    }
-    return <Wrapper />;
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("button", { name: /Toon QR-code/i }),
+    );
   },
 };
 
 export const CopiedFeedback: Story = {
-  render: (args) => {
-    function Wrapper() {
-      return (
-        <div>
-          <CalendarSubscribePanel {...args} />
-          <p className="text-sm text-gray-500 mt-2">
-            Click &quot;Kopieer link&quot; to see the confirmation.
-          </p>
-        </div>
-      );
-    }
-    return <Wrapper />;
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("button", { name: /Kopieer link/i }),
+    );
   },
 };

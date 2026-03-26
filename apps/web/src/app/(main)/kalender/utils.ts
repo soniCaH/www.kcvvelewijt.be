@@ -26,6 +26,7 @@ export interface CalendarMatch {
   status: MatchStatus;
   competition?: string;
   team?: string;
+  kcvvTeamId?: number;
 }
 
 export interface CalendarEvent {
@@ -64,6 +65,7 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     status: match.status,
     competition: match.competition,
     team: match.kcvv_team_label,
+    kcvvTeamId: match.kcvv_team_id,
   };
 }
 
@@ -72,7 +74,10 @@ export function getMatchesForDay(
   matches: CalendarMatch[],
   day: string,
 ): CalendarMatch[] {
-  return matches.filter((m) => DateTime.fromISO(m.date).toISODate() === day);
+  return matches.filter((m) => {
+    const dt = DateTime.fromISO(m.date);
+    return dt.isValid && dt.toISODate() === day;
+  });
 }
 
 /** Filter events whose dateStart falls on the given YYYY-MM-DD */
@@ -80,9 +85,10 @@ export function getEventsForDay(
   events: CalendarEvent[],
   day: string,
 ): CalendarEvent[] {
-  return events.filter(
-    (e) => DateTime.fromISO(e.dateStart).toISODate() === day,
-  );
+  return events.filter((e) => {
+    const dt = DateTime.fromISO(e.dateStart);
+    return dt.isValid && dt.toISODate() === day;
+  });
 }
 
 /**
@@ -118,6 +124,9 @@ export function getDaysInWeek(dateStr: string): string[] {
 
 /** Determine if a match is home or away for KCVV */
 export function getMatchDotType(match: CalendarMatch): "home" | "away" {
-  const homeNameLower = match.homeTeam.name.toLowerCase();
-  return homeNameLower.includes("kcvv") ? "home" : "away";
+  if (match.kcvvTeamId != null) {
+    return match.homeTeam.id === match.kcvvTeamId ? "home" : "away";
+  }
+  // Fallback for matches without kcvvTeamId
+  return match.homeTeam.name.toLowerCase().includes("kcvv") ? "home" : "away";
 }

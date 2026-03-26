@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, userEvent } from "storybook/test";
 import { CalendarWidget } from "./CalendarWidget";
 import type {
   CalendarMatch,
@@ -106,18 +107,14 @@ export const WeekView: Story = {
   },
 };
 
-export const ListView: Story = {
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "list" } },
-    },
-  },
-};
-
 export const SubscribePanelOpen: Story = {
   parameters: {
     nextjs: {
       navigation: { pathname: "/kalender", query: { view: "month" } },
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: /Abonneer/i }));
   },
 };

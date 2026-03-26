@@ -94,11 +94,10 @@ describe("CalendarWidget", () => {
   });
 
   describe("view tabs", () => {
-    it("renders three view tabs: Maand, Week, Lijst", () => {
+    it("renders two view tabs: Maand, Week", () => {
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByRole("button", { name: "Maand" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Week" })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Lijst" })).toBeInTheDocument();
     });
 
     it("defaults to month view when no ?view param", () => {
@@ -118,13 +117,6 @@ describe("CalendarWidget", () => {
       render(<CalendarWidget {...defaultProps} />);
       // Week view shows day range
       expect(screen.getByText(/9 - 15 maart 2026/)).toBeInTheDocument();
-    });
-
-    it("shows list view when ?view=list", () => {
-      mockSearchParams = new URLSearchParams("view=list");
-      render(<CalendarWidget {...defaultProps} />);
-      // List view renders matches grouped by date (CalendarView pattern)
-      expect(screen.getByText("KCVV Elewijt A")).toBeInTheDocument();
     });
 
     it("clicking a tab updates URL to ?view=X", async () => {

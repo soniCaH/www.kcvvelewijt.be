@@ -1,10 +1,9 @@
 /**
  * Calendar Page
- * Full-season matches across all KCVV teams + events, with month/week/list views
+ * Full-season matches across all KCVV teams + events, with month/week views
  */
 
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
@@ -13,7 +12,6 @@ import { EventRepository } from "@/lib/repositories/event.repository";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { transformMatchToCalendar } from "./utils";
 import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
-import { Spinner } from "@/components/design-system";
 
 export const metadata: Metadata = {
   title: "Wedstrijdkalender | KCVV Elewijt",
@@ -58,24 +56,24 @@ async function fetchCalendarData(): Promise<CalendarData> {
         { concurrency: 5 },
       );
 
-      // Flatten and deduplicate by match ID
-      const matchMap = new Map<number, CalendarMatch>();
-      for (const arr of matchArrays) {
-        for (const m of arr) {
-          if (!matchMap.has(m.id)) {
-            matchMap.set(m.id, transformMatchToCalendar(m));
-          }
-        }
-      }
+      // Flatten, enrich with team label, and deduplicate by match ID.
+      // The BFF getTeamMatches endpoint doesn't set kcvv_team_label,
+      // so we enrich from the Sanity team name here.
+      const deduplicatedMatches = matchArrays
+        .flatMap((matches, i) => {
+          const teamLabel = teamsWithPsd[i]!.name;
+          return matches.map((m) => ({
+            ...transformMatchToCalendar(m),
+            team: m.kcvv_team_label ?? teamLabel,
+          }));
+        })
+        .reduce((map, cal) => {
+          if (!map.has(cal.id)) map.set(cal.id, cal);
+          return map;
+        }, new Map<number, CalendarMatch>());
 
       // Fetch events
       const eventVMs = yield* eventRepo.findAll();
-
-      // Build team info list from teams that actually have matches
-      const teamLabelsFromMatches = new Set<string>();
-      for (const m of matchMap.values()) {
-        if (m.team) teamLabelsFromMatches.add(m.team);
-      }
 
       const teamInfos: CalendarTeamInfo[] = teamsWithPsd.map((t) => ({
         id: t.id,
@@ -93,7 +91,7 @@ async function fetchCalendarData(): Promise<CalendarData> {
       }));
 
       return {
-        matches: [...matchMap.values()],
+        matches: [...deduplicatedMatches.values()],
         events,
         teams: teamInfos,
       };
@@ -121,7 +119,7 @@ export default async function CalendarPage({
   const activeTeamFilter = params.team ?? "all";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-100">
       {/* Hero */}
       <div className="bg-linear-to-br from-green-main via-green-hover to-green-dark-hover text-white py-16 px-4">
         <div className="max-w-5xl mx-auto">
@@ -135,20 +133,12 @@ export default async function CalendarPage({
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </div>
-          }
-        >
-          <CalendarWidget
-            matches={data.matches}
-            events={data.events}
-            teams={data.teams}
-            activeTeamFilter={activeTeamFilter}
-          />
-        </Suspense>
+        <CalendarWidget
+          matches={data.matches}
+          events={data.events}
+          teams={data.teams}
+          activeTeamFilter={activeTeamFilter}
+        />
       </div>
     </div>
   );
