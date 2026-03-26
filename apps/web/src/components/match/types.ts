@@ -63,14 +63,25 @@ export interface UpcomingMatch {
   };
   /** Match status */
   status: MatchStatus;
-  /** Squad label — identifies which KCVV team plays (e.g. "A-Ploeg", "U21") */
+  /**
+   * Front-end squad short code (e.g. "A-Ploeg", "U21") used for internal
+   * identification of which KCVV squad is playing. Prefer `kcvvTeamLabel`
+   * for display when available.
+   */
   squadLabel?: string;
   /** Competition name (optional) */
   competition?: string;
   /** PSD team ID identifying which KCVV team plays (A-team, U21, etc.) */
   kcvvTeamId?: number;
-  /** Human-readable label for the KCVV team (e.g. "A-Ploeg", "U21") — from BFF */
+  /**
+   * Canonical human-readable label for the KCVV team (e.g. "A-Ploeg", "U21")
+   * provided by the BFF via `kcvv_team_label`. Preferred for display over
+   * `squadLabel`.
+   */
   kcvvTeamLabel?: string;
-  /** Optional team label for display — set by calling page (overrides kcvvTeamLabel) */
+  /**
+   * Optional display-time team label set by the calling page. When present,
+   * overrides `kcvvTeamLabel` for rendering.
+   */
   teamLabel?: string;
 }
