@@ -14,8 +14,8 @@ export interface ScheurkalenderMatch {
   id: number;
   /** Match time as HH:MM string */
   time?: string;
-  /** Round or label (e.g. team name) */
-  round?: string;
+  /** Squad label — identifies which KCVV team plays (e.g. "A-Ploeg", "U21") */
+  squadLabel?: string;
   homeTeam: { name: string; logo?: string };
   awayTeam: { name: string; logo?: string };
 }
@@ -90,11 +90,11 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
                         {match.time ?? "—"}
                       </div>
 
-                      {/* Team / round label */}
-                      {match.round && (
+                      {/* Squad label */}
+                      {match.squadLabel && (
                         <div className="w-20 shrink-0">
                           <span className="text-xs font-semibold text-green-main bg-green-main/10 px-2 py-0.5 rounded print:bg-transparent print:text-black">
-                            {match.round}
+                            {match.squadLabel}
                           </span>
                         </div>
                       )}

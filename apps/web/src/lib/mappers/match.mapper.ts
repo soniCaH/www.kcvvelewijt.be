@@ -42,7 +42,7 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingMatch {
       score: match.away_team.score,
     },
     status: match.status,
-    round: match.round,
+    squadLabel: match.squadLabel,
     competition: match.competition,
     kcvvTeamId: match.kcvv_team_id,
     kcvvTeamLabel: match.kcvv_team_label,

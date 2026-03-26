@@ -277,9 +277,7 @@ function matchDetailToMatch(detail: MatchDetail): Match {
     home_team: detail.home_team,
     away_team: detail.away_team,
     status: detail.status,
-    round: detail.round,
     competition: detail.competition,
-    kcvv_team_id: detail.kcvv_team_id,
   };
 }
 

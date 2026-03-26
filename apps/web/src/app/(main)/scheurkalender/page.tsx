@@ -72,7 +72,7 @@ export default async function ScheurkalenderPageRoute() {
       matches: dayMatches.map((m) => ({
         id: m.id,
         time: m.time,
-        round: m.round,
+        squadLabel: m.squadLabel,
         homeTeam: { name: m.home_team.name, logo: m.home_team.logo },
         awayTeam: { name: m.away_team.name, logo: m.away_team.logo },
       })),
