@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { Effect } from "effect";
 import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 
 export const metadata: Metadata = {
   title: "Hulp & Contact | KCVV Elewijt",
@@ -29,18 +29,11 @@ export const metadata: Metadata = {
   },
 };
 
-/**
- * Render the Help page populated with responsibility paths fetched from Sanity.
- *
- * Fetches responsibility paths and returns the HelpPage component with those paths provided as a prop.
- *
- * @returns The HelpPage React element rendered with the fetched responsibility paths.
- */
 export default async function HelpPageRoute() {
   const paths = await runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getResponsibilityPaths();
+      const repo = yield* ResponsibilityRepository;
+      return yield* repo.findAll();
     }),
   );
 

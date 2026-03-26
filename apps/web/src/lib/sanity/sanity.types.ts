@@ -1244,6 +1244,49 @@ export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
   }> | null;
 } | null;
 
+// Source: ../web/src/lib/sanity/queries/responsibilityPaths.ts
+// Variable: RESPONSIBILITY_PATHS_QUERY
+// Query: *[_type == "responsibilityPath" && active == true] | order(title asc) {  "id": slug.current,  "role": audience,  question,  keywords,  summary,  category,  icon,  "primaryContact": primaryContact {    "role": role,    "email": select(defined(staffMember) => staffMember->email, email),    "phone": select(defined(staffMember) => staffMember->phone, phone),    "department": select(defined(staffMember) => staffMember->department, department),    "name": select(      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,      null    ),    "memberId": staffMember->_id  },  "steps": steps[] {    description,    link,    "contact": select(defined(contact) => contact {      "role": role,      "email": select(defined(staffMember) => staffMember->email, email),      "phone": select(defined(staffMember) => staffMember->phone, phone),      "department": select(defined(staffMember) => staffMember->department, department),      "name": select(        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,        null      ),      "memberId": staffMember->_id    }, null)  },  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])}
+export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
+  id: string | null;
+  role: Array<
+    "andere" | "niet-lid" | "ouder" | "speler" | "supporter" | "trainer"
+  > | null;
+  question: string | null;
+  keywords: Array<string> | null;
+  summary: string | null;
+  category:
+    | "administratief"
+    | "algemeen"
+    | "commercieel"
+    | "gedrag"
+    | "medisch"
+    | "sportief"
+    | null;
+  icon: string | null;
+  primaryContact: {
+    role: string | null;
+    email: string | null;
+    phone: string | null;
+    department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+    name: string | null;
+    memberId: string | null;
+  } | null;
+  steps: Array<{
+    description: string | null;
+    link: string | null;
+    contact: {
+      role: string | null;
+      email: string | null;
+      phone: string | null;
+      department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+      name: string | null;
+      memberId: string | null;
+    } | null;
+  }> | null;
+  relatedPaths: Array<never> | Array<string | null>;
+}>;
+
 // Source: ../web/src/lib/sanity/queries/sponsors.ts
 // Variable: SPONSORS_QUERY
 // Query: *[_type == "sponsor" && active == true] | order(name asc) {  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
@@ -1457,6 +1500,7 @@ declare module "@sanity/client" {
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      _id,\n      "imageUrl": image.asset->url,\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "responsibilityPath" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  positionTitle,\n  positionShort,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;

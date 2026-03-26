@@ -12,8 +12,8 @@ import { Suspense } from "react";
 import { Effect } from "effect";
 import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
+import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 
 export const metadata: Metadata = {
   title: "Organigram & Hulp | KCVV Elewijt",
@@ -49,9 +49,9 @@ export default async function OrganigramPage() {
   const [members, responsibilityPaths] = await runPromise(
     Effect.gen(function* () {
       const staffRepo = yield* StaffRepository;
-      const sanity = yield* SanityService;
+      const responsibilityRepo = yield* ResponsibilityRepository;
       return yield* Effect.all(
-        [staffRepo.findAll(), sanity.getResponsibilityPaths()],
+        [staffRepo.findAll(), responsibilityRepo.findAll()],
         { concurrency: 2 },
       );
     }),
