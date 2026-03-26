@@ -8,7 +8,7 @@
 export const TEST_SECRET = "whsec_dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg=="; // gitguardian:ignore
 
 export const SECRET_BYTES = Uint8Array.from(
-  atob("dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg=="),
+  atob(TEST_SECRET.slice("whsec_".length)),
   (c) => c.charCodeAt(0),
 );
 
@@ -30,5 +30,5 @@ export async function signPayload(
     key,
     new TextEncoder().encode(signedContent),
   );
-  return `v1,${btoa(String.fromCharCode(...new Uint8Array(sigBytes)))}`;
+  return `v1,${Buffer.from(sigBytes).toString("base64")}`;
 }

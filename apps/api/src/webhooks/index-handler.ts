@@ -22,7 +22,19 @@ const errorMessage = (err: unknown) =>
 
 const parsePayload = (rawBody: string): WebhookPayload | Response => {
   try {
-    return JSON.parse(rawBody) as WebhookPayload;
+    const parsed: unknown = JSON.parse(rawBody);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as Record<string, unknown>)._id !== "string" ||
+      typeof (parsed as Record<string, unknown>)._type !== "string"
+    ) {
+      return Response.json(
+        { ok: false, error: "invalid_shape", code: "parse_failed" },
+        { status: 400 },
+      );
+    }
+    return parsed as WebhookPayload;
   } catch (err) {
     console.error("[webhook] malformed JSON body:", err);
     return Response.json(
@@ -110,15 +122,21 @@ export async function handleIndexWebhook(
   if (parsed instanceof Response) return parsed;
   const { _id, _type } = parsed;
 
+  const allowedTypes = ["responsibilityPath", "article", "page"];
+  const allowedOps = ["create", "update", "delete"];
   const operation = request.headers.get("sanity-operation") ?? "update";
+
+  if (!allowedOps.includes(operation)) {
+    return Response.json({ ok: true, action: "skipped_unknown_operation" });
+  }
+
+  if (!allowedTypes.includes(_type)) {
+    return Response.json({ ok: true, action: "skipped_unknown_type" });
+  }
 
   if (operation === "delete") {
     await env.SEARCH_INDEX.deleteByIds([_id]);
     return Response.json({ ok: true, action: "deleted" });
-  }
-
-  if (!["responsibilityPath", "article", "page"].includes(_type)) {
-    return Response.json({ ok: true, action: "skipped_unknown_type" });
   }
 
   const fetchDoc =
