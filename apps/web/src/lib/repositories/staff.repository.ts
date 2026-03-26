@@ -1,7 +1,24 @@
 import { Context, Effect, Layer } from "effect";
+import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
-import { STAFF_MEMBERS_QUERY } from "../sanity/queries/staffMembers";
 import type { STAFF_MEMBERS_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const STAFF_MEMBERS_QUERY =
+  defineQuery(`*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {
+  _id,
+  firstName,
+  lastName,
+  positionTitle,
+  positionShort,
+  department,
+  email,
+  phone,
+  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+  responsibilities,
+  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)
+}`);
 import type { OrgChartNode } from "@/types/organigram";
 
 const CLUB_ROOT_NODE: OrgChartNode = {

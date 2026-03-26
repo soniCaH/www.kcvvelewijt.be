@@ -3,13 +3,13 @@ import {
   ARTICLES_QUERY,
   ARTICLE_BY_SLUG_QUERY,
   RELATED_ARTICLES_QUERY,
-} from "./articles";
-import { EVENTS_QUERY, NEXT_FEATURED_EVENT_QUERY } from "./events";
-import { PAGE_BY_SLUG_QUERY } from "./pages";
-import { PLAYERS_QUERY, PLAYER_BY_PSD_ID_QUERY } from "./players";
-import { SPONSORS_QUERY } from "./sponsors";
-import { STAFF_MEMBERS_QUERY } from "./staffMembers";
-import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "./teams";
+} from "./article.repository";
+import { EVENTS_QUERY, NEXT_FEATURED_EVENT_QUERY } from "./event.repository";
+import { PAGE_BY_SLUG_QUERY } from "./page.repository";
+import { PLAYERS_QUERY, PLAYER_BY_PSD_ID_QUERY } from "./player.repository";
+import { SPONSORS_QUERY } from "./sponsor.repository";
+import { STAFF_MEMBERS_QUERY } from "./staff.repository";
+import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "./team.repository";
 
 const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp", "fit=max"];
 

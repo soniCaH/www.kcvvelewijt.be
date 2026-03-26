@@ -1,12 +1,6 @@
 import { Context, Effect, Layer } from "effect";
+import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
-import {
-  ARTICLES_QUERY,
-  ARTICLE_TAGS_QUERY,
-  ARTICLES_PAGINATED_QUERY,
-  ARTICLE_BY_SLUG_QUERY,
-  RELATED_ARTICLES_QUERY,
-} from "../sanity/queries/articles";
 import type {
   ARTICLES_QUERY_RESULT,
   ARTICLE_TAGS_QUERY_RESULT,
@@ -14,6 +8,53 @@ import type {
   RELATED_ARTICLES_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import { formatArticleDate } from "../utils/dates";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const ARTICLES_QUERY =
+  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
+  _id, title, slug, publishAt, featured, tags,
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
+}`);
+
+export const ARTICLE_TAGS_QUERY = defineQuery(
+  `array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
+);
+
+export const ARTICLES_PAGINATED_QUERY =
+  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {
+  _id, title, slug, publishAt, featured, tags,
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+}`);
+
+export const RELATED_ARTICLES_QUERY =
+  defineQuery(`*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
+  _id, title, slug, publishAt, featured, tags,
+  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+}`);
+
+export const ARTICLE_BY_SLUG_QUERY =
+  defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
+  _id, title, slug, publishAt, featured, tags,
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
+  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
+    _id, firstName, lastName, position,
+    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    psdId
+  },
+  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {
+    _id, name,
+    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    "slug": slug.current
+  },
+  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
+    _id, firstName, lastName, positionTitle,
+    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"
+  }
+}`);
 
 // ─── View Models ─────────────────────────────────────────────────────────────
 

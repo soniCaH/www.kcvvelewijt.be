@@ -6,8 +6,8 @@ vi.mock("@/lib/effect/runtime", () => ({
   runPromise: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock("@/lib/effect/services/SanityService", () => ({
-  SanityService: {},
+vi.mock("@/lib/repositories/team.repository", () => ({
+  TeamRepository: {},
 }));
 
 describe("/teams page — canonical section flow", () => {

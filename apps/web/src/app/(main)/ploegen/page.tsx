@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import { PageHero } from "@/components/design-system/PageHero";
@@ -19,8 +19,8 @@ async function fetchTeams() {
   try {
     return await runPromise(
       Effect.gen(function* () {
-        const sanity = yield* SanityService;
-        return yield* sanity.getTeamsLanding();
+        const repo = yield* TeamRepository;
+        return yield* repo.findAllForLanding();
       }),
     );
   } catch (error) {

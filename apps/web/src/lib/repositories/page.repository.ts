@@ -1,7 +1,17 @@
 import { Context, Effect, Layer } from "effect";
+import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
-import { PAGE_BY_SLUG_QUERY } from "../sanity/queries/pages";
 import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const PAGE_BY_SLUG_QUERY =
+  defineQuery(`*[_type == "page" && slug.current == $slug][0] {
+  _id,
+  title,
+  slug,
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }
+}`);
 
 export interface PageVM {
   id: string;

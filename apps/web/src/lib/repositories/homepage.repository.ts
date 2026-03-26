@@ -1,7 +1,30 @@
 import { Context, Effect, Layer } from "effect";
+import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
-import { HOMEPAGE_BANNERS_QUERY } from "../sanity/queries/homePage";
 import type { HOMEPAGE_BANNERS_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const HOMEPAGE_BANNERS_QUERY = defineQuery(`*[_type == "homePage"][0] {
+    "bannerSlotA": bannerSlotA-> {
+      _id,
+      "imageUrl": image.asset->url,
+      alt,
+      href
+    },
+    "bannerSlotB": bannerSlotB-> {
+      _id,
+      "imageUrl": image.asset->url,
+      alt,
+      href
+    },
+    "bannerSlotC": bannerSlotC-> {
+      _id,
+      "imageUrl": image.asset->url,
+      alt,
+      href
+    }
+  }`);
 
 export interface BannerSlotVM {
   imageUrl: string;

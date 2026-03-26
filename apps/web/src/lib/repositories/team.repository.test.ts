@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import type {
   TEAMS_QUERY_RESULT,
   TEAM_BY_SLUG_QUERY_RESULT,
+  TEAMS_LANDING_QUERY_RESULT,
 } from "../sanity/sanity.types";
 
 // Mock the sanity client before importing the repository
@@ -316,6 +317,80 @@ describe("TeamRepository", () => {
       );
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("findAllForLanding", () => {
+    function makeLandingRow(
+      overrides: Partial<TEAMS_LANDING_QUERY_RESULT[number]> = {},
+    ): TEAMS_LANDING_QUERY_RESULT[number] {
+      return {
+        _id: "team-1",
+        name: "Eerste Elftallen A",
+        slug: "eerste-elftallen-a",
+        age: "A",
+        division: "3de Afdeling",
+        divisionFull: "3de Afdeling VFV A",
+        tagline: "Er is maar één plezante compagnie",
+        teamImageUrl: "https://cdn.sanity.io/team.webp",
+        staff: [
+          { firstName: "Piet", lastName: "Pieters", role: "hoofdtrainer" },
+        ],
+        ...overrides,
+      };
+    }
+
+    it("maps landing rows to TeamLandingItem[]", async () => {
+      mockFetch.mockResolvedValueOnce([makeLandingRow()]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAllForLanding();
+        }),
+      );
+
+      expect(teams).toHaveLength(1);
+      expect(teams[0]).toEqual({
+        _id: "team-1",
+        name: "Eerste Elftallen A",
+        slug: "eerste-elftallen-a",
+        age: "A",
+        division: "3de Afdeling",
+        divisionFull: "3de Afdeling VFV A",
+        tagline: "Er is maar één plezante compagnie",
+        teamImageUrl: "https://cdn.sanity.io/team.webp",
+        staff: [
+          { firstName: "Piet", lastName: "Pieters", role: "hoofdtrainer" },
+        ],
+      });
+    });
+
+    it("handles null fields by providing defaults", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeLandingRow({
+          name: null,
+          slug: null,
+          age: null,
+          division: null,
+          divisionFull: null,
+          tagline: null,
+          teamImageUrl: null,
+          staff: null,
+        }),
+      ]);
+
+      const [t] = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAllForLanding();
+        }),
+      );
+
+      expect(t.name).toBe("");
+      expect(t.slug).toBe("");
+      expect(t.age).toBe("");
+      expect(t.staff).toBeNull();
     });
   });
 });
