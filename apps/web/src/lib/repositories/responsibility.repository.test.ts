@@ -26,6 +26,15 @@ function runWithRepo<A>(
   );
 }
 
+function runFindAll() {
+  return runWithRepo(
+    Effect.gen(function* () {
+      const repo = yield* ResponsibilityRepository;
+      return yield* repo.findAll();
+    }),
+  );
+}
+
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 
 function makeContact(
@@ -75,12 +84,7 @@ describe("ResponsibilityRepository", () => {
       const row = makePathRow();
       mockFetch.mockResolvedValueOnce([row]);
 
-      const paths = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ResponsibilityRepository;
-          return yield* repo.findAll();
-        }),
-      );
+      const paths = await runFindAll();
 
       expect(paths).toHaveLength(1);
       const path = paths[0];
@@ -152,12 +156,7 @@ describe("ResponsibilityRepository", () => {
       });
       mockFetch.mockResolvedValueOnce([row]);
 
-      const paths = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ResponsibilityRepository;
-          return yield* repo.findAll();
-        }),
-      );
+      const paths = await runFindAll();
 
       const path = paths[0];
 
@@ -175,12 +174,7 @@ describe("ResponsibilityRepository", () => {
       });
       mockFetch.mockResolvedValueOnce([row]);
 
-      const paths = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ResponsibilityRepository;
-          return yield* repo.findAll();
-        }),
-      );
+      const paths = await runFindAll();
 
       // relatedPaths should be passed through as-is from GROQ result
       expect(paths[0].relatedPaths).toEqual([
@@ -195,12 +189,7 @@ describe("ResponsibilityRepository", () => {
       });
       mockFetch.mockResolvedValueOnce([row]);
 
-      const paths = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ResponsibilityRepository;
-          return yield* repo.findAll();
-        }),
-      );
+      const paths = await runFindAll();
 
       expect(paths[0].steps[0]).toEqual({
         order: 1,
