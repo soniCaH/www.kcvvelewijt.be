@@ -10,19 +10,19 @@ vi.mock("next/script", () => ({
 const { GoogleTagManagerLoader } = await import("./GoogleTagManagerLoader");
 
 describe("GoogleTagManagerLoader", () => {
-  it("renders GTM scripts with the provided GTM ID", () => {
+  it("renders GTM init script with the provided GTM ID", () => {
     const { container } = render(
       <GoogleTagManagerLoader gtmId="GTM-TEST123" />,
     );
 
     const scripts = container.querySelectorAll("script");
-    expect(scripts.length).toBe(2);
+    expect(scripts.length).toBe(1);
 
     const initScript = container.querySelector('[data-testid="gtm-init"]');
     expect(initScript?.textContent).toContain("GTM-TEST123");
   });
 
-  it("renders consent default script before GTM init", () => {
+  it("does not render consent default script (handled in root layout)", () => {
     const { container } = render(
       <GoogleTagManagerLoader gtmId="GTM-TEST123" />,
     );
@@ -30,8 +30,7 @@ describe("GoogleTagManagerLoader", () => {
     const consentScript = container.querySelector(
       '[data-testid="gtm-consent-default"]',
     );
-    expect(consentScript?.textContent).toContain("analytics_storage");
-    expect(consentScript?.textContent).toContain("denied");
+    expect(consentScript).toBeNull();
   });
 
   it("renders nothing when gtmId is not provided", () => {

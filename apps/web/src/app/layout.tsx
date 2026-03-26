@@ -90,6 +90,9 @@ export default async function RootLayout({
         )}
       </head>
       <body suppressHydrationWarning>
+        <Script id="gtm-consent-default" strategy="beforeInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','wait_for_update':500});`}
+        </Script>
         <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         <AccentStrip />
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
