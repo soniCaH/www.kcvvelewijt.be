@@ -1,6 +1,8 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, useState } from "react";
+import { Icon } from "@/components/design-system";
+import { ThumbsUp, ThumbsDown } from "@/lib/icons";
 
 interface FeedbackWidgetProps {
   pathSlug: string;
@@ -57,17 +59,19 @@ export function FeedbackWidget({ pathSlug, pathTitle }: FeedbackWidgetProps) {
       <span>Was dit nuttig?</span>
       <button
         type="button"
+        aria-label="Nuttig"
         onClick={() => handleVote("up")}
         className="rounded-md border border-gray-200 px-3 py-1 transition-colors hover:bg-gray-50"
       >
-        👍
+        <Icon icon={ThumbsUp} size="sm" />
       </button>
       <button
         type="button"
+        aria-label="Niet nuttig"
         onClick={() => handleVote("down")}
         className="rounded-md border border-gray-200 px-3 py-1 transition-colors hover:bg-gray-50"
       >
-        👎
+        <Icon icon={ThumbsDown} size="sm" />
       </button>
     </div>
   );

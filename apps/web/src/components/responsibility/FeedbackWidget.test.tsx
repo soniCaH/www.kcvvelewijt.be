@@ -40,8 +40,10 @@ describe("FeedbackWidget", () => {
     );
 
     expect(screen.getByText("Was dit nuttig?")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /👍/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /👎/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nuttig" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Niet nuttig" }),
+    ).toBeInTheDocument();
   });
 
   it("shows voted state when localStorage flag exists", () => {
@@ -56,7 +58,7 @@ describe("FeedbackWidget", () => {
 
     expect(screen.getByText("Bedankt voor je feedback!")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /👍/i }),
+      screen.queryByRole("button", { name: "Nuttig" }),
     ).not.toBeInTheDocument();
   });
 
@@ -65,7 +67,7 @@ describe("FeedbackWidget", () => {
 
     render(<FeedbackWidget pathSlug="test-path" pathTitle="Test Path" />);
 
-    await user.click(screen.getByRole("button", { name: /👍/i }));
+    await user.click(screen.getByRole("button", { name: "Nuttig" }));
 
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
       "kcvv:feedback:test-path",
@@ -92,7 +94,7 @@ describe("FeedbackWidget", () => {
 
     render(<FeedbackWidget pathSlug="test-path" pathTitle="Test Path" />);
 
-    await user.click(screen.getByRole("button", { name: /👎/i }));
+    await user.click(screen.getByRole("button", { name: "Niet nuttig" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/feedback", {
