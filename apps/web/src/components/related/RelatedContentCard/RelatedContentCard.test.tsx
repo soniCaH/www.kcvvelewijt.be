@@ -68,11 +68,11 @@ describe("RelatedContentCard", () => {
       expect(screen.getByText("20 maart 2026")).toBeInTheDocument();
     });
 
-    it("links to /news/[slug]", () => {
+    it("links to /nieuws/[slug]", () => {
       render(<RelatedContentCard item={articleItem} />);
 
       const link = screen.getByText("Interview met de kapitein").closest("a");
-      expect(link).toHaveAttribute("href", "/news/interview-kapitein");
+      expect(link).toHaveAttribute("href", "/nieuws/interview-kapitein");
     });
 
     it("renders cover image when available", () => {
@@ -107,11 +107,11 @@ describe("RelatedContentCard", () => {
       expect(screen.getByText("Aanvaller")).toBeInTheDocument();
     });
 
-    it("links to /players/[psdId]", () => {
+    it("links to /spelers/[psdId]", () => {
       render(<RelatedContentCard item={playerItem} />);
 
       const link = screen.getByText("Jan Janssens").closest("a");
-      expect(link).toHaveAttribute("href", "/players/12345");
+      expect(link).toHaveAttribute("href", "/spelers/12345");
     });
 
     it("renders player photo when available", () => {

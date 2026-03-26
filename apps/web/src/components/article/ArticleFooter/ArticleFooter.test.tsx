@@ -7,7 +7,7 @@ describe("ArticleFooter", () => {
   const sampleRelatedContent: RelatedContent[] = [
     {
       title: "Related Article 1",
-      href: "/news/article-1",
+      href: "/nieuws/article-1",
       type: "article",
     },
     {
@@ -39,7 +39,7 @@ describe("ArticleFooter", () => {
   it("renders links with correct hrefs", () => {
     render(<ArticleFooter relatedContent={sampleRelatedContent} />);
     const link1 = screen.getByRole("link", { name: "Related Article 1" });
-    expect(link1).toHaveAttribute("href", "/news/article-1");
+    expect(link1).toHaveAttribute("href", "/nieuws/article-1");
 
     const link2 = screen.getByRole("link", { name: "Related Player Profile" });
     expect(link2).toHaveAttribute("href", "/player/john-doe");
@@ -72,7 +72,7 @@ describe("ArticleFooter", () => {
     const singleItem: RelatedContent[] = [
       {
         title: "Single Related Item",
-        href: "/news/single",
+        href: "/nieuws/single",
         type: "article",
       },
     ];
@@ -111,7 +111,7 @@ describe("ArticleFooter", () => {
 
   it("renders all content types correctly", () => {
     const allTypes: RelatedContent[] = [
-      { title: "Article", href: "/news/test", type: "article" },
+      { title: "Article", href: "/nieuws/test", type: "article" },
       { title: "Player", href: "/player/test", type: "player" },
       { title: "Staff", href: "/staff/test", type: "staff" },
       { title: "Team", href: "/team/test", type: "team" },

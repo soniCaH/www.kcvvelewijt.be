@@ -31,11 +31,11 @@ describe("RelatedArticlesSection", () => {
     expect(screen.getByText("Wedstrijdverslag")).toBeInTheDocument();
   });
 
-  it("renders article links pointing to /news/[slug]", () => {
+  it("renders article links pointing to /nieuws/[slug]", () => {
     render(<RelatedArticlesSection articles={mockArticles} />);
 
     const link = screen.getByText("Interview met Jan").closest("a");
-    expect(link).toHaveAttribute("href", "/news/interview-jan");
+    expect(link).toHaveAttribute("href", "/nieuws/interview-jan");
   });
 
   it("returns null when articles array is empty", () => {

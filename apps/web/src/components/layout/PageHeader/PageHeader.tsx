@@ -77,7 +77,7 @@ export const PageHeader = ({
 
             {/* Search Button - right side */}
             <Link
-              href="/search"
+              href="/zoeken"
               aria-label="Search"
               className="absolute right-[34px] top-6 text-white w-6 h-6 flex items-center justify-center"
             >
@@ -107,7 +107,7 @@ export const PageHeader = ({
             {/* Desktop Utility Group */}
             <div className="flex items-center gap-3 shrink-0">
               <Link
-                href="/search"
+                href="/zoeken"
                 aria-label="Search"
                 className="text-white/70 hover:text-white transition-colors"
               >

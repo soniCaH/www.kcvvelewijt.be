@@ -24,7 +24,7 @@ function formatDayHeader(dateStr: string): string {
 function MatchRow({ match }: { match: CalendarMatch }) {
   return (
     <Link
-      href={`/game/${match.id}`}
+      href={`/wedstrijd/${match.id}`}
       className="block bg-white border border-gray-200 rounded-lg p-4 hover:border-green-main hover:shadow-sm transition-all"
     >
       {/* Header: team label + competition + time */}

@@ -90,12 +90,12 @@ describe("SearchResult", () => {
     });
 
     it("should render correct link href", () => {
-      const article = createMockArticle({ url: "/news/test-article" });
+      const article = createMockArticle({ url: "/nieuws/test-article" });
 
       render(<SearchResult result={article} />);
 
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/news/test-article");
+      expect(link).toHaveAttribute("href", "/nieuws/test-article");
     });
   });
 

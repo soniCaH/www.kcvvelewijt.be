@@ -149,9 +149,9 @@ export const Default: Story = {
       <ArticleMetadata
         author="Tom Redactie"
         date="15 januari 2025"
-        category={{ name: "A-Ploeg", href: "/news?category=a-ploeg" }}
+        category={{ name: "A-Ploeg", href: "/nieuws?category=a-ploeg" }}
         shareConfig={{
-          url: "https://kcvvelewijt.be/news/overwinning-derby",
+          url: "https://kcvvelewijt.be/nieuws/overwinning-derby",
           title: "KCVV Elewijt wint met 3-1 in spannende derby",
           hashtags: ["kcvv", "derby"],
         }}
@@ -165,7 +165,7 @@ export const Default: Story = {
         relatedContent={[
           {
             title: "Volgende wedstrijd: KCVV Elewijt vs SK Wolvertem",
-            href: "/news/volgende-wedstrijd",
+            href: "/nieuws/volgende-wedstrijd",
             type: "article",
           },
           {
@@ -204,9 +204,9 @@ export const WithoutImage: Story = {
       <ArticleMetadata
         author="Club Secretariaat"
         date="20 december 2024"
-        category={{ name: "Training", href: "/news?category=training" }}
+        category={{ name: "Training", href: "/nieuws?category=training" }}
         shareConfig={{
-          url: "https://kcvvelewijt.be/news/trainingsschema",
+          url: "https://kcvvelewijt.be/nieuws/trainingsschema",
           title: "Trainingsschema aangepast voor winterstop",
         }}
       />
@@ -219,7 +219,7 @@ export const WithoutImage: Story = {
         relatedContent={[
           {
             title: "Winterstop: Wat je moet weten",
-            href: "/news/winterstop-info",
+            href: "/nieuws/winterstop-info",
             type: "article",
           },
           {
@@ -248,9 +248,9 @@ export const LongArticle: Story = {
       <ArticleMetadata
         author="Marc Analyse"
         date="18 december 2024"
-        category={{ name: "A-Ploeg", href: "/news?category=a-ploeg" }}
+        category={{ name: "A-Ploeg", href: "/nieuws?category=a-ploeg" }}
         shareConfig={{
-          url: "https://kcvvelewijt.be/news/seizoensoverzicht",
+          url: "https://kcvvelewijt.be/nieuws/seizoensoverzicht",
           title: "Seizoensoverzicht 2024-2025: Een analyse van onze prestaties",
           hashtags: ["kcvv", "analyse", "seizoen"],
         }}
@@ -269,7 +269,7 @@ export const LongArticle: Story = {
           },
           {
             title: "Trainer reflecteert op eerste seizoenshelft",
-            href: "/news/trainer-reflectie",
+            href: "/nieuws/trainer-reflectie",
             type: "article",
           },
           {
@@ -279,7 +279,7 @@ export const LongArticle: Story = {
           },
           {
             title: "Jeugdwerking ook succesvol",
-            href: "/news/jeugd-succes",
+            href: "/nieuws/jeugd-succes",
             type: "article",
           },
         ]}

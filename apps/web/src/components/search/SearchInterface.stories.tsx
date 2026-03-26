@@ -33,7 +33,7 @@ const mockResponse: SearchResponse = {
       title: "KCVV Elewijt wint belangrijke wedstrijd met 3-2",
       description:
         "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen van de stadsrivaal.",
-      url: "/news/kcvv-elewijt-wint",
+      url: "/nieuws/kcvv-elewijt-wint",
       imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match",
       tags: ["A-ploeg", "Wedstrijdverslag"],
       date: "2026-01-15T10:00:00Z",
@@ -44,7 +44,7 @@ const mockResponse: SearchResponse = {
       title: "Voorbeschouwing: KCVV thuis tegen Racing Mechelen",
       description:
         "Zaterdag ontvangt KCVV Elewijt Racing Mechelen op eigen veld.",
-      url: "/news/voorbeschouwing-racing-mechelen",
+      url: "/nieuws/voorbeschouwing-racing-mechelen",
       imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Preview",
       tags: ["A-ploeg", "Voorbeschouwing"],
       date: "2026-01-10T08:00:00Z",
@@ -54,7 +54,7 @@ const mockResponse: SearchResponse = {
       type: "player",
       title: "Kevin De Smedt",
       description: "Aanvaller — A-ploeg",
-      url: "/players/kevin-de-smedt",
+      url: "/spelers/kevin-de-smedt",
       imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=KDS",
     },
     {
@@ -62,7 +62,7 @@ const mockResponse: SearchResponse = {
       type: "player",
       title: "Jonas Van Acker",
       description: "Doelman — A-ploeg",
-      url: "/players/jonas-van-acker",
+      url: "/spelers/jonas-van-acker",
       imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JVA",
     },
     {
@@ -113,7 +113,7 @@ function mockFetchPending() {
 
 // Shared Next.js navigation parameters used by stories that simulate ?q=KCVV.
 const SEARCH_NAVIGATION_PARAMS = {
-  nextjs: { navigation: { pathname: "/search", query: { q: "KCVV" } } },
+  nextjs: { navigation: { pathname: "/zoeken", query: { q: "KCVV" } } },
 };
 
 // ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ export const FilteredByPlayer: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/search",
+        pathname: "/zoeken",
         query: { q: "KCVV", type: "player" },
       },
     },
@@ -176,7 +176,7 @@ export const NoResults: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/search",
+        pathname: "/zoeken",
         query: { q: "xqzptw" },
       },
     },

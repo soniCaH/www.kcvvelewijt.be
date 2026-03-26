@@ -128,11 +128,11 @@ describe("MobileMenu", () => {
       expect(homeLink).toHaveClass("active");
     });
 
-    it("should mark Nieuws as active on /news path", () => {
-      mockPathname = "/news";
+    it("should mark Nieuws as active on /nieuws path", () => {
+      mockPathname = "/nieuws";
       const { container } = render(<MobileMenu {...defaultProps} />);
       const newsLink = container.querySelector(
-        'a.mobile-nav-link[href="/news"]',
+        'a.mobile-nav-link[href="/nieuws"]',
       );
       expect(newsLink).toHaveClass("active");
     });

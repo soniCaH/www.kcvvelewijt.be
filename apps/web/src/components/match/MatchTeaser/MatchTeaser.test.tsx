@@ -158,9 +158,9 @@ describe("MatchTeaser", () => {
 
   describe("link behavior", () => {
     it("renders as link when href is provided", () => {
-      render(<MatchTeaser {...defaultProps} href="/game/123" />);
+      render(<MatchTeaser {...defaultProps} href="/wedstrijd/123" />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/game/123");
+      expect(link).toHaveAttribute("href", "/wedstrijd/123");
     });
 
     it("renders as div when no href", () => {

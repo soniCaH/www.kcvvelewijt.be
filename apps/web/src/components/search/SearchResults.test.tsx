@@ -418,14 +418,14 @@ describe("SearchResults", () => {
 
     it("should maintain accessible links in results", () => {
       const results = [
-        createMockArticle({ title: "Accessible Article", url: "/news/test" }),
+        createMockArticle({ title: "Accessible Article", url: "/nieuws/test" }),
       ];
 
       render(<SearchResults results={results} query="test" activeType="all" />);
 
       const link = screen.getByRole("link", { name: /accessible article/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/news/test");
+      expect(link).toHaveAttribute("href", "/nieuws/test");
     });
   });
 });

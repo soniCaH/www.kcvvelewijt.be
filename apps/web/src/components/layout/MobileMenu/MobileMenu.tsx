@@ -39,7 +39,7 @@ interface MenuItem {
 
 const staticMenuItems: MenuItem[] = [
   { label: "Home", href: "/" },
-  { label: "Nieuws", href: "/news" },
+  { label: "Nieuws", href: "/nieuws" },
   { label: "Evenementen", href: "/events" },
   { label: "Sponsors", href: "/sponsors" },
   { label: "Hulp", href: "/hulp" },
@@ -61,7 +61,7 @@ const staticMenuItems: MenuItem[] = [
   },
   {
     label: "Zoeken",
-    href: "/search",
+    href: "/zoeken",
   },
 ];
 
@@ -336,7 +336,7 @@ export const MobileMenu = ({
                     )}
                   >
                     {item.label}
-                    {item.href === "/search" && (
+                    {item.href === "/zoeken" && (
                       <Icon icon={Search} size="xs" className="ml-2 inline" />
                     )}
                   </Link>

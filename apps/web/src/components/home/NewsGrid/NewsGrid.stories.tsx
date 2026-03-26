@@ -24,7 +24,7 @@ type Story = StoryObj<typeof meta>;
 
 const mockArticles = [
   {
-    href: "/news/2025-05-05-kampioen",
+    href: "/nieuws/2025-05-05-kampioen",
     title: "Kampioen! 58 punten en titel in eerste provinciale",
     imageUrl: "https://picsum.photos/900/500?random=10",
     imageAlt: "Championship celebration",
@@ -32,7 +32,7 @@ const mockArticles = [
     tags: [{ name: "Clubnieuws" }],
   },
   {
-    href: "/news/2026-03-14-spelersvoorstelling",
+    href: "/nieuws/2026-03-14-spelersvoorstelling",
     title:
       "Spelersvoorstelling seizoen 2025-2026: versterkingen voor nationaal debuut",
     imageUrl: "https://picsum.photos/600/400?random=11",
@@ -41,7 +41,7 @@ const mockArticles = [
     tags: [{ name: "Selectie" }],
   },
   {
-    href: "/news/2026-03-10-jeugdtoernooi",
+    href: "/nieuws/2026-03-10-jeugdtoernooi",
     title: "Jeugdtoernooi 2026: inschrijvingen open voor U9 t/m U15",
     imageUrl: "https://picsum.photos/600/400?random=12",
     imageAlt: "Youth tournament",
@@ -56,7 +56,7 @@ export const Default: Story = {
     articles: mockArticles,
     title: "Nieuws",
     showViewAll: true,
-    viewAllHref: "/news",
+    viewAllHref: "/nieuws",
   },
 };
 

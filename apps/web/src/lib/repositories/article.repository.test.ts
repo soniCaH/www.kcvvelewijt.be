@@ -201,7 +201,7 @@ describe("ArticleRepository", () => {
       const { toHomepageArticle } = await import("./article.repository");
       const hp = toHomepageArticle(articles[0]);
 
-      expect(hp.href).toBe("/news/test-article");
+      expect(hp.href).toBe("/nieuws/test-article");
       expect(hp.title).toBe("Test Article");
       expect(hp.imageAlt).toBe("Test Article");
       expect(hp.imageUrl).toBe("https://cdn.sanity.io/cover.webp");

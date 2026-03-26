@@ -60,13 +60,13 @@ export function CategoryFilters({
     const allTab: FilterTab = {
       value: "all",
       label: "Alles",
-      href: "/news",
+      href: "/nieuws",
     };
 
     const categoryTabs: FilterTab[] = categories.map((category) => ({
       value: category.attributes.slug,
       label: category.attributes.name,
-      href: `/news?category=${encodeURIComponent(category.attributes.slug)}`,
+      href: `/nieuws?category=${encodeURIComponent(category.attributes.slug)}`,
     }));
 
     return [allTab, ...categoryTabs];

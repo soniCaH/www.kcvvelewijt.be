@@ -190,7 +190,7 @@ describe("TeamRepository", () => {
       expect(t.players[0].imageUrl).toBe(
         "https://cdn.sanity.io/transparent.webp",
       );
-      expect(t.players[0].href).toBe("/players/42");
+      expect(t.players[0].href).toBe("/spelers/42");
 
       // Staff transformed to StaffMemberVM
       expect(t.staff).toHaveLength(1);

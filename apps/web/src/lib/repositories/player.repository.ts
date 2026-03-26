@@ -48,7 +48,7 @@ export function toPlayerVM(
     position,
     number: row.jerseyNumber ?? undefined,
     imageUrl: row.transparentImageUrl ?? row.psdImageUrl ?? undefined,
-    href: row.psdId ? `/players/${row.psdId}` : undefined,
+    href: row.psdId ? `/spelers/${row.psdId}` : undefined,
     bio: row.bio ?? undefined,
     birthDate: row.birthDate ?? undefined,
     nationality: row.nationality ?? undefined,

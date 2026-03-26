@@ -30,7 +30,7 @@ export const Default: Story = {
   args: {
     title: "Nieuws",
     linkText: "Alle berichten",
-    linkHref: "/news",
+    linkHref: "/nieuws",
     variant: "light",
   },
 };

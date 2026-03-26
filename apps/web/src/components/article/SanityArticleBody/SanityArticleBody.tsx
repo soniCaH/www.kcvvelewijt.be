@@ -84,13 +84,13 @@ function resolveInternalLinkHref(ref?: InternalLinkReference): string {
   if (!ref) return "#";
   switch (ref._type) {
     case "player":
-      return ref.psdId ? `/players/${ref.psdId}` : "#";
+      return ref.psdId ? `/spelers/${ref.psdId}` : "#";
     case "staffMember":
       return ref.psdId ? `/staff/${ref.psdId}` : "#";
     case "team":
       return ref.slug ? `/team/${ref.slug}` : "#";
     case "article":
-      return ref.slug ? `/news/${ref.slug}` : "#";
+      return ref.slug ? `/nieuws/${ref.slug}` : "#";
     case "page":
       return ref.slug ? `/${ref.slug}` : "#";
     default:

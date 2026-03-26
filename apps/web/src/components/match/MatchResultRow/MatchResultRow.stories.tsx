@@ -66,7 +66,7 @@ export const Upcoming: Story = {
   args: {
     match: baseMatch,
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -82,7 +82,7 @@ export const Win: Story = {
       status: "finished",
     },
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -98,7 +98,7 @@ export const Draw: Story = {
       status: "finished",
     },
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -114,7 +114,7 @@ export const Loss: Story = {
       status: "finished",
     },
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -128,7 +128,7 @@ export const Postponed: Story = {
       status: "postponed",
     },
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -140,7 +140,7 @@ export const NextMatch: Story = {
     match: baseMatch,
     teamId: 1235,
     isNext: true,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -155,7 +155,7 @@ export const WithoutLogos: Story = {
       awayTeam: { id: 59, name: "KFC Turnhout" },
     },
     teamId: 1235,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
 };
 
@@ -173,7 +173,7 @@ export const DarkTheme: Story = {
     match: baseMatch,
     teamId: 1235,
     theme: "dark",
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
   decorators: [darkBgDecorator],
 };
@@ -191,7 +191,7 @@ export const DarkThemeWin: Story = {
     },
     teamId: 1235,
     theme: "dark",
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
   decorators: [darkBgDecorator],
 };
@@ -205,7 +205,7 @@ export const DarkThemeNextMatch: Story = {
     teamId: 1235,
     theme: "dark",
     isNext: true,
-    href: "/game/1001",
+    href: "/wedstrijd/1001",
   },
   decorators: [darkBgDecorator],
 };

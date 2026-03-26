@@ -209,7 +209,7 @@ Composite component for match detail pages.
 - Responsive layout
 
 **Usage:**
-Used as the main view component on match detail pages (/game/[matchId]).
+Used as the main view component on match detail pages (/wedstrijd/[matchId]).
         `,
       },
     },

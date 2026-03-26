@@ -92,7 +92,7 @@ export const OpenWithActiveLink: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/news",
+        pathname: "/nieuws",
       },
     },
   },

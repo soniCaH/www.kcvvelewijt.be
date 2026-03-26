@@ -106,7 +106,7 @@ function toArticleDetailVM(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
 
 export function toHomepageArticle(article: ArticleVM): HomepageArticle {
   return {
-    href: `/news/${article.slug}`,
+    href: `/nieuws/${article.slug}`,
     title: article.title,
     imageUrl: article.coverImageUrl,
     imageAlt: article.title,

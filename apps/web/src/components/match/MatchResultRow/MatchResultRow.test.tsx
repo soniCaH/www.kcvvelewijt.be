@@ -59,25 +59,25 @@ describe("MatchResultRow", () => {
 
   describe("upcoming match", () => {
     it("renders VS placeholder for scheduled matches", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("VS")).toBeInTheDocument();
     });
 
     it("renders team names", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
       expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
     });
 
     it("renders match time in header", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("15:00")).toBeInTheDocument();
     });
 
     it("links to match detail page", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/game/1001");
+      expect(link).toHaveAttribute("href", "/wedstrijd/1001");
     });
   });
 
@@ -87,7 +87,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={finishedMatch}
           teamId={1235}
-          href="/game/1002"
+          href="/wedstrijd/1002"
         />,
       );
       expect(screen.getByText("3")).toBeInTheDocument();
@@ -99,7 +99,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={finishedMatch}
           teamId={1235}
-          href="/game/1002"
+          href="/wedstrijd/1002"
         />,
       );
       expect(screen.getByText("W")).toBeInTheDocument();
@@ -112,7 +112,11 @@ describe("MatchResultRow", () => {
         awayScore: 2,
       };
       render(
-        <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
+        <MatchResultRow
+          match={lossMatch}
+          teamId={1235}
+          href="/wedstrijd/1002"
+        />,
       );
       expect(screen.getByText("L")).toBeInTheDocument();
     });
@@ -124,7 +128,11 @@ describe("MatchResultRow", () => {
         awayScore: 2,
       };
       render(
-        <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
+        <MatchResultRow
+          match={drawMatch}
+          teamId={1235}
+          href="/wedstrijd/1002"
+        />,
       );
       expect(screen.getByText("G")).toBeInTheDocument();
     });
@@ -134,7 +142,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={finishedMatch}
           teamId={1235}
-          href="/game/1002"
+          href="/wedstrijd/1002"
         />,
       );
       const badge = screen.getByText("W");
@@ -148,7 +156,11 @@ describe("MatchResultRow", () => {
         awayScore: 2,
       };
       render(
-        <MatchResultRow match={lossMatch} teamId={1235} href="/game/1002" />,
+        <MatchResultRow
+          match={lossMatch}
+          teamId={1235}
+          href="/wedstrijd/1002"
+        />,
       );
       const badge = screen.getByText("L");
       expect(badge.className).toContain("text-red-400");
@@ -161,7 +173,11 @@ describe("MatchResultRow", () => {
         awayScore: 2,
       };
       render(
-        <MatchResultRow match={drawMatch} teamId={1235} href="/game/1002" />,
+        <MatchResultRow
+          match={drawMatch}
+          teamId={1235}
+          href="/wedstrijd/1002"
+        />,
       );
       const badge = screen.getByText("G");
       expect(badge.className).toContain("text-yellow-400");
@@ -172,7 +188,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={finishedMatch}
           teamId={1235}
-          href="/game/1002"
+          href="/wedstrijd/1002"
         />,
       );
       const link = screen.getByRole("link");
@@ -186,7 +202,7 @@ describe("MatchResultRow", () => {
         ...scheduledMatch,
         status: "postponed",
       };
-      render(<MatchResultRow match={postponedMatch} href="/game/1001" />);
+      render(<MatchResultRow match={postponedMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
     });
 
@@ -195,7 +211,7 @@ describe("MatchResultRow", () => {
         ...scheduledMatch,
         status: "stopped",
       };
-      render(<MatchResultRow match={stoppedMatch} href="/game/1001" />);
+      render(<MatchResultRow match={stoppedMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
@@ -204,7 +220,7 @@ describe("MatchResultRow", () => {
         ...finishedMatch,
         status: "forfeited",
       };
-      render(<MatchResultRow match={forfeitedMatch} href="/game/1001" />);
+      render(<MatchResultRow match={forfeitedMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("FF")).toBeInTheDocument();
     });
   });
@@ -212,21 +228,21 @@ describe("MatchResultRow", () => {
   describe("next match highlight", () => {
     it("shows Volgende badge when isNext is true", () => {
       render(
-        <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
+        <MatchResultRow match={scheduledMatch} isNext href="/wedstrijd/1001" />,
       );
       expect(screen.getByText("Volgende")).toBeInTheDocument();
     });
 
     it("applies green ring when isNext is true (light theme)", () => {
       render(
-        <MatchResultRow match={scheduledMatch} isNext href="/game/1001" />,
+        <MatchResultRow match={scheduledMatch} isNext href="/wedstrijd/1001" />,
       );
       const link = screen.getByRole("link");
       expect(link.className).toContain("ring-kcvv-green-bright");
     });
 
     it("does not show Volgende badge when isNext is false", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       expect(screen.queryByText("Volgende")).not.toBeInTheDocument();
     });
   });
@@ -238,7 +254,7 @@ describe("MatchResultRow", () => {
         homeTeam: { id: 1235, name: "KCVV Elewijt" },
         awayTeam: { id: 59, name: "Opponent FC" },
       };
-      render(<MatchResultRow match={noLogoMatch} href="/game/1001" />);
+      render(<MatchResultRow match={noLogoMatch} href="/wedstrijd/1001" />);
       expect(screen.getByText("K")).toBeInTheDocument();
       expect(screen.getByText("O")).toBeInTheDocument();
     });
@@ -250,7 +266,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={scheduledMatch}
           teamId={1235}
-          href="/game/1001"
+          href="/wedstrijd/1001"
         />,
       );
       const kcvvText = screen.getByText("KCVV Elewijt");
@@ -263,7 +279,7 @@ describe("MatchResultRow", () => {
           match={scheduledMatch}
           teamId={1235}
           theme="dark"
-          href="/game/1001"
+          href="/wedstrijd/1001"
         />,
       );
       const kcvvText = screen.getByText("KCVV Elewijt");
@@ -275,7 +291,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={scheduledMatch}
           teamId={1235}
-          href="/game/1001"
+          href="/wedstrijd/1001"
         />,
       );
       expect(screen.getByText(/Thuis/)).toBeInTheDocument();
@@ -288,7 +304,11 @@ describe("MatchResultRow", () => {
         awayTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
       };
       render(
-        <MatchResultRow match={awayMatch} teamId={1235} href="/game/1001" />,
+        <MatchResultRow
+          match={awayMatch}
+          teamId={1235}
+          href="/wedstrijd/1001"
+        />,
       );
       expect(screen.getByText(/Uit/)).toBeInTheDocument();
     });
@@ -300,7 +320,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={scheduledMatch}
           teamId={1235}
-          href="/game/1001"
+          href="/wedstrijd/1001"
         />,
       );
       const competitions = screen.getAllByText(/3de Nationale/);
@@ -310,7 +330,7 @@ describe("MatchResultRow", () => {
 
   describe("theme prop", () => {
     it("defaults to light theme", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/game/1001" />);
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       const link = screen.getByRole("link");
       expect(link.className).toContain("bg-white");
     });
@@ -320,7 +340,7 @@ describe("MatchResultRow", () => {
         <MatchResultRow
           match={scheduledMatch}
           theme="dark"
-          href="/game/1001"
+          href="/wedstrijd/1001"
         />,
       );
       const link = screen.getByRole("link");

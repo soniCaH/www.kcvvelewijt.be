@@ -33,7 +33,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
-    href: "/news/derby-overwinning",
+    href: "/nieuws/derby-overwinning",
     imageUrl: "https://picsum.photos/800/500?random=1",
     imageAlt: "Derby match",
     badge: "Competitie",
@@ -46,7 +46,7 @@ export const Featured: Story = {
   args: {
     title:
       "Spelersvoorstelling seizoen 2025-2026: versterkingen voor nationaal debuut",
-    href: "/news/spelersvoorstelling",
+    href: "/nieuws/spelersvoorstelling",
     imageUrl: "https://picsum.photos/1200/500?random=2",
     imageAlt: "New players announcement",
     badge: "Selectie",
@@ -58,7 +58,7 @@ export const Featured: Story = {
 export const Listing: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
-    href: "/news/derby-overwinning",
+    href: "/nieuws/derby-overwinning",
     imageUrl: "https://picsum.photos/800/500?random=7",
     imageAlt: "Derby match",
     badge: "Competitie",
@@ -70,7 +70,7 @@ export const Listing: Story = {
 export const ListingWithoutImage: Story = {
   args: {
     title: "Nieuwe trainingsschema seizoen 2025-2026 bekendgemaakt",
-    href: "/news/trainingsschema",
+    href: "/nieuws/trainingsschema",
     badge: "Club",
     date: "12 januari 2025",
     variant: "listing",
@@ -81,7 +81,7 @@ export const ListingLongTitle: Story = {
   args: {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
-    href: "/news/titel",
+    href: "/nieuws/titel",
     imageUrl: "https://picsum.photos/800/500?random=8",
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
@@ -93,7 +93,7 @@ export const ListingLongTitle: Story = {
 export const ListingGrid: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
-    href: "/news/derby-overwinning",
+    href: "/nieuws/derby-overwinning",
     imageUrl: "https://picsum.photos/800/500?random=9",
     imageAlt: "Derby match",
     badge: "Competitie",
@@ -106,7 +106,7 @@ export const ListingGrid: Story = {
         <Story />
         <NewsCard
           title="Spelersvoorstelling seizoen 2025-2026"
-          href="/news/spelersvoorstelling"
+          href="/nieuws/spelersvoorstelling"
           imageUrl="https://picsum.photos/800/500?random=10"
           badge="Selectie"
           date="14 maart 2026"
@@ -114,7 +114,7 @@ export const ListingGrid: Story = {
         />
         <NewsCard
           title="Nieuwe trainingsschema bekendgemaakt"
-          href="/news/trainingsschema"
+          href="/nieuws/trainingsschema"
           badge="Club"
           date="12 januari 2025"
           variant="listing"
@@ -127,7 +127,7 @@ export const ListingGrid: Story = {
 export const WithoutImage: Story = {
   args: {
     title: "Nieuwe trainingsschema seizoen 2025-2026 bekendgemaakt",
-    href: "/news/trainingsschema",
+    href: "/nieuws/trainingsschema",
     badge: "Club",
     date: "12 januari 2025",
     variant: "standard",
@@ -138,7 +138,7 @@ export const LongTitle: Story = {
   args: {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
-    href: "/news/titel",
+    href: "/nieuws/titel",
     imageUrl: "https://picsum.photos/800/500?random=3",
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
@@ -151,7 +151,7 @@ export const FeaturedLongTitle: Story = {
   args: {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
-    href: "/news/titel",
+    href: "/nieuws/titel",
     imageUrl: "https://picsum.photos/1200/500?random=4",
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
@@ -163,7 +163,7 @@ export const FeaturedLongTitle: Story = {
 export const NoBadge: Story = {
   args: {
     title: "Clubbericht zonder categorie",
-    href: "/news/bericht",
+    href: "/nieuws/bericht",
     imageUrl: "https://picsum.photos/800/500?random=5",
     imageAlt: "Club news",
     date: "10 januari 2025",

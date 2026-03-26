@@ -14,7 +14,7 @@ vi.mock("next/image", () => ({
 describe("NewsCard", () => {
   const defaultProps = {
     title: "Test Article Title",
-    href: "/news/test-article",
+    href: "/nieuws/test-article",
   };
 
   describe("Rendering", () => {
@@ -34,7 +34,7 @@ describe("NewsCard", () => {
       render(<NewsCard {...defaultProps} />);
       expect(screen.getByRole("link")).toHaveAttribute(
         "href",
-        "/news/test-article",
+        "/nieuws/test-article",
       );
     });
   });

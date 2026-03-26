@@ -87,7 +87,7 @@ describe("PageHeader", () => {
     it("should render desktop search link in utility group", () => {
       const { container } = render(<PageHeader />);
       // Desktop utility group search link - there are multiple search links (mobile + desktop)
-      const searchLinks = container.querySelectorAll('a[href="/search"]');
+      const searchLinks = container.querySelectorAll('a[href="/zoeken"]');
       expect(searchLinks.length).toBeGreaterThanOrEqual(2);
     });
   });

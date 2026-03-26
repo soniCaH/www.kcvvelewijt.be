@@ -33,7 +33,7 @@ Hero section for match detail pages.
 - Status indicators (Postponed, Stopped, Forfeited)
 
 **Usage:**
-Used at the top of match detail pages (/game/[matchId]).
+Used at the top of match detail pages (/wedstrijd/[matchId]).
         `,
       },
     },

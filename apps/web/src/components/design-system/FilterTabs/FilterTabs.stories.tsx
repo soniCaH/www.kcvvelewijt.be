@@ -247,13 +247,18 @@ export const AsLinks: Story = {
   render: (args) => <InteractiveFilterTabs {...args} />,
   args: {
     tabs: [
-      { value: "all", label: "Alles", count: 156, href: "/news" },
-      { value: "kcvv", label: "KCVV", count: 45, href: "/news?category=kcvv" },
+      { value: "all", label: "Alles", count: 156, href: "/nieuws" },
+      {
+        value: "kcvv",
+        label: "KCVV",
+        count: 45,
+        href: "/nieuws?category=kcvv",
+      },
       {
         value: "jeugd",
         label: "Jeugd",
         count: 32,
-        href: "/news?category=jeugd",
+        href: "/nieuws?category=jeugd",
       },
     ],
     activeTab: "all",

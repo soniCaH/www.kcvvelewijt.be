@@ -30,7 +30,7 @@ const NAV_CARDS: NavCardConfig[] = [
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
     arrowText: "Meer info",
-    href: "/news/prosoccerdata",
+    href: "/nieuws/prosoccerdata",
     imageUrl: "/images/jeugd/prosoccerdata.jpg",
   },
   {
@@ -109,7 +109,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
         "col-span-7 row-span-2 min-h-[520px] max-desk:col-span-full max-desk:row-span-1 max-desk:min-h-[320px] max-sm:min-h-[280px]",
       element: (
         <EditorialCard
-          href={`/news/${article0.slug}`}
+          href={`/nieuws/${article0.slug}`}
           tag={article0.tags[0] ?? "Jeugd"}
           title={article0.title}
           arrowText="Lees meer"
@@ -135,7 +135,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
           "col-start-8 col-span-5 row-start-2 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
         element: (
           <EditorialCard
-            href={`/news/${article1.slug}`}
+            href={`/nieuws/${article1.slug}`}
             tag={article1.tags[0] ?? "Jeugd"}
             title={article1.title}
             arrowText="Lees meer"
@@ -159,7 +159,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
         position: THIRD,
         element: (
           <EditorialCard
-            href={`/news/${article2.slug}`}
+            href={`/nieuws/${article2.slug}`}
             tag={article2.tags[0] ?? "Jeugd"}
             title={article2.title}
             arrowText="Lees meer"

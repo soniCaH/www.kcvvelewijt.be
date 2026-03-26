@@ -29,7 +29,7 @@ interface MenuItem {
 
 const staticMenuItems: MenuItem[] = [
   { label: "Home", href: "/" },
-  { label: "Nieuws", href: "/news" },
+  { label: "Nieuws", href: "/nieuws" },
   { label: "Evenementen", href: "/events" },
   { label: "Sponsors", href: "/sponsors" },
   { label: "Hulp", href: "/hulp" },

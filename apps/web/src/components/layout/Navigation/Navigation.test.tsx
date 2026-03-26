@@ -75,8 +75,8 @@ describe("Navigation", () => {
       expect(homeLink).toHaveClass("active");
     });
 
-    it("should mark Nieuws as active on /news path", () => {
-      mockPathname = "/news";
+    it("should mark Nieuws as active on /nieuws path", () => {
+      mockPathname = "/nieuws";
       render(<Navigation seniorTeams={seniorTeams} />);
       const newsLink = screen.getByText("Nieuws").closest("a");
       expect(newsLink).toHaveClass("active");

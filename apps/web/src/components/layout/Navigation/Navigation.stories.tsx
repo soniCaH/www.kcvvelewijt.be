@@ -52,7 +52,7 @@ export const OnNews: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/news",
+        pathname: "/nieuws",
       },
     },
   },

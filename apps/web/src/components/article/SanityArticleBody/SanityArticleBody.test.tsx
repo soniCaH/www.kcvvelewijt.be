@@ -400,7 +400,7 @@ describe("SanityArticleBody links", () => {
 
   it("renders internal link without target=_blank and without icon", () => {
     const { container } = render(
-      <SanityArticleBody content={[makeLinkBlock("Home", "/news")]} />,
+      <SanityArticleBody content={[makeLinkBlock("Home", "/nieuws")]} />,
     );
 
     const link = container.querySelector("a");
@@ -548,7 +548,7 @@ function makeInternalLinkBlock(
 }
 
 describe("SanityArticleBody internalLink", () => {
-  it("renders player reference as link to /players/{psdId}", () => {
+  it("renders player reference as link to /spelers/{psdId}", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -562,7 +562,7 @@ describe("SanityArticleBody internalLink", () => {
 
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
-    expect(link!.getAttribute("href")).toBe("/players/12345");
+    expect(link!.getAttribute("href")).toBe("/spelers/12345");
     expect(link!.textContent).toBe("John Doe");
   });
 
@@ -583,7 +583,7 @@ describe("SanityArticleBody internalLink", () => {
     expect(link!.getAttribute("href")).toBe("/team/eerste-ploeg");
   });
 
-  it("renders article reference as link to /news/{slug}", () => {
+  it("renders article reference as link to /nieuws/{slug}", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -597,7 +597,7 @@ describe("SanityArticleBody internalLink", () => {
 
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
-    expect(link!.getAttribute("href")).toBe("/news/some-article");
+    expect(link!.getAttribute("href")).toBe("/nieuws/some-article");
   });
 
   it("renders page reference as link to /{slug}", () => {

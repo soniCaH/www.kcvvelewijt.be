@@ -123,7 +123,7 @@ export function generateIcal(
       end,
       timezone: TIMEZONE,
       description: buildDescription(match),
-      url: `https://www.kcvvelewijt.be/game/${match.id}`,
+      url: `https://www.kcvvelewijt.be/wedstrijd/${match.id}`,
       ...(location ? { location } : {}),
     });
   }

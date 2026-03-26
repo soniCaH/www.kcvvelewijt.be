@@ -40,7 +40,7 @@ export const NewsGrid = ({
   featuredEvent,
   title = "Laatste nieuws",
   showViewAll = true,
-  viewAllHref = "/news",
+  viewAllHref = "/nieuws",
   className,
 }: NewsGridProps) => {
   if (articles.length === 0 && !featuredEvent) {

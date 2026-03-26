@@ -183,7 +183,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith("/search?q=test");
+        expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test");
       });
     });
 
@@ -208,7 +208,7 @@ describe("SearchInterface", () => {
       const articleTab = screen.getByRole("tab", { name: /nieuws/i });
       await user.click(articleTab);
 
-      expect(mockPush).toHaveBeenCalledWith("/search?q=test&type=article");
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test&type=article");
     });
 
     it("should trim whitespace from query", async () => {
@@ -541,7 +541,7 @@ describe("SearchInterface", () => {
       const articleTab = screen.getByRole("tab", { name: /nieuws/i });
       await user.click(articleTab);
 
-      expect(mockPush).toHaveBeenCalledWith("/search?q=test&type=article");
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test&type=article");
     });
 
     it("should not refetch when filter is changed", async () => {
@@ -589,7 +589,7 @@ describe("SearchInterface", () => {
       const allTab = screen.getByRole("tab", { name: /alles/i });
       await user.click(allTab);
 
-      expect(mockPush).toHaveBeenCalledWith("/search?q=test");
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test");
     });
   });
 
@@ -930,7 +930,7 @@ describe("SearchInterface", () => {
       });
 
       // 4. Verify URL was updated
-      expect(mockPush).toHaveBeenCalledWith("/search?q=football");
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=football");
 
       // 5. Verify fetch was called
       expect(fetchMock).toHaveBeenCalledWith(
@@ -968,7 +968,7 @@ describe("SearchInterface", () => {
       const articleTab = screen.getByRole("tab", { name: /nieuws/i });
       await user.click(articleTab);
 
-      expect(mockPush).toHaveBeenCalledWith("/search?q=first&type=article");
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=first&type=article");
 
       // Second search
       const mockResponse2 = createMockSearchResponse("second");
@@ -987,7 +987,7 @@ describe("SearchInterface", () => {
 
       // Article filter should still be active
       expect(mockPush).toHaveBeenLastCalledWith(
-        "/search?q=second&type=article",
+        "/zoeken?q=second&type=article",
       );
     });
   });
