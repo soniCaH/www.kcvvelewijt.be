@@ -56,11 +56,14 @@ async function fetchCalendarData(): Promise<CalendarData> {
       // doesn't take down the entire calendar.
       const matchArrays = yield* Effect.all(
         teamsWithPsd.map((t) =>
-          bff
-            .getMatches(Number(t.psdId))
-            .pipe(
-              Effect.catchAll(() => Effect.succeed([] as readonly never[])),
+          bff.getMatches(Number(t.psdId)).pipe(
+            Effect.tapError((error) =>
+              Effect.log(
+                `[Calendar] Failed to fetch matches for team ${t.name} (psdId: ${t.psdId}): ${String(error)}`,
+              ),
             ),
+            Effect.catchAll(() => Effect.succeed([] as readonly never[])),
+          ),
         ),
         { concurrency: 5 },
       );

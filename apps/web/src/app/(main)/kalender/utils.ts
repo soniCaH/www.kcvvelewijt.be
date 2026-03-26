@@ -69,13 +69,20 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
   };
 }
 
+const TIMEZONE = "Europe/Brussels";
+
+/** Parse an ISO string into the club's local timezone */
+function toLocalDate(iso: string): DateTime {
+  return DateTime.fromISO(iso, { zone: TIMEZONE });
+}
+
 /** Filter matches whose date falls on the given YYYY-MM-DD */
 export function getMatchesForDay(
   matches: CalendarMatch[],
   day: string,
 ): CalendarMatch[] {
   return matches.filter((m) => {
-    const dt = DateTime.fromISO(m.date);
+    const dt = toLocalDate(m.date);
     return dt.isValid && dt.toISODate() === day;
   });
 }
@@ -86,12 +93,12 @@ export function getEventsForDay(
   day: string,
 ): CalendarEvent[] {
   return events.filter((e) => {
-    const start = DateTime.fromISO(e.dateStart);
+    const start = toLocalDate(e.dateStart);
     if (!start.isValid) return false;
     const startDay = start.toISODate()!;
     if (startDay === day) return true;
     if (!e.dateEnd) return false;
-    const end = DateTime.fromISO(e.dateEnd);
+    const end = toLocalDate(e.dateEnd);
     return end.isValid && day >= startDay && day <= end.toISODate()!;
   });
 }
