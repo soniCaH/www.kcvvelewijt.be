@@ -32,6 +32,7 @@ import { AiAnswerServiceLive } from "./search/ai-answer";
 import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
 import { runSync } from "./sync/psd-sanity-sync";
+import { handleIndexWebhook } from "./webhooks/index-handler";
 
 /**
  * Provides DefaultServices (HttpPlatform | Etag.Generator | FileSystem | Path)
@@ -71,6 +72,14 @@ function buildAppLayer(env: WorkerEnv) {
 
 export default {
   async fetch(request: Request, env: WorkerEnv): Promise<Response> {
+    // Webhook routes bypass Effect — raw Request/Response
+    if (
+      request.method === "POST" &&
+      new URL(request.url).pathname === "/webhooks/index"
+    ) {
+      return handleIndexWebhook(request, env);
+    }
+
     const { handler, dispose } = HttpApiBuilder.toWebHandler(
       buildAppLayer(env),
       { middleware: HttpMiddleware.cors() },

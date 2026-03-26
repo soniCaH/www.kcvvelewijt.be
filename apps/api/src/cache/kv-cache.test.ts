@@ -36,6 +36,7 @@ function makeEnvLayer(
     SANITY_PROJECT_ID: "test-project",
     SANITY_DATASET: "test",
     SANITY_API_TOKEN: "test-token",
+    SANITY_WEBHOOK_SECRET: "",
     AI: {} as Ai,
     SEARCH_INDEX: {} as VectorizeIndex,
     ...overrides,

@@ -12,6 +12,7 @@ FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "production"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
+# SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 
 [observability.logs]
 enabled = true
@@ -49,6 +50,7 @@ SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "staging"
 CACHE_LONG_TTL = "true"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
+# SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET --env staging
 
 [[env.staging.kv_namespaces]]
 binding = "PSD_CACHE"
