@@ -24,6 +24,8 @@ Object.defineProperty(window, "localStorage", { value: localStorageMock });
 describe("FeedbackWidget", () => {
   beforeEach(() => {
     localStorageMock.clear();
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
     vi.mocked(fetch).mockReset();
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
@@ -95,6 +97,11 @@ describe("FeedbackWidget", () => {
     render(<FeedbackWidget pathSlug="test-path" pathTitle="Test Path" />);
 
     await user.click(screen.getByRole("button", { name: "Niet nuttig" }));
+
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      "kcvv:feedback:test-path",
+      "1",
+    );
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/feedback", {

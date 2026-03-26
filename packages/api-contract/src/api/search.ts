@@ -17,5 +17,6 @@ export class SearchApi extends HttpApiGroup.make("search")
   .add(
     HttpApiEndpoint.post("feedback", "/feedback")
       .setPayload(FeedbackRequest)
-      .addSuccess(FeedbackResponse),
+      .addSuccess(FeedbackResponse)
+      .addError(HttpServiceUnavailable),
   ) {}

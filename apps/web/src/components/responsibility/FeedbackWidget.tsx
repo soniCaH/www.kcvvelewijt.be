@@ -39,11 +39,15 @@ export function FeedbackWidget({ pathSlug, pathTitle }: FeedbackWidgetProps) {
   const handleVote = async (vote: "up" | "down") => {
     localStorage.setItem(storageKey, "1");
     setVotedLocal(true);
-    await fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pathSlug, pathTitle, vote }),
-    });
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pathSlug, pathTitle, vote }),
+      });
+    } catch (error) {
+      console.error("[FeedbackWidget] Failed to submit feedback:", error);
+    }
   };
 
   if (voted) {
