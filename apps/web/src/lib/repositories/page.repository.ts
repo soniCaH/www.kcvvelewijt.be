@@ -1,0 +1,42 @@
+import { Context, Effect, Layer } from "effect";
+import { sanityClient } from "../sanity/client";
+import { PAGE_BY_SLUG_QUERY } from "../sanity/queries/pages";
+import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
+
+export interface PageVM {
+  id: string;
+  title: string;
+  slug: string;
+  body: NonNullable<NonNullable<PAGE_BY_SLUG_QUERY_RESULT>["body"]>;
+}
+
+export function toPageVM(row: NonNullable<PAGE_BY_SLUG_QUERY_RESULT>): PageVM {
+  return {
+    id: row._id,
+    title: row.title ?? "",
+    slug: row.slug?.current ?? "",
+    body: row.body ?? [],
+  };
+}
+
+export interface PageRepositoryInterface {
+  readonly findBySlug: (slug: string) => Effect.Effect<PageVM | null, Error>;
+}
+
+export class PageRepository extends Context.Tag("PageRepository")<
+  PageRepository,
+  PageRepositoryInterface
+>() {}
+
+const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
+  Effect.tryPromise({
+    try: () => sanityClient.fetch<T>(query, params ?? {}),
+    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
+  });
+
+export const PageRepositoryLive = Layer.succeed(PageRepository, {
+  findBySlug: (slug) =>
+    fetchGroq<PAGE_BY_SLUG_QUERY_RESULT>(PAGE_BY_SLUG_QUERY, { slug }).pipe(
+      Effect.map((row) => (row ? toPageVM(row) : null)),
+    ),
+});

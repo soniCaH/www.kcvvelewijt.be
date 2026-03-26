@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
+import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
-import { SanityService } from "@/lib/effect/services/SanityService";
+import { PageRepository } from "@/lib/repositories/page.repository";
 import { PageTitle } from "@/components/layout";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
@@ -13,8 +14,8 @@ interface Props {
 async function fetchPage(slug: string) {
   return runPromise(
     Effect.gen(function* () {
-      const sanity = yield* SanityService;
-      return yield* sanity.getPage(slug);
+      const repo = yield* PageRepository;
+      return yield* repo.findBySlug(slug);
     }),
   );
 }
@@ -45,7 +46,7 @@ export default async function DynamicClubPage({ params }: Props) {
     <>
       <PageTitle title={page.title} />
       <div className="mx-auto max-w-inner-lg px-4 py-8 content">
-        <SanityArticleBody content={page.body ?? []} />
+        <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
       </div>
     </>
   );
