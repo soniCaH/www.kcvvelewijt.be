@@ -32,7 +32,6 @@ function makeServiceMock(
   overrides: Partial<FootbalistoServiceInterface> = {},
 ): FootbalistoServiceInterface {
   return {
-    getTeamStats: () => Effect.fail(new Error("not needed") as never),
     getTeamMatches: () => Effect.fail(new Error("not needed") as never),
     getNextMatches: () => Effect.fail(new Error("not needed") as never),
     getMatchById: () => Effect.fail(new Error("not needed") as never),

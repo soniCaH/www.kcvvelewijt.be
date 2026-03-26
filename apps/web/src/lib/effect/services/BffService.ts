@@ -11,7 +11,6 @@ import {
   type MatchDetail,
   type RankingEntry,
   type RelatedItem,
-  type TeamStats,
 } from "@kcvv/api-contract";
 
 export type BffError =
@@ -33,7 +32,6 @@ export class BffService extends Context.Tag("BffService")<
     getRanking: (
       teamId: number,
     ) => Effect.Effect<readonly RankingEntry[], BffError>;
-    getTeamStats: (teamId: number) => Effect.Effect<TeamStats, BffError>;
     getRelated: (
       id: string,
       limit?: number,
@@ -70,10 +68,6 @@ export const BffServiceLive = Layer.effect(
       getRanking: (teamId: number) =>
         client.ranking
           .getRanking({ path: { teamId } })
-          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
-      getTeamStats: (teamId: number) =>
-        client.stats
-          .getTeamStats({ path: { teamId } })
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
       getRelated: (id: string, limit?: number) =>
         client.related

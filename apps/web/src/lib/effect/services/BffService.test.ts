@@ -150,36 +150,6 @@ describe("BffService", () => {
     expect(result.id).toBe(1);
   });
 
-  it("getTeamStats calls /stats/team/:teamId and returns decoded stats", async () => {
-    const sampleStats = {
-      team_id: 1,
-      team_name: "KCVV Elewijt",
-      total_matches: 10,
-      wins: 7,
-      draws: 2,
-      losses: 1,
-      goals_scored: 22,
-      goals_conceded: 8,
-    };
-    mockFetchWith(sampleStats);
-
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getTeamStats(1);
-      }).pipe(Effect.provide(BffServiceLive)),
-    );
-
-    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href: expect.stringContaining("/stats/team/1"),
-      }),
-      expect.any(Object),
-    );
-    expect(result.team_id).toBe(1);
-    expect(result.wins).toBe(7);
-  });
-
   it("propagates errors as Effect failures (not exceptions)", async () => {
     vi.stubGlobal(
       "fetch",

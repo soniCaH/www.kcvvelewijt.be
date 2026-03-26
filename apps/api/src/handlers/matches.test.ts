@@ -52,7 +52,6 @@ function makeServiceMock(
   overrides: Partial<FootbalistoServiceInterface> = {},
 ): FootbalistoServiceInterface {
   return {
-    getTeamStats: () => Effect.die("not needed"),
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
     getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
