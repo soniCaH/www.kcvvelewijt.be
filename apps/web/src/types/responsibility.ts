@@ -77,6 +77,8 @@ export interface ResponsibilityPath {
     | "commercieel";
   /** Icon for visual representation */
   icon?: string;
+  /** Slugs of related responsibility paths */
+  relatedPaths?: string[];
 }
 
 /**
