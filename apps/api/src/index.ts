@@ -32,6 +32,7 @@ import { AiAnswerServiceLive } from "./search/ai-answer";
 import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
 import { runSync } from "./sync/psd-sanity-sync";
+import { handleIndexWebhook } from "./webhooks/index-handler";
 
 /**
  * Provides DefaultServices (HttpPlatform | Etag.Generator | FileSystem | Path)
@@ -71,6 +72,23 @@ function buildAppLayer(env: WorkerEnv) {
 
 export default {
   async fetch(request: Request, env: WorkerEnv): Promise<Response> {
+    // Webhook routes bypass Effect — raw Request/Response
+    if (
+      request.method === "POST" &&
+      new URL(request.url).pathname === "/webhooks/index"
+    ) {
+      try {
+        return await handleIndexWebhook(request, env);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("[webhook] unhandled error:", err);
+        return Response.json(
+          { ok: false, error: message, code: "internal_error" },
+          { status: 500 },
+        );
+      }
+    }
+
     const { handler, dispose } = HttpApiBuilder.toWebHandler(
       buildAppLayer(env),
       { middleware: HttpMiddleware.cors() },

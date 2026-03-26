@@ -44,6 +44,7 @@ function makeEnvLayer(index: VectorizeIndex) {
     SANITY_PROJECT_ID: "",
     SANITY_DATASET: "",
     SANITY_API_TOKEN: "",
+    SANITY_WEBHOOK_SECRET: "",
   });
 }
 

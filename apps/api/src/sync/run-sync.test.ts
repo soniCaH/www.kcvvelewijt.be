@@ -126,6 +126,7 @@ function makeEnvLayer(kvStub: KVNamespace) {
     SANITY_PROJECT_ID: "test",
     SANITY_DATASET: "test",
     SANITY_API_TOKEN: "test-token",
+    SANITY_WEBHOOK_SECRET: "",
     AI: {} as Ai,
     SEARCH_INDEX: {} as VectorizeIndex,
   });
