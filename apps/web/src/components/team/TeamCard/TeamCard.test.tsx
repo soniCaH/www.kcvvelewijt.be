@@ -9,7 +9,7 @@ import { TeamCard } from "./TeamCard";
 describe("TeamCard", () => {
   const defaultProps = {
     name: "A-Ploeg",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
   };
 
   describe("Rendering", () => {
@@ -26,7 +26,7 @@ describe("TeamCard", () => {
     it("should render link with correct href", () => {
       render(<TeamCard {...defaultProps} />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/team/a-ploeg");
+      expect(link).toHaveAttribute("href", "/ploegen/a-ploeg");
     });
 
     it("should have accessible label with team name", () => {
@@ -48,7 +48,7 @@ describe("TeamCard", () => {
       render(
         <TeamCard
           name="U15"
-          href="/team/u15"
+          href="/ploegen/u15"
           ageGroup="U15"
           teamType="youth"
         />,
@@ -78,7 +78,7 @@ describe("TeamCard", () => {
       render(
         <TeamCard
           name="U15"
-          href="/team/u15"
+          href="/ploegen/u15"
           ageGroup="U15"
           teamType="youth"
         />,
@@ -203,7 +203,7 @@ describe("TeamCard", () => {
       const { container } = render(
         <TeamCard
           name="U15"
-          href="/team/u15"
+          href="/ploegen/u15"
           teamType="youth"
           ageGroup="U15"
         />,
@@ -263,7 +263,7 @@ describe("TeamCard", () => {
       const { container } = render(
         <TeamCard
           name="U15"
-          href="/team/u15"
+          href="/ploegen/u15"
           ageGroup="U15"
           teamType="youth"
           use3DBadge

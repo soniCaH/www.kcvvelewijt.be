@@ -49,7 +49,7 @@ export const WithCta: Story = {
       </>
     ),
     body: "3de Provinciale B",
-    cta: { label: "Bekijk de A-ploeg", href: "/team/kcvv-elewijt-a" },
+    cta: { label: "Bekijk de A-ploeg", href: "/ploegen/kcvv-elewijt-a" },
   },
 };
 

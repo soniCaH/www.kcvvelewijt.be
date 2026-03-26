@@ -40,7 +40,7 @@ describe("JeugdEditorialGrid", () => {
     const links = screen.getAllByRole("link");
     const hrefs = links.map((link) => link.getAttribute("href"));
 
-    expect(hrefs).toContain("/club/register");
+    expect(hrefs).toContain("/club/inschrijven");
     expect(hrefs).toContain("/jeugd/visie");
     expect(hrefs).toContain("/nieuws/prosoccerdata");
     expect(hrefs).toContain("/club/organigram");

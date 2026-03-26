@@ -66,7 +66,7 @@ export function CategoryFilters({
     const categoryTabs: FilterTab[] = categories.map((category) => ({
       value: category.attributes.slug,
       label: category.attributes.name,
-      href: `/nieuws?category=${encodeURIComponent(category.attributes.slug)}`,
+      href: `/nieuws?categorie=${encodeURIComponent(category.attributes.slug)}`,
     }));
 
     return [allTab, ...categoryTabs];

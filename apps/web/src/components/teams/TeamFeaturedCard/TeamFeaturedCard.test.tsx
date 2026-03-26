@@ -55,7 +55,7 @@ describe("TeamFeaturedCard", () => {
   it("renders CTA link to team page", () => {
     render(<TeamFeaturedCard team={team} label="Tweede ploeg" />);
     const link = screen.getByRole("link", { name: /bekijk de ploeg/i });
-    expect(link).toHaveAttribute("href", "/team/kcvv-elewijt-b");
+    expect(link).toHaveAttribute("href", "/ploegen/kcvv-elewijt-b");
   });
 
   it("renders team photo when available", () => {

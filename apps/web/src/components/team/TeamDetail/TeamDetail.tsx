@@ -89,9 +89,9 @@ export function TeamDetail({
   // Build list of valid tabs based on available content
   const validTabs = [
     "info",
-    ...(hasPlayers || hasStaff ? ["lineup"] : []),
-    ...(hasMatches ? ["matches"] : []),
-    ...(hasStandings ? ["standings"] : []),
+    ...(hasPlayers || hasStaff ? ["opstelling"] : []),
+    ...(hasMatches ? ["wedstrijden"] : []),
+    ...(hasStandings ? ["klassement"] : []),
   ];
 
   return (
@@ -117,18 +117,18 @@ export function TeamDetail({
               Info
             </Tabs.Trigger>
             {(hasPlayers || hasStaff) && (
-              <Tabs.Trigger value="lineup" className={TAB_TRIGGER_CLASSES}>
-                Lineup
+              <Tabs.Trigger value="opstelling" className={TAB_TRIGGER_CLASSES}>
+                Opstelling
               </Tabs.Trigger>
             )}
             {hasMatches && (
-              <Tabs.Trigger value="matches" className={TAB_TRIGGER_CLASSES}>
+              <Tabs.Trigger value="wedstrijden" className={TAB_TRIGGER_CLASSES}>
                 Wedstrijden
               </Tabs.Trigger>
             )}
             {hasStandings && (
-              <Tabs.Trigger value="standings" className={TAB_TRIGGER_CLASSES}>
-                Stand
+              <Tabs.Trigger value="klassement" className={TAB_TRIGGER_CLASSES}>
+                Klassement
               </Tabs.Trigger>
             )}
           </Tabs.List>
@@ -188,9 +188,9 @@ export function TeamDetail({
             </div>
           </Tabs.Content>
 
-          {/* Lineup Tab */}
+          {/* Opstelling Tab */}
           {(hasPlayers || hasStaff) && (
-            <Tabs.Content value="lineup" className="focus:outline-none">
+            <Tabs.Content value="opstelling" className="focus:outline-none">
               <TeamRoster
                 players={players}
                 staff={staff}
@@ -201,9 +201,9 @@ export function TeamDetail({
             </Tabs.Content>
           )}
 
-          {/* Matches Tab */}
+          {/* Wedstrijden Tab */}
           {hasMatches && (
-            <Tabs.Content value="matches" className="focus:outline-none">
+            <Tabs.Content value="wedstrijden" className="focus:outline-none">
               {calendarUrl && (
                 <div className="mb-4 flex justify-end">
                   <a
@@ -227,9 +227,9 @@ export function TeamDetail({
             </Tabs.Content>
           )}
 
-          {/* Standings Tab */}
+          {/* Klassement Tab */}
           {hasStandings && (
-            <Tabs.Content value="standings" className="focus:outline-none">
+            <Tabs.Content value="klassement" className="focus:outline-none">
               <TeamStandings
                 standings={standings}
                 highlightTeamId={highlightTeamId}

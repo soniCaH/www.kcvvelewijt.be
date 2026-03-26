@@ -57,7 +57,7 @@ export function TeamFeaturedCard({ team, label }: TeamFeaturedCardProps) {
 
           {/* CTA */}
           <Link
-            href={`/team/${team.slug}`}
+            href={`/ploegen/${team.slug}`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-kcvv-black text-white font-bold text-[0.8125rem] uppercase tracking-[0.08em] rounded-sm w-fit transition-colors hover:bg-kcvv-green-dark"
           >
             Bekijk de ploeg →

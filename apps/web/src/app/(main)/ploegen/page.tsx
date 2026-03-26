@@ -60,7 +60,10 @@ export default async function TeamsPage() {
                 return aTeam.name;
               })()}
               body={aTeam.divisionFull ?? ""}
-              cta={{ label: "Bekijk de A-ploeg", href: `/team/${aTeam.slug}` }}
+              cta={{
+                label: "Bekijk de A-ploeg",
+                href: `/ploegen/${aTeam.slug}`,
+              }}
             />
           ),
           transition: {

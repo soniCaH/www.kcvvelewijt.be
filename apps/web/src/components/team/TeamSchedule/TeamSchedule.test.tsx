@@ -127,7 +127,7 @@ describe("TeamSchedule", () => {
       const links = screen.getAllByRole("link");
       expect(links[0]).toHaveAttribute(
         "href",
-        "/wedstrijd/1001?from=/team/kcvv-elewijt-a&fromTab=matches",
+        "/wedstrijd/1001?from=/ploegen/kcvv-elewijt-a&fromTab=wedstrijden",
       );
     });
   });

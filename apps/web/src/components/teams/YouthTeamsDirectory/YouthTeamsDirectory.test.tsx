@@ -87,10 +87,10 @@ describe("YouthTeamsDirectory", () => {
   it("renders team cards with links", () => {
     render(<YouthTeamsDirectory divisions={divisions} />);
     const u21Link = screen.getByRole("link", { name: /U21/i });
-    expect(u21Link).toHaveAttribute("href", "/team/u21");
+    expect(u21Link).toHaveAttribute("href", "/ploegen/u21");
 
     const u15Link = screen.getByRole("link", { name: /U15/i });
-    expect(u15Link).toHaveAttribute("href", "/team/u15");
+    expect(u15Link).toHaveAttribute("href", "/ploegen/u15");
   });
 
   it("renders age badges in team cards", () => {

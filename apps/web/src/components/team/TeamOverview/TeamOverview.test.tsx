@@ -8,20 +8,20 @@ import userEvent from "@testing-library/user-event";
 import { TeamOverview, type TeamData } from "./TeamOverview";
 
 const mockYouthTeams: TeamData[] = [
-  { name: "U15", href: "/team/u15", ageGroup: "U15", teamType: "youth" },
-  { name: "U10", href: "/team/u10", ageGroup: "U10", teamType: "youth" },
-  { name: "U17", href: "/team/u17", ageGroup: "U17", teamType: "youth" },
-  { name: "U6", href: "/team/u6", ageGroup: "U6", teamType: "youth" },
+  { name: "U15", href: "/ploegen/u15", ageGroup: "U15", teamType: "youth" },
+  { name: "U10", href: "/ploegen/u10", ageGroup: "U10", teamType: "youth" },
+  { name: "U17", href: "/ploegen/u17", ageGroup: "U17", teamType: "youth" },
+  { name: "U6", href: "/ploegen/u6", ageGroup: "U6", teamType: "youth" },
 ];
 
 const mockSeniorTeams: TeamData[] = [
   {
     name: "A-Ploeg",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
     tagline: "The A-Team",
     teamType: "senior",
   },
-  { name: "B-Ploeg", href: "/team/b-ploeg", teamType: "senior" },
+  { name: "B-Ploeg", href: "/ploegen/b-ploeg", teamType: "senior" },
 ];
 
 const _mockClubTeams: TeamData[] = [
@@ -165,7 +165,12 @@ describe("TeamOverview", () => {
     it("should group U21 teams in Bovenbouw tier", () => {
       const teamsWithU21: TeamData[] = [
         ...mockYouthTeams,
-        { name: "U21", href: "/team/u21", ageGroup: "U21", teamType: "youth" },
+        {
+          name: "U21",
+          href: "/ploegen/u21",
+          ageGroup: "U21",
+          teamType: "youth",
+        },
       ];
       render(<TeamOverview teams={teamsWithU21} groupByAge teamType="youth" />);
       const bovenbouwHeading = screen.getByText("Bovenbouw (U14–U21)");
@@ -284,7 +289,7 @@ describe("TeamOverview", () => {
   describe("Age Group Parsing", () => {
     it("should handle teams without age groups", () => {
       const teamsWithoutAge: TeamData[] = [
-        { name: "No Age", href: "/team/no-age", teamType: "youth" },
+        { name: "No Age", href: "/ploegen/no-age", teamType: "youth" },
       ];
       render(<TeamOverview teams={teamsWithoutAge} groupByAge />);
       // Should render in "Overig" category
@@ -295,7 +300,7 @@ describe("TeamOverview", () => {
       const teamsWithMalformedAge: TeamData[] = [
         {
           name: "Weird Team",
-          href: "/team/weird",
+          href: "/ploegen/weird",
           ageGroup: "ABC",
           teamType: "youth",
         },

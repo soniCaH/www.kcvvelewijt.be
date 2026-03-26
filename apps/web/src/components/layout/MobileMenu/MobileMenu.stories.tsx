@@ -105,8 +105,8 @@ export const OpenWithActiveChildLink: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/team/a-ploeg",
-        query: { tab: "lineup" },
+        pathname: "/ploegen/a-ploeg",
+        query: { tab: "opstelling" },
       },
     },
   },

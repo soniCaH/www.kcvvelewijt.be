@@ -25,7 +25,7 @@ export default function MatchNotFound() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/calendar"
+            href="/kalender"
             className="inline-flex items-center justify-center px-6 py-3 bg-green-main text-white font-semibold rounded-lg hover:bg-green-hover transition-colors"
           >
             Bekijk wedstrijdkalender

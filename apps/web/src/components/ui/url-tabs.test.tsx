@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: mockReplace,
   }),
-  usePathname: () => "/team/a-ploeg",
+  usePathname: () => "/ploegen/a-ploeg",
   useSearchParams: () => mockSearchParams,
 }));
 
@@ -28,39 +28,45 @@ describe("UrlTabs", () => {
 
   it("renders with default tab active", () => {
     render(
-      <UrlTabs defaultValue="info" validTabs={["info", "lineup", "matches"]}>
+      <UrlTabs
+        defaultValue="info"
+        validTabs={["info", "opstelling", "wedstrijden"]}
+      >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
-          <Tabs.Trigger value="matches">Matches</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
+          <Tabs.Trigger value="wedstrijden">Wedstrijden</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
-        <Tabs.Content value="matches">Matches content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
+        <Tabs.Content value="wedstrijden">Wedstrijden content</Tabs.Content>
       </UrlTabs>,
     );
 
     expect(screen.getByText("Info content")).toBeInTheDocument();
-    expect(screen.queryByText("Lineup content")).not.toBeInTheDocument();
+    expect(screen.queryByText("Opstelling content")).not.toBeInTheDocument();
   });
 
   it("shows correct tab content when URL has tab param", () => {
-    mockSearchParams = new URLSearchParams("tab=matches");
+    mockSearchParams = new URLSearchParams("tab=wedstrijden");
 
     render(
-      <UrlTabs defaultValue="info" validTabs={["info", "lineup", "matches"]}>
+      <UrlTabs
+        defaultValue="info"
+        validTabs={["info", "opstelling", "wedstrijden"]}
+      >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
-          <Tabs.Trigger value="matches">Matches</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
+          <Tabs.Trigger value="wedstrijden">Wedstrijden</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
-        <Tabs.Content value="matches">Matches content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
+        <Tabs.Content value="wedstrijden">Wedstrijden content</Tabs.Content>
       </UrlTabs>,
     );
 
-    expect(screen.getByText("Matches content")).toBeInTheDocument();
+    expect(screen.getByText("Wedstrijden content")).toBeInTheDocument();
     expect(screen.queryByText("Info content")).not.toBeInTheDocument();
   });
 
@@ -68,15 +74,18 @@ describe("UrlTabs", () => {
     mockSearchParams = new URLSearchParams("tab=invalid-tab");
 
     render(
-      <UrlTabs defaultValue="info" validTabs={["info", "lineup", "matches"]}>
+      <UrlTabs
+        defaultValue="info"
+        validTabs={["info", "opstelling", "wedstrijden"]}
+      >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
-          <Tabs.Trigger value="matches">Matches</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
+          <Tabs.Trigger value="wedstrijden">Wedstrijden</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
-        <Tabs.Content value="matches">Matches content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
+        <Tabs.Content value="wedstrijden">Wedstrijden content</Tabs.Content>
       </UrlTabs>,
     );
 
@@ -105,41 +114,50 @@ describe("UrlTabs", () => {
     const user = userEvent.setup();
 
     render(
-      <UrlTabs defaultValue="info" validTabs={["info", "lineup", "matches"]}>
+      <UrlTabs
+        defaultValue="info"
+        validTabs={["info", "opstelling", "wedstrijden"]}
+      >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
-          <Tabs.Trigger value="matches">Matches</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
+          <Tabs.Trigger value="wedstrijden">Wedstrijden</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
-        <Tabs.Content value="matches">Matches content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
+        <Tabs.Content value="wedstrijden">Wedstrijden content</Tabs.Content>
       </UrlTabs>,
     );
 
-    // Click lineup tab
-    await user.click(screen.getByRole("tab", { name: "Lineup" }));
+    // Click opstelling tab
+    await user.click(screen.getByRole("tab", { name: "Opstelling" }));
 
     // Should update URL with tab parameter
-    expect(mockReplace).toHaveBeenCalledWith("/team/a-ploeg?tab=lineup", {
-      scroll: false,
-    });
+    expect(mockReplace).toHaveBeenCalledWith(
+      "/ploegen/a-ploeg?tab=opstelling",
+      {
+        scroll: false,
+      },
+    );
   });
 
   it("removes tab param when clicking default tab", async () => {
     const user = userEvent.setup();
-    mockSearchParams = new URLSearchParams("tab=lineup");
+    mockSearchParams = new URLSearchParams("tab=opstelling");
 
     render(
-      <UrlTabs defaultValue="info" validTabs={["info", "lineup", "matches"]}>
+      <UrlTabs
+        defaultValue="info"
+        validTabs={["info", "opstelling", "wedstrijden"]}
+      >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
-          <Tabs.Trigger value="matches">Matches</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
+          <Tabs.Trigger value="wedstrijden">Wedstrijden</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
-        <Tabs.Content value="matches">Matches content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
+        <Tabs.Content value="wedstrijden">Wedstrijden content</Tabs.Content>
       </UrlTabs>,
     );
 
@@ -147,7 +165,7 @@ describe("UrlTabs", () => {
     await user.click(screen.getByRole("tab", { name: "Info" }));
 
     // Should remove tab parameter for cleaner URL
-    expect(mockReplace).toHaveBeenCalledWith("/team/a-ploeg", {
+    expect(mockReplace).toHaveBeenCalledWith("/ploegen/a-ploeg", {
       scroll: false,
     });
   });
@@ -158,22 +176,25 @@ describe("UrlTabs", () => {
     render(
       <UrlTabs
         defaultValue="info"
-        validTabs={["info", "lineup"]}
+        validTabs={["info", "opstelling"]}
         paramName="section"
       >
         <Tabs.List>
           <Tabs.Trigger value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger value="lineup">Lineup</Tabs.Trigger>
+          <Tabs.Trigger value="opstelling">Opstelling</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="info">Info content</Tabs.Content>
-        <Tabs.Content value="lineup">Lineup content</Tabs.Content>
+        <Tabs.Content value="opstelling">Opstelling content</Tabs.Content>
       </UrlTabs>,
     );
 
-    await user.click(screen.getByRole("tab", { name: "Lineup" }));
+    await user.click(screen.getByRole("tab", { name: "Opstelling" }));
 
-    expect(mockReplace).toHaveBeenCalledWith("/team/a-ploeg?section=lineup", {
-      scroll: false,
-    });
+    expect(mockReplace).toHaveBeenCalledWith(
+      "/ploegen/a-ploeg?section=opstelling",
+      {
+        scroll: false,
+      },
+    );
   });
 });

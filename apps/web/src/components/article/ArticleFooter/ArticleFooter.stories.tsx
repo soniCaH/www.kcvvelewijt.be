@@ -38,7 +38,7 @@ const sampleRelatedContent: RelatedContent[] = [
   },
   {
     title: "A-Ploeg Informatie",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
     type: "team",
   },
 ];
@@ -87,7 +87,7 @@ export const ManyItems: Story = {
       },
       {
         title: "B-Ploeg Informatie",
-        href: "/team/b-ploeg",
+        href: "/ploegen/b-ploeg",
         type: "team",
       },
     ],
@@ -103,7 +103,7 @@ export const SingleItem: Story = {
     relatedContent: [
       {
         title: "Lees meer over onze A-Ploeg",
-        href: "/team/a-ploeg",
+        href: "/ploegen/a-ploeg",
         type: "team",
       },
     ],
@@ -134,7 +134,7 @@ export const AllContentTypes: Story = {
       },
       {
         title: "Team pagina: A-Ploeg",
-        href: "/team/a-ploeg",
+        href: "/ploegen/a-ploeg",
         type: "team",
       },
     ],

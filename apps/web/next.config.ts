@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/jeugd/:slug",
-        destination: "/team/:slug",
+        destination: "/ploegen/:slug",
         permanent: true, // 308 redirect for SEO
       },
       // #819 — Dutch URL renames
@@ -36,6 +36,32 @@ const nextConfig: NextConfig = {
       {
         source: "/search",
         destination: "/zoeken",
+        permanent: true,
+      },
+      // #1078 — Phase 2 Dutch URL renames
+      {
+        source: "/calendar",
+        destination: "/kalender",
+        permanent: true,
+      },
+      {
+        source: "/teams",
+        destination: "/ploegen",
+        permanent: true,
+      },
+      {
+        source: "/team/:slug",
+        destination: "/ploegen/:slug",
+        permanent: true,
+      },
+      {
+        source: "/club/history",
+        destination: "/club/geschiedenis",
+        permanent: true,
+      },
+      {
+        source: "/club/register",
+        destination: "/club/inschrijven",
         permanent: true,
       },
     ];

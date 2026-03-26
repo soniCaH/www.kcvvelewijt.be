@@ -114,7 +114,7 @@ export const PageHeader = ({
                 <Search size={16} />
               </Link>
               <Link
-                href="/club/register"
+                href="/club/inschrijven"
                 className="border border-kcvv-green/60 text-white text-sm font-semibold px-4 py-1.5 rounded-sm hover:border-kcvv-green hover:text-kcvv-green transition-colors whitespace-nowrap"
               >
                 Word lid

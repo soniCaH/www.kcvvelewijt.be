@@ -346,12 +346,12 @@ describe("CalendarView", () => {
         />,
       );
       await user.click(screen.getByRole("tab", { name: "B-ploeg" }));
-      expect(mockPush).toHaveBeenCalledWith("/calendar?team=B-ploeg", {
+      expect(mockPush).toHaveBeenCalledWith("/kalender?team=B-ploeg", {
         scroll: false,
       });
     });
 
-    it("navigates to /calendar with no params when 'Alle teams' tab is clicked", async () => {
+    it("navigates to /kalender with no params when 'Alle teams' tab is clicked", async () => {
       const user = userEvent.setup();
       mockSearchParams = new URLSearchParams("team=A-ploeg");
       render(
@@ -363,7 +363,7 @@ describe("CalendarView", () => {
         />,
       );
       await user.click(screen.getByRole("tab", { name: "Alle teams" }));
-      expect(mockPush).toHaveBeenCalledWith("/calendar", { scroll: false });
+      expect(mockPush).toHaveBeenCalledWith("/kalender", { scroll: false });
     });
   });
 });

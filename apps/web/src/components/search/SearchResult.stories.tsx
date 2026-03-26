@@ -95,7 +95,7 @@ export const Team: Story = {
       type: "team",
       title: "A-Ploeg",
       description: "3e Provinciale",
-      url: "/team/a-ploeg",
+      url: "/ploegen/a-ploeg",
       imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
     },
   },
@@ -110,7 +110,7 @@ export const TeamNoImage: Story = {
       id: "6",
       type: "team",
       title: "U15",
-      url: "/team/u15",
+      url: "/ploegen/u15",
     },
   },
 };

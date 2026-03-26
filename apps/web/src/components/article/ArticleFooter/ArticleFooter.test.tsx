@@ -17,7 +17,7 @@ describe("ArticleFooter", () => {
     },
     {
       title: "Related Team Page",
-      href: "/team/a-ploeg",
+      href: "/ploegen/a-ploeg",
       type: "team",
     },
   ];
@@ -114,7 +114,7 @@ describe("ArticleFooter", () => {
       { title: "Article", href: "/nieuws/test", type: "article" },
       { title: "Player", href: "/player/test", type: "player" },
       { title: "Staff", href: "/staff/test", type: "staff" },
-      { title: "Team", href: "/team/test", type: "team" },
+      { title: "Team", href: "/ploegen/test", type: "team" },
     ];
     render(<ArticleFooter relatedContent={allTypes} />);
     expect(screen.getByText("Article")).toBeInTheDocument();

@@ -49,7 +49,7 @@ export default function PlayerNotFound() {
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/teams"
+            href="/ploegen"
             className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
           >
             <svg

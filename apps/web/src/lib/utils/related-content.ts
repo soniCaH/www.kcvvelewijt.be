@@ -78,7 +78,7 @@ export function buildRelatedContent(
   );
   const teams: RelatedContent[] = uniqueTeams.map((t) => ({
     title: t.name,
-    href: `/team/${t.slug}`,
+    href: `/ploegen/${t.slug}`,
     type: "team" as const,
   }));
 

@@ -39,7 +39,7 @@ function transformTeamToData(team: TeamNavVM): TeamData | null {
   return {
     id: team.id,
     name: team.name,
-    href: `/team/${team.slug}`,
+    href: `/ploegen/${team.slug}`,
     ageGroup,
     teamType: "youth",
     tagline: team.tagline ?? team.divisionFull ?? team.division ?? undefined,
@@ -182,7 +182,7 @@ export default async function JeugdPage() {
         heading="Interesse in onze jeugd?"
         body="Nieuwe spelers zijn altijd welkom — van U6 tot U21."
         buttonLabel="Word ook lid"
-        buttonHref="/club/register"
+        buttonHref="/club/inschrijven"
       />
     ),
     paddingTop: "pt-16",

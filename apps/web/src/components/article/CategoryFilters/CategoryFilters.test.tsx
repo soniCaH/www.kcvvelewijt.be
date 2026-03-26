@@ -101,10 +101,10 @@ describe("CategoryFilters", () => {
       render(<CategoryFilters categories={mockCategories} />);
 
       const nieuwsTab = screen.getByRole("tab", { name: /nieuws/i });
-      expect(nieuwsTab).toHaveAttribute("href", "/nieuws?category=nieuws");
+      expect(nieuwsTab).toHaveAttribute("href", "/nieuws?categorie=nieuws");
 
       const jeugdTab = screen.getByRole("tab", { name: /jeugd/i });
-      expect(jeugdTab).toHaveAttribute("href", "/nieuws?category=jeugd");
+      expect(jeugdTab).toHaveAttribute("href", "/nieuws?categorie=jeugd");
     });
 
     it("should encode category slugs in URLs", () => {
@@ -121,7 +121,7 @@ describe("CategoryFilters", () => {
       render(<CategoryFilters categories={specialCategories} />);
 
       const tab = screen.getByRole("tab", { name: /test & demo/i });
-      expect(tab).toHaveAttribute("href", "/nieuws?category=test%26demo");
+      expect(tab).toHaveAttribute("href", "/nieuws?categorie=test%26demo");
     });
   });
 

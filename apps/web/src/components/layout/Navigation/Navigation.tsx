@@ -37,7 +37,7 @@ const staticMenuItems: MenuItem[] = [
     label: "De club",
     href: "/club",
     children: [
-      { label: "Geschiedenis", href: "/club/history" },
+      { label: "Geschiedenis", href: "/club/geschiedenis" },
       { label: "Organigram", href: "/club/organigram" },
       { label: "Bestuur", href: "/club/bestuur" },
       { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
@@ -45,7 +45,7 @@ const staticMenuItems: MenuItem[] = [
       { label: "KCVV Ultras", href: "/club/ultras" },
       { label: "Contact", href: "/club/contact" },
       { label: "Downloads", href: "/club/downloads" },
-      { label: "Praktische Info", href: "/club/register" },
+      { label: "Praktische Info", href: "/club/inschrijven" },
       { label: "Cashless clubkaart", href: "/club/cashless" },
     ],
   },
@@ -70,15 +70,15 @@ const buildSeniorMenuItem = (
   label: string,
 ): MenuItem | null => {
   if (!team?.slug) return null;
-  const href = `/team/${team.slug}`;
+  const href = `/ploegen/${team.slug}`;
   return {
     label,
     href,
     children: [
       { label: "Info", href },
-      { label: "Spelers & Staff", href: `${href}?tab=lineup` },
-      { label: "Wedstrijden", href: `${href}?tab=matches` },
-      { label: "Stand", href: `${href}?tab=standings` },
+      { label: "Spelers & Staff", href: `${href}?tab=opstelling` },
+      { label: "Wedstrijden", href: `${href}?tab=wedstrijden` },
+      { label: "Stand", href: `${href}?tab=klassement` },
     ],
   };
 };
@@ -104,7 +104,7 @@ export const Navigation = ({
       ?.filter((t) => t.age != null)
       .map((t) => ({
         label: t.age!,
-        href: `/team/${t.slug}`,
+        href: `/ploegen/${t.slug}`,
       })),
   };
 
@@ -140,7 +140,7 @@ export const Navigation = ({
     }
 
     // For items without query params, check if it's a base path match
-    // but NOT if we're on a tab (e.g., /team/a-ploeg should not be active when on ?tab=lineup)
+    // but NOT if we're on a tab (e.g., /ploegen/a-ploeg should not be active when on ?tab=opstelling)
     if (pathname === itemPath) {
       // Only active if there's no tab param in the URL
       return !searchParams.get("tab");

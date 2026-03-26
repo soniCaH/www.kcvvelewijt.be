@@ -21,7 +21,7 @@ export const MatchesSliderSection = ({
         <SectionHeader
           title="Wedstrijden"
           linkText="Alle wedstrijden"
-          linkHref="/calendar"
+          linkHref="/kalender"
           variant="dark"
         />
 

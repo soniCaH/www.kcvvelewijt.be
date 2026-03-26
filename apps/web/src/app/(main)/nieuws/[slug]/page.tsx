@@ -106,7 +106,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const primaryCategory = tags[0]
     ? {
         name: tags[0],
-        href: `/nieuws?category=${encodeURIComponent(tags[0])}`,
+        href: `/nieuws?categorie=${encodeURIComponent(tags[0])}`,
       }
     : undefined;
 
