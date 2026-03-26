@@ -19,7 +19,7 @@ export const mockScheduledMatches: UpcomingMatch[] = [
       logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1",
     },
     status: "scheduled",
-    round: "U9",
+    squadLabel: "U9",
     competition: "Competitie",
   },
   {
@@ -37,7 +37,7 @@ export const mockScheduledMatches: UpcomingMatch[] = [
       logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/425.png?v=1",
     },
     status: "scheduled",
-    round: "U6",
+    squadLabel: "U6",
     competition: "Competitie",
   },
   {
@@ -55,7 +55,7 @@ export const mockScheduledMatches: UpcomingMatch[] = [
       logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1",
     },
     status: "scheduled",
-    round: "A",
+    squadLabel: "A",
     competition: "Competitie",
   },
 ];
@@ -77,7 +77,7 @@ export const mockScheduledMatchWithScores: UpcomingMatch = {
     score: 1,
   },
   status: "finished",
-  round: "U15",
+  squadLabel: "U15",
   competition: "Competitie",
 };
 
@@ -98,7 +98,7 @@ export const mockFinishedMatch: UpcomingMatch = {
     score: 5,
   },
   status: "finished",
-  round: "U15",
+  squadLabel: "U15",
   competition: "Competitie",
 };
 
@@ -116,7 +116,7 @@ export const mockPostponedMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/872.png?v=1",
   },
   status: "postponed",
-  round: "U13",
+  squadLabel: "U13",
   competition: "Competitie",
 };
 
@@ -134,7 +134,7 @@ export const mockForfeitedMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1",
   },
   status: "forfeited",
-  round: "U12",
+  squadLabel: "U12",
   competition: "Competitie",
 };
 

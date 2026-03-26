@@ -13,7 +13,7 @@ const validMatch = {
   home_team: validMatchTeam,
   away_team: validAwayTeam,
   status: "finished",
-  round: "15",
+  squadLabel: "15",
   competition: "2de Nationale",
   kcvv_team_id: 1,
   kcvv_team_label: "A-Ploeg",
@@ -26,6 +26,7 @@ describe("Match schema", () => {
     expect(result.home_team.name).toBe("KCVV Elewijt");
     expect(result.away_team.score).toBe(1);
     expect(result.status).toBe("finished");
+    expect(result.squadLabel).toBe("15");
   });
 
   it("decodes a minimal Match (only required fields)", () => {

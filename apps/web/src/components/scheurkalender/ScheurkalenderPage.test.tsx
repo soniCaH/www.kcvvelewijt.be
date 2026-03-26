@@ -32,14 +32,14 @@ const mockDays: ScheurkalenderDay[] = [
       {
         id: 1,
         time: "15:00",
-        round: "A-Ploeg",
+        squadLabel: "A-Ploeg",
         homeTeam: { name: "KCVV Elewijt", logo: "/kcvv.png" },
         awayTeam: { name: "Strombeek" },
       },
       {
         id: 2,
         time: "11:00",
-        round: "U15A",
+        squadLabel: "U15A",
         homeTeam: { name: "KCVV Elewijt U15" },
         awayTeam: { name: "FC Kampenhout U15" },
       },
@@ -105,13 +105,13 @@ describe("ScheurkalenderPage", () => {
       expect(screen.getByText("—")).toBeInTheDocument();
     });
 
-    it("renders round badge when round is provided", () => {
+    it("renders squad label badge when squadLabel is provided", () => {
       render(<ScheurkalenderPage days={[mockDays[0]]} />);
       expect(screen.getByText("A-Ploeg")).toBeInTheDocument();
       expect(screen.getByText("U15A")).toBeInTheDocument();
     });
 
-    it("does not render round badge when round is absent", () => {
+    it("does not render squad label badge when squadLabel is absent", () => {
       render(<ScheurkalenderPage days={[mockDays[1]]} />);
       expect(screen.queryByText("A-Ploeg")).not.toBeInTheDocument();
     });

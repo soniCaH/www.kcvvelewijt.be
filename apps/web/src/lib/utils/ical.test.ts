@@ -11,7 +11,7 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
     home_team: { id: 1, name: "KCVV Elewijt", score: undefined },
     away_team: { id: 2, name: "KFC Turnhout", score: undefined },
     status: "scheduled",
-    round: "Speeldag 20",
+    squadLabel: "Speeldag 20",
     competition: "2e Nationale",
     ...overrides,
   } as Match;

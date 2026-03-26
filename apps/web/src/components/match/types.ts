@@ -63,8 +63,8 @@ export interface UpcomingMatch {
   };
   /** Match status */
   status: MatchStatus;
-  /** Round/matchday (optional) */
-  round?: string;
+  /** Squad label — identifies which KCVV team plays (e.g. "A-Ploeg", "U21") */
+  squadLabel?: string;
   /** Competition name (optional) */
   competition?: string;
   /** PSD team ID identifying which KCVV team plays (A-team, U21, etc.) */

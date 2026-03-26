@@ -28,7 +28,7 @@ function buildSummary(match: Match): string {
 function buildDescription(match: Match): string {
   const parts: string[] = [];
   if (match.competition) parts.push(match.competition);
-  if (match.round) parts.push(match.round);
+  if (match.squadLabel) parts.push(match.squadLabel);
   return parts.join(" — ");
 }
 

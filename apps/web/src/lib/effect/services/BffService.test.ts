@@ -18,7 +18,7 @@ const sampleMatch = {
   away_team: { id: 20, name: "Opponent FC", score: undefined, logo: undefined },
   status: "scheduled",
   competition: "LEAGUE",
-  round: undefined,
+  squadLabel: undefined,
 };
 
 const sampleRankingEntry = {

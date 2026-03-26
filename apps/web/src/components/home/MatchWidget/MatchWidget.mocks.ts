@@ -15,7 +15,7 @@ export const mockUpcomingMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1",
   },
   status: "scheduled",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
   venue: "Thuis",
 };
@@ -37,7 +37,7 @@ export const mockFinishedMatchWin: UpcomingMatch = {
     score: 1,
   },
   status: "finished",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
 };
 
@@ -58,7 +58,7 @@ export const mockFinishedMatchDraw: UpcomingMatch = {
     score: 2,
   },
   status: "finished",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
 };
 
@@ -76,7 +76,7 @@ export const mockPostponedMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/230.png?v=1",
   },
   status: "postponed",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
 };
 
@@ -94,7 +94,7 @@ export const mockForfeitedMatch: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1",
   },
   status: "forfeited",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
 };
 
@@ -113,7 +113,7 @@ export const mockLongTeamNames: UpcomingMatch = {
     logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/756.png?v=1",
   },
   status: "scheduled",
-  round: "A",
+  squadLabel: "A",
   competition: "3e Afdeling VV",
   venue: "Sportpark Elewijt",
 };

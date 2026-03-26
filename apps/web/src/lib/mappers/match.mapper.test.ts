@@ -27,7 +27,7 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "scheduled",
-      round: "U9",
+      squadLabel: "U9",
       competition: "Competitie",
     };
 
@@ -51,7 +51,7 @@ describe("mapMatchToUpcomingMatch", () => {
         score: undefined,
       },
       status: "scheduled",
-      round: "U9",
+      squadLabel: "U9",
       competition: "Competitie",
     });
   });
@@ -73,7 +73,7 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "scheduled",
-      round: "A-ploeg",
+      squadLabel: "A-ploeg",
       competition: "Competitie",
     };
 
@@ -102,7 +102,7 @@ describe("mapMatchToUpcomingMatch", () => {
         score: 1,
       },
       status: "forfeited",
-      round: "U15",
+      squadLabel: "U15",
       competition: "Competitie",
     };
 
@@ -130,7 +130,7 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "postponed",
-      round: "U13",
+      squadLabel: "U13",
       competition: "Competitie",
     };
 
@@ -184,7 +184,7 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "stopped",
-      round: "U12",
+      squadLabel: "U12",
       competition: "Competitie",
     };
 
@@ -214,7 +214,7 @@ describe("mapMatchesToUpcomingMatches", () => {
           logo: "https://example.com/logo2.png",
         },
         status: "scheduled",
-        round: "U9",
+        squadLabel: "U9",
         competition: "Competitie",
       },
       {
@@ -233,7 +233,7 @@ describe("mapMatchesToUpcomingMatches", () => {
           logo: "https://example.com/logo2.png",
         },
         status: "scheduled",
-        round: "A-ploeg",
+        squadLabel: "A-ploeg",
         competition: "Competitie",
       },
     ];
