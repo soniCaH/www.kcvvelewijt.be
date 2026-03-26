@@ -360,7 +360,7 @@ describe("ArticleRepository", () => {
   });
 
   describe("findPaginated", () => {
-    it("passes offset, limit, and category to GROQ query", async () => {
+    it("passes offset, end, and category to GROQ query", async () => {
       mockFetch.mockResolvedValueOnce([makeArticleListRow()]);
 
       await runWithRepo(

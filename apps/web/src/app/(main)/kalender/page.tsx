@@ -8,7 +8,11 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
-import { EventRepository } from "@/lib/repositories/event.repository";
+import {
+  EventRepository,
+  type EventVM,
+} from "@/lib/repositories/event.repository";
+import type { Match } from "@/lib/effect/schemas/match.schema";
 import { PageTitle } from "@/components/layout";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { transformMatchToCalendar } from "./utils";
@@ -62,7 +66,7 @@ async function fetchCalendarData(): Promise<CalendarData> {
                 `[Calendar] Failed to fetch matches for team ${t.name} (psdId: ${t.psdId}): ${String(error)}`,
               ),
             ),
-            Effect.catchAll(() => Effect.succeed([] as readonly never[])),
+            Effect.catchAll(() => Effect.succeed([] as readonly Match[])),
           ),
         ),
         { concurrency: 5 },
@@ -87,7 +91,7 @@ async function fetchCalendarData(): Promise<CalendarData> {
       // Fetch events (graceful degradation on failure)
       const eventVMs = yield* eventRepo
         .findAll()
-        .pipe(Effect.catchAll(() => Effect.succeed([] as never[])));
+        .pipe(Effect.catchAll(() => Effect.succeed([] as EventVM[])));
 
       const teamInfos: CalendarTeamInfo[] = teamsWithPsd.map((t) => ({
         id: t.id,
