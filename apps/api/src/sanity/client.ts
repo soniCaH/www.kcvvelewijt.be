@@ -100,6 +100,12 @@ export interface SanityWriteClientInterface {
     fetchUrl: string,
     stableUrl: string,
   ) => Effect.Effect<void, SanityWriteError>;
+  /** Create a searchFeedback document in Sanity. */
+  readonly writeFeedback: (doc: {
+    pathSlug: string;
+    pathTitle: string;
+    vote: "up" | "down";
+  }) => Effect.Effect<void, SanityWriteError>;
 }
 
 export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
@@ -437,6 +443,19 @@ export const SanityWriteClientLive = Layer.effect(
         }),
 
       archiveTeams: (psdIds) => archiveByPsdIds("team", psdIds),
+
+      writeFeedback: (doc) =>
+        Effect.tryPromise({
+          try: () =>
+            client.create({
+              _type: "searchFeedback",
+              pathSlug: doc.pathSlug,
+              pathTitle: doc.pathTitle,
+              vote: doc.vote,
+            }),
+          catch: (cause) =>
+            new SanityWriteError("Failed to write search feedback", cause),
+        }).pipe(Effect.asVoid),
     };
   }),
 );

@@ -11,9 +11,10 @@ import {htmlTable} from './htmlTable'
 import {articleImage} from './articleImage'
 import {banner} from './banner'
 import {homePage} from './homePage'
+import {searchFeedback} from './searchFeedback'
 
 export const schemaTypes = [
   player, team, trainingDay, staffMember, responsibilityPath,
   article, sponsor, event, page, fileAttachment, htmlTable, articleImage,
-  banner, homePage,
+  banner, homePage, searchFeedback,
 ]

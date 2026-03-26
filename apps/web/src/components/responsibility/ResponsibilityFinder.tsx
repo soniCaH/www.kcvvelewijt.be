@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { FeedbackWidget } from "./FeedbackWidget";
 import { RelatedPaths } from "./RelatedPaths";
 import type {
   UserRole,
@@ -632,6 +633,11 @@ export function ResponsibilityFinder({
             </div>
 
             <ResultCard path={selectedResult} onMemberSelect={onMemberSelect} />
+
+            <FeedbackWidget
+              pathSlug={selectedResult.id}
+              pathTitle={selectedResult.question}
+            />
 
             {selectedVectorId && <RelatedPaths sanityId={selectedVectorId} />}
 

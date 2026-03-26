@@ -26,6 +26,8 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
+  ThumbsUp,
+  ThumbsDown,
 
   // Social
   Facebook,
@@ -105,6 +107,8 @@ export const icons = {
   "check-circle": CheckCircle,
   "alert-triangle": AlertTriangle,
   "x-circle": XCircle,
+  "thumbs-up": ThumbsUp,
+  "thumbs-down": ThumbsDown,
 
   // Social
   facebook: Facebook,
@@ -231,6 +235,8 @@ export {
   CheckCircle,
   AlertTriangle,
   XCircle,
+  ThumbsUp,
+  ThumbsDown,
 
   // Social
   Facebook,
