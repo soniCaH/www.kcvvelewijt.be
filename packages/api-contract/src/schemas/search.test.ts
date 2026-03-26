@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { Schema as S, Effect } from "effect";
-import { SearchRequest, SearchResult, SearchResponse } from "./search";
+import {
+  SearchRequest,
+  SearchResult,
+  SearchResponse,
+  FeedbackRequest,
+  FeedbackResponse,
+} from "./search";
 
 describe("SearchRequest", () => {
   it("accepts minimal valid request", async () => {
@@ -74,5 +80,63 @@ describe("SearchResponse", () => {
       S.decodeUnknown(SearchResponse)({ results: [] }),
     );
     expect(result.results).toHaveLength(0);
+  });
+});
+
+describe("FeedbackRequest", () => {
+  it("accepts a valid feedback request", async () => {
+    const result = await Effect.runPromise(
+      S.decodeUnknown(FeedbackRequest)({
+        pathSlug: "inschrijving-nieuw-lid",
+        pathTitle: "Inschrijving nieuw lid",
+        vote: "up",
+      }),
+    );
+    expect(result.pathSlug).toBe("inschrijving-nieuw-lid");
+    expect(result.vote).toBe("up");
+  });
+
+  it("accepts down vote", async () => {
+    const result = await Effect.runPromise(
+      S.decodeUnknown(FeedbackRequest)({
+        pathSlug: "test",
+        pathTitle: "Test",
+        vote: "down",
+      }),
+    );
+    expect(result.vote).toBe("down");
+  });
+
+  it("rejects empty pathSlug", async () => {
+    await expect(
+      Effect.runPromise(
+        S.decodeUnknown(FeedbackRequest)({
+          pathSlug: "",
+          pathTitle: "Test",
+          vote: "up",
+        }),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("rejects invalid vote value", async () => {
+    await expect(
+      Effect.runPromise(
+        S.decodeUnknown(FeedbackRequest)({
+          pathSlug: "test",
+          pathTitle: "Test",
+          vote: "maybe",
+        }),
+      ),
+    ).rejects.toThrow();
+  });
+});
+
+describe("FeedbackResponse", () => {
+  it("decodes a valid response", async () => {
+    const result = await Effect.runPromise(
+      S.decodeUnknown(FeedbackResponse)({ ok: true }),
+    );
+    expect(result.ok).toBe(true);
   });
 });

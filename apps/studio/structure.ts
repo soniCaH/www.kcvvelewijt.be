@@ -104,4 +104,37 @@ export const structure: StructureResolver = (S) =>
             .title('Hulp & Contact')
             .defaultOrdering([{field: 'title', direction: 'asc'}]),
         ),
+      S.divider(),
+      S.listItem()
+        .title('📊 Feedback')
+        .child(
+          S.list()
+            .title('Feedback')
+            .items([
+              S.listItem()
+                .title('Alle feedback')
+                .child(
+                  S.documentList()
+                    .title('Alle feedback')
+                    .filter('_type == "searchFeedback"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+              S.listItem()
+                .title('👍 Positief')
+                .child(
+                  S.documentList()
+                    .title('Positief')
+                    .filter('_type == "searchFeedback" && vote == "up"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+              S.listItem()
+                .title('👎 Negatief')
+                .child(
+                  S.documentList()
+                    .title('Negatief')
+                    .filter('_type == "searchFeedback" && vote == "down"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+            ]),
+        ),
     ])

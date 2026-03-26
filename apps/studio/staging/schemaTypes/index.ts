@@ -8,5 +8,6 @@ import {event} from './event'
 import {page} from './page'
 import {fileAttachment} from './fileAttachment'
 import {htmlTable} from './htmlTable'
+import {searchFeedback} from './searchFeedback'
 
-export const schemaTypes = [player, team, trainingDay, staffMember, responsibilityPath, article, sponsor, event, page, fileAttachment, htmlTable]
+export const schemaTypes = [player, team, trainingDay, staffMember, responsibilityPath, article, sponsor, event, page, fileAttachment, htmlTable, searchFeedback]

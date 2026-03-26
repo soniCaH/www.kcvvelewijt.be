@@ -58,6 +58,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(StatsApiLive),
     Layer.provide(RelatedApiLive),
     Layer.provide(SearchApiLive),
+    Layer.provide(SanityWriteClientLive),
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
     Layer.provide(AiAnswerServiceLive),
