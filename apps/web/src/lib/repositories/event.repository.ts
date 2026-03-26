@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { sanityClient } from "../sanity/client";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type {
   EVENTS_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
@@ -70,20 +70,14 @@ export function toFeaturedEventVM(
 }
 
 export interface EventRepositoryInterface {
-  readonly findAll: () => Effect.Effect<EventVM[], Error>;
-  readonly findNextFeatured: () => Effect.Effect<EventVM | null, Error>;
+  readonly findAll: () => Effect.Effect<EventVM[]>;
+  readonly findNextFeatured: () => Effect.Effect<EventVM | null>;
 }
 
 export class EventRepository extends Context.Tag("EventRepository")<
   EventRepository,
   EventRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  });
 
 export const EventRepositoryLive = Layer.succeed(EventRepository, {
   findAll: () =>

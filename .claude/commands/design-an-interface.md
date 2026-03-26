@@ -106,6 +106,6 @@ export class [Name]Service extends Effect.Service<[Name]Service>()(
 
 ```typescript
 // Always typed: client.fetch<SanityType>(query, params)
-// GROQ queries live in apps/web/src/lib/sanity/queries/
-// One file per domain: articles.ts, players.ts, etc.
+// GROQ queries live in apps/web/src/lib/repositories/
+// One file per domain: article.repository.ts, player.repository.ts, etc.
 ```

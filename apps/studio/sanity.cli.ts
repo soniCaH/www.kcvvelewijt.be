@@ -10,7 +10,7 @@ export default defineCliConfig({
     autoUpdates: true,
   },
   typegen: {
-    path: '../web/src/lib/sanity/queries/**/*.ts',
+    path: '../web/src/lib/repositories/*.ts',
     generates: '../web/src/lib/sanity/sanity.types.ts',
   },
 })

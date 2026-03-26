@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { sanityClient } from "../sanity/client";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { RESPONSIBILITY_PATHS_QUERY_RESULT } from "../sanity/sanity.types";
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 
@@ -92,12 +92,6 @@ export interface ResponsibilityRepositoryInterface {
 export class ResponsibilityRepository extends Context.Tag(
   "ResponsibilityRepository",
 )<ResponsibilityRepository, ResponsibilityRepositoryInterface>() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const ResponsibilityRepositoryLive = Layer.succeed(
   ResponsibilityRepository,

@@ -41,7 +41,7 @@ Follow the data flow from symptom to source. For KCVV:
 **Frontend symptoms** → start in `apps/web/src/`
 
 - Component rendering wrong? → `src/components/`
-- Data fetching wrong? → `src/lib/effect/services/` or `src/lib/sanity/queries/`
+- Data fetching wrong? → `src/lib/repositories/`
 - Route/page wrong? → `src/app/(main)/`
 
 **API/BFF symptoms** → start in `apps/api/src/`

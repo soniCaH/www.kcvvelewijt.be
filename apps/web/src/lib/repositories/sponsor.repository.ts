@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { sanityClient } from "../sanity/client";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { SPONSORS_QUERY_RESULT } from "../sanity/sanity.types";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
@@ -40,12 +40,6 @@ export class SponsorRepository extends Context.Tag("SponsorRepository")<
   SponsorRepository,
   SponsorRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
   findAll: () =>

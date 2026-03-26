@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { sanityClient } from "../sanity/client";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { STAFF_MEMBERS_QUERY_RESULT } from "../sanity/sanity.types";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -55,12 +55,6 @@ export class StaffRepository extends Context.Tag("StaffRepository")<
   StaffRepository,
   StaffRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
   findAll: () =>

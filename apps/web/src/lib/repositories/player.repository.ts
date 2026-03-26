@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { sanityClient } from "../sanity/client";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type {
   PLAYERS_QUERY_RESULT,
   PLAYER_BY_PSD_ID_QUERY_RESULT,
@@ -85,12 +85,6 @@ export class PlayerRepository extends Context.Tag("PlayerRepository")<
   PlayerRepository,
   PlayerRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const PlayerRepositoryLive = Layer.succeed(PlayerRepository, {
   findAll: () =>
