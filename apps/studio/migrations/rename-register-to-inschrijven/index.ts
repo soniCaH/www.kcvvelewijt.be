@@ -1,4 +1,4 @@
-import {defineMigration, at, setIfMissing, unset, set} from 'sanity/migrate'
+import {defineMigration, at, set} from 'sanity/migrate'
 
 /**
  * Rename the page document slug from "register" to "inschrijven".
