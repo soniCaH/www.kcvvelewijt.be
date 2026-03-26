@@ -1,0 +1,1 @@
+export { GoogleTagManagerLoader } from "./GoogleTagManagerLoader";

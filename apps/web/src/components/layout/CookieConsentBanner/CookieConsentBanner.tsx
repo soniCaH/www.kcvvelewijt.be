@@ -2,10 +2,16 @@
 
 import { useEffect } from "react";
 import * as CookieConsent from "vanilla-cookieconsent";
+import { updateConsentState } from "@/lib/analytics/gtm-consent";
 
 // Tracks whether CookieConsent.run() has resolved; used by CookiePreferencesButton
 // to guard showPreferences() calls before initialization completes.
 export let cookieConsentReady = false;
+
+function syncConsentState() {
+  const analyticsAccepted = CookieConsent.acceptedCategory("analytics");
+  updateConsentState(analyticsAccepted);
+}
 
 export function CookieConsentBanner() {
   useEffect(() => {
@@ -22,6 +28,9 @@ export function CookieConsentBanner() {
           readOnly: false,
         },
       },
+
+      onConsent: syncConsentState,
+      onChange: syncConsentState,
 
       language: {
         default: "nl",

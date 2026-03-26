@@ -3,10 +3,17 @@ import { render } from "@testing-library/react";
 
 const mockRun = vi.fn();
 const mockReset = vi.fn();
+const mockAcceptedCategory = vi.fn();
 
 vi.mock("vanilla-cookieconsent", () => ({
   run: mockRun,
   reset: mockReset,
+  acceptedCategory: mockAcceptedCategory,
+}));
+
+const mockUpdateConsentState = vi.fn();
+vi.mock("@/lib/analytics/gtm-consent", () => ({
+  updateConsentState: mockUpdateConsentState,
 }));
 
 // Import after mock is set up
@@ -16,6 +23,8 @@ describe("CookieConsentBanner", () => {
   beforeEach(() => {
     mockRun.mockClear();
     mockReset.mockClear();
+    mockAcceptedCategory.mockClear();
+    mockUpdateConsentState.mockClear();
     mockRun.mockResolvedValue(undefined);
   });
 
@@ -42,5 +51,53 @@ describe("CookieConsentBanner", () => {
     unmount();
     expect(mockReset).toHaveBeenCalledTimes(1);
     expect(mockReset).toHaveBeenCalledWith(false);
+  });
+
+  it("registers an onConsent callback", () => {
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+    expect(config.onConsent).toBeTypeOf("function");
+  });
+
+  it("registers an onChange callback", () => {
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+    expect(config.onChange).toBeTypeOf("function");
+  });
+
+  it("onConsent calls updateConsentState with true when analytics accepted", () => {
+    mockAcceptedCategory.mockReturnValue(true);
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+
+    config.onConsent();
+
+    expect(mockAcceptedCategory).toHaveBeenCalledWith("analytics");
+    expect(mockUpdateConsentState).toHaveBeenCalledWith(true);
+  });
+
+  it("onConsent calls updateConsentState with false when analytics not accepted", () => {
+    mockAcceptedCategory.mockReturnValue(false);
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+
+    config.onConsent();
+
+    expect(mockAcceptedCategory).toHaveBeenCalledWith("analytics");
+    expect(mockUpdateConsentState).toHaveBeenCalledWith(false);
+  });
+
+  it("onChange calls updateConsentState based on current accepted category", () => {
+    mockAcceptedCategory.mockReturnValue(true);
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+
+    config.onChange({
+      changedCategories: ["analytics"],
+      changedServices: {},
+      cookie: {},
+    });
+
+    expect(mockUpdateConsentState).toHaveBeenCalledWith(true);
   });
 });
