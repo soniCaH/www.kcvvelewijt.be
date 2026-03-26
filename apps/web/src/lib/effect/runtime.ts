@@ -33,6 +33,10 @@ import {
   ResponsibilityRepository,
   ResponsibilityRepositoryLive,
 } from "../repositories/responsibility.repository";
+import {
+  PageRepository,
+  PageRepositoryLive,
+} from "../repositories/page.repository";
 
 export const AppLayer = Layer.mergeAll(
   BffServiceLive,
@@ -45,6 +49,7 @@ export const AppLayer = Layer.mergeAll(
   HomepageRepositoryLive,
   EventRepositoryLive,
   ResponsibilityRepositoryLive,
+  PageRepositoryLive,
 );
 export const runtime = ManagedRuntime.make(AppLayer);
 
@@ -62,6 +67,7 @@ export const runPromise = <A, E>(
     | HomepageRepository
     | EventRepository
     | ResponsibilityRepository
+    | PageRepository
   >,
 ) => runtime.runPromise(effect);
 
@@ -79,6 +85,7 @@ export const runPromiseWithLogging = <A, E>(
     | HomepageRepository
     | EventRepository
     | ResponsibilityRepository
+    | PageRepository
   >,
 ) =>
   runtime.runPromise(
@@ -105,4 +112,5 @@ export {
   HomepageRepository,
   EventRepository,
   ResponsibilityRepository,
+  PageRepository,
 };
