@@ -3,7 +3,7 @@
  *
  * Presentational layout for team detail pages.
  * Combines TeamHeader with URL-synced tab navigation:
- * Info · Lineup · Wedstrijden · Stand
+ * Info · Opstelling · Wedstrijden · Klassement
  *
  * Tabs are shown conditionally based on available data.
  * Wraps UrlTabs in Suspense as required for static generation.

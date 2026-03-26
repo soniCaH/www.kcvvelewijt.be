@@ -133,9 +133,19 @@ describe("TeamOverview", () => {
     it("should group youth teams into 3 tiers when groupByAge is true", () => {
       const teamsWithVariousAges = [
         ...mockYouthTeams,
-        { name: "U15B", href: "/u15b", ageGroup: "U15", teamType: "youth" },
-        { name: "U8", href: "/u8", ageGroup: "U8", teamType: "youth" },
-        { name: "U12", href: "/u12", ageGroup: "U12", teamType: "youth" },
+        {
+          name: "U15B",
+          href: "/ploegen/u15b",
+          ageGroup: "U15",
+          teamType: "youth",
+        },
+        { name: "U8", href: "/ploegen/u8", ageGroup: "U8", teamType: "youth" },
+        {
+          name: "U12",
+          href: "/ploegen/u12",
+          ageGroup: "U12",
+          teamType: "youth",
+        },
       ] as TeamData[];
 
       render(
@@ -183,9 +193,19 @@ describe("TeamOverview", () => {
 
     it("should order tiers Bovenbouw first, then Middenbouw, then Onderbouw", () => {
       const teams: TeamData[] = [
-        { name: "U6", href: "/u6", ageGroup: "U6", teamType: "youth" },
-        { name: "U12", href: "/u12", ageGroup: "U12", teamType: "youth" },
-        { name: "U17", href: "/u17", ageGroup: "U17", teamType: "youth" },
+        { name: "U6", href: "/ploegen/u6", ageGroup: "U6", teamType: "youth" },
+        {
+          name: "U12",
+          href: "/ploegen/u12",
+          ageGroup: "U12",
+          teamType: "youth",
+        },
+        {
+          name: "U17",
+          href: "/ploegen/u17",
+          ageGroup: "U17",
+          teamType: "youth",
+        },
       ];
       const { container } = render(
         <TeamOverview teams={teams} groupByAge teamType="youth" />,

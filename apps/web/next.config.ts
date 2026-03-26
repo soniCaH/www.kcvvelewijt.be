@@ -3,12 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Redirects for old /jeugd/* URLs to /team/*
+  // Redirects for old /jeugd/* URLs to /ploegen/*
   // This ensures SEO preservation for any indexed youth team pages
   async redirects() {
     return [
       {
-        source: "/jeugd/:slug",
+        source: "/jeugd/:slug((?!visie|medisch).*)",
         destination: "/ploegen/:slug",
         permanent: true, // 308 redirect for SEO
       },

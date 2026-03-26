@@ -40,11 +40,12 @@ describe("next.config redirects", () => {
     }
   });
 
-  it("redirects /jeugd/:slug to /ploegen/:slug", async () => {
+  it("redirects /jeugd/:slug to /ploegen/:slug (excluding visie and medisch)", async () => {
     const redirects = await nextConfig.redirects!();
 
-    const match = redirects.find((r) => r.source === "/jeugd/:slug");
+    const match = redirects.find((r) => r.source.startsWith("/jeugd/"));
     expect(match).toBeDefined();
+    expect(match!.source).toBe("/jeugd/:slug((?!visie|medisch).*)");
     expect(match!.destination).toBe("/ploegen/:slug");
     expect(match!.permanent).toBe(true);
   });
