@@ -149,7 +149,7 @@ export const Default: Story = {
       <ArticleMetadata
         author="Tom Redactie"
         date="15 januari 2025"
-        category={{ name: "A-Ploeg", href: "/nieuws?category=a-ploeg" }}
+        category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/overwinning-derby",
           title: "KCVV Elewijt wint met 3-1 in spannende derby",
@@ -175,7 +175,7 @@ export const Default: Story = {
           },
           {
             title: "A-Ploeg Teaminfo",
-            href: "/team/a-ploeg",
+            href: "/ploegen/a-ploeg",
             type: "team",
           },
         ]}
@@ -204,7 +204,7 @@ export const WithoutImage: Story = {
       <ArticleMetadata
         author="Club Secretariaat"
         date="20 december 2024"
-        category={{ name: "Training", href: "/nieuws?category=training" }}
+        category={{ name: "Training", href: "/nieuws?categorie=training" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/trainingsschema",
           title: "Trainingsschema aangepast voor winterstop",
@@ -248,7 +248,7 @@ export const LongArticle: Story = {
       <ArticleMetadata
         author="Marc Analyse"
         date="18 december 2024"
-        category={{ name: "A-Ploeg", href: "/nieuws?category=a-ploeg" }}
+        category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/seizoensoverzicht",
           title: "Seizoensoverzicht 2024-2025: Een analyse van onze prestaties",
@@ -274,7 +274,7 @@ export const LongArticle: Story = {
           },
           {
             title: "A-Ploeg Selectie 2024-2025",
-            href: "/team/a-ploeg",
+            href: "/ploegen/a-ploeg",
             type: "team",
           },
           {

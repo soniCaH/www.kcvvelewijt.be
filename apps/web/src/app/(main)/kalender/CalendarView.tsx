@@ -158,7 +158,7 @@ export function CalendarView({ matches }: { matches: CalendarMatch[] }) {
     } else {
       params.set("team", team);
     }
-    router.push(`/calendar${params.size ? `?${params.toString()}` : ""}`, {
+    router.push(`/kalender${params.size ? `?${params.toString()}` : ""}`, {
       scroll: false,
     });
   }

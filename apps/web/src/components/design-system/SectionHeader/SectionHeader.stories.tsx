@@ -47,7 +47,7 @@ export const DarkVariant: Story = {
   args: {
     title: "Wedstrijden",
     linkText: "Volledige kalender",
-    linkHref: "/calendar",
+    linkHref: "/kalender",
     variant: "dark",
   },
 };

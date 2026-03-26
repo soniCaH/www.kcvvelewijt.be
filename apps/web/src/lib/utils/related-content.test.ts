@@ -60,7 +60,7 @@ describe("buildRelatedContent", () => {
         href: "/club/organigram?member=staff-1",
         type: "staff",
       },
-      { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
+      { title: "A-ploeg", href: "/ploegen/a-ploeg", type: "team" },
     ]);
   });
 
@@ -104,7 +104,7 @@ describe("buildRelatedContent", () => {
     expect(result).toEqual<RelatedContent[]>([
       { title: "Jan Janssens", href: "/spelers/123", type: "player" },
       { title: "Piet Pieters", href: "/spelers/456", type: "player" },
-      { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
+      { title: "A-ploeg", href: "/ploegen/a-ploeg", type: "team" },
     ]);
   });
 
@@ -147,7 +147,7 @@ describe("buildRelatedContent", () => {
 
     expect(result).toEqual<RelatedContent[]>([
       { title: "Jan Janssens", href: "/spelers/123", type: "player" },
-      { title: "A-ploeg", href: "/team/a-ploeg", type: "team" },
+      { title: "A-ploeg", href: "/ploegen/a-ploeg", type: "team" },
     ]);
   });
 

@@ -140,7 +140,7 @@ export const PlayerTeamHistory = forwardRef<
               {/* Entry content */}
               <div className="flex-1 pb-2">
                 <Link
-                  href={`/team/${entry.teamSlug}`}
+                  href={`/ploegen/${entry.teamSlug}`}
                   className={cn(
                     "font-medium hover:text-kcvv-green-bright transition-colors",
                     entry.isCurrent

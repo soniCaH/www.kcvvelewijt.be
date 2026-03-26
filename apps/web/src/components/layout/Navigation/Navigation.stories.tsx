@@ -65,7 +65,7 @@ export const OnTeamPage: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/team/a-ploeg",
+        pathname: "/ploegen/a-ploeg",
       },
     },
   },
@@ -78,8 +78,8 @@ export const OnTeamTab: Story = {
   parameters: {
     nextjs: {
       navigation: {
-        pathname: "/team/a-ploeg",
-        query: { tab: "lineup" },
+        pathname: "/ploegen/a-ploeg",
+        query: { tab: "opstelling" },
       },
     },
   },

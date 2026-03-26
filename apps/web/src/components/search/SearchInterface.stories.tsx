@@ -70,7 +70,7 @@ const mockResponse: SearchResponse = {
       type: "team",
       title: "A-Ploeg",
       description: "Eerste ploeg — Nationale 1",
-      url: "/team/a-ploeg",
+      url: "/ploegen/a-ploeg",
       imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
     },
   ],

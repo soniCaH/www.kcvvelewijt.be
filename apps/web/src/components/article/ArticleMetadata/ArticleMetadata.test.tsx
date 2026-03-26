@@ -6,7 +6,7 @@ describe("ArticleMetadata", () => {
   const defaultProps = {
     author: "Jan Janssens",
     date: "15/01/2025",
-    category: { name: "Eerste ploeg", href: "/nieuws?category=eerste-ploeg" },
+    category: { name: "Eerste ploeg", href: "/nieuws?categorie=eerste-ploeg" },
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/test",
       title: "Test Article",
@@ -22,7 +22,7 @@ describe("ArticleMetadata", () => {
     const categoryLink = screen.getByRole("link", { name: "Eerste ploeg" });
     expect(categoryLink).toHaveAttribute(
       "href",
-      "/nieuws?category=eerste-ploeg",
+      "/nieuws?categorie=eerste-ploeg",
     );
   });
 

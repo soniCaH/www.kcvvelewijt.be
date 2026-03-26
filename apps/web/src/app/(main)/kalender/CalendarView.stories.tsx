@@ -8,7 +8,7 @@ const meta = {
   parameters: {
     layout: "padded",
     nextjs: {
-      navigation: { pathname: "/calendar", query: {} },
+      navigation: { pathname: "/kalender", query: {} },
     },
   },
   tags: ["autodocs"],
@@ -122,7 +122,7 @@ export const FilteredByTeam: Story = {
   args: { matches: mockMatches },
   parameters: {
     nextjs: {
-      navigation: { pathname: "/calendar", query: { team: "A-ploeg" } },
+      navigation: { pathname: "/kalender", query: { team: "A-ploeg" } },
     },
   },
 };

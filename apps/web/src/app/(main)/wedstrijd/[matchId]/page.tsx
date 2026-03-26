@@ -128,9 +128,9 @@ export default async function MatchPage({
   const awayLineup = match.lineup?.away.map(transformLineupPlayer) ?? [];
 
   // Only allow back-links to internal team paths (prevent open redirect)
-  const validFromTabs = ["info", "lineup", "matches", "standings"];
+  const validFromTabs = ["info", "opstelling", "wedstrijden", "klassement"];
   const backUrl =
-    from && /^\/team\/[a-zA-Z0-9_-]+$/.test(from)
+    from && /^\/ploegen\/[a-zA-Z0-9_-]+$/.test(from)
       ? `${from}${fromTab && validFromTabs.includes(fromTab) ? `?tab=${fromTab}` : ""}`
       : null;
 

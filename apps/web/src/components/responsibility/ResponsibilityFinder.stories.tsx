@@ -60,7 +60,10 @@ const storyPaths: ResponsibilityPath[] = [
       department: "jeugdbestuur",
     },
     steps: [
-      { description: "Ga naar de inschrijvingspagina", link: "/club/register" },
+      {
+        description: "Ga naar de inschrijvingspagina",
+        link: "/club/inschrijven",
+      },
       { description: "Vul het formulier in met alle gevraagde gegevens" },
       { description: "Betaal het lidgeld" },
     ],

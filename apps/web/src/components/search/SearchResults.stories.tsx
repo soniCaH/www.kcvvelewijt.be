@@ -41,7 +41,7 @@ const mockResults = [
     id: "3",
     type: "team" as const,
     title: "A-Ploeg",
-    url: "/team/a-ploeg",
+    url: "/ploegen/a-ploeg",
     imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
   },
 ];

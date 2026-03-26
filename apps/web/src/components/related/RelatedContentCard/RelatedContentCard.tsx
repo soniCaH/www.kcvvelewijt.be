@@ -19,7 +19,7 @@ function getHref(item: RelatedContentItem): string | null {
     case "player":
       return `/spelers/${item.psdId}`;
     case "team":
-      return `/team/${item.slug}`;
+      return `/ploegen/${item.slug}`;
     case "staff":
       return null;
   }

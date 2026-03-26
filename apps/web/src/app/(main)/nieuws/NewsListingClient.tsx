@@ -142,7 +142,7 @@ export function NewsListingClient({
 
         // Update URL and scroll only after successful fetch
         const url = categoryFilter
-          ? `/nieuws?category=${encodeURIComponent(categoryFilter)}`
+          ? `/nieuws?categorie=${encodeURIComponent(categoryFilter)}`
           : "/nieuws";
         window.history.replaceState({}, "", url);
         window.scrollTo({ top: 0, behavior: "smooth" });

@@ -50,9 +50,9 @@ describe("PlayerTeamHistory", () => {
 
       const links = screen.getAllByRole("link");
       expect(links).toHaveLength(3);
-      expect(links[0]).toHaveAttribute("href", "/team/eerste-ploeg");
-      expect(links[1]).toHaveAttribute("href", "/team/beloften");
-      expect(links[2]).toHaveAttribute("href", "/team/u21");
+      expect(links[0]).toHaveAttribute("href", "/ploegen/eerste-ploeg");
+      expect(links[1]).toHaveAttribute("href", "/ploegen/beloften");
+      expect(links[2]).toHaveAttribute("href", "/ploegen/u21");
     });
 
     it("displays current team badge for active entry", () => {

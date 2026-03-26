@@ -141,17 +141,17 @@ describe("MobileMenu", () => {
   describe("Query parameter active state", () => {
     it("should mark submenu item as active when pathname and tab param match", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=lineup");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=opstelling");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
       // Open the A-Ploeg submenu
       const aPloegButton = screen.getByRole("button", { name: /a-ploeg/i });
       await user.click(aPloegButton);
 
-      // The "Spelers & Staff" link should be active (has ?tab=lineup)
+      // The "Spelers & Staff" link should be active (has ?tab=opstelling)
       const spelersLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a?tab=lineup"]',
+        'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
       );
       expect(spelersLink).toHaveClass("active");
       expect(spelersLink).toHaveClass("text-kcvv-green-bright");
@@ -159,7 +159,7 @@ describe("MobileMenu", () => {
 
     it("should mark Info as active when on team page without tab param", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/eerste-elftallen-a";
+      mockPathname = "/ploegen/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams();
       const { container } = render(<MobileMenu {...defaultProps} />);
 
@@ -169,7 +169,7 @@ describe("MobileMenu", () => {
 
       // The "Info" link should be active (no tab param)
       const infoLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a"]',
+        'a[href="/ploegen/eerste-elftallen-a"]',
       );
       expect(infoLink).toHaveClass("active");
       expect(infoLink).toHaveClass("text-kcvv-green-bright");
@@ -177,25 +177,25 @@ describe("MobileMenu", () => {
 
     it("should not mark Info as active when tab param exists", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=matches");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=wedstrijden");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
       // Open the A-Ploeg submenu
       const aPloegButton = screen.getByRole("button", { name: /a-ploeg/i });
       await user.click(aPloegButton);
 
-      // The "Info" link should NOT be active when we're on ?tab=matches
+      // The "Info" link should NOT be active when we're on ?tab=wedstrijden
       const infoLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a"]',
+        'a[href="/ploegen/eerste-elftallen-a"]',
       );
       expect(infoLink).not.toHaveClass("active");
     });
 
-    it("should mark Wedstrijden as active when tab=matches", async () => {
+    it("should mark Wedstrijden as active when tab=wedstrijden", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/eerste-elftallen-b";
-      mockSearchParams = new URLSearchParams("tab=matches");
+      mockPathname = "/ploegen/eerste-elftallen-b";
+      mockSearchParams = new URLSearchParams("tab=wedstrijden");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
       // Open the B-Ploeg submenu
@@ -204,15 +204,15 @@ describe("MobileMenu", () => {
 
       // The "Wedstrijden" link should be active
       const wedstrijdenLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-b?tab=matches"]',
+        'a[href="/ploegen/eerste-elftallen-b?tab=wedstrijden"]',
       );
       expect(wedstrijdenLink).toHaveClass("active");
     });
 
-    it("should mark Stand as active when tab=standings", async () => {
+    it("should mark Stand as active when tab=klassement", async () => {
       const user = userEvent.setup();
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=standings");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=klassement");
       const { container } = render(<MobileMenu {...defaultProps} />);
 
       // Open the A-Ploeg submenu
@@ -221,7 +221,7 @@ describe("MobileMenu", () => {
 
       // The "Stand" link should be active
       const standLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a?tab=standings"]',
+        'a[href="/ploegen/eerste-elftallen-a?tab=klassement"]',
       );
       expect(standLink).toHaveClass("active");
     });

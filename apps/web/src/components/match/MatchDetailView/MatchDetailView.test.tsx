@@ -210,13 +210,13 @@ describe("MatchDetailView", () => {
       render(
         <MatchDetailView
           {...defaultProps}
-          backUrl="/team/a-ploeg?tab=matches"
+          backUrl="/ploegen/a-ploeg?tab=wedstrijden"
         />,
       );
       const link = screen.getByRole("link", {
         name: /terug naar wedstrijden/i,
       });
-      expect(link).toHaveAttribute("href", "/team/a-ploeg?tab=matches");
+      expect(link).toHaveAttribute("href", "/ploegen/a-ploeg?tab=wedstrijden");
     });
 
     it("does not render back link when backUrl is not provided", () => {

@@ -76,7 +76,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     name: "A-Ploeg",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
     tagline: "De hoofdploeg",
     teamType: "senior",
   },
@@ -88,7 +88,7 @@ export const Default: Story = {
 export const Youth: Story = {
   args: {
     name: "U15",
-    href: "/team/u15",
+    href: "/ploegen/u15",
     ageGroup: "U15",
     teamType: "youth",
   },
@@ -112,7 +112,7 @@ export const Club: Story = {
 export const WithCoach: Story = {
   args: {
     name: "A-Ploeg",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
     tagline: "De hoofdploeg",
     teamType: "senior",
     coach: {
@@ -128,7 +128,7 @@ export const WithCoach: Story = {
 export const WithRecord: Story = {
   args: {
     name: "A-Ploeg",
-    href: "/team/a-ploeg",
+    href: "/ploegen/a-ploeg",
     teamType: "senior",
     record: { wins: 12, draws: 5, losses: 3 },
   },
@@ -151,7 +151,7 @@ export const Loading: Story = {
 export const Compact: Story = {
   args: {
     name: "U10",
-    href: "/team/u10",
+    href: "/ploegen/u10",
     ageGroup: "U10",
     teamType: "youth",
     variant: "compact",

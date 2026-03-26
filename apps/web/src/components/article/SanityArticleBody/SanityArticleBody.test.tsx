@@ -566,7 +566,7 @@ describe("SanityArticleBody internalLink", () => {
     expect(link!.textContent).toBe("John Doe");
   });
 
-  it("renders team reference as link to /team/{slug}", () => {
+  it("renders team reference as link to /ploegen/{slug}", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -580,7 +580,7 @@ describe("SanityArticleBody internalLink", () => {
 
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
-    expect(link!.getAttribute("href")).toBe("/team/eerste-ploeg");
+    expect(link!.getAttribute("href")).toBe("/ploegen/eerste-ploeg");
   });
 
   it("renders article reference as link to /nieuws/{slug}", () => {

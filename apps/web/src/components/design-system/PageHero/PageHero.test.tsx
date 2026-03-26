@@ -55,13 +55,13 @@ describe("PageHero", () => {
     render(
       <PageHero
         {...defaultProps}
-        cta={{ label: "Bekijk de ploeg", href: "/team/a" }}
+        cta={{ label: "Bekijk de ploeg", href: "/ploegen/a" }}
       />,
     );
 
     const link = screen.getByRole("link", { name: /bekijk de ploeg/i });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/team/a");
+    expect(link).toHaveAttribute("href", "/ploegen/a");
   });
 
   it("does not render a CTA when cta prop is omitted", () => {

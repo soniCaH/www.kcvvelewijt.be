@@ -77,9 +77,11 @@ describe("PageHeader", () => {
       expect(nav).toBeInTheDocument();
     });
 
-    it("should render 'Word lid' link pointing to /club/register", () => {
+    it("should render 'Word lid' link pointing to /club/inschrijven", () => {
       const { container } = render(<PageHeader />);
-      const wordLidLink = container.querySelector('a[href="/club/register"]');
+      const wordLidLink = container.querySelector(
+        'a[href="/club/inschrijven"]',
+      );
       expect(wordLidLink).toBeInTheDocument();
       expect(wordLidLink).toHaveTextContent(/word lid/i);
     });

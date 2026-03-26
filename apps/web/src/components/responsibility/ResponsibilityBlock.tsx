@@ -103,7 +103,7 @@ export function ResponsibilityBlock({
           </Link>
 
           <Link
-            href="/club/register"
+            href="/club/inschrijven"
             className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
           >
             <div

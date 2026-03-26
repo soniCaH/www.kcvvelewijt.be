@@ -140,11 +140,11 @@ describe("ScheurkalenderPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders the back link to /calendar", () => {
+    it("renders the back link to /kalender", () => {
       render(<ScheurkalenderPage days={mockDays} />);
       expect(
         screen.getByRole("link", { name: /terug naar kalender/i }),
-      ).toHaveAttribute("href", "/calendar");
+      ).toHaveAttribute("href", "/kalender");
     });
   });
 });

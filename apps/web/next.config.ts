@@ -3,13 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Redirects for old /jeugd/* URLs to /team/*
+  // Redirects for old /jeugd/* URLs to /ploegen/*
   // This ensures SEO preservation for any indexed youth team pages
   async redirects() {
     return [
       {
-        source: "/jeugd/:slug",
-        destination: "/team/:slug",
+        source: "/jeugd/:slug((?!visie|medisch).*)",
+        destination: "/ploegen/:slug",
         permanent: true, // 308 redirect for SEO
       },
       // #819 — Dutch URL renames
@@ -36,6 +36,32 @@ const nextConfig: NextConfig = {
       {
         source: "/search",
         destination: "/zoeken",
+        permanent: true,
+      },
+      // #1078 — Phase 2 Dutch URL renames
+      {
+        source: "/calendar",
+        destination: "/kalender",
+        permanent: true,
+      },
+      {
+        source: "/teams",
+        destination: "/ploegen",
+        permanent: true,
+      },
+      {
+        source: "/team/:slug",
+        destination: "/ploegen/:slug",
+        permanent: true,
+      },
+      {
+        source: "/club/history",
+        destination: "/club/geschiedenis",
+        permanent: true,
+      },
+      {
+        source: "/club/register",
+        destination: "/club/inschrijven",
         permanent: true,
       },
     ];

@@ -107,7 +107,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       {
         order: 1,
         description: "Ga naar de inschrijvingspagina op de website",
-        link: "/club/register",
+        link: "/club/inschrijven",
       },
       {
         order: 2,

@@ -13,14 +13,14 @@ import { fetchArticlesAction } from "./actions";
 import { INITIAL_TOTAL } from "./constants";
 
 interface NewsPageProps {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ categorie?: string }>;
 }
 
 export async function generateMetadata({
   searchParams,
 }: NewsPageProps): Promise<Metadata> {
-  const { category } = await searchParams;
-  if (!category) {
+  const { categorie } = await searchParams;
+  if (!categorie) {
     return {
       title: "Nieuwsarchief | KCVV Elewijt",
       description:
@@ -28,14 +28,14 @@ export async function generateMetadata({
     };
   }
   return {
-    title: `${category} - Nieuwsarchief | KCVV Elewijt`,
-    description: `Bekijk al het ${category} nieuws van KCVV Elewijt.`,
+    title: `${categorie} - Nieuwsarchief | KCVV Elewijt`,
+    description: `Bekijk al het ${categorie} nieuws van KCVV Elewijt.`,
   };
 }
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
-  const categorySlug = params.category;
+  const categorySlug = params.categorie;
 
   // Fetch unique tags (lightweight) and initial paginated batch in parallel
   const [allTags, initialBatch] = await Promise.all([

@@ -54,7 +54,7 @@ export const Youth: Story = {
     heading: "Interesse in onze jeugd?",
     body: "Nieuwe spelers zijn altijd welkom — van U6 tot U21.",
     buttonLabel: "Word ook lid",
-    buttonHref: "/club/register",
+    buttonHref: "/club/inschrijven",
   },
 };
 

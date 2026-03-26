@@ -33,7 +33,7 @@ export function YouthTeamsDirectory({ divisions }: YouthTeamsDirectoryProps) {
               {division.teams.map((team) => (
                 <Link
                   key={team._id}
-                  href={`/team/${team.slug}`}
+                  href={`/ploegen/${team.slug}`}
                   className="flex items-center gap-4 px-5 py-4 bg-white/8 border border-white/8 rounded-sm no-underline transition-colors hover:bg-white/[0.14] hover:border-white/15"
                 >
                   {/* Badge circle */}

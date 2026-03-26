@@ -11,8 +11,8 @@ export interface PageFooterProps {
 
 const clubLinks = [
   { href: "/nieuws", label: "Nieuws" },
-  { href: "/calendar", label: "Kalender" },
-  { href: "/teams", label: "Ploegen" },
+  { href: "/kalender", label: "Kalender" },
+  { href: "/ploegen", label: "Ploegen" },
   { href: "/sponsors", label: "Sponsors" },
   { href: "/club/organigram", label: "Bestuur" },
 ] as const;

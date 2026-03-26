@@ -132,11 +132,11 @@ describe("RelatedContentCard", () => {
       ).toBeInTheDocument();
     });
 
-    it("links to /team/[slug]", () => {
+    it("links to /ploegen/[slug]", () => {
       render(<RelatedContentCard item={teamItem} />);
 
       const link = screen.getByText("A-ploeg").closest("a");
-      expect(link).toHaveAttribute("href", "/team/a-ploeg");
+      expect(link).toHaveAttribute("href", "/ploegen/a-ploeg");
     });
   });
 

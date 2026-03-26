@@ -65,7 +65,7 @@ export const WithContent: Story = {
       <ArticleMetadata
         author="KCVV Elewijt"
         date="15 maart 2026"
-        category={{ name: "Transfers", href: "/nieuws?category=Transfers" }}
+        category={{ name: "Transfers", href: "/nieuws?categorie=Transfers" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/transfers",
           title: args.title,

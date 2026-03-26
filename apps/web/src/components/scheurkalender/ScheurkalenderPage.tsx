@@ -145,7 +145,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
         {/* Back link (screen only) */}
         <div className="mt-8 print:hidden">
           <Link
-            href="/calendar"
+            href="/kalender"
             className="text-sm text-gray-500 hover:text-green-main transition-colors"
           >
             ← Terug naar kalender

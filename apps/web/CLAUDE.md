@@ -4,7 +4,7 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 ## Implemented Routes
 
-`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/team/[slug]`, `/jeugd`, `/wedstrijd/[matchId]`, `/sponsors`, `/club/organigram`, `/hulp`, `/zoeken`, `/privacy`
+`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/sponsors`, `/club/organigram`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
 
 ## Design System & Storybook (MANDATORY)
 

@@ -56,7 +56,7 @@ describe("ResponsibilityBlock", () => {
       render(<ResponsibilityBlock paths={[]} />);
 
       const registerLink = screen.getByText("Inschrijven").closest("a");
-      expect(registerLink).toHaveAttribute("href", "/club/register");
+      expect(registerLink).toHaveAttribute("href", "/club/inschrijven");
     });
 
     it("quick links have proper icons", () => {

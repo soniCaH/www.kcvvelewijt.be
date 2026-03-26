@@ -42,11 +42,11 @@ describe("PageFooter", () => {
     );
     expect(screen.getByRole("link", { name: "Kalender" })).toHaveAttribute(
       "href",
-      "/calendar",
+      "/kalender",
     );
     expect(screen.getByRole("link", { name: "Ploegen" })).toHaveAttribute(
       "href",
-      "/teams",
+      "/ploegen",
     );
     expect(screen.getByRole("link", { name: "Sponsors" })).toHaveAttribute(
       "href",

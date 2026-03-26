@@ -83,8 +83,8 @@ describe("Navigation", () => {
     });
 
     it("should not mark base path as active when tab param exists", async () => {
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=lineup");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=opstelling");
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // A-Ploeg is a dropdown trigger - it should NOT have the "active" class
@@ -101,14 +101,14 @@ describe("Navigation", () => {
       // Wait for dropdown to render
       await waitFor(() => {
         const lineupLink = container.querySelector(
-          'a[href="/team/eerste-elftallen-a?tab=lineup"]',
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
         );
         expect(lineupLink).toBeInTheDocument();
       });
 
-      // The "Spelers & Staff" link (tab=lineup) should be active
+      // The "Spelers & Staff" link (tab=opstelling) should be active
       const lineupLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a?tab=lineup"]',
+        'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
       );
       expect(lineupLink).toHaveClass("text-kcvv-green-bright");
     });
@@ -116,8 +116,8 @@ describe("Navigation", () => {
 
   describe("Query parameter active state", () => {
     it("should mark dropdown item as active when pathname and tab param match", async () => {
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=lineup");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=opstelling");
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // Hover over the A-Ploeg dropdown to open it using fireEvent
@@ -128,20 +128,20 @@ describe("Navigation", () => {
       // Wait for dropdown to render
       await waitFor(() => {
         const spelersLink = container.querySelector(
-          'a[href="/team/eerste-elftallen-a?tab=lineup"]',
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
         );
         expect(spelersLink).toBeInTheDocument();
       });
 
-      // The "Spelers & Staff" link should be active (has ?tab=lineup)
+      // The "Spelers & Staff" link should be active (has ?tab=opstelling)
       const spelersLink = container.querySelector(
-        'a[href="/team/eerste-elftallen-a?tab=lineup"]',
+        'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
       );
       expect(spelersLink).toHaveClass("text-kcvv-green-bright");
     });
 
     it("should mark Info as active when on team page without tab param", async () => {
-      mockPathname = "/team/eerste-elftallen-a";
+      mockPathname = "/ploegen/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams();
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
@@ -153,7 +153,7 @@ describe("Navigation", () => {
       // Wait for dropdown to render with multiple info links
       await waitFor(() => {
         const infoLinks = container.querySelectorAll(
-          'a[href="/team/eerste-elftallen-a"]',
+          'a[href="/ploegen/eerste-elftallen-a"]',
         );
         expect(infoLinks.length).toBeGreaterThan(1);
       });
@@ -161,7 +161,7 @@ describe("Navigation", () => {
       // The "Info" link in the dropdown should be active (no tab param)
       // It's the second link with this href (first is the dropdown trigger)
       const infoLinks = container.querySelectorAll(
-        'a[href="/team/eerste-elftallen-a"]',
+        'a[href="/ploegen/eerste-elftallen-a"]',
       );
       // The dropdown child link (second one) should be green
       const dropdownInfoLink = infoLinks[1];
@@ -169,8 +169,8 @@ describe("Navigation", () => {
     });
 
     it("should not mark Info as active when tab param exists", async () => {
-      mockPathname = "/team/eerste-elftallen-a";
-      mockSearchParams = new URLSearchParams("tab=matches");
+      mockPathname = "/ploegen/eerste-elftallen-a";
+      mockSearchParams = new URLSearchParams("tab=wedstrijden");
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // Hover over the A-Ploeg dropdown to open it using fireEvent
@@ -181,15 +181,15 @@ describe("Navigation", () => {
       // Wait for dropdown to render
       await waitFor(() => {
         const infoLinks = container.querySelectorAll(
-          'a[href="/team/eerste-elftallen-a"]',
+          'a[href="/ploegen/eerste-elftallen-a"]',
         );
         expect(infoLinks.length).toBeGreaterThan(1);
       });
 
-      // The dropdown "Info" link should NOT be active when we're on ?tab=matches
+      // The dropdown "Info" link should NOT be active when we're on ?tab=wedstrijden
       // Get all links with this href - [0] is trigger, [1] is dropdown item
       const infoLinks = container.querySelectorAll(
-        'a[href="/team/eerste-elftallen-a"]',
+        'a[href="/ploegen/eerste-elftallen-a"]',
       );
       const dropdownInfoLink = infoLinks[1];
       expect(dropdownInfoLink).not.toHaveClass("text-kcvv-green-bright");
@@ -198,7 +198,7 @@ describe("Navigation", () => {
 
   describe("Nested routes", () => {
     it("should mark parent as active for nested routes", async () => {
-      mockPathname = "/club/history";
+      mockPathname = "/club/geschiedenis";
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
       // "De club" is a dropdown trigger - hover to open it
@@ -208,12 +208,16 @@ describe("Navigation", () => {
 
       // Wait for dropdown to render
       await waitFor(() => {
-        const historyLink = container.querySelector('a[href="/club/history"]');
+        const historyLink = container.querySelector(
+          'a[href="/club/geschiedenis"]',
+        );
         expect(historyLink).toBeInTheDocument();
       });
 
-      // The "Geschiedenis" link (/club/history) should be active due to exact match
-      const historyLink = container.querySelector('a[href="/club/history"]');
+      // The "Geschiedenis" link (/club/geschiedenis) should be active due to exact match
+      const historyLink = container.querySelector(
+        'a[href="/club/geschiedenis"]',
+      );
       expect(historyLink).toHaveClass("text-kcvv-green-bright");
     });
   });

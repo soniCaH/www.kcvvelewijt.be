@@ -139,7 +139,7 @@ const searchTeams = (query: string) =>
           type: "team",
           title: team.name,
           description: team.divisionFull ?? team.division ?? undefined,
-          url: `/team/${team.slug}`,
+          url: `/ploegen/${team.slug}`,
           imageUrl: team.teamImageUrl ?? undefined,
         }),
       );

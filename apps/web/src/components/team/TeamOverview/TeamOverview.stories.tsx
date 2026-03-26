@@ -146,7 +146,7 @@ export const SeniorTeams: Story = {
   args: {
     teams: MOCK_TEAMS.senior.map((t) => ({
       ...t,
-      href: `/team/${t.slug}`,
+      href: `/ploegen/${t.slug}`,
       teamType: "senior" as const,
     })),
     teamType: "senior",
@@ -175,7 +175,7 @@ export const AllTeams: Story = {
     teams: [
       ...MOCK_TEAMS.senior.map((t) => ({
         ...t,
-        href: `/team/${t.slug}`,
+        href: `/ploegen/${t.slug}`,
         teamType: "senior" as const,
       })),
       ...MOCK_TEAMS.youth.slice(0, 6).map((t) => ({
@@ -236,7 +236,7 @@ export const WithFilters: Story = {
     teams: [
       ...MOCK_TEAMS.senior.map((t) => ({
         ...t,
-        href: `/team/${t.slug}`,
+        href: `/ploegen/${t.slug}`,
         teamType: "senior" as const,
       })),
       ...MOCK_TEAMS.youth.map((t) => ({
@@ -274,7 +274,7 @@ export const FewTeams: Story = {
   args: {
     teams: MOCK_TEAMS.senior.slice(0, 2).map((t) => ({
       ...t,
-      href: `/team/${t.slug}`,
+      href: `/ploegen/${t.slug}`,
       teamType: "senior" as const,
     })),
     teamType: "senior",

@@ -42,7 +42,7 @@ export const Default: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "15/01/2025",
-    category: { name: "Eerste ploeg", href: "/nieuws?category=eerste-ploeg" },
+    category: { name: "Eerste ploeg", href: "/nieuws?categorie=eerste-ploeg" },
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/belangrijke-overwinning",
       title: "KCVV Elewijt behaalt belangrijke overwinning",
@@ -73,7 +73,7 @@ export const WithoutShare: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "10/01/2025",
-    category: { name: "Jeugd", href: "/nieuws?category=jeugd" },
+    category: { name: "Jeugd", href: "/nieuws?categorie=jeugd" },
   },
 };
 
@@ -94,7 +94,7 @@ export const InContext: Story = {
   args: {
     author: "KCVV Elewijt",
     date: "18/01/2025",
-    category: { name: "Transfer", href: "/nieuws?category=transfer" },
+    category: { name: "Transfer", href: "/nieuws?categorie=transfer" },
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/nieuwe-speler",
       title: "Nieuwe speler aangekondigd",

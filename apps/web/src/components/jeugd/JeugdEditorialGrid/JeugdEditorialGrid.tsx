@@ -16,7 +16,7 @@ const NAV_CARDS: NavCardConfig[] = [
     title: "Word lid van KCVV",
     description: "Nieuwe spelers zijn altijd welkom — van U6 tot U21.",
     arrowText: "Schrijf je in",
-    href: "/club/register",
+    href: "/club/inschrijven",
     imageUrl: "/images/jeugd/inschrijven.jpg",
   },
   {
