@@ -137,4 +137,7 @@ export default async function CalendarPage() {
   );
 }
 
-export const revalidate = 21600; // 6 hours
+// Skip build-time prerendering — the page depends on BFF + Sanity APIs
+// that aren't available during build. Runtime caching is handled by the BFF
+// layer (24h KV cache) so per-request rendering is still fast.
+export const dynamic = "force-dynamic";
