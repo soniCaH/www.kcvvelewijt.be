@@ -95,13 +95,15 @@ describe("CalendarWeek", () => {
       expect(screen.getByText("23 - 29 maart 2026")).toBeInTheDocument();
     });
 
-    it("renders match in correct day column", () => {
+    it("renders match in correct day column showing opponent", () => {
       const matches = [
         makeMatch({ id: 1, date: "2026-03-28T15:00:00" }), // Saturday
       ];
       render(<CalendarWeek {...defaultProps} matches={matches} />);
       const saturdayColumn = screen.getByTestId("week-col-2026-03-28");
-      expect(saturdayColumn).toHaveTextContent("KCVV Elewijt A");
+      // Mini card shows opponent name (KCVV is home, so away team is shown)
+      expect(saturdayColumn).toHaveTextContent("Racing Mechelen");
+      expect(saturdayColumn).toHaveTextContent("A-ploeg");
     });
 
     it("renders event in correct day column", () => {

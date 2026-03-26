@@ -115,7 +115,11 @@ function DayPanel({
                   : undefined
               }
               status={match.status === "scheduled" ? "upcoming" : match.status}
-              href={`/wedstrijd/${match.id}`}
+              href={
+                match.status !== "scheduled"
+                  ? `/wedstrijd/${match.id}`
+                  : undefined
+              }
               teamLabel={match.team}
               variant="compact"
             />

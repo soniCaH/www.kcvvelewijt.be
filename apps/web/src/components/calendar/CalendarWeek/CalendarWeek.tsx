@@ -3,11 +3,14 @@
 import { useMemo } from "react";
 import { DateTime } from "luxon";
 import Link from "next/link";
-import { MatchTeaser } from "@/components/match/MatchTeaser";
+import Image from "next/image";
+import { cn } from "@/lib/utils/cn";
+import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import {
   getDaysInWeek,
   getMatchesForDay,
   getEventsForDay,
+  getMatchDotType,
 } from "@/app/(main)/kalender/utils";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 
@@ -100,36 +103,87 @@ export function CalendarWeek({
               </div>
 
               {/* Day content */}
-              <div className="space-y-2">
-                {dayMatches.map((match) => (
-                  <div key={match.id} data-match>
-                    <MatchTeaser
-                      homeTeam={match.homeTeam}
-                      awayTeam={match.awayTeam}
-                      date={match.date}
-                      time={match.time}
-                      score={
-                        match.scoreDisplay.type === "score"
-                          ? {
-                              home: match.scoreDisplay.home,
-                              away: match.scoreDisplay.away,
+              <div className="space-y-1.5">
+                {dayMatches.map((match) => {
+                  const isHome = getMatchDotType(match) === "home";
+                  const hasDetail = match.status !== "scheduled";
+                  const cardClass = cn(
+                    "block rounded border border-gray-200 bg-white p-1.5 transition-all",
+                    hasDetail &&
+                      "hover:border-kcvv-green-bright hover:shadow-sm",
+                  );
+                  const cardContent = (
+                    <>
+                      {/* Team label */}
+                      {match.team && (
+                        <div className="text-[9px] font-bold uppercase tracking-wider text-kcvv-green-bright truncate mb-0.5">
+                          {match.team}
+                        </div>
+                      )}
+                      {/* Opponent + dot */}
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            isHome
+                              ? "bg-kcvv-green-bright"
+                              : "border border-kcvv-green-bright",
+                          )}
+                        />
+                        {(isHome ? match.awayTeam : match.homeTeam).logo ? (
+                          <Image
+                            src={
+                              (isHome ? match.awayTeam : match.homeTeam).logo!
                             }
-                          : undefined
-                      }
-                      status={
-                        match.status === "scheduled" ? "upcoming" : match.status
-                      }
+                            alt=""
+                            width={14}
+                            height={14}
+                            className="w-3.5 h-3.5 object-contain shrink-0"
+                          />
+                        ) : null}
+                        <span className="text-[11px] font-medium text-gray-700 truncate">
+                          {isHome ? match.awayTeam.name : match.homeTeam.name}
+                        </span>
+                      </div>
+                      {/* Time + status */}
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {match.time && (
+                          <span className="text-[10px] text-gray-400 font-medium">
+                            {match.time}
+                          </span>
+                        )}
+                        {match.scoreDisplay.type === "score" && (
+                          <span className="text-[10px] font-bold text-gray-600 tabular-nums">
+                            {match.scoreDisplay.home}-{match.scoreDisplay.away}
+                          </span>
+                        )}
+                        {match.status !== "scheduled" &&
+                          match.status !== "finished" && (
+                            <MatchStatusBadge status={match.status} />
+                          )}
+                      </div>
+                    </>
+                  );
+                  return hasDetail ? (
+                    <Link
+                      key={match.id}
                       href={`/wedstrijd/${match.id}`}
-                      teamLabel={match.team}
-                      variant="compact"
-                    />
-                  </div>
-                ))}
+                      data-match
+                      className={cardClass}
+                    >
+                      {cardContent}
+                    </Link>
+                  ) : (
+                    <div key={match.id} data-match className={cardClass}>
+                      {cardContent}
+                    </div>
+                  );
+                })}
                 {dayEvents.map((event) => (
                   <Link
                     key={event.id}
                     href={event.href}
-                    className="block bg-blue-50 border border-blue-200 rounded p-2 text-xs font-medium text-blue-800 hover:bg-blue-100 transition-colors"
+                    className="block bg-blue-50 border border-blue-200 rounded p-1.5 text-[10px] font-medium text-blue-800 hover:bg-blue-100 transition-colors truncate"
                   >
                     {event.title}
                   </Link>

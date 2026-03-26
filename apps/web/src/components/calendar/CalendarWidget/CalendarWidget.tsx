@@ -37,7 +37,8 @@ export function CalendarWidget({
 }: CalendarWidgetProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const view = (searchParams.get("view") as ViewMode) ?? "month";
+  const rawView = searchParams.get("view");
+  const view: ViewMode = rawView === "week" ? "week" : "month";
 
   const today = DateTime.now();
   const [selectedDate, setSelectedDate] = useState(today.toISODate()!);

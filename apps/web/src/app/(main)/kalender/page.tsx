@@ -9,6 +9,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { EventRepository } from "@/lib/repositories/event.repository";
+import { PageTitle } from "@/components/layout";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { transformMatchToCalendar } from "./utils";
 import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
@@ -120,17 +121,7 @@ export default async function CalendarPage({
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Hero */}
-      <div className="bg-linear-to-br from-green-main via-green-hover to-green-dark-hover text-white py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 font-title">
-            Wedstrijdkalender
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl">
-            Alle wedstrijden en evenementen van KCVV Elewijt
-          </p>
-        </div>
-      </div>
+      <PageTitle title="Wedstrijdkalender" />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <CalendarWidget
