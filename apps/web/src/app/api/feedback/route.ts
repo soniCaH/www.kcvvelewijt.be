@@ -9,8 +9,17 @@ export async function POST(request: Request) {
     );
   }
 
+  let body: unknown;
   try {
-    const body = (await request.json()) as unknown;
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Invalid JSON" },
+      { status: 400 },
+    );
+  }
+
+  try {
     const res = await fetch(`${bffUrl}/feedback`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
