@@ -5,6 +5,7 @@ import {
   RELATED_ARTICLES_QUERY,
 } from "./article.repository";
 import { EVENTS_QUERY, NEXT_FEATURED_EVENT_QUERY } from "./event.repository";
+import { HOMEPAGE_BANNERS_QUERY } from "./homepage.repository";
 import { PAGE_BY_SLUG_QUERY } from "./page.repository";
 import { PLAYERS_QUERY, PLAYER_BY_PSD_ID_QUERY } from "./player.repository";
 import { SPONSORS_QUERY } from "./sponsor.repository";
@@ -52,6 +53,7 @@ describe("Sanity image CDN optimization", () => {
     { name: "ARTICLES_QUERY", query: ARTICLES_QUERY },
     { name: "ARTICLE_BY_SLUG_QUERY", query: ARTICLE_BY_SLUG_QUERY },
     { name: "RELATED_ARTICLES_QUERY", query: RELATED_ARTICLES_QUERY },
+    { name: "HOMEPAGE_BANNERS_QUERY", query: HOMEPAGE_BANNERS_QUERY },
     { name: "EVENTS_QUERY", query: EVENTS_QUERY },
     { name: "NEXT_FEATURED_EVENT_QUERY", query: NEXT_FEATURED_EVENT_QUERY },
     { name: "SPONSORS_QUERY", query: SPONSORS_QUERY },

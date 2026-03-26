@@ -5,6 +5,7 @@ import type {
   PLAYERS_QUERY_RESULT,
   PLAYER_BY_PSD_ID_QUERY_RESULT,
 } from "../sanity/sanity.types";
+import type { SanityPlayerBase } from "../sanity/types";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -27,7 +28,6 @@ export const PLAYER_BY_PSD_ID_QUERY =
   "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
   bio
 }`);
-import type { SanityPlayerBase } from "../sanity/types";
 
 export interface PlayerVM {
   id: string;

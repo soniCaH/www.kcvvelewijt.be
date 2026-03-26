@@ -2,6 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
 import type { RESPONSIBILITY_PATHS_QUERY_RESULT } from "../sanity/sanity.types";
+import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -42,7 +43,6 @@ export const RESPONSIBILITY_PATHS_QUERY =
   },
   "relatedPaths": coalesce(relatedPaths[]->slug.current, [])
 }`);
-import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 type ContactRow = NonNullable<PathRow["primaryContact"]>;

@@ -8,19 +8,19 @@ import type { HOMEPAGE_BANNERS_QUERY_RESULT } from "../sanity/sanity.types";
 export const HOMEPAGE_BANNERS_QUERY = defineQuery(`*[_type == "homePage"][0] {
     "bannerSlotA": bannerSlotA-> {
       _id,
-      "imageUrl": image.asset->url,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
       alt,
       href
     },
     "bannerSlotB": bannerSlotB-> {
       _id,
-      "imageUrl": image.asset->url,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
       alt,
       href
     },
     "bannerSlotC": bannerSlotC-> {
       _id,
-      "imageUrl": image.asset->url,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
       alt,
       href
     }

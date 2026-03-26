@@ -2,6 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { sanityClient } from "../sanity/client";
 import type { STAFF_MEMBERS_QUERY_RESULT } from "../sanity/sanity.types";
+import type { OrgChartNode } from "@/types/organigram";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -19,7 +20,6 @@ export const STAFF_MEMBERS_QUERY =
   responsibilities,
   "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)
 }`);
-import type { OrgChartNode } from "@/types/organigram";
 
 const CLUB_ROOT_NODE: OrgChartNode = {
   id: "club",
