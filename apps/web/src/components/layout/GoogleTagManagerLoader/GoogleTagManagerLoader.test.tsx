@@ -1,10 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
-
-const mockSetDefaultConsent = vi.fn();
-vi.mock("@/lib/analytics/gtm-consent", () => ({
-  setDefaultConsent: mockSetDefaultConsent,
-}));
 
 vi.mock("next/script", () => ({
   default: ({ children, id }: { children?: string; id?: string }) => (
@@ -15,10 +10,6 @@ vi.mock("next/script", () => ({
 const { GoogleTagManagerLoader } = await import("./GoogleTagManagerLoader");
 
 describe("GoogleTagManagerLoader", () => {
-  beforeEach(() => {
-    mockSetDefaultConsent.mockClear();
-  });
-
   it("renders GTM scripts with the provided GTM ID", () => {
     const { container } = render(
       <GoogleTagManagerLoader gtmId="GTM-TEST123" />,
@@ -43,18 +34,8 @@ describe("GoogleTagManagerLoader", () => {
     expect(consentScript?.textContent).toContain("denied");
   });
 
-  it("calls setDefaultConsent on render", () => {
-    render(<GoogleTagManagerLoader gtmId="GTM-TEST123" />);
-    expect(mockSetDefaultConsent).toHaveBeenCalledTimes(1);
-  });
-
   it("renders nothing when gtmId is not provided", () => {
     const { container } = render(<GoogleTagManagerLoader />);
     expect(container.innerHTML).toBe("");
-  });
-
-  it("does not call setDefaultConsent when gtmId is not provided", () => {
-    render(<GoogleTagManagerLoader />);
-    expect(mockSetDefaultConsent).not.toHaveBeenCalled();
   });
 });

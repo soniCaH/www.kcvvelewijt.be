@@ -1,12 +1,9 @@
 "use client";
 
 import Script from "next/script";
-import { setDefaultConsent } from "@/lib/analytics/gtm-consent";
 
 export function GoogleTagManagerLoader({ gtmId }: { gtmId?: string }) {
   if (!gtmId) return null;
-
-  setDefaultConsent();
 
   return (
     <>
