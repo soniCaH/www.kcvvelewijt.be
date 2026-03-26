@@ -17,6 +17,81 @@ interface HandlerOptions {
   fetchDocument?: (id: string) => Promise<Record<string, unknown> | null>;
 }
 
+const errorMessage = (err: unknown) =>
+  err instanceof Error ? err.message : String(err);
+
+const parsePayload = (rawBody: string): WebhookPayload | Response => {
+  try {
+    return JSON.parse(rawBody) as WebhookPayload;
+  } catch (err) {
+    console.error("[webhook] malformed JSON body:", err);
+    return Response.json(
+      { ok: false, error: "invalid_json", code: "parse_failed" },
+      { status: 400 },
+    );
+  }
+};
+
+const safeFetchDoc = async (
+  fetchDoc: (id: string) => Promise<Record<string, unknown> | null>,
+  id: string,
+): Promise<Record<string, unknown> | null | Response> => {
+  try {
+    return await fetchDoc(id);
+  } catch (err) {
+    console.error("[webhook] sanity fetch failed:", err);
+    return Response.json(
+      {
+        ok: false,
+        action: "error_fetching",
+        error: errorMessage(err),
+        code: "sanity_fetch_failed",
+      },
+      { status: 500 },
+    );
+  }
+};
+
+const embedText = async (
+  ai: { run: (model: string, input: unknown) => Promise<{ data: number[][] }> },
+  text: string,
+): Promise<number[] | Response> => {
+  try {
+    const result = await ai.run("@cf/baai/bge-m3", { text: [text] });
+    const vector = result.data[0];
+    if (!vector) {
+      return Response.json(
+        { ok: false, error: "no vector returned", code: "embedding_failed" },
+        { status: 500 },
+      );
+    }
+    return vector;
+  } catch (err) {
+    console.error("[webhook] embedding failed:", err);
+    return Response.json(
+      { ok: false, error: errorMessage(err), code: "embedding_failed" },
+      { status: 500 },
+    );
+  }
+};
+
+const upsertVector = async (
+  index: VectorizeIndex,
+  id: string,
+  values: number[],
+  metadata: Record<string, string>,
+): Promise<Response | undefined> => {
+  try {
+    await index.upsert([{ id, values, metadata }]);
+  } catch (err) {
+    console.error("[webhook] upsert failed:", err);
+    return Response.json(
+      { ok: false, error: errorMessage(err), code: "upsert_failed" },
+      { status: 500 },
+    );
+  }
+};
+
 export async function handleIndexWebhook(
   request: Request,
   env: WorkerEnv,
@@ -31,8 +106,9 @@ export async function handleIndexWebhook(
   );
   if (!valid) return new Response("Unauthorized", { status: 401 });
 
-  const payload = JSON.parse(rawBody) as WebhookPayload;
-  const { _id, _type } = payload;
+  const parsed = parsePayload(rawBody);
+  if (parsed instanceof Response) return parsed;
+  const { _id, _type } = parsed;
 
   const operation = request.headers.get("sanity-operation") ?? "update";
 
@@ -58,7 +134,8 @@ export async function handleIndexWebhook(
       return sanity.fetch(queryForType(_type), { id });
     });
 
-  const doc = await fetchDoc(_id);
+  const doc = await safeFetchDoc(fetchDoc, _id);
+  if (doc instanceof Response) return doc;
   if (!doc) return Response.json({ ok: true, action: "skipped_not_found" });
 
   let indexText: string;
@@ -114,15 +191,18 @@ export async function handleIndexWebhook(
   const ai = env.AI as unknown as {
     run: (model: string, input: unknown) => Promise<{ data: number[][] }>;
   };
-  const result = await ai.run("@cf/baai/bge-m3", { text: [indexText] });
-  const vector = result.data[0];
-  if (!vector)
-    return Response.json(
-      { ok: false, error: "embedding_failed" },
-      { status: 500 },
-    );
 
-  await env.SEARCH_INDEX.upsert([{ id: _id, values: vector, metadata }]);
+  const vector = await embedText(ai, indexText);
+  if (vector instanceof Response) return vector;
+
+  const upsertError = await upsertVector(
+    env.SEARCH_INDEX,
+    _id,
+    vector,
+    metadata,
+  );
+  if (upsertError) return upsertError;
+
   return Response.json({ ok: true, action: "indexed" });
 }
 

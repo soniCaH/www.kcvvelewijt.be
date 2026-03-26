@@ -1,33 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { verifySvixSignature } from "./svix-verify";
-
-// Test secret: base64 of "test-secret-key-1234567890ab"
-const TEST_SECRET = "whsec_dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg==";
-const SECRET_BYTES = Uint8Array.from(
-  atob("dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg=="),
-  (c) => c.charCodeAt(0),
-);
-
-async function signPayload(
-  svixId: string,
-  timestamp: number,
-  body: string,
-): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    SECRET_BYTES,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signedContent = `${svixId}.${timestamp}.${body}`;
-  const sigBytes = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(signedContent),
-  );
-  return `v1,${btoa(String.fromCharCode(...new Uint8Array(sigBytes)))}`;
-}
+import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 
 describe("verifySvixSignature", () => {
   it("returns true for a valid signature", async () => {

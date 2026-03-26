@@ -1,38 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { handleIndexWebhook } from "./index-handler";
 import type { WorkerEnv } from "../env";
+import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-// Test secret: base64 of "test-secret-key-1234567890ab"
-const TEST_SECRET = "whsec_dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg==";
-const SECRET_BYTES = Uint8Array.from(
-  atob("dGVzdC1zZWNyZXQta2V5LTEyMzQ1Njc4OTBhYg=="),
-  (c) => c.charCodeAt(0),
-);
-
-async function signPayload(
-  svixId: string,
-  timestamp: number,
-  body: string,
-): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    SECRET_BYTES,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signedContent = `${svixId}.${timestamp}.${body}`;
-  const sigBytes = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(signedContent),
-  );
-  return `v1,${btoa(String.fromCharCode(...new Uint8Array(sigBytes)))}`;
-}
 
 async function makeSignedRequest(
   body: string,

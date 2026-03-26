@@ -14,7 +14,7 @@ const defaultTestEnv: WorkerEnv = {
   SANITY_API_TOKEN: "test-token",
   AI: {} as Ai,
   SEARCH_INDEX: {} as VectorizeIndex,
-  SANITY_WEBHOOK_SECRET: "whsec_dGVzdC1zZWNyZXQ=",
+  SANITY_WEBHOOK_SECRET: "test-webhook-secret",
 };
 
 export const testEnvLayer = Layer.succeed(WorkerEnvTag, defaultTestEnv);

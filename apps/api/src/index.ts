@@ -77,7 +77,16 @@ export default {
       request.method === "POST" &&
       new URL(request.url).pathname === "/webhooks/index"
     ) {
-      return handleIndexWebhook(request, env);
+      try {
+        return await handleIndexWebhook(request, env);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("[webhook] unhandled error:", err);
+        return Response.json(
+          { ok: false, error: message, code: "internal_error" },
+          { status: 500 },
+        );
+      }
     }
 
     const { handler, dispose } = HttpApiBuilder.toWebHandler(

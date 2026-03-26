@@ -10,6 +10,8 @@ export async function verifySvixSignature(
   rawBody: string,
   secret: string,
 ): Promise<boolean> {
+  if (!secret || !secret.startsWith("whsec_")) return false;
+
   const svixId = headers.get("svix-id");
   const svixTimestamp = headers.get("svix-timestamp");
   const svixSignature = headers.get("svix-signature");
@@ -20,10 +22,14 @@ export async function verifySvixSignature(
   if (Math.abs(Date.now() / 1000 - ts) > 300) return false;
 
   // Decode secret (strip "whsec_" prefix, base64 decode)
-  const secretBytes = Uint8Array.from(
-    atob(secret.replace(/^whsec_/, "")),
-    (c) => c.charCodeAt(0),
-  );
+  let secretBytes: Uint8Array;
+  try {
+    secretBytes = Uint8Array.from(atob(secret.slice(6)), (c) =>
+      c.charCodeAt(0),
+    );
+  } catch {
+    return false;
+  }
 
   const key = await crypto.subtle.importKey(
     "raw",
