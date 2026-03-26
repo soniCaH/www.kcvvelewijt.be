@@ -52,15 +52,15 @@ describe("useResponsibilityAnalytics", () => {
   });
 
   describe("responsibility_no_results", () => {
-    it("fires with query text and role", () => {
+    it("fires with query length and role", () => {
       const { result } = renderHook(() => useResponsibilityAnalytics());
 
       act(() => {
-        result.current.trackNoResults("xyz", "ouder");
+        result.current.trackNoResults(3, "ouder");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("responsibility_no_results", {
-        query_text: "xyz",
+        query_length: 3,
         role: "ouder",
       });
     });

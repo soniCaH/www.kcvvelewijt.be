@@ -28,9 +28,9 @@ export function useResponsibilityAnalytics() {
     [],
   );
 
-  const trackNoResults = useCallback((queryText: string, role: string) => {
+  const trackNoResults = useCallback((queryLength: number, role: string) => {
     trackEvent("responsibility_no_results", {
-      query_text: queryText,
+      query_length: queryLength,
       role,
     });
   }, []);
@@ -106,6 +106,14 @@ export function useResponsibilityAnalytics() {
     clearDwellTimers();
   }, [clearDwellTimers]);
 
+  const resetSession = useCallback(() => {
+    lastRoleRef.current = null;
+    lastQueryLengthRef.current = 0;
+    lastHadResultsRef.current = false;
+    hadContactInteractionRef.current = false;
+    clearDwellTimers();
+  }, [clearDwellTimers]);
+
   // Abandon tracking on unmount
   useEffect(() => {
     return () => {
@@ -131,5 +139,6 @@ export function useResponsibilityAnalytics() {
     trackStepLinkClicked,
     startDwell,
     stopDwell,
+    resetSession,
   };
 }

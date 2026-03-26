@@ -141,6 +141,7 @@ export function ResponsibilityFinder({
   } = useSemanticSearch({ type: "responsibility", limit: 5 });
 
   const analytics = useResponsibilityAnalytics();
+  const userInitiatedQuestionRef = useRef(false);
 
   useEffect(() => {
     semanticSearch(questionText);
@@ -160,17 +161,23 @@ export function ResponsibilityFinder({
           .map((p) => ({ path: p, score: 100 }))
       : [];
 
-  // Track search events when results arrive
+  // Track search events when results arrive (only for user-initiated searches)
   const prevLoadingRef = useRef(false);
   useEffect(() => {
-    if (prevLoadingRef.current && !semanticLoading && questionText?.trim()) {
+    if (
+      prevLoadingRef.current &&
+      !semanticLoading &&
+      questionText?.trim() &&
+      userInitiatedQuestionRef.current
+    ) {
+      userInitiatedQuestionRef.current = false;
       analytics.trackSearch(
         questionText,
         selectedRole || "",
         suggestions.length,
       );
       if (suggestions.length === 0) {
-        analytics.trackNoResults(questionText, selectedRole || "");
+        analytics.trackNoResults(questionText.length, selectedRole || "");
       }
     }
     prevLoadingRef.current = semanticLoading;
@@ -184,6 +191,7 @@ export function ResponsibilityFinder({
 
   // Handle role selection
   const handleRoleSelect = (role: string) => {
+    analytics.resetSession();
     setSelectedRole(role as UserRole);
     setSelectedResult(null);
     setShowRoleDropdown(false);
@@ -233,6 +241,7 @@ export function ResponsibilityFinder({
     setShowSuggestions(false);
     setShowRoleDropdown(false);
     setActiveDescendantIdx(-1);
+    analytics.resetSession();
   };
 
   // Handle keyboard navigation in suggestion list
@@ -474,6 +483,7 @@ export function ResponsibilityFinder({
                 }
                 value={questionText}
                 onChange={(e) => {
+                  userInitiatedQuestionRef.current = true;
                   setQuestionText(e.target.value);
                   setShowSuggestions(true);
                   setSelectedResult(null);
@@ -725,13 +735,15 @@ function ResultCard({
     categoryColors.algemeen;
   const safeOrgLink = toSafeHref(path.primaryContact.orgLink);
 
-  // Dwell-time tracking
+  // Dwell-time tracking — destructure stable callbacks to avoid effect restart
+  // when the analytics object reference changes on parent re-renders
+  const { startDwell, stopDwell } = analytics;
   useEffect(() => {
-    analytics.startDwell(path.id, path.category);
+    startDwell(path.id, path.category);
     return () => {
-      analytics.stopDwell();
+      stopDwell();
     };
-  }, [path.id, path.category, analytics]);
+  }, [path.id, path.category, startDwell, stopDwell]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
@@ -871,6 +883,15 @@ function ResultCard({
                 ) : safeOrgLink ? (
                   <a
                     href={safeOrgLink}
+                    onClick={() => {
+                      if (path.primaryContact.memberId) {
+                        analytics.trackOrganigramLink(
+                          path.id,
+                          path.primaryContact.memberId,
+                        );
+                        onMemberSelect?.(path.primaryContact.memberId);
+                      }
+                    }}
                     className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                   >
                     <svg
