@@ -378,7 +378,7 @@ describe("ArticleRepository", () => {
         expect.any(String),
         expect.objectContaining({
           offset: 3,
-          limit: 6,
+          end: 9,
           category: "Jeugd",
         }),
       );
