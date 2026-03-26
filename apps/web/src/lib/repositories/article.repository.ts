@@ -170,7 +170,7 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
   findPaginated: ({ offset, limit, category }) =>
     fetchGroq<ArticleListRow[]>(ARTICLES_PAGINATED_QUERY, {
       offset,
-      limit,
+      end: offset + limit,
       category: category ?? "",
     }).pipe(
       Effect.map((rows) =>

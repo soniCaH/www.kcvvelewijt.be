@@ -12,7 +12,7 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 );
 
 export const ARTICLES_PAGINATED_QUERY =
-  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$offset + $limit] {
+  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {
   _id, title, slug, publishAt, featured, tags,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
