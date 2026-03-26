@@ -80,14 +80,19 @@ export function getMatchesForDay(
   });
 }
 
-/** Filter events whose dateStart falls on the given YYYY-MM-DD */
+/** Filter events that span the given YYYY-MM-DD (single or multi-day) */
 export function getEventsForDay(
   events: CalendarEvent[],
   day: string,
 ): CalendarEvent[] {
   return events.filter((e) => {
-    const dt = DateTime.fromISO(e.dateStart);
-    return dt.isValid && dt.toISODate() === day;
+    const start = DateTime.fromISO(e.dateStart);
+    if (!start.isValid) return false;
+    const startDay = start.toISODate()!;
+    if (startDay === day) return true;
+    if (!e.dateEnd) return false;
+    const end = DateTime.fromISO(e.dateEnd);
+    return end.isValid && day >= startDay && day <= end.toISODate()!;
   });
 }
 

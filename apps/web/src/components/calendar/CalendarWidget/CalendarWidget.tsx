@@ -18,7 +18,6 @@ export interface CalendarWidgetProps {
   matches: CalendarMatch[];
   events: CalendarEvent[];
   teams: CalendarTeamInfo[];
-  activeTeamFilter: string;
 }
 
 type ViewMode = "month" | "week";
@@ -33,12 +32,12 @@ export function CalendarWidget({
   matches,
   events,
   teams,
-  activeTeamFilter,
 }: CalendarWidgetProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const rawView = searchParams.get("view");
   const view: ViewMode = rawView === "week" ? "week" : "month";
+  const activeTeamFilter = searchParams.get("team") ?? "all";
 
   const today = DateTime.now();
   const [selectedDate, setSelectedDate] = useState(today.toISODate()!);
@@ -222,6 +221,22 @@ export function CalendarWidget({
           onNextWeek={handleNextWeek}
         />
       )}
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-gray-500 pt-4 border-t border-gray-200">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-kcvv-green-bright" />
+          <span>Thuiswedstrijd</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full border border-kcvv-green-bright" />
+          <span>Uitwedstrijd</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          <span>Evenement</span>
+        </div>
+      </div>
     </div>
   );
 }

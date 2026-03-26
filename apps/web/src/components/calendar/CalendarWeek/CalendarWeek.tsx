@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { DateTime } from "luxon";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import {
@@ -106,6 +105,7 @@ export function CalendarWeek({
               <div className="space-y-1.5">
                 {dayMatches.map((match) => {
                   const isHome = getMatchDotType(match) === "home";
+                  const opponent = isHome ? match.awayTeam : match.homeTeam;
                   const hasDetail = match.status !== "scheduled";
                   const cardClass = cn(
                     "block rounded border border-gray-200 bg-white p-1.5 transition-all",
@@ -121,7 +121,10 @@ export function CalendarWeek({
                         </div>
                       )}
                       {/* Opponent + dot */}
-                      <div className="flex items-center gap-1">
+                      <div
+                        className="flex items-center gap-1"
+                        title={opponent.name}
+                      >
                         <span
                           className={cn(
                             "w-1.5 h-1.5 rounded-full shrink-0",
@@ -130,19 +133,8 @@ export function CalendarWeek({
                               : "border border-kcvv-green-bright",
                           )}
                         />
-                        {(isHome ? match.awayTeam : match.homeTeam).logo ? (
-                          <Image
-                            src={
-                              (isHome ? match.awayTeam : match.homeTeam).logo!
-                            }
-                            alt=""
-                            width={14}
-                            height={14}
-                            className="w-3.5 h-3.5 object-contain shrink-0"
-                          />
-                        ) : null}
-                        <span className="text-[11px] font-medium text-gray-700 truncate">
-                          {isHome ? match.awayTeam.name : match.homeTeam.name}
+                        <span className="text-xs font-medium text-gray-700 truncate">
+                          {opponent.name}
                         </span>
                       </div>
                       {/* Time + status */}

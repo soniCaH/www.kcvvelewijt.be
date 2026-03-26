@@ -143,6 +143,27 @@ describe("getEventsForDay", () => {
     ];
     expect(getEventsForDay(events, "2026-03-15")).toEqual([]);
   });
+
+  it("returns multi-day events for days between dateStart and dateEnd", () => {
+    const events = [
+      makeCalendarEvent({
+        id: "e1",
+        dateStart: "2026-03-15T10:00:00",
+        dateEnd: "2026-03-17T18:00:00",
+      }),
+    ];
+    expect(getEventsForDay(events, "2026-03-15").map((e) => e.id)).toEqual([
+      "e1",
+    ]);
+    expect(getEventsForDay(events, "2026-03-16").map((e) => e.id)).toEqual([
+      "e1",
+    ]);
+    expect(getEventsForDay(events, "2026-03-17").map((e) => e.id)).toEqual([
+      "e1",
+    ]);
+    expect(getEventsForDay(events, "2026-03-18")).toEqual([]);
+    expect(getEventsForDay(events, "2026-03-14")).toEqual([]);
+  });
 });
 
 // ── getDaysInMonth ────────────────────────────────────────────────────────

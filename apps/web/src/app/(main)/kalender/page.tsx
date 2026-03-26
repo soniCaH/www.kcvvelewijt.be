@@ -51,9 +51,17 @@ async function fetchCalendarData(): Promise<CalendarData> {
       const allTeams = yield* teamRepo.findAll();
       const teamsWithPsd = allTeams.filter((t) => t.psdId !== null);
 
-      // Fetch full-season matches for all teams in parallel
+      // Fetch full-season matches for all teams in parallel.
+      // Each fetch is individually wrapped so one team failure
+      // doesn't take down the entire calendar.
       const matchArrays = yield* Effect.all(
-        teamsWithPsd.map((t) => bff.getMatches(Number(t.psdId))),
+        teamsWithPsd.map((t) =>
+          bff
+            .getMatches(Number(t.psdId))
+            .pipe(
+              Effect.catchAll(() => Effect.succeed([] as readonly never[])),
+            ),
+        ),
         { concurrency: 5 },
       );
 
@@ -73,8 +81,10 @@ async function fetchCalendarData(): Promise<CalendarData> {
           return map;
         }, new Map<number, CalendarMatch>());
 
-      // Fetch events
-      const eventVMs = yield* eventRepo.findAll();
+      // Fetch events (graceful degradation on failure)
+      const eventVMs = yield* eventRepo
+        .findAll()
+        .pipe(Effect.catchAll(() => Effect.succeed([] as never[])));
 
       const teamInfos: CalendarTeamInfo[] = teamsWithPsd.map((t) => ({
         id: t.id,
@@ -109,15 +119,8 @@ async function fetchCalendarData(): Promise<CalendarData> {
   );
 }
 
-interface CalendarPageProps {
-  searchParams: Promise<{ team?: string; view?: string }>;
-}
-
-export default async function CalendarPage({
-  searchParams,
-}: CalendarPageProps) {
-  const [data, params] = await Promise.all([fetchCalendarData(), searchParams]);
-  const activeTeamFilter = params.team ?? "all";
+export default async function CalendarPage() {
+  const data = await fetchCalendarData();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -128,7 +131,6 @@ export default async function CalendarPage({
           matches={data.matches}
           events={data.events}
           teams={data.teams}
-          activeTeamFilter={activeTeamFilter}
         />
       </div>
     </div>

@@ -79,7 +79,6 @@ const defaultProps = {
   matches: [makeMatch({ id: 1 })],
   events: [] as CalendarEvent[],
   teams,
-  activeTeamFilter: "all",
 };
 
 // ── Tests ──────────────────────────────────────────────────────────────────
@@ -152,9 +151,10 @@ describe("CalendarWidget", () => {
       expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
     });
 
-    it("passes activeTeamFilter as preselectedTeamLabel", async () => {
+    it("passes team filter as preselectedTeamLabel", async () => {
       const user = userEvent.setup();
-      render(<CalendarWidget {...defaultProps} activeTeamFilter="A-ploeg" />);
+      mockSearchParams = new URLSearchParams("team=A-ploeg");
+      render(<CalendarWidget {...defaultProps} />);
 
       await user.click(screen.getByText("Abonneer"));
       // When preselected, only A-ploeg should have a remove button

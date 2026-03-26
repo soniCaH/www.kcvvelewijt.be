@@ -82,7 +82,6 @@ const meta = {
     matches,
     events,
     teams,
-    activeTeamFilter: "all",
   },
 } satisfies Meta<typeof CalendarWidget>;
 
