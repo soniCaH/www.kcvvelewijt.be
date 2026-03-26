@@ -5,6 +5,7 @@ import { AccentStrip } from "@/components/layout/AccentStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageFooter } from "@/components/layout/PageFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
+import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoader";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import {
@@ -89,6 +90,7 @@ export default async function RootLayout({
         )}
       </head>
       <body suppressHydrationWarning>
+        <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         <AccentStrip />
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
         {children}
