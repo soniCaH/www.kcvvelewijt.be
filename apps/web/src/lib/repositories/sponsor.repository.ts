@@ -1,7 +1,14 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import { SPONSORS_QUERY } from "../sanity/queries/sponsors";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { SPONSORS_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const SPONSORS_QUERY =
+  defineQuery(`*[_type == "sponsor" && active == true] | order(name asc) {
+  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"
+}`);
 
 export interface SponsorVM {
   id: string;
@@ -26,19 +33,13 @@ export function toSponsorVM(row: SPONSORS_QUERY_RESULT[number]): SponsorVM {
 }
 
 export interface SponsorRepositoryInterface {
-  readonly findAll: () => Effect.Effect<SponsorVM[], Error>;
+  readonly findAll: () => Effect.Effect<SponsorVM[]>;
 }
 
 export class SponsorRepository extends Context.Tag("SponsorRepository")<
   SponsorRepository,
   SponsorRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  });
 
 export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
   findAll: () =>

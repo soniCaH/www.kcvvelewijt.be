@@ -1,6 +1,5 @@
 import { Effect, Layer, ManagedRuntime } from "effect";
 import { BffService, BffServiceLive } from "./services/BffService";
-import { SanityService, SanityServiceLive } from "./services/SanityService";
 import {
   PlayerRepository,
   PlayerRepositoryLive,
@@ -40,7 +39,6 @@ import {
 
 export const AppLayer = Layer.mergeAll(
   BffServiceLive,
-  SanityServiceLive,
   PlayerRepositoryLive,
   TeamRepositoryLive,
   ArticleRepositoryLive,
@@ -58,7 +56,6 @@ export const runPromise = <A, E>(
     A,
     E,
     | BffService
-    | SanityService
     | PlayerRepository
     | TeamRepository
     | ArticleRepository
@@ -76,7 +73,6 @@ export const runPromiseWithLogging = <A, E>(
     A,
     E,
     | BffService
-    | SanityService
     | PlayerRepository
     | TeamRepository
     | ArticleRepository
@@ -103,7 +99,6 @@ export const provideServices = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
 
 export {
   BffService,
-  SanityService,
   PlayerRepository,
   TeamRepository,
   ArticleRepository,

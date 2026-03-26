@@ -11,7 +11,7 @@ Typical pattern when tracing legacy behavior:
 1. Find the original Gatsby page in `src/pages/` or `src/templates/`
 2. Look at the GraphQL query (usually at the bottom of the file, `export const query = graphql\`...\``)
 3. Map the GraphQL fields to the Drupal JSON:API field names (they usually match with `field_` prefix)
-4. The equivalent is now in Sanity or PSD — check `apps/web/src/lib/sanity/queries/` or `apps/api/src/`
+4. The equivalent is now in Sanity or PSD — check `apps/web/src/lib/repositories/` or `apps/api/src/`
 
 ## Drupal JSON:API
 

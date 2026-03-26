@@ -1,11 +1,44 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "../sanity/queries/teams";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type {
   TEAMS_QUERY_RESULT,
   TEAM_BY_SLUG_QUERY_RESULT,
+  TEAMS_LANDING_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import { toPlayerVM, type PlayerVM } from "./player.repository";
+import type { TeamLandingItem } from "../utils/group-teams";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const TEAMS_QUERY =
+  defineQuery(`*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {
+  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,
+  tagline,
+  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+}`);
+
+export const TEAM_BY_SLUG_QUERY =
+  defineQuery(`*[_type == "team" && slug.current == $slug][0] {
+  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,
+  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
+  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  trainingSchedule,
+  players[]-> {
+    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
+    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
+  },
+  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }
+}`);
+
+export const TEAMS_LANDING_QUERY =
+  defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {
+  _id, name, "slug": slug.current, age,
+  division, divisionFull, tagline,
+  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  staff[]-> { firstName, lastName, role }
+}`);
 
 // ─── View Models ─────────────────────────────────────────────────────────────
 
@@ -119,23 +152,39 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
   };
 }
 
+function toTeamLandingItem(
+  row: TEAMS_LANDING_QUERY_RESULT[number],
+): TeamLandingItem {
+  return {
+    _id: row._id,
+    name: row.name ?? "",
+    slug: row.slug ?? "",
+    age: row.age ?? "",
+    division: row.division,
+    divisionFull: row.divisionFull,
+    tagline: row.tagline,
+    teamImageUrl: row.teamImageUrl,
+    staff:
+      row.staff?.map((s) => ({
+        firstName: s.firstName ?? "",
+        lastName: s.lastName ?? "",
+        role: s.role ?? "",
+      })) ?? null,
+  };
+}
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface TeamRepositoryInterface {
   readonly findAll: () => Effect.Effect<TeamNavVM[]>;
   readonly findBySlug: (slug: string) => Effect.Effect<TeamDetailVM | null>;
+  readonly findAllForLanding: () => Effect.Effect<TeamLandingItem[]>;
 }
 
 export class TeamRepository extends Context.Tag("TeamRepository")<
   TeamRepository,
   TeamRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
   findAll: () =>
@@ -145,5 +194,9 @@ export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
   findBySlug: (slug) =>
     fetchGroq<TEAM_BY_SLUG_QUERY_RESULT>(TEAM_BY_SLUG_QUERY, { slug }).pipe(
       Effect.map((row) => (row ? toTeamDetailVM(row) : null)),
+    ),
+  findAllForLanding: () =>
+    fetchGroq<TEAMS_LANDING_QUERY_RESULT>(TEAMS_LANDING_QUERY).pipe(
+      Effect.map((rows) => rows.map(toTeamLandingItem)),
     ),
 });

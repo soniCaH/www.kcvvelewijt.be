@@ -1,14 +1,33 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import {
-  PLAYERS_QUERY,
-  PLAYER_BY_PSD_ID_QUERY,
-} from "../sanity/queries/players";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type {
   PLAYERS_QUERY_RESULT,
   PLAYER_BY_PSD_ID_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import type { SanityPlayerBase } from "../sanity/types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const PLAYERS_QUERY =
+  defineQuery(`*[_type == "player" && archived != true] | order(lastName asc) {
+  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
+  birthDate, nationality, height, weight,
+  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  bio
+}`);
+
+export const PLAYER_BY_PSD_ID_QUERY =
+  defineQuery(`*[_type == "player" && psdId == $psdId][0] {
+  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
+  birthDate, nationality, height, weight,
+  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  bio
+}`);
 
 export interface PlayerVM {
   id: string;
@@ -66,12 +85,6 @@ export class PlayerRepository extends Context.Tag("PlayerRepository")<
   PlayerRepository,
   PlayerRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const PlayerRepositoryLive = Layer.succeed(PlayerRepository, {
   findAll: () =>

@@ -1,8 +1,48 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import { RESPONSIBILITY_PATHS_QUERY } from "../sanity/queries/responsibilityPaths";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { RESPONSIBILITY_PATHS_QUERY_RESULT } from "../sanity/sanity.types";
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const RESPONSIBILITY_PATHS_QUERY =
+  defineQuery(`*[_type == "responsibilityPath" && active == true] | order(title asc) {
+  "id": slug.current,
+  "role": audience,
+  question,
+  keywords,
+  summary,
+  category,
+  icon,
+  "primaryContact": primaryContact {
+    "role": role,
+    "email": select(defined(staffMember) => staffMember->email, email),
+    "phone": select(defined(staffMember) => staffMember->phone, phone),
+    "department": select(defined(staffMember) => staffMember->department, department),
+    "name": select(
+      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
+      null
+    ),
+    "memberId": staffMember->_id
+  },
+  "steps": steps[] {
+    description,
+    link,
+    "contact": select(defined(contact) => contact {
+      "role": role,
+      "email": select(defined(staffMember) => staffMember->email, email),
+      "phone": select(defined(staffMember) => staffMember->phone, phone),
+      "department": select(defined(staffMember) => staffMember->department, department),
+      "name": select(
+        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
+        null
+      ),
+      "memberId": staffMember->_id
+    }, null)
+  },
+  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])
+}`);
 
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 type ContactRow = NonNullable<PathRow["primaryContact"]>;
@@ -52,12 +92,6 @@ export interface ResponsibilityRepositoryInterface {
 export class ResponsibilityRepository extends Context.Tag(
   "ResponsibilityRepository",
 )<ResponsibilityRepository, ResponsibilityRepositoryInterface>() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  }).pipe(Effect.orDie);
 
 export const ResponsibilityRepositoryLive = Layer.succeed(
   ResponsibilityRepository,

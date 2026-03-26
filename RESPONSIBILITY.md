@@ -84,10 +84,8 @@ src/components/responsibility/
 ### Data Layer
 
 ```text
-src/lib/sanity/queries/responsibilityPaths.ts  # GROQ query + CONTACT_PROJECTION
-src/lib/effect/services/SanityService.ts       # mapResponsibilityPath(), getResponsibilityPaths()
-src/lib/effect/schemas/responsibility.schema.ts # Effect Schema validation
-src/types/responsibility.ts                     # TypeScript interfaces
+src/lib/repositories/responsibility.repository.ts  # GROQ query + toResponsibilityPath()
+src/types/responsibility.ts                         # TypeScript interfaces
 ```
 
 ### Sanity Schema

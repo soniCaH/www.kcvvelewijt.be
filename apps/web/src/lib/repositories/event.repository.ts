@@ -1,13 +1,31 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import {
-  EVENTS_QUERY,
-  NEXT_FEATURED_EVENT_QUERY,
-} from "../sanity/queries/events";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type {
   EVENTS_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
 } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const EVENTS_QUERY =
+  defineQuery(`*[_type == "event"] | order(dateStart asc) {
+  _id, title, dateStart, dateEnd, externalLink,
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+}`);
+
+export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
+  coalesce(
+    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {
+      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,
+      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+    },
+    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {
+      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,
+      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+    }
+  )
+`);
 
 export interface EventVM {
   id: string;
@@ -52,20 +70,14 @@ export function toFeaturedEventVM(
 }
 
 export interface EventRepositoryInterface {
-  readonly findAll: () => Effect.Effect<EventVM[], Error>;
-  readonly findNextFeatured: () => Effect.Effect<EventVM | null, Error>;
+  readonly findAll: () => Effect.Effect<EventVM[]>;
+  readonly findNextFeatured: () => Effect.Effect<EventVM | null>;
 }
 
 export class EventRepository extends Context.Tag("EventRepository")<
   EventRepository,
   EventRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  });
 
 export const EventRepositoryLive = Layer.succeed(EventRepository, {
   findAll: () =>

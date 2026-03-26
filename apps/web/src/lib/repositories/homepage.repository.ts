@@ -1,7 +1,30 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import { HOMEPAGE_BANNERS_QUERY } from "../sanity/queries/homePage";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { HOMEPAGE_BANNERS_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const HOMEPAGE_BANNERS_QUERY = defineQuery(`*[_type == "homePage"][0] {
+    "bannerSlotA": bannerSlotA-> {
+      _id,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      alt,
+      href
+    },
+    "bannerSlotB": bannerSlotB-> {
+      _id,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      alt,
+      href
+    },
+    "bannerSlotC": bannerSlotC-> {
+      _id,
+      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      alt,
+      href
+    }
+  }`);
 
 export interface BannerSlotVM {
   imageUrl: string;
@@ -40,19 +63,13 @@ export function toBannersVM(
 }
 
 export interface HomepageRepositoryInterface {
-  readonly getBanners: () => Effect.Effect<HomepageBannersVM, Error>;
+  readonly getBanners: () => Effect.Effect<HomepageBannersVM>;
 }
 
 export class HomepageRepository extends Context.Tag("HomepageRepository")<
   HomepageRepository,
   HomepageRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  });
 
 export const HomepageRepositoryLive = Layer.succeed(HomepageRepository, {
   getBanners: () =>

@@ -43,7 +43,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       Effect.gen(function* () {
         const repo = yield* ArticleRepository;
         const tags = yield* repo.findTags();
-        return tags.filter((t): t is string => t != null);
+        return tags.filter((t: string | null): t is string => t != null);
       }).pipe(Effect.catchAll(() => Effect.succeed([] as string[]))),
     ),
     fetchArticlesAction({

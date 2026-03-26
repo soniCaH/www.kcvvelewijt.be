@@ -1,7 +1,17 @@
 import { Context, Effect, Layer } from "effect";
-import { sanityClient } from "../sanity/client";
-import { PAGE_BY_SLUG_QUERY } from "../sanity/queries/pages";
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
 import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
+
+// ─── GROQ Queries ────────────────────────────────────────────────────────────
+
+export const PAGE_BY_SLUG_QUERY =
+  defineQuery(`*[_type == "page" && slug.current == $slug][0] {
+  _id,
+  title,
+  slug,
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }
+}`);
 
 export interface PageVM {
   id: string;
@@ -20,19 +30,13 @@ export function toPageVM(row: NonNullable<PAGE_BY_SLUG_QUERY_RESULT>): PageVM {
 }
 
 export interface PageRepositoryInterface {
-  readonly findBySlug: (slug: string) => Effect.Effect<PageVM | null, Error>;
+  readonly findBySlug: (slug: string) => Effect.Effect<PageVM | null>;
 }
 
 export class PageRepository extends Context.Tag("PageRepository")<
   PageRepository,
   PageRepositoryInterface
 >() {}
-
-const fetchGroq = <T>(query: string, params?: Record<string, unknown>) =>
-  Effect.tryPromise({
-    try: () => sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new Error(`Sanity fetch failed: ${String(cause)}`),
-  });
 
 export const PageRepositoryLive = Layer.succeed(PageRepository, {
   findBySlug: (slug) =>
