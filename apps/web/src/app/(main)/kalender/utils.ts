@@ -76,31 +76,35 @@ function toLocalDate(iso: string): DateTime {
   return DateTime.fromISO(iso, { zone: TIMEZONE });
 }
 
-/** Filter matches whose date falls on the given YYYY-MM-DD */
+/** Filter matches whose date falls on the given YYYY-MM-DD, sorted by time */
 export function getMatchesForDay(
   matches: CalendarMatch[],
   day: string,
 ): CalendarMatch[] {
-  return matches.filter((m) => {
-    const dt = toLocalDate(m.date);
-    return dt.isValid && dt.toISODate() === day;
-  });
+  return matches
+    .filter((m) => {
+      const dt = toLocalDate(m.date);
+      return dt.isValid && dt.toISODate() === day;
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/** Filter events that span the given YYYY-MM-DD (single or multi-day) */
+/** Filter events that span the given YYYY-MM-DD, sorted by start date */
 export function getEventsForDay(
   events: CalendarEvent[],
   day: string,
 ): CalendarEvent[] {
-  return events.filter((e) => {
-    const start = toLocalDate(e.dateStart);
-    if (!start.isValid) return false;
-    const startDay = start.toISODate()!;
-    if (startDay === day) return true;
-    if (!e.dateEnd) return false;
-    const end = toLocalDate(e.dateEnd);
-    return end.isValid && day >= startDay && day <= end.toISODate()!;
-  });
+  return events
+    .filter((e) => {
+      const start = toLocalDate(e.dateStart);
+      if (!start.isValid) return false;
+      const startDay = start.toISODate()!;
+      if (startDay === day) return true;
+      if (!e.dateEnd) return false;
+      const end = toLocalDate(e.dateEnd);
+      return end.isValid && day >= startDay && day <= end.toISODate()!;
+    })
+    .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
 }
 
 /**

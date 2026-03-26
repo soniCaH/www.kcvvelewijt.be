@@ -89,14 +89,24 @@ export function CalendarWidget({
       teamLabels.push(m.team);
     }
   }
+  // Sort: seniors first (A, B), then youth by age descending (U21, U17, U15, ...)
+  // When same age group, sort by label (which includes team ID like "U15 A", "U15 B")
   teamLabels.sort((a, b) => {
-    const order = ["A-ploeg", "B-ploeg"];
-    const ai = order.indexOf(a);
-    const bi = order.indexOf(b);
-    if (ai !== -1 && bi !== -1) return ai - bi;
-    if (ai !== -1) return -1;
-    if (bi !== -1) return 1;
-    return a.localeCompare(b);
+    const ageOf = (label: string): number => {
+      const m = label.match(/U(\d+)/i);
+      return m ? parseInt(m[1], 10) : Infinity; // seniors = Infinity → sort first
+    };
+    const seniorOrder = ["A-ploeg", "B-ploeg"];
+    const sa = seniorOrder.indexOf(a);
+    const sb = seniorOrder.indexOf(b);
+    // Both senior → preserve A before B
+    if (sa !== -1 && sb !== -1) return sa - sb;
+    // One senior → senior first
+    if (sa !== -1) return -1;
+    if (sb !== -1) return 1;
+    // Both youth → higher age first (U21 > U17 > U15 > ...)
+    const ageDiff = ageOf(b) - ageOf(a);
+    return ageDiff !== 0 ? ageDiff : a.localeCompare(b);
   });
 
   function setTeam(team: string) {
