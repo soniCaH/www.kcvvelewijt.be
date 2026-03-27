@@ -72,22 +72,11 @@ export const schemaTypes = sharedSchemaTypes;
 ### Production `apps/studio/` updated
 
 - Add `@kcvv/sanity-schemas: workspace:*` dependency
-- Delete the 11 shared schema files
-- Keep only the 3 production-only types: `articleImage.ts`, `banner.ts`, `homePage.ts`
+- Delete all 14 local schema files — no production-only schemas
 - Update `schemaTypes/index.ts`:
 
 ```typescript
-import { sharedSchemaTypes } from "@kcvv/sanity-schemas";
-import { articleImage } from "./articleImage";
-import { banner } from "./banner";
-import { homePage } from "./homePage";
-
-export const schemaTypes = [
-  ...sharedSchemaTypes,
-  articleImage,
-  banner,
-  homePage,
-];
+export { schemaTypes } from "@kcvv/sanity-schemas";
 ```
 
 ### `turbo.json` updated
