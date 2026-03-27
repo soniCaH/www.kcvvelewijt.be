@@ -54,6 +54,9 @@
     "@kcvv/studio#deploy": {
       "dependsOn": ["build"],
       "cache": false
+    },
+    "@kcvv/sanity-schemas#build": {
+      "outputs": []
     }
   }
 }
