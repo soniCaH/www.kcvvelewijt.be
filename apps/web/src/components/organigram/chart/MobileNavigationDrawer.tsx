@@ -84,7 +84,7 @@ export function MobileNavigationDrawer({
       return (
         member.name.toLowerCase().includes(query) ||
         member.title.toLowerCase().includes(query) ||
-        member.positionShort?.toLowerCase().includes(query) ||
+        member.roleCode?.toLowerCase().includes(query) ||
         member.email?.toLowerCase().includes(query) ||
         member.department?.toLowerCase().includes(query)
       );
@@ -251,7 +251,7 @@ export function MobileNavigationDrawer({
                       </p>
 
                       {/* Position Badge */}
-                      {member.positionShort && (
+                      {member.roleCode && (
                         <span
                           className="
                             inline-block mt-1
@@ -263,7 +263,7 @@ export function MobileNavigationDrawer({
                             leading-tight
                           "
                         >
-                          {member.positionShort}
+                          {member.roleCode}
                         </span>
                       )}
                     </div>

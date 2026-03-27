@@ -154,7 +154,7 @@ export function ContactOverlay({
             <p className="text-sm text-kcvv-gray leading-snug">
               {member.title}
             </p>
-            {member.positionShort && (
+            {member.roleCode && (
               <span
                 className="
                   inline-block mt-2
@@ -166,7 +166,7 @@ export function ContactOverlay({
                   leading-tight
                 "
               >
-                {member.positionShort}
+                {member.roleCode}
               </span>
             )}
           </div>

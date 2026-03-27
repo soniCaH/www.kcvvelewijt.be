@@ -66,7 +66,7 @@ const mockMemberComplete: OrgChartNode = {
   id: "president",
   name: "Jan Janssens",
   title: "Voorzitter van het Hoofdbestuur",
-  positionShort: "PRES",
+  roleCode: "PRES",
   imageUrl:
     "https://ui-avatars.com/api/?name=Jan+Janssens&background=4acf52&color=fff&size=96",
   email: "jan.janssens@kcvvelewijt.be",
@@ -90,7 +90,7 @@ const mockMemberNoContact: OrgChartNode = {
   id: "member-3",
   name: "Tom Vermeulen",
   title: "Trainer U10",
-  positionShort: "T-U10",
+  roleCode: "T-U10",
   department: "jeugdbestuur",
   imageUrl: "https://ui-avatars.com/api/?name=Tom+Vermeulen&background=random",
   parentId: "u10-coordinator",
@@ -101,7 +101,7 @@ const mockMemberLongTitle: OrgChartNode = {
   name: "Els Van de Broek-Vandenberghe",
   title:
     "Coördinator Jeugdwerking en Vrijwilligers voor de Benjamins en Pupillen",
-  positionShort: "COORD",
+  roleCode: "COORD",
   email: "els.vandebroek@kcvvelewijt.be",
   department: "jeugdbestuur",
   parentId: "youth",

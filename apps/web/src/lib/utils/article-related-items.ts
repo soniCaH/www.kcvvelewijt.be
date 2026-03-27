@@ -120,7 +120,7 @@ export function mapMentionedStaff(
     id: s._id,
     firstName: s.firstName,
     lastName: s.lastName,
-    role: s.positionTitle,
+    role: s.roleLabel,
     imageUrl: s.imageUrl,
   }));
 }

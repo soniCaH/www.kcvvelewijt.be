@@ -92,7 +92,7 @@ export const staffMember = defineType({
       },
     }),
     defineField({
-      name: 'positionTitle',
+      name: 'roleLabel',
       title: 'Functietitel (organigram)',
       type: 'string',
       description:
@@ -100,7 +100,7 @@ export const staffMember = defineType({
       hidden: ({document}) => !document?.inOrganigram,
     }),
     defineField({
-      name: 'positionShort',
+      name: 'roleCode',
       title: 'Korte functiecode',
       type: 'string',
       description: 'Badge in het diagram, bv. "T1", "VP", "JC". Max 6 tekens. Gesynchroniseerd vanuit PSD voor trainers.',

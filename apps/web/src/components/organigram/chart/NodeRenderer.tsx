@@ -25,7 +25,7 @@ export interface NodeData extends OrgChartNode {
 /**
  * Render an enhanced d3-organigram node card as an HTML string.
  *
- * @param node - Node data to render; may include `imageUrl`, `name`, `title`, `positionShort`, and `_expanded` to indicate expansion state
+ * @param node - Node data to render; may include `imageUrl`, `name`, `title`, `roleCode`, and `_expanded` to indicate expansion state
  * @param hasChildren - Whether the node has child nodes; when `true` an expand/collapse indicator is included
  * @returns An HTML string representing the rendered node card
  */
@@ -109,7 +109,7 @@ export function renderNode(node: NodeData, hasChildren: boolean): string {
 
           <!-- Position Badge -->
           ${
-            node.positionShort
+            node.roleCode
               ? `
             <div style="
               margin-top: 8px;
@@ -123,7 +123,7 @@ export function renderNode(node: NodeData, hasChildren: boolean): string {
               font-weight: 600;
               font-family: 'ibm-plex-mono', monospace;
               letter-spacing: 0.5px;
-            ">${node.positionShort}</div>
+            ">${node.roleCode}</div>
           `
               : ""
           }
