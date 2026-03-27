@@ -14,6 +14,11 @@ vi.mock("@/lib/repositories/article.repository", () => ({
   ArticleRepository: {},
 }));
 
+vi.mock("@/lib/repositories/jeugd-landing-page.repository", () => ({
+  JeugdLandingPageRepository: {},
+  JeugdLandingPageRepositoryLive: {},
+}));
+
 describe("/jeugd page — canonical section flow", () => {
   beforeEach(() => {
     vi.clearAllMocks();

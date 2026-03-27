@@ -1,5 +1,6 @@
 import { EditorialCard } from "@/components/club/EditorialCard/EditorialCard";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
+import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
 
 interface NavCardConfig {
   tag: string;
@@ -62,6 +63,12 @@ type GridItem = {
   element: React.ReactNode;
 };
 
+const FEATURED =
+  "col-span-7 row-span-2 min-h-[520px] max-desk:col-span-full max-desk:row-span-1 max-desk:min-h-[320px] max-sm:min-h-[280px]";
+const MEDIUM_1 =
+  "col-start-8 col-span-5 row-start-1 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
+const MEDIUM_2 =
+  "col-start-8 col-span-5 row-start-2 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
 const THIRD =
   "col-span-4 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]";
 
@@ -79,24 +86,90 @@ function renderNavCard(nav: NavCardConfig): React.ReactNode {
   );
 }
 
-interface JeugdEditorialGridProps {
-  articles: ArticleVM[];
+function posClassForMedium(mediumIndex: number): string {
+  return mediumIndex === 0 ? MEDIUM_1 : MEDIUM_2;
 }
 
-/**
- * 9-item editorial grid: 3 dynamic article slots interleaved with 6 nav cards.
- *
- * Layout (12-col grid, 4 rows):
- *   Row 1-2: Featured article (col 1-7) | Nav card 0 (col 8-12, row 1) + Article 1 (col 8-12, row 2)
- *   Row 3:   Nav card 1 (col 1-4) | Article 2 (col 5-8) | Nav card 2 (col 9-12)
- *   Row 4:   Nav card 3 (col 1-4) | Nav card 4 (col 5-8) | Nav card 5 (col 9-12)
- *
- * When no articles are available, the grid falls back to a simple 3×2 nav card layout.
- * When 1-2 articles are available, missing article slots are omitted from the magazine layout.
- */
-export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
-  const [article0, article1, article2] = articles;
+function posClassForPosition(
+  position: EditorialCardConfig["position"],
+  mediumIndex: number,
+): string {
+  if (position === "featured") return FEATURED;
+  if (position === "medium") return posClassForMedium(mediumIndex);
+  return THIRD;
+}
 
+function buildItemsFromConfig(
+  config: EditorialCardConfig[],
+  articles: ArticleVM[],
+): GridItem[] {
+  const items: GridItem[] = [];
+  let articleIdx = 0;
+  let mediumCount = 0;
+
+  for (let i = 0; i < config.length; i++) {
+    const entry = config[i];
+    const isFeatured = entry.position === "featured";
+    const isMedium = entry.position === "medium";
+
+    if (entry.cardType === "article") {
+      const article = articles[articleIdx++];
+      if (!article) continue;
+
+      const posClass = posClassForPosition(
+        entry.position,
+        isMedium ? mediumCount : 0,
+      );
+      if (isMedium) mediumCount++;
+
+      items.push({
+        key: `article-${article.id}`,
+        position: posClass,
+        element: (
+          <EditorialCard
+            href={`/nieuws/${article.slug}`}
+            tag={article.tags[0] ?? "Jeugd"}
+            title={article.title}
+            arrowText="Lees meer"
+            featured={isFeatured}
+            backgroundImage={article.coverImageUrl}
+          />
+        ),
+      });
+    } else {
+      // nav card — skip if required fields are missing
+      if (!entry.title || !entry.href) continue;
+
+      const posClass = posClassForPosition(
+        entry.position,
+        isMedium ? mediumCount : 0,
+      );
+      if (isMedium) mediumCount++;
+
+      items.push({
+        key: `nav-sanity-${i}`,
+        position: posClass,
+        element: (
+          <EditorialCard
+            href={entry.href}
+            tag={entry.tag ?? ""}
+            title={entry.title}
+            description={entry.description ?? undefined}
+            arrowText={entry.arrowText ?? "Meer info"}
+            variant="nav"
+            backgroundImage={entry.imageUrl ?? undefined}
+            featured={isFeatured}
+          />
+        ),
+      });
+    }
+  }
+
+  return items;
+}
+
+function buildItemsFromHardcoded(articles: ArticleVM[]): GridItem[] {
+  const [article0, article1, article2] = articles;
   const items: GridItem[] = [];
 
   if (article0) {
@@ -105,8 +178,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
     // Position 1: Featured article (col 1-7, row 1-2)
     items.push({
       key: `article-${article0.id}`,
-      position:
-        "col-span-7 row-span-2 min-h-[520px] max-desk:col-span-full max-desk:row-span-1 max-desk:min-h-[320px] max-sm:min-h-[280px]",
+      position: FEATURED,
       element: (
         <EditorialCard
           href={`/nieuws/${article0.slug}`}
@@ -122,8 +194,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
     // Position 2: Nav card — Aansluiten (col 8-12, row 1)
     items.push({
       key: "nav-aansluiten",
-      position:
-        "col-start-8 col-span-5 row-start-1 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
+      position: MEDIUM_1,
       element: renderNavCard(NAV_CARDS[0]),
     });
 
@@ -131,8 +202,7 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
     if (article1) {
       items.push({
         key: `article-${article1.id}`,
-        position:
-          "col-start-8 col-span-5 row-start-2 min-h-[280px] max-desk:col-auto max-desk:row-auto max-desk:min-h-[260px]",
+        position: MEDIUM_2,
         element: (
           <EditorialCard
             href={`/nieuws/${article1.slug}`}
@@ -195,6 +265,37 @@ export function JeugdEditorialGrid({ articles }: JeugdEditorialGridProps) {
       });
     }
   }
+
+  return items;
+}
+
+interface JeugdEditorialGridProps {
+  articles: ArticleVM[];
+  editorialConfig?: EditorialCardConfig[] | null;
+}
+
+/**
+ * 9-item editorial grid: 3 dynamic article slots interleaved with 6 nav cards.
+ *
+ * Layout (12-col grid, 4 rows):
+ *   Row 1-2: Featured article (col 1-7) | Nav card 0 (col 8-12, row 1) + Article 1 (col 8-12, row 2)
+ *   Row 3:   Nav card 1 (col 1-4) | Article 2 (col 5-8) | Nav card 2 (col 9-12)
+ *   Row 4:   Nav card 3 (col 1-4) | Nav card 4 (col 5-8) | Nav card 5 (col 9-12)
+ *
+ * When editorialConfig is provided, card content and positions come from Sanity.
+ * Article slots (cardType "article") are auto-filled with the latest jeugd articles in order.
+ * Falls back to hardcoded NAV_CARDS when editorialConfig is null or undefined.
+ *
+ * When no articles are available, the grid falls back to a simple nav card layout.
+ */
+export function JeugdEditorialGrid({
+  articles,
+  editorialConfig,
+}: JeugdEditorialGridProps) {
+  const items =
+    editorialConfig != null
+      ? buildItemsFromConfig(editorialConfig, articles)
+      : buildItemsFromHardcoded(articles);
 
   return (
     <div className="max-w-inner-lg mx-auto px-4 md:px-10">
