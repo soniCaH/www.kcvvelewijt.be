@@ -13,14 +13,14 @@ import type { TeamLandingItem } from "../utils/group-teams";
 
 export const TEAMS_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {
-  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,
+  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   tagline,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 export const TEAM_BY_SLUG_QUERY =
   defineQuery(`*[_type == "team" && slug.current == $slug][0] {
-  _id, psdId, name, "slug": slug.current, age, gender, footbelId, leagueId, division, divisionFull,
+  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   trainingSchedule,
@@ -69,7 +69,6 @@ export interface TeamDetailVM {
   age: string | null;
   psdId: string | null;
   footbelId: number | null;
-  leagueId: number | null;
   division: string | null;
   divisionFull: string | null;
   tagline: string | undefined;
@@ -137,7 +136,6 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
     age: row.age,
     psdId: row.psdId,
     footbelId: row.footbelId,
-    leagueId: row.leagueId,
     division: row.division,
     divisionFull: row.divisionFull,
     tagline: computeTagline(row),
