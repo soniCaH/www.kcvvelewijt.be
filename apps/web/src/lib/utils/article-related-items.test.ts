@@ -22,6 +22,7 @@ describe("mapEditorialArticles", () => {
     expect(result).toEqual([
       {
         type: "article",
+        source: "editorial",
         id: "art-1",
         title: "Test Article",
         slug: "test-article",
@@ -62,6 +63,7 @@ describe("mapBffRelatedItems", () => {
     expect(result).toEqual([
       {
         type: "article",
+        source: "ai",
         id: "doc-1",
         title: "AI Article",
         slug: "some-article",
@@ -71,6 +73,7 @@ describe("mapBffRelatedItems", () => {
       },
       {
         type: "page",
+        source: "ai",
         id: "doc-2",
         title: "AI Page",
         slug: "some-page",
@@ -101,6 +104,7 @@ describe("mapMentionedPlayers", () => {
     expect(result).toEqual([
       {
         type: "player",
+        source: "reference",
         id: "player-1",
         firstName: "Kevin",
         lastName: "De Bruyne",
@@ -139,6 +143,7 @@ describe("mapMentionedTeams", () => {
     expect(result).toEqual([
       {
         type: "team",
+        source: "reference",
         id: "team-1",
         name: "KCVV Elewijt",
         slug: "kcvv-elewijt",
@@ -173,6 +178,7 @@ describe("mapMentionedStaff", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       type: "staff",
+      source: "reference",
       id: "staff-1",
       firstName: "John",
       lastName: "Doe",
@@ -195,6 +201,7 @@ describe("mapMentionedStaff", () => {
     expect(result).toEqual([
       {
         type: "staff",
+        source: "reference",
         id: "staff-1",
         firstName: "John",
         lastName: "Doe",

@@ -1,7 +1,12 @@
 /** Discriminated union for all related content item types */
 
+export type RelatedContentSource = "editorial" | "ai" | "reference";
+
+export type RelatedPageType = "article" | "page" | "player" | "team" | "staff";
+
 export interface RelatedArticleItem {
   type: "article";
+  source: RelatedContentSource;
   id: string;
   title: string;
   slug: string;
@@ -12,6 +17,7 @@ export interface RelatedArticleItem {
 
 export interface RelatedPageItem {
   type: "page";
+  source: RelatedContentSource;
   id: string;
   title: string;
   slug: string;
@@ -21,6 +27,7 @@ export interface RelatedPageItem {
 
 export interface RelatedPlayerItem {
   type: "player";
+  source: RelatedContentSource;
   id: string;
   firstName: string | null;
   lastName: string | null;
@@ -31,6 +38,7 @@ export interface RelatedPlayerItem {
 
 export interface RelatedTeamItem {
   type: "team";
+  source: RelatedContentSource;
   id: string;
   name: string;
   slug: string;
@@ -40,6 +48,7 @@ export interface RelatedTeamItem {
 
 export interface RelatedStaffItem {
   type: "staff";
+  source: RelatedContentSource;
   id: string;
   firstName: string | null;
   lastName: string | null;

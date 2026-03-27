@@ -10,6 +10,7 @@ import type {
 
 const articleItem: RelatedArticleItem = {
   type: "article",
+  source: "editorial",
   id: "art-1",
   title: "Interview met de kapitein over het seizoen",
   slug: "interview-kapitein",
@@ -20,6 +21,7 @@ const articleItem: RelatedArticleItem = {
 
 const pageItem: RelatedPageItem = {
   type: "page",
+  source: "ai",
   id: "page-1",
   title: "Over de club",
   slug: "over-de-club",
@@ -29,6 +31,7 @@ const pageItem: RelatedPageItem = {
 
 const playerItem: RelatedPlayerItem = {
   type: "player",
+  source: "reference",
   id: "player-1",
   firstName: "Jan",
   lastName: "Janssens",
@@ -39,6 +42,7 @@ const playerItem: RelatedPlayerItem = {
 
 const teamItem: RelatedTeamItem = {
   type: "team",
+  source: "reference",
   id: "team-1",
   name: "A-ploeg",
   slug: "a-ploeg",
@@ -48,6 +52,7 @@ const teamItem: RelatedTeamItem = {
 
 const staffItem: RelatedStaffItem = {
   type: "staff",
+  source: "reference",
   id: "staff-1",
   firstName: "Piet",
   lastName: "Pieters",
@@ -83,40 +88,95 @@ type Story = StoryObj<typeof meta>;
 
 /** Article variant with image, title, date, and excerpt */
 export const Article: Story = {
-  args: { item: articleItem },
+  args: {
+    item: articleItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
 };
 
 /** Page variant with title and excerpt */
 export const Page: Story = {
-  args: { item: pageItem },
+  args: {
+    item: pageItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
 };
 
 /** Player variant with photo, name, and position */
 export const Player: Story = {
-  args: { item: playerItem },
+  args: {
+    item: playerItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
 };
 
 /** Team variant with photo, name, and tagline */
 export const Team: Story = {
-  args: { item: teamItem },
+  args: {
+    item: teamItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
 };
 
 /** Staff variant with photo, name, and role (no link) */
 export const Staff: Story = {
-  args: { item: staffItem },
+  args: {
+    item: staffItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
 };
 
 /** All variants side-by-side to verify consistent dimensions */
 export const AllVariants: Story = {
-  args: { item: articleItem },
+  args: {
+    item: articleItem,
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
+  },
   decorators: [
     () => (
       <div className="flex gap-4 items-start">
-        <RelatedContentCard item={articleItem} />
-        <RelatedContentCard item={pageItem} />
-        <RelatedContentCard item={playerItem} />
-        <RelatedContentCard item={teamItem} />
-        <RelatedContentCard item={staffItem} />
+        <RelatedContentCard
+          item={articleItem}
+          position={1}
+          pageType="article"
+          pageSlug="example-article"
+        />
+        <RelatedContentCard
+          item={pageItem}
+          position={2}
+          pageType="article"
+          pageSlug="example-article"
+        />
+        <RelatedContentCard
+          item={playerItem}
+          position={3}
+          pageType="article"
+          pageSlug="example-article"
+        />
+        <RelatedContentCard
+          item={teamItem}
+          position={4}
+          pageType="article"
+          pageSlug="example-article"
+        />
+        <RelatedContentCard
+          item={staffItem}
+          position={5}
+          pageType="article"
+          pageSlug="example-article"
+        />
       </div>
     ),
   ],
@@ -126,5 +186,8 @@ export const AllVariants: Story = {
 export const NoImage: Story = {
   args: {
     item: { ...articleItem, imageUrl: null },
+    position: 1,
+    pageType: "article",
+    pageSlug: "example-article",
   },
 };

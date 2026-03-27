@@ -27,6 +27,7 @@ export function mapEditorialArticles(
   if (!articles?.length) return [];
   return articles.map((a) => ({
     type: "article" as const,
+    source: "editorial" as const,
     id: a.id,
     title: a.title,
     slug: a.slug,
@@ -43,6 +44,7 @@ export function mapBffRelatedItems(
     if (item.type === "page") {
       return {
         type: "page" as const,
+        source: "ai" as const,
         id: item.id,
         title: item.title,
         slug: item.slug,
@@ -52,6 +54,7 @@ export function mapBffRelatedItems(
     }
     return {
       type: "article" as const,
+      source: "ai" as const,
       id: item.id,
       title: item.title,
       slug: item.slug,
@@ -80,6 +83,7 @@ export function mapMentionedPlayers(
     .filter((p) => p.psdId != null)
     .map((p) => ({
       type: "player" as const,
+      source: "reference" as const,
       id: p._id,
       firstName: p.firstName,
       lastName: p.lastName,
@@ -97,6 +101,7 @@ export function mapMentionedTeams(
     .filter((t) => t.name != null && t.slug != null)
     .map((t) => ({
       type: "team" as const,
+      source: "reference" as const,
       id: t._id,
       name: t.name!,
       slug: t.slug!,
@@ -111,6 +116,7 @@ export function mapMentionedStaff(
   const valid = (staff ?? []).filter((s): s is MentionedStaff => s != null);
   return deduplicateById(valid).map((s) => ({
     type: "staff" as const,
+    source: "reference" as const,
     id: s._id,
     firstName: s.firstName,
     lastName: s.lastName,
