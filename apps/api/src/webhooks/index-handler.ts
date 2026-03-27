@@ -181,6 +181,7 @@ export async function handleIndexWebhook(
       tags: string[];
       bodyText: string | null;
       slug: string;
+      imageUrl?: string | null;
     };
     indexText = buildArticleIndexText(d);
     metadata = {
@@ -188,6 +189,7 @@ export async function handleIndexWebhook(
       type: "article",
       title: d.title,
       excerpt: (d.bodyText ?? "").slice(0, 200),
+      ...(d.imageUrl ? { imageUrl: d.imageUrl } : {}),
     };
   } else {
     // page
@@ -229,7 +231,7 @@ function queryForType(type: string): string {
     case "responsibilityPath":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,""), category }`;
     case "article":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body) }`;
+      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;
     case "page":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`;
     default:

@@ -58,7 +58,7 @@ export function mapBffRelatedItems(
       id: item.id,
       title: item.title,
       slug: item.slug,
-      imageUrl: null,
+      imageUrl: item.imageUrl ?? null,
       date: null,
       excerpt: item.excerpt,
     } satisfies RelatedArticleItem;
