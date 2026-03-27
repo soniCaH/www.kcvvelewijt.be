@@ -23,7 +23,7 @@ describe("useSemanticSearch", () => {
           {
             id: "doc-abc",
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.9,
             title: "Kantine",
             excerpt: "De kantine...",
@@ -65,7 +65,7 @@ describe("useSemanticSearch", () => {
           {
             id: "doc-abc",
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.9,
             title: "Kantine",
             excerpt: "De kantine...",
@@ -96,7 +96,7 @@ describe("useSemanticSearch", () => {
           {
             id: "doc-abc",
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.4,
             title: "Kantine",
             excerpt: "De kantine...",
@@ -124,7 +124,7 @@ describe("useSemanticSearch", () => {
           {
             id: "doc-abc",
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.9,
             title: "Kantine",
             excerpt: "De kantine...",

@@ -6,7 +6,7 @@ import type { SemanticSearchResult } from "../../hooks/useSemanticSearch";
 
 function getHref(item: SemanticSearchResult): string {
   switch (item.type) {
-    case "responsibilityPath":
+    case "responsibility":
       return `/hulp?path=${item.slug}`;
     case "article":
       return `/nieuws/${item.slug}`;

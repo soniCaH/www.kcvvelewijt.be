@@ -1,7 +1,7 @@
 export {player} from './player'
 export {team, trainingDay} from './team'
 export {staffMember} from './staffMember'
-export {responsibilityPath} from './responsibilityPath'
+export {responsibility} from './responsibility'
 export {article} from './article'
 export {articleImage} from './articleImage'
 export {sponsor} from './sponsor'
@@ -16,7 +16,7 @@ export {homePage} from './homePage'
 import {player} from './player'
 import {team, trainingDay} from './team'
 import {staffMember} from './staffMember'
-import {responsibilityPath} from './responsibilityPath'
+import {responsibility} from './responsibility'
 import {article} from './article'
 import {articleImage} from './articleImage'
 import {sponsor} from './sponsor'
@@ -33,7 +33,7 @@ export const schemaTypes = [
   team,
   trainingDay,
   staffMember,
-  responsibilityPath,
+  responsibility,
   article,
   articleImage,
   sponsor,

@@ -36,7 +36,7 @@ describe("RelatedPaths", () => {
         {
           id: "doc-def",
           slug: "blessure-melden",
-          type: "responsibilityPath",
+          type: "responsibility",
           score: 0.85,
           title: "Blessure melden",
           excerpt: "Hoe meld je een blessure...",
@@ -60,13 +60,13 @@ describe("RelatedPaths", () => {
     expect(screen.getByText("Nieuws over blessures")).toBeInTheDocument();
   });
 
-  it("links responsibilityPath items to /hulp?path=<slug>", () => {
+  it("links responsibility items to /hulp?path=<slug>", () => {
     vi.mocked(useRelatedContent).mockReturnValue({
       results: [
         {
           id: "doc-def",
           slug: "blessure-melden",
-          type: "responsibilityPath",
+          type: "responsibility",
           score: 0.85,
           title: "Blessure melden",
           excerpt: "Hoe meld je...",

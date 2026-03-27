@@ -5,7 +5,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 export interface SemanticSearchResult {
   id: string;
   slug: string;
-  type: "responsibilityPath" | "article" | "page";
+  type: "responsibility" | "article" | "page";
   score: number;
   title: string;
   excerpt: string;

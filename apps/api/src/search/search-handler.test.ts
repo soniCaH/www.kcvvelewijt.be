@@ -71,7 +71,7 @@ const makeHit = (id: string, score: number): VectorizeMatch => ({
   score,
   metadata: {
     slug: id,
-    type: "responsibilityPath",
+    type: "responsibility",
     title: id,
     excerpt: `Excerpt for ${id}`,
   },
@@ -89,7 +89,7 @@ describe("handleSearch", () => {
               score: 0.95,
               metadata: {
                 slug: "kantine-evenementen",
-                type: "responsibilityPath",
+                type: "responsibility",
                 title: "Kantine",
                 excerpt: "De kantine...",
               },
@@ -209,7 +209,7 @@ describe("handleSearch", () => {
       ),
     );
 
-    expect(capturedFilter?.["type"]).toBe("responsibilityPath");
+    expect(capturedFilter?.["type"]).toBe("responsibility");
   });
 });
 

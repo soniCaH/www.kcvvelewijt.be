@@ -39,7 +39,7 @@ interface SanityPageDoc {
 
 // ─── Sanity GROQ queries ─────────────────────────────────────────────────────
 
-const RESPONSIBILITY_QUERY = `*[_type == "responsibilityPath" && active == true] {
+const RESPONSIBILITY_QUERY = `*[_type == "responsibility" && active == true] {
   _id,
   "slug": coalesce(slug.current, ""),
   title,
@@ -132,7 +132,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
       (doc) =>
         indexDoc(doc._id, buildResponsibilityIndexText(doc), {
           slug: doc.slug,
-          type: "responsibilityPath",
+          type: "responsibility",
           title: doc.title,
           excerpt: doc.summary.slice(0, 200),
         }).pipe(

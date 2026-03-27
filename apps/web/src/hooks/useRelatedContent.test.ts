@@ -20,7 +20,7 @@ describe("useRelatedContent", () => {
         {
           id: "doc-def",
           slug: "blessure-melden",
-          type: "responsibilityPath",
+          type: "responsibility",
           score: 0.85,
           title: "Blessure melden",
           excerpt: "Hoe meld je...",

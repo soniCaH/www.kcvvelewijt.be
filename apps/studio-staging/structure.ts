@@ -88,7 +88,7 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .title('Hulp & Contact')
         .child(
-          S.documentTypeList('responsibilityPath')
+          S.documentTypeList('responsibility')
             .title('Hulp & Contact')
             .defaultOrdering([{field: 'title', direction: 'asc'}]),
         ),

@@ -122,7 +122,7 @@ export async function handleIndexWebhook(
   if (parsed instanceof Response) return parsed;
   const { _id, _type } = parsed;
 
-  const allowedTypes = ["responsibilityPath", "article", "page"];
+  const allowedTypes = ["responsibility", "article", "page"];
   const allowedOps = ["create", "update", "delete"];
   const operation = request.headers.get("sanity-operation") ?? "update";
 
@@ -159,7 +159,7 @@ export async function handleIndexWebhook(
   let indexText: string;
   let metadata: Record<string, string>;
 
-  if (_type === "responsibilityPath") {
+  if (_type === "responsibility") {
     const d = doc as {
       title: string;
       question: string;
@@ -171,7 +171,7 @@ export async function handleIndexWebhook(
     indexText = buildResponsibilityIndexText(d);
     metadata = {
       slug: d.slug,
-      type: "responsibilityPath",
+      type: "responsibility",
       title: d.title,
       excerpt: d.summary.slice(0, 200),
     };
@@ -228,7 +228,7 @@ export async function handleIndexWebhook(
 
 function queryForType(type: string): string {
   switch (type) {
-    case "responsibilityPath":
+    case "responsibility":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,""), category }`;
     case "article":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;

@@ -64,7 +64,7 @@ describe("SearchResult", () => {
       S.decodeUnknown(SearchResult)({
         id: "abc123",
         slug: "kantine-verantwoordelijke",
-        type: "responsibilityPath",
+        type: "responsibility",
         score: 0.92,
         title: "Kantine & evenementen",
         excerpt: "De kantine wordt beheerd door...",
