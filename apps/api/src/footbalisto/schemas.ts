@@ -100,7 +100,7 @@ export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
   "PsdCompetitionType",
 )({
   id: S.Number,
-  name: S.NullOr(S.String),
+  name: S.optional(S.NullOr(S.String)),
   type: S.String, // "LEAGUE", "CUP", "FRIENDLY", etc.
 }) {}
 

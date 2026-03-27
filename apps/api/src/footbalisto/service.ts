@@ -47,7 +47,7 @@ export function mapCompetitionLabel(
     case "LEAGUE":
       return "Competitie";
     case "CUP":
-      return name ?? "Beker";
+      return name?.trim() || "Beker";
     case "FRIENDLY":
       return "Vriendschappelijk";
     default:
