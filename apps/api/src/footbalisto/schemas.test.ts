@@ -15,7 +15,7 @@ describe("FootbalistoMatchDetailResponse", () => {
         awayClub: { id: 456, name: "Opponent FC" },
         goalsHomeTeam: 3,
         goalsAwayTeam: 1,
-        competitionType: "3de Nationale",
+        competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
         viewGameReport: true,
         status: 1,
       },

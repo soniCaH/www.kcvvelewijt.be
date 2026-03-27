@@ -96,6 +96,14 @@ export class FootbalistoLineup extends S.Class<FootbalistoLineup>(
   away: S.Array(FootbalistoLineupPlayer),
 }) {}
 
+export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
+  "PsdCompetitionType",
+)({
+  id: S.Number,
+  name: S.optional(S.NullOr(S.String)),
+  type: S.String, // "LEAGUE", "CUP", "FRIENDLY", etc.
+}) {}
+
 export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetailGeneral>(
   "FootbalistoMatchDetailGeneral",
 )({
@@ -108,7 +116,7 @@ export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetai
   goalsAwayTeam: S.NullOr(S.Number),
   homeTeamId: S.optional(S.NullOr(S.Number)),
   awayTeamId: S.optional(S.NullOr(S.Number)),
-  competitionType: S.String,
+  competitionType: S.optional(S.NullOr(PsdCompetitionType)),
   viewGameReport: S.Boolean,
   status: S.Number,
   cancelled: S.optional(S.NullOr(S.Boolean)),
@@ -131,14 +139,6 @@ export class PsdSeason extends S.Class<PsdSeason>("PsdSeason")({
 }) {}
 
 export const PsdSeasonsSchema = S.Array(PsdSeason);
-
-export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
-  "PsdCompetitionType",
-)({
-  id: S.Number,
-  name: S.NullOr(S.String),
-  type: S.String, // "LEAGUE", "CUP", "FRIENDLY", etc.
-}) {}
 
 // ─── Shared game fields ─────────────────────────────────────────────────────
 // Field names differ from the old Footbalisto API:
