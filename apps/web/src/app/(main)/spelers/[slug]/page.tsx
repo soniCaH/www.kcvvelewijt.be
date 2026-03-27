@@ -133,6 +133,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
       <RelatedArticlesSection
         articles={relatedArticles}
+        pageType="player"
+        pageSlug={slug}
         className="max-w-4xl mx-auto px-4 pb-8"
       />
     </>

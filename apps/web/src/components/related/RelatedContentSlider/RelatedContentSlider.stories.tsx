@@ -12,6 +12,7 @@ import type {
 const articles: RelatedArticleItem[] = [
   {
     type: "article",
+    source: "editorial",
     id: "art-1",
     title: "Interview met de kapitein",
     slug: "interview-kapitein",
@@ -21,6 +22,7 @@ const articles: RelatedArticleItem[] = [
   },
   {
     type: "article",
+    source: "editorial",
     id: "art-2",
     title: "Wedstrijdverslag: overwinning in de derby",
     slug: "wedstrijdverslag-derby",
@@ -32,6 +34,7 @@ const articles: RelatedArticleItem[] = [
 
 const page: RelatedPageItem = {
   type: "page",
+  source: "ai",
   id: "page-1",
   title: "Over de club",
   slug: "over-de-club",
@@ -42,6 +45,7 @@ const page: RelatedPageItem = {
 const players: RelatedPlayerItem[] = [
   {
     type: "player",
+    source: "reference",
     id: "player-1",
     firstName: "Jan",
     lastName: "Janssens",
@@ -51,6 +55,7 @@ const players: RelatedPlayerItem[] = [
   },
   {
     type: "player",
+    source: "reference",
     id: "player-2",
     firstName: "Pieter",
     lastName: "De Smet",
@@ -62,6 +67,7 @@ const players: RelatedPlayerItem[] = [
 
 const team: RelatedTeamItem = {
   type: "team",
+  source: "reference",
   id: "team-1",
   name: "A-ploeg",
   slug: "a-ploeg",
@@ -71,6 +77,7 @@ const team: RelatedTeamItem = {
 
 const staff: RelatedStaffItem = {
   type: "staff",
+  source: "reference",
   id: "staff-1",
   firstName: "Piet",
   lastName: "Pieters",
@@ -115,20 +122,20 @@ type Story = StoryObj<typeof meta>;
 
 /** Mixed content from multiple types, automatically sorted */
 export const MixedContent: Story = {
-  args: { items: mixedItems },
+  args: { items: mixedItems, pageType: "article", pageSlug: "example-article" },
 };
 
 /** Single type — articles only */
 export const ArticlesOnly: Story = {
-  args: { items: articles },
+  args: { items: articles, pageType: "article", pageSlug: "example-article" },
 };
 
 /** Single type — players only */
 export const PlayersOnly: Story = {
-  args: { items: players },
+  args: { items: players, pageType: "article", pageSlug: "example-article" },
 };
 
 /** Empty state — renders nothing */
 export const Empty: Story = {
-  args: { items: [] },
+  args: { items: [], pageType: "article", pageSlug: "example-article" },
 };

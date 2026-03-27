@@ -174,7 +174,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
         </main>
 
-        <RelatedContentSlider items={relatedItems} />
+        <RelatedContentSlider
+          items={relatedItems}
+          pageType="article"
+          pageSlug={article.slug}
+        />
       </div>
     </>
   );

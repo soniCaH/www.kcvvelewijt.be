@@ -1,27 +1,62 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { trackEvent } from "@/lib/analytics/track-event";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
+import type { RelatedPageType } from "../types";
 
 export interface RelatedArticlesSectionProps {
   articles: ArticleVM[];
+  pageType: RelatedPageType;
+  pageSlug: string;
   className?: string;
 }
 
 export const RelatedArticlesSection = ({
   articles,
+  pageType,
+  pageSlug,
   className,
 }: RelatedArticlesSectionProps) => {
+  const hasFired = useRef(false);
+
+  useEffect(() => {
+    if (hasFired.current || articles.length === 0) return;
+    hasFired.current = true;
+
+    trackEvent("related_content_shown", {
+      source: "reference",
+      count: articles.length,
+      content_types: "article",
+      page_type: pageType,
+      page_slug: pageSlug,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (articles.length === 0) return null;
 
   return (
     <section className={className}>
       <h3 className="text-lg font-bold mb-4">Gerelateerd</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {articles.map((article) => (
+        {articles.map((article, index) => (
           <Link
             key={article.id}
             href={`/nieuws/${article.slug}`}
             className="group block overflow-hidden rounded-lg border border-gray-200 hover:border-kcvv-green-bright transition-colors"
+            onClick={() => {
+              trackEvent("related_content_click", {
+                source: "reference",
+                target_type: "article",
+                target_slug: article.slug,
+                position: index + 1,
+                page_type: pageType,
+                page_slug: pageSlug,
+              });
+            }}
           >
             {article.coverImageUrl && (
               <div className="relative aspect-video overflow-hidden">

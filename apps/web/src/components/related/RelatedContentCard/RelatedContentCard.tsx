@@ -1,11 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import type { RelatedContentItem } from "../types";
+import { trackEvent } from "@/lib/analytics/track-event";
+import type { RelatedContentItem, RelatedPageType } from "../types";
 
 export interface RelatedContentCardProps {
   /** The related content item to display */
   item: RelatedContentItem;
+  /** 1-indexed position in the slider */
+  position: number;
+  /** Type of the page displaying the card */
+  pageType: RelatedPageType;
+  /** Slug of the page displaying the card */
+  pageSlug: string;
   /** Additional CSS classes */
   className?: string;
 }
@@ -22,6 +31,19 @@ function getHref(item: RelatedContentItem): string | null {
       return `/ploegen/${item.slug}`;
     case "staff":
       return null;
+  }
+}
+
+function getTargetSlug(item: RelatedContentItem): string {
+  switch (item.type) {
+    case "article":
+    case "page":
+    case "team":
+      return item.slug;
+    case "player":
+      return item.psdId;
+    case "staff":
+      return item.id;
   }
 }
 
@@ -127,6 +149,9 @@ function CardContent({ item }: { item: RelatedContentItem }) {
 
 export const RelatedContentCard = ({
   item,
+  position,
+  pageType,
+  pageSlug,
   className,
 }: RelatedContentCardProps) => {
   const href = getHref(item);
@@ -155,12 +180,24 @@ export const RelatedContentCard = ({
     <div className="aspect-video bg-gray-100" />
   );
 
+  const handleClick = () => {
+    trackEvent("related_content_click", {
+      source: item.source,
+      target_type: item.type,
+      target_slug: getTargetSlug(item),
+      position,
+      page_type: pageType,
+      page_slug: pageSlug,
+    });
+  };
+
   if (href) {
     return (
       <Link
         href={href}
         className={cn(cardClasses, "relative")}
         data-related-card={item.type}
+        onClick={handleClick}
       >
         <div
           className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
