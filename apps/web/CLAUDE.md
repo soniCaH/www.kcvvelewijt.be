@@ -60,3 +60,12 @@ MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) withou
 | Icons             | `src/lib/icons.ts`                                                            |
 | Foundation docs   | `src/stories/foundation/`                                                     |
 | Design tokens     | `src/app/globals.css` (`@theme {}`)                                           |
+
+## Analytics & Instrumentation
+
+- **Analytics belong in `useEffect`, never inside async fetch functions.** Async functions cannot see derived state (e.g. `filteredResults`) and are not re-triggered by client-side state changes. Use a `useEffect` with all terminal state variables in deps: `[data, isLoading, error, ...]`.
+- **`error` is required in analytics effect deps and guard.** Without it, `trackNoResults` fires after failed fetches when `isLoading` becomes `false` and results are empty. Guard: `if (isLoading || error) return;`.
+- **`AbortController`: abort on all exit paths.** Any early return in an async function that owns an `AbortController` must call `.abort()` and null the ref before returning — not just the happy path.
+- **Analytics data source must match what the UI renders.** If the UI applies client-side filters, analytics must use the post-filter list, not the raw API response.
+- **Privacy: classify each field before remediating.** User-generated input (e.g. query text) → sanitize/truncate via `sanitizeQuery`. Public editorial content (e.g. result titles) → keep as-is. Never remove non-user-authored fields.
+- **Bug fix commits need a regression test.** If a fix adds a guard condition, add a test case that exercises the unguarded path.
