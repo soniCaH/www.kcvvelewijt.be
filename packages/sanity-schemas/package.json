@@ -14,9 +14,11 @@
     "build": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@sanity/icons": ">=3",
     "sanity": ">=5"
   },
   "devDependencies": {
+    "@sanity/icons": "3.7.4",
     "sanity": "5.18.0",
     "typescript": "5.9.3"
   }

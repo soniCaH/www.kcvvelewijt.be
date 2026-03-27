@@ -4,6 +4,7 @@ export const searchFeedback = defineType({
   name: 'searchFeedback',
   title: 'Search Feedback',
   type: 'document',
+  // @ts-expect-error __experimental_actions is not in the public type yet
   __experimental_actions: ['read', 'delete'],
   fields: [
     defineField({name: 'pathSlug', title: 'Path slug', type: 'string'}),
