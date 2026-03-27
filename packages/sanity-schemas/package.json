@@ -1,0 +1,22 @@
+{
+  "name": "@kcvv/sanity-schemas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "sanity": ">=5"
+  },
+  "devDependencies": {
+    "sanity": "5.18.0",
+    "typescript": "5.9.3"
+  }
+}
