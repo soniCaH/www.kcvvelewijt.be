@@ -34,6 +34,7 @@ export function transformMatchToSchedule(match: Match): ScheduleMatch {
     awayScore: match.away_team.score,
     status: match.status,
     competition: match.competition,
+    isHome: match.is_home,
   };
 }
 

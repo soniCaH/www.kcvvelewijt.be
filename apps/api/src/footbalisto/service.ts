@@ -100,6 +100,11 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
     `${datePart} ${timeStr}`,
   );
 
+  const isHome =
+    game.homeTeamId != null && game.teamId != null
+      ? game.homeTeamId === game.teamId
+      : undefined;
+
   return mapGameStatus(
     game.status,
     game.goalsHomeTeam,
@@ -126,6 +131,7 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
       status,
       competition: game.competitionType?.type ?? "UNKNOWN",
       kcvv_team_id: game.teamId ?? undefined,
+      is_home: isHome,
     })),
   );
 }

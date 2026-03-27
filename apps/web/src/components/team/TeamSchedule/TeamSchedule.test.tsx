@@ -235,6 +235,7 @@ describe("TeamSchedule", () => {
         homeScore: 3,
         awayScore: 1,
         status: "finished",
+        isHome: true,
       };
       render(<TeamSchedule matches={[winMatch]} teamId={1235} />);
       expect(screen.getByText("W")).toBeInTheDocument();
@@ -249,6 +250,7 @@ describe("TeamSchedule", () => {
         homeScore: 0,
         awayScore: 2,
         status: "finished",
+        isHome: true,
       };
       render(<TeamSchedule matches={[lossMatch]} teamId={1235} />);
       expect(screen.getByText("L")).toBeInTheDocument();
@@ -263,6 +265,7 @@ describe("TeamSchedule", () => {
         homeScore: 2,
         awayScore: 2,
         status: "finished",
+        isHome: true,
       };
       render(<TeamSchedule matches={[drawMatch]} teamId={1235} />);
       expect(screen.getByText("G")).toBeInTheDocument();
@@ -300,6 +303,7 @@ describe("TeamSchedule", () => {
         homeTeam: { id: 1235, name: "KCVV Elewijt" },
         awayTeam: { id: 59, name: "Opponent" },
         status: "scheduled",
+        isHome: true,
       };
       render(<TeamSchedule matches={[homeMatch]} teamId={1235} />);
       const kcvvText = screen.getByText("KCVV Elewijt");

@@ -39,7 +39,6 @@ export interface TeamScheduleProps {
 
 export function TeamSchedule({
   matches,
-  teamId,
   teamSlug,
   showPast = true,
   highlightNext = true,
@@ -128,7 +127,6 @@ export function TeamSchedule({
           <MatchResultRow
             key={match.id}
             match={match}
-            teamId={teamId}
             isNext={index === nextMatchIndex}
             href={matchHref}
           />

@@ -182,6 +182,65 @@ describe("FootbalistoService.getTeamMatches", () => {
     }
   });
 
+  it("sets is_home: true when homeTeamId matches the queried teamId", async () => {
+    const homeGame = {
+      ...rawMatchList.content[0],
+      id: 201,
+      teamId: 7,
+      homeTeamId: 7,
+      awayTeamId: 8,
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [homeGame] }),
+      });
+
+    const result = await runService((svc) => svc.getTeamMatches(7));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.is_home).toBe(true);
+    }
+  });
+
+  it("sets is_home: false when awayTeamId matches the queried teamId", async () => {
+    const awayGame = {
+      ...rawMatchList.content[0],
+      id: 202,
+      teamId: 8,
+      homeTeamId: 7,
+      awayTeamId: 8,
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [awayGame] }),
+      });
+
+    const result = await runService((svc) => svc.getTeamMatches(8));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.is_home).toBe(false);
+    }
+  });
+
+  it("leaves is_home undefined when homeTeamId is not present", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({ ok: true, json: async () => rawMatchList });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.is_home).toBeUndefined();
+    }
+  });
+
   it("fails when season fetch fails", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,

@@ -36,6 +36,8 @@ export interface ScheduleMatch {
   status: MatchStatus;
   /** Competition name */
   competition?: string;
+  /** Whether the tracked team is playing at home. Provided by BFF via Match.is_home. */
+  isHome?: boolean;
 }
 
 export interface UpcomingMatch {
