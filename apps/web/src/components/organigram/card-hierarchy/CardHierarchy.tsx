@@ -131,7 +131,7 @@ export function CardHierarchy({
       return (
         member.name.toLowerCase().includes(query) ||
         member.title.toLowerCase().includes(query) ||
-        member.positionShort?.toLowerCase().includes(query) ||
+        member.roleCode?.toLowerCase().includes(query) ||
         member.email?.toLowerCase().includes(query) ||
         member.department?.toLowerCase().includes(query)
       );

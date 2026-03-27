@@ -81,7 +81,7 @@ export function transformTeam(
 /**
  * Convert a PSD staff member record into a Sanity staffMember document.
  * Only PSD-sourced fields are written — editorial fields (role, department,
- * parentMember, inOrganigram, positionTitle, responsibilities, photo) are never touched.
+ * parentMember, inOrganigram, roleLabel, responsibilities, photo) are never touched.
  */
 export function transformStaff(psd: PsdMember): SanityStaffDoc {
   return {
@@ -89,7 +89,7 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
     firstName: psd.firstName,
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
-    positionShort:
+    roleCode:
       psd.functionTitle && psd.functionTitle.length <= 6
         ? psd.functionTitle
         : undefined,

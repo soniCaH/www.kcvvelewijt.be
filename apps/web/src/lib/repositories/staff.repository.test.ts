@@ -27,8 +27,8 @@ function makeStaffRow(overrides: Partial<StaffRow> = {}): StaffRow {
     _id: "staff-1",
     firstName: "Jan",
     lastName: "Janssens",
-    positionTitle: "Voorzitter",
-    positionShort: "VZ",
+    roleLabel: "Voorzitter",
+    roleCode: "VZ",
     department: "hoofdbestuur",
     email: "jan@kcvv.be",
     phone: "+32 123 456 789",
@@ -69,7 +69,7 @@ describe("StaffRepository", () => {
         id: "staff-1",
         name: "Jan Janssens",
         title: "Voorzitter",
-        positionShort: "VZ",
+        roleCode: "VZ",
         imageUrl: "https://cdn.sanity.io/photo.webp",
         email: "jan@kcvv.be",
         phone: "+32 123 456 789",
@@ -112,7 +112,7 @@ describe("StaffRepository", () => {
     it("null optional fields become undefined", async () => {
       mockFetch.mockResolvedValueOnce([
         makeStaffRow({
-          positionShort: null,
+          roleCode: null,
           photoUrl: null,
           email: null,
           phone: null,
@@ -129,7 +129,7 @@ describe("StaffRepository", () => {
       );
 
       const member = members[1];
-      expect(member.positionShort).toBeUndefined();
+      expect(member.roleCode).toBeUndefined();
       expect(member.imageUrl).toBeUndefined();
       expect(member.email).toBeUndefined();
       expect(member.phone).toBeUndefined();
@@ -152,8 +152,8 @@ describe("StaffRepository", () => {
       expect(members[1].name).toBe("Janssens");
     });
 
-    it("null positionTitle defaults to empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeStaffRow({ positionTitle: null })]);
+    it("null roleLabel defaults to empty string", async () => {
+      mockFetch.mockResolvedValueOnce([makeStaffRow({ roleLabel: null })]);
 
       const members = await runWithRepo(
         Effect.gen(function* () {

@@ -126,12 +126,12 @@ export function MemberDetailsModal({
                 {member.name}
               </h2>
               <p className="text-white/90 text-lg">{member.title}</p>
-              {member.positionShort && (
+              {member.roleCode && (
                 <span
                   className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-md text-sm font-semibold tracking-wide"
                   style={{ fontFamily: "ibm-plex-mono, monospace" }}
                 >
-                  {member.positionShort}
+                  {member.roleCode}
                 </span>
               )}
             </div>

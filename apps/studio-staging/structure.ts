@@ -53,7 +53,7 @@ export const structure: StructureResolver = (S) =>
                   S.documentList()
                     .title('Ontbrekende velden')
                     .filter(
-                      '_type == "staffMember" && inOrganigram == true && (!defined(positionTitle) || !defined(photo))',
+                      '_type == "staffMember" && inOrganigram == true && (!defined(roleLabel) || !defined(photo))',
                     )
                     .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
                 ),

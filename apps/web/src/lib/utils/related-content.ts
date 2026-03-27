@@ -20,7 +20,7 @@ export interface MentionedStaffMember {
   _id: string;
   firstName: string | null;
   lastName: string | null;
-  positionTitle: string | null;
+  roleLabel: string | null;
   imageUrl: string | null;
 }
 

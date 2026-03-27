@@ -30,7 +30,7 @@ export interface SanityStaffDoc {
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null; // "YYYY-MM-DD"
-  positionShort: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
+  roleCode: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
 }
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -410,8 +410,8 @@ export const SanityWriteClientLive = Layer.effect(
           birthDate: doc.birthDate,
           archived: false,
         };
-        if (doc.positionShort !== undefined) {
-          fields["positionShort"] = doc.positionShort;
+        if (doc.roleCode !== undefined) {
+          fields["roleCode"] = doc.roleCode;
         }
         return upsert("staffMember", doc.psdId, fields);
       },

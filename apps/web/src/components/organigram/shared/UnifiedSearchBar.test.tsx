@@ -10,7 +10,7 @@ describe("UnifiedSearchBar", () => {
       id: "president",
       name: "John Doe",
       title: "Voorzitter",
-      positionShort: "PRES",
+      roleCode: "PRES",
       email: "john@example.com",
       department: "hoofdbestuur",
     },

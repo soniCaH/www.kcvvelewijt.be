@@ -31,7 +31,7 @@ const mockMember: OrgChartNode = {
   id: "1",
   name: "Jean-Pierre Van Rossem",
   title: "Voorzitter",
-  positionShort: "VOOR",
+  roleCode: "VOOR",
   department: "hoofdbestuur",
   email: "jp.vanrossem@kcvv.be",
   phone: "+32 470 12 34 56",

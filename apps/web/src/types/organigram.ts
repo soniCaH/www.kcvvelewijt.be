@@ -19,7 +19,7 @@ export interface OrgChartNode {
   title: string;
 
   /** Short role code (e.g., "PRES" for President) */
-  positionShort?: string;
+  roleCode?: string;
 
   /** URL to profile photo */
   imageUrl?: string;

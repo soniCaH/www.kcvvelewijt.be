@@ -449,8 +449,8 @@ export type StaffMember = {
   }>;
   inOrganigram?: boolean;
   parentMember?: StaffMemberReference;
-  positionTitle?: string;
-  positionShort?: string;
+  roleLabel?: string;
+  roleCode?: string;
   responsibilities?: string;
   psdId?: string;
   archived?: boolean;
@@ -903,7 +903,7 @@ export type RELATED_ARTICLES_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLE_BY_SLUG_QUERY
-// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName, positionTitle,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
+// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName, roleLabel,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
 export type ARTICLE_BY_SLUG_QUERY_RESULT = {
   _id: string;
   title: string | null;
@@ -1101,21 +1101,21 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         _id: string;
         firstName: null;
         lastName: null;
-        positionTitle: null;
+        roleLabel: null;
         imageUrl: null;
       }
     | {
         _id: string;
         firstName: string | null;
         lastName: string | null;
-        positionTitle: null;
+        roleLabel: null;
         imageUrl: null;
       }
     | {
         _id: string;
         firstName: string | null;
         lastName: string | null;
-        positionTitle: string | null;
+        roleLabel: string | null;
         imageUrl: string | null;
       }
     | null
@@ -1396,13 +1396,13 @@ export type SPONSORS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBERS_QUERY
-// Query: *[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {  _id,  firstName,  lastName,  positionTitle,  positionShort,  department,  email,  phone,  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",  responsibilities,  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)}
+// Query: *[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {  _id,  firstName,  lastName,  roleLabel,  roleCode,  department,  email,  phone,  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",  responsibilities,  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)}
 export type STAFF_MEMBERS_QUERY_RESULT = Array<{
   _id: string;
   firstName: string | null;
   lastName: string | null;
-  positionTitle: string | null;
-  positionShort: string | null;
+  roleLabel: string | null;
+  roleCode: string | null;
   department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
   email: string | null;
   phone: string | null;
@@ -1587,7 +1587,7 @@ declare module "@sanity/client" {
     'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
-    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, positionTitle,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, roleLabel,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "event"] | order(dateStart asc) {\n  _id, title, dateStart, dateEnd, externalLink,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
@@ -1596,7 +1596,7 @@ declare module "@sanity/client" {
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "responsibilityPath" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
-    '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  positionTitle,\n  positionShort,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
+    '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  roleLabel,\n  roleCode,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;

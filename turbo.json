@@ -34,7 +34,16 @@
       "inputs": [
         "schemaTypes/**",
         "sanity.cli.ts",
-        "../web/src/lib/repositories/*.ts"
+        "../web/src/lib/repositories/*.ts",
+        "../../packages/sanity-schemas/src/**"
+      ]
+    },
+    "@kcvv/studio-staging#typegen": {
+      "outputs": ["schema.json"],
+      "inputs": [
+        "schemaTypes/**",
+        "sanity.cli.ts",
+        "../../packages/sanity-schemas/src/**"
       ]
     },
     "@kcvv/web#build": {
@@ -53,6 +62,9 @@
     "@kcvv/studio#deploy": {
       "dependsOn": ["build"],
       "cache": false
+    },
+    "@kcvv/sanity-schemas#build": {
+      "outputs": []
     }
   }
 }

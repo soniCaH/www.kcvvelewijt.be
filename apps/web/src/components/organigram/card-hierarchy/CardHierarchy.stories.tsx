@@ -590,7 +590,7 @@ export const LargeDataset: Story = {
         id: `member-${i}`,
         name: `Member ${i + 1}`,
         title: `Position ${i + 1}`,
-        positionShort: `P${i}`,
+        roleCode: `P${i}`,
         email: `member${i}@kcvvelewijt.be`,
         department:
           i % 2 === 0 ? ("hoofdbestuur" as const) : ("jeugdbestuur" as const),

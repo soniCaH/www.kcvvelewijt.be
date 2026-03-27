@@ -4,21 +4,23 @@
 
 Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
-| App/Package      | Path                     | Host               |
-| ---------------- | ------------------------ | ------------------ |
-| Next.js web      | `apps/web/`              | Vercel             |
-| Sanity Studio    | `apps/studio/`           | sanity.io          |
-| API contract     | `packages/api-contract/` | (library)          |
-| BFF (CF Workers) | `apps/api/`              | Cloudflare Workers |
+| App/Package         | Path                       | Host               |
+| ------------------- | -------------------------- | ------------------ |
+| Next.js web         | `apps/web/`                | Vercel             |
+| Sanity Studio       | `apps/studio/`             | sanity.io          |
+| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          |
+| Sanity schemas      | `packages/sanity-schemas/` | (library)          |
+| API contract        | `packages/api-contract/`   | (library)          |
+| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers |
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 
 ### Sanity Studio — Dual Environment
 
-`apps/studio/` (production) and `apps/studio/staging/` (staging) are two independent Sanity Studio configurations with separate project IDs. Schema files are full copies — not a base/override relationship.
+`apps/studio/` (production) and `apps/studio-staging/` (staging) are two independent Sanity Studio configurations. Schemas are NOT copies — both studios consume `@kcvv/sanity-schemas` from `packages/sanity-schemas/`.
 
-- **Production-only schemas** (absent from staging): `articleImage.ts`, `banner.ts`, `homePage.ts`. All other `schemaTypes/*.ts` files are shared and must stay in sync.
-- **When touching any `apps/studio/schemaTypes/<file>.ts`:** check whether a counterpart exists in `apps/studio/staging/schemaTypes/` and apply the equivalent change. Verify parity with `git diff --no-index apps/studio/schemaTypes/<file> apps/studio/staging/schemaTypes/<file>` before declaring the task complete.
+- **All schemas live in `packages/sanity-schemas/src/`** — the shared `@kcvv/sanity-schemas` package. Both studios import from this package and are identical in terms of schema types. There are no production-only schemas; the previous `articleImage.ts`, `banner.ts`, and `homePage.ts` distinction no longer applies.
+- **When touching any schema file:** edit `packages/sanity-schemas/src/<file>.ts` — changes there automatically apply to both studios. No per-studio counterpart check is needed.
 - **Multi-file comparison signals:** when a review comment contains "out of sync", "sync", "match", or "parity" between two environments, read both sides before responding — confirming one side is correct does not falsify the claim.
 
 ## Git Workflow
@@ -27,6 +29,32 @@ App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `pack
 2. **Conventional commits:** `type(scope): description` — scopes: news, matches, teams, players, sponsors, calendar, ranking, api, ui, schema, config, deps
 3. **Quality before commit:** `pnpm --filter @kcvv/web lint:fix` then `pnpm --filter @kcvv/web check-all`
 4. **Never:** commit to main, push before checks pass, create PR without asking
+
+## Development Guidelines
+
+### Adding a New Workspace Package
+
+- **Scaffold from a peer, not from scratch:** Before writing any `package.json` or `tsconfig.json`, open the nearest sibling package's copies and reconcile every field. Use `packages/api-contract/` as the reference for library packages in this monorepo.
+- **Audit `turbo.json` after every new package:** For every script in the new package, add or verify a task entry. Source-only packages (no build output) must have `"outputs": []` to prevent Turbo from expecting `dist/**`.
+
+### Promoting a Nested Directory to a Workspace Member
+
+After `git mv <nested-dir> <new-path>`:
+
+1. Verify `.gitignore` was not silently lost — nested dirs inherit parent's ignore rules, siblings do not. Copy from the peer studio.
+2. Check that auto-generated tooling dirs (`.sanity/runtime/`, `.turbo/`) are listed in the new `.gitignore` and already untracked (`git rm --cached -r <dir>` if needed).
+
+### CLAUDE.md Is a Required Deliverable
+
+When a task changes the architecture described in CLAUDE.md (new packages, renamed paths, schema ownership), add a named "Update CLAUDE.md" step to the implementation plan before the final commit. Do not treat it as optional cleanup.
+
+### Plan and Doc Audit Before Closing a Branch
+
+Before the final commit on any branch, re-read every plan/doc file touched and verify that paths, script names, and code snippets match the current file tree. Stale plan files trigger the same review feedback as stale code.
+
+### Documentation Standards
+
+- **Always add language identifiers to fenced code blocks** in plan/doc/markdown files (e.g. ` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). Bare ` ``` ` blocks fail MD040 and are consistently flagged in code review.
 
 ## Issue Tracking
 

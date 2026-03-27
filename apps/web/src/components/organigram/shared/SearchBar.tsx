@@ -78,7 +78,7 @@ export function SearchBar({
       }
 
       // Search in position short
-      if (member.positionShort?.toLowerCase().includes(query)) {
+      if (member.roleCode?.toLowerCase().includes(query)) {
         score += 7;
         matchedFields.push("position");
       }

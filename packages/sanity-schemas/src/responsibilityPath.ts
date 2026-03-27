@@ -161,6 +161,7 @@ export const responsibilityPath = defineType({
               title: 'Link',
               type: 'string',
               description: 'Optional relative or absolute URL',
+              // @ts-expect-error .uri() exists at runtime but is missing from StringRule types
               validation: (Rule) => Rule.uri({allowRelative: true}),
             }),
             defineField({

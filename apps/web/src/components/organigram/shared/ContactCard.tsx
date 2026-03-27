@@ -19,7 +19,7 @@ import type { ContactCardProps } from "./types";
 /**
  * Render a member contact card with configurable layout, badges, quick actions, and an optional expand/collapse indicator.
  *
- * @param member - Member data to display (name, title, imageUrl, email, phone, department, positionShort, and optional `_children`)
+ * @param member - Member data to display (name, title, imageUrl, email, phone, department, roleCode, and optional `_children`)
  * @param variant - Layout variant: `"compact"`, `"detailed"`, or `"grid"`; controls sizing and typography
  * @param showQuickActions - If true, show inline email and phone action links when available
  * @param showDepartment - If true, show a department badge when `member.department` is present and not `"algemeen"`
@@ -129,12 +129,12 @@ export function ContactCard({
           </p>
 
           {/* Position Badge */}
-          {member.positionShort && variant !== "compact" && (
+          {member.roleCode && variant !== "compact" && (
             <span
               className="inline-block mt-2 px-2 py-1 bg-kcvv-green/10 text-kcvv-green rounded text-xs font-semibold self-start"
               style={{ fontFamily: "ibm-plex-mono, monospace" }}
             >
-              {member.positionShort}
+              {member.roleCode}
             </span>
           )}
 

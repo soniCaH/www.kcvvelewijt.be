@@ -4,6 +4,7 @@ export const homePage = defineType({
   name: 'homePage',
   title: 'Homepage',
   type: 'document',
+  // @ts-expect-error __experimental_actions is not in the public type yet
   __experimental_actions: ['update', 'publish'],
   fields: [
     defineField({

@@ -77,7 +77,7 @@ type SearchResult = MemberResult | ResponsibilityResult;
  * Finds and ranks members that match a search query across common member fields.
  *
  * Performs case-insensitive substring matching against member `name` (highest priority), `title`,
- * `positionShort`, `email`, and `department`. For each matching member it builds a relevance
+ * `roleCode`, `email`, and `department`. For each matching member it builds a relevance
  * score and a list of human-readable matched field labels, then returns the top matches.
  *
  * @param query - The search string to match against member fields
@@ -112,7 +112,7 @@ function searchMembers(
     }
 
     // Position short match
-    if (member.positionShort?.toLowerCase().includes(lowerQuery)) {
+    if (member.roleCode?.toLowerCase().includes(lowerQuery)) {
       score += 20;
       matchedFields.push("Positie");
     }
