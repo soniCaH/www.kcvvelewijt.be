@@ -13,6 +13,14 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 
+### Sanity Studio — Dual Environment
+
+`apps/studio/` (production) and `apps/studio/staging/` (staging) are two independent Sanity Studio configurations with separate project IDs. Schema files are full copies — not a base/override relationship.
+
+- **Production-only schemas** (absent from staging): `articleImage.ts`, `banner.ts`, `homePage.ts`. All other `schemaTypes/*.ts` files are shared and must stay in sync.
+- **When touching any `apps/studio/schemaTypes/<file>.ts`:** check whether a counterpart exists in `apps/studio/staging/schemaTypes/` and apply the equivalent change. Verify parity with `git diff --no-index apps/studio/schemaTypes/<file> apps/studio/staging/schemaTypes/<file>` before declaring the task complete.
+- **Multi-file comparison signals:** when a review comment contains "out of sync", "sync", "match", or "parity" between two environments, read both sides before responding — confirming one side is correct does not falsify the claim.
+
 ## Git Workflow
 
 1. **New worktree per issue:** `/ralph create <issue-number>` — never work on main
