@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { RelatedPaths } from "./RelatedPaths";
 import type {
@@ -139,6 +140,9 @@ export function ResponsibilityFinder({
     search: semanticSearch,
   } = useSemanticSearch({ type: "responsibility", limit: 5 });
 
+  const analytics = useResponsibilityAnalytics();
+  const userInitiatedQuestionRef = useRef(false);
+
   useEffect(() => {
     semanticSearch(questionText);
   }, [questionText, semanticSearch]);
@@ -157,13 +161,43 @@ export function ResponsibilityFinder({
           .map((p) => ({ path: p, score: 100 }))
       : [];
 
+  // Track search events when results arrive (only for user-initiated searches)
+  const prevLoadingRef = useRef(false);
+  useEffect(() => {
+    if (
+      prevLoadingRef.current &&
+      !semanticLoading &&
+      questionText?.trim() &&
+      userInitiatedQuestionRef.current
+    ) {
+      userInitiatedQuestionRef.current = false;
+      analytics.trackSearch(
+        questionText,
+        selectedRole || "",
+        suggestions.length,
+      );
+      if (suggestions.length === 0) {
+        analytics.trackNoResults(questionText.length, selectedRole || "");
+      }
+    }
+    prevLoadingRef.current = semanticLoading;
+  }, [
+    semanticLoading,
+    questionText,
+    selectedRole,
+    suggestions.length,
+    analytics,
+  ]);
+
   // Handle role selection
   const handleRoleSelect = (role: string) => {
+    analytics.resetSession();
     setSelectedRole(role as UserRole);
     setSelectedResult(null);
     setShowRoleDropdown(false);
     setShowSuggestions(true);
     setQuestionText("");
+    analytics.trackRoleSelected(role);
 
     // Clear any existing timeout
     if (focusTimeoutRef.current) {
@@ -207,6 +241,7 @@ export function ResponsibilityFinder({
     setShowSuggestions(false);
     setShowRoleDropdown(false);
     setActiveDescendantIdx(-1);
+    analytics.resetSession();
   };
 
   // Handle keyboard navigation in suggestion list
@@ -223,7 +258,10 @@ export function ResponsibilityFinder({
       setActiveDescendantIdx((prev) => (prev > 0 ? prev - 1 : -1));
     } else if (e.key === "Enter" && activeDescendantIdx >= 0) {
       e.preventDefault();
-      handleSuggestionClick(suggestions[activeDescendantIdx].path);
+      handleSuggestionClick(
+        suggestions[activeDescendantIdx].path,
+        activeDescendantIdx,
+      );
     } else if (e.key === "Escape") {
       setShowSuggestions(false);
       setActiveDescendantIdx(-1);
@@ -231,13 +269,14 @@ export function ResponsibilityFinder({
   };
 
   // Handle suggestion click
-  const handleSuggestionClick = (path: ResponsibilityPath) => {
+  const handleSuggestionClick = (path: ResponsibilityPath, index: number) => {
     const semanticResult = semanticResults.find((r) => r.slug === path.id);
     setSelectedVectorId(semanticResult?.id ?? null);
     setQuestionText(path.question);
     setSelectedResult(path);
     setShowSuggestions(false);
     setActiveDescendantIdx(-1);
+    analytics.trackSuggestionClicked(path.id, path.category, index);
     if (onResultSelect) {
       onResultSelect(path);
     }
@@ -444,6 +483,7 @@ export function ResponsibilityFinder({
                 }
                 value={questionText}
                 onChange={(e) => {
+                  userInitiatedQuestionRef.current = true;
                   setQuestionText(e.target.value);
                   setShowSuggestions(true);
                   setSelectedResult(null);
@@ -532,7 +572,9 @@ export function ResponsibilityFinder({
                         id={`suggestion-${idx}`}
                         role="option"
                         aria-selected={isActive}
-                        onClick={() => handleSuggestionClick(suggestion.path)}
+                        onClick={() =>
+                          handleSuggestionClick(suggestion.path, idx)
+                        }
                         className={`
                           w-full text-left px-5 min-h-11 py-4 transition-all duration-200 cursor-pointer
                           ${idx !== 0 ? "border-t border-gray-100" : ""}
@@ -632,7 +674,11 @@ export function ResponsibilityFinder({
               </button>
             </div>
 
-            <ResultCard path={selectedResult} onMemberSelect={onMemberSelect} />
+            <ResultCard
+              path={selectedResult}
+              onMemberSelect={onMemberSelect}
+              analytics={analytics}
+            />
 
             <FeedbackWidget
               pathSlug={selectedResult.id}
@@ -678,14 +724,26 @@ export function ResponsibilityFinder({
 function ResultCard({
   path,
   onMemberSelect,
+  analytics,
 }: {
   path: ResponsibilityPath;
   onMemberSelect?: (memberId: string) => void;
+  analytics: ReturnType<typeof useResponsibilityAnalytics>;
 }) {
   const colors =
     categoryColors[path.category as keyof typeof categoryColors] ??
     categoryColors.algemeen;
   const safeOrgLink = toSafeHref(path.primaryContact.orgLink);
+
+  // Dwell-time tracking — destructure stable callbacks to avoid effect restart
+  // when the analytics object reference changes on parent re-renders
+  const { startDwell, stopDwell } = analytics;
+  useEffect(() => {
+    startDwell(path.id, path.category);
+    return () => {
+      stopDwell();
+    };
+  }, [path.id, path.category, startDwell, stopDwell]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
@@ -745,6 +803,9 @@ function ResultCard({
               <div>
                 <a
                   href={`mailto:${path.primaryContact.email}`}
+                  onClick={() =>
+                    analytics.trackContactClicked(path.id, "email")
+                  }
                   className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                 >
                   <svg
@@ -768,6 +829,9 @@ function ResultCard({
               <div>
                 <a
                   href={`tel:${path.primaryContact.phone}`}
+                  onClick={() =>
+                    analytics.trackContactClicked(path.id, "phone")
+                  }
                   className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                 >
                   <svg
@@ -792,9 +856,13 @@ function ResultCard({
                 {path.primaryContact.memberId && onMemberSelect ? (
                   <button
                     type="button"
-                    onClick={() =>
-                      onMemberSelect(path.primaryContact.memberId!)
-                    }
+                    onClick={() => {
+                      analytics.trackOrganigramLink(
+                        path.id,
+                        path.primaryContact.memberId!,
+                      );
+                      onMemberSelect(path.primaryContact.memberId!);
+                    }}
                     className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                   >
                     <svg
@@ -815,6 +883,15 @@ function ResultCard({
                 ) : safeOrgLink ? (
                   <a
                     href={safeOrgLink}
+                    onClick={() => {
+                      if (path.primaryContact.memberId) {
+                        analytics.trackOrganigramLink(
+                          path.id,
+                          path.primaryContact.memberId,
+                        );
+                        onMemberSelect?.(path.primaryContact.memberId);
+                      }
+                    }}
                     className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
                   >
                     <svg
@@ -864,6 +941,9 @@ function ResultCard({
                     {safeStepLink && (
                       <a
                         href={safeStepLink}
+                        onClick={() =>
+                          analytics.trackStepLinkClicked(path.id, stepIdx)
+                        }
                         className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
                       >
                         <svg
