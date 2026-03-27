@@ -57,22 +57,15 @@ export const SponsorsSpotlight = ({
   const activeSponsor = sponsors[activeIndex];
 
   return (
-    <div
-      className={cn(
-        "bg-gradient-to-br from-kcvv-green-bright/10 to-kcvv-green/10 py-12 px-6",
-        className,
-      )}
-    >
+    <div className={cn("bg-kcvv-green-dark text-white py-12 px-6", className)}>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-kcvv-gray-blue mb-2">
-            In de kijker
-          </h2>
-          <p className="text-gray-600">Onze featured partners</p>
+          <h2 className="text-2xl font-bold text-white mb-2">In de kijker</h2>
+          <p className="text-white/70">Onze featured partners</p>
         </div>
 
         <div className="relative">
-          <div className="bg-white rounded-lg shadow-xl p-8 md:p-12">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 md:p-12">
             <div className="flex flex-col md:flex-row items-center gap-8">
               {/* Logo */}
               <div className="flex-shrink-0 w-64 h-48 relative">
@@ -87,11 +80,11 @@ export const SponsorsSpotlight = ({
 
               {/* Content */}
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-3xl font-bold text-kcvv-gray-blue mb-4">
+                <h3 className="text-3xl font-bold text-white mb-4">
                   {activeSponsor.name}
                 </h3>
                 {activeSponsor.description && (
-                  <p className="text-lg text-gray-600 mb-6">
+                  <p className="text-lg text-white/80 mb-6">
                     {activeSponsor.description}
                   </p>
                 )}
@@ -100,7 +93,7 @@ export const SponsorsSpotlight = ({
                     href={activeSponsor.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-kcvv-green-bright text-white rounded-lg font-semibold hover:bg-kcvv-green transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-kcvv-green-dark rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                   >
                     Bezoek website
                     <svg
@@ -132,8 +125,8 @@ export const SponsorsSpotlight = ({
                   className={cn(
                     "w-3 h-3 rounded-full transition-all",
                     index === activeIndex
-                      ? "bg-kcvv-green-bright w-8"
-                      : "bg-gray-300 hover:bg-gray-400",
+                      ? "bg-white w-8"
+                      : "bg-white/30 hover:bg-white/50",
                   )}
                   aria-label={`Ga naar sponsor ${index + 1}`}
                 />

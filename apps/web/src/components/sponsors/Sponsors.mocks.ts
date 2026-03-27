@@ -12,6 +12,7 @@ export const mockSponsors: Sponsor[] = [
     logo: "https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+1",
     url: "https://example.com/sponsor1",
     tier: "hoofdsponsor",
+    featured: true,
   },
   {
     id: "2",
@@ -19,12 +20,14 @@ export const mockSponsors: Sponsor[] = [
     logo: "https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+2",
     url: "https://example.com/sponsor2",
     tier: "hoofdsponsor",
+    featured: false,
   },
   {
     id: "3",
     name: "Sponsor Three",
     logo: "https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+3",
     tier: "sponsor",
+    featured: false,
   },
   {
     id: "4",

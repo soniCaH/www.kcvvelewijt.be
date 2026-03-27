@@ -14,6 +14,7 @@ export interface Sponsor {
   logo: string;
   url?: string;
   tier?: "hoofdsponsor" | "sponsor" | "sympathisant";
+  featured?: boolean;
 }
 
 export interface SponsorsProps {

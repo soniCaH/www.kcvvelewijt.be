@@ -1,8 +1,9 @@
 /**
  * SponsorsPage Stories
  *
- * Full sponsors page composition: stats header, spotlight carousel for gold
- * sponsors, and three tiered sponsor grids (gold / silver / bronze).
+ * Full sponsors page composition: intro text, optional featured spotlight,
+ * and a size-differentiated logo grid (hoofdsponsor large, sponsor medium,
+ * sympathisant small). No tier labels, no dividers.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -21,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Full sponsors page for /sponsors. Shows a total-count stats bar, a spotlight carousel of up to 3 gold sponsors, and tiered grids (gold / silver / bronze).",
+          "Full sponsors page for /sponsors. Shows an intro paragraph, an optional dark-green spotlight for featured sponsors, and a size-differentiated logo grid (hoofdsponsor largest, sponsor medium, sympathisant smallest). No tier labels or dividers.",
       },
     },
   },
@@ -35,25 +36,44 @@ type Story = StoryObj<typeof meta>;
 // Stories
 // ---------------------------------------------------------------------------
 
+const hoofdsponsors = mockSponsors.filter((s) => s.tier === "hoofdsponsor");
+const sponsors = mockSponsors.filter((s) => s.tier === "sponsor");
+const sympathisanten = mockSponsors.filter((s) => s.tier === "sympathisant");
+const featured = mockSponsors.filter((s) => s.featured);
+
 /**
- * All three tiers populated with sponsors.
+ * All tiers populated, with one featured sponsor in the spotlight.
  */
 export const Default: Story = {
   args: {
-    goldSponsors: mockSponsors.slice(0, 3),
-    silverSponsors: mockSponsors.slice(3, 7),
-    bronzeSponsors: mockSponsors.slice(7, 10),
+    goldSponsors: hoofdsponsors,
+    silverSponsors: sponsors,
+    bronzeSponsors: sympathisanten,
+    featuredSponsors: featured,
   },
 };
 
 /**
- * Only gold sponsors — silver and bronze sections are hidden.
+ * No featured sponsors — spotlight section is hidden.
  */
-export const GoldOnly: Story = {
+export const NoSpotlight: Story = {
   args: {
-    goldSponsors: mockSponsors.slice(0, 4),
+    goldSponsors: hoofdsponsors,
+    silverSponsors: sponsors,
+    bronzeSponsors: sympathisanten,
+    featuredSponsors: [],
+  },
+};
+
+/**
+ * Only hoofdsponsors — silver and sympathisant sections are hidden.
+ */
+export const HoofdsponsorsOnly: Story = {
+  args: {
+    goldSponsors: hoofdsponsors,
     silverSponsors: [],
     bronzeSponsors: [],
+    featuredSponsors: featured,
   },
 };
 
@@ -65,6 +85,7 @@ export const NoSponsors: Story = {
     goldSponsors: [],
     silverSponsors: [],
     bronzeSponsors: [],
+    featuredSponsors: [],
   },
 };
 
@@ -73,9 +94,10 @@ export const NoSponsors: Story = {
  */
 export const MobileViewport: Story = {
   args: {
-    goldSponsors: mockSponsors.slice(0, 3),
-    silverSponsors: mockSponsors.slice(3, 6),
-    bronzeSponsors: mockSponsors.slice(6, 10),
+    goldSponsors: hoofdsponsors,
+    silverSponsors: sponsors,
+    bronzeSponsors: sympathisanten,
+    featuredSponsors: featured,
   },
   globals: { viewport: { value: "kcvvMobile" } },
 };

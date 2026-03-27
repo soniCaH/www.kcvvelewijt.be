@@ -1,91 +1,93 @@
 /**
  * SponsorsPage Component
- * Full sponsors page with stats, spotlight, and tiered sponsor grids.
+ * Sponsors page: intro, optional featured spotlight, size-differentiated logo grid, CTA.
  */
 
 import { PageTitle } from "@/components/layout";
 import {
-  SponsorsStats,
   SponsorsSpotlight,
   SponsorCallToAction,
-  SponsorsTier,
-  TierDivider,
   SponsorEmptyState,
+  SponsorGrid,
 } from "@/components/sponsors";
 import type { Sponsor } from "../Sponsors";
 
 export interface SponsorsPageProps {
-  /** Gold tier (crossing) sponsors */
+  /** Hoofdsponsor tier sponsors */
   goldSponsors: Sponsor[];
-  /** Silver tier (green/white) sponsors */
+  /** Sponsor tier sponsors */
   silverSponsors: Sponsor[];
-  /** Bronze tier (training/panel/other) sponsors */
+  /** Sympathisant tier sponsors */
   bronzeSponsors: Sponsor[];
+  /** Sponsors with featured=true — drives the spotlight section */
+  featuredSponsors: Sponsor[];
 }
 
 export function SponsorsPage({
   goldSponsors,
   silverSponsors,
   bronzeSponsors,
+  featuredSponsors,
 }: SponsorsPageProps) {
   const totalSponsors =
     goldSponsors.length + silverSponsors.length + bronzeSponsors.length;
 
-  const featuredSponsors = goldSponsors.slice(0, 3).map((sponsor) => ({
-    ...sponsor,
-    description: "Trotse partner van KCVV Elewijt",
+  const spotlightSponsors = featuredSponsors.map((s) => ({
+    id: s.id,
+    name: s.name,
+    logo: s.logo,
+    url: s.url,
   }));
 
   return (
-    <div className="relative">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-linear-to-b from-gray-50 via-white to-gray-50 pointer-events-none" />
+    <div>
+      <PageTitle title="Sponsors KCVV Elewijt" />
 
-      {/* Content */}
-      <div className="relative">
-        <PageTitle title="Sponsors KCVV Elewijt" />
+      <p
+        data-testid="sponsors-intro"
+        className="max-w-2xl mx-auto px-4 py-6 text-center text-gray-600 text-lg"
+      >
+        KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
+        Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
+        jeugd en onze toekomst. We zijn hen daar enorm dankbaar voor.
+      </p>
 
-        {/* Stats section with subtle background */}
-        <div className="bg-linear-to-r from-green-50/30 via-white to-green-50/30">
-          <SponsorsStats totalSponsors={totalSponsors} />
-        </div>
+      {spotlightSponsors.length > 0 && (
+        <SponsorsSpotlight sponsors={spotlightSponsors} />
+      )}
 
-        {/* Spotlight section */}
-        {featuredSponsors.length > 0 && (
-          <div className="bg-linear-to-b from-gray-50 to-white">
-            <SponsorsSpotlight sponsors={featuredSponsors} />
-          </div>
+      <div className="w-full max-w-inner-lg mx-auto px-3 lg:px-0 py-10 space-y-8">
+        {totalSponsors === 0 && <SponsorEmptyState />}
+
+        {goldSponsors.length > 0 && (
+          <SponsorGrid
+            sponsors={goldSponsors}
+            columns={4}
+            size="lg"
+            showNames={false}
+          />
         )}
 
-        {/* Main content section */}
-        <div className="w-full max-w-inner-lg mx-auto px-3 lg:px-0 py-6">
-          <SponsorsTier
-            tier="gold"
-            title="Gouden Sponsors"
-            sponsors={goldSponsors}
-          />
-          {goldSponsors.length > 0 && silverSponsors.length > 0 && (
-            <TierDivider />
-          )}
-          <SponsorsTier
-            tier="silver"
-            title="Zilveren Sponsors"
+        {silverSponsors.length > 0 && (
+          <SponsorGrid
             sponsors={silverSponsors}
+            columns={5}
+            size="md"
+            showNames={false}
           />
-          {silverSponsors.length > 0 && bronzeSponsors.length > 0 && (
-            <TierDivider />
-          )}
-          <SponsorsTier
-            tier="bronze"
-            title="Bronzen Sponsors"
+        )}
+
+        {bronzeSponsors.length > 0 && (
+          <SponsorGrid
             sponsors={bronzeSponsors}
+            columns={6}
+            size="sm"
+            showNames={false}
           />
-
-          {totalSponsors === 0 && <SponsorEmptyState />}
-
-          <SponsorCallToAction />
-        </div>
+        )}
       </div>
+
+      <SponsorCallToAction />
     </div>
   );
 }
