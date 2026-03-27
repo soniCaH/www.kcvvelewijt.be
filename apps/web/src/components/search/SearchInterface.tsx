@@ -5,7 +5,7 @@
  * Main search interface with form, filters, and results
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchForm } from "./SearchForm";
 import { SearchFilters } from "./SearchFilters";
@@ -68,72 +68,87 @@ export const SearchInterface = ({
    * Perform search
    * Note: Always fetches unfiltered results for accurate counts across all types
    */
-  const performSearch = useCallback(
-    async (searchQuery: string) => {
-      if (!searchQuery || searchQuery.trim().length < 2) {
-        setResults([]);
-        setTotalCount(0);
-        setError(null);
-        setIsLoading(false);
+  const performSearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      setResults([]);
+      setTotalCount(0);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // Abort any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Always fetch unfiltered results (no type param)
+      // Client-side filtering will be done in SearchResults
+      const params = new URLSearchParams({ q: searchQuery.trim() });
+
+      const response = await fetch(`/api/search?${params.toString()}`, {
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error("Search failed");
+      }
+
+      const data: SearchResponse = await response.json();
+
+      // Only update state if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setResults(data.results);
+        setTotalCount(data.count);
+      }
+    } catch (error) {
+      // Don't update state if request was aborted
+      if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
-      // Abort any in-flight request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      setError("Er is een fout opgetreden bij het zoeken. Probeer opnieuw.");
+      setResults([]);
+      setTotalCount(0);
+    } finally {
+      // Only clear loading if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
       }
+    }
+  }, []);
 
-      // Create new AbortController for this request
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Always fetch unfiltered results (no type param)
-        // Client-side filtering will be done in SearchResults
-        const params = new URLSearchParams({ q: searchQuery.trim() });
-
-        const response = await fetch(`/api/search?${params.toString()}`, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Search failed");
-        }
-
-        const data: SearchResponse = await response.json();
-
-        // Only update state if this request wasn't aborted
-        if (!controller.signal.aborted) {
-          setResults(data.results);
-          setTotalCount(data.count);
-
-          if (data.results.length > 0) {
-            analytics.trackResultsShown(data.results.length, searchQuery);
-          } else {
-            analytics.trackNoResults(searchQuery);
-          }
-        }
-      } catch (error) {
-        // Don't update state if request was aborted
-        if (error instanceof Error && error.name === "AbortError") {
-          return;
-        }
-
-        setError("Er is een fout opgetreden bij het zoeken. Probeer opnieuw.");
-        setResults([]);
-        setTotalCount(0);
-      } finally {
-        // Only clear loading if this request wasn't aborted
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    },
-    [analytics],
+  // Compute filtered results matching what SearchResults renders
+  const filteredResults = useMemo(
+    () =>
+      activeType === "all"
+        ? results
+        : results.filter((r) => r.type === activeType),
+    [results, activeType],
   );
+
+  // Track analytics based on filtered results (respects active filter)
+  useEffect(() => {
+    if (!query || query.trim().length < 2 || isLoading) return;
+
+    if (filteredResults.length > 0) {
+      analytics.trackResultsShown(filteredResults.length, query.trim());
+    } else {
+      analytics.trackNoResults(query.trim());
+    }
+  }, [filteredResults, activeType, query, isLoading, analytics]);
 
   /**
    * Handle search submit

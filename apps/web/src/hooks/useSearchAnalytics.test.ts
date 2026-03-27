@@ -16,11 +16,11 @@ describe("useSearchAnalytics", () => {
   });
 
   describe("search_submitted", () => {
-    it("fires with query_text and query_length on submit", () => {
+    it("fires with sanitized query_text and query_length on submit", () => {
       const { result } = renderHook(() => useSearchAnalytics());
 
       act(() => {
-        result.current.trackSearchSubmitted("kcvv elewijt");
+        result.current.trackSearchSubmitted("KCVV Elewijt");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("search_submitted", {
@@ -28,14 +28,28 @@ describe("useSearchAnalytics", () => {
         query_length: 12,
       });
     });
+
+    it("truncates query_text to 50 characters", () => {
+      const { result } = renderHook(() => useSearchAnalytics());
+      const longQuery = "a".repeat(80);
+
+      act(() => {
+        result.current.trackSearchSubmitted(longQuery);
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("search_submitted", {
+        query_text: "a".repeat(50),
+        query_length: 80,
+      });
+    });
   });
 
   describe("search_results_shown", () => {
-    it("fires with results_count and query_text", () => {
+    it("fires with results_count and sanitized query_text", () => {
       const { result } = renderHook(() => useSearchAnalytics());
 
       act(() => {
-        result.current.trackResultsShown(5, "spelers");
+        result.current.trackResultsShown(5, "Spelers");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("search_results_shown", {
@@ -46,7 +60,7 @@ describe("useSearchAnalytics", () => {
   });
 
   describe("search_no_results", () => {
-    it("fires with query_text", () => {
+    it("fires with sanitized query_text and query_length", () => {
       const { result } = renderHook(() => useSearchAnalytics());
 
       act(() => {
@@ -55,6 +69,7 @@ describe("useSearchAnalytics", () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith("search_no_results", {
         query_text: "xyznonexistent",
+        query_length: 14,
       });
     });
   });
