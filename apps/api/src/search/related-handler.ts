@@ -21,13 +21,25 @@ export const handleRelated = (request: {
       .filter((m) => m.id !== request.id)
       .filter((m) => m.metadata?.["type"] !== "responsibilityPath")
       .slice(0, request.limit)
-      .map((m) => ({
-        id: m.id,
-        slug: m.metadata?.["slug"] ?? "",
-        type: (m.metadata?.["type"] ?? "page") as "article" | "page",
-        score: m.score,
-        title: m.metadata?.["title"] ?? "",
-        excerpt: m.metadata?.["excerpt"] ?? "",
-        imageUrl: m.metadata?.["imageUrl"] || null,
-      }));
+      .map((m) => {
+        const rawType = m.metadata?.["type"];
+        const type: "article" | "page" =
+          typeof rawType === "string" &&
+          (rawType === "article" || rawType === "page")
+            ? rawType
+            : "page";
+        const rawTitle = m.metadata?.["title"];
+        const title = typeof rawTitle === "string" ? rawTitle : "";
+        const rawExcerpt = m.metadata?.["excerpt"];
+        const excerpt = typeof rawExcerpt === "string" ? rawExcerpt : "";
+        return {
+          id: m.id,
+          slug: m.metadata?.["slug"] ?? "",
+          type,
+          score: m.score,
+          title,
+          excerpt,
+          imageUrl: m.metadata?.["imageUrl"] ?? null,
+        };
+      });
   });

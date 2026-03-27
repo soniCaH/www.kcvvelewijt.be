@@ -8,6 +8,7 @@ import { VectorizeService } from "../search/vectorize";
 import { WorkerEnvTag } from "../env";
 
 const DEFAULT_LIMIT = 4;
+const MAX_LIMIT = 5; // upper bound from S.between(1, 5) in api-contract
 
 const relatedCache = TypedKvCache(S.Array(RelatedItem));
 
@@ -19,8 +20,14 @@ export const getRelatedHandler = (request: {
   never,
   VectorizeService | KvCacheService | WorkerEnvTag
 > => {
-  const cacheKey = `related:${request.id}`;
-  return relatedCache.getOrFetch(cacheKey, handleRelated(request), TTL.RELATED);
+  const cacheKey = `related:${request.id}:max`;
+  return relatedCache
+    .getOrFetch(
+      cacheKey,
+      handleRelated({ id: request.id, limit: MAX_LIMIT }),
+      TTL.RELATED,
+    )
+    .pipe(Effect.map((items) => items.slice(0, request.limit)));
 };
 
 export const RelatedApiLive = HttpApiBuilder.group(
