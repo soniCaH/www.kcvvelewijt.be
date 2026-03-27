@@ -869,6 +869,7 @@ describe("FootbalistoService.getRanking", () => {
         Effect.provide(FootbalistoServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(Layer.succeed(SanityWriteClient, makeSanityMock())),
         Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
       ),
     );
