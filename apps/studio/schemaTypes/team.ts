@@ -82,28 +82,17 @@ export const team = defineType({
       readOnly: true,
     }),
     defineField({
-      name: 'leagueId',
-      title: 'League ID',
-      type: 'number',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'league',
-      title: 'League',
-      type: 'string',
-      readOnly: true,
-    }),
-    defineField({
       name: 'division',
       title: 'Division',
       type: 'string',
-      readOnly: true,
+      description: 'Korte competitiecode, bv. "3NA".',
     }),
     defineField({
       name: 'divisionFull',
       title: 'Division (full)',
       type: 'string',
-      readOnly: true,
+      description:
+        "Volledige naam, bv. 'Eerste Elftal A - 3e Nationale A' of 'U9 - Wit'",
     }),
     defineField({
       name: 'season',
