@@ -32,6 +32,7 @@ import { MobileBottomNav } from "./shared/MobileBottomNav";
 import { KeyboardShortcuts, SkipLink, ScreenReaderAnnouncer } from "./shared";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { useOrganigramAnalytics } from "@/hooks/useOrganigramAnalytics";
 import {
   findMemberById,
   buildOrganigramUrl,
@@ -94,6 +95,7 @@ export function UnifiedOrganigramClient({
 }: UnifiedOrganigramClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { trackViewChanged, trackMemberClicked } = useOrganigramAnalytics();
 
   // Parse URL parameters
   const urlParams = parseOrganigramParams(searchParams);
@@ -207,11 +209,15 @@ export function UnifiedOrganigramClient({
   };
 
   // Handle view change
-  const handleViewChange = (view: string) => {
+  const handleViewChange = (
+    view: string,
+    source: "tab" | "swipe" | "keyboard" = "tab",
+  ) => {
     const newView = view as ViewType;
     setActiveView(newView);
     localStorage.setItem(VIEW_PREFERENCE_KEY, newView);
     updateUrl({ view: newView });
+    trackViewChanged(newView, source);
 
     // Clear selected responsibility when switching away from responsibilities view
     if (newView !== "responsibilities") {
@@ -233,6 +239,7 @@ export function UnifiedOrganigramClient({
   // Handle member click from any view
   // Uses silent URL update to preserve chart state while enabling URL sharing
   const handleMemberClick = (member: OrgChartNode) => {
+    trackMemberClicked(member.id, activeView);
     setSelectedMember(member);
     setIsModalOpen(true);
     updateUrlSilently({ memberId: member.id });
@@ -337,7 +344,7 @@ export function UnifiedOrganigramClient({
     const currentIndex = viewOrder.indexOf(activeView);
     if (currentIndex < viewOrder.length - 1) {
       const nextView = viewOrder[currentIndex + 1];
-      handleViewChange(nextView);
+      handleViewChange(nextView, "swipe");
     }
   };
 
@@ -347,7 +354,7 @@ export function UnifiedOrganigramClient({
     const currentIndex = viewOrder.indexOf(activeView);
     if (currentIndex > 0) {
       const prevView = viewOrder[currentIndex - 1];
-      handleViewChange(prevView);
+      handleViewChange(prevView, "swipe");
     }
   };
 
@@ -359,7 +366,7 @@ export function UnifiedOrganigramClient({
 
   // Phase 5: Keyboard navigation (Arrow keys, numbers, /, Esc)
   useKeyboardNavigation(
-    handleViewChange,
+    (view) => handleViewChange(view, "keyboard"),
     () => {
       // Focus search input when '/' is pressed
       const searchInput = document.querySelector<HTMLInputElement>(

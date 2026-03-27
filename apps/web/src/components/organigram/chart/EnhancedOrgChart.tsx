@@ -43,6 +43,7 @@ import { MobileNavigationDrawer } from "./MobileNavigationDrawer";
 import { ContactOverlay } from "./ContactOverlay";
 import { renderNode, renderCompactNode, type NodeData } from "./NodeRenderer";
 import type { OrgChartNode } from "@/types/organigram";
+import { useOrganigramAnalytics } from "@/hooks/useOrganigramAnalytics";
 
 export interface EnhancedOrgChartProps {
   members: OrgChartNode[];
@@ -74,6 +75,8 @@ export function EnhancedOrgChart({
   const chartRef = useRef<OrgChart<NodeData> | null>(null);
   // Store callback in ref to avoid re-initializing chart when callback changes
   const onMemberClickRef = useRef(onMemberClick);
+  const { trackSearchUsed, trackDepartmentFiltered, trackExportPng } =
+    useOrganigramAnalytics();
 
   // Keep ref updated with latest callback (must be in useEffect per React rules)
   useEffect(() => {
@@ -84,6 +87,13 @@ export function EnhancedOrgChart({
   const [activeDepartment, setActiveDepartment] = useState<
     "all" | "hoofdbestuur" | "jeugdbestuur"
   >("all");
+
+  const handleDepartmentChange = (
+    department: "all" | "hoofdbestuur" | "jeugdbestuur",
+  ) => {
+    setActiveDepartment(department);
+    trackDepartmentFiltered(department);
+  };
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [contactOverlay, setContactOverlay] = useState<{
@@ -295,6 +305,7 @@ export function EnhancedOrgChart({
 
   // Handle search selection - zoom to member
   const handleSearchSelect = (member: OrgChartNode) => {
+    trackSearchUsed(searchQuery);
     if (chartRef.current) {
       chartRef.current.setCentered(member.id).render();
     }
@@ -353,6 +364,7 @@ export function EnhancedOrgChart({
 
   // Export as Image (PNG)
   const handleExportImage = () => {
+    trackExportPng();
     if (chartRef.current) {
       chartRef.current.exportImg({
         full: true,
@@ -392,7 +404,7 @@ export function EnhancedOrgChart({
         {/* Department Filter */}
         <DepartmentFilter
           value={activeDepartment}
-          onChange={setActiveDepartment}
+          onChange={handleDepartmentChange}
           members={members}
           showCounts={true}
           variant="pills"
