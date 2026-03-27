@@ -50,7 +50,7 @@ export class FootbalistoRankingCompetition extends S.Class<FootbalistoRankingCom
 )({
   name: S.String,
   type: S.String,
-  teams: S.Array(FootbalistoRankingEntry),
+  teams: S.Array(S.Unknown),
 }) {}
 
 export const FootbalistoRankingArray = S.Array(FootbalistoRankingCompetition);

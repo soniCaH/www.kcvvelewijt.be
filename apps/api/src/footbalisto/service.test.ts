@@ -798,6 +798,112 @@ describe("FootbalistoService.getRanking", () => {
       expect(result.right).toHaveLength(0);
     }
   });
+
+  it("filters invalid ranking entries and returns only valid ones", async () => {
+    const invalidEntry = {
+      id: 999,
+      rank: 3,
+      matchesPlayed: 10,
+      wins: 5,
+      draws: 2,
+      losses: 3,
+      goalsScored: 12,
+      goalsConceded: 8,
+      points: 17,
+      team: null, // invalid — null team/club data
+    };
+    const mixedRanking = [
+      {
+        name: "3de Nationale",
+        type: "LEAGUE",
+        teams: [rawRankingCompetitions[1]!.teams[0], invalidEntry],
+      },
+    ];
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mixedRanking,
+    });
+
+    const result = await runService((svc) =>
+      svc.getRanking(1, "https://cdn.example.com"),
+    );
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Should return only the valid entry, invalid one filtered out
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.team_name).toBe("KCVV Elewijt");
+    }
+  });
+
+  it("logs invalid ranking entries when some are filtered", async () => {
+    const invalidEntry = {
+      id: 999,
+      rank: 3,
+      team: null, // invalid
+    };
+    const mixedRanking = [
+      {
+        name: "3de Nationale",
+        type: "LEAGUE",
+        teams: [rawRankingCompetitions[1]!.teams[0], invalidEntry],
+      },
+    ];
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mixedRanking,
+    });
+
+    const messages: string[] = [];
+    const TestLogger = Logger.make(({ message }) => {
+      messages.push(String(message));
+    });
+
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* FootbalistoService;
+        return yield* svc.getRanking(1, "https://cdn.example.com");
+      }).pipe(
+        Effect.provide(FootbalistoServiceLive),
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
+      ),
+    );
+
+    expect(
+      messages.some((m) => m.includes("filtered") && m.includes("1")),
+    ).toBe(true);
+  });
+
+  it("fails with ResourceNotFoundError when all ranking entries are invalid", async () => {
+    const allInvalid = [
+      {
+        name: "3de Nationale",
+        type: "LEAGUE",
+        teams: [
+          { id: 1, rank: 1, team: null }, // invalid
+          { id: 2, rank: 2, team: null }, // invalid
+        ],
+      },
+    ];
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => allInvalid,
+    });
+
+    const result = await runService((svc) =>
+      svc.getRanking(1, "https://cdn.example.com"),
+    );
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
 });
 
 describe("FootbalistoService.getMatchDetail", () => {
