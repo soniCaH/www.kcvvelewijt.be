@@ -343,7 +343,7 @@ Expected: `OK: old path removed`
 **Step 7: Commit**
 
 ```bash
-git add apps/studio-staging/ apps/studio/staging
+git add -A
 git commit -m "feat(schema): promote staging to apps/studio-staging, consume @kcvv/sanity-schemas"
 ```
 
@@ -437,7 +437,7 @@ ls apps/studio/schemaTypes/
 
 Expected output (1 file only):
 
-```
+```text
 index.ts
 ```
 
@@ -449,7 +449,7 @@ ls apps/studio-staging/schemaTypes/
 
 Expected output (1 file only):
 
-```
+```text
 index.ts
 ```
 

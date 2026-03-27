@@ -9,7 +9,7 @@
 
 ## Goal
 
-Single source of truth for all shared Sanity schema types. Both studios consume from a shared workspace package. Production-only content types remain local to `apps/studio/`.
+Single source of truth for all Sanity schema types. Both studios consume from a shared workspace package. All 14 schemas are shared — there are no production-only schemas.
 
 ## Architecture
 
@@ -17,23 +17,26 @@ Single source of truth for all shared Sanity schema types. Both studios consume 
 
 Pure TypeScript source exports — no compile step (same pattern as `@kcvv/api-contract`).
 
-```
+```text
 packages/sanity-schemas/
 ├── package.json       (name: @kcvv/sanity-schemas, private: true)
 ├── tsconfig.json
 └── src/
-    ├── index.ts       (named exports + sharedSchemaTypes array)
+    ├── index.ts       (named exports + schemaTypes array)
     ├── player.ts
     ├── team.ts
     ├── staffMember.ts
     ├── responsibilityPath.ts
     ├── article.ts
+    ├── articleImage.ts
     ├── sponsor.ts
     ├── event.ts
     ├── page.ts
     ├── fileAttachment.ts
     ├── htmlTable.ts
-    └── searchFeedback.ts
+    ├── searchFeedback.ts
+    ├── banner.ts
+    └── homePage.ts
 ```
 
 `package.json` exports:
@@ -63,8 +66,7 @@ The source for each schema is taken from `apps/studio/schemaTypes/` (production 
 - Collapse `schemaTypes/index.ts` to:
 
 ```typescript
-import { sharedSchemaTypes } from "@kcvv/sanity-schemas";
-export const schemaTypes = sharedSchemaTypes;
+export { schemaTypes } from "@kcvv/sanity-schemas";
 ```
 
 `pnpm-workspace.yaml` already covers `apps/*` — no change needed.
