@@ -14,6 +14,10 @@ export interface SearchResultProps {
    * Search result data
    */
   result: SearchResultType;
+  /**
+   * Click handler for analytics tracking
+   */
+  onClick?: () => void;
   // Note: query prop removed until highlighting feature is implemented (YAGNI)
 }
 
@@ -32,10 +36,11 @@ const typeLabels = {
 /**
  * Individual search result card
  */
-export const SearchResult = ({ result }: SearchResultProps) => {
+export const SearchResult = ({ result, onClick }: SearchResultProps) => {
   return (
     <Link
       href={result.url}
+      onClick={onClick}
       className="group relative overflow-hidden block bg-white rounded-card shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-4 border border-gray-100 hover:border-green-main"
     >
       <div

@@ -5,12 +5,14 @@
  * Main search interface with form, filters, and results
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchForm } from "./SearchForm";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { Spinner } from "@/components/design-system";
+import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
+import { filterByActiveType } from "./search-filter-utils";
 import type {
   SearchResultType,
   SearchResult,
@@ -39,6 +41,7 @@ export const SearchInterface = ({
 }: SearchInterfaceProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const analytics = useSearchAnalytics();
 
   // Validate and get initial values from URL
   const urlQuery = searchParams.get("q") || initialQuery;
@@ -68,6 +71,10 @@ export const SearchInterface = ({
    */
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery || searchQuery.trim().length < 2) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       setResults([]);
       setTotalCount(0);
       setError(null);
@@ -124,12 +131,34 @@ export const SearchInterface = ({
     }
   }, []);
 
+  // Compute filtered results matching what SearchResults renders
+  const filteredResults = useMemo(
+    () => filterByActiveType(results, activeType),
+    [results, activeType],
+  );
+
+  // Track analytics based on filtered results (respects active filter)
+  // Only fires after a successful fetch (no load, no error)
+  useEffect(() => {
+    if (!query || query.trim().length < 2 || isLoading || error) return;
+
+    if (filteredResults.length > 0) {
+      analytics.trackResultsShown(filteredResults.length, query.trim());
+    } else {
+      analytics.trackNoResults(query.trim());
+    }
+  }, [filteredResults, activeType, query, isLoading, error, analytics]);
+
   /**
    * Handle search submit
    */
   const handleSearch = useCallback(
     (searchQuery: string) => {
       setQuery(searchQuery);
+
+      if (searchQuery.trim()) {
+        analytics.trackSearchSubmitted(searchQuery.trim());
+      }
 
       // Update URL
       const params = new URLSearchParams();
@@ -145,7 +174,7 @@ export const SearchInterface = ({
       // Perform search
       performSearch(searchQuery);
     },
-    [activeType, router, performSearch],
+    [activeType, router, performSearch, analytics],
   );
 
   /**
@@ -155,6 +184,7 @@ export const SearchInterface = ({
   const handleFilterChange = useCallback(
     (type: SearchResultType | "all") => {
       setActiveType(type);
+      analytics.trackFilterChanged(type);
 
       // Update URL
       const params = new URLSearchParams();
@@ -169,7 +199,7 @@ export const SearchInterface = ({
 
       // No need to re-fetch: SearchResults handles client-side filtering
     },
-    [query, router],
+    [query, router, analytics],
   );
 
   /**
@@ -262,6 +292,7 @@ export const SearchInterface = ({
               results={results}
               query={query}
               activeType={activeType}
+              onResultClick={analytics.trackResultClicked}
             />
           )}
         </>

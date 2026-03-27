@@ -10,6 +10,7 @@ import type {
   SearchResultType,
 } from "./SearchInterface";
 import { SearchResult } from "./SearchResult";
+import { filterByActiveType } from "./search-filter-utils";
 
 export interface SearchResultsProps {
   /**
@@ -24,6 +25,14 @@ export interface SearchResultsProps {
    * Active content type filter
    */
   activeType: SearchResultType | "all";
+  /**
+   * Callback when a result is clicked (resultType, resultTitle, 0-indexed position)
+   */
+  onResultClick?: (
+    resultType: string,
+    resultTitle: string,
+    index: number,
+  ) => void;
 }
 
 /**
@@ -35,12 +44,10 @@ export const SearchResults = ({
   results,
   query,
   activeType,
+  onResultClick,
 }: SearchResultsProps) => {
   // Filter results by active type (client-side)
-  const filteredResults =
-    activeType === "all"
-      ? results
-      : results.filter((result) => result.type === activeType);
+  const filteredResults = filterByActiveType(results, activeType);
 
   if (filteredResults.length === 0) {
     return (
@@ -69,8 +76,12 @@ export const SearchResults = ({
 
       {/* Results List */}
       <div className="space-y-4">
-        {filteredResults.map((result) => (
-          <SearchResult key={`${result.type}:${result.id}`} result={result} />
+        {filteredResults.map((result, index) => (
+          <SearchResult
+            key={`${result.type}:${result.id}`}
+            result={result}
+            onClick={() => onResultClick?.(result.type, result.title, index)}
+          />
         ))}
       </div>
     </div>
