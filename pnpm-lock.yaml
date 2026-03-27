@@ -103,6 +103,46 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/studio-staging:
+    dependencies:
+      "@kcvv/sanity-schemas":
+        specifier: workspace:*
+        version: link:../../packages/sanity-schemas
+      "@sanity/icons":
+        specifier: 3.7.4
+        version: 3.7.4(react@19.2.4)
+      "@sanity/vision":
+        specifier: 5.18.0
+        version: 5.18.0(@babel/runtime@7.29.2)(@codemirror/lint@6.9.5)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.4.0)(codemirror@6.0.2)(react-dom@19.2.4(react@19.2.4))(react-is@19.2.4)(react@19.2.4)(sanity@5.18.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@oclif/core@4.10.3)(@sanity/cli-core@1.2.1(@noble/hashes@2.0.1)(@sanity/telemetry@0.9.0(react@19.2.4))(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))(@types/node@25.5.0)(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-toolbelt@9.6.0)(typescript@5.9.3))(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
+      sanity:
+        specifier: 5.18.0
+        version: 5.18.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@oclif/core@4.10.3)(@sanity/cli-core@1.2.1(@noble/hashes@2.0.1)(@sanity/telemetry@0.9.0(react@19.2.4))(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))(@types/node@25.5.0)(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-toolbelt@9.6.0)(typescript@5.9.3)
+      styled-components:
+        specifier: 6.3.12
+        version: 6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+    devDependencies:
+      "@sanity/eslint-config-studio":
+        specifier: 6.0.0
+        version: 6.0.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+      "@types/react":
+        specifier: 19.2.14
+        version: 19.2.14
+      eslint:
+        specifier: 9.39.4
+        version: 9.39.4(jiti@2.6.1)
+      prettier:
+        specifier: 3.8.1
+        version: 3.8.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   apps/web:
     dependencies:
       "@effect/platform":
@@ -16914,6 +16954,42 @@ snapshots:
       react-rx: 4.2.2(react@19.2.4)(rxjs@7.8.2)
       rxjs: 7.8.2
       sanity: 5.18.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@oclif/core@4.10.3)(@sanity/cli-core@1.2.1(@noble/hashes@2.0.1)(@sanity/telemetry@0.8.1(react@19.2.4))(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))(@types/node@25.5.0)(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-toolbelt@9.6.0)(typescript@5.9.3)
+      styled-components: 6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+    transitivePeerDependencies:
+      - "@babel/runtime"
+      - "@codemirror/lint"
+      - "@codemirror/theme-one-dark"
+      - "@emotion/is-prop-valid"
+      - codemirror
+      - react-dom
+      - react-is
+
+  "@sanity/vision@5.18.0(@babel/runtime@7.29.2)(@codemirror/lint@6.9.5)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.4.0)(codemirror@6.0.2)(react-dom@19.2.4(react@19.2.4))(react-is@19.2.4)(react@19.2.4)(sanity@5.18.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@oclif/core@4.10.3)(@sanity/cli-core@1.2.1(@noble/hashes@2.0.1)(@sanity/telemetry@0.9.0(react@19.2.4))(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))(@types/node@25.5.0)(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-toolbelt@9.6.0)(typescript@5.9.3))(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))":
+    dependencies:
+      "@codemirror/autocomplete": 6.20.1
+      "@codemirror/commands": 6.10.3
+      "@codemirror/lang-javascript": 6.2.5
+      "@codemirror/language": 6.12.3
+      "@codemirror/search": 6.6.0
+      "@codemirror/state": 6.6.0
+      "@codemirror/view": 6.40.0
+      "@lezer/highlight": 1.2.3
+      "@rexxars/react-json-inspector": 9.0.1(react@19.2.4)
+      "@rexxars/react-split-pane": 1.0.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      "@sanity/color": 3.0.6
+      "@sanity/icons": 3.7.4(react@19.2.4)
+      "@sanity/ui": 3.1.14(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react-is@19.2.4)(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
+      "@sanity/uuid": 3.0.2
+      "@uiw/react-codemirror": 4.25.9(@babel/runtime@7.29.2)(@codemirror/autocomplete@6.20.1)(@codemirror/language@6.12.3)(@codemirror/lint@6.9.5)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.40.0)(codemirror@6.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      is-hotkey-esm: 1.0.0
+      json-2-csv: 5.5.10
+      json5: 2.2.3
+      lodash-es: 4.17.23
+      quick-lru: 5.1.1
+      react: 19.2.4
+      react-rx: 4.2.2(react@19.2.4)(rxjs@7.8.2)
+      rxjs: 7.8.2
+      sanity: 5.18.0(@emotion/is-prop-valid@1.4.0)(@noble/hashes@2.0.1)(@oclif/core@4.10.3)(@sanity/cli-core@1.2.1(@noble/hashes@2.0.1)(@sanity/telemetry@0.9.0(react@19.2.4))(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))(@types/node@25.5.0)(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-components@6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ts-toolbelt@9.6.0)(typescript@5.9.3)
       styled-components: 6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
       - "@babel/runtime"

@@ -1,5 +1,5 @@
 {
-  "name": "@kcvv/studio",
+  "name": "@kcvv/studio-staging",
   "private": true,
   "version": "1.0.0",
   "main": "package.json",
@@ -15,11 +15,12 @@
     "sanity"
   ],
   "dependencies": {
+    "@kcvv/sanity-schemas": "workspace:*",
     "@sanity/icons": "3.7.4",
-    "@sanity/vision": "5.17.1",
+    "@sanity/vision": "5.18.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "sanity": "5.17.1",
+    "sanity": "5.18.0",
     "styled-components": "6.3.12"
   },
   "devDependencies": {
