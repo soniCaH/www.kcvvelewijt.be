@@ -146,6 +146,16 @@ export const team = defineType({
       title: 'Staff',
       type: 'array',
       of: [{type: 'reference', to: [{type: 'staffMember'}]}],
+      readOnly: true,
+    }),
+    defineField({
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      description:
+        'Set automatically by sync when team is no longer in PSD. Do not edit manually.',
+      readOnly: true,
+      hidden: true,
     }),
   ],
   preview: {
