@@ -20,6 +20,11 @@ except:
     print('')
 " 2>/dev/null || echo "")
 
+# If file is outside the project directory, it's in a sibling worktree — allow it
+if [[ "$FILE_PATH" != "$CLAUDE_PROJECT_DIR/"* ]]; then
+  exit 0
+fi
+
 # Allow writes to docs/, .claude/, scripts/, and root CLAUDE.md on main
 RELATIVE_PATH=$(echo "$FILE_PATH" | sed "s|^$CLAUDE_PROJECT_DIR/||")
 if echo "$RELATIVE_PATH" | grep -qE "^(docs/|\.claude/|scripts/|CLAUDE\.md)"; then

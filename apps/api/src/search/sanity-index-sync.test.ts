@@ -27,6 +27,7 @@ const mockArticle = {
   title: "KCVV wint derby",
   tags: ["verslag", "derby"],
   bodyText: "KCVV Elewijt won de derby met 3-1.",
+  imageUrl: null as string | null,
 };
 
 const mockPage = {
@@ -151,6 +152,52 @@ describe("runSanityIndexSync", () => {
     expect(doc!.metadata["type"]).toBe("article");
     expect(doc!.metadata["title"]).toBe("KCVV wint derby");
     expect(doc!.metadata["excerpt"]).toBe("KCVV Elewijt won de derby met 3-1.");
+    expect(doc!.metadata["imageUrl"]).toBeUndefined();
+  });
+
+  it("stores imageUrl in article metadata when present", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([
+          {
+            ...mockArticle,
+            imageUrl: "https://cdn.example.com/cover.jpg",
+          },
+        ]),
+        fetchPages: noopFetch([]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    const doc = upserted.find((v) => v.id === "article-001");
+    expect(doc!.metadata["imageUrl"]).toBe("https://cdn.example.com/cover.jpg");
+  });
+
+  it("omits imageUrl from article metadata when null", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([{ ...mockArticle, imageUrl: null }]),
+        fetchPages: noopFetch([]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const upserted = upsertCalls.flat();
+    const doc = upserted.find((v) => v.id === "article-001");
+    expect(doc!.metadata["imageUrl"]).toBeUndefined();
   });
 
   it("indexes pages with correct metadata", async () => {

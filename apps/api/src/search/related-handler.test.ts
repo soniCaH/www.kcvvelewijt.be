@@ -48,7 +48,7 @@ describe("handleRelated", () => {
                   score: 1.0,
                   metadata: {
                     slug: "self",
-                    type: "responsibilityPath",
+                    type: "article",
                     title: "Self",
                     excerpt: "Self",
                   },
@@ -58,7 +58,7 @@ describe("handleRelated", () => {
                   score: 0.85,
                   metadata: {
                     slug: "related",
-                    type: "responsibilityPath",
+                    type: "article",
                     title: "Related",
                     excerpt: "Related item",
                   },
@@ -75,7 +75,7 @@ describe("handleRelated", () => {
     expect(result[0]!.slug).toBe("related");
   });
 
-  it("returns cross-type results (responsibilityPath and article)", async () => {
+  it("returns only article and page results, skipping responsibilityPath neighbours", async () => {
     const result = await Effect.runPromise(
       handleRelated({ id: "doc-abc", limit: 3 }).pipe(
         Effect.provide(
@@ -89,7 +89,7 @@ describe("handleRelated", () => {
                   score: 1.0,
                   metadata: {
                     slug: "self",
-                    type: "responsibilityPath",
+                    type: "article",
                     title: "Self",
                     excerpt: "Self",
                   },
@@ -121,14 +121,14 @@ describe("handleRelated", () => {
       ),
     );
 
-    expect(result).toHaveLength(2);
-    expect(result[0]!.type).toBe("responsibilityPath");
-    expect(result[1]!.type).toBe("article");
+    expect(result).toHaveLength(1);
+    expect(result[0]!.type).toBe("article");
+    expect(result[0]!.id).toBe("doc-article");
   });
 
-  it("respects the limit parameter", async () => {
+  it("excludes responsibilityPath type items from results", async () => {
     const result = await Effect.runPromise(
-      handleRelated({ id: "doc-abc", limit: 1 }).pipe(
+      handleRelated({ id: "doc-abc", limit: 3 }).pipe(
         Effect.provide(
           Layer.succeed(
             VectorizeService,
@@ -146,11 +146,62 @@ describe("handleRelated", () => {
                   },
                 },
                 {
+                  id: "doc-path",
+                  score: 0.9,
+                  metadata: {
+                    slug: "path",
+                    type: "responsibilityPath",
+                    title: "Path",
+                    excerpt: "",
+                  },
+                },
+                {
+                  id: "doc-article",
+                  score: 0.8,
+                  metadata: {
+                    slug: "article",
+                    type: "article",
+                    title: "Article",
+                    excerpt: "An article",
+                  },
+                },
+              ],
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe("doc-article");
+    expect(result[0]!.type).toBe("article");
+  });
+
+  it("respects the limit parameter", async () => {
+    const result = await Effect.runPromise(
+      handleRelated({ id: "doc-abc", limit: 1 }).pipe(
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock({
+              stored: [{ id: "doc-abc", values: FAKE_VECTOR, metadata: {} }],
+              matches: [
+                {
+                  id: "doc-abc",
+                  score: 1.0,
+                  metadata: {
+                    slug: "self",
+                    type: "article",
+                    title: "Self",
+                    excerpt: "",
+                  },
+                },
+                {
                   id: "doc-1",
                   score: 0.9,
                   metadata: {
                     slug: "a",
-                    type: "responsibilityPath",
+                    type: "article",
                     title: "A",
                     excerpt: "A",
                   },

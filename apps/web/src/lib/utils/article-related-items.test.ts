@@ -49,6 +49,7 @@ describe("mapBffRelatedItems", () => {
         score: 0.85,
         title: "AI Article",
         excerpt: "An excerpt",
+        imageUrl: null,
       },
       {
         id: "doc-2",
@@ -57,6 +58,7 @@ describe("mapBffRelatedItems", () => {
         score: 0.72,
         title: "AI Page",
         excerpt: "Page excerpt",
+        imageUrl: null,
       },
     ]);
 
@@ -81,6 +83,25 @@ describe("mapBffRelatedItems", () => {
         excerpt: "Page excerpt",
       },
     ]);
+  });
+
+  it("passes imageUrl from BFF response to mapped article item", () => {
+    const result = mapBffRelatedItems([
+      {
+        id: "doc-1",
+        slug: "some-article",
+        type: "article" as const,
+        score: 0.85,
+        title: "AI Article",
+        excerpt: "An excerpt",
+        imageUrl: "https://cdn.example.com/cover.jpg",
+      },
+    ]);
+
+    expect(result[0]).toMatchObject({
+      type: "article",
+      imageUrl: "https://cdn.example.com/cover.jpg",
+    });
   });
 
   it("handles empty input", () => {

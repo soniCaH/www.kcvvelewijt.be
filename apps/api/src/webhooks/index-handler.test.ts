@@ -214,6 +214,55 @@ describe("handleIndexWebhook", () => {
     ]);
   });
 
+  it("stores imageUrl in article metadata when present", async () => {
+    const articleDoc = {
+      _id: "article-001",
+      slug: "kcvv-wint",
+      title: "KCVV wint!",
+      tags: ["verslag"],
+      bodyText: "KCVV won met 3-1.",
+      imageUrl: "https://cdn.example.com/cover.jpg",
+    };
+
+    const body = JSON.stringify({ _id: "article-001", _type: "article" });
+    const request = await makeSignedRequest(body);
+    const env = makeEnv();
+
+    await handleIndexWebhook(request, env, {
+      fetchDocument: async () => articleDoc,
+    });
+
+    expect(env.SEARCH_INDEX.upsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          imageUrl: "https://cdn.example.com/cover.jpg",
+        }),
+      }),
+    ]);
+  });
+
+  it("omits imageUrl from article metadata when absent", async () => {
+    const articleDoc = {
+      _id: "article-001",
+      slug: "kcvv-wint",
+      title: "KCVV wint!",
+      tags: ["verslag"],
+      bodyText: "KCVV won met 3-1.",
+    };
+
+    const body = JSON.stringify({ _id: "article-001", _type: "article" });
+    const request = await makeSignedRequest(body);
+    const env = makeEnv();
+
+    await handleIndexWebhook(request, env, {
+      fetchDocument: async () => articleDoc,
+    });
+
+    const call = (env.SEARCH_INDEX.upsert as ReturnType<typeof vi.fn>).mock
+      .calls[0]?.[0]?.[0];
+    expect(call?.metadata).not.toHaveProperty("imageUrl");
+  });
+
   it("indexes a page with correct metadata", async () => {
     const pageDoc = {
       _id: "page-001",

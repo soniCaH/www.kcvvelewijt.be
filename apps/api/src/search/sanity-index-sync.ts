@@ -27,6 +27,7 @@ interface SanityArticleDoc {
   title: string;
   tags: string[];
   bodyText: string | null;
+  imageUrl: string | null;
 }
 
 interface SanityPageDoc {
@@ -53,7 +54,8 @@ const ARTICLE_QUERY = `*[_type == "article" && publishAt <= now() && (!defined(u
   "slug": coalesce(slug.current, ""),
   title,
   "tags": coalesce(tags, []),
-  "bodyText": pt::text(body)
+  "bodyText": pt::text(body),
+  "imageUrl": coverImage.asset->url
 }`;
 
 const PAGE_QUERY = `*[_type == "page"] {
@@ -179,6 +181,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           title: doc.title,
           excerpt: (doc.bodyText ?? "").slice(0, 200),
           tags: (doc.tags ?? []).join(","),
+          ...(doc.imageUrl ? { imageUrl: doc.imageUrl } : {}),
         }).pipe(
           Effect.tap((ok) =>
             Effect.sync(() => {
