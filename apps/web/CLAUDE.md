@@ -61,6 +61,22 @@ MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) withou
 | Foundation docs   | `src/stories/foundation/`                                                     |
 | Design tokens     | `src/app/globals.css` (`@theme {}`)                                           |
 
+## Analytics Checklist for New Features
+
+Every new user-facing feature or page **must** include an analytics section. Before closing any issue that adds interactive UI, verify:
+
+- [ ] **Events defined**: new user interactions have named events in the PRD event taxonomy
+- [ ] **`trackEvent` calls added**: all interactive components call `trackEvent` with the correct parameters
+- [ ] **GTM updated**: new event names not already matched by the `responsibility_|search_|organigram_|related_content_` regex need a new trigger/tag in GTM; new event parameters need a Data Layer Variable (DLV) created in GTM and mapped into the GA4 Event tag's parameter fields
+- [ ] **GA4 custom dimensions registered**: any new event parameters registered in GA4 → Admin → Data display → Custom definitions (run `node scripts/create-ga4-dimensions.mjs` or add manually)
+- [ ] **GA4 explorations updated**: existing explorations updated, or new exploration created, if the feature introduces a new funnel or metric worth tracking
+- [ ] **No PII**: no email addresses, phone numbers, names, or raw internal IDs in event parameters (hash internal IDs via `hashMemberId`)
+
+When writing a PRD for a new feature, always include an **Analytics** section with:
+- Event taxonomy table (event name, trigger, parameters)
+- Which existing GA4 explorations need updating
+- Whether new custom dimensions are needed, and which GTM DLVs and GA4 Event tag parameter mappings are required for any new event parameters
+
 ## Analytics & Instrumentation
 
 - **Analytics belong in `useEffect`, never inside async fetch functions.** Async functions cannot see derived state (e.g. `filteredResults`) and are not re-triggered by client-side state changes. Use a `useEffect` with all terminal state variables in deps: `[data, isLoading, error, ...]`.
