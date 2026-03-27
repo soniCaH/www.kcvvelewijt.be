@@ -46,12 +46,15 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@sanity/icons": ">=3",
     "sanity": ">=5"
   },
   "devDependencies": {
+    "@sanity/icons": "3.7.4",
     "sanity": "5.18.0",
     "typescript": "5.9.3"
   }
@@ -64,14 +67,14 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["ES2017"],
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "Preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
-    "isolatedModules": true,
-    "noEmit": true
+    "isolatedModules": true
   },
   "include": ["src/**/*.ts"]
 }
