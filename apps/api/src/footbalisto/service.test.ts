@@ -4,6 +4,7 @@ import {
   FootbalistoService,
   FootbalistoServiceLive,
   mapGameStatus,
+  mapCompetitionLabel,
 } from "./service";
 import { Match, MatchDetail, RankingEntry } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
@@ -147,8 +148,65 @@ describe("FootbalistoService.getTeamMatches", () => {
       expect(result.right[0]?.id).toBe(101);
       expect(result.right[0]?.status).toBe("finished");
       expect(result.right[0]?.home_team.name).toBe("KCVV Elewijt");
+      expect(result.right[0]?.competition).toBe("Competitie");
       // Contract boundary: validate transform output against api-contract schema
       expect(() => S.decodeUnknownSync(Match)(result.right[0])).not.toThrow();
+    }
+  });
+
+  it("maps CUP match competition to PSD name", async () => {
+    const cupMatchList = {
+      content: [
+        {
+          id: 201,
+          status: 0,
+          date: "2025-02-10 00:00",
+          time: "15:00",
+          homeClub: { id: 123, name: "KCVV Elewijt" },
+          awayClub: { id: 456, name: "Opponent FC" },
+          goalsHomeTeam: null,
+          goalsAwayTeam: null,
+          competitionType: { id: 5, name: "Beker van Brabant", type: "CUP" },
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({ ok: true, json: async () => cupMatchList });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.competition).toBe("Beker van Brabant");
+    }
+  });
+
+  it("maps FRIENDLY match competition to 'Vriendschappelijk'", async () => {
+    const friendlyMatchList = {
+      content: [
+        {
+          id: 301,
+          status: 0,
+          date: "2025-03-01 00:00",
+          time: "14:00",
+          homeClub: { id: 123, name: "KCVV Elewijt" },
+          awayClub: { id: 456, name: "Opponent FC" },
+          goalsHomeTeam: null,
+          goalsAwayTeam: null,
+          competitionType: { id: 9, name: null, type: "FRIENDLY" },
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({ ok: true, json: async () => friendlyMatchList });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.competition).toBe("Vriendschappelijk");
     }
   });
 
@@ -503,6 +561,26 @@ describe("FootbalistoService.getRanking", () => {
 });
 
 describe("FootbalistoService.getMatchDetail", () => {
+  it("maps LEAGUE competitionType string to 'Competitie'", async () => {
+    const leagueDetailResponse = {
+      general: {
+        ...rawDetailResponse.general,
+        competitionType: "LEAGUE",
+      },
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => leagueDetailResponse,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.competition).toBe("Competitie");
+    }
+  });
+
   it("returns normalized MatchDetail from mocked HTTP response", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -604,5 +682,29 @@ describe("mapGameStatus", () => {
     expect(result).toBe("postponed");
     expect(messages).toHaveLength(1);
     expect(messages[0]).toContain("Unknown PSD game status code: 99");
+  });
+});
+
+describe("mapCompetitionLabel", () => {
+  it("maps LEAGUE to 'Competitie'", () => {
+    expect(mapCompetitionLabel("LEAGUE", "3de Nationale")).toBe("Competitie");
+  });
+
+  it("maps CUP to the PSD name when available", () => {
+    expect(mapCompetitionLabel("CUP", "Beker van Brabant")).toBe(
+      "Beker van Brabant",
+    );
+  });
+
+  it("maps CUP to 'Beker' when name is null", () => {
+    expect(mapCompetitionLabel("CUP", null)).toBe("Beker");
+  });
+
+  it("maps FRIENDLY to 'Vriendschappelijk'", () => {
+    expect(mapCompetitionLabel("FRIENDLY", null)).toBe("Vriendschappelijk");
+  });
+
+  it("falls back to raw type for unknown types", () => {
+    expect(mapCompetitionLabel("INTERLAND", null)).toBe("INTERLAND");
   });
 });

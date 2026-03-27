@@ -32,6 +32,30 @@ import {
 // ─── Transform helpers (internal) ──────────────────────────────────────────────
 
 /**
+ * Map a PSD competition type code + optional name to a Dutch display label.
+ *
+ * - LEAGUE → "Competitie"
+ * - CUP    → PSD name when available (e.g. "Beker van Brabant"), else "Beker"
+ * - FRIENDLY → "Vriendschappelijk"
+ * - Unknown type codes fall back to the raw type string.
+ */
+export function mapCompetitionLabel(
+  type: string,
+  name?: string | null,
+): string {
+  switch (type.toUpperCase()) {
+    case "LEAGUE":
+      return "Competitie";
+    case "CUP":
+      return name ?? "Beker";
+    case "FRIENDLY":
+      return "Vriendschappelijk";
+    default:
+      return type;
+  }
+}
+
+/**
  * Derive a human-readable team label from PSD team name and age group.
  *
  * Youth teams (age !== "A"): use the age directly (e.g. "U21", "U17").
@@ -124,7 +148,10 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
         score: game.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: game.competitionType?.type ?? "UNKNOWN",
+      competition: mapCompetitionLabel(
+        game.competitionType?.type ?? "UNKNOWN",
+        game.competitionType?.name,
+      ),
       kcvv_team_id: game.teamId ?? undefined,
     })),
   );
@@ -260,7 +287,7 @@ function transformFootbalistoMatchDetail(
         score: general.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: general.competitionType,
+      competition: mapCompetitionLabel(general.competitionType),
       lineup,
       hasReport: general.viewGameReport,
     })),
