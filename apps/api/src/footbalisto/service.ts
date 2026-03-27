@@ -287,7 +287,10 @@ function transformFootbalistoMatchDetail(
         score: general.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: mapCompetitionLabel(general.competitionType),
+      competition: mapCompetitionLabel(
+        general.competitionType?.type ?? "UNKNOWN",
+        general.competitionType?.name,
+      ),
       lineup,
       hasReport: general.viewGameReport,
     })),
