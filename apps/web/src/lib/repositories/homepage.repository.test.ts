@@ -11,6 +11,7 @@ vi.mock("../sanity/client", () => ({
 
 import { sanityClient } from "../sanity/client";
 import {
+  HOMEPAGE_BANNERS_QUERY,
   HomepageRepository,
   HomepageRepositoryLive,
   type HomepageBannersVM,
@@ -49,6 +50,18 @@ function makeBannersResult(
     ...overrides,
   };
 }
+
+describe("HOMEPAGE_BANNERS_QUERY", () => {
+  it("includes CDN optimization params for all three banner slots", () => {
+    const query = HOMEPAGE_BANNERS_QUERY as unknown as string;
+    const cdnParams = `"?w=1200&q=80&fm=webp&fit=max"`;
+    const matches = query.match(
+      /image\.asset->url \+ "\?w=1200&q=80&fm=webp&fit=max"/g,
+    );
+    expect(matches).toHaveLength(3);
+    expect(query).toContain(`"imageUrl": image.asset->url + ${cdnParams}`);
+  });
+});
 
 describe("HomepageRepository", () => {
   describe("getBanners", () => {
