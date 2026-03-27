@@ -9,6 +9,10 @@ import { Match, MatchDetail, RankingEntry } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import {
+  SanityWriteClient,
+  type SanityWriteClientInterface,
+} from "../sanity/client";
 
 global.fetch = vi.fn();
 
@@ -35,6 +39,26 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
 };
+
+function makeSanityMock(
+  visiblePsdIds: string[] = ["1"],
+): SanityWriteClientInterface {
+  return {
+    upsertPlayer: () => Effect.succeed(undefined as void),
+    upsertTeam: () => Effect.succeed(undefined as void),
+    upsertStaff: () => Effect.succeed(undefined as void),
+    uploadPlayerImage: () => Effect.succeed(undefined as void),
+    getPlayersImageState: () => Effect.succeed(new Map()),
+    getActivePlayerPsdIds: () => Effect.succeed([]),
+    archivePlayers: () => Effect.succeed(undefined as void),
+    getActiveStaffPsdIds: () => Effect.succeed([]),
+    archiveStaff: () => Effect.succeed(undefined as void),
+    getActiveTeamPsdIds: () => Effect.succeed([]),
+    archiveTeams: () => Effect.succeed(undefined as void),
+    writeFeedback: () => Effect.succeed(undefined as void),
+    getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
+  };
+}
 
 const seasons = [
   {
@@ -117,7 +141,13 @@ function runService<A>(
   fn: (
     svc: (typeof FootbalistoService)["Service"],
   ) => Effect.Effect<A, BffError>,
+  options: {
+    sanityMock?: SanityWriteClientInterface;
+    kvMock?: KvCacheInterface;
+  } = {},
 ) {
+  const sanity = options.sanityMock ?? makeSanityMock();
+  const kv = options.kvMock ?? cacheMock;
   const program = Effect.gen(function* () {
     const service = yield* FootbalistoService;
     return yield* fn(service);
@@ -127,7 +157,8 @@ function runService<A>(
       program.pipe(
         Effect.provide(FootbalistoServiceLive),
         Effect.provide(makeEnvLayer()),
-        Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(Layer.succeed(KvCacheService, kv)),
+        Effect.provide(Layer.succeed(SanityWriteClient, sanity)),
       ),
     ),
   );
@@ -199,7 +230,7 @@ describe("FootbalistoService.getTeamMatches", () => {
 });
 
 describe("FootbalistoService.getNextMatches", () => {
-  it("fetches next match per team, filters out teamId 23, returns transformed Matches", async () => {
+  it("fetches next match per visible team, returns transformed Matches", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {
       // Match team-specific game endpoints before the season endpoint (URL contains /seasons too)
@@ -212,15 +243,16 @@ describe("FootbalistoService.getNextMatches", () => {
       if (url.includes("/seasons")) {
         return Promise.resolve({ ok: true, json: async () => seasons });
       }
-      // /teams list endpoint
+      // /teams list endpoint — rawTeams includes team 1 (visible) and team 23 (not visible)
       return Promise.resolve({ ok: true, json: async () => rawTeams });
     });
 
+    // Default sanityMock returns ["1"] — only team 1 is visible, team 23 is excluded
     const result = await runService((svc) => svc.getNextMatches());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      // Team 23 (Weitse Gans) should be filtered out
+      // Team 23 not in Sanity visible list — only team 1 returns a match
       expect(result.right).toHaveLength(1);
       expect(result.right[0]?.id).toBe(102);
       expect(result.right[0]?.status).toBe("scheduled");
@@ -288,7 +320,7 @@ describe("FootbalistoService.getNextMatches", () => {
       if (url.includes("/seasons")) {
         return Promise.resolve({ ok: true, json: async () => seasons });
       }
-      // /teams — only non-23 team
+      // /teams — only team 1 (visible per default sanityMock)
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
@@ -319,6 +351,133 @@ describe("FootbalistoService.getNextMatches", () => {
     if (result._tag === "Right") {
       expect(result.right).toHaveLength(0);
     }
+  });
+
+  it("uses Sanity showInNavigation to filter teams, not hardcoded IDs", async () => {
+    const threeTeams = [
+      rawTeams[0], // id: 1 — visible in Sanity
+      {
+        id: 2,
+        name: "KCVV B-Ploeg",
+        age: "A",
+        gender: "mannen",
+        footbelId: null,
+        active: true,
+      },
+      rawTeams[1], // id: 23 — NOT visible in Sanity
+    ];
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => rawFutureMatchList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => seasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => threeTeams });
+    });
+
+    // Only team 1 is visible in Sanity (team 2 and 23 excluded)
+    const sanityMock = makeSanityMock(["1"]);
+    const result = await runService((svc) => svc.getNextMatches(), {
+      sanityMock,
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Team 2 and team 23 must both be excluded — only team 1 is in the Sanity visible list
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.kcvv_team_id).toBe(1);
+    }
+  });
+
+  it("caches visible team PSD IDs in KV with 1h TTL on cache miss", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => rawFutureMatchList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => seasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    let capturedKey: string | undefined;
+    let capturedValue: string | undefined;
+    let capturedTtl: number | undefined;
+    const trackingKv: KvCacheInterface = {
+      get: () => Effect.succeed(null), // cache miss
+      set: (key, value, ttl) => {
+        if (key.includes("visible-team")) {
+          capturedKey = key;
+          capturedValue = value;
+          capturedTtl = ttl;
+        }
+        return Effect.succeed(undefined);
+      },
+      increment: () => Effect.succeed(undefined),
+    };
+
+    const sanityMock = makeSanityMock(["1"]);
+    await runService((svc) => svc.getNextMatches(), {
+      sanityMock,
+      kvMock: trackingKv,
+    });
+
+    expect(capturedKey).toBeDefined();
+    expect(JSON.parse(capturedValue!)).toEqual(["1"]);
+    expect(capturedTtl).toBe(3600);
+  });
+
+  it("uses KV-cached visible team IDs and skips Sanity on cache hit", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => rawFutureMatchList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => seasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    // KV already has cached visible IDs
+    const cachedIds = JSON.stringify(["1"]);
+    const hitKv: KvCacheInterface = {
+      get: (key) =>
+        key.includes("visible-team")
+          ? Effect.succeed(cachedIds)
+          : Effect.succeed(null),
+      set: () => Effect.succeed(undefined),
+      increment: () => Effect.succeed(undefined),
+    };
+
+    let sanityCallCount = 0;
+    const spySanityMock: SanityWriteClientInterface = {
+      ...makeSanityMock(["1"]),
+      getVisibleTeamPsdIds: () => {
+        sanityCallCount++;
+        return Effect.succeed(["1"]);
+      },
+    };
+
+    await runService((svc) => svc.getNextMatches(), {
+      sanityMock: spySanityMock,
+      kvMock: hitKv,
+    });
+
+    // Sanity should NOT be called when KV has cached data
+    expect(sanityCallCount).toBe(0);
   });
 });
 

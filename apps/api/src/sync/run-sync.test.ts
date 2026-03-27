@@ -53,6 +53,7 @@ function makeSanityWriteClientMock() {
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
 
   const writeFeedback = vi.fn(() => Effect.succeed(undefined as void));
+  const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
 
   const mock: SanityWriteClientInterface = {
     upsertPlayer,
@@ -67,6 +68,7 @@ function makeSanityWriteClientMock() {
     getActiveTeamPsdIds,
     archiveTeams,
     writeFeedback,
+    getVisibleTeamPsdIds,
   };
 
   return {
@@ -361,6 +363,7 @@ describe("runSync", () => {
       getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
       writeFeedback: vi.fn(() => Effect.succeed(undefined as void)),
+      getVisibleTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

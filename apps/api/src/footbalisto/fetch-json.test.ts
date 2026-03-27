@@ -4,6 +4,10 @@ import { FootbalistoService, FootbalistoServiceLive } from "./service";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { UpstreamUnavailableError } from "./errors";
+import {
+  SanityWriteClient,
+  type SanityWriteClientInterface,
+} from "../sanity/client";
 
 global.fetch = vi.fn();
 
@@ -31,6 +35,22 @@ const cacheMock: KvCacheInterface = {
   increment: () => Effect.succeed(undefined),
 };
 
+const sanityMock: SanityWriteClientInterface = {
+  upsertPlayer: () => Effect.succeed(undefined as void),
+  upsertTeam: () => Effect.succeed(undefined as void),
+  upsertStaff: () => Effect.succeed(undefined as void),
+  uploadPlayerImage: () => Effect.succeed(undefined as void),
+  getPlayersImageState: () => Effect.succeed(new Map()),
+  getActivePlayerPsdIds: () => Effect.succeed([]),
+  archivePlayers: () => Effect.succeed(undefined as void),
+  getActiveStaffPsdIds: () => Effect.succeed([]),
+  archiveStaff: () => Effect.succeed(undefined as void),
+  getActiveTeamPsdIds: () => Effect.succeed([]),
+  archiveTeams: () => Effect.succeed(undefined as void),
+  writeFeedback: () => Effect.succeed(undefined as void),
+  getVisibleTeamPsdIds: () => Effect.succeed([]),
+};
+
 const seasons = [
   {
     id: 42,
@@ -56,6 +76,7 @@ function runGetTeamMatches(teamId: number) {
         Effect.provide(FootbalistoServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
+        Effect.provide(Layer.succeed(SanityWriteClient, sanityMock)),
       ),
     ),
   );

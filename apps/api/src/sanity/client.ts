@@ -106,6 +106,11 @@ export interface SanityWriteClientInterface {
     pathTitle: string;
     vote: "up" | "down";
   }) => Effect.Effect<void, SanityWriteError>;
+  /** Fetch PSD IDs of all teams where showInNavigation is not false. */
+  readonly getVisibleTeamPsdIds: () => Effect.Effect<
+    string[],
+    SanityWriteError
+  >;
 }
 
 export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
@@ -456,6 +461,20 @@ export const SanityWriteClientLive = Layer.effect(
           catch: (cause) =>
             new SanityWriteError("Failed to write search feedback", cause),
         }).pipe(Effect.asVoid),
+
+      getVisibleTeamPsdIds: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<string | null>>(
+              `*[_type == "team" && showInNavigation != false].psdId`,
+            );
+            return rows.filter(
+              (id): id is string => typeof id === "string" && id.length > 0,
+            );
+          },
+          catch: (cause) =>
+            new SanityWriteError("Failed to fetch visible team PSD IDs", cause),
+        }),
     };
   }),
 );

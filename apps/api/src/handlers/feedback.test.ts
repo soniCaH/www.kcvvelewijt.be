@@ -23,6 +23,7 @@ function makeSanityMock(
     getActiveTeamPsdIds: () => Effect.succeed([]),
     archiveTeams: () => Effect.succeed(undefined),
     writeFeedback: writeFeedbackImpl ?? (() => Effect.succeed(undefined)),
+    getVisibleTeamPsdIds: () => Effect.succeed([]),
   };
 }
 

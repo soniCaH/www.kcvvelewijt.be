@@ -1,6 +1,7 @@
 import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
+import { SanityWriteClient } from "../sanity/client";
 import {
   UpstreamUnavailableError,
   UpstreamClientError,
@@ -405,6 +406,7 @@ export const FootbalistoServiceLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
+    const sanityClient = yield* SanityWriteClient;
     const base = env.PSD_API_BASE_URL;
 
     const psdHeaders = {
@@ -468,6 +470,45 @@ export const FootbalistoServiceLive = Layer.effect(
       return Date.UTC(year!, month! - 1, day!, hour, minute);
     };
 
+    const VISIBLE_TEAM_IDS_CACHE_KEY = "sanity:visible-team-ids";
+    const VISIBLE_TEAM_IDS_TTL = 60 * 60; // 1 hour
+
+    const getVisibleTeamIds = (): Effect.Effect<string[] | undefined, never> =>
+      Effect.gen(function* () {
+        const cached = yield* cache.get(VISIBLE_TEAM_IDS_CACHE_KEY);
+        if (cached) {
+          const parsed = yield* Effect.try({
+            try: () => JSON.parse(cached),
+            catch: () => null,
+          }).pipe(Effect.option);
+          if (
+            Option.isSome(parsed) &&
+            Array.isArray(parsed.value) &&
+            parsed.value.every(
+              (item) => typeof item === "string" && item.trim().length > 0,
+            )
+          ) {
+            return parsed.value as string[];
+          }
+        }
+        const ids = yield* sanityClient
+          .getVisibleTeamPsdIds()
+          .pipe(
+            Effect.catchAll((e) =>
+              Effect.log(
+                `getVisibleTeamIds: Sanity unavailable, skipping visibility filter: ${e.message}`,
+              ).pipe(Effect.as(undefined as string[] | undefined)),
+            ),
+          );
+        if (ids === undefined) return undefined;
+        yield* cache.set(
+          VISIBLE_TEAM_IDS_CACHE_KEY,
+          JSON.stringify(ids),
+          VISIBLE_TEAM_IDS_TTL,
+        );
+        return ids;
+      });
+
     const fetchRawMatchDetail = (matchId: number) =>
       countedFetch(
         `${base}/games/${matchId}/info`,
@@ -506,66 +547,68 @@ export const FootbalistoServiceLive = Layer.effect(
 
       getNextMatches: () =>
         Effect.gen(function* () {
+          const visiblePsdIds = yield* getVisibleTeamIds();
           const teams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
           const season = yield* getCurrentSeason();
           const now = Date.now();
 
+          const visibleTeams = visiblePsdIds
+            ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
+            : teams;
+
           const teamNextMatches = yield* Effect.all(
-            teams
-              .filter((t) => t.id !== 23)
-              .map((team) =>
-                countedFetch(
-                  `${base}/games/team/${team.id}/seasons/${season.id}`,
-                  PsdMatchListSchema,
-                ).pipe(
-                  Effect.flatMap((data) =>
-                    Effect.gen(function* () {
-                      const [errors, games] = yield* Effect.partition(
-                        data.content,
-                        (item) =>
-                          S.decodeUnknown(PsdGame)(item).pipe(
-                            Effect.mapError((parseError) => ({
-                              id: extractId(item),
-                              parseError,
-                            })),
-                          ),
+            visibleTeams.map((team) =>
+              countedFetch(
+                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                PsdMatchListSchema,
+              ).pipe(
+                Effect.flatMap((data) =>
+                  Effect.gen(function* () {
+                    const [errors, games] = yield* Effect.partition(
+                      data.content,
+                      (item) =>
+                        S.decodeUnknown(PsdGame)(item).pipe(
+                          Effect.mapError((parseError) => ({
+                            id: extractId(item),
+                            parseError,
+                          })),
+                        ),
+                    );
+
+                    if (errors.length > 0) {
+                      const ids = errors.map((e) => e.id).join(", ");
+                      yield* Effect.log(
+                        `getNextMatches(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
                       );
+                    }
 
-                      if (errors.length > 0) {
-                        const ids = errors.map((e) => e.id).join(", ");
-                        yield* Effect.log(
-                          `getNextMatches(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
-                        );
-                      }
-
-                      const next = [...games]
-                        .filter((m) => toMs(m) >= now)
-                        .sort((a, b) => toMs(a) - toMs(b))[0];
-                      return next
-                        ? yield* transformPsdGame({ ...next, teamId: team.id })
-                        : null;
-                    }),
-                  ),
-                  Effect.map((match) => ({ _tag: "ok" as const, match })),
-                  Effect.catchAll((e) =>
-                    Effect.log(
-                      `getNextMatches: team ${team.id} failed: ${String(e)}`,
-                    ).pipe(Effect.as({ _tag: "failed" as const, match: null })),
-                  ),
+                    const next = [...games]
+                      .filter((m) => toMs(m) >= now)
+                      .sort((a, b) => toMs(a) - toMs(b))[0];
+                    return next
+                      ? yield* transformPsdGame({ ...next, teamId: team.id })
+                      : null;
+                  }),
+                ),
+                Effect.map((match) => ({ _tag: "ok" as const, match })),
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `getNextMatches: team ${team.id} failed: ${String(e)}`,
+                  ).pipe(Effect.as({ _tag: "failed" as const, match: null })),
                 ),
               ),
+            ),
             { concurrency: 5 },
           );
 
-          const filteredTeams = teams.filter((t) => t.id !== 23);
           const allFailed =
-            filteredTeams.length > 0 &&
+            visibleTeams.length > 0 &&
             teamNextMatches.every((r) => r._tag === "failed");
 
           if (allFailed) {
             return yield* Effect.fail(
               new UpstreamUnavailableError({
-                message: `getNextMatches: all ${filteredTeams.length} team fetches failed`,
+                message: `getNextMatches: all ${visibleTeams.length} team fetches failed`,
               }),
             );
           }
@@ -575,7 +618,7 @@ export const FootbalistoServiceLive = Layer.effect(
           for (let i = 0; i < teamNextMatches.length; i++) {
             const entry = teamNextMatches[i]!;
             if (entry._tag === "ok" && entry.match) {
-              const team = filteredTeams[i]!;
+              const team = visibleTeams[i]!;
               matches.push({
                 ...entry.match,
                 kcvv_team_label: derivePsdTeamLabel(team.name, team.age),
