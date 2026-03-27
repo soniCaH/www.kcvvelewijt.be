@@ -34,7 +34,8 @@
       "inputs": [
         "schemaTypes/**",
         "sanity.cli.ts",
-        "../web/src/lib/repositories/*.ts"
+        "../web/src/lib/repositories/*.ts",
+        "../../packages/sanity-schemas/src/**"
       ]
     },
     "@kcvv/web#build": {
