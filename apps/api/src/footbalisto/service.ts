@@ -473,7 +473,7 @@ export const FootbalistoServiceLive = Layer.effect(
     const VISIBLE_TEAM_IDS_CACHE_KEY = "sanity:visible-team-ids";
     const VISIBLE_TEAM_IDS_TTL = 60 * 60; // 1 hour
 
-    const getVisibleTeamIds = (): Effect.Effect<string[], BffError> =>
+    const getVisibleTeamIds = (): Effect.Effect<string[] | undefined, never> =>
       Effect.gen(function* () {
         const cached = yield* cache.get(VISIBLE_TEAM_IDS_CACHE_KEY);
         if (cached) {
@@ -481,18 +481,26 @@ export const FootbalistoServiceLive = Layer.effect(
             try: () => JSON.parse(cached),
             catch: () => null,
           }).pipe(Effect.option);
-          if (Option.isSome(parsed) && Array.isArray(parsed.value)) {
+          if (
+            Option.isSome(parsed) &&
+            Array.isArray(parsed.value) &&
+            parsed.value.every(
+              (item) => typeof item === "string" && item.trim().length > 0,
+            )
+          ) {
             return parsed.value as string[];
           }
         }
-        const ids = yield* sanityClient.getVisibleTeamPsdIds().pipe(
-          Effect.mapError(
-            (e) =>
-              new UpstreamUnavailableError({
-                message: `Failed to fetch visible team IDs from Sanity: ${e.message}`,
-              }),
-          ),
-        );
+        const ids = yield* sanityClient
+          .getVisibleTeamPsdIds()
+          .pipe(
+            Effect.catchAll((e) =>
+              Effect.log(
+                `getVisibleTeamIds: Sanity unavailable, skipping visibility filter: ${e.message}`,
+              ).pipe(Effect.as(undefined as string[] | undefined)),
+            ),
+          );
+        if (ids === undefined) return undefined;
         yield* cache.set(
           VISIBLE_TEAM_IDS_CACHE_KEY,
           JSON.stringify(ids),
@@ -544,9 +552,9 @@ export const FootbalistoServiceLive = Layer.effect(
           const season = yield* getCurrentSeason();
           const now = Date.now();
 
-          const visibleTeams = teams.filter((t) =>
-            visiblePsdIds.includes(String(t.id)),
-          );
+          const visibleTeams = visiblePsdIds
+            ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
+            : teams;
 
           const teamNextMatches = yield* Effect.all(
             visibleTeams.map((team) =>
