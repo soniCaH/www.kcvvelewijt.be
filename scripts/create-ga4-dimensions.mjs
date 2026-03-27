@@ -10,12 +10,19 @@
  *      https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com
  *
  * Usage:
- *   node scripts/create-ga4-dimensions.mjs
+ *   PROPERTY_ID=530024143 node scripts/create-ga4-dimensions.mjs
+ *   node scripts/create-ga4-dimensions.mjs 530024143
  */
 
 import { execSync } from "child_process";
 
-const PROPERTY_ID = "530024143";
+const PROPERTY_ID = process.env.PROPERTY_ID ?? process.argv[2];
+if (!PROPERTY_ID) {
+  console.error("Error: PROPERTY_ID is required. Provide it as an env var or CLI argument:");
+  console.error("  PROPERTY_ID=530024143 node scripts/create-ga4-dimensions.mjs");
+  console.error("  node scripts/create-ga4-dimensions.mjs 530024143");
+  process.exit(1);
+}
 const BASE_URL = `https://analyticsadmin.googleapis.com/v1beta/properties/${PROPERTY_ID}/customDimensions`;
 
 const dimensions = [
@@ -52,34 +59,72 @@ try {
   process.exit(1);
 }
 
+// Preload existing custom dimension parameterNames to skip duplicates
+const existingParams = new Set();
+try {
+  const listRes = await fetch(BASE_URL, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (listRes.ok) {
+    const listData = await listRes.json();
+    for (const d of listData.customDimensions ?? []) {
+      existingParams.add(d.parameterName);
+    }
+    if (existingParams.size > 0) {
+      console.log(`Found ${existingParams.size} existing custom dimension(s). Skipping duplicates.\n`);
+    }
+  } else {
+    console.warn("Could not list existing dimensions; proceeding without dedup check.\n");
+  }
+} catch {
+  console.warn("Could not list existing dimensions; proceeding without dedup check.\n");
+}
+
 console.log(`Creating ${dimensions.length} custom dimensions for property ${PROPERTY_ID}...\n`);
 
 let ok = 0;
 let failed = 0;
+let skipped = 0;
 
 for (const dim of dimensions) {
-  const res = await fetch(BASE_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      parameterName: dim.parameterName,
-      displayName: dim.displayName,
-      scope: "EVENT",
-    }),
-  });
+  if (existingParams.has(dim.parameterName)) {
+    console.log(`  –  ${dim.displayName} (${dim.parameterName}) — already exists, skipped`);
+    skipped++;
+    continue;
+  }
 
-  if (res.ok) {
-    console.log(`  ✓  ${dim.displayName} (${dim.parameterName})`);
-    ok++;
-  } else {
-    const err = await res.json();
-    const msg = err?.error?.message ?? res.statusText;
-    console.log(`  ✗  ${dim.displayName} (${dim.parameterName}) — ${res.status}: ${msg}`);
+  try {
+    const res = await fetch(BASE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        parameterName: dim.parameterName,
+        displayName: dim.displayName,
+        scope: "EVENT",
+      }),
+    });
+
+    if (res.ok) {
+      console.log(`  ✓  ${dim.displayName} (${dim.parameterName})`);
+      ok++;
+    } else {
+      let msg;
+      try {
+        const err = await res.json();
+        msg = err?.error?.message ?? res.statusText;
+      } catch {
+        msg = (await res.text()) || res.statusText;
+      }
+      console.log(`  ✗  ${dim.displayName} (${dim.parameterName}) — ${res.status}: ${msg}`);
+      failed++;
+    }
+  } catch (e) {
+    console.log(`  ✗  ${dim.displayName} (${dim.parameterName}) — network error: ${e.message}`);
     failed++;
   }
 }
 
-console.log(`\nDone: ${ok} created, ${failed} failed.`);
+console.log(`\nDone: ${ok} created, ${skipped} skipped, ${failed} failed.`);

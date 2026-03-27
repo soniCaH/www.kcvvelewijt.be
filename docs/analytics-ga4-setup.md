@@ -44,9 +44,9 @@ property, you land on the **Home** screen. The left sidebar has five sections:
 | **Reports**     | Standard reports: traffic, engagement, pages, devices              |
 | **Explore**     | Where you build custom funnels and reports (called "Explorations") |
 | **Advertising** | Attribution and conversion paths                                   |
-| **Configure**   | Events list, custom definitions, audiences, DebugView              |
+| **Admin**       | Custom definitions: Admin → Data display → Custom definitions; DebugView: Admin → Data display → DebugView; Events/Key events: Admin → Data display → Events; Audiences: Admin → Audience manager; Data streams: Admin → Data collection and modification → Data Streams |
 
-We will mostly work in **Explore** and **Configure**.
+We will mostly work in **Explore** and **Admin**.
 
 ---
 
@@ -58,7 +58,15 @@ Before setting anything up, confirm GA4 is receiving the KCVV custom events.
 
 DebugView shows events from individual browser sessions in real time.
 
-1. Open the site in Chrome and accept the analytics cookie consent.
+> **Prerequisite — enable debug mode first**: DebugView only shows sessions where
+> debug mode is active. The easiest way to enable it is to open the GTM container in
+> **Preview mode** (GTM → Preview) — this automatically enables debug mode for your
+> browser tab. Alternatively, append `?gtm_debug=x` to the URL.
+> Running `dataLayer` in the console (step 2 below) confirms GTM is loaded, but will
+> **not** make your session appear in DebugView unless debug mode or GTM Preview is
+> active. Enable GTM Preview or the debug parameter before proceeding to step 3.
+
+1. Open the site in Chrome with GTM Preview active (or `?gtm_debug=x` appended) and accept the analytics cookie consent.
 2. Open Chrome DevTools → Console → run:
    ```javascript
    dataLayer
@@ -182,12 +190,15 @@ right panel to open the step editor:
 - Condition: Event name → `responsibility_contact_clicked`
 - Click **Or** (inside the same step) → Event name → `responsibility_dwell`
 
-**Step 5 — Abandoned**
-- Click **Add step**
-- Step name: `Abandoned`
-- Condition: Event name → `responsibility_abandon`
-
 Click **Apply** to close the step editor.
+
+> **Analyzing abandonment**: Do not add `responsibility_abandon` as a sequential
+> funnel step — GA4 models abandonment as drop-off *before* the final success step,
+> not as a step after it. To analyze abandonment separately, use **Path exploration**
+> (Explore → + → Path exploration) filtered to `responsibility_abandon`, or create a
+> **segment comparison**: one segment for sessions containing
+> `responsibility_contact_clicked` or `responsibility_dwell` (converters) and a
+> second segment for sessions containing `responsibility_abandon` (non-converters).
 
 **Add a breakdown by role (optional):** In the right panel scroll to **Breakdown** →
 select the **Role** dimension. This shows which roles have the lowest completion rates.
@@ -216,12 +227,25 @@ select the **Role** dimension. This shows which roles have the lowest completion
 **Step 3 — Result clicked**
 - Condition: Event name → `search_result_clicked`
 
+**Step 4 — Dead end (no results)**
+- Click **Add step**
+- Step name: `Dead end`
+- Condition: Event name → `search_no_results`
+
+> This step is reached by users who submitted a search but received no results. Drop-off
+> from Step 2 to Step 4 reveals the dead-end rate. You can also track filter churn with
+> a separate exploration: create a second funnel (or a **segment**) that includes
+> `search_filter_changed` events to capture sessions where users refined their query
+> via filters before finding or abandoning results.
+
 **Set funnel type to Open:** In the right panel, find the **Funnel type** toggle and
 switch from **Closed** to **Open**. Open funnel allows users to enter at any step —
 more realistic for search since users may land on the search page from a direct link.
 
-**Breakdown:** Add **Result type** dimension to see which content types (article,
-player, team) receive the most clicks.
+**Breakdown:** Add the **Result type** dimension to see which content types (article,
+player, team) receive the most clicks. To analyse filter churn, also try the
+**Filter type** dimension — it slices by `search_filter_changed` events so you can
+see which filter options users change most before clicking or abandoning.
 
 **Share the exploration.**
 
@@ -311,7 +335,7 @@ All of these are **Free form** explorations.
 
 Read the counts and compute:
 
-```
+```text
 Success rate = (responsibility_contact_clicked + responsibility_dwell) / responsibility_search × 100
 ```
 
@@ -359,7 +383,7 @@ content.
 
 Compute from the counts:
 
-```
+```text
 CTR           = search_result_clicked / search_submitted × 100
 Dead-end rate = search_no_results     / search_submitted × 100
 ```
