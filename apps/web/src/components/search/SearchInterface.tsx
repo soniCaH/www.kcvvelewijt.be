@@ -12,6 +12,7 @@ import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { Spinner } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
+import { filterByActiveType } from "./search-filter-utils";
 import type {
   SearchResultType,
   SearchResult,
@@ -132,23 +133,21 @@ export const SearchInterface = ({
 
   // Compute filtered results matching what SearchResults renders
   const filteredResults = useMemo(
-    () =>
-      activeType === "all"
-        ? results
-        : results.filter((r) => r.type === activeType),
+    () => filterByActiveType(results, activeType),
     [results, activeType],
   );
 
   // Track analytics based on filtered results (respects active filter)
+  // Only fires after a successful fetch (no load, no error)
   useEffect(() => {
-    if (!query || query.trim().length < 2 || isLoading) return;
+    if (!query || query.trim().length < 2 || isLoading || error) return;
 
     if (filteredResults.length > 0) {
       analytics.trackResultsShown(filteredResults.length, query.trim());
     } else {
       analytics.trackNoResults(query.trim());
     }
-  }, [filteredResults, activeType, query, isLoading, analytics]);
+  }, [filteredResults, activeType, query, isLoading, error, analytics]);
 
   /**
    * Handle search submit

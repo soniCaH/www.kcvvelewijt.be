@@ -10,6 +10,7 @@ import type {
   SearchResultType,
 } from "./SearchInterface";
 import { SearchResult } from "./SearchResult";
+import { filterByActiveType } from "./search-filter-utils";
 
 export interface SearchResultsProps {
   /**
@@ -46,10 +47,7 @@ export const SearchResults = ({
   onResultClick,
 }: SearchResultsProps) => {
   // Filter results by active type (client-side)
-  const filteredResults =
-    activeType === "all"
-      ? results
-      : results.filter((result) => result.type === activeType);
+  const filteredResults = filterByActiveType(results, activeType);
 
   if (filteredResults.length === 0) {
     return (
