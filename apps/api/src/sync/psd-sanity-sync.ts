@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { PsdMember, PsdTeam } from "@kcvv/api-contract";
+import type { PsdMember, PsdTeam } from "../footbalisto/schemas-player-team";
 import type {
   SanityPlayerDoc,
   SanityTeamDoc,
