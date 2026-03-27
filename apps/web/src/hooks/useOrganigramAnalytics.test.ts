@@ -6,7 +6,7 @@ vi.mock("@/lib/analytics/track-event", () => ({
 }));
 
 import { trackEvent } from "@/lib/analytics/track-event";
-import { useOrganigramAnalytics } from "./useOrganigramAnalytics";
+import { useOrganigramAnalytics, hashMemberId } from "./useOrganigramAnalytics";
 
 const mockTrackEvent = vi.mocked(trackEvent);
 
@@ -57,7 +57,7 @@ describe("useOrganigramAnalytics", () => {
   });
 
   describe("organigram_member_clicked", () => {
-    it("fires with member_id and current view", () => {
+    it("fires with hashed member_id and current view", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
 
       act(() => {
@@ -65,12 +65,12 @@ describe("useOrganigramAnalytics", () => {
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("organigram_member_clicked", {
-        member_id: "voorzitter-id",
+        member_id: hashMemberId("voorzitter-id"),
         view: "chart",
       });
     });
 
-    it("fires with member_id and cards view", () => {
+    it("fires with hashed member_id and cards view", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
 
       act(() => {
@@ -78,22 +78,35 @@ describe("useOrganigramAnalytics", () => {
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("organigram_member_clicked", {
-        member_id: "secretaris-id",
+        member_id: hashMemberId("secretaris-id"),
         view: "cards",
       });
     });
   });
 
   describe("organigram_search_used", () => {
-    it("fires with query_text when user searches in chart", () => {
+    it("fires with sanitized query_text when user searches", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
 
       act(() => {
-        result.current.trackSearchUsed("jan");
+        result.current.trackSearchUsed("JAN");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("organigram_search_used", {
         query_text: "jan",
+      });
+    });
+
+    it("truncates query_text to 50 characters", () => {
+      const { result } = renderHook(() => useOrganigramAnalytics());
+      const longQuery = "a".repeat(60);
+
+      act(() => {
+        result.current.trackSearchUsed(longQuery);
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("organigram_search_used", {
+        query_text: "a".repeat(50),
       });
     });
   });

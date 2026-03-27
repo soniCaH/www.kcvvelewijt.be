@@ -214,6 +214,7 @@ export function UnifiedOrganigramClient({
     source: "tab" | "swipe" | "keyboard" = "tab",
   ) => {
     const newView = view as ViewType;
+    if (newView === activeView) return;
     setActiveView(newView);
     localStorage.setItem(VIEW_PREFERENCE_KEY, newView);
     updateUrl({ view: newView });

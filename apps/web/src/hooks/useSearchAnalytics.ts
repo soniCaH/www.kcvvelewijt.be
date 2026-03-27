@@ -1,12 +1,6 @@
 import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
-
-const MAX_QUERY_LENGTH = 50;
-
-/** Truncate + lowercase for privacy-safe analytics */
-function sanitizeQuery(query: string): string {
-  return query.toLowerCase().slice(0, MAX_QUERY_LENGTH);
-}
+import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
 
 export function useSearchAnalytics() {
   const trackSearchSubmitted = useCallback((queryText: string) => {
