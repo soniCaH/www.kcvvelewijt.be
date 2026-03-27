@@ -17,8 +17,8 @@ App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `pack
 
 `apps/studio/` (production) and `apps/studio/staging/` (staging) are two independent Sanity Studio configurations with separate project IDs. Schema files are full copies — not a base/override relationship.
 
-- **Production-only schemas** (absent from staging): `articleImage.ts`, `banner.ts`, `homePage.ts`. All other `schemaTypes/*.ts` files are shared and must stay in sync.
-- **When touching any `apps/studio/schemaTypes/<file>.ts`:** check whether a counterpart exists in `apps/studio/staging/schemaTypes/` and apply the equivalent change. Verify parity with `git diff --no-index apps/studio/schemaTypes/<file> apps/studio/staging/schemaTypes/<file>` before declaring the task complete.
+- **All schemas live in `packages/sanity-schemas/src/`** — the shared `@kcvv/sanity-schemas` package. Both studios import from this package and are identical in terms of schema types. There are no production-only schemas; the previous `articleImage.ts`, `banner.ts`, and `homePage.ts` distinction no longer applies.
+- **When touching any schema file:** edit `packages/sanity-schemas/src/<file>.ts` — changes there automatically apply to both studios. No per-studio counterpart check is needed.
 - **Multi-file comparison signals:** when a review comment contains "out of sync", "sync", "match", or "parity" between two environments, read both sides before responding — confirming one side is correct does not falsify the claim.
 
 ## Git Workflow

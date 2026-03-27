@@ -38,6 +38,14 @@
         "../../packages/sanity-schemas/src/**"
       ]
     },
+    "@kcvv/studio-staging#typegen": {
+      "outputs": ["schema.json"],
+      "inputs": [
+        "schemaTypes/**",
+        "sanity.cli.ts",
+        "../../packages/sanity-schemas/src/**"
+      ]
+    },
     "@kcvv/web#build": {
       "dependsOn": ["^build", "@kcvv/studio#typegen"],
       "outputs": [".next/**", "!.next/cache/**"],
