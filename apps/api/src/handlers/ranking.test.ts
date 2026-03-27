@@ -37,6 +37,7 @@ function makeServiceMock(
     getMatchById: () => Effect.fail(new Error("not needed") as never),
     getMatchDetail: () => Effect.fail(new Error("not needed") as never),
     getRanking: () => Effect.succeed(rankingEntries),
+    getOpponentHistory: () => Effect.die("not needed"),
     ...overrides,
   };
 }

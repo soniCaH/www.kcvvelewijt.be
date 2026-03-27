@@ -57,6 +57,7 @@ function makeServiceMock(
     getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
+    getOpponentHistory: () => Effect.die("not needed"),
     ...overrides,
   };
 }

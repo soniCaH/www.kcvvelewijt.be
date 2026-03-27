@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { MatchDetail } from "@kcvv/api-contract";
+import Link from "next/link";
 import { MatchDetailView } from "@/components/match/MatchDetailView";
 import {
   transformHomeTeam,
@@ -135,18 +136,37 @@ export default async function MatchPage({
       : null;
 
   return (
-    <MatchDetailView
-      homeTeam={homeTeam}
-      awayTeam={awayTeam}
-      date={match.date}
-      time={time}
-      status={match.status}
-      competition={match.competition}
-      homeLineup={homeLineup}
-      awayLineup={awayLineup}
-      hasReport={match.hasReport}
-      backUrl={backUrl ?? undefined}
-    />
+    <>
+      <MatchDetailView
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        date={match.date}
+        time={time}
+        status={match.status}
+        competition={match.competition}
+        homeLineup={homeLineup}
+        awayLineup={awayLineup}
+        hasReport={match.hasReport}
+        backUrl={backUrl ?? undefined}
+      />
+      {/* Opponent history links */}
+      <div className="container mx-auto max-w-3xl px-4 pb-8">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/tegenstander/${match.home_team.id}`}
+            className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
+          >
+            Historiek vs {match.home_team.name}
+          </Link>
+          <Link
+            href={`/tegenstander/${match.away_team.id}`}
+            className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
+          >
+            Historiek vs {match.away_team.name}
+          </Link>
+        </div>
+      </div>
+    </>
   );
 }
 

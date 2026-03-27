@@ -157,6 +157,9 @@ const PsdGameBaseFields = {
   competitionType: S.optional(S.NullOr(PsdCompetitionType)),
   reportGeneral: S.optional(S.NullOr(S.Boolean)),
   teamId: S.optional(S.NullOr(S.Number)),
+  // PSD team IDs for home/away — used to compute is_home (team ID != club ID)
+  homeTeamId: S.optional(S.NullOr(S.Number)),
+  awayTeamId: S.optional(S.NullOr(S.Number)),
   // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
   cancelled: S.optional(S.NullOr(S.Boolean)),
   // PSD team IDs for home/away — distinct from club IDs (homeClub.id / awayClub.id)

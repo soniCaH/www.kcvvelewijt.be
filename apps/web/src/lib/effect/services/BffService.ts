@@ -9,6 +9,7 @@ import {
   type HttpNotFound,
   type Match,
   type MatchDetail,
+  type OpponentHistory,
   type RankingEntry,
   type RelatedItem,
 } from "@kcvv/api-contract";
@@ -36,6 +37,10 @@ export class BffService extends Context.Tag("BffService")<
       id: string,
       limit?: number,
     ) => Effect.Effect<readonly RelatedItem[], BffError>;
+    getOpponentHistory: (
+      teamId: number,
+      clubId: number,
+    ) => Effect.Effect<OpponentHistory, BffError>;
   }
 >() {}
 
@@ -72,6 +77,10 @@ export const BffServiceLive = Layer.effect(
       getRelated: (id: string, limit?: number) =>
         client.related
           .getRelated({ urlParams: { id, limit } })
+          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+      getOpponentHistory: (teamId: number, clubId: number) =>
+        client.opponent
+          .getOpponentHistory({ path: { teamId, clubId } })
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
     };
   }),
