@@ -19,7 +19,7 @@ function makeVectorizeMock(
           score: 0.95,
           metadata: {
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             title: "Kantine",
             excerpt: "De kantine...",
           },
@@ -63,7 +63,7 @@ describe("VectorizeService", () => {
             values: Array(1024).fill(0.1),
             metadata: {
               slug: "kantine",
-              type: "responsibilityPath",
+              type: "responsibility",
               title: "Kantine",
               excerpt: "De kantine...",
             },
@@ -134,7 +134,7 @@ describe("VectorizeService", () => {
           values: Array(1024).fill(0.1),
           metadata: {
             slug: "kantine",
-            type: "responsibilityPath",
+            type: "responsibility",
             title: "Kantine",
             excerpt: "De kantine...",
           },

@@ -20,7 +20,7 @@ export class SearchResult extends S.Class<SearchResult>("SearchResult")({
   /** URL-friendly slug */
   slug: S.String,
   /** Content type */
-  type: S.Literal("responsibilityPath", "article", "page"),
+  type: S.Literal("responsibility", "article", "page"),
   /** Cosine similarity score (0–1) */
   score: S.Number,
   /** Display title */

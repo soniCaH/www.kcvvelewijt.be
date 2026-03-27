@@ -61,7 +61,7 @@ describe("POST /api/search", () => {
         {
           id: "doc-1",
           slug: "kantine",
-          type: "responsibilityPath",
+          type: "responsibility",
           score: 0.9,
           title: "Kantine",
           excerpt: "...",

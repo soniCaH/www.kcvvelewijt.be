@@ -73,7 +73,7 @@ function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
 
 describe("handleIndexWebhook", () => {
   it("returns 401 for missing SVIX headers", async () => {
-    const body = JSON.stringify({ _id: "doc-1", _type: "responsibilityPath" });
+    const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { missingHeaders: true });
     const env = makeEnv();
 
@@ -82,7 +82,7 @@ describe("handleIndexWebhook", () => {
   });
 
   it("returns 401 for invalid signature", async () => {
-    const body = JSON.stringify({ _id: "doc-1", _type: "responsibilityPath" });
+    const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { invalidSig: true });
     const env = makeEnv();
 
@@ -91,7 +91,7 @@ describe("handleIndexWebhook", () => {
   });
 
   it("returns 401 for replayed requests (timestamp > 5 min old)", async () => {
-    const body = JSON.stringify({ _id: "doc-1", _type: "responsibilityPath" });
+    const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { oldTimestamp: true });
     const env = makeEnv();
 
@@ -102,7 +102,7 @@ describe("handleIndexWebhook", () => {
   it("deletes vector on delete operation", async () => {
     const body = JSON.stringify({
       _id: "doc-to-delete",
-      _type: "responsibilityPath",
+      _type: "responsibility",
     });
     const request = await makeSignedRequest(body, { operation: "delete" });
     const env = makeEnv();
@@ -129,7 +129,7 @@ describe("handleIndexWebhook", () => {
     expect(json).toEqual({ ok: true, action: "skipped_unknown_type" });
   });
 
-  it("indexes a published responsibilityPath", async () => {
+  it("indexes a published responsibility", async () => {
     const sanityDoc = {
       _id: "resp-123",
       slug: "kantine",
@@ -142,7 +142,7 @@ describe("handleIndexWebhook", () => {
 
     const body = JSON.stringify({
       _id: "resp-123",
-      _type: "responsibilityPath",
+      _type: "responsibility",
     });
     const request = await makeSignedRequest(body);
     const env = makeEnv();
@@ -161,7 +161,7 @@ describe("handleIndexWebhook", () => {
         values: FAKE_VECTOR,
         metadata: expect.objectContaining({
           slug: "kantine",
-          type: "responsibilityPath",
+          type: "responsibility",
           title: "Kantine",
         }),
       }),
@@ -171,7 +171,7 @@ describe("handleIndexWebhook", () => {
   it("returns skipped_not_found when document is not in Sanity", async () => {
     const body = JSON.stringify({
       _id: "deleted-doc",
-      _type: "responsibilityPath",
+      _type: "responsibility",
     });
     const request = await makeSignedRequest(body);
     const env = makeEnv();

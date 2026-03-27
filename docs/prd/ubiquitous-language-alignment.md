@@ -151,3 +151,5 @@ No new endpoints. No new schemas. Phases 2–5 do not touch api-contract.
 <!-- During Ralph loop, append here when hitting something unexpected:
 - [date] Discovered: [what was found] → [action taken: new issue #N / PRD updated / resolved inline]
 -->
+
+- [2026-03-27] Discovered: related.test.ts had 2 pre-existing failing tests (wrong limit default 3→4, wrong responsibilityPath type for RelatedItem) → resolved inline

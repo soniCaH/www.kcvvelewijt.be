@@ -8,7 +8,7 @@ describe("RelatedRequest", () => {
       S.decodeUnknown(RelatedRequest)({ id: "doc-abc123" }),
     );
     expect(result.id).toBe("doc-abc123");
-    expect(result.limit).toBe(3);
+    expect(result.limit).toBe(4);
   });
 
   it("accepts request with explicit limit", async () => {
@@ -42,18 +42,19 @@ describe("RelatedRequest", () => {
 });
 
 describe("RelatedItem", () => {
-  it("accepts responsibilityPath type", async () => {
-    const result = await Effect.runPromise(
-      S.decodeUnknown(RelatedItem)({
-        id: "doc-abc",
-        slug: "blessure-melden",
-        type: "responsibilityPath",
-        score: 0.85,
-        title: "Blessure melden",
-        excerpt: "Hoe meld je een blessure...",
-      }),
-    );
-    expect(result.type).toBe("responsibilityPath");
+  it("rejects responsibility type (responsibility paths are excluded from related items)", async () => {
+    await expect(
+      Effect.runPromise(
+        S.decodeUnknown(RelatedItem)({
+          id: "doc-abc",
+          slug: "blessure-melden",
+          type: "responsibility",
+          score: 0.85,
+          title: "Blessure melden",
+          excerpt: "Hoe meld je een blessure...",
+        }),
+      ),
+    ).rejects.toThrow();
   });
 
   it("accepts article type", async () => {

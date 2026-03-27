@@ -75,7 +75,7 @@ describe("handleRelated", () => {
     expect(result[0]!.slug).toBe("related");
   });
 
-  it("returns only article and page results, skipping responsibilityPath neighbours", async () => {
+  it("returns only article and page results, skipping responsibility neighbours", async () => {
     const result = await Effect.runPromise(
       handleRelated({ id: "doc-abc", limit: 3 }).pipe(
         Effect.provide(
@@ -99,7 +99,7 @@ describe("handleRelated", () => {
                   score: 0.9,
                   metadata: {
                     slug: "blessure",
-                    type: "responsibilityPath",
+                    type: "responsibility",
                     title: "Blessure melden",
                     excerpt: "Hoe meld je...",
                   },
@@ -126,7 +126,7 @@ describe("handleRelated", () => {
     expect(result[0]!.id).toBe("doc-article");
   });
 
-  it("excludes responsibilityPath type items from results", async () => {
+  it("excludes responsibility type items from results", async () => {
     const result = await Effect.runPromise(
       handleRelated({ id: "doc-abc", limit: 3 }).pipe(
         Effect.provide(
@@ -140,7 +140,7 @@ describe("handleRelated", () => {
                   score: 1.0,
                   metadata: {
                     slug: "self",
-                    type: "responsibilityPath",
+                    type: "responsibility",
                     title: "Self",
                     excerpt: "",
                   },
@@ -150,7 +150,7 @@ describe("handleRelated", () => {
                   score: 0.9,
                   metadata: {
                     slug: "path",
-                    type: "responsibilityPath",
+                    type: "responsibility",
                     title: "Path",
                     excerpt: "",
                   },

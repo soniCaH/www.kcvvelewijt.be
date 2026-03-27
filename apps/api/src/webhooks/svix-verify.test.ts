@@ -4,7 +4,7 @@ import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 
 describe("verifySvixSignature", () => {
   it("returns true for a valid signature", async () => {
-    const body = JSON.stringify({ _id: "doc-1", _type: "responsibilityPath" });
+    const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const svixId = "msg_abc123";
     const timestamp = Math.floor(Date.now() / 1000);
     const signature = await signPayload(svixId, timestamp, body);
@@ -20,7 +20,7 @@ describe("verifySvixSignature", () => {
   });
 
   it("returns false for an invalid signature", async () => {
-    const body = JSON.stringify({ _id: "doc-1", _type: "responsibilityPath" });
+    const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const headers = new Headers({
       "svix-id": "msg_abc123",
       "svix-timestamp": String(Math.floor(Date.now() / 1000)),

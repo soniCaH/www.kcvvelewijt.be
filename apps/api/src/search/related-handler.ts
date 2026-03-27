@@ -19,7 +19,7 @@ export const handleRelated = (request: {
 
     return matches
       .filter((m) => m.id !== request.id)
-      .filter((m) => m.metadata?.["type"] !== "responsibilityPath")
+      .filter((m) => m.metadata?.["type"] !== "responsibility")
       .slice(0, request.limit)
       .map((m) => {
         const rawType = m.metadata?.["type"];

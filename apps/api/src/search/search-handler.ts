@@ -10,7 +10,7 @@ export const LLM_SCORE_THRESHOLD = 0.5;
 export type SearchError = EmbeddingError | VectorizeError;
 
 const TYPE_FILTER: Record<string, string> = {
-  responsibility: "responsibilityPath",
+  responsibility: "responsibility",
   article: "article",
   general: "page",
 };
@@ -44,8 +44,8 @@ export const handleSearch = (
       .map((m) => ({
         id: m.id,
         slug: m.metadata?.["slug"] ?? "",
-        type: (m.metadata?.["type"] ?? "responsibilityPath") as
-          | "responsibilityPath"
+        type: (m.metadata?.["type"] ?? "responsibility") as
+          | "responsibility"
           | "article"
           | "page",
         score: m.score,

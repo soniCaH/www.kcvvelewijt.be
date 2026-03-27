@@ -7,7 +7,7 @@ import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
 export const RESPONSIBILITY_PATHS_QUERY =
-  defineQuery(`*[_type == "responsibilityPath" && active == true] | order(title asc) {
+  defineQuery(`*[_type == "responsibility" && active == true] | order(title asc) {
   "id": slug.current,
   "role": audience,
   question,

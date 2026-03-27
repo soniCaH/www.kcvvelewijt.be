@@ -94,7 +94,7 @@ describe("runSanityIndexSync", () => {
     const doc = upserted.find((v) => v.id === "sanity-abc-123");
     expect(doc).toBeDefined();
     expect(doc!.metadata["slug"]).toBe("kantine-evenementen");
-    expect(doc!.metadata["type"]).toBe("responsibilityPath");
+    expect(doc!.metadata["type"]).toBe("responsibility");
     expect(doc!.values).toEqual(FAKE_VECTOR);
   });
 

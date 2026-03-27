@@ -23,7 +23,7 @@ export const WithResults: Story = {
           {
             id: "doc-def",
             slug: "blessure-melden",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.85,
             title: "Blessure melden",
             excerpt: "Hoe meld je een blessure bij de club?",
@@ -31,7 +31,7 @@ export const WithResults: Story = {
           {
             id: "doc-ghi",
             slug: "verzekering-aanvragen",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.78,
             title: "Verzekering aanvragen",
             excerpt: "Stappen voor het aanvragen van een sportverz...",
@@ -85,7 +85,7 @@ export const AllSameType: Story = {
           {
             id: "doc-r1",
             slug: "stap-1",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.88,
             title: "Stap 1: Aanmelden",
             excerpt: "Hoe meld je je aan?",
@@ -93,7 +93,7 @@ export const AllSameType: Story = {
           {
             id: "doc-r2",
             slug: "stap-2",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.82,
             title: "Stap 2: Documenten",
             excerpt: "Welke documenten heb je nodig?",
@@ -101,7 +101,7 @@ export const AllSameType: Story = {
           {
             id: "doc-r3",
             slug: "stap-3",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.76,
             title: "Stap 3: Betaling",
             excerpt: "Hoe betaal je het lidgeld?",
@@ -124,7 +124,7 @@ export const MaxResults: Story = {
           {
             id: "doc-m1",
             slug: "blessure-melden",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.92,
             title: "Blessure melden",
             excerpt: "Hoe meld je een blessure bij de club?",
@@ -140,7 +140,7 @@ export const MaxResults: Story = {
           {
             id: "doc-m3",
             slug: "verzekering",
-            type: "responsibilityPath",
+            type: "responsibility",
             score: 0.78,
             title: "Verzekering aanvragen",
             excerpt: "Stappen voor sportverzekeringsaanvraag",

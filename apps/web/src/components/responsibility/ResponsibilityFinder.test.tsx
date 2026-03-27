@@ -24,7 +24,7 @@ function mockSearchReturning(paths: ResponsibilityPath[]) {
       results: paths.map((p) => ({
         id: p.id,
         slug: p.id,
-        type: "responsibilityPath" as const,
+        type: "responsibility" as const,
         score: 0.9,
         title: p.question,
         excerpt: p.summary,
