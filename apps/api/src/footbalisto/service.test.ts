@@ -108,7 +108,7 @@ const rawDetailResponse = {
     awayClub: { id: 456, name: "Opponent FC" },
     goalsHomeTeam: 2,
     goalsAwayTeam: 0,
-    competitionType: "3de Nationale",
+    competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
     viewGameReport: true,
     status: 0,
   },
@@ -565,7 +565,7 @@ describe("FootbalistoService.getMatchDetail", () => {
     const leagueDetailResponse = {
       general: {
         ...rawDetailResponse.general,
-        competitionType: "LEAGUE",
+        competitionType: { id: 1, name: null, type: "LEAGUE" },
       },
     };
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
