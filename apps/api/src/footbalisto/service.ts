@@ -16,6 +16,7 @@ import {
   type RankingEntry,
   type CardType,
   type OpponentHistory,
+  type MatchEvent,
 } from "@kcvv/api-contract";
 import {
   PsdSeason,
@@ -249,6 +250,77 @@ function buildPlayerCardMap(
   return cardMap;
 }
 
+function transformMatchEvent(
+  event: FootbalistoMatchEvent,
+  index: number,
+  homeClubId: number,
+  awayClubId: number,
+): MatchEvent | null {
+  const actionType = event.action.type.toUpperCase();
+  const subtype = event.action.subtype?.toLowerCase() ?? null;
+  const minute = event.minute;
+
+  if (minute == null) return null;
+
+  const team: "home" | "away" | null =
+    event.clubId === homeClubId
+      ? "home"
+      : event.clubId === awayClubId
+        ? "away"
+        : null; // clubId unknown — skip event
+
+  if (team === null) return null;
+
+  const id = event.action.id ?? index;
+
+  if (actionType === "GOAL") {
+    const isPenalty =
+      subtype === "penalty" || subtype === "strafschop" || undefined;
+    const isOwnGoal =
+      subtype === "own_goal" ||
+      subtype === "owngoal" ||
+      subtype === "eigen" ||
+      undefined;
+    return {
+      id,
+      type: "goal",
+      minute,
+      team,
+      player: event.playerName ?? undefined,
+      isPenalty: isPenalty || undefined,
+      isOwnGoal: isOwnGoal || undefined,
+    };
+  }
+
+  if (actionType === "CARD") {
+    const cardType = parseCardType(event);
+    if (!cardType) return null;
+    const type: MatchEvent["type"] =
+      cardType === "red" || cardType === "double_yellow"
+        ? "red_card"
+        : "yellow_card";
+    return {
+      id,
+      type,
+      minute,
+      team,
+      player: event.playerName ?? undefined,
+    };
+  }
+
+  if (actionType === "SUBSTITUTION") {
+    return {
+      id,
+      type: "substitution",
+      minute,
+      team,
+      playerOut: event.playerName ?? undefined,
+    };
+  }
+
+  return null;
+}
+
 function transformPlayerWithCard(
   player: FootbalistoLineupPlayer,
   cardMap: Map<number, CardType> | null,
@@ -289,6 +361,16 @@ function transformFootbalistoMatchDetail(
     };
   }
 
+  let events: MatchEvent[] | undefined;
+  if (response.events) {
+    const transformed = response.events
+      .map((e, i) =>
+        transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
+      )
+      .filter((e): e is MatchEvent => e !== null);
+    events = transformed;
+  }
+
   return mapGameStatus(
     general.status,
     general.goalsHomeTeam,
@@ -315,6 +397,7 @@ function transformFootbalistoMatchDetail(
       status,
       competition: resolveCompetitionLabel(general.competitionType),
       lineup,
+      events,
       hasReport: general.viewGameReport,
     })),
   );

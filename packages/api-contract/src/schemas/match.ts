@@ -81,9 +81,32 @@ export class MatchLineup extends S.Class<MatchLineup>("MatchLineup")({
   away: S.Array(MatchLineupPlayer),
 }) {}
 
-/** Normalized match detail (extended Match with lineup) */
+/** Event type for match events */
+export const MatchEventType = S.Literal(
+  "goal",
+  "yellow_card",
+  "red_card",
+  "substitution",
+);
+export type MatchEventType = S.Schema.Type<typeof MatchEventType>;
+
+/** Normalized match event for UI consumption */
+export class MatchEvent extends S.Class<MatchEvent>("MatchEvent")({
+  id: S.Number,
+  type: MatchEventType,
+  minute: S.Number,
+  team: S.Literal("home", "away"),
+  player: S.optional(S.String),
+  playerIn: S.optional(S.String),
+  playerOut: S.optional(S.String),
+  isPenalty: S.optional(S.Boolean),
+  isOwnGoal: S.optional(S.Boolean),
+}) {}
+
+/** Normalized match detail (extended Match with lineup and events) */
 export class MatchDetail extends S.Class<MatchDetail>("MatchDetail")({
   ...BaseMatchFields,
   lineup: S.optional(MatchLineup),
+  events: S.optional(S.Array(MatchEvent)),
   hasReport: S.Boolean,
 }) {}

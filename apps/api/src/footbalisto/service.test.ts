@@ -966,6 +966,288 @@ describe("FootbalistoService.getMatchDetail", () => {
   });
 });
 
+const rawDetailWithGoal = {
+  general: {
+    id: 123,
+    date: "2025-03-15 15:00",
+    homeClub: { id: 100, name: "KCVV Elewijt" },
+    awayClub: { id: 200, name: "Opponent FC" },
+    goalsHomeTeam: 1,
+    goalsAwayTeam: 0,
+    competitionType: "3de Nationale",
+    viewGameReport: false,
+    status: 0,
+  },
+  events: [
+    {
+      action: { type: "GOAL", subtype: null, id: 10 },
+      minute: 23,
+      playerId: 55,
+      playerName: "De Smet",
+      clubId: 100,
+    },
+  ],
+};
+
+describe("FootbalistoService.getMatchDetail - events", () => {
+  it("includes normalized goal event from PSD events array", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events).toHaveLength(1);
+      expect(result.right.events![0]?.type).toBe("goal");
+      expect(result.right.events![0]?.minute).toBe(23);
+      expect(result.right.events![0]?.team).toBe("home");
+      expect(result.right.events![0]?.player).toBe("De Smet");
+      expect(result.right.events![0]?.id).toBe(10);
+    }
+  });
+
+  it("assigns team='away' when clubId matches awayClub", async () => {
+    const awayGoal = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "GOAL", subtype: null, id: 11 },
+          minute: 60,
+          playerId: 77,
+          playerName: "Jansen",
+          clubId: 200,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => awayGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.team).toBe("away");
+    }
+  });
+
+  it("marks isPenalty=true for penalty goal", async () => {
+    const penaltyGoal = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "GOAL", subtype: "penalty", id: 12 },
+          minute: 45,
+          playerName: "Martens",
+          clubId: 100,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => penaltyGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.isPenalty).toBe(true);
+      expect(result.right.events![0]?.isOwnGoal).toBeUndefined();
+    }
+  });
+
+  it("marks isOwnGoal=true for own goal", async () => {
+    const ownGoal = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "GOAL", subtype: "own_goal", id: 13 },
+          minute: 72,
+          playerName: "Pieters",
+          clubId: 200,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ownGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.isOwnGoal).toBe(true);
+      expect(result.right.events![0]?.isPenalty).toBeUndefined();
+    }
+  });
+
+  it("transforms yellow card event", async () => {
+    const yellowCard = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "CARD", subtype: "yellow", id: 20 },
+          minute: 35,
+          playerName: "Claes",
+          clubId: 100,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => yellowCard,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.type).toBe("yellow_card");
+      expect(result.right.events![0]?.minute).toBe(35);
+      expect(result.right.events![0]?.player).toBe("Claes");
+    }
+  });
+
+  it("transforms red card event (direct red)", async () => {
+    const redCard = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "CARD", subtype: "red", id: 21 },
+          minute: 80,
+          playerName: "Dubois",
+          clubId: 200,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => redCard,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.type).toBe("red_card");
+      expect(result.right.events![0]?.team).toBe("away");
+    }
+  });
+
+  it("transforms double-yellow (tweede geel) as red_card", async () => {
+    const doubleYellow = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "CARD", subtype: "tweedegeel", id: 22 },
+          minute: 88,
+          playerName: "Vermeersch",
+          clubId: 100,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => doubleYellow,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.type).toBe("red_card");
+    }
+  });
+
+  it("transforms substitution event with playerOut", async () => {
+    const substitution = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "SUBSTITUTION", subtype: null, id: 30 },
+          minute: 65,
+          playerName: "Goossens",
+          clubId: 100,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => substitution,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events![0]?.type).toBe("substitution");
+      expect(result.right.events![0]?.playerOut).toBe("Goossens");
+      expect(result.right.events![0]?.minute).toBe(65);
+    }
+  });
+
+  it("skips events with unknown action type", async () => {
+    const unknownEvent = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "UNKNOWN_ACTION", subtype: null, id: 99 },
+          minute: 50,
+          playerName: "Mystery",
+          clubId: 100,
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => unknownEvent,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events).toHaveLength(0);
+    }
+  });
+
+  it("returns undefined events when PSD provides no events", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailResponse,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events).toBeUndefined();
+    }
+  });
+
+  it("validates MatchDetail with events against api-contract schema", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(() =>
+        S.decodeUnknownSync(MatchDetail)(result.right),
+      ).not.toThrow();
+    }
+  });
+});
+
 describe("mapGameStatus", () => {
   it("returns an Effect that resolves to the correct status", async () => {
     const result = await Effect.runPromise(mapGameStatus(0, 3, 1));
