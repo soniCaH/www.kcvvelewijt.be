@@ -149,23 +149,26 @@ export default async function MatchPage({
         hasReport={match.hasReport}
         backUrl={backUrl ?? undefined}
       />
-      {/* Opponent history links */}
-      <div className="container mx-auto max-w-3xl px-4 pb-8">
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href={`/tegenstander/${match.home_team.id}`}
-            className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
-          >
-            Historiek vs {match.home_team.name}
-          </Link>
-          <Link
-            href={`/tegenstander/${match.away_team.id}`}
-            className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
-          >
-            Historiek vs {match.away_team.name}
-          </Link>
-        </div>
-      </div>
+      {/* Opponent history link — only rendered when home/away is known */}
+      {(() => {
+        const opponent =
+          match.is_home === true
+            ? match.away_team
+            : match.is_home === false
+              ? match.home_team
+              : null;
+        if (!opponent) return null;
+        return (
+          <div className="container mx-auto max-w-3xl px-4 pb-8">
+            <Link
+              href={`/tegenstander/${opponent.id}`}
+              className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
+            >
+              Historiek vs {opponent.name}
+            </Link>
+          </div>
+        );
+      })()}
     </>
   );
 }
