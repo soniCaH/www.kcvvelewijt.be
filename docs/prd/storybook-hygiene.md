@@ -117,3 +117,5 @@ Phase 6 (blocked): Will require new `MatchEvent` schema in `packages/api-contrac
 ## 8. Discovered unknowns section (filled during implementation)
 
 _(empty — to be filled during implementation)_
+
+- [2026-03-27] Discovered: PSD /games/{id}/info exposes events[] with goal/card/substitution actions. Goals: action.type=GOAL with subtype (penalty, own_goal). Cards: CARD with subtype (yellow/geel, red/rood, tweedegeel). Substitutions: SUBSTITUTION with playerName=player going out. clubId field identifies team. double_yellow mapped to red_card in normalized schema. Events with null/missing clubId skipped. → resolved inline
