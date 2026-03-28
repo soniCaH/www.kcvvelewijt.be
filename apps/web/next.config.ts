@@ -64,6 +64,12 @@ const nextConfig: NextConfig = {
         destination: "/club/inschrijven",
         permanent: true,
       },
+      // #1002 — Dutch URL for staff member detail pages
+      {
+        source: "/staff/:slug",
+        destination: "/staf/:slug",
+        permanent: true,
+      },
     ];
   },
 

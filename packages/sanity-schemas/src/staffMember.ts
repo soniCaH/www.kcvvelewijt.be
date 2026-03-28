@@ -103,7 +103,7 @@ export const staffMember = defineType({
       name: 'roleCode',
       title: 'Korte functiecode',
       type: 'string',
-      description: 'Badge in het diagram, bv. "T1", "VP", "JC". Max 6 tekens. Gesynchroniseerd vanuit PSD voor trainers.',
+      description: 'Badge in het diagram, bv. "T1", "VP", "JC". Max 6 tekens. Bij sync wordt de PSD functionTitle (bv. "Keeperstrainer") automatisch afgekorte tot deze code — sla de afkorting op, niet de volledige titel.',
       validation: (Rule) => Rule.max(6),
       hidden: ({document}) => !document?.inOrganigram,
     }),
@@ -119,8 +119,8 @@ export const staffMember = defineType({
       name: 'psdId',
       title: 'PSD ID',
       type: 'string',
-      description:
-        'Set by PSD sync (GET /teams/{id}/staff). When synced, role is mapped from PSD functionTitle (free-text, e.g. "Keeperstrainer", "T2").',
+      description: 'Set by PSD sync (GET /teams/{id}/staff). Unique identifier used as the public slug. Read-only — managed by sync only.',
+      readOnly: true,
     }),
     defineField({
       name: 'archived',

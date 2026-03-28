@@ -1411,6 +1411,72 @@ export type STAFF_MEMBERS_QUERY_RESULT = Array<{
   parentId: string | null;
 }>;
 
+// Source: ../web/src/lib/repositories/staff.repository.ts
+// Variable: STAFF_MEMBER_BY_PSD_ID_QUERY
+// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"}
+export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
+  _id: string;
+  psdId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  role:
+    | "hoofdtrainer"
+    | "assistent"
+    | "keeperstrainer"
+    | "tvjo"
+    | "ploegdelegatie"
+    | "afgevaardigde"
+    | "coach"
+    | "voorzitter"
+    | "ondervoorzitter"
+    | "secretaris"
+    | "penningmeester"
+    | "jeugdcoordinator"
+    | "jeugdsecretaris"
+    | "technisch-coordinator"
+    | "sportief-verantwoordelijke"
+    | "sponsoring-verantwoordelijke"
+    | "verzekering-verantwoordelijke"
+    | "evenementen-coordinator"
+    | "pr-verantwoordelijke"
+    | "kantine-verantwoordelijke"
+    | "webmaster"
+    | "bestuur"
+    | "other"
+    | null;
+  roleLabel: string | null;
+  department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+  email: string | null;
+  phone: string | null;
+  bio: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  photoUrl: string | null;
+} | null;
+
+// Source: ../web/src/lib/repositories/staff.repository.ts
+// Variable: STAFF_MEMBERS_PSDID_QUERY
+// Query: *[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {  _id, psdId}
+export type STAFF_MEMBERS_PSDID_QUERY_RESULT = Array<{
+  _id: string;
+  psdId: string | null;
+}>;
+
 // Source: ../web/src/lib/repositories/team.repository.ts
 // Variable: TEAMS_QUERY
 // Query: *[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,  tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
@@ -1597,6 +1663,8 @@ declare module "@sanity/client" {
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  roleLabel,\n  roleCode,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
+    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;
