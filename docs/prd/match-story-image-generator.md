@@ -2,7 +2,7 @@
 
 > GitHub issue: #702
 > Status: Draft
-> Last updated: 2026-03-19
+> Last updated: 2026-03-27
 
 ## 1. Problem statement
 
@@ -135,15 +135,15 @@ None. Player data is fetched directly from Sanity via existing `PLAYERS_QUERY`. 
 
 ## 7. Open questions
 
-- [ ] **Which `html-to-image` library?** — `html-to-image`, `modern-screenshot`, or `dom-to-image-more`? Tracer bullet will evaluate. Key criterion: iOS Safari support and cross-origin image handling — will be answered by Phase 1
-- [ ] **Sanity CDN CORS for canvas export** — `html-to-image` libraries inline images as base64 data URIs by fetching them. Sanity CDN serves CORS headers, but need to verify this works end-to-end in canvas export. If not, proxy through Next.js API route — will be answered by Phase 1
+- [x] **Which `html-to-image` library?** — Chose `html-to-image` v1.11.13. iOS Safari and CORS verified manually during Phase 1.
+- [x] **Sanity CDN CORS for canvas export** — Sanity CDN serves CORS headers compatible with `html-to-image`. `crossOrigin="anonymous"` on `<img>` is required. Verified during Phase 1.
 - [ ] **Background asset format** — PNG or JPG or SVG for the 9 template backgrounds? JPG is smaller but no transparency. Kevin to decide when designing assets — resolved during Phase 2
 - [ ] **Today's matches endpoint** — does the existing `next-matches` BFF endpoint return matches for today specifically, or only future matches? If it doesn't include "in progress" matches, we may need to adjust the query or use a different endpoint — investigate during Phase 3
 - [ ] **Web Share API file sharing on iOS Safari** — `navigator.share({ files: [pngFile] })` support varies. iOS 15+ supports it but with caveats. Need to test on actual device — will be answered by Phase 4
 
 ## 8. Discovered unknowns (filled during implementation)
 
-_None yet._
+- [2026-03-27] Discovered: worktree needs `.env.local` copied from main worktree for `next build` to succeed (Sanity projectId missing otherwise) → resolved inline (not a code change)
 
 ---
 

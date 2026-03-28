@@ -1,0 +1,7 @@
+export const CAPTURE_WIDTH = 1080;
+export const CAPTURE_HEIGHT = 1920;
+
+export const TEMPLATE_SCALE = 0.25;
+
+export const PREVIEW_WIDTH = CAPTURE_WIDTH * TEMPLATE_SCALE; // 270
+export const PREVIEW_HEIGHT = CAPTURE_HEIGHT * TEMPLATE_SCALE; // 480
