@@ -45,7 +45,7 @@ export function SponsorsPage({
 
       <p
         data-testid="sponsors-intro"
-        className="max-w-2xl mx-auto px-4 py-6 text-center text-gray-600 text-lg"
+        className="max-w-2xl mx-auto px-4 py-6 text-center text-kcvv-gray text-lg"
       >
         KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
         Dankzij onze sponsors kunnen we blijven investeren in onze club, onze

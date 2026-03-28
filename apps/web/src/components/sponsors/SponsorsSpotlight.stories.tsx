@@ -64,7 +64,13 @@ export const ManualNavigation: Story = {
 /** Single sponsor — no navigation dots shown. */
 export const SingleSponsor: Story = {
   args: {
-    sponsors: [mockSpotlight[0] ?? mockSpotlight[0]],
+    sponsors: [
+      mockSpotlight[0] ?? {
+        id: "placeholder",
+        name: "Placeholder Sponsor",
+        logo: "",
+      },
+    ],
   },
 };
 
