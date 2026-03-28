@@ -61,6 +61,14 @@ MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) withou
 | Foundation docs   | `src/stories/foundation/`                                                     |
 | Design tokens     | `src/app/globals.css` (`@theme {}`)                                           |
 
+## Effect & Server Component Patterns
+
+- **Never wrap `runPromise` in try/catch in Server Components.** Effect errors must bubble to the Next.js error boundary. The only permitted exception is converting `HttpNotFound` to `notFound()` via `Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound()))`.
+- **Use `Effect.catchTag("HttpNotFound")`, not `Effect.catchAll`.** When fetching multiple items in `Effect.all`, only 404s should be silently treated as "failed". `Effect.catchAll` masks real upstream errors (503s, network failures) as empty results — document the reason if a broader catch is ever necessary.
+- **The BFF owns all aggregated and derived values.** Summaries (W/D/L, goalsFor/Against), enriched flags (`is_home`), and labels (`kcvv_team_label`) are computed by the BFF. Never re-derive them in a Server Component — the preconditions (enrichment ordering, status guards) are already enforced by the BFF and cannot be replicated safely on the page.
+- **Sort before you pick.** Any derivation of "most recent" or "best" record must reference the sorted array. Place all sort operations before any logic that depends on ordering.
+- **Test fixtures for "use newest record" must have distinguishable field values.** If a test validates that the most-recent match is used, the older fixture record must have a detectably different value (e.g. different name or logo) — identical values make sort-order bugs invisible.
+
 ## Analytics Checklist for New Features
 
 Every new user-facing feature or page **must** include an analytics section. Before closing any issue that adds interactive UI, verify:
