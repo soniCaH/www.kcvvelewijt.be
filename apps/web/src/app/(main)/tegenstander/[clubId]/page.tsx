@@ -48,28 +48,6 @@ function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
   return "draw";
 }
 
-function computeCombinedSummary(matches: Match[]): OpponentHistory["summary"] {
-  let wins = 0,
-    draws = 0,
-    losses = 0,
-    goalsFor = 0,
-    goalsAgainst = 0;
-  for (const m of matches) {
-    if (m.status !== "finished") continue;
-    const homeScore = m.home_team.score;
-    const awayScore = m.away_team.score;
-    if (homeScore == null || awayScore == null || m.is_home == null) continue;
-    const kcvvGoals = m.is_home ? homeScore : awayScore;
-    const oppGoals = m.is_home ? awayScore : homeScore;
-    goalsFor += kcvvGoals;
-    goalsAgainst += oppGoals;
-    if (kcvvGoals > oppGoals) wins++;
-    else if (kcvvGoals < oppGoals) losses++;
-    else draws++;
-  }
-  return { wins, draws, losses, goalsFor, goalsAgainst };
-}
-
 const resultBorderClass: Record<"win" | "draw" | "loss", string> = {
   win: "border-l-4 border-l-kcvv-success",
   draw: "border-l-4 border-l-kcvv-warning",
@@ -116,18 +94,35 @@ async function fetchOpponentData(clubId: number): Promise<{
       // Aggregate matches from all teams (flatten)
       const allMatches = successful.flatMap((h) => h.matches);
 
-      const { wins, draws, losses, goalsFor, goalsAgainst } =
-        computeCombinedSummary(allMatches);
+      // Use BFF-computed summaries directly — avoids re-deriving is_home on the client
+      const wins = successful.reduce((sum, h) => sum + h.summary.wins, 0);
+      const draws = successful.reduce((sum, h) => sum + h.summary.draws, 0);
+      const losses = successful.reduce((sum, h) => sum + h.summary.losses, 0);
+      const goalsFor = successful.reduce(
+        (sum, h) => sum + h.summary.goalsFor,
+        0,
+      );
+      const goalsAgainst = successful.reduce(
+        (sum, h) => sum + h.summary.goalsAgainst,
+        0,
+      );
 
       // Sort all matches descending by date
       const sortedMatches = [...allMatches].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
 
-      const firstHistory = successful[0]!;
+      // Derive opponent metadata from the most recent match (newest logo/name)
+      const newestMatch = sortedMatches[0];
+      const opponentTeam = newestMatch
+        ? newestMatch.home_team.id === clubId
+          ? newestMatch.home_team
+          : newestMatch.away_team
+        : null;
+      const fallback = successful[0]!;
       return {
-        opponentName: firstHistory.opponent.name,
-        opponentLogo: firstHistory.opponent.logo,
+        opponentName: opponentTeam?.name ?? fallback.opponent.name,
+        opponentLogo: opponentTeam?.logo ?? fallback.opponent.logo,
         summary: { wins, draws, losses, goalsFor, goalsAgainst },
         matches: sortedMatches,
       };

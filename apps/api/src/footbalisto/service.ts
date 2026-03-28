@@ -25,6 +25,7 @@ import {
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
   PsdGame,
+  type PsdCompetitionType,
   type FootbalistoLineupPlayer,
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
@@ -55,6 +56,26 @@ export function mapCompetitionLabel(
     default:
       return type;
   }
+}
+
+/**
+ * Resolve a PSD competitionType field (object, plain string, or null/undefined)
+ * to a Dutch display label. Returns undefined when no competition info is available.
+ *
+ * Needed because:
+ * - /games/team/{id}/seasons/{id} returns an object { id, name, type }
+ * - /match/{id}/general sometimes returns a plain string (e.g. "Competitie")
+ * - Both endpoints may return null when no competition is assigned
+ *
+ * Note: `typeof null === "object"` in JavaScript, so a null check must come
+ * before the typeof guard.
+ */
+function resolveCompetitionLabel(
+  ct: PsdCompetitionType | string | null | undefined,
+): string | undefined {
+  if (ct == null) return undefined;
+  if (typeof ct === "string") return mapCompetitionLabel(ct, undefined);
+  return mapCompetitionLabel(ct.type ?? "UNKNOWN", ct.name);
 }
 
 /**
@@ -155,14 +176,7 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
         score: game.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: mapCompetitionLabel(
-        typeof game.competitionType === "string"
-          ? game.competitionType
-          : (game.competitionType?.type ?? "UNKNOWN"),
-        typeof game.competitionType === "string"
-          ? undefined
-          : game.competitionType?.name,
-      ),
+      competition: resolveCompetitionLabel(game.competitionType),
       kcvv_team_id: game.teamId ?? undefined,
       is_home: isHome,
     })),
@@ -299,14 +313,7 @@ function transformFootbalistoMatchDetail(
         score: general.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: mapCompetitionLabel(
-        typeof general.competitionType === "object"
-          ? (general.competitionType?.type ?? "UNKNOWN")
-          : (general.competitionType ?? "UNKNOWN"),
-        typeof general.competitionType === "object"
-          ? general.competitionType?.name
-          : undefined,
-      ),
+      competition: resolveCompetitionLabel(general.competitionType),
       lineup,
       hasReport: general.viewGameReport,
     })),
@@ -851,19 +858,19 @@ export const FootbalistoServiceLive = Layer.effect(
             kcvv_team_label: kcvvTeamLabel,
           }));
 
-          // Derive opponent info from the first match containing club
-          const firstMatch = enrichedMatches[0]!;
-          const opponentClub =
-            firstMatch.home_team.id === clubId
-              ? firstMatch.home_team
-              : firstMatch.away_team;
-
           const summary = computeOpponentSummary(enrichedMatches);
 
           // Sort descending by date (most recent first)
           const sortedMatches = [...enrichedMatches].sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
+
+          // Derive opponent info from the most recent match (newest logo/name)
+          const mostRecentMatch = sortedMatches[0]!;
+          const opponentClub =
+            mostRecentMatch.home_team.id === clubId
+              ? mostRecentMatch.home_team
+              : mostRecentMatch.away_team;
 
           return {
             opponent: {

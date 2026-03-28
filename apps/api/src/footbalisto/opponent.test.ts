@@ -191,6 +191,10 @@ describe("FootbalistoService.getOpponentHistory", () => {
       expect(history.matches[0]!.is_home).toBe(false); // KCVV away in match 201
       expect(history.matches[1]!.is_home).toBe(true); // KCVV home in match 101
 
+      // kcvv_team_label derived from the /teams mock: name "KCVV Elewijt", age "A" → "A-Ploeg"
+      expect(history.matches[0]!.kcvv_team_label).toBe("A-Ploeg");
+      expect(history.matches[1]!.kcvv_team_label).toBe("A-Ploeg");
+
       // Schema validation
       expect(() => S.decodeUnknownSync(OpponentHistory)(history)).not.toThrow();
     }
@@ -284,6 +288,29 @@ describe("FootbalistoService.getOpponentHistory", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("UpstreamUnavailable");
       expect((result.left as UpstreamUnavailableError).status).toBe(503);
+    }
+  });
+
+  it("still returns opponent history when /teams fetch fails (best-effort fallback)", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
+      .mockResolvedValueOnce({ ok: true, json: async () => season1Matches })
+      // /teams fails
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+
+    const result = await runService((svc) => svc.getOpponentHistory(1, 456));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // History is returned despite the /teams failure
+      expect(result.right.matches).toHaveLength(1);
+      expect(result.right.matches[0]!.id).toBe(101);
+      // kcvv_team_label is undefined — best-effort failed gracefully
+      expect(result.right.matches[0]!.kcvv_team_label).toBeUndefined();
     }
   });
 
