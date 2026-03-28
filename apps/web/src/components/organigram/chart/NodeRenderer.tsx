@@ -30,7 +30,9 @@ export interface NodeData extends OrgChartNode {
  * @returns An HTML string representing the rendered node card
  */
 export function renderNode(node: NodeData, hasChildren: boolean): string {
-  const imageUrl = node.imageUrl || "/images/logo-flat.png";
+  const primaryMember = node.members[0];
+  const imageUrl = primaryMember?.imageUrl || "/images/logo-flat.png";
+  const displayName = primaryMember?.name ?? node.title;
   const isExpanded = node._expanded !== false;
 
   return `
@@ -62,7 +64,7 @@ export function renderNode(node: NodeData, hasChildren: boolean): string {
         <div style="flex-shrink: 0;">
           <img
             src="${imageUrl}"
-            alt="${node.name}"
+            alt="${displayName}"
             style="
               width: 64px;
               height: 64px;
@@ -92,7 +94,7 @@ export function renderNode(node: NodeData, hasChildren: boolean): string {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-          ">${node.name}</div>
+          ">${displayName}</div>
 
           <!-- Title -->
           <div style="
@@ -171,7 +173,9 @@ export function renderCompactNode(
   node: NodeData,
   hasChildren: boolean,
 ): string {
-  const imageUrl = node.imageUrl || "/images/logo-flat.png";
+  const primaryMember = node.members[0];
+  const imageUrl = primaryMember?.imageUrl || "/images/logo-flat.png";
+  const displayName = primaryMember?.name ?? node.title;
   const isExpanded = node._expanded !== false;
 
   return `
@@ -203,7 +207,7 @@ export function renderCompactNode(
         <div style="flex-shrink: 0;">
           <img
             src="${imageUrl}"
-            alt="${node.name}"
+            alt="${displayName}"
             style="
               width: 48px;
               height: 48px;
@@ -233,7 +237,7 @@ export function renderCompactNode(
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-          ">${node.name}</div>
+          ">${displayName}</div>
 
           <!-- Title (single line) -->
           <div style="

@@ -61,12 +61,12 @@ export function SearchBar({
       let score = 0;
       const matchedFields: string[] = [];
 
-      // Search in name
-      if (member.name.toLowerCase().includes(query)) {
+      // Search in member names
+      const primaryName = member.members[0]?.name ?? "";
+      if (primaryName.toLowerCase().includes(query)) {
         score += 10;
         matchedFields.push("name");
-        // Boost score if match is at start
-        if (member.name.toLowerCase().startsWith(query)) {
+        if (primaryName.toLowerCase().startsWith(query)) {
           score += 5;
         }
       }
@@ -83,8 +83,8 @@ export function SearchBar({
         matchedFields.push("position");
       }
 
-      // Search in email
-      if (member.email?.toLowerCase().includes(query)) {
+      // Search in member emails
+      if (member.members.some((m) => m.email?.toLowerCase().includes(query))) {
         score += 5;
         matchedFields.push("email");
       }
@@ -270,9 +270,9 @@ export function SearchBar({
             >
               {/* Profile Image or Initials */}
               <div className="w-10 h-10 rounded-full bg-kcvv-green/20 flex items-center justify-center text-kcvv-green font-semibold text-sm flex-shrink-0">
-                {result.member.name
+                {(result.member.members[0]?.name ?? result.member.title)
                   .split(" ")
-                  .map((n) => n[0])
+                  .map((n: string) => n[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()}
@@ -281,7 +281,7 @@ export function SearchBar({
               {/* Text Content */}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-kcvv-gray-blue text-sm truncate">
-                  {result.member.name}
+                  {result.member.members[0]?.name ?? result.member.title}
                 </div>
                 <div className="text-xs text-kcvv-gray-dark truncate">
                   {result.member.title}

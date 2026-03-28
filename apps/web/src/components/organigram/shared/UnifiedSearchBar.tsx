@@ -99,8 +99,8 @@ function searchMembers(
     let score = 0;
     const matchedFields: string[] = [];
 
-    // Name match (highest priority)
-    if (member.name.toLowerCase().includes(lowerQuery)) {
+    // Name match (highest priority — search across all linked members)
+    if (member.members.some((m) => m.name.toLowerCase().includes(lowerQuery))) {
       score += 50;
       matchedFields.push("Naam");
     }
@@ -118,7 +118,9 @@ function searchMembers(
     }
 
     // Email match
-    if (member.email?.toLowerCase().includes(lowerQuery)) {
+    if (
+      member.members.some((m) => m.email?.toLowerCase().includes(lowerQuery))
+    ) {
       score += 15;
       matchedFields.push("Email");
     }
@@ -351,7 +353,7 @@ export function UnifiedSearchBar({
   const handleSelect = (result: SearchResult) => {
     if (result.type === "member") {
       onSelectMember?.(result.member);
-      onChange(result.member.name);
+      onChange(result.member.members[0]?.name ?? result.member.title);
     } else {
       onSelectResponsibility?.(result.path);
       onChange(result.path.question);
@@ -432,7 +434,10 @@ export function UnifiedSearchBar({
 
             if (result.type === "member") {
               const { member, matchedFields } = result;
-              const imageUrl = member.imageUrl || "/images/logo-flat.png";
+              const primaryMember = member.members[0];
+              const imageUrl =
+                primaryMember?.imageUrl || "/images/logo-flat.png";
+              const displayName = primaryMember?.name ?? member.title;
 
               return (
                 <button
@@ -452,7 +457,7 @@ export function UnifiedSearchBar({
                   <div className="flex-shrink-0 w-10 h-10 rounded-full border-2 border-kcvv-green overflow-hidden bg-white">
                     <Image
                       src={imageUrl}
-                      alt={member.name}
+                      alt={displayName}
                       width={40}
                       height={40}
                       className="w-full h-full object-cover"
@@ -469,7 +474,7 @@ export function UnifiedSearchBar({
                         className="text-kcvv-green flex-shrink-0"
                       />
                       <span className="font-semibold text-kcvv-gray-blue">
-                        {member.name}
+                        {displayName}
                       </span>
                     </div>
                     <p className="text-sm text-kcvv-gray truncate">

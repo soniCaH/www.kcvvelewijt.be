@@ -1,6 +1,7 @@
 export {player} from './player'
 export {team, trainingDay} from './team'
 export {staffMember} from './staffMember'
+export {organigramNode} from './organigramNode'
 export {responsibility} from './responsibility'
 export {article} from './article'
 export {articleImage} from './articleImage'
@@ -17,6 +18,7 @@ export {jeugdLandingPage} from './jeugdLandingPage'
 import {player} from './player'
 import {team, trainingDay} from './team'
 import {staffMember} from './staffMember'
+import {organigramNode} from './organigramNode'
 import {responsibility} from './responsibility'
 import {article} from './article'
 import {articleImage} from './articleImage'
@@ -35,6 +37,7 @@ export const schemaTypes = [
   team,
   trainingDay,
   staffMember,
+  organigramNode,
   responsibility,
   article,
   articleImage,

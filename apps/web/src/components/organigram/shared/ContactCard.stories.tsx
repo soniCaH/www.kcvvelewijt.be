@@ -30,7 +30,11 @@ Provides consistent visual design following KCVV design system with:
   },
   tags: ["autodocs"],
   args: {
-    member: { id: "default", name: "Naam", title: "Titel" },
+    member: {
+      id: "default",
+      title: "Titel",
+      members: [{ id: "staff-default", name: "Naam" }],
+    },
     onClick: fn(),
   },
   argTypes: {
@@ -64,47 +68,63 @@ type Story = StoryObj<typeof meta>;
 // Mock Data
 const mockMemberComplete: OrgChartNode = {
   id: "president",
-  name: "Jan Janssens",
   title: "Voorzitter van het Hoofdbestuur",
   roleCode: "PRES",
-  imageUrl:
-    "https://ui-avatars.com/api/?name=Jan+Janssens&background=4acf52&color=fff&size=96",
-  email: "jan.janssens@kcvvelewijt.be",
-  phone: "+32 470 12 34 56",
   department: "hoofdbestuur",
-  responsibilities:
+  description:
     "Leiding geven aan het volledige bestuur, vertegenwoordigen van de club naar buiten toe, strategische beslissingen en algemene coördinatie.",
   parentId: "club",
   _children: [{} as OrgChartNode, {} as OrgChartNode], // Simulate children
+  members: [
+    {
+      id: "staff-president",
+      name: "Jan Janssens",
+      imageUrl:
+        "https://ui-avatars.com/api/?name=Jan+Janssens&background=4acf52&color=fff&size=96",
+      email: "jan.janssens@kcvvelewijt.be",
+      phone: "+32 470 12 34 56",
+    },
+  ],
 };
 
 const mockMemberMinimal: OrgChartNode = {
   id: "member-2",
-  name: "Marie Peeters",
   title: "Secretaris Jeugdbestuur",
   department: "jeugdbestuur",
   parentId: "youth-coordinator",
+  members: [{ id: "staff-member-2", name: "Marie Peeters" }],
 };
 
 const mockMemberNoContact: OrgChartNode = {
   id: "member-3",
-  name: "Tom Vermeulen",
   title: "Trainer U10",
   roleCode: "T-U10",
   department: "jeugdbestuur",
-  imageUrl: "https://ui-avatars.com/api/?name=Tom+Vermeulen&background=random",
   parentId: "u10-coordinator",
+  members: [
+    {
+      id: "staff-member-3",
+      name: "Tom Vermeulen",
+      imageUrl:
+        "https://ui-avatars.com/api/?name=Tom+Vermeulen&background=random",
+    },
+  ],
 };
 
 const mockMemberLongTitle: OrgChartNode = {
   id: "member-4",
-  name: "Els Van de Broek-Vandenberghe",
   title:
     "Coördinator Jeugdwerking en Vrijwilligers voor de Benjamins en Pupillen",
   roleCode: "COORD",
-  email: "els.vandebroek@kcvvelewijt.be",
   department: "jeugdbestuur",
   parentId: "youth",
+  members: [
+    {
+      id: "staff-member-4",
+      name: "Els Van de Broek-Vandenberghe",
+      email: "els.vandebroek@kcvvelewijt.be",
+    },
+  ],
 };
 
 // ==================== DEFAULT STORIES ====================
@@ -206,7 +226,13 @@ export const NoImage: Story = {
   args: {
     member: {
       ...mockMemberComplete,
-      imageUrl: undefined,
+      members: [
+        {
+          id: "staff-noimg",
+          name: "Jan Janssens",
+          email: "jan.janssens@kcvvelewijt.be",
+        },
+      ],
     },
     variant: "detailed",
   },
@@ -332,7 +358,12 @@ export const VeryLongName: Story = {
   args: {
     member: {
       ...mockMemberComplete,
-      name: "Johannesburg Van de Meerschautbroeck-Vandenberghe III",
+      members: [
+        {
+          id: "staff-longname",
+          name: "Johannesburg Van de Meerschautbroeck-Vandenberghe III",
+        },
+      ],
     },
     variant: "detailed",
   },
@@ -342,9 +373,9 @@ export const EmptyMember: Story = {
   args: {
     member: {
       id: "empty",
-      name: "",
       title: "",
       parentId: null,
+      members: [{ id: "staff-empty", name: "" }],
     },
     variant: "detailed",
   },

@@ -128,8 +128,8 @@ export function ExpandableCard({
               "
               aria-label={
                 expanded
-                  ? `Inklappen: ${member.name}`
-                  : `Uitklappen: ${member.name}`
+                  ? `Inklappen: ${member.members[0]?.name ?? member.title}`
+                  : `Uitklappen: ${member.members[0]?.name ?? member.title}`
               }
               aria-expanded={expanded}
             >
@@ -174,7 +174,7 @@ export function ExpandableCard({
               ? renderChildren(directReports, depth + 1)
               : directReports.map((child) => (
                   <div key={child.id} className="text-sm text-kcvv-gray">
-                    {child.name}
+                    {child.members[0]?.name ?? child.title}
                   </div>
                 ))}
           </div>

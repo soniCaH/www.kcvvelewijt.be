@@ -43,7 +43,9 @@ export function ContactCard({
   testId,
   responsibilityCount = 0,
 }: ContactCardProps) {
-  const imageUrl = member.imageUrl || "/images/logo-flat.png";
+  const primaryMember = member.members[0];
+  const imageUrl = primaryMember?.imageUrl || "/images/logo-flat.png";
+  const displayName = primaryMember?.name ?? member.title;
   const hasChildren = member._children && member._children.length > 0;
 
   // Variant-specific classes
@@ -91,7 +93,7 @@ export function ContactCard({
         <div className="flex-shrink-0">
           <Image
             src={imageUrl}
-            alt={member.name}
+            alt={displayName}
             width={imageSize[variant]}
             height={imageSize[variant]}
             className="rounded-full object-cover border-2 border-kcvv-green"
@@ -115,7 +117,7 @@ export function ContactCard({
               fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
             }}
           >
-            {member.name}
+            {displayName}
           </h3>
 
           {/* Title */}
@@ -176,24 +178,24 @@ export function ContactCard({
           {/* Quick Contact Actions (inline) */}
           {showQuickActions &&
             variant !== "compact" &&
-            (member.email || member.phone) && (
+            (primaryMember?.email || primaryMember?.phone) && (
               <div className="flex gap-2 mt-3">
-                {member.email && (
+                {primaryMember?.email && (
                   <a
-                    href={`mailto:${member.email}`}
+                    href={`mailto:${primaryMember.email}`}
                     onClick={(e) => e.stopPropagation()}
                     className="text-xs text-kcvv-green hover:text-kcvv-green-hover hover:underline"
-                    aria-label={`Email ${member.name}`}
+                    aria-label={`Email ${displayName}`}
                   >
                     ✉️ Email
                   </a>
                 )}
-                {member.phone && (
+                {primaryMember?.phone && (
                   <a
-                    href={`tel:${member.phone}`}
+                    href={`tel:${primaryMember.phone}`}
                     onClick={(e) => e.stopPropagation()}
                     className="text-xs text-kcvv-green hover:text-kcvv-green-hover hover:underline"
-                    aria-label={`Call ${member.name}`}
+                    aria-label={`Call ${displayName}`}
                   >
                     📞 Bel
                   </a>

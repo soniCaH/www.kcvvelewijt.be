@@ -8,24 +8,30 @@ describe("UnifiedSearchBar", () => {
   const mockMembers: OrgChartNode[] = [
     {
       id: "president",
-      name: "John Doe",
       title: "Voorzitter",
       roleCode: "PRES",
-      email: "john@example.com",
       department: "hoofdbestuur",
+      members: [
+        { id: "staff-president", name: "John Doe", email: "john@example.com" },
+      ],
     },
     {
       id: "secretary",
-      name: "Jane Smith",
       title: "Secretaris",
-      email: "jane@example.com",
       department: "hoofdbestuur",
+      members: [
+        {
+          id: "staff-secretary",
+          name: "Jane Smith",
+          email: "jane@example.com",
+        },
+      ],
     },
     {
       id: "jeugdcoordinator",
-      name: "Maria Janssens",
       title: "Jeugdcoördinator",
       department: "jeugdbestuur",
+      members: [{ id: "staff-jeugd", name: "Maria Janssens" }],
     },
   ];
 

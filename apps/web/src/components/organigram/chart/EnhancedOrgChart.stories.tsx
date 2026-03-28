@@ -77,7 +77,9 @@ const EnhancedOrgChartWithState = (args: Partial<EnhancedOrgChartProps>) => {
         onMemberClick={(member) => {
           setSelectedMember(member);
           args.onMemberClick?.(member);
-          alert(`Clicked: ${member.name} - ${member.title}`);
+          alert(
+            `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+          );
         }}
       />
 
@@ -88,7 +90,8 @@ const EnhancedOrgChartWithState = (args: Partial<EnhancedOrgChartProps>) => {
             Last Selected:
           </p>
           <p className="text-sm text-kcvv-gray-dark">
-            {selectedMember.name} - {selectedMember.title}
+            {selectedMember.members[0]?.name ?? selectedMember.title} -{" "}
+            {selectedMember.title}
           </p>
         </div>
       )}
@@ -141,7 +144,9 @@ export const SearchAndZoom: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -170,7 +175,9 @@ export const MobileNavigation: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -237,7 +244,9 @@ export const FilteredHoofdbestuur: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -263,7 +272,9 @@ export const FilteredJeugdbestuur: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -291,7 +302,9 @@ export const ZoomControls: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -346,73 +359,73 @@ export const SmallDataset: Story = {
     const smallMembers: OrgChartNode[] = [
       {
         id: "1",
-        name: "President",
         title: "Voorzitter",
         department: "hoofdbestuur",
         parentId: null,
+        members: [{ id: "s1", name: "President" }],
       },
       {
         id: "2",
-        name: "Vice President",
         title: "Ondervoorzitter",
         department: "hoofdbestuur",
         parentId: "1",
+        members: [{ id: "s2", name: "Vice President" }],
       },
       {
         id: "3",
-        name: "Secretary",
         title: "Secretaris",
         department: "hoofdbestuur",
         parentId: "1",
+        members: [{ id: "s3", name: "Secretary" }],
       },
       {
         id: "4",
-        name: "Treasurer",
         title: "Penningmeester",
         department: "hoofdbestuur",
         parentId: "1",
+        members: [{ id: "s4", name: "Treasurer" }],
       },
       {
         id: "5",
-        name: "Youth Coordinator",
         title: "Jeugdcoördinator",
         department: "jeugdbestuur",
         parentId: "1",
+        members: [{ id: "s5", name: "Youth Coordinator" }],
       },
       {
         id: "6",
-        name: "Assistant 1",
         title: "Assistent Secretary",
         department: "hoofdbestuur",
         parentId: "3",
+        members: [{ id: "s6", name: "Assistant 1" }],
       },
       {
         id: "7",
-        name: "Assistant 2",
         title: "Assistent Treasurer",
         department: "hoofdbestuur",
         parentId: "4",
+        members: [{ id: "s7", name: "Assistant 2" }],
       },
       {
         id: "8",
-        name: "U10 Coach",
         title: "Trainer U10",
         department: "jeugdbestuur",
         parentId: "5",
+        members: [{ id: "s8", name: "U10 Coach" }],
       },
       {
         id: "9",
-        name: "U12 Coach",
         title: "Trainer U12",
         department: "jeugdbestuur",
         parentId: "5",
+        members: [{ id: "s9", name: "U12 Coach" }],
       },
       {
         id: "10",
-        name: "U15 Coach",
         title: "Trainer U15",
         department: "jeugdbestuur",
         parentId: "5",
+        members: [{ id: "s10", name: "U15 Coach" }],
       },
     ];
 
@@ -424,7 +437,9 @@ export const SmallDataset: Story = {
         <EnhancedOrgChart
           members={smallMembers}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -446,22 +461,26 @@ export const LargeDataset: Story = {
     const largeHierarchy: OrgChartNode[] = [
       {
         id: "root",
-        name: "Club",
         title: "KCVV Elewijt",
         department: "algemeen",
         parentId: null,
+        members: [{ id: "staff-root", name: "Club" }],
       },
       ...Array.from({ length: 60 }, (_, i) => ({
         id: `member-${i}`,
-        name: `Member ${i + 1}`,
         title: `Position ${i + 1}`,
         roleCode: `P${i}`,
-        email: `member${i}@kcvvelewijt.be`,
         department:
           i % 2 === 0 ? ("hoofdbestuur" as const) : ("jeugdbestuur" as const),
-        // Fix parentId calculation to ensure valid references
         parentId:
           i < 15 ? "root" : `member-${Math.max(0, Math.floor(i / 4) - 4)}`,
+        members: [
+          {
+            id: `staff-member-${i}`,
+            name: `Member ${i + 1}`,
+            email: `member${i}@kcvvelewijt.be`,
+          },
+        ],
       })),
     ];
 
@@ -474,7 +493,9 @@ export const LargeDataset: Story = {
         <EnhancedOrgChart
           members={largeHierarchy}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -503,7 +524,7 @@ export const InteractionExample: Story = {
           onMemberClick={(member) => {
             setInteractionHistory((prev) => [
               ...prev,
-              `Clicked: ${member.name} - ${member.title}`,
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
             ]);
           }}
         />
@@ -594,59 +615,59 @@ export const DeepHierarchy: Story = {
     const deepMembers: OrgChartNode[] = [
       {
         id: "root",
-        name: "CEO",
         title: "Chief Executive Officer",
         department: "algemeen",
         parentId: null,
+        members: [{ id: "staff-root", name: "CEO" }],
       },
       {
         id: "vp1",
-        name: "VP Operations",
         title: "Vice President Operations",
         department: "hoofdbestuur",
         parentId: "root",
+        members: [{ id: "staff-vp1", name: "VP Operations" }],
       },
       {
         id: "dir1",
-        name: "Director A",
         title: "Director of Department A",
         department: "hoofdbestuur",
         parentId: "vp1",
+        members: [{ id: "staff-dir1", name: "Director A" }],
       },
       {
         id: "mgr1",
-        name: "Manager A1",
         title: "Manager A1",
         department: "hoofdbestuur",
         parentId: "dir1",
+        members: [{ id: "staff-mgr1", name: "Manager A1" }],
       },
       {
         id: "lead1",
-        name: "Team Lead A1.1",
         title: "Team Lead",
         department: "hoofdbestuur",
         parentId: "mgr1",
+        members: [{ id: "staff-lead1", name: "Team Lead A1.1" }],
       },
       {
         id: "senior1",
-        name: "Senior Member 1",
         title: "Senior Team Member",
         department: "hoofdbestuur",
         parentId: "lead1",
+        members: [{ id: "staff-senior1", name: "Senior Member 1" }],
       },
       {
         id: "emp1",
-        name: "Employee 1",
         title: "Team Member",
         department: "hoofdbestuur",
         parentId: "senior1",
+        members: [{ id: "staff-emp1", name: "Employee 1" }],
       },
       {
         id: "emp2",
-        name: "Employee 2",
         title: "Team Member",
         department: "hoofdbestuur",
         parentId: "senior1",
+        members: [{ id: "staff-emp2", name: "Employee 2" }],
       },
     ];
 
@@ -658,7 +679,9 @@ export const DeepHierarchy: Story = {
         <EnhancedOrgChart
           members={deepMembers}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -700,7 +723,9 @@ export const EnhancedVsCurrent: Story = {
         <EnhancedOrgChart
           members={clubStructure}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>

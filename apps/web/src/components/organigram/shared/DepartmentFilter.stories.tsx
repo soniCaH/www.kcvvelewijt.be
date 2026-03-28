@@ -65,33 +65,33 @@ const mockMembers: OrgChartNode[] = [
   // Hoofdbestuur (8 members)
   ...Array.from({ length: 8 }, (_, i) => ({
     id: `hb-${i}`,
-    name: `Hoofdbestuur Member ${i + 1}`,
     title: `Position ${i + 1}`,
     department: "hoofdbestuur" as const,
     parentId: null,
+    members: [{ id: `hb-staff-${i}`, name: `Hoofdbestuur Member ${i + 1}` }],
   })),
   // Jeugdbestuur (15 members)
   ...Array.from({ length: 15 }, (_, i) => ({
     id: `jb-${i}`,
-    name: `Jeugdbestuur Member ${i + 1}`,
     title: `Position ${i + 1}`,
     department: "jeugdbestuur" as const,
     parentId: null,
+    members: [{ id: `jb-staff-${i}`, name: `Jeugdbestuur Member ${i + 1}` }],
   })),
   // General (2 members)
   {
     id: "gen-1",
-    name: "Club",
     title: "KCVV Elewijt",
     department: "algemeen" as const,
     parentId: null,
+    members: [{ id: "gen-staff-1", name: "Club" }],
   },
   {
     id: "gen-2",
-    name: "President",
     title: "Voorzitter",
     department: "algemeen" as const,
     parentId: null,
+    members: [{ id: "gen-staff-2", name: "President" }],
   },
 ];
 
@@ -308,11 +308,11 @@ export const LargeCounts: Story = {
       ...mockMembers,
       ...Array.from({ length: 100 }, (_, i) => ({
         id: `extra-${i}`,
-        name: `Extra Member ${i}`,
         title: "Position",
         department:
           i % 2 === 0 ? ("hoofdbestuur" as const) : ("jeugdbestuur" as const),
         parentId: null,
+        members: [{ id: `extra-staff-${i}`, name: `Extra Member ${i}` }],
       })),
     ],
     showCounts: true,
@@ -341,7 +341,9 @@ export const WithSearchBar: Story = {
     const searchedMembers = search
       ? filteredMembers.filter(
           (m) =>
-            m.name.toLowerCase().includes(search.toLowerCase()) ||
+            (m.members[0]?.name ?? "")
+              .toLowerCase()
+              .includes(search.toLowerCase()) ||
             m.title.toLowerCase().includes(search.toLowerCase()),
         )
       : filteredMembers;

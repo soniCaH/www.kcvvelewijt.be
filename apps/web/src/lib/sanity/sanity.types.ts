@@ -1438,6 +1438,26 @@ export type SPONSORS_QUERY_RESULT = Array<{
 }>;
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
+// Variable: ORGANIGRAM_NODES_QUERY
+// Query: *[_type == "organigramNode" && active == true] | order(title asc) { _id, title, description, roleCode, department, "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null), "members": members[]->{ "id": _id, "name": coalesce(firstName, "") + " " + coalesce(lastName, ""), "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max", email, phone, "href": select(defined(psdId) && psdId != "" => "/staf/" + psdId, null) } }
+export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
+  _id: string;
+  title: string | null;
+  description: string | null;
+  roleCode: string | null;
+  department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+  parentId: string | null;
+  members: Array<{
+    id: string;
+    name: string | null;
+    imageUrl: string | null;
+    email: string | null;
+    phone: string | null;
+    href: string | null;
+  }> | null;
+}>;
+
+// Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBERS_QUERY
 // Query: *[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {  _id,  firstName,  lastName,  roleLabel,  roleCode,  department,  email,  phone,  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",  responsibilities,  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)}
 export type STAFF_MEMBERS_QUERY_RESULT = Array<{

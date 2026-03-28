@@ -29,17 +29,20 @@ type Story = StoryObj<typeof meta>;
 
 const mockMember: OrgChartNode = {
   id: "1",
-  name: "Jean-Pierre Van Rossem",
   title: "Voorzitter",
   roleCode: "VOOR",
   department: "hoofdbestuur",
-  email: "jp.vanrossem@kcvv.be",
-  phone: "+32 470 12 34 56",
-  imageUrl:
-    "https://ui-avatars.com/api/?name=Jean-Pierre+Van+Rossem&background=random",
-  responsibilities:
+  description:
     "Algemene leiding van de club. Vertegenwoordiging bij de bond en gemeente. Financieel beleid.",
-  profileUrl: "/staff/jp-vanrossem",
+  members: [
+    {
+      id: "staff-1",
+      name: "Jean-Pierre Van Rossem",
+      email: "jp.vanrossem@kcvv.be",
+      phone: "+32 470 12 34 56",
+      href: "/staff/jp-vanrossem",
+    },
+  ],
 };
 
 export const Open: Story = {
@@ -54,8 +57,8 @@ export const MinimalData: Story = {
     isOpen: true,
     member: {
       id: "2",
-      name: "John Doe",
       title: "Lid",
+      members: [{ id: "staff-2", name: "John Doe" }],
     },
   },
 };
