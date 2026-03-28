@@ -204,7 +204,10 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           const result = getMatchResult(match);
           const homeScore = match.home_team.score;
           const awayScore = match.away_team.score;
-          const hasScore = homeScore != null && awayScore != null;
+          const hasScore =
+            match.status === "finished" &&
+            homeScore != null &&
+            awayScore != null;
           const borderClass = result ? resultBorderClass[result] : "";
 
           return (

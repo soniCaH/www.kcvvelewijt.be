@@ -155,7 +155,7 @@ const PsdGameBaseFields = {
   time: S.optional(S.NullOr(S.String)), // "HH:MM" actual kickoff time
   goalsHomeTeam: S.NullOr(S.Number),
   goalsAwayTeam: S.NullOr(S.Number),
-  competitionType: S.optional(S.NullOr(PsdCompetitionType)),
+  competitionType: S.optional(S.NullOr(S.Union(PsdCompetitionType, S.String))),
   reportGeneral: S.optional(S.NullOr(S.Boolean)),
   teamId: S.optional(S.NullOr(S.Number)),
   // PSD team IDs for home/away — used to compute is_home (team ID != club ID)

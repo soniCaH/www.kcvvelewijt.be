@@ -156,8 +156,12 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
       },
       status,
       competition: mapCompetitionLabel(
-        game.competitionType?.type ?? "UNKNOWN",
-        game.competitionType?.name,
+        typeof game.competitionType === "string"
+          ? game.competitionType
+          : (game.competitionType?.type ?? "UNKNOWN"),
+        typeof game.competitionType === "string"
+          ? undefined
+          : game.competitionType?.name,
       ),
       kcvv_team_id: game.teamId ?? undefined,
       is_home: isHome,
@@ -799,26 +803,11 @@ export const FootbalistoServiceLive = Layer.effect(
             { concurrency: 5 },
           );
 
-          // Fetch team metadata to derive the KCVV team label
-          const kcvvTeams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
-          const kcvvTeam = kcvvTeams.find((t) => t.id === teamId);
-          const kcvvTeamLabel = kcvvTeam
-            ? derivePsdTeamLabel(kcvvTeam.name, kcvvTeam.age)
-            : undefined;
-
-          // Flatten, filter by opponent club ID, and enrich:
-          // - is_home: fall back to club-ID comparison when homeTeamId is absent
-          // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
+          // Flatten and filter by opponent club ID
           const allMatches = seasonResults.flatMap((r) => r.matches);
-          const opponentMatches = allMatches
-            .filter(
-              (m) => m.home_team.id === clubId || m.away_team.id === clubId,
-            )
-            .map((m) => ({
-              ...m,
-              is_home: m.is_home ?? m.home_team.id !== clubId,
-              kcvv_team_label: kcvvTeamLabel,
-            }));
+          const opponentMatches = allMatches.filter(
+            (m) => m.home_team.id === clubId || m.away_team.id === clubId,
+          );
 
           const hasFailed = seasonResults.some((r) => r._tag === "failed");
           if (opponentMatches.length === 0) {
@@ -840,17 +829,39 @@ export const FootbalistoServiceLive = Layer.effect(
             );
           }
 
+          // Best-effort: fetch team metadata to derive the KCVV team label.
+          // Errors are swallowed so a /teams failure never discards a valid history.
+          const kcvvTeamLabel = yield* countedFetch(
+            `${base}/teams`,
+            PsdTeamsArray,
+          ).pipe(
+            Effect.map((teams) => {
+              const team = teams.find((t) => t.id === teamId);
+              return team ? derivePsdTeamLabel(team.name, team.age) : undefined;
+            }),
+            Effect.catchAll(() => Effect.succeed(undefined)),
+          );
+
+          // Enrich matches:
+          // - is_home: fall back to club-ID comparison when homeTeamId is absent
+          // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
+          const enrichedMatches = opponentMatches.map((m) => ({
+            ...m,
+            is_home: m.is_home ?? m.home_team.id !== clubId,
+            kcvv_team_label: kcvvTeamLabel,
+          }));
+
           // Derive opponent info from the first match containing club
-          const firstMatch = opponentMatches[0]!;
+          const firstMatch = enrichedMatches[0]!;
           const opponentClub =
             firstMatch.home_team.id === clubId
               ? firstMatch.home_team
               : firstMatch.away_team;
 
-          const summary = computeOpponentSummary(opponentMatches);
+          const summary = computeOpponentSummary(enrichedMatches);
 
           // Sort descending by date (most recent first)
-          const sortedMatches = [...opponentMatches].sort(
+          const sortedMatches = [...enrichedMatches].sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
 

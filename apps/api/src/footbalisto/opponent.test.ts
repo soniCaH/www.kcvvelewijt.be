@@ -287,6 +287,45 @@ describe("FootbalistoService.getOpponentHistory", () => {
     }
   });
 
+  it("fails with UpstreamUnavailableError when some seasons fail and no opponent matches are found", async () => {
+    // Season 1 fails, season 2 succeeds but has no matches against club 456
+    const noOpponentMatches = {
+      content: [
+        {
+          id: 999,
+          status: 0,
+          date: "2024-03-01 00:00",
+          time: "15:00",
+          homeClub: { id: 100, name: "KCVV Elewijt", logo: null },
+          awayClub: { id: 789, name: "Other Club", logo: null },
+          homeTeamId: 1,
+          awayTeamId: 88,
+          goalsHomeTeam: null,
+          goalsAwayTeam: null,
+          competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => allSeasons })
+      // Season 1 fails
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        statusText: "Bad Gateway",
+      })
+      // Season 2 succeeds but no matches against club 456
+      .mockResolvedValueOnce({ ok: true, json: async () => noOpponentMatches });
+
+    const result = await runService((svc) => svc.getOpponentHistory(1, 456));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+      expect((result.left as UpstreamUnavailableError).status).toBe(503);
+    }
+  });
+
   it("skips failed season fetches and continues with available seasons", async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => allSeasons })
