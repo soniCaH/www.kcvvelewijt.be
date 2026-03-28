@@ -36,6 +36,7 @@ function formatMatchDate(date: Date | string): string {
 }
 
 function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
+  if (match.status !== "finished") return null;
   if (match.is_home == null) return null;
   const homeScore = match.home_team.score;
   const awayScore = match.away_team.score;
@@ -54,6 +55,7 @@ function computeCombinedSummary(matches: Match[]): OpponentHistory["summary"] {
     goalsFor = 0,
     goalsAgainst = 0;
   for (const m of matches) {
+    if (m.status !== "finished") continue;
     const homeScore = m.home_team.score;
     const awayScore = m.away_team.score;
     if (homeScore == null || awayScore == null || m.is_home == null) continue;
@@ -80,61 +82,57 @@ async function fetchOpponentData(clubId: number): Promise<{
   summary: OpponentHistory["summary"];
   matches: Match[];
 } | null> {
-  try {
-    return await runPromise(
-      Effect.gen(function* () {
-        const teamRepo = yield* TeamRepository;
-        const bff = yield* BffService;
+  return await runPromise(
+    Effect.gen(function* () {
+      const teamRepo = yield* TeamRepository;
+      const bff = yield* BffService;
 
-        const allTeams = yield* teamRepo.findAll();
-        const seniorTeams = allTeams.filter(
-          (t) => t.age === "A" && t.psdId != null,
-        );
+      const allTeams = yield* teamRepo.findAll();
+      const seniorTeams = allTeams.filter(
+        (t) => t.age === "A" && t.psdId != null,
+      );
 
-        if (seniorTeams.length === 0) return null;
+      if (seniorTeams.length === 0) return null;
 
-        // Fetch opponent history for each senior team, ignore failures
-        const results = yield* Effect.all(
-          seniorTeams.map((team) =>
-            bff.getOpponentHistory(parseInt(team.psdId!, 10), clubId).pipe(
-              Effect.map((h) => ({ _tag: "ok" as const, history: h })),
-              Effect.catchAll(() =>
-                Effect.succeed({ _tag: "failed" as const, history: null }),
-              ),
+      // Fetch opponent history for each senior team; swallow 404s, propagate other errors
+      const results = yield* Effect.all(
+        seniorTeams.map((team) =>
+          bff.getOpponentHistory(parseInt(team.psdId!, 10), clubId).pipe(
+            Effect.map((h) => ({ _tag: "ok" as const, history: h })),
+            Effect.catchTag("HttpNotFound", () =>
+              Effect.succeed({ _tag: "failed" as const, history: null }),
             ),
           ),
-          { concurrency: 3 },
-        );
+        ),
+        { concurrency: 3 },
+      );
 
-        const successful = results
-          .filter((r) => r._tag === "ok" && r.history != null)
-          .map((r) => r.history!);
+      const successful = results
+        .filter((r) => r._tag === "ok" && r.history != null)
+        .map((r) => r.history!);
 
-        if (successful.length === 0) return null;
+      if (successful.length === 0) return null;
 
-        // Aggregate matches from all teams (flatten)
-        const allMatches = successful.flatMap((h) => h.matches);
+      // Aggregate matches from all teams (flatten)
+      const allMatches = successful.flatMap((h) => h.matches);
 
-        const { wins, draws, losses, goalsFor, goalsAgainst } =
-          computeCombinedSummary(allMatches);
+      const { wins, draws, losses, goalsFor, goalsAgainst } =
+        computeCombinedSummary(allMatches);
 
-        // Sort all matches descending by date
-        const sortedMatches = [...allMatches].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
+      // Sort all matches descending by date
+      const sortedMatches = [...allMatches].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
 
-        const firstHistory = successful[0]!;
-        return {
-          opponentName: firstHistory.opponent.name,
-          opponentLogo: firstHistory.opponent.logo,
-          summary: { wins, draws, losses, goalsFor, goalsAgainst },
-          matches: sortedMatches,
-        };
-      }),
-    );
-  } catch {
-    return null;
-  }
+      const firstHistory = successful[0]!;
+      return {
+        opponentName: firstHistory.opponent.name,
+        opponentLogo: firstHistory.opponent.logo,
+        summary: { wins, draws, losses, goalsFor, goalsAgainst },
+        matches: sortedMatches,
+      };
+    }),
+  );
 }
 
 export default async function OpponentPage({ params }: OpponentPageProps) {

@@ -298,10 +298,10 @@ function transformFootbalistoMatchDetail(
       competition: mapCompetitionLabel(
         typeof general.competitionType === "object"
           ? (general.competitionType?.type ?? "UNKNOWN")
-          : "UNKNOWN",
+          : (general.competitionType ?? "UNKNOWN"),
         typeof general.competitionType === "object"
           ? general.competitionType?.name
-          : (general.competitionType ?? undefined),
+          : undefined,
       ),
       lineup,
       hasReport: general.viewGameReport,
@@ -371,9 +371,10 @@ function computeOpponentSummary(
   let goalsAgainst = 0;
 
   for (const m of matches) {
+    if (m.status !== "finished") continue; // only count truly finished matches
     const homeScore = m.home_team.score;
     const awayScore = m.away_team.score;
-    if (homeScore == null || awayScore == null) continue; // not finished
+    if (homeScore == null || awayScore == null) continue;
     if (m.is_home == null) continue; // can't determine result
 
     const kcvvGoals = m.is_home ? homeScore : awayScore;
@@ -819,12 +820,22 @@ export const FootbalistoServiceLive = Layer.effect(
               kcvv_team_label: kcvvTeamLabel,
             }));
 
+          const hasFailed = seasonResults.some((r) => r._tag === "failed");
           if (opponentMatches.length === 0) {
+            if (!hasFailed) {
+              return yield* Effect.fail(
+                new ResourceNotFoundError({
+                  message: `No matches found against club ${clubId} for team ${teamId}`,
+                  resourceType: "opponent-history",
+                  resourceId: String(clubId),
+                }),
+              );
+            }
+            // Some seasons failed — can't determine definitively; propagate as upstream error
             return yield* Effect.fail(
-              new ResourceNotFoundError({
-                message: `No matches found against club ${clubId} for team ${teamId}`,
-                resourceType: "opponent-history",
-                resourceId: String(clubId),
+              new UpstreamUnavailableError({
+                status: 503,
+                message: `Partial season fetch failure for team ${teamId}; cannot determine opponent history for club ${clubId}`,
               }),
             );
           }
