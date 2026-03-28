@@ -33,6 +33,7 @@ function makeSponsorRow(
     type: "crossing",
     tier: "hoofdsponsor",
     featured: true,
+    description: null,
     logoUrl: "https://cdn.sanity.io/logo.webp",
     ...overrides,
   };

@@ -40,6 +40,13 @@ export const sponsor = defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'description',
+      title: 'Spotlight description',
+      description: 'Optional tekst die getoond wordt in de spotlight sectie (bv. "Leverde de matchbal voor de wedstrijd van 12 april")',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
       name: 'type',
       title: 'Type (legacy)',
       type: 'string',

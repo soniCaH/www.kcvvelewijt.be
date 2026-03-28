@@ -37,6 +37,7 @@ export function SponsorsPage({
     name: s.name,
     logo: s.logo,
     url: s.url,
+    description: s.description,
   }));
 
   return (

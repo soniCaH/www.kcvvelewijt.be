@@ -29,6 +29,7 @@ function mapToSponsor(s: SponsorVM): Sponsor {
     url: s.url,
     tier: s.tier,
     featured: s.featured,
+    description: s.description,
   };
 }
 
