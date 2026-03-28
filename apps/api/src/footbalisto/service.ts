@@ -507,7 +507,9 @@ export const FootbalistoServiceLive = Layer.effect(
             );
           }
 
-          return yield* Effect.forEach(games, transformPsdGame);
+          return yield* Effect.forEach(games, (game) =>
+            transformPsdGame({ ...game, teamId: game.teamId ?? teamId }),
+          );
         }),
 
       getNextMatches: () =>

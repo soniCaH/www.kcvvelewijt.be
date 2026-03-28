@@ -241,6 +241,28 @@ describe("FootbalistoService.getTeamMatches", () => {
     }
   });
 
+  it("sets is_home: true using queried teamId when payload teamId is absent", async () => {
+    const gameWithoutTeamId = {
+      ...rawMatchList.content[0],
+      id: 203,
+      homeTeamId: 7,
+      awayTeamId: 8,
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [gameWithoutTeamId] }),
+      });
+
+    const result = await runService((svc) => svc.getTeamMatches(7));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.is_home).toBe(true);
+    }
+  });
+
   it("fails when season fetch fails", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
