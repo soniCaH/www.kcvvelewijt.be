@@ -368,7 +368,7 @@ function transformFootbalistoMatchDetail(
         transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
       )
       .filter((e): e is MatchEvent => e !== null);
-    events = transformed;
+    events = transformed.length > 0 ? transformed : undefined;
   }
 
   return mapGameStatus(

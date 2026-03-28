@@ -1213,7 +1213,7 @@ describe("FootbalistoService.getMatchDetail - events", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.events).toHaveLength(0);
+      expect(result.right.events).toBeUndefined();
     }
   });
 
