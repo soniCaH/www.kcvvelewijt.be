@@ -287,8 +287,8 @@ function transformMatchEvent(
       minute,
       team,
       player: event.playerName ?? undefined,
-      isPenalty: isPenalty || undefined,
-      isOwnGoal: isOwnGoal || undefined,
+      isPenalty,
+      isOwnGoal,
     };
   }
 
