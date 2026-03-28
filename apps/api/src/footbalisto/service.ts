@@ -24,12 +24,12 @@ import {
   PsdMatchListSchema,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
+  FootbalistoRankingEntry,
   PsdGame,
   type PsdCompetitionType,
   type FootbalistoLineupPlayer,
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
-  type FootbalistoRankingEntry,
 } from "./schemas";
 
 // ─── Transform helpers (internal) ──────────────────────────────────────────────
@@ -751,7 +751,35 @@ export const FootbalistoServiceLive = Layer.effect(
             return [] as readonly RankingEntry[];
           }
 
-          return competition.teams.map((e) =>
+          const [errors, entries] = yield* Effect.partition(
+            competition.teams,
+            (item) =>
+              S.decodeUnknown(FootbalistoRankingEntry)(item).pipe(
+                Effect.mapError((parseError) => ({
+                  id: extractId(item),
+                  parseError,
+                })),
+              ),
+          );
+
+          if (errors.length > 0) {
+            const ids = errors.map((e) => e.id).join(", ");
+            yield* Effect.log(
+              `getRanking(${teamId}): filtered ${errors.length} invalid ranking entry(ies) — IDs: [${ids}]`,
+            );
+          }
+
+          if (entries.length === 0) {
+            return yield* Effect.fail(
+              new ResourceNotFoundError({
+                message: `getRanking(${teamId}): all ${competition.teams.length} entries were invalid after filtering`,
+                resourceType: "ranking",
+                resourceId: teamId,
+              }),
+            );
+          }
+
+          return entries.map((e) =>
             transformFootbalistoRankingEntry(e, logoCdnUrl),
           );
         }),

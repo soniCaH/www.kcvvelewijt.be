@@ -3,6 +3,7 @@ import { Schema as S } from "effect";
 import {
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
+  FootbalistoRankingEntry,
 } from "./schemas";
 
 describe("FootbalistoMatchDetailResponse", () => {
@@ -56,6 +57,11 @@ describe("FootbalistoRankingArray", () => {
       },
     ];
     const result = S.decodeUnknownSync(FootbalistoRankingArray)(raw);
-    expect(result[0]?.teams[0]?.rank).toBe(1);
+    expect(result[0]?.teams).toHaveLength(1);
+    // teams are unknown items — decode individually to verify shape
+    const entry = S.decodeUnknownSync(FootbalistoRankingEntry)(
+      result[0]?.teams[0],
+    );
+    expect(entry.rank).toBe(1);
   });
 });
