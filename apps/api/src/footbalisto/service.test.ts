@@ -875,7 +875,7 @@ describe("FootbalistoService.getRanking", () => {
     );
 
     expect(
-      messages.some((m) => m.includes("filtered") && m.includes("1")),
+      messages.some((m) => m.includes("filtered") && m.includes("IDs: [999]")),
     ).toBe(true);
   });
 
