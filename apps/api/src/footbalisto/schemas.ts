@@ -116,7 +116,8 @@ export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetai
   goalsAwayTeam: S.NullOr(S.Number),
   homeTeamId: S.optional(S.NullOr(S.Number)),
   awayTeamId: S.optional(S.NullOr(S.Number)),
-  competitionType: S.optional(S.NullOr(PsdCompetitionType)),
+  // PSD returns either an object {id,name,type} or a plain string for match detail
+  competitionType: S.optional(S.NullOr(S.Union(PsdCompetitionType, S.String))),
   viewGameReport: S.Boolean,
   status: S.Number,
   cancelled: S.optional(S.NullOr(S.Boolean)),

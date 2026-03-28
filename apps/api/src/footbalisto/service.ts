@@ -296,8 +296,12 @@ function transformFootbalistoMatchDetail(
       },
       status,
       competition: mapCompetitionLabel(
-        general.competitionType?.type ?? "UNKNOWN",
-        general.competitionType?.name,
+        typeof general.competitionType === "object"
+          ? (general.competitionType?.type ?? "UNKNOWN")
+          : "UNKNOWN",
+        typeof general.competitionType === "object"
+          ? general.competitionType?.name
+          : (general.competitionType ?? undefined),
       ),
       lineup,
       hasReport: general.viewGameReport,

@@ -9,7 +9,6 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { MatchDetail } from "@kcvv/api-contract";
-import Link from "next/link";
 import { MatchDetailView } from "@/components/match/MatchDetailView";
 import {
   transformHomeTeam,
@@ -149,26 +148,6 @@ export default async function MatchPage({
         hasReport={match.hasReport}
         backUrl={backUrl ?? undefined}
       />
-      {/* Opponent history link — only rendered when home/away is known */}
-      {(() => {
-        const opponent =
-          match.is_home === true
-            ? match.away_team
-            : match.is_home === false
-              ? match.home_team
-              : null;
-        if (!opponent) return null;
-        return (
-          <div className="container mx-auto max-w-3xl px-4 pb-8">
-            <Link
-              href={`/tegenstander/${opponent.id}`}
-              className="text-sm text-[var(--color-muted)] underline hover:text-[var(--color-foreground)]"
-            >
-              Historiek vs {opponent.name}
-            </Link>
-          </div>
-        );
-      })()}
     </>
   );
 }
