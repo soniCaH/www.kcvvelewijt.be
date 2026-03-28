@@ -17,8 +17,6 @@ import type { ScheduleMatch } from "../types";
 export interface MatchResultRowProps {
   /** Match data */
   match: ScheduleMatch;
-  /** Team ID for home/away determination and result highlighting */
-  teamId?: number;
   /** Whether this is the next upcoming match */
   isNext?: boolean;
   /** Link destination for the match detail page */
@@ -48,15 +46,9 @@ function hasScores(
   );
 }
 
-function getResult(match: ScheduleMatch, teamId: number | undefined): Result {
-  const isMember =
-    teamId !== undefined &&
-    (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
-
-  if (!hasScores(match) || !isMember) return null;
-
-  const isHome = match.homeTeam.id === teamId;
-  return getResultColor(match.homeScore, match.awayScore, isHome);
+function getResult(match: ScheduleMatch): Result {
+  if (!hasScores(match) || match.isHome === undefined) return null;
+  return getResultColor(match.homeScore, match.awayScore, match.isHome);
 }
 
 const resultBadgeConfig: Record<
@@ -80,21 +72,18 @@ const resultBorderLight: Record<"win" | "loss" | "draw", string> = {
 
 export function MatchResultRow({
   match,
-  teamId,
   isNext = false,
   href,
   theme = "light",
 }: MatchResultRowProps) {
   const isDark = theme === "dark";
-  const isMember =
-    teamId !== undefined &&
-    (match.homeTeam.id === teamId || match.awayTeam.id === teamId);
-  const isHome = isMember && match.homeTeam.id === teamId;
+  const isMember = match.isHome !== undefined;
+  const isHome = match.isHome ?? false;
   const scored = hasScores(match);
   const homeScore = scored ? match.homeScore : undefined;
   const awayScore = scored ? match.awayScore : undefined;
 
-  const result = getResult(match, teamId);
+  const result = getResult(match);
 
   return (
     <Link
@@ -190,10 +179,10 @@ export function MatchResultRow({
             className={cn(
               "truncate text-sm",
               isDark
-                ? isMember && match.homeTeam.id === teamId
+                ? isMember && isHome
                   ? "font-semibold text-white"
                   : "text-white/85"
-                : isMember && match.homeTeam.id === teamId
+                : isMember && isHome
                   ? "font-semibold"
                   : "text-gray-700",
             )}
@@ -209,8 +198,8 @@ export function MatchResultRow({
               <span
                 className={cn(
                   isDark ? "text-white" : undefined,
-                  teamId !== undefined &&
-                    match.homeTeam.id === teamId &&
+                  isMember &&
+                    isHome &&
                     homeScore > awayScore &&
                     "text-kcvv-green-bright",
                 )}
@@ -223,8 +212,8 @@ export function MatchResultRow({
               <span
                 className={cn(
                   isDark ? "text-white" : undefined,
-                  teamId !== undefined &&
-                    match.awayTeam.id === teamId &&
+                  isMember &&
+                    !isHome &&
                     awayScore > homeScore &&
                     "text-kcvv-green-bright",
                 )}
@@ -250,10 +239,10 @@ export function MatchResultRow({
             className={cn(
               "truncate text-sm text-right",
               isDark
-                ? isMember && match.awayTeam.id === teamId
+                ? isMember && !isHome
                   ? "font-semibold text-white"
                   : "text-white/85"
-                : isMember && match.awayTeam.id === teamId
+                : isMember && !isHome
                   ? "font-semibold"
                   : "text-gray-700",
             )}

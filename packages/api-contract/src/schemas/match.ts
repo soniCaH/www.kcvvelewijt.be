@@ -44,6 +44,8 @@ const BaseMatchFields = {
   kcvv_team_id: S.optional(S.Number),
   /** Human-readable label for the KCVV team (e.g. "A-Ploeg", "U21") */
   kcvv_team_label: S.optional(S.String),
+  /** Whether the KCVV team is playing at home. Computed by BFF from homeTeamId === teamId. */
+  is_home: S.optional(S.Boolean),
 };
 
 /** Normalized match for UI consumption */

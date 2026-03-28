@@ -83,65 +83,82 @@ describe("MatchResultRow", () => {
 
   describe("past match with scores", () => {
     it("renders score for finished matches", () => {
-      render(
-        <MatchResultRow
-          match={finishedMatch}
-          teamId={1235}
-          href="/wedstrijd/1002"
-        />,
-      );
+      render(<MatchResultRow match={finishedMatch} href="/wedstrijd/1002" />);
       expect(screen.getByText("3")).toBeInTheDocument();
       expect(screen.getByText("1")).toBeInTheDocument();
     });
 
-    it("shows W badge for wins", () => {
+    it("shows W badge for home wins using isHome", () => {
       render(
         <MatchResultRow
-          match={finishedMatch}
-          teamId={1235}
+          match={{ ...finishedMatch, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
       expect(screen.getByText("W")).toBeInTheDocument();
     });
 
-    it("shows L badge for losses", () => {
-      const lossMatch: ScheduleMatch = {
-        ...finishedMatch,
-        homeScore: 0,
-        awayScore: 2,
-      };
+    it("shows L badge for home losses using isHome", () => {
       render(
         <MatchResultRow
-          match={lossMatch}
-          teamId={1235}
+          match={{ ...finishedMatch, homeScore: 0, awayScore: 2, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
       expect(screen.getByText("L")).toBeInTheDocument();
     });
 
-    it("shows G badge for draws", () => {
-      const drawMatch: ScheduleMatch = {
-        ...finishedMatch,
-        homeScore: 2,
-        awayScore: 2,
-      };
+    it("shows W badge for away wins using isHome", () => {
       render(
         <MatchResultRow
-          match={drawMatch}
-          teamId={1235}
+          match={{
+            ...finishedMatch,
+            homeScore: 1,
+            awayScore: 3,
+            isHome: false,
+          }}
+          href="/wedstrijd/1002"
+        />,
+      );
+      expect(screen.getByText("W")).toBeInTheDocument();
+    });
+
+    it("shows L badge for away losses using isHome", () => {
+      render(
+        <MatchResultRow
+          match={{
+            ...finishedMatch,
+            homeScore: 2,
+            awayScore: 0,
+            isHome: false,
+          }}
+          href="/wedstrijd/1002"
+        />,
+      );
+      expect(screen.getByText("L")).toBeInTheDocument();
+    });
+
+    it("shows G badge for draws using isHome", () => {
+      render(
+        <MatchResultRow
+          match={{ ...finishedMatch, homeScore: 2, awayScore: 2, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
       expect(screen.getByText("G")).toBeInTheDocument();
     });
 
+    it("shows no result badge when isHome is undefined", () => {
+      render(<MatchResultRow match={finishedMatch} href="/wedstrijd/1002" />);
+      expect(screen.queryByText("W")).not.toBeInTheDocument();
+      expect(screen.queryByText("L")).not.toBeInTheDocument();
+      expect(screen.queryByText("G")).not.toBeInTheDocument();
+    });
+
     it("applies green styling on W badge", () => {
       render(
         <MatchResultRow
-          match={finishedMatch}
-          teamId={1235}
+          match={{ ...finishedMatch, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
@@ -150,15 +167,9 @@ describe("MatchResultRow", () => {
     });
 
     it("applies red styling on L badge", () => {
-      const lossMatch: ScheduleMatch = {
-        ...finishedMatch,
-        homeScore: 0,
-        awayScore: 2,
-      };
       render(
         <MatchResultRow
-          match={lossMatch}
-          teamId={1235}
+          match={{ ...finishedMatch, homeScore: 0, awayScore: 2, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
@@ -167,15 +178,9 @@ describe("MatchResultRow", () => {
     });
 
     it("applies yellow styling on G badge", () => {
-      const drawMatch: ScheduleMatch = {
-        ...finishedMatch,
-        homeScore: 2,
-        awayScore: 2,
-      };
       render(
         <MatchResultRow
-          match={drawMatch}
-          teamId={1235}
+          match={{ ...finishedMatch, homeScore: 2, awayScore: 2, isHome: true }}
           href="/wedstrijd/1002"
         />,
       );
@@ -183,16 +188,74 @@ describe("MatchResultRow", () => {
       expect(badge.className).toContain("text-yellow-400");
     });
 
-    it("applies result left border in light theme", () => {
-      render(
-        <MatchResultRow
-          match={finishedMatch}
-          teamId={1235}
-          href="/wedstrijd/1002"
-        />,
-      );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("border-l-kcvv-success");
+    describe("border colors — home/away × win/loss", () => {
+      it("home win: green left border", () => {
+        render(
+          <MatchResultRow
+            match={{
+              ...finishedMatch,
+              homeScore: 3,
+              awayScore: 1,
+              isHome: true,
+            }}
+            href="/wedstrijd/1002"
+          />,
+        );
+        expect(screen.getByRole("link").className).toContain(
+          "border-l-kcvv-success",
+        );
+      });
+
+      it("home loss: red left border", () => {
+        render(
+          <MatchResultRow
+            match={{
+              ...finishedMatch,
+              homeScore: 0,
+              awayScore: 2,
+              isHome: true,
+            }}
+            href="/wedstrijd/1002"
+          />,
+        );
+        expect(screen.getByRole("link").className).toContain(
+          "border-l-kcvv-alert",
+        );
+      });
+
+      it("away win: green left border", () => {
+        render(
+          <MatchResultRow
+            match={{
+              ...finishedMatch,
+              homeScore: 1,
+              awayScore: 3,
+              isHome: false,
+            }}
+            href="/wedstrijd/1002"
+          />,
+        );
+        expect(screen.getByRole("link").className).toContain(
+          "border-l-kcvv-success",
+        );
+      });
+
+      it("away loss: red left border", () => {
+        render(
+          <MatchResultRow
+            match={{
+              ...finishedMatch,
+              homeScore: 2,
+              awayScore: 0,
+              isHome: false,
+            }}
+            href="/wedstrijd/1002"
+          />,
+        );
+        expect(screen.getByRole("link").className).toContain(
+          "border-l-kcvv-alert",
+        );
+      });
     });
   });
 
@@ -261,11 +324,10 @@ describe("MatchResultRow", () => {
   });
 
   describe("home/away indication", () => {
-    it("highlights team name with font-semibold when teamId matches (light)", () => {
+    it("highlights home team name with font-semibold when isHome is true (light)", () => {
       render(
         <MatchResultRow
-          match={scheduledMatch}
-          teamId={1235}
+          match={{ ...scheduledMatch, isHome: true }}
           href="/wedstrijd/1001"
         />,
       );
@@ -273,11 +335,10 @@ describe("MatchResultRow", () => {
       expect(kcvvText).toHaveClass("font-semibold");
     });
 
-    it("highlights team name with text-white when teamId matches (dark)", () => {
+    it("highlights home team name with text-white when isHome is true (dark)", () => {
       render(
         <MatchResultRow
-          match={scheduledMatch}
-          teamId={1235}
+          match={{ ...scheduledMatch, isHome: true }}
           theme="dark"
           href="/wedstrijd/1001"
         />,
@@ -286,27 +347,20 @@ describe("MatchResultRow", () => {
       expect(kcvvText).toHaveClass("text-white");
     });
 
-    it("shows Thuis indicator on mobile when playing at home", () => {
+    it("shows Thuis indicator on mobile when isHome is true", () => {
       render(
         <MatchResultRow
-          match={scheduledMatch}
-          teamId={1235}
+          match={{ ...scheduledMatch, isHome: true }}
           href="/wedstrijd/1001"
         />,
       );
       expect(screen.getByText(/Thuis/)).toBeInTheDocument();
     });
 
-    it("shows Uit indicator on mobile when playing away", () => {
-      const awayMatch: ScheduleMatch = {
-        ...scheduledMatch,
-        homeTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
-        awayTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
-      };
+    it("shows Uit indicator on mobile when isHome is false", () => {
       render(
         <MatchResultRow
-          match={awayMatch}
-          teamId={1235}
+          match={{ ...scheduledMatch, isHome: false }}
           href="/wedstrijd/1001"
         />,
       );
@@ -316,13 +370,7 @@ describe("MatchResultRow", () => {
 
   describe("competition", () => {
     it("renders competition name in mobile row", () => {
-      render(
-        <MatchResultRow
-          match={scheduledMatch}
-          teamId={1235}
-          href="/wedstrijd/1001"
-        />,
-      );
+      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
       const competitions = screen.getAllByText(/3de Nationale/);
       expect(competitions.length).toBeGreaterThanOrEqual(1);
     });

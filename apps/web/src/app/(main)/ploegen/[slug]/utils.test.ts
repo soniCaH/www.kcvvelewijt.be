@@ -94,6 +94,19 @@ describe("transformMatchToSchedule", () => {
     expect(result.homeTeam.logo).toBeUndefined();
     expect(result.awayTeam.logo).toBeUndefined();
   });
+
+  it("passes is_home through as isHome when present", () => {
+    const homeMatch = createMockMatch({ is_home: true });
+    expect(transformMatchToSchedule(homeMatch).isHome).toBe(true);
+
+    const awayMatch = createMockMatch({ is_home: false });
+    expect(transformMatchToSchedule(awayMatch).isHome).toBe(false);
+  });
+
+  it("leaves isHome undefined when is_home is absent", () => {
+    const match = createMockMatch();
+    expect(transformMatchToSchedule(match).isHome).toBeUndefined();
+  });
 });
 
 describe("transformRankingToStandings", () => {

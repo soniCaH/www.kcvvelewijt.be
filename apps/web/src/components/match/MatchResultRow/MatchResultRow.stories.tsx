@@ -30,6 +30,7 @@ const baseMatch: ScheduleMatch = {
   },
   status: "scheduled",
   competition: "3de Nationale",
+  isHome: true,
 };
 
 const meta = {
@@ -65,7 +66,6 @@ type Story = StoryObj<typeof meta>;
 export const Upcoming: Story = {
   args: {
     match: baseMatch,
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -81,7 +81,6 @@ export const Win: Story = {
       awayScore: 1,
       status: "finished",
     },
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -97,7 +96,6 @@ export const Draw: Story = {
       awayScore: 2,
       status: "finished",
     },
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -113,7 +111,6 @@ export const Loss: Story = {
       awayScore: 2,
       status: "finished",
     },
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -127,7 +124,6 @@ export const Postponed: Story = {
       ...baseMatch,
       status: "postponed",
     },
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -138,7 +134,6 @@ export const Postponed: Story = {
 export const NextMatch: Story = {
   args: {
     match: baseMatch,
-    teamId: 1235,
     isNext: true,
     href: "/wedstrijd/1001",
   },
@@ -154,7 +149,6 @@ export const WithoutLogos: Story = {
       homeTeam: { id: 1235, name: "KCVV Elewijt" },
       awayTeam: { id: 59, name: "KFC Turnhout" },
     },
-    teamId: 1235,
     href: "/wedstrijd/1001",
   },
 };
@@ -171,7 +165,6 @@ const darkBgDecorator = (Story: () => React.ReactNode) => (
 export const DarkTheme: Story = {
   args: {
     match: baseMatch,
-    teamId: 1235,
     theme: "dark",
     href: "/wedstrijd/1001",
   },
@@ -189,7 +182,6 @@ export const DarkThemeWin: Story = {
       awayScore: 1,
       status: "finished",
     },
-    teamId: 1235,
     theme: "dark",
     href: "/wedstrijd/1001",
   },
@@ -202,7 +194,6 @@ export const DarkThemeWin: Story = {
 export const DarkThemeNextMatch: Story = {
   args: {
     match: baseMatch,
-    teamId: 1235,
     theme: "dark",
     isNext: true,
     href: "/wedstrijd/1001",
