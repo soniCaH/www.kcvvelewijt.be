@@ -41,4 +41,12 @@ describe("GoalKcvvTemplate", () => {
     const template = container.firstChild as HTMLElement;
     expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
   });
+
+  it("sets crossOrigin=anonymous on the celebration image for canvas export", () => {
+    render(
+      <GoalKcvvTemplate {...defaultProps} celebrationImageUrl="some-url" />,
+    );
+    const img = screen.getByRole("img");
+    expect(img).toHaveAttribute("crossorigin", "anonymous");
+  });
 });

@@ -3,6 +3,13 @@
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { GoalKcvvTemplate } from "../GoalKcvvTemplate/GoalKcvvTemplate";
+import {
+  CAPTURE_WIDTH,
+  CAPTURE_HEIGHT,
+  TEMPLATE_SCALE,
+  PREVIEW_WIDTH,
+  PREVIEW_HEIGHT,
+} from "../constants";
 
 // Hardcoded tracer-bullet data — replaced by form inputs in Phase 3
 const HARDCODED_PROPS = {
@@ -16,20 +23,26 @@ const HARDCODED_PROPS = {
 export function SharePage() {
   const templateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const handleDownload = async () => {
     if (!templateRef.current) return;
     setIsGenerating(true);
+    setExportError(null);
     try {
       const dataUrl = await toPng(templateRef.current, {
-        width: 1080,
-        height: 1920,
+        width: CAPTURE_WIDTH,
+        height: CAPTURE_HEIGHT,
         pixelRatio: 1,
       });
       const link = document.createElement("a");
       link.download = "kcvv-goal.png";
       link.href = dataUrl;
       link.click();
+    } catch (err) {
+      setExportError(
+        err instanceof Error ? err.message : "Export failed. Please try again.",
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -43,15 +56,30 @@ export function SharePage() {
 
       {/* Scale wrapper — renders template at 1080×1920, displayed at 25% */}
       <div
-        style={{ width: "270px", height: "480px", overflow: "hidden" }}
+        style={{
+          width: `${PREVIEW_WIDTH}px`,
+          height: `${PREVIEW_HEIGHT}px`,
+          overflow: "hidden",
+        }}
         className="shadow-lg rounded-sm"
       >
-        <div style={{ transform: "scale(0.25)", transformOrigin: "top left" }}>
+        <div
+          style={{
+            transform: `scale(${TEMPLATE_SCALE})`,
+            transformOrigin: "top left",
+          }}
+        >
           <div ref={templateRef}>
             <GoalKcvvTemplate {...HARDCODED_PROPS} />
           </div>
         </div>
       </div>
+
+      {exportError && (
+        <p role="alert" className="text-red-600 font-montserrat text-sm">
+          {exportError}
+        </p>
+      )}
 
       <button
         onClick={handleDownload}

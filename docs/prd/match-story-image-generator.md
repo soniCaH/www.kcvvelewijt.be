@@ -2,7 +2,7 @@
 
 > GitHub issue: #702
 > Status: Draft
-> Last updated: 2026-03-19
+> Last updated: 2026-03-27
 
 ## 1. Problem statement
 

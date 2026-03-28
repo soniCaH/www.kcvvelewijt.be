@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { CAPTURE_WIDTH, CAPTURE_HEIGHT } from "../constants";
 
 // Mock html-to-image — browser canvas API not available in happy-dom
 vi.mock("html-to-image", () => ({
@@ -45,7 +46,21 @@ describe("SharePage", () => {
 
     expect(toPng).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ width: 1080, height: 1920 }),
+      expect.objectContaining({ width: CAPTURE_WIDTH, height: CAPTURE_HEIGHT }),
     );
+  });
+
+  it("shows an error message and re-enables the button when toPng rejects", async () => {
+    const { toPng } = await import("html-to-image");
+    vi.mocked(toPng).mockRejectedValueOnce(new Error("CORS error"));
+    const user = userEvent.setup();
+
+    render(<SharePage />);
+    await user.click(screen.getByRole("button", { name: /download/i }));
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /download/i }),
+    ).not.toBeDisabled();
   });
 });
