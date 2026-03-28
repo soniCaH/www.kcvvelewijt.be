@@ -57,7 +57,9 @@ export function SponsorsPage({
       )}
 
       <div className="w-full max-w-inner-lg mx-auto px-3 lg:px-0 py-10 space-y-8">
-        {totalSponsors === 0 && <SponsorEmptyState />}
+        {totalSponsors === 0 && spotlightSponsors.length === 0 && (
+          <SponsorEmptyState />
+        )}
 
         {goldSponsors.length > 0 && (
           <SponsorGrid
