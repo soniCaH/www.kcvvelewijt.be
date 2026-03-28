@@ -32,13 +32,13 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
 }`);
 
 export const STAFF_MEMBERS_PSDID_QUERY =
-  defineQuery(`*[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {
+  defineQuery(`*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {
   _id, psdId
 }`);
 
 // ─── Display label maps ───────────────────────────────────────────────────────
 
-const ROLE_DISPLAY: Record<string, string> = {
+const ROLE_DISPLAY = {
   hoofdtrainer: "Hoofdtrainer",
   assistent: "Assistent-trainer",
   keeperstrainer: "Keeperstrainer",
@@ -62,13 +62,19 @@ const ROLE_DISPLAY: Record<string, string> = {
   webmaster: "Webmaster",
   bestuur: "Bestuur",
   other: "Andere",
-};
+} satisfies Record<
+  NonNullable<NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>["role"]>,
+  string
+>;
 
-const DEPARTMENT_DISPLAY: Record<string, string> = {
+const DEPARTMENT_DISPLAY = {
   hoofdbestuur: "Hoofdbestuur",
   jeugdbestuur: "Jeugdbestuur",
   algemeen: "Algemeen",
-};
+} satisfies Record<
+  NonNullable<NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>["department"]>,
+  string
+>;
 
 // ─── View models ─────────────────────────────────────────────────────────────
 
@@ -127,10 +133,11 @@ export function toStaffDetailVM(
   const departmentDisplay = row.department
     ? DEPARTMENT_DISPLAY[row.department]
     : undefined;
+  const psdId = row.psdId?.trim() ?? "";
 
   return {
     id: row._id,
-    psdId: row.psdId ?? "",
+    psdId,
     firstName: row.firstName ?? "",
     lastName: row.lastName ?? "",
     roleDisplay,
@@ -140,7 +147,7 @@ export function toStaffDetailVM(
     phone: row.phone ?? undefined,
     bio: row.bio ?? undefined,
     imageUrl: row.photoUrl ?? undefined,
-    href: `/staf/${row.psdId ?? ""}`,
+    href: psdId ? `/staf/${psdId}` : "",
   };
 }
 
@@ -171,7 +178,10 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
     fetchGroq<STAFF_MEMBERS_PSDID_QUERY_RESULT>(STAFF_MEMBERS_PSDID_QUERY).pipe(
       Effect.map((rows) =>
         rows
-          .filter((r): r is typeof r & { psdId: string } => r.psdId !== null)
+          .filter(
+            (r): r is typeof r & { psdId: string } =>
+              r.psdId !== null && r.psdId.trim() !== "",
+          )
           .map((r) => ({ psdId: r.psdId })),
       ),
     ),

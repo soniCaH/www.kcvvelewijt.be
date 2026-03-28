@@ -49,9 +49,7 @@ export default async function Image({ params }: ImageProps) {
       lastName = member.lastName;
       roleDisplay = member.roleDisplay ?? member.roleLabel ?? "";
       // Use abbreviated role as watermark (max ~6 chars, uppercase)
-      roleWatermark = (member.roleLabel ?? member.roleDisplay ?? "")
-        .slice(0, 6)
-        .toUpperCase();
+      roleWatermark = (roleDisplay ?? "").slice(0, 6).toUpperCase();
     } else {
       firstName = "KCVV";
       lastName = "Elewijt";

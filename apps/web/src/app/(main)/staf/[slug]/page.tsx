@@ -46,9 +46,9 @@ export async function generateMetadata({
       return { title: "Stafmedewerker niet gevonden | KCVV Elewijt" };
 
     const fullName = `${member.firstName} ${member.lastName}`.trim() || "Staf";
-    const description =
-      [member.roleDisplay, "KCVV Elewijt"].filter(Boolean).join(" bij ") ||
-      "KCVV Elewijt stafmedewerker";
+    const description = member.roleDisplay
+      ? `${member.roleDisplay} bij KCVV Elewijt`
+      : "KCVV Elewijt stafmedewerker";
 
     return {
       title: `${fullName} | KCVV Elewijt`,
