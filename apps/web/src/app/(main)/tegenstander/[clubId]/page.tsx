@@ -47,6 +47,27 @@ function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
   return "draw";
 }
 
+function computeCombinedSummary(matches: Match[]): OpponentHistory["summary"] {
+  let wins = 0,
+    draws = 0,
+    losses = 0,
+    goalsFor = 0,
+    goalsAgainst = 0;
+  for (const m of matches) {
+    const homeScore = m.home_team.score;
+    const awayScore = m.away_team.score;
+    if (homeScore == null || awayScore == null || m.is_home == null) continue;
+    const kcvvGoals = m.is_home ? homeScore : awayScore;
+    const oppGoals = m.is_home ? awayScore : homeScore;
+    goalsFor += kcvvGoals;
+    goalsAgainst += oppGoals;
+    if (kcvvGoals > oppGoals) wins++;
+    else if (kcvvGoals < oppGoals) losses++;
+    else draws++;
+  }
+  return { wins, draws, losses, goalsFor, goalsAgainst };
+}
+
 const resultBorderClass: Record<"win" | "draw" | "loss", string> = {
   win: "border-l-4 border-l-kcvv-success",
   draw: "border-l-4 border-l-kcvv-warning",
@@ -94,25 +115,8 @@ async function fetchOpponentData(clubId: number): Promise<{
         // Aggregate matches from all teams (flatten)
         const allMatches = successful.flatMap((h) => h.matches);
 
-        // Recompute combined summary from all matches
-        let wins = 0,
-          draws = 0,
-          losses = 0,
-          goalsFor = 0,
-          goalsAgainst = 0;
-        for (const m of allMatches) {
-          const homeScore = m.home_team.score;
-          const awayScore = m.away_team.score;
-          if (homeScore == null || awayScore == null || m.is_home == null)
-            continue;
-          const kcvvGoals = m.is_home ? homeScore : awayScore;
-          const oppGoals = m.is_home ? awayScore : homeScore;
-          goalsFor += kcvvGoals;
-          goalsAgainst += oppGoals;
-          if (kcvvGoals > oppGoals) wins++;
-          else if (kcvvGoals < oppGoals) losses++;
-          else draws++;
-        }
+        const { wins, draws, losses, goalsFor, goalsAgainst } =
+          computeCombinedSummary(allMatches);
 
         // Sort all matches descending by date
         const sortedMatches = [...allMatches].sort(

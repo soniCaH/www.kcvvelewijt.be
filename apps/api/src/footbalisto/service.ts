@@ -798,11 +798,26 @@ export const FootbalistoServiceLive = Layer.effect(
             { concurrency: 5 },
           );
 
-          // Flatten and filter by opponent club ID
+          // Fetch team metadata to derive the KCVV team label
+          const kcvvTeams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
+          const kcvvTeam = kcvvTeams.find((t) => t.id === teamId);
+          const kcvvTeamLabel = kcvvTeam
+            ? derivePsdTeamLabel(kcvvTeam.name, kcvvTeam.age)
+            : undefined;
+
+          // Flatten, filter by opponent club ID, and enrich:
+          // - is_home: fall back to club-ID comparison when homeTeamId is absent
+          // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
           const allMatches = seasonResults.flatMap((r) => r.matches);
-          const opponentMatches = allMatches.filter(
-            (m) => m.home_team.id === clubId || m.away_team.id === clubId,
-          );
+          const opponentMatches = allMatches
+            .filter(
+              (m) => m.home_team.id === clubId || m.away_team.id === clubId,
+            )
+            .map((m) => ({
+              ...m,
+              is_home: m.is_home ?? m.home_team.id !== clubId,
+              kcvv_team_label: kcvvTeamLabel,
+            }));
 
           if (opponentMatches.length === 0) {
             return yield* Effect.fail(
