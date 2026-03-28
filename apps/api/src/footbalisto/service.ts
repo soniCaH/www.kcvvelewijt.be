@@ -16,7 +16,6 @@ import {
   type RankingEntry,
   type CardType,
   type OpponentHistory,
-  PsdTeamsArray,
 } from "@kcvv/api-contract";
 import {
   PsdSeason,
@@ -31,6 +30,7 @@ import {
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
 } from "./schemas";
+import { PsdTeamsSchema } from "./schemas-player-team";
 
 // ─── Transform helpers (internal) ──────────────────────────────────────────────
 
@@ -641,7 +641,7 @@ export const FootbalistoServiceLive = Layer.effect(
       getNextMatches: () =>
         Effect.gen(function* () {
           const visiblePsdIds = yield* getVisibleTeamIds();
-          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsArray);
+          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
           const season = yield* getCurrentSeason();
           const now = Date.now();
 
@@ -868,7 +868,7 @@ export const FootbalistoServiceLive = Layer.effect(
           // Errors are swallowed so a /teams failure never discards a valid history.
           const kcvvTeamLabel = yield* countedFetch(
             `${base}/teams`,
-            PsdTeamsArray,
+            PsdTeamsSchema,
           ).pipe(
             Effect.map((teams) => {
               const team = teams.find((t) => t.id === teamId);

@@ -3,10 +3,10 @@ import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import {
   PsdMember,
-  PsdMembersPage,
+  PsdMembersPageSchema,
   PsdTeam,
-  PsdTeamsArray,
-} from "@kcvv/api-contract";
+  PsdTeamsSchema,
+} from "../footbalisto/schemas-player-team";
 
 export class PsdTeamClientError extends Error {
   readonly _tag = "PsdTeamClientError" as const;
@@ -121,7 +121,7 @@ export const PsdTeamClientLive = Layer.effect(
       Effect.gen(function* () {
         const firstPage = yield* countedFetch(
           `${base}/teams/${teamId}/${kind}`,
-          PsdMembersPage,
+          PsdMembersPageSchema,
         );
         if (firstPage.totalPages <= 1) return firstPage.content;
 
@@ -129,7 +129,7 @@ export const PsdTeamClientLive = Layer.effect(
           Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
             countedFetch(
               `${base}/teams/${teamId}/${kind}?page=${i + 1}`,
-              PsdMembersPage,
+              PsdMembersPageSchema,
             ).pipe(Effect.map((page) => page.content)),
           ),
           { concurrency: 3 },
@@ -139,7 +139,7 @@ export const PsdTeamClientLive = Layer.effect(
       });
 
     return {
-      getRawTeams: () => countedFetch(`${base}/teams`, PsdTeamsArray),
+      getRawTeams: () => countedFetch(`${base}/teams`, PsdTeamsSchema),
       getRawMembers: (teamId: number) =>
         fetchPaginatedTeamPeople("members", teamId),
       getRawStaff: (teamId: number) =>

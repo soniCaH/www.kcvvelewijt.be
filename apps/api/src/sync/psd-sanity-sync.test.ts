@@ -5,7 +5,7 @@ import {
   transformStaff,
   partitionMembers,
 } from "./psd-sanity-sync";
-import type { PsdMember } from "@kcvv/api-contract";
+import type { PsdMember } from "../footbalisto/schemas-player-team";
 
 const BASE_URL = "https://clubapi.prosoccerdata.com";
 

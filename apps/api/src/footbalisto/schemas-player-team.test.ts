@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { Schema as S } from "effect";
-import { PsdMember, PsdMembersPage, PsdTeam, PsdTeamsArray } from "./player";
+import {
+  PsdMember,
+  PsdMembersPageSchema,
+  PsdTeam,
+  PsdTeamsSchema,
+} from "./schemas-player-team";
 
 describe("PsdMember schema", () => {
   const validPlayer = {
@@ -60,7 +65,7 @@ describe("PsdMember schema", () => {
       totalElements: 2,
       totalPages: 1,
     };
-    const result = S.decodeUnknownSync(PsdMembersPage)(page);
+    const result = S.decodeUnknownSync(PsdMembersPageSchema)(page);
     expect(result.content).toHaveLength(2);
     expect(result.totalElements).toBe(2);
   });
@@ -84,18 +89,19 @@ describe("PsdTeam schema", () => {
   });
 
   it("decodes a team with null footbelId (youth teams)", () => {
-    const result = S.decodeUnknownSync(PsdTeam)({ ...validTeam, footbelId: null });
+    const result = S.decodeUnknownSync(PsdTeam)({
+      ...validTeam,
+      footbelId: null,
+    });
     expect(result.footbelId).toBeNull();
   });
 
   it("fails on missing required id", () => {
-    expect(() =>
-      S.decodeUnknownSync(PsdTeam)({ name: "Test" }),
-    ).toThrow();
+    expect(() => S.decodeUnknownSync(PsdTeam)({ name: "Test" })).toThrow();
   });
 
   it("decodes teams array", () => {
-    const result = S.decodeUnknownSync(PsdTeamsArray)([validTeam]);
+    const result = S.decodeUnknownSync(PsdTeamsSchema)([validTeam]);
     expect(result).toHaveLength(1);
   });
 });
