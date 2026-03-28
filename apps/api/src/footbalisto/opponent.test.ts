@@ -150,7 +150,20 @@ describe("FootbalistoService.getOpponentHistory", () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => allSeasons })
       .mockResolvedValueOnce({ ok: true, json: async () => season1Matches })
-      .mockResolvedValueOnce({ ok: true, json: async () => season2Matches });
+      .mockResolvedValueOnce({ ok: true, json: async () => season2Matches })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: 1,
+            name: "KCVV Elewijt",
+            age: "A",
+            gender: "mannen",
+            footbelId: null,
+            active: true,
+          },
+        ],
+      });
 
     const result = await runService((svc) => svc.getOpponentHistory(1, 456));
 
@@ -203,7 +216,20 @@ describe("FootbalistoService.getOpponentHistory", () => {
     };
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
-      .mockResolvedValueOnce({ ok: true, json: async () => scheduledMatch });
+      .mockResolvedValueOnce({ ok: true, json: async () => scheduledMatch })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: 1,
+            name: "KCVV Elewijt",
+            age: "A",
+            gender: "mannen",
+            footbelId: null,
+            active: true,
+          },
+        ],
+      });
 
     const result = await runService((svc) => svc.getOpponentHistory(1, 456));
 
@@ -222,7 +248,20 @@ describe("FootbalistoService.getOpponentHistory", () => {
   it("fails with ResourceNotFoundError when no matches found against the club", async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ content: [] }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ content: [] }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: 1,
+            name: "KCVV Elewijt",
+            age: "A",
+            gender: "mannen",
+            footbelId: null,
+            active: true,
+          },
+        ],
+      });
 
     const result = await runService((svc) => svc.getOpponentHistory(1, 456));
 
@@ -254,7 +293,20 @@ describe("FootbalistoService.getOpponentHistory", () => {
       // Season 1 fails
       .mockResolvedValueOnce({ ok: false, status: 500, statusText: "Error" })
       // Season 2 succeeds
-      .mockResolvedValueOnce({ ok: true, json: async () => season2Matches });
+      .mockResolvedValueOnce({ ok: true, json: async () => season2Matches })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: 1,
+            name: "KCVV Elewijt",
+            age: "A",
+            gender: "mannen",
+            footbelId: null,
+            active: true,
+          },
+        ],
+      });
 
     const result = await runService((svc) => svc.getOpponentHistory(1, 456));
 
