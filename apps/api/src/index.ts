@@ -22,6 +22,7 @@ import { PsdTeamClientLive } from "./sync/psd-team-client";
 import { FootbalistoServiceLive } from "./footbalisto/service";
 import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
+import { OpponentApiLive } from "./handlers/opponent";
 import { RankingApiLive } from "./handlers/ranking";
 import { RelatedApiLive } from "./handlers/related";
 import { SearchApiLive } from "./handlers/search";
@@ -54,6 +55,7 @@ const WorkerPlatformLayer = Layer.mergeAll(
 function buildAppLayer(env: WorkerEnv) {
   return HttpApiBuilder.api(PsdApi).pipe(
     Layer.provide(MatchesApiLive),
+    Layer.provide(OpponentApiLive),
     Layer.provide(RankingApiLive),
     Layer.provide(RelatedApiLive),
     Layer.provide(SearchApiLive),

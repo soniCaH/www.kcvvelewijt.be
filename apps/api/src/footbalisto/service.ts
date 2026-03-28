@@ -15,6 +15,7 @@ import {
   type MatchLineupPlayer,
   type RankingEntry,
   type CardType,
+  type OpponentHistory,
   PsdTeamsArray,
 } from "@kcvv/api-contract";
 import {
@@ -24,6 +25,7 @@ import {
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
   PsdGame,
+  type PsdCompetitionType,
   type FootbalistoLineupPlayer,
   type FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
@@ -54,6 +56,26 @@ export function mapCompetitionLabel(
     default:
       return type;
   }
+}
+
+/**
+ * Resolve a PSD competitionType field (object, plain string, or null/undefined)
+ * to a Dutch display label. Returns undefined when no competition info is available.
+ *
+ * Needed because:
+ * - /games/team/{id}/seasons/{id} returns an object { id, name, type }
+ * - /match/{id}/general sometimes returns a plain string (e.g. "Competitie")
+ * - Both endpoints may return null when no competition is assigned
+ *
+ * Note: `typeof null === "object"` in JavaScript, so a null check must come
+ * before the typeof guard.
+ */
+function resolveCompetitionLabel(
+  ct: PsdCompetitionType | string | null | undefined,
+): string | undefined {
+  if (ct == null) return undefined;
+  if (typeof ct === "string") return mapCompetitionLabel(ct, undefined);
+  return mapCompetitionLabel(ct.type ?? "UNKNOWN", ct.name);
 }
 
 /**
@@ -154,10 +176,7 @@ function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
         score: game.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: mapCompetitionLabel(
-        game.competitionType?.type ?? "UNKNOWN",
-        game.competitionType?.name,
-      ),
+      competition: resolveCompetitionLabel(game.competitionType),
       kcvv_team_id: game.teamId ?? undefined,
       is_home: isHome,
     })),
@@ -294,10 +313,7 @@ function transformFootbalistoMatchDetail(
         score: general.goalsAwayTeam ?? undefined,
       },
       status,
-      competition: mapCompetitionLabel(
-        general.competitionType?.type ?? "UNKNOWN",
-        general.competitionType?.name,
-      ),
+      competition: resolveCompetitionLabel(general.competitionType),
       lineup,
       hasReport: general.viewGameReport,
     })),
@@ -351,6 +367,41 @@ function extractId(item: unknown): string | number {
   return "unknown";
 }
 
+/**
+ * Compute W/D/L summary for a list of matches.
+ * Only finished matches (with goals set) contribute to the summary.
+ * `is_home` determines which side's score is "ours".
+ */
+function computeOpponentSummary(
+  matches: readonly Match[],
+): OpponentHistory["summary"] {
+  let wins = 0;
+  let draws = 0;
+  let losses = 0;
+  let goalsFor = 0;
+  let goalsAgainst = 0;
+
+  for (const m of matches) {
+    if (m.status !== "finished") continue; // only count truly finished matches
+    const homeScore = m.home_team.score;
+    const awayScore = m.away_team.score;
+    if (homeScore == null || awayScore == null) continue;
+    if (m.is_home == null) continue; // can't determine result
+
+    const kcvvGoals = m.is_home ? homeScore : awayScore;
+    const opponentGoals = m.is_home ? awayScore : homeScore;
+
+    goalsFor += kcvvGoals;
+    goalsAgainst += opponentGoals;
+
+    if (kcvvGoals > opponentGoals) wins++;
+    else if (kcvvGoals < opponentGoals) losses++;
+    else draws++;
+  }
+
+  return { wins, draws, losses, goalsFor, goalsAgainst };
+}
+
 // ─── Service definition ────────────────────────────────────────────────────────
 
 export interface FootbalistoServiceInterface {
@@ -366,6 +417,10 @@ export interface FootbalistoServiceInterface {
     teamId: number,
     logoCdnUrl: string,
   ) => Effect.Effect<readonly RankingEntry[], BffError>;
+  readonly getOpponentHistory: (
+    teamId: number,
+    clubId: number,
+  ) => Effect.Effect<OpponentHistory, BffError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -699,6 +754,133 @@ export const FootbalistoServiceLive = Layer.effect(
           return competition.teams.map((e) =>
             transformFootbalistoRankingEntry(e, logoCdnUrl),
           );
+        }),
+
+      getOpponentHistory: (teamId: number, clubId: number) =>
+        Effect.gen(function* () {
+          // Fetch all available seasons (not just current)
+          const allSeasons = yield* countedFetch(
+            `${base}/seasons`,
+            PsdSeasonsSchema,
+          );
+
+          // Fetch matches for every season in parallel, skipping failed seasons
+          const seasonResults = yield* Effect.all(
+            allSeasons.map((season) =>
+              countedFetch(
+                `${base}/games/team/${teamId}/seasons/${season.id}`,
+                PsdMatchListSchema,
+              ).pipe(
+                Effect.flatMap((data) =>
+                  Effect.gen(function* () {
+                    const [errors, games] = yield* Effect.partition(
+                      data.content,
+                      (item) =>
+                        S.decodeUnknown(PsdGame)(item).pipe(
+                          Effect.mapError((parseError) => ({
+                            id: extractId(item),
+                            parseError,
+                          })),
+                        ),
+                    );
+                    if (errors.length > 0) {
+                      const ids = errors.map((e) => e.id).join(", ");
+                      yield* Effect.log(
+                        `getOpponentHistory(${teamId}): season ${season.id}: filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
+                      );
+                    }
+                    return yield* Effect.forEach(games, (g) =>
+                      transformPsdGame({ ...g, teamId }),
+                    );
+                  }),
+                ),
+                Effect.map((matches) => ({ _tag: "ok" as const, matches })),
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `getOpponentHistory: season ${season.id} failed: ${String(e)}`,
+                  ).pipe(
+                    Effect.as({
+                      _tag: "failed" as const,
+                      matches: [] as Match[],
+                    }),
+                  ),
+                ),
+              ),
+            ),
+            { concurrency: 5 },
+          );
+
+          // Flatten and filter by opponent club ID
+          const allMatches = seasonResults.flatMap((r) => r.matches);
+          const opponentMatches = allMatches.filter(
+            (m) => m.home_team.id === clubId || m.away_team.id === clubId,
+          );
+
+          const hasFailed = seasonResults.some((r) => r._tag === "failed");
+          if (opponentMatches.length === 0) {
+            if (!hasFailed) {
+              return yield* Effect.fail(
+                new ResourceNotFoundError({
+                  message: `No matches found against club ${clubId} for team ${teamId}`,
+                  resourceType: "opponent-history",
+                  resourceId: String(clubId),
+                }),
+              );
+            }
+            // Some seasons failed — can't determine definitively; propagate as upstream error
+            return yield* Effect.fail(
+              new UpstreamUnavailableError({
+                status: 503,
+                message: `Partial season fetch failure for team ${teamId}; cannot determine opponent history for club ${clubId}`,
+              }),
+            );
+          }
+
+          // Best-effort: fetch team metadata to derive the KCVV team label.
+          // Errors are swallowed so a /teams failure never discards a valid history.
+          const kcvvTeamLabel = yield* countedFetch(
+            `${base}/teams`,
+            PsdTeamsArray,
+          ).pipe(
+            Effect.map((teams) => {
+              const team = teams.find((t) => t.id === teamId);
+              return team ? derivePsdTeamLabel(team.name, team.age) : undefined;
+            }),
+            Effect.catchAll(() => Effect.succeed(undefined)),
+          );
+
+          // Enrich matches:
+          // - is_home: fall back to club-ID comparison when homeTeamId is absent
+          // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
+          const enrichedMatches = opponentMatches.map((m) => ({
+            ...m,
+            is_home: m.is_home ?? m.home_team.id !== clubId,
+            kcvv_team_label: kcvvTeamLabel,
+          }));
+
+          const summary = computeOpponentSummary(enrichedMatches);
+
+          // Sort descending by date (most recent first)
+          const sortedMatches = [...enrichedMatches].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
+
+          // Derive opponent info from the most recent match (newest logo/name)
+          const mostRecentMatch = sortedMatches[0]!;
+          const opponentClub =
+            mostRecentMatch.home_team.id === clubId
+              ? mostRecentMatch.home_team
+              : mostRecentMatch.away_team;
+
+          return {
+            opponent: {
+              id: opponentClub.id,
+              name: opponentClub.name,
+              logo: opponentClub.logo,
+            },
+            summary,
+            matches: sortedMatches,
+          };
         }),
     };
   }),

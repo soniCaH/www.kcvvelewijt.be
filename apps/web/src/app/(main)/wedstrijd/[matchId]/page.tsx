@@ -135,18 +135,20 @@ export default async function MatchPage({
       : null;
 
   return (
-    <MatchDetailView
-      homeTeam={homeTeam}
-      awayTeam={awayTeam}
-      date={match.date}
-      time={time}
-      status={match.status}
-      competition={match.competition}
-      homeLineup={homeLineup}
-      awayLineup={awayLineup}
-      hasReport={match.hasReport}
-      backUrl={backUrl ?? undefined}
-    />
+    <>
+      <MatchDetailView
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        date={match.date}
+        time={time}
+        status={match.status}
+        competition={match.competition}
+        homeLineup={homeLineup}
+        awayLineup={awayLineup}
+        hasReport={match.hasReport}
+        backUrl={backUrl ?? undefined}
+      />
+    </>
   );
 }
 

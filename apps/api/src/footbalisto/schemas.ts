@@ -116,7 +116,8 @@ export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetai
   goalsAwayTeam: S.NullOr(S.Number),
   homeTeamId: S.optional(S.NullOr(S.Number)),
   awayTeamId: S.optional(S.NullOr(S.Number)),
-  competitionType: S.optional(S.NullOr(PsdCompetitionType)),
+  // PSD returns either an object {id,name,type} or a plain string for match detail
+  competitionType: S.optional(S.NullOr(S.Union(PsdCompetitionType, S.String))),
   viewGameReport: S.Boolean,
   status: S.Number,
   cancelled: S.optional(S.NullOr(S.Boolean)),
@@ -154,14 +155,14 @@ const PsdGameBaseFields = {
   time: S.optional(S.NullOr(S.String)), // "HH:MM" actual kickoff time
   goalsHomeTeam: S.NullOr(S.Number),
   goalsAwayTeam: S.NullOr(S.Number),
-  competitionType: S.optional(S.NullOr(PsdCompetitionType)),
+  competitionType: S.optional(S.NullOr(S.Union(PsdCompetitionType, S.String))),
   reportGeneral: S.optional(S.NullOr(S.Boolean)),
   teamId: S.optional(S.NullOr(S.Number)),
-  // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
-  cancelled: S.optional(S.NullOr(S.Boolean)),
-  // PSD team IDs for home/away — distinct from club IDs (homeClub.id / awayClub.id)
+  // PSD team IDs for home/away — used to compute is_home (team ID != club ID)
   homeTeamId: S.optional(S.NullOr(S.Number)),
   awayTeamId: S.optional(S.NullOr(S.Number)),
+  // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
+  cancelled: S.optional(S.NullOr(S.Boolean)),
 };
 
 /**
