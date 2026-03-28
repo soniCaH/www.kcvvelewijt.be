@@ -27,7 +27,7 @@ export const getOpponentHistoryHandler = (
     cacheKey,
     fetchHistory,
     TTL.OPPONENT_HISTORY,
-    undefined,
+    TTL.OPPONENT_HISTORY * 2,
     { shouldServeStale },
   );
 };

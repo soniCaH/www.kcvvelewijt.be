@@ -48,9 +48,9 @@ function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
 }
 
 const resultBorderClass: Record<"win" | "draw" | "loss", string> = {
-  win: "border-l-4 border-l-green-500",
-  draw: "border-l-4 border-l-yellow-400",
-  loss: "border-l-4 border-l-red-500",
+  win: "border-l-4 border-l-kcvv-success",
+  draw: "border-l-4 border-l-kcvv-warning",
+  loss: "border-l-4 border-l-kcvv-alert",
 };
 
 async function fetchOpponentData(clubId: number): Promise<{
@@ -168,15 +168,17 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
       {/* W/D/L summary */}
       <div className="mb-8 grid grid-cols-5 gap-2 rounded-xl bg-[var(--color-surface)] p-4 text-center">
         <div>
-          <p className="text-2xl font-bold text-green-500">{summary.wins}</p>
+          <p className="text-2xl font-bold text-kcvv-success">{summary.wins}</p>
           <p className="text-xs text-[var(--color-muted)]">W</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-yellow-400">{summary.draws}</p>
+          <p className="text-2xl font-bold text-kcvv-warning">
+            {summary.draws}
+          </p>
           <p className="text-xs text-[var(--color-muted)]">G</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-red-500">{summary.losses}</p>
+          <p className="text-2xl font-bold text-kcvv-alert">{summary.losses}</p>
           <p className="text-xs text-[var(--color-muted)]">V</p>
         </div>
         <div>
