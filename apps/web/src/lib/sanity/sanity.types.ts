@@ -44,6 +44,32 @@ export type HomePage = {
   bannerSlotC?: BannerReference;
 };
 
+export type JeugdLandingPage = {
+  _id: string;
+  _type: "jeugdLandingPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  editorialCards?: Array<{
+    _key: string;
+    tag?: string;
+    title?: string;
+    description?: string;
+    arrowText?: string;
+    href?: string;
+    image?: {
+      _type: "image";
+      asset?: {
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+      };
+    };
+    position?: "featured" | "medium" | "third";
+    cardType?: "nav" | "article";
+  }>;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -1177,6 +1203,22 @@ export type HOMEPAGE_BANNERS_QUERY_RESULT = {
   } | null;
 } | null;
 
+// Source: ../web/src/lib/repositories/jeugd-landing-page.repository.ts
+// Variable: JEUGD_LANDING_PAGE_QUERY
+// Query: *[_type == "jeugdLandingPage"][0] { editorialCards[] { tag, title, description, arrowText, href, "imageUrl": image.asset->url + "?w=900&q=80&fm=webp", position, cardType } }
+export type JEUGD_LANDING_PAGE_QUERY_RESULT = {
+  editorialCards: Array<{
+    tag: string | null;
+    title: string | null;
+    description: string | null;
+    arrowText: string | null;
+    href: string | null;
+    imageUrl: string | null;
+    position: "featured" | "medium" | "third" | null;
+    cardType: "nav" | "article" | null;
+  }> | null;
+} | null;
+
 // Source: ../web/src/lib/repositories/page.repository.ts
 // Variable: PAGE_BY_SLUG_QUERY
 // Query: *[_type == "page" && slug.current == $slug][0] {  _id,  title,  slug,  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }}
@@ -1657,6 +1699,7 @@ declare module "@sanity/client" {
     '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, roleLabel,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "event"] | order(dateStart asc) {\n  _id, title, dateStart, dateEnd, externalLink,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
+    '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0] {\n  _id,\n  title,\n  slug,\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;

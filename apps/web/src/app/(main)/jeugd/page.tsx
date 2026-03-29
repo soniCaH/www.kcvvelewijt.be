@@ -9,6 +9,11 @@ import {
   ArticleRepository,
   type ArticleVM,
 } from "@/lib/repositories/article.repository";
+import {
+  JeugdLandingPageRepository,
+  JeugdLandingPageRepositoryLive,
+  type EditorialCardConfig,
+} from "@/lib/repositories/jeugd-landing-page.repository";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
@@ -82,10 +87,20 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
   }
 }
 
+async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* JeugdLandingPageRepository;
+      return yield* repo.getEditorialCards();
+    }).pipe(Effect.provide(JeugdLandingPageRepositoryLive)),
+  );
+}
+
 export default async function JeugdPage() {
-  const [teams, articles] = await Promise.all([
+  const [teams, articles, editorialConfig] = await Promise.all([
     fetchYouthTeams(),
     fetchJeugdArticles(),
+    fetchEditorialConfig(),
   ]);
 
   const heroSection: SectionConfig = {
@@ -116,7 +131,12 @@ export default async function JeugdPage() {
 
   const editorialSection: SectionConfig = {
     bg: "gray-100",
-    content: <JeugdEditorialGrid articles={articles} />,
+    content: (
+      <JeugdEditorialGrid
+        articles={articles}
+        editorialConfig={editorialConfig}
+      />
+    ),
     paddingTop: "pt-20",
     paddingBottom: "pb-20",
     transition: {

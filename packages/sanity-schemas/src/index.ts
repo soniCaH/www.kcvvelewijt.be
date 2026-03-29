@@ -12,6 +12,7 @@ export {htmlTable} from './htmlTable'
 export {searchFeedback} from './searchFeedback'
 export {banner} from './banner'
 export {homePage} from './homePage'
+export {jeugdLandingPage} from './jeugdLandingPage'
 
 import {player} from './player'
 import {team, trainingDay} from './team'
@@ -27,6 +28,7 @@ import {htmlTable} from './htmlTable'
 import {searchFeedback} from './searchFeedback'
 import {banner} from './banner'
 import {homePage} from './homePage'
+import {jeugdLandingPage} from './jeugdLandingPage'
 
 export const schemaTypes = [
   player,
@@ -44,4 +46,5 @@ export const schemaTypes = [
   searchFeedback,
   banner,
   homePage,
+  jeugdLandingPage,
 ]

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { JeugdEditorialGrid } from "./JeugdEditorialGrid";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
+import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
 
 function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
   return {
@@ -120,5 +121,86 @@ describe("JeugdEditorialGrid", () => {
 
     const grid = screen.getByTestId("jeugd-editorial-grid");
     expect(grid.className).toContain("grid-cols-12");
+  });
+
+  describe("with Sanity editorialConfig", () => {
+    function makeNavConfig(
+      overrides: Partial<EditorialCardConfig> = {},
+    ): EditorialCardConfig {
+      return {
+        tag: "Aansluiten",
+        title: "Word lid van KCVV",
+        description: "Nieuwe spelers zijn altijd welkom.",
+        arrowText: "Schrijf je in",
+        href: "/club/inschrijven",
+        imageUrl: null,
+        position: "medium",
+        cardType: "nav",
+        ...overrides,
+      };
+    }
+
+    it("renders nav card titles from Sanity config instead of hardcoded", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ title: "Sanity Nav Card 1", position: "medium" }),
+        makeNavConfig({ title: "Sanity Nav Card 2", position: "third" }),
+      ];
+
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
+
+      expect(screen.getByText("Sanity Nav Card 1")).toBeInTheDocument();
+      expect(screen.getByText("Sanity Nav Card 2")).toBeInTheDocument();
+      // Hardcoded defaults should NOT appear
+      expect(screen.queryByText("Onze jeugdvisie")).not.toBeInTheDocument();
+      expect(screen.queryByText("Organigram")).not.toBeInTheDocument();
+    });
+
+    it("renders nav card links from Sanity config", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ href: "/sanity/route-1", position: "medium" }),
+        makeNavConfig({ href: "/sanity/route-2", position: "third" }),
+      ];
+
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
+
+      const hrefs = screen
+        .getAllByRole("link")
+        .map((l) => l.getAttribute("href"));
+      expect(hrefs).toContain("/sanity/route-1");
+      expect(hrefs).toContain("/sanity/route-2");
+      // Hardcoded default routes should NOT appear
+      expect(hrefs).not.toContain("/jeugd/visie");
+    });
+
+    it("auto-fills article slots from articles prop when config has article cardType", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ cardType: "article", position: "featured" }),
+        makeNavConfig({ title: "Nav from Sanity", position: "medium" }),
+      ];
+      const articles = [
+        makeArticle({ id: "a1", title: "Sanity Article", slug: "sanity-art" }),
+      ];
+
+      render(
+        <JeugdEditorialGrid articles={articles} editorialConfig={config} />,
+      );
+
+      expect(screen.getByText("Sanity Article")).toBeInTheDocument();
+      expect(screen.getByText("Nav from Sanity")).toBeInTheDocument();
+    });
+
+    it("falls back to hardcoded defaults when editorialConfig is null", () => {
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={null} />);
+
+      // Hardcoded cards should appear
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+      expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
+    });
+
+    it("falls back to hardcoded defaults when editorialConfig is undefined", () => {
+      render(<JeugdEditorialGrid articles={[]} />);
+
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+    });
   });
 });

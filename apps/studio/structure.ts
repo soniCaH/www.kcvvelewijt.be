@@ -96,6 +96,14 @@ export const structure: StructureResolver = (S) =>
             .documentId('homePage')
             .title('Homepage configuratie'),
         ),
+      S.listItem()
+        .title('Jeugd landing page')
+        .child(
+          S.document()
+            .schemaType('jeugdLandingPage')
+            .documentId('jeugdLandingPage')
+            .title('Jeugd landing page configuratie'),
+        ),
       S.divider(),
       S.listItem()
         .title('Hulp & Contact')

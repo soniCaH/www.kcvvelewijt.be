@@ -14,6 +14,24 @@ vi.mock("@/lib/repositories/article.repository", () => ({
   ArticleRepository: {},
 }));
 
+vi.mock(
+  "@/lib/repositories/jeugd-landing-page.repository",
+  async (importOriginal) => {
+    const { Layer, Effect } = await import("effect");
+    const mod =
+      await importOriginal<
+        typeof import("@/lib/repositories/jeugd-landing-page.repository")
+      >();
+    return {
+      ...mod,
+      JeugdLandingPageRepositoryLive: Layer.succeed(
+        mod.JeugdLandingPageRepository,
+        { getEditorialCards: () => Effect.succeed(null) },
+      ),
+    };
+  },
+);
+
 describe("/jeugd page — canonical section flow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
