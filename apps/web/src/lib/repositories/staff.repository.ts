@@ -11,7 +11,7 @@ import type { OrgChartNode } from "@/types/organigram";
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
 export const ORGANIGRAM_NODES_QUERY =
-  defineQuery(`*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 0) asc, title asc) {
+  defineQuery(`*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {
   _id,
   title,
   description,
