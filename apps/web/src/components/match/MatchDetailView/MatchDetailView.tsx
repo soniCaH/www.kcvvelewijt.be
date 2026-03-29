@@ -14,6 +14,7 @@
 import Link from "next/link";
 import { MatchHeader, type MatchTeamProps } from "../MatchHeader";
 import { MatchLineup, type LineupPlayer } from "../MatchLineup";
+import { MatchEvents, type MatchEvent } from "../MatchEvents/MatchEvents";
 
 export interface MatchDetailViewProps {
   /** Home team info */
@@ -36,6 +37,8 @@ export interface MatchDetailViewProps {
   hasReport?: boolean;
   /** URL to navigate back to (e.g. team page with tab) */
   backUrl?: string;
+  /** Match events (goals, cards, substitutions) */
+  events?: MatchEvent[];
   /** Loading state */
   isLoading?: boolean;
   /** Additional CSS classes */
@@ -60,6 +63,7 @@ export function MatchDetailView({
   awayLineup,
   hasReport = false,
   backUrl,
+  events,
   isLoading = false,
   className,
 }: MatchDetailViewProps) {
@@ -142,6 +146,20 @@ export function MatchDetailView({
           homeLineup={homeLineup}
           awayLineup={awayLineup}
         />
+
+        {/* Events Section */}
+        {events !== undefined && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Wedstrijdgebeurtenissen
+            </h2>
+            <MatchEvents
+              homeTeamName={homeTeam.name}
+              awayTeamName={awayTeam.name}
+              events={events}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchDetailView } from "./MatchDetailView";
 import type { LineupPlayer } from "../MatchLineup";
+import type { MatchEvent } from "../MatchEvents/MatchEvents";
 
 const KCVV_LOGO =
   "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";
@@ -402,6 +403,114 @@ export const WithoutLogos: Story = {
     homeLineup: mockHomeLineup,
     awayLineup: [],
     hasReport: true,
+  },
+};
+
+const mockEvents: MatchEvent[] = [
+  {
+    id: 1,
+    type: "goal",
+    minute: 23,
+    team: "home",
+    player: "Breugelmans Maxim",
+  },
+  {
+    id: 2,
+    type: "yellow_card",
+    minute: 34,
+    team: "away",
+    player: "De Vries Tom",
+  },
+  {
+    id: 3,
+    type: "goal",
+    minute: 56,
+    team: "home",
+    player: "Fozin Tembou James",
+    isPenalty: true,
+  },
+  {
+    id: 4,
+    type: "substitution",
+    minute: 65,
+    team: "away",
+    playerIn: "Verhoeven Nick",
+    playerOut: "Maes Wim",
+  },
+  {
+    id: 5,
+    type: "goal",
+    minute: 78,
+    team: "away",
+    player: "Van Damme Kris",
+  },
+  {
+    id: 6,
+    type: "red_card",
+    minute: 88,
+    team: "away",
+    player: "Claes Bart",
+  },
+  {
+    id: 7,
+    type: "goal",
+    minute: 90,
+    additionalTime: 3,
+    team: "home",
+    player: "El Attabi Adil",
+  },
+];
+
+/**
+ * Finished match with full events timeline
+ */
+export const WithEvents: Story = {
+  render,
+  args: {
+    homeTeam: {
+      name: "KCVV Elewijt",
+      logo: KCVV_LOGO,
+      score: 3,
+    },
+    awayTeam: {
+      name: "KFC Turnhout",
+      logo: OPPONENT_LOGO,
+      score: 1,
+    },
+    date: new Date("2025-12-07T15:00:00Z"),
+    time: "15:00",
+    status: "finished",
+    competition: "3de Nationale",
+    homeLineup: mockHomeLineup,
+    awayLineup: mockAwayLineup,
+    hasReport: true,
+    events: mockEvents,
+  },
+};
+
+/**
+ * Finished match with empty events (no data available)
+ */
+export const WithEmptyEvents: Story = {
+  render,
+  args: {
+    homeTeam: {
+      name: "KCVV Elewijt",
+      logo: KCVV_LOGO,
+      score: 2,
+    },
+    awayTeam: {
+      name: "KFC Turnhout",
+      logo: OPPONENT_LOGO,
+      score: 0,
+    },
+    date: new Date("2025-12-07T15:00:00Z"),
+    time: "15:00",
+    status: "finished",
+    competition: "3de Nationale",
+    homeLineup: mockHomeLineup,
+    awayLineup: mockAwayLineup,
+    events: [],
   },
 };
 
