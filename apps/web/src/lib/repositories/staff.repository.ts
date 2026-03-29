@@ -24,7 +24,7 @@ export const ORGANIGRAM_NODES_QUERY =
     "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
     email,
     phone,
-    "href": select(defined(psdId) && psdId != "" => "/staf/" + psdId, null)
+    "href": select(defined(psdId) && trim(psdId) != "" => "/staf/" + trim(psdId), null)
   }
 }`);
 
