@@ -24,7 +24,7 @@ export const ORGANIGRAM_NODES_QUERY =
     "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
     email,
     phone,
-    "href": select(defined(psdId) && trim(psdId) != "" => "/staf/" + trim(psdId), null)
+    "psdId": psdId
   }
 }`);
 
@@ -126,13 +126,14 @@ export function toOrgChartNode(
     parentId: node.parentId ?? "club",
     members: (node.members ?? []).map((m) => {
       const trimmed = (m.name ?? "").trim();
+      const psdId = m.psdId?.trim();
       return {
         id: m.id,
         name: trimmed === "" ? undefined : trimmed,
         imageUrl: m.imageUrl ?? undefined,
         email: m.email ?? undefined,
         phone: m.phone ?? undefined,
-        href: m.href ?? undefined,
+        href: psdId ? `/staf/${psdId}` : undefined,
       };
     }),
   };
