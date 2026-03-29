@@ -142,10 +142,10 @@ export function EnhancedOrgChart({
     const query = searchQuery.toLowerCase();
     return departmentFilteredMembers.filter((member) => {
       return (
-        member.name.toLowerCase().includes(query) ||
+        member.members.some((m) => m.name?.toLowerCase().includes(query)) ||
         member.title.toLowerCase().includes(query) ||
         member.roleCode?.toLowerCase().includes(query) ||
-        member.email?.toLowerCase().includes(query)
+        member.members.some((m) => m.email?.toLowerCase().includes(query))
       );
     });
   }, [departmentFilteredMembers, searchQuery]);
@@ -266,7 +266,7 @@ export function EnhancedOrgChart({
       .sort((a, b) => a.id.localeCompare(b.id))
       .map(
         (d) =>
-          `${d.id}|${d.name}|${d.title}|${d.department}|${d.parentId ?? ""}`,
+          `${d.id}|${d.members[0]?.name ?? ""}|${d.title}|${d.department}|${d.parentId ?? ""}`,
       )
       .join(",");
 

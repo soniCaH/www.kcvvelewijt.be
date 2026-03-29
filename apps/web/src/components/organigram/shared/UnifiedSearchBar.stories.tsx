@@ -7,38 +7,38 @@ import type { ResponsibilityPath } from "@/types/responsibility";
 const mockMembers: OrgChartNode[] = [
   {
     id: "m-1",
-    name: "Jan Janssen",
     title: "Voorzitter",
     department: "hoofdbestuur",
     parentId: null,
+    members: [{ id: "staff-m-1", name: "Jan Janssen" }],
   },
   {
     id: "m-2",
-    name: "Els Pieters",
     title: "Secretaris",
     department: "hoofdbestuur",
     parentId: null,
+    members: [{ id: "staff-m-2", name: "Els Pieters" }],
   },
   {
     id: "m-3",
-    name: "Koen De Smedt",
     title: "Penningmeester",
     department: "hoofdbestuur",
     parentId: null,
+    members: [{ id: "staff-m-3", name: "Koen De Smedt" }],
   },
   {
     id: "m-4",
-    name: "Lien Van Acker",
     title: "Jeugdcoördinator",
     department: "jeugdbestuur",
     parentId: null,
+    members: [{ id: "staff-m-4", name: "Lien Van Acker" }],
   },
   {
     id: "m-5",
-    name: "Tom Claes",
     title: "Trainer U15",
     department: "jeugdbestuur",
     parentId: "m-4",
+    members: [{ id: "staff-m-5", name: "Tom Claes" }],
   },
 ];
 

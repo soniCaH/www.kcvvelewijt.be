@@ -82,10 +82,10 @@ export function MobileNavigationDrawer({
     const query = searchQuery.toLowerCase();
     return departmentFilteredMembers.filter((member) => {
       return (
-        member.name.toLowerCase().includes(query) ||
+        member.members[0]?.name?.toLowerCase().includes(query) ||
         member.title.toLowerCase().includes(query) ||
         member.roleCode?.toLowerCase().includes(query) ||
-        member.email?.toLowerCase().includes(query) ||
+        member.members[0]?.email?.toLowerCase().includes(query) ||
         member.department?.toLowerCase().includes(query)
       );
     });
@@ -223,9 +223,10 @@ export function MobileNavigationDrawer({
                         src={
                           imageErrors[member.id]
                             ? "/images/logo-flat.png"
-                            : member.imageUrl || "/images/logo-flat.png"
+                            : member.members[0]?.imageUrl ||
+                              "/images/logo-flat.png"
                         }
-                        alt={member.name}
+                        alt={member.members[0]?.name ?? member.title}
                         width={48}
                         height={48}
                         className="rounded-full object-cover border-2 border-kcvv-green"
@@ -242,7 +243,7 @@ export function MobileNavigationDrawer({
                     <div className="flex-1 min-w-0">
                       {/* Name */}
                       <p className="font-semibold text-kcvv-gray-blue text-sm truncate">
-                        {member.name}
+                        {member.members[0]?.name ?? member.title}
                       </p>
 
                       {/* Title */}

@@ -146,7 +146,8 @@ const CardHierarchyWithState = (args: Partial<CardHierarchyProps>) => {
             Last Selected:
           </p>
           <p className="text-sm text-kcvv-gray-dark">
-            {selectedMember.name} - {selectedMember.title}
+            {selectedMember.members[0]?.name ?? selectedMember.title} -{" "}
+            {selectedMember.title}
           </p>
         </div>
       )}
@@ -245,52 +246,52 @@ export const DeepHierarchy: Story = {
     const deepMembers: OrgChartNode[] = [
       {
         id: "root",
-        name: "CEO",
         title: "Chief Executive Officer",
         department: "algemeen",
         parentId: null,
+        members: [{ id: "s-root", name: "CEO" }],
       },
       {
         id: "vp1",
-        name: "VP Operations",
         title: "Vice President Operations",
         department: "hoofdbestuur",
         parentId: "root",
+        members: [{ id: "s-vp1", name: "VP Operations" }],
       },
       {
         id: "dir1",
-        name: "Director A",
         title: "Director of Department A",
         department: "hoofdbestuur",
         parentId: "vp1",
+        members: [{ id: "s-dir1", name: "Director A" }],
       },
       {
         id: "mgr1",
-        name: "Manager A1",
         title: "Manager A1",
         department: "hoofdbestuur",
         parentId: "dir1",
+        members: [{ id: "s-mgr1", name: "Manager A1" }],
       },
       {
         id: "lead1",
-        name: "Team Lead A1.1",
         title: "Team Lead",
         department: "hoofdbestuur",
         parentId: "mgr1",
+        members: [{ id: "s-lead1", name: "Team Lead A1.1" }],
       },
       {
         id: "emp1",
-        name: "Employee 1",
         title: "Team Member",
         department: "hoofdbestuur",
         parentId: "lead1",
+        members: [{ id: "s-emp1", name: "Employee 1" }],
       },
       {
         id: "emp2",
-        name: "Employee 2",
         title: "Team Member",
         department: "hoofdbestuur",
         parentId: "lead1",
+        members: [{ id: "s-emp2", name: "Employee 2" }],
       },
     ];
 
@@ -304,7 +305,9 @@ export const DeepHierarchy: Story = {
           members={deepMembers}
           initialExpandedDepth={3}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -334,7 +337,9 @@ export const SearchWithAutoExpand: Story = {
           members={clubStructure}
           initialExpandedDepth={1}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -438,7 +443,9 @@ export const FilteredHoofdbestuur: Story = {
           members={hoofdbestuurMembers}
           initialExpandedDepth={2}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -468,7 +475,7 @@ export const InteractionExample: Story = {
           onMemberClick={(member) => {
             setExpandHistory((prev) => [
               ...prev,
-              `Clicked: ${member.name} - ${member.title}`,
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
             ]);
           }}
         />
@@ -513,38 +520,38 @@ export const AnimationShowcase: Story = {
     const simpleHierarchy: OrgChartNode[] = [
       {
         id: "1",
-        name: "President",
         title: "Voorzitter",
         department: "hoofdbestuur",
         parentId: null,
+        members: [{ id: "sh-1", name: "President" }],
       },
       {
         id: "2",
-        name: "Vice President",
         title: "Ondervoorzitter",
         department: "hoofdbestuur",
         parentId: "1",
+        members: [{ id: "sh-2", name: "Vice President" }],
       },
       {
         id: "3",
-        name: "Secretary",
         title: "Secretaris",
         department: "hoofdbestuur",
         parentId: "1",
+        members: [{ id: "sh-3", name: "Secretary" }],
       },
       {
         id: "4",
-        name: "Assistant 1",
         title: "Assistent",
         department: "hoofdbestuur",
         parentId: "2",
+        members: [{ id: "sh-4", name: "Assistant 1" }],
       },
       {
         id: "5",
-        name: "Assistant 2",
         title: "Assistent",
         department: "hoofdbestuur",
         parentId: "2",
+        members: [{ id: "sh-5", name: "Assistant 2" }],
       },
     ];
 
@@ -558,7 +565,9 @@ export const AnimationShowcase: Story = {
           members={simpleHierarchy}
           initialExpandedDepth={1}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -581,20 +590,25 @@ export const LargeDataset: Story = {
     const largeHierarchy: OrgChartNode[] = [
       {
         id: "root",
-        name: "Club",
         title: "KCVV Elewijt",
         department: "algemeen",
         parentId: null,
+        members: [{ id: "lh-root", name: "Club" }],
       },
       ...Array.from({ length: 50 }, (_, i) => ({
         id: `member-${i}`,
-        name: `Member ${i + 1}`,
         title: `Position ${i + 1}`,
         roleCode: `P${i}`,
-        email: `member${i}@kcvvelewijt.be`,
         department:
           i % 2 === 0 ? ("hoofdbestuur" as const) : ("jeugdbestuur" as const),
         parentId: i < 10 ? "root" : `member-${Math.floor(i / 5) - 2}`,
+        members: [
+          {
+            id: `lh-staff-${i}`,
+            name: `Member ${i + 1}`,
+            email: `member${i}@kcvvelewijt.be`,
+          },
+        ],
       })),
     ];
 
@@ -608,7 +622,9 @@ export const LargeDataset: Story = {
           members={largeHierarchy}
           initialExpandedDepth={2}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>
@@ -659,8 +675,8 @@ export const SingleMember: Story = {
     members: [
       clubStructure[0] ?? {
         id: "club",
-        name: "KCVV Elewijt",
         title: "Voetbalclub",
+        members: [{ id: "club", name: "KCVV Elewijt" }],
       },
     ],
   },
@@ -687,7 +703,9 @@ export const FlatHierarchy: Story = {
           members={flatMembers}
           initialExpandedDepth={0}
           onMemberClick={(member) =>
-            alert(`Clicked: ${member.name} - ${member.title}`)
+            alert(
+              `Clicked: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+            )
           }
         />
       </div>

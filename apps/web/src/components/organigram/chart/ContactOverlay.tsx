@@ -97,6 +97,10 @@ export function ContactOverlay({
   // Don't render if not visible
   if (!isVisible) return null;
 
+  const primaryMember = member.members[0];
+  const displayName = primaryMember?.name ?? member.title;
+  const displayImageUrl = primaryMember?.imageUrl;
+
   return (
     <>
       {/* Backdrop (mobile only) */}
@@ -126,7 +130,7 @@ export function ContactOverlay({
           width: "calc(100vw - 32px)", // Mobile: 16px margin on each side
         }}
         role="dialog"
-        aria-label={`Contactinformatie voor ${member.name}`}
+        aria-label={`Contactinformatie voor ${displayName}`}
       >
         {/* Header */}
         <div className="flex items-start gap-3 p-4 border-b border-gray-100">
@@ -136,9 +140,9 @@ export function ContactOverlay({
               src={
                 imageError
                   ? "/images/logo-flat.png"
-                  : member.imageUrl || "/images/logo-flat.png"
+                  : displayImageUrl || "/images/logo-flat.png"
               }
-              alt={member.name}
+              alt={displayName}
               width={64}
               height={64}
               className="rounded-full object-cover border-2 border-kcvv-green"
@@ -149,7 +153,7 @@ export function ContactOverlay({
           {/* Member Info */}
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-kcvv-gray-blue text-base leading-tight mb-1 font-heading">
-              {member.name}
+              {displayName}
             </h3>
             <p className="text-sm text-kcvv-gray leading-snug">
               {member.title}
@@ -193,9 +197,9 @@ export function ContactOverlay({
         {/* Quick Actions */}
         <div className="p-4">
           <ContactQuickActions
-            email={member.email}
-            phone={member.phone}
-            name={member.name}
+            email={primaryMember?.email}
+            phone={primaryMember?.phone}
+            name={displayName}
             size="lg"
           />
         </div>

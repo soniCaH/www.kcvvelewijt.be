@@ -5,10 +5,14 @@ import { staffMembersFixture } from "@/components/organigram/__fixtures__/staff-
 
 const president = staffMembersFixture.find((n) => n.id === "president") ?? {
   id: "president",
-  name: "Voorzitter",
   title: "Voorzitter",
+  members: [{ id: "staff-president", name: "Voorzitter" }],
 };
-const minimal = { id: "x", name: "Jan Janssen", title: "Vrijwilliger" };
+const minimal = {
+  id: "x",
+  title: "Vrijwilliger",
+  members: [{ id: "staff-x", name: "Jan Janssen" }],
+};
 
 const meta = {
   title: "Features/Organigram/ContactOverlay",

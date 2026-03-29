@@ -5,20 +5,20 @@ import { staffMembersFixture } from "@/components/organigram/__fixtures__/staff-
 
 const president = staffMembersFixture.find((n) => n.id === "president") ?? {
   id: "president",
-  name: "Voorzitter",
   title: "Voorzitter",
+  members: [{ id: "staff-president", name: "Voorzitter" }],
 };
 const vicePresident = staffMembersFixture.find(
   (n) => n.id === "vice-president",
 ) ?? {
   id: "vice-president",
-  name: "Ondervoorzitter",
   title: "Ondervoorzitter",
+  members: [{ id: "staff-vp", name: "Ondervoorzitter" }],
 };
 const secretary = staffMembersFixture.find((n) => n.id === "secretary") ?? {
   id: "secretary",
-  name: "Secretaris",
   title: "Secretaris",
+  members: [{ id: "staff-secretary", name: "Secretaris" }],
 };
 
 const meta = {
@@ -78,7 +78,11 @@ export const DeepNesting: Story = {
 /** Card with minimal data — no email, phone, or image. */
 export const MinimalData: Story = {
   args: {
-    member: { id: "x", name: "Onbekend Lid", title: "Vrijwilliger" },
+    member: {
+      id: "x",
+      title: "Vrijwilliger",
+      members: [{ id: "staff-x", name: "Onbekend Lid" }],
+    },
     directReports: [],
     depth: 0,
     isExpanded: false,

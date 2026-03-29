@@ -17,48 +17,55 @@ import {
 const mockMembers: OrgChartNode[] = [
   {
     id: "club",
-    name: "KCVV Elewijt",
     title: "Voetbalclub",
     department: "algemeen",
     parentId: null,
+    members: [{ id: "club", name: "KCVV Elewijt" }],
   },
   {
     id: "president",
-    name: "John Doe",
     title: "Voorzitter",
     department: "hoofdbestuur",
     parentId: "club",
-    email: "president@test.com",
+    members: [
+      { id: "staff-president", name: "John Doe", email: "president@test.com" },
+    ],
   },
   {
     id: "secretary",
-    name: "Jane Smith",
     title: "Secretaris",
     department: "hoofdbestuur",
     parentId: "president",
-    email: "secretary@test.com",
+    members: [
+      {
+        id: "staff-secretary",
+        name: "Jane Smith",
+        email: "secretary@test.com",
+      },
+    ],
   },
   {
     id: "treasurer",
-    name: "Bob Johnson",
     title: "Penningmeester",
     department: "hoofdbestuur",
     parentId: "president",
-    phone: "0123456789",
+    members: [
+      { id: "staff-treasurer", name: "Bob Johnson", phone: "0123456789" },
+    ],
   },
   {
     id: "jeugdcoordinator",
-    name: "Alice Brown",
     title: "Jeugdcoördinator",
     department: "jeugdbestuur",
     parentId: "president",
+    members: [{ id: "staff-jeugd", name: "Alice Brown" }],
   },
   {
     id: "team-manager",
-    name: "Charlie Wilson",
     title: "Teammanager",
     department: "jeugdbestuur",
     parentId: "jeugdcoordinator",
+    members: [{ id: "staff-tm", name: "Charlie Wilson" }],
   },
 ];
 
@@ -68,7 +75,7 @@ describe("findMemberById", () => {
 
     expect(result).toBeDefined();
     expect(result?.id).toBe("president");
-    expect(result?.name).toBe("John Doe");
+    expect(result?.members[0]?.name).toBe("John Doe");
   });
 
   it("should return undefined for non-existent ID", () => {
@@ -238,21 +245,21 @@ describe("getAncestors", () => {
     const membersWithCycle: OrgChartNode[] = [
       {
         id: "a",
-        name: "Member A",
         title: "Title A",
         parentId: "c", // Points to C, creating a cycle
+        members: [{ id: "staff-a", name: "Member A" }],
       },
       {
         id: "b",
-        name: "Member B",
         title: "Title B",
         parentId: "a",
+        members: [{ id: "staff-b", name: "Member B" }],
       },
       {
         id: "c",
-        name: "Member C",
         title: "Title C",
         parentId: "b",
+        members: [{ id: "staff-c", name: "Member C" }],
       },
     ];
 

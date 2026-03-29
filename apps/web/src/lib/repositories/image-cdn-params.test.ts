@@ -9,7 +9,7 @@ import { HOMEPAGE_BANNERS_QUERY } from "./homepage.repository";
 import { PAGE_BY_SLUG_QUERY } from "./page.repository";
 import { PLAYERS_QUERY, PLAYER_BY_PSD_ID_QUERY } from "./player.repository";
 import { SPONSORS_QUERY } from "./sponsor.repository";
-import { STAFF_MEMBERS_QUERY } from "./staff.repository";
+import { ORGANIGRAM_NODES_QUERY } from "./staff.repository";
 import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "./team.repository";
 
 const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp", "fit=max"];
@@ -49,7 +49,7 @@ describe("Sanity image CDN optimization", () => {
     { name: "PLAYER_BY_PSD_ID_QUERY", query: PLAYER_BY_PSD_ID_QUERY },
     { name: "TEAMS_QUERY", query: TEAMS_QUERY },
     { name: "TEAM_BY_SLUG_QUERY", query: TEAM_BY_SLUG_QUERY },
-    { name: "STAFF_MEMBERS_QUERY", query: STAFF_MEMBERS_QUERY },
+    { name: "ORGANIGRAM_NODES_QUERY", query: ORGANIGRAM_NODES_QUERY },
     { name: "ARTICLES_QUERY", query: ARTICLES_QUERY },
     { name: "ARTICLE_BY_SLUG_QUERY", query: ARTICLE_BY_SLUG_QUERY },
     { name: "RELATED_ARTICLES_QUERY", query: RELATED_ARTICLES_QUERY },

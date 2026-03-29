@@ -8,9 +8,10 @@ export const staffMembersFixture: OrgChartNode[] = [
   // Root
   {
     id: "club",
-    name: "KCVV Elewijt",
-    title: "Voetbalclub",
-    imageUrl: "/images/logo-flat.png",
+    title: "KCVV Elewijt",
+    members: [
+      { id: "club", name: "KCVV Elewijt", imageUrl: "/images/logo-flat.png" },
+    ],
     department: "algemeen",
     parentId: null,
   },
@@ -18,106 +19,138 @@ export const staffMembersFixture: OrgChartNode[] = [
   // Hoofdbestuur
   {
     id: "president",
-    name: "Jan Voorzitter",
     title: "Voorzitter",
     roleCode: "PRES",
     department: "hoofdbestuur",
-    responsibilities:
+    description:
       "Leiding geven aan het volledige bestuur, vertegenwoordigen van de club naar buiten toe.",
-    email: "voorzitter@kcvvelewijt.be",
+    members: [
+      {
+        id: "staff-president",
+        name: "Jan Voorzitter",
+        email: "voorzitter@kcvvelewijt.be",
+      },
+    ],
     parentId: "club",
   },
   {
     id: "vice-president",
-    name: "Marie Ondervoorzitter",
     title: "Ondervoorzitter",
     roleCode: "VP",
     department: "hoofdbestuur",
-    responsibilities:
-      "Ondersteunen van de voorzitter, waarnemen bij afwezigheid.",
-    email: "ondervoorzitter@kcvvelewijt.be",
+    description: "Ondersteunen van de voorzitter, waarnemen bij afwezigheid.",
+    members: [
+      {
+        id: "staff-vp",
+        name: "Marie Ondervoorzitter",
+        email: "ondervoorzitter@kcvvelewijt.be",
+      },
+    ],
     parentId: "president",
   },
   {
     id: "secretary",
-    name: "Luc Secretaris",
     title: "Secretaris",
     roleCode: "SEC",
     department: "hoofdbestuur",
-    responsibilities:
+    description:
       "Administratie, correspondentie, verslaggeving van vergaderingen.",
-    email: "secretaris@kcvvelewijt.be",
+    members: [
+      {
+        id: "staff-sec",
+        name: "Luc Secretaris",
+        email: "secretaris@kcvvelewijt.be",
+      },
+    ],
     parentId: "president",
   },
   {
     id: "treasurer",
-    name: "Els Penningmeester",
     title: "Penningmeester",
     roleCode: "PM",
     department: "hoofdbestuur",
-    responsibilities: "Financieel beheer, budgettering, kascontrole.",
-    email: "penningmeester@kcvvelewijt.be",
+    description: "Financieel beheer, budgettering, kascontrole.",
+    members: [
+      {
+        id: "staff-pm",
+        name: "Els Penningmeester",
+        email: "penningmeester@kcvvelewijt.be",
+      },
+    ],
     parentId: "president",
   },
   {
     id: "technical-coordinator",
-    name: "Dirk Technisch",
     title: "Technisch Coördinator",
     roleCode: "TC",
     department: "hoofdbestuur",
-    responsibilities:
-      "Coördinatie van alle technische aspecten, trainersbeleid.",
-    email: "technisch@kcvvelewijt.be",
+    description: "Coördinatie van alle technische aspecten, trainersbeleid.",
+    members: [
+      {
+        id: "staff-tc",
+        name: "Dirk Technisch",
+        email: "technisch@kcvvelewijt.be",
+      },
+    ],
     parentId: "vice-president",
   },
   {
     id: "head-coach-seniors",
-    name: "Marc Trainer",
     title: "Hoofdtrainer Senioren",
     roleCode: "T1",
     department: "hoofdbestuur",
-    responsibilities: "Training en begeleiding eerste ploeg.",
+    description: "Training en begeleiding eerste ploeg.",
+    members: [{ id: "staff-t1", name: "Marc Trainer" }],
     parentId: "technical-coordinator",
   },
   {
     id: "communication-manager",
-    name: "Sofie Communicatie",
     title: "Communicatieverantwoordelijke",
     roleCode: "COM",
     department: "hoofdbestuur",
-    responsibilities: "Website, social media, nieuwsberichten.",
-    email: "communicatie@kcvvelewijt.be",
+    description: "Website, social media, nieuwsberichten.",
+    members: [
+      {
+        id: "staff-com",
+        name: "Sofie Communicatie",
+        email: "communicatie@kcvvelewijt.be",
+      },
+    ],
     parentId: "secretary",
   },
 
   // Jeugdbestuur
   {
     id: "youth-coordinator",
-    name: "Petra Jeugd",
     title: "Jeugdcoördinator",
     roleCode: "JC",
     department: "jeugdbestuur",
-    responsibilities:
-      "Algemene leiding jeugdwerking, coördinatie jeugdbestuur.",
-    email: "jeugd@kcvvelewijt.be",
+    description: "Algemene leiding jeugdwerking, coördinatie jeugdbestuur.",
+    members: [
+      {
+        id: "staff-jc",
+        name: "Petra Jeugd",
+        email: "jeugd@kcvvelewijt.be",
+      },
+    ],
     parentId: "president",
   },
   {
     id: "youth-technical-coordinator",
-    name: "Tom Technisch Jeugd",
     title: "Technisch Verantwoordelijke Jeugd",
     roleCode: "TJ",
     department: "jeugdbestuur",
-    responsibilities: "Trainersbeleid jeugd, sportieve ontwikkeling.",
+    description: "Trainersbeleid jeugd, sportieve ontwikkeling.",
+    members: [{ id: "staff-tj", name: "Tom Technisch Jeugd" }],
     parentId: "youth-coordinator",
   },
   {
     id: "youth-secretary",
-    name: "An Secretaris Jeugd",
     title: "Secretaris Jeugdbestuur",
     roleCode: "JSEC",
     department: "jeugdbestuur",
-    responsibilities: "Administratie jeugdwerking, inschrijvingen, mutaties.",
+    description: "Administratie jeugdwerking, inschrijvingen, mutaties.",
+    members: [{ id: "staff-jsec", name: "An Secretaris Jeugd" }],
     parentId: "youth-coordinator",
   },
 ];

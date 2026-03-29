@@ -6,20 +6,14 @@
  */
 
 /**
- * A single person/position in the organizational chart
+ * A single member (person) linked to an organigram node.
  */
-export interface OrgChartNode {
-  /** Unique identifier for this node */
+export interface OrgChartMember {
+  /** Sanity _id of the staffMember document, or a synthetic value for generated nodes (e.g. "club") */
   id: string;
 
-  /** Full name of the person */
-  name: string;
-
-  /** Job title or position */
-  title: string;
-
-  /** Short role code (e.g., "PRES" for President) */
-  roleCode?: string;
+  /** Full name of the person; undefined when whitespace-only or absent */
+  name?: string;
 
   /** URL to profile photo */
   imageUrl?: string;
@@ -30,17 +24,40 @@ export interface OrgChartNode {
   /** Phone number */
   phone?: string;
 
-  /** Description of responsibilities */
-  responsibilities?: string;
+  /** Canonical URL to the staff profile page (/staf/{psdId}) */
+  href?: string;
+}
 
-  /** Optional deep-link to a staff profile page (not populated by Sanity; reserved for future use) */
-  profileUrl?: string;
+/**
+ * A single position/role in the organizational chart.
+ * One node can be linked to zero (vacant), one, or multiple (shared) staff members.
+ */
+export interface OrgChartNode {
+  /** Unique identifier — organigramNode._id for Sanity-backed nodes, or a synthetic value for generated root nodes (e.g. "club") */
+  id: string;
 
-  /** Department or section this person belongs to */
+  /** Position title — organigramNode.title for Sanity-backed nodes, or a synthetic label for generated root nodes */
+  title: string;
+
+  /** Short role code badge (e.g., "PRES" for President) */
+  roleCode?: string;
+
+  /** Description of the position's responsibilities */
+  description?: string;
+
+  /** Department or section this position belongs to */
   department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
 
   /** Parent node ID (for building the hierarchy) */
   parentId?: string | null;
+
+  /**
+   * Staff members holding this position.
+   * - 0 members: vacant position
+   * - 1 member: standard single-person role
+   * - 2+ members: shared/co-held role
+   */
+  members: OrgChartMember[];
 
   /** Array of child node IDs (computed) */
   _children?: OrgChartNode[];

@@ -15,17 +15,6 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
-export type SearchFeedback = {
-  _id: string;
-  _type: "searchFeedback";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  pathSlug?: string;
-  pathTitle?: string;
-  vote?: "up" | "down";
-};
-
 export type BannerReference = {
   _ref: string;
   _type: "reference";
@@ -110,17 +99,15 @@ export type SanityImageHotspot = {
   width?: number;
 };
 
-export type ArticleImage = {
-  _type: "articleImage";
-  image?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  alt?: string;
-  fullBleed?: boolean;
+export type SearchFeedback = {
+  _id: string;
+  _type: "searchFeedback";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  pathSlug?: string;
+  pathTitle?: string;
+  vote?: "up" | "down";
 };
 
 export type HtmlTable = {
@@ -185,8 +172,22 @@ export type Sponsor = {
   url?: string;
   tier?: "hoofdsponsor" | "sponsor" | "sympathisant";
   featured?: boolean;
+  description?: string;
   type?: "crossing" | "training" | "white" | "green" | "panel" | "other";
   active?: boolean;
+};
+
+export type ArticleImage = {
+  _type: "articleImage";
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  alt?: string;
+  fullBleed?: boolean;
 };
 
 export type PlayerReference = {
@@ -354,14 +355,14 @@ export type Slug = {
   source?: string;
 };
 
-export type ResponsibilityPathReference = {
+export type ResponsibilityReference = {
   _ref: string;
   _type: "reference";
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: "responsibility";
 };
 
-export type ResponsibilityPath = {
+export type Responsibility = {
   _id: string;
   _type: "responsibility";
   _createdAt: string;
@@ -407,8 +408,35 @@ export type ResponsibilityPath = {
   relatedPaths?: Array<
     {
       _key: string;
-    } & ResponsibilityPathReference
+    } & ResponsibilityReference
   >;
+};
+
+export type OrganigramNodeReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "organigramNode";
+};
+
+export type OrganigramNode = {
+  _id: string;
+  _type: "organigramNode";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  description?: string;
+  roleCode?: string;
+  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
+  parentNode?: OrganigramNodeReference;
+  members?: Array<
+    {
+      _key: string;
+    } & StaffMemberReference
+  >;
+  active?: boolean;
+  sortOrder?: number;
 };
 
 export type StaffMember = {
@@ -733,19 +761,19 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | SearchFeedback
   | BannerReference
   | HomePage
   | SanityImageAssetReference
   | Banner
   | SanityImageCrop
   | SanityImageHotspot
-  | ArticleImage
+  | SearchFeedback
   | HtmlTable
   | SanityFileAssetReference
   | FileAttachment
   | Event
   | Sponsor
+  | ArticleImage
   | PlayerReference
   | StaffMemberReference
   | TeamReference
@@ -754,8 +782,10 @@ export type AllSanitySchemaTypes =
   | Article
   | Page
   | Slug
-  | ResponsibilityPathReference
-  | ResponsibilityPath
+  | ResponsibilityReference
+  | Responsibility
+  | OrganigramNodeReference
+  | OrganigramNode
   | StaffMember
   | TrainingSession
   | Team
@@ -1438,20 +1468,23 @@ export type SPONSORS_QUERY_RESULT = Array<{
 }>;
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
-// Variable: STAFF_MEMBERS_QUERY
-// Query: *[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {  _id,  firstName,  lastName,  roleLabel,  roleCode,  department,  email,  phone,  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",  responsibilities,  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)}
-export type STAFF_MEMBERS_QUERY_RESULT = Array<{
+// Variable: ORGANIGRAM_NODES_QUERY
+// Query: *[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {  _id,  title,  description,  roleCode,  department,  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),  "members": members[@->archived != true]->{    "id": _id,    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",    email,    phone,    "psdId": psdId  }}
+export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
   _id: string;
-  firstName: string | null;
-  lastName: string | null;
-  roleLabel: string | null;
+  title: string | null;
+  description: string | null;
   roleCode: string | null;
   department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
-  email: string | null;
-  phone: string | null;
-  photoUrl: string | null;
-  responsibilities: string | null;
   parentId: string | null;
+  members: Array<{
+    id: string;
+    name: string | " ";
+    imageUrl: string | null;
+    email: string | null;
+    phone: string | null;
+    psdId: string | null;
+  }> | null;
 }>;
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
@@ -1463,29 +1496,29 @@ export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
   firstName: string | null;
   lastName: string | null;
   role:
-    | "hoofdtrainer"
-    | "assistent"
-    | "keeperstrainer"
-    | "tvjo"
-    | "ploegdelegatie"
     | "afgevaardigde"
+    | "assistent"
+    | "bestuur"
     | "coach"
-    | "voorzitter"
-    | "ondervoorzitter"
-    | "secretaris"
-    | "penningmeester"
+    | "evenementen-coordinator"
+    | "hoofdtrainer"
     | "jeugdcoordinator"
     | "jeugdsecretaris"
-    | "technisch-coordinator"
-    | "sportief-verantwoordelijke"
-    | "sponsoring-verantwoordelijke"
-    | "verzekering-verantwoordelijke"
-    | "evenementen-coordinator"
-    | "pr-verantwoordelijke"
     | "kantine-verantwoordelijke"
-    | "webmaster"
-    | "bestuur"
+    | "keeperstrainer"
+    | "ondervoorzitter"
     | "other"
+    | "penningmeester"
+    | "ploegdelegatie"
+    | "pr-verantwoordelijke"
+    | "secretaris"
+    | "sponsoring-verantwoordelijke"
+    | "sportief-verantwoordelijke"
+    | "technisch-coordinator"
+    | "tvjo"
+    | "verzekering-verantwoordelijke"
+    | "voorzitter"
+    | "webmaster"
     | null;
   roleLabel: string | null;
   department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
@@ -1514,7 +1547,7 @@ export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBERS_PSDID_QUERY
-// Query: *[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {  _id, psdId}
+// Query: *[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {  _id, psdId}
 export type STAFF_MEMBERS_PSDID_QUERY_RESULT = Array<{
   _id: string;
   psdId: string | null;
@@ -1706,9 +1739,9 @@ declare module "@sanity/client" {
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, description, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
-    '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  roleLabel,\n  roleCode,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
+    '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
     '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
-    '*[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
+    '*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[]-> { firstName, lastName, role }\n}': TEAMS_LANDING_QUERY_RESULT;

@@ -71,79 +71,111 @@ type Story = StoryObj<typeof meta>;
 const mockMembers: OrgChartNode[] = [
   {
     id: "1",
-    name: "Jan Janssens",
     title: "Voorzitter Hoofdbestuur",
     roleCode: "PRES",
-    email: "jan.janssens@kcvvelewijt.be",
     department: "hoofdbestuur",
-    imageUrl:
-      "https://ui-avatars.com/api/?name=Jan+Janssens&background=4acf52&color=fff",
     parentId: null,
+    members: [
+      {
+        id: "staff-1",
+        name: "Jan Janssens",
+        email: "jan.janssens@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "2",
-    name: "Marie Peeters",
     title: "Secretaris Jeugdbestuur",
     roleCode: "JSEC",
-    email: "marie.peeters@kcvvelewijt.be",
     department: "jeugdbestuur",
-    imageUrl:
-      "https://ui-avatars.com/api/?name=Marie+Peeters&background=random",
     parentId: null,
+    members: [
+      {
+        id: "staff-2",
+        name: "Marie Peeters",
+        email: "marie.peeters@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "3",
-    name: "Tom Vermeulen",
     title: "Trainer U10",
     roleCode: "T-U10",
-    email: "tom.vermeulen@kcvvelewijt.be",
     department: "jeugdbestuur",
     parentId: null,
+    members: [
+      {
+        id: "staff-3",
+        name: "Tom Vermeulen",
+        email: "tom.vermeulen@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "4",
-    name: "Els Van de Broek",
     title: "Coördinator Jeugdwerking",
     roleCode: "COORD",
-    email: "els.vandebroek@kcvvelewijt.be",
     department: "jeugdbestuur",
     parentId: null,
+    members: [
+      {
+        id: "staff-4",
+        name: "Els Van de Broek",
+        email: "els.vandebroek@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "5",
-    name: "Peter Janssens",
     title: "Penningmeester Hoofdbestuur",
     roleCode: "PM",
-    email: "peter.janssens@kcvvelewijt.be",
     department: "hoofdbestuur",
     parentId: null,
+    members: [
+      {
+        id: "staff-5",
+        name: "Peter Janssens",
+        email: "peter.janssens@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "6",
-    name: "Anna De Vries",
     title: "Trainer U13",
     roleCode: "T-U13",
-    email: "anna.devries@kcvvelewijt.be",
     department: "jeugdbestuur",
     parentId: null,
+    members: [
+      {
+        id: "staff-6",
+        name: "Anna De Vries",
+        email: "anna.devries@kcvvelewijt.be",
+      },
+    ],
   },
   {
     id: "7",
-    name: "Dirk Smits",
     title: "Technisch Coördinator",
     roleCode: "TC",
-    email: "dirk.smits@kcvvelewijt.be",
     department: "hoofdbestuur",
     parentId: null,
+    members: [
+      { id: "staff-7", name: "Dirk Smits", email: "dirk.smits@kcvvelewijt.be" },
+    ],
   },
   {
     id: "8",
-    name: "Sarah Willems",
     title: "Jeugdcoördinator",
     roleCode: "JC",
-    email: "sarah.willems@kcvvelewijt.be",
     department: "jeugdbestuur",
     parentId: null,
+    members: [
+      {
+        id: "staff-8",
+        name: "Sarah Willems",
+        email: "sarah.willems@kcvvelewijt.be",
+      },
+    ],
   },
 ];
 
@@ -164,7 +196,9 @@ const SearchBarWithState = (args: Partial<SearchBarProps>) => {
       onSelect={(member) => {
         args.onSelect?.(member);
         console.log("Selected:", member);
-        alert(`Selected: ${member.name} - ${member.title}`);
+        alert(
+          `Selected: ${member.members[0]?.name ?? member.title} - ${member.title}`,
+        );
       }}
     />
   );
@@ -492,12 +526,19 @@ export const LargeDataset: Story = {
       { length: 50 },
       (_, i) => ({
         id: `member-${i}`,
-        name: `Member ${i + 1}`,
         title: `Position ${i + 1}`,
         roleCode: `P${i}`,
-        email: `member${i}@kcvvelewijt.be`,
-        department: i % 2 === 0 ? "hoofdbestuur" : "jeugdbestuur",
+        department: (i % 2 === 0 ? "hoofdbestuur" : "jeugdbestuur") as
+          | "hoofdbestuur"
+          | "jeugdbestuur",
         parentId: null,
+        members: [
+          {
+            id: `staff-member-${i}`,
+            name: `Member ${i + 1}`,
+            email: `member${i}@kcvvelewijt.be`,
+          },
+        ],
       }),
     );
 

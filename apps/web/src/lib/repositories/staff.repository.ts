@@ -2,7 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
 import type {
-  STAFF_MEMBERS_QUERY_RESULT,
+  ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
   STAFF_MEMBERS_PSDID_QUERY_RESULT,
 } from "../sanity/sanity.types";
@@ -10,19 +10,22 @@ import type { OrgChartNode } from "@/types/organigram";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
-export const STAFF_MEMBERS_QUERY =
-  defineQuery(`*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {
+export const ORGANIGRAM_NODES_QUERY =
+  defineQuery(`*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {
   _id,
-  firstName,
-  lastName,
-  roleLabel,
+  title,
+  description,
   roleCode,
   department,
-  email,
-  phone,
-  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
-  responsibilities,
-  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)
+  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),
+  "members": members[@->archived != true]->{
+    "id": _id,
+    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+    email,
+    phone,
+    "psdId": psdId
+  }
 }`);
 
 export const STAFF_MEMBER_BY_PSD_ID_QUERY =
@@ -80,9 +83,14 @@ const DEPARTMENT_DISPLAY = {
 
 const CLUB_ROOT_NODE: OrgChartNode = {
   id: "club",
-  name: "KCVV Elewijt",
-  title: "Voetbalclub",
-  imageUrl: "/images/logo-flat.png",
+  title: "KCVV Elewijt",
+  members: [
+    {
+      id: "club",
+      name: "KCVV Elewijt",
+      imageUrl: "/images/logo-flat.png",
+    },
+  ],
   department: "algemeen",
   parentId: null,
 };
@@ -107,19 +115,27 @@ export interface StaffDetailVM {
 }
 
 export function toOrgChartNode(
-  m: STAFF_MEMBERS_QUERY_RESULT[number],
+  node: ORGANIGRAM_NODES_QUERY_RESULT[number],
 ): OrgChartNode {
   return {
-    id: m._id,
-    name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim(),
-    title: m.roleLabel ?? "",
-    roleCode: m.roleCode ?? undefined,
-    imageUrl: m.photoUrl ?? undefined,
-    email: m.email ?? undefined,
-    phone: m.phone ?? undefined,
-    responsibilities: m.responsibilities ?? undefined,
-    department: (m.department ?? undefined) as OrgChartNode["department"],
-    parentId: m.parentId ?? "club",
+    id: node._id,
+    title: node.title ?? "",
+    roleCode: node.roleCode ?? undefined,
+    description: node.description ?? undefined,
+    department: (node.department ?? undefined) as OrgChartNode["department"],
+    parentId: node.parentId ?? "club",
+    members: (node.members ?? []).map((m) => {
+      const trimmed = (m.name ?? "").trim();
+      const psdId = m.psdId?.trim();
+      return {
+        id: m.id,
+        name: trimmed === "" ? undefined : trimmed,
+        imageUrl: m.imageUrl ?? undefined,
+        email: m.email ?? undefined,
+        phone: m.phone ?? undefined,
+        href: psdId ? `/staf/${psdId}` : undefined,
+      };
+    }),
   };
 }
 
@@ -166,8 +182,8 @@ export class StaffRepository extends Context.Tag("StaffRepository")<
 
 export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
   findAll: () =>
-    fetchGroq<STAFF_MEMBERS_QUERY_RESULT>(STAFF_MEMBERS_QUERY).pipe(
-      Effect.map((members) => [CLUB_ROOT_NODE, ...members.map(toOrgChartNode)]),
+    fetchGroq<ORGANIGRAM_NODES_QUERY_RESULT>(ORGANIGRAM_NODES_QUERY).pipe(
+      Effect.map((nodes) => [CLUB_ROOT_NODE, ...nodes.map(toOrgChartNode)]),
     ),
   findByPsdId: (psdId) =>
     fetchGroq<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>(

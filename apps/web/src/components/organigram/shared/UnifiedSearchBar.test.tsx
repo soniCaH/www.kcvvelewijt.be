@@ -8,24 +8,36 @@ describe("UnifiedSearchBar", () => {
   const mockMembers: OrgChartNode[] = [
     {
       id: "president",
-      name: "John Doe",
       title: "Voorzitter",
       roleCode: "PRES",
-      email: "john@example.com",
       department: "hoofdbestuur",
+      members: [
+        { id: "staff-president", name: "John Doe", email: "john@example.com" },
+      ],
     },
     {
       id: "secretary",
-      name: "Jane Smith",
       title: "Secretaris",
-      email: "jane@example.com",
       department: "hoofdbestuur",
+      members: [
+        {
+          id: "staff-secretary",
+          name: "Jane Smith",
+          email: "jane@example.com",
+        },
+      ],
     },
     {
       id: "jeugdcoordinator",
-      name: "Maria Janssens",
       title: "Jeugdcoördinator",
       department: "jeugdbestuur",
+      members: [{ id: "staff-jeugd", name: "Maria Janssens" }],
+    },
+    {
+      id: "vacant-secretary",
+      title: "Vacante secretaris",
+      department: "hoofdbestuur",
+      members: [],
     },
   ];
 
@@ -637,6 +649,47 @@ describe("UnifiedSearchBar", () => {
       );
 
       expect(screen.getByText("wil mij graag inschrijven")).toBeInTheDocument();
+    });
+
+    it("vacant node (members: []): title matches search, title shown as display name, node is selectable", () => {
+      const handleSelectMember = vi.fn();
+      const vacantNode = mockMembers[3];
+      const { rerender } = render(
+        <UnifiedSearchBar
+          value=""
+          onChange={vi.fn()}
+          members={mockMembers}
+          responsibilityPaths={mockResponsibilityPaths}
+          debounceMs={0}
+          onSelectMember={handleSelectMember}
+          showAutocomplete={true}
+        />,
+      );
+
+      const input = screen.getByRole("textbox", { name: /zoeken/i });
+      fireEvent.focus(input);
+
+      rerender(
+        <UnifiedSearchBar
+          value="Vacante secretaris"
+          onChange={vi.fn()}
+          members={mockMembers}
+          responsibilityPaths={mockResponsibilityPaths}
+          debounceMs={0}
+          onSelectMember={handleSelectMember}
+          showAutocomplete={true}
+        />,
+      );
+
+      // Title is used as display name (fallback when no primary member)
+      const titleElements = screen.getAllByText("Vacante secretaris");
+      expect(titleElements.length).toBeGreaterThan(0);
+
+      // Node is selectable via the same button pattern used elsewhere
+      const memberButton = titleElements[0].closest("button");
+      expect(memberButton).not.toBeNull();
+      fireEvent.click(memberButton!);
+      expect(handleSelectMember).toHaveBeenCalledWith(vacantNode);
     });
 
     it("matches responsibility by keywords", () => {

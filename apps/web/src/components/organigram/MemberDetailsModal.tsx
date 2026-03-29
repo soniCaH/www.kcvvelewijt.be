@@ -62,14 +62,17 @@ export function MemberDetailsModal({
   // Track if the member's image failed to load (only state we need)
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
+  const primaryMember = member?.members[0];
+  const displayName = primaryMember?.name ?? member?.title ?? "";
+  const primaryImageUrl = primaryMember?.imageUrl;
+
   // Determine which image to show
   const imageSrc = useMemo(() => {
-    const memberImage = member?.imageUrl;
-    if (!memberImage || failedImages.has(memberImage)) {
+    if (!primaryImageUrl || failedImages.has(primaryImageUrl)) {
       return defaultImage;
     }
-    return memberImage;
-  }, [member?.imageUrl, failedImages, defaultImage]);
+    return primaryImageUrl;
+  }, [primaryImageUrl, failedImages, defaultImage]);
 
   // Find linked responsibility paths
   const linkedResponsibilities = useMemo(() => {
@@ -101,16 +104,16 @@ export function MemberDetailsModal({
           <div className="flex items-center gap-6">
             <Image
               src={imageSrc}
-              alt={member.name}
+              alt={displayName}
               width={96}
               height={96}
               className="w-24 h-24 rounded-full border-4 border-white/30 object-cover"
               onError={() => {
-                if (member.imageUrl) {
+                if (primaryImageUrl) {
                   setFailedImages((prev) => {
-                    if (prev.has(member.imageUrl!)) return prev;
+                    if (prev.has(primaryImageUrl)) return prev;
                     const next = new Set(prev);
-                    next.add(member.imageUrl!);
+                    next.add(primaryImageUrl);
                     return next;
                   });
                 }
@@ -123,7 +126,7 @@ export function MemberDetailsModal({
                   fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
                 }}
               >
-                {member.name}
+                {displayName}
               </h2>
               <p className="text-white/90 text-lg">{member.title}</p>
               {member.roleCode && (
@@ -141,7 +144,7 @@ export function MemberDetailsModal({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Contact Information */}
-          {(member.email || member.phone) && (
+          {(primaryMember?.email || primaryMember?.phone) && (
             <div>
               <h3
                 className="text-lg font-bold text-gray-blue mb-3"
@@ -152,7 +155,7 @@ export function MemberDetailsModal({
                 Contactgegevens
               </h3>
               <div className="space-y-2">
-                {member.email && (
+                {primaryMember?.email && (
                   <div className="flex items-center gap-3">
                     <svg
                       className="w-5 h-5 text-green-main flex-shrink-0"
@@ -168,14 +171,14 @@ export function MemberDetailsModal({
                       />
                     </svg>
                     <a
-                      href={`mailto:${member.email}`}
+                      href={`mailto:${primaryMember.email}`}
                       className="text-green-main hover:text-green-hover hover:underline transition-colors"
                     >
-                      {member.email}
+                      {primaryMember.email}
                     </a>
                   </div>
                 )}
-                {member.phone && (
+                {primaryMember?.phone && (
                   <div className="flex items-center gap-3">
                     <svg
                       className="w-5 h-5 text-green-main flex-shrink-0"
@@ -191,10 +194,10 @@ export function MemberDetailsModal({
                       />
                     </svg>
                     <a
-                      href={`tel:${member.phone}`}
+                      href={`tel:${primaryMember.phone}`}
                       className="text-green-main hover:text-green-hover hover:underline transition-colors"
                     >
-                      {member.phone}
+                      {primaryMember.phone}
                     </a>
                   </div>
                 )}
@@ -202,8 +205,8 @@ export function MemberDetailsModal({
             </div>
           )}
 
-          {/* Responsibilities */}
-          {member.responsibilities && (
+          {/* Description */}
+          {member.description && (
             <div>
               <h3
                 className="text-lg font-bold text-gray-blue mb-3"
@@ -214,7 +217,7 @@ export function MemberDetailsModal({
                 Verantwoordelijkheden
               </h3>
               <p className="text-gray-dark leading-relaxed">
-                {member.responsibilities}
+                {member.description}
               </p>
             </div>
           )}
@@ -284,10 +287,10 @@ export function MemberDetailsModal({
           )}
 
           {/* Link to full profile */}
-          {member.profileUrl && (
+          {primaryMember?.href && (
             <div className="pt-4 border-t border-gray-light">
               <Link
-                href={member.profileUrl}
+                href={primaryMember.href}
                 className="inline-flex items-center gap-2 text-green-main hover:text-green-hover font-semibold transition-colors"
               >
                 <span>Bekijk volledig profiel</span>
