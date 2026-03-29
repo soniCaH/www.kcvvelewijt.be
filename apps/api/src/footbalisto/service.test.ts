@@ -1248,6 +1248,61 @@ describe("FootbalistoService.getMatchDetail - events", () => {
   });
 });
 
+describe("FootbalistoService.getMatchDetail - resilient decoding", () => {
+  it("filters out invalid lineup players and passes valid ones through", async () => {
+    const responseWithBadLineup = {
+      general: rawDetailResponse.general,
+      lineup: {
+        home: [
+          { playerName: "De Smet", number: 9, status: "basis" }, // valid
+          { number: 10, status: "basis" }, // invalid — missing required playerName
+        ],
+        away: [],
+      },
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => responseWithBadLineup,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.lineup?.home).toHaveLength(1);
+      expect(result.right.lineup?.home[0]?.name).toBe("De Smet");
+    }
+  });
+
+  it("filters out invalid events and passes valid ones through", async () => {
+    const responseWithBadEvent = {
+      ...rawDetailWithGoal,
+      events: [
+        {
+          action: { type: "GOAL", subtype: null, id: 10 },
+          minute: 23,
+          playerId: 55,
+          playerName: "De Smet",
+          clubId: 100,
+        }, // valid
+        { minute: 40, playerName: "Unknown" }, // invalid — missing required action field
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => responseWithBadEvent,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.events).toHaveLength(1);
+      expect(result.right.events![0]?.type).toBe("goal");
+    }
+  });
+});
+
 describe("mapGameStatus", () => {
   it("returns an Effect that resolves to the correct status", async () => {
     const result = await Effect.runPromise(mapGameStatus(0, 3, 1));

@@ -92,8 +92,8 @@ export class FootbalistoLineupPlayer extends S.Class<FootbalistoLineupPlayer>(
 export class FootbalistoLineup extends S.Class<FootbalistoLineup>(
   "FootbalistoLineup",
 )({
-  home: S.Array(FootbalistoLineupPlayer),
-  away: S.Array(FootbalistoLineupPlayer),
+  home: S.Array(S.Unknown),
+  away: S.Array(S.Unknown),
 }) {}
 
 export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
@@ -129,7 +129,7 @@ export class FootbalistoMatchDetailResponse extends S.Class<FootbalistoMatchDeta
   general: FootbalistoMatchDetailGeneral,
   lineup: S.optional(FootbalistoLineup),
   substitutes: S.optional(FootbalistoLineup),
-  events: S.optional(S.Array(FootbalistoMatchEvent)),
+  events: S.optional(S.Array(S.Unknown)),
 }) {}
 
 export class PsdSeason extends S.Class<PsdSeason>("PsdSeason")({
