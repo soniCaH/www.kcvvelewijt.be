@@ -123,6 +123,26 @@ describe("toOrgChartNode", () => {
     expect(member.phone).toBeUndefined();
     expect(member.href).toBeUndefined();
   });
+
+  it("whitespace-only name collapses to undefined and psdId is trimmed in href", () => {
+    const result = toOrgChartNode(
+      makeNodeRow({
+        members: [
+          {
+            id: "staff-1",
+            name: " ",
+            imageUrl: null,
+            email: null,
+            phone: null,
+            psdId: " 42 ",
+          },
+        ],
+      }),
+    );
+    const member = result.members[0];
+    expect(member.name).toBeUndefined();
+    expect(member.href).toBe("/staf/42");
+  });
 });
 
 describe("StaffRepository", () => {

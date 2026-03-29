@@ -356,6 +356,7 @@ export function UnifiedSearchBar({
       onSelectResponsibility?.(result.path);
       onChange(result.path.question);
     }
+    setSelectedIndex(-1);
     setIsFocused(false);
     inputRef.current?.blur();
   };

@@ -373,9 +373,9 @@ export const EmptyMember: Story = {
   args: {
     member: {
       id: "empty",
-      title: "",
+      title: "Vacante positie",
       parentId: null,
-      members: [{ id: "staff-empty", name: "" }],
+      members: [],
     },
     variant: "detailed",
   },
