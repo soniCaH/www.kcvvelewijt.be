@@ -24,7 +24,7 @@ export interface EditorialCardConfig {
   href: string | null;
   imageUrl: string | null;
   position: "featured" | "medium" | "third";
-  cardType: "nav" | "article" | null;
+  cardType: "nav" | "article";
 }
 
 // ─── Mapping ─────────────────────────────────────────────────────────────────
@@ -39,6 +39,9 @@ function toEditorialCardConfig(card: RawCard): EditorialCardConfig | null {
     card.position !== "medium" &&
     card.position !== "third"
   ) {
+    return null;
+  }
+  if (card.cardType !== "nav" && card.cardType !== "article") {
     return null;
   }
   return {

@@ -88,17 +88,12 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
 }
 
 async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
-  try {
-    return await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* JeugdLandingPageRepository;
-        return yield* repo.getEditorialCards();
-      }).pipe(Effect.provide(JeugdLandingPageRepositoryLive)),
-    );
-  } catch (error) {
-    console.error("Failed to fetch jeugd editorial config:", error);
-    return null;
-  }
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* JeugdLandingPageRepository;
+      return yield* repo.getEditorialCards();
+    }).pipe(Effect.provide(JeugdLandingPageRepositoryLive)),
+  );
 }
 
 export default async function JeugdPage() {

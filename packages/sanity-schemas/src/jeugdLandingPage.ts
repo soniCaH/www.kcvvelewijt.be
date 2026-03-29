@@ -58,6 +58,7 @@ export const jeugdLandingPage = defineType({
                   {title: 'Third (bottom row)', value: 'third'},
                 ],
               },
+              validation: (Rule) => Rule.required(),
             }),
             defineField({
               name: 'cardType',
@@ -71,6 +72,7 @@ export const jeugdLandingPage = defineType({
               },
               description:
                 'Article slots are auto-filled with the latest jeugd-tagged articles from Sanity. Nav cards use the fields above.',
+              validation: (Rule) => Rule.required(),
             }),
           ],
           preview: {
