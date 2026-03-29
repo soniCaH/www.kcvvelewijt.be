@@ -27,8 +27,8 @@ import {
   FootbalistoRankingEntry,
   PsdGame,
   type PsdCompetitionType,
-  type FootbalistoLineupPlayer,
-  type FootbalistoMatchEvent,
+  FootbalistoLineupPlayer,
+  FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
 } from "./schemas";
 import { PsdTeamsSchema } from "./schemas-player-team";
@@ -333,51 +333,82 @@ function transformPlayerWithCard(
 function transformFootbalistoMatchDetail(
   response: RawDetailResponse,
 ): Effect.Effect<MatchDetail> {
-  const general = response.general;
-  const { date: matchDate, time: timePart } = parseDateString(general.date);
-  const cardMap = response.events ? buildPlayerCardMap(response.events) : null;
+  return Effect.gen(function* () {
+    const general = response.general;
+    const { date: matchDate, time: timePart } = parseDateString(general.date);
 
-  let lineup:
-    | { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] }
-    | undefined;
-  if (response.lineup || response.substitutes) {
-    lineup = {
-      home: [
-        ...(response.lineup?.home ?? []).map((p) =>
-          transformPlayerWithCard(p, cardMap),
-        ),
-        ...(response.substitutes?.home ?? []).map((p) =>
-          transformPlayerWithCard(p, cardMap),
-        ),
-      ],
-      away: [
-        ...(response.lineup?.away ?? []).map((p) =>
-          transformPlayerWithCard(p, cardMap),
-        ),
-        ...(response.substitutes?.away ?? []).map((p) =>
-          transformPlayerWithCard(p, cardMap),
-        ),
-      ],
-    };
-  }
+    // Resilient event decoding — invalid items are filtered, valid ones pass through
+    let validEvents: FootbalistoMatchEvent[] = [];
+    if (response.events) {
+      const [eventErrors, decodedEvents] = yield* Effect.partition(
+        response.events,
+        (item) => S.decodeUnknown(FootbalistoMatchEvent)(item),
+      );
+      if (eventErrors.length > 0) {
+        yield* Effect.log(
+          `getMatchDetail(${general.id}): filtered ${eventErrors.length} invalid event(s)`,
+        );
+      }
+      validEvents = decodedEvents;
+    }
 
-  let events: MatchEvent[] | undefined;
-  if (response.events) {
-    const transformed = response.events
-      .map((e, i) =>
-        transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
-      )
-      .filter((e): e is MatchEvent => e !== null);
-    events = transformed.length > 0 ? transformed : undefined;
-  }
+    const cardMap =
+      validEvents.length > 0 ? buildPlayerCardMap(validEvents) : null;
 
-  return mapGameStatus(
-    general.status,
-    general.goalsHomeTeam,
-    general.goalsAwayTeam,
-    general.cancelled,
-  ).pipe(
-    Effect.map((status) => ({
+    // Resilient lineup decoding — invalid players are filtered, valid ones pass through
+    let lineup:
+      | { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] }
+      | undefined;
+    if (response.lineup || response.substitutes) {
+      const rawHome = [
+        ...(response.lineup?.home ?? []),
+        ...(response.substitutes?.home ?? []),
+      ];
+      const rawAway = [
+        ...(response.lineup?.away ?? []),
+        ...(response.substitutes?.away ?? []),
+      ];
+
+      const [homeErrors, homePlayers] = yield* Effect.partition(
+        rawHome,
+        (item) => S.decodeUnknown(FootbalistoLineupPlayer)(item),
+      );
+      const [awayErrors, awayPlayers] = yield* Effect.partition(
+        rawAway,
+        (item) => S.decodeUnknown(FootbalistoLineupPlayer)(item),
+      );
+
+      const totalErrors = homeErrors.length + awayErrors.length;
+      if (totalErrors > 0) {
+        yield* Effect.log(
+          `getMatchDetail(${general.id}): filtered ${totalErrors} invalid lineup player(s)`,
+        );
+      }
+
+      lineup = {
+        home: homePlayers.map((p) => transformPlayerWithCard(p, cardMap)),
+        away: awayPlayers.map((p) => transformPlayerWithCard(p, cardMap)),
+      };
+    }
+
+    let events: MatchEvent[] | undefined;
+    if (validEvents.length > 0) {
+      const transformed = validEvents
+        .map((e, i) =>
+          transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
+        )
+        .filter((e): e is MatchEvent => e !== null);
+      events = transformed.length > 0 ? transformed : undefined;
+    }
+
+    const status = yield* mapGameStatus(
+      general.status,
+      general.goalsHomeTeam,
+      general.goalsAwayTeam,
+      general.cancelled,
+    );
+
+    return {
       id: general.id,
       date: matchDate,
       time: timePart,
@@ -399,8 +430,8 @@ function transformFootbalistoMatchDetail(
       lineup,
       events,
       hasReport: general.viewGameReport,
-    })),
-  );
+    };
+  });
 }
 
 /** Strip lineup from a MatchDetail to produce a basic Match */
