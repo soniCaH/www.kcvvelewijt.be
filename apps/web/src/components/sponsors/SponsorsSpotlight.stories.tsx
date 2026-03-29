@@ -7,6 +7,12 @@ const meta = {
   component: SponsorsSpotlight,
   parameters: {
     layout: "padded",
+    docs: {
+      description: {
+        component:
+          "Dark-green spotlight carousel shown on the sponsors page when at least one sponsor has featured=true. Auto-rotates every 5 seconds by default.",
+      },
+    },
   },
   tags: ["autodocs"],
 } satisfies Meta<typeof SponsorsSpotlight>;
@@ -39,7 +45,7 @@ const mockSpotlight: SpotlightSponsor[] = [
   },
 ];
 
-/** Multiple sponsors with 5-second auto-rotate (default). */
+/** Multiple sponsors with 5-second auto-rotate (default). Dark green background. */
 export const AutoRotating: Story = {
   args: {
     sponsors: mockSpotlight,
@@ -58,13 +64,19 @@ export const ManualNavigation: Story = {
 /** Single sponsor — no navigation dots shown. */
 export const SingleSponsor: Story = {
   args: {
-    sponsors: [mockSpotlight[0]],
+    sponsors: [
+      mockSpotlight[0] ?? {
+        id: "placeholder",
+        name: "Placeholder Sponsor",
+        logo: "",
+      },
+    ],
   },
 };
 
 /** Sponsor without URL — no "Bezoek website" button. */
 export const NoWebsite: Story = {
   args: {
-    sponsors: [mockSpotlight[2]],
+    sponsors: [mockSpotlight[2] ?? mockSpotlight[0]],
   },
 };

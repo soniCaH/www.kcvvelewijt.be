@@ -27,6 +27,9 @@ function mapToSponsor(s: SponsorVM): Sponsor {
     name: s.name,
     logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
     url: s.url,
+    tier: s.tier,
+    featured: s.featured,
+    description: s.description,
   };
 }
 
@@ -67,11 +70,14 @@ export default async function SponsorsPageRoute() {
     )
     .map(mapToSponsor);
 
+  const featuredSponsors = sponsors.filter((s) => s.featured).map(mapToSponsor);
+
   return (
     <SponsorsPage
       goldSponsors={goldSponsors}
       silverSponsors={silverSponsors}
       bronzeSponsors={bronzeSponsors}
+      featuredSponsors={featuredSponsors}
     />
   );
 }

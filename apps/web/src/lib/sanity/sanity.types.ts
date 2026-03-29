@@ -1383,7 +1383,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/sponsor.repository.ts
 // Variable: SPONSORS_QUERY
-// Query: *[_type == "sponsor" && active == true] | order(name asc) {  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
+// Query: *[_type == "sponsor" && active == true] | order(name asc) {  _id, name, url, type, tier, featured, description, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
 export type SPONSORS_QUERY_RESULT = Array<{
   _id: string;
   name: string | null;
@@ -1391,6 +1391,7 @@ export type SPONSORS_QUERY_RESULT = Array<{
   type: "crossing" | "green" | "other" | "panel" | "training" | "white" | null;
   tier: "hoofdsponsor" | "sponsor" | "sympathisant" | null;
   featured: boolean | null;
+  description: string | null;
   logoUrl: string | null;
 }>;
 
@@ -1661,7 +1662,7 @@ declare module "@sanity/client" {
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
-    '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
+    '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, description, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && inOrganigram == true] | order(lastName asc) {\n  _id,\n  firstName,\n  lastName,\n  roleLabel,\n  roleCode,\n  department,\n  email,\n  phone,\n  "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n  responsibilities,\n  "parentId": select(defined(parentMember) && parentMember->inOrganigram == true && parentMember->archived != true => parentMember->_id, null)\n}': STAFF_MEMBERS_QUERY_RESULT;
     '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && defined(psdId)] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
