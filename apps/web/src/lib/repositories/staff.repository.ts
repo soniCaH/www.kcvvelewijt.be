@@ -18,7 +18,7 @@ export const ORGANIGRAM_NODES_QUERY =
   roleCode,
   department,
   "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),
-  "members": members[]->{
+  "members": members[archived != true]->{
     "id": _id,
     "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
     "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
@@ -124,14 +124,17 @@ export function toOrgChartNode(
     description: node.description ?? undefined,
     department: (node.department ?? undefined) as OrgChartNode["department"],
     parentId: node.parentId ?? "club",
-    members: (node.members ?? []).map((m) => ({
-      id: m.id,
-      name: m.name ?? "",
-      imageUrl: m.imageUrl ?? undefined,
-      email: m.email ?? undefined,
-      phone: m.phone ?? undefined,
-      href: m.href ?? undefined,
-    })),
+    members: (node.members ?? []).map((m) => {
+      const trimmed = (m.name ?? "").trim();
+      return {
+        id: m.id,
+        name: trimmed === "" ? undefined : trimmed,
+        imageUrl: m.imageUrl ?? undefined,
+        email: m.email ?? undefined,
+        phone: m.phone ?? undefined,
+        href: m.href ?? undefined,
+      };
+    }),
   };
 }
 

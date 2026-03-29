@@ -84,7 +84,7 @@ export function SearchBar({
       }
 
       // Search in member emails
-      if (member.members.some((m) => m.email?.toLowerCase().includes(query))) {
+      if (member.members[0]?.email?.toLowerCase().includes(query)) {
         score += 5;
         matchedFields.push("email");
       }

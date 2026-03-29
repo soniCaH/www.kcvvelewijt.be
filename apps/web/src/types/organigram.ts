@@ -12,8 +12,8 @@ export interface OrgChartMember {
   /** Sanity _id of the staffMember document */
   id: string;
 
-  /** Full name of the person */
-  name: string;
+  /** Full name of the person; undefined when whitespace-only or absent */
+  name?: string;
 
   /** URL to profile photo */
   imageUrl?: string;

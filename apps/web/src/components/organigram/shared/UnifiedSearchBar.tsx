@@ -99,8 +99,8 @@ function searchMembers(
     let score = 0;
     const matchedFields: string[] = [];
 
-    // Name match (highest priority — search across all linked members)
-    if (member.members.some((m) => m.name.toLowerCase().includes(lowerQuery))) {
+    // Name match (highest priority — primary member only)
+    if (member.members[0]?.name?.toLowerCase().includes(lowerQuery)) {
       score += 50;
       matchedFields.push("Naam");
     }
@@ -118,9 +118,7 @@ function searchMembers(
     }
 
     // Email match
-    if (
-      member.members.some((m) => m.email?.toLowerCase().includes(lowerQuery))
-    ) {
+    if (member.members[0]?.email?.toLowerCase().includes(lowerQuery)) {
       score += 15;
       matchedFields.push("Email");
     }

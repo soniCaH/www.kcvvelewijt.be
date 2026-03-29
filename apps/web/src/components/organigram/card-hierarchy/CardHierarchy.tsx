@@ -129,7 +129,7 @@ export function CardHierarchy({
     const query = searchQuery.toLowerCase();
     return departmentFilteredMembers.filter((member) => {
       return (
-        member.members.some((m) => m.name.toLowerCase().includes(query)) ||
+        member.members.some((m) => m.name?.toLowerCase().includes(query)) ||
         member.title.toLowerCase().includes(query) ||
         member.roleCode?.toLowerCase().includes(query) ||
         member.members.some((m) => m.email?.toLowerCase().includes(query)) ||

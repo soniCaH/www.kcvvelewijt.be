@@ -595,8 +595,8 @@ export const SingleMember: Story = {
     members: [
       clubStructure[0] ?? {
         id: "fallback",
-        name: "Naam",
         title: "Functie",
+        members: [{ id: "fallback", name: "Naam" }],
       },
     ],
   },

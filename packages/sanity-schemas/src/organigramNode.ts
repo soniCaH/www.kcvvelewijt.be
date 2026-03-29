@@ -65,6 +65,12 @@ export const organigramNode = defineType({
       initialValue: true,
       description: 'Zet uit om deze node te verbergen in het organigram.',
     }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sortering',
+      type: 'number',
+      description: 'Handmatige volgorde voor weergave in het organigram. Lagere waarden worden eerst getoond.',
+    }),
   ],
   preview: {
     select: {
