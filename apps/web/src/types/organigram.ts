@@ -9,7 +9,7 @@
  * A single member (person) linked to an organigram node.
  */
 export interface OrgChartMember {
-  /** Sanity _id of the staffMember document */
+  /** Sanity _id of the staffMember document, or a synthetic value for generated nodes (e.g. "club") */
   id: string;
 
   /** Full name of the person; undefined when whitespace-only or absent */
@@ -33,10 +33,10 @@ export interface OrgChartMember {
  * One node can be linked to zero (vacant), one, or multiple (shared) staff members.
  */
 export interface OrgChartNode {
-  /** Unique identifier for this node (organigramNode._id) */
+  /** Unique identifier — organigramNode._id for Sanity-backed nodes, or a synthetic value for generated root nodes (e.g. "club") */
   id: string;
 
-  /** Position title (e.g. "Voorzitter", "Technisch Coördinator Jeugd") */
+  /** Position title — organigramNode.title for Sanity-backed nodes, or a synthetic label for generated root nodes */
   title: string;
 
   /** Short role code badge (e.g., "PRES" for President) */

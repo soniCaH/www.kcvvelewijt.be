@@ -11,14 +11,14 @@ import type { OrgChartNode } from "@/types/organigram";
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
 export const ORGANIGRAM_NODES_QUERY =
-  defineQuery(`*[_type == "organigramNode" && active == true] | order(title asc) {
+  defineQuery(`*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 0) asc, title asc) {
   _id,
   title,
   description,
   roleCode,
   department,
   "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),
-  "members": members[archived != true]->{
+  "members": members[@->archived != true]->{
     "id": _id,
     "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
     "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
