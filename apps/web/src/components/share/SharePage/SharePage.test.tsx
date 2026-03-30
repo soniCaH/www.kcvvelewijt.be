@@ -9,6 +9,17 @@ vi.mock("html-to-image", () => ({
   toPng: vi.fn().mockResolvedValue("data:image/png;base64,ABC"),
 }));
 
+// Mock URL.createObjectURL / revokeObjectURL (not available in happy-dom)
+const mockObjectUrl = "blob:http://localhost/fake-blob-url";
+globalThis.URL.createObjectURL = vi.fn().mockReturnValue(mockObjectUrl);
+globalThis.URL.revokeObjectURL = vi.fn();
+
+// Mock fetch for data URL → blob conversion
+const mockBlob = new Blob(["fake-png-data"], { type: "image/png" });
+globalThis.fetch = vi.fn().mockResolvedValue({
+  blob: () => Promise.resolve(mockBlob),
+} as unknown as Response);
+
 import { SharePage } from "./SharePage";
 
 const PLAYERS: PlayerForShare[] = [
@@ -51,21 +62,21 @@ describe("SharePage", () => {
     vi.clearAllMocks();
   });
 
-  // ─── Existing Phase 1 tests (updated to pass props) ──────────────────────
+  // ─── Existing Phase 1 tests (updated for Phase 4 generate flow) ──────────
 
-  it("renders the Download button", () => {
+  it("renders the Generate button", () => {
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
     expect(
-      screen.getByRole("button", { name: /download/i }),
+      screen.getByRole("button", { name: /genereer/i }),
     ).toBeInTheDocument();
   });
 
-  it("calls html-to-image toPng when Download is clicked", async () => {
+  it("calls html-to-image toPng when Generate is clicked", async () => {
     const { toPng } = await import("html-to-image");
     const user = userEvent.setup();
 
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /download/i }));
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
 
     expect(toPng).toHaveBeenCalledTimes(1);
   });
@@ -75,7 +86,7 @@ describe("SharePage", () => {
     const user = userEvent.setup();
 
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /download/i }));
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
 
     expect(toPng).toHaveBeenCalledWith(
       expect.anything(),
@@ -89,11 +100,11 @@ describe("SharePage", () => {
     const user = userEvent.setup();
 
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /download/i }));
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /download/i }),
+      screen.getByRole("button", { name: /genereer/i }),
     ).not.toBeDisabled();
   });
 
@@ -322,5 +333,155 @@ describe("SharePage", () => {
     await user.click(screen.getByRole("button", { name: /gele kaart teg/i }));
 
     expect(screen.queryByLabelText(/zoek speler/i)).not.toBeInTheDocument();
+  });
+
+  // ─── Phase 4: Image export and mobile UX ──────────────────────────────────
+
+  it("renders a Generate button", () => {
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    expect(
+      screen.getByRole("button", { name: /genereer/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("clicking Generate shows a preview image", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+    expect(screen.getByRole("img", { name: /preview/i })).toBeInTheDocument();
+  });
+
+  it("no Share or Download button visible before Generate", () => {
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    expect(
+      screen.queryByRole("button", { name: /delen/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /download/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows Download button after Generate when canShare is not supported", async () => {
+    // Default: navigator.canShare is undefined → falls back to download
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+    expect(
+      screen.getByRole("button", { name: /download/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /delen/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows Share button after Generate when canShare supports files", async () => {
+    const originalCanShare = navigator.canShare;
+    Object.defineProperty(navigator, "canShare", {
+      value: () => true,
+      writable: true,
+      configurable: true,
+    });
+
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+    expect(screen.getByRole("button", { name: /delen/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /download/i }),
+    ).not.toBeInTheDocument();
+
+    // Restore
+    Object.defineProperty(navigator, "canShare", {
+      value: originalCanShare,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("Share button calls navigator.share with a PNG file", async () => {
+    const mockShare = vi.fn().mockResolvedValue(undefined);
+    const originalShare = navigator.share;
+    const originalCanShare = navigator.canShare;
+    Object.defineProperty(navigator, "canShare", {
+      value: () => true,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "share", {
+      value: mockShare,
+      writable: true,
+      configurable: true,
+    });
+
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+    await user.click(screen.getByRole("button", { name: /delen/i }));
+
+    expect(mockShare).toHaveBeenCalledTimes(1);
+    const { files } = mockShare.mock.calls[0][0] as { files: File[] };
+    expect(files).toHaveLength(1);
+    expect(files[0]).toBeInstanceOf(File);
+    expect(files[0].type).toBe("image/png");
+    expect(files[0].name).toMatch(/^kcvv-.*\.png$/);
+
+    // Restore
+    Object.defineProperty(navigator, "share", {
+      value: originalShare,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "canShare", {
+      value: originalCanShare,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("Download button triggers file download via anchor click", async () => {
+    const clickSpy = vi.fn();
+    const originalCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const el = originalCreateElement(tag);
+      if (tag === "a") {
+        Object.defineProperty(el, "click", { value: clickSpy });
+      }
+      return el;
+    });
+
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+    await user.click(screen.getByRole("button", { name: /download/i }));
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+
+    vi.mocked(document.createElement).mockRestore();
+  });
+
+  it("generated PNG uses 1080x1920 dimensions (pixelRatio 1)", async () => {
+    const { toPng } = await import("html-to-image");
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+    expect(toPng).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        width: CAPTURE_WIDTH,
+        height: CAPTURE_HEIGHT,
+        pixelRatio: 1,
+      }),
+    );
   });
 });

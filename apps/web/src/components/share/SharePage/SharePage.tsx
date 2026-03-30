@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { GoalKcvvTemplate } from "../GoalKcvvTemplate/GoalKcvvTemplate";
 import { GoalOpponentTemplate } from "../GoalOpponentTemplate/GoalOpponentTemplate";
@@ -234,6 +234,8 @@ export function SharePage({ matches, players }: SharePageProps) {
   const templateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Template selection
   const [selectedTemplateId, setSelectedTemplateId] =
@@ -271,20 +273,27 @@ export function SharePage({ matches, players }: SharePageProps) {
     setPlayerSearch("");
   };
 
-  const handleDownload = async () => {
+  const clearPreview = useCallback(() => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setGeneratedBlob(null);
+    setPreviewUrl(null);
+  }, [previewUrl]);
+
+  const handleGenerate = async () => {
     if (!templateRef.current) return;
     setIsGenerating(true);
     setExportError(null);
+    clearPreview();
     try {
       const dataUrl = await toPng(templateRef.current, {
         width: CAPTURE_WIDTH,
         height: CAPTURE_HEIGHT,
         pixelRatio: 1,
       });
-      const link = document.createElement("a");
-      link.download = `kcvv-${selectedTemplateId}.png`;
-      link.href = dataUrl;
-      link.click();
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      setGeneratedBlob(blob);
+      setPreviewUrl(URL.createObjectURL(blob));
     } catch (err) {
       setExportError(
         err instanceof Error ? err.message : "Export failed. Please try again.",
@@ -292,6 +301,37 @@ export function SharePage({ matches, players }: SharePageProps) {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const canShareFiles =
+    typeof navigator !== "undefined" &&
+    typeof navigator.canShare === "function" &&
+    navigator.canShare({
+      files: [new File([], "test.png", { type: "image/png" })],
+    });
+
+  const handleShare = async () => {
+    if (!generatedBlob) return;
+    const file = new File([generatedBlob], `kcvv-${selectedTemplateId}.png`, {
+      type: "image/png",
+    });
+    try {
+      await navigator.share({ files: [file] });
+    } catch (err) {
+      // User cancelled share sheet — not an error
+      if (err instanceof Error && err.name === "AbortError") return;
+      setExportError(
+        err instanceof Error ? err.message : "Share failed. Please try again.",
+      );
+    }
+  };
+
+  const handleDownload = () => {
+    if (!previewUrl) return;
+    const link = document.createElement("a");
+    link.download = `kcvv-${selectedTemplateId}.png`;
+    link.href = previewUrl;
+    link.click();
   };
 
   const inputClass =
@@ -501,12 +541,39 @@ export function SharePage({ matches, players }: SharePageProps) {
       )}
 
       <button
-        onClick={handleDownload}
+        onClick={handleGenerate}
         disabled={isGenerating}
         className="bg-kcvv-green-bright hover:bg-kcvv-green-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
       >
-        {isGenerating ? "Generating…" : "Download PNG"}
+        {isGenerating ? "Generating…" : "Genereer"}
       </button>
+
+      {previewUrl && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt="Generated preview"
+            className="max-w-full rounded-sm shadow-lg self-center"
+          />
+
+          {canShareFiles ? (
+            <button
+              onClick={handleShare}
+              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
+            >
+              Delen
+            </button>
+          ) : (
+            <button
+              onClick={handleDownload}
+              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
+            >
+              Download PNG
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
