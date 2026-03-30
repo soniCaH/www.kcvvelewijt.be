@@ -234,14 +234,14 @@ export const MobileMenu = ({
           "fixed top-0 left-0 h-full w-[280px] bg-[#1E2024] z-50",
           "transform transition-transform duration-500 ease-in-out",
           "shadow-[0_0_10px_rgba(0,0,0,0.7)]",
-          "overflow-y-auto",
+          "flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
           className,
         )}
         aria-label="Mobile navigation"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 shrink-0">
           <Link href="/" onClick={onClose}>
             <Image
               src="/images/logo-flat.png"
@@ -261,93 +261,95 @@ export const MobileMenu = ({
           </button>
         </div>
 
-        {/* Menu Items */}
-        <ul className="list-none m-0 p-0">
-          {menuItems.map((item) => {
-            const active = isActive(item.href);
-            const hasChildren = item.children && item.children.length > 0;
-            const isSubmenuOpen = openSubmenu === item.href;
+        {/* Menu Items — scrollable area, keeps social footer always visible below */}
+        <div className="flex-1 overflow-y-auto">
+          <ul className="list-none m-0 p-0">
+            {menuItems.map((item) => {
+              const active = isActive(item.href);
+              const hasChildren = item.children && item.children.length > 0;
+              const isSubmenuOpen = openSubmenu === item.href;
 
-            return (
-              <li key={item.href} className="relative">
-                {hasChildren ? (
-                  <>
-                    {/* Parent with submenu */}
-                    <button
-                      onClick={() => toggleSubmenu(item.href)}
+              return (
+                <li key={item.href} className="relative">
+                  {hasChildren ? (
+                    <>
+                      {/* Parent with submenu */}
+                      <button
+                        onClick={() => toggleSubmenu(item.href)}
+                        className={cn(
+                          "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-[#292c31] text-white text-[0.6875rem] uppercase font-bold transition-colors",
+                          active && "active",
+                        )}
+                      >
+                        <span>{item.label}</span>
+                        <Icon
+                          icon={ChevronDown}
+                          size="xs"
+                          className={cn(
+                            "transition-transform",
+                            isSubmenuOpen && "rotate-180",
+                          )}
+                        />
+                      </button>
+
+                      {/* Submenu */}
+                      <div
+                        className={cn(
+                          "overflow-hidden transition-all duration-300",
+                          isSubmenuOpen ? "max-h-[800px]" : "max-h-0",
+                        )}
+                      >
+                        <ul
+                          className="list-none m-0 p-0 bg-[#292c31]"
+                          style={{
+                            boxShadow:
+                              "inset 0 7px 9px -7px #1E2024, inset 0 -7px 9px -7px #1E2024",
+                          }}
+                        >
+                          {item.children?.map((child) => {
+                            const childActive = isActive(child.href);
+
+                            return (
+                              <li key={child.href}>
+                                <Link
+                                  href={child.href}
+                                  className={cn(
+                                    "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline transition-colors",
+                                    childActive
+                                      ? "text-kcvv-green-bright active"
+                                      : "text-white hover:text-kcvv-green-bright",
+                                  )}
+                                >
+                                  {child.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
                       className={cn(
-                        "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-[#292c31] text-white text-[0.6875rem] uppercase font-bold transition-colors",
+                        "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#292c31] text-white no-underline transition-colors",
                         active && "active",
                       )}
                     >
-                      <span>{item.label}</span>
-                      <Icon
-                        icon={ChevronDown}
-                        size="xs"
-                        className={cn(
-                          "transition-transform",
-                          isSubmenuOpen && "rotate-180",
-                        )}
-                      />
-                    </button>
-
-                    {/* Submenu */}
-                    <div
-                      className={cn(
-                        "overflow-hidden transition-all duration-300",
-                        isSubmenuOpen ? "max-h-[800px]" : "max-h-0",
+                      {item.label}
+                      {item.href === "/zoeken" && (
+                        <Icon icon={Search} size="xs" className="ml-2 inline" />
                       )}
-                    >
-                      <ul
-                        className="list-none m-0 p-0 bg-[#292c31]"
-                        style={{
-                          boxShadow:
-                            "inset 0 7px 9px -7px #1E2024, inset 0 -7px 9px -7px #1E2024",
-                        }}
-                      >
-                        {item.children?.map((child) => {
-                          const childActive = isActive(child.href);
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-                          return (
-                            <li key={child.href}>
-                              <Link
-                                href={child.href}
-                                className={cn(
-                                  "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline transition-colors",
-                                  childActive
-                                    ? "text-kcvv-green-bright active"
-                                    : "text-white hover:text-kcvv-green-bright",
-                                )}
-                              >
-                                {child.label}
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  </>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#292c31] text-white no-underline transition-colors",
-                      active && "active",
-                    )}
-                  >
-                    {item.label}
-                    {item.href === "/zoeken" && (
-                      <Icon icon={Search} size="xs" className="ml-2 inline" />
-                    )}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Social Links */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
+        {/* Social Links — outside scroll area so they never overlap menu items */}
+        <div className="shrink-0 p-6 border-t border-white/10">
           <div className="flex items-center justify-center">
             <SocialLinks variant="inline" size="lg" />
           </div>

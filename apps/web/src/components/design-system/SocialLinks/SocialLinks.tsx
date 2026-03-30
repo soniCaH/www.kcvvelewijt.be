@@ -128,7 +128,7 @@ export const SocialLinks = ({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={link.name}
-          className="p-3 text-white hover:text-kcvv-green-bright transition-colors rounded-full hover:bg-white/5"
+          className="p-3 text-white hover:text-kcvv-green-bright transition-colors"
         >
           <Icon icon={link.icon} size={size} />
         </a>
