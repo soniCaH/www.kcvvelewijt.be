@@ -96,3 +96,7 @@ None. Sponsors are fetched directly from Sanity via `SanityService` in `apps/web
 ## 8. Discovered Unknowns
 
 _Filled during implementation._
+
+- [2026-03-30] Discovered: SponsorEmptyState still used in SponsorsPage (zero-sponsor edge case) → kept, not deleted
+- [2026-03-30] Discovered: Sanity type field removal deferred — editor confirmation not received; legacy type fallback in sponsors/page.tsx preserved
+- [2026-03-30] Discovered: Homepage bannerSlotC → sponsors diagonal already handled by SectionStack (bannerSlotCSection.transition set in Phase 2) — no homepage changes needed in Phase 3
