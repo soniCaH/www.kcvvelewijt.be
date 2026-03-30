@@ -83,18 +83,28 @@ export function SectionTransition({
   className,
 }: SectionTransitionProps) {
   const isDouble = type === "double-diagonal";
-  const height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
 
+  // For overlap cases, extend height and marginTop by 1px so the SVG bleeds 1px
+  // into the previous section. This covers the sub-pixel gap that appears at the
+  // SVG's top edge where the section boundary is (visible as a horizontal line on
+  // the left side of the page, where the TO color polygon starts at the very top
+  // of the SVG). The extra pixel is invisible: it paints the FROM color into the
+  // section's own background area.
+  let height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
   let marginTop = "0";
   let zIndex = "";
 
   if (overlap === "half") {
     marginTop = isDouble
-      ? `calc(-1 * ${DIAGONAL_HEIGHT})`
-      : `calc(-1 * ${DIAGONAL_HALF})`;
+      ? `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`
+      : `calc(-1 * ${DIAGONAL_HALF} - 1px)`;
+    height = isDouble
+      ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
+      : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   } else if (overlap === "full") {
-    marginTop = `calc(-1 * ${DIAGONAL_HEIGHT})`;
+    marginTop = `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`;
+    height = `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   }
 
@@ -111,7 +121,10 @@ export function SectionTransition({
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
     const midColor = via ?? to;
-    const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
+    // Always use an explicit color for the FROM polygon — never rely on SVG
+    // transparency. SVG transparency depends on compositing chain order which can
+    // differ from CSS background rendering, causing sub-pixel color mismatches.
+    const fromFill = BG_COLOR[from];
     return (
       <div
         aria-hidden="true"
@@ -158,7 +171,10 @@ export function SectionTransition({
     );
   }
 
-  const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
+  // Always use an explicit color for the FROM polygon — never rely on SVG
+  // transparency. SVG transparency depends on compositing chain order which can
+  // differ from CSS background rendering, causing sub-pixel color mismatches.
+  const fromFill = BG_COLOR[from];
 
   return (
     <div
