@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { GoalKcvvTemplate } from "./GoalKcvvTemplate";
 
 const defaultProps = {
   playerName: "Kevin Van Ransbeeck",
   shirtNumber: 10,
   score: "1 - 0",
-  matchName: "KCVV Elewijt - FC Opponent",
+  matchName: "KCVV Elewijt — FC Opponent",
   minute: "45",
 };
 
@@ -23,8 +23,9 @@ describe("GoalKcvvTemplate", () => {
 
   it("renders shirt number", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
-    // shirtNumber appears in both the ghost (aria-hidden) and stats row
-    expect(screen.getAllByText("10").length).toBeGreaterThan(0);
+    // scope to the Nr. stats column to avoid matching the ghost aria-hidden element
+    const nrLabel = screen.getByText("Nr.");
+    expect(within(nrLabel.parentElement!).getByText("10")).toBeInTheDocument();
   });
 
   it("renders score", () => {
@@ -34,7 +35,9 @@ describe("GoalKcvvTemplate", () => {
 
   it("renders match name", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    // matchName is split on em-dash; both halves appear in the footer section
+    expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
+    expect(screen.getByText("FC Opponent")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {

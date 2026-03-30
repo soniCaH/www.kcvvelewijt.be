@@ -18,7 +18,7 @@ production templates apply this pattern with event-appropriate variants.
 
 ### Core anatomy
 
-```
+```text
 ┌──────────────────────────────────────────┐  ← 1080 px wide
 │  [KCVV logo]             [@kcvvelewijt]  │  top:60 left/right:80
 │                                          │
@@ -41,7 +41,7 @@ production templates apply this pattern with event-appropriate variants.
 The torn-paper effect is a CSS `clip-path: polygon(...)` with 3 % oscillation at 38–41 %
 of canvas height. The same polygon is used by all 9 templates:
 
-```
+```text
 polygon(
   0% 40%, 2% 38%, 5% 41%, 8% 38%, 11% 41%, 14% 38%,
   …(every 3% across the full width)…

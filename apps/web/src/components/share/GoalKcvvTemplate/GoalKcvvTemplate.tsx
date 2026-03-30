@@ -30,8 +30,9 @@ export function GoalKcvvTemplate({
   minute,
   celebrationImageUrl,
 }: GoalKcvvTemplateProps) {
-  const team1 = matchName.split("—")[0]?.trim() ?? matchName;
-  const team2 = matchName.split("—")[1]?.trim() ?? "KCVV Elewijt";
+  const parts = matchName.split(/—| - /).map((s) => s.trim());
+  const team1 = parts[0] ?? matchName;
+  const team2 = parts[1] ?? "";
 
   return (
     <div

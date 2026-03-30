@@ -31,10 +31,9 @@ export function YellowCardOpponentTemplate({
   matchName,
   minute,
 }: YellowCardOpponentTemplateProps) {
-  const [matchPart1, matchPart2] = [
-    matchName.split("—")[0]?.trim(),
-    matchName.split("—")[1]?.trim() ?? "KCVV Elewijt",
-  ];
+  const parts = matchName.split("—").map((p) => p.trim());
+  const matchPart1 = parts[0];
+  const matchPart2 = parts[1] ?? "";
 
   return (
     <div
