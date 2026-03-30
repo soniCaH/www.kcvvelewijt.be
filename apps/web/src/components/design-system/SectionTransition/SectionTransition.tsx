@@ -108,13 +108,15 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  // -1px bottom margin pulls the next section up to cover any sub-pixel gap
-  // caused by fractional pixel heights from clamp(). The overlap is invisible
-  // because both the SVG's bottom edge and the next section share the TO color.
+  // backgroundColor: BG_COLOR[to] — ensures any sub-pixel gap between the
+  // SVG's bottom edge and the next section shows the TO color, not the white
+  // page background. The SVG covers the wrapper completely via absolute inset-0,
+  // so this background is only ever visible at fractional-pixel boundaries.
   const style: React.CSSProperties = {
     height,
     marginTop,
     marginBottom: "-1px",
+    backgroundColor: BG_COLOR[to],
   };
   if (zIndex) style.zIndex = zIndex;
 
