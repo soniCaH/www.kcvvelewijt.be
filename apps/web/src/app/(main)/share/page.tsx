@@ -48,14 +48,15 @@ async function fetchSharePageData(): Promise<{
         { concurrency: 2 },
       );
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
+      // en-CA locale gives YYYY-MM-DD format for reliable string comparison
+      const brusselsDate = new Date().toLocaleDateString("en-CA", {
+        timeZone: "Europe/Brussels",
+      });
       const todayMatches = nextMatches.filter((m) => {
-        const kickoff = new Date(m.date);
-        return kickoff >= today && kickoff < tomorrow;
+        const kickoffDate = new Date(m.date).toLocaleDateString("en-CA", {
+          timeZone: "Europe/Brussels",
+        });
+        return kickoffDate === brusselsDate;
       });
 
       const matches = todayMatches.map(toMatchOption);
