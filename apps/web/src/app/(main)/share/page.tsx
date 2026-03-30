@@ -40,13 +40,15 @@ async function fetchSharePageData(): Promise<{
 
       const [nextMatches, allPlayers] = yield* Effect.all(
         [
-          bff.getNextMatches().pipe(Effect.catchAll(() => Effect.succeed([]))),
-          playerRepo.findAll().pipe(Effect.catchAll(() => Effect.succeed([]))),
+          bff
+            .getNextMatches()
+            .pipe(Effect.catchTag("HttpNotFound", () => Effect.succeed([]))),
+          playerRepo.findAll(),
         ],
         { concurrency: 2 },
       );
 
-      const matches = [...nextMatches].map(toMatchOption);
+      const matches = nextMatches.map(toMatchOption);
 
       const players: PlayerForShare[] = allPlayers.map((p) => ({
         id: p.id,

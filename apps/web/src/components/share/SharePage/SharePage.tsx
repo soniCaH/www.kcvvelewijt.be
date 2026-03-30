@@ -145,6 +145,11 @@ export interface SharePageProps {
   players: PlayerForShare[];
 }
 
+const FULL_TIME_MOODS: readonly FullTimeMood[] = ["win", "draw", "loss"];
+function isFullTimeMood(value: string): value is FullTimeMood {
+  return (FULL_TIME_MOODS as readonly string[]).includes(value);
+}
+
 const FALLBACK_MATCH_NAME = "KCVV Elewijt — FC Tegenstander";
 const FALLBACK_SCORE = "0 - 0";
 const FALLBACK_MINUTE = "0";
@@ -440,7 +445,9 @@ export function SharePage({ matches, players }: SharePageProps) {
           <select
             id="mood-select"
             value={mood}
-            onChange={(e) => setMood(e.target.value as FullTimeMood)}
+            onChange={(e) => {
+              if (isFullTimeMood(e.target.value)) setMood(e.target.value);
+            }}
             aria-labelledby="mood-label"
             className={inputClass}
           >
