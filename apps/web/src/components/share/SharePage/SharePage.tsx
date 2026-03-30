@@ -232,6 +232,7 @@ function renderTemplate(
 
 export function SharePage({ matches, players }: SharePageProps) {
   const templateRef = useRef<HTMLDivElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
@@ -274,16 +275,22 @@ export function SharePage({ matches, players }: SharePageProps) {
   };
 
   const clearPreview = useCallback(() => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setGeneratedBlob(null);
     setPreviewUrl(null);
-  }, [previewUrl]);
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
     };
-  }, [previewUrl]);
+  }, []);
 
   const handleGenerate = async () => {
     if (!templateRef.current) return;
@@ -298,8 +305,10 @@ export function SharePage({ matches, players }: SharePageProps) {
       });
       const res = await fetch(dataUrl);
       const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      previewUrlRef.current = url;
       setGeneratedBlob(blob);
-      setPreviewUrl(URL.createObjectURL(blob));
+      setPreviewUrl(url);
     } catch (err) {
       setExportError(
         err instanceof Error ? err.message : "Export failed. Please try again.",
