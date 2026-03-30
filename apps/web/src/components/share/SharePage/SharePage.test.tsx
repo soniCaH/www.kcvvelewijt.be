@@ -81,7 +81,7 @@ describe("SharePage", () => {
     expect(toPng).toHaveBeenCalledTimes(1);
   });
 
-  it("calls toPng with exactly 1080x1920 dimensions", async () => {
+  it("calls toPng with exactly 1080x1920 dimensions and pixelRatio 1", async () => {
     const { toPng } = await import("html-to-image");
     const user = userEvent.setup();
 
@@ -90,7 +90,11 @@ describe("SharePage", () => {
 
     expect(toPng).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ width: CAPTURE_WIDTH, height: CAPTURE_HEIGHT }),
+      expect.objectContaining({
+        width: CAPTURE_WIDTH,
+        height: CAPTURE_HEIGHT,
+        pixelRatio: 1,
+      }),
     );
   });
 
@@ -337,13 +341,6 @@ describe("SharePage", () => {
 
   // ─── Phase 4: Image export and mobile UX ──────────────────────────────────
 
-  it("renders a Generate button", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(
-      screen.getByRole("button", { name: /genereer/i }),
-    ).toBeInTheDocument();
-  });
-
   it("clicking Generate shows a preview image", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
@@ -387,22 +384,25 @@ describe("SharePage", () => {
       configurable: true,
     });
 
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    try {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
 
-    expect(screen.getByRole("button", { name: /delen/i })).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /download/i }),
-    ).not.toBeInTheDocument();
-
-    // Restore
-    Object.defineProperty(navigator, "canShare", {
-      value: originalCanShare,
-      writable: true,
-      configurable: true,
-    });
+      expect(
+        screen.getByRole("button", { name: /delen/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /download/i }),
+      ).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(navigator, "canShare", {
+        value: originalCanShare,
+        writable: true,
+        configurable: true,
+      });
+    }
   });
 
   it("Share button calls navigator.share with a PNG file", async () => {
@@ -420,30 +420,83 @@ describe("SharePage", () => {
       configurable: true,
     });
 
+    try {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await user.click(screen.getByRole("button", { name: /delen/i }));
+
+      expect(mockShare).toHaveBeenCalledTimes(1);
+      const { files } = mockShare.mock.calls[0][0] as { files: File[] };
+      expect(files).toHaveLength(1);
+      expect(files[0]).toBeInstanceOf(File);
+      expect(files[0].type).toBe("image/png");
+      expect(files[0].name).toMatch(/^kcvv-.*\.png$/);
+    } finally {
+      Object.defineProperty(navigator, "share", {
+        value: originalShare,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "canShare", {
+        value: originalCanShare,
+        writable: true,
+        configurable: true,
+      });
+    }
+  });
+
+  it("does not show an error when share is cancelled (AbortError)", async () => {
+    const abortError = new Error("Share cancelled");
+    abortError.name = "AbortError";
+    const mockShare = vi.fn().mockRejectedValue(abortError);
+    const originalShare = navigator.share;
+    const originalCanShare = navigator.canShare;
+    Object.defineProperty(navigator, "canShare", {
+      value: () => true,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "share", {
+      value: mockShare,
+      writable: true,
+      configurable: true,
+    });
+
+    try {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await user.click(screen.getByRole("button", { name: /delen/i }));
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(navigator, "share", {
+        value: originalShare,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "canShare", {
+        value: originalCanShare,
+        writable: true,
+        configurable: true,
+      });
+    }
+  });
+
+  it("revokes previous object URL when generating a new preview", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
     await user.click(screen.getByRole("button", { name: /genereer/i }));
-    await user.click(screen.getByRole("button", { name: /delen/i }));
+    const firstUrl = vi.mocked(globalThis.URL.createObjectURL).mock.results[0]
+      ?.value as string;
 
-    expect(mockShare).toHaveBeenCalledTimes(1);
-    const { files } = mockShare.mock.calls[0][0] as { files: File[] };
-    expect(files).toHaveLength(1);
-    expect(files[0]).toBeInstanceOf(File);
-    expect(files[0].type).toBe("image/png");
-    expect(files[0].name).toMatch(/^kcvv-.*\.png$/);
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
 
-    // Restore
-    Object.defineProperty(navigator, "share", {
-      value: originalShare,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "canShare", {
-      value: originalCanShare,
-      writable: true,
-      configurable: true,
-    });
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(firstUrl);
   });
 
   it("Download button triggers file download via anchor click", async () => {
@@ -466,22 +519,5 @@ describe("SharePage", () => {
     expect(clickSpy).toHaveBeenCalledTimes(1);
 
     vi.mocked(document.createElement).mockRestore();
-  });
-
-  it("generated PNG uses 1080x1920 dimensions (pixelRatio 1)", async () => {
-    const { toPng } = await import("html-to-image");
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(toPng).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        width: CAPTURE_WIDTH,
-        height: CAPTURE_HEIGHT,
-        pixelRatio: 1,
-      }),
-    );
   });
 });

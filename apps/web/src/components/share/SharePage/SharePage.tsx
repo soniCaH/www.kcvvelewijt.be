@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { GoalKcvvTemplate } from "../GoalKcvvTemplate/GoalKcvvTemplate";
 import { GoalOpponentTemplate } from "../GoalOpponentTemplate/GoalOpponentTemplate";
@@ -279,6 +279,12 @@ export function SharePage({ matches, players }: SharePageProps) {
     setPreviewUrl(null);
   }, [previewUrl]);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   const handleGenerate = async () => {
     if (!templateRef.current) return;
     setIsGenerating(true);
@@ -303,12 +309,15 @@ export function SharePage({ matches, players }: SharePageProps) {
     }
   };
 
-  const canShareFiles =
-    typeof navigator !== "undefined" &&
-    typeof navigator.canShare === "function" &&
-    navigator.canShare({
-      files: [new File([], "test.png", { type: "image/png" })],
-    });
+  const canShareFiles = useMemo(
+    () =>
+      typeof navigator !== "undefined" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({
+        files: [new File([], "test.png", { type: "image/png" })],
+      }),
+    [],
+  );
 
   const handleShare = async () => {
     if (!generatedBlob) return;
