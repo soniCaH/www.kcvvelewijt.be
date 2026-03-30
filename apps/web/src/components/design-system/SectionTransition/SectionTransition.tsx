@@ -108,15 +108,18 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  // backgroundColor: BG_COLOR[to] — ensures any sub-pixel gap between the
-  // SVG's bottom edge and the next section shows the TO color, not the white
-  // page background. The SVG covers the wrapper completely via absolute inset-0,
-  // so this background is only ever visible at fractional-pixel boundaries.
+  // background gradient from FROM (top) to TO (bottom) — any sub-pixel
+  // transparent strip left by shapeRendering="crispEdges" at the SVG's top
+  // edge shows the FROM color (same as the previous section → invisible), and
+  // any strip at the bottom shows the TO color (same as next section →
+  // invisible). A plain backgroundColor: TO would expose the TO color at the
+  // top edge of overlap transitions, creating a visible tinted line over the
+  // hero's FROM background.
   const style: React.CSSProperties = {
     height,
     marginTop,
     marginBottom: "-1px",
-    backgroundColor: BG_COLOR[to],
+    background: `linear-gradient(to bottom, ${BG_COLOR[from]}, ${BG_COLOR[to]})`,
   };
   if (zIndex) style.zIndex = zIndex;
 
