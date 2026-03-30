@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram } from "@/lib/icons";
-import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
+import { FooterTransition } from "./FooterTransition";
 import { cn } from "@/lib/utils/cn";
 
 export interface PageFooterProps {
@@ -22,13 +22,8 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
   return (
     <div className={cn(className)}>
-      {/* Diagonal: gray-100 → green-dark */}
-      <SectionTransition
-        from="gray-100"
-        to="kcvv-green-dark"
-        type="diagonal"
-        direction="left"
-      />
+      {/* Diagonal: adapts based on the last section of the current page */}
+      <FooterTransition />
 
       {/* Zone 1 — Green hero */}
       <div className="bg-kcvv-green-dark">

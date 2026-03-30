@@ -19,11 +19,8 @@ export const SponsorCallToAction = ({
 }: SponsorCallToActionProps) => {
   return (
     <div className={cn("text-white py-16 px-6", className)}>
-      <div className="max-w-[40rem] mx-auto text-center">
-        <h2
-          className="font-title font-extrabold uppercase text-white mb-4"
-          style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}
-        >
+      <div className="max-w-inner mx-auto text-center">
+        <h2 className="font-title font-extrabold uppercase text-white text-5xl mb-4">
           Word sponsor
         </h2>
         <p className="text-sm text-white/70 mb-8 leading-relaxed">

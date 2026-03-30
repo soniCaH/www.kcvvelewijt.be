@@ -31,11 +31,14 @@ export interface SectionTransitionProps {
 }
 
 // CSS color values for SVG polygon fills.
+// NOTE: Use resolved hex values, not CSS custom properties — SVG fill rendering
+// uses a different pipeline from CSS background-color, and CSS variables in SVG
+// attributes can produce sub-pixel color mismatches visible as a 1px seam line.
 const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
-  "gray-100": "var(--color-gray-100)",
-  "kcvv-black": "var(--color-kcvv-black)",
-  "kcvv-green-dark": "var(--color-kcvv-green-dark)",
+  "gray-100": "#f3f4f6",
+  "kcvv-black": "#1E2024",
+  "kcvv-green-dark": "#008755",
   transparent: "transparent",
 };
 
