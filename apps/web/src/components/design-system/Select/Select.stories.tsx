@@ -121,7 +121,7 @@ export const Disabled: Story = {
 };
 
 /**
- * Select paired with Label — typical filter form usage (mirrors SponsorsFilters)
+ * Select paired with Label — typical filter form usage
  */
 export const WithLabel: Story = {
   render: () => (
@@ -137,7 +137,7 @@ export const WithLabel: Story = {
 };
 
 /**
- * Filter panel as used in SponsorsFilters — two selects side by side
+ * Filter panel with two selects side by side
  */
 export const FilterPanel: Story = {
   render: () => (
@@ -162,8 +162,7 @@ export const FilterPanel: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Two Select fields side by side, as used in the SponsorsFilters component.",
+        story: "Two Select fields side by side — typical filter panel layout.",
       },
     },
   },
