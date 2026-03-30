@@ -52,24 +52,12 @@ export function SponsorsPage({
           <span className="block w-5 h-0.5 bg-kcvv-green" aria-hidden="true" />
           KCVV Elewijt
         </div>
-        <h1 className="font-title font-black text-white uppercase text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] mb-0">
+        <h1 className="font-title font-black text-white uppercase text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] mb-4">
           Onze sponsors
         </h1>
-      </div>
-    ),
-    paddingTop: "pt-10",
-    paddingBottom: "pb-16",
-    transition: { type: "diagonal", direction: "right", overlap: "full" },
-  };
-
-  const introSection: SectionConfig = {
-    key: "intro",
-    bg: "gray-100",
-    content: (
-      <div className="max-w-inner-lg mx-auto px-4 md:px-10">
         <p
           data-testid="sponsors-intro"
-          className="max-w-2xl text-kcvv-gray text-lg py-4"
+          className="max-w-2xl text-white/60 text-lg"
         >
           KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
           Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
@@ -77,11 +65,9 @@ export function SponsorsPage({
         </p>
       </div>
     ),
-    paddingTop: "pt-8",
-    paddingBottom: "pb-0",
-    transition: hasSpotlight
-      ? { type: "diagonal", direction: "left" }
-      : undefined,
+    paddingTop: "pt-16",
+    paddingBottom: "pb-16",
+    transition: { type: "diagonal", direction: "right", overlap: "full" },
   };
 
   const spotlightSection: SectionConfig | false = hasSpotlight && {
@@ -143,13 +129,7 @@ export function SponsorsPage({
 
   return (
     <SectionStack
-      sections={[
-        headerSection,
-        introSection,
-        spotlightSection,
-        gridSection,
-        ctaSection,
-      ]}
+      sections={[headerSection, spotlightSection, gridSection, ctaSection]}
     />
   );
 }

@@ -15,7 +15,7 @@ import { mockSponsors } from "../Sponsors.mocks";
 // ---------------------------------------------------------------------------
 
 const meta = {
-  title: "Pages/SponsorsPage",
+  title: "Features/Sponsors/SponsorsPage",
   component: SponsorsPage,
   parameters: {
     layout: "fullscreen",

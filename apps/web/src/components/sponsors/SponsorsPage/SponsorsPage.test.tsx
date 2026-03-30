@@ -180,22 +180,8 @@ describe("SponsorsPage", () => {
       ).toBeGreaterThan(0);
     });
 
-    it("renders more section-transitions when featuredSponsors exist (diagonal above spotlight)", () => {
-      const { getAllByTestId: withSpotlight } = render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-
-      const withCount = withSpotlight("section-transition").length;
-      expect(withCount).toBeGreaterThan(1);
-    });
-
     it("renders fewer section-transitions when no featuredSponsors (no spotlight diagonal)", () => {
-      const { getAllByTestId: withoutSpotlight, unmount: u1 } = render(
+      const { getAllByTestId: withoutSpotlight } = render(
         <SponsorsPage
           goldSponsors={hoofdsponsors}
           silverSponsors={sponsors}
@@ -203,9 +189,11 @@ describe("SponsorsPage", () => {
           featuredSponsors={[]}
         />,
       );
-      const withoutCount = withoutSpotlight("section-transition").length;
-      u1();
+      // Without spotlight: header→grid + grid→cta = 2 transitions
+      expect(withoutSpotlight("section-transition").length).toBe(2);
+    });
 
+    it("renders more section-transitions when featuredSponsors exist (spotlight adds two diagonals)", () => {
       const { getAllByTestId: withSpotlight } = render(
         <SponsorsPage
           goldSponsors={hoofdsponsors}
@@ -214,9 +202,8 @@ describe("SponsorsPage", () => {
           featuredSponsors={featuredSponsors}
         />,
       );
-      const withCount = withSpotlight("section-transition").length;
-
-      expect(withCount).toBeGreaterThan(withoutCount);
+      // With spotlight: header→spotlight + spotlight→grid + grid→cta = 3 transitions
+      expect(withSpotlight("section-transition").length).toBe(3);
     });
 
     it("does not use the legacy green PageTitle background", () => {
