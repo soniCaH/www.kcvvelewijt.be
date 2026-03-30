@@ -48,7 +48,17 @@ async function fetchSharePageData(): Promise<{
         { concurrency: 2 },
       );
 
-      const matches = nextMatches.map(toMatchOption);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const todayMatches = nextMatches.filter((m) => {
+        const kickoff = new Date(m.date);
+        return kickoff >= today && kickoff < tomorrow;
+      });
+
+      const matches = todayMatches.map(toMatchOption);
 
       const players: PlayerForShare[] = allPlayers.map((p) => ({
         id: p.id,

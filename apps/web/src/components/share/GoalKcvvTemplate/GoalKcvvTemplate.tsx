@@ -10,7 +10,7 @@ const TORN_POLYGON =
 
 export interface GoalKcvvTemplateProps {
   playerName: string;
-  shirtNumber: number;
+  shirtNumber?: number;
   score: string;
   matchName: string;
   minute: string;
@@ -126,7 +126,7 @@ export function GoalKcvvTemplate({
                 pointerEvents: "none",
               }}
             >
-              {shirtNumber}
+              {shirtNumber ?? "—"}
             </div>
           </>
         )}
@@ -359,7 +359,7 @@ export function GoalKcvvTemplate({
               lineHeight: 1,
             }}
           >
-            {shirtNumber}
+            {shirtNumber ?? "—"}
           </span>
         </div>
 

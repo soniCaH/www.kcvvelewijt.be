@@ -62,6 +62,11 @@ import {
   // Sports & Activities
   Trophy,
   Activity,
+  CircleDot,
+  Flag,
+  Timer,
+  RectangleVertical,
+  Square,
 
   // Medical & Safety
   Heart,
@@ -143,6 +148,11 @@ export const icons = {
   // Sports & Activities
   trophy: Trophy,
   activity: Activity,
+  "circle-dot": CircleDot,
+  flag: Flag,
+  timer: Timer,
+  "rectangle-vertical": RectangleVertical,
+  square: Square,
 
   // Medical & Safety
   heart: Heart,
@@ -271,6 +281,11 @@ export {
   // Sports & Activities
   Trophy,
   Activity,
+  CircleDot,
+  Flag,
+  Timer,
+  RectangleVertical,
+  Square,
 
   // Medical & Safety
   Heart,

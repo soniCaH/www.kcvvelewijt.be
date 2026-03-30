@@ -19,6 +19,8 @@ import {
   PREVIEW_WIDTH,
   PREVIEW_HEIGHT,
 } from "../constants";
+import type { LucideIcon } from "@/lib/icons";
+import { CircleDot, Play, Timer, Flag, Square } from "@/lib/icons";
 
 export type TemplateId =
   | "goal-kcvv"
@@ -49,7 +51,8 @@ export interface MatchOption {
 interface TemplateMeta {
   id: TemplateId;
   label: string;
-  icon: string;
+  icon: LucideIcon;
+  iconClassName?: string;
   requiresPlayer: boolean;
   requiresScore: boolean;
   requiresMinute: boolean;
@@ -60,7 +63,7 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "goal-kcvv",
     label: "Goal KCVV",
-    icon: "⚽",
+    icon: CircleDot,
     requiresPlayer: true,
     requiresScore: true,
     requiresMinute: true,
@@ -69,7 +72,7 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "goal-opponent",
     label: "Goal Teg.",
-    icon: "⚽",
+    icon: CircleDot,
     requiresPlayer: false,
     requiresScore: true,
     requiresMinute: true,
@@ -78,7 +81,7 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "kickoff",
     label: "Aftrap",
-    icon: "🟢",
+    icon: Play,
     requiresPlayer: false,
     requiresScore: false,
     requiresMinute: false,
@@ -87,7 +90,7 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "halftime",
     label: "Rust",
-    icon: "⏱️",
+    icon: Timer,
     requiresPlayer: false,
     requiresScore: true,
     requiresMinute: false,
@@ -96,7 +99,7 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "full-time",
     label: "Eindstand",
-    icon: "🏁",
+    icon: Flag,
     requiresPlayer: false,
     requiresScore: true,
     requiresMinute: false,
@@ -105,7 +108,8 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "red-card-kcvv",
     label: "Rode Kaart KCVV",
-    icon: "🟥",
+    icon: Square,
+    iconClassName: "fill-red-500 text-red-600",
     requiresPlayer: true,
     requiresScore: false,
     requiresMinute: true,
@@ -114,7 +118,8 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "red-card-opponent",
     label: "Rode Kaart Teg.",
-    icon: "🟥",
+    icon: Square,
+    iconClassName: "fill-red-500 text-red-600",
     requiresPlayer: false,
     requiresScore: false,
     requiresMinute: true,
@@ -123,7 +128,8 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "yellow-card-kcvv",
     label: "Gele Kaart KCVV",
-    icon: "🟨",
+    icon: Square,
+    iconClassName: "fill-yellow-400 text-yellow-500",
     requiresPlayer: true,
     requiresScore: false,
     requiresMinute: true,
@@ -132,7 +138,8 @@ const TEMPLATES: TemplateMeta[] = [
   {
     id: "yellow-card-opponent",
     label: "Gele Kaart Teg.",
-    icon: "🟨",
+    icon: Square,
+    iconClassName: "fill-yellow-400 text-yellow-500",
     requiresPlayer: false,
     requiresScore: false,
     requiresMinute: true,
@@ -166,7 +173,7 @@ function renderTemplate(
 ): React.ReactNode {
   const { matchName, score, minute, player, mood } = opts;
   const playerName = player ? `${player.firstName} ${player.lastName}` : "";
-  const shirtNumber = player?.number ?? 0;
+  const shirtNumber = player?.number;
 
   switch (id) {
     case "goal-kcvv":
@@ -255,6 +262,7 @@ export function SharePage({ matches, players }: SharePageProps) {
     : players;
 
   const handleTemplateChange = (id: TemplateId) => {
+    if (id === selectedTemplateId) return;
     setSelectedTemplateId(id);
     // Reset template-specific fields; matchName + score persist intentionally
     setMinute("");
@@ -314,9 +322,10 @@ export function SharePage({ matches, players }: SharePageProps) {
                   : "border-gray-200 bg-white text-kcvv-black hover:border-kcvv-green/50"
               }`}
             >
-              <span className="text-xl" aria-hidden="true">
-                {t.icon}
-              </span>
+              <t.icon
+                className={`size-5 ${t.iconClassName ?? ""}`}
+                aria-hidden="true"
+              />
               <span className="text-center leading-tight">{t.label}</span>
             </button>
           ))}
