@@ -83,6 +83,7 @@ export function SectionTransition({
   className,
 }: SectionTransitionProps) {
   const isDouble = type === "double-diagonal";
+  const isOverlap = overlap !== "none";
 
   // For overlap cases, extend height and marginTop by 1px so the SVG bleeds 1px
   // into the previous section. This covers the sub-pixel gap that appears at the
@@ -108,28 +109,36 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  // background gradient from FROM (top) to TO (bottom) — any sub-pixel
-  // transparent strip left by shapeRendering="crispEdges" at the SVG's top
-  // edge shows the FROM color (same as the previous section → invisible), and
-  // any strip at the bottom shows the TO color (same as next section →
-  // invisible). A plain backgroundColor: TO would expose the TO color at the
-  // top edge of overlap transitions, creating a visible tinted line over the
-  // hero's FROM background.
+  // Wrapper background strategy:
+  //
+  // Non-overlap: solid TO color. The FROM polygon is opaque and hides it in the
+  //   FROM area; the TO color covers any sub-pixel gap at the SVG's bottom edge
+  //   where the page background (white) would otherwise show.
+  //
+  // Overlap: the FROM polygon must be TRANSPARENT so the hero/section image
+  //   behind it is visible (the diagonal cuts into the hero visually). The wrapper
+  //   background is therefore transparent in the FROM area. A step gradient paints
+  //   the TO color only in the last 2% (≈1–3 px) to seal the bottom gap without
+  //   affecting the hero image area.
   const style: React.CSSProperties = {
     height,
     marginTop,
     marginBottom: "-1px",
-    background: `linear-gradient(to bottom, ${BG_COLOR[from]}, ${BG_COLOR[to]})`,
+    background: isOverlap
+      ? `linear-gradient(to bottom, transparent 98%, ${BG_COLOR[to]} 98%)`
+      : BG_COLOR[to],
   };
   if (zIndex) style.zIndex = zIndex;
+
+  // For overlap transitions the FROM polygon must be transparent — the section
+  // behind the transition (hero image, sponsor header, etc.) should be visible
+  // through the upper-triangle area. For non-overlap transitions the FROM polygon
+  // is painted explicitly so it doesn't depend on what happens to be behind it.
+  const fromFill = isOverlap ? "transparent" : BG_COLOR[from];
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
     const midColor = via ?? to;
-    // Always use an explicit color for the FROM polygon — never rely on SVG
-    // transparency. SVG transparency depends on compositing chain order which can
-    // differ from CSS background rendering, causing sub-pixel color mismatches.
-    const fromFill = BG_COLOR[from];
     return (
       <div
         aria-hidden="true"
@@ -145,6 +154,11 @@ export function SectionTransition({
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full"
         >
+          {/* Bottom seam guard: TO-colored rect at the SVG bottom, drawn BEFORE
+              the polygons. crispEdges can snap the TO polygon's bottom edge up by
+              1 px, leaving a transparent fringe. The rect fills it with TO color
+              from inside the SVG — the CSS wrapper background cannot reach here. */}
+          <rect x="0" y="196" width="100" height="4" fill={BG_COLOR[to]} />
           {/* Upper half (y 0–100): from → via */}
           <polygon
             data-testid="st-upper-from"
@@ -176,11 +190,6 @@ export function SectionTransition({
     );
   }
 
-  // Always use an explicit color for the FROM polygon — never rely on SVG
-  // transparency. SVG transparency depends on compositing chain order which can
-  // differ from CSS background rendering, causing sub-pixel color mismatches.
-  const fromFill = BG_COLOR[from];
-
   return (
     <div
       aria-hidden="true"
@@ -195,6 +204,8 @@ export function SectionTransition({
         preserveAspectRatio="none"
         className="absolute inset-0 w-full h-full"
       >
+        {/* Bottom seam guard — same rationale as double-diagonal above. */}
+        <rect x="0" y="97" width="100" height="3" fill={BG_COLOR[to]} />
         <polygon
           data-testid="st-from"
           points={SVG_FROM[direction]}
