@@ -77,6 +77,7 @@ describe("PlayerRepository", () => {
         position: "Aanvaller",
         number: 7,
         imageUrl: "https://cdn.sanity.io/transparent.webp",
+        celebrationImageUrl: "https://cdn.sanity.io/celebration.webp",
         href: "/spelers/12345",
         bio: row.bio,
         birthDate: "1995-03-15",
