@@ -23,7 +23,8 @@ describe("GoalKcvvTemplate", () => {
 
   it("renders shirt number", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("10")).toBeInTheDocument();
+    // shirtNumber appears in both the ghost (aria-hidden) and stats row
+    expect(screen.getAllByText("10").length).toBeGreaterThan(0);
   });
 
   it("renders score", () => {
@@ -46,7 +47,8 @@ describe("GoalKcvvTemplate", () => {
     render(
       <GoalKcvvTemplate {...defaultProps} celebrationImageUrl="some-url" />,
     );
-    const img = screen.getByRole("img");
+    // target the celebration image by its alt text; KCVV logos are also present
+    const img = screen.getByAltText("Kevin Van Ransbeeck celebration");
     expect(img).toHaveAttribute("crossorigin", "anonymous");
   });
 });

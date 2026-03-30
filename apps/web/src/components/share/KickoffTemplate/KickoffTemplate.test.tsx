@@ -3,18 +3,20 @@ import { render, screen } from "@testing-library/react";
 import { KickoffTemplate } from "./KickoffTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt - FC Opponent",
+  matchName: "KCVV Elewijt — FC Opponent",
 };
 
 describe("KickoffTemplate", () => {
   it("renders a kick-off label", () => {
     render(<KickoffTemplate {...defaultProps} />);
-    expect(screen.getByText(/kick.?off|aftrap/i)).toBeInTheDocument();
+    // headline is split across two nodes: "KICK-" and "OFF"
+    expect(screen.getByText("KICK-")).toBeInTheDocument();
   });
 
   it("renders match name", () => {
     render(<KickoffTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    // em-dash fixture splits correctly; full matchName appears only in the footer
+    expect(screen.getByText("KCVV Elewijt — FC Opponent")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {

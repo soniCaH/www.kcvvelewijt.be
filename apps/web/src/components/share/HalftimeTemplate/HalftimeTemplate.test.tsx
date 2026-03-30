@@ -3,14 +3,15 @@ import { render, screen } from "@testing-library/react";
 import { HalftimeTemplate } from "./HalftimeTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt - FC Opponent",
+  matchName: "KCVV Elewijt — FC Opponent",
   score: "1 - 0",
 };
 
 describe("HalftimeTemplate", () => {
   it("renders a halftime label", () => {
     render(<HalftimeTemplate {...defaultProps} />);
-    expect(screen.getByText(/half.?time|rust/i)).toBeInTheDocument();
+    // "RUST" headline and "Rust-stand" label both match /rust/i; target the headline exactly
+    expect(screen.getByText("RUST")).toBeInTheDocument();
   });
 
   it("renders score", () => {
@@ -20,7 +21,8 @@ describe("HalftimeTemplate", () => {
 
   it("renders match name", () => {
     render(<HalftimeTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    // em-dash fixture splits correctly; full matchName appears only in the footer
+    expect(screen.getByText("KCVV Elewijt — FC Opponent")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
