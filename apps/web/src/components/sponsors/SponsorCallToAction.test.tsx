@@ -73,11 +73,11 @@ describe("SponsorCallToAction", () => {
   });
 
   describe("dark styling", () => {
-    it("applies dark green background class", () => {
+    it("applies white text class for use on dark section backgrounds", () => {
       const { container } = render(<SponsorCallToAction />);
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper.className).toContain("bg-kcvv-green-dark");
+      expect(wrapper.className).toContain("text-white");
     });
   });
 });
