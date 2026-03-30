@@ -36,6 +36,7 @@ export interface PlayerVM {
   position: string;
   number?: number;
   imageUrl?: string;
+  celebrationImageUrl?: string;
   href?: string;
   bio?: PLAYERS_QUERY_RESULT[number]["bio"];
   birthDate?: string;
@@ -49,6 +50,7 @@ export type RoutablePlayerVM = PlayerVM & { href: string };
 
 export function toPlayerVM(
   row: SanityPlayerBase & {
+    celebrationImageUrl?: string | null;
     bio?: PLAYERS_QUERY_RESULT[number]["bio"] | null;
     birthDate?: string | null;
     nationality?: string | null;
@@ -67,6 +69,7 @@ export function toPlayerVM(
     position,
     number: row.jerseyNumber ?? undefined,
     imageUrl: row.transparentImageUrl ?? row.psdImageUrl ?? undefined,
+    celebrationImageUrl: row.celebrationImageUrl ?? undefined,
     href: row.psdId ? `/spelers/${row.psdId}` : undefined,
     bio: row.bio ?? undefined,
     birthDate: row.birthDate ?? undefined,

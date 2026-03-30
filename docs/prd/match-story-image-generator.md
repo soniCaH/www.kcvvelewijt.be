@@ -138,12 +138,14 @@ None. Player data is fetched directly from Sanity via existing `PLAYERS_QUERY`. 
 - [x] **Which `html-to-image` library?** — Chose `html-to-image` v1.11.13. iOS Safari and CORS verified manually during Phase 1.
 - [x] **Sanity CDN CORS for canvas export** — Sanity CDN serves CORS headers compatible with `html-to-image`. `crossOrigin="anonymous"` on `<img>` is required. Verified during Phase 1.
 - [ ] **Background asset format** — PNG or JPG or SVG for the 9 template backgrounds? JPG is smaller but no transparency. Kevin to decide when designing assets — resolved during Phase 2
-- [ ] **Today's matches endpoint** — does the existing `next-matches` BFF endpoint return matches for today specifically, or only future matches? If it doesn't include "in progress" matches, we may need to adjust the query or use a different endpoint — investigate during Phase 3
+- [x] **Today's matches endpoint** — `next-matches` filters `toMs(game) >= now`, where `toMs` combines the game's `date` + `time` fields into a UTC timestamp. A game whose scheduled kick-off time has already passed is excluded. During a live game, the match will NOT appear in the combo-box suggestions — the user types it manually. No endpoint change needed; free-text override covers this. Resolved during Phase 3.
 - [ ] **Web Share API file sharing on iOS Safari** — `navigator.share({ files: [pngFile] })` support varies. iOS 15+ supports it but with caveats. Need to test on actual device — will be answered by Phase 4
 
 ## 8. Discovered unknowns (filled during implementation)
 
 - [2026-03-27] Discovered: worktree needs `.env.local` copied from main worktree for `next build` to succeed (Sanity projectId missing otherwise) → resolved inline (not a code change)
+- [2026-03-30] Discovered: `celebrationImageUrl` was fetched by `PLAYERS_QUERY` but not exposed in `PlayerVM.toPlayerVM` → added field to `PlayerVM` and `toPlayerVM` in `player.repository.ts` (Phase 3, resolved inline)
+- [2026-03-30] Discovered: `/share` route was rendered as `○ Static` by Next.js because all errors were caught silently — added `export const dynamic = "force-dynamic"` so match data is fresh on every request (Phase 3, resolved inline)
 
 ---
 

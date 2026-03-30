@@ -20,7 +20,7 @@ const CARD_COLOR = "#f59e0b";
 
 export interface YellowCardKcvvTemplateProps {
   playerName: string;
-  shirtNumber: number;
+  shirtNumber?: number;
   matchName: string;
   minute: string;
 }
@@ -320,7 +320,7 @@ export function YellowCardKcvvTemplate({
               lineHeight: 1,
             }}
           >
-            {shirtNumber}
+            {shirtNumber ?? "—"}
           </span>
         </div>
         {/* Divider */}
