@@ -205,6 +205,46 @@ describe("MatchDetailView", () => {
     });
   });
 
+  describe("events section", () => {
+    const mockEvents = [
+      {
+        id: 1,
+        type: "goal" as const,
+        minute: 23,
+        team: "home" as const,
+        player: "Breugelmans Maxim",
+      },
+      {
+        id: 2,
+        type: "yellow_card" as const,
+        minute: 45,
+        team: "away" as const,
+        player: "Janssen Pieter",
+      },
+    ];
+
+    it("renders events when events prop is provided", () => {
+      render(<MatchDetailView {...defaultProps} events={mockEvents} />);
+      expect(screen.getByText("Wedstrijdgebeurtenissen")).toBeInTheDocument();
+      expect(screen.getByText("Breugelmans Maxim")).toBeInTheDocument();
+      expect(screen.getByText("Janssen Pieter")).toBeInTheDocument();
+    });
+
+    it("does not render events section when events prop is undefined", () => {
+      render(<MatchDetailView {...defaultProps} />);
+      expect(
+        screen.queryByText("Wedstrijdgebeurtenissen"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders empty state when events is an empty array", () => {
+      render(<MatchDetailView {...defaultProps} events={[]} />);
+      expect(screen.getByText("Wedstrijdgebeurtenissen")).toBeInTheDocument();
+      // Queries MatchEvents' role="status" empty state rather than coupling to its exact string
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+  });
+
   describe("back link", () => {
     it("renders back link when backUrl is provided", () => {
       render(

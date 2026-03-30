@@ -145,6 +145,7 @@ export default async function MatchPage({
         competition={match.competition}
         homeLineup={homeLineup}
         awayLineup={awayLineup}
+        events={match.events}
         hasReport={match.hasReport}
         backUrl={backUrl ?? undefined}
       />
