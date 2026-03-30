@@ -38,7 +38,7 @@ export interface MatchDetailViewProps {
   /** URL to navigate back to (e.g. team page with tab) */
   backUrl?: string;
   /** Match events (goals, cards, substitutions) */
-  events?: MatchEvent[];
+  events?: readonly MatchEvent[];
   /** Loading state */
   isLoading?: boolean;
   /** Additional CSS classes */

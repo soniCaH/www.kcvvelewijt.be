@@ -45,7 +45,7 @@ export interface MatchEventsProps {
   /** Away team name */
   awayTeamName: string;
   /** List of match events */
-  events: MatchEvent[];
+  events: readonly MatchEvent[];
   /** Filter events by type */
   filter?: "all" | "goals" | "cards" | "substitutions";
   /** Show event type icons */
@@ -156,7 +156,7 @@ export function MatchEvents({
   // Empty state
   if (filteredEvents.length === 0) {
     return (
-      <div className={cn("text-center py-8", className)}>
+      <div role="status" className={cn("text-center py-8", className)}>
         <p className="text-gray-500">
           Nog geen gebeurtenissen in deze wedstrijd.
         </p>
@@ -211,7 +211,7 @@ function EventList({
   showIcons,
   side,
 }: {
-  events: MatchEvent[];
+  events: readonly MatchEvent[];
   showIcons: boolean;
   side: "home" | "away";
 }) {

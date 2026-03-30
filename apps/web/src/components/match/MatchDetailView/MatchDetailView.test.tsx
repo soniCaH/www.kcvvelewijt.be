@@ -240,9 +240,8 @@ describe("MatchDetailView", () => {
     it("renders empty state when events is an empty array", () => {
       render(<MatchDetailView {...defaultProps} events={[]} />);
       expect(screen.getByText("Wedstrijdgebeurtenissen")).toBeInTheDocument();
-      expect(
-        screen.getByText("Nog geen gebeurtenissen in deze wedstrijd."),
-      ).toBeInTheDocument();
+      // Queries MatchEvents' role="status" empty state rather than coupling to its exact string
+      expect(screen.getByRole("status")).toBeInTheDocument();
     });
   });
 
