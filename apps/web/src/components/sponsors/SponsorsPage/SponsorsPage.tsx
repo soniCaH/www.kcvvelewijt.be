@@ -66,7 +66,7 @@ export function SponsorsPage({
       </div>
     ),
     paddingTop: "pt-16",
-    paddingBottom: "pb-16",
+    paddingBottom: "pb-24",
     transition: { type: "diagonal", direction: "right", overlap: "full" },
   };
 
@@ -121,7 +121,7 @@ export function SponsorsPage({
 
   const ctaSection: SectionConfig = {
     key: "cta",
-    bg: "kcvv-green-dark",
+    bg: "kcvv-black",
     content: <SponsorCallToAction />,
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
