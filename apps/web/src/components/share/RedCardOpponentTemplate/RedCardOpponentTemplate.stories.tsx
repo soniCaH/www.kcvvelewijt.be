@@ -14,14 +14,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     minute: "82",
   },
 };
 
 export const EarlyExpulsion: Story = {
   args: {
-    matchName: "KCVV Elewijt - Sporting Hasselt",
+    matchName: "KCVV Elewijt — Sporting Hasselt",
     minute: "34",
   },
 };

@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Win: Story = {
   args: {
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     score: "3 - 1",
     mood: "win",
   },
@@ -22,7 +22,7 @@ export const Win: Story = {
 
 export const Draw: Story = {
   args: {
-    matchName: "KCVV Elewijt - Sporting Hasselt",
+    matchName: "KCVV Elewijt — Sporting Hasselt",
     score: "2 - 2",
     mood: "draw",
   },
@@ -30,7 +30,7 @@ export const Draw: Story = {
 
 export const Loss: Story = {
   args: {
-    matchName: "FC Opponent - KCVV Elewijt",
+    matchName: "FC Opponent — KCVV Elewijt",
     score: "4 - 1",
     mood: "loss",
   },

@@ -14,21 +14,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Leading: Story = {
   args: {
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     score: "1 - 0",
   },
 };
 
 export const Trailing: Story = {
   args: {
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     score: "0 - 1",
   },
 };
 
 export const Level: Story = {
   args: {
-    matchName: "KCVV Elewijt - Sporting Hasselt",
+    matchName: "KCVV Elewijt — Sporting Hasselt",
     score: "1 - 1",
   },
 };

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { FullTimeTemplate } from "./FullTimeTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt - FC Opponent",
+  matchName: "KCVV Elewijt — FC Opponent",
   score: "2 - 1",
   mood: "win" as const,
 };
@@ -21,7 +21,7 @@ describe("FullTimeTemplate", () => {
 
   it("renders match name", () => {
     render(<FullTimeTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    expect(screen.getByText("KCVV Elewijt — FC Opponent")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
@@ -30,17 +30,13 @@ describe("FullTimeTemplate", () => {
     expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
   });
 
-  it("accepts draw mood", () => {
-    const { container } = render(
-      <FullTimeTemplate {...defaultProps} mood="draw" />,
-    );
-    expect(container.firstChild).toBeInTheDocument();
+  it("renders draw mood headline", () => {
+    render(<FullTimeTemplate {...defaultProps} mood="draw" />);
+    expect(screen.getByText("GELIJKSPEL")).toBeInTheDocument();
   });
 
-  it("accepts loss mood", () => {
-    const { container } = render(
-      <FullTimeTemplate {...defaultProps} mood="loss" />,
-    );
-    expect(container.firstChild).toBeInTheDocument();
+  it("renders loss mood headline", () => {
+    render(<FullTimeTemplate {...defaultProps} mood="loss" />);
+    expect(screen.getByText("VERLOREN")).toBeInTheDocument();
   });
 });

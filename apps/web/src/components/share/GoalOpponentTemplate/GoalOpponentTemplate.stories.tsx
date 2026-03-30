@@ -12,18 +12,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const WithScore: Story = {
   args: {
     score: "0 - 1",
-    matchName: "KCVV Elewijt - FC Opponent",
-    minute: "33",
+    matchName: "KCVV Elewijt — FC Opponent",
+    minute: "23",
   },
 };
 
-export const TwoGoalsDown: Story = {
+export const EarlyGoal: Story = {
   args: {
-    score: "1 - 3",
-    matchName: "KCVV Elewijt - Sporting Hasselt",
-    minute: "67",
+    score: "0 - 1",
+    matchName: "KCVV Elewijt — Sporting Hasselt",
+    minute: "12",
   },
 };

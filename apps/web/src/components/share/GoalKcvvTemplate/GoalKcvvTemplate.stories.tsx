@@ -17,7 +17,7 @@ export const WithCelebrationImage: Story = {
     playerName: "Kevin Van Ransbeeck",
     shirtNumber: 10,
     score: "1 - 0",
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     minute: "45",
     celebrationImageUrl:
       "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
@@ -29,7 +29,7 @@ export const WithoutCelebrationImage: Story = {
     playerName: "Kevin Van Ransbeeck",
     shirtNumber: 10,
     score: "2 - 1",
-    matchName: "KCVV Elewijt - FC Opponent",
+    matchName: "KCVV Elewijt — FC Opponent",
     minute: "78",
   },
 };
@@ -39,7 +39,7 @@ export const LateGoal: Story = {
     playerName: "Jan Peeters",
     shirtNumber: 9,
     score: "3 - 2",
-    matchName: "KCVV Elewijt - Sporting Hasselt",
+    matchName: "KCVV Elewijt — Sporting Hasselt",
     minute: "90+3",
   },
 };

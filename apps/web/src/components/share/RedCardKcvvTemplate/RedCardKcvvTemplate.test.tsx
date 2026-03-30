@@ -32,7 +32,7 @@ describe("RedCardKcvvTemplate", () => {
 
   it("renders minute", () => {
     render(<RedCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText(/67/)).toBeInTheDocument();
+    expect(screen.getByText("67' Minuten")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
