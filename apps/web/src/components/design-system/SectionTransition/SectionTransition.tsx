@@ -111,15 +111,18 @@ export function SectionTransition({
 
   // Wrapper background strategy:
   //
-  // Non-overlap: solid TO color. The FROM polygon is opaque and hides it in the
-  //   FROM area; the TO color covers any sub-pixel gap at the SVG's bottom edge
-  //   where the page background (white) would otherwise show.
+  // The SVG is composited over the wrapper div background. Transparent pixels in
+  // the SVG (including any 1-px fringe crispEdges leaves at polygon edges) reveal
+  // the wrapper background — so the background doubles as a seam guard without
+  // needing explicit <rect> elements that would bleed through the FROM area.
   //
-  // Overlap: the FROM polygon must be TRANSPARENT so the hero/section image
-  //   behind it is visible (the diagonal cuts into the hero visually). The wrapper
-  //   background is therefore transparent in the FROM area. A step gradient paints
-  //   the TO color only in the last 2% (≈1–3 px) to seal the bottom gap without
-  //   affecting the hero image area.
+  // Non-overlap: solid TO color. The opaque FROM polygon hides it in the FROM
+  //   area; the TO color seals any sub-pixel gap at the SVG bottom where the
+  //   page background (white) would otherwise show.
+  //
+  // Overlap: the FROM polygon is TRANSPARENT so the hero image shows through.
+  //   A step gradient is transparent at the top (FROM area stays clear) and
+  //   switches to TO color at 98% (seals the last ~2 px at the SVG bottom).
   const style: React.CSSProperties = {
     height,
     marginTop,
@@ -154,11 +157,6 @@ export function SectionTransition({
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full"
         >
-          {/* Bottom seam guard: TO-colored rect at the SVG bottom, drawn BEFORE
-              the polygons. crispEdges can snap the TO polygon's bottom edge up by
-              1 px, leaving a transparent fringe. The rect fills it with TO color
-              from inside the SVG — the CSS wrapper background cannot reach here. */}
-          <rect x="0" y="196" width="100" height="4" fill={BG_COLOR[to]} />
           {/* Upper half (y 0–100): from → via */}
           <polygon
             data-testid="st-upper-from"
@@ -204,8 +202,6 @@ export function SectionTransition({
         preserveAspectRatio="none"
         className="absolute inset-0 w-full h-full"
       >
-        {/* Bottom seam guard — same rationale as double-diagonal above. */}
-        <rect x="0" y="97" width="100" height="3" fill={BG_COLOR[to]} />
         <polygon
           data-testid="st-from"
           points={SVG_FROM[direction]}
