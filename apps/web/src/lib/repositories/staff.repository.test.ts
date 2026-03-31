@@ -240,6 +240,8 @@ describe("StaffRepository", () => {
         phone: "+32 123 456 789",
         bio: null,
         photoUrl: "https://cdn.sanity.io/photo.webp",
+        organigramPositions: [],
+        responsibilityPaths: [],
         ...overrides,
       };
     }
@@ -264,6 +266,8 @@ describe("StaffRepository", () => {
         bio: undefined,
         imageUrl: "https://cdn.sanity.io/photo.webp",
         href: "/staf/psd-42",
+        organigramPositions: [],
+        responsibilityPaths: [],
       });
     });
 
@@ -278,6 +282,119 @@ describe("StaffRepository", () => {
       );
 
       expect(member).toBeNull();
+    });
+
+    it("maps organigram positions to VM", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          organigramPositions: [
+            {
+              _id: "org-1",
+              title: "Voorzitter",
+              roleCode: "VZ",
+              department: "hoofdbestuur",
+            },
+            {
+              _id: "org-2",
+              title: "Sportief Verantwoordelijke",
+              roleCode: null,
+              department: null,
+            },
+          ],
+        }),
+      );
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.organigramPositions).toEqual([
+        {
+          _id: "org-1",
+          title: "Voorzitter",
+          roleCode: "VZ",
+          department: "hoofdbestuur",
+        },
+        { _id: "org-2", title: "Sportief Verantwoordelijke" },
+      ]);
+    });
+
+    it("maps responsibility paths to VM", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          responsibilityPaths: [
+            {
+              title: "Blessure melden",
+              slug: "blessure-melden",
+              category: "medisch",
+              icon: "activity",
+            },
+            {
+              title: "Lidgeld betalen",
+              slug: "lidgeld-betalen",
+              category: "administratief",
+              icon: null,
+            },
+          ],
+        }),
+      );
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.responsibilityPaths).toEqual([
+        {
+          title: "Blessure melden",
+          slug: "blessure-melden",
+          category: "medisch",
+          icon: "activity",
+        },
+        {
+          title: "Lidgeld betalen",
+          slug: "lidgeld-betalen",
+          category: "administratief",
+        },
+      ]);
+    });
+
+    it("empty organigram positions and responsibility paths become empty arrays", async () => {
+      mockFetch.mockResolvedValueOnce(makeDetailRow());
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.organigramPositions).toEqual([]);
+      expect(member?.responsibilityPaths).toEqual([]);
+    });
+
+    it("null organigram positions and responsibility paths from Sanity become empty arrays", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          organigramPositions: null as unknown as [],
+          responsibilityPaths: null as unknown as [],
+        }),
+      );
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.organigramPositions).toEqual([]);
+      expect(member?.responsibilityPaths).toEqual([]);
     });
 
     it("null optional fields become undefined", async () => {

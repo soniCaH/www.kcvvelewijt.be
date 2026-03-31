@@ -31,7 +31,9 @@ export const ORGANIGRAM_NODES_QUERY =
 export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
-  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
+  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },
+  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
 }`);
 
 export const STAFF_MEMBERS_PSDID_QUERY =
@@ -55,6 +57,20 @@ const CLUB_ROOT_NODE: OrgChartNode = {
   parentId: null,
 };
 
+export interface OrganigramPositionVM {
+  _id: string;
+  title: string;
+  roleCode?: string;
+  department?: string;
+}
+
+export interface ResponsibilityPathVM {
+  title: string;
+  slug: string;
+  category?: string;
+  icon?: string;
+}
+
 export interface StaffDetailVM {
   id: string;
   psdId: string;
@@ -66,6 +82,8 @@ export interface StaffDetailVM {
   imageUrl?: string;
   /** Canonical URL: /staf/{psdId} */
   href: string;
+  organigramPositions: OrganigramPositionVM[];
+  responsibilityPaths: ResponsibilityPathVM[];
 }
 
 export function toOrgChartNode(
@@ -108,6 +126,18 @@ export function toStaffDetailVM(
     bio: row.bio ?? undefined,
     imageUrl: row.photoUrl ?? undefined,
     href: psdId ? `/staf/${psdId}` : "",
+    organigramPositions: (row.organigramPositions ?? []).map((p) => ({
+      _id: p._id,
+      title: p.title ?? "",
+      ...(p.roleCode ? { roleCode: p.roleCode } : {}),
+      ...(p.department ? { department: p.department } : {}),
+    })),
+    responsibilityPaths: (row.responsibilityPaths ?? []).map((r) => ({
+      title: r.title ?? "",
+      slug: r.slug ?? "",
+      ...(r.category ? { category: r.category } : {}),
+      ...(r.icon ? { icon: r.icon } : {}),
+    })),
   };
 }
 
