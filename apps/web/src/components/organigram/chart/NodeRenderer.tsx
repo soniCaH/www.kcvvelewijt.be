@@ -14,6 +14,17 @@
 
 import type { OrgChartNode } from "@/types/organigram";
 
+// Design-token equivalents used as literal values because d3-org-chart renders
+// raw HTML strings where CSS custom properties are not available.
+const NODE_ACCENT_COLOR = "#4acf52";
+const NODE_ACCENT_GRADIENT_END = "#41b147";
+const NODE_TEXT_PRIMARY = "#31404b";
+const NODE_TEXT_SECONDARY = "#62656A";
+const NODE_TEXT_MUTED = "#9ca3af";
+const NODE_BORDER_COLOR = "#edeff4";
+const NODE_ACCENT_BG = "rgba(74, 207, 82, 0.1)";
+const NODE_MUTED_BG = "rgba(156, 163, 175, 0.1)";
+
 export interface NodeData extends OrgChartNode {
   _expanded?: boolean;
   _children?: NodeData[];
@@ -34,7 +45,7 @@ function expandCollapseIndicator(isExpanded: boolean, size: "lg" | "sm") {
       right: ${right}px;
       width: ${dim}px;
       height: ${dim}px;
-      background: #4acf52;
+      background: ${NODE_ACCENT_COLOR};
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -58,7 +69,7 @@ function greenAccentBar(borderRadius: string, height: number) {
       left: 0;
       right: 0;
       height: ${height}px;
-      background: linear-gradient(90deg, #4acf52 0%, #41b147 100%);
+      background: linear-gradient(90deg, ${NODE_ACCENT_COLOR} 0%, ${NODE_ACCENT_GRADIENT_END} 100%);
       border-radius: ${borderRadius};
     "></div>
   `;
@@ -87,7 +98,7 @@ function renderSingleNode(
   return `
     <div class="org-node-enhanced" style="
       background: white;
-      border: 2px solid #edeff4;
+      border: 2px solid ${NODE_BORDER_COLOR};
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -109,7 +120,7 @@ function renderSingleNode(
               height: 64px;
               border-radius: 50%;
               object-fit: cover;
-              border: 2px solid #4acf52;
+              border: 2px solid ${NODE_ACCENT_COLOR};
             "
             onerror="this.src='/images/logo-flat.png'"
           />
@@ -126,7 +137,7 @@ function renderSingleNode(
             font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
             font-size: 16px;
             font-weight: 700;
-            color: #31404b;
+            color: ${NODE_TEXT_PRIMARY};
             margin-bottom: 4px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -136,7 +147,7 @@ function renderSingleNode(
           <div style="
             font-family: 'montserrat', sans-serif;
             font-size: 13px;
-            color: #62656A;
+            color: ${NODE_TEXT_SECONDARY};
             line-height: 1.4;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -153,8 +164,8 @@ function renderSingleNode(
               display: inline-block;
               align-self: flex-start;
               padding: 2px 8px;
-              background: rgba(74, 207, 82, 0.1);
-              color: #4acf52;
+              background: ${NODE_ACCENT_BG};
+              color: ${NODE_ACCENT_COLOR};
               border-radius: 4px;
               font-size: 11px;
               font-weight: 600;
@@ -202,7 +213,7 @@ function renderVacantNode(
           font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
           font-size: 16px;
           font-weight: 700;
-          color: #31404b;
+          color: ${NODE_TEXT_PRIMARY};
           margin-bottom: 4px;
         ">${node.title}</div>
 
@@ -210,7 +221,7 @@ function renderVacantNode(
           font-family: 'montserrat', sans-serif;
           font-size: 12px;
           font-weight: 600;
-          color: #9ca3af;
+          color: ${NODE_TEXT_MUTED};
           text-transform: uppercase;
           letter-spacing: 0.5px;
           margin-bottom: 6px;
@@ -222,7 +233,7 @@ function renderVacantNode(
           <div style="
             font-family: 'montserrat', sans-serif;
             font-size: 12px;
-            color: #9ca3af;
+            color: ${NODE_TEXT_MUTED};
             line-height: 1.4;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -242,8 +253,8 @@ function renderVacantNode(
             display: inline-block;
             align-self: center;
             padding: 2px 8px;
-            background: rgba(156, 163, 175, 0.1);
-            color: #9ca3af;
+            background: ${NODE_MUTED_BG};
+            color: ${NODE_TEXT_MUTED};
             border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
@@ -276,7 +287,7 @@ function renderSharedNode(
               height: 28px;
               border-radius: 50%;
               object-fit: cover;
-              border: 1.5px solid #4acf52;
+              border: 1.5px solid ${NODE_ACCENT_COLOR};
               flex-shrink: 0;
             "
             onerror="this.src='/images/logo-flat.png'"
@@ -306,7 +317,7 @@ function renderSharedNode(
             font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
             font-size: 13px;
             font-weight: 600;
-            color: #31404b;
+            color: ${NODE_TEXT_PRIMARY};
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -319,7 +330,7 @@ function renderSharedNode(
   return `
     <div class="org-node-enhanced org-node-shared" style="
       background: white;
-      border: 2px solid #edeff4;
+      border: 2px solid ${NODE_BORDER_COLOR};
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -334,7 +345,7 @@ function renderSharedNode(
       <div style="
         font-family: 'montserrat', sans-serif;
         font-size: 13px;
-        color: #62656A;
+        color: ${NODE_TEXT_SECONDARY};
         margin-bottom: 8px;
         display: flex;
         align-items: center;
@@ -345,8 +356,8 @@ function renderSharedNode(
           node.roleCode
             ? `<span style="
               padding: 1px 6px;
-              background: rgba(74, 207, 82, 0.1);
-              color: #4acf52;
+              background: ${NODE_ACCENT_BG};
+              color: ${NODE_ACCENT_COLOR};
               border-radius: 4px;
               font-size: 10px;
               font-weight: 600;
@@ -398,7 +409,7 @@ function renderCompactSingleNode(
   return `
     <div class="org-node-compact" style="
       background: white;
-      border: 2px solid #edeff4;
+      border: 2px solid ${NODE_BORDER_COLOR};
       border-radius: 8px;
       padding: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -420,7 +431,7 @@ function renderCompactSingleNode(
               height: 48px;
               border-radius: 50%;
               object-fit: cover;
-              border: 2px solid #4acf52;
+              border: 2px solid ${NODE_ACCENT_COLOR};
             "
             onerror="this.src='/images/logo-flat.png'"
           />
@@ -437,7 +448,7 @@ function renderCompactSingleNode(
             font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
             font-size: 14px;
             font-weight: 700;
-            color: #31404b;
+            color: ${NODE_TEXT_PRIMARY};
             margin-bottom: 2px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -447,7 +458,7 @@ function renderCompactSingleNode(
           <div style="
             font-family: 'montserrat', sans-serif;
             font-size: 11px;
-            color: #62656A;
+            color: ${NODE_TEXT_SECONDARY};
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -490,7 +501,7 @@ function renderCompactVacantNode(
           font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
           font-size: 14px;
           font-weight: 700;
-          color: #31404b;
+          color: ${NODE_TEXT_PRIMARY};
           margin-bottom: 2px;
         ">${node.title}</div>
 
@@ -498,7 +509,7 @@ function renderCompactVacantNode(
           font-family: 'montserrat', sans-serif;
           font-size: 10px;
           font-weight: 600;
-          color: #9ca3af;
+          color: ${NODE_TEXT_MUTED};
           text-transform: uppercase;
           letter-spacing: 0.5px;
         ">Vacante functie</div>
@@ -526,7 +537,7 @@ function renderCompactSharedNode(
           font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
           font-size: 11px;
           font-weight: 600;
-          color: #31404b;
+          color: ${NODE_TEXT_PRIMARY};
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -539,7 +550,7 @@ function renderCompactSharedNode(
   return `
     <div class="org-node-compact org-node-shared" style="
       background: white;
-      border: 2px solid #edeff4;
+      border: 2px solid ${NODE_BORDER_COLOR};
       border-radius: 8px;
       padding: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -554,7 +565,7 @@ function renderCompactSharedNode(
       <div style="
         font-family: 'montserrat', sans-serif;
         font-size: 11px;
-        color: #62656A;
+        color: ${NODE_TEXT_SECONDARY};
         margin-bottom: 4px;
       ">${node.title}</div>
 

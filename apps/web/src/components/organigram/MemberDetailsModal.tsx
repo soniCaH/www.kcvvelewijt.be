@@ -7,7 +7,7 @@
  * in the organizational chart. Handles vacant, single, and shared states.
  */
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import type { OrgChartNode, OrgChartMember } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import Link from "next/link";
@@ -50,6 +50,11 @@ export function MemberDetailsModal({
 
   const defaultImage = "/images/logo-flat.png";
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const prevMemberIdRef = useRef(member?.id);
+  if (prevMemberIdRef.current !== member?.id) {
+    prevMemberIdRef.current = member?.id;
+    if (failedImages.size > 0) setFailedImages(new Set());
+  }
 
   const linkedResponsibilities = useMemo(() => {
     if (!member || !responsibilityPaths.length) return [];
@@ -112,43 +117,21 @@ export function MemberDetailsModal({
             <div>
               {isVacant ? (
                 <>
-                  <h2
-                    className="text-2xl font-bold mb-1"
-                    style={{
-                      fontFamily:
-                        "quasimoda, acumin-pro, Montserrat, sans-serif",
-                    }}
-                  >
-                    {member.title}
-                  </h2>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
                   <p className="text-white/70 text-lg font-semibold">
                     Vacante functie
                   </p>
                 </>
               ) : isShared ? (
                 <>
-                  <h2
-                    className="text-2xl font-bold mb-1"
-                    style={{
-                      fontFamily:
-                        "quasimoda, acumin-pro, Montserrat, sans-serif",
-                    }}
-                  >
-                    {member.title}
-                  </h2>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
                   <p className="text-white/90 text-sm">
                     {member.members.length} personen
                   </p>
                 </>
               ) : (
                 <>
-                  <h2
-                    className="text-2xl font-bold mb-1"
-                    style={{
-                      fontFamily:
-                        "quasimoda, acumin-pro, Montserrat, sans-serif",
-                    }}
-                  >
+                  <h2 className="text-2xl font-bold mb-1">
                     {primaryMember?.name ?? member.title}
                   </h2>
                   <p className="text-white/90 text-lg">{member.title}</p>
@@ -171,14 +154,7 @@ export function MemberDetailsModal({
           {/* Shared: per-member contact blocks */}
           {isShared && (
             <div>
-              <h3
-                className="text-lg font-bold text-gray-blue mb-3"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                }}
-              >
-                Leden
-              </h3>
+              <h3 className="text-lg font-bold text-gray-blue mb-3">Leden</h3>
               <div className="space-y-4">
                 {member.members.map((m) => (
                   <MemberCard
@@ -320,14 +296,7 @@ export function MemberDetailsModal({
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h3
-      className="text-lg font-bold text-gray-blue mb-3"
-      style={{ fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif" }}
-    >
-      {children}
-    </h3>
-  );
+  return <h3 className="text-lg font-bold text-gray-blue mb-3">{children}</h3>;
 }
 
 function ContactRow({
@@ -382,7 +351,7 @@ function MemberCard({
     <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50 border border-gray-100">
       <Image
         src={resolveImage(member.imageUrl)}
-        alt={member.name ?? ""}
+        alt={member.name ?? "Lid foto"}
         width={56}
         height={56}
         className="w-14 h-14 rounded-full border-2 border-kcvv-green object-cover flex-shrink-0"
