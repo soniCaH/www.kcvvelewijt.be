@@ -10,6 +10,8 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
+import Link from "next/link";
+import { Network, CircleHelp } from "lucide-react";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
@@ -184,6 +186,68 @@ export default async function StafPage({ params }: StaffPageProps) {
       {member.bio && member.bio.length > 0 && (
         <section className="max-w-4xl mx-auto px-4 py-8">
           <SanityArticleBody content={member.bio as PortableTextBlock[]} />
+        </section>
+      )}
+
+      {/* Organigram positions */}
+      {member.organigramPositions.length > 0 && (
+        <section className="max-w-4xl mx-auto px-4 py-8">
+          <h2 className="text-xl font-semibold text-kcvv-gray-dark flex items-center gap-2 mb-4">
+            <Network className="w-5 h-5" aria-hidden="true" />
+            Posities in het organigram
+          </h2>
+          <ul className="space-y-2">
+            {member.organigramPositions.map((pos) => (
+              <li
+                key={pos.title}
+                className="flex items-center gap-3 rounded-lg border border-kcvv-gray-light/50 bg-white px-4 py-3"
+              >
+                {pos.roleCode && (
+                  <span className="inline-flex items-center justify-center rounded bg-kcvv-green-bright/10 px-2 py-0.5 text-xs font-semibold text-kcvv-green-bright">
+                    {pos.roleCode}
+                  </span>
+                )}
+                <span className="font-medium text-kcvv-gray-dark">
+                  {pos.title}
+                </span>
+                {pos.department && (
+                  <span className="ml-auto text-xs text-kcvv-gray">
+                    {pos.department}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Responsibility paths */}
+      {member.responsibilityPaths.length > 0 && (
+        <section className="max-w-4xl mx-auto px-4 py-8">
+          <h2 className="text-xl font-semibold text-kcvv-gray-dark flex items-center gap-2 mb-4">
+            <CircleHelp className="w-5 h-5" aria-hidden="true" />
+            Verantwoordelijkheden
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {member.responsibilityPaths.map((path) => (
+              <Link
+                key={path.slug}
+                href={`/hulp?pad=${path.slug}`}
+                className="flex items-start gap-3 rounded-lg border border-kcvv-gray-light/50 bg-white px-4 py-3 transition-colors hover:border-kcvv-green-bright/30 hover:bg-kcvv-green-bright/5"
+              >
+                <div className="min-w-0">
+                  <span className="font-medium text-kcvv-gray-dark">
+                    {path.title}
+                  </span>
+                  {path.category && (
+                    <span className="mt-0.5 block text-xs text-kcvv-gray">
+                      {path.category}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
