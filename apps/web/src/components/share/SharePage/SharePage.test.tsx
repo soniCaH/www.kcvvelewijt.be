@@ -520,4 +520,29 @@ describe("SharePage", () => {
 
     vi.mocked(document.createElement).mockRestore();
   });
+
+  it("ignores a second Generate click while the first is still in progress", async () => {
+    const { toPng } = await import("html-to-image");
+    let resolveToPng!: (value: string) => void;
+    vi.mocked(toPng).mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveToPng = resolve;
+        }),
+    );
+
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    const btn = screen.getByRole("button", { name: /genereer/i });
+    // First click starts generation
+    await user.click(btn);
+    // Second click should be ignored by the ref guard
+    await user.click(btn);
+
+    expect(toPng).toHaveBeenCalledTimes(1);
+
+    // Resolve to let the component settle
+    resolveToPng("data:image/png;base64,ABC");
+  });
 });
