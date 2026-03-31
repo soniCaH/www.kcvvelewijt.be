@@ -14,6 +14,10 @@ SANITY_DATASET = "production"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 
+routes = [
+  { pattern = "bff.kcvvelewijt.be", custom_domain = true }
+]
+
 [observability.logs]
 enabled = true
 invocation_logs = true # captures all console.log / Effect.log output per cron invocation
