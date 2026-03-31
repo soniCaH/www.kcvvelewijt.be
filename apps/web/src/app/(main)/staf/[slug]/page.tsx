@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
+import { SITE_CONFIG } from "@/lib/constants";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import Link from "next/link";
@@ -53,6 +54,7 @@ export async function generateMetadata({
     return {
       title: `${fullName} | KCVV Elewijt`,
       description,
+      alternates: { canonical: `${SITE_CONFIG.siteUrl}/staf/${slug}` },
       openGraph: {
         title: fullName,
         description,

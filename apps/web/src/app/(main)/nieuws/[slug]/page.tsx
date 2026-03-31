@@ -16,6 +16,7 @@ import {
   mapMentionedTeams,
   mapMentionedStaff,
 } from "@/lib/utils/article-related-items";
+import { SITE_CONFIG } from "@/lib/constants";
 import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 import { RelatedContentSlider } from "@/components/related/RelatedContentSlider/RelatedContentSlider";
@@ -66,6 +67,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
 
     return {
       title: `${article.title} | KCVV Elewijt`,
+      alternates: { canonical: `${SITE_CONFIG.siteUrl}/nieuws/${slug}` },
       openGraph: {
         title: article.title,
         type: "article" as const,
@@ -111,7 +113,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     : undefined;
 
   const shareConfig = {
-    url: `https://kcvvelewijt.be/nieuws/${article.slug}`,
+    url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
     title: article.title,
     hashtags: tags,
   };
