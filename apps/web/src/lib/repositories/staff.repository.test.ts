@@ -288,8 +288,14 @@ describe("StaffRepository", () => {
       mockFetch.mockResolvedValueOnce(
         makeDetailRow({
           organigramPositions: [
-            { title: "Voorzitter", roleCode: "VZ", department: "hoofdbestuur" },
             {
+              _id: "org-1",
+              title: "Voorzitter",
+              roleCode: "VZ",
+              department: "hoofdbestuur",
+            },
+            {
+              _id: "org-2",
               title: "Sportief Verantwoordelijke",
               roleCode: null,
               department: null,
@@ -306,8 +312,13 @@ describe("StaffRepository", () => {
       );
 
       expect(member?.organigramPositions).toEqual([
-        { title: "Voorzitter", roleCode: "VZ", department: "hoofdbestuur" },
-        { title: "Sportief Verantwoordelijke" },
+        {
+          _id: "org-1",
+          title: "Voorzitter",
+          roleCode: "VZ",
+          department: "hoofdbestuur",
+        },
+        { _id: "org-2", title: "Sportief Verantwoordelijke" },
       ]);
     });
 
@@ -355,6 +366,25 @@ describe("StaffRepository", () => {
 
     it("empty organigram positions and responsibility paths become empty arrays", async () => {
       mockFetch.mockResolvedValueOnce(makeDetailRow());
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.organigramPositions).toEqual([]);
+      expect(member?.responsibilityPaths).toEqual([]);
+    });
+
+    it("null organigram positions and responsibility paths from Sanity become empty arrays", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          organigramPositions: null as unknown as [],
+          responsibilityPaths: null as unknown as [],
+        }),
+      );
 
       const member = await runWithRepo(
         Effect.gen(function* () {

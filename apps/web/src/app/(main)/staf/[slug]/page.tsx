@@ -199,7 +199,7 @@ export default async function StafPage({ params }: StaffPageProps) {
           <ul className="space-y-2">
             {member.organigramPositions.map((pos) => (
               <li
-                key={pos.title}
+                key={pos._id}
                 className="flex items-center gap-3 rounded-lg border border-kcvv-gray-light/50 bg-white px-4 py-3"
               >
                 {pos.roleCode && (

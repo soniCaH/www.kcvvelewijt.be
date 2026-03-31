@@ -32,8 +32,8 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
-  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active != false]{ title, roleCode, department },
-  "responsibilityPaths": *[_type == "responsibility" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)]{ title, "slug": slug.current, category, icon }
+  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true]{ _id, title, roleCode, department },
+  "responsibilityPaths": *[_type == "responsibility" && active == true && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)]{ title, "slug": slug.current, category, icon }
 }`);
 
 export const STAFF_MEMBERS_PSDID_QUERY =
@@ -58,6 +58,7 @@ const CLUB_ROOT_NODE: OrgChartNode = {
 };
 
 export interface OrganigramPositionVM {
+  _id: string;
   title: string;
   roleCode?: string;
   department?: string;
@@ -126,6 +127,7 @@ export function toStaffDetailVM(
     imageUrl: row.photoUrl ?? undefined,
     href: psdId ? `/staf/${psdId}` : "",
     organigramPositions: (row.organigramPositions ?? []).map((p) => ({
+      _id: p._id,
       title: p.title ?? "",
       ...(p.roleCode ? { roleCode: p.roleCode } : {}),
       ...(p.department ? { department: p.department } : {}),
