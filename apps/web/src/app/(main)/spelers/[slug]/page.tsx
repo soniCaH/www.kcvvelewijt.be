@@ -7,6 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
+import { SITE_CONFIG } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerProfile, PlayerShare } from "@/components/player";
@@ -64,6 +65,7 @@ export async function generateMetadata({
     return {
       title: `${fullName} | KCVV Elewijt`,
       description: `${player.position} bij KCVV Elewijt`,
+      alternates: { canonical: `${SITE_CONFIG.siteUrl}/spelers/${slug}` },
       openGraph: {
         title: fullName,
         description: `${player.position} bij KCVV Elewijt`,

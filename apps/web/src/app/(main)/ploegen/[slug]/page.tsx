@@ -7,6 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
+import { SITE_CONFIG } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
@@ -68,6 +69,7 @@ export async function generateMetadata({
     return {
       title: `${team.name} | KCVV Elewijt`,
       description,
+      alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen/${slug}` },
       openGraph: {
         title: team.name,
         description,
