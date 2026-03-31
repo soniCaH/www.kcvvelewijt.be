@@ -105,7 +105,9 @@ export function SectionTransition({
     zIndex = "10";
   } else if (overlap === "full") {
     marginTop = `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`;
-    height = `calc(${DIAGONAL_HEIGHT} + 1px)`;
+    height = isDouble
+      ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
+      : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   }
 
