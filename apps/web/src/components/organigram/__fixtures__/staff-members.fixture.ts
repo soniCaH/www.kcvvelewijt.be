@@ -153,4 +153,41 @@ export const staffMembersFixture: OrgChartNode[] = [
     members: [{ id: "staff-jsec", name: "An Secretaris Jeugd" }],
     parentId: "youth-coordinator",
   },
+
+  // Vacant position — no members assigned
+  {
+    id: "sponsor-coordinator",
+    title: "Sponsorverantwoordelijke",
+    roleCode: "SPON",
+    department: "hoofdbestuur",
+    description:
+      "Sponsorwerving, contacten met sponsors, sponsorevents organiseren.",
+    members: [],
+    parentId: "president",
+  },
+
+  // Shared position — two co-holders
+  {
+    id: "co-treasurers",
+    title: "Co-Penningmeester",
+    roleCode: "PM",
+    department: "hoofdbestuur",
+    description: "Gedeeld financieel beheer, budgettering, kascontrole.",
+    members: [
+      {
+        id: "staff-pm1",
+        name: "Els Penningmeester",
+        email: "els@kcvvelewijt.be",
+        phone: "+32 470 111 111",
+        href: "/staf/pm1",
+      },
+      {
+        id: "staff-pm2",
+        name: "Tom Penningmeester",
+        email: "tom@kcvvelewijt.be",
+        href: "/staf/pm2",
+      },
+    ],
+    parentId: "president",
+  },
 ];

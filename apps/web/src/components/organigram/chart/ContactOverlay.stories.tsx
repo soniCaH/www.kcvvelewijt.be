@@ -13,6 +13,22 @@ const minimal = {
   title: "Vrijwilliger",
   members: [{ id: "staff-x", name: "Jan Janssen" }],
 };
+const vacant = staffMembersFixture.find(
+  (n) => n.id === "sponsor-coordinator",
+) ?? {
+  id: "vacant",
+  title: "Sponsorverantwoordelijke",
+  description: "Sponsorwerving.",
+  members: [],
+};
+const shared = staffMembersFixture.find((n) => n.id === "co-treasurers") ?? {
+  id: "shared",
+  title: "Co-Penningmeester",
+  members: [
+    { id: "a", name: "Els" },
+    { id: "b", name: "Tom" },
+  ],
+};
 
 const meta = {
   title: "Features/Organigram/ContactOverlay",
@@ -68,6 +84,40 @@ export const Hidden: Story = {
       description: {
         story:
           "When `isVisible` is false the component returns null — the canvas is intentionally blank.",
+      },
+    },
+  },
+};
+
+/** Vacant position — no members, shows description only. */
+export const VacantNode: Story = {
+  args: {
+    member: vacant,
+    isVisible: true,
+    position: defaultPosition,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Vacant position with 0 members. Shows position title, vacant indicator, and description text.",
+      },
+    },
+  },
+};
+
+/** Shared position — 2+ members with per-member contact blocks. */
+export const SharedNode: Story = {
+  args: {
+    member: shared,
+    isVisible: true,
+    position: defaultPosition,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Shared position with 2 members. Shows position title as header and individual contact blocks per member.",
       },
     },
   },
