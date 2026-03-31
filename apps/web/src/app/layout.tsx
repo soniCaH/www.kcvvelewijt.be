@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@kcvve",
-    creator: "@kcvve",
+    site: `@${SITE_CONFIG.twitterHandle}`,
+    creator: `@${SITE_CONFIG.twitterHandle}`,
   },
 };
 
