@@ -233,6 +233,7 @@ function renderTemplate(
 export function SharePage({ matches, players }: SharePageProps) {
   const templateRef = useRef<HTMLDivElement>(null);
   const previewUrlRef = useRef<string | null>(null);
+  const isGeneratingRef = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
@@ -293,7 +294,8 @@ export function SharePage({ matches, players }: SharePageProps) {
   }, []);
 
   const handleGenerate = async () => {
-    if (!templateRef.current) return;
+    if (!templateRef.current || isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     setExportError(null);
     clearPreview();
@@ -314,6 +316,7 @@ export function SharePage({ matches, players }: SharePageProps) {
         err instanceof Error ? err.message : "Export failed. Please try again.",
       );
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
   };
