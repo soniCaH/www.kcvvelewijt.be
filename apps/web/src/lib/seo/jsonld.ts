@@ -60,7 +60,7 @@ export function buildSportsClubJsonLd(): SportsClubJsonLd {
     url: SITE_CONFIG.siteUrl,
     logo: LOGO_URL,
     foundingDate: "1924",
-    sameAs: ["https://www.facebook.com/KCVVEleworthy"],
+    sameAs: ["https://www.facebook.com/KCVVElewijt"],
     sport: "Soccer",
     address: {
       "@type": "PostalAddress",

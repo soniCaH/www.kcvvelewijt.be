@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         data={buildNewsArticleJsonLd({
           headline: article.title,
           datePublished: article.publishedAt ?? new Date().toISOString(),
-          dateModified: article.publishedAt ?? undefined,
+          dateModified: article.updatedAt ?? article.publishedAt ?? undefined,
           author: "KCVV Elewijt",
           image: article.coverImageUrl,
           url: articleUrl,

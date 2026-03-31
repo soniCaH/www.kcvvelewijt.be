@@ -46,6 +46,7 @@ function makeArticleDetailRow(
 ): NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT> {
   return {
     _id: "article-1",
+    _updatedAt: "2026-03-21T12:00:00Z",
     title: "Test Article Detail",
     slug: { _type: "slug", current: "test-article-detail" },
     publishAt: "2026-03-20T10:00:00Z",

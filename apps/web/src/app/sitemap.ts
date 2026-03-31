@@ -35,7 +35,11 @@ async function fetchArticleSlugs(): Promise<ArticleSitemapRow[]> {
   try {
     const { sanityClient } = await import("@/lib/sanity/client");
     return await sanityClient.fetch<ArticleSitemapRow[]>(ARTICLE_SITEMAP_QUERY);
-  } catch {
+  } catch (error) {
+    console.error(
+      "[sitemap] fetchArticleSlugs failed (sanityClient.fetch with ARTICLE_SITEMAP_QUERY):",
+      error,
+    );
     return [];
   }
 }
