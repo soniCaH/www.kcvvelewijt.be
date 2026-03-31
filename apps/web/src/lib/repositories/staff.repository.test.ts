@@ -236,9 +236,6 @@ describe("StaffRepository", () => {
         psdId: "psd-42",
         firstName: "Jan",
         lastName: "Janssens",
-        role: "voorzitter",
-        roleLabel: "Voorzitter",
-        department: "hoofdbestuur",
         email: "jan@kcvv.be",
         phone: "+32 123 456 789",
         bio: null,
@@ -262,9 +259,6 @@ describe("StaffRepository", () => {
         psdId: "psd-42",
         firstName: "Jan",
         lastName: "Janssens",
-        roleDisplay: "Voorzitter",
-        roleLabel: "Voorzitter",
-        departmentDisplay: "Hoofdbestuur",
         email: "jan@kcvv.be",
         phone: "+32 123 456 789",
         bio: undefined,
@@ -286,49 +280,6 @@ describe("StaffRepository", () => {
       expect(member).toBeNull();
     });
 
-    it("maps role enum to display label", async () => {
-      mockFetch.mockResolvedValueOnce(makeDetailRow({ role: "hoofdtrainer" }));
-
-      const member = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findByPsdId("psd-42");
-        }),
-      );
-
-      expect(member?.roleDisplay).toBe("Hoofdtrainer");
-    });
-
-    it("maps unknown role to roleLabel fallback", async () => {
-      mockFetch.mockResolvedValueOnce(
-        makeDetailRow({ role: null, roleLabel: "Custom Title" }),
-      );
-
-      const member = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findByPsdId("psd-42");
-        }),
-      );
-
-      expect(member?.roleDisplay).toBe("Custom Title");
-    });
-
-    it("maps department to display label", async () => {
-      mockFetch.mockResolvedValueOnce(
-        makeDetailRow({ department: "jeugdbestuur" }),
-      );
-
-      const member = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findByPsdId("psd-42");
-        }),
-      );
-
-      expect(member?.departmentDisplay).toBe("Jeugdbestuur");
-    });
-
     it("null optional fields become undefined", async () => {
       mockFetch.mockResolvedValueOnce(
         makeDetailRow({
@@ -336,7 +287,6 @@ describe("StaffRepository", () => {
           phone: null,
           photoUrl: null,
           bio: null,
-          department: null,
         }),
       );
 
@@ -351,7 +301,6 @@ describe("StaffRepository", () => {
       expect(member?.phone).toBeUndefined();
       expect(member?.imageUrl).toBeUndefined();
       expect(member?.bio).toBeUndefined();
-      expect(member?.departmentDisplay).toBeUndefined();
     });
   });
 

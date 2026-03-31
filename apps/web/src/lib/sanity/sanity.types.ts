@@ -15,6 +15,54 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type JeugdLandingPage = {
+  _id: string;
+  _type: "jeugdLandingPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  editorialCards?: Array<{
+    tag?: string;
+    title?: string;
+    description?: string;
+    arrowText?: string;
+    href?: string;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    position?: "featured" | "medium" | "third";
+    cardType?: "nav" | "article";
+    _key: string;
+  }>;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
+};
+
 export type BannerReference = {
   _ref: string;
   _type: "reference";
@@ -33,39 +81,6 @@ export type HomePage = {
   bannerSlotC?: BannerReference;
 };
 
-export type JeugdLandingPage = {
-  _id: string;
-  _type: "jeugdLandingPage";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  editorialCards?: Array<{
-    _key: string;
-    tag?: string;
-    title?: string;
-    description?: string;
-    arrowText?: string;
-    href?: string;
-    image?: {
-      _type: "image";
-      asset?: {
-        _ref: string;
-        _type: "reference";
-        _weak?: boolean;
-      };
-    };
-    position?: "featured" | "medium" | "third";
-    cardType?: "nav" | "article";
-  }>;
-};
-
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
 export type Banner = {
   _id: string;
   _type: "banner";
@@ -81,22 +96,6 @@ export type Banner = {
   };
   alt?: string;
   href?: string;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
 };
 
 export type SearchFeedback = {
@@ -447,31 +446,6 @@ export type StaffMember = {
   _rev: string;
   firstName?: string;
   lastName?: string;
-  role?:
-    | "hoofdtrainer"
-    | "assistent"
-    | "keeperstrainer"
-    | "tvjo"
-    | "ploegdelegatie"
-    | "afgevaardigde"
-    | "coach"
-    | "voorzitter"
-    | "ondervoorzitter"
-    | "secretaris"
-    | "penningmeester"
-    | "jeugdcoordinator"
-    | "jeugdsecretaris"
-    | "technisch-coordinator"
-    | "sportief-verantwoordelijke"
-    | "sponsoring-verantwoordelijke"
-    | "verzekering-verantwoordelijke"
-    | "evenementen-coordinator"
-    | "pr-verantwoordelijke"
-    | "kantine-verantwoordelijke"
-    | "webmaster"
-    | "bestuur"
-    | "other";
-  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
   email?: string;
   phone?: string;
   birthDate?: string;
@@ -501,11 +475,6 @@ export type StaffMember = {
     _type: "block";
     _key: string;
   }>;
-  inOrganigram?: boolean;
-  parentMember?: StaffMemberReference;
-  roleLabel?: string;
-  roleCode?: string;
-  responsibilities?: string;
   psdId?: string;
   archived?: boolean;
 };
@@ -761,12 +730,13 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | BannerReference
-  | HomePage
   | SanityImageAssetReference
-  | Banner
+  | JeugdLandingPage
   | SanityImageCrop
   | SanityImageHotspot
+  | BannerReference
+  | HomePage
+  | Banner
   | SearchFeedback
   | HtmlTable
   | SanityFileAssetReference
@@ -959,7 +929,7 @@ export type RELATED_ARTICLES_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLE_BY_SLUG_QUERY
-// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName, roleLabel,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
+// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  _id, title, slug, publishAt, featured, tags,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
 export type ARTICLE_BY_SLUG_QUERY_RESULT = {
   _id: string;
   title: string | null;
@@ -1157,21 +1127,18 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         _id: string;
         firstName: null;
         lastName: null;
-        roleLabel: null;
         imageUrl: null;
       }
     | {
         _id: string;
         firstName: string | null;
         lastName: string | null;
-        roleLabel: null;
         imageUrl: null;
       }
     | {
         _id: string;
         firstName: string | null;
         lastName: string | null;
-        roleLabel: string | null;
         imageUrl: string | null;
       }
     | null
@@ -1235,7 +1202,7 @@ export type HOMEPAGE_BANNERS_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/jeugd-landing-page.repository.ts
 // Variable: JEUGD_LANDING_PAGE_QUERY
-// Query: *[_type == "jeugdLandingPage"][0] { editorialCards[] { tag, title, description, arrowText, href, "imageUrl": image.asset->url + "?w=900&q=80&fm=webp", position, cardType } }
+// Query: *[_type == "jeugdLandingPage"][0] {  editorialCards[] {    tag, title, description, arrowText, href,    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",    position, cardType  }}
 export type JEUGD_LANDING_PAGE_QUERY_RESULT = {
   editorialCards: Array<{
     tag: string | null;
@@ -1245,7 +1212,7 @@ export type JEUGD_LANDING_PAGE_QUERY_RESULT = {
     href: string | null;
     imageUrl: string | null;
     position: "featured" | "medium" | "third" | null;
-    cardType: "nav" | "article" | null;
+    cardType: "article" | "nav" | null;
   }> | null;
 } | null;
 
@@ -1434,7 +1401,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
     role: string | null;
     email: string | null;
     phone: string | null;
-    department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+    department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
     name: string | null;
     memberId: string | null;
   } | null;
@@ -1445,7 +1412,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
       role: string | null;
       email: string | null;
       phone: string | null;
-      department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
+      department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
       name: string | null;
       memberId: string | null;
     } | null;
@@ -1489,39 +1456,12 @@ export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBER_BY_PSD_ID_QUERY
-// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"}
+// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"}
 export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
   _id: string;
   psdId: string | null;
   firstName: string | null;
   lastName: string | null;
-  role:
-    | "afgevaardigde"
-    | "assistent"
-    | "bestuur"
-    | "coach"
-    | "evenementen-coordinator"
-    | "hoofdtrainer"
-    | "jeugdcoordinator"
-    | "jeugdsecretaris"
-    | "kantine-verantwoordelijke"
-    | "keeperstrainer"
-    | "ondervoorzitter"
-    | "other"
-    | "penningmeester"
-    | "ploegdelegatie"
-    | "pr-verantwoordelijke"
-    | "secretaris"
-    | "sponsoring-verantwoordelijke"
-    | "sportief-verantwoordelijke"
-    | "technisch-coordinator"
-    | "tvjo"
-    | "verzekering-verantwoordelijke"
-    | "voorzitter"
-    | "webmaster"
-    | null;
-  roleLabel: string | null;
-  department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
   email: string | null;
   phone: string | null;
   bio: Array<{
@@ -1649,31 +1589,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
     _id: string;
     firstName: string | null;
     lastName: string | null;
-    role:
-      | "afgevaardigde"
-      | "assistent"
-      | "bestuur"
-      | "coach"
-      | "evenementen-coordinator"
-      | "hoofdtrainer"
-      | "jeugdcoordinator"
-      | "jeugdsecretaris"
-      | "kantine-verantwoordelijke"
-      | "keeperstrainer"
-      | "ondervoorzitter"
-      | "other"
-      | "penningmeester"
-      | "ploegdelegatie"
-      | "pr-verantwoordelijke"
-      | "secretaris"
-      | "sponsoring-verantwoordelijke"
-      | "sportief-verantwoordelijke"
-      | "technisch-coordinator"
-      | "tvjo"
-      | "verzekering-verantwoordelijke"
-      | "voorzitter"
-      | "webmaster"
-      | null;
+    role: null;
     photoUrl: string | null;
   }> | null;
 } | null;
@@ -1693,31 +1609,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
   staff: Array<{
     firstName: string | null;
     lastName: string | null;
-    role:
-      | "afgevaardigde"
-      | "assistent"
-      | "bestuur"
-      | "coach"
-      | "evenementen-coordinator"
-      | "hoofdtrainer"
-      | "jeugdcoordinator"
-      | "jeugdsecretaris"
-      | "kantine-verantwoordelijke"
-      | "keeperstrainer"
-      | "ondervoorzitter"
-      | "other"
-      | "penningmeester"
-      | "ploegdelegatie"
-      | "pr-verantwoordelijke"
-      | "secretaris"
-      | "sponsoring-verantwoordelijke"
-      | "sportief-verantwoordelijke"
-      | "technisch-coordinator"
-      | "tvjo"
-      | "verzekering-verantwoordelijke"
-      | "voorzitter"
-      | "webmaster"
-      | null;
+    role: null;
   }> | null;
 }>;
 
@@ -1729,18 +1621,18 @@ declare module "@sanity/client" {
     'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
-    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName, roleLabel,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  _id, title, slug, publishAt, featured, tags,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "event"] | order(dateStart asc) {\n  _id, title, dateStart, dateEnd, externalLink,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      _id, title, dateStart, dateEnd, featuredOnHome, externalLink,\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
-    '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      _id,\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
+    '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0] {\n  _id,\n  title,\n  slug,\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  _id, name, url, type, tier, featured, description, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
-    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }\n}': TEAM_BY_SLUG_QUERY_RESULT;

@@ -192,7 +192,6 @@ describe("mapMentionedStaff", () => {
       _id: "staff-1",
       firstName: "John",
       lastName: "Doe",
-      roleLabel: "Coach",
       imageUrl: "https://example.com/photo.jpg",
     };
     const result = mapMentionedStaff([null, staff, staff]);
@@ -203,7 +202,7 @@ describe("mapMentionedStaff", () => {
       id: "staff-1",
       firstName: "John",
       lastName: "Doe",
-      role: "Coach",
+      role: null,
       imageUrl: "https://example.com/photo.jpg",
     });
   });
@@ -214,7 +213,6 @@ describe("mapMentionedStaff", () => {
         _id: "staff-1",
         firstName: "John",
         lastName: "Doe",
-        roleLabel: "Coach",
         imageUrl: null,
       },
     ]);
@@ -226,7 +224,7 @@ describe("mapMentionedStaff", () => {
         id: "staff-1",
         firstName: "John",
         lastName: "Doe",
-        role: "Coach",
+        role: null,
         imageUrl: null,
       },
     ]);

@@ -30,7 +30,7 @@ export const ORGANIGRAM_NODES_QUERY =
 
 export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
-  _id, psdId, firstName, lastName, role, roleLabel, department, email, phone, bio,
+  _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
 }`);
 
@@ -38,46 +38,6 @@ export const STAFF_MEMBERS_PSDID_QUERY =
   defineQuery(`*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {
   _id, psdId
 }`);
-
-// ─── Display label maps ───────────────────────────────────────────────────────
-
-const ROLE_DISPLAY = {
-  hoofdtrainer: "Hoofdtrainer",
-  assistent: "Assistent-trainer",
-  keeperstrainer: "Keeperstrainer",
-  tvjo: "TVJO",
-  ploegdelegatie: "Ploegdelegatie",
-  afgevaardigde: "Afgevaardigde",
-  coach: "Coach",
-  voorzitter: "Voorzitter",
-  ondervoorzitter: "Ondervoorzitter",
-  secretaris: "Secretaris",
-  penningmeester: "Penningmeester",
-  jeugdcoordinator: "Jeugdcoördinator",
-  jeugdsecretaris: "Jeugdsecretaris",
-  "technisch-coordinator": "Technisch coördinator",
-  "sportief-verantwoordelijke": "Sportief verantwoordelijke",
-  "sponsoring-verantwoordelijke": "Verantwoordelijke sponsoring",
-  "verzekering-verantwoordelijke": "Verzekeringverantwoordelijke",
-  "evenementen-coordinator": "Evenementencoördinator",
-  "pr-verantwoordelijke": "PR-verantwoordelijke",
-  "kantine-verantwoordelijke": "Kantineverantwoordelijke",
-  webmaster: "Webmaster",
-  bestuur: "Bestuur",
-  other: "Andere",
-} satisfies Record<
-  NonNullable<NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>["role"]>,
-  string
->;
-
-const DEPARTMENT_DISPLAY = {
-  hoofdbestuur: "Hoofdbestuur",
-  jeugdbestuur: "Jeugdbestuur",
-  algemeen: "Algemeen",
-} satisfies Record<
-  NonNullable<NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>["department"]>,
-  string
->;
 
 // ─── View models ─────────────────────────────────────────────────────────────
 
@@ -100,12 +60,6 @@ export interface StaffDetailVM {
   psdId: string;
   firstName: string;
   lastName: string;
-  /** Mapped display label from role enum (falls back to roleLabel) */
-  roleDisplay?: string;
-  /** Free-text organigram title */
-  roleLabel?: string;
-  /** Mapped display label from department enum */
-  departmentDisplay?: string;
   email?: string;
   phone?: string;
   bio?: NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>["bio"];
@@ -142,13 +96,6 @@ export function toOrgChartNode(
 export function toStaffDetailVM(
   row: NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>,
 ): StaffDetailVM {
-  const roleDisplay =
-    (row.role ? ROLE_DISPLAY[row.role] : undefined) ??
-    row.roleLabel ??
-    undefined;
-  const departmentDisplay = row.department
-    ? DEPARTMENT_DISPLAY[row.department]
-    : undefined;
   const psdId = row.psdId?.trim() ?? "";
 
   return {
@@ -156,9 +103,6 @@ export function toStaffDetailVM(
     psdId,
     firstName: row.firstName ?? "",
     lastName: row.lastName ?? "",
-    roleDisplay,
-    roleLabel: row.roleLabel ?? undefined,
-    departmentDisplay,
     email: row.email ?? undefined,
     phone: row.phone ?? undefined,
     bio: row.bio ?? undefined,

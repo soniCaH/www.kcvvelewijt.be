@@ -51,7 +51,7 @@ export const ARTICLE_BY_SLUG_QUERY =
     "slug": slug.current
   },
   "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
-    _id, firstName, lastName, roleLabel,
+    _id, firstName, lastName,
     "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"
   }
 }`);
