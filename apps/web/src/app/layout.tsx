@@ -12,9 +12,10 @@ import {
   TeamRepository,
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
-import { BRAND } from "@/lib/constants";
+import { BRAND, SITE_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_CONFIG.siteUrl),
   title: {
     template: "%s | KCVV Elewijt",
     default: "KCVV Elewijt - Officiële Website",
@@ -25,6 +26,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@kcvve",
+    creator: "@kcvve",
   },
 };
 
