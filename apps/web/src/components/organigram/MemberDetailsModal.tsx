@@ -50,6 +50,9 @@ export function MemberDetailsModal({
 
   const defaultImage = "/images/logo-flat.png";
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  // Synchronous state-during-render reset: clear failed-image cache when
+  // switching members so a prior broken URL doesn't force the fallback for the
+  // new member. This avoids useEffect (which would flash the stale fallback).
   const prevMemberIdRef = useRef(member?.id);
   if (prevMemberIdRef.current !== member?.id) {
     prevMemberIdRef.current = member?.id;
@@ -140,7 +143,7 @@ export function MemberDetailsModal({
               {member.roleCode && (
                 <span
                   className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-md text-sm font-semibold tracking-wide"
-                  style={{ fontFamily: "ibm-plex-mono, monospace" }}
+                  style={{ fontFamily: "var(--font-family-mono)" }}
                 >
                   {member.roleCode}
                 </span>
@@ -360,7 +363,9 @@ function MemberCard({
         }}
       />
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-kcvv-gray-blue text-base">{member.name}</p>
+        <p className="font-bold text-kcvv-gray-blue text-base">
+          {member.name ?? "Naamloos lid"}
+        </p>
         <div className="mt-1 space-y-1">
           {member.email && (
             <ContactRow
