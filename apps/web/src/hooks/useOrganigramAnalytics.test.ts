@@ -57,30 +57,87 @@ describe("useOrganigramAnalytics", () => {
   });
 
   describe("organigram_member_clicked", () => {
-    it("fires with hashed member_id and current view", () => {
+    it("single member node: fires with hashed staffMember ID (members[0].id), not the node ID", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
 
+      const singleNode = {
+        id: "organigramNode-abc",
+        title: "Voorzitter",
+        members: [{ id: "staffMember-jan", name: "Jan Janssen" }],
+      };
+
       act(() => {
-        result.current.trackMemberClicked("voorzitter-id", "chart");
+        result.current.trackMemberClicked(singleNode, "chart");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("organigram_member_clicked", {
-        member_id: hashMemberId("voorzitter-id"),
+        member_id: hashMemberId("staffMember-jan"),
         view: "chart",
       });
     });
 
-    it("fires with hashed member_id and cards view", () => {
+    it("vacant node: fires without member_id when node has no members", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
 
+      const vacantNode = {
+        id: "organigramNode-vacant",
+        title: "Penningmeester",
+        members: [],
+      };
+
       act(() => {
-        result.current.trackMemberClicked("secretaris-id", "cards");
+        result.current.trackMemberClicked(vacantNode, "cards");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith("organigram_member_clicked", {
-        member_id: hashMemberId("secretaris-id"),
         view: "cards",
       });
+    });
+
+    it("shared node: fires with hashed first member ID (members[0].id)", () => {
+      const { result } = renderHook(() => useOrganigramAnalytics());
+
+      // Shared node: 2+ members hold the same position
+      // Decision: track members[0].id — the first listed member is the primary contact.
+      // A future enhancement could track all member IDs if per-member click tracking is needed.
+      const sharedNode = {
+        id: "organigramNode-shared",
+        title: "Co-Penningmeester",
+        members: [
+          { id: "staffMember-piet", name: "Piet Pieters" },
+          { id: "staffMember-els", name: "Els Elsman" },
+        ],
+      };
+
+      act(() => {
+        result.current.trackMemberClicked(sharedNode, "chart");
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("organigram_member_clicked", {
+        member_id: hashMemberId("staffMember-piet"),
+        view: "chart",
+      });
+    });
+
+    it("never sends raw organigramNode._id as member_id", () => {
+      const { result } = renderHook(() => useOrganigramAnalytics());
+
+      const node = {
+        id: "organigramNode-xyz",
+        title: "Secretaris",
+        members: [{ id: "staffMember-kaat", name: "Kaat Kaatsen" }],
+      };
+
+      act(() => {
+        result.current.trackMemberClicked(node, "cards");
+      });
+
+      const call = mockTrackEvent.mock.calls[0];
+      const params = call[1] as Record<string, unknown>;
+      // The hashed member_id must NOT be the hash of the node ID
+      expect(params.member_id).not.toBe(hashMemberId("organigramNode-xyz"));
+      // It must be the hash of the staffMember ID
+      expect(params.member_id).toBe(hashMemberId("staffMember-kaat"));
     });
   });
 
