@@ -240,7 +240,7 @@ export function UnifiedOrganigramClient({
   // Handle member click from any view
   // Uses silent URL update to preserve chart state while enabling URL sharing
   const handleMemberClick = (member: OrgChartNode) => {
-    trackMemberClicked(member.id, activeView);
+    trackMemberClicked(member, activeView);
     setSelectedMember(member);
     setIsModalOpen(true);
     updateUrlSilently({ memberId: member.id });
