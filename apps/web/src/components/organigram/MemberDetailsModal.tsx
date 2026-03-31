@@ -134,10 +134,13 @@ export function MemberDetailsModal({
                 </>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold mb-1">
-                    {primaryMember?.name ?? member.title}
-                  </h2>
-                  <p className="text-white/90 text-lg">{member.title}</p>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
+                  {primaryMember?.name &&
+                    primaryMember.name !== member.title && (
+                      <p className="text-white/90 text-lg">
+                        {primaryMember.name}
+                      </p>
+                    )}
                 </>
               )}
               {member.roleCode && (
@@ -207,19 +210,21 @@ export function MemberDetailsModal({
           )}
 
           {/* Department Badge */}
-          {member.department && member.department !== "algemeen" && (
-            <div>
-              <SectionHeading>Afdeling</SectionHeading>
-              <span className="inline-block px-4 py-2 bg-green-main/10 text-green-main rounded-lg font-medium">
-                {member.department === "hoofdbestuur"
-                  ? "Hoofdbestuur"
-                  : "Jeugdbestuur"}
-              </span>
-            </div>
-          )}
+          {!isVacant &&
+            member.department &&
+            member.department !== "algemeen" && (
+              <div>
+                <SectionHeading>Afdeling</SectionHeading>
+                <span className="inline-block px-4 py-2 bg-green-main/10 text-green-main rounded-lg font-medium">
+                  {member.department === "hoofdbestuur"
+                    ? "Hoofdbestuur"
+                    : "Jeugdbestuur"}
+                </span>
+              </div>
+            )}
 
           {/* Linked Responsibility Paths */}
-          {linkedResponsibilities.length > 0 && (
+          {!isVacant && linkedResponsibilities.length > 0 && (
             <div>
               <SectionHeading>
                 Hulpvragen ({linkedResponsibilities.length})
