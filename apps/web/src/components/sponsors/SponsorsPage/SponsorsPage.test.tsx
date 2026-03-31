@@ -162,4 +162,80 @@ describe("SponsorsPage", () => {
       expect(screen.queryByText("Sponsor C")).not.toBeInTheDocument();
     });
   });
+
+  describe("diagonal section transitions", () => {
+    it("renders at least one diagonal section-transition before the CTA section", () => {
+      render(
+        <SponsorsPage
+          goldSponsors={[]}
+          silverSponsors={[]}
+          bronzeSponsors={[]}
+          featuredSponsors={[]}
+        />,
+      );
+
+      // SectionTransition renders data-testid="section-transition"
+      expect(
+        screen.getAllByTestId("section-transition").length,
+      ).toBeGreaterThan(0);
+    });
+
+    it("renders fewer section-transitions when no featuredSponsors (no spotlight diagonal)", () => {
+      const { getAllByTestId: withoutSpotlight } = render(
+        <SponsorsPage
+          goldSponsors={hoofdsponsors}
+          silverSponsors={sponsors}
+          bronzeSponsors={sympathisanten}
+          featuredSponsors={[]}
+        />,
+      );
+      // Without spotlight: header→grid + grid→cta = 2 transitions
+      expect(withoutSpotlight("section-transition").length).toBe(2);
+    });
+
+    it("renders more section-transitions when featuredSponsors exist (spotlight adds two diagonals)", () => {
+      const { getAllByTestId: withSpotlight } = render(
+        <SponsorsPage
+          goldSponsors={hoofdsponsors}
+          silverSponsors={sponsors}
+          bronzeSponsors={sympathisanten}
+          featuredSponsors={featuredSponsors}
+        />,
+      );
+      // With spotlight: header→spotlight + spotlight→grid + grid→cta = 3 transitions
+      expect(withSpotlight("section-transition").length).toBe(3);
+    });
+
+    it("does not use the legacy green PageTitle background", () => {
+      const { container } = render(
+        <SponsorsPage
+          goldSponsors={hoofdsponsors}
+          silverSponsors={sponsors}
+          bronzeSponsors={sympathisanten}
+          featuredSponsors={[]}
+        />,
+      );
+
+      // Legacy PageTitle uses inline style background: #4acf52
+      const legacyHeader = container.querySelector(
+        '[style*="background"][style*="4acf52"]',
+      );
+      expect(legacyHeader).toBeNull();
+    });
+
+    it("renders a dark-themed page title heading", () => {
+      render(
+        <SponsorsPage
+          goldSponsors={[]}
+          silverSponsors={[]}
+          bronzeSponsors={[]}
+          featuredSponsors={[]}
+        />,
+      );
+
+      // Modern page header should still have an h1 with sponsors-related text
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading).toBeInTheDocument();
+    });
+  });
 });

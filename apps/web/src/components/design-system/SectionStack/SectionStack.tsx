@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { cn } from "@/lib/utils/cn";
 import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
 import type {
@@ -46,24 +47,30 @@ export function SectionStack({ sections, className }: SectionStackProps) {
           section.bg !== next.bg;
 
         return (
-          <div
-            key={section.key ?? i}
-            className={cn("w-full", BG_CLASS[section.bg])}
-          >
-            {/* Section content wrapper */}
-            <div
-              className={cn(
-                "w-full",
-                BG_CLASS[section.bg],
-                section.paddingTop ?? "pt-20",
-                section.paddingBottom ?? "pb-20",
-                hasOverlap && "relative z-0",
-              )}
-            >
-              {section.content}
+          // Fragment keeps the key while allowing the transition to sit
+          // between section divs — not inside the current section's div.
+          // This makes SectionTransition's marginBottom: "-1px" correctly
+          // affect when the NEXT section div starts, eliminating sub-pixel
+          // seam gaps between sections.
+          <Fragment key={section.key ?? i}>
+            <div className={cn("w-full", BG_CLASS[section.bg])}>
+              {/* Section content wrapper */}
+              <div
+                className={cn(
+                  "w-full",
+                  BG_CLASS[section.bg],
+                  section.paddingTop ?? "pt-20",
+                  section.paddingBottom ?? "pb-20",
+                  hasOverlap && "relative z-0",
+                )}
+              >
+                {section.content}
+              </div>
             </div>
 
-            {/* Transition between this section and the next */}
+            {/* Transition rendered as sibling between sections — NOT inside the
+                current section div. marginBottom: "-1px" on SectionTransition
+                now pulls the next section up by 1px, covering sub-pixel gaps. */}
             {showTransition && (
               <SectionTransition
                 from={section.bg}
@@ -78,7 +85,7 @@ export function SectionStack({ sections, className }: SectionStackProps) {
                 overlap={section.transition!.overlap}
               />
             )}
-          </div>
+          </Fragment>
         );
       })}
     </div>

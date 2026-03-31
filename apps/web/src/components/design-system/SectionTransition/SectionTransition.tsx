@@ -31,11 +31,14 @@ export interface SectionTransitionProps {
 }
 
 // CSS color values for SVG polygon fills.
+// NOTE: Use resolved hex values, not CSS custom properties — SVG fill rendering
+// uses a different pipeline from CSS background-color, and CSS variables in SVG
+// attributes can produce sub-pixel color mismatches visible as a 1px seam line.
 const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
-  "gray-100": "var(--color-gray-100)",
-  "kcvv-black": "var(--color-kcvv-black)",
-  "kcvv-green-dark": "var(--color-kcvv-green-dark)",
+  "gray-100": "#f3f4f6",
+  "kcvv-black": "#1E2024",
+  "kcvv-green-dark": "#008755",
   transparent: "transparent",
 };
 
@@ -80,35 +83,67 @@ export function SectionTransition({
   className,
 }: SectionTransitionProps) {
   const isDouble = type === "double-diagonal";
-  const height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
+  const isOverlap = overlap !== "none";
 
+  // For overlap cases, extend height and marginTop by 1px so the SVG bleeds 1px
+  // into the previous section. This covers the sub-pixel gap that appears at the
+  // SVG's top edge where the section boundary is (visible as a horizontal line on
+  // the left side of the page, where the TO color polygon starts at the very top
+  // of the SVG). The extra pixel is invisible: it paints the FROM color into the
+  // section's own background area.
+  let height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
   let marginTop = "0";
   let zIndex = "";
 
   if (overlap === "half") {
     marginTop = isDouble
-      ? `calc(-1 * ${DIAGONAL_HEIGHT})`
-      : `calc(-1 * ${DIAGONAL_HALF})`;
+      ? `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`
+      : `calc(-1 * ${DIAGONAL_HALF} - 1px)`;
+    height = isDouble
+      ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
+      : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   } else if (overlap === "full") {
-    marginTop = `calc(-1 * ${DIAGONAL_HEIGHT})`;
+    marginTop = `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`;
+    height = isDouble
+      ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
+      : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   }
 
-  // -1px bottom margin pulls the next section up to cover any sub-pixel gap
-  // caused by fractional pixel heights from clamp(). The overlap is invisible
-  // because both the SVG's bottom edge and the next section share the TO color.
+  // Wrapper background strategy:
+  //
+  // The SVG is composited over the wrapper div background. Transparent pixels in
+  // the SVG (including any 1-px fringe crispEdges leaves at polygon edges) reveal
+  // the wrapper background — so the background doubles as a seam guard without
+  // needing explicit <rect> elements that would bleed through the FROM area.
+  //
+  // Non-overlap: solid TO color. The opaque FROM polygon hides it in the FROM
+  //   area; the TO color seals any sub-pixel gap at the SVG bottom where the
+  //   page background (white) would otherwise show.
+  //
+  // Overlap: the FROM polygon is TRANSPARENT so the hero image shows through.
+  //   A step gradient is transparent at the top (FROM area stays clear) and
+  //   switches to TO color at 98% (seals the last ~2 px at the SVG bottom).
   const style: React.CSSProperties = {
     height,
     marginTop,
     marginBottom: "-1px",
+    background: isOverlap
+      ? `linear-gradient(to bottom, transparent 98%, ${BG_COLOR[to]} 98%)`
+      : BG_COLOR[to],
   };
   if (zIndex) style.zIndex = zIndex;
+
+  // For overlap transitions the FROM polygon must be transparent — the section
+  // behind the transition (hero image, sponsor header, etc.) should be visible
+  // through the upper-triangle area. For non-overlap transitions the FROM polygon
+  // is painted explicitly so it doesn't depend on what happens to be behind it.
+  const fromFill = isOverlap ? "transparent" : BG_COLOR[from];
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
     const midColor = via ?? to;
-    const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
     return (
       <div
         aria-hidden="true"
@@ -154,8 +189,6 @@ export function SectionTransition({
       </div>
     );
   }
-
-  const fromFill = overlap !== "none" ? "transparent" : BG_COLOR[from];
 
   return (
     <div

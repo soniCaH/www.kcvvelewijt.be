@@ -1,9 +1,11 @@
 /**
  * SponsorsPage Component
- * Sponsors page: intro, optional featured spotlight, size-differentiated logo grid, CTA.
+ * Sponsors page: modern dark header, optional featured spotlight, size-differentiated logo grid, CTA.
+ * Sections are composed via SectionStack with diagonal transitions.
  */
 
-import { PageTitle } from "@/components/layout";
+import { SectionStack } from "@/components/design-system";
+import type { SectionConfig } from "@/components/design-system";
 import {
   SponsorsSpotlight,
   SponsorCallToAction,
@@ -31,6 +33,7 @@ export function SponsorsPage({
 }: SponsorsPageProps) {
   const totalSponsors =
     goldSponsors.length + silverSponsors.length + bronzeSponsors.length;
+  const hasSpotlight = featuredSponsors.length > 0;
 
   const spotlightSponsors = featuredSponsors.map((s) => ({
     id: s.id,
@@ -40,27 +43,48 @@ export function SponsorsPage({
     description: s.description,
   }));
 
-  return (
-    <div>
-      <PageTitle title="Sponsors KCVV Elewijt" />
+  const headerSection: SectionConfig = {
+    key: "header",
+    bg: "kcvv-black",
+    content: (
+      <div className="max-w-inner-lg mx-auto px-4 md:px-10">
+        <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-white/50 mb-4">
+          <span className="block w-5 h-0.5 bg-kcvv-green" aria-hidden="true" />
+          KCVV Elewijt
+        </div>
+        <h1 className="font-title font-black text-white uppercase text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] mb-4">
+          Onze sponsors
+        </h1>
+        <p
+          data-testid="sponsors-intro"
+          className="max-w-2xl text-white/60 text-lg"
+        >
+          KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
+          Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
+          jeugd en onze toekomst. We zijn hen daar enorm dankbaar voor.
+        </p>
+      </div>
+    ),
+    paddingTop: "pt-16",
+    paddingBottom: "pb-24",
+    transition: { type: "diagonal", direction: "right", overlap: "full" },
+  };
 
-      <p
-        data-testid="sponsors-intro"
-        className="max-w-2xl mx-auto px-4 py-6 text-center text-kcvv-gray text-lg"
-      >
-        KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
-        Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
-        jeugd en onze toekomst. We zijn hen daar enorm dankbaar voor.
-      </p>
+  const spotlightSection: SectionConfig | false = hasSpotlight && {
+    key: "spotlight",
+    bg: "kcvv-green-dark",
+    content: <SponsorsSpotlight sponsors={spotlightSponsors} />,
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+    transition: { type: "diagonal", direction: "right" },
+  };
 
-      {spotlightSponsors.length > 0 && (
-        <SponsorsSpotlight sponsors={spotlightSponsors} />
-      )}
-
-      <div className="w-full max-w-inner-lg mx-auto px-3 lg:px-0 py-10 space-y-8">
-        {totalSponsors === 0 && spotlightSponsors.length === 0 && (
-          <SponsorEmptyState />
-        )}
+  const gridSection: SectionConfig = {
+    key: "grid",
+    bg: "gray-100",
+    content: (
+      <div className="max-w-inner-lg mx-auto px-4 md:px-10 py-10 space-y-8">
+        {totalSponsors === 0 && !hasSpotlight && <SponsorEmptyState />}
 
         {goldSponsors.length > 0 && (
           <SponsorGrid
@@ -89,8 +113,23 @@ export function SponsorsPage({
           />
         )}
       </div>
+    ),
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+    transition: { type: "diagonal", direction: "left" },
+  };
 
-      <SponsorCallToAction />
-    </div>
+  const ctaSection: SectionConfig = {
+    key: "cta",
+    bg: "kcvv-black",
+    content: <SponsorCallToAction />,
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+  };
+
+  return (
+    <SectionStack
+      sections={[headerSection, spotlightSection, gridSection, ctaSection]}
+    />
   );
 }

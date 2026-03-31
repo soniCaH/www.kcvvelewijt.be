@@ -100,7 +100,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-margin-top")).toBe(
-        "calc(-1 * clamp(1rem, 3vw, 2.5rem))",
+        "calc(-1 * clamp(1rem, 3vw, 2.5rem) - 1px)",
       );
     });
 
@@ -116,7 +116,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-margin-top")).toBe(
-        "calc(-1 * clamp(2rem, 6vw, 5rem))",
+        "calc(-1 * clamp(2rem, 6vw, 5rem) - 1px)",
       );
     });
 
@@ -232,7 +232,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-margin-top")).toBe(
-        "calc(-1 * clamp(2rem, 6vw, 5rem))",
+        "calc(-1 * clamp(2rem, 6vw, 5rem) - 1px)",
       );
     });
   });

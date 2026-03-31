@@ -15,14 +15,14 @@ import { mockSponsors } from "../Sponsors.mocks";
 // ---------------------------------------------------------------------------
 
 const meta = {
-  title: "Pages/SponsorsPage",
+  title: "Features/Sponsors/SponsorsPage",
   component: SponsorsPage,
   parameters: {
     layout: "fullscreen",
     docs: {
       description: {
         component:
-          "Full sponsors page for /sponsors. Shows an intro paragraph, an optional dark-green spotlight for featured sponsors, and a size-differentiated logo grid (hoofdsponsor largest, sponsor medium, sympathisant smallest). No tier labels or dividers.",
+          "Full sponsors page for /sponsors. Dark header section (replaces legacy PageTitle), intro paragraph, optional dark-green spotlight with diagonal transition for featured sponsors, size-differentiated logo grid (hoofdsponsor largest, sponsor medium, sympathisant smallest), and dark CTA with diagonal transition. No tier labels or dividers.",
       },
     },
   },
