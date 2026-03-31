@@ -32,8 +32,6 @@ export default async function Image({ params }: ImageProps) {
 
   let firstName = "";
   let lastName = "";
-  let roleDisplay = "";
-  let roleWatermark = "";
   const teamName = "KCVV Elewijt";
 
   try {
@@ -47,9 +45,6 @@ export default async function Image({ params }: ImageProps) {
     if (member) {
       firstName = member.firstName;
       lastName = member.lastName;
-      roleDisplay = member.roleDisplay ?? member.roleLabel ?? "";
-      // Use abbreviated role as watermark (max ~6 chars, uppercase)
-      roleWatermark = (roleDisplay ?? "").slice(0, 6).toUpperCase();
     } else {
       firstName = "KCVV";
       lastName = "Elewijt";
@@ -71,25 +66,6 @@ export default async function Image({ params }: ImageProps) {
         overflow: "hidden",
       }}
     >
-      {/* Role watermark */}
-      {roleWatermark && (
-        <div
-          style={{
-            position: "absolute",
-            right: 40,
-            top: 20,
-            fontSize: 260,
-            fontWeight: 900,
-            color: "rgba(75, 155, 72, 0.12)",
-            lineHeight: 0.9,
-            fontFamily: "system-ui, sans-serif",
-            letterSpacing: "-0.04em",
-          }}
-        >
-          {roleWatermark}
-        </div>
-      )}
-
       {/* Main content */}
       <div
         style={{
@@ -141,12 +117,6 @@ export default async function Image({ params }: ImageProps) {
             fontSize: 32,
           }}
         >
-          {roleDisplay && (
-            <>
-              <span style={{ fontWeight: 500 }}>{roleDisplay}</span>
-              <span style={{ color: "#4acf52" }}>•</span>
-            </>
-          )}
           <span>{teamName}</span>
         </div>
       </div>

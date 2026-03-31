@@ -29,7 +29,6 @@ describe("buildRelatedContent", () => {
       _id: "staff-1",
       firstName: "Marc",
       lastName: "De Trainer",
-      roleLabel: "Hoofdtrainer",
       imageUrl: null,
     },
   ];

@@ -149,7 +149,7 @@ describe("TeamRepository", () => {
             _id: "staff-1",
             firstName: "Piet",
             lastName: "Pieters",
-            role: "hoofdtrainer",
+            role: null,
             photoUrl: "https://cdn.sanity.io/photo.webp",
           },
         ],
@@ -197,7 +197,7 @@ describe("TeamRepository", () => {
         id: "staff-1",
         firstName: "Piet",
         lastName: "Pieters",
-        role: "hoofdtrainer",
+        role: "",
         imageUrl: "https://cdn.sanity.io/photo.webp",
       });
     });
@@ -287,7 +287,7 @@ describe("TeamRepository", () => {
               _id: "s1",
               firstName: "A",
               lastName: "B",
-              role: "coach",
+              role: null,
               photoUrl: null,
             },
           ],
@@ -331,9 +331,7 @@ describe("TeamRepository", () => {
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
-        staff: [
-          { firstName: "Piet", lastName: "Pieters", role: "hoofdtrainer" },
-        ],
+        staff: [{ firstName: "Piet", lastName: "Pieters", role: null }],
         ...overrides,
       };
     }
@@ -358,9 +356,7 @@ describe("TeamRepository", () => {
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
-        staff: [
-          { firstName: "Piet", lastName: "Pieters", role: "hoofdtrainer" },
-        ],
+        staff: [{ firstName: "Piet", lastName: "Pieters", role: "" }],
       });
     });
 

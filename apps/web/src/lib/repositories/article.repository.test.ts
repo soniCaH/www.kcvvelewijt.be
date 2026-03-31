@@ -99,7 +99,6 @@ function makeArticleDetailRow(
         _id: "staff-1",
         firstName: "Piet",
         lastName: "Pieters",
-        roleLabel: "Trainer",
         imageUrl: "https://cdn.sanity.io/staff.webp",
       },
     ],
@@ -325,7 +324,6 @@ describe("ArticleRepository", () => {
         _id: "staff-1",
         firstName: "Piet",
         lastName: "Pieters",
-        roleLabel: "Trainer",
         imageUrl: "https://cdn.sanity.io/staff.webp",
       });
     });
