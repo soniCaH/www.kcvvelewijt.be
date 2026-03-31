@@ -113,7 +113,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     : undefined;
 
   const shareConfig = {
-    url: `https://kcvvelewijt.be/nieuws/${article.slug}`,
+    url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
     title: article.title,
     hashtags: tags,
   };

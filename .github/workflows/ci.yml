@@ -87,7 +87,7 @@ jobs:
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
       - name: Build Storybook
-        run: cd apps/web && pnpm run build-storybook
+        run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
 
   migration-status:
     name: Update Migration Status
