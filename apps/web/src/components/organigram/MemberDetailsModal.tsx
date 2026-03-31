@@ -3,12 +3,12 @@
 /**
  * Member Details Modal
  *
- * Displays detailed information about a board member when clicked
- * in the organizational chart.
+ * Displays detailed information about a board position when clicked
+ * in the organizational chart. Handles vacant, single, and shared states.
  */
 
-import { useEffect, useState, useMemo } from "react";
-import type { OrgChartNode } from "@/types/organigram";
+import { useEffect, useRef, useState, useMemo } from "react";
+import type { OrgChartNode, OrgChartMember } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,13 +25,6 @@ interface MemberDetailsModalProps {
   onViewResponsibility?: (responsibilityId: string) => void;
 }
 
-/**
- * Show a modal with detailed information for a board member.
- *
- * While open, body scroll is locked and pressing Escape invokes the provided close callback.
- *
- * @returns The modal JSX when `isOpen` is true and `member` is provided; otherwise `null`.
- */
 export function MemberDetailsModal({
   member,
   isOpen,
@@ -39,7 +32,6 @@ export function MemberDetailsModal({
   responsibilityPaths = [],
   onViewResponsibility,
 }: MemberDetailsModalProps) {
-  // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -56,31 +48,41 @@ export function MemberDetailsModal({
     };
   }, [isOpen, onClose]);
 
-  // Derive image source directly from props (no useEffect needed)
   const defaultImage = "/images/logo-flat.png";
-
-  // Track if the member's image failed to load (only state we need)
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  // Synchronous state-during-render reset: clear failed-image cache when
+  // switching members so a prior broken URL doesn't force the fallback for the
+  // new member. This avoids useEffect (which would flash the stale fallback).
+  const prevMemberIdRef = useRef(member?.id);
+  if (prevMemberIdRef.current !== member?.id) {
+    prevMemberIdRef.current = member?.id;
+    if (failedImages.size > 0) setFailedImages(new Set());
+  }
 
-  const primaryMember = member?.members[0];
-  const displayName = primaryMember?.name ?? member?.title ?? "";
-  const primaryImageUrl = primaryMember?.imageUrl;
-
-  // Determine which image to show
-  const imageSrc = useMemo(() => {
-    if (!primaryImageUrl || failedImages.has(primaryImageUrl)) {
-      return defaultImage;
-    }
-    return primaryImageUrl;
-  }, [primaryImageUrl, failedImages, defaultImage]);
-
-  // Find linked responsibility paths
   const linkedResponsibilities = useMemo(() => {
     if (!member || !responsibilityPaths.length) return [];
     return findMemberResponsibilities(member.id, responsibilityPaths);
   }, [member, responsibilityPaths]);
 
   if (!isOpen || !member) return null;
+
+  const isVacant = member.members.length === 0;
+  const isShared = member.members.length >= 2;
+  const primaryMember = member.members[0];
+
+  const handleImageError = (url: string) => {
+    setFailedImages((prev) => {
+      if (prev.has(url)) return prev;
+      const next = new Set(prev);
+      next.add(url);
+      return next;
+    });
+  };
+
+  const resolveImage = (url?: string) => {
+    if (!url || failedImages.has(url)) return defaultImage;
+    return url;
+  };
 
   return (
     <div
@@ -91,48 +93,60 @@ export function MemberDetailsModal({
         className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with green accent */}
+        {/* Header */}
         <div className="relative bg-gradient-to-r from-green-main to-green-hover p-6 text-white rounded-t-xl">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
             aria-label="Close"
           >
-            <span className="text-2xl leading-none">×</span>
+            <span className="text-2xl leading-none">&times;</span>
           </button>
 
           <div className="flex items-center gap-6">
-            <Image
-              src={imageSrc}
-              alt={displayName}
-              width={96}
-              height={96}
-              className="w-24 h-24 rounded-full border-4 border-white/30 object-cover"
-              onError={() => {
-                if (primaryImageUrl) {
-                  setFailedImages((prev) => {
-                    if (prev.has(primaryImageUrl)) return prev;
-                    const next = new Set(prev);
-                    next.add(primaryImageUrl);
-                    return next;
-                  });
-                }
-              }}
-            />
-            <div>
-              <h2
-                className="text-2xl font-bold mb-1"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+            {!isVacant && !isShared && (
+              <Image
+                src={resolveImage(primaryMember?.imageUrl)}
+                alt={primaryMember?.name ?? member.title}
+                width={96}
+                height={96}
+                className="w-24 h-24 rounded-full border-4 border-white/30 object-cover"
+                onError={() => {
+                  if (primaryMember?.imageUrl)
+                    handleImageError(primaryMember.imageUrl);
                 }}
-              >
-                {displayName}
-              </h2>
-              <p className="text-white/90 text-lg">{member.title}</p>
+              />
+            )}
+            <div>
+              {isVacant ? (
+                <>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
+                  <p className="text-white/70 text-lg font-semibold">
+                    Vacante functie
+                  </p>
+                </>
+              ) : isShared ? (
+                <>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
+                  <p className="text-white/90 text-sm">
+                    {member.members.length} personen
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
+                  {primaryMember?.name &&
+                    primaryMember.name !== member.title && (
+                      <p className="text-white/90 text-lg">
+                        {primaryMember.name}
+                      </p>
+                    )}
+                </>
+              )}
               {member.roleCode && (
                 <span
                   className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-md text-sm font-semibold tracking-wide"
-                  style={{ fontFamily: "ibm-plex-mono, monospace" }}
+                  style={{ fontFamily: "var(--font-family-mono)" }}
                 >
                   {member.roleCode}
                 </span>
@@ -143,79 +157,52 @@ export function MemberDetailsModal({
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Contact Information */}
-          {(primaryMember?.email || primaryMember?.phone) && (
+          {/* Shared: per-member contact blocks */}
+          {isShared && (
             <div>
-              <h3
-                className="text-lg font-bold text-gray-blue mb-3"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                }}
-              >
-                Contactgegevens
-              </h3>
-              <div className="space-y-2">
-                {primaryMember?.email && (
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-main flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <a
-                      href={`mailto:${primaryMember.email}`}
-                      className="text-green-main hover:text-green-hover hover:underline transition-colors"
-                    >
-                      {primaryMember.email}
-                    </a>
-                  </div>
-                )}
-                {primaryMember?.phone && (
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-main flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
-                    <a
-                      href={`tel:${primaryMember.phone}`}
-                      className="text-green-main hover:text-green-hover hover:underline transition-colors"
-                    >
-                      {primaryMember.phone}
-                    </a>
-                  </div>
-                )}
+              <h3 className="text-lg font-bold text-gray-blue mb-3">Leden</h3>
+              <div className="space-y-4">
+                {member.members.map((m) => (
+                  <MemberCard
+                    key={m.id}
+                    member={m}
+                    resolveImage={resolveImage}
+                    onImageError={handleImageError}
+                  />
+                ))}
               </div>
             </div>
           )}
 
+          {/* Single: contact info */}
+          {!isVacant &&
+            !isShared &&
+            (primaryMember?.email || primaryMember?.phone) && (
+              <div>
+                <SectionHeading>Contactgegevens</SectionHeading>
+                <div className="space-y-2">
+                  {primaryMember?.email && (
+                    <ContactRow
+                      icon="email"
+                      href={`mailto:${primaryMember.email}`}
+                      label={primaryMember.email}
+                    />
+                  )}
+                  {primaryMember?.phone && (
+                    <ContactRow
+                      icon="phone"
+                      href={`tel:${primaryMember.phone}`}
+                      label={primaryMember.phone}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
           {/* Description */}
           {member.description && (
             <div>
-              <h3
-                className="text-lg font-bold text-gray-blue mb-3"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                }}
-              >
-                Verantwoordelijkheden
-              </h3>
+              <SectionHeading>Verantwoordelijkheden</SectionHeading>
               <p className="text-gray-dark leading-relaxed">
                 {member.description}
               </p>
@@ -223,35 +210,25 @@ export function MemberDetailsModal({
           )}
 
           {/* Department Badge */}
-          {member.department && member.department !== "algemeen" && (
-            <div>
-              <h3
-                className="text-lg font-bold text-gray-blue mb-3"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                }}
-              >
-                Afdeling
-              </h3>
-              <span className="inline-block px-4 py-2 bg-green-main/10 text-green-main rounded-lg font-medium">
-                {member.department === "hoofdbestuur"
-                  ? "Hoofdbestuur"
-                  : "Jeugdbestuur"}
-              </span>
-            </div>
-          )}
+          {!isVacant &&
+            member.department &&
+            member.department !== "algemeen" && (
+              <div>
+                <SectionHeading>Afdeling</SectionHeading>
+                <span className="inline-block px-4 py-2 bg-green-main/10 text-green-main rounded-lg font-medium">
+                  {member.department === "hoofdbestuur"
+                    ? "Hoofdbestuur"
+                    : "Jeugdbestuur"}
+                </span>
+              </div>
+            )}
 
           {/* Linked Responsibility Paths */}
-          {linkedResponsibilities.length > 0 && (
+          {!isVacant && linkedResponsibilities.length > 0 && (
             <div>
-              <h3
-                className="text-lg font-bold text-gray-blue mb-3"
-                style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                }}
-              >
+              <SectionHeading>
                 Hulpvragen ({linkedResponsibilities.length})
-              </h3>
+              </SectionHeading>
               <p className="text-sm text-gray-dark mb-3">
                 Je kan deze persoon contacteren voor:
               </p>
@@ -286,8 +263,8 @@ export function MemberDetailsModal({
             </div>
           )}
 
-          {/* Link to full profile */}
-          {primaryMember?.href && (
+          {/* Link to full profile — single member */}
+          {!isVacant && !isShared && primaryMember?.href && (
             <div className="pt-4 border-t border-gray-light">
               <Link
                 href={primaryMember.href}
@@ -321,6 +298,116 @@ export function MemberDetailsModal({
             Sluiten
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-lg font-bold text-gray-blue mb-3">{children}</h3>;
+}
+
+function ContactRow({
+  icon,
+  href,
+  label,
+}: {
+  icon: "email" | "phone";
+  href: string;
+  label: string;
+}) {
+  const svgPath =
+    icon === "email"
+      ? "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      : "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z";
+
+  return (
+    <div className="flex items-center gap-3">
+      <svg
+        className="w-5 h-5 text-green-main flex-shrink-0"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d={svgPath}
+        />
+      </svg>
+      <a
+        href={href}
+        className="text-green-main hover:text-green-hover hover:underline transition-colors"
+      >
+        {label}
+      </a>
+    </div>
+  );
+}
+
+function MemberCard({
+  member,
+  resolveImage,
+  onImageError,
+}: {
+  member: OrgChartMember;
+  resolveImage: (url?: string) => string;
+  onImageError: (url: string) => void;
+}) {
+  return (
+    <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50 border border-gray-100">
+      <Image
+        src={resolveImage(member.imageUrl)}
+        alt={member.name ?? "Lid foto"}
+        width={56}
+        height={56}
+        className="w-14 h-14 rounded-full border-2 border-kcvv-green object-cover flex-shrink-0"
+        onError={() => {
+          if (member.imageUrl) onImageError(member.imageUrl);
+        }}
+      />
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-kcvv-gray-blue text-base">
+          {member.name ?? "Naamloos lid"}
+        </p>
+        <div className="mt-1 space-y-1">
+          {member.email && (
+            <ContactRow
+              icon="email"
+              href={`mailto:${member.email}`}
+              label={member.email}
+            />
+          )}
+          {member.phone && (
+            <ContactRow
+              icon="phone"
+              href={`tel:${member.phone}`}
+              label={member.phone}
+            />
+          )}
+        </div>
+        {member.href && (
+          <Link
+            href={member.href}
+            className="inline-flex items-center gap-1 mt-2 text-sm text-green-main hover:text-green-hover font-semibold transition-colors"
+          >
+            <span>Bekijk volledig profiel</span>
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </Link>
+        )}
       </div>
     </div>
   );
