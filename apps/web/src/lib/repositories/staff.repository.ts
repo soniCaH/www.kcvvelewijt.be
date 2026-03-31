@@ -32,8 +32,8 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
-  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true]{ _id, title, roleCode, department },
-  "responsibilityPaths": *[_type == "responsibility" && active == true && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)]{ title, "slug": slug.current, category, icon }
+  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },
+  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
 }`);
 
 export const STAFF_MEMBERS_PSDID_QUERY =
