@@ -11,6 +11,7 @@ import {
   ScheurkalenderPage,
   type ScheurkalenderDay,
 } from "./ScheurkalenderPage";
+import ScheurkalenderLoading from "@/app/(main)/scheurkalender/loading";
 
 // ---------------------------------------------------------------------------
 // Mock data
@@ -156,4 +157,11 @@ export const NoMatches: Story = {
 export const MobileViewport: Story = {
   args: { days: mockDays },
   globals: { viewport: { value: "kcvvMobile" } },
+};
+
+export const RouteSkeleton: Story = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: {} as any,
+  render: () => <ScheurkalenderLoading />,
+  parameters: { layout: "fullscreen" },
 };

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UnifiedOrganigramClient } from "./UnifiedOrganigramClient";
 import { staffMembersFixture as clubStructure } from "@/components/organigram/__fixtures__/staff-members.fixture";
 import type { ResponsibilityPath } from "@/types/responsibility";
+import OrganigramLoading from "@/app/(main)/club/organigram/loading";
 
 const storyPaths: ResponsibilityPath[] = [
   {
@@ -143,4 +144,11 @@ export const JeugdbestuurOnly: Story = {
   args: {
     members: clubStructure.filter((m) => m.department === "jeugdbestuur"),
   },
+};
+
+export const RouteSkeleton: Story = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: {} as any,
+  render: () => <OrganigramLoading />,
+  parameters: { layout: "fullscreen" },
 };

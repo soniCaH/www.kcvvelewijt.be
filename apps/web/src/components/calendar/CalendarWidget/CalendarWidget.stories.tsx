@@ -6,6 +6,7 @@ import type {
   CalendarEvent,
   CalendarTeamInfo,
 } from "@/app/(main)/kalender/utils";
+import CalendarLoading from "@/app/(main)/kalender/loading";
 
 const kcvv = {
   id: 1,
@@ -116,4 +117,9 @@ export const SubscribePanelOpen: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: /Abonneer/i }));
   },
+};
+
+export const RouteSkeleton: Story = {
+  render: () => <CalendarLoading />,
+  parameters: { layout: "fullscreen" },
 };
