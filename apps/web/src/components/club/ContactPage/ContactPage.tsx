@@ -141,7 +141,7 @@ export function ContactPage() {
             </div>
           </div>
 
-          {/* Map embed — consent-gated to avoid loading third-party trackers before user approval */}
+          {/* Map embed — OpenStreetMap, no consent needed */}
           <MapEmbed />
         </div>
 

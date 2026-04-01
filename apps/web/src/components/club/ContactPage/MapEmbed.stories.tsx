@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Consent-gated Google Maps embed for the club address (Driesstraat 30, 1982 Elewijt). Shows a privacy notice and a \u201cLaad kaart\u201d button before loading the iframe.",
+          "OpenStreetMap embed for the club address (Driesstraat 30, 1982 Elewijt). No consent gate needed — OSM does not track users.",
       },
     },
   },
@@ -19,8 +19,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Default state — privacy consent gate.
- * Click "Laad kaart" to load the Google Maps iframe.
- */
-export const ConsentGate: Story = {};
+export const Default: Story = {};
