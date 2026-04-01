@@ -11,6 +11,8 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
@@ -162,6 +164,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Ploegen", url: `${SITE_CONFIG.siteUrl}/ploegen` },
+          { name: team.name, url: `${SITE_CONFIG.siteUrl}/ploegen/${slug}` },
+        ])}
+      />
       <TeamDetail
         header={{
           name: team.name,

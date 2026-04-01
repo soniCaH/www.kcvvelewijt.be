@@ -9,6 +9,9 @@
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { Effect } from "effect";
 import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
@@ -58,35 +61,46 @@ export default async function OrganigramPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-green-main via-green-hover to-green-dark-hover text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1
-            className="text-3xl md:text-5xl font-bold mb-4"
-            style={{
-              fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-            }}
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: "Organigram", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
+        ])}
+      />
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-br from-green-main via-green-hover to-green-dark-hover text-white py-12 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h1
+              className="text-3xl md:text-5xl font-bold mb-4"
+              style={{
+                fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+              }}
+            >
+              Clubstructuur & Hulp
+            </h1>
+            <p className="text-lg md:text-xl text-white/90 max-w-3xl">
+              Ontdek wie er bij KCVV werkt en vind snel de juiste contactpersoon
+              voor jouw vraag.
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <Suspense
+            fallback={<div className="text-center py-12">Laden...</div>}
           >
-            Clubstructuur & Hulp
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-3xl">
-            Ontdek wie er bij KCVV werkt en vind snel de juiste contactpersoon
-            voor jouw vraag.
-          </p>
+            <UnifiedOrganigramClient
+              members={members}
+              responsibilityPaths={responsibilityPaths}
+            />
+          </Suspense>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Suspense fallback={<div className="text-center py-12">Laden...</div>}>
-          <UnifiedOrganigramClient
-            members={members}
-            responsibilityPaths={responsibilityPaths}
-          />
-        </Suspense>
-      </div>
-    </div>
+    </>
   );
 }
 

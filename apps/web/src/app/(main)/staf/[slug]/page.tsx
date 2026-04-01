@@ -13,6 +13,8 @@ import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import Link from "next/link";
 import { Network, CircleHelp } from "lucide-react";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
@@ -94,6 +96,14 @@ export default async function StafPage({ params }: StaffPageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: "Staf", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
+          { name: fullName, url: `${SITE_CONFIG.siteUrl}/staf/${slug}` },
+        ])}
+      />
       {/* Hero section */}
       <section className="bg-gradient-to-br from-kcvv-gray-light to-white">
         <div className="max-w-4xl mx-auto px-4 py-12 flex flex-col sm:flex-row items-center sm:items-start gap-8">

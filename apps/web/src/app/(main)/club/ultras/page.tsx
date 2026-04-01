@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageTitle } from "@/components/layout";
 
 export const metadata: Metadata = {
@@ -17,6 +20,13 @@ export const metadata: Metadata = {
 export default function UltrasPage() {
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: "Ultras", url: `${SITE_CONFIG.siteUrl}/club/ultras` },
+        ])}
+      />
       <PageTitle title="KCVV Ultras" />
 
       {/* Hero image */}

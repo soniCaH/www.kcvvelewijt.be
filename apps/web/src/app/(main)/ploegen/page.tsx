@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import { PageHero } from "@/components/design-system/PageHero";
 import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
@@ -34,76 +37,87 @@ export default async function TeamsPage() {
   const { aTeam, bTeam, youthByDivision } = groupTeamsForLanding(teams);
 
   return (
-    <SectionStack
-      sections={[
-        aTeam && {
-          bg: "kcvv-black",
-          paddingTop: "pt-0",
-          paddingBottom: "pb-0",
-          content: (
-            <PageHero
-              image={aTeam.teamImageUrl ?? "/images/hero-club.jpg"}
-              imageAlt={`Team foto ${aTeam.name}`}
-              label="Eerste ploeg"
-              headline={(() => {
-                const parts = aTeam.name.split(/\s+/);
-                if (parts.length >= 2) {
-                  return (
-                    <>
-                      {parts[0]}
-                      <br />
-                      <span className="text-kcvv-green">{parts[1]}</span>
-                      {parts.length > 2 ? ` ${parts.slice(2).join(" ")}` : ""}
-                    </>
-                  );
-                }
-                return aTeam.name;
-              })()}
-              body={aTeam.divisionFull ?? ""}
-              cta={{
-                label: "Bekijk de A-ploeg",
-                href: `/ploegen/${aTeam.slug}`,
-              }}
-            />
-          ),
-          transition: {
-            type: "diagonal" as const,
-            direction: "right" as const,
-            overlap: "full" as const,
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Ploegen", url: `${SITE_CONFIG.siteUrl}/ploegen` },
+        ])}
+      />
+      <SectionStack
+        sections={[
+          aTeam && {
+            bg: "kcvv-black",
+            paddingTop: "pt-0",
+            paddingBottom: "pb-0",
+            content: (
+              <PageHero
+                image={aTeam.teamImageUrl ?? "/images/hero-club.jpg"}
+                imageAlt={`Team foto ${aTeam.name}`}
+                label="Eerste ploeg"
+                headline={(() => {
+                  const parts = aTeam.name.split(/\s+/);
+                  if (parts.length >= 2) {
+                    return (
+                      <>
+                        {parts[0]}
+                        <br />
+                        <span className="text-kcvv-green">{parts[1]}</span>
+                        {parts.length > 2 ? ` ${parts.slice(2).join(" ")}` : ""}
+                      </>
+                    );
+                  }
+                  return aTeam.name;
+                })()}
+                body={aTeam.divisionFull ?? ""}
+                cta={{
+                  label: "Bekijk de A-ploeg",
+                  href: `/ploegen/${aTeam.slug}`,
+                }}
+              />
+            ),
+            transition: {
+              type: "diagonal" as const,
+              direction: "right" as const,
+              overlap: "full" as const,
+            },
           },
-        },
-        bTeam && {
-          bg: "gray-100",
-          paddingTop: "pt-20",
-          paddingBottom: "pb-20",
-          content: <TeamFeaturedCard team={bTeam} label="Tweede ploeg" />,
-          transition: { type: "diagonal" as const, direction: "left" as const },
-        },
-        {
-          bg: "kcvv-black",
-          paddingTop: "pt-20",
-          paddingBottom: "pb-20",
-          content: <YouthTeamsDirectory divisions={youthByDivision} />,
-          transition: {
-            type: "diagonal" as const,
-            direction: "right" as const,
+          bTeam && {
+            bg: "gray-100",
+            paddingTop: "pt-20",
+            paddingBottom: "pb-20",
+            content: <TeamFeaturedCard team={bTeam} label="Tweede ploeg" />,
+            transition: {
+              type: "diagonal" as const,
+              direction: "left" as const,
+            },
           },
-        },
-        {
-          bg: "gray-100",
-          paddingTop: "pt-16",
-          paddingBottom: "pb-16",
-          content: (
-            <SectionCta
-              heading="Aansluiten bij KCVV Elewijt?"
-              body="Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."
-              buttonLabel="Meer info"
-              buttonHref="/club/aansluiten"
-            />
-          ),
-        },
-      ]}
-    />
+          {
+            bg: "kcvv-black",
+            paddingTop: "pt-20",
+            paddingBottom: "pb-20",
+            content: <YouthTeamsDirectory divisions={youthByDivision} />,
+            transition: {
+              type: "diagonal" as const,
+              direction: "right" as const,
+            },
+          },
+          {
+            bg: "gray-100",
+            paddingTop: "pt-16",
+            paddingBottom: "pb-16",
+            content: (
+              <SectionCta
+                heading="Aansluiten bij KCVV Elewijt?"
+                body="Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."
+                buttonLabel="Meer info"
+                buttonHref="/club/aansluiten"
+              />
+            ),
+          },
+        ]}
+      />
+    </>
   );
 }
 

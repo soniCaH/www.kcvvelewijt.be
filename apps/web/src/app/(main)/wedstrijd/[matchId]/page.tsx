@@ -10,6 +10,8 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { MatchDetail } from "@kcvv/api-contract";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { MatchDetailView } from "@/components/match/MatchDetailView";
 import {
   transformHomeTeam,
@@ -136,8 +138,20 @@ export default async function MatchPage({
       ? `${from}${fromTab && validFromTabs.includes(fromTab) ? `?tab=${fromTab}` : ""}`
       : null;
 
+  const matchLabel = formatMatchTitle(match);
+
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Kalender", url: `${SITE_CONFIG.siteUrl}/kalender` },
+          {
+            name: matchLabel,
+            url: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}`,
+          },
+        ])}
+      />
       <MatchDetailView
         homeTeam={homeTeam}
         awayTeam={awayTeam}
