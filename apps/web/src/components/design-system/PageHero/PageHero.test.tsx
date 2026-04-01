@@ -80,4 +80,19 @@ describe("PageHero", () => {
     const accentBar = container.querySelector(".bg-kcvv-green");
     expect(accentBar).toBeInTheDocument();
   });
+
+  it("renders with default min-h-[60vh] when no size prop", () => {
+    const { container } = render(<PageHero {...defaultProps} />);
+    const content = container.querySelector(".min-h-\\[60vh\\]");
+    expect(content).toBeInTheDocument();
+  });
+
+  it("renders with min-h-[35vh] when size is compact", () => {
+    const { container } = render(<PageHero {...defaultProps} size="compact" />);
+    const content = container.querySelector(".min-h-\\[35vh\\]");
+    expect(content).toBeInTheDocument();
+    expect(
+      container.querySelector(".min-h-\\[60vh\\]"),
+    ).not.toBeInTheDocument();
+  });
 });
