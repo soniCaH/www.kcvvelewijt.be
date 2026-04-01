@@ -58,7 +58,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             <ul className="flex flex-col gap-2.5">
               {clubLinks.map((item) => (
                 <li key={item.label}>
-                  {"external" in item && item.external ? (
+                  {"external" in item ? (
                     <a
                       href={item.href}
                       target="_blank"
