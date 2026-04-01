@@ -1,0 +1,35 @@
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  height: 2px;
+  width: 0;
+  background: var(--color-kcvv-green-bright);
+  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+  left: 0;
+}
+
+.dropdown-trigger::after {
+  content: "";
+  display: inline-block;
+  margin-left: 9px;
+  width: 6px;
+  height: 4px;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 4'%3E%3Cpath transform='translate(-586.156 -1047.28)' fill='%23fff' d='M586.171,1048l0.708-.71,2.828,2.83-0.707.71Zm4.95-.71,0.707,0.71L589,1050.83l-0.707-.71Z'/%3E%3C/svg%3E");
+  background-size: 6px 4px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  position: relative;
+  top: -2px;
+}

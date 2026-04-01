@@ -19,6 +19,7 @@ import {
   isMenuItemActive,
 } from "../menuItems";
 import type { MenuItem } from "../menuItems";
+import "./Navigation.css";
 
 export interface NavigationProps {
   youthTeams?: TeamNavVM[];
@@ -68,109 +69,67 @@ export const Navigation = ({
   };
 
   return (
-    <>
-      {/* Styles for navigation hover effects - using dangerouslySetInnerHTML for Storybook compatibility */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .nav-link {
-              position: relative;
-            }
-            .nav-link::after {
-              content: "";
-              display: block;
-              position: absolute;
-              bottom: 0;
-              left: 50%;
-              height: 2px;
-              width: 0;
-              background: var(--color-kcvv-green-bright);
-              transition: width 0.3s ease 0s, left 0.3s ease 0s;
-            }
-            .nav-link:hover::after,
-            .nav-link.active::after {
-              width: 100%;
-              left: 0;
-            }
-            .dropdown-trigger::after {
-              content: "";
-              display: inline-block;
-              margin-left: 9px;
-              width: 6px;
-              height: 4px;
-              background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 4'%3E%3Cpath transform='translate(-586.156 -1047.28)' fill='%23fff' d='M586.171,1048l0.708-.71,2.828,2.83-0.707.71Zm4.95-.71,0.707,0.71L589,1050.83l-0.707-.71Z'/%3E%3C/svg%3E");
-              background-size: 6px 4px;
-              background-repeat: no-repeat;
-              background-position: center center;
-              position: relative;
-              top: -2px;
-            }
-          `,
-        }}
-      />
+    <nav className={cn("flex grow max-w-[90%]", className)}>
+      <ul className="flex items-center justify-between grow flex-nowrap list-none m-0 p-0">
+        {menuItems.map((item, index) => {
+          const active = isActive(item.href) || hasActiveChild(item);
+          const hasDropdown = item.children && item.children.length > 0;
+          // Align dropdown to right for last 2 items to prevent overflow
+          const isNearEnd = index >= menuItems.length - 2;
 
-      <nav className={cn("flex grow max-w-[90%]", className)}>
-        <ul className="flex items-center justify-between grow flex-nowrap list-none m-0 p-0">
-          {menuItems.map((item, index) => {
-            const active = isActive(item.href) || hasActiveChild(item);
-            const hasDropdown = item.children && item.children.length > 0;
-            // Align dropdown to right for last 2 items to prevent overflow
-            const isNearEnd = index >= menuItems.length - 2;
-
-            return (
-              <li
-                key={item.href}
-                className="inline-block relative"
-                onMouseEnter={() => hasDropdown && setOpenDropdown(item.href)}
-                onMouseLeave={() => setOpenDropdown(null)}
+          return (
+            <li
+              key={item.href}
+              className="inline-block relative"
+              onMouseEnter={() => hasDropdown && setOpenDropdown(item.href)}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <Link
+                href={item.href}
+                className={cn(
+                  "text-[0.7rem] xl:text-[0.875rem] uppercase font-bold text-white whitespace-nowrap no-underline py-2 px-2 transition-all duration-300",
+                  hasDropdown ? "dropdown-trigger" : "nav-link",
+                  active && !hasDropdown && "active",
+                )}
               >
-                <Link
-                  href={item.href}
+                {item.label}
+              </Link>
+
+              {/* Dropdown Menu */}
+              {hasDropdown && openDropdown === item.href && (
+                <div
                   className={cn(
-                    "text-[0.7rem] xl:text-[0.875rem] uppercase font-bold text-white whitespace-nowrap no-underline py-2 px-2 transition-all duration-300",
-                    hasDropdown ? "dropdown-trigger" : "nav-link",
-                    active && !hasDropdown && "active",
+                    "absolute top-full mt-0 min-w-[200px] bg-kcvv-black border border-gray-700 z-10",
+                    isNearEnd ? "right-0" : "left-0",
                   )}
                 >
-                  {item.label}
-                </Link>
+                  <ul className="list-none m-0 p-0">
+                    {item.children?.map((child) => {
+                      const childActive = isActive(child.href);
 
-                {/* Dropdown Menu */}
-                {hasDropdown && openDropdown === item.href && (
-                  <div
-                    className={cn(
-                      "absolute top-full mt-0 min-w-[200px] bg-kcvv-black border border-gray-700 z-10",
-                      isNearEnd ? "right-0" : "left-0",
-                    )}
-                  >
-                    <ul className="list-none m-0 p-0">
-                      {item.children?.map((child) => {
-                        const childActive = isActive(child.href);
-
-                        return (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              className={cn(
-                                "block px-7 py-3 text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 text-left",
-                                childActive
-                                  ? "text-kcvv-green-bright"
-                                  : "text-white hover:text-kcvv-green-bright",
-                              )}
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </>
+                      return (
+                        <li key={child.href}>
+                          <Link
+                            href={child.href}
+                            className={cn(
+                              "block px-7 py-3 text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 text-left",
+                              childActive
+                                ? "text-kcvv-green-bright"
+                                : "text-white hover:text-kcvv-green-bright",
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 };
