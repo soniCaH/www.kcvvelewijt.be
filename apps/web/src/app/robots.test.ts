@@ -41,19 +41,8 @@ describe("robots.ts", () => {
     process.env.VERCEL_ENV = "production";
     const { default: robots } = await import("./robots");
     const result = robots();
-    const rules = result.rules;
+    const rules = result.rules as { allow: string[] };
 
-    // allow can be a string or array — normalize to array
-    const allowList = Array.isArray(rules)
-      ? rules.flatMap((r) =>
-          Array.isArray(r.allow) ? r.allow : r.allow ? [r.allow] : [],
-        )
-      : Array.isArray(rules.allow)
-        ? rules.allow
-        : rules.allow
-          ? [rules.allow]
-          : [];
-
-    expect(allowList).toContain("/llms.txt");
+    expect(rules.allow).toContain("/llms.txt");
   });
 });
