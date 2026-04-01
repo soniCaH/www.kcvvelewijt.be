@@ -1,47 +1,26 @@
+import type {
+  MergeLeafTypes,
+  NewsArticle,
+  OrganizationLeaf,
+  SportsClubLeaf,
+  WithContext,
+} from "schema-dts";
+
 import { SITE_CONFIG } from "@/lib/constants";
 
 const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
 
-interface SportsClubJsonLd {
-  "@context": string;
-  "@type": string[];
-  name: string;
-  url: string;
-  logo: string;
-  foundingDate: string;
-  sameAs: string[];
-  sport: string;
-  address: PostalAddress;
-}
-
-interface PostalAddress {
-  "@type": "PostalAddress";
-  streetAddress: string;
-  addressLocality: string;
-  postalCode: string;
-  addressCountry: string;
-}
-
-interface PublisherJsonLd {
-  "@type": "Organization";
-  name: string;
-  logo: {
-    "@type": "ImageObject";
-    url: string;
-  };
-}
-
-interface NewsArticleJsonLd {
-  "@context": string;
-  "@type": "NewsArticle";
-  headline: string;
-  datePublished: string;
-  dateModified?: string;
-  author: { "@type": "Organization"; name: string };
-  image?: string;
-  publisher: PublisherJsonLd;
-  url: string;
-}
+/**
+ * schema-dts models SportsClub under LocalBusiness, not SportsOrganization,
+ * so `sport` is absent from SportsClubLeaf. Google Rich Results accept it
+ * on SportsClub, so we add it via intersection.
+ *
+ * MergeLeafTypes produces `@type: ["SportsClub", "Organization"]` — the
+ * JSON-LD multi-type array that Google explicitly supports.
+ */
+type SportsClubOrganization = MergeLeafTypes<
+  [SportsClubLeaf, OrganizationLeaf]
+> & { sport?: string };
 
 export interface NewsArticleInput {
   headline: string;
@@ -52,7 +31,7 @@ export interface NewsArticleInput {
   url: string;
 }
 
-export function buildSportsClubJsonLd(): SportsClubJsonLd {
+export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
   return {
     "@context": "https://schema.org",
     "@type": ["SportsClub", "Organization"],
@@ -74,7 +53,7 @@ export function buildSportsClubJsonLd(): SportsClubJsonLd {
 
 export function buildNewsArticleJsonLd(
   input: NewsArticleInput,
-): NewsArticleJsonLd {
+): WithContext<NewsArticle> {
   return {
     "@context": "https://schema.org",
     "@type": "NewsArticle",

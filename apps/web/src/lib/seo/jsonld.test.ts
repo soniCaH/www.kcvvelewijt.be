@@ -37,9 +37,14 @@ describe("buildSportsClubJsonLd", () => {
     const result = buildSportsClubJsonLd();
 
     expect(result.address).toBeDefined();
-    expect(result.address["@type"]).toBe("PostalAddress");
-    expect(result.address.addressLocality).toBeDefined();
-    expect(result.address.addressCountry).toBe("BE");
+    const address = result.address as {
+      "@type": string;
+      addressLocality: string;
+      addressCountry: string;
+    };
+    expect(address["@type"]).toBe("PostalAddress");
+    expect(address.addressLocality).toBeDefined();
+    expect(address.addressCountry).toBe("BE");
   });
 });
 
@@ -76,10 +81,15 @@ describe("buildNewsArticleJsonLd", () => {
   it("includes publisher with logo", () => {
     const result = buildNewsArticleJsonLd(input);
 
-    expect(result.publisher["@type"]).toBe("Organization");
-    expect(result.publisher.name).toBe("KCVV Elewijt");
-    expect(result.publisher.logo).toBeDefined();
-    expect(result.publisher.logo["@type"]).toBe("ImageObject");
+    const publisher = result.publisher as {
+      "@type": string;
+      name: string;
+      logo: { "@type": string };
+    };
+    expect(publisher["@type"]).toBe("Organization");
+    expect(publisher.name).toBe("KCVV Elewijt");
+    expect(publisher.logo).toBeDefined();
+    expect(publisher.logo["@type"]).toBe("ImageObject");
   });
 
   it("includes image as absolute URL", () => {

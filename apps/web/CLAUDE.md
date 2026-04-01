@@ -81,9 +81,21 @@ Every new user-facing feature or page **must** include an analytics section. Bef
 - [ ] **No PII**: no email addresses, phone numbers, names, or raw internal IDs in event parameters (hash internal IDs via `hashMemberId`)
 
 When writing a PRD for a new feature, always include an **Analytics** section with:
+
 - Event taxonomy table (event name, trigger, parameters)
 - Which existing GA4 explorations need updating
 - Whether new custom dimensions are needed, and which GTM DLVs and GA4 Event tag parameter mappings are required for any new event parameters
+
+## SEO & Structured Data Checklist
+
+When adding or updating a page route, verify:
+
+- [ ] **Metadata**: `generateMetadata` exports title, description, and Open Graph fields appropriate for the page
+- [ ] **Canonical URL**: page has a canonical URL (handled by `metadataBase` for most routes)
+- [ ] **JSON-LD**: if the page represents a distinct Schema.org entity (article, event, person, organization, etc.), add or update a `<JsonLd>` block with the appropriate `schema-dts` type via a builder in `src/lib/seo/jsonld.ts`
+- [ ] **Validate**: test new/changed JSON-LD output with [Google Rich Results Test](https://search.google.com/test/rich-results) or [Schema.org Validator](https://validator.schema.org/)
+
+Structured data builders live in `src/lib/seo/jsonld.ts` and use `schema-dts` types for compile-time Schema.org validation. The generic `<JsonLd>` component (`src/components/seo/JsonLd.tsx`) renders any `WithContext<T>` to a `<script type="application/ld+json">` tag.
 
 ## Analytics & Instrumentation
 

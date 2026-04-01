@@ -149,16 +149,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <>
-      <JsonLd
-        data={buildNewsArticleJsonLd({
-          headline: article.title,
-          datePublished: article.publishedAt ?? new Date().toISOString(),
-          dateModified: article.updatedAt ?? article.publishedAt ?? undefined,
-          author: "KCVV Elewijt",
-          image: article.coverImageUrl,
-          url: articleUrl,
-        })}
-      />
+      {article.publishedAt && (
+        <JsonLd
+          data={buildNewsArticleJsonLd({
+            headline: article.title,
+            datePublished: article.publishedAt,
+            dateModified: article.updatedAt ?? undefined,
+            author: "KCVV Elewijt",
+            image: article.coverImageUrl,
+            url: articleUrl,
+          })}
+        />
+      )}
       <ArticleHeader
         title={article.title}
         imageUrl={article.coverImageUrl}
