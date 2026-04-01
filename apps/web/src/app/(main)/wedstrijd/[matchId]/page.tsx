@@ -11,7 +11,10 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import {
+  buildBreadcrumbJsonLd,
+  buildSportsEventJsonLd,
+} from "@/lib/seo/jsonld";
 import { MatchDetailView } from "@/components/match/MatchDetailView";
 import {
   transformHomeTeam,
@@ -151,6 +154,17 @@ export default async function MatchPage({
             url: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}`,
           },
         ])}
+      />
+      <JsonLd
+        data={buildSportsEventJsonLd({
+          name: `${match.home_team.name} vs ${match.away_team.name}`,
+          startDate: match.date.toISOString(),
+          homeTeamName: match.home_team.name,
+          awayTeamName: match.away_team.name,
+          status: match.status,
+          url: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}`,
+          venue: match.venue,
+        })}
       />
       <MatchDetailView
         homeTeam={homeTeam}

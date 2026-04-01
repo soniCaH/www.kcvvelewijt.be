@@ -4,8 +4,17 @@ import {
   buildSportsClubJsonLd,
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
+  buildPersonJsonLd,
+  buildSportsTeamJsonLd,
+  buildSportsEventJsonLd,
   type NewsArticleInput,
+  type PersonInput,
+  type SportsTeamInput,
+  type SportsEventInput,
 } from "./jsonld";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON-LD tests assert on runtime shape, not compile-time types
+type AnyJsonLd = Record<string, any>;
 
 describe("buildSportsClubJsonLd", () => {
   it("returns a valid SportsClub + Organization schema", () => {
@@ -175,5 +184,149 @@ describe("buildBreadcrumbJsonLd", () => {
     }>;
     expect(items).toHaveLength(1);
     expect(items[0].position).toBe(1);
+  });
+});
+
+describe("buildPersonJsonLd", () => {
+  const playerInput: PersonInput = {
+    name: "Jan Janssen",
+    url: "https://www.kcvvelewijt.be/spelers/123",
+    jobTitle: "Aanvaller",
+    image: "https://cdn.sanity.io/images/test/player.webp",
+  };
+
+  it("returns a valid Person schema", () => {
+    const result = buildPersonJsonLd(playerInput) as AnyJsonLd;
+
+    expect(result["@context"]).toBe("https://schema.org");
+    expect(result["@type"]).toBe("Person");
+    expect(result.name).toBe("Jan Janssen");
+    expect(result.url).toBe("https://www.kcvvelewijt.be/spelers/123");
+    expect(result.jobTitle).toBe("Aanvaller");
+    expect(result.image).toBe("https://cdn.sanity.io/images/test/player.webp");
+  });
+
+  it("includes affiliation as Organization stub", () => {
+    const result = buildPersonJsonLd(playerInput) as AnyJsonLd;
+
+    expect(result.affiliation["@type"]).toBe("Organization");
+    expect(result.affiliation.name).toBe("KCVV Elewijt");
+  });
+
+  it("handles missing optional fields", () => {
+    const minimal: PersonInput = {
+      name: "Piet Pieters",
+      url: "https://www.kcvvelewijt.be/staf/456",
+    };
+    const result = buildPersonJsonLd(minimal) as AnyJsonLd;
+
+    expect(result.name).toBe("Piet Pieters");
+    expect(result.image).toBeUndefined();
+    expect(result.jobTitle).toBeUndefined();
+  });
+});
+
+describe("buildSportsTeamJsonLd", () => {
+  const teamInput: SportsTeamInput = {
+    name: "KCVV Elewijt A",
+    url: "https://www.kcvvelewijt.be/ploegen/a-ploeg",
+  };
+
+  it("returns a valid SportsTeam schema", () => {
+    const result = buildSportsTeamJsonLd(teamInput) as AnyJsonLd;
+
+    expect(result["@context"]).toBe("https://schema.org");
+    expect(result["@type"]).toBe("SportsTeam");
+    expect(result.name).toBe("KCVV Elewijt A");
+    expect(result.url).toBe("https://www.kcvvelewijt.be/ploegen/a-ploeg");
+    expect(result.sport).toBe("Soccer");
+  });
+
+  it("includes memberOf as Organization stub", () => {
+    const result = buildSportsTeamJsonLd(teamInput) as AnyJsonLd;
+
+    expect(result.memberOf["@type"]).toBe("Organization");
+    expect(result.memberOf.name).toBe("KCVV Elewijt");
+  });
+});
+
+describe("buildSportsEventJsonLd", () => {
+  const matchInput: SportsEventInput = {
+    name: "KCVV Elewijt vs FC Opponent",
+    startDate: "2026-03-15T15:00:00+01:00",
+    homeTeamName: "KCVV Elewijt",
+    awayTeamName: "FC Opponent",
+    status: "scheduled",
+    url: "https://www.kcvvelewijt.be/wedstrijd/12345",
+  };
+
+  it("returns a valid SportsEvent schema", () => {
+    const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
+
+    expect(result["@context"]).toBe("https://schema.org");
+    expect(result["@type"]).toBe("SportsEvent");
+    expect(result.name).toBe("KCVV Elewijt vs FC Opponent");
+    expect(result.startDate).toBe("2026-03-15T15:00:00+01:00");
+    expect(result.url).toBe("https://www.kcvvelewijt.be/wedstrijd/12345");
+  });
+
+  it("includes homeTeam and awayTeam as SportsTeam stubs", () => {
+    const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
+
+    expect(result.homeTeam["@type"]).toBe("SportsTeam");
+    expect(result.homeTeam.name).toBe("KCVV Elewijt");
+    expect(result.awayTeam["@type"]).toBe("SportsTeam");
+    expect(result.awayTeam.name).toBe("FC Opponent");
+  });
+
+  it("maps 'scheduled' status to EventScheduled", () => {
+    const result = buildSportsEventJsonLd({
+      ...matchInput,
+      status: "scheduled",
+    }) as AnyJsonLd;
+    expect(result.eventStatus).toBe("https://schema.org/EventScheduled");
+  });
+
+  it("maps 'finished' and 'forfeited' to EventScheduled", () => {
+    const finished = buildSportsEventJsonLd({
+      ...matchInput,
+      status: "finished",
+    }) as AnyJsonLd;
+    expect(finished.eventStatus).toBe("https://schema.org/EventScheduled");
+
+    const forfeited = buildSportsEventJsonLd({
+      ...matchInput,
+      status: "forfeited",
+    }) as AnyJsonLd;
+    expect(forfeited.eventStatus).toBe("https://schema.org/EventScheduled");
+  });
+
+  it("maps 'postponed' and 'stopped' to EventPostponed", () => {
+    const postponed = buildSportsEventJsonLd({
+      ...matchInput,
+      status: "postponed",
+    }) as AnyJsonLd;
+    expect(postponed.eventStatus).toBe("https://schema.org/EventPostponed");
+
+    const stopped = buildSportsEventJsonLd({
+      ...matchInput,
+      status: "stopped",
+    }) as AnyJsonLd;
+    expect(stopped.eventStatus).toBe("https://schema.org/EventPostponed");
+  });
+
+  it("includes location when venue is provided", () => {
+    const result = buildSportsEventJsonLd({
+      ...matchInput,
+      venue: "Driesstraat 39, Elewijt",
+    }) as AnyJsonLd;
+
+    expect(result.location["@type"]).toBe("Place");
+    expect(result.location.name).toBe("Driesstraat 39, Elewijt");
+  });
+
+  it("omits location when venue is not provided", () => {
+    const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
+    expect(result.location).toBeUndefined();
   });
 });
