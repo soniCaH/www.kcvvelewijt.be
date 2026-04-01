@@ -17,6 +17,8 @@ import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
+import { PageHero } from "@/components/design-system/PageHero";
+import { Spinner } from "@/components/design-system/Spinner";
 
 export const metadata: Metadata = {
   title: "Organigram & Hulp | KCVV Elewijt",
@@ -71,28 +73,22 @@ export default async function OrganigramPage() {
         ])}
       />
       <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-br from-green-main via-green-hover to-green-dark-hover text-white py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <h1
-              className="text-3xl md:text-5xl font-bold mb-4"
-              style={{
-                fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-              }}
-            >
-              Clubstructuur & Hulp
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-3xl">
-              Ontdek wie er bij KCVV werkt en vind snel de juiste contactpersoon
-              voor jouw vraag.
-            </p>
-          </div>
-        </div>
+        <PageHero
+          image="/images/youth-trainers.jpg"
+          imageAlt="KCVV clubstructuur"
+          label="De club"
+          headline="Clubstructuur & Hulp"
+          body="Ontdek de structuur van KCVV Elewijt en vind snel de juiste persoon."
+        />
 
-        {/* Main Content */}
+        {/* Main Content — max-w-7xl is intentional: the D3 chart and card hierarchy need 1280px, not the 1120px of max-w-inner-lg */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           <Suspense
-            fallback={<div className="text-center py-12">Laden...</div>}
+            fallback={
+              <div className="flex justify-center py-12">
+                <Spinner size="lg" label="Laden..." />
+              </div>
+            }
           >
             <UnifiedOrganigramClient
               members={members}
