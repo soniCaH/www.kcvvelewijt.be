@@ -12,6 +12,7 @@ describe("SearchFilters", () => {
     all: 10,
     article: 5,
     player: 3,
+    staff: 0,
     team: 2,
   };
 
@@ -59,7 +60,7 @@ describe("SearchFilters", () => {
 
       // Verify tab structure
       const tabs = screen.getAllByRole("tab");
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
     });
 
     it("should display correct labels for each tab", () => {
@@ -103,6 +104,7 @@ describe("SearchFilters", () => {
         all: 0,
         article: 0,
         player: 0,
+        staff: 0,
         team: 0,
       };
 
@@ -116,7 +118,7 @@ describe("SearchFilters", () => {
 
       // All tabs should still render
       const tabs = screen.getAllByRole("tab");
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
     });
   });
 
@@ -298,6 +300,7 @@ describe("SearchFilters", () => {
         all: 20,
         article: 10,
         player: 7,
+        staff: 0,
         team: 3,
       };
 

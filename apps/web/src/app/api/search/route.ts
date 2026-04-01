@@ -9,8 +9,10 @@ import { unstable_cache } from "next/cache";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
+import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
+import type { OrgChartMember } from "@/types/organigram";
 import type { SearchResult } from "@/types/search";
 
 export const runtime = "nodejs";
@@ -122,6 +124,43 @@ const searchPlayers = (query: string) =>
   });
 
 /**
+ * Search across staff members by name
+ */
+const searchStaff = (query: string) =>
+  Effect.gen(function* () {
+    const repo = yield* StaffRepository;
+    const allNodes = yield* repo.findAll();
+
+    const queryLower = query.toLowerCase();
+
+    const routableMembers = allNodes.flatMap((node) =>
+      node.members
+        .filter(
+          (m): m is OrgChartMember & { href: string; name: string } =>
+            !!m.href && !!m.name && m.name.trim() !== "",
+        )
+        .map((m) => ({ member: m, roleCode: node.roleCode })),
+    );
+
+    const filtered = routableMembers.filter((entry) =>
+      entry.member.name.toLowerCase().includes(queryLower),
+    );
+
+    debugLog(`[Search API] Found ${filtered.length} staff matches`);
+
+    return filtered.map(
+      ({ member, roleCode }): SearchResult => ({
+        id: member.id,
+        type: "staff",
+        title: member.name,
+        description: roleCode,
+        url: member.href,
+        imageUrl: member.imageUrl,
+      }),
+    );
+  });
+
+/**
  * Search across teams by name
  */
 const searchTeams = (query: string) =>
@@ -225,7 +264,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Normalize and validate type against whitelist
-  const allowedTypes = ["article", "player", "team"];
+  const allowedTypes = ["article", "player", "staff", "team"];
   const type = rawType?.toLowerCase().trim();
   if (type && !allowedTypes.includes(type)) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
@@ -252,13 +291,14 @@ export async function GET(request: NextRequest) {
         const players = yield* searchPlayers(query);
         debugLog(`[Search API] Found ${players.length} players`);
         results.push(...players);
+      }
 
-        // TODO: Add staff search once staff detail pages are implemented
-        // Staff pages don't exist yet, so we're excluding them from search
-        // console.log("[Search API] Searching staff...");
-        // const staff = yield* searchStaff(query);
-        // console.log(`[Search API] Found ${staff.length} staff`);
-        // results.push(...staff);
+      // Search staff
+      if (!type || type === "staff") {
+        debugLog("[Search API] Searching staff...");
+        const staff = yield* searchStaff(query);
+        debugLog(`[Search API] Found ${staff.length} staff`);
+        results.push(...staff);
       }
 
       // Search teams

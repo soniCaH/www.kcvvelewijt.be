@@ -2,7 +2,7 @@
  * Shared search types used by both API and UI
  */
 
-export type SearchResultType = "article" | "player" | "team";
+export type SearchResultType = "article" | "player" | "staff" | "team";
 
 export interface SearchResult {
   id: string;

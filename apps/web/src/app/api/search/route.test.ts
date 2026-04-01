@@ -273,6 +273,139 @@ describe("GET /api/search", () => {
     });
   });
 
+  describe("Staff Search", () => {
+    it("should return staff results matching query by name", async () => {
+      // Sanity returns organigramNode data for staff, player data for players, etc.
+      // The mock returns the same data for all fetch calls, so we set up
+      // organigram nodes with members that match the search query.
+      mockSanityFetch.mockResolvedValue([
+        {
+          _id: "node-1",
+          title: "Voorzitter",
+          roleCode: "PRES",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [
+            {
+              id: "staff-1",
+              name: "Jan Janssens",
+              imageUrl: "https://cdn.sanity.io/jan.webp",
+              email: null,
+              phone: null,
+              psdId: "123",
+            },
+          ],
+        },
+        {
+          _id: "node-2",
+          title: "Secretaris",
+          roleCode: "SEC",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [
+            {
+              id: "staff-2",
+              name: "Piet Pieters",
+              imageUrl: "https://cdn.sanity.io/piet.webp",
+              email: null,
+              phone: null,
+              psdId: "456",
+            },
+          ],
+        },
+      ]);
+
+      const request = createRequest("/api/search?q=jan&type=staff");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.count).toBe(1);
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          type: "staff",
+          title: "Jan Janssens",
+          description: "PRES",
+          url: "/staf/123",
+          imageUrl: "https://cdn.sanity.io/jan.webp",
+        }),
+      ]);
+    });
+
+    it("should exclude staff members without href (no psdId)", async () => {
+      mockSanityFetch.mockResolvedValue([
+        {
+          _id: "node-1",
+          title: "Vrijwilliger",
+          roleCode: null,
+          department: "algemeen",
+          parentId: null,
+          description: null,
+          members: [
+            {
+              id: "staff-3",
+              name: "KarelAnsen",
+              imageUrl: null,
+              email: null,
+              phone: null,
+              psdId: null,
+            },
+          ],
+        },
+      ]);
+
+      const request = createRequest("/api/search?q=karel&type=staff");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.count).toBe(0);
+      expect(body.results).toEqual([]);
+    });
+
+    it("should exclude staff members without a name", async () => {
+      mockSanityFetch.mockResolvedValue([
+        {
+          _id: "node-1",
+          title: "Vacant",
+          roleCode: "TREAS",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [
+            {
+              id: "staff-4",
+              name: "  ",
+              imageUrl: null,
+              email: null,
+              phone: null,
+              psdId: "789",
+            },
+          ],
+        },
+      ]);
+
+      const request = createRequest("/api/search?q=vacant&type=staff");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.count).toBe(0);
+    });
+
+    it("should accept type=staff and return 200", async () => {
+      const request = createRequest("/api/search?q=test&type=staff");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.query).toBe("test");
+      expect(Array.isArray(body.results)).toBe(true);
+    });
+  });
+
   describe("Error Handling", () => {
     it("should return 500 when Sanity fetch throws", async () => {
       mockSanityFetch.mockRejectedValueOnce(new Error("boom"));
