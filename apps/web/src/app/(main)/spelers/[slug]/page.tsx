@@ -114,15 +114,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     }),
   );
 
-  // Graceful degradation: if the player has no stats endpoint (404), show
-  // the profile without stats. Other errors (5xx, timeouts) propagate to
-  // the error boundary.
+  // Graceful degradation: if the BFF has no stats (404) or is unavailable
+  // (502/503), show the profile without stats. Contract violations
+  // (ParseError, HttpApiDecodeError) still propagate to the error boundary.
   const playerStats = await runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
       const stats = yield* bff.getPlayerStats(Number(slug));
       return toOutfieldPlayerStatsData(stats.teams);
-    }).pipe(Effect.catchTag("HttpNotFound", () => Effect.succeed(null))),
+    }).pipe(
+      Effect.catchTags({
+        HttpNotFound: () => Effect.succeed(null),
+        HttpServiceUnavailable: () => Effect.succeed(null),
+        HttpBadGateway: () => Effect.succeed(null),
+      }),
+    ),
   );
 
   const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
