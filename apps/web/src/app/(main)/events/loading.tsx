@@ -6,10 +6,10 @@
 export default function EventsLoading() {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
-      {/* Hero — use real gradient, skeleton text */}
+      {/* Hero — real gradient, skeleton text */}
       <div className="bg-linear-to-br from-green-main via-green-hover to-green-dark-hover text-white py-16 px-4">
         <div className="max-w-5xl mx-auto space-y-4">
-          <div className="h-12 w-64 rounded bg-white/20 animate-pulse" />
+          <div className="h-12 w-64 rounded bg-white/10 animate-pulse" />
           <div className="h-6 w-96 max-w-full rounded bg-white/15 animate-pulse" />
         </div>
       </div>
@@ -19,7 +19,7 @@ export default function EventsLoading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="flex flex-col overflow-hidden rounded-sm bg-white border border-foundation-gray-light shadow-sm animate-pulse"
+              className="flex flex-col overflow-hidden rounded-sm bg-white border border-gray-200 shadow-sm animate-pulse"
             >
               <div className="h-48 bg-gray-200" />
               <div className="p-4 space-y-2">

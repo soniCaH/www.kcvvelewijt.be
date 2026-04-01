@@ -36,7 +36,7 @@ export default function NewsLoading() {
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-sm bg-white border border-foundation-gray-light shadow-sm animate-pulse overflow-hidden"
+                className="flex-1 rounded-sm bg-white border border-gray-200 shadow-sm animate-pulse overflow-hidden"
               >
                 <div className="h-32 bg-gray-200" />
                 <div className="p-3 space-y-2">
@@ -54,7 +54,7 @@ export default function NewsLoading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-sm bg-white border border-foundation-gray-light shadow-sm animate-pulse overflow-hidden"
+              className="rounded-sm bg-white border border-gray-200 shadow-sm animate-pulse overflow-hidden"
             >
               <div className="aspect-[3/2] bg-gray-200" />
               <div className="p-4 space-y-2">
