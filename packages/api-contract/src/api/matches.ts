@@ -1,6 +1,7 @@
 import { HttpApiEndpoint, HttpApiGroup } from "@effect/platform";
 import { Schema as S } from "effect";
 import { Match, MatchDetail, MatchesArray } from "../schemas/match";
+import { PlayerSeasonStats } from "../schemas/player-stats";
 import {
   HttpServiceUnavailable,
   HttpBadGateway,
@@ -35,6 +36,14 @@ export class MatchesApi extends HttpApiGroup.make("matches")
     HttpApiEndpoint.get("getMatchDetail", "/match/:matchId/detail")
       .setPath(S.Struct({ matchId: S.NumberFromString }))
       .addSuccess(MatchDetail)
+      .addError(HttpServiceUnavailable)
+      .addError(HttpBadGateway)
+      .addError(HttpNotFound),
+  )
+  .add(
+    HttpApiEndpoint.get("getPlayerStats", "/statistics/player/:memberId")
+      .setPath(S.Struct({ memberId: S.NumberFromString }))
+      .addSuccess(PlayerSeasonStats)
       .addError(HttpServiceUnavailable)
       .addError(HttpBadGateway)
       .addError(HttpNotFound),

@@ -17,6 +17,7 @@ import {
   type CardType,
   type OpponentHistory,
   type MatchEvent,
+  type PlayerSeasonStats,
 } from "@kcvv/api-contract";
 import {
   PsdSeason,
@@ -30,6 +31,7 @@ import {
   FootbalistoLineupPlayer,
   FootbalistoMatchEvent,
   type FootbalistoMatchDetailResponse as RawDetailResponse,
+  PsdPlayerGameStatisticsResponse,
 } from "./schemas";
 import { PsdTeamsSchema } from "./schemas-player-team";
 
@@ -535,6 +537,9 @@ export interface FootbalistoServiceInterface {
     teamId: number,
     clubId: number,
   ) => Effect.Effect<OpponentHistory, BffError>;
+  readonly getPlayerStats: (
+    memberId: number,
+  ) => Effect.Effect<PlayerSeasonStats, BffError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -1022,6 +1027,41 @@ export const FootbalistoServiceLive = Layer.effect(
             },
             summary,
             matches: sortedMatches,
+          };
+        }),
+
+      getPlayerStats: (memberId: number) =>
+        Effect.gen(function* () {
+          const season = yield* getCurrentSeason();
+          const formatDate = (iso: string): string => {
+            const d = new Date(iso);
+            const dd = String(d.getUTCDate()).padStart(2, "0");
+            const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+            const yyyy = String(d.getUTCFullYear());
+            return `${dd}${mm}${yyyy}`;
+          };
+          const dateFrom = formatDate(season.start);
+          const dateTo = formatDate(season.end);
+
+          const response = yield* countedFetch(
+            `${base}/statistics/player/${memberId}/from/${dateFrom}/to/${dateTo}`,
+            PsdPlayerGameStatisticsResponse,
+          );
+
+          return {
+            memberId,
+            teams: response.playerStatistics.map((ps) => ({
+              team: ps.team ?? "Unknown",
+              gamesPlayed: ps.gamesPlayed,
+              gamesWon: ps.gamesWon,
+              gamesEqual: ps.gamesEqual,
+              gamesLost: ps.gamesLost,
+              goals: ps.goals,
+              assists: ps.assists,
+              yellowCards: ps.yellowCards,
+              redCards: ps.redCards,
+              minutes: ps.minutes,
+            })),
           };
         }),
     };

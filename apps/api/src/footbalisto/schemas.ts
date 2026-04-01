@@ -189,3 +189,24 @@ export class PsdGame extends S.Class<PsdGame>("PsdGame")({
 export const PsdMatchListSchema = S.Struct({
   content: S.Array(S.Unknown),
 });
+
+// ─── Player statistics (per-player season stats) ────────────────────────────
+
+export class PsdPlayerStatistics extends S.Class<PsdPlayerStatistics>(
+  "PsdPlayerStatistics",
+)({
+  gamesPlayed: S.Number,
+  gamesWon: S.Number,
+  gamesEqual: S.Number,
+  gamesLost: S.Number,
+  goals: S.Number,
+  assists: S.Number,
+  yellowCards: S.Number,
+  redCards: S.Number,
+  minutes: S.Number,
+  team: S.NullOr(S.String),
+}) {}
+
+export const PsdPlayerGameStatisticsResponse = S.Struct({
+  playerStatistics: S.Array(PsdPlayerStatistics),
+});

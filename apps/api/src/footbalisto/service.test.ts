@@ -1392,3 +1392,121 @@ describe("mapCompetitionLabel", () => {
     expect(mapCompetitionLabel("INTERLAND", null)).toBe("INTERLAND");
   });
 });
+
+describe("FootbalistoService.getPlayerStats", () => {
+  const psdPlayerStatsResponse = {
+    playerStatistics: [
+      {
+        gamesPlayed: 15,
+        gamesWon: 10,
+        gamesEqual: 3,
+        gamesLost: 2,
+        goals: 8,
+        assists: 4,
+        yellowCards: 2,
+        redCards: 0,
+        minutes: 1200,
+        team: "KCVV Elewijt A",
+      },
+    ],
+    gameReports: [],
+    goals: [],
+  };
+
+  it("returns normalized PlayerSeasonStats from PSD response", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => psdPlayerStatsResponse,
+      });
+
+    const result = await runService((svc) => svc.getPlayerStats(42));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.memberId).toBe(42);
+      expect(result.right.teams).toHaveLength(1);
+      expect(result.right.teams[0]?.team).toBe("KCVV Elewijt A");
+      expect(result.right.teams[0]?.gamesPlayed).toBe(15);
+      expect(result.right.teams[0]?.goals).toBe(8);
+      expect(result.right.teams[0]?.assists).toBe(4);
+      expect(result.right.teams[0]?.minutes).toBe(1200);
+    }
+  });
+
+  it("formats season dates as ddMMyyyy in PSD API URL", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => psdPlayerStatsResponse,
+      });
+
+    await runService((svc) => svc.getPlayerStats(42));
+
+    const secondCall = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[1];
+    const url = secondCall?.[0] as string;
+    expect(url).toContain("/statistics/player/42/from/");
+    // Verify ddMMyyyy format (8 digits)
+    const dateMatch = url.match(/\/from\/(\d{8})\/to\/(\d{8})/);
+    expect(dateMatch).not.toBeNull();
+  });
+
+  it("returns empty teams when playerStatistics is empty", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ playerStatistics: [] }),
+      });
+
+    const result = await runService((svc) => svc.getPlayerStats(42));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.memberId).toBe(42);
+      expect(result.right.teams).toHaveLength(0);
+    }
+  });
+
+  it("handles null team name gracefully", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          playerStatistics: [
+            {
+              ...psdPlayerStatsResponse.playerStatistics[0],
+              team: null,
+            },
+          ],
+        }),
+      });
+
+    const result = await runService((svc) => svc.getPlayerStats(42));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.teams[0]?.team).toBe("Unknown");
+    }
+  });
+
+  it("propagates 404 as ResourceNotFoundError", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+    const result = await runService((svc) => svc.getPlayerStats(99999));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
+});

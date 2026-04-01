@@ -5,6 +5,7 @@ import {
   getNextMatchesHandler,
   getMatchByIdHandler,
   getMatchDetailHandler,
+  getPlayerStatsHandler,
 } from "./matches";
 import { HARD_TTL_DEFAULT } from "../cache/kv-cache";
 import {
@@ -23,8 +24,10 @@ import {
   Match,
   MatchesArray,
   MatchDetail,
+  PlayerSeasonStats,
   type Match as MatchType,
   type MatchDetail as MatchDetailType,
+  type PlayerSeasonStats as PlayerSeasonStatsType,
 } from "@kcvv/api-contract";
 
 const baseMatch: MatchType = {
@@ -58,6 +61,24 @@ function makeServiceMock(
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
     getOpponentHistory: () => Effect.die("not needed"),
+    getPlayerStats: (_memberId) =>
+      Effect.succeed({
+        memberId: 42,
+        teams: [
+          {
+            team: "KCVV Elewijt A",
+            gamesPlayed: 10,
+            gamesWon: 7,
+            gamesEqual: 2,
+            gamesLost: 1,
+            goals: 5,
+            assists: 3,
+            yellowCards: 1,
+            redCards: 0,
+            minutes: 850,
+          },
+        ],
+      }),
     ...overrides,
   };
 }
@@ -240,5 +261,69 @@ describe("getMatchByIdHandler", () => {
     expect(result.id).toBe(99);
     expect("lineup" in result).toBe(false);
     expect(() => S.decodeUnknownSync(Match)(result)).not.toThrow();
+  });
+});
+
+describe("getPlayerStatsHandler", () => {
+  it("returns PlayerSeasonStats from FootbalistoService", async () => {
+    const result = await Effect.runPromise(provide(getPlayerStatsHandler(42)));
+    expect(result.memberId).toBe(42);
+    expect(result.teams).toHaveLength(1);
+    expect(result.teams[0]?.gamesPlayed).toBe(10);
+    expect(result.teams[0]?.goals).toBe(5);
+    expect(() => S.decodeUnknownSync(PlayerSeasonStats)(result)).not.toThrow();
+  });
+
+  it("returns empty teams array when player has no stats", async () => {
+    const result = await Effect.runPromise(
+      provide(getPlayerStatsHandler(999), {
+        getPlayerStats: (_memberId) =>
+          Effect.succeed({ memberId: 999, teams: [] }),
+      }),
+    );
+    expect(result.memberId).toBe(999);
+    expect(result.teams).toHaveLength(0);
+    expect(() => S.decodeUnknownSync(PlayerSeasonStats)(result)).not.toThrow();
+  });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getPlayerStatsHandler(42), {
+          getPlayerStats: () =>
+            Effect.fail(
+              new UpstreamUnavailableError({
+                message: "PSD returned 503",
+                status: 503,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
+  it("propagates ResourceNotFoundError for unknown player", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getPlayerStatsHandler(999), {
+          getPlayerStats: () =>
+            Effect.fail(
+              new ResourceNotFoundError({
+                message: "Player not found",
+                resourceType: "player",
+                resourceId: 999,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+    }
   });
 });

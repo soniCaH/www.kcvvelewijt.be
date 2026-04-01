@@ -38,6 +38,7 @@ function makeServiceMock(
     getMatchDetail: () => Effect.fail(new Error("not needed") as never),
     getRanking: () => Effect.succeed(rankingEntries),
     getOpponentHistory: () => Effect.die("not needed"),
+    getPlayerStats: () => Effect.die("not needed"),
     ...overrides,
   };
 }

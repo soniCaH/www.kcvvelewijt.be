@@ -10,6 +10,7 @@ export const TTL = {
   RANKING: 60 * 60 * 24, // 24 hours — updates only after a match day
   RELATED: 60 * 60 * 6, // 6 hours — related content changes infrequently
   OPPONENT_HISTORY: 60 * 60 * 24 * 7, // 7 days — historical match data doesn't change
+  PLAYER_STATS: 60 * 60 * 6, // 6 hours — player stats update after match days
 } as const;
 
 export interface KvCacheInterface {

@@ -4,4 +4,5 @@ export * from "./match";
 export * from "./opponent";
 export * from "./ranking";
 export * from "./related";
+export * from "./player-stats";
 export * from "./search";
