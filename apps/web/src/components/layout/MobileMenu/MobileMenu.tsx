@@ -11,8 +11,15 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Icon, SocialLinks } from "@/components/design-system";
-import { X, ChevronDown, Search } from "@/lib/icons";
+import { X, ChevronDown } from "@/lib/icons";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
+import {
+  buildMenuItems,
+  buildSeniorMenuItem,
+  seniorNavLabel,
+  buildJeugdItem,
+  isMenuItemActive,
+} from "../menuItems";
 
 export interface MobileMenuProps {
   /**
@@ -31,40 +38,6 @@ export interface MobileMenuProps {
   className?: string;
 }
 
-interface MenuItem {
-  label: string;
-  href: string;
-  children?: MenuItem[];
-}
-
-const staticMenuItems: MenuItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Nieuws", href: "/nieuws" },
-  { label: "Evenementen", href: "/events" },
-  { label: "Sponsors", href: "/sponsors" },
-  { label: "Hulp", href: "/hulp" },
-  {
-    label: "De club",
-    href: "/club",
-    children: [
-      { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
-      { label: "Bestuur", href: "/club/bestuur" },
-      { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
-      { label: "KCVV Angels", href: "/club/angels" },
-      { label: "KCVV Ultras", href: "/club/ultras" },
-      { label: "Contact", href: "/club/contact" },
-      { label: "Downloads", href: "/club/downloads" },
-      { label: "Praktische Info", href: "/club/inschrijven" },
-      { label: "Cashless clubkaart", href: "/club/cashless" },
-    ],
-  },
-  {
-    label: "Zoeken",
-    href: "/zoeken",
-  },
-];
-
 /**
  * Mobile off-canvas navigation menu
  *
@@ -77,24 +50,6 @@ const staticMenuItems: MenuItem[] = [
  * - Padding: 1rem 2rem (16px 32px)
  * - Submenu: darker background with inset shadows
  */
-const buildSeniorMenuItem = (
-  team: TeamNavVM | undefined,
-  label: string,
-): MenuItem | null => {
-  if (!team?.slug) return null;
-  const href = `/ploegen/${team.slug}`;
-  return {
-    label,
-    href,
-    children: [
-      { label: "Info", href },
-      { label: "Spelers & Staff", href: `${href}?tab=opstelling` },
-      { label: "Wedstrijden", href: `${href}?tab=wedstrijden` },
-      { label: "Stand", href: `${href}?tab=klassement` },
-    ],
-  };
-};
-
 export const MobileMenu = ({
   isOpen,
   onClose,
@@ -106,32 +61,13 @@ export const MobileMenu = ({
   const searchParams = useSearchParams();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-  const seniorNavLabel = (name: string): string => {
-    const lastWord = name.trim().split(/\s+/).at(-1) ?? name;
-    return /^[A-Z]$/.test(lastWord) ? `${lastWord}-Ploeg` : name;
-  };
-
-  const jeugdItem: MenuItem = {
-    label: "Jeugd",
-    href: "/jeugd",
-    children: youthTeams
-      ?.filter((t) => t.age != null)
-      .map((t) => ({
-        label: t.age!,
-        href: `/ploegen/${t.slug}`,
-      })),
-  };
+  const jeugdItem = buildJeugdItem(youthTeams);
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>
     buildSeniorMenuItem(t, seniorNavLabel(t.name)),
   );
 
-  const menuItems: MenuItem[] = [
-    ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
-    ...seniorMenuItems,
-    jeugdItem,
-    ...staticMenuItems.slice(3), // Sponsors, Hulp, De club, Zoeken
-  ].filter((item): item is MenuItem => item !== null);
+  const menuItems = buildMenuItems(seniorMenuItems, jeugdItem);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -151,40 +87,8 @@ export const MobileMenu = ({
     onClose();
   }, [pathname, onClose]);
 
-  /**
-   * Check if a menu item is active, handling both pathname and query params
-   */
-  const isActive = (href: string) => {
-    // Parse the href to separate pathname and query params
-    const [itemPath, itemQuery] = href.split("?");
-
-    if (itemPath === "/") {
-      return pathname === "/" && !itemQuery;
-    }
-
-    // If href has query params, check both pathname and query param match
-    if (itemQuery) {
-      const itemParams = new URLSearchParams(itemQuery);
-      const itemTab = itemParams.get("tab");
-
-      // Must match pathname exactly and have the same tab param
-      return pathname === itemPath && searchParams.get("tab") === itemTab;
-    }
-
-    // For items without query params, check if it's a base path match
-    // but NOT if we're on a tab (e.g., /ploegen/a-ploeg should not be active when on ?tab=opstelling)
-    if (pathname === itemPath) {
-      // Only active if there's no tab param in the URL
-      return !searchParams.get("tab");
-    }
-
-    // Check for nested routes (but not for team pages with tabs)
-    if (pathname?.startsWith(itemPath + "/")) {
-      return true;
-    }
-
-    return false;
-  };
+  const isActive = (href: string) =>
+    isMenuItemActive(href, pathname, searchParams);
 
   const toggleSubmenu = (href: string) => {
     setOpenSubmenu(openSubmenu === href ? null : href);
@@ -337,9 +241,6 @@ export const MobileMenu = ({
                       )}
                     >
                       {item.label}
-                      {item.href === "/zoeken" && (
-                        <Icon icon={Search} size="xs" className="ml-2 inline" />
-                      )}
                     </Link>
                   )}
                 </li>

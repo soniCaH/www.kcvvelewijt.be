@@ -175,7 +175,7 @@ describe("MobileMenu", () => {
       expect(infoLink).toHaveClass("text-kcvv-green-bright");
     });
 
-    it("should not mark Info as active when tab param exists", async () => {
+    it("should mark Info as active when tab param exists on same path", async () => {
       const user = userEvent.setup();
       mockPathname = "/ploegen/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams("tab=wedstrijden");
@@ -185,11 +185,11 @@ describe("MobileMenu", () => {
       const aPloegButton = screen.getByRole("button", { name: /a-ploeg/i });
       await user.click(aPloegButton);
 
-      // The "Info" link should NOT be active when we're on ?tab=wedstrijden
+      // The "Info" link should be active — it's the parent of the tabbed page
       const infoLink = container.querySelector(
         'a[href="/ploegen/eerste-elftallen-a"]',
       );
-      expect(infoLink).not.toHaveClass("active");
+      expect(infoLink).toHaveClass("active");
     });
 
     it("should mark Wedstrijden as active when tab=wedstrijden", async () => {

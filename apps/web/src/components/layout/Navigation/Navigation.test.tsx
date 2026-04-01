@@ -168,7 +168,7 @@ describe("Navigation", () => {
       expect(dropdownInfoLink).toHaveClass("text-kcvv-green-bright");
     });
 
-    it("should not mark Info as active when tab param exists", async () => {
+    it("should mark Info as active when tab param exists on same path", async () => {
       mockPathname = "/ploegen/eerste-elftallen-a";
       mockSearchParams = new URLSearchParams("tab=wedstrijden");
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
@@ -186,13 +186,12 @@ describe("Navigation", () => {
         expect(infoLinks.length).toBeGreaterThan(1);
       });
 
-      // The dropdown "Info" link should NOT be active when we're on ?tab=wedstrijden
-      // Get all links with this href - [0] is trigger, [1] is dropdown item
+      // The dropdown "Info" link should be active — it's the parent of the tabbed page
       const infoLinks = container.querySelectorAll(
         'a[href="/ploegen/eerste-elftallen-a"]',
       );
       const dropdownInfoLink = infoLinks[1];
-      expect(dropdownInfoLink).not.toHaveClass("text-kcvv-green-bright");
+      expect(dropdownInfoLink).toHaveClass("text-kcvv-green-bright");
     });
   });
 
