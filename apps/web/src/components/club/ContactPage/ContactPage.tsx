@@ -192,6 +192,7 @@ export function ContactPage() {
                 />
                 <div>
                   <p className="font-bold text-gray-blue mb-2">Parking</p>
+                  {/* TODO: add gemeente Zemst parking plan URL once confirmed */}
                   <p className="text-sm text-gray-dark">
                     Parkeren kan aan het voetbalveld en rondom het Van Innis
                     sportpark. Een gedetailleerd parkeerplan vind je op de
