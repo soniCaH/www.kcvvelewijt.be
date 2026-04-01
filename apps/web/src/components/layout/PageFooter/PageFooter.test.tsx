@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PageFooter } from "./PageFooter";
+import { EXTERNAL_LINKS } from "@/lib/constants";
 
 vi.mock("./CookiePreferencesButton", () => ({
   CookiePreferencesButton: () => (
@@ -93,6 +94,14 @@ describe("PageFooter", () => {
     render(<PageFooter />);
     const btn = screen.getByRole("button", { name: /cookie-instellingen/i });
     expect(btn).toBeInTheDocument();
+  });
+
+  it("renders Webshop link as external link opening in new tab", () => {
+    render(<PageFooter />);
+    const webshopLink = screen.getByRole("link", { name: "Webshop" });
+    expect(webshopLink).toHaveAttribute("href", EXTERNAL_LINKS.webshop);
+    expect(webshopLink).toHaveAttribute("target", "_blank");
+    expect(webshopLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("applies custom className", () => {

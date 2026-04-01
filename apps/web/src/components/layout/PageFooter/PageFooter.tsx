@@ -4,6 +4,7 @@ import { Facebook, Instagram } from "@/lib/icons";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import { FooterTransition } from "./FooterTransition";
 import { cn } from "@/lib/utils/cn";
+import { EXTERNAL_LINKS } from "@/lib/constants";
 
 export interface PageFooterProps {
   className?: string;
@@ -15,6 +16,7 @@ const clubLinks = [
   { href: "/ploegen", label: "Ploegen" },
   { href: "/sponsors", label: "Sponsors" },
   { href: "/club/organigram", label: "Bestuur" },
+  { href: EXTERNAL_LINKS.webshop, label: "Webshop", external: true },
 ] as const;
 
 export const PageFooter = ({ className }: PageFooterProps) => {
@@ -55,13 +57,24 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             </p>
             <ul className="flex flex-col gap-2.5">
               {clubLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
-                  >
-                    {item.label}
-                  </Link>
+                <li key={item.label}>
+                  {"external" in item ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

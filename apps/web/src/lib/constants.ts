@@ -51,6 +51,11 @@ export const DEFAULT_OG_IMAGE = {
   alt: "KCVV Elewijt",
 } as const;
 
+// External Links
+export const EXTERNAL_LINKS = {
+  webshop: "https://www.brandsfit.com/kcvvelewijt/nl-eu",
+} as const;
+
 // Image Aspect Ratios
 export const IMAGE_RATIOS = {
   article: 1.5, // 3:2

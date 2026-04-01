@@ -28,3 +28,6 @@ export type { YouthSectionProps } from "./YouthSection";
 
 export { SponsorsSection } from "./SponsorsSection";
 export type { SponsorsSectionProps } from "./SponsorsSection";
+
+export { WebshopSection } from "./WebshopSection";
+export type { WebshopSectionProps } from "./WebshopSection";
