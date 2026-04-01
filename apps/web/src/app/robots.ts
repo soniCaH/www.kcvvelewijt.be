@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      ...(isProduction ? { allow: "/" } : { disallow: "/" }),
+      ...(isProduction ? { allow: ["/", "/llms.txt"] } : { disallow: "/" }),
     },
     sitemap: `${SITE_CONFIG.siteUrl}/sitemap.xml`,
   };
