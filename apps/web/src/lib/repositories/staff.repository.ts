@@ -31,6 +31,7 @@ export const ORGANIGRAM_NODES_QUERY =
 const KEY_CONTACT_ROLE_CODES = [
   "voorzitter",
   "secretaris",
+  "gc",
   "jeugdcoordinator",
   "sponsoring-verantwoordelijke",
   "pr-verantwoordelijke",
