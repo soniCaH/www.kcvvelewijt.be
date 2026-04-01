@@ -84,7 +84,7 @@ export const Navigation = ({
               left: 50%;
               height: 2px;
               width: 0;
-              background: #4acf52;
+              background: var(--color-kcvv-green-bright);
               transition: width 0.3s ease 0s, left 0.3s ease 0s;
             }
             .nav-link:hover::after,
@@ -139,7 +139,7 @@ export const Navigation = ({
                 {hasDropdown && openDropdown === item.href && (
                   <div
                     className={cn(
-                      "absolute top-full mt-0 min-w-[200px] bg-[#1E2024] border border-gray-700 z-10",
+                      "absolute top-full mt-0 min-w-[200px] bg-kcvv-black border border-gray-700 z-10",
                       isNearEnd ? "right-0" : "left-0",
                     )}
                   >
