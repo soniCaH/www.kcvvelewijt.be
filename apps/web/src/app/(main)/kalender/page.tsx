@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
@@ -35,6 +36,7 @@ export const metadata: Metadata = {
     title: "Wedstrijdkalender - KCVV Elewijt",
     description: "Alle aankomende wedstrijden van KCVV Elewijt",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

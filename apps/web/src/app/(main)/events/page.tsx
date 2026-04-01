@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import Link from "next/link";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     title: "Evenementen - KCVV Elewijt",
     description: "Alle aankomende evenementen van KCVV Elewijt",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

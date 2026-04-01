@@ -16,7 +16,7 @@ import {
   mapMentionedTeams,
   mapMentionedStaff,
 } from "@/lib/utils/article-related-items";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildNewsArticleJsonLd,
@@ -57,35 +57,35 @@ export async function generateStaticParams() {
  * Produce page and Open Graph metadata for the article identified by the route params.
  *
  * @param params - Route parameters (resolve to obtain the article slug) used to locate the article
- * @returns A metadata object with `title` and, when the article exists, an `openGraph` object containing `title`, `type`, optional `publishedTime`, `authors`, and optional `images`. If the article cannot be found, returns a title indicating the article was not found.
+ * @returns A metadata object with `title`, `description`, and an `openGraph` object containing `title`, `description`, `type`, optional `publishedTime`, `authors`, and `images`. If the article cannot be found, returns a title indicating the article was not found.
  */
 export async function generateMetadata({ params }: ArticlePageProps) {
   const { slug } = await params;
-  try {
-    const article = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        return yield* repo.findBySlug(slug);
-      }),
-    );
-    if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
+  const article = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* ArticleRepository;
+      return yield* repo.findBySlug(slug);
+    }),
+  );
+  if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
 
-    return {
-      title: `${article.title} | KCVV Elewijt`,
-      alternates: { canonical: `${SITE_CONFIG.siteUrl}/nieuws/${slug}` },
-      openGraph: {
-        title: article.title,
-        type: "article" as const,
-        publishedTime: article.publishedAt ?? undefined,
-        authors: ["KCVV Elewijt"],
-        images: article.coverImageUrl
-          ? [{ url: article.coverImageUrl, alt: article.title }]
-          : undefined,
-      },
-    };
-  } catch {
-    return { title: "Artikel niet gevonden | KCVV Elewijt" };
-  }
+  const description = `${article.title} — Nieuws van KCVV Elewijt`;
+
+  return {
+    title: `${article.title} | KCVV Elewijt`,
+    description,
+    alternates: { canonical: `${SITE_CONFIG.siteUrl}/nieuws/${slug}` },
+    openGraph: {
+      title: article.title,
+      description,
+      type: "article" as const,
+      publishedTime: article.publishedAt ?? undefined,
+      authors: ["KCVV Elewijt"],
+      images: article.coverImageUrl
+        ? [{ url: article.coverImageUrl, alt: article.title }]
+        : [DEFAULT_OG_IMAGE],
+    },
+  };
 }
 
 /**

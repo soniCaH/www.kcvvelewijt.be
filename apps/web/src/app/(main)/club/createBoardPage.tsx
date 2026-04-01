@@ -6,6 +6,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
@@ -73,7 +74,7 @@ export function createBoardPage({
           type: "website",
           images: team.teamImageUrl
             ? [{ url: team.teamImageUrl, alt: `${team.name} foto` }]
-            : undefined,
+            : [DEFAULT_OG_IMAGE],
         },
       };
     } catch (error) {

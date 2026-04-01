@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { HistoryContent } from "./HistoryContent";
@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description:
       "Tijdslijn van de rijkgevulde geschiedenis van KCVV Elewijt van 1909 tot nu!",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

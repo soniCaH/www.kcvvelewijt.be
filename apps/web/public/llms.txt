@@ -1,0 +1,51 @@
+# KCVV Elewijt
+
+> KCVV Elewijt (stamnummer 55) is een Belgische voetbalclub uit Elewijt, deelgemeente van Zemst in Vlaams-Brabant. Opgericht in 1924. Clubmotto: "Er is maar één plezante compagnie". Clubkleuren: groen en wit.
+
+## Over de club
+
+KCVV Elewijt is een amateurvoetbalclub actief in de Belgische competitie. De club heeft meerdere seniorenploegen (eerste ploeg en een B-elftal) en een uitgebreide jeugdwerking met ploegen van U6 tot U21, onderverdeeld in Bovenbouw, Middenbouw en Onderbouw.
+
+De thuisbasis is gelegen aan Driesstraat 32, 1982 Elewijt, België.
+
+## Website
+
+De officiële website van KCVV Elewijt: https://www.kcvvelewijt.be
+
+### Navigatie
+
+- /nieuws — Clubnieuws en artikels
+- /ploegen — Overzicht van alle seniorenploegen
+- /jeugd — Overzicht van alle jeugdploegen
+- /kalender — Wedstrijdkalender met uitslagen en komende matchen
+- /spelers/{slug} — Spelersprofielen met statistieken
+- /staf/{slug} — Profielen van trainers en stafleden
+- /wedstrijd/{matchId} — Wedstrijddetails met opstelling en doelpunten
+- /sponsors — Overzicht van clubsponsors
+- /club — Informatie over de club
+- /club/geschiedenis — Clubgeschiedenis
+- /club/organigram — Bestuursstructuur
+- /club/contact — Contactgegevens
+- /club/inschrijven — Lid worden / Inschrijven
+- /zoeken — Zoeken op de website
+- /privacy — Privacybeleid
+
+### Beschikbare content
+
+- Nieuwsartikels: clubnieuws, wedstrijdverslagen, transfernieuws en jeugdnieuws
+- Wedstrijdresultaten: uitslagen, opstellingen, doelpuntenmakers en klassementen
+- Spelersprofielen: foto, positie, rugnummer en seizoensstatistieken
+- Stafprofielen: trainers, afgevaardigden en bestuursleden
+- Ploegpagina's: selectie, kalender en resultaten per ploeg
+- Sponsoroverzicht: partners en sponsors van de club
+
+## Contact en socials
+
+- Adres: Driesstraat 32, 1982 Elewijt, België
+- Website: https://www.kcvvelewijt.be
+- Facebook: https://www.facebook.com/KCVVElewijt
+- Twitter/X: @kcvve
+
+## Wat deze website NIET bevat
+
+Deze website bevat geen ticketverkoop, online shop, livestreaming van wedstrijden, gokken of betting, of betaalde content. Er is geen registratie of login vereist om de website te bezoeken. Alle content is vrij toegankelijk.

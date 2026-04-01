@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Suspense } from "react";
 import { SearchInterface } from "@/components/search";
 import { Spinner } from "@/components/design-system";
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     title: "Zoeken - KCVV Elewijt",
     description: "Doorzoek de website van KCVV Elewijt",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

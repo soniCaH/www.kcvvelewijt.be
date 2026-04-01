@@ -7,7 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -71,6 +71,7 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
+        images: [DEFAULT_OG_IMAGE],
       },
     };
   } catch {

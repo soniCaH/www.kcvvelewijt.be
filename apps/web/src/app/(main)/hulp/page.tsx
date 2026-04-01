@@ -5,6 +5,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
 import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
 import { runPromise } from "@/lib/effect/runtime";
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
     title: "Hulp & Contact - KCVV Elewijt",
     description: "Vind snel de juiste contactpersoon voor jouw vraag",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

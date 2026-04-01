@@ -9,7 +9,7 @@
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { Effect } from "effect";
@@ -38,6 +38,7 @@ export const metadata: Metadata = {
     description:
       "Interactieve organisatiestructuur en hulp bij KCVV Elewijt - Kies je eigen weergave en vind snel de juiste persoon",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

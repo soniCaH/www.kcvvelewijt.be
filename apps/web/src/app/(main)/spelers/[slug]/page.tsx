@@ -7,7 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -76,7 +76,7 @@ export async function generateMetadata({
         lastName: player.lastName,
         images: player.imageUrl
           ? [{ url: player.imageUrl, alt: fullName }]
-          : undefined,
+          : [DEFAULT_OG_IMAGE],
       },
     };
   } catch {

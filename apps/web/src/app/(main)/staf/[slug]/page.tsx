@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import Link from "next/link";
@@ -65,7 +65,7 @@ export async function generateMetadata({
         lastName: member.lastName,
         images: member.imageUrl
           ? [{ url: member.imageUrl, alt: fullName }]
-          : undefined,
+          : [DEFAULT_OG_IMAGE],
       },
     };
   } catch {

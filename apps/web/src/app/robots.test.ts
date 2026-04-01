@@ -21,7 +21,7 @@ describe("robots.ts", () => {
     const result = robots();
 
     expect(result).toEqual({
-      rules: { userAgent: "*", allow: "/" },
+      rules: { userAgent: "*", allow: ["/", "/llms.txt"] },
       sitemap: "https://www.kcvvelewijt.be/sitemap.xml",
     });
   });
@@ -35,5 +35,14 @@ describe("robots.ts", () => {
       rules: { userAgent: "*", disallow: "/" },
       sitemap: "https://www.kcvvelewijt.be/sitemap.xml",
     });
+  });
+
+  it("explicitly allows /llms.txt in production", async () => {
+    process.env.VERCEL_ENV = "production";
+    const { default: robots } = await import("./robots");
+    const result = robots();
+    const rules = result.rules as { allow: string[] };
+
+    expect(rules.allow).toContain("/llms.txt");
   });
 });
