@@ -159,9 +159,9 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               Snelle contacten
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {keyContacts.map((contact) => (
+              {keyContacts.map((contact, index) => (
                 <div
-                  key={`${contact.role}-${contact.email}`}
+                  key={`${contact.role}-${contact.email}-${index}`}
                   className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
                 >
                   <p className="text-xs font-semibold text-green-main uppercase tracking-wide mb-1">
