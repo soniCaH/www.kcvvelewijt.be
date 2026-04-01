@@ -23,6 +23,7 @@ import {
   BannerSlot,
   MatchesSliderSection,
   YouthSection,
+  WebshopSection,
   SponsorsSection,
 } from "@/components/home";
 import type { FeaturedEventStub } from "@/components/home";
@@ -291,6 +292,13 @@ export default async function HomePage() {
       }
     : null;
 
+  const webshopSection: SectionConfig = {
+    key: "webshop",
+    bg: "gray-100",
+    content: <WebshopSection />,
+    transition: { type: "diagonal", direction: "right" },
+  };
+
   const sponsorsSection: SectionConfig = {
     key: "sponsors",
     bg: "kcvv-green-dark",
@@ -326,6 +334,7 @@ export default async function HomePage() {
           matchesSliderSection,
           youthSection,
           bannerSlotCSection,
+          webshopSection,
           sponsorsSection,
           preFooterSection,
         ]}
