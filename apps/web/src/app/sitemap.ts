@@ -72,24 +72,26 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
     const { runPromise } = await import("@/lib/effect/runtime");
     const { BffService } = await import("@/lib/effect/services/BffService");
 
+    const validTeamIds = teamPsdIds
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
+
+    const effects = validTeamIds.map((teamId) =>
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(teamId);
+      }).pipe(Effect.catchAll(() => Effect.succeed([] as const))),
+    );
+
+    const results = await runPromise(
+      Effect.all(effects, { concurrency: "unbounded" }),
+    );
+
     const allMatchIds: number[] = [];
-    for (const psdId of teamPsdIds) {
-      const teamId = parseInt(psdId, 10);
-      if (isNaN(teamId)) continue;
-
-      const matches = await runPromise(
-        Effect.gen(function* () {
-          const bff = yield* BffService;
-          return yield* bff.getMatches(teamId);
-        }).pipe(
-          Effect.catchAll(() =>
-            Effect.succeed([] as readonly import("@kcvv/api-contract").Match[]),
-          ),
-        ),
-      );
-
+    const now = new Date();
+    for (const matches of results) {
       for (const match of matches) {
-        if (match.date >= ninetyDaysAgo && match.date <= new Date()) {
+        if (match.date >= ninetyDaysAgo && match.date <= now) {
           allMatchIds.push(match.id);
         }
       }
