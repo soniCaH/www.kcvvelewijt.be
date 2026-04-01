@@ -4,9 +4,9 @@
 
 ## Over de club
 
-KCVV Elewijt is een amateurvoetbalclub actief in de Belgische competitie. De club heeft meerdere seniorenploegen (eerste ploeg en reserven) en een uitgebreide jeugdwerking met ploegen van U6 tot U21, onderverdeeld in Bovenbouw, Middenbouw en Onderbouw.
+KCVV Elewijt is een amateurvoetbalclub actief in de Belgische competitie. De club heeft meerdere seniorenploegen (eerste ploeg en een B-elftal) en een uitgebreide jeugdwerking met ploegen van U6 tot U21, onderverdeeld in Bovenbouw, Middenbouw en Onderbouw.
 
-De thuisbasis is gelegen aan Driesstraat 39, 1982 Elewijt, België.
+De thuisbasis is gelegen aan Driesstraat 32, 1982 Elewijt, België.
 
 ## Website
 
@@ -26,6 +26,7 @@ De officiële website van KCVV Elewijt: https://www.kcvvelewijt.be
 - /club/geschiedenis — Clubgeschiedenis
 - /club/organigram — Bestuursstructuur
 - /club/contact — Contactgegevens
+- /club/inschrijven — Lid worden / Inschrijven
 - /zoeken — Zoeken op de website
 - /privacy — Privacybeleid
 
@@ -40,7 +41,7 @@ De officiële website van KCVV Elewijt: https://www.kcvvelewijt.be
 
 ## Contact en socials
 
-- Adres: Driesstraat 39, 1982 Elewijt, België
+- Adres: Driesstraat 32, 1982 Elewijt, België
 - Website: https://www.kcvvelewijt.be
 - Facebook: https://www.facebook.com/KCVVElewijt
 - Twitter/X: @kcvve
