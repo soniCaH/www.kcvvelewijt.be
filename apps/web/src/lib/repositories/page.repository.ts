@@ -10,6 +10,7 @@ export const PAGE_BY_SLUG_QUERY =
   _id,
   title,
   slug,
+  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }
 }`);
 
@@ -17,6 +18,7 @@ export interface PageVM {
   id: string;
   title: string;
   slug: string;
+  heroImageUrl: string | null;
   body: NonNullable<NonNullable<PAGE_BY_SLUG_QUERY_RESULT>["body"]>;
 }
 
@@ -25,6 +27,8 @@ export function toPageVM(row: NonNullable<PAGE_BY_SLUG_QUERY_RESULT>): PageVM {
     id: row._id,
     title: row.title ?? "",
     slug: row.slug?.current ?? "",
+    heroImageUrl:
+      ((row as Record<string, unknown>).heroImageUrl as string | null) ?? null,
     body: row.body ?? [],
   };
 }

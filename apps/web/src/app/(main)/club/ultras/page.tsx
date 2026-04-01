@@ -3,7 +3,7 @@ import Image from "next/image";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system/PageHero";
 
 export const metadata: Metadata = {
   title: "KCVV Ultras | KCVV Elewijt",
@@ -27,19 +27,21 @@ export default function UltrasPage() {
           { name: "Ultras", url: `${SITE_CONFIG.siteUrl}/club/ultras` },
         ])}
       />
-      <PageTitle title="KCVV Ultras" />
-
-      {/* Hero image */}
-      <div className="relative h-64 w-full md:h-96">
-        <Image
-          src="/images/ultras/header-ultras.jpg"
-          alt="KCVV Ultra's"
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
-      </div>
+      <PageHero
+        image="/images/ultras/header-ultras.jpg"
+        imageAlt="KCVV Ultra's sfeeractie"
+        label="Supporters"
+        headline={
+          <>
+            KCVV <span className="text-kcvv-green">Ultra&apos;s</span>
+          </>
+        }
+        body="Positief aanmoedigen van onze ploeg — vocaal, met trommels, met sfeermateriaal."
+        cta={{
+          label: "Word lid via Facebook",
+          href: "https://www.facebook.com/KCVV.ULTRAS.55/",
+        }}
+      />
 
       <main className="mx-auto max-w-inner-lg px-4 py-8 content">
         {/* Wie zijn we */}

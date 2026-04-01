@@ -19,6 +19,12 @@ export const page = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'heroImage',
+      title: 'Hero image',
+      type: 'image',
+      options: {hotspot: true},
+    }),
+    defineField({
       name: 'body',
       title: 'Body',
       type: 'array',
