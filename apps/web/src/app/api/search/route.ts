@@ -185,10 +185,10 @@ const searchTeams = (query: string) =>
   });
 
 /**
- * Handle GET /api/search requests and return matching articles, players, and teams.
+ * Handle GET /api/search requests and return matching articles, players, staff, and teams.
  *
  * Accepts query parameter `q` (required, at least 2 characters) and optional `type`
- * filter (`"article"`, `"player"`, or `"team"`). Performs searches across the
+ * filter (`"article"`, `"player"`, `"staff"`, or `"team"`). Performs searches across the
  * requested content types, ranks results by a simple relevance heuristic
  * (exact title match, then starts-with, then alphabetical), and returns a JSON
  * payload with the original query, result count, and ordered results.
