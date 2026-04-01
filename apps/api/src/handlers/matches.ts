@@ -4,7 +4,9 @@ import {
   PsdApi,
   MatchesArray,
   MatchDetail,
+  PlayerSeasonStats,
   type Match,
+  type PlayerSeasonStats as PlayerSeasonStatsType,
 } from "@kcvv/api-contract";
 import { FootbalistoService } from "../footbalisto/service";
 import { shouldServeStale, type BffError } from "../footbalisto/errors";
@@ -14,6 +16,7 @@ import { withErrorMapping } from "./error-mapping";
 
 const matchesCache = TypedKvCache(MatchesArray);
 const matchDetailCache = TypedKvCache(MatchDetail);
+const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 
 export const getMatchesByTeamHandler = (
   teamId: number,
@@ -97,6 +100,31 @@ export const getMatchDetailHandler = (
   );
 };
 
+export const getPlayerStatsHandler = (
+  memberId: number,
+): Effect.Effect<
+  PlayerSeasonStatsType,
+  BffError,
+  FootbalistoService | KvCacheService | WorkerEnvTag
+> =>
+  Effect.gen(function* () {
+    const service = yield* FootbalistoService;
+    const seasonId = yield* service.getCurrentSeasonId();
+
+    const fetchStats = service.getPlayerStats(memberId);
+
+    const cacheKey = `stats:player:${memberId}:${seasonId}`;
+    return yield* playerStatsCache.getOrFetch(
+      cacheKey,
+      fetchStats,
+      TTL.PLAYER_STATS,
+      undefined,
+      {
+        shouldServeStale,
+      },
+    );
+  });
+
 export const MatchesApiLive = HttpApiBuilder.group(
   PsdApi,
   "matches",
@@ -111,5 +139,8 @@ export const MatchesApiLive = HttpApiBuilder.group(
       )
       .handle("getMatchDetail", ({ path: { matchId } }) =>
         withErrorMapping(getMatchDetailHandler(matchId)),
+      )
+      .handle("getPlayerStats", ({ path: { memberId } }) =>
+        withErrorMapping(getPlayerStatsHandler(memberId)),
       ),
 );
