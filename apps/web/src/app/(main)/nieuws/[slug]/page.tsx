@@ -18,7 +18,10 @@ import {
 } from "@/lib/utils/article-related-items";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildNewsArticleJsonLd } from "@/lib/seo/jsonld";
+import {
+  buildNewsArticleJsonLd,
+  buildBreadcrumbJsonLd,
+} from "@/lib/seo/jsonld";
 import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 import { RelatedContentSlider } from "@/components/related/RelatedContentSlider/RelatedContentSlider";
@@ -147,6 +150,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Nieuws", url: `${SITE_CONFIG.siteUrl}/nieuws` },
+          { name: article.title, url: shareConfig.url },
+        ])}
+      />
       {article.publishedAt && (
         <JsonLd
           data={buildNewsArticleJsonLd({

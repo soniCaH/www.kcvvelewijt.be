@@ -29,8 +29,9 @@ import type { FeaturedEventStub } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildSportsClubJsonLd } from "@/lib/seo/jsonld";
+import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 /**
@@ -310,6 +311,11 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={buildSportsClubJsonLd()} />
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+        ])}
+      />
       <SectionStack
         sections={[
           heroSection,

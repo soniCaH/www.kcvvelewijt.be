@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { HistoryContent } from "./HistoryContent";
 
 export const metadata: Metadata = {
@@ -21,5 +24,19 @@ export const metadata: Metadata = {
 };
 
 export default function HistoryPage() {
-  return <HistoryContent />;
+  return (
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          {
+            name: "Geschiedenis",
+            url: `${SITE_CONFIG.siteUrl}/club/geschiedenis`,
+          },
+        ])}
+      />
+      <HistoryContent />
+    </>
+  );
 }

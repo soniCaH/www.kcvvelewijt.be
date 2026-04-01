@@ -8,6 +8,9 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
 import { INITIAL_TOTAL } from "./constants";
@@ -66,14 +69,22 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const gridArticles = initialBatch.articles.slice(3);
 
   return (
-    <NewsListingClient
-      featuredArticles={featuredArticles}
-      initialArticles={gridArticles}
-      categories={categories}
-      hasMore={initialBatch.hasMore}
-      initialCategory={categorySlug}
-      fetchArticles={fetchArticlesAction}
-    />
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Nieuws", url: `${SITE_CONFIG.siteUrl}/nieuws` },
+        ])}
+      />
+      <NewsListingClient
+        featuredArticles={featuredArticles}
+        initialArticles={gridArticles}
+        categories={categories}
+        hasMore={initialBatch.hasMore}
+        initialCategory={categorySlug}
+        fetchArticles={fetchArticlesAction}
+      />
+    </>
   );
 }
 

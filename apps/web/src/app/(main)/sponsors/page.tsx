@@ -10,6 +10,9 @@ import {
   SponsorRepository,
   type SponsorVM,
 } from "@/lib/repositories/sponsor.repository";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
@@ -73,12 +76,20 @@ export default async function SponsorsPageRoute() {
   const featuredSponsors = sponsors.filter((s) => s.featured).map(mapToSponsor);
 
   return (
-    <SponsorsPage
-      goldSponsors={goldSponsors}
-      silverSponsors={silverSponsors}
-      bronzeSponsors={bronzeSponsors}
-      featuredSponsors={featuredSponsors}
-    />
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Sponsors", url: `${SITE_CONFIG.siteUrl}/sponsors` },
+        ])}
+      />
+      <SponsorsPage
+        goldSponsors={goldSponsors}
+        silverSponsors={silverSponsors}
+        bronzeSponsors={bronzeSponsors}
+        featuredSponsors={featuredSponsors}
+      />
+    </>
   );
 }
 

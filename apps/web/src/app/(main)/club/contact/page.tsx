@@ -4,6 +4,9 @@
  */
 
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
 
 export const metadata: Metadata = {
@@ -27,5 +30,16 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPageRoute() {
-  return <ContactPage />;
+  return (
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: "Contact", url: `${SITE_CONFIG.siteUrl}/club/contact` },
+        ])}
+      />
+      <ContactPage />
+    </>
+  );
 }

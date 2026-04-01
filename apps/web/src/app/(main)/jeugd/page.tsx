@@ -15,6 +15,9 @@ import {
   type EditorialCardConfig,
 } from "@/lib/repositories/jeugd-landing-page.repository";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
 import { PageHero } from "@/components/design-system/PageHero";
@@ -211,15 +214,23 @@ export default async function JeugdPage() {
   };
 
   return (
-    <SectionStack
-      sections={[
-        heroSection,
-        editorialSection,
-        teamsSection,
-        quoteSection,
-        ctaSection,
-      ]}
-    />
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Jeugd", url: `${SITE_CONFIG.siteUrl}/jeugd` },
+        ])}
+      />
+      <SectionStack
+        sections={[
+          heroSection,
+          editorialSection,
+          teamsSection,
+          quoteSection,
+          ctaSection,
+        ]}
+      />
+    </>
   );
 }
 

@@ -10,6 +10,8 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 
@@ -114,6 +116,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "KCVV Elewijt", url: `${SITE_CONFIG.siteUrl}/ploegen` },
+          { name: fullName, url: `${SITE_CONFIG.siteUrl}/spelers/${slug}` },
+        ])}
+      />
       <PlayerProfile
         firstName={player.firstName}
         lastName={player.lastName}

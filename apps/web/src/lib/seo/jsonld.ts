@@ -1,4 +1,5 @@
 import type {
+  BreadcrumbList,
   MergeLeafTypes,
   NewsArticle,
   OrganizationLeaf,
@@ -21,6 +22,26 @@ const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
 type SportsClubOrganization = MergeLeafTypes<
   [SportsClubLeaf, OrganizationLeaf]
 > & { sport?: string };
+
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+export function buildBreadcrumbJsonLd(
+  items: BreadcrumbItem[],
+): WithContext<BreadcrumbList> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem" as const,
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
 
 export interface NewsArticleInput {
   headline: string;

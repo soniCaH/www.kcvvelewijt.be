@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
 import { PageHero } from "@/components/design-system/PageHero";
@@ -79,8 +82,21 @@ const contactSection: SectionConfig = {
 
 export default function ClubPage() {
   return (
-    <SectionStack
-      sections={[heroSection, editorialSection, missionSection, contactSection]}
-    />
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+        ])}
+      />
+      <SectionStack
+        sections={[
+          heroSection,
+          editorialSection,
+          missionSection,
+          contactSection,
+        ]}
+      />
+    </>
   );
 }
