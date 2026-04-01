@@ -2,7 +2,7 @@
  * ContactPage Stories
  *
  * Club contact information page with address, map embed, and categorized
- * email contacts. The map is consent-gated — click "Laad kaart" to reveal it.
+ * email contacts.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Full contact page for /club/contact. Shows club address, a consent-gated Google Maps embed, and a grid of categorized email contacts.",
+          "Full contact page for /club/contact. Shows club address, an OpenStreetMap embed, and a grid of categorized email contacts.",
       },
     },
   },

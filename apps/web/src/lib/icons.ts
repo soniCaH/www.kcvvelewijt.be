@@ -43,6 +43,8 @@ import {
   Calendar,
   CalendarDays,
   Clock,
+  Ticket,
+  Coffee,
 
   // Communication
   Mail,
@@ -58,6 +60,10 @@ import {
 
   // Location & Measurement
   MapPin,
+  CircleParking,
+
+  // Accessibility
+  Accessibility,
 
   // Sports & Activities
   Trophy,
@@ -144,6 +150,14 @@ export const icons = {
 
   // Location & Measurement
   "map-pin": MapPin,
+  "circle-parking": CircleParking,
+
+  // Accessibility
+  accessibility: Accessibility,
+
+  // Content & Document (additional)
+  ticket: Ticket,
+  coffee: Coffee,
 
   // Sports & Activities
   trophy: Trophy,
@@ -277,6 +291,14 @@ export {
 
   // Location & Measurement
   MapPin,
+  CircleParking,
+
+  // Accessibility
+  Accessibility,
+
+  // Content & Document (additional)
+  Ticket,
+  Coffee,
 
   // Sports & Activities
   Trophy,
