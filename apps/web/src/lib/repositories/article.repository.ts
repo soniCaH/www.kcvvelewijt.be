@@ -36,7 +36,7 @@ export const RELATED_ARTICLES_QUERY =
 
 export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
-  _id, title, slug, publishAt, featured, tags,
+  _id, _updatedAt, title, slug, publishAt, featured, tags,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
   relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
@@ -69,6 +69,7 @@ export interface ArticleVM {
 }
 
 export interface ArticleDetailVM extends ArticleVM {
+  updatedAt: string | null;
   body: NonNullable<ARTICLE_BY_SLUG_DETAIL>["body"];
   relatedArticles?: RelatedArticleRef[];
   mentionedPlayers?: ARTICLE_BY_SLUG_DETAIL["mentionedPlayers"];
@@ -117,6 +118,7 @@ function toArticleDetailVM(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
     title: row.title ?? "",
     slug: row.slug?.current ?? "",
     publishedAt: row.publishAt,
+    updatedAt: row._updatedAt,
     featured: row.featured ?? false,
     coverImageUrl: row.coverImageUrl ?? undefined,
     tags: row.tags ?? [],

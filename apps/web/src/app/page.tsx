@@ -29,6 +29,8 @@ import type { FeaturedEventStub } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildSportsClubJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 /**
@@ -306,20 +308,23 @@ export default async function HomePage() {
   };
 
   return (
-    <SectionStack
-      sections={[
-        heroSection,
-        matchWidgetSection,
-        bannerSlotASection,
-        latestNewsSection,
-        bannerSlotBSection,
-        matchesSliderSection,
-        youthSection,
-        bannerSlotCSection,
-        sponsorsSection,
-        preFooterSection,
-      ]}
-    />
+    <>
+      <JsonLd data={buildSportsClubJsonLd()} />
+      <SectionStack
+        sections={[
+          heroSection,
+          matchWidgetSection,
+          bannerSlotASection,
+          latestNewsSection,
+          bannerSlotBSection,
+          matchesSliderSection,
+          youthSection,
+          bannerSlotCSection,
+          sponsorsSection,
+          preFooterSection,
+        ]}
+      />
+    </>
   );
 }
 

@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
-
 const staticRoutes: Array<{
   path: string;
   priority: number;
@@ -22,13 +21,48 @@ const staticRoutes: Array<{
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ];
 
+interface ArticleSitemapRow {
+  slug: string;
+  updatedAt: string;
+}
+
+const ARTICLE_SITEMAP_QUERY = `*[_type == "article" && defined(slug.current) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
+  "slug": slug.current,
+  "updatedAt": _updatedAt
+}`;
+
+async function fetchArticleSlugs(): Promise<ArticleSitemapRow[]> {
+  try {
+    const { sanityClient } = await import("@/lib/sanity/client");
+    return await sanityClient.fetch<ArticleSitemapRow[]>(ARTICLE_SITEMAP_QUERY);
+  } catch (error) {
+    console.error(
+      "[sitemap] fetchArticleSlugs failed (sanityClient.fetch with ARTICLE_SITEMAP_QUERY):",
+      error,
+    );
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
-  return staticRoutes.map(({ path, priority, changeFrequency }) => ({
-    url: `${SITE_CONFIG.siteUrl}${path}`,
-    lastModified,
-    changeFrequency,
-    priority,
+  const staticEntries = staticRoutes.map(
+    ({ path, priority, changeFrequency }) => ({
+      url: `${SITE_CONFIG.siteUrl}${path}`,
+      lastModified,
+      changeFrequency,
+      priority,
+    }),
+  );
+
+  const articles = await fetchArticleSlugs();
+  const articleEntries = articles.map((article) => ({
+    url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
+    lastModified: new Date(article.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
   }));
+
+  return [...staticEntries, ...articleEntries];
 }

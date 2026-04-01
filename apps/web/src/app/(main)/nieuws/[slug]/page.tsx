@@ -17,6 +17,8 @@ import {
   mapMentionedStaff,
 } from "@/lib/utils/article-related-items";
 import { SITE_CONFIG } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildNewsArticleJsonLd } from "@/lib/seo/jsonld";
 import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 import { RelatedContentSlider } from "@/components/related/RelatedContentSlider/RelatedContentSlider";
@@ -145,6 +147,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <>
+      {article.publishedAt && (
+        <JsonLd
+          data={buildNewsArticleJsonLd({
+            headline: article.title,
+            datePublished: article.publishedAt,
+            dateModified: article.updatedAt ?? undefined,
+            author: "KCVV Elewijt",
+            image: article.coverImageUrl,
+            url: shareConfig.url,
+          })}
+        />
+      )}
       <ArticleHeader
         title={article.title}
         imageUrl={article.coverImageUrl}
