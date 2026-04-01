@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SearchResult as SearchResultType } from "./SearchInterface";
 import { Icon } from "@/components/design-system";
-import { Newspaper, User, Users, ArrowRight } from "lucide-react";
+import { Newspaper, User, UserCog, Users, ArrowRight } from "lucide-react";
 
 export interface SearchResultProps {
   /**
@@ -24,12 +24,14 @@ export interface SearchResultProps {
 const typeIcons = {
   article: Newspaper,
   player: User,
+  staff: UserCog,
   team: Users,
 } as const;
 
 const typeLabels = {
   article: "Nieuws",
   player: "Speler",
+  staff: "Staf",
   team: "Team",
 } as const;
 

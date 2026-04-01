@@ -12,6 +12,7 @@ describe("SearchFilters", () => {
     all: 10,
     article: 5,
     player: 3,
+    staff: 0,
     team: 2,
   };
 
@@ -28,6 +29,7 @@ describe("SearchFilters", () => {
       expect(screen.getByRole("tab", { name: /alles/i })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /nieuws/i })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /spelers/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /staf/i })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /teams/i })).toBeInTheDocument();
     });
 
@@ -48,7 +50,7 @@ describe("SearchFilters", () => {
   });
 
   describe("Tab Configuration", () => {
-    it("should configure all four tabs with correct values", () => {
+    it("should configure all five tabs with correct values", () => {
       render(
         <SearchFilters
           activeType="all"
@@ -57,9 +59,11 @@ describe("SearchFilters", () => {
         />,
       );
 
-      // Verify tab structure
+      // Verify tab structure and ordering
       const tabs = screen.getAllByRole("tab");
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
+      expect(tabs[3]).toHaveTextContent("Staf");
+      expect(within(tabs[3]).getByText("0")).toBeInTheDocument();
     });
 
     it("should display correct labels for each tab", () => {
@@ -74,6 +78,7 @@ describe("SearchFilters", () => {
       expect(screen.getByText("Alles")).toBeInTheDocument();
       expect(screen.getByText("Nieuws")).toBeInTheDocument();
       expect(screen.getByText("Spelers")).toBeInTheDocument();
+      expect(screen.getByText("Staf")).toBeInTheDocument();
       expect(screen.getByText("Teams")).toBeInTheDocument();
     });
 
@@ -90,11 +95,13 @@ describe("SearchFilters", () => {
       const allTab = screen.getByRole("tab", { name: /alles/i });
       const articleTab = screen.getByRole("tab", { name: /nieuws/i });
       const playerTab = screen.getByRole("tab", { name: /spelers/i });
+      const staffTab = screen.getByRole("tab", { name: /staf/i });
       const teamTab = screen.getByRole("tab", { name: /teams/i });
 
       expect(within(allTab).getByText("10")).toBeInTheDocument();
       expect(within(articleTab).getByText("5")).toBeInTheDocument();
       expect(within(playerTab).getByText("3")).toBeInTheDocument();
+      expect(within(staffTab).getByText("0")).toBeInTheDocument();
       expect(within(teamTab).getByText("2")).toBeInTheDocument();
     });
 
@@ -103,6 +110,7 @@ describe("SearchFilters", () => {
         all: 0,
         article: 0,
         player: 0,
+        staff: 0,
         team: 0,
       };
 
@@ -116,7 +124,7 @@ describe("SearchFilters", () => {
 
       // All tabs should still render
       const tabs = screen.getAllByRole("tab");
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
     });
   });
 
@@ -298,6 +306,7 @@ describe("SearchFilters", () => {
         all: 20,
         article: 10,
         player: 7,
+        staff: 0,
         team: 3,
       };
 

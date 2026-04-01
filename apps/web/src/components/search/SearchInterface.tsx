@@ -46,7 +46,12 @@ export const SearchInterface = ({
   // Validate and get initial values from URL
   const urlQuery = searchParams.get("q") || initialQuery;
   const rawUrlType = searchParams.get("type");
-  const allowedTypes: SearchResultType[] = ["article", "player", "team"];
+  const allowedTypes: SearchResultType[] = [
+    "article",
+    "player",
+    "staff",
+    "team",
+  ];
   const urlType =
     rawUrlType && allowedTypes.includes(rawUrlType as SearchResultType)
       ? (rawUrlType as SearchResultType)
@@ -268,6 +273,7 @@ export const SearchInterface = ({
               all: totalCount,
               article: results.filter((r) => r.type === "article").length,
               player: results.filter((r) => r.type === "player").length,
+              staff: results.filter((r) => r.type === "staff").length,
               team: results.filter((r) => r.type === "team").length,
             }}
           />

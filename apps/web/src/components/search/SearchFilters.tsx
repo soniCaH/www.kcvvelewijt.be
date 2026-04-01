@@ -11,7 +11,7 @@ import {
   FilterTabs,
   type FilterTab,
 } from "@/components/design-system/FilterTabs";
-import { Search, Newspaper, User, Users } from "lucide-react";
+import { Search, Newspaper, User, UserCog, Users } from "lucide-react";
 
 export interface SearchFiltersProps {
   /**
@@ -29,6 +29,7 @@ export interface SearchFiltersProps {
     all: number;
     article: number;
     player: number;
+    staff: number;
     team: number;
   };
 }
@@ -60,6 +61,12 @@ export const SearchFilters = ({
         label: "Spelers",
         icon: User,
         count: resultCounts.player,
+      },
+      {
+        value: "staff",
+        label: "Staf",
+        icon: UserCog,
+        count: resultCounts.staff,
       },
       {
         value: "team",
