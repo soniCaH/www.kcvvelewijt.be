@@ -1,11 +1,48 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ContactPage } from "./ContactPage";
+import type { KeyContactVM } from "@/lib/repositories/staff.repository";
 
 // Stub MapEmbed to avoid consent/iframe complexity in unit tests
 vi.mock("./MapEmbed", () => ({
   MapEmbed: () => <div data-testid="map-embed" />,
 }));
+
+const KEY_CONTACTS: KeyContactVM[] = [
+  { role: "Voorzitter", name: "Jan Janssens", email: "jan@kcvv.be" },
+  { role: "Secretaris", name: "Piet Pieters", email: "piet@kcvv.be" },
+];
+
+describe("ContactPage — Snelle contacten section", () => {
+  it("renders the section heading when key contacts are provided", () => {
+    render(<ContactPage keyContacts={KEY_CONTACTS} />);
+    expect(
+      screen.getByRole("heading", { name: /snelle contacten/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders each key contact with role, name, and mailto link", () => {
+    render(<ContactPage keyContacts={KEY_CONTACTS} />);
+    expect(screen.getByText("Voorzitter")).toBeInTheDocument();
+    expect(screen.getByText("Jan Janssens")).toBeInTheDocument();
+    const mailtoLink = screen.getByRole("link", { name: /jan@kcvv.be/i });
+    expect(mailtoLink).toHaveAttribute("href", "mailto:jan@kcvv.be");
+  });
+
+  it("does not render section when keyContacts is empty", () => {
+    render(<ContactPage keyContacts={[]} />);
+    expect(
+      screen.queryByRole("heading", { name: /snelle contacten/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not render section when keyContacts is undefined", () => {
+    render(<ContactPage />);
+    expect(
+      screen.queryByRole("heading", { name: /snelle contacten/i }),
+    ).not.toBeInTheDocument();
+  });
+});
 
 describe("ContactPage — Kom naar ons section", () => {
   it("renders the section heading", () => {

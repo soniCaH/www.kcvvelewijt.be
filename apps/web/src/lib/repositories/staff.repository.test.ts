@@ -19,7 +19,9 @@ import {
   StaffRepository,
   StaffRepositoryLive,
   toOrgChartNode,
+  toKeyContactVMs,
   type StaffDetailVM,
+  type KeyContactVM,
 } from "./staff.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,6 +144,54 @@ describe("toOrgChartNode", () => {
     const member = result.members[0];
     expect(member.name).toBeUndefined();
     expect(member.href).toBe("/staf/42");
+  });
+});
+
+describe("toKeyContactVMs", () => {
+  it("maps a node row to KeyContactVM entries", () => {
+    const rows = [
+      {
+        title: "Voorzitter",
+        roleCode: "voorzitter",
+        members: [{ name: "Jan Janssens", email: "jan@kcvv.be" }],
+      },
+    ];
+    expect(toKeyContactVMs(rows)).toEqual<KeyContactVM[]>([
+      { role: "Voorzitter", name: "Jan Janssens", email: "jan@kcvv.be" },
+    ]);
+  });
+
+  it("trims whitespace from member names", () => {
+    const rows = [
+      {
+        title: "Secretaris",
+        roleCode: "secretaris",
+        members: [{ name: " Piet Pieters ", email: "piet@kcvv.be" }],
+      },
+    ];
+    expect(toKeyContactVMs(rows)[0].name).toBe("Piet Pieters");
+  });
+
+  it("uses role title as fallback when name is whitespace-only", () => {
+    const rows = [
+      {
+        title: "Voorzitter",
+        roleCode: "voorzitter",
+        members: [{ name: "  ", email: "voorzitter@kcvv.be" }],
+      },
+    ];
+    expect(toKeyContactVMs(rows)[0].name).toBe("Voorzitter");
+  });
+
+  it("null title defaults to empty string for role", () => {
+    const rows = [
+      {
+        title: null as unknown as string,
+        roleCode: "voorzitter",
+        members: [{ name: "Jan", email: "jan@kcvv.be" }],
+      },
+    ];
+    expect(toKeyContactVMs(rows)[0].role).toBe("");
   });
 });
 
@@ -418,6 +468,72 @@ describe("StaffRepository", () => {
       expect(member?.phone).toBeUndefined();
       expect(member?.imageUrl).toBeUndefined();
       expect(member?.bio).toBeUndefined();
+    });
+  });
+
+  describe("findKeyContacts", () => {
+    it("returns key contacts with role, name, and email", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          title: "Voorzitter",
+          roleCode: "voorzitter",
+          members: [{ name: "Jan Janssens", email: "jan@kcvv.be" }],
+        },
+        {
+          title: "Secretaris",
+          roleCode: "secretaris",
+          members: [{ name: "Piet Pieters", email: "piet@kcvv.be" }],
+        },
+      ]);
+
+      const contacts = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findKeyContacts();
+        }),
+      );
+
+      expect(contacts).toEqual<KeyContactVM[]>([
+        { role: "Voorzitter", name: "Jan Janssens", email: "jan@kcvv.be" },
+        { role: "Secretaris", name: "Piet Pieters", email: "piet@kcvv.be" },
+      ]);
+    });
+
+    it("flattens multiple members per node into separate contacts", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          title: "Jeugdcoördinator",
+          roleCode: "jeugdcoordinator",
+          members: [
+            { name: "An Anssens", email: "an@kcvv.be" },
+            { name: "Bea Boons", email: "bea@kcvv.be" },
+          ],
+        },
+      ]);
+
+      const contacts = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findKeyContacts();
+        }),
+      );
+
+      expect(contacts).toHaveLength(2);
+      expect(contacts[0].name).toBe("An Anssens");
+      expect(contacts[1].name).toBe("Bea Boons");
+    });
+
+    it("returns empty array when no key contacts exist", async () => {
+      mockFetch.mockResolvedValueOnce([]);
+
+      const contacts = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findKeyContacts();
+        }),
+      );
+
+      expect(contacts).toEqual([]);
     });
   });
 
