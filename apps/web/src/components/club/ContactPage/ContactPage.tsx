@@ -4,7 +4,15 @@
  */
 
 import Link from "next/link";
-import { MapPin, Mail, ExternalLink } from "@/lib/icons";
+import {
+  MapPin,
+  Mail,
+  ExternalLink,
+  CircleParking,
+  Ticket,
+  Coffee,
+  Accessibility,
+} from "@/lib/icons";
 import { MapEmbed } from "./MapEmbed";
 
 const CONTACT_CATEGORIES = [
@@ -166,6 +174,111 @@ export function ContactPage() {
                 </div>
               </a>
             ))}
+          </div>
+        </div>
+
+        {/* Matchday & venue info */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-blue font-title mb-6">
+            Kom naar ons
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Parking */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <CircleParking
+                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="font-bold text-gray-blue mb-2">Parking</p>
+                  <p className="text-sm text-gray-dark">
+                    Parkeren kan aan het voetbalveld en rondom het Van Innis
+                    sportpark. Een gedetailleerd parkeerplan vind je op de
+                    website van de gemeente Zemst.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Entry prices */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <Ticket
+                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="font-bold text-gray-blue mb-2">Inkom</p>
+                  <table className="w-full text-sm text-gray-dark">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left py-1 font-semibold">
+                          Wedstrijd
+                        </th>
+                        <th className="text-right py-1 font-semibold">Prijs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-1">Jeugd</td>
+                        <td className="text-right py-1">€3</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-1">B-ploeg</td>
+                        <td className="text-right py-1">€5</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1">A-ploeg</td>
+                        <td className="text-right py-1">€10</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Canteen */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <Coffee
+                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="font-bold text-gray-blue mb-2">Kantine</p>
+                  <p className="text-sm text-gray-dark mb-2">
+                    De kantine is open op trainingsdagen:
+                  </p>
+                  <ul className="text-sm text-gray-dark space-y-1">
+                    <li>Woensdag &amp; vrijdag: vanaf 18u00</li>
+                    <li>Donderdag: vanaf 20u00</li>
+                  </ul>
+                  <p className="text-sm text-gray-dark mt-2">
+                    Op wedstrijddagen zijn er geen vaste uren.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Accessibility */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <Accessibility
+                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="font-bold text-gray-blue mb-2">
+                    Toegankelijkheid
+                  </p>
+                  <p className="text-sm text-gray-dark">
+                    Het sportpark is toegankelijk voor rolstoelgebruikers. Er
+                    zijn 2 voorbehouden parkeerplaatsen beschikbaar.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
