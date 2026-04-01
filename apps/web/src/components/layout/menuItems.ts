@@ -67,16 +67,19 @@ export const seniorNavLabel = (name: string): string => {
   return /^[A-Z]$/.test(lastWord) ? `${lastWord}-Ploeg` : name;
 };
 
-export const buildJeugdItem = (youthTeams?: TeamNavVM[]): MenuItem => ({
-  label: "Jeugd",
-  href: "/jeugd",
-  children: youthTeams
+export const buildJeugdItem = (youthTeams?: TeamNavVM[]): MenuItem => {
+  const children = youthTeams
     ?.filter((t) => t.age != null)
     .map((t) => ({
       label: t.age!,
       href: `/ploegen/${t.slug}`,
-    })),
-});
+    }));
+  return {
+    label: "Jeugd",
+    href: "/jeugd",
+    children: children?.length ? children : undefined,
+  };
+};
 
 export const isMenuItemActive = (
   href: string,
@@ -89,14 +92,14 @@ export const isMenuItemActive = (
     return pathname === "/" && !itemQuery;
   }
 
+  if (pathname === itemPath && !itemQuery) {
+    return true;
+  }
+
   if (itemQuery) {
     const itemParams = new URLSearchParams(itemQuery);
     const itemTab = itemParams.get("tab");
     return pathname === itemPath && searchParams.get("tab") === itemTab;
-  }
-
-  if (pathname === itemPath) {
-    return !searchParams.get("tab");
   }
 
   if (pathname?.startsWith(itemPath + "/")) {
