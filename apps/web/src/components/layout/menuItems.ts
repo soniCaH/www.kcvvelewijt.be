@@ -23,6 +23,7 @@ export const staticMenuItems: MenuItem[] = [
       { label: "KCVV Angels", href: "/club/angels" },
       { label: "KCVV Ultras", href: "/club/ultras" },
       { label: "Contact", href: "/club/contact" },
+      { label: "Word vrijwilliger", href: "/club/vrijwilliger" },
       { label: "Downloads", href: "/club/downloads" },
       { label: "Praktische Info", href: "/club/inschrijven" },
       { label: "Cashless clubkaart", href: "/club/cashless" },

@@ -13,6 +13,21 @@ describe("staticMenuItems", () => {
     const labels = staticMenuItems.map((item) => item.label);
     expect(labels).not.toContain("Zoeken");
   });
+
+  it("includes 'Word vrijwilliger' in 'De club' children after 'Contact'", () => {
+    const deClub = staticMenuItems.find((item) => item.label === "De club");
+    expect(deClub).toBeDefined();
+    const children = deClub!.children!;
+    const labels = children.map((c) => c.label);
+    expect(labels).toContain("Word vrijwilliger");
+
+    const contactIdx = labels.indexOf("Contact");
+    const vrijwilligerIdx = labels.indexOf("Word vrijwilliger");
+    expect(vrijwilligerIdx).toBe(contactIdx + 1);
+
+    const vrijwilliger = children.find((c) => c.label === "Word vrijwilliger");
+    expect(vrijwilliger?.href).toBe("/club/vrijwilliger");
+  });
 });
 
 describe("buildMenuItems", () => {
