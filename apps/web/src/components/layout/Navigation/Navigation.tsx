@@ -11,7 +11,13 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
-import { buildMenuItems } from "../menuItems";
+import {
+  buildMenuItems,
+  buildSeniorMenuItem,
+  seniorNavLabel,
+  buildJeugdItem,
+  isMenuItemActive,
+} from "../menuItems";
 import type { MenuItem } from "../menuItems";
 
 export interface NavigationProps {
@@ -37,24 +43,6 @@ export interface NavigationProps {
  * - Dropdown border: 1px solid gray-700
  * - Dropdown font-size: 0.6875rem (11px)
  */
-const buildSeniorMenuItem = (
-  team: TeamNavVM | undefined,
-  label: string,
-): MenuItem | null => {
-  if (!team?.slug) return null;
-  const href = `/ploegen/${team.slug}`;
-  return {
-    label,
-    href,
-    children: [
-      { label: "Info", href },
-      { label: "Spelers & Staff", href: `${href}?tab=opstelling` },
-      { label: "Wedstrijden", href: `${href}?tab=wedstrijden` },
-      { label: "Stand", href: `${href}?tab=klassement` },
-    ],
-  };
-};
-
 export const Navigation = ({
   youthTeams,
   seniorTeams,
@@ -64,21 +52,7 @@ export const Navigation = ({
   const searchParams = useSearchParams();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-  const seniorNavLabel = (name: string): string => {
-    const lastWord = name.trim().split(/\s+/).at(-1) ?? name;
-    return /^[A-Z]$/.test(lastWord) ? `${lastWord}-Ploeg` : name;
-  };
-
-  const jeugdItem: MenuItem = {
-    label: "Jeugd",
-    href: "/jeugd",
-    children: youthTeams
-      ?.filter((t) => t.age != null)
-      .map((t) => ({
-        label: t.age!,
-        href: `/ploegen/${t.slug}`,
-      })),
-  };
+  const jeugdItem = buildJeugdItem(youthTeams);
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>
     buildSeniorMenuItem(t, seniorNavLabel(t.name)),
@@ -86,40 +60,8 @@ export const Navigation = ({
 
   const menuItems = buildMenuItems(seniorMenuItems, jeugdItem);
 
-  /**
-   * Check if a menu item is active, handling both pathname and query params
-   */
-  const isActive = (href: string) => {
-    // Parse the href to separate pathname and query params
-    const [itemPath, itemQuery] = href.split("?");
-
-    if (itemPath === "/") {
-      return pathname === "/" && !itemQuery;
-    }
-
-    // If href has query params, check both pathname and query param match
-    if (itemQuery) {
-      const itemParams = new URLSearchParams(itemQuery);
-      const itemTab = itemParams.get("tab");
-
-      // Must match pathname exactly and have the same tab param
-      return pathname === itemPath && searchParams.get("tab") === itemTab;
-    }
-
-    // For items without query params, check if it's a base path match
-    // but NOT if we're on a tab (e.g., /ploegen/a-ploeg should not be active when on ?tab=opstelling)
-    if (pathname === itemPath) {
-      // Only active if there's no tab param in the URL
-      return !searchParams.get("tab");
-    }
-
-    // Check for nested routes (but not for team pages with tabs)
-    if (pathname?.startsWith(itemPath + "/")) {
-      return true;
-    }
-
-    return false;
-  };
+  const isActive = (href: string) =>
+    isMenuItemActive(href, pathname, searchParams);
 
   const hasActiveChild = (item: MenuItem) => {
     return item.children?.some((child) => isActive(child.href)) || false;

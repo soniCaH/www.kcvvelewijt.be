@@ -53,6 +53,28 @@ describe("buildMenuItems", () => {
     ]);
   });
 
+  it("filters out null entries from seniorItems", () => {
+    const seniorItems: (MenuItem | null)[] = [
+      { label: "A", href: "/a" },
+      null,
+      { label: "B", href: "/b" },
+    ];
+    const result = buildMenuItems(seniorItems, jeugdItem);
+    const labels = result.map((item) => item.label);
+
+    expect(labels).toEqual([
+      "Home",
+      "Nieuws",
+      "Evenementen",
+      "A",
+      "B",
+      "Jeugd",
+      "Sponsors",
+      "Hulp",
+      "De club",
+    ]);
+  });
+
   it("preserves children on all items", () => {
     const result = buildMenuItems(seniorItems, jeugdItem);
     const jeugd = result.find((item) => item.label === "Jeugd");
