@@ -11,6 +11,8 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
+import { buildMenuItems } from "../menuItems";
+import type { MenuItem } from "../menuItems";
 
 export interface NavigationProps {
   youthTeams?: TeamNavVM[];
@@ -20,36 +22,6 @@ export interface NavigationProps {
    */
   className?: string;
 }
-
-interface MenuItem {
-  label: string;
-  href: string;
-  children?: MenuItem[];
-}
-
-const staticMenuItems: MenuItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Nieuws", href: "/nieuws" },
-  { label: "Evenementen", href: "/events" },
-  { label: "Sponsors", href: "/sponsors" },
-  { label: "Hulp", href: "/hulp" },
-  {
-    label: "De club",
-    href: "/club",
-    children: [
-      { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
-      { label: "Bestuur", href: "/club/bestuur" },
-      { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
-      { label: "KCVV Angels", href: "/club/angels" },
-      { label: "KCVV Ultras", href: "/club/ultras" },
-      { label: "Contact", href: "/club/contact" },
-      { label: "Downloads", href: "/club/downloads" },
-      { label: "Praktische Info", href: "/club/inschrijven" },
-      { label: "Cashless clubkaart", href: "/club/cashless" },
-    ],
-  },
-];
 
 /**
  * Desktop horizontal navigation with dropdown menus
@@ -112,12 +84,7 @@ export const Navigation = ({
     buildSeniorMenuItem(t, seniorNavLabel(t.name)),
   );
 
-  const menuItems: MenuItem[] = [
-    ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
-    ...seniorMenuItems,
-    jeugdItem,
-    ...staticMenuItems.slice(3), // Sponsors, Hulp, De club
-  ].filter((item): item is MenuItem => item !== null);
+  const menuItems = buildMenuItems(seniorMenuItems, jeugdItem);
 
   /**
    * Check if a menu item is active, handling both pathname and query params

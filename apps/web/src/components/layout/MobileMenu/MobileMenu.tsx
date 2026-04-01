@@ -11,8 +11,10 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Icon, SocialLinks } from "@/components/design-system";
-import { X, ChevronDown, Search } from "@/lib/icons";
+import { X, ChevronDown } from "@/lib/icons";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
+import { buildMenuItems } from "../menuItems";
+import type { MenuItem } from "../menuItems";
 
 export interface MobileMenuProps {
   /**
@@ -30,40 +32,6 @@ export interface MobileMenuProps {
    */
   className?: string;
 }
-
-interface MenuItem {
-  label: string;
-  href: string;
-  children?: MenuItem[];
-}
-
-const staticMenuItems: MenuItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Nieuws", href: "/nieuws" },
-  { label: "Evenementen", href: "/events" },
-  { label: "Sponsors", href: "/sponsors" },
-  { label: "Hulp", href: "/hulp" },
-  {
-    label: "De club",
-    href: "/club",
-    children: [
-      { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
-      { label: "Bestuur", href: "/club/bestuur" },
-      { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
-      { label: "KCVV Angels", href: "/club/angels" },
-      { label: "KCVV Ultras", href: "/club/ultras" },
-      { label: "Contact", href: "/club/contact" },
-      { label: "Downloads", href: "/club/downloads" },
-      { label: "Praktische Info", href: "/club/inschrijven" },
-      { label: "Cashless clubkaart", href: "/club/cashless" },
-    ],
-  },
-  {
-    label: "Zoeken",
-    href: "/zoeken",
-  },
-];
 
 /**
  * Mobile off-canvas navigation menu
@@ -126,12 +94,7 @@ export const MobileMenu = ({
     buildSeniorMenuItem(t, seniorNavLabel(t.name)),
   );
 
-  const menuItems: MenuItem[] = [
-    ...staticMenuItems.slice(0, 3), // Home, Nieuws, Evenementen
-    ...seniorMenuItems,
-    jeugdItem,
-    ...staticMenuItems.slice(3), // Sponsors, Hulp, De club, Zoeken
-  ].filter((item): item is MenuItem => item !== null);
+  const menuItems = buildMenuItems(seniorMenuItems, jeugdItem);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -337,9 +300,6 @@ export const MobileMenu = ({
                       )}
                     >
                       {item.label}
-                      {item.href === "/zoeken" && (
-                        <Icon icon={Search} size="xs" className="ml-2 inline" />
-                      )}
                     </Link>
                   )}
                 </li>
