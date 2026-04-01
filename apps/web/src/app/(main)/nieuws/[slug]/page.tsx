@@ -145,8 +145,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ...mapMentionedTeams(article.mentionedTeams),
   ];
 
-  const articleUrl = `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`;
-
   return (
     <>
       {article.publishedAt && (
@@ -157,7 +155,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             dateModified: article.updatedAt ?? undefined,
             author: "KCVV Elewijt",
             image: article.coverImageUrl,
-            url: articleUrl,
+            url: shareConfig.url,
           })}
         />
       )}
