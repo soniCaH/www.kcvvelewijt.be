@@ -65,6 +65,7 @@ describe("PageRepository", () => {
         id: "page-1",
         title: "Praktische Info",
         slug: "praktische-info",
+        heroImageUrl: null,
         body: row.body!,
       });
     });
@@ -106,6 +107,39 @@ describe("PageRepository", () => {
       );
 
       expect(page?.body).toEqual([]);
+    });
+
+    it("maps heroImageUrl when heroImage is set", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makePageRow({
+          heroImageUrl:
+            "https://cdn.sanity.io/images/proj/dataset/abc.jpg?w=1600&q=80&fm=webp&fit=max",
+        } as Record<string, unknown>),
+      );
+
+      const page = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PageRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(page?.heroImageUrl).toBe(
+        "https://cdn.sanity.io/images/proj/dataset/abc.jpg?w=1600&q=80&fm=webp&fit=max",
+      );
+    });
+
+    it("heroImageUrl is null when heroImage is not set", async () => {
+      mockFetch.mockResolvedValueOnce(makePageRow());
+
+      const page = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PageRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(page?.heroImageUrl).toBeNull();
     });
   });
 });

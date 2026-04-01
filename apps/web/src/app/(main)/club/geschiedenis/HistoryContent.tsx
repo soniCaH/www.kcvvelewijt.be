@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system/PageHero";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 function TimelineItem({
@@ -109,7 +109,17 @@ export function HistoryContent() {
 
   return (
     <div ref={containerRef}>
-      <PageTitle title="Geschiedenis" />
+      <PageHero
+        image="/images/history/history-24-25.jpg"
+        imageAlt="KCVV Elewijt kampioen 2024-2025"
+        label="Onze club"
+        headline={
+          <>
+            Onze <span className="text-kcvv-green">geschiedenis</span>
+          </>
+        }
+        body="Van 1909 tot vandaag — meer dan een eeuw voetbalpassie in Elewijt."
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-12">
         {/* 1909 - 1941 */}
