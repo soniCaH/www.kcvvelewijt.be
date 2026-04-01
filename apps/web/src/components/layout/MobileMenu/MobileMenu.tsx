@@ -20,6 +20,7 @@ import {
   buildJeugdItem,
   isMenuItemActive,
 } from "../menuItems";
+import "./MobileMenu.css";
 
 export interface MobileMenuProps {
   /**
@@ -96,32 +97,6 @@ export const MobileMenu = ({
 
   return (
     <>
-      {/* Styles for mobile menu left border effect - using dangerouslySetInnerHTML for Storybook compatibility */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .mobile-nav-link {
-              position: relative;
-            }
-            .mobile-nav-link::before {
-              content: "";
-              position: absolute;
-              left: 0;
-              top: 0;
-              bottom: 0;
-              width: 4px;
-              background-color: transparent;
-              transition: background-color 0.3s ease;
-              z-index: 1;
-            }
-            .mobile-nav-link:hover::before,
-            .mobile-nav-link.active::before {
-              background-color: var(--color-kcvv-green-bright);
-            }
-          `,
-        }}
-      />
-
       {/* Backdrop */}
       <div
         className={cn(

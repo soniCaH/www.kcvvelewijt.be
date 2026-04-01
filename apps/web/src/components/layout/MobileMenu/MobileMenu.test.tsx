@@ -266,6 +266,14 @@ describe("MobileMenu", () => {
     });
   });
 
+  describe("No inline style blocks", () => {
+    it("should not render any inline <style> elements", () => {
+      const { container } = render(<MobileMenu {...defaultProps} />);
+      const styleElements = container.querySelectorAll("style");
+      expect(styleElements).toHaveLength(0);
+    });
+  });
+
   describe("Custom className", () => {
     it("should apply custom className to nav", () => {
       render(<MobileMenu {...defaultProps} className="custom-class" />);

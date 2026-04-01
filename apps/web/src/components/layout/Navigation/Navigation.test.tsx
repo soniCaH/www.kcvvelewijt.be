@@ -221,6 +221,14 @@ describe("Navigation", () => {
     });
   });
 
+  describe("No inline style blocks", () => {
+    it("should not render any inline <style> elements", () => {
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
+      const styleElements = container.querySelectorAll("style");
+      expect(styleElements).toHaveLength(0);
+    });
+  });
+
   describe("Custom className", () => {
     it("should apply custom className", () => {
       render(<Navigation seniorTeams={seniorTeams} className="custom-class" />);
