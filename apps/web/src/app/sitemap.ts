@@ -80,7 +80,16 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatches(teamId);
-      }).pipe(Effect.catchAll(() => Effect.succeed([] as const))),
+      }).pipe(
+        Effect.catchTag("HttpNotFound", () => Effect.succeed([] as const)),
+        Effect.catchAll((error) => {
+          console.error(
+            `[sitemap] Failed to fetch matches for team ${teamId}:`,
+            error,
+          );
+          return Effect.succeed([] as const);
+        }),
+      ),
     );
 
     const results = await runPromise(
