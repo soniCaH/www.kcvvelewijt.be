@@ -26,20 +26,11 @@ interface PlayerPageProps {
  *
  * @returns An array of objects each containing a `slug` property set to the player's `psdId`; returns an empty array if player retrieval fails.
  */
+// No static prerendering — the page body fetches PSD data via the BFF,
+// which is heavily rate-limited. Pages are built on-demand and ISR-cached
+// (see revalidate at the bottom of this file).
 export async function generateStaticParams() {
-  try {
-    const players = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PlayerRepository;
-        return yield* repo.findAll();
-      }),
-    );
-    return players
-      .filter((p): p is typeof p & { href: string } => !!p.href)
-      .map((p) => ({ slug: p.href.replace("/spelers/", "") }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 /**
