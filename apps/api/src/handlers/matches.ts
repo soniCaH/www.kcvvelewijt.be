@@ -106,23 +106,24 @@ export const getPlayerStatsHandler = (
   PlayerSeasonStatsType,
   BffError,
   FootbalistoService | KvCacheService | WorkerEnvTag
-> => {
-  const fetchStats = Effect.gen(function* () {
+> =>
+  Effect.gen(function* () {
     const service = yield* FootbalistoService;
-    return yield* service.getPlayerStats(memberId);
-  });
+    const seasonId = yield* service.getCurrentSeasonId();
 
-  const cacheKey = `stats:player:${memberId}`;
-  return playerStatsCache.getOrFetch(
-    cacheKey,
-    fetchStats,
-    TTL.PLAYER_STATS,
-    undefined,
-    {
-      shouldServeStale,
-    },
-  );
-};
+    const fetchStats = service.getPlayerStats(memberId);
+
+    const cacheKey = `stats:player:${memberId}:${seasonId}`;
+    return yield* playerStatsCache.getOrFetch(
+      cacheKey,
+      fetchStats,
+      TTL.PLAYER_STATS,
+      undefined,
+      {
+        shouldServeStale,
+      },
+    );
+  });
 
 export const MatchesApiLive = HttpApiBuilder.group(
   PsdApi,

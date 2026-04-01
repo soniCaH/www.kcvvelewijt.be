@@ -61,6 +61,7 @@ function makeServiceMock(
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
     getOpponentHistory: () => Effect.die("not needed"),
+    getCurrentSeasonId: () => Effect.succeed(123),
     getPlayerStats: (_memberId) =>
       Effect.succeed({
         memberId: 42,

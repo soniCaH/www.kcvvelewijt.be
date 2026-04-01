@@ -39,6 +39,7 @@ function makeServiceMock(
     getRanking: () => Effect.succeed(rankingEntries),
     getOpponentHistory: () => Effect.die("not needed"),
     getPlayerStats: () => Effect.die("not needed"),
+    getCurrentSeasonId: () => Effect.succeed(123),
     ...overrides,
   };
 }

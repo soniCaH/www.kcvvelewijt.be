@@ -540,6 +540,7 @@ export interface FootbalistoServiceInterface {
   readonly getPlayerStats: (
     memberId: number,
   ) => Effect.Effect<PlayerSeasonStats, BffError>;
+  readonly getCurrentSeasonId: () => Effect.Effect<number, BffError>;
 }
 
 export class FootbalistoService extends Context.Tag("FootbalistoService")<
@@ -1064,6 +1065,9 @@ export const FootbalistoServiceLive = Layer.effect(
             })),
           };
         }),
+
+      getCurrentSeasonId: () =>
+        getCurrentSeason().pipe(Effect.map((s) => s.id)),
     };
   }),
 );
