@@ -67,6 +67,12 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
+  // Intentional try/catch around runPromise: sitemap generation must degrade
+  // gracefully rather than fail entirely. Inner Effect.catchTag("HttpNotFound")
+  // silently handles missing teams; the inner Effect.catchAll logs unexpected
+  // errors per team while allowing other teams to succeed. This outer try/catch
+  // is a last-resort fallback for catastrophic failures (e.g. import errors,
+  // runtime misconfiguration) — returns a partial sitemap instead of crashing.
   try {
     const { Effect } = await import("effect");
     const { runPromise } = await import("@/lib/effect/runtime");
