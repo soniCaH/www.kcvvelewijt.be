@@ -16,6 +16,11 @@ const meta = {
     },
     label: { control: "text", description: "Small label above the headline" },
     body: { control: "text", description: "Body text below the headline" },
+    size: {
+      control: "select",
+      options: ["default", "compact"],
+      description: "Hero height variant",
+    },
   },
 } satisfies Meta<typeof PageHero>;
 
@@ -65,5 +70,16 @@ export const WithoutCta: Story = {
       </>
     ),
     body: "Meer dan 200 jonge voetballers. Gediplomeerde trainers. Eén missie: plezier, techniek en teamspirit.",
+  },
+};
+
+export const Compact: Story = {
+  args: {
+    image: "/images/youth-trainers.jpg",
+    imageAlt: "KCVV jeugdtraining",
+    label: "Kalender",
+    headline: "Wedstrijdkalender",
+    body: "Bekijk alle wedstrijden en activiteiten van KCVV Elewijt.",
+    size: "compact",
   },
 };

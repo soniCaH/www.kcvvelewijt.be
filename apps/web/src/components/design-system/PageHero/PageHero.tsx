@@ -9,6 +9,7 @@ export interface PageHeroProps {
   headline: ReactNode;
   body: string;
   cta?: { label: string; href: string };
+  size?: "default" | "compact";
 }
 
 export function PageHero({
@@ -18,6 +19,7 @@ export function PageHero({
   headline,
   body,
   cta,
+  size = "default",
 }: PageHeroProps) {
   return (
     <div className="relative">
@@ -42,7 +44,9 @@ export function PageHero({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-[60vh] flex items-end">
+      <div
+        className={`relative z-10 flex items-end ${size === "compact" ? "min-h-[35vh]" : "min-h-[60vh]"}`}
+      >
         <div className="max-w-inner-lg mx-auto px-4 md:px-10 pt-10 pb-16 md:pt-16 md:pb-24 w-full">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-white/50 mb-6">
             <span className="block w-5 h-0.5 bg-kcvv-green" />

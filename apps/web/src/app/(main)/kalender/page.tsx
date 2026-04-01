@@ -13,7 +13,7 @@ import {
   type EventVM,
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { transformMatchToCalendar } from "./utils";
 import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
@@ -131,7 +131,14 @@ export default async function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageTitle title="Wedstrijdkalender" />
+      <PageHero
+        image="/images/youth-trainers.jpg"
+        imageAlt="KCVV jeugdtraining"
+        label="Kalender"
+        headline="Wedstrijdkalender"
+        body="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
+        size="compact"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <CalendarWidget
