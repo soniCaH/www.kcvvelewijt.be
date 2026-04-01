@@ -7,6 +7,13 @@ import type {
   WithContext,
 } from "schema-dts";
 
+/** Loose JSON-LD document type — allows arbitrary Schema.org properties */
+interface JsonLdDocument {
+  "@context": "https://schema.org";
+  "@type": string;
+  [key: string]: unknown;
+}
+
 import { SITE_CONFIG } from "@/lib/constants";
 
 const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
@@ -97,5 +104,97 @@ export function buildNewsArticleJsonLd(
       },
     },
     url: input.url,
+  };
+}
+
+export interface PersonInput {
+  name: string;
+  url: string;
+  image?: string;
+  jobTitle?: string;
+}
+
+export function buildPersonJsonLd(input: PersonInput): JsonLdDocument {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: input.name,
+    url: input.url,
+    image: input.image,
+    jobTitle: input.jobTitle,
+    affiliation: {
+      "@type": "Organization",
+      name: SITE_CONFIG.title,
+    },
+  };
+}
+
+export interface SportsTeamInput {
+  name: string;
+  url: string;
+}
+
+export function buildSportsTeamJsonLd(input: SportsTeamInput): JsonLdDocument {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsTeam",
+    name: input.name,
+    url: input.url,
+    sport: "Soccer",
+    memberOf: {
+      "@type": "Organization",
+      name: SITE_CONFIG.title,
+    },
+  };
+}
+
+export interface SportsEventInput {
+  name: string;
+  startDate: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  url: string;
+  venue?: string;
+}
+
+function mapEventStatus(status: SportsEventInput["status"]): string {
+  switch (status) {
+    case "postponed":
+    case "stopped":
+      return "https://schema.org/EventPostponed";
+    case "scheduled":
+    case "finished":
+    case "forfeited":
+      return "https://schema.org/EventScheduled";
+  }
+}
+
+export function buildSportsEventJsonLd(
+  input: SportsEventInput,
+): JsonLdDocument {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: input.name,
+    startDate: input.startDate,
+    url: input.url,
+    eventStatus: mapEventStatus(input.status),
+    homeTeam: {
+      "@type": "SportsTeam",
+      name: input.homeTeamName,
+    },
+    awayTeam: {
+      "@type": "SportsTeam",
+      name: input.awayTeamName,
+    },
+    ...(input.venue
+      ? {
+          location: {
+            "@type": "Place" as const,
+            name: input.venue,
+          },
+        }
+      : {}),
   };
 }

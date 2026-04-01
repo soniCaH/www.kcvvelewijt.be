@@ -14,7 +14,7 @@ import { ArticleRepository } from "@/lib/repositories/article.repository";
 import Link from "next/link";
 import { Network, CircleHelp } from "lucide-react";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
@@ -103,6 +103,14 @@ export default async function StafPage({ params }: StaffPageProps) {
           { name: "Staf", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
           { name: fullName, url: `${SITE_CONFIG.siteUrl}/staf/${slug}` },
         ])}
+      />
+      <JsonLd
+        data={buildPersonJsonLd({
+          name: fullName,
+          url: `${SITE_CONFIG.siteUrl}/staf/${slug}`,
+          image: member.imageUrl ?? undefined,
+          jobTitle: member.organigramPositions[0]?.title,
+        })}
       />
       {/* Hero section */}
       <section className="bg-gradient-to-br from-kcvv-gray-light to-white">

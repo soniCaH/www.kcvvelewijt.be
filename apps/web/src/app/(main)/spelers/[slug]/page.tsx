@@ -11,7 +11,7 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 
@@ -122,6 +122,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           { name: "KCVV Elewijt", url: `${SITE_CONFIG.siteUrl}/ploegen` },
           { name: fullName, url: `${SITE_CONFIG.siteUrl}/spelers/${slug}` },
         ])}
+      />
+      <JsonLd
+        data={buildPersonJsonLd({
+          name: fullName,
+          url: `${SITE_CONFIG.siteUrl}/spelers/${slug}`,
+          image: player.imageUrl ?? undefined,
+          jobTitle: player.position ?? undefined,
+        })}
       />
       <PlayerProfile
         firstName={player.firstName}
