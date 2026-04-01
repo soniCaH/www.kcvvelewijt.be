@@ -16,6 +16,7 @@ import { forwardRef, type HTMLAttributes } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { PlayerBio } from "../PlayerBio";
+import { PlayerStats, type PlayerStatsData } from "../PlayerStats/PlayerStats";
 
 /**
  * Generate text-shadow CSS for the 3D effect on jersey number
@@ -63,6 +64,10 @@ export interface PlayerProfileProps extends Omit<
   leaveDate?: string;
   /** Biography text */
   biography?: string;
+  /** Player stats position type */
+  statsPosition?: "outfield" | "goalkeeper";
+  /** Player season statistics */
+  stats?: PlayerStatsData[];
   /** Loading state */
   isLoading?: boolean;
   /** Error message */
@@ -85,6 +90,8 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
       joinDate,
       leaveDate,
       biography,
+      statsPosition,
+      stats,
       isLoading = false,
       error,
       onRetry,
@@ -306,8 +313,14 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
             biography={biography}
           />
 
-          {/* Stats section placeholder */}
-          {/* TODO: Add PlayerStats component when Footbalisto integration is ready */}
+          {/* Stats section */}
+          {stats && statsPosition && (
+            <PlayerStats
+              position={statsPosition}
+              stats={stats}
+              className="mt-8"
+            />
+          )}
         </section>
       </div>
     );

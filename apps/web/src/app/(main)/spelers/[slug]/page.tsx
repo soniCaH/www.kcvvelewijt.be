@@ -7,9 +7,11 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
+import { BffService } from "@/lib/effect/services/BffService";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
+import { toPlayerStatsData } from "@/lib/player-stats";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
@@ -112,7 +114,19 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     }),
   );
 
+  // Graceful degradation: stats are optional — any BFF error results in
+  // showing the profile without stats rather than breaking the page.
+  const playerStats = await runPromise(
+    Effect.gen(function* () {
+      const bff = yield* BffService;
+      const stats = yield* bff.getPlayerStats(Number(slug));
+      return toPlayerStatsData(stats.teams);
+    }).pipe(Effect.catchAll(() => Effect.succeed(null))),
+  );
+
   const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
+  const statsPosition =
+    player.position === "Keeper" ? "goalkeeper" : "outfield";
 
   return (
     <>
@@ -139,6 +153,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         imageUrl={player.imageUrl}
         teamName="KCVV Elewijt"
         birthDate={player.birthDate}
+        statsPosition={statsPosition}
+        stats={playerStats ?? []}
       />
 
       <section className="max-w-4xl mx-auto px-4 pb-8">

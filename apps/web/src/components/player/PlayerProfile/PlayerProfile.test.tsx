@@ -5,6 +5,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { PlayerProfile } from "./PlayerProfile";
+import type { PlayerStatsData } from "../PlayerStats/PlayerStats";
 
 // Mock next/image
 vi.mock("next/image", () => ({
@@ -187,6 +188,49 @@ describe("PlayerProfile", () => {
       render(<PlayerProfile {...defaultProps} error="Error" />);
 
       expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
+
+  describe("PlayerStats integration", () => {
+    const outfieldStats: PlayerStatsData[] = [
+      {
+        season: "2025-2026",
+        matches: 10,
+        goals: 4,
+        assists: 2,
+        yellowCards: 1,
+        redCards: 0,
+        minutesPlayed: 900,
+      },
+    ];
+
+    it("renders PlayerStats when stats are provided", () => {
+      render(
+        <PlayerProfile
+          {...defaultProps}
+          statsPosition="outfield"
+          stats={outfieldStats}
+        />,
+      );
+
+      expect(screen.getByText("Statistieken")).toBeInTheDocument();
+      expect(screen.getByText("4")).toBeInTheDocument(); // goals
+    });
+
+    it("renders empty state when stats is empty array", () => {
+      render(
+        <PlayerProfile {...defaultProps} statsPosition="outfield" stats={[]} />,
+      );
+
+      expect(
+        screen.getByText("Geen statistieken beschikbaar."),
+      ).toBeInTheDocument();
+    });
+
+    it("does not render PlayerStats when stats prop is omitted", () => {
+      render(<PlayerProfile {...defaultProps} />);
+
+      expect(screen.queryByText("Statistieken")).not.toBeInTheDocument();
     });
   });
 

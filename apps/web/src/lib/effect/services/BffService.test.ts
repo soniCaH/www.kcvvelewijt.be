@@ -223,6 +223,44 @@ describe("BffService", () => {
     );
   });
 
+  it("getPlayerStats calls /statistics/player/:memberId and returns decoded stats", async () => {
+    const samplePlayerStats = {
+      memberId: 42,
+      teams: [
+        {
+          team: "A-team",
+          gamesPlayed: 10,
+          gamesWon: 5,
+          gamesEqual: 3,
+          gamesLost: 2,
+          goals: 4,
+          assists: 2,
+          yellowCards: 1,
+          redCards: 0,
+          minutes: 900,
+        },
+      ],
+    };
+    mockFetchWith(samplePlayerStats);
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getPlayerStats(42);
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining("/statistics/player/42"),
+      }),
+      expect.any(Object),
+    );
+    expect(result.memberId).toBe(42);
+    expect(result.teams).toHaveLength(1);
+    expect(result.teams[0]?.goals).toBe(4);
+  });
+
   it("throws when KCVV_API_URL is missing", async () => {
     vi.stubEnv("KCVV_API_URL", "   ");
 
