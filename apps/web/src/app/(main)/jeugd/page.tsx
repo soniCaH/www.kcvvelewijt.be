@@ -15,7 +15,7 @@ import {
   type EditorialCardConfig,
 } from "@/lib/repositories/jeugd-landing-page.repository";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
@@ -34,6 +34,7 @@ export const metadata: Metadata = {
     description:
       "Ontdek de jeugdopleiding van KCVV Elewijt. Van U6 tot U21: ploegen, nieuws, trainingsinfo en meer.",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageHero } from "@/components/design-system/PageHero";
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     title: "KCVV Ultra's 55 - KCVV Elewijt",
     description: "Supportersclub van KCVV Elewijt: De Ultra's!",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

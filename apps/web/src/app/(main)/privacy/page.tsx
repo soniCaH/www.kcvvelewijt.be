@@ -5,6 +5,7 @@
  */
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import Link from "next/link";
 
 /**
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
     description:
       "Privacyverklaring en cookiebeleid van KCVV Elewijt conform GDPR",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

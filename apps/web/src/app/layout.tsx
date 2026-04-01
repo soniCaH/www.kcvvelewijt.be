@@ -12,7 +12,7 @@ import {
   TeamRepository,
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
-import { BRAND, SITE_CONFIG } from "@/lib/constants";
+import { BRAND, SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.siteUrl),
@@ -28,14 +28,7 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   openGraph: {
-    images: [
-      {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "KCVV Elewijt",
-      },
-    ],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",

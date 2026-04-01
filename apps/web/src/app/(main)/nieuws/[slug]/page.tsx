@@ -16,7 +16,7 @@ import {
   mapMentionedTeams,
   mapMentionedStaff,
 } from "@/lib/utils/article-related-items";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildNewsArticleJsonLd,
@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
         authors: ["KCVV Elewijt"],
         images: article.coverImageUrl
           ? [{ url: article.coverImageUrl, alt: article.title }]
-          : undefined,
+          : [DEFAULT_OG_IMAGE],
       },
     };
   } catch {

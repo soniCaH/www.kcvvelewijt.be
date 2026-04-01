@@ -42,6 +42,15 @@ export const PAGINATION = {
   playersPerPage: 24,
 } as const;
 
+// Default Open Graph image — used as fallback in page metadata to prevent
+// Next.js shallow-merge from losing the root openGraph.images.
+export const DEFAULT_OG_IMAGE = {
+  url: "/opengraph-image.png",
+  width: 1200,
+  height: 630,
+  alt: "KCVV Elewijt",
+} as const;
+
 // Image Aspect Ratios
 export const IMAGE_RATIOS = {
   article: 1.5, // 3:2

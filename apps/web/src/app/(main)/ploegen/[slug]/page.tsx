@@ -7,7 +7,7 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
@@ -78,7 +78,7 @@ export async function generateMetadata({
         type: "website",
         images: team.teamImageUrl
           ? [{ url: team.teamImageUrl, alt: `${team.name} teamfoto` }]
-          : undefined,
+          : [DEFAULT_OG_IMAGE],
       },
     };
   } catch {

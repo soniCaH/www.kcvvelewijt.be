@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${page.title} - KCVV Elewijt`,
       type: "website",
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }
