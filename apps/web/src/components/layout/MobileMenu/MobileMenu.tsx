@@ -116,7 +116,7 @@ export const MobileMenu = ({
             }
             .mobile-nav-link:hover::before,
             .mobile-nav-link.active::before {
-              background-color: #4acf52;
+              background-color: var(--color-kcvv-green-bright);
             }
           `,
         }}
@@ -135,7 +135,7 @@ export const MobileMenu = ({
       {/* Menu Panel */}
       <nav
         className={cn(
-          "fixed top-0 left-0 h-full w-[280px] bg-[#1E2024] z-50",
+          "fixed top-0 left-0 h-full w-[280px] bg-kcvv-black z-50",
           "transform transition-transform duration-500 ease-in-out",
           "shadow-[0_0_10px_rgba(0,0,0,0.7)]",
           "flex flex-col",
@@ -181,7 +181,7 @@ export const MobileMenu = ({
                       <button
                         onClick={() => toggleSubmenu(item.href)}
                         className={cn(
-                          "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-[#292c31] text-white text-[0.6875rem] uppercase font-bold transition-colors",
+                          "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-kcvv-gray-dark text-white text-[0.6875rem] uppercase font-bold transition-colors",
                           active && "active",
                         )}
                       >
@@ -204,10 +204,10 @@ export const MobileMenu = ({
                         )}
                       >
                         <ul
-                          className="list-none m-0 p-0 bg-[#292c31]"
+                          className="list-none m-0 p-0 bg-kcvv-gray-dark"
                           style={{
                             boxShadow:
-                              "inset 0 7px 9px -7px #1E2024, inset 0 -7px 9px -7px #1E2024",
+                              "inset 0 7px 9px -7px var(--color-kcvv-black), inset 0 -7px 9px -7px var(--color-kcvv-black)",
                           }}
                         >
                           {item.children?.map((child) => {
@@ -218,7 +218,7 @@ export const MobileMenu = ({
                                 <Link
                                   href={child.href}
                                   className={cn(
-                                    "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline transition-colors",
+                                    "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-kcvv-gray no-underline transition-colors",
                                     childActive
                                       ? "text-kcvv-green-bright active"
                                       : "text-white hover:text-kcvv-green-bright",
@@ -236,7 +236,7 @@ export const MobileMenu = ({
                     <Link
                       href={item.href}
                       className={cn(
-                        "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-[#292c31] text-white no-underline transition-colors",
+                        "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-kcvv-gray-dark text-white no-underline transition-colors",
                         active && "active",
                       )}
                     >
