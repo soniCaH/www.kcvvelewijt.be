@@ -31,6 +31,7 @@ export default function ErrorPage({
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
+            type="button"
             onClick={reset}
             className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
           >
@@ -40,7 +41,7 @@ export default function ErrorPage({
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-kcvv-gray-dark font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 border border-kcvv-gray-light text-kcvv-gray-dark font-medium rounded-lg hover:bg-kcvv-green-bright/5 transition-colors"
           >
             <Home className="w-5 h-5 mr-2" aria-hidden="true" />
             Naar home

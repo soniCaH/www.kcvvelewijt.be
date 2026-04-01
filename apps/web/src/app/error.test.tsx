@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
@@ -23,6 +23,10 @@ vi.mock("next/link", () => ({
 describe("Global Error page", () => {
   const defaultError = new Error("Something went wrong");
   const mockReset = vi.fn();
+
+  beforeEach(() => {
+    mockReset.mockReset();
+  });
 
   it("renders a Dutch error heading", () => {
     render(<ErrorPage error={defaultError} reset={mockReset} />);
@@ -56,7 +60,7 @@ describe("Global Error page", () => {
 
   it("has 'use client' directive at the top of the file", () => {
     const source = readFileSync(resolve(__dirname, "error.tsx"), "utf-8");
-    expect(source.trimStart().startsWith('"use client"')).toBe(true);
+    expect(source.trimStart()).toMatch(/^["']use client["']/);
   });
 
   it("does not render PageHeader or PageFooter", () => {
