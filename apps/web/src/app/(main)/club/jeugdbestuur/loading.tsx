@@ -49,6 +49,21 @@ export default function BoardLoading() {
             </div>
           ))}
         </div>
+
+        {/* Organigram CTA placeholder */}
+        <section
+          aria-hidden="true"
+          className="mt-8 rounded-xl bg-gray-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+        >
+          <div className="flex items-center gap-4">
+            <div className="h-8 w-8 rounded bg-gray-300" />
+            <div className="space-y-2">
+              <div className="h-5 w-44 rounded bg-gray-300" />
+              <div className="h-4 w-64 max-w-full rounded bg-gray-300" />
+            </div>
+          </div>
+          <div className="h-10 w-36 rounded-lg bg-gray-300 shrink-0" />
+        </section>
       </div>
     </div>
   );

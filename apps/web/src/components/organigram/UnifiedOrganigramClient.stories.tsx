@@ -146,9 +146,7 @@ export const JeugdbestuurOnly: Story = {
   },
 };
 
-export const RouteSkeleton: Story = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: {} as any,
+export const RouteSkeleton: StoryObj = {
   render: () => <OrganigramLoading />,
   parameters: { layout: "fullscreen" },
 };

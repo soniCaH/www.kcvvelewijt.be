@@ -60,9 +60,7 @@ export const Mobile: Story = {
   globals: { viewport: { value: "kcvvMobile" } },
 };
 
-export const RouteSkeleton: Story = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: {} as any,
+export const RouteSkeleton: StoryObj = {
   render: () => <EventsLoading />,
   parameters: { layout: "fullscreen" },
 };

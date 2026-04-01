@@ -159,9 +159,7 @@ export const MobileViewport: Story = {
   globals: { viewport: { value: "kcvvMobile" } },
 };
 
-export const RouteSkeleton: Story = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: {} as any,
+export const RouteSkeleton: StoryObj = {
   render: () => <ScheurkalenderLoading />,
   parameters: { layout: "fullscreen" },
 };

@@ -18,9 +18,9 @@ export default function OpponentLoading() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* W/D/L summary */}
-        <div className="grid grid-cols-3 gap-4 mb-8 animate-pulse">
-          {Array.from({ length: 3 }).map((_, i) => (
+        {/* W/D/L/GF/GA summary */}
+        <div className="grid grid-cols-5 gap-2 mb-8 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="text-center rounded-sm bg-white border border-gray-200 shadow-sm p-4 space-y-2"

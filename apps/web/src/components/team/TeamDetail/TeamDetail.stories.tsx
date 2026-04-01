@@ -409,9 +409,7 @@ export const MobileViewport: Story = {
   },
 };
 
-export const RouteSkeleton: Story = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: {} as any,
+export const RouteSkeleton: StoryObj = {
   render: () => <TeamDetailLoading />,
   parameters: { layout: "fullscreen" },
 };

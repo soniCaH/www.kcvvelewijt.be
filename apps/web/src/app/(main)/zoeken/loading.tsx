@@ -6,6 +6,9 @@
 export default function SearchLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
+      <span role="status" aria-live="polite" className="sr-only">
+        Zoekpagina laden...
+      </span>
       {/* Hero with search bar */}
       <div className="bg-linear-to-br from-green-main via-green-hover to-green-dark-hover text-white py-12 px-4">
         <div className="max-w-3xl mx-auto space-y-4 animate-pulse">

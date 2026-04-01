@@ -6,6 +6,9 @@
 export default function StaffDetailLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
+      <span role="status" aria-live="polite" className="sr-only">
+        Stafprofiel laden...
+      </span>
       {/* Staff hero — photo + name + contact */}
       <div className="bg-kcvv-dark-bg text-white">
         <div className="max-w-4xl mx-auto px-4 py-8">

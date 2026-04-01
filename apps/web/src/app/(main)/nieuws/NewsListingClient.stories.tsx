@@ -157,9 +157,7 @@ export const Mobile: Story = {
   },
 };
 
-export const RouteSkeleton: Story = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: {} as any,
+export const RouteSkeleton: StoryObj = {
   render: () => <NewsLoading />,
   parameters: { layout: "fullscreen" },
 };
