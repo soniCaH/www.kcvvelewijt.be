@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import {
@@ -11,6 +12,7 @@ import {
   type EventVM,
 } from "@/lib/repositories/event.repository";
 import { EventsList, type EventsListItem } from "@/components/event/EventsList";
+import { Calendar, Newspaper, CalendarDays } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Evenementen | KCVV Elewijt",
@@ -68,7 +70,47 @@ export default async function EventsPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <EventsList events={upcomingEvents} />
+        {upcomingEvents.length === 0 ? (
+          <div className="min-h-[40vh] flex flex-col items-center justify-center px-4 py-16">
+            <div className="text-center max-w-md">
+              <div className="mb-6">
+                <Calendar
+                  className="w-24 h-24 mx-auto text-kcvv-gray opacity-50"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <h2 className="text-3xl font-bold text-kcvv-gray-dark mb-4">
+                Geen evenementen gepland
+              </h2>
+
+              <p className="text-kcvv-gray mb-8">
+                Er zijn momenteel geen aankomende evenementen. Bekijk het
+                laatste nieuws of de wedstrijdkalender.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/nieuws"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
+                >
+                  <Newspaper className="w-5 h-5 mr-2" aria-hidden="true" />
+                  Naar nieuws
+                </Link>
+
+                <Link
+                  href="/kalender"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-kcvv-gray-dark font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <CalendarDays className="w-5 h-5 mr-2" aria-hidden="true" />
+                  Wedstrijdkalender
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <EventsList events={upcomingEvents} />
+        )}
       </div>
     </div>
   );
