@@ -11,6 +11,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchDetailView } from "./MatchDetailView";
 import type { LineupPlayer } from "../MatchLineup";
 import type { MatchEvent } from "../MatchEvents/MatchEvents";
+import MatchDetailLoading from "@/app/(main)/wedstrijd/[matchId]/loading";
 
 const KCVV_LOGO =
   "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";
@@ -540,4 +541,9 @@ export const MobileView: Story = {
   globals: {
     viewport: { value: "mobile1" },
   },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <MatchDetailLoading />,
+  parameters: { layout: "fullscreen" },
 };

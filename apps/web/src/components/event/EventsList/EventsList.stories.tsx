@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EventsList, type EventsListItem } from "./EventsList";
+import EventsLoading from "@/app/(main)/events/loading";
 
 const mockEvents: EventsListItem[] = [
   {
@@ -57,4 +58,9 @@ export const SingleEvent: Story = {
 export const Mobile: Story = {
   args: { events: mockEvents },
   globals: { viewport: { value: "kcvvMobile" } },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <EventsLoading />,
+  parameters: { layout: "fullscreen" },
 };

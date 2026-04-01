@@ -7,6 +7,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PlayerProfile } from "./PlayerProfile";
+import PlayerDetailLoading from "@/app/(main)/spelers/[slug]/loading";
 
 // Real player images from KCVV API
 const REAL_PLAYER_IMAGES = {
@@ -195,4 +196,9 @@ export const ErrorState: Story = {
     error: "Kon spelersprofiel niet laden. Probeer het later opnieuw.",
     onRetry: () => alert("Retry clicked"),
   },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <PlayerDetailLoading />,
+  parameters: { layout: "fullscreen" },
 };

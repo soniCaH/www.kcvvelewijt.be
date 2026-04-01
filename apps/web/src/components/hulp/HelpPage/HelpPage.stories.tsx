@@ -10,6 +10,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HelpPage } from "./HelpPage";
 import { mockResponsibilityPaths as responsibilityPaths } from "@/components/responsibility/__fixtures__/responsibility-paths.fixture";
+import HelpLoading from "@/app/(main)/hulp/loading";
 
 // ---------------------------------------------------------------------------
 // Meta
@@ -50,4 +51,9 @@ export const Default: Story = {};
  */
 export const MobileViewport: Story = {
   globals: { viewport: { value: "kcvvMobile" } },
+};
+
+export const RouteSkeleton: Story = {
+  render: () => <HelpLoading />,
+  parameters: { layout: "fullscreen" },
 };

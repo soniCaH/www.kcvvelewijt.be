@@ -8,6 +8,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BestuurPage } from "./BestuurPage";
 import type { StaffMember } from "@/components/team/TeamRoster";
+import BoardLoading from "@/app/(main)/club/bestuur/loading";
 
 const MEMBER_IMAGES = {
   rudy: "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
@@ -131,4 +132,9 @@ export const MobileViewport: Story = {
   globals: {
     viewport: { value: "kcvvMobile" },
   },
+};
+
+export const RouteSkeleton: Story = {
+  render: () => <BoardLoading />,
+  parameters: { layout: "fullscreen" },
 };

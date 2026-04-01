@@ -8,6 +8,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
+import NewsLoading from "@/app/(main)/nieuws/loading";
 
 function makeMockArticle(
   id: number,
@@ -154,4 +155,9 @@ export const Mobile: Story = {
   globals: {
     viewport: { value: "mobile1" },
   },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <NewsLoading />,
+  parameters: { layout: "fullscreen" },
 };

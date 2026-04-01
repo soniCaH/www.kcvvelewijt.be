@@ -9,6 +9,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SponsorsPage } from "./SponsorsPage";
 import { mockSponsors } from "../Sponsors.mocks";
+import SponsorsLoading from "@/app/(main)/sponsors/loading";
 
 // ---------------------------------------------------------------------------
 // Meta
@@ -100,4 +101,9 @@ export const MobileViewport: Story = {
     featuredSponsors: featured,
   },
   globals: { viewport: { value: "kcvvMobile" } },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <SponsorsLoading />,
+  parameters: { layout: "fullscreen" },
 };

@@ -11,6 +11,7 @@ import { TeamDetail } from "./TeamDetail";
 import type { RosterPlayer, StaffMember } from "../TeamRoster";
 import type { ScheduleMatch } from "../TeamSchedule";
 import type { StandingsEntry } from "../TeamStandings";
+import TeamDetailLoading from "@/app/(main)/ploegen/[slug]/loading";
 
 // ---------------------------------------------------------------------------
 // Fixture images
@@ -406,4 +407,9 @@ export const MobileViewport: Story = {
   globals: {
     viewport: { value: "kcvvMobile" },
   },
+};
+
+export const RouteSkeleton: StoryObj = {
+  render: () => <TeamDetailLoading />,
+  parameters: { layout: "fullscreen" },
 };
