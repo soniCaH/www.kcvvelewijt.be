@@ -28,8 +28,10 @@ export interface BreadcrumbItem {
   url: string;
 }
 
+export type NonEmptyArray<T> = [T, ...T[]];
+
 export function buildBreadcrumbJsonLd(
-  items: BreadcrumbItem[],
+  items: NonEmptyArray<BreadcrumbItem>,
 ): WithContext<BreadcrumbList> {
   return {
     "@context": "https://schema.org",
