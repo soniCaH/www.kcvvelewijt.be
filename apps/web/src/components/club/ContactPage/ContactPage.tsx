@@ -14,6 +14,11 @@ import {
   Accessibility,
 } from "@/lib/icons";
 import { MapEmbed } from "./MapEmbed";
+import type { KeyContactVM } from "@/lib/repositories/staff.repository";
+
+interface ContactPageProps {
+  keyContacts?: KeyContactVM[];
+}
 
 const CONTACT_CATEGORIES = [
   {
@@ -38,7 +43,9 @@ const CONTACT_CATEGORIES = [
   },
 ];
 
-export function ContactPage() {
+export function ContactPage({ keyContacts }: ContactPageProps = {}) {
+  const hasKeyContacts = keyContacts && keyContacts.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero */}
@@ -144,6 +151,35 @@ export function ContactPage() {
           {/* Map embed — OpenStreetMap, no consent needed */}
           <MapEmbed />
         </div>
+
+        {/* Key contacts */}
+        {hasKeyContacts && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-blue font-title mb-6">
+              Snelle contacten
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {keyContacts.map((contact, index) => (
+                <div
+                  key={`${contact.role}-${contact.email}-${index}`}
+                  className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
+                >
+                  <p className="text-xs font-semibold text-green-main uppercase tracking-wide mb-1">
+                    {contact.role}
+                  </p>
+                  <p className="font-bold text-gray-blue">{contact.name}</p>
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="inline-flex items-center gap-1.5 text-sm text-green-main hover:text-green-hover hover:underline mt-2"
+                  >
+                    <Mail className="w-4 h-4" aria-hidden="true" />
+                    {contact.email}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Contact categories */}
         <div>

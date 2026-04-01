@@ -28,6 +28,25 @@ export const ORGANIGRAM_NODES_QUERY =
   }
 }`);
 
+const KEY_CONTACT_ROLE_CODES = [
+  "voorzitter",
+  "secretaris",
+  "gc",
+  "jeugdcoordinator",
+  "sponsoring-verantwoordelijke",
+  "pr-verantwoordelijke",
+] as const;
+
+export const KEY_CONTACTS_QUERY =
+  defineQuery(`*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{
+  title,
+  roleCode,
+  "members": members[@->archived != true && defined(@->email)]->{
+    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+    email
+  }
+}[count(members) > 0] | order(title asc)`);
+
 export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
@@ -56,6 +75,31 @@ const CLUB_ROOT_NODE: OrgChartNode = {
   department: "algemeen",
   parentId: null,
 };
+
+export interface KeyContactVM {
+  role: string;
+  name: string;
+  email: string;
+}
+
+export function toKeyContactVMs(
+  rows: Array<{
+    title: string | null;
+    roleCode: string | null;
+    members: Array<{ name: string; email: string }>;
+  }>,
+): KeyContactVM[] {
+  return rows.flatMap((row) =>
+    row.members.map((m) => {
+      const trimmed = m.name.trim();
+      return {
+        role: row.title ?? "",
+        name: trimmed === "" ? (row.title ?? "") : trimmed,
+        email: m.email,
+      };
+    }),
+  );
+}
 
 export interface OrganigramPositionVM {
   _id: string;
@@ -146,6 +190,7 @@ export function toStaffDetailVM(
 export interface StaffRepositoryInterface {
   readonly findAll: () => Effect.Effect<OrgChartNode[]>;
   readonly findByPsdId: (psdId: string) => Effect.Effect<StaffDetailVM | null>;
+  readonly findKeyContacts: () => Effect.Effect<KeyContactVM[]>;
   readonly findAllForStaticParams: () => Effect.Effect<{ psdId: string }[]>;
 }
 
@@ -164,6 +209,16 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
       STAFF_MEMBER_BY_PSD_ID_QUERY,
       { psdId },
     ).pipe(Effect.map((row) => (row ? toStaffDetailVM(row) : null))),
+  findKeyContacts: () =>
+    fetchGroq<
+      Array<{
+        title: string | null;
+        roleCode: string | null;
+        members: Array<{ name: string; email: string }>;
+      }>
+    >(KEY_CONTACTS_QUERY, { roleCodes: KEY_CONTACT_ROLE_CODES }).pipe(
+      Effect.map(toKeyContactVMs),
+    ),
   findAllForStaticParams: () =>
     fetchGroq<STAFF_MEMBERS_PSDID_QUERY_RESULT>(STAFF_MEMBERS_PSDID_QUERY).pipe(
       Effect.map((rows) =>

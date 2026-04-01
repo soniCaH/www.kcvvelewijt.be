@@ -4,9 +4,12 @@
  */
 
 import type { Metadata } from "next";
+import { Effect } from "effect";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { runPromise } from "@/lib/effect/runtime";
+import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
 
 export const metadata: Metadata = {
@@ -30,7 +33,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPageRoute() {
+export default async function ContactPageRoute() {
+  const keyContacts = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* StaffRepository;
+      return yield* repo.findKeyContacts();
+    }),
+  );
+
   return (
     <>
       <JsonLd
@@ -40,7 +50,7 @@ export default function ContactPageRoute() {
           { name: "Contact", url: `${SITE_CONFIG.siteUrl}/club/contact` },
         ])}
       />
-      <ContactPage />
+      <ContactPage keyContacts={keyContacts} />
     </>
   );
 }
