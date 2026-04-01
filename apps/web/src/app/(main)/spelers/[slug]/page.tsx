@@ -11,7 +11,7 @@ import { BffService } from "@/lib/effect/services/BffService";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
-import { toPlayerStatsData } from "@/lib/player-stats";
+import { toOutfieldPlayerStatsData } from "@/lib/player-stats";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
@@ -114,19 +114,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     }),
   );
 
-  // Graceful degradation: stats are optional — any BFF error results in
-  // showing the profile without stats rather than breaking the page.
+  // Graceful degradation: if the player has no stats endpoint (404), show
+  // the profile without stats. Other errors (5xx, timeouts) propagate to
+  // the error boundary.
   const playerStats = await runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
       const stats = yield* bff.getPlayerStats(Number(slug));
-      return toPlayerStatsData(stats.teams);
-    }).pipe(Effect.catchAll(() => Effect.succeed(null))),
+      return toOutfieldPlayerStatsData(stats.teams);
+    }).pipe(Effect.catchTag("HttpNotFound", () => Effect.succeed(null))),
   );
 
   const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
-  const statsPosition =
-    player.position === "Keeper" ? "goalkeeper" : "outfield";
+  // The BFF contract only provides outfield stats (goals, assists) — keeper-shaped
+  // data (cleanSheets, goalsConceded, saves) is not yet available. Always use the
+  // outfield variant until toOutfieldPlayerStatsData and the contract are position-aware.
+  const statsPosition = "outfield" as const;
 
   return (
     <>

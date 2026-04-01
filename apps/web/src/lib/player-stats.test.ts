@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { toPlayerStatsData } from "./player-stats";
+import { toOutfieldPlayerStatsData } from "./player-stats";
 import type { PlayerTeamStats } from "@kcvv/api-contract";
 
-describe("toPlayerStatsData", () => {
+describe("toOutfieldPlayerStatsData", () => {
   it("transforms a single team's stats to OutfieldStats", () => {
     const teams: PlayerTeamStats[] = [
       {
@@ -19,7 +19,7 @@ describe("toPlayerStatsData", () => {
       },
     ];
 
-    const result = toPlayerStatsData(teams);
+    const result = toOutfieldPlayerStatsData(teams);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
@@ -61,7 +61,7 @@ describe("toPlayerStatsData", () => {
       },
     ];
 
-    const result = toPlayerStatsData(teams);
+    const result = toOutfieldPlayerStatsData(teams);
 
     expect(result).toHaveLength(2);
     expect(result[0]?.season).toBe("A-team");
@@ -69,6 +69,6 @@ describe("toPlayerStatsData", () => {
   });
 
   it("returns empty array for empty teams", () => {
-    expect(toPlayerStatsData([])).toEqual([]);
+    expect(toOutfieldPlayerStatsData([])).toEqual([]);
   });
 });
