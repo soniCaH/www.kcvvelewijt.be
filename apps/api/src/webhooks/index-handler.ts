@@ -48,6 +48,13 @@ const ALLOWED_TYPES = ["responsibility", "article", "page"] as const;
 const ALLOWED_OPS = ["create", "update", "delete"] as const;
 
 type AllowedType = (typeof ALLOWED_TYPES)[number];
+type AllowedOp = (typeof ALLOWED_OPS)[number];
+
+const isAllowedType = (value: string): value is AllowedType =>
+  (ALLOWED_TYPES as readonly string[]).includes(value);
+
+const isAllowedOp = (value: string): value is AllowedOp =>
+  (ALLOWED_OPS as readonly string[]).includes(value);
 
 const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
@@ -142,7 +149,7 @@ const toErrorResponse = (
       return new Response("Unauthorized", { status: 401 });
     case "WebhookServiceError":
       return Response.json(
-        { ok: false, error: error.detail, code: error.code },
+        { ok: false, error: "Internal server error" },
         { status: 500 },
       );
   }
@@ -162,10 +169,16 @@ const webhookEffect = (
       catch: () => new WebhookParseError("invalid_json", "failed to read body"),
     });
 
-    // 2. Verify SVIX signature (unexpected throws propagate as defects → 500)
-    const valid = yield* Effect.promise(() =>
-      verifySvixSignature(request.headers, rawBody, env.SANITY_WEBHOOK_SECRET),
-    );
+    // 2. Verify SVIX signature
+    const valid = yield* Effect.tryPromise({
+      try: () =>
+        verifySvixSignature(
+          request.headers,
+          rawBody,
+          env.SANITY_WEBHOOK_SECRET,
+        ),
+      catch: () => new WebhookAuthError(),
+    });
     if (!valid) return yield* Effect.fail(new WebhookAuthError());
 
     // 3. Parse JSON
@@ -186,15 +199,15 @@ const webhookEffect = (
 
     // 5. Check operation
     const operation = request.headers.get("sanity-operation") ?? "update";
-    if (!(ALLOWED_OPS as readonly string[]).includes(operation)) {
+    if (!isAllowedOp(operation)) {
       return Response.json({ ok: true, action: "skipped_unknown_operation" });
     }
 
     // 6. Check document type
-    if (!(ALLOWED_TYPES as readonly string[]).includes(_type)) {
+    if (!isAllowedType(_type)) {
       return Response.json({ ok: true, action: "skipped_unknown_type" });
     }
-    const docType = _type as AllowedType;
+    const docType = _type;
 
     // 7. Delete path
     if (operation === "delete") {
