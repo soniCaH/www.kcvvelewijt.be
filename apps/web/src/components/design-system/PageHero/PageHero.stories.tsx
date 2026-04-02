@@ -21,6 +21,11 @@ const meta = {
       options: ["default", "compact"],
       description: "Hero height variant",
     },
+    gradient: {
+      control: "select",
+      options: ["dark", "green", "neutral"],
+      description: "Gradient preset (used when no image)",
+    },
   },
 } satisfies Meta<typeof PageHero>;
 
@@ -81,5 +86,35 @@ export const Compact: Story = {
     headline: "Wedstrijdkalender",
     body: "Bekijk alle wedstrijden en activiteiten van KCVV Elewijt.",
     size: "compact",
+  },
+};
+
+export const GradientDark: Story = {
+  args: {
+    label: "Club",
+    headline: "Hulp nodig?",
+    body: "Vind snel de juiste persoon bij KCVV Elewijt.",
+    size: "compact",
+    gradient: "dark",
+  },
+};
+
+export const GradientGreen: Story = {
+  args: {
+    label: "Kalender",
+    headline: "Wedstrijdkalender",
+    body: "Bekijk alle wedstrijden en activiteiten van KCVV Elewijt.",
+    size: "compact",
+    gradient: "green",
+  },
+};
+
+export const GradientNeutral: Story = {
+  args: {
+    label: "Scheurkalender",
+    headline: "Scheurkalender",
+    body: "Alle komende wedstrijden op een rij.",
+    size: "compact",
+    gradient: "neutral",
   },
 };
