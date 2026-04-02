@@ -1,7 +1,7 @@
 import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
-import { SanityWriteClient } from "../sanity/client";
+import { SanityProjection } from "../sanity/projection";
 import {
   UpstreamUnavailableError,
   UpstreamClientError,
@@ -137,7 +137,7 @@ export const PsdServiceLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
-    const sanityClient = yield* SanityWriteClient;
+    const projection = yield* SanityProjection;
     const base = env.PSD_API_BASE_URL;
 
     const psdHeaders = {
@@ -213,7 +213,7 @@ export const PsdServiceLive = Layer.effect(
             return parsed.value as string[];
           }
         }
-        const ids = yield* sanityClient
+        const ids = yield* projection
           .getVisibleTeamPsdIds()
           .pipe(
             Effect.catchAll((e) =>

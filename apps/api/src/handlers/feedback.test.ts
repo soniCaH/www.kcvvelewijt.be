@@ -14,16 +14,11 @@ function makeSanityMock(
     upsertPlayer: () => Effect.succeed(undefined),
     upsertTeam: () => Effect.succeed(undefined),
     upsertStaff: () => Effect.succeed(undefined),
-    getPlayersImageState: () => Effect.succeed(new Map()),
     uploadPlayerImage: () => Effect.succeed(undefined),
-    getActivePlayerPsdIds: () => Effect.succeed([]),
     archivePlayers: () => Effect.succeed(undefined),
-    getActiveStaffPsdIds: () => Effect.succeed([]),
     archiveStaff: () => Effect.succeed(undefined),
-    getActiveTeamPsdIds: () => Effect.succeed([]),
     archiveTeams: () => Effect.succeed(undefined),
     writeFeedback: writeFeedbackImpl ?? (() => Effect.succeed(undefined)),
-    getVisibleTeamPsdIds: () => Effect.succeed([]),
   };
 }
 

@@ -6,9 +6,9 @@ import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
-  SanityWriteClient,
-  type SanityWriteClientInterface,
-} from "../sanity/client";
+  SanityProjection,
+  type SanityProjectionInterface,
+} from "../sanity/projection";
 
 global.fetch = vi.fn();
 
@@ -36,19 +36,11 @@ const cacheMock: KvCacheInterface = {
   increment: () => Effect.succeed(undefined),
 };
 
-const sanityClientMock: SanityWriteClientInterface = {
-  upsertPlayer: () => Effect.succeed(undefined),
-  upsertTeam: () => Effect.succeed(undefined),
-  upsertStaff: () => Effect.succeed(undefined),
+const sanityProjectionMock: SanityProjectionInterface = {
   getPlayersImageState: () => Effect.succeed(new Map()),
   getActivePlayerPsdIds: () => Effect.succeed([]),
-  archivePlayers: () => Effect.succeed(undefined),
   getActiveStaffPsdIds: () => Effect.succeed([]),
-  archiveStaff: () => Effect.succeed(undefined),
   getActiveTeamPsdIds: () => Effect.succeed([]),
-  archiveTeams: () => Effect.succeed(undefined),
-  uploadPlayerImage: () => Effect.succeed(undefined),
-  writeFeedback: () => Effect.succeed(undefined),
   getVisibleTeamPsdIds: () => Effect.succeed([]),
 };
 
@@ -65,7 +57,7 @@ function runService<A>(
         Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
-        Effect.provide(Layer.succeed(SanityWriteClient, sanityClientMock)),
+        Effect.provide(Layer.succeed(SanityProjection, sanityProjectionMock)),
       ),
     ),
   );
