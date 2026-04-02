@@ -1,14 +1,19 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the PageTitle + calendar widget layout
+ * Matches the PageHero + calendar widget layout
  */
 
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system/PageHero";
 
 export default function CalendarLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageTitle title="Wedstrijdkalender" />
+      <PageHero
+        label="Kalender"
+        headline="Wedstrijdkalender"
+        body="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
+        size="compact"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* Toolbar skeleton: view toggle + team filter */}

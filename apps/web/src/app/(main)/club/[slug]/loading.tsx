@@ -1,17 +1,14 @@
 /**
  * Club Page (Dynamic) — Loading Skeleton
- * Matches the PageTitle + article body layout
+ * Matches the PageHero + article body layout
  */
+
+import { PageHero } from "@/components/design-system/PageHero";
 
 export default function ClubPageLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* PageTitle placeholder */}
-      <div className="bg-kcvv-dark-bg py-10 px-4">
-        <div className="max-w-5xl mx-auto animate-pulse">
-          <div className="h-10 w-64 rounded bg-white/10" />
-        </div>
-      </div>
+      <PageHero label="Club" headline="Laden..." body="" size="compact" />
 
       {/* Article body prose */}
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-4 animate-pulse">

@@ -5,7 +5,6 @@ import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
-import { PageTitle } from "@/components/layout";
 import { PageHero } from "@/components/design-system/PageHero";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
@@ -47,17 +46,14 @@ export default async function DynamicClubPage({ params }: Props) {
 
   return (
     <>
-      {page.heroImageUrl ? (
-        <PageHero
-          image={page.heroImageUrl}
-          imageAlt={page.title}
-          label="Club"
-          headline={page.title}
-          body=""
-        />
-      ) : (
-        <PageTitle title={page.title} />
-      )}
+      <PageHero
+        image={page.heroImageUrl ?? undefined}
+        imageAlt={page.title}
+        label="Club"
+        headline={page.title}
+        body=""
+        size="compact"
+      />
       <div className="mx-auto max-w-inner-lg px-4 py-8 content">
         <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
       </div>
