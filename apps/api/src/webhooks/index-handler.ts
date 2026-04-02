@@ -116,7 +116,7 @@ function buildDocumentIndex(
   }
 }
 
-function queryForType(type: string): string {
+function queryForType(type: AllowedType): string {
   switch (type) {
     case "responsibility":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,""), category }`;
@@ -124,8 +124,6 @@ function queryForType(type: string): string {
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;
     case "page":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`;
-    default:
-      return `*[_id == $id][0]`;
   }
 }
 
@@ -243,6 +241,7 @@ const webhookEffect = (
     });
 
     // 10. Embed
+    // Cast needed: bge-m3 isn't in the @cloudflare/workers-types AiModels type yet
     const ai = env.AI as unknown as {
       run: (model: string, input: unknown) => Promise<{ data: number[][] }>;
     };
