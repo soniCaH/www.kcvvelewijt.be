@@ -88,9 +88,10 @@ export function derivePsdTeamLabel(name: string, age: string): string {
  *   3 = STOP (ended prematurely) → "stopped"    (may be rescheduled)
  *
  * The `cancelled` boolean takes full precedence — if true, status is always "postponed"
- * regardless of the numeric code (unknown codes are still logged in that path).
+ * regardless of the numeric code.
  * Any unknown code (when not cancelled) falls back to "scheduled" (safe default).
- * Unknown codes are logged so we can detect undocumented PSD values in production.
+ * This is a pure function — callers that need to detect unknown codes for logging
+ * can use {@link isUnknownGameStatus}.
  */
 export function mapGameStatus(
   status: number,
