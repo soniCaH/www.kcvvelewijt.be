@@ -7,9 +7,11 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
+import { BffService } from "@/lib/effect/services/BffService";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
+import { toOutfieldPlayerStatsData } from "@/lib/player-stats";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
@@ -24,20 +26,11 @@ interface PlayerPageProps {
  *
  * @returns An array of objects each containing a `slug` property set to the player's `psdId`; returns an empty array if player retrieval fails.
  */
+// No static prerendering — the page body fetches PSD data via the BFF,
+// which is heavily rate-limited. Pages are built on-demand and ISR-cached
+// (see revalidate at the bottom of this file).
 export async function generateStaticParams() {
-  try {
-    const players = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PlayerRepository;
-        return yield* repo.findAll();
-      }),
-    );
-    return players
-      .filter((p): p is typeof p & { href: string } => !!p.href)
-      .map((p) => ({ slug: p.href.replace("/spelers/", "") }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 /**
@@ -112,7 +105,31 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     }),
   );
 
+  // Graceful degradation: if the BFF has no stats (404) or is unavailable
+  // (502/503), show the profile without stats. Contract violations
+  // (ParseError, HttpApiDecodeError) still propagate to the error boundary.
+  const psdId = Number(slug);
+  const playerStats = Number.isNaN(psdId)
+    ? null
+    : await runPromise(
+        Effect.gen(function* () {
+          const bff = yield* BffService;
+          const stats = yield* bff.getPlayerStats(psdId);
+          return toOutfieldPlayerStatsData(stats.teams);
+        }).pipe(
+          Effect.catchTags({
+            HttpNotFound: () => Effect.succeed(null),
+            HttpServiceUnavailable: () => Effect.succeed(null),
+            HttpBadGateway: () => Effect.succeed(null),
+          }),
+        ),
+      );
+
   const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
+  // The BFF contract only provides outfield stats (goals, assists) — keeper-shaped
+  // data (cleanSheets, goalsConceded, saves) is not yet available. Always use the
+  // outfield variant until toOutfieldPlayerStatsData and the contract are position-aware.
+  const statsPosition = "outfield" as const;
 
   return (
     <>
@@ -139,6 +156,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         imageUrl={player.imageUrl}
         teamName="KCVV Elewijt"
         birthDate={player.birthDate}
+        statsPosition={statsPosition}
+        stats={playerStats ?? []}
       />
 
       <section className="max-w-4xl mx-auto px-4 pb-8">

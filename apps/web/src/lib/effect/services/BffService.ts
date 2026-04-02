@@ -10,6 +10,7 @@ import {
   type Match,
   type MatchDetail,
   type OpponentHistory,
+  type PlayerSeasonStats,
   type RankingEntry,
   type RelatedItem,
 } from "@kcvv/api-contract";
@@ -41,6 +42,9 @@ export class BffService extends Context.Tag("BffService")<
       teamId: number,
       clubId: number,
     ) => Effect.Effect<OpponentHistory, BffError>;
+    getPlayerStats: (
+      memberId: number,
+    ) => Effect.Effect<PlayerSeasonStats, BffError>;
   }
 >() {}
 
@@ -81,6 +85,10 @@ export const BffServiceLive = Layer.effect(
       getOpponentHistory: (teamId: number, clubId: number) =>
         client.opponent
           .getOpponentHistory({ path: { teamId, clubId } })
+          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+      getPlayerStats: (memberId: number) =>
+        client.matches
+          .getPlayerStats({ path: { memberId } })
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
     };
   }),

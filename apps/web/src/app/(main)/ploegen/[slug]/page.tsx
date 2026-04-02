@@ -28,20 +28,11 @@ interface TeamPageProps {
  *
  * @returns An array of route parameter objects with `slug` set to each team's slug; returns an empty array if teams cannot be fetched.
  */
+// No static prerendering — the page body fetches PSD data via the BFF,
+// which is heavily rate-limited. Pages are built on-demand and ISR-cached
+// (see revalidate at the bottom of this file).
 export async function generateStaticParams() {
-  try {
-    const teams = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findAll();
-      }),
-    );
-    return teams
-      .filter((team) => team.slug)
-      .map((team) => ({ slug: team.slug }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 /**
