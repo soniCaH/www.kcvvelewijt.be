@@ -1,9 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { Effect } from "effect";
 import {
   transformMember,
   transformTeam,
   transformStaff,
   partitionMembers,
+  reconcileEntity,
+  MAX_ORPHAN_RATIO,
 } from "./psd-sanity-sync";
 import type { PsdMember } from "../footbalisto/schemas-player-team";
 
@@ -293,5 +296,96 @@ describe("partitionMembers", () => {
     expect(players.map((m) => m.id)).toEqual([1, 2]);
     expect(staff.map((m) => m.id)).toEqual([3]);
     expect(unknown.map((m) => m.id)).toEqual([4]);
+  });
+});
+
+// ─── reconcileEntity ─────────────────────────────────────────────────────────
+
+describe("reconcileEntity", () => {
+  it("archives orphans when ratio is below threshold", async () => {
+    // 10 active in Sanity, 8 accumulated from PSD → 2 orphans (20% < 30%)
+    const activeIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+    const accumulatedIds = new Set(["1", "2", "3", "4", "5", "6", "7", "8"]);
+    const archiveFn = vi.fn(() => Effect.void);
+
+    const result = await Effect.runPromise(
+      reconcileEntity("players", activeIds, accumulatedIds, archiveFn),
+    );
+
+    expect(result).toEqual({ action: "archived", orphanIds: ["9", "10"] });
+    expect(archiveFn).toHaveBeenCalledWith(["9", "10"]);
+  });
+
+  it("skips archival when orphan ratio exceeds threshold", async () => {
+    // 10 active in Sanity, 3 accumulated → 7 orphans (70% > 30%)
+    const activeIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+    const accumulatedIds = new Set(["1", "2", "3"]);
+    const archiveFn = vi.fn(() => Effect.void);
+
+    const result = await Effect.runPromise(
+      reconcileEntity("teams", activeIds, accumulatedIds, archiveFn),
+    );
+
+    expect(result).toEqual({
+      action: "skipped",
+      orphanCount: 7,
+      activeCount: 10,
+      ratio: 0.7,
+    });
+    expect(archiveFn).not.toHaveBeenCalled();
+  });
+
+  it("handles 0 active entities without division by zero", async () => {
+    const activeIds: string[] = [];
+    const accumulatedIds = new Set(["1", "2"]);
+    const archiveFn = vi.fn(() => Effect.void);
+
+    const result = await Effect.runPromise(
+      reconcileEntity("staff", activeIds, accumulatedIds, archiveFn),
+    );
+
+    expect(result).toEqual({ action: "none" });
+    expect(archiveFn).not.toHaveBeenCalled();
+  });
+
+  it("triggers threshold when accumulated set is empty but active entities exist", async () => {
+    // 5 active, 0 accumulated → 5 orphans (100% > 30%)
+    const activeIds = ["1", "2", "3", "4", "5"];
+    const accumulatedIds = new Set<string>();
+    const archiveFn = vi.fn(() => Effect.void);
+
+    const result = await Effect.runPromise(
+      reconcileEntity("players", activeIds, accumulatedIds, archiveFn),
+    );
+
+    expect(result).toEqual({
+      action: "skipped",
+      orphanCount: 5,
+      activeCount: 5,
+      ratio: 1,
+    });
+    expect(archiveFn).not.toHaveBeenCalled();
+  });
+
+  it("archives when orphan ratio is exactly at threshold (30%)", async () => {
+    // 10 active, 7 accumulated → 3 orphans (exactly 30%, not greater than)
+    const activeIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+    const accumulatedIds = new Set(["1", "2", "3", "4", "5", "6", "7"]);
+    const archiveFn = vi.fn(() => Effect.void);
+
+    const result = await Effect.runPromise(
+      reconcileEntity("players", activeIds, accumulatedIds, archiveFn),
+    );
+
+    // ratio == 0.3 is NOT greater than 0.3, so archival proceeds
+    expect(result).toEqual({
+      action: "archived",
+      orphanIds: ["8", "9", "10"],
+    });
+    expect(archiveFn).toHaveBeenCalledWith(["8", "9", "10"]);
+  });
+
+  it("has MAX_ORPHAN_RATIO set to 0.3", () => {
+    expect(MAX_ORPHAN_RATIO).toBe(0.3);
   });
 });

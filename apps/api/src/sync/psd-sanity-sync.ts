@@ -122,6 +122,66 @@ export function partitionMembers(members: readonly PsdMember[]): {
   return { players, staff, unknown };
 }
 
+// ─── Reconciliation helper ───────────────────────────────────────────────────
+
+/**
+ * Safety threshold: refuse to archive if more than 30% of active entities
+ * would be orphaned. In normal operation only 1–3 entities are orphaned per
+ * cycle (roster changes). A higher ratio signals a data source problem
+ * (e.g. PSD returning a partial list).
+ */
+export const MAX_ORPHAN_RATIO = 0.3;
+
+export type ReconciliationResult =
+  | { readonly action: "archived"; readonly orphanIds: string[] }
+  | {
+      readonly action: "skipped";
+      readonly orphanCount: number;
+      readonly activeCount: number;
+      readonly ratio: number;
+    }
+  | { readonly action: "none" };
+
+/**
+ * Compare active Sanity IDs against accumulated PSD IDs and archive orphans,
+ * unless the orphan ratio exceeds the safety threshold.
+ */
+export const reconcileEntity = <E>(
+  type: string,
+  activeIds: readonly string[],
+  accumulatedIds: ReadonlySet<string>,
+  archiveFn: (ids: string[]) => Effect.Effect<void, E>,
+): Effect.Effect<ReconciliationResult, E> =>
+  Effect.gen(function* () {
+    const orphanIds = activeIds.filter((id) => !accumulatedIds.has(id));
+
+    if (orphanIds.length === 0) {
+      yield* Effect.log(`reconciliation: no orphan ${type} found`);
+      return { action: "none" } as const;
+    }
+
+    const activeCount = activeIds.length;
+    const ratio = orphanIds.length / activeCount;
+
+    if (ratio > MAX_ORPHAN_RATIO) {
+      yield* Effect.log(
+        `reconciliation: SKIPPED — ${orphanIds.length}/${activeCount} ${type} would be archived (${Math.round(ratio * 100)}%), exceeds safety threshold of ${MAX_ORPHAN_RATIO * 100}%`,
+      );
+      return {
+        action: "skipped",
+        orphanCount: orphanIds.length,
+        activeCount,
+        ratio,
+      } as const;
+    }
+
+    yield* archiveFn(orphanIds);
+    yield* Effect.log(
+      `reconciliation: archived ${orphanIds.length} ${type}: ${orphanIds.join(", ")}`,
+    );
+    return { action: "archived", orphanIds } as const;
+  });
+
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
 const CURSOR_KEY = "sync:team-cursor";
@@ -330,52 +390,30 @@ export const runSync = Effect.gen(function* () {
 
   // ─── Reconciliation at cycle end ─────────────────────────────────────
   if (nextCursor === 0) {
-    yield* Effect.log("cycle complete — running player reconciliation");
+    yield* Effect.log("cycle complete — running reconciliation");
+
     const activeInSanity = yield* sanity.getActivePlayerPsdIds();
-    const orphanIds = activeInSanity.filter((id) => !accumulatedIds.has(id));
+    yield* reconcileEntity("players", activeInSanity, accumulatedIds, (ids) =>
+      sanity.archivePlayers(ids),
+    );
 
-    if (orphanIds.length > 0) {
-      yield* sanity.archivePlayers(orphanIds);
-      yield* Effect.log(
-        `reconciliation: archived ${orphanIds.length} players: ${orphanIds.join(", ")}`,
-      );
-    } else {
-      yield* Effect.log("reconciliation: no orphan players found");
-    }
-
-    // ─── Staff reconciliation ─────────────────────────────────────────
-    yield* Effect.log("running staff reconciliation");
     const activeStaffInSanity = yield* sanity.getActiveStaffPsdIds();
-    const orphanStaffIds = activeStaffInSanity.filter(
-      (id) => !accumulatedStaffIds.has(id),
+    yield* reconcileEntity(
+      "staff",
+      activeStaffInSanity,
+      accumulatedStaffIds,
+      (ids) => sanity.archiveStaff(ids),
     );
 
-    if (orphanStaffIds.length > 0) {
-      yield* sanity.archiveStaff(orphanStaffIds);
-      yield* Effect.log(
-        `reconciliation: archived ${orphanStaffIds.length} staff: ${orphanStaffIds.join(", ")}`,
-      );
-    } else {
-      yield* Effect.log("reconciliation: no orphan staff found");
-    }
-
-    // ─── Team reconciliation ──────────────────────────────────────────
-    yield* Effect.log("running team reconciliation");
     const activeTeamsInSanity = yield* sanity.getActiveTeamPsdIds();
-    const orphanTeamIds = activeTeamsInSanity.filter(
-      (id) => !accumulatedTeamIds.has(id),
+    yield* reconcileEntity(
+      "teams",
+      activeTeamsInSanity,
+      accumulatedTeamIds,
+      (ids) => sanity.archiveTeams(ids),
     );
 
-    if (orphanTeamIds.length > 0) {
-      yield* sanity.archiveTeams(orphanTeamIds);
-      yield* Effect.log(
-        `reconciliation: archived ${orphanTeamIds.length} teams: ${orphanTeamIds.join(", ")}`,
-      );
-    } else {
-      yield* Effect.log("reconciliation: no orphan teams found");
-    }
-
-    // Clear accumulation keys for next cycle
+    // Clear accumulation keys for next cycle (even when archival is skipped)
     yield* Effect.tryPromise({
       try: () =>
         Promise.all([
