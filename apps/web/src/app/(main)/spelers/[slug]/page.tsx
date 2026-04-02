@@ -108,19 +108,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   // Graceful degradation: if the BFF has no stats (404) or is unavailable
   // (502/503), show the profile without stats. Contract violations
   // (ParseError, HttpApiDecodeError) still propagate to the error boundary.
-  const playerStats = await runPromise(
-    Effect.gen(function* () {
-      const bff = yield* BffService;
-      const stats = yield* bff.getPlayerStats(Number(slug));
-      return toOutfieldPlayerStatsData(stats.teams);
-    }).pipe(
-      Effect.catchTags({
-        HttpNotFound: () => Effect.succeed(null),
-        HttpServiceUnavailable: () => Effect.succeed(null),
-        HttpBadGateway: () => Effect.succeed(null),
-      }),
-    ),
-  );
+  const psdId = Number(slug);
+  const playerStats = Number.isNaN(psdId)
+    ? null
+    : await runPromise(
+        Effect.gen(function* () {
+          const bff = yield* BffService;
+          const stats = yield* bff.getPlayerStats(psdId);
+          return toOutfieldPlayerStatsData(stats.teams);
+        }).pipe(
+          Effect.catchTags({
+            HttpNotFound: () => Effect.succeed(null),
+            HttpServiceUnavailable: () => Effect.succeed(null),
+            HttpBadGateway: () => Effect.succeed(null),
+          }),
+        ),
+      );
 
   const fullName = `${player.firstName} ${player.lastName}`.trim() || "Speler";
   // The BFF contract only provides outfield stats (goals, assists) — keeper-shaped
