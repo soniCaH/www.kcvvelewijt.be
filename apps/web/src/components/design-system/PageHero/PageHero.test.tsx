@@ -109,11 +109,11 @@ describe("PageHero", () => {
   });
 
   it("renders image background when image is provided", () => {
-    render(<PageHero {...defaultProps} />);
-    const img = screen.getByRole("img");
+    const { container } = render(<PageHero {...defaultProps} />);
+    const img = container.querySelector("img");
     expect(img).toBeInTheDocument();
     expect(
-      document.querySelector("[data-testid='hero-gradient']"),
+      container.querySelector("[data-testid='hero-gradient']"),
     ).not.toBeInTheDocument();
   });
 
