@@ -65,7 +65,6 @@ const ResponsibilityDoc = S.Struct({
   keywords: S.Array(S.String),
   summary: S.String,
   slug: S.String,
-  category: S.String,
 });
 
 const ArticleDoc = S.Struct({
@@ -126,7 +125,7 @@ function buildDocumentIndex(
 function queryForType(type: AllowedType): string {
   switch (type) {
     case "responsibility":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,""), category }`;
+      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,"") }`;
     case "article":
       return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;
     case "page":
