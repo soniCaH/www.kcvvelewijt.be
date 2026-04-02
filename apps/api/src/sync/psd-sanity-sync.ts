@@ -6,6 +6,7 @@ import type {
   SanityStaffDoc,
 } from "../sanity/client";
 import { SanityWriteClient } from "../sanity/client";
+import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
 import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
@@ -140,6 +141,7 @@ const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
 export const runSync = Effect.gen(function* () {
   const psd = yield* PsdTeamClient;
   const sanity = yield* SanityWriteClient;
+  const projection = yield* SanityProjection;
   const env = yield* WorkerEnvTag;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
   // API domain (PSD_API_BASE_URL). profilePictureURL is a relative path.
@@ -156,7 +158,7 @@ export const runSync = Effect.gen(function* () {
 
   // Pre-fetch existing player image state to avoid redundant uploads
   yield* Effect.log("fetching player image state from Sanity");
-  const imageState = yield* sanity.getPlayersImageState();
+  const imageState = yield* projection.getPlayersImageState();
   yield* Effect.log(`player image state fetched: ${imageState.size} records`);
 
   yield* Effect.log("fetching teams from PSD");
@@ -331,7 +333,7 @@ export const runSync = Effect.gen(function* () {
   // ─── Reconciliation at cycle end ─────────────────────────────────────
   if (nextCursor === 0) {
     yield* Effect.log("cycle complete — running player reconciliation");
-    const activeInSanity = yield* sanity.getActivePlayerPsdIds();
+    const activeInSanity = yield* projection.getActivePlayerPsdIds();
     const orphanIds = activeInSanity.filter((id) => !accumulatedIds.has(id));
 
     if (orphanIds.length > 0) {
@@ -345,7 +347,7 @@ export const runSync = Effect.gen(function* () {
 
     // ─── Staff reconciliation ─────────────────────────────────────────
     yield* Effect.log("running staff reconciliation");
-    const activeStaffInSanity = yield* sanity.getActiveStaffPsdIds();
+    const activeStaffInSanity = yield* projection.getActiveStaffPsdIds();
     const orphanStaffIds = activeStaffInSanity.filter(
       (id) => !accumulatedStaffIds.has(id),
     );
@@ -361,7 +363,7 @@ export const runSync = Effect.gen(function* () {
 
     // ─── Team reconciliation ──────────────────────────────────────────
     yield* Effect.log("running team reconciliation");
-    const activeTeamsInSanity = yield* sanity.getActiveTeamPsdIds();
+    const activeTeamsInSanity = yield* projection.getActiveTeamPsdIds();
     const orphanTeamIds = activeTeamsInSanity.filter(
       (id) => !accumulatedTeamIds.has(id),
     );

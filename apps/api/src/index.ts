@@ -31,6 +31,7 @@ import { VectorizeServiceLive } from "./search/vectorize";
 import { AiAnswerServiceLive } from "./search/ai-answer";
 import { runSanityIndexSync } from "./search/sanity-index-sync";
 import { SanityWriteClientLive } from "./sanity/client";
+import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
 import { handleIndexWebhook } from "./webhooks/index-handler";
 
@@ -63,6 +64,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(VectorizeServiceLive),
     Layer.provide(AiAnswerServiceLive),
     Layer.provide(FootbalistoServiceLive),
+    Layer.provide(SanityProjectionLive),
     Layer.provide(SanityWriteClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
@@ -131,6 +133,7 @@ export default {
       const layer = Layer.mergeAll(
         PsdTeamClientLive,
         SanityWriteClientLive,
+        SanityProjectionLive,
         envLayer,
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
       ctx.waitUntil(

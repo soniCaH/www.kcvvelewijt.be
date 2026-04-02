@@ -11,9 +11,9 @@ import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
-  SanityWriteClient,
-  type SanityWriteClientInterface,
-} from "../sanity/client";
+  SanityProjection,
+  type SanityProjectionInterface,
+} from "../sanity/projection";
 
 global.fetch = vi.fn();
 
@@ -41,23 +41,15 @@ const cacheMock: KvCacheInterface = {
   increment: () => Effect.succeed(undefined),
 };
 
-function makeSanityMock(
+function makeProjectionMock(
   visiblePsdIds: string[] = ["1"],
-): SanityWriteClientInterface {
+): SanityProjectionInterface {
   return {
-    upsertPlayer: () => Effect.succeed(undefined as void),
-    upsertTeam: () => Effect.succeed(undefined as void),
-    upsertStaff: () => Effect.succeed(undefined as void),
-    uploadPlayerImage: () => Effect.succeed(undefined as void),
+    getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
     getPlayersImageState: () => Effect.succeed(new Map()),
     getActivePlayerPsdIds: () => Effect.succeed([]),
-    archivePlayers: () => Effect.succeed(undefined as void),
     getActiveStaffPsdIds: () => Effect.succeed([]),
-    archiveStaff: () => Effect.succeed(undefined as void),
     getActiveTeamPsdIds: () => Effect.succeed([]),
-    archiveTeams: () => Effect.succeed(undefined as void),
-    writeFeedback: () => Effect.succeed(undefined as void),
-    getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
   };
 }
 
@@ -143,11 +135,11 @@ function runService<A>(
     svc: (typeof FootbalistoService)["Service"],
   ) => Effect.Effect<A, BffError>,
   options: {
-    sanityMock?: SanityWriteClientInterface;
+    projectionMock?: SanityProjectionInterface;
     kvMock?: KvCacheInterface;
   } = {},
 ) {
-  const sanity = options.sanityMock ?? makeSanityMock();
+  const projection = options.projectionMock ?? makeProjectionMock();
   const kv = options.kvMock ?? cacheMock;
   const program = Effect.gen(function* () {
     const service = yield* FootbalistoService;
@@ -159,7 +151,7 @@ function runService<A>(
         Effect.provide(FootbalistoServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, kv)),
-        Effect.provide(Layer.succeed(SanityWriteClient, sanity)),
+        Effect.provide(Layer.succeed(SanityProjection, projection)),
       ),
     ),
   );
@@ -520,9 +512,9 @@ describe("FootbalistoService.getNextMatches", () => {
     });
 
     // Only team 1 is visible in Sanity (team 2 and 23 excluded)
-    const sanityMock = makeSanityMock(["1"]);
+    const projectionMock = makeProjectionMock(["1"]);
     const result = await runService((svc) => svc.getNextMatches(), {
-      sanityMock,
+      projectionMock,
     });
 
     expect(result._tag).toBe("Right");
@@ -564,9 +556,9 @@ describe("FootbalistoService.getNextMatches", () => {
       increment: () => Effect.succeed(undefined),
     };
 
-    const sanityMock = makeSanityMock(["1"]);
+    const projectionMock = makeProjectionMock(["1"]);
     await runService((svc) => svc.getNextMatches(), {
-      sanityMock,
+      projectionMock,
       kvMock: trackingKv,
     });
 
@@ -602,8 +594,8 @@ describe("FootbalistoService.getNextMatches", () => {
     };
 
     let sanityCallCount = 0;
-    const spySanityMock: SanityWriteClientInterface = {
-      ...makeSanityMock(["1"]),
+    const spyProjectionMock: SanityProjectionInterface = {
+      ...makeProjectionMock(["1"]),
       getVisibleTeamPsdIds: () => {
         sanityCallCount++;
         return Effect.succeed(["1"]);
@@ -611,7 +603,7 @@ describe("FootbalistoService.getNextMatches", () => {
     };
 
     await runService((svc) => svc.getNextMatches(), {
-      sanityMock: spySanityMock,
+      projectionMock: spyProjectionMock,
       kvMock: hitKv,
     });
 
@@ -869,7 +861,7 @@ describe("FootbalistoService.getRanking", () => {
         Effect.provide(FootbalistoServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
-        Effect.provide(Layer.succeed(SanityWriteClient, makeSanityMock())),
+        Effect.provide(Layer.succeed(SanityProjection, makeProjectionMock())),
         Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
       ),
     );

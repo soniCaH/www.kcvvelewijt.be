@@ -3,7 +3,7 @@ import { Effect, Layer } from "effect";
 import {
   SanityWriteClient,
   type SanityWriteClientInterface,
-  SanityWriteError,
+  SanityError,
 } from "../sanity/client";
 import { handleFeedback } from "./feedback";
 
@@ -14,16 +14,11 @@ function makeSanityMock(
     upsertPlayer: () => Effect.succeed(undefined),
     upsertTeam: () => Effect.succeed(undefined),
     upsertStaff: () => Effect.succeed(undefined),
-    getPlayersImageState: () => Effect.succeed(new Map()),
     uploadPlayerImage: () => Effect.succeed(undefined),
-    getActivePlayerPsdIds: () => Effect.succeed([]),
     archivePlayers: () => Effect.succeed(undefined),
-    getActiveStaffPsdIds: () => Effect.succeed([]),
     archiveStaff: () => Effect.succeed(undefined),
-    getActiveTeamPsdIds: () => Effect.succeed([]),
     archiveTeams: () => Effect.succeed(undefined),
     writeFeedback: writeFeedbackImpl ?? (() => Effect.succeed(undefined)),
-    getVisibleTeamPsdIds: () => Effect.succeed([]),
   };
 }
 
@@ -52,9 +47,9 @@ describe("handleFeedback", () => {
     });
   });
 
-  it("propagates SanityWriteError as die", async () => {
+  it("propagates SanityError as die", async () => {
     const mock = makeSanityMock(() =>
-      Effect.fail(new SanityWriteError("Sanity is down")),
+      Effect.fail(new SanityError("Sanity is down")),
     );
     const layer = Layer.succeed(SanityWriteClient, mock);
 
