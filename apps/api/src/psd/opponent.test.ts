@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
-import { FootbalistoService, FootbalistoServiceLive } from "./service";
+import { PsdService, PsdServiceLive } from "./service";
 import { OpponentHistory } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
@@ -53,18 +53,16 @@ const sanityClientMock: SanityWriteClientInterface = {
 };
 
 function runService<A>(
-  fn: (
-    svc: (typeof FootbalistoService)["Service"],
-  ) => Effect.Effect<A, BffError>,
+  fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,
 ) {
   const program = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* fn(service);
   });
   return Effect.runPromise(
     Effect.either(
       program.pipe(
-        Effect.provide(FootbalistoServiceLive),
+        Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
         Effect.provide(Layer.succeed(SanityWriteClient, sanityClientMock)),
@@ -140,7 +138,7 @@ const season2Matches = {
   ],
 };
 
-describe("FootbalistoService.getOpponentHistory", () => {
+describe("PsdService.getOpponentHistory", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     global.fetch = vi.fn();

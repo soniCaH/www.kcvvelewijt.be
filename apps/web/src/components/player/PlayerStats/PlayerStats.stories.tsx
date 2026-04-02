@@ -2,7 +2,7 @@
  * PlayerStats Component Stories
  *
  * Statistics display table/grid for player performance data.
- * Data sourced from Footbalisto API.
+ * Data sourced from PSD API via BFF.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -24,7 +24,7 @@ Features:
 - Multi-season historical view
 - Loading and empty states
 
-**Note:** Data comes from the Footbalisto API (external).
+**Note:** Data comes from the PSD API via BFF (external).
         `,
       },
     },

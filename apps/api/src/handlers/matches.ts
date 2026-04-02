@@ -8,8 +8,8 @@ import {
   type Match,
   type PlayerSeasonStats as PlayerSeasonStatsType,
 } from "@kcvv/api-contract";
-import { FootbalistoService } from "../footbalisto/service";
-import { shouldServeStale, type BffError } from "../footbalisto/errors";
+import { PsdService } from "../psd/service";
+import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { withErrorMapping } from "./error-mapping";
@@ -23,11 +23,11 @@ export const getMatchesByTeamHandler = (
 ): Effect.Effect<
   readonly Match[],
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `matches:team:${teamId}`;
   const fetchMatches = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getTeamMatches(teamId);
   });
 
@@ -43,11 +43,11 @@ export const getMatchesByTeamHandler = (
 export const getNextMatchesHandler = (): Effect.Effect<
   readonly Match[],
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = "matches:next";
   const fetchMatches = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getNextMatches();
   });
 
@@ -62,9 +62,9 @@ export const getNextMatchesHandler = (): Effect.Effect<
 
 export const getMatchByIdHandler = (
   matchId: number,
-): Effect.Effect<Match, BffError, FootbalistoService> =>
+): Effect.Effect<Match, BffError, PsdService> =>
   Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getMatchById(matchId);
   });
 
@@ -73,11 +73,11 @@ export const getMatchDetailHandler = (
 ): Effect.Effect<
   MatchDetail,
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `match:detail:${matchId}`;
   const fetchDetail = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getMatchDetail(matchId);
   });
 
@@ -105,10 +105,10 @@ export const getPlayerStatsHandler = (
 ): Effect.Effect<
   PlayerSeasonStatsType,
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > =>
   Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     const seasonId = yield* service.getCurrentSeasonId();
 
     const fetchStats = service.getPlayerStats(memberId);

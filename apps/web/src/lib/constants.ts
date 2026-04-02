@@ -21,11 +21,6 @@ export const SITE_CONFIG = {
   stamnummer: 55,
 } as const;
 
-// API Configuration
-export const API_CONFIG = {
-  footbalisto: process.env.FOOTBALISTO_API_URL || "https://footbalisto.be",
-} as const;
-
 // Revalidation Intervals (in seconds)
 export const REVALIDATE = {
   articles: 60, // 1 minute

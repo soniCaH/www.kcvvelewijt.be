@@ -6,7 +6,7 @@ import { SanityWriteClient, SanityWriteError } from "../sanity/client";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
-import type { PsdMember, PsdTeam } from "../footbalisto/schemas-player-team";
+import type { PsdMember, PsdTeam } from "../psd/schemas-player-team";
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 

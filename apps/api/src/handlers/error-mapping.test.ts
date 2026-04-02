@@ -3,7 +3,7 @@ import {
   UpstreamUnavailableError,
   UpstreamDecodeError,
   ResourceNotFoundError,
-} from "../footbalisto/errors";
+} from "../psd/errors";
 import { mapBffErrorToHttpError } from "./error-mapping";
 import {
   HttpServiceUnavailable,

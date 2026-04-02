@@ -11,9 +11,12 @@ src/
 ├── env.ts                    ← WorkerEnv type + WorkerEnvTag (Effect Context)
 ├── cache/
 │   └── kv-cache.ts           ← KvCacheService (get/set with TTL)
-├── footbalisto/
+├── psd/
+│   ├── errors.ts             ← BffError discriminated union (typed API errors)
 │   ├── schemas.ts            ← Raw PSD API schemas (internal only)
-│   └── service.ts            ← FootbalistoService (fetch + transform + business logic)
+│   ├── schemas-player-team.ts ← PSD player/team/staff schemas (used by sync)
+│   ├── service.ts            ← PsdService (fetch + transform + business logic)
+│   └── transforms.ts         ← Pure transform functions (PSD → domain types)
 ├── handlers/
 │   ├── matches.ts            ← MatchesApi HttpApiGroup
 │   ├── ranking.ts            ← RankingApi HttpApiGroup
@@ -100,7 +103,7 @@ pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 
 ## PSD Schema & Transform Rules
 
-- **Audit existing schema declarations before writing a new field.** When adding a field that appears on multiple PSD endpoints, grep `schemas.ts` for the field name first. `competitionType` appears in both `PsdGameBaseFields` (seasons endpoint) and `FootbalistoMatchDetailGeneral` (match detail endpoint) — they must stay in sync.
+- **Audit existing schema declarations before writing a new field.** When adding a field that appears on multiple PSD endpoints, grep `schemas.ts` for the field name first. `competitionType` appears in both `PsdGameBaseFields` (seasons endpoint) and the match detail general schema (match detail endpoint) — they must stay in sync.
 - **Null before typeof.** When dispatching on `typeof value` for a nullable union field, always guard `if (val == null)` first — `typeof null === "object"` silently routes null into the object branch (e.g. `null?.type ?? "UNKNOWN"` → literal `"UNKNOWN"`). Pattern: `if (ct == null) return undefined; if (typeof ct === "string") ...; return /* object path */`.
 - **Best-effort enrichment fetches run after the mandatory empty/not-found guard.** Any fetch that only enriches the response (e.g. `/teams` for team labels) must be placed after the primary empty-check and wrapped in `Effect.catchAll(() => Effect.succeed(undefined))` — an enrichment failure must never abort the primary response.
 - **Status guard before every W/D/L aggregation.** When computing win/draw/loss counts over a match list, explicitly guard `m.status === "finished"` before each increment — scheduled, postponed, and forfeited matches must not count.

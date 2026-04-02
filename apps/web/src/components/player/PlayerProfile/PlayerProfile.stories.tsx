@@ -30,7 +30,7 @@ Main player profile page layout component that displays:
 - Player name with first name (semibold) / last name (thin) styling
 - Position and team information
 - Biography section (via PlayerBio)
-- Statistics section (future - data from Footbalisto API)
+- Statistics section (future - data from PSD API via BFF)
 
 This is the container component for the /player/[slug] route.
         `,

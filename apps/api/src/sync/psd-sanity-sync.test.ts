@@ -8,7 +8,7 @@ import {
   reconcileEntity,
   MAX_ORPHAN_RATIO,
 } from "./psd-sanity-sync";
-import type { PsdMember } from "../footbalisto/schemas-player-team";
+import type { PsdMember } from "../psd/schemas-player-team";
 
 const BASE_URL = "https://clubapi.prosoccerdata.com";
 

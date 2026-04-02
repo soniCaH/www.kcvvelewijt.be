@@ -1,12 +1,12 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RankingArray, type RankingEntry } from "@kcvv/api-contract";
-import { FootbalistoService } from "../footbalisto/service";
+import { PsdService } from "../psd/service";
 import {
   shouldServeStale,
   ResourceNotFoundError,
   type BffError,
-} from "../footbalisto/errors";
+} from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { withErrorMapping } from "./error-mapping";
@@ -19,11 +19,11 @@ export const getRankingHandler = (
 ): Effect.Effect<
   readonly RankingEntry[],
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `ranking:team:${teamId}`;
   const fetchRanking = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     const entries = yield* service.getRanking(teamId, logoCdnUrl);
     if (entries.length === 0) {
       return yield* new ResourceNotFoundError({

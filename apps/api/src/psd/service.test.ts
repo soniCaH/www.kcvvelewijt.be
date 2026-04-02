@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer, Logger, Schema as S } from "effect";
-import { FootbalistoService, FootbalistoServiceLive } from "./service";
+import { PsdService, PsdServiceLive } from "./service";
 import { Match, MatchDetail, RankingEntry } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
@@ -134,9 +134,7 @@ const rawDetailResponse = {
 };
 
 function runService<A>(
-  fn: (
-    svc: (typeof FootbalistoService)["Service"],
-  ) => Effect.Effect<A, BffError>,
+  fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,
   options: {
     sanityMock?: SanityWriteClientInterface;
     kvMock?: KvCacheInterface;
@@ -145,13 +143,13 @@ function runService<A>(
   const sanity = options.sanityMock ?? makeSanityMock();
   const kv = options.kvMock ?? cacheMock;
   const program = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* fn(service);
   });
   return Effect.runPromise(
     Effect.either(
       program.pipe(
-        Effect.provide(FootbalistoServiceLive),
+        Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, kv)),
         Effect.provide(Layer.succeed(SanityWriteClient, sanity)),
@@ -160,7 +158,7 @@ function runService<A>(
   );
 }
 
-describe("FootbalistoService.getTeamMatches", () => {
+describe("PsdService.getTeamMatches", () => {
   it("returns normalized Match array from mocked HTTP responses", async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => seasons })
@@ -363,7 +361,7 @@ describe("FootbalistoService.getTeamMatches", () => {
   });
 });
 
-describe("FootbalistoService.getNextMatches", () => {
+describe("PsdService.getNextMatches", () => {
   it("fetches next match per visible team, returns transformed Matches", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {
@@ -615,7 +613,7 @@ describe("FootbalistoService.getNextMatches", () => {
   });
 });
 
-describe("FootbalistoService.getMatchById", () => {
+describe("PsdService.getMatchById", () => {
   it("returns normalized Match (no lineup) from mocked HTTP response", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -711,7 +709,7 @@ const rawRankingCompetitions = [
   },
 ];
 
-describe("FootbalistoService.getRanking", () => {
+describe("PsdService.getRanking", () => {
   it("prefers non-CUP, non-FRIENDLY competition and returns transformed RankingEntry[]", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -858,10 +856,10 @@ describe("FootbalistoService.getRanking", () => {
 
     await Effect.runPromise(
       Effect.gen(function* () {
-        const svc = yield* FootbalistoService;
+        const svc = yield* PsdService;
         return yield* svc.getRanking(1, "https://cdn.example.com");
       }).pipe(
-        Effect.provide(FootbalistoServiceLive),
+        Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
         Effect.provide(Layer.succeed(SanityWriteClient, makeSanityMock())),
@@ -902,7 +900,7 @@ describe("FootbalistoService.getRanking", () => {
   });
 });
 
-describe("FootbalistoService.getMatchDetail", () => {
+describe("PsdService.getMatchDetail", () => {
   it("maps LEAGUE competitionType string to 'Competitie'", async () => {
     const leagueDetailResponse = {
       general: {
@@ -984,7 +982,7 @@ const rawDetailWithGoal = {
   ],
 };
 
-describe("FootbalistoService.getMatchDetail - events", () => {
+describe("PsdService.getMatchDetail - events", () => {
   it("includes normalized goal event from PSD events array", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -1243,7 +1241,7 @@ describe("FootbalistoService.getMatchDetail - events", () => {
   });
 });
 
-describe("FootbalistoService.getMatchDetail - resilient decoding", () => {
+describe("PsdService.getMatchDetail - resilient decoding", () => {
   it("filters out invalid lineup players and passes valid ones through", async () => {
     const responseWithBadLineup = {
       general: rawDetailResponse.general,
@@ -1298,7 +1296,7 @@ describe("FootbalistoService.getMatchDetail - resilient decoding", () => {
   });
 });
 
-describe("FootbalistoService.getPlayerStats", () => {
+describe("PsdService.getPlayerStats", () => {
   const psdPlayerStatsResponse = {
     playerStatistics: [
       {

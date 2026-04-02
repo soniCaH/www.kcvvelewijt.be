@@ -19,7 +19,7 @@ import { Effect, Layer } from "effect";
 import { PsdApi } from "@kcvv/api-contract";
 import { WorkerEnvTag, type WorkerEnv } from "./env";
 import { PsdTeamClientLive } from "./sync/psd-team-client";
-import { FootbalistoServiceLive } from "./footbalisto/service";
+import { PsdServiceLive } from "./psd/service";
 import { KvCacheLive } from "./cache/kv-cache";
 import { MatchesApiLive } from "./handlers/matches";
 import { OpponentApiLive } from "./handlers/opponent";
@@ -62,7 +62,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
     Layer.provide(AiAnswerServiceLive),
-    Layer.provide(FootbalistoServiceLive),
+    Layer.provide(PsdServiceLive),
     Layer.provide(SanityWriteClientLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),

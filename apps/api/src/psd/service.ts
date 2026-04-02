@@ -40,7 +40,7 @@ import {
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
-export interface FootbalistoServiceInterface {
+export interface PsdServiceInterface {
   readonly getTeamMatches: (
     teamId: number,
   ) => Effect.Effect<readonly Match[], BffError>;
@@ -63,9 +63,9 @@ export interface FootbalistoServiceInterface {
   readonly getCurrentSeasonId: () => Effect.Effect<number, BffError>;
 }
 
-export class FootbalistoService extends Context.Tag("FootbalistoService")<
-  FootbalistoService,
-  FootbalistoServiceInterface
+export class PsdService extends Context.Tag("PsdService")<
+  PsdService,
+  PsdServiceInterface
 >() {}
 
 function classifyHttpError(
@@ -132,8 +132,8 @@ function fetchJson<A, I>(
   });
 }
 
-export const FootbalistoServiceLive = Layer.effect(
-  FootbalistoService,
+export const PsdServiceLive = Layer.effect(
+  PsdService,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;

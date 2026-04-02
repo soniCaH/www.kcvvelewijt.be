@@ -2,7 +2,7 @@
  * Effect Schemas - Central Export
  */
 
-// External API schemas (BFF / Footbalisto)
+// External API schemas (BFF / PSD)
 export * from "./match.schema";
 
 // Responsibility schema

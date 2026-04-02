@@ -6,7 +6,7 @@ import {
   PsdMembersPageSchema,
   PsdTeam,
   PsdTeamsSchema,
-} from "../footbalisto/schemas-player-team";
+} from "../psd/schemas-player-team";
 
 export class PsdTeamClientError extends Error {
   readonly _tag = "PsdTeamClientError" as const;
