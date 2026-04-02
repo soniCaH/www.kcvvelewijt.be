@@ -67,6 +67,7 @@ function makeVectorizeCapture() {
       }),
     query: () => Effect.succeed([]),
     getByIds: () => Effect.succeed([]),
+    deleteByIds: () => Effect.succeed(undefined as void),
   };
   return { upsertCalls, mock };
 }
@@ -118,6 +119,7 @@ describe("runSanityIndexSync", () => {
             upsert: () => Effect.succeed(undefined),
             query: () => Effect.succeed([]),
             getByIds: () => Effect.succeed([]),
+            deleteByIds: () => Effect.succeed(undefined as void),
           }),
         ),
       ),

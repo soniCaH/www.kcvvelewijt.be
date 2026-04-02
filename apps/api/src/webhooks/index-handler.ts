@@ -1,11 +1,14 @@
-import { createClient } from "@sanity/client";
-import { Effect, Schema as S } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import type { WorkerEnv } from "../env";
+import { WorkerEnvTag } from "../env";
+import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
   buildArticleIndexText,
   buildPageIndexText,
   buildResponsibilityIndexText,
 } from "../search/index-text";
+import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
+import { WebhookSanityClient, WebhookSanityClientLive } from "./sanity-client";
 import { WebhookPayload } from "./schemas";
 import { verifySvixSignature } from "./svix-verify";
 
@@ -36,12 +39,6 @@ class WebhookServiceError {
   ) {}
 }
 
-// ─── Handler options ───────────────────────────────────────────────────────
-
-interface HandlerOptions {
-  fetchDocument?: (id: string) => Promise<Record<string, unknown> | null>;
-}
-
 // ─── Pure helpers ──────────────────────────────────────────────────────────
 
 const ALLOWED_TYPES = ["responsibility", "article", "page"] as const;
@@ -55,9 +52,6 @@ const isAllowedType = (value: string): value is AllowedType =>
 
 const isAllowedOp = (value: string): value is AllowedOp =>
   (ALLOWED_OPS as readonly string[]).includes(value);
-
-const errorMessage = (err: unknown) =>
-  err instanceof Error ? err.message : String(err);
 
 const ResponsibilityDoc = S.Struct({
   title: S.String,
@@ -81,57 +75,76 @@ const PageDoc = S.Struct({
   slug: S.String,
 });
 
+interface TypeDescriptor {
+  readonly query: string;
+  readonly buildIndex: (doc: Record<string, unknown>) => {
+    indexText: string;
+    metadata: Record<string, string>;
+  };
+}
+
+const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
+  responsibility: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,"") }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(ResponsibilityDoc)(doc);
+      return {
+        indexText: buildResponsibilityIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "responsibility",
+          title: r.title,
+          excerpt: r.summary.slice(0, 200),
+        },
+      };
+    },
+  },
+  article: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(ArticleDoc)(doc);
+      return {
+        indexText: buildArticleIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "article",
+          title: r.title,
+          excerpt: (r.bodyText ?? "").slice(0, 200),
+          ...(r.imageUrl ? { imageUrl: r.imageUrl } : {}),
+        },
+      };
+    },
+  },
+  page: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(PageDoc)(doc);
+      return {
+        indexText: buildPageIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "page",
+          title: r.title,
+          excerpt: (r.bodyText ?? "").slice(0, 200),
+        },
+      };
+    },
+  },
+};
+
 function buildDocumentIndex(
   _type: AllowedType,
   doc: Record<string, unknown>,
 ): { indexText: string; metadata: Record<string, string> } {
-  if (_type === "responsibility") {
-    const result = S.decodeUnknownSync(ResponsibilityDoc)(doc);
-    return {
-      indexText: buildResponsibilityIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "responsibility",
-        title: result.title,
-        excerpt: result.summary.slice(0, 200),
-      },
-    };
-  } else if (_type === "article") {
-    const result = S.decodeUnknownSync(ArticleDoc)(doc);
-    return {
-      indexText: buildArticleIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "article",
-        title: result.title,
-        excerpt: (result.bodyText ?? "").slice(0, 200),
-        ...(result.imageUrl ? { imageUrl: result.imageUrl } : {}),
-      },
-    };
-  } else {
-    const result = S.decodeUnknownSync(PageDoc)(doc);
-    return {
-      indexText: buildPageIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "page",
-        title: result.title,
-        excerpt: (result.bodyText ?? "").slice(0, 200),
-      },
-    };
-  }
+  return typeDescriptors[_type].buildIndex(doc);
 }
 
-function queryForType(type: AllowedType): string {
-  switch (type) {
-    case "responsibility":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,"") }`;
-    case "article":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;
-    case "page":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`;
-  }
+export function queryForType(type: AllowedType): string {
+  return typeDescriptors[type].query;
 }
+
+const errorMessage = (err: unknown) =>
+  err instanceof Error ? err.message : String(err);
 
 // ─── Error → Response mapping ──────────────────────────────────────────────
 
@@ -156,12 +169,12 @@ const toErrorResponse = (
 
 // ─── Effect pipeline ───────────────────────────────────────────────────────
 
-const webhookEffect = (
-  request: Request,
-  env: WorkerEnv,
-  options?: HandlerOptions,
-) =>
+const webhookEffect = (request: Request, webhookSecret: string) =>
   Effect.gen(function* () {
+    const sanityClient = yield* WebhookSanityClient;
+    const embedding = yield* EmbeddingService;
+    const vectorize = yield* VectorizeService;
+
     // 1. Read raw body
     const rawBody = yield* Effect.tryPromise({
       try: () => request.text(),
@@ -170,12 +183,7 @@ const webhookEffect = (
 
     // 2. Verify SVIX signature
     const valid = yield* Effect.tryPromise({
-      try: () =>
-        verifySvixSignature(
-          request.headers,
-          rawBody,
-          env.SANITY_WEBHOOK_SECRET,
-        ),
+      try: () => verifySvixSignature(request.headers, rawBody, webhookSecret),
       catch: () => new WebhookAuthError(),
     });
     if (!valid) return yield* Effect.fail(new WebhookAuthError());
@@ -210,33 +218,26 @@ const webhookEffect = (
 
     // 7. Delete path
     if (operation === "delete") {
-      yield* Effect.tryPromise({
-        try: () => env.SEARCH_INDEX.deleteByIds([_id]),
-        catch: (err) =>
-          new WebhookServiceError("delete_failed", errorMessage(err)),
-      });
+      yield* vectorize
+        .deleteByIds([_id])
+        .pipe(
+          Effect.mapError(
+            (err) =>
+              new WebhookServiceError("delete_failed", errorMessage(err)),
+          ),
+        );
       return Response.json({ ok: true, action: "deleted" });
     }
 
     // 8. Fetch document from Sanity
-    const fetchDoc =
-      options?.fetchDocument ??
-      ((id: string) => {
-        const sanity = createClient({
-          projectId: env.SANITY_PROJECT_ID,
-          dataset: env.SANITY_DATASET,
-          apiVersion: "2024-01-01",
-          token: env.SANITY_API_TOKEN,
-          useCdn: false,
-        });
-        return sanity.fetch(queryForType(docType), { id });
-      });
-
-    const doc = yield* Effect.tryPromise({
-      try: () => fetchDoc(_id),
-      catch: (err) =>
-        new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
-    });
+    const doc = yield* sanityClient
+      .fetchDocument(_id, queryForType(docType))
+      .pipe(
+        Effect.mapError(
+          (err) =>
+            new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
+        ),
+      );
 
     if (!doc) {
       return Response.json({ ok: true, action: "skipped_not_found" });
@@ -253,44 +254,51 @@ const webhookEffect = (
     });
 
     // 10. Embed
-    // Cast needed: bge-m3 isn't in the @cloudflare/workers-types AiModels type yet
-    const ai = env.AI as unknown as {
-      run: (model: string, input: unknown) => Promise<{ data: number[][] }>;
-    };
-
-    const embeddingResult = yield* Effect.tryPromise({
-      try: () => ai.run("@cf/baai/bge-m3", { text: [indexText] }),
-      catch: (err) =>
-        new WebhookServiceError("embedding_failed", errorMessage(err)),
-    });
-
-    const vector = embeddingResult.data[0];
-    if (!vector) {
-      return yield* Effect.fail(
-        new WebhookServiceError("embedding_failed", "no vector returned"),
+    const vector = yield* embedding
+      .embed(indexText)
+      .pipe(
+        Effect.mapError(
+          (err) =>
+            new WebhookServiceError("embedding_failed", errorMessage(err)),
+        ),
       );
-    }
 
     // 11. Upsert vector
-    yield* Effect.tryPromise({
-      try: () =>
-        env.SEARCH_INDEX.upsert([{ id: _id, values: vector, metadata }]),
-      catch: (err) =>
-        new WebhookServiceError("upsert_failed", errorMessage(err)),
-    });
+    yield* vectorize
+      .upsert([{ id: _id, values: vector, metadata }])
+      .pipe(
+        Effect.mapError(
+          (err) => new WebhookServiceError("upsert_failed", errorMessage(err)),
+        ),
+      );
 
     return Response.json({ ok: true, action: "indexed" });
   });
 
 // ─── Public handler ────────────────────────────────────────────────────────
 
+export type WebhookLayer = Layer.Layer<
+  WebhookSanityClient | EmbeddingService | VectorizeService
+>;
+
 export async function handleIndexWebhook(
   request: Request,
   env: WorkerEnv,
-  options?: HandlerOptions,
+  layer?: WebhookLayer,
 ): Promise<Response> {
+  const envLayer = Layer.succeed(WorkerEnvTag, env);
+  const serviceLayer =
+    layer ??
+    Layer.mergeAll(
+      WebhookSanityClientLive,
+      EmbeddingServiceLive,
+      VectorizeServiceLive,
+    );
+
   return Effect.runPromise(
-    webhookEffect(request, env, options).pipe(
+    webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
+      Effect.provide(serviceLayer),
+      Effect.provide(envLayer),
       Effect.tapError((error) =>
         Effect.sync(() => {
           if (error._tag === "WebhookServiceError") {

@@ -1,7 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleIndexWebhook } from "./index-handler";
+import { beforeEach, describe, it, expect, vi } from "vitest";
+import { Effect, Layer } from "effect";
+import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
 import type { WorkerEnv } from "../env";
 import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
+import { EmbeddingService } from "../search/embedding";
+import { VectorizeService } from "../search/vectorize";
+import { WebhookSanityClient } from "./sanity-client";
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
@@ -58,44 +62,76 @@ function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
     SANITY_DATASET: "test",
     SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
-    AI: {
-      run: vi.fn(async () => ({ data: [FAKE_VECTOR] })),
-    } as unknown as Ai,
-    SEARCH_INDEX: {
-      upsert: vi.fn(async () => ({ mutationId: "m1", count: 1 })),
-      deleteByIds: vi.fn(async () => ({ mutationId: "m2", count: 1 })),
-    } as unknown as VectorizeIndex,
+    AI: {} as Ai,
+    SEARCH_INDEX: {} as VectorizeIndex,
     ...overrides,
   };
+}
+
+// ─── Test layer factories ──────────────────────────────────────────────────
+
+const upsertSpy = vi.fn<(vectors: unknown[]) => void>();
+const deleteByIdsSpy = vi.fn<(ids: string[]) => void>();
+
+function makeTestLayer(
+  fetchDocument: (
+    id: string,
+    query: string,
+  ) => Effect.Effect<Record<string, unknown> | null>,
+): WebhookLayer {
+  return Layer.mergeAll(
+    Layer.succeed(WebhookSanityClient, {
+      fetchDocument,
+    }),
+    Layer.succeed(EmbeddingService, {
+      embed: () => Effect.succeed(FAKE_VECTOR),
+    }),
+    Layer.succeed(VectorizeService, {
+      upsert: (vectors) =>
+        Effect.sync(() => {
+          upsertSpy(vectors);
+        }),
+      deleteByIds: (ids) =>
+        Effect.sync(() => {
+          deleteByIdsSpy(ids);
+        }),
+      query: () => Effect.succeed([]),
+      getByIds: () => Effect.succeed([]),
+    }),
+  );
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("handleIndexWebhook", () => {
+  beforeEach(() => {
+    upsertSpy.mockClear();
+    deleteByIdsSpy.mockClear();
+  });
+
+  const defaultLayer = makeTestLayer(() => Effect.succeed(null));
+
   it("returns 401 for missing SVIX headers", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { missingHeaders: true });
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(401);
   });
 
   it("returns 401 for invalid signature", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { invalidSig: true });
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(401);
   });
 
   it("returns 401 for replayed requests (timestamp > 5 min old)", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { oldTimestamp: true });
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(401);
   });
 
@@ -105,24 +141,20 @@ describe("handleIndexWebhook", () => {
       _type: "responsibility",
     });
     const request = await makeSignedRequest(body, { operation: "delete" });
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(200);
 
     const json = await response.json();
     expect(json).toEqual({ ok: true, action: "deleted" });
-    expect(env.SEARCH_INDEX.deleteByIds).toHaveBeenCalledWith([
-      "doc-to-delete",
-    ]);
+    expect(deleteByIdsSpy).toHaveBeenCalledWith(["doc-to-delete"]);
   });
 
   it("returns 200 with skipped_unknown_type for unknown document type", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "unknownType" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(200);
 
     const json = await response.json();
@@ -140,22 +172,21 @@ describe("handleIndexWebhook", () => {
       category: "algemeen",
     };
 
+    const layer = makeTestLayer(() => Effect.succeed(sanityDoc));
+
     const body = JSON.stringify({
       _id: "resp-123",
       _type: "responsibility",
     });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env, {
-      fetchDocument: async () => sanityDoc,
-    });
+    const response = await handleIndexWebhook(request, makeEnv(), layer);
 
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json).toEqual({ ok: true, action: "indexed" });
 
-    expect(env.SEARCH_INDEX.upsert).toHaveBeenCalledWith([
+    expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
         id: "resp-123",
         values: FAKE_VECTOR,
@@ -174,11 +205,10 @@ describe("handleIndexWebhook", () => {
       _type: "responsibility",
     });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env, {
-      fetchDocument: async () => null,
-    });
+    const layer = makeTestLayer(() => Effect.succeed(null));
+
+    const response = await handleIndexWebhook(request, makeEnv(), layer);
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -194,16 +224,15 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV won met 3-1.",
     };
 
+    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env, {
-      fetchDocument: async () => articleDoc,
-    });
+    const response = await handleIndexWebhook(request, makeEnv(), layer);
 
     expect(response.status).toBe(200);
-    expect(env.SEARCH_INDEX.upsert).toHaveBeenCalledWith([
+    expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
         id: "article-001",
         metadata: expect.objectContaining({
@@ -224,15 +253,14 @@ describe("handleIndexWebhook", () => {
       imageUrl: "https://cdn.example.com/cover.jpg",
     };
 
+    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    await handleIndexWebhook(request, env, {
-      fetchDocument: async () => articleDoc,
-    });
+    await handleIndexWebhook(request, makeEnv(), layer);
 
-    expect(env.SEARCH_INDEX.upsert).toHaveBeenCalledWith([
+    expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
         metadata: expect.objectContaining({
           imageUrl: "https://cdn.example.com/cover.jpg",
@@ -250,17 +278,18 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV won met 3-1.",
     };
 
+    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    await handleIndexWebhook(request, env, {
-      fetchDocument: async () => articleDoc,
-    });
+    await handleIndexWebhook(request, makeEnv(), layer);
 
-    const call = (env.SEARCH_INDEX.upsert as ReturnType<typeof vi.fn>).mock
-      .calls[0]?.[0]?.[0];
-    expect(call?.metadata).not.toHaveProperty("imageUrl");
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    const call = upsertSpy.mock.calls[0]![0]![0] as {
+      metadata: Record<string, string>;
+    };
+    expect(call.metadata).not.toHaveProperty("imageUrl");
   });
 
   it("indexes a page with correct metadata", async () => {
@@ -271,16 +300,15 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV Elewijt is een voetbalclub.",
     };
 
+    const layer = makeTestLayer(() => Effect.succeed(pageDoc));
+
     const body = JSON.stringify({ _id: "page-001", _type: "page" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env, {
-      fetchDocument: async () => pageDoc,
-    });
+    const response = await handleIndexWebhook(request, makeEnv(), layer);
 
     expect(response.status).toBe(200);
-    expect(env.SEARCH_INDEX.upsert).toHaveBeenCalledWith([
+    expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
         id: "page-001",
         metadata: expect.objectContaining({
@@ -294,9 +322,8 @@ describe("handleIndexWebhook", () => {
   it("returns 400 for payload missing _id (schema validation)", async () => {
     const body = JSON.stringify({ _type: "article" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(400);
 
     const json = await response.json();
@@ -306,9 +333,8 @@ describe("handleIndexWebhook", () => {
   it("returns 400 for payload missing _type (schema validation)", async () => {
     const body = JSON.stringify({ _id: "doc-1" });
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(400);
 
     const json = await response.json();
@@ -318,9 +344,8 @@ describe("handleIndexWebhook", () => {
   it("returns 400 for malformed JSON body", async () => {
     const body = "not valid json{{{";
     const request = await makeSignedRequest(body);
-    const env = makeEnv();
 
-    const response = await handleIndexWebhook(request, env);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(400);
 
     const json = await response.json();
