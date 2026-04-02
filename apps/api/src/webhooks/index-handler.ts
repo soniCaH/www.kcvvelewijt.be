@@ -1,164 +1,60 @@
 import { createClient } from "@sanity/client";
+import { Effect, Schema as S } from "effect";
 import type { WorkerEnv } from "../env";
 import {
   buildArticleIndexText,
   buildPageIndexText,
   buildResponsibilityIndexText,
 } from "../search/index-text";
+import { WebhookPayload } from "./schemas";
 import { verifySvixSignature } from "./svix-verify";
 
-interface WebhookPayload {
-  _id: string;
-  _type: string;
-  _rev?: string;
+// ─── Error types ───────────────────────────────────────────────────────────
+
+class WebhookParseError {
+  readonly _tag = "WebhookParseError";
+  constructor(
+    readonly code: "invalid_json" | "invalid_shape",
+    readonly detail: string,
+  ) {}
 }
+
+class WebhookAuthError {
+  readonly _tag = "WebhookAuthError";
+}
+
+class WebhookServiceError {
+  readonly _tag = "WebhookServiceError";
+  constructor(
+    readonly code:
+      | "sanity_fetch_failed"
+      | "embedding_failed"
+      | "upsert_failed"
+      | "delete_failed",
+    readonly detail: string,
+  ) {}
+}
+
+// ─── Handler options ───────────────────────────────────────────────────────
 
 interface HandlerOptions {
   fetchDocument?: (id: string) => Promise<Record<string, unknown> | null>;
 }
 
+// ─── Pure helpers ──────────────────────────────────────────────────────────
+
+const ALLOWED_TYPES = ["responsibility", "article", "page"] as const;
+const ALLOWED_OPS = ["create", "update", "delete"] as const;
+
+type AllowedType = (typeof ALLOWED_TYPES)[number];
+
 const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
 
-const parsePayload = (rawBody: string): WebhookPayload | Response => {
-  try {
-    const parsed: unknown = JSON.parse(rawBody);
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      typeof (parsed as Record<string, unknown>)._id !== "string" ||
-      typeof (parsed as Record<string, unknown>)._type !== "string"
-    ) {
-      return Response.json(
-        { ok: false, error: "invalid_shape", code: "parse_failed" },
-        { status: 400 },
-      );
-    }
-    return parsed as WebhookPayload;
-  } catch (err) {
-    console.error("[webhook] malformed JSON body:", err);
-    return Response.json(
-      { ok: false, error: "invalid_json", code: "parse_failed" },
-      { status: 400 },
-    );
-  }
-};
-
-const safeFetchDoc = async (
-  fetchDoc: (id: string) => Promise<Record<string, unknown> | null>,
-  id: string,
-): Promise<Record<string, unknown> | null | Response> => {
-  try {
-    return await fetchDoc(id);
-  } catch (err) {
-    console.error("[webhook] sanity fetch failed:", err);
-    return Response.json(
-      {
-        ok: false,
-        action: "error_fetching",
-        error: errorMessage(err),
-        code: "sanity_fetch_failed",
-      },
-      { status: 500 },
-    );
-  }
-};
-
-const embedText = async (
-  ai: { run: (model: string, input: unknown) => Promise<{ data: number[][] }> },
-  text: string,
-): Promise<number[] | Response> => {
-  try {
-    const result = await ai.run("@cf/baai/bge-m3", { text: [text] });
-    const vector = result.data[0];
-    if (!vector) {
-      return Response.json(
-        { ok: false, error: "no vector returned", code: "embedding_failed" },
-        { status: 500 },
-      );
-    }
-    return vector;
-  } catch (err) {
-    console.error("[webhook] embedding failed:", err);
-    return Response.json(
-      { ok: false, error: errorMessage(err), code: "embedding_failed" },
-      { status: 500 },
-    );
-  }
-};
-
-const upsertVector = async (
-  index: VectorizeIndex,
-  id: string,
-  values: number[],
-  metadata: Record<string, string>,
-): Promise<Response | undefined> => {
-  try {
-    await index.upsert([{ id, values, metadata }]);
-  } catch (err) {
-    console.error("[webhook] upsert failed:", err);
-    return Response.json(
-      { ok: false, error: errorMessage(err), code: "upsert_failed" },
-      { status: 500 },
-    );
-  }
-};
-
-export async function handleIndexWebhook(
-  request: Request,
-  env: WorkerEnv,
-  options?: HandlerOptions,
-): Promise<Response> {
-  const rawBody = await request.text();
-
-  const valid = await verifySvixSignature(
-    request.headers,
-    rawBody,
-    env.SANITY_WEBHOOK_SECRET,
-  );
-  if (!valid) return new Response("Unauthorized", { status: 401 });
-
-  const parsed = parsePayload(rawBody);
-  if (parsed instanceof Response) return parsed;
-  const { _id, _type } = parsed;
-
-  const allowedTypes = ["responsibility", "article", "page"];
-  const allowedOps = ["create", "update", "delete"];
-  const operation = request.headers.get("sanity-operation") ?? "update";
-
-  if (!allowedOps.includes(operation)) {
-    return Response.json({ ok: true, action: "skipped_unknown_operation" });
-  }
-
-  if (!allowedTypes.includes(_type)) {
-    return Response.json({ ok: true, action: "skipped_unknown_type" });
-  }
-
-  if (operation === "delete") {
-    await env.SEARCH_INDEX.deleteByIds([_id]);
-    return Response.json({ ok: true, action: "deleted" });
-  }
-
-  const fetchDoc =
-    options?.fetchDocument ??
-    ((id: string) => {
-      const sanity = createClient({
-        projectId: env.SANITY_PROJECT_ID,
-        dataset: env.SANITY_DATASET,
-        apiVersion: "2024-01-01",
-        token: env.SANITY_API_TOKEN,
-        useCdn: false,
-      });
-      return sanity.fetch(queryForType(_type), { id });
-    });
-
-  const doc = await safeFetchDoc(fetchDoc, _id);
-  if (doc instanceof Response) return doc;
-  if (!doc) return Response.json({ ok: true, action: "skipped_not_found" });
-
-  let indexText: string;
-  let metadata: Record<string, string>;
-
+function buildDocumentIndex(
+  _type: AllowedType,
+  doc: Record<string, unknown>,
+): { indexText: string; metadata: Record<string, string> } {
   if (_type === "responsibility") {
     const d = doc as {
       title: string;
@@ -168,12 +64,14 @@ export async function handleIndexWebhook(
       slug: string;
       category: string;
     };
-    indexText = buildResponsibilityIndexText(d);
-    metadata = {
-      slug: d.slug,
-      type: "responsibility",
-      title: d.title,
-      excerpt: d.summary.slice(0, 200),
+    return {
+      indexText: buildResponsibilityIndexText(d),
+      metadata: {
+        slug: d.slug,
+        type: "responsibility",
+        title: d.title,
+        excerpt: d.summary.slice(0, 200),
+      },
     };
   } else if (_type === "article") {
     const d = doc as {
@@ -183,47 +81,32 @@ export async function handleIndexWebhook(
       slug: string;
       imageUrl?: string | null;
     };
-    indexText = buildArticleIndexText(d);
-    metadata = {
-      slug: d.slug,
-      type: "article",
-      title: d.title,
-      excerpt: (d.bodyText ?? "").slice(0, 200),
-      ...(d.imageUrl ? { imageUrl: d.imageUrl } : {}),
+    return {
+      indexText: buildArticleIndexText(d),
+      metadata: {
+        slug: d.slug,
+        type: "article",
+        title: d.title,
+        excerpt: (d.bodyText ?? "").slice(0, 200),
+        ...(d.imageUrl ? { imageUrl: d.imageUrl } : {}),
+      },
     };
   } else {
-    // page
     const d = doc as {
       title: string;
       bodyText: string | null;
       slug: string;
     };
-    indexText = buildPageIndexText(d);
-    metadata = {
-      slug: d.slug,
-      type: "page",
-      title: d.title,
-      excerpt: (d.bodyText ?? "").slice(0, 200),
+    return {
+      indexText: buildPageIndexText(d),
+      metadata: {
+        slug: d.slug,
+        type: "page",
+        title: d.title,
+        excerpt: (d.bodyText ?? "").slice(0, 200),
+      },
     };
   }
-
-  // Embed + upsert
-  const ai = env.AI as unknown as {
-    run: (model: string, input: unknown) => Promise<{ data: number[][] }>;
-  };
-
-  const vector = await embedText(ai, indexText);
-  if (vector instanceof Response) return vector;
-
-  const upsertError = await upsertVector(
-    env.SEARCH_INDEX,
-    _id,
-    vector,
-    metadata,
-  );
-  if (upsertError) return upsertError;
-
-  return Response.json({ ok: true, action: "indexed" });
 }
 
 function queryForType(type: string): string {
@@ -237,4 +120,168 @@ function queryForType(type: string): string {
     default:
       return `*[_id == $id][0]`;
   }
+}
+
+// ─── Error → Response mapping ──────────────────────────────────────────────
+
+const toErrorResponse = (
+  error: WebhookParseError | WebhookAuthError | WebhookServiceError,
+): Response => {
+  switch (error._tag) {
+    case "WebhookParseError":
+      return Response.json(
+        { ok: false, error: error.code, code: "parse_failed" },
+        { status: 400 },
+      );
+    case "WebhookAuthError":
+      return new Response("Unauthorized", { status: 401 });
+    case "WebhookServiceError":
+      return Response.json(
+        { ok: false, error: error.detail, code: error.code },
+        { status: 500 },
+      );
+  }
+};
+
+// ─── Effect pipeline ───────────────────────────────────────────────────────
+
+const webhookEffect = (
+  request: Request,
+  env: WorkerEnv,
+  options?: HandlerOptions,
+) =>
+  Effect.gen(function* () {
+    // 1. Read raw body
+    const rawBody = yield* Effect.tryPromise({
+      try: () => request.text(),
+      catch: () => new WebhookParseError("invalid_json", "failed to read body"),
+    });
+
+    // 2. Verify SVIX signature (unexpected throws propagate as defects → 500)
+    const valid = yield* Effect.promise(() =>
+      verifySvixSignature(request.headers, rawBody, env.SANITY_WEBHOOK_SECRET),
+    );
+    if (!valid) return yield* Effect.fail(new WebhookAuthError());
+
+    // 3. Parse JSON
+    const parsed = yield* Effect.try({
+      try: () => JSON.parse(rawBody) as unknown,
+      catch: () => new WebhookParseError("invalid_json", "malformed JSON body"),
+    });
+
+    // 4. Validate payload via Effect Schema
+    const payload = yield* S.decodeUnknown(WebhookPayload)(parsed).pipe(
+      Effect.mapError(
+        () =>
+          new WebhookParseError("invalid_shape", "schema validation failed"),
+      ),
+    );
+
+    const { _id, _type } = payload;
+
+    // 5. Check operation
+    const operation = request.headers.get("sanity-operation") ?? "update";
+    if (!(ALLOWED_OPS as readonly string[]).includes(operation)) {
+      return Response.json({ ok: true, action: "skipped_unknown_operation" });
+    }
+
+    // 6. Check document type
+    if (!(ALLOWED_TYPES as readonly string[]).includes(_type)) {
+      return Response.json({ ok: true, action: "skipped_unknown_type" });
+    }
+    const docType = _type as AllowedType;
+
+    // 7. Delete path
+    if (operation === "delete") {
+      yield* Effect.tryPromise({
+        try: () => env.SEARCH_INDEX.deleteByIds([_id]),
+        catch: (err) =>
+          new WebhookServiceError("delete_failed", errorMessage(err)),
+      });
+      return Response.json({ ok: true, action: "deleted" });
+    }
+
+    // 8. Fetch document from Sanity
+    const fetchDoc =
+      options?.fetchDocument ??
+      ((id: string) => {
+        const sanity = createClient({
+          projectId: env.SANITY_PROJECT_ID,
+          dataset: env.SANITY_DATASET,
+          apiVersion: "2024-01-01",
+          token: env.SANITY_API_TOKEN,
+          useCdn: false,
+        });
+        return sanity.fetch(queryForType(docType), { id });
+      });
+
+    const doc = yield* Effect.tryPromise({
+      try: () => fetchDoc(_id),
+      catch: (err) =>
+        new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
+    });
+
+    if (!doc) {
+      return Response.json({ ok: true, action: "skipped_not_found" });
+    }
+
+    // 9. Build index text + metadata
+    const { indexText, metadata } = buildDocumentIndex(docType, doc);
+
+    // 10. Embed
+    const ai = env.AI as unknown as {
+      run: (model: string, input: unknown) => Promise<{ data: number[][] }>;
+    };
+
+    const embeddingResult = yield* Effect.tryPromise({
+      try: () => ai.run("@cf/baai/bge-m3", { text: [indexText] }),
+      catch: (err) =>
+        new WebhookServiceError("embedding_failed", errorMessage(err)),
+    });
+
+    const vector = embeddingResult.data[0];
+    if (!vector) {
+      return yield* Effect.fail(
+        new WebhookServiceError("embedding_failed", "no vector returned"),
+      );
+    }
+
+    // 11. Upsert vector
+    yield* Effect.tryPromise({
+      try: () =>
+        env.SEARCH_INDEX.upsert([{ id: _id, values: vector, metadata }]),
+      catch: (err) =>
+        new WebhookServiceError("upsert_failed", errorMessage(err)),
+    });
+
+    return Response.json({ ok: true, action: "indexed" });
+  });
+
+// ─── Public handler ────────────────────────────────────────────────────────
+
+export async function handleIndexWebhook(
+  request: Request,
+  env: WorkerEnv,
+  options?: HandlerOptions,
+): Promise<Response> {
+  return Effect.runPromise(
+    webhookEffect(request, env, options).pipe(
+      Effect.tapError((error) =>
+        Effect.sync(() => {
+          if (error._tag === "WebhookServiceError") {
+            console.error(`[webhook] ${error.code}: ${error.detail}`);
+          }
+        }),
+      ),
+      Effect.catchAll((error) => Effect.succeed(toErrorResponse(error))),
+      Effect.catchAllDefect(() =>
+        Effect.succeed(
+          Response.json(
+            { ok: false, error: "internal error", code: "internal" },
+            { status: 500 },
+          ),
+        ),
+      ),
+    ),
+  );
 }

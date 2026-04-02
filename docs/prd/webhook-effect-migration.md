@@ -99,4 +99,5 @@ class WebhookPayload extends S.Class<WebhookPayload>("WebhookPayload")({
 
 ## 8. Discovered Unknowns
 
-_(filled during implementation)_
+- [2026-04-02] Webhook handler stays as separate handler in `index.ts` — Effect wrapping is clean enough, no need to move into HttpApiBuilder. The handler uses `Effect.gen` internally but keeps `Request → Response` entry point for Workers compatibility.
+- [2026-04-02] Document-level `as` casts remain in `buildDocumentIndex` helper for Sanity doc shapes (dynamic/untyped from GROQ). These should be addressed in Phase 2/3 when SanityProjection provides typed fetches.
