@@ -30,7 +30,8 @@ class WebhookServiceError {
       | "sanity_fetch_failed"
       | "embedding_failed"
       | "upsert_failed"
-      | "delete_failed",
+      | "delete_failed"
+      | "invalid_document",
     readonly detail: string,
   ) {}
 }
@@ -51,59 +52,65 @@ type AllowedType = (typeof ALLOWED_TYPES)[number];
 const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
 
+const ResponsibilityDoc = S.Struct({
+  title: S.String,
+  question: S.String,
+  keywords: S.Array(S.String),
+  summary: S.String,
+  slug: S.String,
+  category: S.String,
+});
+
+const ArticleDoc = S.Struct({
+  title: S.String,
+  tags: S.Array(S.String),
+  bodyText: S.NullOr(S.String),
+  slug: S.String,
+  imageUrl: S.optional(S.NullOr(S.String)),
+});
+
+const PageDoc = S.Struct({
+  title: S.String,
+  bodyText: S.NullOr(S.String),
+  slug: S.String,
+});
+
 function buildDocumentIndex(
   _type: AllowedType,
   doc: Record<string, unknown>,
 ): { indexText: string; metadata: Record<string, string> } {
   if (_type === "responsibility") {
-    const d = doc as {
-      title: string;
-      question: string;
-      keywords: string[];
-      summary: string;
-      slug: string;
-      category: string;
-    };
+    const result = S.decodeUnknownSync(ResponsibilityDoc)(doc);
     return {
-      indexText: buildResponsibilityIndexText(d),
+      indexText: buildResponsibilityIndexText(result),
       metadata: {
-        slug: d.slug,
+        slug: result.slug,
         type: "responsibility",
-        title: d.title,
-        excerpt: d.summary.slice(0, 200),
+        title: result.title,
+        excerpt: result.summary.slice(0, 200),
       },
     };
   } else if (_type === "article") {
-    const d = doc as {
-      title: string;
-      tags: string[];
-      bodyText: string | null;
-      slug: string;
-      imageUrl?: string | null;
-    };
+    const result = S.decodeUnknownSync(ArticleDoc)(doc);
     return {
-      indexText: buildArticleIndexText(d),
+      indexText: buildArticleIndexText(result),
       metadata: {
-        slug: d.slug,
+        slug: result.slug,
         type: "article",
-        title: d.title,
-        excerpt: (d.bodyText ?? "").slice(0, 200),
-        ...(d.imageUrl ? { imageUrl: d.imageUrl } : {}),
+        title: result.title,
+        excerpt: (result.bodyText ?? "").slice(0, 200),
+        ...(result.imageUrl ? { imageUrl: result.imageUrl } : {}),
       },
     };
   } else {
-    const d = doc as {
-      title: string;
-      bodyText: string | null;
-      slug: string;
-    };
+    const result = S.decodeUnknownSync(PageDoc)(doc);
     return {
-      indexText: buildPageIndexText(d),
+      indexText: buildPageIndexText(result),
       metadata: {
-        slug: d.slug,
+        slug: result.slug,
         type: "page",
-        title: d.title,
-        excerpt: (d.bodyText ?? "").slice(0, 200),
+        title: result.title,
+        excerpt: (result.bodyText ?? "").slice(0, 200),
       },
     };
   }
@@ -226,7 +233,14 @@ const webhookEffect = (
     }
 
     // 9. Build index text + metadata
-    const { indexText, metadata } = buildDocumentIndex(docType, doc);
+    const { indexText, metadata } = yield* Effect.try({
+      try: () => buildDocumentIndex(docType, doc),
+      catch: (err) =>
+        new WebhookServiceError(
+          "invalid_document",
+          `document validation failed for ${docType}: ${errorMessage(err)}`,
+        ),
+    });
 
     // 10. Embed
     const ai = env.AI as unknown as {

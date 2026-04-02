@@ -1,7 +1,7 @@
 export function buildResponsibilityIndexText(doc: {
   title: string;
   question: string;
-  keywords: string[];
+  keywords: readonly string[];
   summary: string;
 }): string {
   return [doc.title, doc.question, doc.keywords.join(" "), doc.summary]
@@ -11,7 +11,7 @@ export function buildResponsibilityIndexText(doc: {
 
 export function buildArticleIndexText(doc: {
   title: string;
-  tags: string[];
+  tags: readonly string[];
   bodyText: string | null;
 }): string {
   return [doc.title, doc.tags.join(" "), doc.bodyText ?? ""]
