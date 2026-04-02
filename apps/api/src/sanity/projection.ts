@@ -102,7 +102,7 @@ export const SanityProjectionLive = Layer.effect(
         Effect.tryPromise({
           try: async () => {
             const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "player" && archived != true] { psdId }`,
+              `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
           },

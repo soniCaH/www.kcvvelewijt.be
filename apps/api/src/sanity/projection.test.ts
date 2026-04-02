@@ -143,6 +143,24 @@ describe("getPlayersImageState", () => {
 
     expect(result.size).toBe(0);
   });
+
+  it("fails with SanityQueryError on client error", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    const result = await Effect.runPromise(
+      Effect.either(
+        Effect.gen(function* () {
+          const projection = yield* SanityProjection;
+          return yield* projection.getPlayersImageState();
+        }).pipe(Effect.provide(makeTestLayer())),
+      ),
+    );
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(SanityQueryError);
+    }
+  });
 });
 
 // ─── getActivePlayerPsdIds ───────────────────────────────────────────────────
@@ -160,7 +178,7 @@ describe("getActivePlayerPsdIds", () => {
 
     expect(result).toEqual(["100", "200"]);
     expect(mockFetch).toHaveBeenCalledWith(
-      `*[_type == "player" && archived != true] { psdId }`,
+      `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
     );
   });
 
