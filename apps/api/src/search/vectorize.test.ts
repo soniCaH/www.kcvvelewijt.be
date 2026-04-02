@@ -201,6 +201,51 @@ describe("VectorizeService", () => {
     ).toBeInstanceOf(VectorizeError);
   });
 
+  it("deletes vectors by ids", async () => {
+    const mockIndex = makeVectorizeMock({
+      deleteByIds: async () => ({
+        mutationId: "mut-del",
+        count: 1,
+        ids: ["doc-abc"],
+      }),
+    });
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        yield* svc.deleteByIds(["doc-abc"]);
+      }).pipe(Effect.provide(layer)),
+    );
+  });
+
+  it("fails with VectorizeError when deleteByIds throws", async () => {
+    const failIndex = makeVectorizeMock({
+      deleteByIds: async () => {
+        throw new Error("Vectorize unavailable");
+      },
+    });
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(failIndex)),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.deleteByIds(["doc-abc"]).pipe(Effect.either);
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(result._tag).toBe("Left");
+    expect(
+      (result as Extract<typeof result, { _tag: "Left" }>).left,
+    ).toBeInstanceOf(VectorizeError);
+  });
+
   it("fails with VectorizeError when query throws", async () => {
     const failIndex = {
       upsert: makeVectorizeMock().upsert,

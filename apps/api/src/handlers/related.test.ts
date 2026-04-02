@@ -26,6 +26,7 @@ function makeVectorizeMock(
     upsert: () => Effect.succeed(undefined),
     query: () => Effect.succeed([]),
     getByIds: () => Effect.succeed([]),
+    deleteByIds: () => Effect.succeed(undefined as void),
     ...overrides,
   };
 }

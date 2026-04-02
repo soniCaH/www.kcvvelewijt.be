@@ -31,6 +31,7 @@ function makeVectorizeMock(
     upsert: () => Effect.succeed(undefined),
     query: () => Effect.succeed(matches),
     getByIds: () => Effect.succeed([]),
+    deleteByIds: () => Effect.succeed(undefined as void),
   };
 }
 
@@ -177,6 +178,7 @@ describe("handleSearch", () => {
               query: () =>
                 Effect.fail(new VectorizeError("Vectorize unavailable")),
               getByIds: () => Effect.succeed([]),
+              deleteByIds: () => Effect.succeed(undefined as void),
             }),
           ),
           Effect.provide(Layer.succeed(AiAnswerService, makeAiAnswerMock())),
@@ -199,6 +201,7 @@ describe("handleSearch", () => {
           return [];
         }),
       getByIds: () => Effect.succeed([]),
+      deleteByIds: () => Effect.succeed(undefined as void),
     };
 
     await Effect.runPromise(

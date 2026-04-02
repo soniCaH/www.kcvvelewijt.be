@@ -101,3 +101,5 @@ class WebhookPayload extends S.Class<WebhookPayload>("WebhookPayload")({
 
 - [2026-04-02] Webhook handler stays as separate handler in `index.ts` — Effect wrapping is clean enough, no need to move into HttpApiBuilder. The handler uses `Effect.gen` internally but keeps `Request → Response` entry point for Workers compatibility.
 - [2026-04-02] Document-level `as` casts remain in `buildDocumentIndex` helper for Sanity doc shapes (dynamic/untyped from GROQ). These should be addressed in Phase 2/3 when SanityProjection provides typed fetches.
+- [2026-04-02] `VectorizeService` was missing `deleteByIds` — added to interface and implementation during Phase 2/3 (needed for webhook delete path). Resolved inline.
+- [2026-04-02] `SanityProjection` does not exist yet — created `WebhookSanityClient` as a webhook-specific projection service. When sanity-client-split ships, this can be replaced with `SanityProjection`.

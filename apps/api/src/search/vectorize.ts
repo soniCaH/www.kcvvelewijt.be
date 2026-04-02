@@ -38,6 +38,7 @@ export interface VectorizeServiceInterface {
   readonly getByIds: (
     ids: string[],
   ) => Effect.Effect<VectorRecord[], VectorizeError>;
+  readonly deleteByIds: (ids: string[]) => Effect.Effect<void, VectorizeError>;
 }
 
 export class VectorizeService extends Context.Tag("VectorizeService")<
@@ -118,6 +119,16 @@ export const VectorizeServiceLive = Layer.effect(
           catch: (cause) =>
             new VectorizeError(
               `Vectorize getByIds failed: ${String(cause)}`,
+              cause,
+            ),
+        }),
+
+      deleteByIds: (ids) =>
+        Effect.tryPromise({
+          try: () => env.SEARCH_INDEX.deleteByIds(ids).then(() => undefined),
+          catch: (cause) =>
+            new VectorizeError(
+              `Vectorize deleteByIds failed: ${String(cause)}`,
               cause,
             ),
         }),
