@@ -264,7 +264,7 @@ export const FootbalistoServiceLive = Layer.effect(
             );
           }
 
-          return yield* Effect.forEach(games, (game) =>
+          return games.map((game) =>
             transformPsdGame({ ...game, teamId: game.teamId ?? teamId }),
           );
         }),
@@ -310,7 +310,7 @@ export const FootbalistoServiceLive = Layer.effect(
                       .filter((m) => psdGameToMs(m) >= now)
                       .sort((a, b) => psdGameToMs(a) - psdGameToMs(b))[0];
                     return next
-                      ? yield* transformPsdGame({ ...next, teamId: team.id })
+                      ? transformPsdGame({ ...next, teamId: team.id })
                       : null;
                   }),
                 ),
@@ -354,13 +354,13 @@ export const FootbalistoServiceLive = Layer.effect(
 
       getMatchById: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
-          Effect.flatMap(transformFootbalistoMatchDetail),
+          Effect.map(transformFootbalistoMatchDetail),
           Effect.map(matchDetailToMatch),
         ),
 
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
-          Effect.flatMap(transformFootbalistoMatchDetail),
+          Effect.map(transformFootbalistoMatchDetail),
         ),
 
       getRanking: (teamId: number, logoCdnUrl: string) =>
@@ -448,9 +448,7 @@ export const FootbalistoServiceLive = Layer.effect(
                         `getOpponentHistory(${teamId}): season ${season.id}: filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
                       );
                     }
-                    return yield* Effect.forEach(games, (g) =>
-                      transformPsdGame({ ...g, teamId }),
-                    );
+                    return games.map((g) => transformPsdGame({ ...g, teamId }));
                   }),
                 ),
                 Effect.map((matches) => ({ _tag: "ok" as const, matches })),

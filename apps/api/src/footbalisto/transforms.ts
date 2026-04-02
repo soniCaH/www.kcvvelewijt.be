@@ -1,4 +1,4 @@
-import { Effect, Schema as S } from "effect";
+import { Schema as S } from "effect";
 import type {
   Match,
   MatchDetail,
@@ -97,26 +97,20 @@ export function mapGameStatus(
   goalsHome: number | null,
   goalsAway: number | null,
   cancelled?: boolean | null,
-): Effect.Effect<Match["status"]> {
-  const warnUnknown = Effect.logWarning(
-    `[transforms] Unknown PSD game status code: ${status}`,
-  );
-
-  if (cancelled) {
-    if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
-      return Effect.as(warnUnknown, "postponed" as const);
-    }
-    return Effect.succeed("postponed" as const);
-  }
-  if (status === 1) return Effect.succeed("forfeited" as const);
-  if (status === 2) return Effect.succeed("postponed" as const);
-  if (status === 3) return Effect.succeed("stopped" as const);
+): Match["status"] {
+  if (cancelled) return "postponed";
+  if (status === 1) return "forfeited";
+  if (status === 2) return "postponed";
+  if (status === 3) return "stopped";
   if (status === 0) {
-    return Effect.succeed(
-      goalsHome !== null && goalsAway !== null ? "finished" : "scheduled",
-    );
+    return goalsHome !== null && goalsAway !== null ? "finished" : "scheduled";
   }
-  return Effect.as(warnUnknown, "scheduled" as const);
+  return "scheduled";
+}
+
+/** Returns true when the PSD status code is not one of the known values (0–3). */
+export function isUnknownGameStatus(status: number): boolean {
+  return status !== 0 && status !== 1 && status !== 2 && status !== 3;
 }
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
@@ -128,8 +122,28 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
   if ([year, month, day].some((n) => n == null || isNaN(n))) {
     throw new Error(`Invalid date string: "${dateStr}"`);
   }
+  if (
+    month! < 1 ||
+    month! > 12 ||
+    day! < 1 ||
+    hour! < 0 ||
+    hour! > 23 ||
+    minute! < 0 ||
+    minute! > 59
+  ) {
+    throw new Error(`Invalid date string: "${dateStr}"`);
+  }
   const date = new Date(Date.UTC(year!, month! - 1, day!, hour, minute));
   if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date string: "${dateStr}"`);
+  }
+  if (
+    date.getUTCFullYear() !== year! ||
+    date.getUTCMonth() + 1 !== month! ||
+    date.getUTCDate() !== day! ||
+    date.getUTCHours() !== hour! ||
+    date.getUTCMinutes() !== minute!
+  ) {
     throw new Error(`Invalid date string: "${dateStr}"`);
   }
   return { date, time: timePart };
@@ -144,7 +158,7 @@ export function psdGameToMs(m: PsdGame): number {
 
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
-export function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
+export function transformPsdGame(game: PsdGame): Match {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
   const { date: matchDate, time: timePart } = parseDateString(
@@ -156,35 +170,35 @@ export function transformPsdGame(game: PsdGame): Effect.Effect<Match> {
       ? game.homeTeamId === game.teamId
       : undefined;
 
-  return mapGameStatus(
+  const status = mapGameStatus(
     game.status,
     game.goalsHomeTeam,
     game.goalsAwayTeam,
     game.cancelled,
-  ).pipe(
-    Effect.map((status) => ({
-      id: game.id,
-      date: matchDate,
-      time: timePart,
-      venue: undefined,
-      home_team: {
-        id: game.homeClub.id,
-        name: game.homeClub.name,
-        logo: game.homeClub.logo ?? undefined,
-        score: game.goalsHomeTeam ?? undefined,
-      },
-      away_team: {
-        id: game.awayClub.id,
-        name: game.awayClub.name,
-        logo: game.awayClub.logo ?? undefined,
-        score: game.goalsAwayTeam ?? undefined,
-      },
-      status,
-      competition: resolveCompetitionLabel(game.competitionType),
-      kcvv_team_id: game.teamId ?? undefined,
-      is_home: isHome,
-    })),
   );
+
+  return {
+    id: game.id,
+    date: matchDate,
+    time: timePart,
+    venue: undefined,
+    home_team: {
+      id: game.homeClub.id,
+      name: game.homeClub.name,
+      logo: game.homeClub.logo ?? undefined,
+      score: game.goalsHomeTeam ?? undefined,
+    },
+    away_team: {
+      id: game.awayClub.id,
+      name: game.awayClub.name,
+      logo: game.awayClub.logo ?? undefined,
+      score: game.goalsAwayTeam ?? undefined,
+    },
+    status,
+    competition: resolveCompetitionLabel(game.competitionType),
+    kcvv_team_id: game.teamId ?? undefined,
+    is_home: isHome,
+  };
 }
 
 // ─── Lineup transforms ───────────────────────────────────────────────────────
@@ -333,112 +347,104 @@ function transformPlayerWithCard(
   cardMap: Map<number, CardType> | null,
 ): MatchLineupPlayer {
   const base = transformLineupPlayer(player);
-  const card = cardMap && base.id ? cardMap.get(base.id) : undefined;
+  const card = cardMap && base.id != null ? cardMap.get(base.id) : undefined;
   return card ? { ...base, card } : base;
+}
+
+/** Decode items individually, filtering out any that fail schema validation. */
+function decodeItemsSync<A, I>(
+  schema: S.Schema<A, I>,
+  items: readonly unknown[],
+): A[] {
+  const decode = S.decodeUnknownSync(schema);
+  const valid: A[] = [];
+  for (const item of items) {
+    try {
+      valid.push(decode(item));
+    } catch {
+      // skip invalid items — caller can compare input/output length to detect filtered items
+    }
+  }
+  return valid;
 }
 
 export function transformFootbalistoMatchDetail(
   response: RawDetailResponse,
-): Effect.Effect<MatchDetail> {
-  return Effect.gen(function* () {
-    const general = response.general;
-    const { date: matchDate, time: timePart } = parseDateString(general.date);
+): MatchDetail {
+  const general = response.general;
+  const { date: matchDate, time: timePart } = parseDateString(general.date);
 
-    // Resilient event decoding — invalid items are filtered, valid ones pass through
-    let validEvents: FootbalistoMatchEvent[] = [];
-    if (response.events) {
-      const [eventErrors, decodedEvents] = yield* Effect.partition(
-        response.events,
-        (item) => S.decodeUnknown(FootbalistoMatchEvent)(item),
-      );
-      if (eventErrors.length > 0) {
-        yield* Effect.log(
-          `getMatchDetail(${general.id}): filtered ${eventErrors.length} invalid event(s)`,
-        );
-      }
-      validEvents = decodedEvents;
-    }
+  // Resilient event decoding — invalid items are filtered, valid ones pass through
+  const validEvents = response.events
+    ? decodeItemsSync(FootbalistoMatchEvent, response.events)
+    : [];
 
-    const cardMap =
-      validEvents.length > 0 ? buildPlayerCardMap(validEvents) : null;
+  const cardMap =
+    validEvents.length > 0 ? buildPlayerCardMap(validEvents) : null;
 
-    // Resilient lineup decoding — invalid players are filtered, valid ones pass through
-    let lineup:
-      | { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] }
-      | undefined;
-    if (response.lineup || response.substitutes) {
-      const rawHome = [
-        ...(response.lineup?.home ?? []),
-        ...(response.substitutes?.home ?? []),
-      ];
-      const rawAway = [
-        ...(response.lineup?.away ?? []),
-        ...(response.substitutes?.away ?? []),
-      ];
+  // Resilient lineup decoding — invalid players are filtered, valid ones pass through
+  let lineup:
+    | { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] }
+    | undefined;
+  if (response.lineup || response.substitutes) {
+    const rawHome = [
+      ...(response.lineup?.home ?? []),
+      ...(response.substitutes?.home ?? []),
+    ];
+    const rawAway = [
+      ...(response.lineup?.away ?? []),
+      ...(response.substitutes?.away ?? []),
+    ];
 
-      const [homeErrors, homePlayers] = yield* Effect.partition(
-        rawHome,
-        (item) => S.decodeUnknown(FootbalistoLineupPlayer)(item),
-      );
-      const [awayErrors, awayPlayers] = yield* Effect.partition(
-        rawAway,
-        (item) => S.decodeUnknown(FootbalistoLineupPlayer)(item),
-      );
+    const homePlayers = decodeItemsSync(FootbalistoLineupPlayer, rawHome);
+    const awayPlayers = decodeItemsSync(FootbalistoLineupPlayer, rawAway);
 
-      const totalErrors = homeErrors.length + awayErrors.length;
-      if (totalErrors > 0) {
-        yield* Effect.log(
-          `getMatchDetail(${general.id}): filtered ${totalErrors} invalid lineup player(s)`,
-        );
-      }
-
-      lineup = {
-        home: homePlayers.map((p) => transformPlayerWithCard(p, cardMap)),
-        away: awayPlayers.map((p) => transformPlayerWithCard(p, cardMap)),
-      };
-    }
-
-    let events: MatchEvent[] | undefined;
-    if (validEvents.length > 0) {
-      const transformed = validEvents
-        .map((e, i) =>
-          transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
-        )
-        .filter((e): e is MatchEvent => e !== null);
-      events = transformed.length > 0 ? transformed : undefined;
-    }
-
-    const status = yield* mapGameStatus(
-      general.status,
-      general.goalsHomeTeam,
-      general.goalsAwayTeam,
-      general.cancelled,
-    );
-
-    return {
-      id: general.id,
-      date: matchDate,
-      time: timePart,
-      venue: undefined,
-      home_team: {
-        id: general.homeClub.id,
-        name: general.homeClub.name,
-        logo: general.homeClub.logo ?? undefined,
-        score: general.goalsHomeTeam ?? undefined,
-      },
-      away_team: {
-        id: general.awayClub.id,
-        name: general.awayClub.name,
-        logo: general.awayClub.logo ?? undefined,
-        score: general.goalsAwayTeam ?? undefined,
-      },
-      status,
-      competition: resolveCompetitionLabel(general.competitionType),
-      lineup,
-      events,
-      hasReport: general.viewGameReport,
+    lineup = {
+      home: homePlayers.map((p) => transformPlayerWithCard(p, cardMap)),
+      away: awayPlayers.map((p) => transformPlayerWithCard(p, cardMap)),
     };
-  });
+  }
+
+  let events: MatchEvent[] | undefined;
+  if (validEvents.length > 0) {
+    const transformed = validEvents
+      .map((e, i) =>
+        transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
+      )
+      .filter((e): e is MatchEvent => e !== null);
+    events = transformed.length > 0 ? transformed : undefined;
+  }
+
+  const status = mapGameStatus(
+    general.status,
+    general.goalsHomeTeam,
+    general.goalsAwayTeam,
+    general.cancelled,
+  );
+
+  return {
+    id: general.id,
+    date: matchDate,
+    time: timePart,
+    venue: undefined,
+    home_team: {
+      id: general.homeClub.id,
+      name: general.homeClub.name,
+      logo: general.homeClub.logo ?? undefined,
+      score: general.goalsHomeTeam ?? undefined,
+    },
+    away_team: {
+      id: general.awayClub.id,
+      name: general.awayClub.name,
+      logo: general.awayClub.logo ?? undefined,
+      score: general.goalsAwayTeam ?? undefined,
+    },
+    status,
+    competition: resolveCompetitionLabel(general.competitionType),
+    lineup,
+    events,
+    hasReport: general.viewGameReport,
+  };
 }
 
 // ─── Ranking transforms ──────────────────────────────────────────────────────
