@@ -95,4 +95,45 @@ describe("PageHero", () => {
       container.querySelector(".min-h-\\[60vh\\]"),
     ).not.toBeInTheDocument();
   });
+
+  it("renders gradient background when no image is provided", () => {
+    const { container } = render(
+      <PageHero label="Club" headline="Test" body="" />,
+    );
+    const img = container.querySelector("img");
+    expect(img).not.toBeInTheDocument();
+    const gradientDiv = container.querySelector(
+      "[data-testid='hero-gradient']",
+    );
+    expect(gradientDiv).toBeInTheDocument();
+  });
+
+  it("renders image background when image is provided", () => {
+    render(<PageHero {...defaultProps} />);
+    const img = screen.getByRole("img");
+    expect(img).toBeInTheDocument();
+    expect(
+      document.querySelector("[data-testid='hero-gradient']"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses dark gradient by default when no image", () => {
+    const { container } = render(
+      <PageHero label="Club" headline="Test" body="" />,
+    );
+    const gradientDiv = container.querySelector(
+      "[data-testid='hero-gradient']",
+    );
+    expect(gradientDiv).toBeInTheDocument();
+  });
+
+  it("accepts gradient prop to select a preset", () => {
+    const { container } = render(
+      <PageHero label="Club" headline="Test" body="" gradient="green" />,
+    );
+    const gradientDiv = container.querySelector(
+      "[data-testid='hero-gradient']",
+    );
+    expect(gradientDiv).toBeInTheDocument();
+  });
 });
