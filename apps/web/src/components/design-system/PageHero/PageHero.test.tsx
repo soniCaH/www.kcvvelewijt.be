@@ -118,22 +118,20 @@ describe("PageHero", () => {
   });
 
   it("uses dark gradient by default when no image", () => {
-    const { container } = render(
-      <PageHero label="Club" headline="Test" body="" />,
-    );
-    const gradientDiv = container.querySelector(
-      "[data-testid='hero-gradient']",
-    );
-    expect(gradientDiv).toBeInTheDocument();
+    render(<PageHero label="Club" headline="Test" body="" />);
+    const gradientDiv = screen.getByTestId("hero-gradient");
+    expect(gradientDiv).toHaveStyle({
+      background:
+        "linear-gradient(135deg, #1E2024 0%, #1E2024 30%, #008755 70%, #1E2024 100%)",
+    });
   });
 
-  it("accepts gradient prop to select a preset", () => {
-    const { container } = render(
-      <PageHero label="Club" headline="Test" body="" gradient="green" />,
-    );
-    const gradientDiv = container.querySelector(
-      "[data-testid='hero-gradient']",
-    );
-    expect(gradientDiv).toBeInTheDocument();
+  it("applies the selected gradient preset", () => {
+    render(<PageHero label="Club" headline="Test" body="" gradient="green" />);
+    const gradientDiv = screen.getByTestId("hero-gradient");
+    expect(gradientDiv).toHaveStyle({
+      background:
+        "linear-gradient(135deg, #008755 0%, #4acf52 50%, #008755 100%)",
+    });
   });
 });
