@@ -1,6 +1,6 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the PageTitle + calendar widget layout
+ * Matches the PageHero + calendar widget layout
  */
 
 import { PageHero } from "@/components/design-system/PageHero";
