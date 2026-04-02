@@ -202,12 +202,16 @@ describe("VectorizeService", () => {
   });
 
   it("deletes vectors by ids", async () => {
+    const receivedIds: string[][] = [];
     const mockIndex = makeVectorizeMock({
-      deleteByIds: async () => ({
-        mutationId: "mut-del",
-        count: 1,
-        ids: ["doc-abc"],
-      }),
+      deleteByIds: async (ids: string[]) => {
+        receivedIds.push(ids);
+        return {
+          mutationId: "mut-del",
+          count: 1,
+          ids: ["doc-abc"],
+        };
+      },
     });
 
     const layer = VectorizeServiceLive.pipe(
@@ -220,6 +224,8 @@ describe("VectorizeService", () => {
         yield* svc.deleteByIds(["doc-abc"]);
       }).pipe(Effect.provide(layer)),
     );
+
+    expect(receivedIds).toEqual([["doc-abc"]]);
   });
 
   it("fails with VectorizeError when deleteByIds throws", async () => {

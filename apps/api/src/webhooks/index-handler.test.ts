@@ -285,10 +285,11 @@ describe("handleIndexWebhook", () => {
 
     await handleIndexWebhook(request, makeEnv(), layer);
 
-    const call = upsertSpy.mock.calls[0]?.[0]?.[0] as {
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    const call = upsertSpy.mock.calls[0]![0]![0] as {
       metadata: Record<string, string>;
     };
-    expect(call?.metadata).not.toHaveProperty("imageUrl");
+    expect(call.metadata).not.toHaveProperty("imageUrl");
   });
 
   it("indexes a page with correct metadata", async () => {

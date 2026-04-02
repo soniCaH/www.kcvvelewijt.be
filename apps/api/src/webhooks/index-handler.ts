@@ -75,56 +75,72 @@ const PageDoc = S.Struct({
   slug: S.String,
 });
 
+interface TypeDescriptor {
+  readonly query: string;
+  readonly buildIndex: (doc: Record<string, unknown>) => {
+    indexText: string;
+    metadata: Record<string, string>;
+  };
+}
+
+const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
+  responsibility: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,"") }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(ResponsibilityDoc)(doc);
+      return {
+        indexText: buildResponsibilityIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "responsibility",
+          title: r.title,
+          excerpt: r.summary.slice(0, 200),
+        },
+      };
+    },
+  },
+  article: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(ArticleDoc)(doc);
+      return {
+        indexText: buildArticleIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "article",
+          title: r.title,
+          excerpt: (r.bodyText ?? "").slice(0, 200),
+          ...(r.imageUrl ? { imageUrl: r.imageUrl } : {}),
+        },
+      };
+    },
+  },
+  page: {
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(PageDoc)(doc);
+      return {
+        indexText: buildPageIndexText(r),
+        metadata: {
+          slug: r.slug,
+          type: "page",
+          title: r.title,
+          excerpt: (r.bodyText ?? "").slice(0, 200),
+        },
+      };
+    },
+  },
+};
+
 function buildDocumentIndex(
   _type: AllowedType,
   doc: Record<string, unknown>,
 ): { indexText: string; metadata: Record<string, string> } {
-  if (_type === "responsibility") {
-    const result = S.decodeUnknownSync(ResponsibilityDoc)(doc);
-    return {
-      indexText: buildResponsibilityIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "responsibility",
-        title: result.title,
-        excerpt: result.summary.slice(0, 200),
-      },
-    };
-  } else if (_type === "article") {
-    const result = S.decodeUnknownSync(ArticleDoc)(doc);
-    return {
-      indexText: buildArticleIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "article",
-        title: result.title,
-        excerpt: (result.bodyText ?? "").slice(0, 200),
-        ...(result.imageUrl ? { imageUrl: result.imageUrl } : {}),
-      },
-    };
-  } else {
-    const result = S.decodeUnknownSync(PageDoc)(doc);
-    return {
-      indexText: buildPageIndexText(result),
-      metadata: {
-        slug: result.slug,
-        type: "page",
-        title: result.title,
-        excerpt: (result.bodyText ?? "").slice(0, 200),
-      },
-    };
-  }
+  return typeDescriptors[_type].buildIndex(doc);
 }
 
 export function queryForType(type: AllowedType): string {
-  switch (type) {
-    case "responsibility":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, question, "keywords": coalesce(keywords,[]), "summary": coalesce(summary,"") }`;
-    case "article":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`;
-    case "page":
-      return `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "bodyText": pt::text(body) }`;
-  }
+  return typeDescriptors[type].query;
 }
 
 const errorMessage = (err: unknown) =>
@@ -281,6 +297,8 @@ export async function handleIndexWebhook(
 
   return Effect.runPromise(
     webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
+      Effect.provide(serviceLayer),
+      Effect.provide(envLayer),
       Effect.tapError((error) =>
         Effect.sync(() => {
           if (error._tag === "WebhookServiceError") {
@@ -297,8 +315,6 @@ export async function handleIndexWebhook(
           ),
         ),
       ),
-      Effect.provide(serviceLayer),
-      Effect.provide(envLayer),
     ),
   );
 }
