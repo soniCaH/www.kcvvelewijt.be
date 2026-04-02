@@ -1052,7 +1052,7 @@ describe("FootbalistoService.getMatchDetail - events", () => {
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
       expect(result.right.events![0]?.isPenalty).toBe(true);
-      expect(result.right.events![0]?.isOwnGoal).toBeUndefined();
+      expect(result.right.events![0]?.isOwnGoal).toBe(false);
     }
   });
 
@@ -1078,7 +1078,7 @@ describe("FootbalistoService.getMatchDetail - events", () => {
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
       expect(result.right.events![0]?.isOwnGoal).toBe(true);
-      expect(result.right.events![0]?.isPenalty).toBeUndefined();
+      expect(result.right.events![0]?.isPenalty).toBe(false);
     }
   });
 
