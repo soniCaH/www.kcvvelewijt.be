@@ -100,6 +100,20 @@ pnpm turbo build --filter=@kcvv/web
 
 Do not proceed to PR if any check fails.
 
+## Step 5.5 — Code Review (Pre-PR)
+
+After quality checks pass, spawn the `superpowers:code-reviewer` agent to review all changes before pushing. This catches issues that would otherwise be flagged by CodeRabbitAI.
+
+Use the Agent tool with `subagent_type: "superpowers:code-reviewer"` and provide:
+
+- The issue number and PRD context
+- The diff of all changes (`git diff origin/main...HEAD`)
+- Instruction to review against CLAUDE.md coding standards
+
+Fix any issues the reviewer identifies, then re-run the quality gate before proceeding to Step 6.
+
+Do not skip this step — it exists to reduce PR review round-trips.
+
 ## Step 6 — Commit, Push, and Open PR
 
 Do NOT ask the user what to do. Do NOT present options or wait for approval.
