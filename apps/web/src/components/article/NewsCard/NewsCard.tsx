@@ -7,7 +7,7 @@ import { Calendar, Clock, ExternalLink } from "@/lib/icons";
 export interface NewsCardProps {
   title: string;
   href?: string; // now optional — cards without href are non-interactive
-  imageUrl?: string;
+  imageUrl?: string | null;
   imageAlt?: string;
   /** Single category label — shown above title and in footer */
   badge?: string;

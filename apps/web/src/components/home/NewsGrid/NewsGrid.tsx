@@ -5,7 +5,7 @@ import { NewsCard } from "@/components/article/NewsCard";
 export interface NewsGridArticle {
   href: string;
   title: string;
-  imageUrl?: string;
+  imageUrl: string | null;
   imageAlt: string;
   date: string;
   tags?: Array<{ name: string }>;

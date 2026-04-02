@@ -11,7 +11,7 @@ export interface ArticleHeaderProps {
   /** Article title */
   title: string;
   /** Hero image URL (optional — renders dark fallback when absent) */
-  imageUrl?: string;
+  imageUrl?: string | null;
   /** Hero image alt text */
   imageAlt?: string;
   /** Category badge */

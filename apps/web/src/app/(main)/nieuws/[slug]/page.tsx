@@ -164,7 +164,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             datePublished: article.publishedAt,
             dateModified: article.updatedAt ?? undefined,
             author: "KCVV Elewijt",
-            image: article.coverImageUrl,
+            image: article.coverImageUrl ?? undefined,
             url: shareConfig.url,
           })}
         />

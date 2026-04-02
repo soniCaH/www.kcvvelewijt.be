@@ -220,7 +220,7 @@ describe("FeaturedArticles", () => {
     const articlesWithoutImages = [
       {
         ...mockArticles[0],
-        imageUrl: undefined,
+        imageUrl: null,
       },
     ];
 

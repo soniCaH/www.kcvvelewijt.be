@@ -29,10 +29,10 @@ function makeArticleListRow(
   overrides: Partial<ARTICLES_QUERY_RESULT[number]> = {},
 ): ARTICLES_QUERY_RESULT[number] {
   return {
-    _id: "article-1",
+    id: "article-1",
     title: "Test Article",
-    slug: { _type: "slug", current: "test-article" },
-    publishAt: "2026-03-20T10:00:00Z",
+    slug: "test-article",
+    publishedAt: "2026-03-20T10:00:00Z",
     featured: false,
     tags: ["Eerste ploeg", "Wedstrijdverslag"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
@@ -45,11 +45,11 @@ function makeArticleDetailRow(
   overrides: Partial<NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>> = {},
 ): NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT> {
   return {
-    _id: "article-1",
-    _updatedAt: "2026-03-21T12:00:00Z",
+    id: "article-1",
+    updatedAt: "2026-03-21T12:00:00Z",
     title: "Test Article Detail",
-    slug: { _type: "slug", current: "test-article-detail" },
-    publishAt: "2026-03-20T10:00:00Z",
+    slug: "test-article-detail",
+    publishedAt: "2026-03-20T10:00:00Z",
     featured: true,
     tags: ["Eerste ploeg"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
@@ -69,10 +69,10 @@ function makeArticleDetailRow(
     ],
     relatedArticles: [
       {
-        _id: "article-2",
+        id: "article-2",
         title: "Related Article",
-        slug: { _type: "slug", current: "related-article" },
-        publishAt: "2026-03-19T10:00:00Z",
+        slug: "related-article",
+        publishedAt: "2026-03-19T10:00:00Z",
         unpublishAt: null,
         coverImageUrl: "https://cdn.sanity.io/related.webp",
       },
@@ -109,7 +109,7 @@ function makeArticleDetailRow(
 
 describe("ArticleRepository", () => {
   describe("findAll", () => {
-    it("maps all ArticleVM fields correctly from GROQ result", async () => {
+    it("returns GROQ result directly without transform", async () => {
       const row = makeArticleListRow();
       mockFetch.mockResolvedValueOnce([row]);
 
@@ -121,7 +121,7 @@ describe("ArticleRepository", () => {
       );
 
       expect(articles).toHaveLength(1);
-      expect(articles[0]).toEqual<ArticleVM>({
+      expect(articles[0]).toMatchObject<ArticleVM>({
         id: "article-1",
         title: "Test Article",
         slug: "test-article",
@@ -132,7 +132,7 @@ describe("ArticleRepository", () => {
       });
     });
 
-    it("null coverImageUrl becomes undefined", async () => {
+    it("null coverImageUrl stays null (no conversion to undefined)", async () => {
       mockFetch.mockResolvedValueOnce([
         makeArticleListRow({ coverImageUrl: null }),
       ]);
@@ -144,46 +144,7 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(a.coverImageUrl).toBeUndefined();
-    });
-
-    it("null/empty tags become empty array", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: null })]);
-
-      const [a] = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-      );
-
-      expect(a.tags).toEqual([]);
-    });
-
-    it("null title becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ title: null })]);
-
-      const [a] = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-      );
-
-      expect(a.title).toBe("");
-    });
-
-    it("null slug becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ slug: null })]);
-
-      const [a] = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-      );
-
-      expect(a.slug).toBe("");
+      expect(a.coverImageUrl).toBeNull();
     });
   });
 
@@ -226,11 +187,11 @@ describe("ArticleRepository", () => {
       const { toHomepageArticle } = await import("./article.repository");
       const hp = toHomepageArticle(articles[0]);
 
-      expect(hp.imageUrl).toBeUndefined();
+      expect(hp.imageUrl).toBeNull();
     });
 
     it("handles empty tags", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: null })]);
+      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: [] })]);
 
       const articles = await runWithRepo(
         Effect.gen(function* () {

@@ -28,7 +28,7 @@ export interface FeaturedArticle {
   /**
    * Featured image URL
    */
-  imageUrl?: string;
+  imageUrl: string | null;
   /**
    * Image alt text
    */

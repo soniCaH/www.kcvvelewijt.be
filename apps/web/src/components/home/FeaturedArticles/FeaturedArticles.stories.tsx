@@ -118,7 +118,7 @@ export const WithoutImage: Story = {
     articles: [
       {
         ...mockArticles[0],
-        imageUrl: undefined,
+        imageUrl: null,
       },
     ],
     autoRotate: false,

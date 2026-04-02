@@ -87,3 +87,6 @@ None. Repositories use Sanity typegen types, not Effect Schema.
 ## 8. Discovered Unknowns
 
 _(filled during implementation)_
+
+- [2026-04-02] Discovered: coalesce() in GROQ handles all null-coalescing cases including slug.current on missing slug → resolved inline (returns empty string)
+- [2026-04-02] Discovered: coverImageUrl null→undefined conversion cannot be done in GROQ — resolved by changing downstream consumers to accept string|null instead of string|undefined

@@ -99,7 +99,7 @@ export const WithFeaturedEventStub: Story = {
 /** Cards without cover images — fallback background */
 export const WithoutImages: Story = {
   args: {
-    articles: mockArticles.map((a) => ({ ...a, imageUrl: undefined })),
+    articles: mockArticles.map((a) => ({ ...a, imageUrl: null })),
     title: "Nieuws",
     showViewAll: true,
   },

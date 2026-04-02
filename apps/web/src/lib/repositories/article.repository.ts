@@ -2,6 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
 import type {
+  ARTICLES_PAGINATED_QUERY_RESULT,
   ARTICLES_QUERY_RESULT,
   ARTICLE_TAGS_QUERY_RESULT,
   ARTICLE_BY_SLUG_QUERY_RESULT,
@@ -13,7 +14,7 @@ import { formatArticleDate } from "../utils/dates";
 
 export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
-  _id, title, slug, publishAt, featured, tags,
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
 }`);
@@ -24,22 +25,22 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {
-  _id, title, slug, publishAt, featured, tags,
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 export const RELATED_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
-  _id, title, slug, publishAt, featured, tags,
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
 }`);
 
 export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
-  _id, _updatedAt, title, slug, publishAt, featured, tags,
+  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
-  relatedArticles[]-> { _id, title, slug, publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
     _id, firstName, lastName, position,
     "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
@@ -58,19 +59,14 @@ export const ARTICLE_BY_SLUG_QUERY =
 
 // ─── View Models ─────────────────────────────────────────────────────────────
 
-export interface ArticleVM {
-  id: string;
-  title: string;
-  slug: string;
-  publishedAt: string | null;
-  featured: boolean;
-  coverImageUrl?: string;
-  tags: string[];
-}
+/** Article list item — type alias for the GROQ projection result (no runtime transform needed). */
+export type ArticleVM = ARTICLES_PAGINATED_QUERY_RESULT[number];
+
+type ARTICLE_BY_SLUG_DETAIL = NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>;
 
 export interface ArticleDetailVM extends ArticleVM {
-  updatedAt: string | null;
-  body: NonNullable<ARTICLE_BY_SLUG_DETAIL>["body"];
+  updatedAt: string;
+  body: ARTICLE_BY_SLUG_DETAIL["body"];
   relatedArticles?: RelatedArticleRef[];
   mentionedPlayers?: ARTICLE_BY_SLUG_DETAIL["mentionedPlayers"];
   mentionedTeams?: ARTICLE_BY_SLUG_DETAIL["mentionedTeams"];
@@ -89,58 +85,33 @@ export interface HomepageArticle {
   href: string;
   title: string;
   description?: string;
-  imageUrl?: string;
+  imageUrl: string | null;
   imageAlt: string;
   date: string;
   dateIso: string;
   tags: Array<{ name: string }>;
 }
 
-type ARTICLE_BY_SLUG_DETAIL = NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>;
-
 // ─── Transforms ──────────────────────────────────────────────────────────────
 
-export function toArticleVM(row: ARTICLES_QUERY_RESULT[number]): ArticleVM {
-  return {
-    id: row._id,
-    title: row.title ?? "",
-    slug: row.slug?.current ?? "",
-    publishedAt: row.publishAt,
-    featured: row.featured ?? false,
-    coverImageUrl: row.coverImageUrl ?? undefined,
-    tags: row.tags ?? [],
-  };
-}
-
 function toArticleDetailVM(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
+  const now = new Date().toISOString();
   return {
-    id: row._id,
-    title: row.title ?? "",
-    slug: row.slug?.current ?? "",
-    publishedAt: row.publishAt,
-    updatedAt: row._updatedAt,
-    featured: row.featured ?? false,
-    coverImageUrl: row.coverImageUrl ?? undefined,
-    tags: row.tags ?? [],
-    body: row.body,
-    relatedArticles: (() => {
-      const now = new Date().toISOString();
-      return (
-        row.relatedArticles
-          ?.filter((a) => {
-            if (a.publishAt && a.publishAt > now) return false;
-            if (a.unpublishAt && a.unpublishAt <= now) return false;
-            return true;
-          })
-          .map((a) => ({
-            id: a._id,
-            title: a.title ?? "",
-            slug: a.slug?.current ?? "",
-            publishedAt: a.publishAt,
-            coverImageUrl: a.coverImageUrl,
-          })) ?? undefined
-      );
-    })(),
+    ...row,
+    relatedArticles:
+      row.relatedArticles
+        ?.filter((a) => {
+          if (a.publishedAt && a.publishedAt > now) return false;
+          if (a.unpublishAt && a.unpublishAt <= now) return false;
+          return true;
+        })
+        .map((a) => ({
+          id: a.id,
+          title: a.title,
+          slug: a.slug,
+          publishedAt: a.publishedAt,
+          coverImageUrl: a.coverImageUrl,
+        })) ?? undefined,
     mentionedPlayers: row.mentionedPlayers ?? undefined,
     mentionedTeams: row.mentionedTeams ?? undefined,
     mentionedStaffMembers: row.mentionedStaffMembers ?? undefined,
@@ -167,17 +138,6 @@ export function toHomepageArticles(
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 
-/** The list item type returned by the paginated query (no typegen for variable slicing) */
-export type ArticleListRow = {
-  _id: string;
-  title: string | null;
-  slug: { _type: "slug"; current?: string } | null;
-  publishAt: string | null;
-  featured: boolean | null;
-  tags: string[] | null;
-  coverImageUrl: string | null;
-};
-
 export interface ArticleRepositoryInterface {
   readonly findAll: () => Effect.Effect<ArticleVM[]>;
   readonly findBySlug: (slug: string) => Effect.Effect<ArticleDetailVM | null>;
@@ -196,31 +156,20 @@ export class ArticleRepository extends Context.Tag("ArticleRepository")<
 >() {}
 
 export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
-  findAll: () =>
-    fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY).pipe(
-      Effect.map((rows) => rows.map(toArticleVM)),
-    ),
+  findAll: () => fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY),
   findBySlug: (slug) =>
     fetchGroq<ARTICLE_BY_SLUG_QUERY_RESULT>(ARTICLE_BY_SLUG_QUERY, {
       slug,
     }).pipe(Effect.map((row) => (row ? toArticleDetailVM(row) : null))),
   findPaginated: ({ offset, limit, category }) =>
-    fetchGroq<ArticleListRow[]>(ARTICLES_PAGINATED_QUERY, {
+    fetchGroq<ARTICLES_PAGINATED_QUERY_RESULT>(ARTICLES_PAGINATED_QUERY, {
       offset,
       end: offset + limit,
       category: category ?? "",
-    }).pipe(
-      Effect.map((rows) =>
-        rows.map((row) => toArticleVM(row as ARTICLES_QUERY_RESULT[number])),
-      ),
-    ),
+    }),
   findTags: () => fetchGroq<ARTICLE_TAGS_QUERY_RESULT>(ARTICLE_TAGS_QUERY),
   findRelated: (documentId) =>
     fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(RELATED_ARTICLES_QUERY, {
       documentId,
-    }).pipe(
-      Effect.map((rows) =>
-        rows.map((row) => toArticleVM(row as ARTICLES_QUERY_RESULT[number])),
-      ),
-    ),
+    }),
 });

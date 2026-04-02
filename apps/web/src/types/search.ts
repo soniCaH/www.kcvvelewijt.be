@@ -10,7 +10,7 @@ export interface SearchResult {
   title: string;
   description?: string;
   url: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   tags?: string[];
   date?: string;
 }

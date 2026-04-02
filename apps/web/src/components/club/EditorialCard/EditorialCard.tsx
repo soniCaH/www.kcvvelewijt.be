@@ -7,7 +7,7 @@ interface EditorialCardProps {
   description?: string;
   arrowText: string;
   featured?: boolean;
-  backgroundImage?: string;
+  backgroundImage?: string | null;
   variant?: "default" | "nav";
 }
 

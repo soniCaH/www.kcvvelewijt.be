@@ -112,7 +112,7 @@ export const WithActiveCategory: Story = {
   args: {
     featuredArticles,
     initialArticles: gridArticles.filter((a) =>
-      a.tags.includes("Wedstrijdverslagen"),
+      (a.tags as string[]).includes("Wedstrijdverslagen"),
     ),
     categories: mockCategories,
     hasMore: false,

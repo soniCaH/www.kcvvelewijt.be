@@ -10,7 +10,7 @@ function makeArticle(
     slug: `jeugd-artikel-${overrides.id}`,
     publishedAt: "2026-03-20",
     featured: false,
-    coverImageUrl: undefined,
+    coverImageUrl: null,
     tags: ["Jeugd"],
     ...overrides,
   };
