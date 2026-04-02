@@ -7,10 +7,6 @@
 export { PageHeader } from "./PageHeader";
 export type { PageHeaderProps } from "./PageHeader";
 
-// PageTitle
-export { PageTitle } from "./PageTitle";
-export type { PageTitleProps } from "./PageTitle";
-
 // Navigation
 export { Navigation } from "./Navigation";
 export type { NavigationProps } from "./Navigation";
