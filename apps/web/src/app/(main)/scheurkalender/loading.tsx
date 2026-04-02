@@ -3,12 +3,17 @@
  * Matches the date-grouped upcoming matches layout
  */
 
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system/PageHero";
 
 export default function ScheurkalenderLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageTitle title="Scheurkalender" />
+      <PageHero
+        label="Kalender"
+        headline="Scheurkalender"
+        body=""
+        size="compact"
+      />
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {Array.from({ length: 4 }).map((_, day) => (

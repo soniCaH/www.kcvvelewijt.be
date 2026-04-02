@@ -3,12 +3,12 @@
  * Matches the question-builder + contact results layout
  */
 
-import { PageTitle } from "@/components/layout";
+import { PageHero } from "@/components/design-system/PageHero";
 
 export default function HelpLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageTitle title="Hulp nodig?" />
+      <PageHero label="Hulp" headline="Hulp nodig?" body="" size="compact" />
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         {/* Question builder */}
