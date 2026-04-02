@@ -125,10 +125,14 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
   const [datePart, timePart = "00:00"] = dateStr.split(" ");
   const [year, month, day] = datePart!.split("-").map(Number);
   const [hour = 0, minute = 0] = timePart.split(":").map(Number);
-  return {
-    date: new Date(Date.UTC(year!, month! - 1, day!, hour, minute)),
-    time: timePart,
-  };
+  if ([year, month, day].some((n) => n == null || isNaN(n))) {
+    throw new Error(`Invalid date string: "${dateStr}"`);
+  }
+  const date = new Date(Date.UTC(year!, month! - 1, day!, hour, minute));
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date string: "${dateStr}"`);
+  }
+  return { date, time: timePart };
 }
 
 /** Convert a PsdGame date + time fields to UTC milliseconds (for sorting). */
@@ -279,13 +283,9 @@ function transformMatchEvent(
   const id = event.action.id ?? index;
 
   if (actionType === "GOAL") {
-    const isPenalty =
-      subtype === "penalty" || subtype === "strafschop" || undefined;
+    const isPenalty = subtype === "penalty" || subtype === "strafschop";
     const isOwnGoal =
-      subtype === "own_goal" ||
-      subtype === "owngoal" ||
-      subtype === "eigen" ||
-      undefined;
+      subtype === "own_goal" || subtype === "owngoal" || subtype === "eigen";
     return {
       id,
       type: "goal",
