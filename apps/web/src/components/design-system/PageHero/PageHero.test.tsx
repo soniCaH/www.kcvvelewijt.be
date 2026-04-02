@@ -134,4 +134,15 @@ describe("PageHero", () => {
         "linear-gradient(135deg, #008755 0%, #4acf52 50%, #008755 100%)",
     });
   });
+
+  it("applies the neutral gradient preset", () => {
+    render(
+      <PageHero label="Club" headline="Test" body="" gradient="neutral" />,
+    );
+    const gradientDiv = screen.getByTestId("hero-gradient");
+    expect(gradientDiv).toHaveStyle({
+      background:
+        "linear-gradient(135deg, #1E2024 0%, #31404b 50%, #1E2024 100%)",
+    });
+  });
 });

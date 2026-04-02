@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PageHero } from "./PageHero";
 
 const meta = {
-  title: "Features/PageHero",
+  title: "UI/PageHero",
   component: PageHero,
   parameters: {
     layout: "fullscreen",
