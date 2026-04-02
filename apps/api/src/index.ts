@@ -72,7 +72,7 @@ function buildAppLayer(env: WorkerEnv) {
 
 export default {
   async fetch(request: Request, env: WorkerEnv): Promise<Response> {
-    // Webhook routes bypass Effect — raw Request/Response
+    // Webhook routes use Effect internally but keep raw Request/Response entry point
     if (
       request.method === "POST" &&
       new URL(request.url).pathname === "/webhooks/index"

@@ -18,7 +18,6 @@ const mockDoc = {
   question: "wie regelt de kantine",
   keywords: ["kantine", "bar", "evenementen"],
   summary: "De kantine wordt beheerd door de evenementencommissie.",
-  category: "algemeen",
 };
 
 const mockArticle = {

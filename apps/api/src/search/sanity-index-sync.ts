@@ -18,7 +18,6 @@ interface SanityResponsibilityDoc {
   question: string;
   keywords: string[];
   summary: string;
-  category: string;
 }
 
 interface SanityArticleDoc {
@@ -45,8 +44,7 @@ const RESPONSIBILITY_QUERY = `*[_type == "responsibility" && active == true] {
   title,
   question,
   "keywords": coalesce(keywords, []),
-  "summary": coalesce(summary, ""),
-  category
+  "summary": coalesce(summary, "")
 }`;
 
 const ARTICLE_QUERY = `*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] {

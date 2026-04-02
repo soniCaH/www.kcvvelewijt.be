@@ -290,4 +290,40 @@ describe("handleIndexWebhook", () => {
       }),
     ]);
   });
+
+  it("returns 400 for payload missing _id (schema validation)", async () => {
+    const body = JSON.stringify({ _type: "article" });
+    const request = await makeSignedRequest(body);
+    const env = makeEnv();
+
+    const response = await handleIndexWebhook(request, env);
+    expect(response.status).toBe(400);
+
+    const json = await response.json();
+    expect(json).toMatchObject({ ok: false, code: "parse_failed" });
+  });
+
+  it("returns 400 for payload missing _type (schema validation)", async () => {
+    const body = JSON.stringify({ _id: "doc-1" });
+    const request = await makeSignedRequest(body);
+    const env = makeEnv();
+
+    const response = await handleIndexWebhook(request, env);
+    expect(response.status).toBe(400);
+
+    const json = await response.json();
+    expect(json).toMatchObject({ ok: false, code: "parse_failed" });
+  });
+
+  it("returns 400 for malformed JSON body", async () => {
+    const body = "not valid json{{{";
+    const request = await makeSignedRequest(body);
+    const env = makeEnv();
+
+    const response = await handleIndexWebhook(request, env);
+    expect(response.status).toBe(400);
+
+    const json = await response.json();
+    expect(json).toMatchObject({ ok: false, code: "parse_failed" });
+  });
 });
