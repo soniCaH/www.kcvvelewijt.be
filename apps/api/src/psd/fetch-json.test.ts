@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer } from "effect";
-import { FootbalistoService, FootbalistoServiceLive } from "./service";
+import { PsdService, PsdServiceLive } from "./service";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { UpstreamUnavailableError } from "./errors";
@@ -67,13 +67,13 @@ beforeEach(() => {
 
 function runGetTeamMatches(teamId: number) {
   const program = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getTeamMatches(teamId);
   });
   return Effect.runPromise(
     Effect.either(
       program.pipe(
-        Effect.provide(FootbalistoServiceLive),
+        Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
         Effect.provide(Layer.succeed(SanityWriteClient, sanityMock)),

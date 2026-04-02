@@ -2,7 +2,7 @@
  * PlayerStats Component
  *
  * Statistics display table/grid for player performance data.
- * Data sourced from Footbalisto API.
+ * Data sourced from PSD API via BFF.
  *
  * Features:
  * - Season statistics table

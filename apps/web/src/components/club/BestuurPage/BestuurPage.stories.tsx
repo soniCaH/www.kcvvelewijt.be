@@ -83,7 +83,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Page layout for /club/bestuur. Shows a club-team header, a description section with a green left-border accent above the member roster, and an organigram CTA card. No tabs, no Footbalisto data.",
+          "Page layout for /club/bestuur. Shows a club-team header, a description section with a green left-border accent above the member roster, and an organigram CTA card. No tabs, no PSD data.",
       },
     },
   },

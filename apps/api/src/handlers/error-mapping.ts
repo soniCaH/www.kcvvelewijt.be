@@ -4,7 +4,7 @@ import {
   HttpBadGateway,
   HttpNotFound,
 } from "@kcvv/api-contract";
-import type { BffError } from "../footbalisto/errors";
+import type { BffError } from "../psd/errors";
 
 type HttpApiError = HttpServiceUnavailable | HttpBadGateway | HttpNotFound;
 

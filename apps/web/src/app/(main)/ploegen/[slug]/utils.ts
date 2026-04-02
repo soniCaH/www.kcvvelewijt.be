@@ -12,9 +12,9 @@ import type {
 import type { StandingsEntry } from "@/components/team/TeamStandings";
 
 /**
- * Transform Footbalisto Match to ScheduleMatch for TeamSchedule component
+ * Transform BFF Match to ScheduleMatch for TeamSchedule component
  *
- * @param match - Match from Footbalisto API
+ * @param match - Match from PSD API via BFF
  * @returns ScheduleMatch object for display
  */
 export function transformMatchToSchedule(match: Match): ScheduleMatch {
@@ -39,9 +39,9 @@ export function transformMatchToSchedule(match: Match): ScheduleMatch {
 }
 
 /**
- * Convert a Footbalisto ranking entry into a StandingsEntry suitable for the TeamStandings UI.
+ * Convert a BFF ranking entry into a StandingsEntry suitable for the TeamStandings UI.
  *
- * @param entry - Ranking entry object from the Footbalisto API
+ * @param entry - Ranking entry object from the PSD API via BFF
  * @returns A StandingsEntry containing position, team identifiers and display fields (teamId, teamName, teamLogo), match totals (played, won, drawn, lost), goal totals (goalsFor, goalsAgainst, goalDifference), and points
  */
 export function transformRankingToStandings(

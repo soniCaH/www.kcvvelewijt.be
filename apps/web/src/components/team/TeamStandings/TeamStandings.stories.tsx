@@ -49,7 +49,7 @@ Used in team detail pages "Stand" tab and on homepage.
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Mock data based on actual Footbalisto API structure
+// Mock data based on actual PSD API structure
 const mockStandings: StandingsEntry[] = [
   {
     position: 1,

@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, OpponentHistory } from "@kcvv/api-contract";
-import { FootbalistoService } from "../footbalisto/service";
-import { shouldServeStale, type BffError } from "../footbalisto/errors";
+import { PsdService } from "../psd/service";
+import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { withErrorMapping } from "./error-mapping";
@@ -15,11 +15,11 @@ export const getOpponentHistoryHandler = (
 ): Effect.Effect<
   OpponentHistory,
   BffError,
-  FootbalistoService | KvCacheService | WorkerEnvTag
+  PsdService | KvCacheService | WorkerEnvTag
 > => {
   const cacheKey = `opponent:team:${teamId}:club:${clubId}`;
   const fetchHistory = Effect.gen(function* () {
-    const service = yield* FootbalistoService;
+    const service = yield* PsdService;
     return yield* service.getOpponentHistory(teamId, clubId);
   });
 

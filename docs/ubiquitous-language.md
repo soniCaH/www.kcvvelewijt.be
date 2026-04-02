@@ -33,7 +33,7 @@ The lifecycle state of a match.
 | `postponed` | Uitgesteld | Cancelled/rescheduled (AFG or `cancelled: true`) |
 | `stopped`   | Gestaakt   | Ended prematurely (STOP), may be replayed        |
 
-**Status derivation:** PSD numeric code + `cancelled` boolean + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/footbalisto/service.ts`.
+**Status derivation:** PSD numeric code + `cancelled` boolean + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
 
 ### Match Side
 
@@ -369,7 +369,7 @@ A row in the league standings table.
 
 The Cloudflare Worker in `apps/api/`. Transforms raw PSD data into normalised `@kcvv/api-contract` schemas. Handles caching, search, and PSD↔Sanity sync.
 
-**Term:** Always "BFF" — distinguishes from PSD API (external), Drupal API (deprecated), and Footbalisto (to be deprecated).
+**Term:** Always "BFF" — distinguishes from PSD API (external) and Drupal API (deprecated).
 
 ### PSD API (ProSoccerData)
 
@@ -381,7 +381,7 @@ Content management system. Source of truth for editorial content (articles, even
 
 ### Footbalisto
 
-Legacy name for the PSD API integration layer in the BFF. The `FootbalistoService` in `apps/api/` will be renamed as part of future refactoring. **Do not use "Footbalisto" for new code.**
+Legacy name for the PSD API integration layer in the BFF, now renamed to `PsdService` in `apps/api/src/psd/`. The `footbalisto.be` domain is still owned and may be used as a custom Worker domain. **Do not use "Footbalisto" for new code — use "PSD" or "BFF".**
 
 ### PSD↔Sanity Sync
 

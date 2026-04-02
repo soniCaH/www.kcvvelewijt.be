@@ -332,7 +332,7 @@ export const SeniorTeam: Story = {
 };
 
 /**
- * Youth team with Info and Lineup tabs only (no Footbalisto data).
+ * Youth team with Info and Lineup tabs only (no PSD data).
  */
 export const YouthTeam: Story = {
   args: {

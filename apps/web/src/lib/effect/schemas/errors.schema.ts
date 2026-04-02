@@ -18,16 +18,13 @@ export class NotFoundError extends S.TaggedError<NotFoundError>()(
 ) {}
 
 /**
- * Footbalisto API errors
+ * PSD API errors
  */
-export class FootbalistoError extends S.TaggedError<FootbalistoError>()(
-  "FootbalistoError",
-  {
-    message: S.String,
-    status: S.optional(S.Number),
-    cause: S.optional(S.Unknown),
-  },
-) {}
+export class PsdApiError extends S.TaggedError<PsdApiError>()("PsdApiError", {
+  message: S.String,
+  status: S.optional(S.Number),
+  cause: S.optional(S.Unknown),
+}) {}
 
 /**
  * Validation error (schema decode failure)
@@ -68,7 +65,7 @@ export class TimeoutError extends S.TaggedError<TimeoutError>()(
  */
 export type AppError =
   | NotFoundError
-  | FootbalistoError
+  | PsdApiError
   | ValidationError
   | NetworkError
   | TimeoutError;

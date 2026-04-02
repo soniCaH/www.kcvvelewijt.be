@@ -99,4 +99,8 @@ None. This is an internal refactor within `apps/api`.
 
 ## 8. Discovered Unknowns
 
-_(filled during implementation)_
+- [2026-04-02] Schemas (`schemas.ts`, `schemas-player-team.ts`) already live inside the renamed `src/psd/` directory — no separate move needed. `Footbalisto*` schema class names kept as internal implementation details (they reference the raw PSD API shapes).
+- [2026-04-02] `PsdTeamClient` stays in `src/sync/` — it's a sync concern, not a PSD service concern. Its import path updated from `../footbalisto/` to `../psd/`.
+- [2026-04-02] `BffError` types stay in `src/psd/errors.ts` — they're PSD-specific errors, shared location not needed.
+- [2026-04-02] `FootbalistoError` in `apps/web` renamed to `PsdApiError` (only defined, never imported elsewhere).
+- [2026-04-02] Pre-existing unused import (`PlayerSeasonStatsType`) in `matches.test.ts` — removed as part of cleanup.

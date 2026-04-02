@@ -8,15 +8,9 @@ import {
   getPlayerStatsHandler,
 } from "./matches";
 import { HARD_TTL_DEFAULT } from "../cache/kv-cache";
-import {
-  FootbalistoService,
-  type FootbalistoServiceInterface,
-} from "../footbalisto/service";
-import type { BffError } from "../footbalisto/errors";
-import {
-  UpstreamUnavailableError,
-  ResourceNotFoundError,
-} from "../footbalisto/errors";
+import { PsdService, type PsdServiceInterface } from "../psd/service";
+import type { BffError } from "../psd/errors";
+import { UpstreamUnavailableError, ResourceNotFoundError } from "../psd/errors";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -27,7 +21,6 @@ import {
   PlayerSeasonStats,
   type Match as MatchType,
   type MatchDetail as MatchDetailType,
-  type PlayerSeasonStats as PlayerSeasonStatsType,
 } from "@kcvv/api-contract";
 
 const baseMatch: MatchType = {
@@ -52,8 +45,8 @@ const baseDetail: MatchDetailType = {
 };
 
 function makeServiceMock(
-  overrides: Partial<FootbalistoServiceInterface> = {},
-): FootbalistoServiceInterface {
+  overrides: Partial<PsdServiceInterface> = {},
+): PsdServiceInterface {
   return {
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
@@ -96,21 +89,19 @@ function provide<A>(
   effect: Effect.Effect<
     A,
     BffError,
-    FootbalistoService | KvCacheService | WorkerEnvTag
+    PsdService | KvCacheService | WorkerEnvTag
   >,
-  overrides: Partial<FootbalistoServiceInterface> = {},
+  overrides: Partial<PsdServiceInterface> = {},
 ) {
   return effect.pipe(
-    Effect.provide(
-      Layer.succeed(FootbalistoService, makeServiceMock(overrides)),
-    ),
+    Effect.provide(Layer.succeed(PsdService, makeServiceMock(overrides))),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
     Effect.provide(testEnvLayer),
   );
 }
 
 describe("getMatchesByTeamHandler", () => {
-  it("returns matches from FootbalistoService", async () => {
+  it("returns matches from PsdService", async () => {
     const result = await Effect.runPromise(provide(getMatchesByTeamHandler(1)));
     expect(result[0]?.id).toBe(1);
     expect(result[0]?.status).toBe("finished");
@@ -140,7 +131,7 @@ describe("getMatchesByTeamHandler", () => {
 });
 
 describe("getNextMatchesHandler", () => {
-  it("returns next matches from FootbalistoService (team 23 filter is internal to service)", async () => {
+  it("returns next matches from PsdService (team 23 filter is internal to service)", async () => {
     const result = await Effect.runPromise(provide(getNextMatchesHandler()));
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
@@ -183,7 +174,7 @@ describe("getMatchDetailHandler", () => {
     await Effect.runPromise(
       getMatchDetailHandler(99).pipe(
         Effect.provide(
-          Layer.succeed(FootbalistoService, {
+          Layer.succeed(PsdService, {
             ...makeServiceMock(),
             getMatchDetail: () =>
               Effect.succeed({ ...baseDetail, date: threeDaysAgo }),
@@ -256,7 +247,7 @@ describe("getMatchByIdHandler", () => {
   it("returns a basic Match (no lineup)", async () => {
     const result = await Effect.runPromise(
       getMatchByIdHandler(99).pipe(
-        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+        Effect.provide(Layer.succeed(PsdService, makeServiceMock())),
       ),
     );
     expect(result.id).toBe(99);
@@ -266,7 +257,7 @@ describe("getMatchByIdHandler", () => {
 });
 
 describe("getPlayerStatsHandler", () => {
-  it("returns PlayerSeasonStats from FootbalistoService", async () => {
+  it("returns PlayerSeasonStats from PsdService", async () => {
     const result = await Effect.runPromise(provide(getPlayerStatsHandler(42)));
     expect(result.memberId).toBe(42);
     expect(result.teams).toHaveLength(1);

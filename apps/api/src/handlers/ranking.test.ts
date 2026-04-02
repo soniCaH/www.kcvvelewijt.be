@@ -1,14 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
 import { getRankingHandler } from "./ranking";
-import {
-  FootbalistoService,
-  type FootbalistoServiceInterface,
-} from "../footbalisto/service";
+import { PsdService, type PsdServiceInterface } from "../psd/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import { RankingArray, type RankingEntry } from "@kcvv/api-contract";
-import { UpstreamUnavailableError } from "../footbalisto/errors";
+import { UpstreamUnavailableError } from "../psd/errors";
 
 const rankingEntries: readonly RankingEntry[] = [
   {
@@ -29,8 +26,8 @@ const rankingEntries: readonly RankingEntry[] = [
 ];
 
 function makeServiceMock(
-  overrides: Partial<FootbalistoServiceInterface> = {},
-): FootbalistoServiceInterface {
+  overrides: Partial<PsdServiceInterface> = {},
+): PsdServiceInterface {
   return {
     getTeamMatches: () => Effect.fail(new Error("not needed") as never),
     getNextMatches: () => Effect.fail(new Error("not needed") as never),
@@ -51,10 +48,10 @@ const cacheMock: KvCacheInterface = {
 };
 
 describe("getRankingHandler", () => {
-  it("yields FootbalistoService and returns ranking entries", async () => {
+  it("yields PsdService and returns ranking entries", async () => {
     const result = await Effect.runPromise(
       getRankingHandler(1, "https://cdn.example.com").pipe(
-        Effect.provide(Layer.succeed(FootbalistoService, makeServiceMock())),
+        Effect.provide(Layer.succeed(PsdService, makeServiceMock())),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
         Effect.provide(testEnvLayer),
       ),
@@ -71,7 +68,7 @@ describe("getRankingHandler", () => {
         getRankingHandler(1, "https://cdn.example.com").pipe(
           Effect.provide(
             Layer.succeed(
-              FootbalistoService,
+              PsdService,
               makeServiceMock({
                 getRanking: () => Effect.succeed([]),
               }),
@@ -94,7 +91,7 @@ describe("getRankingHandler", () => {
         getRankingHandler(1, "https://cdn.example.com").pipe(
           Effect.provide(
             Layer.succeed(
-              FootbalistoService,
+              PsdService,
               makeServiceMock({
                 getRanking: () =>
                   Effect.fail(
