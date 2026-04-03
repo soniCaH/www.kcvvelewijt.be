@@ -20,10 +20,10 @@ describe('buildLinkToPsdMutations', () => {
   it('creates a new document with psdId and all fields copied from the old doc', () => {
     const mutations = buildLinkToPsdMutations({oldDoc, psdId: '252', referencingDocs: []})
 
-    const creates = mutations.filter((m) => 'createOrReplace' in m)
+    const creates = mutations.filter((m) => 'create' in m)
     expect(creates).toHaveLength(1)
 
-    const newDoc = creates[0].createOrReplace
+    const newDoc = creates[0].create
     expect(newDoc._id).toBe('staffMember-psd-252')
     expect(newDoc._type).toBe('staffMember')
     expect(newDoc.firstName).toBe('Tom')
@@ -35,7 +35,7 @@ describe('buildLinkToPsdMutations', () => {
 
   it('does not copy system fields (_rev, _createdAt, _updatedAt) to the new document', () => {
     const mutations = buildLinkToPsdMutations({oldDoc, psdId: '252', referencingDocs: []})
-    const newDoc = mutations.find((m) => 'createOrReplace' in m)!.createOrReplace
+    const newDoc = mutations.find((m) => 'create' in m)!.create
     expect(newDoc._rev).toBeUndefined()
     expect(newDoc._createdAt).toBeUndefined()
     expect(newDoc._updatedAt).toBeUndefined()
@@ -64,11 +64,13 @@ describe('buildLinkToPsdMutations', () => {
 
     const mutations = buildLinkToPsdMutations({oldDoc, psdId: '252', referencingDocs})
 
-    // Should have: 1 createOrReplace (new doc) + 2 createOrReplace (relinked refs) + 2 deletes
-    const creates = mutations.filter((m) => 'createOrReplace' in m)
-    expect(creates).toHaveLength(3)
+    // Should have: 1 create (new doc) + 2 createOrReplace (relinked refs) + 2 deletes
+    const creates = mutations.filter((m) => 'create' in m)
+    expect(creates).toHaveLength(1)
+    const relinks = mutations.filter((m) => 'createOrReplace' in m)
+    expect(relinks).toHaveLength(2)
 
-    const organigramMutation = creates.find(
+    const organigramMutation = relinks.find(
       (m) => m.createOrReplace._id === 'organigramNode-123',
     )!
     const orgNode = organigramMutation.createOrReplace as Record<string, unknown>
@@ -76,7 +78,7 @@ describe('buildLinkToPsdMutations', () => {
     expect(members[0]._ref).toBe('staffMember-psd-252')
     expect(members[1]._ref).toBe('staffMember-psd-999') // unchanged
 
-    const teamMutation = creates.find((m) => m.createOrReplace._id === 'team-bestuur')!
+    const teamMutation = relinks.find((m) => m.createOrReplace._id === 'team-bestuur')!
     const teamDoc = teamMutation.createOrReplace as Record<string, unknown>
     const staff = teamDoc.staff as Array<{_ref: string}>
     expect(staff[0]._ref).toBe('staffMember-psd-252')

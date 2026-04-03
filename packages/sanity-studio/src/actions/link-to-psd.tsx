@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {type DocumentActionComponent, useClient} from 'sanity'
 import {useRouter} from 'sanity/router'
 import {buildLinkToPsdMutations} from './build-link-to-psd-mutations'
@@ -23,6 +23,13 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
   const [psdId, setPsdId] = useState('')
   const [status, setStatus] = useState<'idle' | 'executing' | 'done' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
+  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current)
+    }
+  }, [])
 
   // Only show for staffMember documents without psdId
   if (type !== 'staffMember') return null
@@ -43,7 +50,10 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
       ? {
           type: 'dialog' as const,
           header: 'Koppel aan PSD',
-          onClose: () => setDialogOpen(false),
+          onClose: () => {
+            if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current)
+            setDialogOpen(false)
+          },
           content: (
             <div style={{padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem'}}>
               {status === 'done' ? (
@@ -166,7 +176,11 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
 
                           const transaction = client.transaction()
                           for (const mutation of mutations) {
-                            if ('createOrReplace' in mutation) {
+                            if ('create' in mutation) {
+                              transaction.create(
+                                mutation.create as Parameters<typeof transaction.create>[0],
+                              )
+                            } else if ('createOrReplace' in mutation) {
                               transaction.createOrReplace(
                                 mutation.createOrReplace as Parameters<
                                   typeof transaction.createOrReplace
@@ -182,7 +196,7 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
 
                           // Navigate to the newly created document after a short delay
                           // so the user can see the success message briefly.
-                          setTimeout(() => {
+                          navTimeoutRef.current = setTimeout(() => {
                             const path = router.resolveIntentLink('edit', {
                               id: targetId,
                               type: 'staffMember',

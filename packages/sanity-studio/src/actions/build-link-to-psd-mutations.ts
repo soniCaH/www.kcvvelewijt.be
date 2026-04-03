@@ -19,6 +19,10 @@ export interface LinkToPsdInput {
   referencingDocs: SanityDoc[]
 }
 
+interface CreateMutation {
+  create: Record<string, unknown>
+}
+
 interface CreateOrReplaceMutation {
   createOrReplace: Record<string, unknown>
 }
@@ -27,7 +31,7 @@ interface DeleteMutation {
   delete: {id: string}
 }
 
-export type Mutation = CreateOrReplaceMutation | DeleteMutation
+export type Mutation = CreateMutation | CreateOrReplaceMutation | DeleteMutation
 
 /** Recursively replace all `_ref` values matching `oldId` with `newId`. */
 function deepReplaceRef(value: unknown, oldId: string, newId: string): unknown {
@@ -64,7 +68,7 @@ export function buildLinkToPsdMutations({oldDoc, psdId, referencingDocs}: LinkTo
 
   const mutations: Mutation[] = [
     {
-      createOrReplace: {
+      create: {
         ...userFields,
         _id: newId,
         _type: 'staffMember',
