@@ -5,7 +5,7 @@
  * Staging first, then production.
  *
  * Run: SANITY_DATASET=staging tsx src/phase4-organigram-seeding.ts
- *      SANITY_DATASET=production tsx src/phase4-organigram-seeding.ts
+ *      CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production tsx src/phase4-organigram-seeding.ts
  */
 import { client } from "./sanity-client";
 
@@ -482,20 +482,60 @@ const nodes: OrganigramNode[] = [
   },
 ];
 
+// ─── Preflight validation ───────────────────────────────────────────────────
+
+function validateOrganigramNodes(input: OrganigramNode[]): void {
+  const ids = new Set<string>();
+  const errors: string[] = [];
+
+  for (const node of input) {
+    if (ids.has(node._id)) {
+      errors.push(`Duplicate _id: "${node._id}"`);
+    }
+    ids.add(node._id);
+  }
+
+  for (const node of input) {
+    if (node.parentNode && !ids.has(node.parentNode._ref)) {
+      errors.push(
+        `"${node._id}" references parentNode "${node.parentNode._ref}" which does not exist in nodes`
+      );
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error("Validation failed:\n" + errors.map((e) => `  - ${e}`).join("\n"));
+    process.exit(1);
+  }
+}
+
 // ─── Execute ────────────────────────────────────────────────────────────────
 
 async function seed() {
-  console.log(`Seeding ${nodes.length} organigramNode documents...`);
+  const dataset = process.env.SANITY_DATASET ?? "staging";
+
+  if (dataset === "production" && !process.env.CONFIRM_PRODUCTION_SEED) {
+    console.error(
+      "Refusing to seed production without CONFIRM_PRODUCTION_SEED=yes.\n" +
+      "Run: CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production tsx src/phase4-organigram-seeding.ts"
+    );
+    process.exit(1);
+  }
+
+  validateOrganigramNodes(nodes);
+
+  console.log(`Seeding ${nodes.length} organigramNode documents on ${dataset}...`);
 
   const transaction = client.transaction();
 
   for (const node of nodes) {
-    transaction.createOrReplace(node);
+    transaction.createIfNotExists(node);
+    transaction.patch(node._id, (p) => p.set(node));
   }
 
   const result = await transaction.commit({ visibility: "async" });
   console.log(
-    `Done! Transaction ID: ${result.transactionId}, ${nodes.length} documents created.`
+    `Done! Transaction ID: ${result.transactionId}, ${nodes.length} documents seeded.`
   );
 }
 
