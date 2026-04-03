@@ -231,6 +231,19 @@ describe("archivePlayers", () => {
     );
 
     expect(mockTransaction).toHaveBeenCalledOnce();
+
+    const tx = mockTransaction.mock.results[0]!.value;
+    expect(tx.patch).toHaveBeenCalledTimes(2);
+    expect(tx.patch).toHaveBeenCalledWith(
+      "player-psd-100",
+      expect.any(Function),
+    );
+    expect(tx.patch).toHaveBeenCalledWith(
+      "player-psd-200",
+      expect.any(Function),
+    );
+    expect(mockSet).toHaveBeenCalledWith({ archived: true });
+
     expect(mockCommit).toHaveBeenCalled();
   });
 
@@ -269,6 +282,57 @@ describe("archivePlayers", () => {
 // ─── uploadPlayerImage ──────────────────────────────────────────────────────
 
 describe("uploadPlayerImage", () => {
+  it("uploads image and patches player doc on success", async () => {
+    const imageBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    // First call: PSD image fetch
+    fetchSpy.mockResolvedValueOnce(
+      new Response(imageBytes, {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+
+    // Second call: Sanity asset upload
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: { _id: "image-abc123" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage(
+          "42",
+          "https://kcvv.prosoccerdata.com/img/player.jpg?profileAccessKey=abc",
+          "https://kcvv.prosoccerdata.com/img/player.jpg?v=1",
+        );
+      }),
+    );
+
+    // PSD image was fetched
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://kcvv.prosoccerdata.com/img/player.jpg?profileAccessKey=abc",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+
+    // Player doc was patched with psdImage and psdImageUrl
+    expect(mockClientPatch).toHaveBeenCalledWith("player-psd-42");
+    const setFn = mockClientPatch.mock.results[0]!.value.set;
+    expect(setFn).toHaveBeenCalledWith({
+      psdImage: {
+        _type: "image",
+        asset: { _type: "reference", _ref: "image-abc123" },
+      },
+      psdImageUrl: "https://kcvv.prosoccerdata.com/img/player.jpg?v=1",
+    });
+
+    fetchSpy.mockRestore();
+  });
+
   it("rejects non-HTTPS image URLs", async () => {
     const result = await Effect.runPromise(
       Effect.either(

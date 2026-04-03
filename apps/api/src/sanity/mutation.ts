@@ -49,10 +49,7 @@ export class SanityMutationError extends Error {
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
-export interface PlayerImageState {
-  psdImageUrl: string | null;
-  hasPsdImage: boolean;
-}
+export type { PlayerImageState } from "./types";
 
 export interface SanityMutationInterface {
   readonly upsertPlayer: (
