@@ -90,7 +90,7 @@ function buildFeaturedEventStub(event: EventVM): FeaturedEventStub {
   return {
     title: event.title,
     href: isExternal ? event.href : undefined,
-    imageUrl: event.coverImageUrl,
+    imageUrl: event.coverImageUrl ?? undefined,
     badge: "EVENEMENT",
     date: eventDate,
     time: eventTime,

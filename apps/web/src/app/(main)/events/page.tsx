@@ -36,7 +36,7 @@ function toEventsListItem(event: EventVM): EventsListItem {
     href: event.href,
     date: new Date(event.dateStart),
     endDate: event.dateEnd ? new Date(event.dateEnd) : undefined,
-    imageUrl: event.coverImageUrl,
+    imageUrl: event.coverImageUrl ?? undefined,
   };
 }
 

@@ -10,11 +10,7 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import {
-  SponsorRepository,
-  SponsorRepositoryLive,
-  type SponsorVM,
-} from "./sponsor.repository";
+import { SponsorRepository, SponsorRepositoryLive } from "./sponsor.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -23,11 +19,12 @@ function runWithRepo<A>(effect: Effect.Effect<A, never, SponsorRepository>) {
   return Effect.runPromise(Effect.provide(effect, SponsorRepositoryLive));
 }
 
+/** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
 function makeSponsorRow(
   overrides: Partial<SPONSORS_QUERY_RESULT[number]> = {},
 ): SPONSORS_QUERY_RESULT[number] {
   return {
-    _id: "sponsor-1",
+    id: "sponsor-1",
     name: "Acme Corp",
     url: "https://acme.example.com",
     type: "crossing",
@@ -41,7 +38,7 @@ function makeSponsorRow(
 
 describe("SponsorRepository", () => {
   describe("findAll", () => {
-    it("maps all SponsorVM fields correctly from GROQ result", async () => {
+    it("returns GROQ projection shape directly — no post-fetch transform", async () => {
       const row = makeSponsorRow();
       mockFetch.mockResolvedValueOnce([row]);
 
@@ -53,7 +50,7 @@ describe("SponsorRepository", () => {
       );
 
       expect(sponsors).toHaveLength(1);
-      expect(sponsors[0]).toEqual<SponsorVM>({
+      expect(sponsors[0]).toMatchObject({
         id: "sponsor-1",
         name: "Acme Corp",
         url: "https://acme.example.com",
@@ -64,8 +61,10 @@ describe("SponsorRepository", () => {
       });
     });
 
-    it("null name becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeSponsorRow({ name: null })]);
+    it("GROQ coalesce handles nulls — name defaults to empty string, featured to false", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeSponsorRow({ name: "", featured: false }),
+      ]);
 
       const [s] = await runWithRepo(
         Effect.gen(function* () {
@@ -75,14 +74,15 @@ describe("SponsorRepository", () => {
       );
 
       expect(s.name).toBe("");
+      expect(s.featured).toBe(false);
     });
 
-    it("null optional fields become undefined", async () => {
+    it("null optional fields stay null (GROQ returns null for missing values)", async () => {
       mockFetch.mockResolvedValueOnce([
         makeSponsorRow({
           url: null,
           tier: null,
-          featured: null,
+          featured: false,
           logoUrl: null,
           type: null,
         }),
@@ -95,11 +95,11 @@ describe("SponsorRepository", () => {
         }),
       );
 
-      expect(s.url).toBeUndefined();
-      expect(s.tier).toBeUndefined();
+      expect(s.url).toBeNull();
+      expect(s.tier).toBeNull();
       expect(s.featured).toBe(false);
-      expect(s.logoUrl).toBeUndefined();
-      expect(s.type).toBeUndefined();
+      expect(s.logoUrl).toBeNull();
+      expect(s.type).toBeNull();
     });
   });
 });

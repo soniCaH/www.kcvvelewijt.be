@@ -7,31 +7,23 @@ import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
 
 export const PAGE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "page" && slug.current == $slug][0] {
-  _id,
-  title,
-  slug,
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),
   "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }
 }`);
 
-export interface PageVM {
-  id: string;
+// ─── View Models ─────────────────────────────────────────────────────────────
+
+type PAGE_DETAIL = NonNullable<PAGE_BY_SLUG_QUERY_RESULT>;
+
+/** GROQ projection now returns the final shape — PageVM is a type alias.
+ *  Omit + re-declare normalises the `coalesce()` unions typegen emits. */
+export type PageVM = Omit<PAGE_DETAIL, "title" | "slug"> & {
   title: string;
   slug: string;
-  heroImageUrl: string | null;
-  body: NonNullable<NonNullable<PAGE_BY_SLUG_QUERY_RESULT>["body"]>;
-}
+};
 
-export function toPageVM(row: NonNullable<PAGE_BY_SLUG_QUERY_RESULT>): PageVM {
-  return {
-    id: row._id,
-    title: row.title ?? "",
-    slug: row.slug?.current ?? "",
-    heroImageUrl:
-      ((row as Record<string, unknown>).heroImageUrl as string | null) ?? null,
-    body: row.body ?? [],
-  };
-}
+// ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface PageRepositoryInterface {
   readonly findBySlug: (slug: string) => Effect.Effect<PageVM | null>;
@@ -45,6 +37,6 @@ export class PageRepository extends Context.Tag("PageRepository")<
 export const PageRepositoryLive = Layer.succeed(PageRepository, {
   findBySlug: (slug) =>
     fetchGroq<PAGE_BY_SLUG_QUERY_RESULT>(PAGE_BY_SLUG_QUERY, { slug }).pipe(
-      Effect.map((row) => (row ? toPageVM(row) : null)),
+      Effect.map((row) => row ?? null),
     ),
 });

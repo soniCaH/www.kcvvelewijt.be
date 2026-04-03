@@ -84,9 +84,21 @@ None. Repositories use Sanity typegen types, not Effect Schema.
 - [ ] Will removing `ArticleVM` break component type imports elsewhere? — Grep for imports during Phase 1
 - [ ] Should we regenerate `sanity.types.ts` as part of this work to ensure typegen picks up projection changes? — Likely yes, add to Phase 1
 
-## 8. Discovered Unknowns
+## 8. Secondary ViewModel Audit (Phase 3)
+
+| ViewModel           | Location                    | Decision               | Reason                                                                                                                       |
+| ------------------- | --------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `HomepageArticle`   | `article.repository.ts:92`  | **Keep**               | Date formatting (`formatArticleDate`), URL construction (`/nieuws/${slug}`), tag reshaping — runtime logic GROQ can't handle |
+| `CalendarMatch`     | `kalender/utils.ts:17`      | **Keep**               | Transforms BFF `Match` (api-contract), not Sanity data — out of scope for Sanity pipeline simplification                     |
+| `CalendarEvent`     | `kalender/utils.ts:32`      | **Keep**               | Interface segregation — calendar widget only needs `id/title/dateStart/dateEnd/href`, not full `EventVM`                     |
+| `BannerSlotVM`      | `homepage.repository.ts:29` | **Keep**               | Primary VM with validation guard (`!imageUrl` or `!alt` → null) — real business logic                                        |
+| `RelatedArticleRef` | `article.repository.ts:88`  | **Already simplified** | Type alias from GROQ result (done in Phase 1)                                                                                |
+
+## 9. Discovered Unknowns
 
 - [2026-04-03] `coalesce()` in GROQ works for `slug.current` on missing slug — returns `""` as expected → resolved inline
 - [2026-04-03] `coverImageUrl` changes from `string | undefined` to `string | null` (GROQ can't produce JS `undefined`) — requires `?? undefined` at component prop boundaries → resolved inline
 - [2026-04-03] `RelatedArticleRef` now includes `unpublishAt` field from GROQ projection (used for publication filtering) — test mocks updated → resolved inline
 - [2026-04-03] `sanity.types.ts` was updated manually (no `sanity typegen` CLI available in worktree) — should be regenerated with `sanity typegen generate` when available
+- [2026-04-03] `homepage.repository.ts` validation transform kept — `toBannerSlotVM` guards against incomplete banner data (missing imageUrl/alt). Only GROQ change: removed unused `_id` from projection
+- [2026-04-03] Nullable fields in simplified VMs use `string | null` (GROQ's natural return type) instead of `string | undefined`. Consumer mapping points add `?? undefined` where component props require it

@@ -29,10 +29,10 @@ function mapToSponsor(s: SponsorVM): Sponsor {
     id: s.id,
     name: s.name,
     logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
-    url: s.url,
-    tier: s.tier,
+    url: s.url ?? undefined,
+    tier: s.tier ?? undefined,
     featured: s.featured,
-    description: s.description,
+    description: s.description ?? undefined,
   };
 }
 
