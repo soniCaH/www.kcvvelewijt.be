@@ -144,9 +144,10 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
 
                         try {
                           const targetId = `staffMember-psd-${trimmedPsdId}`
+                          const draftTargetId = `drafts.${targetId}`
                           const existing = await client.fetch<{_id: string} | null>(
-                            `*[_id == $targetId][0]{_id}`,
-                            {targetId},
+                            `*[_id == $targetId || _id == $draftTargetId][0]{_id}`,
+                            {targetId, draftTargetId},
                           )
                           if (existing) {
                             setStatus('error')
@@ -156,9 +157,13 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
                             return
                           }
 
+                          const draftId = `drafts.${id}`
                           const referencingDocs = await client.fetch<
                             Array<Record<string, unknown>>
-                          >(`*[references($docId) && _id != $docId]`, {docId: id})
+                          >(
+                            `*[(references($docId) || references($draftId)) && !(_id in [$docId, $draftId])]`,
+                            {docId: id, draftId},
+                          )
 
                           const mutations = buildLinkToPsdMutations({
                             oldDoc: {

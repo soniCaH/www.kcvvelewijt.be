@@ -84,6 +84,26 @@ describe('buildLinkToPsdMutations', () => {
     expect(staff[0]._ref).toBe('staffMember-psd-252')
   })
 
+  it('replaces draft _ref values in referencing documents', () => {
+    const referencingDocs = [
+      {
+        _id: 'organigramNode-456',
+        _type: 'organigramNode',
+        members: [
+          {_ref: 'drafts.staff-board-dcb0e9e6', _type: 'reference', _key: 'k1'},
+          {_ref: 'staff-board-dcb0e9e6', _type: 'reference', _key: 'k2'},
+        ],
+      },
+    ]
+
+    const mutations = buildLinkToPsdMutations({oldDoc, psdId: '252', referencingDocs})
+    const relinks = mutations.filter((m) => 'createOrReplace' in m)
+    const orgNode = relinks[0].createOrReplace as Record<string, unknown>
+    const members = orgNode.members as Array<{_ref: string}>
+    expect(members[0]._ref).toBe('staffMember-psd-252')
+    expect(members[1]._ref).toBe('staffMember-psd-252')
+  })
+
   it('deletes both the published document and its draft', () => {
     const mutations = buildLinkToPsdMutations({oldDoc, psdId: '252', referencingDocs: []})
     const deletes = mutations.filter((m) => 'delete' in m)

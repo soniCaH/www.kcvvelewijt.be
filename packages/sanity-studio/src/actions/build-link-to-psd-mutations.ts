@@ -77,11 +77,14 @@ export function buildLinkToPsdMutations({oldDoc, psdId, referencingDocs}: LinkTo
     },
   ]
 
-  // Relink referencing documents. Uses createOrReplace for simplicity —
-  // concurrent edits between fetch and commit would be overwritten, but this
-  // is acceptable for a rare, manual migration action.
+  // Relink referencing documents. Replace refs to both the published ID and
+  // its draft variant. Uses createOrReplace for simplicity — concurrent edits
+  // between fetch and commit would be overwritten, but this is acceptable for
+  // a rare, manual migration action.
+  const draftOldId = `drafts.${oldId}`
   for (const refDoc of referencingDocs) {
-    const updated = deepReplaceRef(refDoc, oldId, newId) as SanityDoc
+    let updated = deepReplaceRef(refDoc, oldId, newId) as SanityDoc
+    updated = deepReplaceRef(updated, draftOldId, newId) as SanityDoc
     mutations.push({createOrReplace: updated})
   }
 
