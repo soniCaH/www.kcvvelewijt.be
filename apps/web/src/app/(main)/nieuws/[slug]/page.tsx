@@ -128,7 +128,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   let articleRelatedItems: RelatedContentItem[];
   if (hasEditorialArticles) {
-    articleRelatedItems = mapEditorialArticles(article.relatedArticles);
+    articleRelatedItems = mapEditorialArticles(
+      article.relatedArticles ?? undefined,
+    );
   } else {
     articleRelatedItems = await runPromise(
       Effect.gen(function* () {
@@ -143,9 +145,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const relatedItems: RelatedContentItem[] = [
     ...articleRelatedItems,
-    ...mapMentionedPlayers(article.mentionedPlayers),
-    ...mapMentionedStaff(article.mentionedStaffMembers),
-    ...mapMentionedTeams(article.mentionedTeams),
+    ...mapMentionedPlayers(article.mentionedPlayers ?? undefined),
+    ...mapMentionedStaff(article.mentionedStaffMembers ?? undefined),
+    ...mapMentionedTeams(article.mentionedTeams ?? undefined),
   ];
 
   return (
@@ -164,14 +166,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             datePublished: article.publishedAt,
             dateModified: article.updatedAt ?? undefined,
             author: "KCVV Elewijt",
-            image: article.coverImageUrl,
+            image: article.coverImageUrl ?? undefined,
             url: shareConfig.url,
           })}
         />
       )}
       <ArticleHeader
         title={article.title}
-        imageUrl={article.coverImageUrl}
+        imageUrl={article.coverImageUrl ?? undefined}
         imageAlt={article.title}
         category={primaryCategory?.name}
         date={

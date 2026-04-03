@@ -9,6 +9,7 @@ function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
     slug: "test-article",
     publishedAt: "2026-03-15T10:00:00Z",
     featured: false,
+    coverImageUrl: null,
     tags: [],
     ...overrides,
   };

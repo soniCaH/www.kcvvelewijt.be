@@ -30,6 +30,7 @@ function makePageRow(
     _id: "page-1",
     title: "Praktische Info",
     slug: { current: "praktische-info", _type: "slug" },
+    heroImageUrl: null,
     body: [
       {
         _type: "block",

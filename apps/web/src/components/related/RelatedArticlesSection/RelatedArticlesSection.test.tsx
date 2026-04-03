@@ -27,6 +27,7 @@ const mockArticles = [
     slug: "wedstrijdverslag",
     publishedAt: "2026-03-19T10:00:00Z",
     featured: false,
+    coverImageUrl: null,
     tags: [],
   },
 ];
