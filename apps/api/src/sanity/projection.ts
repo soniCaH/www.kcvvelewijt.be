@@ -42,6 +42,11 @@ export interface SanityProjectionInterface {
   >;
   /** Fetch PSD IDs of all non-archived teams. */
   readonly getActiveTeamPsdIds: () => Effect.Effect<string[], SanityQueryError>;
+  /** Fetch PSD IDs of staff members referenced by active organigramNode or responsibility documents. */
+  readonly getProtectedStaffPsdIds: () => Effect.Effect<
+    string[],
+    SanityQueryError
+  >;
 }
 
 export class SanityProjection extends Context.Tag("SanityProjection")<
@@ -135,6 +140,29 @@ export const SanityProjectionLive = Layer.effect(
           },
           catch: (cause) =>
             new SanityQueryError("Failed to fetch active team PSD IDs", cause),
+        }),
+
+      getProtectedStaffPsdIds: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<string | null>>(
+              `*[_type == "staffMember" && defined(psdId) && psdId != "" && (
+                _id in *[_type == "organigramNode" && active == true].members[]._ref
+                ||
+                _id in *[_type == "responsibility" && active == true].primaryContact.staffMember._ref
+                ||
+                _id in *[_type == "responsibility" && active == true].steps[].contact.staffMember._ref
+              )].psdId`,
+            );
+            return rows.filter(
+              (id): id is string => typeof id === "string" && id.length > 0,
+            );
+          },
+          catch: (cause) =>
+            new SanityQueryError(
+              "Failed to fetch protected staff PSD IDs",
+              cause,
+            ),
         }),
     };
   }),
