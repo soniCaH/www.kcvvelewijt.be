@@ -1,4 +1,5 @@
 import type {StructureResolver} from 'sanity/structure'
+import {staffStructure, responsibilityStructure} from '@kcvv/sanity-studio'
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -26,47 +27,7 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .title('Teams')
         .child(S.documentTypeList('team').title('Teams')),
-      S.listItem()
-        .title('Staff')
-        .child(
-          S.list()
-            .title('Staff')
-            .items([
-              S.listItem()
-                .title('Alle leden')
-                .child(
-                  S.documentTypeList('staffMember')
-                    .title('Alle leden')
-                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
-                ),
-              S.listItem()
-                .title('📋 Organigram beheer')
-                .child(
-                  S.documentList()
-                    .title('In organigram')
-                    .filter('_type == "staffMember" && inOrganigram == true')
-                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
-                ),
-              S.listItem()
-                .title('⚠️ Aanvullen vereist')
-                .child(
-                  S.documentList()
-                    .title('Ontbrekende velden')
-                    .filter(
-                      '_type == "staffMember" && inOrganigram == true && (!defined(roleLabel) || !defined(photo))',
-                    )
-                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
-                ),
-              S.listItem()
-                .title('🔄 PSD gesynchroniseerd')
-                .child(
-                  S.documentList()
-                    .title('PSD gesynchroniseerd')
-                    .filter('_type == "staffMember" && defined(psdId)')
-                    .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
-                ),
-            ]),
-        ),
+      staffStructure(S),
       S.divider(),
       S.listItem()
         .title('Articles')
@@ -85,11 +46,5 @@ export const structure: StructureResolver = (S) =>
         .title('Pages')
         .child(S.documentTypeList('page').title('Pages')),
       S.divider(),
-      S.listItem()
-        .title('Hulp & Contact')
-        .child(
-          S.documentTypeList('responsibility')
-            .title('Hulp & Contact')
-            .defaultOrdering([{field: 'title', direction: 'asc'}]),
-        ),
+      responsibilityStructure(S),
     ])

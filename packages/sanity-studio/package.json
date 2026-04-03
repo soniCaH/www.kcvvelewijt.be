@@ -17,6 +17,9 @@
     "lint": "eslint .",
     "check-all": "pnpm type-check && pnpm lint && pnpm test"
   },
+  "dependencies": {
+    "@kcvv/sanity-schemas": "workspace:*"
+  },
   "peerDependencies": {
     "react": ">=18",
     "sanity": ">=5"
