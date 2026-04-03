@@ -6,7 +6,7 @@ const gcNode = {
   title: "Gerechtelijk Correspondent",
   department: "hoofdbestuur",
   parentNode: { _type: "reference", _ref: "organigramNode-voorzitter", _weak: true },
-  members: [{ _type: "reference", _ref: "staffMember-psd-245", _key: "staffMemberpsd245" }],
+  members: [{ _type: "reference", _ref: "staffMember-psd-245", _key: "staffMemberpsd245", _weak: true }],
   active: true,
   sortOrder: 95,
   roleCode: "GC",
