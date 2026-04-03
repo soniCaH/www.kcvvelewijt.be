@@ -1,7 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
-import type { PlayerImageState } from "./client";
+import type { PlayerImageState } from "./mutation";
 import { sanityClientConfig } from "./config";
 
 // ─── Error ────────────────────────────────────────────────────────────────────

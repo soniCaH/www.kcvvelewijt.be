@@ -36,14 +36,14 @@ export interface SanityStaffDoc {
 
 // ─── Error ────────────────────────────────────────────────────────────────────
 
-export class SanityWriteError extends Error {
-  readonly _tag = "SanityWriteError" as const;
+export class SanityMutationError extends Error {
+  readonly _tag = "SanityMutationError" as const;
   constructor(
     message: string,
     readonly cause?: unknown,
   ) {
     super(message);
-    this.name = "SanityWriteError";
+    this.name = "SanityMutationError";
   }
 }
 
@@ -54,28 +54,28 @@ export interface PlayerImageState {
   hasPsdImage: boolean;
 }
 
-export interface SanityWriteClientInterface {
+export interface SanityMutationInterface {
   readonly upsertPlayer: (
     doc: SanityPlayerDoc,
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   readonly upsertTeam: (
     doc: SanityTeamDoc,
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   readonly upsertStaff: (
     doc: SanityStaffDoc,
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Set archived: true on players with these PSD IDs. */
   readonly archivePlayers: (
     psdIds: string[],
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Set archived: true on staff members with these PSD IDs. */
   readonly archiveStaff: (
     psdIds: string[],
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Set archived: true on teams with these PSD IDs. */
   readonly archiveTeams: (
     psdIds: string[],
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Download image from fetchUrl and upload to Sanity, patching psdImage + psdImageUrl.
    * stableUrl is persisted as psdImageUrl for dedup on future syncs — must match
    * the value produced by transformMember._psdImageUrl (includes ?v=N if present). */
@@ -83,18 +83,18 @@ export interface SanityWriteClientInterface {
     psdId: string,
     fetchUrl: string,
     stableUrl: string,
-  ) => Effect.Effect<void, SanityWriteError>;
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Create a searchFeedback document in Sanity. */
   readonly writeFeedback: (doc: {
     pathSlug: string;
     pathTitle: string;
     vote: "up" | "down";
-  }) => Effect.Effect<void, SanityWriteError>;
+  }) => Effect.Effect<void, SanityMutationError>;
 }
 
-export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
-  SanityWriteClient,
-  SanityWriteClientInterface
+export class SanityMutation extends Context.Tag("SanityMutation")<
+  SanityMutation,
+  SanityMutationInterface
 >() {}
 
 // ─── Live layer ───────────────────────────────────────────────────────────────
@@ -105,8 +105,8 @@ export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
  * fields (transparentImage, celebrationImage, position, bio, trainingSchedule).
  * Both `players` and `staff` on team documents are sync-owned (readOnly in Studio).
  */
-export const SanityWriteClientLive = Layer.effect(
-  SanityWriteClient,
+export const SanityMutationLive = Layer.effect(
+  SanityMutation,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const client = createClient({
@@ -127,7 +127,7 @@ export const SanityWriteClientLive = Layer.effect(
           await tx.commit();
         },
         catch: (cause) =>
-          new SanityWriteError(`Failed to archive ${type} documents`, cause),
+          new SanityMutationError(`Failed to archive ${type} documents`, cause),
       }).pipe(Effect.asVoid);
 
     const upsert = <T extends Record<string, unknown>>(
@@ -143,7 +143,7 @@ export const SanityWriteClientLive = Layer.effect(
             .patch(docId(type, psdId), (p) => p.set(psdFields))
             .commit(),
         catch: (cause) =>
-          new SanityWriteError(`Failed to upsert ${type} ${psdId}`, cause),
+          new SanityMutationError(`Failed to upsert ${type} ${psdId}`, cause),
       }).pipe(Effect.asVoid);
 
     return {
@@ -167,7 +167,7 @@ export const SanityWriteClientLive = Layer.effect(
             parsedUrl = new URL(imageUrl);
           } catch {
             return yield* Effect.fail(
-              new SanityWriteError(`Invalid image URL: ${imageUrl}`),
+              new SanityMutationError(`Invalid image URL: ${imageUrl}`),
             );
           }
           const expectedHost = new URL(env.PSD_IMAGE_BASE_URL).hostname;
@@ -176,7 +176,7 @@ export const SanityWriteClientLive = Layer.effect(
             parsedUrl.hostname !== expectedHost
           ) {
             return yield* Effect.fail(
-              new SanityWriteError(
+              new SanityMutationError(
                 `Image URL host not allowed: ${parsedUrl.hostname}`,
               ),
             );
@@ -220,7 +220,7 @@ export const SanityWriteClientLive = Layer.effect(
               }
             },
             catch: (cause) =>
-              new SanityWriteError(
+              new SanityMutationError(
                 `Failed to upload image for player ${psdId}`,
                 cause,
               ),
@@ -234,7 +234,7 @@ export const SanityWriteClientLive = Layer.effect(
           if (response.status === 404) return;
           if (!response.ok) {
             return yield* Effect.fail(
-              new SanityWriteError(
+              new SanityMutationError(
                 `PSD image fetch failed: ${response.status} ${response.statusText}`,
               ),
             );
@@ -245,7 +245,7 @@ export const SanityWriteClientLive = Layer.effect(
           const arrayBuffer = yield* Effect.tryPromise({
             try: () => response.arrayBuffer(),
             catch: (cause) =>
-              new SanityWriteError(
+              new SanityMutationError(
                 `Failed to read image body for player ${psdId}`,
                 cause,
               ),
@@ -286,7 +286,7 @@ export const SanityWriteClientLive = Layer.effect(
               return document;
             },
             catch: (cause) =>
-              new SanityWriteError(
+              new SanityMutationError(
                 `Failed to upload image for player ${psdId}`,
                 cause,
               ),
@@ -311,7 +311,7 @@ export const SanityWriteClientLive = Layer.effect(
                 })
                 .commit(),
             catch: (cause) =>
-              new SanityWriteError(
+              new SanityMutationError(
                 `Failed to patch player ${psdId} with image`,
                 cause,
               ),
@@ -373,7 +373,7 @@ export const SanityWriteClientLive = Layer.effect(
               vote: doc.vote,
             }),
           catch: (cause) =>
-            new SanityWriteError("Failed to write search feedback", cause),
+            new SanityMutationError("Failed to write search feedback", cause),
         }).pipe(Effect.asVoid),
     };
   }),

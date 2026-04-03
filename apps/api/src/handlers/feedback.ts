@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { SanityWriteClient } from "../sanity/client";
+import { SanityMutation } from "../sanity/mutation";
 
 export const handleFeedback = (payload: {
   pathSlug: string;
@@ -7,7 +7,7 @@ export const handleFeedback = (payload: {
   vote: "up" | "down";
 }) =>
   Effect.gen(function* () {
-    const sanity = yield* SanityWriteClient;
+    const sanity = yield* SanityMutation;
     yield* sanity.writeFeedback(payload).pipe(Effect.orDie);
     return { ok: true as const };
   });

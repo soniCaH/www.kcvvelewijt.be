@@ -4,8 +4,8 @@ import type {
   SanityPlayerDoc,
   SanityTeamDoc,
   SanityStaffDoc,
-} from "../sanity/client";
-import { SanityWriteClient } from "../sanity/client";
+} from "../sanity/mutation";
+import { SanityMutation } from "../sanity/mutation";
 import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
@@ -200,7 +200,7 @@ const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
  */
 export const runSync = Effect.gen(function* () {
   const psd = yield* PsdTeamClient;
-  const sanityWriter = yield* SanityWriteClient;
+  const sanityWriter = yield* SanityMutation;
   const sanityReader = yield* SanityProjection;
   const env = yield* WorkerEnvTag;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
