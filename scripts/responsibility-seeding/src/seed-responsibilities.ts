@@ -3,29 +3,39 @@ import { client, dataset } from "./sanity-client";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function ref(id: string) {
-  return { _type: "reference" as const, _ref: id };
+interface SanityRef {
+  _type: "reference";
+  _ref: string;
+}
+
+type SeedContact =
+  | { contactType: "position"; organigramNode: SanityRef }
+  | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde" }
+  | { contactType: "manual"; role?: string; email?: string; phone?: string; department?: string };
+
+function ref(id: string): SanityRef {
+  return { _type: "reference", _ref: id };
 }
 
 function slug(value: string) {
   return { _type: "slug" as const, current: value };
 }
 
-function positionContact(nodeId: string) {
+function positionContact(nodeId: string): SeedContact {
   return {
     contactType: "position",
     organigramNode: ref(nodeId),
   };
 }
 
-function manualContact(fields: { role: string; email?: string; phone?: string; department?: string }) {
+function manualContact(fields: { role?: string; email?: string; phone?: string; department?: string }): SeedContact {
   return {
     contactType: "manual",
     ...fields,
   };
 }
 
-function step(description: string, opts?: { link?: string; contact?: ReturnType<typeof positionContact> | ReturnType<typeof manualContact> }) {
+function step(description: string, opts?: { link?: string; contact?: SeedContact }) {
   const hash = createHash("sha256").update(description).digest("hex").slice(0, 8);
   return {
     _key: `step-${hash}`,
@@ -36,6 +46,13 @@ function step(description: string, opts?: { link?: string; contact?: ReturnType<
 }
 
 // ─── Responsibility documents ───────────────────────────────────────────────
+
+interface SeedStep {
+  _key: string;
+  description: string;
+  link?: string;
+  contact?: SeedContact;
+}
 
 interface ResponsibilityDoc {
   _id: string;
@@ -49,8 +66,8 @@ interface ResponsibilityDoc {
   summary: string;
   category: string;
   icon: string;
-  primaryContact: Record<string, unknown>;
-  steps: Record<string, unknown>[];
+  primaryContact: SeedContact;
+  steps: SeedStep[];
 }
 
 const responsibilities: ResponsibilityDoc[] = [
@@ -641,6 +658,13 @@ async function preflight() {
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   if (dupes.length > 0) {
     throw new Error(`Duplicate _id values: ${dupes.join(", ")}`);
+  }
+
+  // Check for duplicate slugs
+  const slugs = responsibilities.map((d) => d.slug.current);
+  const slugDupes = slugs.filter((s, i) => slugs.indexOf(s) !== i);
+  if (slugDupes.length > 0) {
+    throw new Error(`Duplicate slug values: ${slugDupes.join(", ")}`);
   }
 
   console.log(`Preflight OK — ${nodeIds.size} organigramNodes verified, ${responsibilities.length} responsibilities to seed`);

@@ -1,6 +1,9 @@
 import {defineField, defineType} from 'sanity'
 import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
 
+const hasContent = (value: unknown): boolean =>
+  typeof value === 'string' && value.trim().length > 0
+
 const contactFields = [
   defineField({
     name: 'contactType',
@@ -181,7 +184,7 @@ export const responsibility = defineType({
             case 'team-role':
               return contact.teamRole ? true : 'Kies een teamrol'
             case 'manual':
-              return contact.email || contact.phone || contact.role
+              return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role)
                 ? true
                 : 'Vul minstens één van: rol, email, telefoon in'
             default:
@@ -228,7 +231,7 @@ export const responsibility = defineType({
                     case 'team-role':
                       return contact.teamRole ? true : 'Kies een teamrol'
                     case 'manual':
-                      return (contact.email || contact.phone || contact.role)
+                      return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role)
                         ? true
                         : 'Vul minstens één van: rol, email, telefoon in'
                     default:

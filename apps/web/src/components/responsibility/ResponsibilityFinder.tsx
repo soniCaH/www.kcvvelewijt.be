@@ -96,6 +96,19 @@ const categoryColors = {
   },
 } as const;
 
+function getContactLabel(contact: Contact): string {
+  switch (contact.contactType) {
+    case "position":
+      return contact.position ?? "—";
+    case "team-role":
+      return contact.teamRole === "trainer" ? "Trainer" : "Afgevaardigde";
+    case "manual":
+      return contact.role ?? "—";
+    default:
+      return "—";
+  }
+}
+
 const ONBOARDING_HINT_SLUGS = [
   "inschrijving-nieuw-lid",
   "ongeval-speler-training",
@@ -635,12 +648,9 @@ export function ResponsibilityFinder({
                               </span>
                               <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md flex items-center gap-1">
                                 <User size={12} />
-                                {suggestion.path.primaryContact.contactType ===
-                                "position"
-                                  ? (suggestion.path.primaryContact.position ??
-                                    "—")
-                                  : (suggestion.path.primaryContact.role ??
-                                    "—")}
+                                {getContactLabel(
+                                  suggestion.path.primaryContact,
+                                )}
                               </span>
                             </div>
                           </div>
@@ -806,34 +816,38 @@ function ContactDisplay({
               )}
             </div>
           ))}
-          {contact.members?.[0]?.id && onMemberSelect && (
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  const memberId = contact.members![0].id;
-                  analytics.trackOrganigramLink(pathId, memberId);
-                  onMemberSelect(memberId);
-                }}
-                className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
-              >
-                <svg
-                  className={iconSize}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-                Bekijk in organigram
-              </button>
-            </div>
-          )}
+          {onMemberSelect &&
+            contact.members
+              ?.filter((m) => m.id)
+              .map((member) => (
+                <div key={member.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      analytics.trackOrganigramLink(pathId, member.id);
+                      onMemberSelect(member.id);
+                    }}
+                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                  >
+                    <svg
+                      className={iconSize}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                    {(contact.members?.length ?? 0) > 1
+                      ? `${member.name} in organigram`
+                      : "Bekijk in organigram"}
+                  </button>
+                </div>
+              ))}
         </div>
       );
 
