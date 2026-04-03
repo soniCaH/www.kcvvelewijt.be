@@ -127,7 +127,7 @@ describe("getPlayersImageState", () => {
       hasPsdImage: false,
     });
     expect(mockFetch).toHaveBeenCalledWith(
-      `*[_type == "player"] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
+      `*[_type == "player" && defined(psdId) && psdId != ""] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
     );
   });
 

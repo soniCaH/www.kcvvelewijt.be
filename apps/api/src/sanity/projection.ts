@@ -57,7 +57,7 @@ export const SanityProjectionLive = Layer.effect(
     const env = yield* WorkerEnvTag;
     const client = createClient({
       ...sanityClientConfig(env),
-      useCdn: true,
+      useCdn: false,
     });
 
     return {
@@ -85,7 +85,7 @@ export const SanityProjectionLive = Layer.effect(
                 hasPsdImage: boolean;
               }>
             >(
-              `*[_type == "player"] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
+              `*[_type == "player" && defined(psdId) && psdId != ""] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
             );
             return new Map(
               rows.map((r) => [
