@@ -17,6 +17,7 @@ const storyPaths: ResponsibilityPath[] = [
     category: "medisch",
     icon: "heart",
     primaryContact: {
+      contactType: "manual",
       role: "Verzekeringverantwoordelijke",
       email: "verzekering@kcvvelewijt.be",
       department: "algemeen",
@@ -26,6 +27,7 @@ const storyPaths: ResponsibilityPath[] = [
       {
         description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
         contact: {
+          contactType: "manual",
           role: "Verzekeringverantwoordelijke",
           email: "verzekering@kcvvelewijt.be",
         },
@@ -41,6 +43,7 @@ const storyPaths: ResponsibilityPath[] = [
     category: "administratief",
     icon: "file-text",
     primaryContact: {
+      contactType: "manual",
       role: "Jeugdsecretaris",
       email: "jeugd@kcvvelewijt.be",
       department: "jeugdbestuur",

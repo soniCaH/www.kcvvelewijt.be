@@ -18,8 +18,10 @@ describe("responsibility-utils", () => {
       summary: "Test summary 1",
       category: "sportief",
       primaryContact: {
-        role: "Test Role",
-        memberId: "member-1",
+        contactType: "position",
+        position: "Test Positie",
+        members: [{ id: "member-1", name: "Jan Test" }],
+        nodeId: "organigramNode-test",
       },
       steps: [],
     },
@@ -31,16 +33,20 @@ describe("responsibility-utils", () => {
       summary: "Test summary 2",
       category: "medisch",
       primaryContact: {
-        role: "Test Role",
-        memberId: "member-2",
+        contactType: "position",
+        position: "Andere Positie",
+        members: [{ id: "member-2", name: "Piet Test" }],
+        nodeId: "organigramNode-other",
       },
       steps: [
         {
           order: 1,
           description: "Step 1",
           contact: {
-            role: "Secondary Contact",
-            memberId: "member-1",
+            contactType: "position",
+            position: "Secondary Positie",
+            members: [{ id: "member-1", name: "Jan Test" }],
+            nodeId: "organigramNode-secondary",
           },
         },
       ],
@@ -53,8 +59,8 @@ describe("responsibility-utils", () => {
       summary: "Test summary 3",
       category: "administratief",
       primaryContact: {
+        contactType: "manual",
         role: "Test Role",
-        // No memberId
       },
       steps: [],
     },
@@ -109,7 +115,7 @@ describe("responsibility-utils", () => {
       expect(result).toHaveLength(0);
     });
 
-    it("should handle paths with no member IDs", () => {
+    it("should handle paths with no member IDs (manual contacts)", () => {
       const result = getMembersWithResponsibilities([mockPaths[2]]);
       expect(result).toHaveLength(0);
     });

@@ -1399,23 +1399,41 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
     | null;
   icon: string | null;
   primaryContact: {
+    contactType: string | null;
+    teamRole: string | null;
+    position: string | null;
+    roleCode: string | null;
+    members: Array<{
+      id: string | null;
+      name: string | null;
+      email: string | null;
+      phone: string | null;
+    }> | null;
+    nodeId: string | null;
     role: string | null;
     email: string | null;
     phone: string | null;
     department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
-    name: string | null;
-    memberId: string | null;
   } | null;
   steps: Array<{
     description: string | null;
     link: string | null;
     contact: {
+      contactType: string | null;
+      teamRole: string | null;
+      position: string | null;
+      roleCode: string | null;
+      members: Array<{
+        id: string | null;
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+      }> | null;
+      nodeId: string | null;
       role: string | null;
       email: string | null;
       phone: string | null;
       department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
-      name: string | null;
-      memberId: string | null;
     } | null;
   }> | null;
   relatedPaths: Array<never> | Array<string | null>;

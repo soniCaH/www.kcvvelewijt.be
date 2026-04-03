@@ -4,20 +4,32 @@
  * Helper functions for linking organigram members with responsibility paths
  */
 
-import type { ResponsibilityPath } from "@/types/responsibility";
+import type { Contact, ResponsibilityPath } from "@/types/responsibility";
+
+/**
+ * Check if a contact references the given staff member (through organigramNode members).
+ */
+function contactHasMember(
+  contact: Contact | undefined,
+  memberId: string,
+): boolean {
+  return contact?.members?.some((m) => m.id === memberId) ?? false;
+}
 
 /**
  * Finds responsibility paths for which the given member is the primary contact.
  *
- * @param memberId - The ID of the member to match as primary contact
+ * @param memberId - The staffMember ID to match against organigramNode members
  * @param paths - The list of responsibility paths to search
- * @returns Responsibility paths where the member is the primary contact
+ * @returns Responsibility paths where the member is a primary contact member
  */
 export function findMemberResponsibilities(
   memberId: string,
   paths: ResponsibilityPath[],
 ): ResponsibilityPath[] {
-  return paths.filter((path) => path.primaryContact?.memberId === memberId);
+  return paths.filter((path) =>
+    contactHasMember(path.primaryContact, memberId),
+  );
 }
 
 /**
@@ -32,12 +44,12 @@ export function findMemberStepResponsibilities(
   paths: ResponsibilityPath[],
 ): ResponsibilityPath[] {
   return paths.filter((path) =>
-    path.steps?.some((step) => step.contact?.memberId === memberId),
+    path.steps?.some((step) => contactHasMember(step.contact, memberId)),
   );
 }
 
 /**
- * Collect member IDs referenced in responsibility paths.
+ * Collect member IDs referenced in responsibility paths (through organigramNode members).
  *
  * @param paths - Responsibility paths to scan for primary and step contacts
  * @returns An array of member IDs referenced as primary or step contacts in `paths`
@@ -48,13 +60,9 @@ export function getMembersWithResponsibilities(
   const memberIds = new Set<string>();
 
   paths.forEach((path) => {
-    if (path.primaryContact?.memberId) {
-      memberIds.add(path.primaryContact.memberId);
-    }
+    path.primaryContact?.members?.forEach((m) => memberIds.add(m.id));
     path.steps?.forEach((step) => {
-      if (step.contact?.memberId) {
-        memberIds.add(step.contact.memberId);
-      }
+      step.contact?.members?.forEach((m) => memberIds.add(m.id));
     });
   });
 

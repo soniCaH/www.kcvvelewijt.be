@@ -41,12 +41,23 @@ function makeContact(
   overrides: Partial<NonNullable<PathRow["primaryContact"]>> = {},
 ): NonNullable<PathRow["primaryContact"]> {
   return {
-    role: "Voorzitter",
-    email: "jan@kcvv.be",
-    phone: "+32 123 456 789",
-    department: "hoofdbestuur",
-    name: "Jan Janssens",
-    memberId: "staff-1",
+    contactType: "position",
+    teamRole: null,
+    position: "Secretaris",
+    roleCode: "SEC",
+    members: [
+      {
+        id: "staffMember-1",
+        name: "Jan Janssens",
+        email: "jan@kcvv.be",
+        phone: "+32 123 456 789",
+      },
+    ],
+    nodeId: "organigramNode-secretaris",
+    role: null,
+    email: null,
+    phone: null,
+    department: null,
     ...overrides,
   };
 }
@@ -63,9 +74,21 @@ function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
     primaryContact: makeContact(),
     steps: [
       {
-        description: "Contacteer je trainer",
+        description: "Contacteer de secretaris",
         link: "https://kcvv.be/hulp",
-        contact: makeContact({ role: "Trainer", name: "Piet Pieters" }),
+        contact: makeContact({
+          position: "TVJO",
+          roleCode: "TVJO",
+          members: [
+            {
+              id: "staffMember-2",
+              name: "Piet Pieters",
+              email: "piet@kcvv.be",
+              phone: null,
+            },
+          ],
+          nodeId: "organigramNode-tvjo",
+        }),
       },
       {
         description: "Neem contact op met het bestuur",
@@ -80,7 +103,7 @@ function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
 
 describe("ResponsibilityRepository", () => {
   describe("findAll", () => {
-    it("maps full nested shape to ResponsibilityPathVM[]", async () => {
+    it("maps position contact with members to ResponsibilityPath", async () => {
       const row = makePathRow();
       mockFetch.mockResolvedValueOnce([row]);
 
@@ -98,25 +121,36 @@ describe("ResponsibilityRepository", () => {
         category: "medisch",
         icon: "medical",
         primaryContact: {
-          role: "Voorzitter",
-          name: "Jan Janssens",
-          email: "jan@kcvv.be",
-          phone: "+32 123 456 789",
-          department: "hoofdbestuur",
-          memberId: "staff-1",
+          contactType: "position",
+          position: "Secretaris",
+          roleCode: "SEC",
+          members: [
+            {
+              id: "staffMember-1",
+              name: "Jan Janssens",
+              email: "jan@kcvv.be",
+              phone: "+32 123 456 789",
+            },
+          ],
+          nodeId: "organigramNode-secretaris",
         },
         steps: [
           {
             order: 1,
-            description: "Contacteer je trainer",
+            description: "Contacteer de secretaris",
             link: "https://kcvv.be/hulp",
             contact: {
-              role: "Trainer",
-              name: "Piet Pieters",
-              email: "jan@kcvv.be",
-              phone: "+32 123 456 789",
-              department: "hoofdbestuur",
-              memberId: "staff-1",
+              contactType: "position",
+              position: "TVJO",
+              roleCode: "TVJO",
+              members: [
+                {
+                  id: "staffMember-2",
+                  name: "Piet Pieters",
+                  email: "piet@kcvv.be",
+                },
+              ],
+              nodeId: "organigramNode-tvjo",
             },
           },
           {
@@ -128,28 +162,85 @@ describe("ResponsibilityRepository", () => {
       });
     });
 
+    it("maps manual contact with inline fields", async () => {
+      const row = makePathRow({
+        primaryContact: makeContact({
+          contactType: "manual",
+          position: null,
+          roleCode: null,
+          members: null,
+          nodeId: null,
+          role: "Verzekering",
+          email: "verzekering@kcvvelewijt.be",
+          phone: null,
+          department: "algemeen",
+        }),
+      });
+      mockFetch.mockResolvedValueOnce([row]);
+
+      const paths = await runFindAll();
+      const contact = paths[0].primaryContact;
+
+      expect(contact).toEqual({
+        contactType: "manual",
+        role: "Verzekering",
+        email: "verzekering@kcvvelewijt.be",
+        department: "algemeen",
+      });
+    });
+
+    it("maps team-role contact", async () => {
+      const row = makePathRow({
+        primaryContact: makeContact({
+          contactType: "team-role",
+          teamRole: "trainer",
+          position: null,
+          roleCode: null,
+          members: null,
+          nodeId: null,
+        }),
+      });
+      mockFetch.mockResolvedValueOnce([row]);
+
+      const paths = await runFindAll();
+      const contact = paths[0].primaryContact;
+
+      expect(contact).toEqual({
+        contactType: "team-role",
+        teamRole: "trainer",
+      });
+    });
+
     it("missing optional contact fields use fallback values", async () => {
       const row = makePathRow({
         icon: null,
         primaryContact: makeContact({
+          contactType: null,
+          position: null,
+          roleCode: null,
+          members: null,
+          nodeId: null,
+          teamRole: null,
           role: null,
-          name: null,
           email: null,
           phone: null,
           department: null,
-          memberId: null,
         }),
         steps: [
           {
             description: "Stap 1",
             link: null,
             contact: makeContact({
+              contactType: null,
+              position: null,
+              roleCode: null,
+              members: null,
+              nodeId: null,
+              teamRole: null,
               role: null,
-              name: null,
               email: null,
               phone: null,
               department: null,
-              memberId: null,
             }),
           },
         ],
@@ -157,15 +248,11 @@ describe("ResponsibilityRepository", () => {
       mockFetch.mockResolvedValueOnce([row]);
 
       const paths = await runFindAll();
-
       const path = paths[0];
 
-      // icon should be absent when null
       expect(path.icon).toBeUndefined();
-
-      // role defaults to empty string, other null fields are omitted
-      expect(path.primaryContact).toEqual({ role: "" });
-      expect(path.steps[0].contact).toEqual({ role: "" });
+      expect(path.primaryContact).toEqual({ contactType: "manual" });
+      expect(path.steps[0].contact).toEqual({ contactType: "manual" });
     });
 
     it("relatedPaths resolved to slugs", async () => {
@@ -176,7 +263,6 @@ describe("ResponsibilityRepository", () => {
 
       const paths = await runFindAll();
 
-      // relatedPaths should be passed through as-is from GROQ result
       expect(paths[0].relatedPaths).toEqual([
         "transfer-aanvragen",
         "verzekering",
