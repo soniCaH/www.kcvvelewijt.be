@@ -177,7 +177,7 @@ export function NewsListingClient({
       className={className}
       title={article.title}
       href={`/nieuws/${article.slug}`}
-      imageUrl={article.coverImageUrl}
+      imageUrl={article.coverImageUrl ?? undefined}
       imageAlt={article.title}
       badge={article.tags[0] ?? undefined}
       date={

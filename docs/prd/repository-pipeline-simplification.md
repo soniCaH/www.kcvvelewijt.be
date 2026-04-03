@@ -86,4 +86,7 @@ None. Repositories use Sanity typegen types, not Effect Schema.
 
 ## 8. Discovered Unknowns
 
-_(filled during implementation)_
+- [2026-04-03] `coalesce()` in GROQ works for `slug.current` on missing slug — returns `""` as expected → resolved inline
+- [2026-04-03] `coverImageUrl` changes from `string | undefined` to `string | null` (GROQ can't produce JS `undefined`) — requires `?? undefined` at component prop boundaries → resolved inline
+- [2026-04-03] `RelatedArticleRef` now includes `unpublishAt` field from GROQ projection (used for publication filtering) — test mocks updated → resolved inline
+- [2026-04-03] `sanity.types.ts` was updated manually (no `sanity typegen` CLI available in worktree) — should be regenerated with `sanity typegen generate` when available

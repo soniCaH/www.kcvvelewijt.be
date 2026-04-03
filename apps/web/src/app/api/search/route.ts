@@ -57,7 +57,7 @@ const searchArticles = (query: string) =>
           title: article.title,
           description: undefined,
           url: `/nieuws/${article.slug}`,
-          imageUrl: article.coverImageUrl,
+          imageUrl: article.coverImageUrl ?? undefined,
           tags: article.tags,
           date: article.publishedAt ?? "",
         }),

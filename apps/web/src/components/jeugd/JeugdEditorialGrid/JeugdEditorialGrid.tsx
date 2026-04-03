@@ -132,7 +132,7 @@ function buildItemsFromConfig(
             title={article.title}
             arrowText="Lees meer"
             featured={isFeatured}
-            backgroundImage={article.coverImageUrl}
+            backgroundImage={article.coverImageUrl ?? undefined}
           />
         ),
       });
@@ -186,7 +186,7 @@ function buildItemsFromHardcoded(articles: ArticleVM[]): GridItem[] {
           title={article0.title}
           arrowText="Lees meer"
           featured
-          backgroundImage={article0.coverImageUrl}
+          backgroundImage={article0.coverImageUrl ?? undefined}
         />
       ),
     });
@@ -209,7 +209,7 @@ function buildItemsFromHardcoded(articles: ArticleVM[]): GridItem[] {
             tag={article1.tags[0] ?? "Jeugd"}
             title={article1.title}
             arrowText="Lees meer"
-            backgroundImage={article1.coverImageUrl}
+            backgroundImage={article1.coverImageUrl ?? undefined}
           />
         ),
       });
@@ -233,7 +233,7 @@ function buildItemsFromHardcoded(articles: ArticleVM[]): GridItem[] {
             tag={article2.tags[0] ?? "Jeugd"}
             title={article2.title}
             arrowText="Lees meer"
-            backgroundImage={article2.coverImageUrl}
+            backgroundImage={article2.coverImageUrl ?? undefined}
           />
         ),
       });

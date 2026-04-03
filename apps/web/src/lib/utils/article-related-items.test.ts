@@ -15,6 +15,7 @@ describe("mapEditorialArticles", () => {
         title: "Test Article",
         slug: "test-article",
         publishedAt: "2025-03-01T12:00:00Z",
+        unpublishAt: null,
         coverImageUrl: "https://cdn.example.com/img.jpg",
       },
     ]);

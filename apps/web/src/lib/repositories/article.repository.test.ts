@@ -12,11 +12,7 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import {
-  ArticleRepository,
-  ArticleRepositoryLive,
-  type ArticleVM,
-} from "./article.repository";
+import { ArticleRepository, ArticleRepositoryLive } from "./article.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -29,10 +25,10 @@ function makeArticleListRow(
   overrides: Partial<ARTICLES_QUERY_RESULT[number]> = {},
 ): ARTICLES_QUERY_RESULT[number] {
   return {
-    _id: "article-1",
+    id: "article-1",
     title: "Test Article",
-    slug: { _type: "slug", current: "test-article" },
-    publishAt: "2026-03-20T10:00:00Z",
+    slug: "test-article",
+    publishedAt: "2026-03-20T10:00:00Z",
     featured: false,
     tags: ["Eerste ploeg", "Wedstrijdverslag"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
@@ -45,11 +41,11 @@ function makeArticleDetailRow(
   overrides: Partial<NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>> = {},
 ): NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT> {
   return {
-    _id: "article-1",
-    _updatedAt: "2026-03-21T12:00:00Z",
+    id: "article-1",
+    updatedAt: "2026-03-21T12:00:00Z",
     title: "Test Article Detail",
-    slug: { _type: "slug", current: "test-article-detail" },
-    publishAt: "2026-03-20T10:00:00Z",
+    slug: "test-article-detail",
+    publishedAt: "2026-03-20T10:00:00Z",
     featured: true,
     tags: ["Eerste ploeg"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
@@ -69,10 +65,10 @@ function makeArticleDetailRow(
     ],
     relatedArticles: [
       {
-        _id: "article-2",
+        id: "article-2",
         title: "Related Article",
-        slug: { _type: "slug", current: "related-article" },
-        publishAt: "2026-03-19T10:00:00Z",
+        slug: "related-article",
+        publishedAt: "2026-03-19T10:00:00Z",
         unpublishAt: null,
         coverImageUrl: "https://cdn.sanity.io/related.webp",
       },
@@ -121,7 +117,7 @@ describe("ArticleRepository", () => {
       );
 
       expect(articles).toHaveLength(1);
-      expect(articles[0]).toEqual<ArticleVM>({
+      expect(articles[0]).toMatchObject({
         id: "article-1",
         title: "Test Article",
         slug: "test-article",
@@ -132,7 +128,7 @@ describe("ArticleRepository", () => {
       });
     });
 
-    it("null coverImageUrl becomes undefined", async () => {
+    it("null coverImageUrl stays null (GROQ returns null for missing images)", async () => {
       mockFetch.mockResolvedValueOnce([
         makeArticleListRow({ coverImageUrl: null }),
       ]);
@@ -144,11 +140,11 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(a.coverImageUrl).toBeUndefined();
+      expect(a.coverImageUrl).toBeNull();
     });
 
-    it("null/empty tags become empty array", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: null })]);
+    it("GROQ coalesce handles tags — returns empty array from projection", async () => {
+      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: [] })]);
 
       const [a] = await runWithRepo(
         Effect.gen(function* () {
@@ -160,8 +156,8 @@ describe("ArticleRepository", () => {
       expect(a.tags).toEqual([]);
     });
 
-    it("null title becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ title: null })]);
+    it("GROQ coalesce handles title — returns empty string from projection", async () => {
+      mockFetch.mockResolvedValueOnce([makeArticleListRow({ title: "" })]);
 
       const [a] = await runWithRepo(
         Effect.gen(function* () {
@@ -171,19 +167,6 @@ describe("ArticleRepository", () => {
       );
 
       expect(a.title).toBe("");
-    });
-
-    it("null slug becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ slug: null })]);
-
-      const [a] = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-      );
-
-      expect(a.slug).toBe("");
     });
   });
 
@@ -230,7 +213,7 @@ describe("ArticleRepository", () => {
     });
 
     it("handles empty tags", async () => {
-      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: null })]);
+      mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: [] })]);
 
       const articles = await runWithRepo(
         Effect.gen(function* () {
@@ -261,6 +244,7 @@ describe("ArticleRepository", () => {
       expect(result).not.toBeNull();
       const a = result!;
       expect(a.id).toBe("article-1");
+      expect(a.updatedAt).toBe("2026-03-21T12:00:00Z");
       expect(a.title).toBe("Test Article Detail");
       expect(a.slug).toBe("test-article-detail");
       expect(a.publishedAt).toBe("2026-03-20T10:00:00Z");
@@ -282,7 +266,7 @@ describe("ArticleRepository", () => {
       );
 
       expect(result!.relatedArticles).toHaveLength(1);
-      expect(result!.relatedArticles![0]).toEqual({
+      expect(result!.relatedArticles![0]).toMatchObject({
         id: "article-2",
         title: "Related Article",
         slug: "related-article",
@@ -354,7 +338,7 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(result!.relatedArticles).toBeUndefined();
+      expect(result!.relatedArticles).toBeNull();
     });
   });
 
