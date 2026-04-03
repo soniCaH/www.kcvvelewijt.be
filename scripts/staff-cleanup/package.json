@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "phase1": "tsx src/phase1-dearchive-create-delete.ts",
-    "phase2:match": "tsx src/phase2-board-psd-matching.ts"
+    "phase2:match": "tsx src/phase2-board-psd-matching.ts",
+    "phase4": "tsx src/phase4-organigram-seeding.ts"
   },
   "dependencies": {
     "@sanity/client": "7.20.0"
