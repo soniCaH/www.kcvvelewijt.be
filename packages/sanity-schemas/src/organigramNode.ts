@@ -1,4 +1,6 @@
 import {defineField, defineType} from 'sanity'
+import {organigramNodePreviewSelect, prepareOrganigramNodePreview} from './preview/organigramNode-preview'
+import {validateOrganigramMember} from './validation/organigram-members'
 
 export const organigramNode = defineType({
   name: 'organigramNode',
@@ -54,9 +56,12 @@ export const organigramNode = defineType({
         {
           type: 'reference',
           to: [{type: 'staffMember'}],
+          validation: (Rule) =>
+            Rule.custom((ref, context) => validateOrganigramMember(ref as never, context)),
         },
       ],
-      description: 'Staffleden die deze positie bekleden. Meerdere leden = gedeelde positie; geen leden = vacante positie.',
+      description:
+        'Staffleden die deze positie bekleden. Meerdere leden = gedeelde positie; geen leden = vacante positie.',
     }),
     defineField({
       name: 'active',
@@ -73,18 +78,7 @@ export const organigramNode = defineType({
     }),
   ],
   preview: {
-    select: {
-      title: 'title',
-      roleCode: 'roleCode',
-      department: 'department',
-    },
-    prepare({title, roleCode, department}) {
-      const badge = roleCode ? `[${roleCode}]` : ''
-      const dept = department ?? ''
-      return {
-        title: [badge, title].filter(Boolean).join(' '),
-        subtitle: dept,
-      }
-    },
+    select: organigramNodePreviewSelect,
+    prepare: prepareOrganigramNodePreview,
   },
 })

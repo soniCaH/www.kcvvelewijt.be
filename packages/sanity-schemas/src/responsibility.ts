@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
 
 const contactFields = [
   defineField({
@@ -191,16 +192,7 @@ export const responsibility = defineType({
     }),
   ],
   preview: {
-    select: {
-      title: 'title',
-      active: 'active',
-      category: 'category',
-    },
-    prepare({title, active, category}: {title?: string; active?: boolean; category?: string}) {
-      return {
-        title: title ?? '(untitled)',
-        subtitle: [category, active === false ? '— inactief' : undefined].filter(Boolean).join(' '),
-      }
-    },
+    select: responsibilityPreviewSelect,
+    prepare: prepareResponsibilityPreview,
   },
 })
