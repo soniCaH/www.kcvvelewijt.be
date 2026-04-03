@@ -402,6 +402,13 @@ export const runSync = Effect.gen(function* () {
     );
 
     const activeStaffInSanity = yield* sanityReader.getActiveStaffPsdIds();
+    const protectedStaffIds = yield* sanityReader.getProtectedStaffPsdIds();
+    for (const id of protectedStaffIds) accumulatedStaffIds.add(id);
+    if (protectedStaffIds.length > 0) {
+      yield* Effect.log(
+        `reconciliation: ${protectedStaffIds.length} staff protected by organigram/responsibility refs: ${protectedStaffIds.join(", ")}`,
+      );
+    }
     yield* reconcileEntity(
       "staff",
       activeStaffInSanity,

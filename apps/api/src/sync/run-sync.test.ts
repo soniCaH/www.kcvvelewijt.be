@@ -58,6 +58,7 @@ function makeSanityMocks() {
   const getActiveStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const getProtectedStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
 
   const writerMock: SanityMutationInterface = {
     upsertPlayer,
@@ -76,6 +77,7 @@ function makeSanityMocks() {
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
     getVisibleTeamPsdIds,
+    getProtectedStaffPsdIds,
   };
 
   return {
@@ -90,6 +92,7 @@ function makeSanityMocks() {
     getActivePlayerPsdIds,
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
+    getProtectedStaffPsdIds,
     writerMock,
     readerMock,
   };
@@ -378,6 +381,7 @@ describe("runSync", () => {
       getActiveStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getVisibleTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      getProtectedStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],
@@ -824,5 +828,124 @@ describe("runSync", () => {
 
     expect(archiveStaff).not.toHaveBeenCalled();
     expect(archiveTeams).not.toHaveBeenCalled();
+  });
+
+  // ─── Reconciliation safety net: organigram/responsibility protection ────────
+
+  it("skips archiving orphan staff referenced by active organigramNode", async () => {
+    const kvStub = makeKvStub();
+
+    // PSD returns 4 staff for the single team
+    const psdStaff: PsdMember[] = [
+      { ...ONE_STAFF, id: 500 },
+      { ...ONE_STAFF, id: 600 },
+      { ...ONE_STAFF, id: 700 },
+      { ...ONE_STAFF, id: 800 },
+    ];
+
+    const {
+      getActiveStaffPsdIds,
+      getProtectedStaffPsdIds,
+      archiveStaff,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Sanity has 6 active staff — 900 and 950 are orphans (not in PSD)
+    getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["500", "600", "700", "800", "900", "950"]),
+    );
+    // Staff 900 is referenced by an active organigramNode → protected
+    getProtectedStaffPsdIds.mockReturnValue(Effect.succeed(["900"]));
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER], psdStaff);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // Only 950 should be archived — 900 is protected by organigram ref
+    expect(archiveStaff).toHaveBeenCalledOnce();
+    expect(archiveStaff).toHaveBeenCalledWith(["950"]);
+  });
+
+  it("skips archiving orphan staff referenced by active responsibility", async () => {
+    const kvStub = makeKvStub();
+
+    // PSD returns 4 staff for the single team
+    const psdStaff: PsdMember[] = [
+      { ...ONE_STAFF, id: 500 },
+      { ...ONE_STAFF, id: 600 },
+      { ...ONE_STAFF, id: 700 },
+      { ...ONE_STAFF, id: 800 },
+    ];
+
+    const {
+      getActiveStaffPsdIds,
+      getProtectedStaffPsdIds,
+      archiveStaff,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Sanity has 6 active staff — 900 and 950 are orphans
+    getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["500", "600", "700", "800", "900", "950"]),
+    );
+    // Staff 950 is referenced by an active responsibility → protected
+    getProtectedStaffPsdIds.mockReturnValue(Effect.succeed(["950"]));
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER], psdStaff);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // Only 900 should be archived — 950 is protected by responsibility ref
+    expect(archiveStaff).toHaveBeenCalledOnce();
+    expect(archiveStaff).toHaveBeenCalledWith(["900"]);
+  });
+
+  it("archives orphan staff without organigram or responsibility refs", async () => {
+    const kvStub = makeKvStub();
+
+    // PSD returns 4 staff for the single team
+    const psdStaff: PsdMember[] = [
+      { ...ONE_STAFF, id: 500 },
+      { ...ONE_STAFF, id: 600 },
+      { ...ONE_STAFF, id: 700 },
+      { ...ONE_STAFF, id: 800 },
+    ];
+
+    const {
+      getActiveStaffPsdIds,
+      getProtectedStaffPsdIds,
+      archiveStaff,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Sanity has 5 active staff — 900 is the orphan (1/5 = 20% < 30%)
+    getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["500", "600", "700", "800", "900"]),
+    );
+    // No protected staff — 900 has no organigram or responsibility refs
+    getProtectedStaffPsdIds.mockReturnValue(Effect.succeed([]));
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER], psdStaff);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // 900 should be archived — no protection
+    expect(archiveStaff).toHaveBeenCalledOnce();
+    expect(archiveStaff).toHaveBeenCalledWith(["900"]);
   });
 });
