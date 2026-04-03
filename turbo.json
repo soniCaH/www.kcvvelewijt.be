@@ -63,6 +63,9 @@
     },
     "@kcvv/sanity-schemas#build": {
       "outputs": []
+    },
+    "@kcvv/sanity-studio#build": {
+      "outputs": []
     }
   }
 }
