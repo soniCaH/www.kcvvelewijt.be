@@ -6,9 +6,9 @@ import { UpstreamUnavailableError, type BffError } from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
-  SanityWriteClient,
-  type SanityWriteClientInterface,
-} from "../sanity/client";
+  SanityProjection,
+  type SanityProjectionInterface,
+} from "../sanity/projection";
 
 global.fetch = vi.fn();
 
@@ -38,20 +38,12 @@ const cacheMock: KvCacheInterface = {
 
 function makeSanityMock(
   visiblePsdIds: string[] = ["1"],
-): SanityWriteClientInterface {
+): SanityProjectionInterface {
   return {
-    upsertPlayer: () => Effect.succeed(undefined as void),
-    upsertTeam: () => Effect.succeed(undefined as void),
-    upsertStaff: () => Effect.succeed(undefined as void),
-    uploadPlayerImage: () => Effect.succeed(undefined as void),
     getPlayersImageState: () => Effect.succeed(new Map()),
     getActivePlayerPsdIds: () => Effect.succeed([]),
-    archivePlayers: () => Effect.succeed(undefined as void),
     getActiveStaffPsdIds: () => Effect.succeed([]),
-    archiveStaff: () => Effect.succeed(undefined as void),
     getActiveTeamPsdIds: () => Effect.succeed([]),
-    archiveTeams: () => Effect.succeed(undefined as void),
-    writeFeedback: () => Effect.succeed(undefined as void),
     getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
   };
 }
@@ -136,7 +128,7 @@ const rawDetailResponse = {
 function runService<A>(
   fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,
   options: {
-    sanityMock?: SanityWriteClientInterface;
+    sanityMock?: SanityProjectionInterface;
     kvMock?: KvCacheInterface;
   } = {},
 ) {
@@ -152,7 +144,7 @@ function runService<A>(
         Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, kv)),
-        Effect.provide(Layer.succeed(SanityWriteClient, sanity)),
+        Effect.provide(Layer.succeed(SanityProjection, sanity)),
       ),
     ),
   );
@@ -595,7 +587,7 @@ describe("PsdService.getNextMatches", () => {
     };
 
     let sanityCallCount = 0;
-    const spySanityMock: SanityWriteClientInterface = {
+    const spySanityMock: SanityProjectionInterface = {
       ...makeSanityMock(["1"]),
       getVisibleTeamPsdIds: () => {
         sanityCallCount++;
@@ -862,7 +854,7 @@ describe("PsdService.getRanking", () => {
         Effect.provide(PsdServiceLive),
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
-        Effect.provide(Layer.succeed(SanityWriteClient, makeSanityMock())),
+        Effect.provide(Layer.succeed(SanityProjection, makeSanityMock())),
         Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
       ),
     );

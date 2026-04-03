@@ -6,6 +6,7 @@ import type {
   SanityStaffDoc,
 } from "../sanity/client";
 import { SanityWriteClient } from "../sanity/client";
+import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
 import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
@@ -199,7 +200,8 @@ const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
  */
 export const runSync = Effect.gen(function* () {
   const psd = yield* PsdTeamClient;
-  const sanity = yield* SanityWriteClient;
+  const sanityWriter = yield* SanityWriteClient;
+  const sanityReader = yield* SanityProjection;
   const env = yield* WorkerEnvTag;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
   // API domain (PSD_API_BASE_URL). profilePictureURL is a relative path.
@@ -216,7 +218,7 @@ export const runSync = Effect.gen(function* () {
 
   // Pre-fetch existing player image state to avoid redundant uploads
   yield* Effect.log("fetching player image state from Sanity");
-  const imageState = yield* sanity.getPlayersImageState();
+  const imageState = yield* sanityReader.getPlayersImageState();
   yield* Effect.log(`player image state fetched: ${imageState.size} records`);
 
   yield* Effect.log("fetching teams from PSD");
@@ -259,7 +261,7 @@ export const runSync = Effect.gen(function* () {
     (m) =>
       Effect.gen(function* () {
         const doc = transformMember(m, imageBaseUrl);
-        yield* sanity.upsertPlayer(doc);
+        yield* sanityWriter.upsertPlayer(doc);
 
         const stableImageUrl = doc._psdImageUrl;
         const fetchImageUrl = doc._psdImageFetchUrl;
@@ -286,7 +288,7 @@ export const runSync = Effect.gen(function* () {
         yield* Effect.log(
           `player ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
         );
-        yield* sanity
+        yield* sanityWriter
           .uploadPlayerImage(doc.psdId, fetchImageUrl, stableImageUrl)
           .pipe(
             Effect.catchAll((e) =>
@@ -301,13 +303,15 @@ export const runSync = Effect.gen(function* () {
 
   yield* Effect.forEach(
     staffMembers,
-    (m) => sanity.upsertStaff(transformStaff(m)),
+    (m) => sanityWriter.upsertStaff(transformStaff(m)),
     { concurrency: 3 },
   );
 
   const playerPsdIds = players.map((m) => String(m.id));
   const staffPsdIds = staffMembers.map((m) => String(m.id));
-  yield* sanity.upsertTeam(transformTeam(team, playerPsdIds, staffPsdIds));
+  yield* sanityWriter.upsertTeam(
+    transformTeam(team, playerPsdIds, staffPsdIds),
+  );
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
@@ -392,25 +396,25 @@ export const runSync = Effect.gen(function* () {
   if (nextCursor === 0) {
     yield* Effect.log("cycle complete — running reconciliation");
 
-    const activeInSanity = yield* sanity.getActivePlayerPsdIds();
+    const activeInSanity = yield* sanityReader.getActivePlayerPsdIds();
     yield* reconcileEntity("players", activeInSanity, accumulatedIds, (ids) =>
-      sanity.archivePlayers(ids),
+      sanityWriter.archivePlayers(ids),
     );
 
-    const activeStaffInSanity = yield* sanity.getActiveStaffPsdIds();
+    const activeStaffInSanity = yield* sanityReader.getActiveStaffPsdIds();
     yield* reconcileEntity(
       "staff",
       activeStaffInSanity,
       accumulatedStaffIds,
-      (ids) => sanity.archiveStaff(ids),
+      (ids) => sanityWriter.archiveStaff(ids),
     );
 
-    const activeTeamsInSanity = yield* sanity.getActiveTeamPsdIds();
+    const activeTeamsInSanity = yield* sanityReader.getActiveTeamPsdIds();
     yield* reconcileEntity(
       "teams",
       activeTeamsInSanity,
       accumulatedTeamIds,
-      (ids) => sanity.archiveTeams(ids),
+      (ids) => sanityWriter.archiveTeams(ids),
     );
 
     // Clear accumulation keys for next cycle (even when archival is skipped)

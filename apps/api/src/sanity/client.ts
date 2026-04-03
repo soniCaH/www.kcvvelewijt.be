@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
+import { sanityClientConfig } from "./config";
 
 // ─── Document shapes written to Sanity ───────────────────────────────────────
 
@@ -63,31 +64,14 @@ export interface SanityWriteClientInterface {
   readonly upsertStaff: (
     doc: SanityStaffDoc,
   ) => Effect.Effect<void, SanityWriteError>;
-  /** Fetch existing psdImageUrl + psdImage presence for all player docs. */
-  readonly getPlayersImageState: () => Effect.Effect<
-    Map<string, PlayerImageState>,
-    SanityWriteError
-  >;
-  /** Fetch PSD IDs of all non-archived players. */
-  readonly getActivePlayerPsdIds: () => Effect.Effect<
-    string[],
-    SanityWriteError
-  >;
   /** Set archived: true on players with these PSD IDs. */
   readonly archivePlayers: (
     psdIds: string[],
   ) => Effect.Effect<void, SanityWriteError>;
-  /** Fetch PSD IDs of all non-archived staff members. */
-  readonly getActiveStaffPsdIds: () => Effect.Effect<
-    string[],
-    SanityWriteError
-  >;
   /** Set archived: true on staff members with these PSD IDs. */
   readonly archiveStaff: (
     psdIds: string[],
   ) => Effect.Effect<void, SanityWriteError>;
-  /** Fetch PSD IDs of all non-archived teams. */
-  readonly getActiveTeamPsdIds: () => Effect.Effect<string[], SanityWriteError>;
   /** Set archived: true on teams with these PSD IDs. */
   readonly archiveTeams: (
     psdIds: string[],
@@ -106,11 +90,6 @@ export interface SanityWriteClientInterface {
     pathTitle: string;
     vote: "up" | "down";
   }) => Effect.Effect<void, SanityWriteError>;
-  /** Fetch PSD IDs of all teams where showInNavigation is not false. */
-  readonly getVisibleTeamPsdIds: () => Effect.Effect<
-    string[],
-    SanityWriteError
-  >;
 }
 
 export class SanityWriteClient extends Context.Tag("SanityWriteClient")<
@@ -131,10 +110,7 @@ export const SanityWriteClientLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const client = createClient({
-      projectId: env.SANITY_PROJECT_ID,
-      dataset: env.SANITY_DATASET,
-      apiVersion: "2024-01-01",
-      token: env.SANITY_API_TOKEN,
+      ...sanityClientConfig(env),
       useCdn: false,
     });
 
@@ -181,29 +157,6 @@ export const SanityWriteClientLive = Layer.effect(
           keeper: doc.keeper,
           positionPsd: doc.positionPsd,
           archived: false,
-        }),
-
-      getPlayersImageState: () =>
-        Effect.tryPromise({
-          try: async () => {
-            const rows = await client.fetch<
-              Array<{
-                psdId: string;
-                psdImageUrl: string | null;
-                hasPsdImage: boolean;
-              }>
-            >(
-              `*[_type == "player"] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
-            );
-            return new Map(
-              rows.map((r) => [
-                r.psdId,
-                { psdImageUrl: r.psdImageUrl, hasPsdImage: r.hasPsdImage },
-              ]),
-            );
-          },
-          catch: (cause) =>
-            new SanityWriteError("Failed to fetch player image state", cause),
         }),
 
       uploadPlayerImage: (psdId, imageUrl, stableUrl) =>
@@ -369,21 +322,6 @@ export const SanityWriteClientLive = Layer.effect(
           );
         }).pipe(Effect.asVoid),
 
-      getActivePlayerPsdIds: () =>
-        Effect.tryPromise({
-          try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "player" && archived != true] { psdId }`,
-            );
-            return rows.map((r) => r.psdId);
-          },
-          catch: (cause) =>
-            new SanityWriteError(
-              "Failed to fetch active player PSD IDs",
-              cause,
-            ),
-        }),
-
       archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
       upsertTeam: (doc) =>
@@ -421,31 +359,7 @@ export const SanityWriteClientLive = Layer.effect(
         return upsert("staffMember", doc.psdId, fields);
       },
 
-      getActiveStaffPsdIds: () =>
-        Effect.tryPromise({
-          try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
-            );
-            return rows.map((r) => r.psdId);
-          },
-          catch: (cause) =>
-            new SanityWriteError("Failed to fetch active staff PSD IDs", cause),
-        }),
-
       archiveStaff: (psdIds) => archiveByPsdIds("staffMember", psdIds),
-
-      getActiveTeamPsdIds: () =>
-        Effect.tryPromise({
-          try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
-              `*[_type == "team" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
-            );
-            return rows.map((r) => r.psdId);
-          },
-          catch: (cause) =>
-            new SanityWriteError("Failed to fetch active team PSD IDs", cause),
-        }),
 
       archiveTeams: (psdIds) => archiveByPsdIds("team", psdIds),
 
@@ -461,20 +375,6 @@ export const SanityWriteClientLive = Layer.effect(
           catch: (cause) =>
             new SanityWriteError("Failed to write search feedback", cause),
         }).pipe(Effect.asVoid),
-
-      getVisibleTeamPsdIds: () =>
-        Effect.tryPromise({
-          try: async () => {
-            const rows = await client.fetch<Array<string | null>>(
-              `*[_type == "team" && showInNavigation != false].psdId`,
-            );
-            return rows.filter(
-              (id): id is string => typeof id === "string" && id.length > 0,
-            );
-          },
-          catch: (cause) =>
-            new SanityWriteError("Failed to fetch visible team PSD IDs", cause),
-        }),
     };
   }),
 );

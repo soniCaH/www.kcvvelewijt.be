@@ -3,6 +3,8 @@ import { Effect, Layer } from "effect";
 import { runSync } from "./psd-sanity-sync";
 import type { SanityWriteClientInterface } from "../sanity/client";
 import { SanityWriteClient, SanityWriteError } from "../sanity/client";
+import type { SanityProjectionInterface } from "../sanity/projection";
+import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
@@ -35,39 +37,44 @@ const ONE_PLAYER: PsdMember = {
 
 // ─── Mock factories ──────────────────────────────────────────────────────────
 
-function makeSanityWriteClientMock() {
+function makeSanityMocks() {
+  // Write methods (SanityWriteClient)
   const upsertPlayer = vi.fn(() => Effect.succeed(undefined as void));
   const upsertTeam = vi.fn(() => Effect.succeed(undefined as void));
   const upsertStaff = vi.fn(() => Effect.succeed(undefined as void));
   const uploadPlayerImage = vi.fn(() => Effect.succeed(undefined as void));
+  const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
+  const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
+  const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
+  const writeFeedback = vi.fn(() => Effect.succeed(undefined as void));
+
+  // Read methods (SanityProjection)
   const getPlayersImageState = vi.fn(() =>
     Effect.succeed(
       new Map<string, { psdImageUrl: string | null; hasPsdImage: boolean }>(),
     ),
   );
   const getActivePlayerPsdIds = vi.fn(() => Effect.succeed([] as string[]));
-  const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
   const getActiveStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
-  const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
-  const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
-
-  const writeFeedback = vi.fn(() => Effect.succeed(undefined as void));
   const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
 
-  const mock: SanityWriteClientInterface = {
+  const writerMock: SanityWriteClientInterface = {
     upsertPlayer,
     upsertTeam,
     upsertStaff,
     uploadPlayerImage,
-    getPlayersImageState,
-    getActivePlayerPsdIds,
     archivePlayers,
-    getActiveStaffPsdIds,
     archiveStaff,
-    getActiveTeamPsdIds,
     archiveTeams,
     writeFeedback,
+  };
+
+  const readerMock: SanityProjectionInterface = {
+    getPlayersImageState,
+    getActivePlayerPsdIds,
+    getActiveStaffPsdIds,
+    getActiveTeamPsdIds,
     getVisibleTeamPsdIds,
   };
 
@@ -76,14 +83,15 @@ function makeSanityWriteClientMock() {
     upsertTeam,
     upsertStaff,
     uploadPlayerImage,
+    archivePlayers,
+    archiveStaff,
+    archiveTeams,
     getPlayersImageState,
     getActivePlayerPsdIds,
-    archivePlayers,
     getActiveStaffPsdIds,
-    archiveStaff,
     getActiveTeamPsdIds,
-    archiveTeams,
-    mock,
+    writerMock,
+    readerMock,
   };
 }
 
@@ -211,11 +219,13 @@ const UNKNOWN_STATUS_MEMBER: PsdMember = {
 
 function buildTestLayer(
   kvStub: KVNamespace,
-  sanityMock: SanityWriteClientInterface,
+  writerMock: SanityWriteClientInterface,
+  readerMock: SanityProjectionInterface,
   psdMock: PsdTeamClientInterface,
 ) {
   return Layer.mergeAll(
-    Layer.succeed(SanityWriteClient, sanityMock),
+    Layer.succeed(SanityWriteClient, writerMock),
+    Layer.succeed(SanityProjection, readerMock),
     Layer.succeed(PsdTeamClient, psdMock),
     makeEnvLayer(kvStub),
   );
@@ -231,13 +241,15 @@ describe("runSync", () => {
       upsertTeam,
       upsertStaff,
       uploadPlayerImage,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
 
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(Layer.succeed(SanityWriteClient, sanityMock)),
+        Effect.provide(Layer.succeed(SanityWriteClient, writerMock)),
+        Effect.provide(Layer.succeed(SanityProjection, readerMock)),
         Effect.provide(Layer.succeed(PsdTeamClient, psdMock)),
         Effect.provide(makeEnvLayer(kvStub)),
       ),
@@ -268,10 +280,12 @@ describe("runSync", () => {
 
     // Run sync 3 times — each run processes one team, cursor advances
     for (let i = 0; i < 3; i++) {
-      const { mock: sanityMock } = makeSanityWriteClientMock();
+      const { writerMock, readerMock } = makeSanityMocks();
       await Effect.runPromise(
         runSync.pipe(
-          Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock)),
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
         ),
       );
     }
@@ -288,12 +302,8 @@ describe("runSync", () => {
     // getRawStaff is a separate PSD endpoint — its results go directly to upsertStaff
     const staffFromApi: PsdMember[] = [ONE_STAFF];
 
-    const {
-      upsertPlayer,
-      upsertTeam,
-      upsertStaff,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { upsertPlayer, upsertTeam, upsertStaff, writerMock, readerMock } =
+      makeSanityMocks();
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],
       mixedMembers,
@@ -301,7 +311,9 @@ describe("runSync", () => {
     );
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // Only "speler" from getRawMembers → upsertPlayer
@@ -334,7 +346,7 @@ describe("runSync", () => {
     const kvStub = makeKvStub();
     const callOrder: string[] = [];
 
-    const sanityMock: SanityWriteClientInterface = {
+    const writerMock: SanityWriteClientInterface = {
       upsertPlayer: vi.fn(() => {
         callOrder.push("upsertPlayer");
         return Effect.succeed(undefined as void);
@@ -348,6 +360,12 @@ describe("runSync", () => {
         return Effect.succeed(undefined as void);
       }),
       uploadPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
+      archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
+      archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
+      archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
+      writeFeedback: vi.fn(() => Effect.succeed(undefined as void)),
+    };
+    const readerMock: SanityProjectionInterface = {
       getPlayersImageState: vi.fn(() =>
         Effect.succeed(
           new Map<
@@ -357,12 +375,8 @@ describe("runSync", () => {
         ),
       ),
       getActivePlayerPsdIds: vi.fn(() => Effect.succeed([] as string[])),
-      archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
       getActiveStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
-      archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
-      archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
-      writeFeedback: vi.fn(() => Effect.succeed(undefined as void)),
       getVisibleTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
     };
     const psdMock = makePsdTeamClientMock(
@@ -372,7 +386,9 @@ describe("runSync", () => {
     );
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // upsertTeam must be the last upsert call (after all players and staff)
@@ -386,16 +402,15 @@ describe("runSync", () => {
 
   it("calls uploadPlayerImage when profilePictureURL is present and needsUpload is true", async () => {
     const kvStub = makeKvStub();
-    const {
-      upsertPlayer,
-      uploadPlayerImage,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { upsertPlayer, uploadPlayerImage, writerMock, readerMock } =
+      makeSanityMocks();
     // Image state: empty map → no existing image → needsUpload = true
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_WITH_IMAGE]);
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     expect(upsertPlayer).toHaveBeenCalledOnce();
@@ -414,8 +429,9 @@ describe("runSync", () => {
       upsertPlayer,
       uploadPlayerImage,
       getPlayersImageState,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
 
     // The stable URL that transformMember will produce for PLAYER_WITH_IMAGE
     const expectedStableUrl =
@@ -433,7 +449,9 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_WITH_IMAGE]);
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     expect(upsertPlayer).toHaveBeenCalledOnce();
@@ -447,8 +465,9 @@ describe("runSync", () => {
       upsertPlayer,
       upsertTeam,
       uploadPlayerImage,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
 
     // Make uploadPlayerImage fail
     uploadPlayerImage.mockReturnValue(
@@ -460,7 +479,9 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_WITH_IMAGE]);
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // Player was still upserted despite image failure
@@ -492,11 +513,8 @@ describe("runSync", () => {
       { ...ONE_PLAYER, id: 400 },
     ];
 
-    const {
-      getActivePlayerPsdIds,
-      archivePlayers,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { getActivePlayerPsdIds, archivePlayers, writerMock, readerMock } =
+      makeSanityMocks();
 
     // Sanity has 5 active players — player 500 is the orphan (1/5 = 20% < 30%)
     getActivePlayerPsdIds.mockReturnValue(
@@ -506,7 +524,9 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock([ONE_TEAM], psdPlayers);
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // With 1 team, cursor wraps to 0 immediately → reconciliation runs
@@ -522,12 +542,14 @@ describe("runSync", () => {
       { ...ONE_TEAM, id: 2, name: "Team B" },
     ];
 
-    const { archivePlayers, mock: sanityMock } = makeSanityWriteClientMock();
+    const { archivePlayers, writerMock, readerMock } = makeSanityMocks();
     const psdMock = makePsdTeamClientMock(TWO_TEAMS, [ONE_PLAYER]);
 
     // Run 1: processes Team A (cursor 0 → 1), not at end of cycle
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     expect(archivePlayers).not.toHaveBeenCalled();
@@ -560,30 +582,34 @@ describe("runSync", () => {
     };
 
     // Run 1: processes Team A (cursor 0 → 1)
-    const sanity1 = makeSanityWriteClientMock();
+    const s1 = makeSanityMocks();
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(buildTestLayer(kvStub, sanity1.mock, psdMock)),
+        Effect.provide(
+          buildTestLayer(kvStub, s1.writerMock, s1.readerMock, psdMock),
+        ),
       ),
     );
-    expect(sanity1.archivePlayers).not.toHaveBeenCalled();
+    expect(s1.archivePlayers).not.toHaveBeenCalled();
 
     // Run 2: processes Team B (cursor 1 → 0, cycle complete)
-    const sanity2 = makeSanityWriteClientMock();
+    const s2 = makeSanityMocks();
     // Sanity has 4 active players — player 400 is the orphan
-    sanity2.getActivePlayerPsdIds.mockReturnValue(
+    s2.getActivePlayerPsdIds.mockReturnValue(
       Effect.succeed(["100", "200", "300", "400"]),
     );
 
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(buildTestLayer(kvStub, sanity2.mock, psdMock)),
+        Effect.provide(
+          buildTestLayer(kvStub, s2.writerMock, s2.readerMock, psdMock),
+        ),
       ),
     );
 
     // Reconciliation should archive player 400
-    expect(sanity2.archivePlayers).toHaveBeenCalledOnce();
-    expect(sanity2.archivePlayers).toHaveBeenCalledWith(["400"]);
+    expect(s2.archivePlayers).toHaveBeenCalledOnce();
+    expect(s2.archivePlayers).toHaveBeenCalledWith(["400"]);
 
     // KV accumulation key should be cleared after reconciliation
     const accumulatedIds = await kvStub.get("sync:cycle-player-ids");
@@ -601,11 +627,8 @@ describe("runSync", () => {
       { ...ONE_STAFF, id: 800 },
     ];
 
-    const {
-      getActiveStaffPsdIds,
-      archiveStaff,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { getActiveStaffPsdIds, archiveStaff, writerMock, readerMock } =
+      makeSanityMocks();
 
     // Sanity has 5 active staff — staff 900 is the orphan (1/5 = 20% < 30%)
     getActiveStaffPsdIds.mockReturnValue(
@@ -615,7 +638,9 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER], psdStaff);
 
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // With 1 team, cursor wraps to 0 immediately → reconciliation runs
@@ -634,11 +659,8 @@ describe("runSync", () => {
       { ...ONE_TEAM, id: 45, name: "Team D" },
     ];
 
-    const {
-      getActiveTeamPsdIds,
-      archiveTeams,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { getActiveTeamPsdIds, archiveTeams, writerMock, readerMock } =
+      makeSanityMocks();
 
     // Sanity has 5 active teams — team 77 is the orphan (1/5 = 20% < 30%)
     getActiveTeamPsdIds.mockReturnValue(
@@ -650,12 +672,19 @@ describe("runSync", () => {
     // Run all 4 teams to complete the cycle
     for (let i = 0; i < 4; i++) {
       const isLastRun = i === 3;
-      const currentSanity = isLastRun
-        ? sanityMock
-        : makeSanityWriteClientMock().mock;
+      const current = isLastRun
+        ? { writerMock, readerMock }
+        : makeSanityMocks();
       await Effect.runPromise(
         runSync.pipe(
-          Effect.provide(buildTestLayer(kvStub, currentSanity, psdMock)),
+          Effect.provide(
+            buildTestLayer(
+              kvStub,
+              current.writerMock,
+              current.readerMock,
+              psdMock,
+            ),
+          ),
         ),
       );
     }
@@ -693,30 +722,34 @@ describe("runSync", () => {
     };
 
     // Run 1: processes Team A (cursor 0 → 1)
-    const sanity1 = makeSanityWriteClientMock();
+    const s1 = makeSanityMocks();
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(buildTestLayer(kvStub, sanity1.mock, psdMock)),
+        Effect.provide(
+          buildTestLayer(kvStub, s1.writerMock, s1.readerMock, psdMock),
+        ),
       ),
     );
-    expect(sanity1.archiveStaff).not.toHaveBeenCalled();
+    expect(s1.archiveStaff).not.toHaveBeenCalled();
 
     // Run 2: processes Team B (cursor 1 → 0, cycle complete)
-    const sanity2 = makeSanityWriteClientMock();
+    const s2 = makeSanityMocks();
     // Sanity has 4 active staff — staff 800 is the orphan (1/4 = 25% < 30%)
-    sanity2.getActiveStaffPsdIds.mockReturnValue(
+    s2.getActiveStaffPsdIds.mockReturnValue(
       Effect.succeed(["500", "600", "700", "800"]),
     );
 
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(buildTestLayer(kvStub, sanity2.mock, psdMock)),
+        Effect.provide(
+          buildTestLayer(kvStub, s2.writerMock, s2.readerMock, psdMock),
+        ),
       ),
     );
 
     // Reconciliation should archive staff 800
-    expect(sanity2.archiveStaff).toHaveBeenCalledOnce();
-    expect(sanity2.archiveStaff).toHaveBeenCalledWith(["800"]);
+    expect(s2.archiveStaff).toHaveBeenCalledOnce();
+    expect(s2.archiveStaff).toHaveBeenCalledWith(["800"]);
 
     // KV accumulation key should be cleared after reconciliation
     const accumulatedStaffIds = await kvStub.get("sync:cycle-staff-ids");
@@ -740,8 +773,9 @@ describe("runSync", () => {
       archiveStaff,
       getActiveTeamPsdIds,
       archiveTeams,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
 
     // Sanity has 5 active players but PSD only returned 1 → 4 orphans (80% > 30%)
     getActivePlayerPsdIds.mockReturnValue(
@@ -758,7 +792,9 @@ describe("runSync", () => {
 
     // With 1 team, cursor wraps to 0 immediately → reconciliation runs
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     // Safety threshold should prevent all three archive calls
@@ -775,16 +811,15 @@ describe("runSync", () => {
       { ...ONE_TEAM, id: 2, name: "Team B" },
     ];
 
-    const {
-      archiveStaff,
-      archiveTeams,
-      mock: sanityMock,
-    } = makeSanityWriteClientMock();
+    const { archiveStaff, archiveTeams, writerMock, readerMock } =
+      makeSanityMocks();
     const psdMock = makePsdTeamClientMock(TWO_TEAMS, [ONE_PLAYER], [ONE_STAFF]);
 
     // Run 1: processes Team A (cursor 0 → 1), not at end of cycle
     await Effect.runPromise(
-      runSync.pipe(Effect.provide(buildTestLayer(kvStub, sanityMock, psdMock))),
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
     );
 
     expect(archiveStaff).not.toHaveBeenCalled();
