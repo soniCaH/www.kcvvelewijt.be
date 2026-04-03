@@ -175,7 +175,7 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
                             }
                           }
 
-                          await transaction.commit()
+                          await transaction.commit({ visibility: 'async' })
                           setStatus('done')
                         } catch (err) {
                           setStatus('error')
