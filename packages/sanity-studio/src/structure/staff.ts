@@ -81,7 +81,7 @@ export function staffStructure(S: StructureBuilder) {
               S.documentList()
                 .title('In organigram maar geen foto')
                 .filter(
-                  '_type == "staffMember" && !defined(photo) && _id in *[_type == "organigramNode"].members[]._ref',
+                  '_type == "staffMember" && !defined(photo) && !archived && _id in *[_type == "organigramNode"].members[]._ref',
                 )
                 .defaultOrdering([{field: 'lastName', direction: 'asc'}]),
             ),
