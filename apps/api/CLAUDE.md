@@ -17,6 +17,10 @@ src/
 │   ├── schemas-player-team.ts ← PSD player/team/staff schemas (used by sync)
 │   ├── service.ts            ← PsdService (fetch + transform + business logic)
 │   └── transforms.ts         ← Pure transform functions (PSD → domain types)
+├── sanity/
+│   ├── config.ts             ← Sanity client config (project ID, dataset, token)
+│   ├── mutation.ts           ← SanityMutation — write ops (upsert, archive, image upload)
+│   └── projection.ts         ← SanityProjection — read ops (GROQ queries → typed results)
 ├── handlers/
 │   ├── matches.ts            ← MatchesApi HttpApiGroup
 │   ├── ranking.ts            ← RankingApi HttpApiGroup

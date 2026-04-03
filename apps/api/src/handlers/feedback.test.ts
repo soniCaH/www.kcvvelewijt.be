@@ -1,15 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import {
-  SanityWriteClient,
-  type SanityWriteClientInterface,
-  SanityWriteError,
-} from "../sanity/client";
+  SanityMutation,
+  type SanityMutationInterface,
+  SanityMutationError,
+} from "../sanity/mutation";
 import { handleFeedback } from "./feedback";
 
 function makeSanityMock(
-  writeFeedbackImpl?: SanityWriteClientInterface["writeFeedback"],
-): SanityWriteClientInterface {
+  writeFeedbackImpl?: SanityMutationInterface["writeFeedback"],
+): SanityMutationInterface {
   return {
     upsertPlayer: () => Effect.succeed(undefined),
     upsertTeam: () => Effect.succeed(undefined),
@@ -26,7 +26,7 @@ describe("handleFeedback", () => {
   it("calls writeFeedback and returns ok: true", async () => {
     const writeFeedbackSpy = vi.fn(() => Effect.succeed(undefined as void));
     const mock = makeSanityMock(writeFeedbackSpy);
-    const layer = Layer.succeed(SanityWriteClient, mock);
+    const layer = Layer.succeed(SanityMutation, mock);
 
     const result = await Effect.runPromise(
       Effect.provide(
@@ -47,11 +47,11 @@ describe("handleFeedback", () => {
     });
   });
 
-  it("propagates SanityWriteError as die", async () => {
+  it("propagates SanityMutationError as die", async () => {
     const mock = makeSanityMock(() =>
-      Effect.fail(new SanityWriteError("Sanity is down")),
+      Effect.fail(new SanityMutationError("Sanity is down")),
     );
-    const layer = Layer.succeed(SanityWriteClient, mock);
+    const layer = Layer.succeed(SanityMutation, mock);
 
     await expect(
       Effect.runPromise(

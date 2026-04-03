@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { runSync } from "./psd-sanity-sync";
-import type { SanityWriteClientInterface } from "../sanity/client";
-import { SanityWriteClient, SanityWriteError } from "../sanity/client";
+import type { SanityMutationInterface } from "../sanity/mutation";
+import { SanityMutation, SanityMutationError } from "../sanity/mutation";
 import type { SanityProjectionInterface } from "../sanity/projection";
 import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
@@ -38,7 +38,7 @@ const ONE_PLAYER: PsdMember = {
 // ─── Mock factories ──────────────────────────────────────────────────────────
 
 function makeSanityMocks() {
-  // Write methods (SanityWriteClient)
+  // Write methods (SanityMutation)
   const upsertPlayer = vi.fn(() => Effect.succeed(undefined as void));
   const upsertTeam = vi.fn(() => Effect.succeed(undefined as void));
   const upsertStaff = vi.fn(() => Effect.succeed(undefined as void));
@@ -59,7 +59,7 @@ function makeSanityMocks() {
   const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
 
-  const writerMock: SanityWriteClientInterface = {
+  const writerMock: SanityMutationInterface = {
     upsertPlayer,
     upsertTeam,
     upsertStaff,
@@ -219,12 +219,12 @@ const UNKNOWN_STATUS_MEMBER: PsdMember = {
 
 function buildTestLayer(
   kvStub: KVNamespace,
-  writerMock: SanityWriteClientInterface,
+  writerMock: SanityMutationInterface,
   readerMock: SanityProjectionInterface,
   psdMock: PsdTeamClientInterface,
 ) {
   return Layer.mergeAll(
-    Layer.succeed(SanityWriteClient, writerMock),
+    Layer.succeed(SanityMutation, writerMock),
     Layer.succeed(SanityProjection, readerMock),
     Layer.succeed(PsdTeamClient, psdMock),
     makeEnvLayer(kvStub),
@@ -248,7 +248,7 @@ describe("runSync", () => {
 
     await Effect.runPromise(
       runSync.pipe(
-        Effect.provide(Layer.succeed(SanityWriteClient, writerMock)),
+        Effect.provide(Layer.succeed(SanityMutation, writerMock)),
         Effect.provide(Layer.succeed(SanityProjection, readerMock)),
         Effect.provide(Layer.succeed(PsdTeamClient, psdMock)),
         Effect.provide(makeEnvLayer(kvStub)),
@@ -346,7 +346,7 @@ describe("runSync", () => {
     const kvStub = makeKvStub();
     const callOrder: string[] = [];
 
-    const writerMock: SanityWriteClientInterface = {
+    const writerMock: SanityMutationInterface = {
       upsertPlayer: vi.fn(() => {
         callOrder.push("upsertPlayer");
         return Effect.succeed(undefined as void);
@@ -472,7 +472,7 @@ describe("runSync", () => {
     // Make uploadPlayerImage fail
     uploadPlayerImage.mockReturnValue(
       Effect.fail(
-        new SanityWriteError("Sanity asset upload timeout"),
+        new SanityMutationError("Sanity asset upload timeout"),
       ) as unknown as Effect.Effect<void>,
     );
 

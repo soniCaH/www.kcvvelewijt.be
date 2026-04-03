@@ -30,7 +30,7 @@ import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
 import { AiAnswerServiceLive } from "./search/ai-answer";
 import { runSanityIndexSync } from "./search/sanity-index-sync";
-import { SanityWriteClientLive } from "./sanity/client";
+import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
 import { handleIndexWebhook } from "./webhooks/index-handler";
@@ -65,7 +65,7 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(AiAnswerServiceLive),
     Layer.provide(PsdServiceLive),
     Layer.provide(SanityProjectionLive),
-    Layer.provide(SanityWriteClientLive),
+    Layer.provide(SanityMutationLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
     Layer.provideMerge(WorkerPlatformLayer),
@@ -132,7 +132,7 @@ export default {
       // PSD → Sanity player/team/staff sync
       const layer = Layer.mergeAll(
         PsdTeamClientLive,
-        SanityWriteClientLive,
+        SanityMutationLive,
         SanityProjectionLive,
         envLayer,
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));

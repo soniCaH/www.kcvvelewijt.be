@@ -81,9 +81,10 @@ None. This is an internal refactor within `apps/api`.
 ## 7. Open Questions
 
 - [ ] Should `SanityProjection` use Effect Schema to validate GROQ results, or keep current unvalidated approach? — Decide during Phase 1 (tracer bullet will answer)
-- [ ] Should `SanityWriteError` be split into `SanityQueryError` + `SanityMutationError`? — Decide during Phase 3
+- [x] Should `SanityWriteError` be split into `SanityQueryError` + `SanityMutationError`? — **Yes.** `SanityQueryError` lives in `projection.ts`, `SanityMutationError` lives in `mutation.ts`. Done in Phase 3.
 - [ ] The webhook handler creates its own Sanity client directly — should it use `SanityMutation` instead? — Deferred to webhook Effect migration PRD
 
 ## 8. Discovered Unknowns
 
-_(filled during implementation)_
+- [2026-04-03] `SanityWriteError` renamed to `SanityMutationError` during Phase 3 rename — resolved inline
+- [2026-04-03] `apps/api` has no `check-all` script; used `type-check` + `lint` + `test` separately — resolved inline
