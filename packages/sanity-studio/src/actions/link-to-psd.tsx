@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import {type DocumentActionComponent, useClient} from 'sanity'
+import {useRouter} from 'sanity/router'
 import {buildLinkToPsdMutations} from './build-link-to-psd-mutations'
 
 const API_VERSION = '2024-01-01'
@@ -16,6 +17,7 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
   // Prefer draft — it contains the latest (possibly unpublished) changes.
   const doc = draft || published
   const client = useClient({apiVersion: API_VERSION})
+  const router = useRouter()
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [psdId, setPsdId] = useState('')
@@ -177,6 +179,16 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
 
                           await transaction.commit({ visibility: 'async' })
                           setStatus('done')
+
+                          // Navigate to the newly created document after a short delay
+                          // so the user can see the success message briefly.
+                          setTimeout(() => {
+                            const path = router.resolveIntentLink('edit', {
+                              id: targetId,
+                              type: 'staffMember',
+                            })
+                            router.navigateUrl({path})
+                          }, 1500)
                         } catch (err) {
                           setStatus('error')
                           setError(err instanceof Error ? err.message : 'Onbekende fout')
@@ -190,7 +202,7 @@ export const LinkToPsdAction: DocumentActionComponent = (props) => {
                         padding: '0.5rem 1rem',
                         borderRadius: '4px',
                         cursor:
-                          psdId.trim() && status !== 'executing' ? 'pointer' : 'not-allowed',
+                          /^\d+$/.test(psdId.trim()) && status !== 'executing' ? 'pointer' : 'not-allowed',
                       }}
                     >
                       {status === 'executing' ? 'Bezig met migratie...' : 'Migreer document'}
