@@ -1,4 +1,5 @@
-import { client } from "./sanity-client";
+import { createHash } from "crypto";
+import { client, dataset } from "./sanity-client";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -25,8 +26,9 @@ function manualContact(fields: { role: string; email?: string; phone?: string; d
 }
 
 function step(description: string, opts?: { link?: string; contact?: ReturnType<typeof positionContact> | ReturnType<typeof manualContact> }) {
+  const hash = createHash("sha256").update(description).digest("hex").slice(0, 8);
   return {
-    _key: description.slice(0, 20).replace(/\s/g, "-").toLowerCase(),
+    _key: `step-${hash}`,
     description,
     ...(opts?.link ? { link: opts.link } : {}),
     ...(opts?.contact ? { contact: opts.contact } : {}),
@@ -653,7 +655,6 @@ function omit<T extends Record<string, unknown>>(obj: T, keys: string[]): Partia
 }
 
 async function seed() {
-  const dataset = process.env.SANITY_DATASET ?? "staging";
   if (dataset === "production" && process.env.CONFIRM_PRODUCTION_SEED !== "yes") {
     throw new Error("Set CONFIRM_PRODUCTION_SEED=yes for production");
   }

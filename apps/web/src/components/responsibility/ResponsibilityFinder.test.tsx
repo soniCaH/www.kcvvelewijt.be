@@ -549,12 +549,12 @@ describe("ResponsibilityFinder", () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
 
-      // Find a path with nodeId from the actual data (position contacts have nodeId)
+      // Find a path with members from the actual data (position contacts have members)
       const pathWithMemberId = responsibilityPaths.find(
-        (path) => path.primaryContact.nodeId,
+        (path) => path.primaryContact.members?.[0]?.id,
       );
       expect(pathWithMemberId).toBeDefined();
-      expect(pathWithMemberId!.primaryContact.nodeId).toBeDefined();
+      expect(pathWithMemberId!.primaryContact.members?.[0]?.id).toBeDefined();
       mockSearchReturning([pathWithMemberId!]);
 
       render(
@@ -592,9 +592,9 @@ describe("ResponsibilityFinder", () => {
       });
       await user.click(organigramButton);
 
-      // Verify callback was called with the actual nodeId from data
+      // Verify callback was called with the actual member ID from data
       expect(onMemberSelect).toHaveBeenCalledWith(
-        pathWithMemberId!.primaryContact.nodeId,
+        pathWithMemberId!.primaryContact.members![0].id,
       );
     });
 

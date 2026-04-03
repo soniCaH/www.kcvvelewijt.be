@@ -635,7 +635,12 @@ export function ResponsibilityFinder({
                               </span>
                               <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md flex items-center gap-1">
                                 <User size={12} />
-                                {suggestion.path.primaryContact.role}
+                                {suggestion.path.primaryContact.contactType ===
+                                "position"
+                                  ? (suggestion.path.primaryContact.position ??
+                                    "—")
+                                  : (suggestion.path.primaryContact.role ??
+                                    "—")}
                               </span>
                             </div>
                           </div>
@@ -801,13 +806,14 @@ function ContactDisplay({
               )}
             </div>
           ))}
-          {contact.nodeId && onMemberSelect && (
+          {contact.members?.[0]?.id && onMemberSelect && (
             <div>
               <button
                 type="button"
                 onClick={() => {
-                  analytics.trackOrganigramLink(pathId, contact.nodeId!);
-                  onMemberSelect(contact.nodeId!);
+                  const memberId = contact.members![0].id;
+                  analytics.trackOrganigramLink(pathId, memberId);
+                  onMemberSelect(memberId);
                 }}
                 className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
               >
@@ -907,7 +913,7 @@ function ContactDisplay({
  * Display a formatted card for a ResponsibilityPath, showing its header (icon, question, category, summary), the primary contact panel, and an ordered list of steps.
  *
  * @param path - The responsibility path to display
- * @param onMemberSelect - Optional callback invoked with a nodeId when the "Bekijk in organigram" action is triggered
+ * @param onMemberSelect - Optional callback invoked with a staffMember ID when the "Bekijk in organigram" action is triggered
  * @returns A React element rendering the styled result card for the provided `path`
  */
 function ResultCard({

@@ -52,6 +52,9 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },
+  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.
+  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).
+  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).
   "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
 }`);
 

@@ -22,7 +22,7 @@ export const RESPONSIBILITY_PATHS_QUERY =
     "roleCode": organigramNode->roleCode,
     "members": organigramNode->members[]->{
       "id": _id,
-      "name": firstName + " " + lastName,
+      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
       email, phone
     },
     "nodeId": organigramNode->_id,
@@ -41,7 +41,7 @@ export const RESPONSIBILITY_PATHS_QUERY =
       "roleCode": organigramNode->roleCode,
       "members": organigramNode->members[]->{
         "id": _id,
-        "name": firstName + " " + lastName,
+        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
         email, phone
       },
       "nodeId": organigramNode->_id,
@@ -59,17 +59,20 @@ type ContactRow = NonNullable<PathRow["primaryContact"]>;
 
 function toContact(c: ContactRow): Contact {
   return {
+    // Default to "manual" when contactType is null (legacy docs or incomplete data)
     contactType: (c.contactType ?? "manual") as Contact["contactType"],
     ...(c.position ? { position: c.position } : {}),
     ...(c.roleCode ? { roleCode: c.roleCode } : {}),
     ...(c.members?.length
       ? {
-          members: c.members.map((m) => ({
-            id: m.id ?? "",
-            name: m.name ?? "",
-            ...(m.email ? { email: m.email } : {}),
-            ...(m.phone ? { phone: m.phone } : {}),
-          })),
+          members: c.members
+            .filter((m): m is NonNullable<typeof m> => m != null)
+            .map((m) => ({
+              id: m.id ?? "",
+              name: (m.name ?? "").replace(/\s+/g, " ").trim(),
+              ...(m.email ? { email: m.email } : {}),
+              ...(m.phone ? { phone: m.phone } : {}),
+            })),
         }
       : {}),
     ...(c.nodeId ? { nodeId: c.nodeId } : {}),

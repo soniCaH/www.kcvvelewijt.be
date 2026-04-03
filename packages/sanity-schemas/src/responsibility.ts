@@ -219,6 +219,22 @@ export const responsibility = defineType({
               type: 'object',
               description: 'Optional contact specific to this step',
               fields: contactFields,
+              validation: (Rule) =>
+                Rule.custom((contact: Record<string, unknown> | undefined) => {
+                  if (!contact?.contactType) return true // step contacts are optional
+                  switch (contact.contactType) {
+                    case 'position':
+                      return contact.organigramNode ? true : 'Kies een organigram-positie'
+                    case 'team-role':
+                      return contact.teamRole ? true : 'Kies een teamrol'
+                    case 'manual':
+                      return (contact.email || contact.phone || contact.role)
+                        ? true
+                        : 'Vul minstens één van: rol, email, telefoon in'
+                    default:
+                      return true
+                  }
+                }),
             }),
           ],
           preview: {

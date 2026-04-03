@@ -1,4 +1,4 @@
-import { client } from "./sanity-client";
+import { client, dataset } from "./sanity-client";
 
 const gcNode = {
   _id: "organigramNode-gerechtelijk-correspondent",
@@ -13,7 +13,6 @@ const gcNode = {
 };
 
 async function main() {
-  const dataset = process.env.SANITY_DATASET ?? "staging";
   if (dataset === "production" && process.env.CONFIRM_PRODUCTION_SEED !== "yes") {
     throw new Error("Set CONFIRM_PRODUCTION_SEED=yes for production");
   }
