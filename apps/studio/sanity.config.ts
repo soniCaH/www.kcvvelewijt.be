@@ -1,6 +1,7 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
+import {LinkToPsdAction} from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 
@@ -15,5 +16,9 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+  },
+
+  document: {
+    actions: (prev) => [...prev, LinkToPsdAction],
   },
 })
