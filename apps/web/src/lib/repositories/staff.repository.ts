@@ -93,14 +93,16 @@ export function toKeyContactVMs(
   }>,
 ): KeyContactVM[] {
   return rows.flatMap((row) =>
-    row.members.map((m) => {
-      const trimmed = m.name.trim();
-      return {
-        role: row.title ?? "",
-        name: trimmed === "" ? (row.title ?? "") : trimmed,
-        email: m.email,
-      };
-    }),
+    row.members
+      .filter((m): m is NonNullable<typeof m> => m != null)
+      .map((m) => {
+        const trimmed = m.name.trim();
+        return {
+          role: row.title ?? "",
+          name: trimmed === "" ? (row.title ?? "") : trimmed,
+          email: m.email,
+        };
+      }),
   );
 }
 
@@ -143,18 +145,20 @@ export function toOrgChartNode(
     description: node.description ?? undefined,
     department: (node.department ?? undefined) as OrgChartNode["department"],
     parentId: node.parentId ?? "club",
-    members: (node.members ?? []).map((m) => {
-      const trimmed = (m.name ?? "").trim();
-      const psdId = m.psdId?.trim();
-      return {
-        id: m.id,
-        name: trimmed === "" ? undefined : trimmed,
-        imageUrl: m.imageUrl ?? undefined,
-        email: m.email ?? undefined,
-        phone: m.phone ?? undefined,
-        href: psdId ? `/staf/${psdId}` : undefined,
-      };
-    }),
+    members: (node.members ?? [])
+      .filter((m): m is NonNullable<typeof m> => m != null)
+      .map((m) => {
+        const trimmed = (m.name ?? "").trim();
+        const psdId = m.psdId?.trim();
+        return {
+          id: m.id,
+          name: trimmed === "" ? undefined : trimmed,
+          imageUrl: m.imageUrl ?? undefined,
+          email: m.email ?? undefined,
+          phone: m.phone ?? undefined,
+          href: psdId ? `/staf/${psdId}` : undefined,
+        };
+      }),
   };
 }
 
