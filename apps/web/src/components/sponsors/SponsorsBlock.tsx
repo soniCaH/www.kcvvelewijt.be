@@ -73,8 +73,8 @@ export async function SponsorsBlock({
             id: s.id,
             name: s.name,
             logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
-            url: s.url,
-            tier: s.tier,
+            url: s.url ?? undefined,
+            tier: s.tier ?? undefined,
           }),
         );
     }).pipe(

@@ -10,11 +10,7 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import {
-  PageRepository,
-  PageRepositoryLive,
-  type PageVM,
-} from "./page.repository";
+import { PageRepository, PageRepositoryLive } from "./page.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -23,13 +19,14 @@ function runWithRepo<A>(effect: Effect.Effect<A, never, PageRepository>) {
   return Effect.runPromise(Effect.provide(effect, PageRepositoryLive));
 }
 
+/** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
 function makePageRow(
   overrides: Partial<NonNullable<PAGE_BY_SLUG_QUERY_RESULT>> = {},
 ): NonNullable<PAGE_BY_SLUG_QUERY_RESULT> {
   return {
-    _id: "page-1",
+    id: "page-1",
     title: "Praktische Info",
-    slug: { current: "praktische-info", _type: "slug" },
+    slug: "praktische-info",
     heroImageUrl: null,
     body: [
       {
@@ -51,7 +48,7 @@ function makePageRow(
 
 describe("PageRepository", () => {
   describe("findBySlug", () => {
-    it("maps all PageVM fields correctly from GROQ result", async () => {
+    it("returns GROQ projection shape directly — no post-fetch transform", async () => {
       const row = makePageRow();
       mockFetch.mockResolvedValueOnce(row);
 
@@ -62,13 +59,13 @@ describe("PageRepository", () => {
         }),
       );
 
-      expect(page).toEqual<PageVM>({
+      expect(page).toMatchObject({
         id: "page-1",
         title: "Praktische Info",
         slug: "praktische-info",
         heroImageUrl: null,
-        body: row.body!,
       });
+      expect(page?.body).toEqual(row.body);
     });
 
     it("returns null for unknown slug", async () => {
@@ -84,8 +81,8 @@ describe("PageRepository", () => {
       expect(page).toBeNull();
     });
 
-    it("null title becomes empty string", async () => {
-      mockFetch.mockResolvedValueOnce(makePageRow({ title: null }));
+    it("GROQ coalesce handles nulls — title defaults to empty string", async () => {
+      mockFetch.mockResolvedValueOnce(makePageRow({ title: "" }));
 
       const page = await runWithRepo(
         Effect.gen(function* () {
@@ -97,7 +94,7 @@ describe("PageRepository", () => {
       expect(page?.title).toBe("");
     });
 
-    it("null body becomes empty array", async () => {
+    it("null body stays null (consumer handles with ?? [])", async () => {
       mockFetch.mockResolvedValueOnce(makePageRow({ body: null }));
 
       const page = await runWithRepo(
@@ -107,7 +104,7 @@ describe("PageRepository", () => {
         }),
       );
 
-      expect(page?.body).toEqual([]);
+      expect(page?.body).toBeNull();
     });
 
     it("maps heroImageUrl when heroImage is set", async () => {
@@ -115,7 +112,7 @@ describe("PageRepository", () => {
         makePageRow({
           heroImageUrl:
             "https://cdn.sanity.io/images/proj/dataset/abc.jpg?w=1600&q=80&fm=webp&fit=max",
-        } as Record<string, unknown>),
+        }),
       );
 
       const page = await runWithRepo(

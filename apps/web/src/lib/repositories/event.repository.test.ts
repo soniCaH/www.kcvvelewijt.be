@@ -13,11 +13,7 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import {
-  EventRepository,
-  EventRepositoryLive,
-  type EventVM,
-} from "./event.repository";
+import { EventRepository, EventRepositoryLive } from "./event.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -26,16 +22,18 @@ function runWithRepo<A>(effect: Effect.Effect<A, never, EventRepository>) {
   return Effect.runPromise(Effect.provide(effect, EventRepositoryLive));
 }
 
+/** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
 function makeEventRow(
   overrides: Partial<EVENTS_QUERY_RESULT[number]> = {},
 ): EVENTS_QUERY_RESULT[number] {
   return {
-    _id: "event-1",
+    id: "event-1",
     title: "Spaghetti-avond",
     dateStart: "2026-04-15T18:00:00Z",
     dateEnd: "2026-04-15T22:00:00Z",
-    externalLink: { url: "https://tickets.example.com", label: "Tickets" },
+    href: "https://tickets.example.com",
     coverImageUrl: "https://cdn.sanity.io/event.webp",
+    featuredOnHome: false,
     ...overrides,
   };
 }
@@ -44,20 +42,20 @@ function makeFeaturedEventRow(
   overrides: Partial<NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT>> = {},
 ): NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT> {
   return {
-    _id: "event-2",
+    id: "event-2",
     title: "Seizoensopener",
     dateStart: "2026-08-01T14:00:00Z",
     dateEnd: null,
-    featuredOnHome: true,
-    externalLink: null,
+    href: "#",
     coverImageUrl: "https://cdn.sanity.io/featured.webp",
+    featuredOnHome: true,
     ...overrides,
   };
 }
 
 describe("EventRepository", () => {
   describe("findAll", () => {
-    it("maps all EventVM fields correctly from GROQ result", async () => {
+    it("returns GROQ projection shape directly — no post-fetch transform", async () => {
       const row = makeEventRow();
       mockFetch.mockResolvedValueOnce([row]);
 
@@ -69,7 +67,7 @@ describe("EventRepository", () => {
       );
 
       expect(events).toHaveLength(1);
-      expect(events[0]).toEqual<EventVM>({
+      expect(events[0]).toMatchObject({
         id: "event-1",
         title: "Spaghetti-avond",
         dateStart: "2026-04-15T18:00:00Z",
@@ -80,13 +78,13 @@ describe("EventRepository", () => {
       });
     });
 
-    it("null optional fields become undefined", async () => {
+    it("GROQ coalesce handles nulls — title defaults to empty string, href to #", async () => {
       mockFetch.mockResolvedValueOnce([
         makeEventRow({
+          title: "",
           dateEnd: null,
-          externalLink: null,
+          href: "#",
           coverImageUrl: null,
-          title: null,
         }),
       ]);
 
@@ -98,9 +96,9 @@ describe("EventRepository", () => {
       );
 
       expect(e.title).toBe("");
-      expect(e.dateEnd).toBeUndefined();
+      expect(e.dateEnd).toBeNull();
       expect(e.href).toBe("#");
-      expect(e.coverImageUrl).toBeUndefined();
+      expect(e.coverImageUrl).toBeNull();
     });
   });
 
@@ -118,7 +116,7 @@ describe("EventRepository", () => {
       expect(result).toBeNull();
     });
 
-    it("maps featured event fields correctly", async () => {
+    it("returns GROQ projection shape directly for featured event", async () => {
       mockFetch.mockResolvedValueOnce(makeFeaturedEventRow());
 
       const result = await runWithRepo(
@@ -128,11 +126,11 @@ describe("EventRepository", () => {
         }),
       );
 
-      expect(result).toEqual<EventVM>({
+      expect(result).toMatchObject({
         id: "event-2",
         title: "Seizoensopener",
         dateStart: "2026-08-01T14:00:00Z",
-        dateEnd: undefined,
+        dateEnd: null,
         href: "#",
         coverImageUrl: "https://cdn.sanity.io/featured.webp",
         featuredOnHome: true,

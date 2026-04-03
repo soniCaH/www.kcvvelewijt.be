@@ -106,7 +106,7 @@ async function fetchCalendarData(): Promise<CalendarData> {
         id: e.id,
         title: e.title,
         dateStart: e.dateStart,
-        dateEnd: e.dateEnd,
+        dateEnd: e.dateEnd ?? undefined,
         href: e.href,
       }));
 

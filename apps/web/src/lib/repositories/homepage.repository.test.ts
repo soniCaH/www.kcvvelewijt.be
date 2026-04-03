@@ -30,19 +30,16 @@ function makeBannersResult(
 ): HOMEPAGE_BANNERS_QUERY_RESULT {
   return {
     bannerSlotA: {
-      _id: "banner-a",
       imageUrl: "https://cdn.sanity.io/banner-a.webp",
       alt: "Banner A alt",
       href: "https://example.com/a",
     },
     bannerSlotB: {
-      _id: "banner-b",
       imageUrl: "https://cdn.sanity.io/banner-b.webp",
       alt: "Banner B alt",
       href: null,
     },
     bannerSlotC: {
-      _id: "banner-c",
       imageUrl: "https://cdn.sanity.io/banner-c.webp",
       alt: "Banner C alt",
       href: "https://example.com/c",
@@ -132,7 +129,6 @@ describe("HomepageRepository", () => {
       mockFetch.mockResolvedValueOnce(
         makeBannersResult({
           bannerSlotA: {
-            _id: "banner-a",
             imageUrl: null,
             alt: "Banner A alt",
             href: null,
