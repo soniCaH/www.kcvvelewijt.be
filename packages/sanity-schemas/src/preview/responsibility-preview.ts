@@ -1,31 +1,42 @@
 /**
  * Sanity preview select + prepare for responsibility.
- * Shows contact name (staffMember name or fallback role label) in subtitle.
+ * Shows contact info (organigramNode title, team role, or manual role) in subtitle.
  */
 
 export const responsibilityPreviewSelect = {
   title: 'title',
   active: 'active',
   category: 'category',
-  contactFirstName: 'primaryContact.staffMember->firstName',
-  contactLastName: 'primaryContact.staffMember->lastName',
+  contactNodeTitle: 'primaryContact.organigramNode->title',
   contactRole: 'primaryContact.role',
+  contactType: 'primaryContact.contactType',
 }
 
 interface ResponsibilityPreviewSelection {
   title?: string
   active?: boolean
   category?: string
-  contactFirstName?: string
-  contactLastName?: string
+  contactNodeTitle?: string
   contactRole?: string
+  contactType?: string
 }
 
 export function prepareResponsibilityPreview(selection: ResponsibilityPreviewSelection) {
-  const {title, active, category, contactFirstName, contactLastName, contactRole} = selection
+  const {title, active, category, contactNodeTitle, contactRole, contactType} = selection
 
-  const contactName = [contactFirstName, contactLastName].filter(Boolean).join(' ')
-  const contact = contactName || contactRole
+  let contact: string | undefined
+  switch (contactType) {
+    case 'position':
+      contact = contactNodeTitle
+      break
+    case 'team-role':
+      contact = 'Teamrol (dynamisch)'
+      break
+    case 'manual':
+      contact = contactRole
+      break
+  }
+  if (!contact) contact = '(geen contact)'
 
   const parts = [category, contact, active === false ? 'inactief' : undefined].filter(Boolean)
 

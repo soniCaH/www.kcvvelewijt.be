@@ -3,23 +3,63 @@ import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './previ
 
 const contactFields = [
   defineField({
-    name: 'staffMember',
-    title: 'Staff member',
+    name: 'contactType',
+    title: 'Type contact',
+    type: 'string',
+    options: {
+      list: [
+        {title: 'Organigram positie', value: 'position'},
+        {title: 'Teamrol (dynamisch)', value: 'team-role'},
+        {title: 'Handmatig', value: 'manual'},
+      ],
+      layout: 'radio',
+    },
+    initialValue: 'position',
+    validation: (Rule) => Rule.required(),
+  }),
+  defineField({
+    name: 'organigramNode',
+    title: 'Positie',
     type: 'reference',
-    to: [{type: 'staffMember'}],
-    description: 'Link to a staff member document (takes precedence over inline fields)',
+    to: [{type: 'organigramNode'}],
+    description: 'Kies de organigram-positie (bijv. Secretaris, TVJO, API)',
+    hidden: ({parent}) => parent?.contactType !== 'position',
+  }),
+  defineField({
+    name: 'teamRole',
+    title: 'Teamrol',
+    type: 'string',
+    options: {
+      list: [
+        {title: 'Trainer', value: 'trainer'},
+        {title: 'Afgevaardigde', value: 'afgevaardigde'},
+      ],
+    },
+    description: 'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest',
+    hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
     name: 'role',
-    title: 'Role label',
+    title: 'Rol',
     type: 'string',
-    description: 'Display role when no staff member is linked (e.g. "Trainer")',
+    description: 'Weergavenaam (bijv. "Kantine")',
+    hidden: ({parent}) => parent?.contactType !== 'manual',
   }),
-  defineField({name: 'email', title: 'Email', type: 'string'}),
-  defineField({name: 'phone', title: 'Phone', type: 'string'}),
+  defineField({
+    name: 'email',
+    title: 'Email',
+    type: 'string',
+    hidden: ({parent}) => parent?.contactType !== 'manual',
+  }),
+  defineField({
+    name: 'phone',
+    title: 'Telefoon',
+    type: 'string',
+    hidden: ({parent}) => parent?.contactType !== 'manual',
+  }),
   defineField({
     name: 'department',
-    title: 'Department',
+    title: 'Afdeling',
     type: 'string',
     options: {
       list: [
@@ -28,6 +68,7 @@ const contactFields = [
         {title: 'Algemeen', value: 'algemeen'},
       ],
     },
+    hidden: ({parent}) => parent?.contactType !== 'manual',
   }),
 ]
 
@@ -133,12 +174,19 @@ export const responsibility = defineType({
       fields: contactFields,
       validation: (Rule) =>
         Rule.required().custom((contact: Record<string, unknown> | undefined) => {
-          if (!contact) return 'Primary contact is required'
-          const hasRef = Boolean(contact.staffMember)
-          const hasInline = Boolean(contact.email || contact.phone || contact.role)
-          return hasRef || hasInline
-            ? true
-            : 'Provide either a staff member reference or at least one of: email, phone, role'
+          if (!contact?.contactType) return 'Kies een type contact'
+          switch (contact.contactType) {
+            case 'position':
+              return contact.organigramNode ? true : 'Kies een organigram-positie'
+            case 'team-role':
+              return contact.teamRole ? true : 'Kies een teamrol'
+            case 'manual':
+              return contact.email || contact.phone || contact.role
+                ? true
+                : 'Vul minstens één van: rol, email, telefoon in'
+            default:
+              return 'Ongeldig type contact'
+          }
         }),
     }),
     defineField({
