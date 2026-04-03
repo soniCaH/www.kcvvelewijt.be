@@ -232,7 +232,7 @@ export const responsibility = defineType({
                         ? true
                         : 'Vul minstens één van: rol, email, telefoon in'
                     default:
-                      return true
+                      return 'Ongeldig type contact'
                   }
                 }),
             }),

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { hashMemberId } from "@/hooks/useOrganigramAnalytics";
 
 const DWELL_THRESHOLDS = [5, 15, 30];
 
@@ -62,7 +63,7 @@ export function useResponsibilityAnalytics() {
       hadContactInteractionRef.current = true;
       trackEvent("responsibility_organigram_link", {
         path_id: pathId,
-        member_id: memberId,
+        member_id: hashMemberId(memberId),
       });
     },
     [],

@@ -663,9 +663,13 @@ async function seed() {
 
   await preflight();
 
+  const tx = client.transaction();
   for (const doc of responsibilities) {
-    await client.createIfNotExists(doc);
-    await client.patch(doc._id).set(omit(doc, ["_id", "_type"])).commit();
+    tx.createIfNotExists(doc);
+    tx.patch(doc._id, (p) => p.set(omit(doc, ["_id", "_type"])));
+  }
+  await tx.commit();
+  for (const doc of responsibilities) {
     console.log(`  ✓ ${doc._id}`);
   }
 

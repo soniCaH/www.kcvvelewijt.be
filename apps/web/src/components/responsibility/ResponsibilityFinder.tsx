@@ -852,7 +852,6 @@ function ContactDisplay({
       );
 
     case "manual":
-    default:
       return (
         <div className="space-y-2">
           {contact.role && <div className={titleClass}>{contact.role}</div>}
@@ -906,6 +905,9 @@ function ContactDisplay({
           )}
         </div>
       );
+
+    default:
+      return null;
   }
 }
 
