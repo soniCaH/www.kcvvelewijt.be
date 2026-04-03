@@ -632,7 +632,7 @@ describe("ResponsibilityFinder", () => {
       expect(organigramButton).toBeInTheDocument();
     });
 
-    it("shows organigram link when onMemberSelect not provided", async () => {
+    it("hides organigram button when onMemberSelect not provided", async () => {
       const user = userEvent.setup();
       const sponsorPath = responsibilityPaths.find(
         (p) => p.id === "club-sponsoren",
@@ -654,12 +654,15 @@ describe("ResponsibilityFinder", () => {
       );
       await user.click(suggestions[0]);
 
-      // Should show link instead of button (findByRole waits for it to appear)
-      const organigramLink = await screen.findByRole("link", {
-        name: /bekijk in organigram/i,
+      // Wait for result card to appear
+      await waitFor(() => {
+        expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
       });
-      expect(organigramLink).toBeInTheDocument();
-      expect(organigramLink).toHaveAttribute("href", "/club/organigram");
+
+      // Without onMemberSelect, no organigram button should be rendered
+      expect(
+        screen.queryByRole("button", { name: /bekijk in organigram/i }),
+      ).not.toBeInTheDocument();
     });
   });
 
