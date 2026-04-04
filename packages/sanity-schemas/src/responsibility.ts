@@ -231,9 +231,9 @@ export const responsibility = defineType({
                     case 'team-role':
                       return contact.teamRole ? true : 'Kies een teamrol'
                     case 'manual':
-                      return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role)
+                      return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role) || hasContent(contact.department)
                         ? true
-                        : 'Vul minstens één van: rol, email, telefoon in'
+                        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
                     default:
                       return 'Ongeldig type contact'
                   }
