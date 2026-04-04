@@ -28,14 +28,14 @@ interface SanityDoc {
 
 interface BoardToPsdMapping {
   boardId: string;
-  psdId: number;
+  psdId: string;
   firstName?: string; // override firstName from board doc
   archived?: boolean;
 }
 
 interface ManualToPsdMapping {
   manualId: string;
-  psdId: number;
+  psdId: string;
 }
 
 interface BoardToManualMapping {
@@ -45,33 +45,33 @@ interface BoardToManualMapping {
 
 /** Board docs → new PSD docs (create PSD doc from board data) */
 const BOARD_TO_NEW_PSD: BoardToPsdMapping[] = [
-  { boardId: "staff-board-d2332ee2-19b0-4c9e-ac21-5c3bb35a60fc", psdId: 160 },                 // Rudy Bautmans
-  { boardId: "staff-board-67832a6b-9cbb-4776-8307-e01268df9f2b", psdId: 256, archived: true },  // Maarten Boon
-  { boardId: "staff-board-97bcb134-f673-475c-9507-c98cf33a5b10", psdId: 255, archived: true },  // Guido Dierickx
-  { boardId: "staff-board-82404e68-9c6f-466e-80d4-f1c0d67e3369", psdId: 122 },                 // Hans Junius
-  { boardId: "staff-board-9aeed3fc-2d50-4f52-85c4-ee8c72ad7b1d", psdId: 774, firstName: "Chris" }, // Chris Nobels
-  { boardId: "staff-board-400e96fc-df0f-474b-9b2a-dc7d9aac0536", psdId: 825 },                 // Werner Sanfrinnon
-  { boardId: "staff-board-24c53ac0-ba52-428a-a039-a146a5eff963", psdId: 821 },                  // Ilona Trouwkens
-  { boardId: "staff-board-acffe287-67c1-42fc-8aa6-eab82c268b4c", psdId: 823 },                  // Paul Vanhamme
+  { boardId: "staff-board-d2332ee2-19b0-4c9e-ac21-5c3bb35a60fc", psdId: "160" },                 // Rudy Bautmans
+  { boardId: "staff-board-67832a6b-9cbb-4776-8307-e01268df9f2b", psdId: "256", archived: true },  // Maarten Boon
+  { boardId: "staff-board-97bcb134-f673-475c-9507-c98cf33a5b10", psdId: "255", archived: true },  // Guido Dierickx
+  { boardId: "staff-board-82404e68-9c6f-466e-80d4-f1c0d67e3369", psdId: "122" },                 // Hans Junius
+  { boardId: "staff-board-9aeed3fc-2d50-4f52-85c4-ee8c72ad7b1d", psdId: "774", firstName: "Chris" }, // Chris Nobels
+  { boardId: "staff-board-400e96fc-df0f-474b-9b2a-dc7d9aac0536", psdId: "825" },                 // Werner Sanfrinnon
+  { boardId: "staff-board-24c53ac0-ba52-428a-a039-a146a5eff963", psdId: "821" },                  // Ilona Trouwkens
+  { boardId: "staff-board-acffe287-67c1-42fc-8aa6-eab82c268b4c", psdId: "823" },                  // Paul Vanhamme
 ];
 
 /** Board docs → existing PSD docs (relink only, possibly migrate photo) */
 const BOARD_TO_EXISTING_PSD: BoardToPsdMapping[] = [
-  { boardId: "staff-board-ef3a6397-8dd8-443c-b06a-1a3fb3e39fcc", psdId: 257 },  // Stefan De Wael
-  { boardId: "staff-board-dd7508e6-f7c6-4425-81d8-8f176265eacd", psdId: 248 },  // Stefan Robberechts
-  { boardId: "staff-board-19c6f821-55cb-405b-ad0e-7fd70839a455", psdId: 261 },  // Erik Talboom
+  { boardId: "staff-board-ef3a6397-8dd8-443c-b06a-1a3fb3e39fcc", psdId: "257" },  // Stefan De Wael
+  { boardId: "staff-board-dd7508e6-f7c6-4425-81d8-8f176265eacd", psdId: "248" },  // Stefan Robberechts
+  { boardId: "staff-board-19c6f821-55cb-405b-ad0e-7fd70839a455", psdId: "261" },  // Erik Talboom
 ];
 
 /** Manual docs → new PSD docs (upgrade manual to PSD) */
 const MANUAL_TO_PSD: ManualToPsdMapping[] = [
-  { manualId: "staffMember-manual-rudy-bautmans", psdId: 160 },
-  { manualId: "staffMember-manual-chris-nobels", psdId: 774 },
-  { manualId: "staffMember-manual-werner-sanfrinnon", psdId: 825 },
-  { manualId: "staffMember-manual-ilona-trouwkens", psdId: 821 },
-  { manualId: "staffMember-manual-paul-vanhamme", psdId: 823 },
-  { manualId: "staffMember-manual-sven-de-smedt", psdId: 10061 },
-  { manualId: "staffMember-manual-matthias-knevels", psdId: 8946 },
-  { manualId: "staffMember-manual-shauni-hellemans", psdId: 10228 },
+  { manualId: "staffMember-manual-rudy-bautmans", psdId: "160" },
+  { manualId: "staffMember-manual-chris-nobels", psdId: "774" },
+  { manualId: "staffMember-manual-werner-sanfrinnon", psdId: "825" },
+  { manualId: "staffMember-manual-ilona-trouwkens", psdId: "821" },
+  { manualId: "staffMember-manual-paul-vanhamme", psdId: "823" },
+  { manualId: "staffMember-manual-sven-de-smedt", psdId: "10061" },
+  { manualId: "staffMember-manual-matthias-knevels", psdId: "8946" },
+  { manualId: "staffMember-manual-shauni-hellemans", psdId: "10228" },
 ];
 
 /** Board doc → new manual doc */
@@ -180,8 +180,15 @@ async function deleteDoc(id: string): Promise<void> {
     console.log(`    [DRY] Would delete ${id}`);
     return;
   }
-  try { await client.delete(id); } catch { /* may not exist */ }
-  try { await client.delete(`drafts.${id}`); } catch { /* draft may not exist */ }
+  for (const docId of [id, `drafts.${id}`]) {
+    try {
+      await client.delete(docId);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("not found") || msg.includes("404")) continue;
+      console.warn(`    Warning deleting ${docId}: ${msg}`);
+    }
+  }
 }
 
 // ─── Migration steps ───────────────────────────────────────────────────
@@ -434,12 +441,12 @@ async function step6_deleteOldDocs() {
     await deleteDoc(id);
   }
 
-  // 6c. Delete ALL remaining unreferenced board docs
+  // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking)
   const remainingBoardDocs = await client.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
     `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
   );
 
-  console.log(`\n  Deleting ${remainingBoardDocs.length} remaining unreferenced board docs...`);
+  console.log(`\n  Deleting ${remainingBoardDocs.length} remaining board docs...`);
   for (const doc of remainingBoardDocs) {
     console.log(`    ${doc._id} (${doc.firstName} ${doc.lastName})`);
     await deleteDoc(doc._id);

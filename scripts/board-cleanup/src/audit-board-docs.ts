@@ -1,3 +1,6 @@
+import { writeFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { client } from "./sanity-client.js";
 
 interface BoardDoc {
@@ -11,7 +14,7 @@ interface BoardDoc {
 
 interface PsdDoc {
   _id: string;
-  psdId: number;
+  psdId: string;
   firstName: string | null;
   lastName: string | null;
   hasPhoto: boolean;
@@ -121,9 +124,6 @@ async function main() {
 
   // Output JSON for further processing
   const output = { boardDocs, psdDocs, manualDocs, teams };
-  const { writeFileSync } = await import("fs");
-  const { join, dirname } = await import("path");
-  const { fileURLToPath } = await import("url");
   const outPath = join(dirname(fileURLToPath(import.meta.url)), "..", "audit-result.json");
   writeFileSync(outPath, JSON.stringify(output, null, 2));
   console.log("\nFull data written to audit-result.json");
