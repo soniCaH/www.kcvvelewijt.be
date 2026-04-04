@@ -16,29 +16,39 @@ export const RESPONSIBILITY_PATHS_QUERY =
   category,
   icon,
   "primaryContact": primaryContact {
+    contactType,
+    teamRole,
+    "position": organigramNode->title,
+    "roleCode": organigramNode->roleCode,
+    "members": organigramNode->members[]->{
+      "id": _id,
+      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+      email, phone
+    },
+    "nodeId": organigramNode->_id,
     "role": role,
-    "email": select(defined(staffMember) => staffMember->email, email),
-    "phone": select(defined(staffMember) => staffMember->phone, phone),
-    "department": select(defined(staffMember) => staffMember->department, department),
-    "name": select(
-      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
-      null
-    ),
-    "memberId": staffMember->_id
+    "email": email,
+    "phone": phone,
+    "department": department
   },
   "steps": steps[] {
     description,
     link,
     "contact": select(defined(contact) => contact {
+      contactType,
+      teamRole,
+      "position": organigramNode->title,
+      "roleCode": organigramNode->roleCode,
+      "members": organigramNode->members[]->{
+        "id": _id,
+        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+        email, phone
+      },
+      "nodeId": organigramNode->_id,
       "role": role,
-      "email": select(defined(staffMember) => staffMember->email, email),
-      "phone": select(defined(staffMember) => staffMember->phone, phone),
-      "department": select(defined(staffMember) => staffMember->department, department),
-      "name": select(
-        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,
-        null
-      ),
-      "memberId": staffMember->_id
+      "email": email,
+      "phone": phone,
+      "department": department
     }, null)
   },
   "relatedPaths": coalesce(relatedPaths[]->slug.current, [])
@@ -49,14 +59,30 @@ type ContactRow = NonNullable<PathRow["primaryContact"]>;
 
 function toContact(c: ContactRow): Contact {
   return {
-    role: c.role ?? "",
-    ...(c.name ? { name: c.name } : {}),
+    // Default to "manual" when contactType is null (legacy docs or incomplete data)
+    contactType: (c.contactType ?? "manual") as Contact["contactType"],
+    ...(c.position ? { position: c.position } : {}),
+    ...(c.roleCode ? { roleCode: c.roleCode } : {}),
+    ...(c.members?.length
+      ? {
+          members: c.members
+            .filter((m): m is NonNullable<typeof m> => m != null)
+            .map((m) => ({
+              id: m.id ?? "",
+              name: (m.name ?? "").replace(/\s+/g, " ").trim(),
+              ...(m.email ? { email: m.email } : {}),
+              ...(m.phone ? { phone: m.phone } : {}),
+            })),
+        }
+      : {}),
+    ...(c.nodeId ? { nodeId: c.nodeId } : {}),
+    ...(c.teamRole ? { teamRole: c.teamRole as Contact["teamRole"] } : {}),
+    ...(c.role ? { role: c.role } : {}),
     ...(c.email ? { email: c.email } : {}),
     ...(c.phone ? { phone: c.phone } : {}),
     ...(c.department
       ? { department: c.department as Contact["department"] }
       : {}),
-    ...(c.memberId ? { memberId: c.memberId } : {}),
   };
 }
 
@@ -74,7 +100,7 @@ export function toResponsibilityPath(p: PathRow): ResponsibilityPath {
     ...(p.icon ? { icon: p.icon } : {}),
     primaryContact: p.primaryContact
       ? toContact(p.primaryContact)
-      : { role: "" },
+      : { contactType: "manual" },
     steps: (p.steps ?? []).map((s, i) => ({
       order: i + 1,
       description: s.description ?? "",

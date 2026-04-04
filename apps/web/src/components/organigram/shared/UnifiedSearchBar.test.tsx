@@ -50,9 +50,16 @@ describe("UnifiedSearchBar", () => {
       summary: "Gebruik het online inschrijvingsformulier",
       category: "administratief",
       primaryContact: {
-        role: "Jeugdsecretaris",
-        email: "jeugd@example.com",
-        memberId: "jeugdcoordinator",
+        contactType: "position",
+        position: "Jeugdsecretaris",
+        members: [
+          {
+            id: "jeugdcoordinator",
+            name: "Jeugdsecretaris",
+            email: "jeugd@example.com",
+          },
+        ],
+        nodeId: "organigramNode-jeugdsecretaris",
       },
       steps: [],
     },
@@ -64,9 +71,16 @@ describe("UnifiedSearchBar", () => {
       summary: "Neem contact op met de sponsoringverantwoordelijke",
       category: "commercieel",
       primaryContact: {
-        role: "Verantwoordelijke Sponsoring",
-        email: "sponsoring@example.com",
-        memberId: "treasurer",
+        contactType: "position",
+        position: "Sponsoring",
+        members: [
+          {
+            id: "treasurer",
+            name: "Verantwoordelijke Sponsoring",
+            email: "sponsoring@example.com",
+          },
+        ],
+        nodeId: "organigramNode-sponsoring",
       },
       steps: [],
     },

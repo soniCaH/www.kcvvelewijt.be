@@ -16,23 +16,34 @@ export type UserRole =
   | "andere";
 
 /**
- * Contact information for who to reach out to
+ * Contact information for who to reach out to.
+ * Discriminated by contactType: position (organigramNode), team-role (dynamic), manual (fallback).
  */
 export interface Contact {
-  /** Role/title of the contact person */
-  role: string;
-  /** Name if known (can be placeholder) */
-  name?: string;
-  /** Email address */
+  contactType: "position" | "team-role" | "manual";
+  /** position: organigramNode title */
+  position?: string;
+  /** position: organigramNode roleCode */
+  roleCode?: string;
+  /** position: resolved organigramNode members */
+  members?: Array<{
+    id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+  }>;
+  /** position: organigramNode _id for "Bekijk in organigram" link */
+  nodeId?: string;
+  /** team-role: dynamic role resolved at runtime by #1220 */
+  teamRole?: "trainer" | "afgevaardigde";
+  /** manual: display role label */
+  role?: string;
+  /** manual: email address */
   email?: string;
-  /** Phone number */
+  /** manual: phone number */
   phone?: string;
-  /** Link to org chart or profile */
-  orgLink?: string;
-  /** Department */
+  /** manual: department */
   department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
-  /** Member ID for deep linking to organigram (e.g., 'president', 'jeugdcoordinator') */
-  memberId?: string;
 }
 
 /**

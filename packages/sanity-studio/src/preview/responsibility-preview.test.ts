@@ -2,40 +2,52 @@ import {describe, expect, it} from 'vitest'
 import {prepareResponsibilityPreview} from './responsibility-preview'
 
 describe('responsibility preview', () => {
-  it('shows staffMember name when linked', () => {
+  it('shows organigramNode title for position type', () => {
     const result = prepareResponsibilityPreview({
       title: 'Blessure – herstel',
       active: true,
       category: 'medisch',
-      contactFirstName: 'Kevin',
-      contactLastName: 'Schutijser',
+      contactType: 'position',
+      contactNodeTitle: 'Secretaris',
       contactRole: undefined,
     })
-    expect(result.subtitle).toBe('medisch — Kevin Schutijser')
+    expect(result.subtitle).toBe('medisch — Secretaris')
   })
 
-  it('falls back to role label when no staffMember', () => {
+  it('shows "Teamrol (dynamisch)" for team-role type', () => {
+    const result = prepareResponsibilityPreview({
+      title: 'Sportieve vraag',
+      active: true,
+      category: 'sportief',
+      contactType: 'team-role',
+      contactNodeTitle: undefined,
+      contactRole: undefined,
+    })
+    expect(result.subtitle).toBe('sportief — Teamrol (dynamisch)')
+  })
+
+  it('shows role label for manual type', () => {
     const result = prepareResponsibilityPreview({
       title: 'Sponsoring',
       active: true,
       category: 'commercieel',
-      contactFirstName: undefined,
-      contactLastName: undefined,
+      contactType: 'manual',
+      contactNodeTitle: undefined,
       contactRole: 'Sponsorverantwoordelijke',
     })
     expect(result.subtitle).toBe('commercieel — Sponsorverantwoordelijke')
   })
 
-  it('shows only category when no contact info', () => {
+  it('shows "(geen contact)" when no contactType', () => {
     const result = prepareResponsibilityPreview({
       title: 'Test',
       active: true,
       category: 'algemeen',
-      contactFirstName: undefined,
-      contactLastName: undefined,
+      contactType: undefined,
+      contactNodeTitle: undefined,
       contactRole: undefined,
     })
-    expect(result.subtitle).toBe('algemeen')
+    expect(result.subtitle).toBe('algemeen — (geen contact)')
   })
 
   it('appends "— inactief" when inactive', () => {
@@ -43,10 +55,10 @@ describe('responsibility preview', () => {
       title: 'Old',
       active: false,
       category: 'sportief',
-      contactFirstName: 'A',
-      contactLastName: 'B',
+      contactType: 'position',
+      contactNodeTitle: 'TVJO',
       contactRole: undefined,
     })
-    expect(result.subtitle).toBe('sportief — A B — inactief')
+    expect(result.subtitle).toBe('sportief — TVJO — inactief')
   })
 })

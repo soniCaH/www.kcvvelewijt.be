@@ -15,6 +15,7 @@ import { FeedbackWidget } from "./FeedbackWidget";
 import { RelatedPaths } from "./RelatedPaths";
 import type {
   UserRole,
+  Contact,
   ResponsibilityPath,
   AutocompleteSuggestion,
 } from "@/types/responsibility";
@@ -94,6 +95,30 @@ const categoryColors = {
     accentLight: "rgba(22, 163, 74, 0.1)",
   },
 } as const;
+
+const DEPARTMENT_LABELS: Record<string, string> = {
+  hoofdbestuur: "Hoofdbestuur",
+  jeugdbestuur: "Jeugdbestuur",
+  algemeen: "Algemeen",
+};
+
+function getContactLabel(contact: Contact): string {
+  switch (contact.contactType) {
+    case "position":
+      return contact.position ?? "—";
+    case "team-role":
+      return contact.teamRole === "trainer" ? "Trainer" : "Afgevaardigde";
+    case "manual":
+      return (
+        contact.role ??
+        (contact.department
+          ? (DEPARTMENT_LABELS[contact.department] ?? contact.department)
+          : "—")
+      );
+    default:
+      return "—";
+  }
+}
 
 const ONBOARDING_HINT_SLUGS = [
   "inschrijving-nieuw-lid",
@@ -634,7 +659,9 @@ export function ResponsibilityFinder({
                               </span>
                               <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md flex items-center gap-1">
                                 <User size={12} />
-                                {suggestion.path.primaryContact.role}
+                                {getContactLabel(
+                                  suggestion.path.primaryContact,
+                                )}
                               </span>
                             </div>
                           </div>
@@ -715,10 +742,213 @@ export function ResponsibilityFinder({
 }
 
 /**
+ * Renders contact information based on contactType discriminator.
+ * Supports position (organigramNode), team-role (placeholder), and manual (inline) contacts.
+ */
+function ContactDisplay({
+  contact,
+  pathId,
+  analytics,
+  onMemberSelect,
+  compact,
+}: {
+  contact: Contact;
+  pathId: string;
+  analytics: ReturnType<typeof useResponsibilityAnalytics>;
+  onMemberSelect?: (memberId: string) => void;
+  compact?: boolean;
+}) {
+  const titleClass = compact
+    ? "font-semibold text-gray-700 mb-1"
+    : "font-bold text-kcvv-gray-blue";
+  const iconSize = compact ? "w-3 h-3" : "w-4 h-4";
+
+  switch (contact.contactType) {
+    case "position":
+      return (
+        <div className="space-y-2">
+          {contact.position && (
+            <div className={titleClass}>{contact.position}</div>
+          )}
+          {contact.members?.map((member) => (
+            <div key={`details-${member.id}`} className="space-y-1">
+              <div className="text-gray-600">{member.name}</div>
+              {member.email && (
+                <div>
+                  <a
+                    href={`mailto:${member.email}`}
+                    onClick={() =>
+                      analytics.trackContactClicked(pathId, "email")
+                    }
+                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                  >
+                    <svg
+                      className={iconSize}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {member.email}
+                  </a>
+                </div>
+              )}
+              {member.phone && (
+                <div>
+                  <a
+                    href={`tel:${member.phone}`}
+                    onClick={() =>
+                      analytics.trackContactClicked(pathId, "phone")
+                    }
+                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                  >
+                    <svg
+                      className={iconSize}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                    {member.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+          ))}
+          {onMemberSelect &&
+            contact.members
+              ?.filter((m) => m.id)
+              .map((member) => (
+                <div key={`org-${member.id}`}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      analytics.trackOrganigramLink(pathId, member.id);
+                      onMemberSelect(member.id);
+                    }}
+                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                  >
+                    <svg
+                      className={iconSize}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                    {(contact.members?.length ?? 0) > 1
+                      ? `${member.name} in organigram`
+                      : "Bekijk in organigram"}
+                  </button>
+                </div>
+              ))}
+        </div>
+      );
+
+    case "team-role":
+      return (
+        <div className="space-y-2">
+          <div className={titleClass}>
+            {contact.teamRole === "trainer"
+              ? "Trainer van je ploeg"
+              : "Afgevaardigde van je ploeg"}
+          </div>
+          <p className="text-sm text-gray-500 italic">
+            Selecteer je ploeg om de contactpersoon te zien
+          </p>
+        </div>
+      );
+
+    case "manual":
+      return (
+        <div className="space-y-2">
+          {(contact.role || contact.department) && (
+            <div className={titleClass}>
+              {contact.role ??
+                (contact.department
+                  ? (DEPARTMENT_LABELS[contact.department] ??
+                    contact.department)
+                  : undefined)}
+            </div>
+          )}
+          {contact.email && (
+            <div>
+              <a
+                href={`mailto:${contact.email}`}
+                onClick={() => analytics.trackContactClicked(pathId, "email")}
+                className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+              >
+                <svg
+                  className={iconSize}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {contact.email}
+              </a>
+            </div>
+          )}
+          {contact.phone && (
+            <div>
+              <a
+                href={`tel:${contact.phone}`}
+                onClick={() => analytics.trackContactClicked(pathId, "phone")}
+                className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+              >
+                <svg
+                  className={iconSize}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+                {contact.phone}
+              </a>
+            </div>
+          )}
+        </div>
+      );
+
+    default:
+      return null;
+  }
+}
+
+/**
  * Display a formatted card for a ResponsibilityPath, showing its header (icon, question, category, summary), the primary contact panel, and an ordered list of steps.
  *
  * @param path - The responsibility path to display
- * @param onMemberSelect - Optional callback invoked with a memberId when the "Bekijk in organigram" action is triggered
+ * @param onMemberSelect - Optional callback invoked with a staffMember ID when the "Bekijk in organigram" action is triggered
  * @returns A React element rendering the styled result card for the provided `path`
  */
 function ResultCard({
@@ -733,7 +963,6 @@ function ResultCard({
   const colors =
     categoryColors[path.category as keyof typeof categoryColors] ??
     categoryColors.algemeen;
-  const safeOrgLink = toSafeHref(path.primaryContact.orgLink);
 
   // Dwell-time tracking — destructure stable callbacks to avoid effect restart
   // when the analytics object reference changes on parent re-renders
@@ -792,127 +1021,12 @@ function ResultCard({
             </div>
             Contactpersoon
           </h4>
-          <div className="space-y-2">
-            <div className="font-bold text-kcvv-gray-blue">
-              {path.primaryContact.role}
-            </div>
-            {path.primaryContact.name && (
-              <div className="text-gray-600">{path.primaryContact.name}</div>
-            )}
-            {path.primaryContact.email && (
-              <div>
-                <a
-                  href={`mailto:${path.primaryContact.email}`}
-                  onClick={() =>
-                    analytics.trackContactClicked(path.id, "email")
-                  }
-                  className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                  {path.primaryContact.email}
-                </a>
-              </div>
-            )}
-            {path.primaryContact.phone && (
-              <div>
-                <a
-                  href={`tel:${path.primaryContact.phone}`}
-                  onClick={() =>
-                    analytics.trackContactClicked(path.id, "phone")
-                  }
-                  className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                  {path.primaryContact.phone}
-                </a>
-              </div>
-            )}
-            {(path.primaryContact.memberId || safeOrgLink) && (
-              <div>
-                {path.primaryContact.memberId && onMemberSelect ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      analytics.trackOrganigramLink(
-                        path.id,
-                        path.primaryContact.memberId!,
-                      );
-                      onMemberSelect(path.primaryContact.memberId!);
-                    }}
-                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                    Bekijk in organigram
-                  </button>
-                ) : safeOrgLink ? (
-                  <a
-                    href={safeOrgLink}
-                    onClick={() => {
-                      if (path.primaryContact.memberId) {
-                        analytics.trackOrganigramLink(
-                          path.id,
-                          path.primaryContact.memberId,
-                        );
-                        onMemberSelect?.(path.primaryContact.memberId);
-                      }
-                    }}
-                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                    Bekijk in organigram
-                  </a>
-                ) : null}
-              </div>
-            )}
-          </div>
+          <ContactDisplay
+            contact={path.primaryContact}
+            pathId={path.id}
+            analytics={analytics}
+            onMemberSelect={onMemberSelect}
+          />
         </div>
 
         {/* Steps */}
@@ -964,30 +1078,13 @@ function ResultCard({
                     )}
                     {step.contact && (
                       <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <div className="font-semibold text-gray-700 mb-1">
-                          {step.contact.role}
-                        </div>
-                        {step.contact.email && (
-                          <a
-                            href={`mailto:${step.contact.email}`}
-                            className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1"
-                          >
-                            <svg
-                              className="w-3 h-3"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                              />
-                            </svg>
-                            {step.contact.email}
-                          </a>
-                        )}
+                        <ContactDisplay
+                          contact={step.contact}
+                          pathId={path.id}
+                          analytics={analytics}
+                          onMemberSelect={onMemberSelect}
+                          compact
+                        />
                       </div>
                     )}
                   </div>

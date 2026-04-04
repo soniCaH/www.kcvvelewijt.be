@@ -149,9 +149,9 @@ export const SanityProjectionLive = Layer.effect(
               `*[_type == "staffMember" && defined(psdId) && psdId != "" && (
                 _id in *[_type == "organigramNode" && active == true].members[]._ref
                 ||
-                _id in *[_type == "responsibility" && active == true].primaryContact.staffMember._ref
+                _id in *[_type == "responsibility" && active == true].primaryContact.organigramNode->members[]._ref
                 ||
-                _id in *[_type == "responsibility" && active == true].steps[].contact.staffMember._ref
+                _id in *[_type == "responsibility" && active == true].steps[].contact.organigramNode->members[]._ref
               )].psdId`,
             );
             return rows.filter(

@@ -52,7 +52,10 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },
-  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
+  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.
+  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).
+  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).
+  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
 }`);
 
 export const STAFF_MEMBERS_PSDID_QUERY =
@@ -90,14 +93,16 @@ export function toKeyContactVMs(
   }>,
 ): KeyContactVM[] {
   return rows.flatMap((row) =>
-    row.members.map((m) => {
-      const trimmed = m.name.trim();
-      return {
-        role: row.title ?? "",
-        name: trimmed === "" ? (row.title ?? "") : trimmed,
-        email: m.email,
-      };
-    }),
+    row.members
+      .filter((m): m is NonNullable<typeof m> => m != null)
+      .map((m) => {
+        const trimmed = m.name.trim();
+        return {
+          role: row.title ?? "",
+          name: trimmed === "" ? (row.title ?? "") : trimmed,
+          email: m.email,
+        };
+      }),
   );
 }
 
@@ -140,18 +145,20 @@ export function toOrgChartNode(
     description: node.description ?? undefined,
     department: (node.department ?? undefined) as OrgChartNode["department"],
     parentId: node.parentId ?? "club",
-    members: (node.members ?? []).map((m) => {
-      const trimmed = (m.name ?? "").trim();
-      const psdId = m.psdId?.trim();
-      return {
-        id: m.id,
-        name: trimmed === "" ? undefined : trimmed,
-        imageUrl: m.imageUrl ?? undefined,
-        email: m.email ?? undefined,
-        phone: m.phone ?? undefined,
-        href: psdId ? `/staf/${psdId}` : undefined,
-      };
-    }),
+    members: (node.members ?? [])
+      .filter((m): m is NonNullable<typeof m> => m != null)
+      .map((m) => {
+        const trimmed = (m.name ?? "").trim();
+        const psdId = m.psdId?.trim();
+        return {
+          id: m.id,
+          name: trimmed === "" ? undefined : trimmed,
+          imageUrl: m.imageUrl ?? undefined,
+          email: m.email ?? undefined,
+          phone: m.phone ?? undefined,
+          href: psdId ? `/staf/${psdId}` : undefined,
+        };
+      }),
   };
 }
 

@@ -549,12 +549,12 @@ describe("ResponsibilityFinder", () => {
       const onMemberSelect = vi.fn();
       const user = userEvent.setup();
 
-      // Find a path with memberId from the actual data
+      // Find a path with members from the actual data (position contacts have members)
       const pathWithMemberId = responsibilityPaths.find(
-        (path) => path.primaryContact.memberId,
+        (path) => path.primaryContact.members?.[0]?.id,
       );
       expect(pathWithMemberId).toBeDefined();
-      expect(pathWithMemberId!.primaryContact.memberId).toBeDefined();
+      expect(pathWithMemberId!.primaryContact.members?.[0]?.id).toBeDefined();
       mockSearchReturning([pathWithMemberId!]);
 
       render(
@@ -592,9 +592,9 @@ describe("ResponsibilityFinder", () => {
       });
       await user.click(organigramButton);
 
-      // Verify callback was called with the actual memberId from data
+      // Verify callback was called with the actual member ID from data
       expect(onMemberSelect).toHaveBeenCalledWith(
-        pathWithMemberId!.primaryContact.memberId,
+        pathWithMemberId!.primaryContact.members![0].id,
       );
     });
 
@@ -632,7 +632,7 @@ describe("ResponsibilityFinder", () => {
       expect(organigramButton).toBeInTheDocument();
     });
 
-    it("shows organigram link when onMemberSelect not provided", async () => {
+    it("hides organigram button when onMemberSelect not provided", async () => {
       const user = userEvent.setup();
       const sponsorPath = responsibilityPaths.find(
         (p) => p.id === "club-sponsoren",
@@ -654,12 +654,15 @@ describe("ResponsibilityFinder", () => {
       );
       await user.click(suggestions[0]);
 
-      // Should show link instead of button (findByRole waits for it to appear)
-      const organigramLink = await screen.findByRole("link", {
-        name: /bekijk in organigram/i,
+      // Wait for result card to appear
+      await waitFor(() => {
+        expect(screen.getByText(/Contactpersoon/i)).toBeInTheDocument();
       });
-      expect(organigramLink).toBeInTheDocument();
-      expect(organigramLink).toHaveAttribute("href", "/club/organigram");
+
+      // Without onMemberSelect, no organigram button should be rendered
+      expect(
+        screen.queryByRole("button", { name: /bekijk in organigram/i }),
+      ).not.toBeInTheDocument();
     });
   });
 

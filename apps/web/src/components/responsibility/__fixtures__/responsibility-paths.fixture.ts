@@ -18,11 +18,16 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "commercieel",
     icon: "handshake",
     primaryContact: {
-      role: "Verantwoordelijke Sponsoring",
-      email: "sponsoring@kcvvelewijt.be",
-      department: "hoofdbestuur",
-      orgLink: "/club/organigram",
-      memberId: "sponsoring-manager",
+      contactType: "position",
+      position: "Sponsoring",
+      members: [
+        {
+          id: "sponsoring-manager",
+          name: "Verantwoordelijke Sponsoring",
+          email: "sponsoring@kcvvelewijt.be",
+        },
+      ],
+      nodeId: "organigramNode-sponsoring",
     },
     steps: [
       {
@@ -35,6 +40,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         description:
           "Contacteer de verantwoordelijke sponsoring voor een gesprek",
         contact: {
+          contactType: "manual",
           role: "Verantwoordelijke Sponsoring",
           email: "sponsoring@kcvvelewijt.be",
         },
@@ -62,7 +68,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       "Breng je trainer op de hoogte en lever een medisch attest af indien vereist.",
     category: "medisch",
     icon: "zap",
-    primaryContact: { role: "Trainer", department: "jeugdbestuur" },
+    primaryContact: {
+      contactType: "manual",
+      role: "Trainer",
+      department: "jeugdbestuur",
+    },
     steps: [
       {
         order: 1,
@@ -97,11 +107,16 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "administratief",
     icon: "file-text",
     primaryContact: {
-      role: "Jeugdsecretaris",
-      email: "jeugd@kcvvelewijt.be",
-      department: "jeugdbestuur",
-      orgLink: "/club/organigram",
-      memberId: "youth-coordinator",
+      contactType: "position",
+      position: "Jeugdsecretaris",
+      members: [
+        {
+          id: "youth-coordinator",
+          name: "Jeugdsecretaris",
+          email: "jeugd@kcvvelewijt.be",
+        },
+      ],
+      nodeId: "organigramNode-jeugdsecretaris",
     },
     steps: [
       {
@@ -122,7 +137,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       {
         order: 5,
         description: "Je ontvangt een bevestiging per e-mail",
-        contact: { role: "Jeugdsecretaris", email: "jeugd@kcvvelewijt.be" },
+        contact: {
+          contactType: "manual",
+          role: "Jeugdsecretaris",
+          email: "jeugd@kcvvelewijt.be",
+        },
       },
     ],
   },
@@ -143,10 +162,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "administratief",
     icon: "activity",
     primaryContact: {
+      contactType: "manual",
       role: "Evenementencoördinator",
       email: "evenementen@kcvvelewijt.be",
       department: "hoofdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -163,6 +182,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         order: 4,
         description: "Je ontvangt een bevestiging met praktische info",
         contact: {
+          contactType: "manual",
           role: "Evenementencoördinator",
           email: "evenementen@kcvvelewijt.be",
         },
@@ -186,10 +206,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "administratief",
     icon: "clipboard-list",
     primaryContact: {
+      contactType: "manual",
       role: "Secretaris",
       email: "secretaris@kcvvelewijt.be",
       department: "hoofdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -201,7 +221,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         order: 3,
         description:
           "Bezorg het attest aan de secretaris voor het clubstempel en de handtekening",
-        contact: { role: "Secretaris", email: "secretaris@kcvvelewijt.be" },
+        contact: {
+          contactType: "manual",
+          role: "Secretaris",
+          email: "secretaris@kcvvelewijt.be",
+        },
       },
     ],
   },
@@ -223,10 +247,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "gedrag",
     icon: "shield",
     primaryContact: {
+      contactType: "manual",
       role: "Voorzitter",
       email: "voorzitter@kcvvelewijt.be",
       department: "hoofdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -237,7 +261,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       {
         order: 2,
         description: "Neem vertrouwelijk contact op met de voorzitter",
-        contact: { role: "Voorzitter", email: "voorzitter@kcvvelewijt.be" },
+        contact: {
+          contactType: "manual",
+          role: "Voorzitter",
+          email: "voorzitter@kcvvelewijt.be",
+        },
       },
       {
         order: 3,
@@ -268,10 +296,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "medisch",
     icon: "heart",
     primaryContact: {
+      contactType: "manual",
       role: "Verzekeringverantwoordelijke",
       email: "verzekering@kcvvelewijt.be",
       department: "algemeen",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -288,6 +316,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         order: 3,
         description: "Contacteer de verzekeringverantwoordelijke binnen 48 uur",
         contact: {
+          contactType: "manual",
           role: "Verzekeringverantwoordelijke",
           email: "verzekering@kcvvelewijt.be",
         },
@@ -316,10 +345,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "algemeen",
     icon: "smartphone",
     primaryContact: {
+      contactType: "manual",
       role: "Technisch Coördinator",
       email: "technisch@kcvvelewijt.be",
       department: "hoofdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       { order: 1, description: "Vraag je logingegevens bij je trainer" },
@@ -333,6 +362,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         order: 4,
         description: "Bij problemen, contacteer de technisch coördinator",
         contact: {
+          contactType: "manual",
           role: "Technisch Coördinator",
           email: "technisch@kcvvelewijt.be",
         },
@@ -354,10 +384,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "sportief",
     icon: "user",
     primaryContact: {
+      contactType: "manual",
       role: "Jeugdcoördinator",
       email: "jeugd@kcvvelewijt.be",
       department: "jeugdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -374,7 +404,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       {
         order: 3,
         description: "Of contacteer de algemene jeugdcoördinator",
-        contact: { role: "Jeugdcoördinator", email: "jeugd@kcvvelewijt.be" },
+        contact: {
+          contactType: "manual",
+          role: "Jeugdcoördinator",
+          email: "jeugd@kcvvelewijt.be",
+        },
       },
     ],
   },
@@ -395,10 +429,10 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     category: "algemeen",
     icon: "graduation-cap",
     primaryContact: {
+      contactType: "manual",
       role: "Technisch Coördinator",
       email: "technisch@kcvvelewijt.be",
       department: "hoofdbestuur",
-      orgLink: "/club/organigram",
     },
     steps: [
       {
@@ -406,6 +440,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
         description:
           "Contacteer de technisch coördinator (senioren) of jeugdcoördinator (jeugd)",
         contact: {
+          contactType: "manual",
           role: "Technisch Coördinator",
           email: "technisch@kcvvelewijt.be",
         },
@@ -438,7 +473,11 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       "Bekijk de wedstrijdkalender op de website of gebruik ProSoccerData.",
     category: "sportief",
     icon: "calendar",
-    primaryContact: { role: "Website", email: "communicatie@kcvvelewijt.be" },
+    primaryContact: {
+      contactType: "manual",
+      role: "Website",
+      email: "communicatie@kcvvelewijt.be",
+    },
     steps: [
       {
         order: 1,

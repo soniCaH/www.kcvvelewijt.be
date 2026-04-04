@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { hashMemberId } from "@/hooks/useOrganigramAnalytics";
 
 vi.mock("@/lib/analytics/track-event", () => ({
   trackEvent: vi.fn(),
@@ -119,7 +120,7 @@ describe("useResponsibilityAnalytics", () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         "responsibility_organigram_link",
-        { path_id: "herstel-blessure", member_id: "kinesist" },
+        { path_id: "herstel-blessure", member_id: hashMemberId("kinesist") },
       );
     });
   });

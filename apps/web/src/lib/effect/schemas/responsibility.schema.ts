@@ -68,47 +68,44 @@ export type Department = S.Schema.Type<typeof DepartmentSchema>;
  * }
  * ```
  */
+/**
+ * Contact member schema — resolved organigramNode member
+ */
+export class ContactMemberSchema extends S.Class<ContactMemberSchema>(
+  "ContactMemberSchema",
+)({
+  id: S.String,
+  name: S.String,
+  email: S.optional(S.String),
+  phone: S.optional(S.String),
+}) {}
+
 export class ContactSchema extends S.Class<ContactSchema>("ContactSchema")({
   /**
-   * Role or title of the contact person (required)
-   * @example "Verzekeringverantwoordelijke", "Trainer", "Jeugdsecretaris"
+   * Contact type discriminator
    */
-  role: S.String,
+  contactType: S.Literal("position", "team-role", "manual"),
 
-  /**
-   * Person's name (optional)
-   * @example "Jan Janssens"
-   */
-  name: S.optional(S.String),
+  /** position: organigramNode title */
+  position: S.optional(S.String),
+  /** position: organigramNode roleCode */
+  roleCode: S.optional(S.String),
+  /** position: resolved organigramNode members */
+  members: S.optional(S.Array(ContactMemberSchema)),
+  /** position: organigramNode _id for organigram deep-linking */
+  nodeId: S.optional(S.String),
 
-  /**
-   * Email address (optional)
-   * @example "contact@kcvvelewijt.be"
-   */
+  /** team-role: dynamic role */
+  teamRole: S.optional(S.Literal("trainer", "afgevaardigde")),
+
+  /** manual: display role label */
+  role: S.optional(S.String),
+  /** manual: email address */
   email: S.optional(S.String),
-
-  /**
-   * Phone number (optional)
-   * @example "+32 123 45 67 89"
-   */
+  /** manual: phone number */
   phone: S.optional(S.String),
-
-  /**
-   * Department the contact belongs to (optional)
-   */
+  /** manual: department */
   department: S.optional(DepartmentSchema),
-
-  /**
-   * Link to organigram or profile (optional)
-   * @example "/club/organigram"
-   */
-  orgLink: S.optional(S.String),
-
-  /**
-   * Member ID linking to organigram member (optional)
-   * @example "youth-coordinator"
-   */
-  memberId: S.optional(S.String),
 }) {}
 
 /**

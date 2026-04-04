@@ -51,6 +51,7 @@ const mockPaths: ResponsibilityPath[] = [
     summary: "Contacteer de medische verantwoordelijke.",
     steps: [{ order: 1, description: "Meld de blessure aan je trainer." }],
     primaryContact: {
+      contactType: "manual",
       role: "Medische verantwoordelijke",
       email: "medisch@kcvvelewijt.be",
       department: "hoofdbestuur",
@@ -70,6 +71,7 @@ const mockPaths: ResponsibilityPath[] = [
       },
     ],
     primaryContact: {
+      contactType: "manual",
       role: "Jeugdcoördinator",
       email: "jeugd@kcvvelewijt.be",
       department: "jeugdbestuur",
@@ -89,6 +91,7 @@ const mockPaths: ResponsibilityPath[] = [
       },
     ],
     primaryContact: {
+      contactType: "manual",
       role: "Technisch coördinator",
       email: "technisch@kcvvelewijt.be",
       department: "hoofdbestuur",
