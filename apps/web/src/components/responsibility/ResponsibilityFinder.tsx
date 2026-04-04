@@ -103,7 +103,7 @@ function getContactLabel(contact: Contact): string {
     case "team-role":
       return contact.teamRole === "trainer" ? "Trainer" : "Afgevaardigde";
     case "manual":
-      return contact.role ?? "—";
+      return contact.role ?? contact.department ?? "—";
     default:
       return "—";
   }
@@ -744,7 +744,7 @@ function ContactDisplay({
   contact: Contact;
   pathId: string;
   analytics: ReturnType<typeof useResponsibilityAnalytics>;
-  onMemberSelect?: (nodeId: string) => void;
+  onMemberSelect?: (memberId: string) => void;
   compact?: boolean;
 }) {
   const titleClass = compact
@@ -868,7 +868,11 @@ function ContactDisplay({
     case "manual":
       return (
         <div className="space-y-2">
-          {contact.role && <div className={titleClass}>{contact.role}</div>}
+          {(contact.role || contact.department) && (
+            <div className={titleClass}>
+              {contact.role ?? contact.department}
+            </div>
+          )}
           {contact.email && (
             <div>
               <a
