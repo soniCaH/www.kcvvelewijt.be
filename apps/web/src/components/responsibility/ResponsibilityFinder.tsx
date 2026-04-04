@@ -96,6 +96,12 @@ const categoryColors = {
   },
 } as const;
 
+const DEPARTMENT_LABELS: Record<string, string> = {
+  hoofdbestuur: "Hoofdbestuur",
+  jeugdbestuur: "Jeugdbestuur",
+  algemeen: "Algemeen",
+};
+
 function getContactLabel(contact: Contact): string {
   switch (contact.contactType) {
     case "position":
@@ -103,7 +109,12 @@ function getContactLabel(contact: Contact): string {
     case "team-role":
       return contact.teamRole === "trainer" ? "Trainer" : "Afgevaardigde";
     case "manual":
-      return contact.role ?? contact.department ?? "—";
+      return (
+        contact.role ??
+        (contact.department
+          ? (DEPARTMENT_LABELS[contact.department] ?? contact.department)
+          : "—")
+      );
     default:
       return "—";
   }
@@ -760,7 +771,7 @@ function ContactDisplay({
             <div className={titleClass}>{contact.position}</div>
           )}
           {contact.members?.map((member) => (
-            <div key={member.id} className="space-y-1">
+            <div key={`details-${member.id}`} className="space-y-1">
               <div className="text-gray-600">{member.name}</div>
               {member.email && (
                 <div>
@@ -820,7 +831,7 @@ function ContactDisplay({
             contact.members
               ?.filter((m) => m.id)
               .map((member) => (
-                <div key={member.id}>
+                <div key={`org-${member.id}`}>
                   <button
                     type="button"
                     onClick={() => {
@@ -870,7 +881,11 @@ function ContactDisplay({
         <div className="space-y-2">
           {(contact.role || contact.department) && (
             <div className={titleClass}>
-              {contact.role ?? contact.department}
+              {contact.role ??
+                (contact.department
+                  ? (DEPARTMENT_LABELS[contact.department] ??
+                    contact.department)
+                  : undefined)}
             </div>
           )}
           {contact.email && (
