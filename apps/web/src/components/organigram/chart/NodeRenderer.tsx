@@ -115,6 +115,7 @@ function renderSingleNode(
           <img
             src="${imageUrl}"
             alt="${displayName}"
+            crossorigin="anonymous"
             style="
               width: 64px;
               height: 64px;
@@ -282,6 +283,7 @@ function renderSharedNode(
         ? `<img
             src="${m.imageUrl}"
             alt="${m.name ?? ""}"
+            crossorigin="anonymous"
             style="
               width: 28px;
               height: 28px;
@@ -426,6 +428,7 @@ function renderCompactSingleNode(
           <img
             src="${imageUrl}"
             alt="${displayName}"
+            crossorigin="anonymous"
             style="
               width: 48px;
               height: 48px;

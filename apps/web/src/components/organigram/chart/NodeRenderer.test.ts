@@ -53,6 +53,41 @@ const threeSharedNode: NodeData = {
   ],
 };
 
+// --- CORS: crossorigin="anonymous" on all img tags (#1222) ---
+
+function findImgTags(html: string): string[] {
+  return html.match(/<img\s[^>]*>/g) ?? [];
+}
+
+describe("img crossorigin attribute for canvas export (#1222)", () => {
+  it("single member node img has crossorigin=anonymous", () => {
+    const html = renderNode(singleMemberNode, false);
+    const imgs = findImgTags(html);
+    expect(imgs.length).toBeGreaterThan(0);
+    for (const img of imgs) {
+      expect(img).toContain('crossorigin="anonymous"');
+    }
+  });
+
+  it("shared node imgs have crossorigin=anonymous", () => {
+    const html = renderNode(sharedNode, false);
+    const imgs = findImgTags(html);
+    expect(imgs.length).toBeGreaterThan(0);
+    for (const img of imgs) {
+      expect(img).toContain('crossorigin="anonymous"');
+    }
+  });
+
+  it("compact single member node img has crossorigin=anonymous", () => {
+    const html = renderCompactNode(singleMemberNode, false);
+    const imgs = findImgTags(html);
+    expect(imgs.length).toBeGreaterThan(0);
+    for (const img of imgs) {
+      expect(img).toContain('crossorigin="anonymous"');
+    }
+  });
+});
+
 // --- renderNode ---
 
 describe("renderNode", () => {
