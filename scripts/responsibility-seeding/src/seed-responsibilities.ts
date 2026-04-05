@@ -10,7 +10,7 @@ interface SanityRef {
 
 type SeedContact =
   | { contactType: "position"; organigramNode: SanityRef }
-  | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde" }
+  | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde"; teamRoleFallback?: "trainer" | "afgevaardigde" }
   | { contactType: "manual"; role?: string; email?: string; phone?: string; department?: string };
 
 function ref(id: string): SanityRef {
@@ -35,10 +35,11 @@ function manualContact(fields: { role?: string; email?: string; phone?: string; 
   };
 }
 
-function teamRoleContact(teamRole: "trainer" | "afgevaardigde"): SeedContact {
+function teamRoleContact(teamRole: "trainer" | "afgevaardigde", fallback?: "trainer" | "afgevaardigde"): SeedContact {
   return {
     contactType: "team-role",
     teamRole,
+    ...(fallback ? { teamRoleFallback: fallback } : {}),
   };
 }
 
@@ -240,9 +241,9 @@ const responsibilities: ResponsibilityDoc[] = [
     summary: "Meld het onmiddellijk aan de trainer of afgevaardigde. Zij helpen je met de verdere stappen.",
     category: "medisch",
     icon: "alert-triangle",
-    primaryContact: teamRoleContact("trainer"),
+    primaryContact: teamRoleContact("trainer", "afgevaardigde"),
     steps: [
-      step("Meld het onmiddellijk aan de trainer of afgevaardigde van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("Meld het onmiddellijk aan de trainer of afgevaardigde van je ploeg", { contact: teamRoleContact("trainer", "afgevaardigde") }),
       step("Neem contact op met de Gerechtelijk Correspondent voor de verzekering", { contact: positionContact("organigramNode-gerechtelijk-correspondent") }),
     ],
   },

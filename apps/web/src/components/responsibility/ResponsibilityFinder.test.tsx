@@ -1123,9 +1123,15 @@ describe("ResponsibilityFinder", () => {
   });
 
   describe("Team Selection (team-role contacts)", () => {
-    const teamRolePath = responsibilityPaths.find(
-      (p) => p.id === "vraag-over-training",
-    )!;
+    let teamRolePath: (typeof responsibilityPaths)[number];
+
+    beforeEach(() => {
+      const found = responsibilityPaths.find(
+        (p) => p.id === "vraag-over-training",
+      );
+      expect(found).toBeDefined();
+      teamRolePath = found!;
+    });
 
     it("shows team selector when result has team-role contact", async () => {
       mockSearchReturning([teamRolePath]);

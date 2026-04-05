@@ -36,6 +36,8 @@ export interface Contact {
   nodeId?: string;
   /** team-role: dynamic role resolved at runtime by #1220 */
   teamRole?: "trainer" | "afgevaardigde";
+  /** team-role: optional fallback when primary teamRole is unavailable */
+  teamRoleFallback?: "trainer" | "afgevaardigde";
   /** manual: display role label */
   role?: string;
   /** manual: email address */

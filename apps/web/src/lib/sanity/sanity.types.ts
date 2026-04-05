@@ -1401,6 +1401,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
   primaryContact: {
     contactType: string | null;
     teamRole: string | null;
+    teamRoleFallback: string | null;
     position: string | null;
     roleCode: string | null;
     members: Array<{
@@ -1421,6 +1422,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
     contact: {
       contactType: string | null;
       teamRole: string | null;
+      teamRoleFallback: string | null;
       position: string | null;
       roleCode: string | null;
       members: Array<{

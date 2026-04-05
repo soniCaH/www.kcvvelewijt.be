@@ -888,10 +888,14 @@ function ContactDisplay({
 
     case "team-role": {
       if (selectedTeam && contact.teamRole) {
-        const resolved = resolveTeamRoleContact(
-          selectedTeam.staff,
-          contact.teamRole,
-        );
+        const resolved =
+          resolveTeamRoleContact(selectedTeam.staff, contact.teamRole) ??
+          (contact.teamRoleFallback
+            ? resolveTeamRoleContact(
+                selectedTeam.staff,
+                contact.teamRoleFallback,
+              )
+            : null);
         if (resolved) {
           return (
             <ContactDisplay

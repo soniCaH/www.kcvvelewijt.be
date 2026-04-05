@@ -225,13 +225,13 @@ function toYouthTeamForContactVM(
     staff: (row.staff ?? [])
       .filter(
         (s): s is typeof s & { member: NonNullable<typeof s.member> } =>
-          s.member !== null,
+          s.member !== null && !!s.role,
       )
       .map((s) => ({
         id: s.member._id,
         firstName: s.member.firstName ?? "",
         lastName: s.member.lastName ?? "",
-        role: s.role ?? "",
+        role: s.role!,
         ...(s.member.email ? { email: s.member.email } : {}),
         ...(s.member.phone ? { phone: s.member.phone } : {}),
       })),

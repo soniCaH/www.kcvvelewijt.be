@@ -42,6 +42,19 @@ const contactFields = [
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
+    name: 'teamRoleFallback',
+    title: 'Fallback teamrol',
+    type: 'string',
+    options: {
+      list: [
+        {title: 'Trainer', value: 'trainer'},
+        {title: 'Afgevaardigde', value: 'afgevaardigde'},
+      ],
+    },
+    description: 'Optioneel: als de primaire teamrol niet beschikbaar is, wordt deze rol geprobeerd',
+    hidden: ({parent}) => parent?.contactType !== 'team-role',
+  }),
+  defineField({
     name: 'role',
     title: 'Rol',
     type: 'string',
