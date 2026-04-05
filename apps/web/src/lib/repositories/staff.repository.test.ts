@@ -126,6 +126,24 @@ describe("toOrgChartNode", () => {
     expect(member.href).toBeUndefined();
   });
 
+  it("numeric psdId is coerced to string for href", () => {
+    const result = toOrgChartNode(
+      makeNodeRow({
+        members: [
+          {
+            id: "staff-1",
+            name: "Jan Janssens",
+            imageUrl: null,
+            email: null,
+            phone: null,
+            psdId: 42 as unknown as string,
+          },
+        ],
+      }),
+    );
+    expect(result.members[0].href).toBe("/staf/42");
+  });
+
   it("whitespace-only name collapses to undefined and psdId is trimmed in href", () => {
     const result = toOrgChartNode(
       makeNodeRow({
@@ -553,6 +571,21 @@ describe("StaffRepository", () => {
       );
 
       expect(result).toEqual([{ psdId: "psd-1" }, { psdId: "psd-2" }]);
+    });
+
+    it("coerces numeric psdId to string", async () => {
+      const rows = [{ _id: "s1", psdId: 123 as unknown as string }];
+      mockFetch.mockResolvedValueOnce(rows);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findAllForStaticParams();
+        }),
+      );
+
+      expect(result).toEqual([{ psdId: "123" }]);
+      expect(typeof result[0].psdId).toBe("string");
     });
 
     it("filters out rows with null psdId", async () => {
