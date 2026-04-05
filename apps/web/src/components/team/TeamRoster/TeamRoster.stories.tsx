@@ -158,7 +158,7 @@ const MOCK_STAFF = [
     firstName: "Marc",
     lastName: "Van den Berg",
     role: "Hoofdtrainer",
-    roleCode: "T1",
+    functionTitle: "T1",
     imageUrl: REAL_PLAYER_IMAGES.chiel,
   },
   {
@@ -166,7 +166,7 @@ const MOCK_STAFF = [
     firstName: "Dirk",
     lastName: "Hermans",
     role: "Assistent-trainer",
-    roleCode: "T2",
+    functionTitle: "T2",
     imageUrl: REAL_PLAYER_IMAGES.jarne,
   },
   {
@@ -174,7 +174,7 @@ const MOCK_STAFF = [
     firstName: "Peter",
     lastName: "Jacobs",
     role: "Keeperstrainer",
-    roleCode: "TK",
+    functionTitle: "TK",
     // No image - tests placeholder
   },
   {
@@ -182,14 +182,14 @@ const MOCK_STAFF = [
     firstName: "Johan",
     lastName: "De Vries",
     role: "TV Jeugdopleiding",
-    roleCode: "TVJO",
+    functionTitle: "TVJO",
   },
   {
     id: "staff-5",
     firstName: "Stefan",
     lastName: "Peeters",
     role: "Ploegdelegé",
-    roleCode: "PDG",
+    functionTitle: "PDG",
     imageUrl: REAL_PLAYER_IMAGES.yoran,
   },
 ];

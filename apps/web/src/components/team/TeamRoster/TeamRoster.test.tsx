@@ -380,7 +380,7 @@ describe("TeamRoster", () => {
           firstName: "John",
           lastName: "Doe",
           role: "Trainer",
-          roleCode: "T1",
+          functionTitle: "T1",
           imageUrl: "/images/staff/john-doe.jpg",
         },
       ];
@@ -399,7 +399,7 @@ describe("TeamRoster", () => {
           firstName: "S",
           lastName: "M",
           role: "Role",
-          roleCode: "T1",
+          functionTitle: "T1",
           imageUrl: "/img.jpg",
         },
       ];
@@ -423,7 +423,7 @@ describe("TeamRoster", () => {
       expect(image).toHaveAttribute("sizes", "180px");
     });
 
-    it("should render staff member without roleCode", () => {
+    it("should render staff member without functionTitle", () => {
       const staffWithoutCode: StaffMember[] = [
         {
           id: "staff-no-code",

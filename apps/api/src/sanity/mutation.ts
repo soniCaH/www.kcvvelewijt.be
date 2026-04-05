@@ -31,7 +31,7 @@ export interface SanityStaffDoc {
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null; // "YYYY-MM-DD"
-  roleCode: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
+  functionTitle: string | null; // from PSD functionTitle; null clears the stored value
 }
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -322,39 +322,97 @@ export const SanityMutationLive = Layer.effect(
       archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
       upsertTeam: (doc) =>
-        upsert("team", doc.psdId, {
-          psdId: doc.psdId,
-          name: doc.name,
-          slug: { _type: "slug", current: doc.slug },
-          age: doc.age,
-          gender: doc.gender,
-          ...(doc.footbelId != null && { footbelId: doc.footbelId }),
-          players: doc.playerPsdIds.map((id) => ({
-            _type: "reference",
-            _ref: `player-psd-${id}`,
-            _key: id,
-          })),
-          staff: doc.staffPsdIds.map((id) => ({
-            _type: "reference",
-            _ref: `staffMember-psd-${id}`,
-            _key: id,
-          })),
-          archived: false,
-        }),
+        Effect.gen(function* () {
+          const id = docId("team", doc.psdId);
 
-      upsertStaff: (doc) => {
-        const fields: Record<string, unknown> = {
+          // Read existing doc to preserve editorial `role` values and capture _rev for conflict detection
+          const existing = yield* Effect.tryPromise({
+            try: () => client.getDocument(id),
+            catch: (cause) =>
+              new SanityMutationError(
+                `Failed to read existing team ${doc.psdId}`,
+                cause,
+              ),
+          });
+
+          const existingStaff =
+            (existing?.staff as
+              | Array<{
+                  _key?: string;
+                  member?: { _ref?: string };
+                  role?: string;
+                }>
+              | undefined) ?? [];
+          const existingRev = existing?._rev as string | undefined;
+
+          // Build a lookup from staff member ref → existing role
+          const existingRoleByRef = new Map<string, string>();
+          for (const entry of existingStaff) {
+            if (entry.member?._ref && entry.role) {
+              existingRoleByRef.set(entry.member._ref, entry.role);
+            }
+          }
+
+          const staffArray = doc.staffPsdIds.map((id) => {
+            const ref = `staffMember-psd-${id}`;
+            const existingRole = existingRoleByRef.get(ref);
+            return {
+              _key: id,
+              _type: "object",
+              member: {
+                _type: "reference",
+                _ref: ref,
+              },
+              ...(existingRole && { role: existingRole }),
+            };
+          });
+
+          const psdFields = {
+            psdId: doc.psdId,
+            name: doc.name,
+            slug: { _type: "slug", current: doc.slug },
+            age: doc.age,
+            gender: doc.gender,
+            footbelId: doc.footbelId,
+            players: doc.playerPsdIds.map((id) => ({
+              _type: "reference",
+              _ref: `player-psd-${id}`,
+              _key: id,
+            })),
+            staff: staffArray,
+            archived: false,
+          };
+
+          // Use ifRevisionId when document exists to detect concurrent edits
+          yield* Effect.tryPromise({
+            try: () => {
+              const tx = client
+                .transaction()
+                .createIfNotExists({ _id: id, _type: "team", psdId: doc.psdId })
+                .patch(id, (p) =>
+                  existingRev
+                    ? p.ifRevisionId(existingRev).set(psdFields)
+                    : p.set(psdFields),
+                );
+              return tx.commit();
+            },
+            catch: (cause) =>
+              new SanityMutationError(
+                `Failed to upsert team ${doc.psdId}`,
+                cause,
+              ),
+          });
+        }).pipe(Effect.asVoid),
+
+      upsertStaff: (doc) =>
+        upsert("staffMember", doc.psdId, {
           psdId: doc.psdId,
           firstName: doc.firstName,
           lastName: doc.lastName,
           birthDate: doc.birthDate,
+          functionTitle: doc.functionTitle,
           archived: false,
-        };
-        if (doc.roleCode !== undefined) {
-          fields["roleCode"] = doc.roleCode;
-        }
-        return upsert("staffMember", doc.psdId, fields);
-      },
+        }),
 
       archiveStaff: (psdIds) => archiveByPsdIds("staffMember", psdIds),
 

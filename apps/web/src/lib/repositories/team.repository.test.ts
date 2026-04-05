@@ -146,11 +146,14 @@ describe("TeamRepository", () => {
         ],
         staff: [
           {
-            _id: "staff-1",
-            firstName: "Piet",
-            lastName: "Pieters",
             role: null,
-            photoUrl: "https://cdn.sanity.io/photo.webp",
+            member: {
+              _id: "staff-1",
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: null,
+              photoUrl: "https://cdn.sanity.io/photo.webp",
+            },
           },
         ],
         ...overrides,
@@ -279,16 +282,52 @@ describe("TeamRepository", () => {
       expect(t!.staff).toEqual([]);
     });
 
+    it("filters out staff entries with null member", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: null,
+              member: null,
+            },
+            {
+              role: "Trainer",
+              member: {
+                _id: "staff-2",
+                firstName: "Jan",
+                lastName: "Janssens",
+                functionTitle: "T1",
+                photoUrl: null,
+              },
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff).toHaveLength(1);
+      expect(t!.staff[0].id).toBe("staff-2");
+    });
+
     it("staff with null photoUrl gets undefined imageUrl", async () => {
       mockFetch.mockResolvedValueOnce(
         makeDetailRow({
           staff: [
             {
-              _id: "s1",
-              firstName: "A",
-              lastName: "B",
               role: null,
-              photoUrl: null,
+              member: {
+                _id: "s1",
+                firstName: "A",
+                lastName: "B",
+                functionTitle: null,
+                photoUrl: null,
+              },
             },
           ],
         }),
@@ -331,7 +370,16 @@ describe("TeamRepository", () => {
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
-        staff: [{ firstName: "Piet", lastName: "Pieters", role: null }],
+        staff: [
+          {
+            role: null,
+            member: {
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: null,
+            },
+          },
+        ],
         ...overrides,
       };
     }

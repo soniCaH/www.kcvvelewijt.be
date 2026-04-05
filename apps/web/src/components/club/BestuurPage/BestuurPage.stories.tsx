@@ -25,7 +25,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Rudy",
     lastName: "Bautmans",
     role: "Voorzitter",
-    roleCode: "VZ",
+    functionTitle: "VZ",
     imageUrl: MEMBER_IMAGES.rudy,
   },
   {
@@ -33,7 +33,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Ilona",
     lastName: "Trouwkens",
     role: "Secretaris",
-    roleCode: "SEC",
+    functionTitle: "SEC",
     imageUrl: MEMBER_IMAGES.ilona,
   },
   {
@@ -41,7 +41,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Stefan",
     lastName: "Robberechts",
     role: "Penningmeester",
-    roleCode: "PEN",
+    functionTitle: "PEN",
     imageUrl: MEMBER_IMAGES.stefan,
   },
   {
@@ -49,7 +49,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Erik",
     lastName: "Talboom",
     role: "Sportief verantwoordelijke",
-    roleCode: "SV",
+    functionTitle: "SV",
     imageUrl: MEMBER_IMAGES.erik,
   },
   {
@@ -57,14 +57,14 @@ const mockStaff: StaffMember[] = [
     firstName: "Stef",
     lastName: "Pieters",
     role: "Jeugdcoördinator",
-    roleCode: "JC",
+    functionTitle: "JC",
   },
   {
     id: "m-6",
     firstName: "Peter",
     lastName: "Lemmens",
     role: "Materiaalmeester",
-    roleCode: "MAT",
+    functionTitle: "MAT",
   },
 ];
 

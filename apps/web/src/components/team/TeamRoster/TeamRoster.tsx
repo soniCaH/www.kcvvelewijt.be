@@ -35,10 +35,10 @@ export interface StaffMember {
   firstName: string;
   /** Last name */
   lastName: string;
-  /** Role (e.g., Hoofdtrainer, Assistent-trainer) */
+  /** Role (e.g., trainer, afgevaardigde) — editorial, assigned per team */
   role: string;
-  /** Short role code displayed like jersey number (e.g., T1, T2, TK, TVJO, PDG) */
-  roleCode?: string;
+  /** PSD function title displayed like jersey number (e.g., T1, T2, Keeperstrainer) */
+  functionTitle?: string;
   /** Photo URL */
   imageUrl?: string;
 }
@@ -64,6 +64,25 @@ export interface TeamRosterProps {
   staffSectionLabel?: string | null;
   /** Additional CSS classes */
   className?: string;
+}
+
+/**
+ * Abbreviate a PSD function title for use inside a NumberBadge.
+ * Short codes (<=4 chars, e.g. "T1", "TVJO") pass through unchanged.
+ * Longer titles are split on whitespace, hyphens, and camelCase boundaries,
+ * then reduced to uppercase initials (e.g. "Keeperstrainer" → "KS",
+ * "Hoofd trainer" → "HT"). Falls back to a 4-char truncation for single
+ * words without internal boundaries.
+ */
+function abbreviateFunctionTitle(title: string): string {
+  if (title.length <= 4) return title;
+  // Insert space at camelCase boundaries (lower→upper) before splitting
+  const expanded = title.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const words = expanded.split(/[\s-]+/).filter(Boolean);
+  if (words.length > 1) {
+    return words.map((w) => w[0]!.toUpperCase()).join("");
+  }
+  return title.slice(0, 4).toUpperCase();
 }
 
 /**
@@ -292,10 +311,10 @@ export function TeamRoster({
                     isCompact ? "h-[200px]" : "h-[200px] lg:h-[320px]",
                   )}
                 >
-                  {/* 3D Role code badge using NumberBadge */}
-                  {member.roleCode && (
+                  {/* Function title badge — short code only to fit badge bounds */}
+                  {member.functionTitle && (
                     <NumberBadge
-                      value={member.roleCode}
+                      value={abbreviateFunctionTitle(member.functionTitle)}
                       color="navy"
                       size={isCompact ? "sm" : "md"}
                     />
@@ -387,6 +406,18 @@ export function TeamRoster({
                   >
                     {member.lastName}
                   </div>
+
+                  {/* Function title (full text) */}
+                  {member.functionTitle && (
+                    <div
+                      className={cn(
+                        "text-gray-500 mt-1 font-medium",
+                        isCompact ? "text-xs" : "text-sm",
+                      )}
+                    >
+                      {member.functionTitle}
+                    </div>
+                  )}
 
                   {/* Role */}
                   <div
