@@ -90,7 +90,7 @@ export function transformStaff(psd: PsdMember): SanityStaffDoc {
     firstName: psd.firstName,
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
-    functionTitle: psd.functionTitle ?? undefined,
+    functionTitle: psd.functionTitle,
   };
 }
 

@@ -282,6 +282,39 @@ describe("TeamRepository", () => {
       expect(t!.staff).toEqual([]);
     });
 
+    it("filters out staff entries with null member", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: null,
+              member: null,
+            },
+            {
+              role: "Trainer",
+              member: {
+                _id: "staff-2",
+                firstName: "Jan",
+                lastName: "Janssens",
+                functionTitle: "T1",
+                photoUrl: null,
+              },
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff).toHaveLength(1);
+      expect(t!.staff[0].id).toBe("staff-2");
+    });
+
     it("staff with null photoUrl gets undefined imageUrl", async () => {
       mockFetch.mockResolvedValueOnce(
         makeDetailRow({

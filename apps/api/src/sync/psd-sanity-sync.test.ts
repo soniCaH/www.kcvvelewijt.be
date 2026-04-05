@@ -173,7 +173,7 @@ describe("transformStaff", () => {
 
   it("handles null functionTitle", () => {
     const result = transformStaff({ ...baseStaff, functionTitle: null });
-    expect(result.functionTitle).toBeUndefined();
+    expect(result.functionTitle).toBeNull();
   });
 
   it("handles null birthDate", () => {
@@ -194,9 +194,9 @@ describe("transformStaff", () => {
     expect(result.functionTitle).toBe("T1");
   });
 
-  it("sets functionTitle to undefined when PSD functionTitle is null", () => {
+  it("sets functionTitle to null when PSD functionTitle is null", () => {
     const result = transformStaff({ ...baseStaff, functionTitle: null });
-    expect(result.functionTitle).toBeUndefined();
+    expect(result.functionTitle).toBeNull();
   });
 });
 

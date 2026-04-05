@@ -31,7 +31,7 @@ export interface SanityStaffDoc {
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null; // "YYYY-MM-DD"
-  functionTitle: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
+  functionTitle: string | null; // from PSD functionTitle; null clears the stored value
 }
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -343,7 +343,7 @@ export const SanityMutationLive = Layer.effect(
               new SanityMutationError(
                 `Failed to read existing team ${doc.psdId}`,
               ),
-          }).pipe(Effect.orElseSucceed(() => []));
+          });
 
           // Build a lookup from staff member ref → existing role
           const existingRoleByRef = new Map<string, string>();
@@ -384,19 +384,15 @@ export const SanityMutationLive = Layer.effect(
           });
         }).pipe(Effect.asVoid),
 
-      upsertStaff: (doc) => {
-        const fields: Record<string, unknown> = {
+      upsertStaff: (doc) =>
+        upsert("staffMember", doc.psdId, {
           psdId: doc.psdId,
           firstName: doc.firstName,
           lastName: doc.lastName,
           birthDate: doc.birthDate,
+          functionTitle: doc.functionTitle,
           archived: false,
-        };
-        if (doc.functionTitle !== undefined) {
-          fields["functionTitle"] = doc.functionTitle;
-        }
-        return upsert("staffMember", doc.psdId, fields);
-      },
+        }),
 
       archiveStaff: (psdIds) => archiveByPsdIds("staffMember", psdIds),
 

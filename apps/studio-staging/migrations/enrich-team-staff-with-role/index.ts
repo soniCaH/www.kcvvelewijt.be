@@ -25,21 +25,27 @@ export default defineMigration({
         return undefined
       }
 
-      // Only migrate if the first entry is a plain reference (has _ref at top level)
-      // Skip if already migrated (has member sub-object)
-      const firstEntry = staff[0]
-      if (!firstEntry || firstEntry.member !== undefined || !firstEntry._ref) {
+      // Check if any entry needs migration (legacy plain ref without member sub-object)
+      const needsMigration = staff.some((entry) => entry._ref && entry.member === undefined)
+      if (!needsMigration) {
         return undefined
       }
 
-      const migrated = staff.map((entry) => ({
-        _type: 'object' as const,
-        _key: entry._key ?? entry._ref?.replace('staffMember-psd-', '') ?? String(Math.random()),
-        member: {
-          _type: 'reference' as const,
-          _ref: entry._ref!,
-        },
-      }))
+      const migrated = staff.map((entry) => {
+        // Already-migrated entries (has member sub-object) — preserve as-is including role
+        if (entry.member !== undefined) {
+          return entry
+        }
+        // Legacy plain ref — convert to object shape
+        return {
+          _type: 'object' as const,
+          _key: entry._key ?? entry._ref?.replace('staffMember-psd-', '') ?? String(Math.random()),
+          member: {
+            _type: 'reference' as const,
+            _ref: entry._ref!,
+          },
+        }
+      })
 
       return [at('staff', set(migrated))]
     },

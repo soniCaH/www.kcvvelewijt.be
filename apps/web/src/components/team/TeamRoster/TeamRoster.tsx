@@ -67,6 +67,21 @@ export interface TeamRosterProps {
 }
 
 /**
+ * Abbreviate a PSD function title for use inside a NumberBadge.
+ * Short codes (<=4 chars, e.g. "T1", "TVJO") pass through unchanged.
+ * Longer titles are reduced to uppercase initials (e.g. "Keeperstrainer" → "KT",
+ * "Hoofd trainer" → "HT"). Falls back to a 4-char truncation if only one word.
+ */
+function abbreviateFunctionTitle(title: string): string {
+  if (title.length <= 4) return title;
+  const words = title.split(/[\s-]+/).filter(Boolean);
+  if (words.length > 1) {
+    return words.map((w) => w[0]!.toUpperCase()).join("");
+  }
+  return title.slice(0, 4).toUpperCase();
+}
+
+/**
  * Position display names and order
  */
 const POSITION_CONFIG: Record<
@@ -292,10 +307,10 @@ export function TeamRoster({
                     isCompact ? "h-[200px]" : "h-[200px] lg:h-[320px]",
                   )}
                 >
-                  {/* Function title badge using NumberBadge */}
+                  {/* Function title badge — short code only to fit badge bounds */}
                   {member.functionTitle && (
                     <NumberBadge
-                      value={member.functionTitle}
+                      value={abbreviateFunctionTitle(member.functionTitle)}
                       color="navy"
                       size={isCompact ? "sm" : "md"}
                     />
@@ -387,6 +402,18 @@ export function TeamRoster({
                   >
                     {member.lastName}
                   </div>
+
+                  {/* Function title (full text) */}
+                  {member.functionTitle && (
+                    <div
+                      className={cn(
+                        "text-gray-500 mt-1 font-medium",
+                        isCompact ? "text-xs" : "text-sm",
+                      )}
+                    >
+                      {member.functionTitle}
+                    </div>
+                  )}
 
                   {/* Role */}
                   <div
