@@ -145,8 +145,45 @@ export const team = defineType({
       name: 'staff',
       title: 'Staff',
       type: 'array',
-      of: [{type: 'reference', to: [{type: 'staffMember'}]}],
-      readOnly: true,
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'member',
+              title: 'Staff member',
+              type: 'reference',
+              to: [{type: 'staffMember'}],
+              readOnly: true,
+            }),
+            defineField({
+              name: 'role',
+              title: 'Role',
+              type: 'string',
+              description: 'Editorial role for this team (e.g. trainer, afgevaardigde)',
+              options: {
+                list: [
+                  {title: 'Trainer', value: 'trainer'},
+                  {title: 'Afgevaardigde', value: 'afgevaardigde'},
+                ],
+              },
+            }),
+          ],
+          preview: {
+            select: {
+              firstName: 'member.firstName',
+              lastName: 'member.lastName',
+              role: 'role',
+            },
+            prepare({firstName, lastName, role}) {
+              return {
+                title: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
+                subtitle: role ?? '',
+              }
+            },
+          },
+        },
+      ],
     }),
     defineField({
       name: 'archived',

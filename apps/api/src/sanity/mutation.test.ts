@@ -37,11 +37,14 @@ const mockClientPatch = vi.fn((_id: string) => ({
   })),
 }));
 
+const mockGetDocument = vi.fn().mockResolvedValue(null);
+
 vi.mock("@sanity/client", () => ({
   createClient: () => ({
     transaction: mockTransaction,
     patch: mockClientPatch,
     create: mockCreate,
+    getDocument: mockGetDocument,
   }),
 }));
 
@@ -152,7 +155,7 @@ describe("upsertPlayer", () => {
 // ─── upsertTeam ─────────────────────────────────────────────────────────────
 
 describe("upsertTeam", () => {
-  it("creates a transaction with slug, player refs, and staff refs", async () => {
+  it("creates a transaction with slug, player refs, and staff as objects", async () => {
     await run(
       Effect.gen(function* () {
         const mutation = yield* SanityMutation;
@@ -189,9 +192,69 @@ describe("upsertTeam", () => {
           { _type: "reference", _ref: "player-psd-200", _key: "200" },
         ],
         staff: [
-          { _type: "reference", _ref: "staffMember-psd-300", _key: "300" },
+          {
+            _key: "300",
+            _type: "object",
+            member: { _type: "reference", _ref: "staffMember-psd-300" },
+          },
         ],
         archived: false,
+      }),
+    );
+  });
+
+  it("preserves existing editorial role values on staff objects", async () => {
+    mockGetDocument.mockResolvedValueOnce({
+      _id: "team-psd-42",
+      _type: "team",
+      staff: [
+        {
+          _key: "300",
+          _type: "object",
+          member: { _type: "reference", _ref: "staffMember-psd-300" },
+          role: "trainer",
+        },
+        {
+          _key: "301",
+          _type: "object",
+          member: { _type: "reference", _ref: "staffMember-psd-301" },
+          role: "afgevaardigde",
+        },
+      ],
+    });
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.upsertTeam({
+          psdId: "42",
+          name: "Eerste Elftal A",
+          slug: "eerste-elftal-a",
+          age: "A",
+          gender: "mannen",
+          footbelId: 183904,
+          playerPsdIds: [],
+          staffPsdIds: ["300", "301"],
+        });
+      }),
+    );
+
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        staff: [
+          {
+            _key: "300",
+            _type: "object",
+            member: { _type: "reference", _ref: "staffMember-psd-300" },
+            role: "trainer",
+          },
+          {
+            _key: "301",
+            _type: "object",
+            member: { _type: "reference", _ref: "staffMember-psd-301" },
+            role: "afgevaardigde",
+          },
+        ],
       }),
     );
   });

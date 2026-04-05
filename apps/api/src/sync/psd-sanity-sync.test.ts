@@ -168,30 +168,35 @@ describe("transformStaff", () => {
     expect(result.firstName).toBe("Marc");
     expect(result.lastName).toBe("Peeters");
     expect(result.birthDate).toBe("1975-04-12");
-    expect(result.roleCode).toBe("T1");
+    expect(result.functionTitle).toBe("T1");
   });
 
   it("handles null functionTitle", () => {
     const result = transformStaff({ ...baseStaff, functionTitle: null });
-    expect(result.roleCode).toBeUndefined();
-  });
-
-  it("accepts functionTitle of exactly 6 characters", () => {
-    const result = transformStaff({ ...baseStaff, functionTitle: "T12345" });
-    expect(result.roleCode).toBe("T12345");
-  });
-
-  it("sets roleCode to undefined when functionTitle exceeds 6 characters", () => {
-    const result = transformStaff({
-      ...baseStaff,
-      functionTitle: "Jeugdcoördinator",
-    });
-    expect(result.roleCode).toBeUndefined();
+    expect(result.functionTitle).toBeUndefined();
   });
 
   it("handles null birthDate", () => {
     const result = transformStaff({ ...baseStaff, birthDate: null });
     expect(result.birthDate).toBeNull();
+  });
+
+  it("passes through full functionTitle without truncation", () => {
+    const result = transformStaff({
+      ...baseStaff,
+      functionTitle: "Keeperstrainer",
+    });
+    expect(result.functionTitle).toBe("Keeperstrainer");
+  });
+
+  it("passes through short functionTitle", () => {
+    const result = transformStaff(baseStaff); // functionTitle: "T1"
+    expect(result.functionTitle).toBe("T1");
+  });
+
+  it("sets functionTitle to undefined when PSD functionTitle is null", () => {
+    const result = transformStaff({ ...baseStaff, functionTitle: null });
+    expect(result.functionTitle).toBeUndefined();
   });
 });
 

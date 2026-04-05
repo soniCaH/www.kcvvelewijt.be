@@ -29,7 +29,7 @@ export const TEAM_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[]-> { _id, firstName, lastName, role, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" }
+  staff[] { role, "member": member-> { _id, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }
 }`);
 
 export const TEAMS_LANDING_QUERY =
@@ -37,7 +37,7 @@ export const TEAMS_LANDING_QUERY =
   _id, name, "slug": slug.current, age,
   division, divisionFull, tagline,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
-  staff[]-> { firstName, lastName, role }
+  staff[] { role, "member": member-> { firstName, lastName, functionTitle } }
 }`);
 
 // ─── View Models ─────────────────────────────────────────────────────────────
@@ -59,6 +59,7 @@ export interface StaffMemberVM {
   firstName: string;
   lastName: string;
   role: string;
+  functionTitle?: string;
   imageUrl?: string;
 }
 
@@ -118,13 +119,15 @@ function computeAgeGroup(age: string | null): string | undefined {
 
 function toStaffMemberVM(
   row: NonNullable<TEAM_BY_SLUG_DETAIL["staff"]>[number],
-): StaffMemberVM {
+): StaffMemberVM | null {
+  if (!row.member) return null;
   return {
-    id: row._id,
-    firstName: row.firstName ?? "",
-    lastName: row.lastName ?? "",
-    role: row.role ?? "",
-    imageUrl: row.photoUrl ?? undefined,
+    id: row.member._id,
+    firstName: row.member.firstName ?? "",
+    lastName: row.member.lastName ?? "",
+    role: row.role ?? row.member.functionTitle ?? "",
+    functionTitle: row.member.functionTitle ?? undefined,
+    imageUrl: row.member.photoUrl ?? undefined,
   };
 }
 
@@ -146,7 +149,9 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
     contactInfo: row.contactInfo,
     trainingSchedule: row.trainingSchedule,
     players: (row.players ?? []).map(toPlayerVM),
-    staff: (row.staff ?? []).map(toStaffMemberVM),
+    staff: (row.staff ?? [])
+      .map(toStaffMemberVM)
+      .filter((s): s is StaffMemberVM => s !== null),
   };
 }
 
@@ -163,11 +168,16 @@ function toTeamLandingItem(
     tagline: row.tagline,
     teamImageUrl: row.teamImageUrl,
     staff:
-      row.staff?.map((s) => ({
-        firstName: s.firstName ?? "",
-        lastName: s.lastName ?? "",
-        role: s.role ?? "",
-      })) ?? null,
+      row.staff
+        ?.filter(
+          (s): s is typeof s & { member: NonNullable<typeof s.member> } =>
+            s.member !== null,
+        )
+        .map((s) => ({
+          firstName: s.member.firstName ?? "",
+          lastName: s.member.lastName ?? "",
+          role: s.role ?? s.member.functionTitle ?? "",
+        })) ?? null,
   };
 }
 

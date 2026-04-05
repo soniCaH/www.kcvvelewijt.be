@@ -38,7 +38,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Marc",
     lastName: "Janssen",
     role: "Hoofdtrainer",
-    roleCode: "T1",
+    functionTitle: "T1",
     imageUrl: PLAYER_IMAGES.chiel,
   },
   {
@@ -46,7 +46,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Koen",
     lastName: "Peeters",
     role: "Assistent-trainer",
-    roleCode: "T2",
+    functionTitle: "T2",
     imageUrl: PLAYER_IMAGES.jarne,
   },
   {
@@ -54,7 +54,7 @@ const mockStaff: StaffMember[] = [
     firstName: "Pieter",
     lastName: "De Smet",
     role: "Keeperstrainer",
-    roleCode: "TK",
+    functionTitle: "TK",
   },
 ];
 

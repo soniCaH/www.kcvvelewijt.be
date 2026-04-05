@@ -24,6 +24,14 @@ export const staffMember = defineType({
       of: [{type: 'block'}],
     }),
     defineField({
+      name: 'functionTitle',
+      title: 'Function title',
+      type: 'string',
+      description:
+        'Synced from PSD functionTitle — full value, no truncation. Read-only — managed by sync only.',
+      readOnly: true,
+    }),
+    defineField({
       name: 'psdId',
       title: 'PSD ID',
       type: 'string',

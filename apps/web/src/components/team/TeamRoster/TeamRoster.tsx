@@ -35,10 +35,10 @@ export interface StaffMember {
   firstName: string;
   /** Last name */
   lastName: string;
-  /** Role (e.g., Hoofdtrainer, Assistent-trainer) */
+  /** Role (e.g., trainer, afgevaardigde) — editorial, assigned per team */
   role: string;
-  /** Short role code displayed like jersey number (e.g., T1, T2, TK, TVJO, PDG) */
-  roleCode?: string;
+  /** PSD function title displayed like jersey number (e.g., T1, T2, Keeperstrainer) */
+  functionTitle?: string;
   /** Photo URL */
   imageUrl?: string;
 }
@@ -292,10 +292,10 @@ export function TeamRoster({
                     isCompact ? "h-[200px]" : "h-[200px] lg:h-[320px]",
                   )}
                 >
-                  {/* 3D Role code badge using NumberBadge */}
-                  {member.roleCode && (
+                  {/* Function title badge using NumberBadge */}
+                  {member.functionTitle && (
                     <NumberBadge
-                      value={member.roleCode}
+                      value={member.functionTitle}
                       color="navy"
                       size={isCompact ? "sm" : "md"}
                     />

@@ -146,11 +146,14 @@ describe("TeamRepository", () => {
         ],
         staff: [
           {
-            _id: "staff-1",
-            firstName: "Piet",
-            lastName: "Pieters",
             role: null,
-            photoUrl: "https://cdn.sanity.io/photo.webp",
+            member: {
+              _id: "staff-1",
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: null,
+              photoUrl: "https://cdn.sanity.io/photo.webp",
+            },
           },
         ],
         ...overrides,
@@ -284,11 +287,14 @@ describe("TeamRepository", () => {
         makeDetailRow({
           staff: [
             {
-              _id: "s1",
-              firstName: "A",
-              lastName: "B",
               role: null,
-              photoUrl: null,
+              member: {
+                _id: "s1",
+                firstName: "A",
+                lastName: "B",
+                functionTitle: null,
+                photoUrl: null,
+              },
             },
           ],
         }),
@@ -331,7 +337,16 @@ describe("TeamRepository", () => {
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
-        staff: [{ firstName: "Piet", lastName: "Pieters", role: null }],
+        staff: [
+          {
+            role: null,
+            member: {
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: null,
+            },
+          },
+        ],
         ...overrides,
       };
     }

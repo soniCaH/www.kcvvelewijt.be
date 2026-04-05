@@ -31,7 +31,7 @@ export interface SanityStaffDoc {
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null; // "YYYY-MM-DD"
-  roleCode: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
+  functionTitle: string | undefined; // from PSD functionTitle; undefined = skip patch (preserve editor value)
 }
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -322,25 +322,67 @@ export const SanityMutationLive = Layer.effect(
       archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
       upsertTeam: (doc) =>
-        upsert("team", doc.psdId, {
-          psdId: doc.psdId,
-          name: doc.name,
-          slug: { _type: "slug", current: doc.slug },
-          age: doc.age,
-          gender: doc.gender,
-          ...(doc.footbelId != null && { footbelId: doc.footbelId }),
-          players: doc.playerPsdIds.map((id) => ({
-            _type: "reference",
-            _ref: `player-psd-${id}`,
-            _key: id,
-          })),
-          staff: doc.staffPsdIds.map((id) => ({
-            _type: "reference",
-            _ref: `staffMember-psd-${id}`,
-            _key: id,
-          })),
-          archived: false,
-        }),
+        Effect.gen(function* () {
+          // Read existing staff array to preserve editorial `role` values
+          const existingStaff = yield* Effect.tryPromise({
+            try: async () => {
+              const existing = await client.getDocument(
+                docId("team", doc.psdId),
+              );
+              return (
+                (existing?.staff as
+                  | Array<{
+                      _key?: string;
+                      member?: { _ref?: string };
+                      role?: string;
+                    }>
+                  | undefined) ?? []
+              );
+            },
+            catch: () =>
+              new SanityMutationError(
+                `Failed to read existing team ${doc.psdId}`,
+              ),
+          }).pipe(Effect.orElseSucceed(() => []));
+
+          // Build a lookup from staff member ref → existing role
+          const existingRoleByRef = new Map<string, string>();
+          for (const entry of existingStaff) {
+            if (entry.member?._ref && entry.role) {
+              existingRoleByRef.set(entry.member._ref, entry.role);
+            }
+          }
+
+          const staffArray = doc.staffPsdIds.map((id) => {
+            const ref = `staffMember-psd-${id}`;
+            const existingRole = existingRoleByRef.get(ref);
+            return {
+              _key: id,
+              _type: "object",
+              member: {
+                _type: "reference",
+                _ref: ref,
+              },
+              ...(existingRole && { role: existingRole }),
+            };
+          });
+
+          yield* upsert("team", doc.psdId, {
+            psdId: doc.psdId,
+            name: doc.name,
+            slug: { _type: "slug", current: doc.slug },
+            age: doc.age,
+            gender: doc.gender,
+            ...(doc.footbelId != null && { footbelId: doc.footbelId }),
+            players: doc.playerPsdIds.map((id) => ({
+              _type: "reference",
+              _ref: `player-psd-${id}`,
+              _key: id,
+            })),
+            staff: staffArray,
+            archived: false,
+          });
+        }).pipe(Effect.asVoid),
 
       upsertStaff: (doc) => {
         const fields: Record<string, unknown> = {
@@ -350,8 +392,8 @@ export const SanityMutationLive = Layer.effect(
           birthDate: doc.birthDate,
           archived: false,
         };
-        if (doc.roleCode !== undefined) {
-          fields["roleCode"] = doc.roleCode;
+        if (doc.functionTitle !== undefined) {
+          fields["functionTitle"] = doc.functionTitle;
         }
         return upsert("staffMember", doc.psdId, fields);
       },
