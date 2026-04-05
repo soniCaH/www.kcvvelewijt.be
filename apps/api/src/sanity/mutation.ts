@@ -328,9 +328,10 @@ export const SanityMutationLive = Layer.effect(
           // Read existing doc to preserve editorial `role` values and capture _rev for conflict detection
           const existing = yield* Effect.tryPromise({
             try: () => client.getDocument(id),
-            catch: () =>
+            catch: (cause) =>
               new SanityMutationError(
                 `Failed to read existing team ${doc.psdId}`,
+                cause,
               ),
           });
 
