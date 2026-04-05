@@ -573,6 +573,21 @@ describe("StaffRepository", () => {
       expect(result).toEqual([{ psdId: "psd-1" }, { psdId: "psd-2" }]);
     });
 
+    it("coerces numeric psdId to string", async () => {
+      const rows = [{ _id: "s1", psdId: 123 as unknown as string }];
+      mockFetch.mockResolvedValueOnce(rows);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findAllForStaticParams();
+        }),
+      );
+
+      expect(result).toEqual([{ psdId: "123" }]);
+      expect(typeof result[0].psdId).toBe("string");
+    });
+
     it("filters out rows with null psdId", async () => {
       const rows: STAFF_MEMBERS_PSDID_QUERY_RESULT = [
         { _id: "s1", psdId: "psd-1" },

@@ -234,7 +234,7 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
             (r): r is typeof r & { psdId: string } =>
               r.psdId !== null && String(r.psdId).trim() !== "",
           )
-          .map((r) => ({ psdId: r.psdId })),
+          .map((r) => ({ psdId: String(r.psdId).trim() })),
       ),
     ),
 });
