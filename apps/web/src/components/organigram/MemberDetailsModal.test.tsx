@@ -55,6 +55,16 @@ const defaultProps = {
 
 describe("MemberDetailsModal", () => {
   describe("single member", () => {
+    it("renders header with kcvv-green gradient classes", () => {
+      const { container } = render(
+        <MemberDetailsModal member={singleNode} {...defaultProps} />,
+      );
+      const header = container.querySelector(
+        ".bg-gradient-to-r.from-kcvv-green.to-kcvv-green-hover",
+      );
+      expect(header).toBeInTheDocument();
+    });
+
     it("shows member name and position title", () => {
       render(<MemberDetailsModal member={singleNode} {...defaultProps} />);
       expect(screen.getByText("Jan Voorzitter")).toBeInTheDocument();
