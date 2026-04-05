@@ -323,27 +323,26 @@ export const SanityMutationLive = Layer.effect(
 
       upsertTeam: (doc) =>
         Effect.gen(function* () {
-          // Read existing staff array to preserve editorial `role` values
-          const existingStaff = yield* Effect.tryPromise({
-            try: async () => {
-              const existing = await client.getDocument(
-                docId("team", doc.psdId),
-              );
-              return (
-                (existing?.staff as
-                  | Array<{
-                      _key?: string;
-                      member?: { _ref?: string };
-                      role?: string;
-                    }>
-                  | undefined) ?? []
-              );
-            },
+          const id = docId("team", doc.psdId);
+
+          // Read existing doc to preserve editorial `role` values and capture _rev for conflict detection
+          const existing = yield* Effect.tryPromise({
+            try: () => client.getDocument(id),
             catch: () =>
               new SanityMutationError(
                 `Failed to read existing team ${doc.psdId}`,
               ),
           });
+
+          const existingStaff =
+            (existing?.staff as
+              | Array<{
+                  _key?: string;
+                  member?: { _ref?: string };
+                  role?: string;
+                }>
+              | undefined) ?? [];
+          const existingRev = existing?._rev as string | undefined;
 
           // Build a lookup from staff member ref → existing role
           const existingRoleByRef = new Map<string, string>();
@@ -367,13 +366,13 @@ export const SanityMutationLive = Layer.effect(
             };
           });
 
-          yield* upsert("team", doc.psdId, {
+          const psdFields = {
             psdId: doc.psdId,
             name: doc.name,
             slug: { _type: "slug", current: doc.slug },
             age: doc.age,
             gender: doc.gender,
-            ...(doc.footbelId != null && { footbelId: doc.footbelId }),
+            footbelId: doc.footbelId,
             players: doc.playerPsdIds.map((id) => ({
               _type: "reference",
               _ref: `player-psd-${id}`,
@@ -381,6 +380,26 @@ export const SanityMutationLive = Layer.effect(
             })),
             staff: staffArray,
             archived: false,
+          };
+
+          // Use ifRevisionId when document exists to detect concurrent edits
+          yield* Effect.tryPromise({
+            try: () => {
+              const tx = client
+                .transaction()
+                .createIfNotExists({ _id: id, _type: "team", psdId: doc.psdId })
+                .patch(id, (p) =>
+                  existingRev
+                    ? p.ifRevisionId(existingRev).set(psdFields)
+                    : p.set(psdFields),
+                );
+              return tx.commit();
+            },
+            catch: (cause) =>
+              new SanityMutationError(
+                `Failed to upsert team ${doc.psdId}`,
+                cause,
+              ),
           });
         }).pipe(Effect.asVoid),
 

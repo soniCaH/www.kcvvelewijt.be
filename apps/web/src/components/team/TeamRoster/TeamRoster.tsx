@@ -69,12 +69,16 @@ export interface TeamRosterProps {
 /**
  * Abbreviate a PSD function title for use inside a NumberBadge.
  * Short codes (<=4 chars, e.g. "T1", "TVJO") pass through unchanged.
- * Longer titles are reduced to uppercase initials (e.g. "Keeperstrainer" → "KT",
- * "Hoofd trainer" → "HT"). Falls back to a 4-char truncation if only one word.
+ * Longer titles are split on whitespace, hyphens, and camelCase boundaries,
+ * then reduced to uppercase initials (e.g. "Keeperstrainer" → "KS",
+ * "Hoofd trainer" → "HT"). Falls back to a 4-char truncation for single
+ * words without internal boundaries.
  */
 function abbreviateFunctionTitle(title: string): string {
   if (title.length <= 4) return title;
-  const words = title.split(/[\s-]+/).filter(Boolean);
+  // Insert space at camelCase boundaries (lower→upper) before splitting
+  const expanded = title.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const words = expanded.split(/[\s-]+/).filter(Boolean);
   if (words.length > 1) {
     return words.map((w) => w[0]!.toUpperCase()).join("");
   }
