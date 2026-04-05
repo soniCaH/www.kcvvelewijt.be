@@ -126,6 +126,24 @@ describe("toOrgChartNode", () => {
     expect(member.href).toBeUndefined();
   });
 
+  it("numeric psdId is coerced to string for href", () => {
+    const result = toOrgChartNode(
+      makeNodeRow({
+        members: [
+          {
+            id: "staff-1",
+            name: "Jan Janssens",
+            imageUrl: null,
+            email: null,
+            phone: null,
+            psdId: 42 as unknown as string,
+          },
+        ],
+      }),
+    );
+    expect(result.members[0].href).toBe("/staf/42");
+  });
+
   it("whitespace-only name collapses to undefined and psdId is trimmed in href", () => {
     const result = toOrgChartNode(
       makeNodeRow({

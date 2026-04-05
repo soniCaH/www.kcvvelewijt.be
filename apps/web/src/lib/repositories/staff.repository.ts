@@ -149,7 +149,7 @@ export function toOrgChartNode(
       .filter((m): m is NonNullable<typeof m> => m != null)
       .map((m) => {
         const trimmed = (m.name ?? "").trim();
-        const psdId = m.psdId?.trim();
+        const psdId = m.psdId != null ? String(m.psdId).trim() : undefined;
         return {
           id: m.id,
           name: trimmed === "" ? undefined : trimmed,
@@ -165,7 +165,7 @@ export function toOrgChartNode(
 export function toStaffDetailVM(
   row: NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>,
 ): StaffDetailVM {
-  const psdId = row.psdId?.trim() ?? "";
+  const psdId = row.psdId != null ? String(row.psdId).trim() : "";
 
   return {
     id: row._id,
@@ -232,7 +232,7 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
         rows
           .filter(
             (r): r is typeof r & { psdId: string } =>
-              r.psdId !== null && r.psdId.trim() !== "",
+              r.psdId !== null && String(r.psdId).trim() !== "",
           )
           .map((r) => ({ psdId: r.psdId })),
       ),
