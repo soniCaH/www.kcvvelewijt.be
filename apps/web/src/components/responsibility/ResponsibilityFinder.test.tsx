@@ -14,6 +14,7 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResponsibilityFinder } from "./ResponsibilityFinder";
 import { mockResponsibilityPaths as responsibilityPaths } from "./__fixtures__/responsibility-paths.fixture";
+import { mockYouthTeams } from "./__fixtures__/youth-teams.fixture";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
 /** Stub fetch to return the given paths as semantic search results. */
@@ -1117,6 +1118,84 @@ describe("ResponsibilityFinder", () => {
       await waitFor(() => {
         const roleOption = screen.getByRole("button", { name: /speler/i });
         expect(roleOption.className).toMatch(/min-h-\[44px\]|min-h-11/);
+      });
+    });
+  });
+
+  describe("Team Selection (team-role contacts)", () => {
+    const teamRolePath = responsibilityPaths.find(
+      (p) => p.id === "vraag-over-training",
+    )!;
+
+    it("shows team selector when result has team-role contact", async () => {
+      mockSearchReturning([teamRolePath]);
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          youthTeams={mockYouthTeams}
+          initialPath={teamRolePath}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/ploeg/i)).toBeInTheDocument();
+      });
+    });
+
+    it("does not show team selector for position-only results", () => {
+      const positionPath = responsibilityPaths.find(
+        (p) => p.id === "club-sponsoren",
+      )!;
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          youthTeams={mockYouthTeams}
+          initialPath={positionPath}
+        />,
+      );
+
+      expect(screen.queryByLabelText(/ploeg/i)).not.toBeInTheDocument();
+    });
+
+    it("populates team dropdown with youth teams", async () => {
+      const user = userEvent.setup();
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          youthTeams={mockYouthTeams}
+          initialPath={teamRolePath}
+        />,
+      );
+
+      const teamSelect = await waitFor(() => screen.getByLabelText(/ploeg/i));
+
+      await user.selectOptions(teamSelect, "team-u13a");
+
+      // After selection, resolved contact should appear (primary + step both resolve)
+      await waitFor(() => {
+        const matches = screen.getAllByText("Kim De Smet");
+        expect(matches.length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
+    it("shows fallback when selected team has no matching role", async () => {
+      const user = userEvent.setup();
+      render(
+        <ResponsibilityFinder
+          paths={responsibilityPaths}
+          youthTeams={mockYouthTeams}
+          initialPath={teamRolePath}
+        />,
+      );
+
+      const teamSelect = await waitFor(() => screen.getByLabelText(/ploeg/i));
+
+      await user.selectOptions(teamSelect, "team-u17a");
+
+      // Should show fallback message (primary + step both have no match)
+      await waitFor(() => {
+        const matches = screen.getAllByText(/geen trainer.*toegewezen/i);
+        expect(matches.length).toBeGreaterThanOrEqual(1);
       });
     });
   });

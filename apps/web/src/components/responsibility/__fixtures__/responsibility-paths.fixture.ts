@@ -458,6 +458,46 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
     ],
   },
   {
+    id: "vraag-over-training",
+    role: ["ouder", "speler"],
+    question: "heb een vraag over de training",
+    keywords: ["training", "oefening", "trainer", "ploeg"],
+    summary:
+      "Neem contact op met de trainer van je ploeg. Bij escalatie: JC of TVJO.",
+    category: "sportief",
+    icon: "dumbbell",
+    primaryContact: {
+      contactType: "team-role",
+      teamRole: "trainer",
+    },
+    steps: [
+      {
+        order: 1,
+        description: "Neem contact op met de trainer van je ploeg",
+        contact: {
+          contactType: "team-role",
+          teamRole: "trainer",
+        },
+      },
+      {
+        order: 2,
+        description: "Escalatie: Jeugdcoördinator",
+        contact: {
+          contactType: "position",
+          position: "JC Onderbouw",
+          members: [
+            {
+              id: "jc-onderbouw",
+              name: "JC Onderbouw",
+              email: "jc-onderbouw@kcvv.be",
+            },
+          ],
+          nodeId: "organigramNode-jc-onderbouw",
+        },
+      },
+    ],
+  },
+  {
     id: "wedstrijden-zoeken",
     role: ["speler", "ouder", "supporter"],
     question: "zoek mijn wedstrijden",

@@ -8,6 +8,7 @@ import type {
 } from "../sanity/sanity.types";
 import { toPlayerVM, type PlayerVM } from "./player.repository";
 import type { TeamLandingItem } from "../utils/group-teams";
+import type { TeamStaffMember } from "../team-role-resolution";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -32,6 +33,12 @@ export const TEAM_BY_SLUG_QUERY =
   staff[] { role, "member": member-> { _id, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }
 }`);
 
+export const YOUTH_TEAMS_CONTACT_QUERY =
+  defineQuery(`*[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {
+  _id, name, "slug": slug.current, age,
+  staff[] { role, "member": member-> { _id, firstName, lastName, email, phone } }
+}`);
+
 export const TEAMS_LANDING_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {
   _id, name, "slug": slug.current, age,
@@ -41,6 +48,32 @@ export const TEAMS_LANDING_QUERY =
 }`);
 
 // ─── View Models ─────────────────────────────────────────────────────────────
+
+// Manual result type for YOUTH_TEAMS_CONTACT_QUERY (typegen will generate this later)
+type YouthTeamContactRow = {
+  _id: string;
+  name: string | null;
+  slug: string | null;
+  age: string | null;
+  staff: Array<{
+    role: string | null;
+    member: {
+      _id: string;
+      firstName: string | null;
+      lastName: string | null;
+      email: string | null;
+      phone: string | null;
+    } | null;
+  }> | null;
+};
+
+export interface YouthTeamForContactVM {
+  id: string;
+  name: string;
+  slug: string;
+  age: string;
+  staff: TeamStaffMember[];
+}
 
 export interface TeamNavVM {
   id: string;
@@ -181,12 +214,39 @@ function toTeamLandingItem(
   };
 }
 
+function toYouthTeamForContactVM(
+  row: YouthTeamContactRow,
+): YouthTeamForContactVM {
+  return {
+    id: row._id,
+    name: row.name ?? "",
+    slug: row.slug ?? "",
+    age: row.age ?? "",
+    staff: (row.staff ?? [])
+      .filter(
+        (s): s is typeof s & { member: NonNullable<typeof s.member> } =>
+          s.member !== null,
+      )
+      .map((s) => ({
+        id: s.member._id,
+        firstName: s.member.firstName ?? "",
+        lastName: s.member.lastName ?? "",
+        role: s.role ?? "",
+        ...(s.member.email ? { email: s.member.email } : {}),
+        ...(s.member.phone ? { phone: s.member.phone } : {}),
+      })),
+  };
+}
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface TeamRepositoryInterface {
   readonly findAll: () => Effect.Effect<TeamNavVM[]>;
   readonly findBySlug: (slug: string) => Effect.Effect<TeamDetailVM | null>;
   readonly findAllForLanding: () => Effect.Effect<TeamLandingItem[]>;
+  readonly findYouthTeamsForContact: () => Effect.Effect<
+    YouthTeamForContactVM[]
+  >;
 }
 
 export class TeamRepository extends Context.Tag("TeamRepository")<
@@ -206,5 +266,9 @@ export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
   findAllForLanding: () =>
     fetchGroq<TEAMS_LANDING_QUERY_RESULT>(TEAMS_LANDING_QUERY).pipe(
       Effect.map((rows) => rows.map(toTeamLandingItem)),
+    ),
+  findYouthTeamsForContact: () =>
+    fetchGroq<YouthTeamContactRow[]>(YOUTH_TEAMS_CONTACT_QUERY).pipe(
+      Effect.map((rows) => rows.map(toYouthTeamForContactVM)),
     ),
 });

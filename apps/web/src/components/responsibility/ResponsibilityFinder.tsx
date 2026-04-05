@@ -20,6 +20,12 @@ import type {
   AutocompleteSuggestion,
 } from "@/types/responsibility";
 import { ROLE_OPTIONS } from "@/types/responsibility";
+import type { YouthTeamForContactVM } from "@/lib/repositories/team.repository";
+import {
+  hasTeamRoleContact,
+  resolveTeamRoleContact,
+  mapAgeToJcGroup,
+} from "@/lib/team-role-resolution";
 import {
   X,
   User,
@@ -60,6 +66,8 @@ interface ResponsibilityFinderProps {
   initialPathId?: string;
   /** Responsibility path object to pre-select and display */
   initialPath?: ResponsibilityPath;
+  /** Youth teams for dynamic team-role contact resolution */
+  youthTeams?: YouthTeamForContactVM[];
 }
 
 // Category color palette - professional and subtle
@@ -145,6 +153,7 @@ export function ResponsibilityFinder({
   compact = false,
   initialPathId,
   initialPath,
+  youthTeams = [],
 }: ResponsibilityFinderProps) {
   const [selectedRole, setSelectedRole] = useState<UserRole | "">("");
   const [questionText, setQuestionText] = useState("");
@@ -154,6 +163,7 @@ export function ResponsibilityFinder({
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [activeDescendantIdx, setActiveDescendantIdx] = useState(-1);
   const [selectedVectorId, setSelectedVectorId] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -254,6 +264,7 @@ export function ResponsibilityFinder({
   const handleBack = () => {
     setSelectedResult(null);
     setSelectedVectorId(null);
+    setSelectedTeamId("");
     setShowSuggestions(true);
   };
 
@@ -262,6 +273,7 @@ export function ResponsibilityFinder({
     setSelectedRole("");
     setSelectedResult(null);
     setSelectedVectorId(null);
+    setSelectedTeamId("");
     setQuestionText("");
     setShowSuggestions(false);
     setShowRoleDropdown(false);
@@ -701,10 +713,20 @@ export function ResponsibilityFinder({
               </button>
             </div>
 
+            {/* Team Selector — shown when result has team-role contacts */}
+            {hasTeamRoleContact(selectedResult) && youthTeams.length > 0 && (
+              <TeamSelector
+                teams={youthTeams}
+                selectedTeamId={selectedTeamId}
+                onTeamSelect={setSelectedTeamId}
+              />
+            )}
+
             <ResultCard
               path={selectedResult}
               onMemberSelect={onMemberSelect}
               analytics={analytics}
+              selectedTeam={youthTeams.find((t) => t.id === selectedTeamId)}
             />
 
             <FeedbackWidget
@@ -751,12 +773,14 @@ function ContactDisplay({
   analytics,
   onMemberSelect,
   compact,
+  selectedTeam,
 }: {
   contact: Contact;
   pathId: string;
   analytics: ReturnType<typeof useResponsibilityAnalytics>;
   onMemberSelect?: (memberId: string) => void;
   compact?: boolean;
+  selectedTeam?: YouthTeamForContactVM;
 }) {
   const titleClass = compact
     ? "font-semibold text-gray-700 mb-1"
@@ -862,7 +886,40 @@ function ContactDisplay({
         </div>
       );
 
-    case "team-role":
+    case "team-role": {
+      if (selectedTeam && contact.teamRole) {
+        const resolved = resolveTeamRoleContact(
+          selectedTeam.staff,
+          contact.teamRole,
+        );
+        if (resolved) {
+          return (
+            <ContactDisplay
+              contact={resolved}
+              pathId={pathId}
+              analytics={analytics}
+              onMemberSelect={onMemberSelect}
+              compact={compact}
+            />
+          );
+        }
+        // Fallback: no matching role on the selected team
+        const roleLabel =
+          contact.teamRole === "trainer" ? "trainer" : "afgevaardigde";
+        return (
+          <div className="space-y-2">
+            <div className={titleClass}>
+              {contact.teamRole === "trainer"
+                ? "Trainer van je ploeg"
+                : "Afgevaardigde van je ploeg"}
+            </div>
+            <p className="text-sm text-amber-600">
+              Er is nog geen {roleLabel} toegewezen aan {selectedTeam.name}.
+              Neem contact op via de volgende stap in het escalatiepad.
+            </p>
+          </div>
+        );
+      }
       return (
         <div className="space-y-2">
           <div className={titleClass}>
@@ -875,6 +932,7 @@ function ContactDisplay({
           </p>
         </div>
       );
+    }
 
     case "manual":
       return (
@@ -955,14 +1013,19 @@ function ResultCard({
   path,
   onMemberSelect,
   analytics,
+  selectedTeam,
 }: {
   path: ResponsibilityPath;
   onMemberSelect?: (memberId: string) => void;
   analytics: ReturnType<typeof useResponsibilityAnalytics>;
+  selectedTeam?: YouthTeamForContactVM;
 }) {
   const colors =
     categoryColors[path.category as keyof typeof categoryColors] ??
     categoryColors.algemeen;
+
+  // Compute JC group from selected team's age for step highlighting
+  const jcGroup = selectedTeam ? mapAgeToJcGroup(selectedTeam.age) : null;
 
   // Dwell-time tracking — destructure stable callbacks to avoid effect restart
   // when the analytics object reference changes on parent re-renders
@@ -1026,6 +1089,7 @@ function ResultCard({
             pathId={path.id}
             analytics={analytics}
             onMemberSelect={onMemberSelect}
+            selectedTeam={selectedTeam}
           />
         </div>
 
@@ -1040,11 +1104,21 @@ function ResultCard({
           <ol className="space-y-3">
             {path.steps.map((step, stepIdx) => {
               const safeStepLink = toSafeHref(step.link);
+              const isHighlightedJc =
+                jcGroup !== null &&
+                step.description.toLowerCase().includes(`jc ${jcGroup}`);
               return (
-                <li key={stepIdx} className="flex gap-3 group">
+                <li
+                  key={stepIdx}
+                  className={`flex gap-3 group ${isHighlightedJc ? "bg-kcvv-green/5 -mx-2 px-2 py-1 rounded-lg ring-1 ring-kcvv-green/20" : ""}`}
+                >
                   <div
                     className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: colors.accent }}
+                    style={{
+                      backgroundColor: isHighlightedJc
+                        ? "var(--color-kcvv-green)"
+                        : colors.accent,
+                    }}
                   >
                     {stepIdx + 1}
                   </div>
@@ -1084,6 +1158,7 @@ function ResultCard({
                           analytics={analytics}
                           onMemberSelect={onMemberSelect}
                           compact
+                          selectedTeam={selectedTeam}
                         />
                       </div>
                     )}
@@ -1094,6 +1169,48 @@ function ResultCard({
           </ol>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Team selection dropdown for dynamic team-role contact resolution.
+ * Shown when the selected responsibility has a team-role contact.
+ */
+function TeamSelector({
+  teams,
+  selectedTeamId,
+  onTeamSelect,
+}: {
+  teams: YouthTeamForContactVM[];
+  selectedTeamId: string;
+  onTeamSelect: (teamId: string) => void;
+}) {
+  return (
+    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
+      <label
+        htmlFor="team-selector"
+        className="block font-bold text-gray-900 mb-2"
+      >
+        Selecteer je ploeg
+      </label>
+      <p className="text-sm text-gray-600 mb-3">
+        Om de juiste contactpersoon te tonen, moeten we weten bij welke ploeg je
+        hoort.
+      </p>
+      <select
+        id="team-selector"
+        value={selectedTeamId}
+        onChange={(e) => onTeamSelect(e.target.value)}
+        className="w-full max-w-sm px-4 py-2 min-h-11 border-2 border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:outline-none focus:border-kcvv-green focus:ring-2 focus:ring-kcvv-green/20"
+      >
+        <option value="">Kies een ploeg...</option>
+        {teams.map((team) => (
+          <option key={team.id} value={team.id}>
+            {team.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

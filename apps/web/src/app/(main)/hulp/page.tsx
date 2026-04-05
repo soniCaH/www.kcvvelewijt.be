@@ -10,6 +10,7 @@ import { Effect } from "effect";
 import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
 import { runPromise } from "@/lib/effect/runtime";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
+import { TeamRepository } from "@/lib/repositories/team.repository";
 
 export const metadata: Metadata = {
   title: "Hulp & Contact | KCVV Elewijt",
@@ -32,14 +33,19 @@ export const metadata: Metadata = {
 };
 
 export default async function HelpPageRoute() {
-  const paths = await runPromise(
+  const { paths, youthTeams } = await runPromise(
     Effect.gen(function* () {
-      const repo = yield* ResponsibilityRepository;
-      return yield* repo.findAll();
+      const responsibilityRepo = yield* ResponsibilityRepository;
+      const teamRepo = yield* TeamRepository;
+      const [paths, youthTeams] = yield* Effect.all([
+        responsibilityRepo.findAll(),
+        teamRepo.findYouthTeamsForContact(),
+      ]);
+      return { paths, youthTeams };
     }),
   );
 
-  return <HelpPage paths={paths} />;
+  return <HelpPage paths={paths} youthTeams={youthTeams} />;
 }
 
 export const revalidate = 3600;
