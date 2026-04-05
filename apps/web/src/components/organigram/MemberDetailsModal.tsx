@@ -94,7 +94,7 @@ export function MemberDetailsModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-green-main to-green-hover p-6 text-white rounded-t-xl">
+        <div className="relative bg-gradient-to-r from-kcvv-green to-kcvv-green-hover p-6 text-white rounded-t-xl">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
@@ -215,7 +215,7 @@ export function MemberDetailsModal({
             member.department !== "algemeen" && (
               <div>
                 <SectionHeading>Afdeling</SectionHeading>
-                <span className="inline-block px-4 py-2 bg-green-main/10 text-green-main rounded-lg font-medium">
+                <span className="inline-block px-4 py-2 bg-kcvv-green/10 text-kcvv-green rounded-lg font-medium">
                   {member.department === "hoofdbestuur"
                     ? "Hoofdbestuur"
                     : "Jeugdbestuur"}
@@ -268,7 +268,7 @@ export function MemberDetailsModal({
             <div className="pt-4 border-t border-gray-light">
               <Link
                 href={primaryMember.href}
-                className="inline-flex items-center gap-2 text-green-main hover:text-green-hover font-semibold transition-colors"
+                className="inline-flex items-center gap-2 text-kcvv-green hover:text-kcvv-green-hover font-semibold transition-colors"
               >
                 <span>Bekijk volledig profiel</span>
                 <svg
@@ -293,7 +293,7 @@ export function MemberDetailsModal({
         <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-green-main text-white font-semibold rounded-lg hover:bg-green-hover transition-colors"
+            className="px-6 py-2 bg-kcvv-green text-white font-semibold rounded-lg hover:bg-kcvv-green-hover transition-colors"
           >
             Sluiten
           </button>
@@ -324,7 +324,7 @@ function ContactRow({
   return (
     <div className="flex items-center gap-3">
       <svg
-        className="w-5 h-5 text-green-main flex-shrink-0"
+        className="w-5 h-5 text-kcvv-green flex-shrink-0"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -338,7 +338,7 @@ function ContactRow({
       </svg>
       <a
         href={href}
-        className="text-green-main hover:text-green-hover hover:underline transition-colors"
+        className="text-kcvv-green hover:text-kcvv-green-hover hover:underline transition-colors"
       >
         {label}
       </a>
@@ -390,7 +390,7 @@ function MemberCard({
         {member.href && (
           <Link
             href={member.href}
-            className="inline-flex items-center gap-1 mt-2 text-sm text-green-main hover:text-green-hover font-semibold transition-colors"
+            className="inline-flex items-center gap-1 mt-2 text-sm text-kcvv-green hover:text-kcvv-green-hover font-semibold transition-colors"
           >
             <span>Bekijk volledig profiel</span>
             <svg
