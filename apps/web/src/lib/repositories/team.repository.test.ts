@@ -19,6 +19,7 @@ import {
   TeamRepositoryLive,
   type TeamNavVM,
   type StaffMemberVM,
+  type YouthTeamForContactVM,
 } from "./team.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -291,7 +292,7 @@ describe("TeamRepository", () => {
               member: null,
             },
             {
-              role: "Trainer",
+              role: "trainer",
               member: {
                 _id: "staff-2",
                 firstName: "Jan",
@@ -354,6 +355,167 @@ describe("TeamRepository", () => {
       );
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("findYouthTeamsForContact", () => {
+    it("maps youth teams with staff contact info", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          _id: "team-u13",
+          name: "U13A",
+          slug: "u13a",
+          age: "U13",
+          staff: [
+            {
+              role: "trainer",
+              member: {
+                _id: "staff-1",
+                firstName: "Jan",
+                lastName: "Janssens",
+                email: "jan@kcvv.be",
+                phone: "+32 123",
+              },
+            },
+            {
+              role: "afgevaardigde",
+              member: {
+                _id: "staff-2",
+                firstName: "Piet",
+                lastName: "Pieters",
+                email: "piet@kcvv.be",
+                phone: null,
+              },
+            },
+          ],
+        },
+      ]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findYouthTeamsForContact();
+        }),
+      );
+
+      expect(teams).toHaveLength(1);
+      expect(teams[0]).toEqual<YouthTeamForContactVM>({
+        id: "team-u13",
+        name: "U13A",
+        slug: "u13a",
+        age: "U13",
+        staff: [
+          {
+            id: "staff-1",
+            firstName: "Jan",
+            lastName: "Janssens",
+            role: "trainer",
+            email: "jan@kcvv.be",
+            phone: "+32 123",
+          },
+          {
+            id: "staff-2",
+            firstName: "Piet",
+            lastName: "Pieters",
+            role: "afgevaardigde",
+            email: "piet@kcvv.be",
+          },
+        ],
+      });
+    });
+
+    it("filters out staff entries with null member", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          _id: "team-u9",
+          name: "U9A",
+          slug: "u9a",
+          age: "U9",
+          staff: [
+            { role: "trainer", member: null },
+            {
+              role: "afgevaardigde",
+              member: {
+                _id: "staff-3",
+                firstName: "Kim",
+                lastName: "De Smet",
+                email: null,
+                phone: null,
+              },
+            },
+          ],
+        },
+      ]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findYouthTeamsForContact();
+        }),
+      );
+
+      expect(teams[0].staff).toHaveLength(1);
+      expect(teams[0].staff[0].id).toBe("staff-3");
+      expect(teams[0].staff[0].email).toBeUndefined();
+      expect(teams[0].staff[0].phone).toBeUndefined();
+    });
+
+    it("filters out staff entries with null role", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          _id: "team-u11",
+          name: "U11A",
+          slug: "u11a",
+          age: "U11",
+          staff: [
+            {
+              role: null,
+              member: {
+                _id: "staff-no-role",
+                firstName: "Tom",
+                lastName: "Bakker",
+                email: "tom@kcvv.be",
+                phone: null,
+              },
+            },
+            {
+              role: "trainer",
+              member: {
+                _id: "staff-with-role",
+                firstName: "Jan",
+                lastName: "Janssens",
+                email: null,
+                phone: null,
+              },
+            },
+          ],
+        },
+      ]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findYouthTeamsForContact();
+        }),
+      );
+
+      expect(teams[0].staff).toHaveLength(1);
+      expect(teams[0].staff[0].id).toBe("staff-with-role");
+    });
+
+    it("handles null staff array", async () => {
+      mockFetch.mockResolvedValueOnce([
+        { _id: "team-u7", name: "U7A", slug: "u7a", age: "U7", staff: null },
+      ]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findYouthTeamsForContact();
+        }),
+      );
+
+      expect(teams[0].staff).toEqual([]);
     });
   });
 

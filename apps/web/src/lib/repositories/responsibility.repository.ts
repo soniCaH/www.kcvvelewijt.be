@@ -18,6 +18,7 @@ export const RESPONSIBILITY_PATHS_QUERY =
   "primaryContact": primaryContact {
     contactType,
     teamRole,
+    teamRoleFallback,
     "position": organigramNode->title,
     "roleCode": organigramNode->roleCode,
     "members": organigramNode->members[]->{
@@ -37,6 +38,7 @@ export const RESPONSIBILITY_PATHS_QUERY =
     "contact": select(defined(contact) => contact {
       contactType,
       teamRole,
+      teamRoleFallback,
       "position": organigramNode->title,
       "roleCode": organigramNode->roleCode,
       "members": organigramNode->members[]->{
@@ -77,6 +79,9 @@ function toContact(c: ContactRow): Contact {
       : {}),
     ...(c.nodeId ? { nodeId: c.nodeId } : {}),
     ...(c.teamRole ? { teamRole: c.teamRole as Contact["teamRole"] } : {}),
+    ...(c.teamRoleFallback
+      ? { teamRoleFallback: c.teamRoleFallback as Contact["teamRoleFallback"] }
+      : {}),
     ...(c.role ? { role: c.role } : {}),
     ...(c.email ? { email: c.email } : {}),
     ...(c.phone ? { phone: c.phone } : {}),

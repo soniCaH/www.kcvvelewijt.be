@@ -361,6 +361,13 @@ export type Slug = {
   source?: string;
 };
 
+export type OrganigramNodeReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "organigramNode";
+};
+
 export type ResponsibilityReference = {
   _ref: string;
   _type: "reference";
@@ -392,7 +399,10 @@ export type Responsibility = {
     | "commercieel";
   icon?: string;
   primaryContact?: {
-    staffMember?: StaffMemberReference;
+    contactType?: "position" | "team-role" | "manual";
+    organigramNode?: OrganigramNodeReference;
+    teamRole?: "trainer" | "afgevaardigde";
+    teamRoleFallback?: "trainer" | "afgevaardigde";
     role?: string;
     email?: string;
     phone?: string;
@@ -402,7 +412,10 @@ export type Responsibility = {
     description?: string;
     link?: string;
     contact?: {
-      staffMember?: StaffMemberReference;
+      contactType?: "position" | "team-role" | "manual";
+      organigramNode?: OrganigramNodeReference;
+      teamRole?: "trainer" | "afgevaardigde";
+      teamRoleFallback?: "trainer" | "afgevaardigde";
       role?: string;
       email?: string;
       phone?: string;
@@ -416,13 +429,6 @@ export type Responsibility = {
       _key: string;
     } & ResponsibilityReference
   >;
-};
-
-export type OrganigramNodeReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "organigramNode";
 };
 
 export type OrganigramNode = {
@@ -443,47 +449,6 @@ export type OrganigramNode = {
   >;
   active?: boolean;
   sortOrder?: number;
-};
-
-export type StaffMember = {
-  _id: string;
-  _type: "staffMember";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  birthDate?: string;
-  joinDate?: string;
-  photo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  bio?: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
-    markDefs?: Array<{
-      href?: string;
-      _type: "link";
-      _key: string;
-    }>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  }>;
-  psdId?: string;
-  archived?: boolean;
 };
 
 export type TrainingSession = {
@@ -571,11 +536,53 @@ export type Team = {
       _key: string;
     } & TrainingSession
   >;
-  staff?: Array<
-    {
+  staff?: Array<{
+    member?: StaffMemberReference;
+    role?: "trainer" | "afgevaardigde";
+    _key: string;
+  }>;
+  archived?: boolean;
+};
+
+export type StaffMember = {
+  _id: string;
+  _type: "staffMember";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  birthDate?: string;
+  joinDate?: string;
+  photo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  bio?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
       _key: string;
-    } & StaffMemberReference
-  >;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  functionTitle?: string;
+  psdId?: string;
   archived?: boolean;
 };
 
@@ -759,13 +766,13 @@ export type AllSanitySchemaTypes =
   | Article
   | Page
   | Slug
+  | OrganigramNodeReference
   | ResponsibilityReference
   | Responsibility
-  | OrganigramNodeReference
   | OrganigramNode
-  | StaffMember
   | TrainingSession
   | Team
+  | StaffMember
   | Player
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -1168,7 +1175,7 @@ export type EVENTS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: NEXT_FEATURED_EVENT_QUERY
-// Query: coalesce(...)
+// Query: coalesce(    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    },    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    }  )
 export type NEXT_FEATURED_EVENT_QUERY_RESULT = {
   id: string;
   title: string | "";
@@ -1380,7 +1387,7 @@ export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/responsibility.repository.ts
 // Variable: RESPONSIBILITY_PATHS_QUERY
-// Query: *[_type == "responsibility" && active == true] | order(title asc) {  "id": slug.current,  "role": audience,  question,  keywords,  summary,  category,  icon,  "primaryContact": primaryContact {    "role": role,    "email": select(defined(staffMember) => staffMember->email, email),    "phone": select(defined(staffMember) => staffMember->phone, phone),    "department": select(defined(staffMember) => staffMember->department, department),    "name": select(      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,      null    ),    "memberId": staffMember->_id  },  "steps": steps[] {    description,    link,    "contact": select(defined(contact) => contact {      "role": role,      "email": select(defined(staffMember) => staffMember->email, email),      "phone": select(defined(staffMember) => staffMember->phone, phone),      "department": select(defined(staffMember) => staffMember->department, department),      "name": select(        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,        null      ),      "memberId": staffMember->_id    }, null)  },  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])}
+// Query: *[_type == "responsibility" && active == true] | order(title asc) {  "id": slug.current,  "role": audience,  question,  keywords,  summary,  category,  icon,  "primaryContact": primaryContact {    contactType,    teamRole,    teamRoleFallback,    "position": organigramNode->title,    "roleCode": organigramNode->roleCode,    "members": organigramNode->members[]->{      "id": _id,      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),      email, phone    },    "nodeId": organigramNode->_id,    "role": role,    "email": email,    "phone": phone,    "department": department  },  "steps": steps[] {    description,    link,    "contact": select(defined(contact) => contact {      contactType,      teamRole,      teamRoleFallback,      "position": organigramNode->title,      "roleCode": organigramNode->roleCode,      "members": organigramNode->members[]->{        "id": _id,        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),        email, phone      },      "nodeId": organigramNode->_id,      "role": role,      "email": email,      "phone": phone,      "department": department    }, null)  },  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])}
 export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
   id: string | null;
   role: Array<
@@ -1399,13 +1406,14 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
     | null;
   icon: string | null;
   primaryContact: {
-    contactType: string | null;
-    teamRole: string | null;
+    contactType: "manual" | "position" | "team-role" | null;
+    teamRole: "afgevaardigde" | "trainer" | null;
+    teamRoleFallback: "afgevaardigde" | "trainer" | null;
     position: string | null;
     roleCode: string | null;
     members: Array<{
-      id: string | null;
-      name: string | null;
+      id: string;
+      name: string | " ";
       email: string | null;
       phone: string | null;
     }> | null;
@@ -1413,19 +1421,20 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
     role: string | null;
     email: string | null;
     phone: string | null;
-    department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
+    department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
   } | null;
   steps: Array<{
     description: string | null;
     link: string | null;
     contact: {
-      contactType: string | null;
-      teamRole: string | null;
+      contactType: "manual" | "position" | "team-role" | null;
+      teamRole: "afgevaardigde" | "trainer" | null;
+      teamRoleFallback: "afgevaardigde" | "trainer" | null;
       position: string | null;
       roleCode: string | null;
       members: Array<{
-        id: string | null;
-        name: string | null;
+        id: string;
+        name: string | " ";
         email: string | null;
         phone: string | null;
       }> | null;
@@ -1433,7 +1442,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
       role: string | null;
       email: string | null;
       phone: string | null;
-      department: null | "algemeen" | "hoofdbestuur" | "jeugdbestuur";
+      department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
     } | null;
   }> | null;
   relatedPaths: Array<never> | Array<string | null>;
@@ -1441,7 +1450,7 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/sponsor.repository.ts
 // Variable: SPONSORS_QUERY
-// Query: *[_type == "sponsor" && active == true] | order(name asc) {  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description, "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
+// Query: *[_type == "sponsor" && active == true] | order(name asc) {  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
 export type SPONSORS_QUERY_RESULT = Array<{
   id: string;
   name: string | "";
@@ -1487,7 +1496,7 @@ export type KEY_CONTACTS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBER_BY_PSD_ID_QUERY
-// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }}
+// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }}
 export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
   _id: string;
   psdId: string | null;
@@ -1636,7 +1645,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
     transparentImageUrl: string | null;
   }> | null;
   staff: Array<{
-    role: string | null;
+    role: "afgevaardigde" | "trainer" | null;
     member: {
       _id: string;
       firstName: string | null;
@@ -1646,6 +1655,26 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
     } | null;
   }> | null;
 } | null;
+
+// Source: ../web/src/lib/repositories/team.repository.ts
+// Variable: YOUTH_TEAMS_CONTACT_QUERY
+// Query: *[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {  _id, name, "slug": slug.current, age,  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }}
+export type YOUTH_TEAMS_CONTACT_QUERY_RESULT = Array<{
+  _id: string;
+  name: string | null;
+  slug: string | null;
+  age: string | null;
+  staff: Array<{
+    role: "afgevaardigde" | "trainer" | null;
+    member: {
+      _id: string;
+      firstName: string | null;
+      lastName: string | null;
+      email: string | null;
+      phone: string | null;
+    } | null;
+  }> | null;
+}>;
 
 // Source: ../web/src/lib/repositories/team.repository.ts
 // Variable: TEAMS_LANDING_QUERY
@@ -1660,7 +1689,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
   tagline: string | null;
   teamImageUrl: string | null;
   staff: Array<{
-    role: string | null;
+    role: "afgevaardigde" | "trainer" | null;
     member: {
       firstName: string | null;
       lastName: string | null;
@@ -1685,14 +1714,15 @@ declare module "@sanity/client" {
     '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
-    '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    "role": role,\n    "email": select(defined(staffMember) => staffMember->email, email),\n    "phone": select(defined(staffMember) => staffMember->phone, phone),\n    "department": select(defined(staffMember) => staffMember->department, department),\n    "name": select(\n      defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n      null\n    ),\n    "memberId": staffMember->_id\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      "role": role,\n      "email": select(defined(staffMember) => staffMember->email, email),\n      "phone": select(defined(staffMember) => staffMember->phone, phone),\n      "department": select(defined(staffMember) => staffMember->department, department),\n      "name": select(\n        defined(staffMember) => staffMember->firstName + " " + staffMember->lastName,\n        null\n      ),\n      "memberId": staffMember->_id\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
+    '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    contactType,\n    teamRole,\n    teamRoleFallback,\n    "position": organigramNode->title,\n    "roleCode": organigramNode->roleCode,\n    "members": organigramNode->members[]->{\n      "id": _id,\n      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n      email, phone\n    },\n    "nodeId": organigramNode->_id,\n    "role": role,\n    "email": email,\n    "phone": phone,\n    "department": department\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      contactType,\n      teamRole,\n      teamRoleFallback,\n      "position": organigramNode->title,\n      "roleCode": organigramNode->roleCode,\n      "members": organigramNode->members[]->{\n        "id": _id,\n        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n        email, phone\n      },\n      "nodeId": organigramNode->_id,\n      "role": role,\n      "email": email,\n      "phone": phone,\n      "department": department\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,\n  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{\n  title,\n  roleCode,\n  "members": members[@->archived != true && defined(@->email)]->{\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    email\n  }\n}[count(members) > 0] | order(title asc)': KEY_CONTACTS_QUERY_RESULT;
-    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },\n  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },\n  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.\n  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).\n  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).\n  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  trainingSchedule,\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[] { role, "member": member-> { _id, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }\n}': TEAM_BY_SLUG_QUERY_RESULT;
+    '*[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }\n}': YOUTH_TEAMS_CONTACT_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  staff[] { role, "member": member-> { firstName, lastName, functionTitle } }\n}': TEAMS_LANDING_QUERY_RESULT;
   }
 }

@@ -10,7 +10,7 @@ interface SanityRef {
 
 type SeedContact =
   | { contactType: "position"; organigramNode: SanityRef }
-  | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde" }
+  | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde"; teamRoleFallback?: "trainer" | "afgevaardigde" }
   | { contactType: "manual"; role?: string; email?: string; phone?: string; department?: string };
 
 function ref(id: string): SanityRef {
@@ -32,6 +32,14 @@ function manualContact(fields: { role?: string; email?: string; phone?: string; 
   return {
     contactType: "manual",
     ...fields,
+  };
+}
+
+function teamRoleContact(teamRole: "trainer" | "afgevaardigde", fallback?: "trainer" | "afgevaardigde"): SeedContact {
+  return {
+    contactType: "team-role",
+    teamRole,
+    ...(fallback ? { teamRoleFallback: fallback } : {}),
   };
 }
 
@@ -156,6 +164,168 @@ const responsibilities: ResponsibilityDoc[] = [
     primaryContact: positionContact("organigramNode-gerechtelijk-correspondent"),
     steps: [
       step("Neem direct contact op met de Gerechtelijk Correspondent"),
+    ],
+  },
+
+  // ── Sportief (dynamic — team-role) ──────────────────────────────────────
+
+  {
+    _id: "responsibility-vraag-over-training",
+    _type: "responsibility",
+    title: "Vraag over de training",
+    slug: slug("vraag-over-training"),
+    active: true,
+    audience: ["ouder", "speler"],
+    question: "heb een vraag over de training",
+    keywords: ["training", "oefening", "trainer", "ploeg", "trainingsuur", "trainingsdag", "schema"],
+    summary: "Neem contact op met de trainer van je ploeg. Bij escalatie: JC of TVJO.",
+    category: "sportief",
+    icon: "dumbbell",
+    primaryContact: teamRoleContact("trainer"),
+    steps: [
+      step("Neem contact op met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
+      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
+      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
+      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+    ],
+  },
+  {
+    _id: "responsibility-kind-niet-opgesteld",
+    _type: "responsibility",
+    title: "Kind niet opgesteld",
+    slug: slug("kind-niet-opgesteld"),
+    active: true,
+    audience: ["ouder"],
+    question: "begrijp niet waarom mijn kind niet opgesteld wordt",
+    keywords: ["opgesteld", "opstelling", "niet spelen", "bank", "selectie", "niet geselecteerd", "wisselspeler"],
+    summary: "Bespreek het eerst met de trainer van je ploeg. Bij onvoldoende antwoord: JC of TVJO.",
+    category: "sportief",
+    icon: "user-x",
+    primaryContact: teamRoleContact("trainer"),
+    steps: [
+      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
+      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
+      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
+      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+    ],
+  },
+  {
+    _id: "responsibility-afwezigheid-melden",
+    _type: "responsibility",
+    title: "Afwezigheid melden",
+    slug: slug("afwezigheid-melden"),
+    active: true,
+    audience: ["ouder", "speler"],
+    question: "wil een afwezigheid melden voor training of wedstrijd",
+    keywords: ["afwezigheid", "afwezig", "niet kunnen", "ziek", "vakantie", "melden", "verwittigen"],
+    summary: "Meld je afwezigheid aan de trainer of afgevaardigde van je ploeg.",
+    category: "sportief",
+    icon: "calendar-x",
+    primaryContact: teamRoleContact("trainer"),
+    steps: [
+      step("Meld je afwezigheid aan de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("Of meld het aan de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
+      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
+    ],
+  },
+  {
+    _id: "responsibility-sportongeval-jeugd",
+    _type: "responsibility",
+    title: "Sportongeval jeugd",
+    slug: slug("sportongeval-jeugd"),
+    active: true,
+    audience: ["ouder", "speler"],
+    question: "heb een sportongeval gehad als jeugdspeler",
+    keywords: ["sportongeval", "ongeval", "blessure", "letsel", "jeugd", "verzekering", "dokter"],
+    summary: "Meld het onmiddellijk aan de trainer of afgevaardigde. Zij helpen je met de verdere stappen.",
+    category: "medisch",
+    icon: "alert-triangle",
+    primaryContact: teamRoleContact("trainer", "afgevaardigde"),
+    steps: [
+      step("Meld het onmiddellijk aan de trainer of afgevaardigde van je ploeg", { contact: teamRoleContact("trainer", "afgevaardigde") }),
+      step("Neem contact op met de Gerechtelijk Correspondent voor de verzekering", { contact: positionContact("organigramNode-gerechtelijk-correspondent") }),
+    ],
+  },
+  {
+    _id: "responsibility-ploegindeling-vraag",
+    _type: "responsibility",
+    title: "Vraag over ploegindeling",
+    slug: slug("ploegindeling-vraag"),
+    active: true,
+    audience: ["ouder", "speler"],
+    question: "heb een vraag over de ploegindeling",
+    keywords: ["ploegindeling", "indeling", "welke ploeg", "categorie", "leeftijdsgroep", "niveau"],
+    summary: "Bespreek het met de trainer. Bij escalatie: JC of TVJO.",
+    category: "sportief",
+    icon: "users",
+    primaryContact: teamRoleContact("trainer"),
+    steps: [
+      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
+      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
+      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
+      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+    ],
+  },
+  {
+    _id: "responsibility-wedstrijdinfo-jeugd",
+    _type: "responsibility",
+    title: "Wedstrijdinformatie jeugd",
+    slug: slug("wedstrijdinfo-jeugd"),
+    active: true,
+    audience: ["ouder", "speler"],
+    question: "zoek informatie over een wedstrijd van mijn ploeg",
+    keywords: ["wedstrijd", "wedstrijdinfo", "locatie", "uur", "tegenstander", "verplaatsing", "afspraak"],
+    summary: "Neem contact op met de afgevaardigde van je ploeg voor wedstrijdinformatie.",
+    category: "sportief",
+    icon: "map-pin",
+    primaryContact: teamRoleContact("afgevaardigde"),
+    steps: [
+      step("Neem contact op met de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
+      step("Of contacteer de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
+    ],
+  },
+  {
+    _id: "responsibility-speler-gedrag-ploeg",
+    _type: "responsibility",
+    title: "Gedrag van een speler in de ploeg",
+    slug: slug("speler-gedrag-ploeg"),
+    active: true,
+    audience: ["ouder", "trainer"],
+    question: "wil het gedrag van een speler in de ploeg bespreken",
+    keywords: ["gedrag", "speler", "pesten", "sfeer", "ploeg", "team", "samenwerking", "respect"],
+    summary: "Bespreek het eerst met de trainer. Bij escalatie: JC of API.",
+    category: "gedrag",
+    icon: "message-circle",
+    primaryContact: teamRoleContact("trainer"),
+    steps: [
+      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
+      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
+      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
+      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+      step("Escalatie: Aanspreekpunt Integriteit (API)", { contact: positionContact("organigramNode-api-integriteit") }),
+    ],
+  },
+  {
+    _id: "responsibility-materiaal-ploeg",
+    _type: "responsibility",
+    title: "Materiaal voor de ploeg",
+    slug: slug("materiaal-ploeg"),
+    active: true,
+    audience: ["trainer"],
+    question: "heb materiaal nodig voor mijn ploeg",
+    keywords: ["materiaal", "ballen", "hesjes", "pionnen", "doelen", "uitrusting", "veld"],
+    summary: "Neem contact op met de afgevaardigde van je ploeg of de materiaalbeheerder.",
+    category: "sportief",
+    icon: "package",
+    primaryContact: teamRoleContact("afgevaardigde"),
+    steps: [
+      step("Neem contact op met de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
+      step("Of neem contact op met de materiaalbeheerder", { contact: positionContact("organigramNode-materiaal-kantinedienst-wedstrijden") }),
     ],
   },
 

@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { ResponsibilityFinder } from "@/components/responsibility";
 import type { ResponsibilityPath } from "@/types/responsibility";
+import type { YouthTeamForContactVM } from "@/lib/repositories/team.repository";
 
 /**
  * Render the Help page with a responsibility-based finder, informational cards, and a three-step workflow.
@@ -13,7 +14,13 @@ import type { ResponsibilityPath } from "@/types/responsibility";
  * @param paths - Optional array of responsibility paths to populate the ResponsibilityFinder; defaults to an empty array.
  * @returns The Help page as a JSX element.
  */
-export function HelpPage({ paths = [] }: { paths?: ResponsibilityPath[] }) {
+export function HelpPage({
+  paths = [],
+  youthTeams = [],
+}: {
+  paths?: ResponsibilityPath[];
+  youthTeams?: YouthTeamForContactVM[];
+}) {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
       {/* Hero Section */}
@@ -36,7 +43,7 @@ export function HelpPage({ paths = [] }: { paths?: ResponsibilityPath[] }) {
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <ResponsibilityFinder paths={paths} />
+        <ResponsibilityFinder paths={paths} youthTeams={youthTeams} />
 
         {/* Additional Info */}
         <h2
