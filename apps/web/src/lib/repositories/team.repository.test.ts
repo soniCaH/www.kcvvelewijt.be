@@ -292,7 +292,7 @@ describe("TeamRepository", () => {
               member: null,
             },
             {
-              role: "Trainer",
+              role: "trainer",
               member: {
                 _id: "staff-2",
                 firstName: "Jan",

@@ -1110,7 +1110,7 @@ function ResultCard({
               const safeStepLink = toSafeHref(step.link);
               const isHighlightedJc =
                 jcGroup !== null &&
-                step.description.toLowerCase().includes(`jc ${jcGroup}`);
+                step.contact?.nodeId === `organigramNode-jc-${jcGroup}`;
               return (
                 <li
                   key={stepIdx}

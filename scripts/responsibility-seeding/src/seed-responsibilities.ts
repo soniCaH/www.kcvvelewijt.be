@@ -227,6 +227,7 @@ const responsibilities: ResponsibilityDoc[] = [
     steps: [
       step("Meld je afwezigheid aan de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
       step("Of meld het aan de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
+      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
     ],
   },
   {
@@ -284,6 +285,7 @@ const responsibilities: ResponsibilityDoc[] = [
     steps: [
       step("Neem contact op met de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
       step("Of contacteer de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
+      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
     ],
   },
   {
