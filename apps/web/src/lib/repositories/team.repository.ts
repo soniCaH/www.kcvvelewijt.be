@@ -36,7 +36,7 @@ export const TEAM_BY_SLUG_QUERY =
 export const YOUTH_TEAMS_CONTACT_QUERY =
   defineQuery(`*[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {
   _id, name, "slug": slug.current, age,
-  staff[] { role, "member": member-> { _id, firstName, lastName, email, phone } }
+  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }
 }`);
 
 export const TEAMS_LANDING_QUERY =

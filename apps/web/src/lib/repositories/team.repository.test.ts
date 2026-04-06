@@ -460,6 +460,49 @@ describe("TeamRepository", () => {
       expect(teams[0].staff[0].phone).toBeUndefined();
     });
 
+    it("filters out staff entries with null role", async () => {
+      mockFetch.mockResolvedValueOnce([
+        {
+          _id: "team-u11",
+          name: "U11A",
+          slug: "u11a",
+          age: "U11",
+          staff: [
+            {
+              role: null,
+              member: {
+                _id: "staff-no-role",
+                firstName: "Tom",
+                lastName: "Bakker",
+                email: "tom@kcvv.be",
+                phone: null,
+              },
+            },
+            {
+              role: "trainer",
+              member: {
+                _id: "staff-with-role",
+                firstName: "Jan",
+                lastName: "Janssens",
+                email: null,
+                phone: null,
+              },
+            },
+          ],
+        },
+      ]);
+
+      const teams = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findYouthTeamsForContact();
+        }),
+      );
+
+      expect(teams[0].staff).toHaveLength(1);
+      expect(teams[0].staff[0].id).toBe("staff-with-role");
+    });
+
     it("handles null staff array", async () => {
       mockFetch.mockResolvedValueOnce([
         { _id: "team-u7", name: "U7A", slug: "u7a", age: "U7", staff: null },
