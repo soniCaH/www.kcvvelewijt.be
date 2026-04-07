@@ -1,3 +1,6 @@
+export { HulpPage } from "./HulpPage";
+export type { HulpPageProps } from "./HulpPage";
+
 export { HulpSearchInput } from "./HulpSearchInput";
 export type { HulpSearchInputProps } from "./HulpSearchInput";
 
