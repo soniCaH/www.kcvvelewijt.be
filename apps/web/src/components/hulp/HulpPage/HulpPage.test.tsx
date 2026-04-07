@@ -280,6 +280,42 @@ describe("HulpPage", () => {
     expect(screen.getByText("Medisch")).toBeInTheDocument();
   });
 
+  it("does not push or track when clicking a question card whose id matches selectedIdParam", () => {
+    // Race-window scenario: the URL still has `?id=lidgeld-inschrijving`
+    // (router.replace hasn't propagated yet) but the user has typed
+    // something into the search box, so search results render and the
+    // matching question card is visible. Clicking it must be a no-op
+    // because that path is already the "selected" one in the URL.
+    mockSearchParams = new URLSearchParams("id=lidgeld-inschrijving");
+    currentResults = [
+      {
+        id: "lidgeld-inschrijving",
+        slug: "lidgeld-inschrijving",
+        type: "responsibility",
+        score: 0.9,
+        title: "Ik wil mij of mijn kind inschrijven",
+        excerpt: "...",
+      },
+    ];
+    currentExecutedQuery = "inschrijving";
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "inschrijving" },
+    });
+    // Search results now render the matching question card. Clear the
+    // mocks so we only assert what happens on the clicking step.
+    mockPush.mockClear();
+    trackSuggestionClicked.mockClear();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /ik wil mij of mijn kind inschrijven/i,
+      }),
+    );
+    // Dedup guard in handlePathClick: id === selectedIdParam → return.
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(trackSuggestionClicked).not.toHaveBeenCalled();
+  });
+
   it("clears ?id= and shows search results when the user starts typing in answer view", () => {
     mockSearchParams = new URLSearchParams("id=lidgeld-inschrijving");
     render(<HulpPage paths={FIXTURE_PATHS} />);

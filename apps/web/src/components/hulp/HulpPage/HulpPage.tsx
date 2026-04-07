@@ -46,6 +46,46 @@ export interface HulpPageProps {
 
 const URL_PARAM = "id";
 
+/**
+ * Inline contact-CTA card used in two places on the page: the empty-data
+ * fallback (when Sanity returns no responsibility paths) and the closing
+ * "still no answer?" callout below the browse/search content. Kept local
+ * to HulpPage because it has no other consumers.
+ */
+function ContactCtaCard({
+  heading,
+  body,
+  centered = false,
+  role,
+}: {
+  heading: string;
+  body: string;
+  centered?: boolean;
+  role?: "status";
+}) {
+  return (
+    <div
+      role={role}
+      className={
+        centered
+          ? "mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 text-center shadow-sm md:p-8"
+          : "mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm md:p-8"
+      }
+    >
+      <h2 className="font-title text-2xl font-bold uppercase leading-tight text-kcvv-black">
+        {heading}
+      </h2>
+      <p className="mt-2 text-sm text-kcvv-gray">{body}</p>
+      <a
+        href="mailto:info@kcvvelewijt.be"
+        className="mt-4 inline-flex items-center gap-2 rounded-sm bg-kcvv-green-bright px-5 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-black transition-colors hover:bg-kcvv-green-dark hover:text-white"
+      >
+        Contact opnemen
+      </a>
+    </div>
+  );
+}
+
 export function HulpPage({ paths }: HulpPageProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -250,24 +290,12 @@ export function HulpPage({ paths }: HulpPageProps) {
     // explicit fallback instead of leaving the page mostly empty.
     if (paths.length === 0) {
       return (
-        <div
+        <ContactCtaCard
+          centered
           role="status"
-          className="mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 text-center shadow-sm md:p-8"
-        >
-          <h2 className="font-title text-xl font-bold uppercase leading-tight text-kcvv-black">
-            Nog geen vragen beschikbaar
-          </h2>
-          <p className="mt-2 text-sm text-kcvv-gray">
-            We zijn de hulppagina aan het vullen. Stuur ons in de tussentijd
-            gerust een bericht.
-          </p>
-          <a
-            href="mailto:info@kcvvelewijt.be"
-            className="mt-4 inline-flex items-center gap-2 rounded-sm bg-kcvv-green-bright px-5 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-black transition-colors hover:bg-kcvv-green-dark hover:text-white"
-          >
-            Contact opnemen
-          </a>
-        </div>
+          heading="Nog geen vragen beschikbaar"
+          body="We zijn de hulppagina aan het vullen. Stuur ons in de tussentijd gerust een bericht."
+        />
       );
     }
 
@@ -377,20 +405,10 @@ export function HulpPage({ paths }: HulpPageProps) {
               footer. Suppressed when `paths` is empty since the empty-
               data state already shows its own contact CTA. */}
           {paths.length > 0 && (
-            <div className="mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm md:p-8">
-              <h2 className="font-title text-2xl font-bold uppercase leading-tight text-kcvv-black">
-                Niet gevonden wat je zocht?
-              </h2>
-              <p className="mt-2 text-sm text-kcvv-gray">
-                Stuur ons een bericht en we helpen je graag verder.
-              </p>
-              <a
-                href="mailto:info@kcvvelewijt.be"
-                className="mt-4 inline-flex items-center gap-2 rounded-sm bg-kcvv-green-bright px-5 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-black transition-colors hover:bg-kcvv-green-dark hover:text-white"
-              >
-                Contact opnemen
-              </a>
-            </div>
+            <ContactCtaCard
+              heading="Niet gevonden wat je zocht?"
+              body="Stuur ons een bericht en we helpen je graag verder."
+            />
           )}
         </div>
       ),
