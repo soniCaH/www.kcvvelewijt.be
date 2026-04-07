@@ -78,7 +78,7 @@ function TimelineImage({
             src={src}
             alt={alt}
             fill
-            sizes="100vw"
+            sizes="(min-width: 1024px) 1024px, 100vw"
             className="object-contain"
           />
         </div>

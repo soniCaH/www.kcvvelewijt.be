@@ -98,6 +98,8 @@ describe("PrivacyPage", () => {
 
   it("displays the last updated date", () => {
     render(<PrivacyPage />);
-    expect(screen.getByText(/laatst bijgewerkt/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/laatst bijgewerkt:\s*februari 2026/i),
+    ).toBeInTheDocument();
   });
 });

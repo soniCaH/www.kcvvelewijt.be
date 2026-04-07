@@ -47,12 +47,56 @@ describe("BrandedTabs", () => {
     expect(inactive).toHaveAttribute("tabindex", "-1");
   });
 
-  it("calls onTabChange with the clicked tab id", () => {
+  it("calls onTabChange exactly once with the clicked tab id", () => {
     const onTabChange = vi.fn();
     render(
       <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={onTabChange} />,
     );
     fireEvent.click(screen.getByRole("tab", { name: "Wedstrijden" }));
+    expect(onTabChange).toHaveBeenCalledTimes(1);
+    expect(onTabChange).toHaveBeenCalledWith("wedstrijden");
+  });
+
+  it("does not call onTabChange when clicking the already-active tab", () => {
+    const onTabChange = vi.fn();
+    render(
+      <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={onTabChange} />,
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Info" }));
+    expect(onTabChange).not.toHaveBeenCalled();
+  });
+
+  it("moves selection right with ArrowRight and updates tabIndex", () => {
+    const onTabChange = vi.fn();
+    const { rerender } = render(
+      <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={onTabChange} />,
+    );
+    const info = screen.getByRole("tab", { name: "Info" });
+    fireEvent.keyDown(info, { key: "ArrowRight" });
+    expect(onTabChange).toHaveBeenCalledTimes(1);
+    expect(onTabChange).toHaveBeenCalledWith("spelers");
+
+    rerender(
+      <BrandedTabs
+        tabs={tabs}
+        activeTabId="spelers"
+        onTabChange={onTabChange}
+      />,
+    );
+    const spelers = screen.getByRole("tab", { name: "Spelers" });
+    expect(spelers).toHaveAttribute("tabindex", "0");
+    expect(spelers).toHaveAttribute("aria-selected", "true");
+    expect(info).toHaveAttribute("tabindex", "-1");
+    expect(info).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("moves selection left with ArrowLeft and wraps around", () => {
+    const onTabChange = vi.fn();
+    render(
+      <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={onTabChange} />,
+    );
+    const info = screen.getByRole("tab", { name: "Info" });
+    fireEvent.keyDown(info, { key: "ArrowLeft" });
     expect(onTabChange).toHaveBeenCalledWith("wedstrijden");
   });
 

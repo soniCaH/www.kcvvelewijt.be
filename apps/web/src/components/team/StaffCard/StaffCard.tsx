@@ -35,13 +35,17 @@ export interface StaffCardProps {
  * Longer titles are reduced to uppercase initials of word boundaries.
  */
 function abbreviateFunctionTitle(title: string): string {
-  if (title.length <= 4) return title;
-  const expanded = title.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const trimmed = title.trim().replace(/\s+/g, " ");
+  if (trimmed.length === 0) return "";
+  const expanded = trimmed.replace(/([a-z])([A-Z])/g, "$1 $2");
   const words = expanded.split(/[\s-]+/).filter(Boolean);
   if (words.length > 1) {
-    return words.map((w) => w[0]!.toUpperCase()).join("");
+    return words
+      .map((w) => w[0]!.toUpperCase())
+      .join("")
+      .slice(0, 4);
   }
-  return title.slice(0, 4).toUpperCase();
+  return trimmed.slice(0, 4).toUpperCase();
 }
 
 export function StaffCard({
