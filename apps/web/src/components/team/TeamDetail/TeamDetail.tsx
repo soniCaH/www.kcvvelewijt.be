@@ -184,7 +184,12 @@ export function TeamDetail({
     },
   ];
 
-  if (hasPlayers || hasStaff) {
+  // The Spelers tab is only added when there are actual players to show.
+  // Staff-only teams (hasPlayers=false, hasStaff=true) surface their staff
+  // through `InfoPanel`'s `showStaffInInfo` branch instead — adding a
+  // separate Spelers tab in that case would duplicate the same staff
+  // content across two tabs and pick a meaningless default.
+  if (hasPlayers) {
     panels.push({
       id: "spelers",
       label: "Spelers",
@@ -244,8 +249,11 @@ export function TeamDetail({
     });
   }
 
-  // Default tab: prefer Spelers when available, fall back to Info
-  const defaultTabId = hasPlayers || hasStaff ? "spelers" : "info";
+  // Default tab: prefer Spelers when there are actual players (the only
+  // case where the Spelers tab is added — see above). Staff-only and
+  // empty teams default to Info, which is where their staff / fallback
+  // copy lives.
+  const defaultTabId = hasPlayers ? "spelers" : "info";
 
   const sections: SectionConfig[] = [
     {

@@ -134,6 +134,19 @@ describe("TeamDetail", () => {
     expect(active).toHaveAccessibleName("Info");
   });
 
+  it("does not add a Spelers tab when only staff is present (staff renders in Info)", () => {
+    render(<TeamDetail header={header} staff={staff} />);
+    const tabLabels = screen
+      .getAllByRole("tab")
+      .map((t) => t.textContent?.trim());
+    expect(tabLabels).not.toContain("Spelers");
+    // The default tab should be Info (the only tab in this case)
+    const active = screen
+      .getAllByRole("tab")
+      .find((t) => t.getAttribute("aria-selected") === "true");
+    expect(active).toHaveAccessibleName("Info");
+  });
+
   it("respects the ?tab= URL parameter", () => {
     mockSearchParams = new URLSearchParams("tab=wedstrijden");
     render(
