@@ -1,21 +1,22 @@
 /**
- * Help / Responsibility Finder Page
+ * Help / Hulp Page
  *
- * "Ik ben ... en ik ..." question builder to find the right contact person
+ * Search + browse + answer view for the responsibility paths fetched
+ * from Sanity. The new HulpPage UX replaces the legacy
+ * "Ik ben … en ik …" inline-sentence finder.
  */
 
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
-import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { HulpPage } from "@/components/hulp/HulpPage";
 import { runPromise } from "@/lib/effect/runtime";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
-import { TeamRepository } from "@/lib/repositories/team.repository";
 
 export const metadata: Metadata = {
   title: "Hulp & Contact | KCVV Elewijt",
   description:
-    "Vind snel de juiste contactpersoon voor jouw vraag. Wie ben je en wat wil je weten?",
+    "Vind snel de juiste contactpersoon voor jouw vraag. Stel je vraag of blader door de categorieën.",
   keywords: [
     "hulp",
     "contact",
@@ -32,20 +33,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function HelpPageRoute() {
-  const { paths, youthTeams } = await runPromise(
+export default async function HulpPageRoute() {
+  const paths = await runPromise(
     Effect.gen(function* () {
       const responsibilityRepo = yield* ResponsibilityRepository;
-      const teamRepo = yield* TeamRepository;
-      const [paths, youthTeams] = yield* Effect.all([
-        responsibilityRepo.findAll(),
-        teamRepo.findYouthTeamsForContact(),
-      ]);
-      return { paths, youthTeams };
+      return yield* responsibilityRepo.findAll();
     }),
   );
 
-  return <HelpPage paths={paths} youthTeams={youthTeams} />;
+  return <HulpPage paths={paths} />;
 }
 
 export const revalidate = 3600;
