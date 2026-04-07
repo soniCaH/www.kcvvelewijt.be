@@ -69,6 +69,7 @@ export function BrandedTabs({
         return (
           <button
             key={tab.id}
+            id={tab.id}
             ref={(el) => {
               tabRefs.current[index] = el;
             }}

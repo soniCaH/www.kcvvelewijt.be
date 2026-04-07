@@ -68,6 +68,8 @@ export function BestuurPage({
 }: BestuurPageProps) {
   const hasMembers = players.length > 0 || staff.length > 0;
   const hasDescription = !!description?.trim();
+  const trimmedTagline = header.tagline?.trim();
+  const heroBody = trimmedTagline || "De mensen achter KCVV Elewijt";
 
   const sections: SectionConfig[] = [
     {
@@ -83,7 +85,7 @@ export function BestuurPage({
           imageAlt={`${header.name} groepsfoto`}
           label="De club"
           headline={header.name}
-          body={header.tagline ?? "De mensen achter KCVV Elewijt"}
+          body={heroBody}
         />
       ),
       transition: { type: "diagonal", direction: "right", overlap: "full" },

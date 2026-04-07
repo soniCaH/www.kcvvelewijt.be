@@ -163,6 +163,23 @@ describe("TeamDetail", () => {
     expect(active).toHaveAccessibleName("Wedstrijden");
   });
 
+  it("falls back to the default tab when ?tab= is an unknown id", () => {
+    mockSearchParams = new URLSearchParams("tab=does-not-exist");
+    render(
+      <TeamDetail
+        header={header}
+        players={players}
+        matches={matches}
+        highlightTeamId={12345}
+      />,
+    );
+    const active = screen
+      .getAllByRole("tab")
+      .find((t) => t.getAttribute("aria-selected") === "true");
+    // Default tab when players are present is Spelers — not the stale value.
+    expect(active).toHaveAccessibleName("Spelers");
+  });
+
   it("renders the closing CTA pointing at /hulp", () => {
     render(<TeamDetail header={header} />);
     const cta = screen.getByRole("link", { name: /meer info/i });
