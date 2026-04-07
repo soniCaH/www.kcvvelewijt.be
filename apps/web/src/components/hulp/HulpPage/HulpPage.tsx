@@ -52,11 +52,25 @@ export function HulpPage({ paths }: HulpPageProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const analytics = useResponsibilityAnalytics();
+  // Destructure the analytics callbacks at the call site so the effect
+  // and click handlers can depend on the stable `useCallback` references
+  // directly. The wrapping object returned by `useResponsibilityAnalytics`
+  // is a fresh literal every render, so depending on `analytics` would
+  // cause every parent re-render to re-fire the analytics effect (and
+  // emit duplicate trackSearch / trackNoResults events).
+  const {
+    trackSearch,
+    trackNoResults,
+    trackSuggestionClicked,
+    trackContactClicked,
+    trackStepLinkClicked,
+  } = useResponsibilityAnalytics();
+
   const {
     results: searchResults,
     loading: searchLoading,
     error: searchError,
+    executedQuery,
     search,
     clear: clearSearch,
   } = useSemanticSearch({ type: "responsibility", limit: 10 });
@@ -69,17 +83,45 @@ export function HulpPage({ paths }: HulpPageProps) {
 
   const pathsByCategory = useMemo(() => groupPathsByCategory(paths), [paths]);
 
-  const selectedId = searchParams.get(URL_PARAM);
-  const selectedPath = selectedId ? (pathById.get(selectedId) ?? null) : null;
+  const selectedIdParam = searchParams.get(URL_PARAM);
+  // When the user starts typing, the answer view should give way to the
+  // search view — but we don't aggressively rewrite the URL on every
+  // keystroke (that would clutter browser history). Instead, override the
+  // selectedPath at render time when a search is active, and clear the
+  // URL param the next time `searchQuery` actually has a value (see the
+  // search-trigger effect below).
+  const selectedPath =
+    selectedIdParam && searchQuery.trim().length === 0
+      ? (pathById.get(selectedIdParam) ?? null)
+      : null;
 
-  // Trigger debounced semantic search when the query changes.
+  // Trigger debounced semantic search when the query changes. Also clear
+  // the `?id=` URL param the moment a query becomes non-empty, so the
+  // shareable URL stays consistent with what the user actually sees.
   useEffect(() => {
-    if (searchQuery.trim().length === 0) {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length === 0) {
       clearSearch();
       return;
     }
-    search(searchQuery);
-  }, [searchQuery, search, clearSearch]);
+    if (selectedIdParam) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete(URL_PARAM);
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    }
+    search(trimmed);
+  }, [
+    searchQuery,
+    search,
+    clearSearch,
+    selectedIdParam,
+    pathname,
+    router,
+    searchParams,
+  ]);
 
   // Map semantic search results back to full ResponsibilityPath records.
   // The Vectorize index keys vectors by Sanity `_id` and stores the slug
@@ -87,12 +129,16 @@ export function HulpPage({ paths }: HulpPageProps) {
   // ResponsibilityRepository — `"id": slug.current`). Match by slug first
   // (the common case for responsibility hits), then fall back to id so
   // local fixtures and any future indexers that key by slug both work.
+  //
+  // Gated on `executedQuery` (the query that produced the current results)
+  // rather than `searchQuery` (the live input value) so the UI doesn't
+  // flash "Geen resultaten" during the hook's debounce window.
   const filteredPaths = useMemo<ResponsibilityPath[]>(() => {
-    if (searchQuery.trim().length === 0) return [];
+    if (executedQuery.length === 0) return [];
     return searchResults
       .map((r) => pathById.get(r.slug) ?? pathById.get(r.id))
       .filter((p): p is ResponsibilityPath => p !== undefined);
-  }, [searchQuery, searchResults, pathById]);
+  }, [executedQuery, searchResults, pathById]);
 
   // Group filtered results by category so we can reuse `<CategorySection>`
   // for the search-results view (preserves visual consistency with browse).
@@ -101,74 +147,81 @@ export function HulpPage({ paths }: HulpPageProps) {
     [filteredPaths],
   );
 
-  // Analytics: search event fires when results settle (loading=false, error=null).
-  // Guarding on `searchLoading` and `searchError` is required by the project's
-  // analytics conventions (see apps/web/CLAUDE.md).
+  // Flatten the currently-rendered grouped order so analytics positions
+  // match the visible card order, not the raw fetch order from Sanity.
+  const renderedOrder = useMemo<ResponsibilityPath[]>(() => {
+    const grouped =
+      filteredPaths.length > 0 ? filteredByCategory : pathsByCategory;
+    return CATEGORY_ORDER.flatMap((cat) => grouped[cat]);
+  }, [filteredPaths.length, filteredByCategory, pathsByCategory]);
+
+  // Analytics: search event fires when results settle. Gating on
+  // `executedQuery` (instead of the raw `searchQuery`) means the effect
+  // fires once per settled fetch, never during the debounce window. The
+  // dependency list intentionally omits the wrapping `analytics` object —
+  // see the destructure above for rationale.
   useEffect(() => {
-    if (searchQuery.trim().length === 0) return;
+    if (executedQuery.length === 0) return;
     if (searchLoading || searchError) return;
     if (filteredPaths.length === 0) {
-      analytics.trackNoResults(searchQuery.length, "all");
+      trackNoResults(executedQuery.length, "all");
     } else {
-      analytics.trackSearch(searchQuery, "all", filteredPaths.length);
+      trackSearch(executedQuery, "all", filteredPaths.length);
     }
   }, [
-    searchQuery,
+    executedQuery,
     searchLoading,
     searchError,
     filteredPaths.length,
-    analytics,
+    trackSearch,
+    trackNoResults,
   ]);
 
   const handlePathClick = useCallback(
     (id: string) => {
-      if (id === selectedId) return; // dedup guard
+      if (id === selectedIdParam) return; // dedup guard
       const params = new URLSearchParams(searchParams.toString());
       params.set(URL_PARAM, id);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
       const path = pathById.get(id);
       if (path) {
-        const index =
-          filteredPaths.length > 0
-            ? filteredPaths.findIndex((p) => p.id === id)
-            : paths.findIndex((p) => p.id === id);
-        analytics.trackSuggestionClicked(id, path.category, Math.max(0, index));
+        const index = renderedOrder.findIndex((p) => p.id === id);
+        trackSuggestionClicked(id, path.category, Math.max(0, index));
       }
     },
     [
-      analytics,
-      filteredPaths,
-      paths,
+      trackSuggestionClicked,
+      renderedOrder,
       pathById,
       pathname,
       router,
       searchParams,
-      selectedId,
+      selectedIdParam,
     ],
   );
 
   const handleBack = useCallback(() => {
-    if (!selectedId) return; // dedup guard
+    if (!selectedIdParam) return; // dedup guard
     const params = new URLSearchParams(searchParams.toString());
     params.delete(URL_PARAM);
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-  }, [pathname, router, searchParams, selectedId]);
+  }, [pathname, router, searchParams, selectedIdParam]);
 
   const handleContactClick = useCallback(
     (channel: "email" | "phone") => {
       if (!selectedPath) return;
-      analytics.trackContactClicked(selectedPath.id, channel);
+      trackContactClicked(selectedPath.id, channel);
     },
-    [analytics, selectedPath],
+    [trackContactClicked, selectedPath],
   );
 
   const handleStepLinkClick = useCallback(
     (stepIndex: number) => {
       if (!selectedPath) return;
-      analytics.trackStepLinkClicked(selectedPath.id, stepIndex);
+      trackStepLinkClicked(selectedPath.id, stepIndex);
     },
-    [analytics, selectedPath],
+    [trackStepLinkClicked, selectedPath],
   );
 
   const renderContent = () => {
@@ -210,16 +263,33 @@ export function HulpPage({ paths }: HulpPageProps) {
     }
 
     if (searchQuery.trim().length > 0) {
-      if (searchLoading && filteredPaths.length === 0) {
+      // Loading state covers both the hook's `loading` flag AND the
+      // window between the user typing and the debounced fetch settling
+      // (when `executedQuery` hasn't caught up to `searchQuery` yet).
+      // Without this second condition the UI would briefly flash
+      // "Geen resultaten" during the debounce window.
+      const isAwaitingResults =
+        searchLoading || executedQuery !== searchQuery.trim();
+
+      if (isAwaitingResults && filteredPaths.length === 0) {
         return <p className="text-center text-sm text-kcvv-gray">Zoeken...</p>;
       }
 
       if (searchError) {
+        // Render the error inline AND fall through to the browse content
+        // below — the message tells the user to "blader hieronder door
+        // alle categorieën", so the categories must actually be visible.
         return (
-          <p className="text-center text-sm text-kcvv-gray">
-            Er ging iets mis bij het zoeken. Probeer het opnieuw of blader door
-            de categorieën hieronder.
-          </p>
+          <div className="space-y-12">
+            <p className="text-center text-sm text-kcvv-gray">
+              Er ging iets mis bij het zoeken. Probeer het opnieuw of blader
+              door de categorieën hieronder.
+            </p>
+            <BrowseContent
+              pathsByCategory={pathsByCategory}
+              onPathClick={handlePathClick}
+            />
+          </div>
         );
       }
 
@@ -227,7 +297,7 @@ export function HulpPage({ paths }: HulpPageProps) {
         return (
           <div className="space-y-12">
             <p className="text-center text-sm text-kcvv-gray">
-              Geen resultaten voor &quot;{searchQuery}&quot;. Blader hieronder
+              Geen resultaten voor &quot;{executedQuery}&quot;. Blader hieronder
               door alle categorieën.
             </p>
             <BrowseContent

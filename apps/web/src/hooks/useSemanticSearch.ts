@@ -22,6 +22,13 @@ export interface UseSemanticSearchReturn {
   answer: string | undefined;
   loading: boolean;
   error: string | null;
+  /**
+   * The query that produced the current `results`/`error` state.
+   * Updated only when a fetch settles (success or error), so consumers
+   * can distinguish "results we're showing" from "query the user is
+   * still typing". Empty string when no search has settled.
+   */
+  executedQuery: string;
   search: (query: string) => void;
   clear: () => void;
 }
@@ -48,6 +55,7 @@ export function useSemanticSearch(
   const [answer, setAnswer] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [executedQuery, setExecutedQuery] = useState("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -62,6 +70,7 @@ export function useSemanticSearch(
         setAnswer(undefined);
         setError(null);
         setLoading(false);
+        setExecutedQuery("");
         return;
       }
 
@@ -91,12 +100,14 @@ export function useSemanticSearch(
           if (abortRef.current === controller) {
             setResults(data.results);
             setAnswer(data.answer);
+            setExecutedQuery(query);
           }
         } catch (err) {
           if ((err as Error).name === "AbortError") return;
           setError((err as Error).message);
           setResults([]);
           setAnswer(undefined);
+          setExecutedQuery(query);
         } finally {
           if (abortRef.current === controller) {
             setLoading(false);
@@ -115,6 +126,7 @@ export function useSemanticSearch(
     setAnswer(undefined);
     setError(null);
     setLoading(false);
+    setExecutedQuery("");
   }, []);
 
   useEffect(() => {
@@ -125,5 +137,5 @@ export function useSemanticSearch(
     };
   }, []);
 
-  return { results, answer, loading, error, search, clear };
+  return { results, answer, loading, error, executedQuery, search, clear };
 }

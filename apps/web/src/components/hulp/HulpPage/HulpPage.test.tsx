@@ -10,9 +10,10 @@ import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
 // next/navigation hooks used by HulpPage
 const mockPush = vi.fn();
+const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace }),
   usePathname: () => "/hulp",
   useSearchParams: () => mockSearchParams,
 }));
@@ -21,6 +22,7 @@ vi.mock("next/navigation", () => ({
 let currentResults: SemanticSearchResult[] = [];
 let currentLoading = false;
 let currentError: string | null = null;
+let currentExecutedQuery = "";
 const mockSearch = vi.fn();
 const mockClear = vi.fn();
 vi.mock("@/hooks/useSemanticSearch", () => ({
@@ -29,6 +31,7 @@ vi.mock("@/hooks/useSemanticSearch", () => ({
     answer: undefined,
     loading: currentLoading,
     error: currentError,
+    executedQuery: currentExecutedQuery,
     search: mockSearch,
     clear: mockClear,
   }),
@@ -57,6 +60,7 @@ vi.mock("@/hooks/useResponsibilityAnalytics", () => ({
 
 function resetMocks() {
   mockPush.mockClear();
+  mockReplace.mockClear();
   mockSearch.mockClear();
   mockClear.mockClear();
   trackSearch.mockClear();
@@ -68,6 +72,7 @@ function resetMocks() {
   currentResults = [];
   currentLoading = false;
   currentError = null;
+  currentExecutedQuery = "";
 }
 
 describe("HulpPage", () => {
@@ -112,13 +117,11 @@ describe("HulpPage", () => {
         excerpt: "...",
       },
     ];
+    currentExecutedQuery = "inschrijving";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "inschrijving" },
     });
-    // Browse content should still mount on initial render; the search-results
-    // branch only kicks in after the input has a value (which we just set).
-    // The matched question should be visible.
     expect(
       screen.getAllByText("Ik wil mij of mijn kind inschrijven").length,
     ).toBeGreaterThan(0);
@@ -126,6 +129,7 @@ describe("HulpPage", () => {
 
   it("falls back to BrowseContent with a no-results message when search has no matches", async () => {
     currentResults = [];
+    currentExecutedQuery = "xyzz";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "xyzz" },
@@ -135,6 +139,19 @@ describe("HulpPage", () => {
         screen.getByText(/Geen resultaten voor "xyzz"/),
       ).toBeInTheDocument();
     });
+  });
+
+  it('shows "Zoeken..." while the debounced fetch has not settled yet', () => {
+    // executedQuery still empty (no fetch has settled), but searchQuery is set
+    currentResults = [];
+    currentExecutedQuery = "";
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "inschrijving" },
+    });
+    expect(screen.getByText(/zoeken\.\.\./i)).toBeInTheDocument();
+    // Importantly, "Geen resultaten" must NOT flash during this window
+    expect(screen.queryByText(/geen resultaten voor/i)).not.toBeInTheDocument();
   });
 
   it("renders the AnswerCard when ?id= matches a known path", () => {
@@ -189,6 +206,7 @@ describe("HulpPage", () => {
         excerpt: "...",
       },
     ];
+    currentExecutedQuery = "lidgeld";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "lidgeld" },
@@ -200,6 +218,7 @@ describe("HulpPage", () => {
 
   it("tracks no_results event when search returns nothing", async () => {
     currentResults = [];
+    currentExecutedQuery = "xyzz";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "xyzz" },
@@ -211,6 +230,7 @@ describe("HulpPage", () => {
 
   it("does not fire analytics while search is loading", () => {
     currentLoading = true;
+    currentExecutedQuery = "loading-test";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "loading-test" },
@@ -219,8 +239,22 @@ describe("HulpPage", () => {
     expect(trackNoResults).not.toHaveBeenCalled();
   });
 
-  it("renders the error branch when useSemanticSearch reports an error", () => {
+  it("does not fire analytics during the debounce window before results settle", () => {
+    // Loading is false but no fetch has settled yet (executedQuery is "")
+    currentResults = [];
+    currentLoading = false;
+    currentExecutedQuery = "";
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "inschrijving" },
+    });
+    expect(trackSearch).not.toHaveBeenCalled();
+    expect(trackNoResults).not.toHaveBeenCalled();
+  });
+
+  it("renders the error message AND the browse content as a fallback", () => {
     currentError = "fetch failed";
+    currentExecutedQuery = "inschrijving";
     render(<HulpPage paths={FIXTURE_PATHS} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "inschrijving" },
@@ -228,6 +262,27 @@ describe("HulpPage", () => {
     expect(
       screen.getByText(/er ging iets mis bij het zoeken/i),
     ).toBeInTheDocument();
+    // The message tells the user to browse below — categories must be visible
+    expect(screen.getByText("Administratief")).toBeInTheDocument();
+    expect(screen.getByText("Medisch")).toBeInTheDocument();
+  });
+
+  it("clears ?id= and shows search results when the user starts typing in answer view", () => {
+    mockSearchParams = new URLSearchParams("id=lidgeld-inschrijving");
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    // Initially the answer view is shown
+    expect(
+      screen.getByRole("button", { name: /terug naar overzicht/i }),
+    ).toBeInTheDocument();
+    // Typing into the search input must dismiss the answer view AND
+    // trigger router.replace to drop the ?id= query param
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "transfer" },
+    });
+    expect(
+      screen.queryByRole("button", { name: /terug naar overzicht/i }),
+    ).not.toBeInTheDocument();
+    expect(mockReplace).toHaveBeenCalledWith("/hulp", expect.anything());
   });
 
   it("renders the empty-data fallback when paths is an empty array", () => {
