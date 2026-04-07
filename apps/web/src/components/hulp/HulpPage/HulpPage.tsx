@@ -26,7 +26,6 @@ import {
   type SectionConfig,
 } from "@/components/design-system/SectionStack/SectionStack";
 import { PageHero } from "@/components/design-system/PageHero/PageHero";
-import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import type { ResponsibilityPath } from "@/types/responsibility";
@@ -83,10 +82,15 @@ export function HulpPage({ paths }: HulpPageProps) {
   }, [searchQuery, search, clearSearch]);
 
   // Map semantic search results back to full ResponsibilityPath records.
+  // The Vectorize index keys vectors by Sanity `_id` and stores the slug
+  // as metadata, while `path.id` here is the slug (see
+  // ResponsibilityRepository — `"id": slug.current`). Match by slug first
+  // (the common case for responsibility hits), then fall back to id so
+  // local fixtures and any future indexers that key by slug both work.
   const filteredPaths = useMemo<ResponsibilityPath[]>(() => {
     if (searchQuery.trim().length === 0) return [];
     return searchResults
-      .map((r) => pathById.get(r.id))
+      .map((r) => pathById.get(r.slug) ?? pathById.get(r.id))
       .filter((p): p is ResponsibilityPath => p !== undefined);
   }, [searchQuery, searchResults, pathById]);
 
@@ -260,24 +264,29 @@ export function HulpPage({ paths }: HulpPageProps) {
             </p>
           </div>
           {renderContent()}
+
+          {/* Closing "still no answer?" callout — sits inside the gray
+              content section so the page footer's diagonal transition
+              flows directly out of gray. Avoids the green→gray→green
+              sandwich a separate CTA section would create above the
+              footer. */}
+          <div className="mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm md:p-8">
+            <h2 className="font-title text-2xl font-bold uppercase leading-tight text-kcvv-black">
+              Niet gevonden wat je zocht?
+            </h2>
+            <p className="mt-2 text-sm text-kcvv-gray">
+              Stuur ons een bericht en we helpen je graag verder.
+            </p>
+            <a
+              href="mailto:info@kcvvelewijt.be"
+              className="mt-4 inline-flex items-center gap-2 rounded-sm bg-kcvv-green-bright px-5 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-black transition-colors hover:bg-kcvv-green-dark hover:text-white"
+            >
+              Contact opnemen
+            </a>
+          </div>
         </div>
       ),
       transition: { type: "diagonal", direction: "left" },
-    },
-    {
-      key: "cta",
-      bg: "kcvv-green-dark",
-      paddingTop: "pt-16",
-      paddingBottom: "pb-16",
-      content: (
-        <SectionCta
-          variant="dark"
-          heading="Niet gevonden wat je zocht?"
-          body="Stuur ons een bericht en we helpen je graag verder."
-          buttonLabel="Contact opnemen"
-          buttonHref="mailto:info@kcvvelewijt.be"
-        />
-      ),
     },
   ];
 
