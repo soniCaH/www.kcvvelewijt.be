@@ -1,17 +1,31 @@
 /**
  * TeamDetail Component
  *
- * Presentational layout for team detail pages.
- * Combines TeamHeader with URL-synced tab navigation:
- * Info · Opstelling · Wedstrijden · Klassement
+ * Page-level layout for team detail pages, composed as a `SectionStack`:
  *
- * Tabs are shown conditionally based on available data.
- * Wraps UrlTabs in Suspense as required for static generation.
+ *   1. Compact `PageHero` with the team image as background
+ *   2. Gray `BrandedTabs` content section showing the active panel
+ *      (Info / Spelers / Wedstrijden / Klassement) — only tabs with
+ *      data are exposed
+ *   3. Closing `SectionCta` on dark green pointing at the help page
+ *
+ * The tab interactivity lives in `TeamDetailTabs` (a small client island)
+ * so the panel content can still be rendered server-side.
  */
 
 import { Suspense } from "react";
 import sanitizeHtml from "sanitize-html";
-import * as Tabs from "@radix-ui/react-tabs";
+import {
+  SectionStack,
+  type SectionConfig,
+} from "@/components/design-system/SectionStack/SectionStack";
+import { PageHero } from "@/components/design-system/PageHero/PageHero";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
+import { Spinner } from "@/components/design-system/Spinner";
+import { TeamRoster, type RosterPlayer, type StaffMember } from "../TeamRoster";
+import { TeamSchedule, type ScheduleMatch } from "../TeamSchedule";
+import { TeamStandings, type StandingsEntry } from "../TeamStandings";
+import { TeamDetailTabs, type TeamDetailTabPanel } from "./TeamDetailTabs";
 
 const PROSE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, "img"],
@@ -27,20 +41,23 @@ const PROSE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     }),
   },
 };
-import { UrlTabs } from "@/components/ui/url-tabs";
-import { TeamHeader, type TeamHeaderProps } from "../TeamHeader";
-import { TeamRoster, type RosterPlayer, type StaffMember } from "../TeamRoster";
-import { TeamSchedule, type ScheduleMatch } from "../TeamSchedule";
-import { TeamStandings, type StandingsEntry } from "../TeamStandings";
-import { cn } from "@/lib/utils/cn";
 
-/** Shared tab trigger styles */
-const TAB_TRIGGER_CLASSES =
-  "px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent data-[state=active]:border-kcvv-green-bright data-[state=active]:text-kcvv-green-bright transition-colors";
+export interface TeamDetailHeader {
+  /** Team name (rendered as the hero headline) */
+  name: string;
+  /** Team tagline / division (rendered as hero body) */
+  tagline?: string;
+  /** Team / group photo URL — used as the hero background */
+  imageUrl?: string;
+  /** Age group for youth teams (e.g., U15) */
+  ageGroup?: string;
+  /** Type of team for the hero label */
+  teamType?: "senior" | "youth" | "club";
+}
 
 export interface TeamDetailProps {
-  /** Team header props */
-  header: TeamHeaderProps;
+  /** Team header data */
+  header: TeamDetailHeader;
   /** Contact info HTML content */
   contactInfo?: string;
   /** Body content HTML */
@@ -59,13 +76,79 @@ export interface TeamDetailProps {
   teamSlug?: string;
   /** URL to the iCal feed for this team */
   calendarUrl?: string;
-  /** Additional CSS classes for the root wrapper */
-  className?: string;
 }
 
-/**
- * Render a complete team detail view with header and tabbed content.
- */
+const HERO_LABELS: Record<NonNullable<TeamDetailHeader["teamType"]>, string> = {
+  senior: "Eerste ploeg",
+  youth: "Jeugd",
+  club: "De club",
+};
+
+function InfoPanel({
+  contactInfo,
+  bodyContent,
+  staff,
+  hasPlayers,
+  teamName,
+}: {
+  contactInfo?: string;
+  bodyContent?: string;
+  staff: StaffMember[];
+  hasPlayers: boolean;
+  teamName: string;
+}) {
+  const hasContactInfo = !!contactInfo?.trim();
+  const hasBodyContent = !!bodyContent?.trim();
+  const hasStaff = staff.length > 0;
+  const showStaffInInfo = !hasPlayers && hasStaff;
+
+  if (!hasContactInfo && !hasBodyContent && !showStaffInInfo) {
+    return (
+      <p className="py-8 text-center text-gray-500">
+        Geen extra informatie beschikbaar voor dit team.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {hasContactInfo && (
+        <section className="prose prose-gray max-w-none">
+          <h2 className="text-2xl font-bold mb-4">Contactinformatie</h2>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(contactInfo!, PROSE_SANITIZE_OPTIONS),
+            }}
+          />
+        </section>
+      )}
+
+      {showStaffInInfo && (
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Technische Staf</h2>
+          <TeamRoster
+            players={[]}
+            staff={staff}
+            teamName={teamName}
+            groupByPosition={false}
+            showStaff
+          />
+        </section>
+      )}
+
+      {hasBodyContent && (
+        <section className="prose prose-gray max-w-none">
+          <div
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(bodyContent!, PROSE_SANITIZE_OPTIONS),
+            }}
+          />
+        </section>
+      )}
+    </div>
+  );
+}
+
 export function TeamDetail({
   header,
   contactInfo,
@@ -77,167 +160,145 @@ export function TeamDetail({
   highlightTeamId,
   teamSlug,
   calendarUrl,
-  className,
 }: TeamDetailProps) {
   const hasPlayers = players.length > 0;
   const hasStaff = staff.length > 0;
-  const hasContactInfo = !!contactInfo?.trim();
-  const hasBodyContent = !!bodyContent?.trim();
   const hasMatches = matches.length > 0;
   const hasStandings = standings.length > 0;
 
-  // Build list of valid tabs based on available content
-  const validTabs = [
-    "info",
-    ...(hasPlayers || hasStaff ? ["opstelling"] : []),
-    ...(hasMatches ? ["wedstrijden"] : []),
-    ...(hasStandings ? ["klassement"] : []),
+  const heroLabel = HERO_LABELS[header.teamType ?? "senior"];
+
+  const panels: TeamDetailTabPanel[] = [
+    {
+      id: "info",
+      label: "Info",
+      content: (
+        <InfoPanel
+          contactInfo={contactInfo}
+          bodyContent={bodyContent}
+          staff={staff}
+          hasPlayers={hasPlayers}
+          teamName={header.name}
+        />
+      ),
+    },
   ];
 
-  return (
-    <div className={cn(className)}>
-      {/* Team Header */}
-      <TeamHeader {...header} />
+  if (hasPlayers || hasStaff) {
+    panels.push({
+      id: "spelers",
+      label: "Spelers",
+      content: (
+        <TeamRoster
+          players={players}
+          staff={staff}
+          teamName={header.name}
+          groupByPosition
+          showStaff={hasStaff}
+        />
+      ),
+    });
+  }
 
-      {/* URL-synced Tab Navigation */}
-      {/* Suspense boundary required for useSearchParams in UrlTabs during static generation */}
-      <Suspense
-        fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}
-      >
-        <UrlTabs
-          defaultValue="info"
-          validTabs={validTabs}
-          className="container mx-auto px-4 py-8"
-        >
-          <Tabs.List
-            className="flex border-b border-gray-200 mb-6"
-            aria-label="Team informatie"
-          >
-            <Tabs.Trigger value="info" className={TAB_TRIGGER_CLASSES}>
-              Info
-            </Tabs.Trigger>
-            {(hasPlayers || hasStaff) && (
-              <Tabs.Trigger value="opstelling" className={TAB_TRIGGER_CLASSES}>
-                Opstelling
-              </Tabs.Trigger>
-            )}
-            {hasMatches && (
-              <Tabs.Trigger value="wedstrijden" className={TAB_TRIGGER_CLASSES}>
-                Wedstrijden
-              </Tabs.Trigger>
-            )}
-            {hasStandings && (
-              <Tabs.Trigger value="klassement" className={TAB_TRIGGER_CLASSES}>
-                Klassement
-              </Tabs.Trigger>
-            )}
-          </Tabs.List>
-
-          {/* Info Tab */}
-          <Tabs.Content value="info" className="focus:outline-none">
-            <div className="space-y-8">
-              {/* Contact Info */}
-              {hasContactInfo && (
-                <section className="prose prose-gray max-w-none">
-                  <h2 className="text-2xl font-bold mb-4">Contactinformatie</h2>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: sanitizeHtml(
-                        contactInfo!,
-                        PROSE_SANITIZE_OPTIONS,
-                      ),
-                    }}
-                  />
-                </section>
-              )}
-
-              {/* Staff only (when no players - show staff in info tab) */}
-              {!hasPlayers && hasStaff && (
-                <section>
-                  <h2 className="text-2xl font-bold mb-4">Technische Staf</h2>
-                  <TeamRoster
-                    players={[]}
-                    staff={staff}
-                    teamName={header.name}
-                    groupByPosition={false}
-                    showStaff={true}
-                  />
-                </section>
-              )}
-
-              {/* Team body content */}
-              {hasBodyContent && (
-                <section className="prose prose-gray max-w-none">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: sanitizeHtml(
-                        bodyContent!,
-                        PROSE_SANITIZE_OPTIONS,
-                      ),
-                    }}
-                  />
-                </section>
-              )}
-
-              {/* No content message */}
-              {!hasContactInfo && !hasStaff && !hasBodyContent && (
-                <p className="text-gray-500 text-center py-8">
-                  Geen extra informatie beschikbaar voor dit team.
-                </p>
-              )}
+  if (hasMatches) {
+    panels.push({
+      id: "wedstrijden",
+      label: "Wedstrijden",
+      content: (
+        <>
+          {calendarUrl && (
+            <div className="mb-4 flex justify-end">
+              <a
+                href={calendarUrl}
+                download="kcvv-wedstrijden.ics"
+                aria-label={`Download kalender (.ics) voor ${header.name}`}
+                rel="noopener"
+                className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
+              >
+                Voeg toe aan kalender
+              </a>
             </div>
-          </Tabs.Content>
-
-          {/* Opstelling Tab */}
-          {(hasPlayers || hasStaff) && (
-            <Tabs.Content value="opstelling" className="focus:outline-none">
-              <TeamRoster
-                players={players}
-                staff={staff}
-                teamName={header.name}
-                groupByPosition={true}
-                showStaff={hasStaff}
-              />
-            </Tabs.Content>
           )}
+          <TeamSchedule
+            matches={matches}
+            teamId={highlightTeamId}
+            teamSlug={teamSlug}
+            showPast
+            highlightNext
+          />
+        </>
+      ),
+    });
+  }
 
-          {/* Wedstrijden Tab */}
-          {hasMatches && (
-            <Tabs.Content value="wedstrijden" className="focus:outline-none">
-              {calendarUrl && (
-                <div className="mb-4 flex justify-end">
-                  <a
-                    href={calendarUrl}
-                    download="kcvv-wedstrijden.ics"
-                    aria-label={`Download kalender (.ics) voor ${header.name}`}
-                    rel="noopener"
-                    className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
-                  >
-                    📅 Voeg toe aan kalender
-                  </a>
-                </div>
-              )}
-              <TeamSchedule
-                matches={matches}
-                teamId={highlightTeamId}
-                teamSlug={teamSlug}
-                showPast={true}
-                highlightNext={true}
-              />
-            </Tabs.Content>
-          )}
+  if (hasStandings) {
+    panels.push({
+      id: "klassement",
+      label: "Klassement",
+      content: (
+        <TeamStandings
+          standings={standings}
+          highlightTeamId={highlightTeamId}
+        />
+      ),
+    });
+  }
 
-          {/* Klassement Tab */}
-          {hasStandings && (
-            <Tabs.Content value="klassement" className="focus:outline-none">
-              <TeamStandings
-                standings={standings}
-                highlightTeamId={highlightTeamId}
-              />
-            </Tabs.Content>
-          )}
-        </UrlTabs>
-      </Suspense>
-    </div>
-  );
+  // Default tab: prefer Spelers when available, fall back to Info
+  const defaultTabId = hasPlayers || hasStaff ? "spelers" : "info";
+
+  const sections: SectionConfig[] = [
+    {
+      key: "hero",
+      bg: "kcvv-black",
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      content: (
+        <PageHero
+          size="compact"
+          image={header.imageUrl}
+          imageAlt={`${header.name} teamfoto`}
+          label={header.ageGroup ?? heroLabel}
+          headline={header.name}
+          body={header.tagline ?? ""}
+        />
+      ),
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "tabs",
+      bg: "gray-100",
+      content: (
+        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-12">
+                <Spinner size="lg" label="Laden..." />
+              </div>
+            }
+          >
+            <TeamDetailTabs panels={panels} defaultTabId={defaultTabId} />
+          </Suspense>
+        </div>
+      ),
+      transition: { type: "diagonal", direction: "right" },
+    },
+    {
+      key: "cta",
+      bg: "kcvv-green-dark",
+      paddingTop: "pt-16",
+      paddingBottom: "pb-16",
+      content: (
+        <SectionCta
+          variant="dark"
+          heading="Word lid van KCVV Elewijt"
+          body="Sluit je aan bij onze club en word deel van de KCVV-familie. Spelers, vrijwilligers en supporters welkom!"
+          buttonLabel="Meer info"
+          buttonHref="/hulp"
+        />
+      ),
+    },
+  ];
+
+  return <SectionStack sections={sections} />;
 }
