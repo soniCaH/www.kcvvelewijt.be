@@ -20,15 +20,15 @@ import type { SectionBg } from "@/components/design-system/SectionTransition/Sec
 const STATIC_FROM: Partial<Record<string, SectionBg>> = {
   "/sponsors": "kcvv-black",
   "/club/geschiedenis": "kcvv-black",
-  "/club/organigram": "kcvv-green-dark",
-  "/club/bestuur": "kcvv-green-dark",
-  "/club/angels": "kcvv-green-dark",
-  "/club/jeugdbestuur": "kcvv-green-dark",
+  "/club/organigram": "kcvv-black",
+  "/club/bestuur": "kcvv-black",
+  "/club/angels": "kcvv-black",
+  "/club/jeugdbestuur": "kcvv-black",
 };
 
 const DYNAMIC_FROM: ReadonlyArray<{ pattern: RegExp; from: SectionBg }> = [
-  // Team detail pages end on the green CTA section.
-  { pattern: /^\/ploegen\/[^/]+$/, from: "kcvv-green-dark" },
+  // Team detail pages end on the dark CTA section.
+  { pattern: /^\/ploegen\/[^/]+$/, from: "kcvv-black" },
 ];
 
 function resolveFrom(pathname: string): SectionBg {

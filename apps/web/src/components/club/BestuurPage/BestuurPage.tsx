@@ -133,7 +133,7 @@ export function BestuurPage({
 
   sections.push({
     key: "cta",
-    bg: "kcvv-green-dark",
+    bg: "kcvv-black",
     paddingTop: "pt-16",
     paddingBottom: "pb-16",
     content: (

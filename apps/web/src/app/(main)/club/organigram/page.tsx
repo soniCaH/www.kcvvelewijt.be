@@ -109,7 +109,7 @@ export default async function OrganigramPage() {
     },
     {
       key: "cta",
-      bg: "kcvv-green-dark",
+      bg: "kcvv-black",
       paddingTop: "pt-16",
       paddingBottom: "pb-16",
       content: (

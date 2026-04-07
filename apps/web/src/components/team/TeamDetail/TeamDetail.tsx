@@ -84,6 +84,24 @@ const HERO_LABELS: Record<NonNullable<TeamDetailHeader["teamType"]>, string> = {
   club: "De club",
 };
 
+/**
+ * Slugify a team name for use in a download filename. Lowercases, strips
+ * accents, replaces any non-alphanumeric run with a single dash, trims
+ * leading/trailing dashes, and caps the length so the resulting filename
+ * stays well within filesystem limits. Falls back to "kcvv" when the input
+ * contains no usable characters.
+ */
+function slugifyTeamName(name: string): string {
+  const slug = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return slug || "kcvv";
+}
+
 function InfoPanel({
   contactInfo,
   bodyContent,
@@ -206,6 +224,7 @@ export function TeamDetail({
   }
 
   if (hasMatches) {
+    const calendarFilename = `${slugifyTeamName(header.name)}-wedstrijden.ics`;
     panels.push({
       id: "wedstrijden",
       label: "Wedstrijden",
@@ -215,7 +234,7 @@ export function TeamDetail({
             <div className="mb-4 flex justify-end">
               <a
                 href={calendarUrl}
-                download="kcvv-wedstrijden.ics"
+                download={calendarFilename}
                 aria-label={`Download kalender (.ics) voor ${header.name}`}
                 rel="noopener"
                 className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
@@ -293,7 +312,7 @@ export function TeamDetail({
     },
     {
       key: "cta",
-      bg: "kcvv-green-dark",
+      bg: "kcvv-black",
       paddingTop: "pt-16",
       paddingBottom: "pb-16",
       content: (
