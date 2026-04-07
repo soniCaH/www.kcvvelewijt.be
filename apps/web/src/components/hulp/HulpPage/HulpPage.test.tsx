@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { HulpPage } from "./HulpPage";
 import { FIXTURE_PATHS } from "./__fixtures__/paths.fixture";
+import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
 // next/navigation hooks used by HulpPage
@@ -212,7 +213,14 @@ describe("HulpPage", () => {
       target: { value: "lidgeld" },
     });
     await waitFor(() => {
-      expect(trackSearch).toHaveBeenCalledWith("lidgeld", "all", 1);
+      // Query is sanitized (lowercased + truncated to 50) before being
+      // forwarded to analytics. For "lidgeld" the sanitized value is
+      // identical, but the assertion encodes the privacy convention.
+      expect(trackSearch).toHaveBeenCalledWith(
+        sanitizeQuery("lidgeld"),
+        "all",
+        1,
+      );
     });
   });
 
@@ -224,7 +232,12 @@ describe("HulpPage", () => {
       target: { value: "xyzz" },
     });
     await waitFor(() => {
-      expect(trackNoResults).toHaveBeenCalledWith(4, "all");
+      // trackNoResults is called with the sanitized length, not the raw
+      // input length, per the project's analytics privacy convention.
+      expect(trackNoResults).toHaveBeenCalledWith(
+        sanitizeQuery("xyzz").length,
+        "all",
+      );
     });
   });
 

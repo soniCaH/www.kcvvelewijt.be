@@ -28,6 +28,7 @@ import {
 import { PageHero } from "@/components/design-system/PageHero/PageHero";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { HulpSearchInput } from "./HulpSearchInput";
 import { BrowseContent } from "./BrowseContent";
@@ -160,13 +161,21 @@ export function HulpPage({ paths }: HulpPageProps) {
   // fires once per settled fetch, never during the debounce window. The
   // dependency list intentionally omits the wrapping `analytics` object —
   // see the destructure above for rationale.
+  //
+  // The query is wrapped in `sanitizeQuery` at the call site. The current
+  // `useResponsibilityAnalytics` hook only forwards `query.length` — the
+  // text never reaches the wire — but sanitizing here is the project
+  // convention for any user-generated input passed into an analytics
+  // function (see apps/web/CLAUDE.md), and it future-proofs the call site
+  // against hook changes that might later forward the text.
   useEffect(() => {
     if (executedQuery.length === 0) return;
     if (searchLoading || searchError) return;
+    const safeQuery = sanitizeQuery(executedQuery);
     if (filteredPaths.length === 0) {
-      trackNoResults(executedQuery.length, "all");
+      trackNoResults(safeQuery.length, "all");
     } else {
-      trackSearch(executedQuery, "all", filteredPaths.length);
+      trackSearch(safeQuery, "all", filteredPaths.length);
     }
   }, [
     executedQuery,
