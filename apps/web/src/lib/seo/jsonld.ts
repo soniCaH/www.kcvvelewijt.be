@@ -1,5 +1,6 @@
 import type {
   BreadcrumbList,
+  FAQPage,
   MergeLeafTypes,
   NewsArticle,
   OrganizationLeaf,
@@ -183,15 +184,15 @@ export interface FAQEntry {
  */
 export function buildFAQPageJsonLd(
   entries: ReadonlyArray<FAQEntry>,
-): JsonLdDocument {
+): WithContext<FAQPage> {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: entries.map((entry) => ({
-      "@type": "Question",
+      "@type": "Question" as const,
       name: entry.question,
       acceptedAnswer: {
-        "@type": "Answer",
+        "@type": "Answer" as const,
         text: entry.answer,
       },
     })),
