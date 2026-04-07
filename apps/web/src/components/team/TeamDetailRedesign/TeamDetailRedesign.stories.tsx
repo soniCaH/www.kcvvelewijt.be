@@ -80,7 +80,6 @@ const mockPlayers: RosterPlayer[] = [
     position: "Verdediger",
     number: 4,
     href: "/spelers/thomas-maes",
-    isCaptain: true,
     imageUrl: PLAYER_IMAGES.jarne,
   },
   {

@@ -70,7 +70,6 @@ const MOCK_PLAYERS = {
       position: "Verdediger",
       number: 4,
       href: "/speler/thomas-maes",
-      isCaptain: true,
       imageUrl: REAL_PLAYER_IMAGES.jarne,
     },
     {
@@ -253,11 +252,6 @@ Used on team detail pages to display the full squad.
       control: "boolean",
       description: "Display staff section",
     },
-    variant: {
-      control: "radio",
-      options: ["grid", "compact"],
-      description: "Layout variant",
-    },
     isLoading: {
       control: "boolean",
       description: "Show loading skeleton",
@@ -293,18 +287,6 @@ export const WithStaff: Story = {
     teamName: "A-Ploeg",
     groupByPosition: true,
     showStaff: true,
-  },
-};
-
-/**
- * Compact list view - denser layout
- */
-export const Compact: Story = {
-  args: {
-    players: ALL_PLAYERS,
-    teamName: "A-Ploeg",
-    variant: "compact",
-    groupByPosition: true,
   },
 };
 
