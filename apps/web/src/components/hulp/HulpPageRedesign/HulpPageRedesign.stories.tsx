@@ -66,7 +66,10 @@ interface MockPath {
   steps: string[];
 }
 
-const CONTACTS: Record<string, MockContact> = {
+// Object literal type (no `Record<string, MockContact>` annotation) so
+// TypeScript narrows each key to the specific MockContact and we don't
+// need non-null assertions on lookups.
+const CONTACTS = {
   jeugd: {
     name: "Lien Wouters",
     role: "Jeugdcoördinator",
@@ -114,7 +117,7 @@ const mockPaths: MockPath[] = [
     category: "medisch",
     question: "Mijn kind heeft een sportongeval",
     summary: "Wat te doen na een ongeval op training of wedstrijd",
-    contact: CONTACTS.jeugd ?? CONTACTS.secretariaat!,
+    contact: CONTACTS.jeugd,
     steps: [
       "Verleen onmiddellijk eerste hulp en bel indien nodig 112.",
       "Verwittig de trainer of afgevaardigde van het ongeval.",
@@ -128,7 +131,7 @@ const mockPaths: MockPath[] = [
     category: "medisch",
     question: "Ik heb een attest van mijn mutualiteit nodig",
     summary: "Aanvragen van een attest voor terugbetaling lidgeld",
-    contact: CONTACTS.secretariaat!,
+    contact: CONTACTS.secretariaat,
     steps: [
       "Mail je vraag met je naam en lidnummer.",
       "Vermeld de naam van je mutualiteit (CM, Solidaris, ...).",
@@ -140,7 +143,7 @@ const mockPaths: MockPath[] = [
     category: "medisch",
     question: "Ik wil een allergie of medicatie melden",
     summary: "Belangrijke medische info doorgeven aan trainer en afgevaardigde",
-    contact: CONTACTS.jeugd!,
+    contact: CONTACTS.jeugd,
     steps: [
       "Mail de jeugdcoördinator met de naam en leeftijd van het kind.",
       "Beschrijf de allergie of medicatie en wat te doen bij een reactie.",
@@ -153,7 +156,7 @@ const mockPaths: MockPath[] = [
     category: "sportief",
     question: "Mag mijn kind een proeftraining doen?",
     summary: "Hoe vraag je een proeftraining aan voor de jeugd",
-    contact: CONTACTS.jeugd!,
+    contact: CONTACTS.jeugd,
     steps: [
       "Stuur een mail met naam, geboortedatum en huidige club.",
       "De jeugdcoördinator stelt een trainingsdatum voor met de juiste leeftijdsgroep.",
@@ -165,7 +168,7 @@ const mockPaths: MockPath[] = [
     category: "sportief",
     question: "Vraag over de ploegindeling",
     summary: "Hoe wordt mijn kind ingedeeld in een ploeg",
-    contact: CONTACTS.jeugd!,
+    contact: CONTACTS.jeugd,
     steps: [
       "Bekijk eerst de visie van onze jeugdopleiding op de site.",
       "Heb je een specifieke vraag? Mail de jeugdcoördinator.",
@@ -177,7 +180,7 @@ const mockPaths: MockPath[] = [
     category: "sportief",
     question: "Mijn kind wordt niet opgesteld",
     summary: "Omgaan met speeltijd-discussies",
-    contact: CONTACTS.trainer!,
+    contact: CONTACTS.trainer,
     steps: [
       "Bespreek dit eerst rechtstreeks met de trainer na de wedstrijd.",
       "Geef de trainer de kans om uit te leggen waarom de keuze gemaakt werd.",
@@ -189,7 +192,7 @@ const mockPaths: MockPath[] = [
     category: "sportief",
     question: "Vraag over materiaal voor de ploeg",
     summary: "Ballen, kegels, hesjes en ander trainingsmateriaal",
-    contact: CONTACTS.materiaal!,
+    contact: CONTACTS.materiaal,
     steps: [
       "Stel je vraag rechtstreeks aan de materiaalmeester via mail.",
       "Vermeld voor welke ploeg het materiaal nodig is.",
@@ -201,7 +204,7 @@ const mockPaths: MockPath[] = [
     category: "administratief",
     question: "Ik wil mij of mijn kind inschrijven",
     summary: "Lidmaatschap en lidgeld bij KCVV Elewijt",
-    contact: CONTACTS.secretariaat!,
+    contact: CONTACTS.secretariaat,
     steps: [
       "Vul het inschrijvingsformulier in op onze website.",
       "Betaal het lidgeld via overschrijving of Payconiq.",
@@ -214,7 +217,7 @@ const mockPaths: MockPath[] = [
     category: "administratief",
     question: "Ik wil een transfer aanvragen",
     summary: "Transfer van of naar een andere club",
-    contact: CONTACTS.secretariaat!,
+    contact: CONTACTS.secretariaat,
     steps: [
       "Mail het secretariaat met je naam en je huidige club.",
       "De secretaris start de transferaanvraag bij Voetbal Vlaanderen.",
@@ -226,7 +229,7 @@ const mockPaths: MockPath[] = [
     category: "administratief",
     question: "Ik kan niet komen trainen of spelen",
     summary: "Een afwezigheid correct melden",
-    contact: CONTACTS.trainer!,
+    contact: CONTACTS.trainer,
     steps: [
       "Verwittig je trainer ten laatste 24 uur op voorhand.",
       "Bij ziekte of blessure mag dit korter, maar verwittig zo snel mogelijk.",
@@ -237,7 +240,7 @@ const mockPaths: MockPath[] = [
     category: "administratief",
     question: "Vraag over kledij of uitrusting",
     summary: "Kit, training, schoenen en bestellingen",
-    contact: CONTACTS.materiaal!,
+    contact: CONTACTS.materiaal,
     steps: [
       "Bekijk eerst onze webshop voor de standaard uitrusting.",
       "Voor maatadvies of bestellingen buiten de webshop: contacteer de materiaalmeester.",
@@ -249,7 +252,7 @@ const mockPaths: MockPath[] = [
     category: "gedrag",
     question: "Ik heb een conflict met een ouder of speler",
     summary: "Bemiddelen bij conflicten in en rond de club",
-    contact: CONTACTS.jeugd!,
+    contact: CONTACTS.jeugd,
     steps: [
       "Spreek het probleem eerst rustig uit met de andere persoon.",
       "Komt er geen oplossing? Contacteer de jeugdcoördinator voor bemiddeling.",
@@ -261,7 +264,7 @@ const mockPaths: MockPath[] = [
     category: "gedrag",
     question: "Ik wil een klacht indienen",
     summary: "Formele klachtenprocedure bij het bestuur",
-    contact: CONTACTS.voorzitter!,
+    contact: CONTACTS.voorzitter,
     steps: [
       "Stel je klacht schriftelijk op met een duidelijke beschrijving van de feiten.",
       "Mail de klacht naar de voorzitter.",
@@ -273,7 +276,7 @@ const mockPaths: MockPath[] = [
     category: "gedrag",
     question: "Vraag over de Fair Play code",
     summary: "Onze gedragscode voor spelers, ouders en supporters",
-    contact: CONTACTS.voorzitter!,
+    contact: CONTACTS.voorzitter,
     steps: [
       "Lees de Fair Play charter op onze website.",
       "Wordt ondertekend bij inschrijving — geldt voor het hele seizoen.",
@@ -285,7 +288,7 @@ const mockPaths: MockPath[] = [
     category: "algemeen",
     question: "Ik wil vrijwilliger worden bij de club",
     summary: "Helpende handen zijn altijd welkom",
-    contact: CONTACTS.voorzitter!,
+    contact: CONTACTS.voorzitter,
     steps: [
       "Mail de voorzitter met je interesses (kantine, evenementen, jeugd, ...).",
       "Een korte kennismaking wordt ingepland.",
@@ -297,7 +300,7 @@ const mockPaths: MockPath[] = [
     category: "algemeen",
     question: "Ik wil mijn contactgegevens wijzigen",
     summary: "Adres, telefoonnummer of e-mail bijwerken",
-    contact: CONTACTS.secretariaat!,
+    contact: CONTACTS.secretariaat,
     steps: [
       "Mail het secretariaat met je naam, lidnummer en de nieuwe gegevens.",
       "De wijziging wordt binnen 1 werkdag verwerkt.",
@@ -308,7 +311,7 @@ const mockPaths: MockPath[] = [
     category: "algemeen",
     question: "Ik ben iets verloren of vond iets",
     summary: "Gevonden voorwerpen in de kantine of kleedkamer",
-    contact: CONTACTS.materiaal!,
+    contact: CONTACTS.materiaal,
     steps: [
       "Vraag eerst rond bij de trainer of in de kantine.",
       "Niets gevonden? Mail de materiaalmeester met een beschrijving.",
@@ -320,7 +323,7 @@ const mockPaths: MockPath[] = [
     category: "commercieel",
     question: "Ik wil sponsor worden van KCVV",
     summary: "Word partner van onze club",
-    contact: CONTACTS.sponsoring!,
+    contact: CONTACTS.sponsoring,
     steps: [
       "Bekijk onze sponsorpakketten op de sponsorspagina.",
       "Mail de sponsorverantwoordelijke voor een persoonlijk gesprek.",
@@ -332,7 +335,7 @@ const mockPaths: MockPath[] = [
     category: "commercieel",
     question: "Ik wil een evenement organiseren",
     summary: "Eigen evenement op het sportcomplex",
-    contact: CONTACTS.events!,
+    contact: CONTACTS.events,
     steps: [
       "Mail de evenementenverantwoordelijke met een korte beschrijving.",
       "Vermeld de gewenste datum en het verwachte aantal deelnemers.",
@@ -344,7 +347,7 @@ const mockPaths: MockPath[] = [
     category: "commercieel",
     question: "Ik wil de kantine huren",
     summary: "Privéfeest of vergadering in onze kantine",
-    contact: CONTACTS.events!,
+    contact: CONTACTS.events,
     steps: [
       "Mail je verzoek met datum, type evenement en aantal personen.",
       "We bevestigen de beschikbaarheid binnen 3 dagen.",

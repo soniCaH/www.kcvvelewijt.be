@@ -2,15 +2,9 @@
  * Club Organigram Redesign — Visual Prototype
  *
  * Brings /club/organigram into the site design language by wrapping the
- * actual UnifiedOrganigramClient in a SectionStack with diagonal transitions.
- *
- * Key behaviour:
- * - The chart section is wider than the regular max-w-inner-lg containers
- *   (uses max-w-outer / 90rem) so the chart has room to breathe
- * - The chart wrapper uses `touch-action: pan-y` so users can scroll
- *   vertically past the chart on mobile/touch without getting trapped
- *   inside the chart's pan/zoom canvas
- * - A small "scroll-past" hint appears below the chart
+ * actual UnifiedOrganigramClient in a SectionStack with diagonal
+ * transitions. The chart section uses max-w-7xl (matching production)
+ * so the d3 chart has its required 1280px of breathing room.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";

@@ -28,7 +28,9 @@ describe("TeamStandings", () => {
       goalsAgainst: 12,
       goalDifference: 26,
       points: 38,
-      form: "WWWDW",
+      // Includes one of each result so the form-badge color test
+      // exercises green (W), yellow (D), and red (L) at the same time.
+      form: "WLDWW",
     },
     {
       position: 2,
@@ -146,6 +148,9 @@ describe("TeamStandings", () => {
     });
 
     it("renders form badges with correct colors for the highlighted team", () => {
+      // mockStandings[0] (KCVV) has form "WLDWW" — three Ws, one L, one D.
+      // Form is gated to the highlighted team, so we should see exactly:
+      // 3 green badges, 1 red badge, 1 yellow badge.
       const { container } = render(
         <TeamStandings
           standings={mockStandings}
@@ -153,16 +158,12 @@ describe("TeamStandings", () => {
           highlightTeamId={1235}
         />,
       );
-      // Check for W badges (green)
       const greenBadges = container.querySelectorAll(".bg-green-500");
-      expect(greenBadges.length).toBeGreaterThan(0);
-      // Check for D badges (yellow)
+      expect(greenBadges.length).toBe(3);
       const yellowBadges = container.querySelectorAll(".bg-yellow-500");
-      expect(yellowBadges.length).toBeGreaterThan(0);
-      // Check for L badges (red) — present because the highlighted team's
-      // form contains an L
+      expect(yellowBadges.length).toBe(1);
       const redBadges = container.querySelectorAll(".bg-red-500");
-      expect(redBadges.length).toBeGreaterThanOrEqual(0);
+      expect(redBadges.length).toBe(1);
     });
 
     it("only renders form badges for the highlighted KCVV row, opponent rows show em-dash", () => {

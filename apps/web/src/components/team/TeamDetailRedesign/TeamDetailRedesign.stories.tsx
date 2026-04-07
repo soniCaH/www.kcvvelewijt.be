@@ -261,14 +261,16 @@ function DiagonalPlayerCard({ player }: { player: RosterPlayer }) {
   );
 }
 
-/** Diagonal staff card — same shape, navy seam, function title as badge */
+/** Diagonal staff card — same shape, navy seam, function title as badge.
+ * Uses a button (not an anchor) because staff have no detail route to
+ * navigate to in the prototype. */
 function DiagonalStaffCard({ member }: { member: StaffMember }) {
   const fullName = `${member.firstName} ${member.lastName}`;
   const badge = member.functionTitle ?? "";
   return (
-    <a
-      href="#"
-      className="group relative flex h-full flex-col overflow-hidden rounded-sm bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-hover"
+    <button
+      type="button"
+      className="group relative flex h-full flex-col overflow-hidden rounded-sm bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-hover"
       title={fullName}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] origin-center scale-x-0 bg-kcvv-green-bright transition-transform duration-300 ease-out group-hover:scale-x-100" />
@@ -317,7 +319,7 @@ function DiagonalStaffCard({ member }: { member: StaffMember }) {
           <span className="font-thin">{member.lastName}</span>
         </h3>
       </div>
-    </a>
+    </button>
   );
 }
 
