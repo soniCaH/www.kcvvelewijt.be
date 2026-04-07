@@ -88,3 +88,7 @@ export type { SectionCtaProps } from "./SectionCta";
 // PageHero
 export { PageHero } from "./PageHero";
 export type { PageHeroProps } from "./PageHero";
+
+// BrandedTabs
+export { BrandedTabs } from "./BrandedTabs";
+export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
