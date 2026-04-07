@@ -189,7 +189,7 @@ describe("TeamStandings", () => {
       });
 
       // The total number of FormBadge wrapper divs should equal 5
-      // (KCVV's "WWWDW" form is 5 chars, opponents render no badges).
+      // (KCVV's "WLDWW" form is 5 chars, opponents render no badges).
       // Each form badge has the bg-green-500/bg-yellow-500/bg-red-500
       // class so we count those instead.
       const allFormBadges = container.querySelectorAll(

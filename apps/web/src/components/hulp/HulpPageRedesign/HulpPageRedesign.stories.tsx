@@ -413,9 +413,9 @@ function QuestionCard({ path }: { path: MockPath }) {
   const meta = CATEGORY_META[path.category];
   const Icon = meta.icon;
   return (
-    <a
-      href="#"
-      className="group flex items-start gap-4 rounded-sm border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-kcvv-green-bright hover:shadow-card-hover"
+    <button
+      type="button"
+      className="group flex w-full items-start gap-4 rounded-sm border border-gray-200 bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:border-kcvv-green-bright hover:shadow-card-hover"
     >
       <div
         className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm bg-gray-50 ${meta.color}`}
@@ -431,7 +431,7 @@ function QuestionCard({ path }: { path: MockPath }) {
         </p>
       </div>
       <ChevronRight className="h-5 w-5 flex-shrink-0 self-center text-kcvv-gray transition-transform group-hover:translate-x-1 group-hover:text-kcvv-green-bright" />
-    </a>
+    </button>
   );
 }
 
@@ -511,12 +511,12 @@ function AnswerCard({ path }: { path: MockPath }) {
   return (
     <div className="mx-auto max-w-3xl">
       {/* Back link */}
-      <a
-        href="#"
+      <button
+        type="button"
         className="mb-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-gray hover:text-kcvv-black"
       >
         ← Terug naar overzicht
-      </a>
+      </button>
 
       {/* Header */}
       <div className="mb-8 flex items-start gap-4">

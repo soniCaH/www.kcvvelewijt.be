@@ -426,12 +426,21 @@ export const Approach3_HeroTabs: Story = {
         bg: "gray-100",
         content: (
           <div className="mx-auto max-w-inner-lg px-4 md:px-10">
-            {/* Tab bar */}
-            <div className="mb-8 flex gap-8 border-b border-gray-200">
+            {/* Tab bar — uses WAI-ARIA tabs pattern. The real
+                BrandedTabs component (see implementation plan) will
+                apply the same semantics. */}
+            <div
+              role="tablist"
+              aria-label="Team detail secties"
+              className="mb-8 flex gap-8 border-b border-gray-200"
+            >
               {TAB_ITEMS.map((tab) => (
                 <button
                   key={tab.label}
                   type="button"
+                  role="tab"
+                  aria-selected={tab.active}
+                  tabIndex={tab.active ? 0 : -1}
                   className={
                     tab.active
                       ? "border-b-4 border-kcvv-green-bright px-1 py-4 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-green-dark"
