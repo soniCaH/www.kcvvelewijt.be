@@ -263,7 +263,7 @@ export function TeamDetail({
           body={header.tagline ?? ""}
         />
       ),
-      transition: { type: "diagonal", direction: "left" },
+      transition: { type: "diagonal", direction: "right", overlap: "full" },
     },
     {
       key: "tabs",
@@ -281,7 +281,7 @@ export function TeamDetail({
           </Suspense>
         </div>
       ),
-      transition: { type: "diagonal", direction: "right" },
+      transition: { type: "diagonal", direction: "left" },
     },
     {
       key: "cta",
