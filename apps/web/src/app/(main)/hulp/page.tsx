@@ -1,21 +1,28 @@
 /**
- * Help / Responsibility Finder Page
+ * Help / Hulp Page
  *
- * "Ik ben ... en ik ..." question builder to find the right contact person
+ * Search + browse + answer view for the responsibility paths fetched
+ * from Sanity. The new HulpPage UX replaces the legacy
+ * "Ik ben … en ik …" inline-sentence finder.
  */
 
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
-import { HelpPage } from "@/components/hulp/HelpPage/HelpPage";
+import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
+import { HulpPage } from "@/components/hulp/HulpPage";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  buildBreadcrumbJsonLd,
+  buildFAQPageJsonLd,
+  type FAQEntry,
+} from "@/lib/seo/jsonld";
 import { runPromise } from "@/lib/effect/runtime";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
-import { TeamRepository } from "@/lib/repositories/team.repository";
 
 export const metadata: Metadata = {
   title: "Hulp & Contact | KCVV Elewijt",
   description:
-    "Vind snel de juiste contactpersoon voor jouw vraag. Wie ben je en wat wil je weten?",
+    "Vind snel de juiste contactpersoon voor jouw vraag. Stel je vraag of blader door de categorieën.",
   keywords: [
     "hulp",
     "contact",
@@ -32,20 +39,42 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function HelpPageRoute() {
-  const { paths, youthTeams } = await runPromise(
+export default async function HulpPageRoute() {
+  const paths = await runPromise(
     Effect.gen(function* () {
       const responsibilityRepo = yield* ResponsibilityRepository;
-      const teamRepo = yield* TeamRepository;
-      const [paths, youthTeams] = yield* Effect.all([
-        responsibilityRepo.findAll(),
-        teamRepo.findYouthTeamsForContact(),
-      ]);
-      return { paths, youthTeams };
+      return yield* responsibilityRepo.findAll();
     }),
   );
 
-  return <HelpPage paths={paths} youthTeams={youthTeams} />;
+  // Project each responsibility path to a FAQ entry — the answer is the
+  // summary plus the numbered steps joined into a single paragraph so it
+  // works as a Schema.org `Answer.text` payload.
+  const faqEntries: FAQEntry[] = paths.map((path) => {
+    const stepsText = path.steps
+      .map((step, i) => `${i + 1}. ${step.description}`)
+      .join(" ");
+    return {
+      question: path.question,
+      answer:
+        stepsText.length > 0 ? `${path.summary} ${stepsText}` : path.summary,
+    };
+  });
+
+  return (
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Hulp", url: `${SITE_CONFIG.siteUrl}/hulp` },
+        ])}
+      />
+      {faqEntries.length > 0 && (
+        <JsonLd data={buildFAQPageJsonLd(faqEntries)} />
+      )}
+      <HulpPage paths={paths} />
+    </>
+  );
 }
 
 export const revalidate = 3600;

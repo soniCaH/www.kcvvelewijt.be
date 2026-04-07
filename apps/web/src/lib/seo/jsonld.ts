@@ -1,5 +1,6 @@
 import type {
   BreadcrumbList,
+  FAQPage,
   MergeLeafTypes,
   NewsArticle,
   OrganizationLeaf,
@@ -168,6 +169,34 @@ function mapEventStatus(status: SportsEventInput["status"]): string {
     case "forfeited":
       return "https://schema.org/EventScheduled";
   }
+}
+
+export interface FAQEntry {
+  /** The user-facing question */
+  question: string;
+  /** Plain-text answer (steps joined into a single paragraph) */
+  answer: string;
+}
+
+/**
+ * Build a Schema.org FAQPage document for the /hulp page so search
+ * engines can surface KCVV's responsibility paths as FAQ rich results.
+ */
+export function buildFAQPageJsonLd(
+  entries: ReadonlyArray<FAQEntry>,
+): WithContext<FAQPage> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: entries.map((entry) => ({
+      "@type": "Question" as const,
+      name: entry.question,
+      acceptedAnswer: {
+        "@type": "Answer" as const,
+        text: entry.answer,
+      },
+    })),
+  };
 }
 
 export function buildSportsEventJsonLd(

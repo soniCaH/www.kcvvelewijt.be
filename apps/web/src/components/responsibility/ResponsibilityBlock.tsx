@@ -1,32 +1,38 @@
 "use client";
 
 /**
- * Responsibility Block for Homepage
+ * Responsibility Block — Homepage teaser for the /hulp page
  *
- * Compact version of the responsibility finder for the homepage
+ * A compact section with the same headline + search-input visual as the
+ * full /hulp page, plus three quick-link cards. Submitting the search
+ * navigates to /hulp (the actual semantic search lives there). The
+ * legacy role-dropdown / inline-sentence finder has been removed.
  */
 
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronRight, Users, Mail, UserPlus } from "@/lib/icons";
-import { ResponsibilityFinder } from "./ResponsibilityFinder";
-import type { ResponsibilityPath } from "@/types/responsibility";
+import { HulpSearchInput } from "@/components/hulp/HulpPage";
 
-/**
- * Render the homepage responsibility block with a compact responsibility finder, a link to the full help page, and three quick-link cards.
- *
- * @param paths - Optional list of responsibility paths supplied to the finder; defaults to an empty array.
- * @returns The React element for the responsibility block.
- */
-export function ResponsibilityBlock({
-  paths = [],
-}: {
-  paths?: ResponsibilityPath[];
-}) {
+export function ResponsibilityBlock() {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    // The /hulp page owns the actual search experience — navigate there.
+    // We intentionally don't pass the query as a URL param: HulpPage doesn't
+    // read one, and the user retypes one character to re-trigger the
+    // semantic search anyway.
+    router.push("/hulp");
+  }
+
   return (
     <section className="bg-gradient-to-br from-green-main/5 to-green-hover/5 py-16 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2
             className="text-3xl md:text-5xl font-bold text-gray-blue mb-4"
             style={{
@@ -40,9 +46,18 @@ export function ResponsibilityBlock({
           </p>
         </div>
 
-        {/* Compact Finder */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
-          <ResponsibilityFinder paths={paths} compact />
+        {/* Search teaser — submit navigates to /hulp */}
+        <form
+          onSubmit={handleSubmit}
+          role="search"
+          aria-label="Hulp zoeken"
+          className="bg-white rounded-2xl shadow-xl p-6 md:p-10"
+        >
+          <HulpSearchInput
+            value={query}
+            onChange={setQuery}
+            ariaLabel="Hulp zoeken"
+          />
 
           {/* Link to full page */}
           <div className="mt-8 text-center">
@@ -54,7 +69,7 @@ export function ResponsibilityBlock({
               <ChevronRight size={16} />
             </Link>
           </div>
-        </div>
+        </form>
 
         {/* Quick Links */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
