@@ -63,4 +63,28 @@ describe("SectionCta", () => {
       expect(icon).toHaveAttribute("aria-hidden", "true");
     });
   });
+
+  describe("Variants", () => {
+    it("defaults to light variant — heading is text-kcvv-black, body is text-kcvv-gray", () => {
+      render(<SectionCta {...defaultProps} />);
+      const heading = screen.getByRole("heading");
+      expect(heading).toHaveClass("text-kcvv-black");
+      const body = screen.getByText(defaultProps.body);
+      expect(body).toHaveClass("text-kcvv-gray");
+    });
+
+    it("dark variant uses white text for heading and white/75 for body", () => {
+      render(<SectionCta {...defaultProps} variant="dark" />);
+      const heading = screen.getByRole("heading");
+      expect(heading).toHaveClass("text-white");
+      const body = screen.getByText(defaultProps.body);
+      expect(body).toHaveClass("text-white/75");
+    });
+
+    it("dark variant heading does NOT use the light text-kcvv-black class", () => {
+      render(<SectionCta {...defaultProps} variant="dark" />);
+      const heading = screen.getByRole("heading");
+      expect(heading).not.toHaveClass("text-kcvv-black");
+    });
+  });
 });

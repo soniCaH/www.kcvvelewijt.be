@@ -294,11 +294,23 @@ export function TeamStandings({
                 </td>
                 {showForm && (
                   <td className="px-2 py-3 hidden sm:table-cell">
-                    <div className="flex items-center justify-center gap-1">
-                      {entry.form?.split("").map((result, i) => (
-                        <FormBadge key={i} result={result} />
-                      ))}
-                    </div>
+                    {isHighlighted && entry.form ? (
+                      <div className="flex items-center justify-center gap-1">
+                        {entry.form.split("").map((result, i) => (
+                          <FormBadge key={i} result={result} />
+                        ))}
+                      </div>
+                    ) : (
+                      // Form data is only computed for KCVV teams (PSD only
+                      // exposes recent results for our own teams), so
+                      // opponent rows show a placeholder em-dash instead.
+                      <div
+                        className="text-center text-xs text-kcvv-gray/50"
+                        aria-label="Geen vormgegevens beschikbaar"
+                      >
+                        —
+                      </div>
+                    )}
                   </td>
                 )}
               </tr>

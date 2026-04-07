@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Facebook, Instagram } from "@/lib/icons";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import { FooterTransition } from "./FooterTransition";
+import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
 import { cn } from "@/lib/utils/cn";
 import { EXTERNAL_LINKS } from "@/lib/constants";
 
@@ -35,6 +36,15 @@ export const PageFooter = ({ className }: PageFooterProps) => {
           </p>
         </div>
       </div>
+
+      {/* Diagonal between green hero and info zone — eliminates the
+          previous hard-color seam between green and black */}
+      <SectionTransition
+        from="kcvv-green-dark"
+        to="kcvv-black"
+        type="diagonal"
+        direction="right"
+      />
 
       {/* Zone 2 — Info zone */}
       <footer className="bg-kcvv-black text-white">

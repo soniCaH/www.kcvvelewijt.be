@@ -94,10 +94,13 @@ export function ExpandableCard({
       4: "ml-24",
     }[Math.min(depth, 4)] || "ml-24";
 
-  // Background color for depth levels - subtle gradient
+  // Background color for depth levels - subtle gradient.
+  // Depth 0 is transparent so top-level cards float on the section bg
+  // (no nested-card-on-card look). Deeper levels still get a subtle
+  // tint to indicate hierarchy.
   const depthBackground =
     {
-      0: "bg-white",
+      0: "bg-transparent",
       1: "bg-gray-50/30",
       2: "bg-gray-50/50",
       3: "bg-gray-50/70",

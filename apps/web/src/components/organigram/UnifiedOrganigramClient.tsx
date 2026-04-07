@@ -444,11 +444,20 @@ export function UnifiedOrganigramClient({
         </div>
       </div>
 
-      {/* Active View - With swipe gestures on mobile (Phase 4) */}
+      {/* Active View - With swipe gestures on mobile (Phase 4)
+          Chart and Cards views: transparent wrapper so the inner content
+          (chart nodes / hierarchy cards) floats on the section background
+          without a nested-card-on-card look or rounded-bottom seam.
+          Responsibilities view: keep the white card frame since the
+          finder UI benefits from a contained card. */}
       <div
         id="organigram-main-content"
         tabIndex={-1}
-        className={`bg-white rounded-xl shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2 ${
+        className={`focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2 ${
+          activeView === "chart" || activeView === "cards"
+            ? ""
+            : "bg-white rounded-xl shadow-sm border border-gray-200"
+        } ${
           activeView === "responsibilities"
             ? "overflow-visible"
             : "overflow-hidden"
