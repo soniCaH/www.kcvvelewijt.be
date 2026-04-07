@@ -170,6 +170,34 @@ function mapEventStatus(status: SportsEventInput["status"]): string {
   }
 }
 
+export interface FAQEntry {
+  /** The user-facing question */
+  question: string;
+  /** Plain-text answer (steps joined into a single paragraph) */
+  answer: string;
+}
+
+/**
+ * Build a Schema.org FAQPage document for the /hulp page so search
+ * engines can surface KCVV's responsibility paths as FAQ rich results.
+ */
+export function buildFAQPageJsonLd(
+  entries: ReadonlyArray<FAQEntry>,
+): JsonLdDocument {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: entries.map((entry) => ({
+      "@type": "Question",
+      name: entry.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: entry.answer,
+      },
+    })),
+  };
+}
+
 export function buildSportsEventJsonLd(
   input: SportsEventInput,
 ): JsonLdDocument {

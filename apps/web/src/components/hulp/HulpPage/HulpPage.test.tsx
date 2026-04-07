@@ -219,6 +219,29 @@ describe("HulpPage", () => {
     expect(trackNoResults).not.toHaveBeenCalled();
   });
 
+  it("renders the error branch when useSemanticSearch reports an error", () => {
+    currentError = "fetch failed";
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "inschrijving" },
+    });
+    expect(
+      screen.getByText(/er ging iets mis bij het zoeken/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the empty-data fallback when paths is an empty array", () => {
+    render(<HulpPage paths={[]} />);
+    expect(
+      screen.getByRole("heading", { name: /nog geen vragen beschikbaar/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /contact opnemen/i }),
+    ).toHaveAttribute("href", "mailto:info@kcvvelewijt.be");
+    // Browse content should NOT render in the empty-data state
+    expect(screen.queryByText("Administratief")).not.toBeInTheDocument();
+  });
+
   it("removes the ?id= param when the back button is clicked", () => {
     mockSearchParams = new URLSearchParams("id=lidgeld-inschrijving");
     render(<HulpPage paths={FIXTURE_PATHS} />);
