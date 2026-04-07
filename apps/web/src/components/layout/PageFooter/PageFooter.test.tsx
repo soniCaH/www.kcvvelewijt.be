@@ -22,10 +22,13 @@ describe("PageFooter", () => {
     expect(heroText.className).toMatch(/font-title/);
   });
 
-  it("renders SectionTransition from gray-100 to kcvv-green-dark", () => {
+  it("renders two SectionTransitions: one into the green hero zone and one between green hero and black info zone", () => {
+    // The second transition (green → black) was added so the previously
+    // hard color seam between the green KCVV hero zone and the black info
+    // zone is now a smooth diagonal cut, matching the rest of the site.
     render(<PageFooter />);
-    const transition = screen.queryByTestId("section-transition");
-    expect(transition).toBeInTheDocument();
+    const transitions = screen.queryAllByTestId("section-transition");
+    expect(transitions).toHaveLength(2);
   });
 
   it("renders club crest logo", () => {

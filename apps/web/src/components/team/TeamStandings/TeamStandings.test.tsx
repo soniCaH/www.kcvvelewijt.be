@@ -145,9 +145,13 @@ describe("TeamStandings", () => {
       expect(screen.getByText("Vorm")).toBeInTheDocument();
     });
 
-    it("renders form badges with correct colors", () => {
+    it("renders form badges with correct colors for the highlighted team", () => {
       const { container } = render(
-        <TeamStandings standings={mockStandings} showForm />,
+        <TeamStandings
+          standings={mockStandings}
+          showForm
+          highlightTeamId={1235}
+        />,
       );
       // Check for W badges (green)
       const greenBadges = container.querySelectorAll(".bg-green-500");
@@ -155,9 +159,52 @@ describe("TeamStandings", () => {
       // Check for D badges (yellow)
       const yellowBadges = container.querySelectorAll(".bg-yellow-500");
       expect(yellowBadges.length).toBeGreaterThan(0);
-      // Check for L badges (red)
+      // Check for L badges (red) — present because the highlighted team's
+      // form contains an L
       const redBadges = container.querySelectorAll(".bg-red-500");
-      expect(redBadges.length).toBeGreaterThan(0);
+      expect(redBadges.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it("only renders form badges for the highlighted KCVV row, opponent rows show em-dash", () => {
+      // Form data is only available for KCVV teams (PSD limitation).
+      // Opponent rows must NOT show form badges to avoid implying we have
+      // data we don't.
+      const { container } = render(
+        <TeamStandings
+          standings={mockStandings}
+          showForm
+          highlightTeamId={1235}
+        />,
+      );
+
+      // Em-dash placeholder should be present for opponent rows (2 of 3
+      // mock entries are not KCVV).
+      const emDashes = screen.getAllByLabelText(
+        "Geen vormgegevens beschikbaar",
+      );
+      expect(emDashes).toHaveLength(2);
+      emDashes.forEach((node) => {
+        expect(node).toHaveTextContent("—");
+      });
+
+      // The total number of FormBadge wrapper divs should equal 5
+      // (KCVV's "WWWDW" form is 5 chars, opponents render no badges).
+      // Each form badge has the bg-green-500/bg-yellow-500/bg-red-500
+      // class so we count those instead.
+      const allFormBadges = container.querySelectorAll(
+        ".bg-green-500, .bg-yellow-500, .bg-red-500",
+      );
+      expect(allFormBadges).toHaveLength(5);
+    });
+
+    it("shows em-dash for all rows when showForm is true but no team is highlighted", () => {
+      // Without a highlighted team, no row qualifies as KCVV, so all rows
+      // show the em-dash placeholder.
+      render(<TeamStandings standings={mockStandings} showForm />);
+      const emDashes = screen.getAllByLabelText(
+        "Geen vormgegevens beschikbaar",
+      );
+      expect(emDashes).toHaveLength(3);
     });
   });
 

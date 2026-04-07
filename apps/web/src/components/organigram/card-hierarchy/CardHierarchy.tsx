@@ -420,8 +420,10 @@ export function CardHierarchy({
         )}
       </div>
 
-      {/* Hierarchy */}
-      <div ref={hierarchyContainerRef} className="bg-white">
+      {/* Hierarchy — transparent so individual member cards float on the
+          section background. The export functionality uses its own
+          offscreen white container further down (search for fixed -left-). */}
+      <div ref={hierarchyContainerRef}>
         {searchResults.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">

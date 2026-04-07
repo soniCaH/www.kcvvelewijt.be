@@ -37,7 +37,6 @@ import {
   Download,
 } from "lucide-react";
 import { Menu } from "@/lib/icons";
-import { SearchBar } from "../shared/SearchBar";
 import { DepartmentFilter } from "../shared/DepartmentFilter";
 import { MobileNavigationDrawer } from "./MobileNavigationDrawer";
 import { ContactOverlay } from "./ContactOverlay";
@@ -75,15 +74,21 @@ export function EnhancedOrgChart({
   const chartRef = useRef<OrgChart<NodeData> | null>(null);
   // Store callback in ref to avoid re-initializing chart when callback changes
   const onMemberClickRef = useRef(onMemberClick);
-  const { trackSearchUsed, trackDepartmentFiltered, trackExportPng } =
-    useOrganigramAnalytics();
+  // trackSearchUsed was previously called by handleSearchSelect which has
+  // been removed along with the inline SearchBar. Search analytics now
+  // fire from the unified search at the top of UnifiedOrganigramClient.
+  const { trackDepartmentFiltered, trackExportPng } = useOrganigramAnalytics();
 
   // Keep ref updated with latest callback (must be in useEffect per React rules)
   useEffect(() => {
     onMemberClickRef.current = onMemberClick;
   }, [onMemberClick]);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // searchQuery is intentionally read-only — the inline SearchBar that
+  // used to set it was removed in favour of the unified search at the
+  // top of UnifiedOrganigramClient. The state structure stays so that
+  // the existing filter / zoom logic compiles.
+  const [searchQuery] = useState("");
   const [activeDepartment, setActiveDepartment] = useState<
     "all" | "hoofdbestuur" | "jeugdbestuur"
   >("all");
@@ -303,13 +308,7 @@ export function EnhancedOrgChart({
     }
   }, [centeredMemberId]);
 
-  // Handle search selection - zoom to member
-  const handleSearchSelect = (member: OrgChartNode) => {
-    trackSearchUsed(searchQuery);
-    if (chartRef.current) {
-      chartRef.current.setCentered(member.id).render();
-    }
-  };
+  // (handleSearchSelect was removed along with the inline SearchBar.)
 
   // Handle mobile drawer member selection - zoom to member
   const handleMobileDrawerSelect = (member: OrgChartNode) => {
@@ -388,19 +387,11 @@ export function EnhancedOrgChart({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Header: Search + Filters */}
-      <div className="space-y-4">
-        {/* Search Bar */}
-        <SearchBar
-          value={searchQuery}
-          onChange={setSearchQuery}
-          members={members}
-          placeholder="Zoek persoon, functie of afdeling..."
-          showAutocomplete={true}
-          maxResults={6}
-          onSelect={handleSearchSelect}
-        />
-
+      {/* Header: Filters only — the SearchBar that used to live here is
+          removed to avoid duplicating the unified search at the top of
+          UnifiedOrganigramClient. searchQuery state stays in scope so
+          internal filter/zoom logic still works (defaults to empty). */}
+      <div>
         {/* Department Filter */}
         <DepartmentFilter
           value={activeDepartment}
@@ -549,17 +540,13 @@ export function EnhancedOrgChart({
         </div>
       ) : (
         <div className="relative">
-          {/* Chart */}
+          {/* Chart — transparent so the chart's own node cards float on the
+              section background (no nested-card-on-card look, no rounded
+              corner seam between the chart container and the section bg). */}
           <div
             id="enhanced-org-chart-container"
             ref={chartContainerRef}
-            className="
-              w-full
-              bg-white
-              rounded-lg
-              border-2 border-gray-200
-              overflow-hidden
-            "
+            className="w-full overflow-hidden"
             style={{
               minHeight: "600px",
               height: isFullscreen ? "100vh" : "600px",
