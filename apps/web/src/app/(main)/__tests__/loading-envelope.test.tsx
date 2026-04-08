@@ -16,7 +16,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { globSync } from "node:fs";
-import { resolve, relative } from "node:path";
+import { resolve } from "node:path";
 
 // ---------------------------------------------------------------------------
 // SectionStack loading components
@@ -227,13 +227,18 @@ describe("loading.tsx envelope drift guard", () => {
     const loadingFiles = globSync("**/loading.tsx", { cwd: mainDir });
     const testedRoutes =
       sectionStackRoutes.length + nonSectionStackRoutes.length;
+    const expectedFiles = new Set(
+      [...sectionStackRoutes, ...nonSectionStackRoutes].map(
+        ({ name }) => `${name.replace(/^\//, "")}/loading.tsx`,
+      ),
+    );
+    const missingFiles = loadingFiles
+      .filter((f) => !expectedFiles.has(f))
+      .sort();
     expect(
       loadingFiles.length,
       `Found ${loadingFiles.length} loading.tsx files on disk but only ${testedRoutes} in test arrays. ` +
-        `Missing: ${loadingFiles
-          .map((f) => relative(mainDir, resolve(mainDir, f)))
-          .sort()
-          .join(", ")}`,
+        `Missing: ${missingFiles.join(", ")}`,
     ).toBe(testedRoutes);
   });
 });
