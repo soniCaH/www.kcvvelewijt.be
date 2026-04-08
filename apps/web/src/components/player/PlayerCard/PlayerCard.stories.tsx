@@ -1,14 +1,14 @@
 /**
  * PlayerCard Component Stories
  *
- * Visual player card for team rosters and player listings.
- * Unified card design matching TeamCard styling.
+ * Diagonal-cut player card with stencil number on the seam — see
+ * `PlayerCard.tsx` for design notes.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PlayerCard } from "./PlayerCard";
 
-// Real player images from KCVV API (with transparent backgrounds)
+// Real player images from KCVV API
 const REAL_PLAYER_IMAGES = {
   chiel:
     "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
@@ -28,17 +28,13 @@ const meta = {
     docs: {
       description: {
         component: `
-Visual player card with unified card design:
-- White card container with border and shadow
-- 3D jersey number badge with stenciletta font
-- Player photo with hover shift effect (contained within card)
-- Separate content section for names and position
-- Captain badge support
+Diagonal-cut player card for team rosters and player listings.
 
-**Unified with TeamCard styling:**
-- Same border and shadow treatment
-- Same content section layout
-- Consistent hover behavior
+- Photo is clipped via CSS \`clip-path\` so the white card surface flows
+  up into the cut-away triangle
+- Stenciletta-font jersey number sits on the diagonal seam
+- Green hover accent bar at the top scales from the center
+- \`flex h-full flex-col\` keeps cards in a CSS Grid row equal height
         `,
       },
     },
@@ -46,10 +42,9 @@ Visual player card with unified card design:
       default: "light",
     },
   },
-  // Give cards a representative width in Storybook
   decorators: [
     (Story) => (
-      <div className="w-[300px]">
+      <div className="w-[260px]">
         <Story />
       </div>
     ),
@@ -81,15 +76,6 @@ Visual player card with unified card design:
       control: "text",
       description: "Link to player profile",
     },
-    isCaptain: {
-      control: "boolean",
-      description: "Show captain badge",
-    },
-    variant: {
-      control: "radio",
-      options: ["default", "compact"],
-      description: "Card size variant",
-    },
   },
 } satisfies Meta<typeof PlayerCard>;
 
@@ -111,22 +97,7 @@ export const Default: Story = {
 };
 
 /**
- * Player card with captain badge
- */
-export const Captain: Story = {
-  args: {
-    firstName: "Chiel",
-    lastName: "Bertens",
-    position: "Verdediger",
-    number: 5,
-    imageUrl: REAL_PLAYER_IMAGES.chiel,
-    href: "/player/chiel-bertens",
-    isCaptain: true,
-  },
-};
-
-/**
- * Goalkeeper with specific styling
+ * Goalkeeper variant
  */
 export const Goalkeeper: Story = {
   args: {
@@ -153,7 +124,7 @@ export const WithoutPhoto: Story = {
 };
 
 /**
- * Without jersey number
+ * Without jersey number - omits the seam badge
  */
 export const WithoutNumber: Story = {
   args: {
@@ -180,28 +151,6 @@ export const LongName: Story = {
 };
 
 /**
- * Compact variant for dense layouts
- */
-export const Compact: Story = {
-  args: {
-    firstName: "Jarne",
-    lastName: "Feron",
-    position: "Aanvaller",
-    number: 9,
-    imageUrl: REAL_PLAYER_IMAGES.jarne,
-    href: "/player/jarne-feron",
-    variant: "compact",
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-[240px]">
-        <Story />
-      </div>
-    ),
-  ],
-};
-
-/**
  * Loading skeleton state
  */
 export const Loading: Story = {
@@ -215,7 +164,7 @@ export const Loading: Story = {
 };
 
 /**
- * Grid layout with multiple cards
+ * Grid layout with multiple cards (verifies equal-height rows)
  */
 export const GridLayout: Story = {
   args: {
@@ -224,9 +173,9 @@ export const GridLayout: Story = {
     position: "",
     href: "",
   },
-  decorators: [], // Remove default decorator
+  decorators: [],
   render: () => (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl">
+    <div className="grid max-w-5xl grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       <PlayerCard
         firstName="Louie"
         lastName="Keeper"
@@ -242,7 +191,6 @@ export const GridLayout: Story = {
         number={5}
         imageUrl={REAL_PLAYER_IMAGES.chiel}
         href="/player/chiel-bertens"
-        isCaptain
       />
       <PlayerCard
         firstName="Jarne"
@@ -286,27 +234,5 @@ export const MobileView: Story = {
   },
   globals: {
     viewport: { value: "mobile1" },
-  },
-};
-
-/**
- * Hover interaction demo
- */
-export const HoverDemo: Story = {
-  args: {
-    firstName: "Chiel",
-    lastName: "Bertens",
-    position: "Aanvaller",
-    number: 14,
-    imageUrl: REAL_PLAYER_IMAGES.chiel,
-    href: "/player/chiel-bertens",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Hover over the card to see the contained image shift effect and shadow change. The jersey number badge also scales up.",
-      },
-    },
   },
 };

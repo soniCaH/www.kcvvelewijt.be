@@ -7,19 +7,24 @@ import { render, screen } from "@testing-library/react";
 import PrivacyPage from "./page";
 
 describe("PrivacyPage", () => {
-  it("renders the privacy policy page", () => {
+  it("renders the PageHero with the Juridisch label and headline", () => {
     render(<PrivacyPage />);
-
-    // Check main heading
+    expect(screen.getByText("Juridisch")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /privacyverklaring/i, level: 1 }),
     ).toBeInTheDocument();
   });
 
-  it("displays all required sections", () => {
-    render(<PrivacyPage />);
+  it("renders the prose container inside the gray section", () => {
+    const { container } = render(<PrivacyPage />);
+    const prose = container.querySelector("article.prose");
+    expect(prose).not.toBeNull();
+    expect(prose).toHaveClass("max-w-2xl");
+    expect(prose).toHaveClass("mx-auto");
+  });
 
-    // Key sections that must be present
+  it("displays all required legal sections", () => {
+    render(<PrivacyPage />);
     expect(
       screen.getByRole("heading", { name: /contactgegevens/i }),
     ).toBeInTheDocument();
@@ -40,32 +45,25 @@ describe("PrivacyPage", () => {
     expect(
       screen.getByRole("heading", { name: /beveiliging/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /hoe lang bewaren we je gegevens/i }),
+    ).toBeInTheDocument();
   });
 
   it("displays contact information", () => {
     render(<PrivacyPage />);
-
-    // Check for club name
     expect(screen.getByText(/KCVV Elewijt vzw/i)).toBeInTheDocument();
-
-    // Check for address (appears multiple times, so use getAllByText)
-    const addressElements = screen.getAllByText(
-      /Driesstraat 30, 1982 Elewijt/i,
+    expect(
+      screen.getAllByText(/Driesstraat 30, 1982 Elewijt/i).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("info@kcvvelewijt.be").length).toBeGreaterThan(
+      0,
     );
-    expect(addressElements.length).toBeGreaterThan(0);
-
-    // Check for email links (appear multiple times)
-    const infoEmails = screen.getAllByText("info@kcvvelewijt.be");
-    expect(infoEmails.length).toBeGreaterThan(0);
-
-    const kevinEmails = screen.getAllByText("kevin@kcvvelewijt.be");
-    expect(kevinEmails.length).toBeGreaterThan(0);
+    expect(screen.getByText("kevin@kcvvelewijt.be")).toBeInTheDocument();
   });
 
   it("includes GDPR rights information", () => {
     render(<PrivacyPage />);
-
-    // Check for GDPR rights
     expect(screen.getByText(/recht op inzage/i)).toBeInTheDocument();
     expect(screen.getByText(/recht op correctie/i)).toBeInTheDocument();
     expect(screen.getByText(/recht op verwijdering/i)).toBeInTheDocument();
@@ -74,77 +72,34 @@ describe("PrivacyPage", () => {
 
   it("has working email links", () => {
     render(<PrivacyPage />);
-
-    // Find all mailto links
     const emailLinks = screen.getAllByRole("link", {
       name: /info@kcvvelewijt\.be/i,
     });
-
-    // Check at least one email link exists and has correct href
     expect(emailLinks.length).toBeGreaterThan(0);
     expect(emailLinks[0]).toHaveAttribute("href", "mailto:info@kcvvelewijt.be");
   });
 
-  it("has link to help page", () => {
+  it("links to the help page from the closing section", () => {
     render(<PrivacyPage />);
-
-    const helpLink = screen.getByRole("link", {
-      name: /contact via hulppagina/i,
-    });
-
+    const helpLink = screen.getByRole("link", { name: /hulppagina/i });
     expect(helpLink).toHaveAttribute("href", "/hulp");
   });
 
   it("mentions cookie types", () => {
     render(<PrivacyPage />);
-
     expect(screen.getByText(/noodzakelijke cookies/i)).toBeInTheDocument();
     expect(screen.getByText(/analytische cookies/i)).toBeInTheDocument();
   });
 
-  it("includes data retention information", () => {
-    render(<PrivacyPage />);
-
-    expect(
-      screen.getByRole("heading", { name: /hoe lang bewaren we je gegevens/i }),
-    ).toBeInTheDocument();
-  });
-
   it("mentions GDPR/AVG compliance", () => {
     render(<PrivacyPage />);
-
     expect(screen.getByText(/GDPR\/AVG/i)).toBeInTheDocument();
   });
 
-  it("displays last updated date", () => {
+  it("displays the last updated date", () => {
     render(<PrivacyPage />);
-
-    expect(screen.getByText(/laatst bijgewerkt/i)).toBeInTheDocument();
-  });
-
-  it("has a call-to-action section for questions", () => {
-    render(<PrivacyPage />);
-
     expect(
-      screen.getByRole("heading", { name: /vragen over privacy/i }),
+      screen.getByText(/laatst bijgewerkt:\s*februari 2026/i),
     ).toBeInTheDocument();
-
-    // Check for both CTA buttons
-    expect(
-      screen.getByRole("link", { name: /contact via hulppagina/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /e-mail ons direct/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("applies correct styling classes", () => {
-    const { container } = render(<PrivacyPage />);
-
-    // Check for gradient background
-    const mainContainer = container.querySelector(
-      ".bg-gradient-to-br.from-gray-50",
-    );
-    expect(mainContainer).toBeInTheDocument();
   });
 });

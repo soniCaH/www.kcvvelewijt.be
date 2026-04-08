@@ -1,24 +1,28 @@
 /**
  * Organigram Page
  *
- * Unified interface showing KCVV club structure with multiple views:
- * - Card Hierarchy: Collapsible card-based view
- * - Interactive Chart: D3-based visual diagram
- * - Responsibility Finder: Help system integration
+ * Unified interface showing KCVV club structure (collapsible card hierarchy
+ * + interactive D3 chart + responsibility finder), wrapped in the standard
+ * SectionStack layout used across the redesigned pages.
  */
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Effect } from "effect";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { Effect } from "effect";
 import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 import { PageHero } from "@/components/design-system/PageHero";
 import { Spinner } from "@/components/design-system/Spinner";
+import {
+  SectionStack,
+  type SectionConfig,
+} from "@/components/design-system/SectionStack/SectionStack";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 
 export const metadata: Metadata = {
   title: "Organigram & Hulp | KCVV Elewijt",
@@ -63,26 +67,30 @@ export default async function OrganigramPage() {
     }),
   );
 
-  return (
-    <>
-      <JsonLd
-        data={buildBreadcrumbJsonLd([
-          { name: "Home", url: SITE_CONFIG.siteUrl },
-          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
-          { name: "Organigram", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
-        ])}
-      />
-      <div className="min-h-screen bg-gray-50">
+  const sections: SectionConfig[] = [
+    {
+      key: "hero",
+      bg: "kcvv-black",
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      content: (
         <PageHero
-          image="/images/youth-trainers.jpg"
-          imageAlt="KCVV clubstructuur"
+          size="compact"
+          gradient="dark"
           label="De club"
-          headline="Clubstructuur & Hulp"
-          body="Ontdek de structuur van KCVV Elewijt en vind snel de juiste persoon."
+          headline="Clubstructuur"
+          body="Ontdek de organisatie achter KCVV Elewijt."
         />
-
-        {/* Main Content — max-w-7xl is intentional: the D3 chart and card hierarchy need 1280px, not the 1120px of max-w-inner-lg */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      ),
+      transition: { type: "diagonal", direction: "right", overlap: "full" },
+    },
+    {
+      key: "chart",
+      bg: "gray-100",
+      // Match the previous max-w-7xl: the D3 chart and card hierarchy need
+      // 1280px of breathing room, not the 1120px of max-w-inner-lg.
+      content: (
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
           <Suspense
             fallback={
               <div className="flex justify-center py-12">
@@ -96,7 +104,36 @@ export default async function OrganigramPage() {
             />
           </Suspense>
         </div>
-      </div>
+      ),
+      transition: { type: "diagonal", direction: "left" },
+    },
+    {
+      key: "cta",
+      bg: "kcvv-black",
+      paddingTop: "pt-16",
+      paddingBottom: "pb-16",
+      content: (
+        <SectionCta
+          variant="dark"
+          heading="Wie zoek je?"
+          body="Vind de juiste contactpersoon voor jouw vraag."
+          buttonLabel="Naar de helppagina"
+          buttonHref="/hulp"
+        />
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: "Organigram", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
+        ])}
+      />
+      <SectionStack sections={sections} />
     </>
   );
 }

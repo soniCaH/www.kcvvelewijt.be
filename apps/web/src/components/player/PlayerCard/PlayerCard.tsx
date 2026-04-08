@@ -1,29 +1,22 @@
 /**
  * PlayerCard Component
  *
- * Visual player card for team rosters and player listings.
- * Features unified card design matching TeamCard styling.
+ * Diagonal-cut player card for team rosters and player listings.
  *
- * Features:
- * - White card container with border and shadow
- * - 3D jersey number badge (using NumberBadge component)
- * - Player photo with hover shift effect (contained)
- * - Separate content section for names and position
- * - Captain badge support
- * - Loading skeleton state
+ * The photo is clipped via CSS `clip-path` so the white card surface flows
+ * up into the cut-away triangle, with a stenciletta-font jersey number
+ * sitting on the diagonal seam. A green accent bar at the top of the card
+ * scales from the center on hover.
+ *
+ * The card uses `flex h-full flex-col` so siblings inside a CSS Grid row
+ * stay equal height regardless of name length.
  */
 
-import { forwardRef, type HTMLAttributes, type Ref } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { NumberBadge } from "@/components/shared/NumberBadge";
-import { CARD_COLORS } from "@/lib/utils/card-tokens";
 
-export interface PlayerCardProps extends Omit<
-  HTMLAttributes<HTMLElement>,
-  "title"
-> {
+export interface PlayerCardProps {
   /** Player first name */
   firstName: string;
   /** Player last name */
@@ -36,230 +29,131 @@ export interface PlayerCardProps extends Omit<
   number?: number;
   /** Player photo URL */
   imageUrl?: string;
-  /** Is team captain */
-  isCaptain?: boolean;
-  /** Card size variant */
-  variant?: "default" | "compact";
   /** Loading state */
   isLoading?: boolean;
+  /** Optional extra classes on the card root */
+  className?: string;
 }
 
-export const PlayerCard = forwardRef<HTMLElement, PlayerCardProps>(
-  (
-    {
-      firstName,
-      lastName,
-      position,
-      href,
-      number,
-      imageUrl,
-      isCaptain = false,
-      variant = "default",
-      isLoading = false,
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const fullName = `${firstName} ${lastName}`.trim();
-    const isCompact = variant === "compact";
-
-    // Loading skeleton
-    if (isLoading) {
-      const skeletonBg = CARD_COLORS.background.skeleton;
-      return (
-        <div
-          ref={ref as Ref<HTMLDivElement>}
-          className={cn(
-            "relative overflow-hidden bg-white rounded-card shadow-sm animate-pulse border",
-            isCompact ? "h-[280px]" : "",
-            className,
-          )}
-          style={{ borderColor: CARD_COLORS.border.default }}
-          aria-label="Laden..."
-        >
-          {/* Image skeleton */}
-          <div
-            className={cn(isCompact ? "h-[200px]" : "aspect-[3/4]")}
-            style={{ backgroundColor: skeletonBg }}
-          />
-          {/* Content skeleton */}
-          <div className="p-4 space-y-2">
-            <div
-              className="h-6 rounded w-3/4"
-              style={{ backgroundColor: skeletonBg }}
-            />
-            <div
-              className="h-6 rounded w-1/2"
-              style={{ backgroundColor: skeletonBg }}
-            />
-            <div
-              className="h-4 rounded w-1/3"
-              style={{ backgroundColor: skeletonBg }}
-            />
-          </div>
-        </div>
-      );
-    }
-
+export function PlayerCard({
+  firstName,
+  lastName,
+  position,
+  href,
+  number,
+  imageUrl,
+  isLoading = false,
+  className,
+}: PlayerCardProps) {
+  if (isLoading) {
     return (
-      <article
-        ref={ref}
-        className={cn("player-card group h-full", className)}
-        {...props}
+      <div
+        className={cn(
+          "relative flex h-full flex-col overflow-hidden rounded-sm bg-white shadow-sm animate-pulse",
+          className,
+        )}
+        aria-label="Laden..."
       >
-        <Link
-          href={href}
-          className={cn(
-            "relative flex flex-col overflow-hidden rounded-card h-full",
-            "no-underline text-inherit",
-            "bg-white border shadow-sm",
-            "transition-all duration-300",
-            "hover:shadow-card-hover hover:-translate-y-1",
-          )}
-          style={{ borderColor: CARD_COLORS.border.default }}
-          title={`${position} - ${fullName}`}
-          aria-label={`Bekijk profiel van ${fullName}, ${position}${number !== undefined ? `, nummer ${number}` : ""}`}
-        >
-          <div
-            className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
-            aria-hidden="true"
-          />
-          {/* Image Section - fixed height with contained image */}
-          <div
-            className={cn(
-              "relative overflow-hidden flex-shrink-0",
-              isCompact ? "h-[200px]" : "aspect-[3/4]",
-            )}
-            style={{ backgroundColor: CARD_COLORS.background.placeholder }}
-          >
-            {/* 3D Jersey number badge */}
-            {number !== undefined && (
-              <NumberBadge
-                value={number}
-                color="green"
-                size={isCompact ? "sm" : "lg"}
-              />
-            )}
-
-            {/* Player image container - z-6 to be above badge (z-5), slides left on hover */}
-            <div
-              className={cn(
-                "absolute inset-0 z-[6]",
-                "transition-transform duration-300 ease-in-out",
-                "group-hover:-translate-x-[30px]",
-              )}
-            >
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  alt={fullName}
-                  fill
-                  className="object-cover object-top"
-                  sizes={
-                    isCompact ? "180px" : "(max-width: 960px) 232px, 299px"
-                  }
-                />
-              ) : (
-                /* Placeholder silhouette - sized to match real player photos */
-                <div className="absolute inset-0 flex items-end justify-center">
-                  <svg
-                    className={cn(
-                      isCompact
-                        ? "w-[120px] h-[155px]"
-                        : "w-[160px] h-[160px] lg:w-[210px] lg:h-[240px]",
-                    )}
-                    style={{ color: CARD_COLORS.background.icon }}
-                    fill="currentColor"
-                    viewBox="0 0 24 32"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 0C8.7 0 6 2.7 6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 14c-6.6 0-12 3.4-12 8v10h24V22c0-4.6-5.4-8-12-8z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            {/* Subtle gradient overlay at bottom of image */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-[40%] z-[3] pointer-events-none"
-              style={{
-                background: `linear-gradient(0deg, ${CARD_COLORS.gradient.green}40 0%, transparent 100%)`,
-              }}
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Content Section */}
-          <div className="p-4 flex-1 flex flex-col">
-            {/* Captain badge */}
-            {isCaptain && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 mb-2 self-start",
-                  "text-xs font-medium uppercase tracking-wide",
-                  "bg-kcvv-green-bright/10 text-kcvv-green-bright rounded px-2 py-0.5",
-                )}
-                aria-label="Aanvoerder"
-              >
-                <svg
-                  className="w-3 h-3"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Aanvoerder
-              </span>
-            )}
-
-            {/* First name - semibold */}
-            <div
-              className={cn(
-                "text-gray-900 uppercase font-semibold truncate",
-                isCompact ? "text-lg" : "text-xl lg:text-2xl",
-              )}
-              style={{
-                fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                lineHeight: 1.2,
-              }}
-            >
-              {firstName}
-            </div>
-
-            {/* Last name - thin */}
-            <div
-              className={cn(
-                "text-gray-900 uppercase font-thin truncate",
-                isCompact ? "text-lg" : "text-xl lg:text-2xl",
-              )}
-              style={{
-                fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
-                lineHeight: 1.2,
-              }}
-            >
-              {lastName}
-            </div>
-
-            {/* Position */}
-            <div
-              className={cn(
-                "text-gray-500 mt-1",
-                isCompact ? "text-xs" : "text-sm",
-              )}
-            >
-              {position}
-            </div>
-          </div>
-        </Link>
-      </article>
+        <div
+          className="relative shrink-0 bg-gray-200"
+          style={{ aspectRatio: "4 / 5" }}
+        />
+        <div className="flex-1 space-y-2 px-4 pb-5 pt-3">
+          <div className="h-3 w-1/3 rounded bg-gray-200" />
+          <div className="h-5 w-3/4 rounded bg-gray-200" />
+          <div className="h-5 w-1/2 rounded bg-gray-200" />
+        </div>
+      </div>
     );
-  },
-);
+  }
 
-PlayerCard.displayName = "PlayerCard";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const numberText = number !== undefined ? String(number) : null;
+
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group relative flex h-full flex-col overflow-hidden rounded-sm bg-white text-inherit no-underline shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-hover",
+        className,
+      )}
+      title={`${position} - ${fullName}`}
+      aria-label={`Bekijk profiel van ${fullName}, ${position}${
+        numberText !== null ? `, nummer ${numberText}` : ""
+      }`}
+    >
+      {/* Green hover top-accent bar — scales from center */}
+      <div
+        data-testid="player-hover-accent"
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] origin-center scale-x-0 bg-kcvv-green-bright transition-transform duration-300 ease-out group-hover:scale-x-100"
+        aria-hidden="true"
+      />
+
+      {/* Photo wrapper — diagonal clip-path on the inner div lets the
+          parent's white background bleed into the cut-away triangle. */}
+      <div
+        data-testid="player-photo-wrapper"
+        className="relative shrink-0"
+        style={{ aspectRatio: "4 / 5" }}
+      >
+        <div
+          data-testid="player-photo-clip"
+          className="absolute inset-0 bg-gray-100"
+          style={{ clipPath: "polygon(0 0, 100% 0, 100% 86%, 0 100%)" }}
+        >
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={fullName}
+              fill
+              className="object-cover object-top"
+              sizes="(min-width: 1280px) 240px, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 flex items-end justify-center text-gray-300"
+              aria-hidden="true"
+            >
+              <svg
+                className="h-[60%] w-auto"
+                fill="currentColor"
+                viewBox="0 0 24 32"
+              >
+                <path d="M12 0C8.7 0 6 2.7 6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 14c-6.6 0-12 3.4-12 8v10h24V22c0-4.6-5.4-8-12-8z" />
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {/* Stencil number sitting on the diagonal seam */}
+        {numberText !== null && (
+          <div
+            data-testid="player-number"
+            className="pointer-events-none absolute right-3 z-10 select-none font-black leading-none text-kcvv-green-bright"
+            style={{
+              bottom: "-1rem",
+              fontFamily: "stenciletta, sans-serif",
+              fontSize: numberText.length > 2 ? "3rem" : "5.5rem",
+              WebkitTextStroke: "2px white",
+            }}
+            aria-hidden="true"
+          >
+            {numberText}
+          </div>
+        )}
+      </div>
+
+      {/* Name section */}
+      <div className="flex-1 px-4 pb-5 pt-3">
+        <div className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-kcvv-green-dark">
+          {position}
+        </div>
+        <h3 className="mt-1 font-title text-lg uppercase leading-tight text-kcvv-black">
+          <span className="font-semibold">{firstName}</span>
+          <br />
+          <span className="font-thin">{lastName}</span>
+        </h3>
+      </div>
+    </Link>
+  );
+}

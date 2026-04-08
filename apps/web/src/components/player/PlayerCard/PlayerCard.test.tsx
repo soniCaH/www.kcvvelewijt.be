@@ -1,12 +1,18 @@
 /**
- * PlayerCard Component Tests
+ * PlayerCard Component Tests — diagonal-cut redesign
+ *
+ * The redesigned PlayerCard renders an `<a>` (no `<article>` wrapper, no
+ * forwardRef), uses CSS `clip-path` on an inner photo wrapper, places a
+ * stencil-font jersey number on the diagonal seam, and animates a center-
+ * scaled hover accent bar at the top. The `variant` and `isCaptain` props
+ * have been removed.
  */
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PlayerCard } from "./PlayerCard";
 
-describe("PlayerCard", () => {
+describe("PlayerCard (diagonal redesign)", () => {
   const defaultProps = {
     firstName: "Kevin",
     lastName: "De Bruyne",
@@ -15,186 +21,94 @@ describe("PlayerCard", () => {
     number: 7,
   };
 
-  describe("Rendering", () => {
-    it("should render player name", () => {
-      render(<PlayerCard {...defaultProps} />);
-      expect(screen.getByText("Kevin")).toBeInTheDocument();
-      expect(screen.getByText("De Bruyne")).toBeInTheDocument();
-    });
-
-    it("should render player position in content section", () => {
-      render(<PlayerCard {...defaultProps} />);
-      expect(screen.getByText("Middenvelder")).toBeInTheDocument();
-    });
-
-    it("should render as article element", () => {
-      const { container } = render(<PlayerCard {...defaultProps} />);
-      expect(container.querySelector("article")).toBeInTheDocument();
-    });
-
-    it("should render link with correct href", () => {
-      render(<PlayerCard {...defaultProps} />);
-      const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/player/kevin-de-bruyne");
-    });
-
-    it("should have accessible label with full player info", () => {
-      render(<PlayerCard {...defaultProps} />);
-      const link = screen.getByRole("link");
-      expect(link).toHaveAttribute(
-        "aria-label",
-        "Bekijk profiel van Kevin De Bruyne, Middenvelder, nummer 7",
-      );
-    });
-
-    it("should have white card container with border", () => {
-      render(<PlayerCard {...defaultProps} />);
-      const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-white");
-      expect(link).toHaveClass("border");
-      expect(link).toHaveClass("shadow-sm");
-    });
+  it("renders an <a> linking to href", () => {
+    render(<PlayerCard {...defaultProps} />);
+    const link = screen.getByRole("link");
+    expect(link.tagName).toBe("A");
+    expect(link).toHaveAttribute("href", "/player/kevin-de-bruyne");
   });
 
-  describe("Jersey Number", () => {
-    it("should display jersey number using NumberBadge", () => {
-      const { container } = render(
-        <PlayerCard {...defaultProps} number={10} />,
-      );
-      // NumberBadge has .number-badge class and is aria-hidden
-      const numberEl = container.querySelector(".number-badge");
-      expect(numberEl).toHaveTextContent("10");
-      expect(numberEl).toHaveAttribute("aria-hidden", "true");
-    });
-
-    it("should not display jersey number when not provided", () => {
-      const { container } = render(
-        <PlayerCard {...defaultProps} number={undefined} />,
-      );
-      const numberEl = container.querySelector(".number-badge");
-      expect(numberEl).toBeNull();
-    });
-
-    it("should not include number in accessible label when not provided", () => {
-      render(<PlayerCard {...defaultProps} number={undefined} />);
-      const link = screen.getByRole("link");
-      expect(link).toHaveAttribute(
-        "aria-label",
-        "Bekijk profiel van Kevin De Bruyne, Middenvelder",
-      );
-    });
+  it("renders the player's first and last name", () => {
+    render(<PlayerCard {...defaultProps} />);
+    expect(screen.getByText("Kevin")).toBeInTheDocument();
+    expect(screen.getByText("De Bruyne")).toBeInTheDocument();
   });
 
-  describe("Captain Badge", () => {
-    it("should display captain badge when isCaptain is true", () => {
-      render(<PlayerCard {...defaultProps} isCaptain />);
-      expect(screen.getByLabelText("Aanvoerder")).toBeInTheDocument();
-      expect(screen.getByText("Aanvoerder")).toBeInTheDocument();
-    });
-
-    it("should not display captain badge by default", () => {
-      render(<PlayerCard {...defaultProps} />);
-      expect(screen.queryByLabelText("Aanvoerder")).not.toBeInTheDocument();
-    });
+  it("renders the position label", () => {
+    render(<PlayerCard {...defaultProps} />);
+    expect(screen.getByText("Middenvelder")).toBeInTheDocument();
   });
 
-  describe("Player Image", () => {
-    it("should render image when imageUrl is provided", () => {
-      render(
-        <PlayerCard
-          {...defaultProps}
-          imageUrl="https://example.com/photo.jpg"
-        />,
-      );
-      const img = screen.getByRole("img");
-      expect(img).toHaveAttribute("alt", "Kevin De Bruyne");
-    });
-
-    it("should render placeholder when no image provided", () => {
-      const { container } = render(<PlayerCard {...defaultProps} />);
-      // Check for SVG placeholder
-      expect(container.querySelector("svg")).toBeInTheDocument();
-    });
+  it("renders the jersey number in a stencil-font element", () => {
+    const { container } = render(<PlayerCard {...defaultProps} number={10} />);
+    const numberEl = container.querySelector('[data-testid="player-number"]');
+    expect(numberEl).not.toBeNull();
+    expect(numberEl).toHaveTextContent("10");
+    // Stenciletta font + white text-stroke per the design
+    expect(numberEl).toHaveStyle({ fontFamily: "stenciletta, sans-serif" });
   });
 
-  describe("Variants", () => {
-    it("should render default variant", () => {
-      const { container } = render(<PlayerCard {...defaultProps} />);
-      const article = container.querySelector("article");
-      expect(article).toHaveClass("player-card");
-    });
-
-    it("should render compact variant with smaller image section", () => {
-      const { container } = render(
-        <PlayerCard {...defaultProps} variant="compact" />,
-      );
-      // Compact variant should have h-[200px] image section
-      const imageSection = container.querySelector(
-        ".overflow-hidden.flex-shrink-0",
-      );
-      expect(imageSection).toHaveClass("h-[200px]");
-    });
+  it("omits the jersey number element when `number` is not provided", () => {
+    const { container } = render(
+      <PlayerCard {...defaultProps} number={undefined} />,
+    );
+    expect(container.querySelector('[data-testid="player-number"]')).toBeNull();
   });
 
-  describe("Loading State", () => {
-    it("should render loading skeleton when isLoading is true", () => {
-      render(<PlayerCard {...defaultProps} isLoading />);
-      expect(screen.getByLabelText("Laden...")).toBeInTheDocument();
-    });
-
-    it("should not render player info when loading", () => {
-      render(<PlayerCard {...defaultProps} isLoading />);
-      expect(screen.queryByText("Kevin")).not.toBeInTheDocument();
-      expect(screen.queryByText("De Bruyne")).not.toBeInTheDocument();
-    });
-
-    it("should have skeleton animation class", () => {
-      const { container } = render(<PlayerCard {...defaultProps} isLoading />);
-      expect(container.firstChild).toHaveClass("animate-pulse");
-    });
-
-    it("should have card styling when loading", () => {
-      const { container } = render(<PlayerCard {...defaultProps} isLoading />);
-      expect(container.firstChild).toHaveClass("bg-white");
-      expect(container.firstChild).toHaveClass("rounded-card");
-      // Border is applied via Tailwind class with color from tokens
-      expect(container.firstChild).toHaveClass("border");
-    });
+  it("clips the photo wrapper with the diagonal polygon", () => {
+    const { container } = render(<PlayerCard {...defaultProps} />);
+    const clipped = container.querySelector(
+      '[data-testid="player-photo-clip"]',
+    );
+    expect(clipped).not.toBeNull();
+    // The exact polygon defined in the design spec
+    expect((clipped as HTMLElement).style.clipPath).toBe(
+      "polygon(0 0, 100% 0, 100% 86%, 0 100%)",
+    );
   });
 
-  describe("Custom Props", () => {
-    it("should accept custom className", () => {
-      const { container } = render(
-        <PlayerCard {...defaultProps} className="custom-class" />,
-      );
-      const article = container.querySelector("article");
-      expect(article).toHaveClass("custom-class");
-    });
-
-    it("should forward ref", () => {
-      const ref = { current: null };
-      render(<PlayerCard {...defaultProps} ref={ref} />);
-      expect(ref.current).toBeInstanceOf(HTMLElement);
-    });
+  it("has a `relative shrink-0` photo wrapper for equal-height grid layout", () => {
+    const { container } = render(<PlayerCard {...defaultProps} />);
+    const wrapper = container.querySelector(
+      '[data-testid="player-photo-wrapper"]',
+    );
+    expect(wrapper).not.toBeNull();
+    expect(wrapper).toHaveClass("relative");
+    expect(wrapper).toHaveClass("shrink-0");
   });
 
-  describe("Card Design", () => {
-    it("should have separate content section for names", () => {
-      const { container } = render(<PlayerCard {...defaultProps} />);
-      // Content section has p-4 class
-      const contentSection = container.querySelector(".p-4.flex-1");
-      expect(contentSection).toBeInTheDocument();
-      // Names should be inside content section
-      expect(contentSection).toHaveTextContent("Kevin");
-      expect(contentSection).toHaveTextContent("De Bruyne");
-    });
+  it("renders the card root as a full-height flex column", () => {
+    render(<PlayerCard {...defaultProps} />);
+    const link = screen.getByRole("link");
+    expect(link).toHaveClass("flex");
+    expect(link).toHaveClass("h-full");
+    expect(link).toHaveClass("flex-col");
+  });
 
-    it("should have image section with background color", () => {
-      const { container } = render(<PlayerCard {...defaultProps} />);
-      const imageSection = container.querySelector(
-        ".overflow-hidden.flex-shrink-0",
-      );
-      expect(imageSection).toHaveStyle({ backgroundColor: "#edeff4" });
-    });
+  it("renders a hover accent bar that scales from the center on hover", () => {
+    const { container } = render(<PlayerCard {...defaultProps} />);
+    const accent = container.querySelector(
+      '[data-testid="player-hover-accent"]',
+    );
+    expect(accent).not.toBeNull();
+    expect(accent).toHaveClass("bg-kcvv-green-bright");
+    expect(accent).toHaveClass("origin-center");
+    expect(accent).toHaveClass("scale-x-0");
+    expect(accent).toHaveClass("group-hover:scale-x-100");
+  });
+
+  it("renders the loading skeleton when `isLoading` is true", () => {
+    const { container } = render(<PlayerCard {...defaultProps} isLoading />);
+    expect(screen.getByLabelText("Laden...")).toBeInTheDocument();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
+    expect(screen.queryByText("Kevin")).not.toBeInTheDocument();
+  });
+
+  it("renders the player photo when `imageUrl` is provided", () => {
+    render(
+      <PlayerCard {...defaultProps} imageUrl="https://example.com/photo.jpg" />,
+    );
+    const img = screen.getByRole("img");
+    expect(img).toHaveAttribute("alt", "Kevin De Bruyne");
   });
 });

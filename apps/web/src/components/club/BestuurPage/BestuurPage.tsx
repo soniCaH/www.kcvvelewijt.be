@@ -1,33 +1,94 @@
 /**
  * BestuurPage Component
  *
- * Presentational layout for /club/bestuur.
- * Renders a club-team header, a description section above the member roster,
- * and an organigram call-to-action card. No matches or standings.
+ * Page-level layout for the board pages (`/club/bestuur`,
+ * `/club/jeugdbestuur`, `/club/angels`, …) — composed as a `SectionStack`
+ * matching the "Dark Roster Spotlight" prototype:
+ *
+ *   1. Compact `PageHero` ("De club" / team name)
+ *   2. `gray-100` description block with green left-border accent
+ *   3. `kcvv-black` member roster (white StaffCards pop on dark)
+ *   4. `kcvv-green-dark` organigram CTA
  */
 
-import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
-import { TeamHeader, type TeamHeaderProps } from "@/components/team/TeamHeader";
+import {
+  SectionStack,
+  type SectionConfig,
+} from "@/components/design-system/SectionStack/SectionStack";
+import { PageHero } from "@/components/design-system/PageHero/PageHero";
+import { SectionHeader } from "@/components/design-system/SectionHeader/SectionHeader";
+import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 import {
   TeamRoster,
   type RosterPlayer,
   type StaffMember,
 } from "@/components/team/TeamRoster";
-import { Network } from "@/lib/icons";
-import { cn } from "@/lib/utils/cn";
+
+/**
+ * When the CMS marks a link as `target="_blank"` we must also emit
+ * `rel="noopener noreferrer"` to prevent reverse-tabnabbing and to avoid
+ * leaking the Referer header to the third-party destination. `sanitize-html`
+ * does not enforce this by default — `rel` is not in the default allowed
+ * attributes for `<a>`, so any `rel` the CMS author sets would be stripped.
+ * We explicitly allow `rel` and merge the required tokens in the transform.
+ */
+function hardenExternalLinkRel(existingRel: string | undefined): string {
+  const tokens = new Set(
+    (existingRel ?? "").split(/\s+/).filter((t) => t.length > 0),
+  );
+  tokens.add("noopener");
+  tokens.add("noreferrer");
+  return Array.from(tokens).join(" ");
+}
+
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    a: [
+      ...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []),
+      "class",
+      "rel",
+    ],
+  },
+  transformTags: {
+    a: (tagName, attribs) => {
+      const hardenedRel =
+        attribs.target === "_blank"
+          ? hardenExternalLinkRel(attribs.rel)
+          : attribs.rel;
+      return {
+        tagName,
+        attribs: {
+          ...attribs,
+          ...(hardenedRel ? { rel: hardenedRel } : {}),
+          class: "content-link",
+        },
+      };
+    },
+  },
+};
+
+export interface BestuurPageHeader {
+  /** Team name (rendered as the hero headline) */
+  name: string;
+  /** Team tagline (rendered as hero body — falls back to a default) */
+  tagline?: string;
+  /** Team / group photo URL — used as the hero background image */
+  imageUrl?: string;
+  /** Team type — kept for prop compatibility with the route call sites */
+  teamType?: "senior" | "youth" | "club";
+}
 
 export interface BestuurPageProps {
-  /** Props forwarded to TeamHeader */
-  header: TeamHeaderProps;
-  /** Sanitised HTML description shown above the roster */
+  /** Team header data */
+  header: BestuurPageHeader;
+  /** Sanitised HTML description shown in the gray section */
   description?: string;
   /** Board members rendered as staff cards */
   staff?: StaffMember[];
   /** Players (rarely set for board teams, included for completeness) */
   players?: RosterPlayer[];
-  /** Additional CSS classes for the content wrapper */
-  className?: string;
 }
 
 export function BestuurPage({
@@ -35,78 +96,89 @@ export function BestuurPage({
   description,
   staff = [],
   players = [],
-  className,
 }: BestuurPageProps) {
   const hasMembers = players.length > 0 || staff.length > 0;
+  const hasDescription = !!description?.trim();
+  const trimmedTagline = header.tagline?.trim();
+  const heroBody = trimmedTagline || "De mensen achter KCVV Elewijt";
 
-  return (
-    <>
-      <TeamHeader {...header} teamType="club" />
+  const sections: SectionConfig[] = [
+    {
+      key: "hero",
+      bg: "kcvv-black",
+      paddingTop: "pt-0",
+      paddingBottom: "pb-0",
+      content: (
+        <PageHero
+          size="compact"
+          gradient="dark"
+          image={header.imageUrl}
+          imageAlt={`${header.name} groepsfoto`}
+          label="De club"
+          headline={header.name}
+          body={heroBody}
+        />
+      ),
+      transition: { type: "diagonal", direction: "right", overlap: "full" },
+    },
+  ];
 
-      <div className={cn("container mx-auto px-4 py-12 space-y-12", className)}>
-        {/* Description — green left-border accent, rendered above the roster */}
-        {description && (
-          <section className="max-w-3xl border-l-4 border-kcvv-green-bright pl-6">
+  if (hasDescription) {
+    sections.push({
+      key: "about",
+      bg: "gray-100",
+      content: (
+        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
+          <div className="max-w-3xl border-l-4 border-kcvv-green-bright pl-6">
             <div
               className="prose prose-gray"
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(description, {
-                  allowedAttributes: {
-                    ...sanitizeHtml.defaults.allowedAttributes,
-                    a: [
-                      ...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []),
-                      "class",
-                    ],
-                  },
-                  transformTags: {
-                    a: (tagName, attribs) => ({
-                      tagName,
-                      attribs: { ...attribs, class: "content-link" },
-                    }),
-                  },
-                }),
+                __html: sanitizeHtml(description!, SANITIZE_OPTIONS),
               }}
             />
-          </section>
-        )}
-
-        {/* Member roster */}
-        {hasMembers && (
-          <section>
-            <TeamRoster
-              players={players}
-              staff={staff}
-              teamName={header.name}
-              groupByPosition={false}
-              showStaff={true}
-              staffSectionLabel={null}
-            />
-          </section>
-        )}
-
-        {/* Organigram CTA */}
-        <section className="rounded-xl bg-kcvv-green-dark text-white p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <Network
-              className="w-8 h-8 shrink-0 opacity-80"
-              aria-hidden="true"
-            />
-            <div>
-              <h2 className="text-xl font-bold">Volledig organigram</h2>
-              <p className="text-white/80 text-sm mt-1">
-                Bekijk de volledige clubstructuur met alle rollen en
-                verantwoordelijkheden.
-              </p>
-            </div>
           </div>
-          <Link
-            href="/club/organigram"
-            className="shrink-0 rounded-lg bg-white text-kcvv-green-dark font-semibold px-6 py-3 hover:bg-kcvv-green-bright hover:text-white transition-colors"
-          >
-            Naar organigram
-          </Link>
-        </section>
-      </div>
-    </>
-  );
+        </div>
+      ),
+      transition: { type: "diagonal", direction: "left" },
+    });
+  }
+
+  if (hasMembers) {
+    sections.push({
+      key: "members",
+      bg: "kcvv-black",
+      content: (
+        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
+          <SectionHeader title={header.name} variant="dark" />
+          <TeamRoster
+            players={players}
+            staff={staff}
+            teamName={header.name}
+            groupByPosition={false}
+            showStaff
+            staffSectionLabel={null}
+          />
+        </div>
+      ),
+      transition: { type: "diagonal", direction: "right" },
+    });
+  }
+
+  sections.push({
+    key: "cta",
+    bg: "kcvv-black",
+    paddingTop: "pt-16",
+    paddingBottom: "pb-16",
+    content: (
+      <SectionCta
+        variant="dark"
+        heading="Wie doet wat?"
+        body="Bekijk het volledige organigram van KCVV Elewijt en vind snel de juiste persoon voor jouw vraag."
+        buttonLabel="Organigram bekijken"
+        buttonHref="/club/organigram"
+      />
+    ),
+  });
+
+  return <SectionStack sections={sections} />;
 }
