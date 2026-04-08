@@ -13,11 +13,15 @@ describe("ClubLoading", () => {
     expect(transitions).toHaveLength(3);
   });
 
-  it("renders via SectionStack (no hand-rolled divs)", () => {
+  it("renders all four getClubSections backgrounds via SectionStack", () => {
     const { container } = render(<ClubLoading />);
-    // SectionStack renders a single wrapper div with className containing "w-full"
-    // Each section has bg class — verify kcvv-green-dark appears (loading.tsx had kcvv-black)
-    const greenDark = container.querySelector(".bg-kcvv-green-dark");
-    expect(greenDark).not.toBeNull();
+    // getClubSections defines: hero (kcvv-black), editorial (gray-100),
+    // mission (kcvv-green-dark), contact (gray-100). If a hand-rolled layout
+    // replaced SectionStack, at least one of these bg classes would be missing.
+    expect(container.querySelector(".bg-kcvv-black")).not.toBeNull();
+    expect(container.querySelector(".bg-kcvv-green-dark")).not.toBeNull();
+    expect(
+      container.querySelectorAll(".bg-gray-100").length,
+    ).toBeGreaterThanOrEqual(2);
   });
 });
