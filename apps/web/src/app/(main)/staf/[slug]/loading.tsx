@@ -10,17 +10,15 @@ export default function StaffDetailLoading() {
         Stafprofiel laden...
       </span>
       {/* Staff hero — photo + name + contact */}
-      <div className="bg-kcvv-dark-bg text-white">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row gap-8 animate-pulse">
-            <div className="w-48 h-60 rounded-sm bg-white/10 flex-shrink-0" />
-            <div className="flex-1 space-y-4">
-              <div className="h-8 w-48 rounded bg-white/10" />
-              <div className="h-5 w-32 rounded bg-white/15" />
-              <div className="flex gap-3 mt-4">
-                <div className="h-8 w-8 rounded bg-white/10" />
-                <div className="h-8 w-8 rounded bg-white/10" />
-              </div>
+      <div className="bg-gradient-to-br from-kcvv-gray-light to-white">
+        <div className="max-w-4xl mx-auto px-4 py-12 flex flex-col sm:flex-row items-center sm:items-start gap-8 animate-pulse">
+          <div className="w-40 h-40 rounded-full bg-gray-300 flex-shrink-0" />
+          <div className="flex-1 space-y-4 text-center sm:text-left">
+            <div className="h-8 w-48 rounded bg-gray-300 mx-auto sm:mx-0" />
+            <div className="h-5 w-32 rounded bg-gray-200 mx-auto sm:mx-0" />
+            <div className="flex gap-3 mt-4 justify-center sm:justify-start">
+              <div className="h-8 w-8 rounded bg-gray-200" />
+              <div className="h-8 w-8 rounded bg-gray-200" />
             </div>
           </div>
         </div>

@@ -98,4 +98,6 @@ None. This is a pure `apps/web` UI refactor — no BFF, no schemas, no contracts
 
 ## 8. Discovered Unknowns
 
-(Filled during implementation.)
+- [2026-04-08] `/club/organigram/loading.tsx` tab-bar skeleton already existed — false positive from audit, no change needed
+- [2026-04-08] `/spelers/[slug]/loading.tsx` hero mismatch was larger than specified: bg color (`bg-kcvv-dark-bg` vs `bg-[#edeff4]`), container width (`max-w-4xl` vs `max-w-6xl`), flex direction (`md` vs `lg` breakpoint), and photo dimensions all diverged — resolved inline
+- [2026-04-08] `/staf/[slug]/loading.tsx` hero photo shape was rectangular (`w-48 h-60`) but page uses circular (`w-40 h-40 rounded-full`) — resolved inline
