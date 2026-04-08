@@ -8,6 +8,15 @@ export default function PlayerDetailLoading() {
     <div className="min-h-screen bg-gray-100">
       {/* Player profile header */}
       <div className="relative bg-[#edeff4] overflow-hidden">
+        {/* Background gradient — matches PlayerProfile hero */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background:
+              "linear-gradient(135deg, #edeff4 0%, #e0e3eb 50%, #edeff4 100%)",
+          }}
+          aria-hidden="true"
+        />
         <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 lg:py-12">
           <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8 animate-pulse">
             {/* Player photo */}
