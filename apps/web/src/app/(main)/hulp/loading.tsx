@@ -1,43 +1,53 @@
 /**
- * Help / Responsibility Finder — Loading Skeleton
- * Matches the question-builder + contact results layout
+ * Help / Hulp page — server-render loading skeleton
+ *
+ * Mirrors the new HulpPage layout (post-#1237): real PageHero (props are
+ * static, server-renders identically), search input shell, then the same
+ * QuestionCardSkeletonGrid used for the in-search loading state. Sharing
+ * the grid component prevents the two skeletons from drifting visually.
  */
 
 import { PageHero } from "@/components/design-system/PageHero";
+import { Search } from "@/lib/icons";
+import { QuestionCardSkeletonGrid } from "@/components/hulp/HulpPage/QuestionCardSkeleton";
 
-export default function HelpLoading() {
+export default function HulpLoading() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <PageHero label="Hulp" headline="Hulp nodig?" body="" size="compact" />
+    <div className="min-h-screen">
+      {/* Real hero — props match HulpPage.tsx exactly so first paint is identical */}
+      <PageHero
+        size="compact"
+        gradient="dark"
+        label="Help"
+        headline="Vind de juiste persoon"
+        body="Stel je vraag of blader door de categorieën hieronder."
+      />
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Question builder */}
-        <div className="rounded-lg bg-white border border-gray-200 p-6 space-y-6 animate-pulse">
-          <div className="h-6 w-48 rounded bg-gray-200" />
-          {/* Dropdowns */}
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <div className="h-4 w-16 rounded bg-gray-200" />
-              <div className="h-10 w-full rounded bg-gray-200" />
-            </div>
-          ))}
-          <div className="h-10 w-32 rounded bg-gray-200" />
-        </div>
-
-        {/* Results placeholder */}
-        <div className="space-y-4 animate-pulse">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="rounded-sm bg-white border border-gray-200 shadow-sm p-4 flex items-center gap-4"
-            >
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-40 rounded bg-gray-200" />
-                <div className="h-3 w-24 rounded bg-gray-200" />
+      {/* Content section — gray background matches the real page */}
+      <div className="bg-gray-100">
+        <div className="mx-auto max-w-inner-lg space-y-12 px-4 py-20 md:px-10">
+          {/* Search input shell — visual mimic of HulpSearchInput.tsx */}
+          <div>
+            <div className="relative mx-auto w-full max-w-2xl">
+              <div className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-kcvv-gray">
+                <Search className="h-6 w-6" aria-hidden="true" />
               </div>
+              {/* Match HulpSearchInput's py-5 + base text + border + shadow.
+                  Empty div — no real input — keeps it non-interactive. */}
+              <div
+                className="w-full rounded-sm border border-gray-200 bg-white py-5 pl-14 pr-5 shadow-md"
+                style={{ height: "60px" }}
+                aria-hidden="true"
+              />
             </div>
-          ))}
+            <p className="mt-3 text-center text-xs text-kcvv-gray">
+              Tip: probeer trefwoorden zoals <em>inschrijving</em>,{" "}
+              <em>sportongeval</em>, of <em>transfer</em>.
+            </p>
+          </div>
+
+          {/* Card grid skeleton — same component as the in-search loading */}
+          <QuestionCardSkeletonGrid count={4} label="Hulppagina laden..." />
         </div>
       </div>
     </div>

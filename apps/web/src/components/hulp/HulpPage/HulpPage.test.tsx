@@ -142,7 +142,7 @@ describe("HulpPage", () => {
     });
   });
 
-  it('shows "Zoeken..." while the debounced fetch has not settled yet', () => {
+  it("shows the skeleton grid while the debounced fetch has not settled yet", () => {
     // executedQuery still empty (no fetch has settled), but searchQuery is set
     currentResults = [];
     currentExecutedQuery = "";
@@ -150,7 +150,8 @@ describe("HulpPage", () => {
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "inschrijving" },
     });
-    expect(screen.getByText(/zoeken\.\.\./i)).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByText("Zoeken naar resultaten...")).toBeInTheDocument();
     // Importantly, "Geen resultaten" must NOT flash during this window
     expect(screen.queryByText(/geen resultaten voor/i)).not.toBeInTheDocument();
   });
@@ -353,5 +354,98 @@ describe("HulpPage", () => {
       screen.getByRole("button", { name: /terug naar overzicht/i }),
     );
     expect(mockPush).toHaveBeenCalledWith("/hulp", expect.anything());
+  });
+
+  describe("clicking a result while a search is active", () => {
+    it("clears search state and does not re-fire /search", () => {
+      currentResults = [
+        {
+          id: "lidgeld-inschrijving",
+          slug: "lidgeld-inschrijving",
+          type: "responsibility",
+          score: 0.9,
+          title: "Ik wil mij of mijn kind inschrijven",
+          excerpt: "...",
+        },
+      ];
+      currentExecutedQuery = "inschrijving";
+      currentLoading = false;
+
+      render(<HulpPage paths={FIXTURE_PATHS} />);
+
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "inschrijving" },
+      });
+
+      const card = screen.getByRole("button", {
+        name: /ik wil mij of mijn kind inschrijven/i,
+      });
+
+      mockSearch.mockClear();
+      mockClear.mockClear();
+      mockPush.mockClear();
+
+      fireEvent.click(card);
+
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining("id=lidgeld-inschrijving"),
+        { scroll: false },
+      );
+
+      expect(mockClear).toHaveBeenCalled();
+
+      // The bug: search was re-fired with the old query after clicking
+      expect(mockSearch).not.toHaveBeenCalledWith("inschrijving");
+    });
+  });
+
+  describe("loading skeleton", () => {
+    it("shows the skeleton grid on the first search", () => {
+      currentLoading = true;
+      currentExecutedQuery = "";
+      render(<HulpPage paths={FIXTURE_PATHS} />);
+
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "trainer" },
+      });
+
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      expect(screen.getByText("Zoeken naar resultaten...")).toBeInTheDocument();
+    });
+
+    it("keeps stale results visible with reduced opacity on consecutive searches", () => {
+      currentResults = [
+        {
+          id: "lidgeld-inschrijving",
+          slug: "lidgeld-inschrijving",
+          type: "responsibility",
+          score: 0.9,
+          title: "Ik wil mij of mijn kind inschrijven",
+          excerpt: "...",
+        },
+      ];
+      currentExecutedQuery = "inschrijving";
+      currentLoading = true;
+
+      render(<HulpPage paths={FIXTURE_PATHS} />);
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "inschrijving" },
+      });
+
+      // Stale results remain visible (no skeleton replaces them)
+      expect(
+        screen.getAllByText("Ik wil mij of mijn kind inschrijven").length,
+      ).toBeGreaterThan(0);
+      // The container has reduced opacity to signal staleness
+      const resultsContainer = screen
+        .getAllByText("Ik wil mij of mijn kind inschrijven")[0]
+        .closest(".space-y-12");
+      expect(resultsContainer?.className).toContain("opacity-50");
+    });
+
+    it("does not show the skeleton when search query is empty", () => {
+      render(<HulpPage paths={FIXTURE_PATHS} />);
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
   });
 });

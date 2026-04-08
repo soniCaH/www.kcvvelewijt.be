@@ -34,6 +34,7 @@ import { HulpSearchInput } from "./HulpSearchInput";
 import { BrowseContent } from "./BrowseContent";
 import { CategorySection } from "./CategorySection";
 import { AnswerCard } from "./AnswerCard";
+import { QuestionCardSkeletonGrid } from "./QuestionCardSkeleton";
 import {
   CATEGORY_ORDER,
   groupPathsByCategory,
@@ -229,6 +230,16 @@ export function HulpPage({ paths }: HulpPageProps) {
   const handlePathClick = useCallback(
     (id: string) => {
       if (id === selectedIdParam) return; // dedup guard
+      // Leave search mode before pushing the ?id param. Without this, the
+      // search-trigger effect would see (searchQuery non-empty + new
+      // selectedIdParam) and strip ?id back out via router.replace, then
+      // re-fire the semantic search — leaving the user stuck on the
+      // results view. See issue #1238 for full root-cause trace.
+      setSearchQuery("");
+      // Intentionally eager — the search-trigger effect would also call
+      // clearSearch() after setSearchQuery("") propagates, but we clear
+      // now so the search state is already gone before router.push fires.
+      clearSearch();
       const params = new URLSearchParams(searchParams.toString());
       params.set(URL_PARAM, id);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -246,6 +257,7 @@ export function HulpPage({ paths }: HulpPageProps) {
       router,
       searchParams,
       selectedIdParam,
+      clearSearch,
     ],
   );
 
@@ -300,16 +312,18 @@ export function HulpPage({ paths }: HulpPageProps) {
     }
 
     if (searchQuery.trim().length > 0) {
-      // Loading state covers both the hook's `loading` flag AND the
-      // window between the user typing and the debounced fetch settling
-      // (when `executedQuery` hasn't caught up to `searchQuery` yet).
-      // Without this second condition the UI would briefly flash
-      // "Geen resultaten" during the debounce window.
+      // Show the skeleton when the search is in flight OR the debounce
+      // window is open (executedQuery still lagging searchQuery). When
+      // stale results exist, keep them visible with a subtle opacity
+      // reduction instead of replacing them with a skeleton grid — this
+      // avoids a content flash on every keystroke during query refinement.
+      // Only show the full skeleton when there are no stale results to
+      // display. See issue #1238.
       const isAwaitingResults =
         searchLoading || executedQuery !== searchQuery.trim();
 
       if (isAwaitingResults && filteredPaths.length === 0) {
-        return <p className="text-center text-sm text-kcvv-gray">Zoeken...</p>;
+        return <QuestionCardSkeletonGrid count={4} />;
       }
 
       if (searchError) {
@@ -346,7 +360,9 @@ export function HulpPage({ paths }: HulpPageProps) {
       }
 
       return (
-        <div className="space-y-12">
+        <div
+          className={`space-y-12 transition-opacity duration-150 ${isAwaitingResults ? "pointer-events-none opacity-50" : ""}`}
+        >
           {CATEGORY_ORDER.map((category: CategoryKey) => (
             <CategorySection
               key={category}
