@@ -27,18 +27,47 @@ import { TeamSchedule, type ScheduleMatch } from "../TeamSchedule";
 import { TeamStandings, type StandingsEntry } from "../TeamStandings";
 import { TeamDetailTabs, type TeamDetailTabPanel } from "./TeamDetailTabs";
 
+/**
+ * CMS authors can set `target="_blank"` on a link, but `sanitize-html`'s
+ * defaults strip `rel` from `<a>`, so we'd end up with an externally-opening
+ * link without `rel="noopener noreferrer"` — a reverse-tabnabbing risk and a
+ * Referer leak. Allow `rel` explicitly and harden it in the transform.
+ */
+function hardenExternalLinkRel(existingRel: string | undefined): string {
+  const tokens = new Set(
+    (existingRel ?? "").split(/\s+/).filter((t) => t.length > 0),
+  );
+  tokens.add("noopener");
+  tokens.add("noreferrer");
+  return Array.from(tokens).join(" ");
+}
+
 const PROSE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, "img"],
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
-    a: [...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []), "class"],
+    a: [
+      ...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []),
+      "class",
+      "rel",
+    ],
     img: ["src", "srcset", "alt", "title", "width", "height", "loading"],
   },
   transformTags: {
-    a: (tagName, attribs) => ({
-      tagName,
-      attribs: { ...attribs, class: "content-link" },
-    }),
+    a: (tagName, attribs) => {
+      const hardenedRel =
+        attribs.target === "_blank"
+          ? hardenExternalLinkRel(attribs.rel)
+          : attribs.rel;
+      return {
+        tagName,
+        attribs: {
+          ...attribs,
+          ...(hardenedRel ? { rel: hardenedRel } : {}),
+          class: "content-link",
+        },
+      };
+    },
   },
 };
 
@@ -183,11 +212,24 @@ export function TeamDetail({
   const hasStaff = staff.length > 0;
   const hasMatches = matches.length > 0;
   const hasStandings = standings.length > 0;
+  const hasContactInfo = !!contactInfo?.trim();
+  const hasBodyContent = !!bodyContent?.trim();
+  // The Info panel renders real content only when there is contact info,
+  // body copy, or staff that isn't already shown on the Spelers tab.
+  const hasInfoContent =
+    hasContactInfo || hasBodyContent || (!hasPlayers && hasStaff);
+  const hasAnyOtherTab = hasPlayers || hasMatches || hasStandings;
+  // Show the Info tab when it has real content, or when it is the only
+  // thing we could show (so users still see the "no data" fallback copy
+  // instead of an empty page body).
+  const showInfoTab = hasInfoContent || !hasAnyOtherTab;
 
   const heroLabel = HERO_LABELS[header.teamType ?? "senior"];
 
-  const panels: TeamDetailTabPanel[] = [
-    {
+  const panels: TeamDetailTabPanel[] = [];
+
+  if (showInfoTab) {
+    panels.push({
       id: "info",
       label: "Info",
       content: (
@@ -199,8 +241,8 @@ export function TeamDetail({
           teamName={header.name}
         />
       ),
-    },
-  ];
+    });
+  }
 
   // The Spelers tab is only added when there are actual players to show.
   // Staff-only teams (hasPlayers=false, hasStaff=true) surface their staff
@@ -271,8 +313,14 @@ export function TeamDetail({
   // Default tab: prefer Spelers when there are actual players (the only
   // case where the Spelers tab is added — see above). Staff-only and
   // empty teams default to Info, which is where their staff / fallback
-  // copy lives.
-  const defaultTabId = hasPlayers ? "spelers" : "info";
+  // copy lives. If neither Spelers nor Info is present, fall back to the
+  // first available panel so the TeamDetailTabs guard has something to
+  // select.
+  const defaultTabId = hasPlayers
+    ? "spelers"
+    : showInfoTab
+      ? "info"
+      : (panels[0]?.id ?? "info");
 
   const sections: SectionConfig[] = [
     {

@@ -51,7 +51,7 @@ function TimelineItem({
 
       {/* Right content */}
       <div
-        className={`mt-6 w-full md:mt-0 md:w-[45%] ${side === "left" ? "hidden md:block md:invisible" : ""}`}
+        className={`w-full md:w-[45%] ${side === "left" ? "hidden md:block md:invisible" : ""}`}
       >
         {side === "right" && (
           <TimelineCard date={date}>{children}</TimelineCard>

@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { TeamDetail, type TeamDetailHeader } from "./TeamDetail";
 import type { RosterPlayer, StaffMember } from "../TeamRoster";
 import type { ScheduleMatch } from "../TeamSchedule";
@@ -113,6 +113,26 @@ describe("TeamDetail", () => {
     const tabLabels = screen
       .getAllByRole("tab")
       .map((t) => t.textContent?.trim());
+    // Info is intentionally omitted when there is no contact info / body
+    // copy and staff is already surfaced on the Spelers tab — showing an
+    // empty Info tab alongside real content panels is confusing.
+    expect(tabLabels).toEqual(["Spelers", "Wedstrijden", "Klassement"]);
+  });
+
+  it("adds the Info tab when contactInfo or bodyContent is present alongside other tabs", () => {
+    render(
+      <TeamDetail
+        header={header}
+        contactInfo="<p>Contact details</p>"
+        players={players}
+        matches={matches}
+        standings={standings}
+        highlightTeamId={12345}
+      />,
+    );
+    const tabLabels = screen
+      .getAllByRole("tab")
+      .map((t) => t.textContent?.trim());
     expect(tabLabels).toEqual(["Info", "Spelers", "Wedstrijden", "Klassement"]);
   });
 
@@ -124,14 +144,21 @@ describe("TeamDetail", () => {
     expect(active).toHaveAccessibleName("Spelers");
   });
 
-  it("defaults to the Info tab when there are no players or staff", () => {
+  it("falls back to the first available tab when only matches are present", () => {
     render(
       <TeamDetail header={header} matches={matches} highlightTeamId={12345} />,
     );
+    // Info is skipped (no contact info / body copy / staff), Spelers is
+    // skipped (no players), so Wedstrijden becomes the only tab and the
+    // default selection.
+    const tabLabels = screen
+      .getAllByRole("tab")
+      .map((t) => t.textContent?.trim());
+    expect(tabLabels).toEqual(["Wedstrijden"]);
     const active = screen
       .getAllByRole("tab")
       .find((t) => t.getAttribute("aria-selected") === "true");
-    expect(active).toHaveAccessibleName("Info");
+    expect(active).toHaveAccessibleName("Wedstrijden");
   });
 
   it("does not add a Spelers tab when only staff is present (staff renders in Info)", () => {
@@ -178,6 +205,57 @@ describe("TeamDetail", () => {
       .find((t) => t.getAttribute("aria-selected") === "true");
     // Default tab when players are present is Spelers — not the stale value.
     expect(active).toHaveAccessibleName("Spelers");
+  });
+
+  it("pushes the new tab to the router when switching tabs", () => {
+    render(
+      <TeamDetail
+        header={header}
+        players={players}
+        matches={matches}
+        highlightTeamId={12345}
+      />,
+    );
+    // Default selected tab is Spelers (when players are present).
+    fireEvent.click(screen.getByRole("tab", { name: "Wedstrijden" }));
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith(
+      "/ploegen/a-ploeg?tab=wedstrijden",
+      expect.objectContaining({ scroll: false }),
+    );
+  });
+
+  it("strips the ?tab= query when switching to the default tab", () => {
+    mockSearchParams = new URLSearchParams("tab=wedstrijden");
+    render(
+      <TeamDetail
+        header={header}
+        players={players}
+        matches={matches}
+        highlightTeamId={12345}
+      />,
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Spelers" }));
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    // Default tab (Spelers) is represented as "no tab query".
+    expect(mockPush).toHaveBeenCalledWith(
+      "/ploegen/a-ploeg",
+      expect.objectContaining({ scroll: false }),
+    );
+  });
+
+  it("does not push when clicking the already-active tab", () => {
+    render(
+      <TeamDetail
+        header={header}
+        players={players}
+        matches={matches}
+        highlightTeamId={12345}
+      />,
+    );
+    // Default is Spelers — clicking it again must not trigger a router push.
+    fireEvent.click(screen.getByRole("tab", { name: "Spelers" }));
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it("renders the closing CTA pointing at /hulp", () => {

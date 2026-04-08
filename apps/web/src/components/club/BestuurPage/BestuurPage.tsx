@@ -25,16 +25,47 @@ import {
   type StaffMember,
 } from "@/components/team/TeamRoster";
 
+/**
+ * When the CMS marks a link as `target="_blank"` we must also emit
+ * `rel="noopener noreferrer"` to prevent reverse-tabnabbing and to avoid
+ * leaking the Referer header to the third-party destination. `sanitize-html`
+ * does not enforce this by default — `rel` is not in the default allowed
+ * attributes for `<a>`, so any `rel` the CMS author sets would be stripped.
+ * We explicitly allow `rel` and merge the required tokens in the transform.
+ */
+function hardenExternalLinkRel(existingRel: string | undefined): string {
+  const tokens = new Set(
+    (existingRel ?? "").split(/\s+/).filter((t) => t.length > 0),
+  );
+  tokens.add("noopener");
+  tokens.add("noreferrer");
+  return Array.from(tokens).join(" ");
+}
+
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
-    a: [...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []), "class"],
+    a: [
+      ...(sanitizeHtml.defaults.allowedAttributes?.["a"] ?? []),
+      "class",
+      "rel",
+    ],
   },
   transformTags: {
-    a: (tagName, attribs) => ({
-      tagName,
-      attribs: { ...attribs, class: "content-link" },
-    }),
+    a: (tagName, attribs) => {
+      const hardenedRel =
+        attribs.target === "_blank"
+          ? hardenExternalLinkRel(attribs.rel)
+          : attribs.rel;
+      return {
+        tagName,
+        attribs: {
+          ...attribs,
+          ...(hardenedRel ? { rel: hardenedRel } : {}),
+          class: "content-link",
+        },
+      };
+    },
   },
 };
 
