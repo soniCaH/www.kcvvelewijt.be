@@ -118,7 +118,7 @@ export function BestuurPage({
       bg: "kcvv-black",
       content: (
         <div className="mx-auto max-w-inner-lg px-4 md:px-10">
-          <SectionHeader title="Ons bestuur" variant="dark" />
+          <SectionHeader title={header.name} variant="dark" />
           <TeamRoster
             players={players}
             staff={staff}
