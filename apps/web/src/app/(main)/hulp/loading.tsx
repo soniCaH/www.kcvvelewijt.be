@@ -25,7 +25,7 @@ export default function HulpLoading() {
 
       {/* Content section — gray background matches the real page */}
       <div className="bg-gray-100">
-        <div className="mx-auto max-w-inner-lg space-y-12 px-4 py-12 md:px-10">
+        <div className="mx-auto max-w-inner-lg space-y-12 px-4 py-20 md:px-10">
           {/* Search input shell — visual mimic of HulpSearchInput.tsx */}
           <div>
             <div className="relative mx-auto w-full max-w-2xl">
