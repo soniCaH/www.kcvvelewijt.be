@@ -11,7 +11,7 @@ export default function ClubPageLoading() {
       <PageHero label="Club" headline="Laden..." body="" size="compact" />
 
       {/* Article body prose */}
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4 animate-pulse">
+      <div className="max-w-inner-lg mx-auto px-4 py-8 space-y-4 animate-pulse">
         <div className="h-5 w-full rounded bg-gray-200" />
         <div className="h-5 w-full rounded bg-gray-200" />
         <div className="h-5 w-4/5 rounded bg-gray-200" />
