@@ -140,6 +140,21 @@ export const NextMatch: Story = {
 };
 
 /**
+ * Away match — shows "Uit · Competitie" label below the match row
+ */
+export const AwayMatch: Story = {
+  args: {
+    match: {
+      ...baseMatch,
+      isHome: false,
+      homeTeam: { id: 59, name: "KFC Turnhout", logo: OPPONENT_LOGO },
+      awayTeam: { id: 1235, name: "KCVV Elewijt", logo: KCVV_LOGO },
+    },
+    href: "/wedstrijd/1001",
+  },
+};
+
+/**
  * Without logos — shows initial placeholders
  */
 export const WithoutLogos: Story = {

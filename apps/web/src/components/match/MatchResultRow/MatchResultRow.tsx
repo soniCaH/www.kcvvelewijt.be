@@ -294,7 +294,7 @@ export function MatchResultRow({
       {/* Home/Away indicator for mobile */}
       <div
         className={cn(
-          "mt-2 text-xs sm:hidden",
+          "mt-2 text-xs",
           isDark ? "text-white/40" : "text-gray-500",
         )}
       >
