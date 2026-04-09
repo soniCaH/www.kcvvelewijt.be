@@ -7,6 +7,7 @@ import {
   mockFinishedMatchWin,
   mockFinishedMatchDraw,
   mockPostponedMatch,
+  mockStoppedMatch,
   mockForfeitedMatch,
   mockLongTeamNames,
 } from "./MatchWidget.mocks";
@@ -171,6 +172,12 @@ describe("MatchWidget", () => {
 
     it("links postponed match to calendar page", () => {
       render(<MatchWidget match={mockPostponedMatch} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute("href", "/kalender");
+    });
+
+    it("links stopped match to calendar page", () => {
+      render(<MatchWidget match={mockStoppedMatch} />);
       const link = screen.getByRole("link");
       expect(link).toHaveAttribute("href", "/kalender");
     });
