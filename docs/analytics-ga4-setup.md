@@ -19,6 +19,7 @@ and at least one real user session with analytics consent given.
    - [4b. Search Funnel](#4b-search-funnel)
    - [4c. Organigram Usage Exploration](#4c-organigram-usage-exploration)
    - [4d. Related Content Funnel](#4d-related-content-funnel)
+   - [4e. Homepage Match Widget Clicks](#4e-homepage-match-widget-clicks)
 5. [Create custom reports](#5-create-custom-reports)
    - [5a. Responsibility Finder Success Rate](#5a-responsibility-finder-success-rate)
    - [5b. Responsibility No-Results (Content Gaps)](#5b-responsibility-no-results-content-gaps)
@@ -38,12 +39,12 @@ and at least one real user session with analytics consent given.
 When you open [analytics.google.com](https://analytics.google.com) and select the KCVV
 property, you land on the **Home** screen. The left sidebar has five sections:
 
-| Sidebar item    | What it is                                                         |
-| --------------- | ------------------------------------------------------------------ |
-| **Home**        | Overview dashboard with auto-generated cards                       |
-| **Reports**     | Standard reports: traffic, engagement, pages, devices              |
-| **Explore**     | Where you build custom funnels and reports (called "Explorations") |
-| **Advertising** | Attribution and conversion paths                                   |
+| Sidebar item    | What it is                                                                                                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Home**        | Overview dashboard with auto-generated cards                                                                                                                                                                                                                             |
+| **Reports**     | Standard reports: traffic, engagement, pages, devices                                                                                                                                                                                                                    |
+| **Explore**     | Where you build custom funnels and reports (called "Explorations")                                                                                                                                                                                                       |
+| **Advertising** | Attribution and conversion paths                                                                                                                                                                                                                                         |
 | **Admin**       | Custom definitions: Admin → Data display → Custom definitions; DebugView: Admin → Data display → DebugView; Events/Key events: Admin → Data display → Events; Audiences: Admin → Audience manager; Data streams: Admin → Data collection and modification → Data Streams |
 
 We will mostly work in **Explore** and **Admin**.
@@ -69,7 +70,7 @@ DebugView shows events from individual browser sessions in real time.
 1. Open the site in Chrome with GTM Preview active (or `?gtm_debug=x` appended) and accept the analytics cookie consent.
 2. Open Chrome DevTools → Console → run:
    ```javascript
-   dataLayer
+   dataLayer;
    ```
    You should see an array with `gtm.js`, `gtm.dom`, `gtm.load` entries.
 3. In GA4, go to **Configure** → **DebugView** (bottom of the left sidebar under Configure).
@@ -103,7 +104,7 @@ GA4 automatically tracks standard parameters (`page_location`, `session_id`, etc
 but **custom event parameters are invisible in reports unless you register them first**
 as Custom Dimensions.
 
-You have 50 custom dimension slots. We will use 20.
+You have 50 custom dimension slots. We will use 23.
 
 ### How to add a custom dimension
 
@@ -120,28 +121,31 @@ Repeat for each row in the table below.
 
 ### Dimensions to register
 
-| Dimension name     | Event parameter      | Where it appears                                                            |
-| ------------------ | -------------------- | --------------------------------------------------------------------------- |
-| Role               | `role`               | Responsibility finder events                                                |
-| Query text         | `query_text`         | Search & responsibility no-results events                                   |
-| Query length       | `query_length`       | Search & responsibility events                                              |
-| Results count      | `results_count`      | `search_results_shown`, `responsibility_search`                             |
-| Path ID            | `path_id`            | Responsibility finder events                                                |
-| Category           | `category`           | `responsibility_suggestion_clicked`, `responsibility_dwell`                 |
+| Dimension name     | Event parameter      | Where it appears                                                                      |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------- |
+| Role               | `role`               | Responsibility finder events                                                          |
+| Query text         | `query_text`         | Search & responsibility no-results events                                             |
+| Query length       | `query_length`       | Search & responsibility events                                                        |
+| Results count      | `results_count`      | `search_results_shown`, `responsibility_search`                                       |
+| Path ID            | `path_id`            | Responsibility finder events                                                          |
+| Category           | `category`           | `responsibility_suggestion_clicked`, `responsibility_dwell`                           |
 | Position           | `position`           | `responsibility_suggestion_clicked`, `search_result_clicked`, `related_content_click` |
-| Contact type       | `contact_type`       | `responsibility_contact_clicked` ("email" / "phone")                        |
-| Dwell seconds      | `dwell_seconds`      | `responsibility_dwell`                                                      |
-| Had results        | `had_results`        | `responsibility_abandon`                                                    |
-| Filter type        | `filter_type`        | `search_filter_changed`                                                     |
-| Result type        | `result_type`        | `search_result_clicked`, `related_content_click`                            |
-| Result title       | `result_title`       | `search_result_clicked`                                                     |
-| Organigram view    | `view`               | Organigram events                                                           |
-| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`                              |
-| Department         | `department`         | `organigram_department_filtered`                                            |
-| Member ID          | `member_id`          | `organigram_member_clicked`                                                 |
-| Target type        | `target_type`        | `related_content_click`, `related_content_shown`                            |
-| Target ID          | `target_id`          | `related_content_click`                                                     |
-| Source entity type | `source_entity_type` | `related_content_shown`, `related_content_click`                            |
+| Contact type       | `contact_type`       | `responsibility_contact_clicked` ("email" / "phone")                                  |
+| Dwell seconds      | `dwell_seconds`      | `responsibility_dwell`                                                                |
+| Had results        | `had_results`        | `responsibility_abandon`                                                              |
+| Filter type        | `filter_type`        | `search_filter_changed`                                                               |
+| Result type        | `result_type`        | `search_result_clicked`, `related_content_click`                                      |
+| Result title       | `result_title`       | `search_result_clicked`                                                               |
+| Organigram view    | `view`               | Organigram events                                                                     |
+| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`                                        |
+| Department         | `department`         | `organigram_department_filtered`                                                      |
+| Member ID          | `member_id`          | `organigram_member_clicked`                                                           |
+| Target type        | `target_type`        | `related_content_click`, `related_content_shown`                                      |
+| Target ID          | `target_id`          | `related_content_click`                                                               |
+| Source entity type | `source_entity_type` | `related_content_shown`, `related_content_click`                                      |
+| Match ID           | `match_id`           | `homepage_match_widget_clicked`                                                       |
+| Match status       | `match_status`       | `homepage_match_widget_clicked`                                                       |
+| Destination        | `destination`        | `homepage_match_widget_clicked`                                                       |
 
 > **Tip**: The dimension name is only a label for the GA4 UI. The event parameter must
 > match the code exactly (case-sensitive, snake_case).
@@ -170,21 +174,25 @@ make it accessible to anyone in the GA4 property.
 right panel to open the step editor:
 
 **Step 1 — Role selected**
+
 - Click **Add step**
 - Step name: `Role selected`
 - Click **Add condition** → Event name → `responsibility_role_selected`
 
 **Step 2 — Search performed**
+
 - Click **Add step**
 - Step name: `Search performed`
 - Condition: Event name → `responsibility_search`
 
 **Step 3 — Suggestion clicked**
+
 - Click **Add step**
 - Step name: `Suggestion clicked`
 - Condition: Event name → `responsibility_suggestion_clicked`
 
 **Step 4 — Success**
+
 - Click **Add step**
 - Step name: `Success (contact or dwell)`
 - Condition: Event name → `responsibility_contact_clicked`
@@ -193,7 +201,7 @@ right panel to open the step editor:
 Click **Apply** to close the step editor.
 
 > **Analyzing abandonment**: Do not add `responsibility_abandon` as a sequential
-> funnel step — GA4 models abandonment as drop-off *before* the final success step,
+> funnel step — GA4 models abandonment as drop-off _before_ the final success step,
 > not as a step after it. To analyze abandonment separately, use **Path exploration**
 > (Explore → + → Path exploration) filtered to `responsibility_abandon`, or create a
 > **segment comparison**: one segment for sessions containing
@@ -219,15 +227,19 @@ select the **Role** dimension. This shows which roles have the lowest completion
 **Steps:**
 
 **Step 1 — Search submitted**
+
 - Condition: Event name → `search_submitted`
 
 **Step 2 — Results shown**
+
 - Condition: Event name → `search_results_shown`
 
 **Step 3 — Result clicked**
+
 - Condition: Event name → `search_result_clicked`
 
 **Step 4 — Dead end (no results)**
+
 - Click **Add step**
 - Step name: `Dead end`
 - Condition: Event name → `search_no_results`
@@ -261,6 +273,7 @@ This is a **Free form** exploration (pivot table), not a funnel.
 **Add variables** (left panel — click **+** next to Dimensions and Metrics):
 
 Dimensions to add:
+
 - Event name
 - Organigram view
 - Interaction source
@@ -268,6 +281,7 @@ Dimensions to add:
 - Member ID
 
 Metrics to add:
+
 - Event count
 
 **Tab 1 — View distribution** (centre panel, Tab settings):
@@ -302,14 +316,49 @@ Name it "Member Clicks".
 **Steps:**
 
 **Step 1 — Content shown**
+
 - Condition: Event name → `related_content_shown`
 
 **Step 2 — Content clicked**
+
 - Condition: Event name → `related_content_click`
 
 **Breakdown:** Add **Interaction source** dimension (values: `ai` / `editorial` /
 `reference`). The drop-off from Step 1 to Step 2 per source directly answers whether
 AI suggestions are performing compared to manually curated content.
+
+**Share the exploration.**
+
+---
+
+### 4e. Homepage Match Widget Clicks
+
+**Key question**: Are users engaging with the match widget, and which match states drive the most clicks?
+
+1. **Explore** → **+** → leave Technique as **Free form**.
+2. Rename to **"Homepage Match Widget Clicks"**.
+
+**Add variables** (left panel):
+
+Dimensions to add:
+
+- Event name
+- Match status
+- Destination
+
+Metrics to add:
+
+- Event count
+
+**Tab settings:**
+
+- Rows: Match status
+- Values: Event count
+- Filter: Event name → exactly matches → `homepage_match_widget_clicked`
+
+This shows click distribution by match status (`finished`, `scheduled`, `postponed`, etc.).
+High `finished` counts relative to `scheduled` suggest users prefer reviewing past results
+over checking upcoming fixtures.
 
 **Share the exploration.**
 
@@ -329,6 +378,7 @@ All of these are **Free form** explorations.
 **Variables:** Dimensions: Event name — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Event name
 - Values: Event count
 - Filter: Event name → contains → `responsibility_`
@@ -355,6 +405,7 @@ Success rate = (responsibility_contact_clicked + responsibility_dwell) / respons
 **Variables:** Dimensions: Query text, Role — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Query text
 - Columns: Role
 - Values: Event count
@@ -376,6 +427,7 @@ content.
 **Variables:** Dimensions: Event name — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Event name
 - Values: Event count
 - Filter: Event name → one of → `search_submitted`, `search_results_shown`,
@@ -400,6 +452,7 @@ Dead-end rate = search_no_results     / search_submitted × 100
 **Variables:** Dimensions: Query text — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Query text
 - Values: Event count
 - Filter: Event name → exactly matches → `search_no_results`
@@ -417,6 +470,7 @@ Dead-end rate = search_no_results     / search_submitted × 100
 **Variables:** Dimensions: Organigram view, Interaction source — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Organigram view
 - Columns: Interaction source
 - Values: Event count
@@ -434,6 +488,7 @@ Dead-end rate = search_no_results     / search_submitted × 100
 **Variables:** Dimensions: Event name, Interaction source — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Interaction source
 - Columns: Event name
 - Values: Event count
@@ -454,6 +509,7 @@ Divide `related_content_click` by `related_content_shown` per row to get CTR.
 **Variables:** Dimensions: Target type, Interaction source — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Target type
 - Columns: Interaction source
 - Values: Event count
@@ -471,6 +527,7 @@ Divide `related_content_click` by `related_content_shown` per row to get CTR.
 **Variables:** Dimensions: Position, Target type — Metrics: Event count
 
 **Tab settings:**
+
 - Rows: Position
 - Columns: Target type
 - Values: Event count
@@ -517,33 +574,35 @@ download context is needed.
 
 ### Events by feature area
 
-| Feature area          | Event names                                                                                                                                                                                                                                                          |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature area          | Event names                                                                                                                                                                                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Responsibility finder | `responsibility_role_selected`, `responsibility_search`, `responsibility_no_results`, `responsibility_suggestion_clicked`, `responsibility_contact_clicked`, `responsibility_organigram_link`, `responsibility_step_link_clicked`, `responsibility_dwell`, `responsibility_abandon` |
-| Search                | `search_submitted`, `search_results_shown`, `search_no_results`, `search_filter_changed`, `search_result_clicked`                                                                                                                                                    |
-| Organigram            | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`                                                                                                                          |
-| Related content       | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                     |
-| Downloads (auto)      | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                           |
+| Search                | `search_submitted`, `search_results_shown`, `search_no_results`, `search_filter_changed`, `search_result_clicked`                                                                                                                                                                   |
+| Organigram            | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`                                                                                                                                         |
+| Related content       | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                                    |
+| Homepage              | `homepage_match_widget_clicked`                                                                                                                                                                                                                                                     |
+| Downloads (auto)      | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                          |
 
 ### Where to find each report
 
-| Report name                          | Location in GA4                              | Key metric                                    |
-| ------------------------------------ | -------------------------------------------- | --------------------------------------------- |
-| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel       | Step-to-step completion rate                  |
-| Search Funnel                        | Explore → Search Funnel                      | search_submitted → result_clicked drop-off    |
-| Organigram Usage                     | Explore → Organigram Usage                   | View mode distribution, member engagement     |
-| Related Content Funnel               | Explore → Related Content Funnel             | CTR by source (AI vs editorial vs reference)  |
-| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate | (contact_clicked + dwell) / search            |
-| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries  | Queries with zero results (content gaps)      |
-| Search — Click-Through Rate          | Explore → Search Click-Through Rate          | result_clicked / submitted                    |
-| Search — No Results Queries          | Explore → Search No Results Queries          | Queries with zero results (index gaps)        |
-| Organigram — View Preference         | Explore → Organigram View Preference         | Which view is used most                       |
-| Related Content — CTR by Source      | Explore → Related Content CTR by Source      | Clicks / impressions per source               |
-| Related Content — Type Engagement    | Explore → Related Content Type Engagement    | Click counts per target_type                  |
-| Related Content — Position Bias      | Explore → Related Content Position Bias      | Click distribution by position                |
-| All events overview                  | Reports → Engagement → Events                | Raw event counts (24–72h delay)               |
-| Realtime events                      | Reports → Realtime                           | Live event counts                             |
-| DebugView                            | Configure → DebugView                        | Individual session event timeline             |
+| Report name                          | Location in GA4                               | Key metric                                   |
+| ------------------------------------ | --------------------------------------------- | -------------------------------------------- |
+| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel        | Step-to-step completion rate                 |
+| Search Funnel                        | Explore → Search Funnel                       | search_submitted → result_clicked drop-off   |
+| Organigram Usage                     | Explore → Organigram Usage                    | View mode distribution, member engagement    |
+| Related Content Funnel               | Explore → Related Content Funnel              | CTR by source (AI vs editorial vs reference) |
+| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate  | (contact_clicked + dwell) / search           |
+| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries   | Queries with zero results (content gaps)     |
+| Search — Click-Through Rate          | Explore → Search Click-Through Rate           | result_clicked / submitted                   |
+| Search — No Results Queries          | Explore → Search No Results Queries           | Queries with zero results (index gaps)       |
+| Organigram — View Preference         | Explore → Organigram View Preference          | Which view is used most                      |
+| Related Content — CTR by Source      | Explore → Related Content CTR by Source       | Clicks / impressions per source              |
+| Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                 |
+| Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position               |
+| Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status           |
+| All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)              |
+| Realtime events                      | Reports → Realtime                            | Live event counts                            |
+| DebugView                            | Configure → DebugView                         | Individual session event timeline            |
 | File downloads                       | Reports → Engagement → Events → file_download | file_name, file_extension breakdown          |
-| Traffic sources                      | Reports → Acquisition → Traffic acquisition  | Where visitors come from                      |
-| Top pages                            | Reports → Engagement → Pages and screens     | Most visited pages, bounce rate               |
+| Traffic sources                      | Reports → Acquisition → Traffic acquisition   | Where visitors come from                     |
+| Top pages                            | Reports → Engagement → Pages and screens      | Most visited pages, bounce rate              |
