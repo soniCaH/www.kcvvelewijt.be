@@ -129,6 +129,25 @@ describe("PageHeader", () => {
   });
 
   describe("Focus management", () => {
+    it("does not move focus when close is called while menu already closed", async () => {
+      render(<PageHeader />);
+
+      const menuButton = screen.getByLabelText(/toggle navigation menu/i);
+
+      // Menu is initially closed
+      expect(menuButton).not.toHaveAttribute("aria-expanded", "true");
+
+      // Close button should not be present when menu is closed
+      const closeButton = screen.queryByLabelText(/close menu/i);
+      if (closeButton) {
+        const user = userEvent.setup();
+        await user.click(closeButton);
+      }
+
+      // Hamburger should NOT have focus — handleClose was a no-op
+      expect(menuButton).not.toHaveFocus();
+    });
+
     it("should return focus to hamburger button when mobile menu is closed", async () => {
       const user = userEvent.setup();
       render(<PageHeader />);

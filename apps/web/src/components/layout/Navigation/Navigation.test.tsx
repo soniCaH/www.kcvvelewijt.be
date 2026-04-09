@@ -239,6 +239,20 @@ describe("Navigation", () => {
   });
 
   describe("Keyboard dismiss", () => {
+    it("should not error when Escape is pressed with no dropdown open", async () => {
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
+
+      // No dropdown open — Escape should be a no-op
+      const user = userEvent.setup();
+      await user.keyboard("{Escape}");
+
+      expect(
+        container.querySelector(
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+        ),
+      ).not.toBeInTheDocument();
+    });
+
     it("should close dropdown when Escape is pressed", async () => {
       const { container } = render(<Navigation seniorTeams={seniorTeams} />);
 
@@ -269,6 +283,25 @@ describe("Navigation", () => {
   });
 
   describe("Click-outside dismiss", () => {
+    it("should not error when clicking outside with no dropdown open", async () => {
+      const { container } = render(
+        <div>
+          <Navigation seniorTeams={seniorTeams} />
+          <div data-testid="outside">Outside content</div>
+        </div>,
+      );
+
+      // No dropdown open — clicking outside should be a no-op
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("outside"));
+
+      expect(
+        container.querySelector(
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+        ),
+      ).not.toBeInTheDocument();
+    });
+
     it("should close dropdown when clicking outside the nav", async () => {
       const { container } = render(
         <div>
