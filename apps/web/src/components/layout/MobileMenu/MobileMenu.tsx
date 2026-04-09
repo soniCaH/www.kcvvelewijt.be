@@ -145,9 +145,13 @@ export const MobileMenu = ({
         <div className="px-4 py-3 border-b border-white/10">
           <Link
             href="/club/contact"
-            onClick={() =>
-              trackEvent("directions_clicked", { source: "mobile_menu" })
-            }
+            onClick={() => {
+              if (pathname === "/club/contact") {
+                onClose();
+                return;
+              }
+              trackEvent("directions_clicked", { source: "mobile_menu" });
+            }}
             className="inline-flex items-center gap-2 text-[0.6875rem] uppercase font-bold text-white hover:text-kcvv-green-bright transition-colors"
           >
             <Icon icon={MapPin} size="sm" />

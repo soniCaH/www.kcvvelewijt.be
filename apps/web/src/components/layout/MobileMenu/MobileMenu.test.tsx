@@ -314,5 +314,16 @@ describe("MobileMenu", () => {
         source: "mobile_menu",
       });
     });
+
+    it("should not fire directions_clicked when already on /club/contact and should close menu instead", async () => {
+      mockPathname = "/club/contact";
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+      render(<MobileMenu {...defaultProps} onClose={onClose} />);
+      const stadionLink = screen.getByRole("link", { name: /stadion/i });
+      await user.click(stadionLink);
+      expect(trackEvent).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 });
