@@ -24,8 +24,11 @@ describe("SocialLinks", () => {
 
   it("inline variant has ≥44×44 tap area on each social link", () => {
     render(<SocialLinks variant="inline" />);
-    const link = screen.getByLabelText("Facebook");
-    expect(link).toHaveClass("min-h-11", "min-w-11");
+    const links = screen.getAllByRole("link");
+    expect(links.length).toBeGreaterThanOrEqual(3);
+    for (const link of links) {
+      expect(link).toHaveClass("min-h-11", "min-w-11");
+    }
   });
 
   it("opens links in new tab", () => {
