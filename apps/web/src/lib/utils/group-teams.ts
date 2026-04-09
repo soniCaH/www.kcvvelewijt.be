@@ -22,7 +22,7 @@ export type GroupedTeams = {
   youthByDivision: YouthDivisionGroup[];
 };
 
-const BOVENBOUW = ["U21", "U19", "U17"];
+const BOVENBOUW = ["U21", "U20", "U19", "U18", "U17"];
 const MIDDENBOUW = ["U16", "U15", "U14", "U13", "U12"];
 const ONDERBOUW = ["U11", "U10", "U9", "U8", "U7", "U6"];
 
@@ -48,8 +48,14 @@ export function getYouthDivision(
 }
 
 function sortByAgeDesc(ageOrder: string[]) {
-  return (a: TeamLandingItem, b: TeamLandingItem) =>
-    ageOrder.indexOf(a.age) - ageOrder.indexOf(b.age);
+  return (a: TeamLandingItem, b: TeamLandingItem) => {
+    const idxA = ageOrder.indexOf(a.age);
+    const idxB = ageOrder.indexOf(b.age);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return (parseAge(b.age) ?? 0) - (parseAge(a.age) ?? 0);
+  };
 }
 
 /** Extract the trailing single letter from a team name, e.g. "Eerste Elftallen A" → "A" */
