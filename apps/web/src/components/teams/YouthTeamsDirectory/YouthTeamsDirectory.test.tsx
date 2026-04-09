@@ -21,7 +21,7 @@ vi.mock("next/link", () => ({
 const divisions: YouthDivisionGroup[] = [
   {
     label: "Bovenbouw",
-    range: "U14–U21",
+    range: "U17–U21",
     teams: [
       {
         _id: "u21",
@@ -34,6 +34,12 @@ const divisions: YouthDivisionGroup[] = [
         teamImageUrl: null,
         staff: null,
       },
+    ],
+  },
+  {
+    label: "Middenbouw",
+    range: "U12–U16",
+    teams: [
       {
         _id: "u15",
         name: "U15",
@@ -45,12 +51,6 @@ const divisions: YouthDivisionGroup[] = [
         teamImageUrl: null,
         staff: null,
       },
-    ],
-  },
-  {
-    label: "Middenbouw",
-    range: "U10–U13",
-    teams: [
       {
         _id: "u13",
         name: "U13",
@@ -66,7 +66,7 @@ const divisions: YouthDivisionGroup[] = [
   },
   {
     label: "Onderbouw",
-    range: "U6–U9",
+    range: "U6–U11",
     teams: [],
   },
 ];

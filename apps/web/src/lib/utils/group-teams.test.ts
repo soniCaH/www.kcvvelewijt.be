@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { groupTeamsForLanding, type TeamLandingItem } from "./group-teams";
+import {
+  groupTeamsForLanding,
+  getYouthDivision,
+  type TeamLandingItem,
+} from "./group-teams";
 
 const makeTeam = (
   overrides: Partial<TeamLandingItem> = {},
@@ -43,22 +47,20 @@ describe("groupTeamsForLanding", () => {
 
     expect(result.youthByDivision).toHaveLength(3);
     expect(result.youthByDivision[0].label).toBe("Bovenbouw");
-    expect(result.youthByDivision[0].range).toBe("U14–U21");
+    expect(result.youthByDivision[0].range).toBe("U17–U21");
     expect(result.youthByDivision[0].teams.map((t) => t.age)).toEqual([
       "U21",
       "U17",
     ]);
 
     expect(result.youthByDivision[1].label).toBe("Middenbouw");
-    expect(result.youthByDivision[1].range).toBe("U10–U13");
-    expect(result.youthByDivision[1].teams.map((t) => t.age)).toEqual([
-      "U13",
-      "U10",
-    ]);
+    expect(result.youthByDivision[1].range).toBe("U12–U16");
+    expect(result.youthByDivision[1].teams.map((t) => t.age)).toEqual(["U13"]);
 
     expect(result.youthByDivision[2].label).toBe("Onderbouw");
-    expect(result.youthByDivision[2].range).toBe("U6–U9");
+    expect(result.youthByDivision[2].range).toBe("U6–U11");
     expect(result.youthByDivision[2].teams.map((t) => t.age)).toEqual([
+      "U10",
       "U9",
       "U6",
     ]);
@@ -83,9 +85,13 @@ describe("groupTeamsForLanding", () => {
 
     const result = groupTeamsForLanding(teams);
 
+    // Bovenbouw: U21, U17
     expect(result.youthByDivision[0].teams.map((t) => t.age)).toEqual([
       "U21",
       "U17",
+    ]);
+    // Middenbouw: U15, U15, U14
+    expect(result.youthByDivision[1].teams.map((t) => t.age)).toEqual([
       "U15",
       "U15",
       "U14",
@@ -99,9 +105,17 @@ describe("groupTeamsForLanding", () => {
     ];
     const result = groupTeamsForLanding(teams);
 
-    expect(result.youthByDivision[0].teams).toHaveLength(1); // Bovenbouw: U15
-    expect(result.youthByDivision[1].teams).toHaveLength(0); // Middenbouw: empty
+    expect(result.youthByDivision[0].teams).toHaveLength(0); // Bovenbouw: empty
+    expect(result.youthByDivision[1].teams).toHaveLength(1); // Middenbouw: U15
     expect(result.youthByDivision[2].teams).toHaveLength(0); // Onderbouw: empty
+  });
+
+  it("should handle U19 in Bovenbouw", () => {
+    const teams = [
+      makeTeam({ _id: "u19", age: "U19", name: "KCVV Elewijt U19" }),
+    ];
+    const result = groupTeamsForLanding(teams);
+    expect(result.youthByDivision[0].teams.map((t) => t.age)).toEqual(["U19"]);
   });
 
   it("should not include senior teams in youth divisions", () => {
@@ -116,5 +130,39 @@ describe("groupTeamsForLanding", () => {
 
     expect(allYouth).toHaveLength(1);
     expect(allYouth[0].age).toBe("U15");
+  });
+});
+
+describe("getYouthDivision", () => {
+  it("should return Bovenbouw for U17–U21", () => {
+    expect(getYouthDivision("U21")).toBe("Bovenbouw");
+    expect(getYouthDivision("U19")).toBe("Bovenbouw");
+    expect(getYouthDivision("U17")).toBe("Bovenbouw");
+  });
+
+  it("should return Middenbouw for U12–U16", () => {
+    expect(getYouthDivision("U16")).toBe("Middenbouw");
+    expect(getYouthDivision("U15")).toBe("Middenbouw");
+    expect(getYouthDivision("U14")).toBe("Middenbouw");
+    expect(getYouthDivision("U13")).toBe("Middenbouw");
+    expect(getYouthDivision("U12")).toBe("Middenbouw");
+  });
+
+  it("should return Onderbouw for U6–U11", () => {
+    expect(getYouthDivision("U11")).toBe("Onderbouw");
+    expect(getYouthDivision("U10")).toBe("Onderbouw");
+    expect(getYouthDivision("U9")).toBe("Onderbouw");
+    expect(getYouthDivision("U6")).toBe("Onderbouw");
+  });
+
+  it("should handle age groups not in the standard roster via numeric parsing", () => {
+    expect(getYouthDivision("U18")).toBe("Bovenbouw");
+    expect(getYouthDivision("U5")).toBeNull();
+    expect(getYouthDivision("U22")).toBeNull();
+  });
+
+  it("should return null for non-youth age groups", () => {
+    expect(getYouthDivision("A")).toBeNull();
+    expect(getYouthDivision(undefined)).toBeNull();
   });
 });

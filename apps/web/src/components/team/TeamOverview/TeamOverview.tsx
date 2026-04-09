@@ -16,6 +16,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
+import { getYouthDivision } from "@/lib/utils/group-teams";
 import { TeamCard, type TeamCardProps } from "../TeamCard";
 
 export interface TeamData extends Omit<TeamCardProps, "variant" | "isLoading"> {
@@ -44,11 +45,14 @@ export interface TeamOverviewProps {
   className?: string;
 }
 
+const DIVISION_RANGE_LABELS: Record<string, string> = {
+  Bovenbouw: "Bovenbouw (U17–U21)",
+  Middenbouw: "Middenbouw (U12–U16)",
+  Onderbouw: "Onderbouw (U6–U11)",
+};
+
 /**
  * Convert an age-group label (e.g., "U15") to its numeric age.
- *
- * @param ageGroup - A string like `"U15"` or a number-only string; may be undefined
- * @returns The parsed age as a number, or `999` if `ageGroup` is undefined or cannot be parsed
  */
 function parseAgeGroup(ageGroup: string | undefined): number {
   if (!ageGroup) return 999;
@@ -58,17 +62,11 @@ function parseAgeGroup(ageGroup: string | undefined): number {
 
 /**
  * Map an age-group identifier to its 3-tier category label.
- *
- * @param ageGroup - Age group string such as `"U15"`, or `undefined` when not available.
- * @returns One of: `"Onderbouw (U6–U9)"`, `"Middenbouw (U10–U13)"`,
- * `"Bovenbouw (U14–U21)"`, or `"Overig"` depending on the parsed age.
+ * Delegates to `getYouthDivision()` for classification.
  */
 function getAgeCategory(ageGroup: string | undefined): string {
-  const age = parseAgeGroup(ageGroup);
-  if (age >= 6 && age <= 9) return "Onderbouw (U6–U9)";
-  if (age >= 10 && age <= 13) return "Middenbouw (U10–U13)";
-  if (age >= 14 && age <= 21) return "Bovenbouw (U14–U21)";
-  return "Overig";
+  const division = getYouthDivision(ageGroup);
+  return division ? DIVISION_RANGE_LABELS[division] : "Overig";
 }
 
 /**
@@ -138,9 +136,9 @@ export function TeamOverview({
     if (!groupByAge) return null;
 
     const tierOrder = [
-      "Bovenbouw (U14–U21)",
-      "Middenbouw (U10–U13)",
-      "Onderbouw (U6–U9)",
+      "Bovenbouw (U17–U21)",
+      "Middenbouw (U12–U16)",
+      "Onderbouw (U6–U11)",
       "Overig",
     ];
 

@@ -147,6 +147,20 @@ The age category of a team, from PSD.
 
 Multiple teams can share the same age group (e.g. three U9 teams distinguished by `division`).
 
+### Youth Division (Afdeling)
+
+The three-tier grouping of youth teams used by the club internally and by parents. Derived client-side from the age group — not stored in any data source.
+
+| Code / Label   | Dutch      | Age range | Teams                    |
+| -------------- | ---------- | --------- | ------------------------ |
+| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U21, U19, U17            |
+| `"Middenbouw"` | Middenbouw | U12–U16   | U16, U15, U14, U13, U12  |
+| `"Onderbouw"`  | Onderbouw  | U6–U11    | U11, U10, U9, U8, U7, U6 |
+
+**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages.
+
+**Vocabulary rule:** Always use Bovenbouw/Middenbouw/Onderbouw — never the older terms "scholieren" or "duiveltjes."
+
 ---
 
 ## Player

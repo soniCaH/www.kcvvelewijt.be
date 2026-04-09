@@ -258,6 +258,24 @@ describe("TeamDetail", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
+  it("renders division badge in hero label for youth teams", () => {
+    const youthHeader: TeamDetailHeader = {
+      name: "KCVV Elewijt U15",
+      teamType: "youth",
+      ageGroup: "U15",
+    };
+    render(<TeamDetail header={youthHeader} />);
+    expect(screen.getByText(/Jeugd.*Middenbouw/)).toBeInTheDocument();
+  });
+
+  it("does not render division badge for senior teams", () => {
+    render(<TeamDetail header={header} />);
+    expect(screen.getByText("Eerste ploeg")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Bovenbouw|Middenbouw|Onderbouw/),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders the closing CTA pointing at /hulp", () => {
     render(<TeamDetail header={header} />);
     const cta = screen.getByRole("link", { name: /meer info/i });
