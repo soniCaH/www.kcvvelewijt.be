@@ -320,10 +320,12 @@ describe("MobileMenu", () => {
       const user = userEvent.setup();
       const onClose = vi.fn();
       render(<MobileMenu {...defaultProps} onClose={onClose} />);
+      // Reset after mount — the useEffect calls onClose() on mount
+      onClose.mockClear();
       const stadionLink = screen.getByRole("link", { name: /stadion/i });
       await user.click(stadionLink);
       expect(trackEvent).not.toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });
