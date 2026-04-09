@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
 import { MatchWidget } from "./MatchWidget";
 import {
   mockUpcomingMatch,
@@ -33,12 +34,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Upcoming: Story = {
   args: { match: mockUpcomingMatch, teamLabel: "A-Ploeg" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole("link");
+    await expect(link).toHaveAttribute(
+      "href",
+      "/ploegen/eerste-elftal-a?tab=wedstrijden",
+    );
+  },
 };
 
 export const Finished: Story = {
   args: { match: mockFinishedMatchWin, teamLabel: "A-Ploeg" },
   parameters: {
     docs: { description: { story: "Finished match with final score (win)." } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole("link");
+    await expect(link).toHaveAttribute(
+      "href",
+      `/wedstrijd/${mockFinishedMatchWin.id}`,
+    );
   },
 };
 
@@ -64,6 +81,14 @@ export const Forfeited: Story = {
   args: { match: mockForfeitedMatch, teamLabel: "A-Ploeg" },
   parameters: {
     docs: { description: { story: "Forfeited match — shows FF badge." } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole("link");
+    await expect(link).toHaveAttribute(
+      "href",
+      `/wedstrijd/${mockForfeitedMatch.id}`,
+    );
   },
 };
 

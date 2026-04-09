@@ -80,6 +80,24 @@ export const mockPostponedMatch: UpcomingMatch = {
   competition: "3e Afdeling VV",
 };
 
+export const mockStoppedMatch: UpcomingMatch = {
+  id: 106,
+  date: new Date("2026-04-12T13:00:00Z"),
+  homeTeam: {
+    id: 1235,
+    name: "KCVV Elewijt",
+    logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1",
+  },
+  awayTeam: {
+    id: 448,
+    name: "FC Wezel Sport",
+    logo: "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/448.png?v=1",
+  },
+  status: "stopped",
+  squadLabel: "A",
+  competition: "3e Afdeling VV",
+};
+
 export const mockForfeitedMatch: UpcomingMatch = {
   id: 104,
   date: new Date("2026-03-15T14:00:00Z"),

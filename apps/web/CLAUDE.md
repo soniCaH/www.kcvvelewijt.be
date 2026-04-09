@@ -75,7 +75,7 @@ Every new user-facing feature or page **must** include an analytics section. Bef
 
 - [ ] **Events defined**: new user interactions have named events in the PRD event taxonomy
 - [ ] **`trackEvent` calls added**: all interactive components call `trackEvent` with the correct parameters
-- [ ] **GTM updated**: new event names not already matched by the `responsibility_|search_|organigram_|related_content_` regex need a new trigger/tag in GTM; new event parameters need a Data Layer Variable (DLV) created in GTM and mapped into the GA4 Event tag's parameter fields
+- [ ] **GTM updated**: new event names not already matched by the `responsibility_|search_|organigram_|related_content_|homepage_` regex need a new trigger/tag in GTM; new event parameters need a Data Layer Variable (DLV) created in GTM and mapped into the GA4 Event tag's parameter fields
 - [ ] **GA4 custom dimensions registered**: any new event parameters registered in GA4 → Admin → Data display → Custom definitions (run `node scripts/create-ga4-dimensions.mjs` or add manually)
 - [ ] **GA4 explorations updated**: existing explorations updated, or new exploration created, if the feature introduces a new funnel or metric worth tracking
 - [ ] **No PII**: no email addresses, phone numbers, names, or raw internal IDs in event parameters (hash internal IDs via `hashMemberId`)
