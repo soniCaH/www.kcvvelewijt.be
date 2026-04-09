@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { PageFooter } from "./PageFooter";
 import { EXTERNAL_LINKS } from "@/lib/constants";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({
+  trackEvent: vi.fn(),
+}));
 
 vi.mock("./CookiePreferencesButton", () => ({
   CookiePreferencesButton: () => (
@@ -111,5 +117,41 @@ describe("PageFooter", () => {
     const { container } = render(<PageFooter className="custom-footer" />);
     const wrapper = container.firstElementChild;
     expect(wrapper).toHaveClass("custom-footer");
+  });
+
+  describe("Directions link", () => {
+    it("renders address as a Google Maps directions link opening in new tab", () => {
+      render(<PageFooter />);
+      const directionsLink = screen.getByRole("link", {
+        name: /routebeschrijving/i,
+      });
+      expect(directionsLink).toHaveAttribute(
+        "href",
+        "https://www.google.com/maps/dir/?api=1&destination=Driesstraat+32,+1982+Elewijt",
+      );
+      expect(directionsLink).toHaveAttribute("target", "_blank");
+      expect(directionsLink).toHaveAttribute("rel", "noopener noreferrer");
+    });
+
+    it("renders MapPin icon in directions link", () => {
+      render(<PageFooter />);
+      const directionsLink = screen.getByRole("link", {
+        name: /routebeschrijving/i,
+      });
+      const svg = directionsLink.querySelector("svg");
+      expect(svg).toBeInTheDocument();
+    });
+
+    it("fires directions_clicked analytics event with source footer on click", async () => {
+      const user = userEvent.setup();
+      render(<PageFooter />);
+      const directionsLink = screen.getByRole("link", {
+        name: /routebeschrijving/i,
+      });
+      await user.click(directionsLink);
+      expect(trackEvent).toHaveBeenCalledWith("directions_clicked", {
+        source: "footer",
+      });
+    });
   });
 });

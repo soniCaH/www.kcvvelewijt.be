@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram } from "@/lib/icons";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
+import { DirectionsLink } from "./DirectionsLink";
 import { FooterTransition } from "./FooterTransition";
 import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
 import { cn } from "@/lib/utils/cn";
@@ -95,11 +96,14 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
               Contact
             </p>
-            <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-4">
+            <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-3">
               Driesstraat 32
               <br />
               1982 Elewijt
             </p>
+            <div className="mb-4">
+              <DirectionsLink />
+            </div>
             <a
               href="mailto:info@kcvvelewijt.be"
               className="text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"

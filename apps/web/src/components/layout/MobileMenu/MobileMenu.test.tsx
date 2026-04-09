@@ -7,6 +7,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ImageProps } from "next/image";
 import { MobileMenu } from "./MobileMenu";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({
+  trackEvent: vi.fn(),
+}));
 
 // Mock variables to control test behavior
 let mockPathname = "/";
@@ -281,6 +286,33 @@ describe("MobileMenu", () => {
         name: /mobile navigation/i,
       });
       expect(nav).toHaveClass("custom-class");
+    });
+  });
+
+  describe("Stadion quick action", () => {
+    it("should render Stadion entry with MapPin icon above the main nav list", () => {
+      const { container } = render(<MobileMenu {...defaultProps} />);
+      const stadionLink = screen.getByRole("link", { name: /stadion/i });
+      expect(stadionLink).toHaveAttribute("href", "/club/contact");
+      // Verify it contains an SVG icon (MapPin)
+      expect(stadionLink.querySelector("svg")).toBeInTheDocument();
+      // Verify Stadion appears before the main nav list
+      const nav = container.querySelector("nav")!;
+      const stadionSection = stadionLink.closest("div");
+      const menuList = nav.querySelector("ul");
+      expect(stadionSection!.compareDocumentPosition(menuList!)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    });
+
+    it("should fire directions_clicked analytics event with source mobile_menu on click", async () => {
+      const user = userEvent.setup();
+      render(<MobileMenu {...defaultProps} />);
+      const stadionLink = screen.getByRole("link", { name: /stadion/i });
+      await user.click(stadionLink);
+      expect(trackEvent).toHaveBeenCalledWith("directions_clicked", {
+        source: "mobile_menu",
+      });
     });
   });
 });

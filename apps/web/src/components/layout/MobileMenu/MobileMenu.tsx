@@ -11,7 +11,8 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Icon, SocialLinks } from "@/components/design-system";
-import { X, ChevronDown } from "@/lib/icons";
+import { X, ChevronDown, MapPin } from "@/lib/icons";
+import { trackEvent } from "@/lib/analytics/track-event";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 import {
   buildMenuItems,
@@ -138,6 +139,20 @@ export const MobileMenu = ({
           >
             <Icon icon={X} size="lg" />
           </button>
+        </div>
+
+        {/* Stadion quick action */}
+        <div className="px-4 py-3 border-b border-white/10">
+          <Link
+            href="/club/contact"
+            onClick={() =>
+              trackEvent("directions_clicked", { source: "mobile_menu" })
+            }
+            className="inline-flex items-center gap-2 text-[0.6875rem] uppercase font-bold text-white hover:text-kcvv-green-bright transition-colors"
+          >
+            <Icon icon={MapPin} size="sm" />
+            Stadion
+          </Link>
         </div>
 
         {/* Menu Items — scrollable area, keeps social footer always visible below */}
