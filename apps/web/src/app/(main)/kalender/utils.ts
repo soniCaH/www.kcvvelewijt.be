@@ -26,7 +26,7 @@ export interface CalendarMatch {
   status: MatchStatus;
   competition?: string;
   team?: string;
-  kcvvTeamId?: number;
+  isHome?: boolean;
 }
 
 export interface CalendarEvent {
@@ -65,7 +65,7 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     status: match.status,
     competition: match.competition,
     team: match.kcvv_team_label,
-    kcvvTeamId: match.kcvv_team_id,
+    isHome: match.is_home,
   };
 }
 
@@ -140,9 +140,9 @@ export function getDaysInWeek(dateStr: string): string[] {
 
 /** Determine if a match is home or away for KCVV */
 export function getMatchDotType(match: CalendarMatch): "home" | "away" {
-  if (match.kcvvTeamId != null) {
-    return match.homeTeam.id === match.kcvvTeamId ? "home" : "away";
+  if (match.isHome != null) {
+    return match.isHome ? "home" : "away";
   }
-  // Fallback for matches without kcvvTeamId
+  // Fallback for matches without BFF-computed isHome
   return match.homeTeam.name.toLowerCase().includes("kcvv") ? "home" : "away";
 }

@@ -45,7 +45,7 @@ describe("transformMatchToCalendar", () => {
       status: "finished",
       competition: "2e Nationale",
       team: "A-Ploeg",
-      kcvvTeamId: undefined,
+      isHome: undefined,
     });
   });
 
@@ -63,6 +63,14 @@ describe("transformMatchToCalendar", () => {
     const result = transformMatchToCalendar(match);
 
     expect(result.date).toBe("2026-06-15T18:30:00.000Z");
+  });
+
+  it("passes through is_home as isHome", () => {
+    const home = createMatch({ is_home: true } as Partial<Match>);
+    expect(transformMatchToCalendar(home).isHome).toBe(true);
+
+    const away = createMatch({ is_home: false } as Partial<Match>);
+    expect(transformMatchToCalendar(away).isHome).toBe(false);
   });
 
   it("passes through undefined scores", () => {
@@ -216,32 +224,53 @@ describe("getDaysInWeek", () => {
 // ── getMatchDotType ───────────────────────────────────────────────────────
 
 describe("getMatchDotType", () => {
-  it("returns 'home' when kcvvTeamId matches homeTeam.id", () => {
+  it("returns 'home' when isHome is true", () => {
     const match = makeCalendarMatch({
       id: 1,
-      kcvvTeamId: 1,
-      homeTeam: { id: 1, name: "KCVV Elewijt A" },
-      awayTeam: { id: 2, name: "Racing Mechelen" },
+      isHome: true,
+      // Club IDs differ from team IDs in PSD — isHome is the authority
+      homeTeam: { id: 1235, name: "KCVV Elewijt A" },
+      awayTeam: { id: 999, name: "Racing Mechelen" },
     });
     expect(getMatchDotType(match)).toBe("home");
   });
 
-  it("returns 'away' when kcvvTeamId matches awayTeam.id", () => {
+  it("returns 'away' when isHome is false", () => {
     const match = makeCalendarMatch({
       id: 1,
-      kcvvTeamId: 1,
-      homeTeam: { id: 2, name: "Racing Mechelen" },
-      awayTeam: { id: 1, name: "KCVV Elewijt A" },
+      isHome: false,
+      homeTeam: { id: 999, name: "Racing Mechelen" },
+      awayTeam: { id: 1235, name: "KCVV Elewijt A" },
     });
     expect(getMatchDotType(match)).toBe("away");
   });
 
-  it("falls back to name matching when kcvvTeamId is absent", () => {
+  it("returns 'home' when isHome is true even with non-KCVV home team name", () => {
+    // Regression: isHome from BFF is the source of truth, not team names
+    const match = makeCalendarMatch({
+      id: 1,
+      isHome: true,
+      homeTeam: { id: 42, name: "Some Club" },
+      awayTeam: { id: 99, name: "Other Club" },
+    });
+    expect(getMatchDotType(match)).toBe("home");
+  });
+
+  it("falls back to name matching when isHome is absent", () => {
     const match = makeCalendarMatch({
       id: 1,
       homeTeam: { id: 1, name: "KCVV Elewijt A" },
       awayTeam: { id: 2, name: "Racing Mechelen" },
     });
     expect(getMatchDotType(match)).toBe("home");
+  });
+
+  it("falls back to away when isHome is absent and name does not match", () => {
+    const match = makeCalendarMatch({
+      id: 1,
+      homeTeam: { id: 1, name: "Racing Mechelen" },
+      awayTeam: { id: 2, name: "KCVV Elewijt A" },
+    });
+    expect(getMatchDotType(match)).toBe("away");
   });
 });
