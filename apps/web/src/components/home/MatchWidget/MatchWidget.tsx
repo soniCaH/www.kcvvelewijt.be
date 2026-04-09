@@ -1,7 +1,15 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { formatWidgetDate } from "@/lib/utils/dates";
+import { trackEvent } from "@/lib/analytics/track-event";
 import type { UpcomingMatch } from "@/components/match/types";
+
+// The homepage only ever renders the A-team match (see page.tsx nextMatch query).
+// If MatchWidget is reused for other teams, derive the slug from match data or accept it as a prop.
+const TEAM_FIXTURES_FALLBACK = "/ploegen/eerste-elftal-a?tab=wedstrijden";
 
 export interface MatchWidgetProps {
   /** The match to display — typically the first result from BffService.getNextMatches() */
@@ -38,11 +46,25 @@ export function MatchWidget({
     .filter(Boolean)
     .join(" · ");
 
+  const href = isFinished ? `/wedstrijd/${match.id}` : TEAM_FIXTURES_FALLBACK;
+
+  const handleClick = () => {
+    trackEvent("homepage_match_widget_clicked", {
+      match_id: match.id,
+      match_status: match.status,
+      destination: href,
+    });
+  };
+
   return (
     <section
       aria-label={`Wedstrijd: ${match.homeTeam.name} vs ${match.awayTeam.name}`}
     >
-      <div className="px-4 md:px-8 max-w-7xl mx-auto">
+      <Link
+        href={href}
+        onClick={handleClick}
+        className="block px-4 md:px-8 max-w-7xl mx-auto rounded-lg transition-shadow hover:shadow-lg active:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
         {/* Overline — left-aligned, single leading rule */}
         <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-label text-white/50">
           <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
@@ -123,7 +145,7 @@ export function MatchWidget({
           {/* Away team — logo + name stacked, left-aligned */}
           <TeamColumn team={match.awayTeam} align="away" />
         </div>
-      </div>
+      </Link>
     </section>
   );
 }

@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MatchWidget } from "./MatchWidget";
 import {
   mockUpcomingMatch,
@@ -9,6 +10,7 @@ import {
   mockForfeitedMatch,
   mockLongTeamNames,
 } from "./MatchWidget.mocks";
+import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("next/image", () => ({
   default: ({
@@ -21,6 +23,28 @@ vi.mock("next/image", () => ({
     [key: string]: unknown;
   }) => <img src={src} alt={alt} {...props} />,
 }));
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+vi.mock("@/lib/analytics/track-event", () => ({
+  trackEvent: vi.fn(),
+}));
+
+const trackEventMock = vi.mocked(trackEvent);
 
 describe("MatchWidget", () => {
   describe("Overline label", () => {
@@ -117,6 +141,95 @@ describe("MatchWidget", () => {
     it("renders as a section landmark", () => {
       render(<MatchWidget match={mockUpcomingMatch} />);
       expect(screen.getByRole("region")).toBeInTheDocument();
+    });
+  });
+
+  describe("Link wrapping", () => {
+    it("links finished match to /wedstrijd/:id", () => {
+      render(<MatchWidget match={mockFinishedMatchWin} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute(
+        "href",
+        `/wedstrijd/${mockFinishedMatchWin.id}`,
+      );
+    });
+
+    it("links forfeited match to /wedstrijd/:id", () => {
+      render(<MatchWidget match={mockForfeitedMatch} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute(
+        "href",
+        `/wedstrijd/${mockForfeitedMatch.id}`,
+      );
+    });
+
+    it("links upcoming match to team fixtures page", () => {
+      render(<MatchWidget match={mockUpcomingMatch} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute(
+        "href",
+        "/ploegen/eerste-elftal-a?tab=wedstrijden",
+      );
+    });
+
+    it("links postponed match to team fixtures page", () => {
+      render(<MatchWidget match={mockPostponedMatch} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute(
+        "href",
+        "/ploegen/eerste-elftal-a?tab=wedstrijden",
+      );
+    });
+
+    it("wraps entire card content in one link", () => {
+      render(<MatchWidget match={mockUpcomingMatch} />);
+      const link = screen.getByRole("link");
+      expect(link).toContainElement(screen.getByText(/KCVV Elewijt/i));
+      expect(link).toContainElement(screen.getByText(/KVC Wilrijk/i));
+    });
+
+    it("link has visible focus state", () => {
+      render(<MatchWidget match={mockUpcomingMatch} />);
+      const link = screen.getByRole("link");
+      expect(link.className).toMatch(/focus-visible/);
+    });
+  });
+
+  describe("Analytics", () => {
+    beforeEach(() => {
+      trackEventMock.mockClear();
+    });
+
+    it("fires homepage_match_widget_clicked on click for finished match", async () => {
+      const user = userEvent.setup();
+      render(<MatchWidget match={mockFinishedMatchWin} />);
+      const link = screen.getByRole("link");
+      await user.click(link);
+      expect(trackEventMock).toHaveBeenCalledTimes(1);
+      expect(trackEventMock).toHaveBeenCalledWith(
+        "homepage_match_widget_clicked",
+        {
+          match_id: mockFinishedMatchWin.id,
+          match_status: "finished",
+          destination: `/wedstrijd/${mockFinishedMatchWin.id}`,
+        },
+      );
+    });
+
+    it("fires homepage_match_widget_clicked on click for upcoming match", async () => {
+      const user = userEvent.setup();
+      render(<MatchWidget match={mockUpcomingMatch} />);
+      const link = screen.getByRole("link");
+      await user.click(link);
+      expect(trackEventMock).toHaveBeenCalledTimes(1);
+      expect(trackEventMock).toHaveBeenCalledWith(
+        "homepage_match_widget_clicked",
+        {
+          match_id: mockUpcomingMatch.id,
+          match_status: "scheduled",
+          destination: "/ploegen/eerste-elftal-a?tab=wedstrijden",
+        },
+      );
     });
   });
 });
