@@ -94,6 +94,22 @@ describe("PageHeader", () => {
     });
   });
 
+  describe("Touch targets", () => {
+    it("should have ≥44×44 tap area on hamburger button", () => {
+      render(<PageHeader />);
+      const menuButton = screen.getByLabelText(/toggle navigation menu/i);
+      expect(menuButton).toHaveClass("min-h-11", "min-w-11");
+    });
+
+    it("should have ≥44×44 tap area on mobile search link", () => {
+      render(<PageHeader />);
+      const searchLinks = screen.getAllByLabelText(/search/i);
+      // First match is the mobile search link
+      const mobileSearchLink = searchLinks[0];
+      expect(mobileSearchLink).toHaveClass("min-h-11", "min-w-11");
+    });
+  });
+
   describe("Accessibility", () => {
     it("should have proper ARIA labels", () => {
       render(<PageHeader />);
