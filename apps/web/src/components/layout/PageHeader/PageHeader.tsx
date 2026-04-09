@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useCallback, Suspense } from "react";
+import { useState, useCallback, useRef, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
@@ -41,9 +41,13 @@ export const PageHeader = ({
   className,
 }: PageHeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   const handleClose = useCallback(() => {
-    setIsMobileMenuOpen(false);
+    setIsMobileMenuOpen((wasOpen) => {
+      if (wasOpen) hamburgerRef.current?.focus();
+      return false;
+    });
   }, []);
 
   return (
@@ -55,6 +59,7 @@ export const PageHeader = ({
           <div className="lg:hidden h-full relative">
             {/* Hamburger Button - left 34px */}
             <button
+              ref={hamburgerRef}
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Toggle navigation menu"

@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Navigation } from "./Navigation";
 
 // Mock variables to control test behavior
@@ -234,6 +235,71 @@ describe("Navigation", () => {
       render(<Navigation seniorTeams={seniorTeams} className="custom-class" />);
       const nav = screen.getByRole("navigation");
       expect(nav).toHaveClass("custom-class");
+    });
+  });
+
+  describe("Keyboard dismiss", () => {
+    it("should close dropdown when Escape is pressed", async () => {
+      const { container } = render(<Navigation seniorTeams={seniorTeams} />);
+
+      // Open the A-Ploeg dropdown by hovering
+      const aPloegListItem = screen.getByText("A-Ploeg").closest("li");
+      fireEvent.mouseEnter(aPloegListItem!);
+
+      // Wait for dropdown to render
+      await waitFor(() => {
+        expect(
+          container.querySelector(
+            'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+          ),
+        ).toBeInTheDocument();
+      });
+
+      // Press Escape
+      const user = userEvent.setup();
+      await user.keyboard("{Escape}");
+
+      // Dropdown should be closed
+      expect(
+        container.querySelector(
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+        ),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Click-outside dismiss", () => {
+    it("should close dropdown when clicking outside the nav", async () => {
+      const { container } = render(
+        <div>
+          <Navigation seniorTeams={seniorTeams} />
+          <div data-testid="outside">Outside content</div>
+        </div>,
+      );
+
+      // Open the A-Ploeg dropdown by hovering
+      const aPloegListItem = screen.getByText("A-Ploeg").closest("li");
+      fireEvent.mouseEnter(aPloegListItem!);
+
+      // Wait for dropdown to render
+      await waitFor(() => {
+        expect(
+          container.querySelector(
+            'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+          ),
+        ).toBeInTheDocument();
+      });
+
+      // Click outside
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("outside"));
+
+      // Dropdown should be closed
+      expect(
+        container.querySelector(
+          'a[href="/ploegen/eerste-elftallen-a?tab=opstelling"]',
+        ),
+      ).not.toBeInTheDocument();
     });
   });
 });

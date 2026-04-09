@@ -244,6 +244,37 @@ describe("MobileMenu", () => {
       expect(screen.getByText("U21")).toBeInTheDocument();
       expect(screen.getByText("U17")).toBeInTheDocument();
     });
+
+    it("should set aria-expanded on submenu toggle buttons", async () => {
+      const user = userEvent.setup();
+      render(<MobileMenu {...defaultProps} />);
+
+      const jeugdButton = screen.getByRole("button", { name: /jeugd/i });
+      expect(jeugdButton).toHaveAttribute("aria-expanded", "false");
+
+      await user.click(jeugdButton);
+      expect(jeugdButton).toHaveAttribute("aria-expanded", "true");
+
+      await user.click(jeugdButton);
+      expect(jeugdButton).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("should render chevron icon at sm size (20px) with rotation animation", () => {
+      render(<MobileMenu {...defaultProps} />);
+
+      // Find the chevron SVG inside a submenu button
+      const jeugdButton = screen.getByRole("button", { name: /jeugd/i });
+      const chevronSvg = jeugdButton.querySelector("svg");
+      expect(chevronSvg).toBeInTheDocument();
+      // sm size = 20px
+      expect(chevronSvg).toHaveAttribute("width", "20");
+      expect(chevronSvg).toHaveAttribute("height", "20");
+
+      // Should have transition classes for animation
+      const chevronWrapper = chevronSvg!.closest("span");
+      expect(chevronWrapper).toHaveClass("transition-transform");
+      expect(chevronWrapper).toHaveClass("duration-200");
+    });
   });
 
   describe("Touch targets", () => {

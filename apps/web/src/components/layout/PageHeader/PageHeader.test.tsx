@@ -128,6 +128,23 @@ describe("PageHeader", () => {
     });
   });
 
+  describe("Focus management", () => {
+    it("should return focus to hamburger button when mobile menu is closed", async () => {
+      const user = userEvent.setup();
+      render(<PageHeader />);
+
+      const menuButton = screen.getByLabelText(/toggle navigation menu/i);
+      await user.click(menuButton);
+
+      // Menu is open — close it via the close button
+      const closeButton = screen.getByLabelText(/close menu/i);
+      await user.click(closeButton);
+
+      // Focus should return to the hamburger button
+      expect(menuButton).toHaveFocus();
+    });
+  });
+
   describe("Custom Props", () => {
     it("should accept custom className", () => {
       const { container } = render(<PageHeader className="custom-class" />);
