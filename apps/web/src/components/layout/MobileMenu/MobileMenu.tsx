@@ -174,6 +174,7 @@ export const MobileMenu = ({
                       {/* Parent with submenu */}
                       <button
                         onClick={() => toggleSubmenu(item.href)}
+                        aria-expanded={isSubmenuOpen}
                         className={cn(
                           "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-kcvv-gray-dark text-white text-[0.6875rem] uppercase font-bold transition-colors",
                           active && "active",
@@ -182,9 +183,9 @@ export const MobileMenu = ({
                         <span>{item.label}</span>
                         <Icon
                           icon={ChevronDown}
-                          size="xs"
+                          size="sm"
                           className={cn(
-                            "transition-transform",
+                            "transition-transform duration-200",
                             isSubmenuOpen && "rotate-180",
                           )}
                         />

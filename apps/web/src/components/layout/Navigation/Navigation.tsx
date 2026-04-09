@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -52,6 +52,33 @@ export const Navigation = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  const closeDropdown = useCallback(() => setOpenDropdown(null), []);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDropdown();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [openDropdown, closeDropdown]);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        closeDropdown();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown, closeDropdown]);
 
   const jeugdItem = buildJeugdItem(youthTeams);
 
@@ -69,7 +96,7 @@ export const Navigation = ({
   };
 
   return (
-    <nav className={cn("flex grow max-w-[90%]", className)}>
+    <nav ref={navRef} className={cn("flex grow max-w-[90%]", className)}>
       <ul className="flex items-center justify-between grow flex-nowrap list-none m-0 p-0">
         {menuItems.map((item, index) => {
           const active = isActive(item.href) || hasActiveChild(item);
