@@ -38,28 +38,31 @@ export const FullList: Story = {
     divisions: [
       {
         label: "Bovenbouw",
-        range: "U14–U21",
-        teams: [
-          makeTeam("U21"),
-          makeTeam("U17"),
-          makeTeam("U15"),
-          makeTeam("U14"),
-        ],
+        range: "U17–U21",
+        teams: [makeTeam("U21"), makeTeam("U19"), makeTeam("U17")],
       },
       {
         label: "Middenbouw",
-        range: "U10–U13",
+        range: "U12–U16",
         teams: [
+          makeTeam("U16"),
+          makeTeam("U15"),
+          makeTeam("U14"),
           makeTeam("U13"),
           makeTeam("U12"),
-          makeTeam("U11"),
-          makeTeam("U10"),
         ],
       },
       {
         label: "Onderbouw",
-        range: "U6–U9",
-        teams: [makeTeam("U9"), makeTeam("U8"), makeTeam("U7"), makeTeam("U6")],
+        range: "U6–U11",
+        teams: [
+          makeTeam("U11"),
+          makeTeam("U10"),
+          makeTeam("U9"),
+          makeTeam("U8"),
+          makeTeam("U7"),
+          makeTeam("U6"),
+        ],
       },
     ],
   },
@@ -68,9 +71,9 @@ export const FullList: Story = {
 export const EmptyState: Story = {
   args: {
     divisions: [
-      { label: "Bovenbouw", range: "U14–U21", teams: [] },
-      { label: "Middenbouw", range: "U10–U13", teams: [] },
-      { label: "Onderbouw", range: "U6–U9", teams: [] },
+      { label: "Bovenbouw", range: "U17–U21", teams: [] },
+      { label: "Middenbouw", range: "U12–U16", teams: [] },
+      { label: "Onderbouw", range: "U6–U11", teams: [] },
     ],
   },
 };

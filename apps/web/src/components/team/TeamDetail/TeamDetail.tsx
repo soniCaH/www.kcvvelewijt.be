@@ -26,6 +26,7 @@ import { TeamRoster, type RosterPlayer, type StaffMember } from "../TeamRoster";
 import { TeamSchedule, type ScheduleMatch } from "../TeamSchedule";
 import { TeamStandings, type StandingsEntry } from "../TeamStandings";
 import { TeamDetailTabs, type TeamDetailTabPanel } from "./TeamDetailTabs";
+import { getYouthDivision } from "@/lib/utils/group-teams";
 
 /**
  * CMS authors can set `target="_blank"` on a link, but `sanitize-html`'s
@@ -224,7 +225,11 @@ export function TeamDetail({
   // instead of an empty page body).
   const showInfoTab = hasInfoContent || !hasAnyOtherTab;
 
-  const heroLabel = HERO_LABELS[header.teamType ?? "senior"];
+  const baseLabel = HERO_LABELS[header.teamType ?? "senior"];
+  const division = getYouthDivision(header.ageGroup);
+  const heroLabel = division
+    ? `${baseLabel} · ${division}`
+    : (header.ageGroup ?? baseLabel);
 
   const panels: TeamDetailTabPanel[] = [];
 
@@ -333,7 +338,7 @@ export function TeamDetail({
           size="compact"
           image={header.imageUrl}
           imageAlt={`${header.name} teamfoto`}
-          label={header.ageGroup ?? heroLabel}
+          label={heroLabel}
           headline={header.name}
           body={header.tagline ?? ""}
         />

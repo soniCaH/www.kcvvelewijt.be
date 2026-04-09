@@ -11,7 +11,7 @@ export type TeamLandingItem = {
 };
 
 export type YouthDivisionGroup = {
-  label: string;
+  label: YouthDivisionName;
   range: string;
   teams: TeamLandingItem[];
 };
@@ -22,13 +22,40 @@ export type GroupedTeams = {
   youthByDivision: YouthDivisionGroup[];
 };
 
-const BOVENBOUW = ["U21", "U17", "U15", "U14"];
-const MIDDENBOUW = ["U13", "U12", "U11", "U10"];
-const ONDERBOUW = ["U9", "U8", "U7", "U6"];
+const BOVENBOUW = ["U21", "U20", "U19", "U18", "U17"];
+const MIDDENBOUW = ["U16", "U15", "U14", "U13", "U12"];
+const ONDERBOUW = ["U11", "U10", "U9", "U8", "U7", "U6"];
+
+export type YouthDivisionName = "Bovenbouw" | "Middenbouw" | "Onderbouw";
+
+/** Parse the numeric age from an age-group string (e.g. "U15" → 15). Returns null if unparseable. */
+function parseAge(ageGroup: string): number | null {
+  const match = ageGroup.match(/^U(\d+)/i);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+/** Derive the youth division name from an age group string (e.g. "U15" → "Middenbouw"). */
+export function getYouthDivision(
+  ageGroup: string | undefined,
+): YouthDivisionName | null {
+  if (!ageGroup) return null;
+  const age = parseAge(ageGroup);
+  if (age == null) return null;
+  if (age >= 17 && age <= 21) return "Bovenbouw";
+  if (age >= 12 && age <= 16) return "Middenbouw";
+  if (age >= 6 && age <= 11) return "Onderbouw";
+  return null;
+}
 
 function sortByAgeDesc(ageOrder: string[]) {
-  return (a: TeamLandingItem, b: TeamLandingItem) =>
-    ageOrder.indexOf(a.age) - ageOrder.indexOf(b.age);
+  return (a: TeamLandingItem, b: TeamLandingItem) => {
+    const idxA = ageOrder.indexOf(a.age);
+    const idxB = ageOrder.indexOf(b.age);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return (parseAge(b.age) ?? 0) - (parseAge(a.age) ?? 0);
+  };
 }
 
 /** Extract the trailing single letter from a team name, e.g. "Eerste Elftallen A" → "A" */
@@ -48,23 +75,23 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
     youthByDivision: [
       {
         label: "Bovenbouw",
-        range: "U14–U21",
+        range: "U17–U21",
         teams: teams
-          .filter((t) => BOVENBOUW.includes(t.age))
+          .filter((t) => getYouthDivision(t.age) === "Bovenbouw")
           .sort(sortByAgeDesc(BOVENBOUW)),
       },
       {
         label: "Middenbouw",
-        range: "U10–U13",
+        range: "U12–U16",
         teams: teams
-          .filter((t) => MIDDENBOUW.includes(t.age))
+          .filter((t) => getYouthDivision(t.age) === "Middenbouw")
           .sort(sortByAgeDesc(MIDDENBOUW)),
       },
       {
         label: "Onderbouw",
-        range: "U6–U9",
+        range: "U6–U11",
         teams: teams
-          .filter((t) => ONDERBOUW.includes(t.age))
+          .filter((t) => getYouthDivision(t.age) === "Onderbouw")
           .sort(sortByAgeDesc(ONDERBOUW)),
       },
     ],
