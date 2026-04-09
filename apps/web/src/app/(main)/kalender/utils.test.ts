@@ -65,6 +65,14 @@ describe("transformMatchToCalendar", () => {
     expect(result.date).toBe("2026-06-15T18:30:00.000Z");
   });
 
+  it("passes through is_home as isHome", () => {
+    const home = createMatch({ is_home: true } as Partial<Match>);
+    expect(transformMatchToCalendar(home).isHome).toBe(true);
+
+    const away = createMatch({ is_home: false } as Partial<Match>);
+    expect(transformMatchToCalendar(away).isHome).toBe(false);
+  });
+
   it("passes through undefined scores", () => {
     const match = createMatch({
       home_team: { id: 1, name: "KCVV Elewijt" },
