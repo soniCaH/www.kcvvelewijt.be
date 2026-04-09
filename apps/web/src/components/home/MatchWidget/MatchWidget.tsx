@@ -7,8 +7,9 @@ import { formatWidgetDate } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
 import type { UpcomingMatch } from "@/components/match/types";
 
-// The homepage only ever renders the A-team match (see page.tsx nextMatch query).
-// If MatchWidget is reused for other teams, derive the slug from match data or accept it as a prop.
+// Fallback for statuses that don't have a detail page or a calendar entry
+// (e.g. unknown future statuses). If MatchWidget is reused for other teams,
+// derive the slug from match data or accept it as a prop.
 const TEAM_FIXTURES_FALLBACK = "/ploegen/eerste-elftal-a?tab=wedstrijden";
 
 export interface MatchWidgetProps {
@@ -46,7 +47,13 @@ export function MatchWidget({
     .filter(Boolean)
     .join(" · ");
 
-  const href = isFinished ? `/wedstrijd/${match.id}` : TEAM_FIXTURES_FALLBACK;
+  const href = isFinished
+    ? `/wedstrijd/${match.id}`
+    : isPostponed
+      ? "/kalender"
+      : match.status === "scheduled"
+        ? "/kalender"
+        : TEAM_FIXTURES_FALLBACK;
 
   const handleClick = () => {
     trackEvent("homepage_match_widget_clicked", {
@@ -63,7 +70,7 @@ export function MatchWidget({
       <Link
         href={href}
         onClick={handleClick}
-        className="block px-4 md:px-8 max-w-7xl mx-auto rounded-lg transition-shadow hover:shadow-lg active:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="block px-4 py-4 md:px-8 md:py-6 max-w-7xl mx-auto rounded-lg transition-shadow hover:shadow-lg active:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         {/* Overline — left-aligned, single leading rule */}
         <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-label text-white/50">

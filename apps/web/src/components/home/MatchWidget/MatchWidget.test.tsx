@@ -163,22 +163,16 @@ describe("MatchWidget", () => {
       );
     });
 
-    it("links upcoming match to team fixtures page", () => {
+    it("links upcoming match to calendar page", () => {
       render(<MatchWidget match={mockUpcomingMatch} />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute(
-        "href",
-        "/ploegen/eerste-elftal-a?tab=wedstrijden",
-      );
+      expect(link).toHaveAttribute("href", "/kalender");
     });
 
-    it("links postponed match to team fixtures page", () => {
+    it("links postponed match to calendar page", () => {
       render(<MatchWidget match={mockPostponedMatch} />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute(
-        "href",
-        "/ploegen/eerste-elftal-a?tab=wedstrijden",
-      );
+      expect(link).toHaveAttribute("href", "/kalender");
     });
 
     it("wraps entire card content in one link", () => {
@@ -227,7 +221,7 @@ describe("MatchWidget", () => {
         {
           match_id: mockUpcomingMatch.id,
           match_status: "scheduled",
-          destination: "/ploegen/eerste-elftal-a?tab=wedstrijden",
+          destination: "/kalender",
         },
       );
     });
