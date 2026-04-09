@@ -22,6 +22,12 @@ describe("SocialLinks", () => {
     expect(link).not.toHaveClass("border-2");
   });
 
+  it("inline variant has ≥44×44 tap area on each social link", () => {
+    render(<SocialLinks variant="inline" />);
+    const link = screen.getByLabelText("Facebook");
+    expect(link).toHaveClass("min-h-11", "min-w-11");
+  });
+
   it("opens links in new tab", () => {
     render(<SocialLinks />);
     const link = screen.getByLabelText("Facebook");

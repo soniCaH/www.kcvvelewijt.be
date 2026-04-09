@@ -58,9 +58,9 @@ export const PageHeader = ({
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Toggle navigation menu"
-              className="absolute left-[34px] top-6 text-white w-6 h-6 flex items-center justify-center"
+              className="absolute left-[34px] top-1/2 -translate-y-1/2 text-white min-h-11 min-w-11 flex items-center justify-center"
             >
-              <Menu size={16} className="inline-block" />
+              <Menu size={20} className="inline-block" />
             </button>
 
             {/* Mobile Logo - centered */}
@@ -79,9 +79,9 @@ export const PageHeader = ({
             <Link
               href="/zoeken"
               aria-label="Search"
-              className="absolute right-[34px] top-6 text-white w-6 h-6 flex items-center justify-center"
+              className="absolute right-[34px] top-1/2 -translate-y-1/2 text-white min-h-11 min-w-11 flex items-center justify-center"
             >
-              <Search size={16} className="inline-block" />
+              <Search size={20} className="inline-block" />
             </Link>
           </div>
 

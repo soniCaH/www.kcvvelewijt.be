@@ -135,7 +135,7 @@ export const MobileMenu = ({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="p-2 text-white hover:text-kcvv-green-bright transition-colors"
+            className="min-h-11 min-w-11 flex items-center justify-center text-white hover:text-kcvv-green-bright transition-colors"
           >
             <Icon icon={X} size="lg" />
           </button>
@@ -246,7 +246,7 @@ export const MobileMenu = ({
         {/* Social Links — outside scroll area so they never overlap menu items */}
         <div className="shrink-0 p-6 border-t border-white/10">
           <div className="flex items-center justify-center">
-            <SocialLinks variant="inline" size="lg" />
+            <SocialLinks variant="inline" size="md" />
           </div>
         </div>
       </nav>

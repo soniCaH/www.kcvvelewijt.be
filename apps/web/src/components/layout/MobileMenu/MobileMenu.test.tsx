@@ -246,6 +246,14 @@ describe("MobileMenu", () => {
     });
   });
 
+  describe("Touch targets", () => {
+    it("should have ≥44×44 tap area on close button", () => {
+      render(<MobileMenu {...defaultProps} />);
+      const closeButton = screen.getByLabelText(/close menu/i);
+      expect(closeButton).toHaveClass("min-h-11", "min-w-11");
+    });
+  });
+
   describe("Close behavior", () => {
     it("should call onClose when close button clicked", async () => {
       const user = userEvent.setup();
