@@ -20,10 +20,7 @@ describe("HulpSearchInput", () => {
   it("uses the default placeholder and aria-label", () => {
     render(<HulpSearchInput value="" onChange={() => {}} />);
     const input = screen.getByRole("searchbox");
-    expect(input).toHaveAttribute(
-      "placeholder",
-      expect.stringContaining("inschrijving"),
-    );
+    expect(input).toHaveAttribute("placeholder", "Waar ben je naar op zoek?");
     expect(input).toHaveAttribute("aria-label", "Zoek hulp");
   });
 });

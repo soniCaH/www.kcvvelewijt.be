@@ -20,7 +20,7 @@ export interface HulpSearchInputProps {
 export function HulpSearchInput({
   value,
   onChange,
-  placeholder = "Bijv. inschrijving, sportongeval, ploegindeling...",
+  placeholder = "Waar ben je naar op zoek?",
   ariaLabel = "Zoek hulp",
 }: HulpSearchInputProps) {
   return (
