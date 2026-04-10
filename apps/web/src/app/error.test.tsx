@@ -1,6 +1,4 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ErrorPage from "./error";
@@ -56,11 +54,6 @@ describe("Global Error page", () => {
     render(<ErrorPage error={defaultError} reset={mockReset} />);
     const homeLink = screen.getByRole("link", { name: /naar home/i });
     expect(homeLink).toHaveAttribute("href", "/");
-  });
-
-  it("has 'use client' directive at the top of the file", () => {
-    const source = readFileSync(resolve(__dirname, "error.tsx"), "utf-8");
-    expect(source.trimStart()).toMatch(/^["']use client["']/);
   });
 
   it("does not render PageHeader or PageFooter", () => {

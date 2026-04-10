@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { CircleHelp, Home } from "lucide-react";
+import { LinkButton } from "@/components/design-system";
 
 export default function NotFound() {
   return (
@@ -23,13 +23,10 @@ export default function NotFound() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
-          >
-            <Home className="w-5 h-5 mr-2" aria-hidden="true" />
+          <LinkButton href="/" size="lg">
+            <Home className="w-5 h-5" aria-hidden="true" />
             Naar home
-          </Link>
+          </LinkButton>
         </div>
       </div>
     </div>
