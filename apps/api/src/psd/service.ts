@@ -29,6 +29,7 @@ import {
 import { PsdTeamsSchema } from "./schemas-player-team";
 import {
   derivePsdTeamLabel,
+  deriveOwnClubId,
   transformPsdGame,
   transformFootbalistoMatchDetail,
   matchDetailToMatch,
@@ -264,8 +265,12 @@ export const PsdServiceLive = Layer.effect(
             );
           }
 
+          const ownClubId = deriveOwnClubId(games);
           return games.map((game) =>
-            transformPsdGame({ ...game, teamId: game.teamId ?? teamId }),
+            transformPsdGame(
+              { ...game, teamId: game.teamId ?? teamId },
+              { ownClubId },
+            ),
           );
         }),
 
@@ -306,11 +311,15 @@ export const PsdServiceLive = Layer.effect(
                       );
                     }
 
+                    const ownClubId = deriveOwnClubId(games);
                     const next = [...games]
                       .filter((m) => psdGameToMs(m) >= now)
                       .sort((a, b) => psdGameToMs(a) - psdGameToMs(b))[0];
                     return next
-                      ? transformPsdGame({ ...next, teamId: team.id })
+                      ? transformPsdGame(
+                          { ...next, teamId: team.id },
+                          { ownClubId },
+                        )
                       : null;
                   }),
                 ),
@@ -448,7 +457,10 @@ export const PsdServiceLive = Layer.effect(
                         `getOpponentHistory(${teamId}): season ${season.id}: filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
                       );
                     }
-                    return games.map((g) => transformPsdGame({ ...g, teamId }));
+                    const ownClubId = deriveOwnClubId(games);
+                    return games.map((g) =>
+                      transformPsdGame({ ...g, teamId }, { ownClubId }),
+                    );
                   }),
                 ),
                 Effect.map((matches) => ({ _tag: "ok" as const, matches })),
@@ -507,7 +519,9 @@ export const PsdServiceLive = Layer.effect(
           );
 
           // Enrich matches:
-          // - is_home: fall back to club-ID comparison when homeTeamId is absent
+          // - is_home: secondary fallback using the opponent clubId parameter.
+          //   transformPsdGame already uses ownClubId (derived from game data),
+          //   but this acts as a safety net using the caller-provided clubId.
           // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
           const enrichedMatches = opponentMatches.map((m) => ({
             ...m,

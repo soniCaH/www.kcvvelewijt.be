@@ -39,7 +39,7 @@ export function mapCompetitionLabel(
     case "FRIENDLY":
       return "Vriendschappelijk";
     default:
-      return type;
+      return name?.trim() || type;
   }
 }
 
@@ -157,19 +157,48 @@ export function psdGameToMs(m: PsdGame): number {
   return parseDateString(`${datePart} ${timeStr}`).date.getTime();
 }
 
+/**
+ * Derive the club ID that owns the queried team from a set of games.
+ *
+ * Across a season, the team's club appears as homeClub or awayClub in every
+ * game while the opponent changes. Comparing the first two games identifies
+ * the common club ID.
+ *
+ * Returns undefined when fewer than 2 games are available (can't distinguish).
+ */
+export function deriveOwnClubId(games: PsdGame[]): number | undefined {
+  if (games.length < 2) return undefined;
+  const first = games[0]!;
+  const second = games[1]!;
+  const candidateA = first.homeClub.id;
+  // If candidateA appears in the second game (home or away), it's the own club
+  if (second.homeClub.id === candidateA || second.awayClub.id === candidateA) {
+    return candidateA;
+  }
+  // Otherwise the away club of the first game must be the own club
+  return first.awayClub.id;
+}
+
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
-export function transformPsdGame(game: PsdGame): Match {
+export function transformPsdGame(
+  game: PsdGame,
+  options?: { ownClubId?: number },
+): Match {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
   const { date: matchDate, time: timePart } = parseDateString(
     `${datePart} ${timeStr}`,
   );
 
+  // Primary: use homeTeamId (undocumented PSD field, not always present)
+  // Fallback: use club ID comparison when ownClubId is known
   const isHome =
     game.homeTeamId != null && game.teamId != null
       ? game.homeTeamId === game.teamId
-      : undefined;
+      : options?.ownClubId != null
+        ? game.homeClub.id === options.ownClubId
+        : undefined;
 
   const status = mapGameStatus(
     game.status,
