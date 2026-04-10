@@ -150,6 +150,7 @@ describe("BrandedTabs", () => {
     let savedScrollWidth: PropertyDescriptor | undefined;
     let savedClientWidth: PropertyDescriptor | undefined;
     let savedScrollTo: PropertyDescriptor | undefined;
+    let savedScrollLeft: PropertyDescriptor | undefined;
 
     beforeEach(() => {
       savedScrollWidth = Object.getOwnPropertyDescriptor(
@@ -163,6 +164,10 @@ describe("BrandedTabs", () => {
       savedScrollTo = Object.getOwnPropertyDescriptor(
         HTMLElement.prototype,
         "scrollTo",
+      );
+      savedScrollLeft = Object.getOwnPropertyDescriptor(
+        HTMLElement.prototype,
+        "scrollLeft",
       );
     });
 
@@ -178,6 +183,7 @@ describe("BrandedTabs", () => {
       restore("scrollWidth", savedScrollWidth);
       restore("clientWidth", savedClientWidth);
       restore("scrollTo", savedScrollTo);
+      restore("scrollLeft", savedScrollLeft);
       vi.restoreAllMocks();
     });
 

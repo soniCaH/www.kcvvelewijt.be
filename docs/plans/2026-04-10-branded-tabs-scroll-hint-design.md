@@ -5,7 +5,7 @@
 
 ## Problem
 
-1. BrandedTabs has no touch pressed state and inactive tabs have low contrast
+1. BrandedTabs has no touch-pressed state and inactive tabs have low contrast
 2. Three components independently implement scroll overflow hints with two different patterns
 3. No shared utility for scroll overflow detection
 

@@ -21,21 +21,42 @@ function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
 
 describe("useScrollHint", () => {
   let savedScrollTo: PropertyDescriptor | undefined;
+  let savedScrollWidth: PropertyDescriptor | undefined;
+  let savedClientWidth: PropertyDescriptor | undefined;
+  let savedScrollLeft: PropertyDescriptor | undefined;
 
   beforeEach(() => {
     savedScrollTo = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       "scrollTo",
     );
+    savedScrollWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollWidth",
+    );
+    savedClientWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "clientWidth",
+    );
+    savedScrollLeft = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollLeft",
+    );
   });
 
   afterEach(() => {
-    if (savedScrollTo) {
-      Object.defineProperty(HTMLElement.prototype, "scrollTo", savedScrollTo);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (HTMLElement.prototype as any).scrollTo;
-    }
+    const restore = (prop: string, desc: PropertyDescriptor | undefined) => {
+      if (desc) {
+        Object.defineProperty(HTMLElement.prototype, prop, desc);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (HTMLElement.prototype as any)[prop];
+      }
+    };
+    restore("scrollTo", savedScrollTo);
+    restore("scrollWidth", savedScrollWidth);
+    restore("clientWidth", savedClientWidth);
+    restore("scrollLeft", savedScrollLeft);
     vi.restoreAllMocks();
   });
 

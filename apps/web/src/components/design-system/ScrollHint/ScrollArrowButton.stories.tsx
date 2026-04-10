@@ -26,6 +26,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
+ * Interactive playground with all controls.
+ */
+export const Playground: Story = {};
+
+/**
  * Right arrow — light variant (default).
  */
 export const RightLight: Story = {};
