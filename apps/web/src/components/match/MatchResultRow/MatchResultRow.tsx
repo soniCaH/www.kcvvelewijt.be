@@ -104,7 +104,9 @@ export function MatchResultRow({
             ),
       )}
     >
-      {/* Header row: date, time, competition */}
+      {/* Header row: date, time, competition (sm+ only — footer shows it on mobile).
+         Competition is intentionally hidden on mobile (hidden sm:block) to avoid
+         duplication with the footer line. Do NOT remove sm:block. */}
       <div className="flex items-center justify-between text-sm mb-3">
         <div className="flex items-center gap-2">
           <span
@@ -291,16 +293,21 @@ export function MatchResultRow({
         )}
       </div>
 
-      {/* Home/Away indicator for mobile */}
-      <div
-        className={cn(
-          "mt-2 text-xs",
-          isDark ? "text-white/40" : "text-gray-500",
-        )}
-      >
-        {isMember && `${isHome ? "Thuis" : "Uit"} · `}
-        {match.competition ?? "Competitie"}
-      </div>
+      {/* Home/Away indicator (all breakpoints) + competition (mobile only via sm:hidden,
+         header shows competition on sm+). Do NOT remove sm:hidden — causes duplication. */}
+      {isMember && (
+        <div
+          className={cn(
+            "mt-2 text-xs",
+            isDark ? "text-white/40" : "text-gray-500",
+          )}
+        >
+          {isHome ? "Thuis" : "Uit"}
+          <span className="sm:hidden">
+            {` · ${match.competition ?? "Competitie"}`}
+          </span>
+        </div>
+      )}
     </Link>
   );
 }
