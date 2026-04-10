@@ -434,6 +434,15 @@
   padding-right: env(safe-area-inset-right, 0);
 }
 
+/* Hide native scrollbar — cross-browser utility for horizontal scroll containers */
+@utility scrollbar-hide {
+  scrollbar-width: none;            /* Firefox */
+  -ms-overflow-style: none;         /* IE / Edge */
+  &::-webkit-scrollbar {
+    display: none;                  /* Chrome, Safari, Opera */
+  }
+}
+
 /* Touch Optimization: Prevent text selection during swipe gestures */
 .touch-pan-x {
   touch-action: pan-x;

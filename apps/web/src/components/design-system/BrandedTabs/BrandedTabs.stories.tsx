@@ -10,6 +10,17 @@ const TABS: BrandedTab[] = [
   { id: "klassement", label: "Klassement" },
 ];
 
+const MANY_TABS: BrandedTab[] = [
+  { id: "info", label: "Info" },
+  { id: "spelers", label: "Spelers" },
+  { id: "wedstrijden", label: "Wedstrijden" },
+  { id: "klassement", label: "Klassement" },
+  { id: "statistieken", label: "Statistieken" },
+  { id: "transfers", label: "Transfers" },
+  { id: "geschiedenis", label: "Geschiedenis" },
+  { id: "media", label: "Media" },
+];
+
 const meta = {
   title: "UI/BrandedTabs",
   component: BrandedTabs,
@@ -63,5 +74,48 @@ export const Interactive: Story = {
       );
     }
     return <Playground />;
+  },
+};
+
+/**
+ * Many tabs — demonstrates scroll arrows when tabs overflow on narrow screens.
+ * Resize the viewport to see the navigation arrows appear.
+ */
+export const ManyTabs: Story = {
+  args: {
+    tabs: MANY_TABS,
+    activeTabId: "info",
+  },
+  render: (args) => {
+    function Playground() {
+      const [active, setActive] = useState(args.activeTabId);
+      return (
+        <div style={{ maxWidth: 400 }}>
+          <BrandedTabs
+            tabs={args.tabs}
+            activeTabId={active}
+            onTabChange={(id) => {
+              setActive(id);
+              args.onTabChange(id);
+            }}
+            ariaLabel={args.ariaLabel}
+          />
+        </div>
+      );
+    }
+    return <Playground />;
+  },
+};
+
+/**
+ * Mobile viewport — shows scroll arrows with constrained width.
+ */
+export const Mobile: Story = {
+  args: {
+    tabs: MANY_TABS,
+    activeTabId: "spelers",
+  },
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
   },
 };

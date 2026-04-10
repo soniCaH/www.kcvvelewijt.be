@@ -7,11 +7,12 @@ import type {
 } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import sanitizeHtml from "sanitize-html";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
+import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -104,33 +105,14 @@ interface HtmlTableValue {
 }
 
 function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [showOverflowHint, setShowOverflowHint] = useState(false);
-
-  const checkOverflow = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    setShowOverflowHint(el.scrollWidth > el.clientWidth);
-  }, []);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    checkOverflow();
-
-    const resizeObserver = new ResizeObserver(checkOverflow);
-    resizeObserver.observe(el);
-
-    return () => resizeObserver.disconnect();
-  }, [checkOverflow]);
+  const { scrollRef, canScrollRight } = useScrollHint<HTMLDivElement>();
 
   if (!value.html) return null;
 
   return (
     <div className="relative my-4">
       <div
-        ref={containerRef}
+        ref={scrollRef}
         role="region"
         aria-label="Scrollable table"
         tabIndex={0}
@@ -143,7 +125,7 @@ function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
           "[&>table_td]:border [&>table_td]:border-table-border [&>table_td]:p-2 [&>table_td]:align-top",
           "[&>table>tbody>tr:nth-child(odd)_td]:bg-white",
           "[&>table>tbody>tr:nth-child(even)_td]:bg-table-row-even",
-          showOverflowHint && [
+          canScrollRight && [
             "[&>table_td:first-child]:sticky [&>table_td:first-child]:left-0 [&>table_td:first-child]:z-10",
             "[&>table>tbody>tr:nth-child(odd)>td:first-child]:bg-white",
             "[&>table>tbody>tr:nth-child(even)>td:first-child]:bg-table-row-even",
@@ -156,7 +138,7 @@ function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
           __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
         }}
       />
-      {showOverflowHint && (
+      {canScrollRight && (
         <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white/90 to-transparent" />
       )}
     </div>
@@ -219,7 +201,7 @@ const components: PortableTextComponents = {
       children,
       value,
     }: {
-      children: React.ReactNode;
+      children: ReactNode;
       value?: InternalLinkValue;
     }) => {
       const href = resolveInternalLinkHref(value?.reference);

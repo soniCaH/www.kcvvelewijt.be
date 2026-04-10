@@ -89,6 +89,10 @@ export type { SectionCtaProps } from "./SectionCta";
 export { PageHero } from "./PageHero";
 export type { PageHeroProps } from "./PageHero";
 
+// ScrollHint
+export { useScrollHint, ScrollArrowButton } from "./ScrollHint";
+export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
+
 // BrandedTabs
 export { BrandedTabs } from "./BrandedTabs";
 export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
