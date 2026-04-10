@@ -318,7 +318,7 @@ export function HulpPage({ paths }: HulpPageProps) {
 
     const trimmedQuery = searchQuery.trim();
 
-    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
+    if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_QUERY_LENGTH) {
       return (
         <p
           role="status"
