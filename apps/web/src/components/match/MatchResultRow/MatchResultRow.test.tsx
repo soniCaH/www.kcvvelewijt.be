@@ -347,24 +347,28 @@ describe("MatchResultRow", () => {
       expect(kcvvText).toHaveClass("text-white");
     });
 
-    it("shows Thuis indicator on mobile when isHome is true", () => {
+    it("shows Thuis indicator on all breakpoints when isHome is true", () => {
       render(
         <MatchResultRow
           match={{ ...scheduledMatch, isHome: true }}
           href="/wedstrijd/1001"
         />,
       );
-      expect(screen.getByText(/Thuis/)).toBeInTheDocument();
+      const indicator = screen.getByText(/Thuis/);
+      expect(indicator).toBeInTheDocument();
+      expect(indicator.className).not.toContain("sm:hidden");
     });
 
-    it("shows Uit indicator on mobile when isHome is false", () => {
+    it("shows Uit indicator on all breakpoints when isHome is false", () => {
       render(
         <MatchResultRow
           match={{ ...scheduledMatch, isHome: false }}
           href="/wedstrijd/1001"
         />,
       );
-      expect(screen.getByText(/Uit/)).toBeInTheDocument();
+      const indicator = screen.getByText(/Uit/);
+      expect(indicator).toBeInTheDocument();
+      expect(indicator.className).not.toContain("sm:hidden");
     });
   });
 

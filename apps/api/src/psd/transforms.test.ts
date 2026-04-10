@@ -3,6 +3,7 @@ import {
   mapGameStatus,
   isUnknownGameStatus,
   mapCompetitionLabel,
+  deriveOwnClubId,
   transformPsdGame,
   transformFootbalistoMatchDetail,
   psdGameToMs,
@@ -163,6 +164,86 @@ describe("transformFootbalistoMatchDetail — strict date validation", () => {
   });
 });
 
+describe("deriveOwnClubId", () => {
+  const kcvv = { id: 1235, name: "KCVV Elewijt" };
+  const opponentA = { id: 456, name: "FC Opponent A" };
+  const opponentB = { id: 789, name: "FC Opponent B" };
+
+  it("returns the common club ID from two games", () => {
+    const games = [
+      makePsdGame({ homeClub: kcvv, awayClub: opponentA }),
+      makePsdGame({ homeClub: opponentB, awayClub: kcvv }),
+    ];
+    expect(deriveOwnClubId(games)).toBe(1235);
+  });
+
+  it("detects own club when always away", () => {
+    const games = [
+      makePsdGame({ homeClub: opponentA, awayClub: kcvv }),
+      makePsdGame({ homeClub: opponentB, awayClub: kcvv }),
+    ];
+    expect(deriveOwnClubId(games)).toBe(1235);
+  });
+
+  it("detects own club when always home", () => {
+    const games = [
+      makePsdGame({ homeClub: kcvv, awayClub: opponentA }),
+      makePsdGame({ homeClub: kcvv, awayClub: opponentB }),
+    ];
+    expect(deriveOwnClubId(games)).toBe(1235);
+  });
+
+  it("handles same opponent in first two games (cup home-and-away)", () => {
+    const games = [
+      makePsdGame({ homeClub: kcvv, awayClub: opponentA }),
+      makePsdGame({ homeClub: opponentA, awayClub: kcvv }),
+    ];
+    expect(deriveOwnClubId(games)).toBe(1235);
+  });
+
+  it("returns undefined for fewer than 2 games", () => {
+    expect(deriveOwnClubId([])).toBeUndefined();
+    expect(deriveOwnClubId([makePsdGame()])).toBeUndefined();
+  });
+});
+
+describe("transformPsdGame — ownClubId fallback for is_home", () => {
+  it("uses ownClubId when homeTeamId is absent", () => {
+    const game = makePsdGame({
+      homeClub: { id: 1235, name: "KCVV Elewijt" },
+      awayClub: { id: 456, name: "FC Other" },
+    });
+    const match = transformPsdGame(game, { ownClubId: 1235 });
+    expect(match.is_home).toBe(true);
+  });
+
+  it("detects away via ownClubId when homeTeamId is absent", () => {
+    const game = makePsdGame({
+      homeClub: { id: 456, name: "FC Other" },
+      awayClub: { id: 1235, name: "KCVV Elewijt" },
+    });
+    const match = transformPsdGame(game, { ownClubId: 1235 });
+    expect(match.is_home).toBe(false);
+  });
+
+  it("prefers homeTeamId over ownClubId when both available", () => {
+    const game = makePsdGame({
+      teamId: 7,
+      homeTeamId: 7,
+      homeClub: { id: 1235, name: "KCVV Elewijt" },
+      awayClub: { id: 456, name: "FC Other" },
+    });
+    const match = transformPsdGame(game, { ownClubId: 1235 });
+    expect(match.is_home).toBe(true);
+  });
+
+  it("is_home undefined without ownClubId or homeTeamId", () => {
+    const game = makePsdGame();
+    const match = transformPsdGame(game);
+    expect(match.is_home).toBeUndefined();
+  });
+});
+
 describe("mapCompetitionLabel", () => {
   it("maps LEAGUE to 'Competitie'", () => {
     expect(mapCompetitionLabel("LEAGUE", "3de Nationale")).toBe("Competitie");
@@ -182,7 +263,17 @@ describe("mapCompetitionLabel", () => {
     expect(mapCompetitionLabel("FRIENDLY", null)).toBe("Vriendschappelijk");
   });
 
-  it("falls back to raw type for unknown types", () => {
+  it("uses name for unknown types when available", () => {
+    expect(mapCompetitionLabel("OFFICIAL", "3de Provinciale C")).toBe(
+      "3de Provinciale C",
+    );
+  });
+
+  it("falls back to raw type for OFFICIAL without name", () => {
+    expect(mapCompetitionLabel("OFFICIAL", null)).toBe("OFFICIAL");
+  });
+
+  it("falls back to raw type for unknown types without name", () => {
     expect(mapCompetitionLabel("INTERLAND", null)).toBe("INTERLAND");
   });
 });
