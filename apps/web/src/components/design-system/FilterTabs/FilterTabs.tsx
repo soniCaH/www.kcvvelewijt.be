@@ -21,8 +21,9 @@
  * - Hover: bg-kcvv-green-bright text-white
  */
 
-import { useRef, useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, type LucideIcon } from "@/lib/icons";
+import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
+import { ScrollArrowButton } from "@/components/design-system/ScrollHint/ScrollArrowButton";
+import { type LucideIcon } from "@/lib/icons";
 
 export interface FilterTab {
   /** Unique identifier */
@@ -79,51 +80,8 @@ export function FilterTabs({
   ariaLabel = "Filter tabs",
   renderAsLinks = false,
 }: FilterTabsProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
-
-  // Check scroll position for arrow visibility
-  const checkScrollPosition = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    setShowLeftArrow(scrollLeft > 10);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
-
-  // Update arrows on mount, scroll, and resize
-  useEffect(() => {
-    checkScrollPosition();
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    container.addEventListener("scroll", checkScrollPosition);
-    window.addEventListener("resize", checkScrollPosition);
-
-    return () => {
-      container.removeEventListener("scroll", checkScrollPosition);
-      window.removeEventListener("resize", checkScrollPosition);
-    };
-  }, [checkScrollPosition, tabs]);
-
-  // Scroll handlers
-  const scroll = (direction: "left" | "right") => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const scrollAmount = 200;
-    const newScrollLeft =
-      direction === "left"
-        ? container.scrollLeft - scrollAmount
-        : container.scrollLeft + scrollAmount;
-
-    container.scrollTo({
-      left: newScrollLeft,
-      behavior: "smooth",
-    });
-  };
+  const { scrollRef, canScrollLeft, canScrollRight, scrollLeft, scrollRight } =
+    useScrollHint<HTMLDivElement>();
 
   // Size-based styles
   const sizeClasses = {
@@ -236,77 +194,35 @@ export function FilterTabs({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Left Arrow */}
-      {showLeftArrow && (
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          className={`
-            absolute left-0 top-1/2 -translate-y-1/2 z-10
-            ${currentSize.arrow}
-            bg-white
-            rounded-full
-            shadow-md
-            flex items-center justify-center
-            text-kcvv-green-bright
-            hover:bg-kcvv-green-bright hover:text-white
-            transition-colors
-            focus:outline-none focus:ring-2 focus:ring-kcvv-green-bright focus:ring-offset-2
-          `}
-          aria-label="Scroll left"
-        >
-          <ChevronLeft size={size === "sm" ? 16 : size === "lg" ? 24 : 20} />
-        </button>
+      {canScrollLeft && (
+        <ScrollArrowButton
+          direction="left"
+          onClick={scrollLeft}
+          className={currentSize.arrow}
+        />
       )}
 
-      {/* Scrollable Container */}
       <div
-        ref={scrollContainerRef}
+        ref={scrollRef}
         role="tablist"
         aria-label={ariaLabel}
         className={`
           flex gap-2 overflow-x-auto scroll-smooth
-          ${showLeftArrow ? (size === "sm" ? "pl-10" : size === "lg" ? "pl-14" : "pl-12") : "pl-0"}
-          ${showRightArrow ? (size === "sm" ? "pr-10" : size === "lg" ? "pr-14" : "pr-12") : "pr-0"}
+          ${canScrollLeft ? (size === "sm" ? "pl-10" : size === "lg" ? "pl-14" : "pl-12") : "pl-0"}
+          ${canScrollRight ? (size === "sm" ? "pr-10" : size === "lg" ? "pr-14" : "pr-12") : "pr-0"}
           scrollbar-hide
         `}
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
       >
         {tabs.map(renderTab)}
       </div>
 
-      {/* Right Arrow */}
-      {showRightArrow && (
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          className={`
-            absolute right-0 top-1/2 -translate-y-1/2 z-10
-            ${currentSize.arrow}
-            bg-white
-            rounded-full
-            shadow-md
-            flex items-center justify-center
-            text-kcvv-green-bright
-            hover:bg-kcvv-green-bright hover:text-white
-            transition-colors
-            focus:outline-none focus:ring-2 focus:ring-kcvv-green-bright focus:ring-offset-2
-          `}
-          aria-label="Scroll right"
-        >
-          <ChevronRight size={size === "sm" ? 16 : size === "lg" ? 24 : 20} />
-        </button>
+      {canScrollRight && (
+        <ScrollArrowButton
+          direction="right"
+          onClick={scrollRight}
+          className={currentSize.arrow}
+        />
       )}
-
-      {/* Hide scrollbar CSS */}
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }
