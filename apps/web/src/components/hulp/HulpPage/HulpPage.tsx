@@ -46,6 +46,7 @@ export interface HulpPageProps {
 }
 
 const URL_PARAM = "id";
+const MIN_QUERY_LENGTH = 2;
 
 /**
  * Inline contact-CTA card used in two places on the page: the empty-data
@@ -154,7 +155,7 @@ export function HulpPage({ paths }: HulpPageProps) {
         scroll: false,
       });
     }
-    if (trimmed.length < 2) {
+    if (trimmed.length < MIN_QUERY_LENGTH) {
       clearSearch();
       return;
     }
@@ -317,14 +318,14 @@ export function HulpPage({ paths }: HulpPageProps) {
 
     const trimmedQuery = searchQuery.trim();
 
-    if (trimmedQuery.length === 1) {
+    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
       return (
         <p
           role="status"
           aria-live="polite"
           className="text-center text-sm text-kcvv-gray"
         >
-          Typ minstens 2 letters…
+          Typ minstens {MIN_QUERY_LENGTH} letters…
         </p>
       );
     }
