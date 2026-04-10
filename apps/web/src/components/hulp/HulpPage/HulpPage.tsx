@@ -46,6 +46,7 @@ export interface HulpPageProps {
 }
 
 const URL_PARAM = "id";
+const MIN_QUERY_LENGTH = 2;
 
 /**
  * Inline contact-CTA card used in two places on the page: the empty-data
@@ -153,6 +154,10 @@ export function HulpPage({ paths }: HulpPageProps) {
       router.replace(query ? `${pathname}?${query}` : pathname, {
         scroll: false,
       });
+    }
+    if (trimmed.length < MIN_QUERY_LENGTH) {
+      clearSearch();
+      return;
     }
     search(trimmed);
   }, [
@@ -311,7 +316,21 @@ export function HulpPage({ paths }: HulpPageProps) {
       );
     }
 
-    if (searchQuery.trim().length > 0) {
+    const trimmedQuery = searchQuery.trim();
+
+    if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_QUERY_LENGTH) {
+      return (
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-center text-sm text-kcvv-gray"
+        >
+          Typ minstens {MIN_QUERY_LENGTH} letters…
+        </p>
+      );
+    }
+
+    if (trimmedQuery.length > 0) {
       // Show the skeleton when the search is in flight OR the debounce
       // window is open (executedQuery still lagging searchQuery). When
       // stale results exist, keep them visible with a subtle opacity
@@ -319,8 +338,7 @@ export function HulpPage({ paths }: HulpPageProps) {
       // avoids a content flash on every keystroke during query refinement.
       // Only show the full skeleton when there are no stale results to
       // display. See issue #1238.
-      const isAwaitingResults =
-        searchLoading || executedQuery !== searchQuery.trim();
+      const isAwaitingResults = searchLoading || executedQuery !== trimmedQuery;
 
       if (isAwaitingResults && filteredPaths.length === 0) {
         return <QuestionCardSkeletonGrid count={4} />;
@@ -346,7 +364,7 @@ export function HulpPage({ paths }: HulpPageProps) {
 
       if (filteredPaths.length === 0) {
         return (
-          <div className="space-y-12">
+          <div role="status" aria-live="polite" className="space-y-12">
             <p className="text-center text-sm text-kcvv-gray">
               Geen resultaten voor &quot;{executedQuery}&quot;. Blader hieronder
               door alle categorieën.

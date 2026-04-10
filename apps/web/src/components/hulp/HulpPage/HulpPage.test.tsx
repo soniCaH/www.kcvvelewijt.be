@@ -399,6 +399,38 @@ describe("HulpPage", () => {
     });
   });
 
+  it("shows a min-length hint when the query is exactly 1 character", () => {
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "U" },
+    });
+    expect(screen.getByText(/typ minstens 2 letters/i)).toBeInTheDocument();
+  });
+
+  it("does not call search when the query is only 1 character", () => {
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "U" },
+    });
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it("renders the empty results state with role=status and aria-live=polite", async () => {
+    currentResults = [];
+    currentExecutedQuery = "xyzz";
+    render(<HulpPage paths={FIXTURE_PATHS} />);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "xyzz" },
+    });
+    await waitFor(() => {
+      const statusEl = screen
+        .getByText(/geen resultaten voor/i)
+        .closest("[role='status']");
+      expect(statusEl).toBeInTheDocument();
+      expect(statusEl).toHaveAttribute("aria-live", "polite");
+    });
+  });
+
   describe("loading skeleton", () => {
     it("shows the skeleton grid on the first search", () => {
       currentLoading = true;
