@@ -25,3 +25,5 @@ export type { SponsorGridProps } from "./SponsorGrid/SponsorGrid";
 
 export { SponsorLogo } from "./SponsorLogo/SponsorLogo";
 export type { SponsorLogoProps } from "./SponsorLogo/SponsorLogo";
+
+export { formatSponsorAlt } from "./formatSponsorAlt";

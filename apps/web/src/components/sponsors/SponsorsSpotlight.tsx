@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { formatSponsorAlt } from "./formatSponsorAlt";
 
 export interface SpotlightSponsor {
   id: string;
@@ -71,7 +72,7 @@ export const SponsorsSpotlight = ({
               <div className="flex-shrink-0 w-64 h-48 relative">
                 <Image
                   src={activeSponsor.logo}
-                  alt={activeSponsor.name}
+                  alt={formatSponsorAlt(activeSponsor.name)}
                   fill
                   className="object-contain"
                   sizes="256px"

@@ -56,10 +56,10 @@ describe("SponsorCard", () => {
   });
 
   describe("rendering", () => {
-    it("renders sponsor logo with correct alt text", () => {
+    it("renders sponsor logo with descriptive alt text including sponsor name and club", () => {
       render(<SponsorCard sponsor={sponsor} />);
 
-      const img = screen.getByAltText("Test Sponsor");
+      const img = screen.getByAltText("Test Sponsor — sponsor KCVV Elewijt");
       expect(img).toBeInTheDocument();
     });
 
