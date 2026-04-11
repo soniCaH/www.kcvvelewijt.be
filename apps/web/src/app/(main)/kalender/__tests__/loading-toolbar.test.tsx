@@ -57,9 +57,16 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
   it("uses space-y-4 wrapper matching CalendarWidget's outer spacing", () => {
     const { container } = render(<CalendarLoading />);
 
-    // The content area inside the container should use space-y-4
-    // matching CalendarWidget's root <div className="space-y-4">
-    const contentWrapper = container.querySelector(".space-y-4");
+    // Anchor the lookup to the toolbar testid so we only assert against the
+    // CalendarLoading/CalendarWidget hierarchy, not any unrelated descendant
+    // (e.g. PageHero internals) that might also use space-y-4.
+    const toolbarTop = container.querySelector(
+      "[data-testid='calendar-skeleton-toolbar-top']",
+    );
+    expect(toolbarTop).not.toBeNull();
+
+    const contentWrapper = toolbarTop!.parentElement;
     expect(contentWrapper).not.toBeNull();
+    expect(contentWrapper!.className).toContain("space-y-4");
   });
 });
