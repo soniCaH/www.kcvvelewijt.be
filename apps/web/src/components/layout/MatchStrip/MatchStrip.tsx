@@ -42,9 +42,9 @@ function FinishedLine({ match }: { match: UpcomingMatch }) {
     <>
       <span className="text-white/60 text-xs">{dateStr}</span>
       <span className="font-bold">{match.homeTeam.name}</span>
-      <span className="font-mono font-bold">{match.homeTeam.score}</span>
+      <span className="font-mono font-bold">{match.homeTeam.score ?? "-"}</span>
       <span className="text-white/50">–</span>
-      <span className="font-mono font-bold">{match.awayTeam.score}</span>
+      <span className="font-mono font-bold">{match.awayTeam.score ?? "-"}</span>
       <span className="font-bold">{match.awayTeam.name}</span>
     </>
   );

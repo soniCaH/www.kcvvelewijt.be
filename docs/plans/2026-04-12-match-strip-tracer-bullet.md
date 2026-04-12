@@ -43,7 +43,7 @@ This is a tracer bullet — thinnest possible slice that proves the path end-to-
 - Create: `apps/web/src/lib/server/match-data.ts`
 - Test: `apps/web/src/lib/server/match-data.test.ts`
 
-This utility wraps the existing `BffService.getNextMatches()` + `mapMatchesToUpcomingMatches()` calls into one reusable function. Both the homepage and the `(main)` layout will call this instead of duplicating the Effect pipeline.
+This utility wraps the existing `BffService.getNextMatches()` + `mapMatchesToUpcomingMatches()` calls into one reusable function. The `(main)` layout calls this to fetch match data for the `MatchStrip`. The homepage retains its own BFF call because it needs the full matches array for `MatchesSliderSection`.
 
 ### Step 1: Write the failing test
 
@@ -105,7 +105,6 @@ describe("getFirstTeamNextMatch", () => {
 ### Step 2: Run test to verify it fails
 
 ```bash
-cd /Users/kevinvanransbeeck/Sites/KCVV/kcvv-issue-1269
 pnpm --filter @kcvv/web exec vitest run src/lib/server/match-data.test.ts 2>&1 | tail -20
 ```
 
@@ -272,6 +271,7 @@ Expected: FAIL — `Cannot find module './MatchStrip'`
 // apps/web/src/components/layout/MatchStrip/MatchStrip.tsx
 import Link from "next/link";
 import type { UpcomingMatch } from "@/components/match/types";
+import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
 import { formatWidgetDate } from "@/lib/utils/dates";
 
 export interface MatchStripProps {
@@ -323,7 +323,7 @@ function FinishedLine({ match }: { match: UpcomingMatch }) {
 
 function ScheduledLine({ match }: { match: UpcomingMatch }) {
   const opponent =
-    match.homeTeam.id === 1235 ? match.awayTeam.name : match.homeTeam.name;
+    match.homeTeam.id === KCVV_FIRST_TEAM_CLUB_ID ? match.awayTeam.name : match.homeTeam.name;
   const timeStr = match.time
     ? ` · ${formatWidgetDate(match.date)} ${match.time}`
     : ` · ${formatWidgetDate(match.date)}`;
@@ -444,7 +444,7 @@ The homepage already has its own fetch + map pipeline that returns the full arra
 ### Step 2: Add discovered unknown to PRD
 
 ```bash
-echo "- [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline" >> /Users/kevinvanransbeeck/Sites/KCVV/kcvv-issue-1269/docs/prd/first-team-match-strip.md
+echo "- [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline" >> docs/prd/first-team-match-strip.md
 ```
 
 ### Step 3: Commit

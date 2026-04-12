@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { UpcomingMatch } from "@/components/match/types";
 import { MatchStrip } from "./MatchStrip";
 import {
   mockFinishedMatchWin,
@@ -61,6 +62,35 @@ describe("MatchStrip", () => {
         "href",
         `/wedstrijd/${mockUpcomingMatch.id}`,
       );
+    });
+
+    it("shows away opponent when KCVV is home", () => {
+      render(<MatchStrip match={mockUpcomingMatch} />);
+      // mockUpcomingMatch has KCVV (id 1235) as homeTeam
+      expect(screen.getByText(/vs KVC Wilrijk/)).toBeInTheDocument();
+    });
+
+    it("shows home opponent when KCVV is away", () => {
+      const awayMatch: UpcomingMatch = {
+        ...mockUpcomingMatch,
+        homeTeam: { id: 59, name: "KVC Wilrijk" },
+        awayTeam: { id: 1235, name: "KCVV Elewijt" },
+      };
+      render(<MatchStrip match={awayMatch} />);
+      expect(screen.getByText(/vs KVC Wilrijk/)).toBeInTheDocument();
+    });
+  });
+
+  describe("finished match with missing scores", () => {
+    it("renders dash fallback when scores are undefined", () => {
+      const noScoreMatch: UpcomingMatch = {
+        ...mockFinishedMatchWin,
+        homeTeam: { ...mockFinishedMatchWin.homeTeam, score: undefined },
+        awayTeam: { ...mockFinishedMatchWin.awayTeam, score: undefined },
+      };
+      render(<MatchStrip match={noScoreMatch} />);
+      const dashes = screen.getAllByText("-");
+      expect(dashes).toHaveLength(2);
     });
   });
 
