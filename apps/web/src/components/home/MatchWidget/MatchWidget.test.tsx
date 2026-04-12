@@ -183,10 +183,13 @@ describe("MatchWidget", () => {
       );
     });
 
-    it("links upcoming match to calendar page", () => {
+    it("links upcoming match to match detail page", () => {
       render(<MatchWidget match={mockUpcomingMatch} />);
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/kalender");
+      expect(link).toHaveAttribute(
+        "href",
+        `/wedstrijd/${mockUpcomingMatch.id}`,
+      );
     });
 
     it("links postponed match to calendar page", () => {
@@ -247,7 +250,7 @@ describe("MatchWidget", () => {
         {
           match_id: mockUpcomingMatch.id,
           match_status: "scheduled",
-          destination: "/kalender",
+          destination: `/wedstrijd/${mockUpcomingMatch.id}`,
         },
       );
     });

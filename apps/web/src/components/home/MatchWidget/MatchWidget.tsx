@@ -47,11 +47,10 @@ export function MatchWidget({
     .filter(Boolean)
     .join(" · ");
 
-  const href = isFinished
-    ? `/wedstrijd/${match.id}`
-    : isPostponed
-      ? "/kalender"
-      : match.status === "scheduled"
+  const href =
+    isFinished || match.status === "scheduled"
+      ? `/wedstrijd/${match.id}`
+      : isPostponed
         ? "/kalender"
         : TEAM_FIXTURES_FALLBACK;
 

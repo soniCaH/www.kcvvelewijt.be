@@ -139,26 +139,34 @@ export function MatchDetailView({
           </div>
         )}
 
-        {/* Lineup Section - MatchLineup handles empty state internally */}
-        <MatchLineup
-          homeTeamName={homeTeam.name}
-          awayTeamName={awayTeam.name}
-          homeLineup={homeLineup}
-          awayLineup={awayLineup}
-        />
-
-        {/* Events Section */}
-        {events !== undefined && (
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Wedstrijdgebeurtenissen
-            </h2>
-            <MatchEvents
+        {status === "scheduled" ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-500 text-sm">Nog niet gespeeld</p>
+          </div>
+        ) : (
+          <>
+            {/* Lineup Section - MatchLineup handles empty state internally */}
+            <MatchLineup
               homeTeamName={homeTeam.name}
               awayTeamName={awayTeam.name}
-              events={events}
+              homeLineup={homeLineup}
+              awayLineup={awayLineup}
             />
-          </div>
+
+            {/* Events Section */}
+            {events !== undefined && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Wedstrijdgebeurtenissen
+                </h2>
+                <MatchEvents
+                  homeTeamName={homeTeam.name}
+                  awayTeamName={awayTeam.name}
+                  events={events}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
