@@ -114,7 +114,8 @@ export function ContactCard({
               truncate
             `}
             style={{
-              fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+              fontFamily:
+                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
             }}
           >
             {displayName}
@@ -134,7 +135,7 @@ export function ContactCard({
           {member.roleCode && variant !== "compact" && (
             <span
               className="inline-block mt-2 px-2 py-1 bg-kcvv-green/10 text-kcvv-green rounded text-xs font-semibold self-start"
-              style={{ fontFamily: "ibm-plex-mono, monospace" }}
+              style={{ fontFamily: "var(--font-family-mono)" }}
             >
               {member.roleCode}
             </span>

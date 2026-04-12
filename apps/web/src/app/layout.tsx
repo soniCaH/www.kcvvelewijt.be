@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Montserrat, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AccentStrip } from "@/components/layout/AccentStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -13,6 +14,20 @@ import {
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
 import { BRAND, SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-montserrat",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+  variable: "--font-ibm-plex-mono",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.siteUrl),
@@ -83,16 +98,20 @@ export default async function RootLayout({
     .sort((a, b) => parseAge(b.age!) - parseAge(a.age!));
 
   return (
-    <html lang="nl" suppressHydrationWarning>
+    <html
+      lang="nl"
+      suppressHydrationWarning
+      className={`${montserrat.variable} ${ibmPlexMono.variable}`}
+    >
       <head>
-        {/* Adobe Typekit Fonts */}
+        {/* Adobe Typekit Fonts — deferred (only serves quasimoda + stenciletta) */}
         {typekitId && (
           <>
             <Script
               src={`https://use.typekit.net/${typekitId}.js`}
-              strategy="beforeInteractive"
+              strategy="afterInteractive"
             />
-            <Script id="typekit-init" strategy="beforeInteractive">
+            <Script id="typekit-init" strategy="afterInteractive">
               {`try{Typekit.load({ async: true });}catch(e){console.error('Typekit load error:', e);}`}
             </Script>
           </>

@@ -153,7 +153,7 @@ export function FilterTabs({
                   : "bg-kcvv-green-bright/10 text-kcvv-green-bright group-hover:bg-white/20 group-hover:text-white"
               }
             `}
-            style={{ fontFamily: "ibm-plex-mono, monospace" }}
+            style={{ fontFamily: "var(--font-family-mono)" }}
           >
             {tab.count}
           </span>

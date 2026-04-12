@@ -12,7 +12,7 @@
 import type { ExplorationProps } from "./StyleA_StackedType";
 
 const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, acumin-pro, Montserrat, Verdana, sans-serif";
+  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
 const BODY: React.CSSProperties["fontFamily"] =
   'montserrat, "Helvetica Neue", Arial, sans-serif';
 

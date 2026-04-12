@@ -1,7 +1,7 @@
 import React from "react";
 
 const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, acumin-pro, Montserrat, Verdana, sans-serif";
+  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
 const BODY: React.CSSProperties["fontFamily"] =
   'montserrat, "Helvetica Neue", Arial, sans-serif';
 const TORN_BOTTOM_CLIP = `polygon(

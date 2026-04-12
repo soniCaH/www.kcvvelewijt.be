@@ -394,7 +394,8 @@ export function ResponsibilityFinder({
         <div className="flex flex-wrap items-center gap-3 text-2xl md:text-4xl font-bold text-kcvv-gray-blue mb-8">
           <span
             style={{
-              fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+              fontFamily:
+                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
             }}
           >
             Ik ben
@@ -461,7 +462,8 @@ export function ResponsibilityFinder({
 
           <span
             style={{
-              fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+              fontFamily:
+                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
             }}
           >
             en ik
@@ -1064,7 +1066,8 @@ function ResultCard({
               <h3
                 className="text-2xl font-bold text-gray-900"
                 style={{
-                  fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+                  fontFamily:
+                    "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
                 }}
               >
                 {path.question}

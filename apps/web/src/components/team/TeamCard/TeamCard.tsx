@@ -218,7 +218,8 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
                 isCompact ? "text-base" : "text-lg",
               )}
               style={{
-                fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+                fontFamily:
+                  "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
               }}
             >
               {name}

@@ -136,6 +136,25 @@ describe("MatchWidget", () => {
       render(<MatchWidget match={mockLongTeamNames} />);
       expect(screen.getByText(/Verbroedering Hofstade/i)).toBeInTheDocument();
     });
+
+    it("score element uses font-mono without conflicting font-title", () => {
+      render(<MatchWidget match={mockFinishedMatchWin} />);
+      const scoreEl = screen.getByText("3 – 1");
+      expect(scoreEl.className).toContain("font-mono");
+      expect(scoreEl.className).not.toContain("font-title");
+    });
+
+    it("FT element uses font-mono without conflicting font-title", () => {
+      const noScoreMatch = {
+        ...mockFinishedMatchWin,
+        homeTeam: { ...mockFinishedMatchWin.homeTeam, score: undefined },
+        awayTeam: { ...mockFinishedMatchWin.awayTeam, score: undefined },
+      };
+      render(<MatchWidget match={noScoreMatch} />);
+      const ftEl = screen.getByText("FT");
+      expect(ftEl.className).toContain("font-mono");
+      expect(ftEl.className).not.toContain("font-title");
+    });
   });
 
   describe("Accessibility", () => {
