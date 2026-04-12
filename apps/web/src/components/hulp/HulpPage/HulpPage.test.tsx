@@ -79,12 +79,13 @@ function resetMocks() {
 describe("HulpPage", () => {
   beforeEach(resetMocks);
 
-  it("renders the PageHero with the Help label and headline", () => {
+  it("does not render PageHero — hero is owned by the server layer", () => {
     render(<HulpPage paths={FIXTURE_PATHS} />);
-    expect(screen.getByText("Help")).toBeInTheDocument();
+    // PageHero renders a heading with the headline text. After extracting
+    // the hero to page.tsx (server), HulpPage should NOT render it.
     expect(
-      screen.getByRole("heading", { name: /vind de juiste persoon/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /vind de juiste persoon/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders BrowseContent with all categories when no question is selected", () => {

@@ -4,6 +4,8 @@ export type { HulpPageProps } from "./HulpPage";
 export { HulpSearchInput } from "./HulpSearchInput";
 export type { HulpSearchInputProps } from "./HulpSearchInput";
 
+export { SearchInputShell } from "./SearchInputShell";
+
 export { QuestionCard } from "./QuestionCard";
 export type { QuestionCardProps } from "./QuestionCard";
 

@@ -1,10 +1,14 @@
 "use client";
 
 /**
- * HulpPage — top-level orchestration for the redesigned /hulp page
+ * HulpPage — content-only orchestration for the /hulp page
  *
- * Composes a `SectionStack` with hero / content / CTA sections. The
- * content section switches between three views:
+ * Renders the search input, browse/search/answer views, and closing CTA.
+ * The PageHero and SectionStack layout are owned by the server layer
+ * (`page.tsx`) so the hero streams immediately and the data-dependent
+ * content loads inside a Suspense boundary.
+ *
+ * Three view modes (selected by URL + search state):
  *
  *   1. **Browse** — default; shows all paths grouped by category
  *   2. **Search results** — when the user types in the search input
@@ -21,11 +25,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  SectionStack,
-  type SectionConfig,
-} from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero/PageHero";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
@@ -401,54 +400,29 @@ export function HulpPage({ paths }: HulpPageProps) {
     );
   };
 
-  const sections: SectionConfig[] = [
-    {
-      key: "hero",
-      bg: "kcvv-black",
-      paddingTop: "pt-0",
-      paddingBottom: "pb-0",
-      content: (
-        <PageHero
-          size="compact"
-          gradient="dark"
-          label="Help"
-          headline="Vind de juiste persoon"
-          body="Stel je vraag of blader door de categorieën hieronder."
+  return (
+    <>
+      <div>
+        <HulpSearchInput value={searchQuery} onChange={setSearchQuery} />
+        <p className="mt-3 text-center text-xs text-kcvv-gray">
+          Tip: probeer trefwoorden zoals <em>inschrijving</em>,{" "}
+          <em>sportongeval</em>, of <em>transfer</em>.
+        </p>
+      </div>
+      {renderContent()}
+
+      {/* Closing "still no answer?" callout — sits inside the gray
+          content section so the page footer's diagonal transition
+          flows directly out of gray. Avoids the green→gray→green
+          sandwich a separate CTA section would create above the
+          footer. Suppressed when `paths` is empty since the empty-
+          data state already shows its own contact CTA. */}
+      {paths.length > 0 && (
+        <ContactCtaCard
+          heading="Niet gevonden wat je zocht?"
+          body="Stuur ons een bericht en we helpen je graag verder."
         />
-      ),
-      transition: { type: "diagonal", direction: "right", overlap: "full" },
-    },
-    {
-      key: "content",
-      bg: "gray-100",
-      content: (
-        <div className="mx-auto max-w-inner-lg space-y-12 px-4 md:px-10">
-          <div>
-            <HulpSearchInput value={searchQuery} onChange={setSearchQuery} />
-            <p className="mt-3 text-center text-xs text-kcvv-gray">
-              Tip: probeer trefwoorden zoals <em>inschrijving</em>,{" "}
-              <em>sportongeval</em>, of <em>transfer</em>.
-            </p>
-          </div>
-          {renderContent()}
-
-          {/* Closing "still no answer?" callout — sits inside the gray
-              content section so the page footer's diagonal transition
-              flows directly out of gray. Avoids the green→gray→green
-              sandwich a separate CTA section would create above the
-              footer. Suppressed when `paths` is empty since the empty-
-              data state already shows its own contact CTA. */}
-          {paths.length > 0 && (
-            <ContactCtaCard
-              heading="Niet gevonden wat je zocht?"
-              body="Stuur ons een bericht en we helpen je graag verder."
-            />
-          )}
-        </div>
-      ),
-      transition: { type: "diagonal", direction: "left" },
-    },
-  ];
-
-  return <SectionStack sections={sections} />;
+      )}
+    </>
+  );
 }
