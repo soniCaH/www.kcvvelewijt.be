@@ -102,7 +102,7 @@ export function MatchWidget({
 
             {!isPostponed && !isForfeited && hasScore && (
               <span
-                className="font-title font-black text-white font-mono leading-none tracking-[-0.04em]"
+                className="font-mono font-black text-white leading-none tracking-[-0.04em]"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 {match.homeTeam.score} – {match.awayTeam.score}
@@ -120,7 +120,7 @@ export function MatchWidget({
 
             {!isPostponed && isFinished && !isForfeited && !hasScore && (
               <span
-                className="font-title font-black text-white font-mono leading-none tracking-[-0.04em]"
+                className="font-mono font-black text-white leading-none tracking-[-0.04em]"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 FT

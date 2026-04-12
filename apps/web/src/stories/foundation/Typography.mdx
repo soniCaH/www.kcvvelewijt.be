@@ -26,14 +26,27 @@ export const FontSample = ({ label, cssVar, sample, size = '1.25rem', weight = 4
 
 # Typography
 
-All type tokens are defined in `src/app/globals.css`. The body font is **Montserrat** (loaded via
-Adobe Typekit); the heading font is **Quasimoda**. System-safe fallbacks are specified for all families.
+All type tokens are defined in `src/app/globals.css`.
+
+<table>
+  <thead><tr><th>Font</th><th>Source</th><th>Weights</th><th>Usage</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Montserrat</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 500, 600, 700</td><td>Body text, UI labels, buttons</td></tr>
+    <tr><td><strong>IBM Plex Mono</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 600, 700</td><td>Scores, timestamps, keyboard shortcuts</td></tr>
+    <tr><td><strong>Quasimoda</strong></td><td>Adobe Typekit (deferred)</td><td>700</td><td>All headings h1–h6</td></tr>
+    <tr><td><strong>Stenciletta</strong></td><td>Adobe Typekit (deferred)</td><td>400</td><td>Accent / display numbers</td></tr>
+  </tbody>
+</table>
+
+Montserrat and IBM Plex Mono are preloaded and self-hosted via `next/font/google` with `display: 'swap'`.
+Quasimoda and Stenciletta load via Adobe Typekit with `afterInteractive` strategy — they are not
+render-blocking. System-safe fallbacks are specified for all families.
 
 ---
 
 ## Font Families
 
-Fonts are loaded via Adobe Typekit. The samples below render live from the CSS variables.
+The samples below render live from the CSS variables.
 
 <FontSample label="font-title" cssVar="--font-family-title" size="2rem" weight={700} sample="KCVV Elewijt Football Club" note="All headings h1–h6" />
 <FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text" />
@@ -91,8 +104,9 @@ Headings are set globally in CSS — no per-component overrides needed.
   <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
   <tbody>
     <tr><td><code>font-normal</code></td><td>400</td><td>Body text</td></tr>
-    <tr><td><code>font-medium</code></td><td>500</td><td>Emphasis, labels</td></tr>
-    <tr><td><code>font-bold</code></td><td>700</td><td>Headings, CTAs</td></tr>
+    <tr><td><code>font-medium</code></td><td>500</td><td>UI labels</td></tr>
+    <tr><td><code>font-semibold</code></td><td>600</td><td>Buttons, badges</td></tr>
+    <tr><td><code>font-bold</code></td><td>700</td><td>Headings, CTAs, scores</td></tr>
   </tbody>
 </table>
 

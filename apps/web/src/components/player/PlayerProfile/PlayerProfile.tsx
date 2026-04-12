@@ -214,7 +214,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                     className="block text-4xl lg:text-6xl uppercase font-semibold text-kcvv-gray-blue"
                     style={{
                       fontFamily:
-                        "quasimoda, acumin-pro, Montserrat, sans-serif",
+                        "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
                       lineHeight: 1,
                     }}
                   >
@@ -224,7 +224,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                     className="block text-4xl lg:text-6xl uppercase font-thin text-kcvv-gray-blue"
                     style={{
                       fontFamily:
-                        "quasimoda, acumin-pro, Montserrat, sans-serif",
+                        "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
                       lineHeight: 1,
                     }}
                   >

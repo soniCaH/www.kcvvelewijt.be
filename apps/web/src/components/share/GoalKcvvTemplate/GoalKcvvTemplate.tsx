@@ -1,9 +1,5 @@
 import React from "react";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, acumin-pro, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 const TORN_POLYGON =
   "polygon(0% 40%, 2% 38%, 5% 41%, 8% 38%, 11% 41%, 14% 38%, 17% 41%, 20% 38%, 23% 41%, 26% 38%, 29% 41%, 32% 38%, 35% 41%, 38% 38%, 41% 41%, 44% 38%, 47% 41%, 50% 38%, 53% 41%, 56% 38%, 59% 41%, 62% 38%, 65% 41%, 68% 38%, 71% 41%, 74% 38%, 77% 41%, 80% 38%, 83% 41%, 86% 38%, 89% 41%, 92% 38%, 95% 41%, 98% 38%, 100% 40%, 100% 100%, 0% 100%)";
@@ -42,7 +38,7 @@ export function GoalKcvvTemplate({
         background: "#121a14",
         position: "relative",
         overflow: "hidden",
-        fontFamily: BODY,
+        fontFamily: BODY_FONT,
       }}
     >
       {/* ── Upper zone: photo or no-photo fallback ── */}
@@ -117,7 +113,7 @@ export function GoalKcvvTemplate({
                 position: "absolute",
                 right: "20px",
                 top: "-20px",
-                fontFamily: TITLE,
+                fontFamily: TITLE_FONT,
                 fontWeight: 900,
                 fontSize: "580px",
                 lineHeight: 1,
@@ -242,7 +238,7 @@ export function GoalKcvvTemplate({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.48)",
@@ -259,7 +255,7 @@ export function GoalKcvvTemplate({
           position: "absolute",
           left: "80px",
           top: "635px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "260px",
           color: "white",
@@ -289,7 +285,7 @@ export function GoalKcvvTemplate({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: "#4acf52",
@@ -301,7 +297,7 @@ export function GoalKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "74px",
             color: "white",
@@ -314,7 +310,7 @@ export function GoalKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "40px",
             color: "#4acf52",
@@ -342,7 +338,7 @@ export function GoalKcvvTemplate({
         <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 400,
               fontSize: "24px",
               color: "rgba(255,255,255,0.45)",
@@ -352,7 +348,7 @@ export function GoalKcvvTemplate({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               color: "white",
@@ -379,7 +375,7 @@ export function GoalKcvvTemplate({
         <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 400,
               fontSize: "24px",
               color: "rgba(255,255,255,0.45)",
@@ -389,7 +385,7 @@ export function GoalKcvvTemplate({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "110px",
               color: "#4acf52",
@@ -418,7 +414,7 @@ export function GoalKcvvTemplate({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "54px",
             color: "white",
@@ -430,7 +426,7 @@ export function GoalKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "32px",
             color: "#4acf52",
@@ -468,7 +464,7 @@ export function GoalKcvvTemplate({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "26px",
             color: "rgba(255,255,255,0.38)",

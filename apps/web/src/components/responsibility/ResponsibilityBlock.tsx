@@ -36,7 +36,8 @@ export function ResponsibilityBlock() {
           <h2
             className="text-3xl md:text-5xl font-bold text-gray-blue mb-4"
             style={{
-              fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+              fontFamily:
+                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
             }}
           >
             Hoe kunnen we je helpen?

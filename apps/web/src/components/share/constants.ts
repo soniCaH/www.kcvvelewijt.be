@@ -1,3 +1,13 @@
+import type React from "react";
+
+/** Quasimoda title font stack for share templates (inline style usage). */
+export const TITLE_FONT: React.CSSProperties["fontFamily"] =
+  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
+
+/** Montserrat body font stack for share templates (inline style usage). */
+export const BODY_FONT: React.CSSProperties["fontFamily"] =
+  'montserrat, "Helvetica Neue", Arial, sans-serif';
+
 export const CAPTURE_WIDTH = 1080;
 export const CAPTURE_HEIGHT = 1920;
 

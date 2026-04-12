@@ -6,11 +6,7 @@
  * straddles both zones at extreme scale. Very graphic, very kinetic.
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, acumin-pro, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 export function Round3_Diagonal({
   playerName,
@@ -96,7 +92,7 @@ export function Round3_Diagonal({
             position: "absolute",
             bottom: "200px",
             right: "80px",
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "560px",
             lineHeight: 1,
@@ -130,7 +126,7 @@ export function Round3_Diagonal({
           left: "-60px",
           right: "-60px",
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "520px",
           lineHeight: 0.84,
@@ -152,7 +148,7 @@ export function Round3_Diagonal({
           left: 0,
           right: 0,
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "480px",
           lineHeight: 0.84,
@@ -174,7 +170,7 @@ export function Round3_Diagonal({
           position: "absolute",
           top: "12%",
           left: "80px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "220px",
           lineHeight: 1,
@@ -207,7 +203,7 @@ export function Round3_Diagonal({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             letterSpacing: "0.12em",
@@ -233,7 +229,7 @@ export function Round3_Diagonal({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 900,
             fontSize: "72px",
             lineHeight: 1,
@@ -247,7 +243,7 @@ export function Round3_Diagonal({
         <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "80px",
               lineHeight: 1,
@@ -259,7 +255,7 @@ export function Round3_Diagonal({
           </span>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 600,
               fontSize: "44px",
               color: "rgba(255,255,255,0.5)",
@@ -270,7 +266,7 @@ export function Round3_Diagonal({
         </div>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 500,
             fontSize: "32px",
             color: "rgba(255,255,255,0.35)",

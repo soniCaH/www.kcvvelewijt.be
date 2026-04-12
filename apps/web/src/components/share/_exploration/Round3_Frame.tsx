@@ -7,11 +7,7 @@
  * Cinematic, like a match broadcast freeze-frame.
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, acumin-pro, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 export function Round3_Frame({
   playerName,
@@ -143,7 +139,7 @@ export function Round3_Frame({
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "52px",
               lineHeight: 1,
@@ -156,7 +152,7 @@ export function Round3_Frame({
           </span>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 600,
               fontSize: "28px",
               color: "rgba(255,255,255,0.55)",
@@ -177,7 +173,7 @@ export function Round3_Frame({
           left: 0,
           right: 0,
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "520px",
           lineHeight: 0.84,
@@ -199,7 +195,7 @@ export function Round3_Frame({
           left: 0,
           right: 0,
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "480px",
           lineHeight: 0.84,
@@ -235,7 +231,7 @@ export function Round3_Frame({
           left: "-185px",
           top: "50%",
           transform: "translateY(-50%) rotate(-90deg)",
-          fontFamily: BODY,
+          fontFamily: BODY_FONT,
           fontWeight: 900,
           fontSize: "40px",
           letterSpacing: "0.28em",
@@ -299,7 +295,7 @@ export function Round3_Frame({
         {/* Score */}
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "140px",
             lineHeight: 0.9,
@@ -322,7 +318,7 @@ export function Round3_Frame({
         {/* Player + match */}
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "52px",
             lineHeight: 1.1,
@@ -335,7 +331,7 @@ export function Round3_Frame({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 500,
             fontSize: "30px",
             color: "rgba(255,255,255,0.5)",

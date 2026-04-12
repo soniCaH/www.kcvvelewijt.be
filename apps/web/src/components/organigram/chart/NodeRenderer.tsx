@@ -15,7 +15,9 @@
 import type { OrgChartNode } from "@/types/organigram";
 
 // Design-token equivalents used as literal values because d3-org-chart renders
-// raw HTML strings where CSS custom properties are not available.
+// raw HTML strings where most CSS custom properties are not reliably available.
+// Exception: --font-family-mono IS used via var() in node styles (phone/email
+// badges) because the rendered HTML lives inside the DOM where :root vars apply.
 const NODE_ACCENT_COLOR = "#4acf52";
 const NODE_ACCENT_GRADIENT_END = "#41b147";
 const NODE_TEXT_PRIMARY = "#31404b";
@@ -135,7 +137,7 @@ function renderSingleNode(
           min-width: 0;
         ">
           <div style="
-            font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+            font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
             font-size: 16px;
             font-weight: 700;
             color: ${NODE_TEXT_PRIMARY};
@@ -170,7 +172,7 @@ function renderSingleNode(
               border-radius: 4px;
               font-size: 11px;
               font-weight: 600;
-              font-family: 'ibm-plex-mono', monospace;
+              font-family: var(--font-family-mono);
               letter-spacing: 0.5px;
             ">${node.roleCode}</div>
           `
@@ -211,7 +213,7 @@ function renderVacantNode(
         text-align: center;
       ">
         <div style="
-          font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+          font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
           font-size: 16px;
           font-weight: 700;
           color: ${NODE_TEXT_PRIMARY};
@@ -259,7 +261,7 @@ function renderVacantNode(
             border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
-            font-family: 'ibm-plex-mono', monospace;
+            font-family: var(--font-family-mono);
             letter-spacing: 0.5px;
           ">${node.roleCode}</div>
         `
@@ -316,7 +318,7 @@ function renderSharedNode(
         ">
           ${chipImage}
           <span style="
-            font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+            font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
             font-size: 13px;
             font-weight: 600;
             color: ${NODE_TEXT_PRIMARY};
@@ -363,7 +365,7 @@ function renderSharedNode(
               border-radius: 4px;
               font-size: 10px;
               font-weight: 600;
-              font-family: 'ibm-plex-mono', monospace;
+              font-family: var(--font-family-mono);
               letter-spacing: 0.5px;
             ">${node.roleCode}</span>`
             : ""
@@ -448,7 +450,7 @@ function renderCompactSingleNode(
           min-width: 0;
         ">
           <div style="
-            font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+            font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
             font-size: 14px;
             font-weight: 700;
             color: ${NODE_TEXT_PRIMARY};
@@ -501,7 +503,7 @@ function renderCompactVacantNode(
         text-align: center;
       ">
         <div style="
-          font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+          font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
           font-size: 14px;
           font-weight: 700;
           color: ${NODE_TEXT_PRIMARY};
@@ -537,7 +539,7 @@ function renderCompactSharedNode(
         gap: 4px;
       ">
         <span style="
-          font-family: 'quasimoda', 'acumin-pro', 'Montserrat', sans-serif;
+          font-family: 'quasimoda', -apple-system, system-ui, 'Montserrat', sans-serif;
           font-size: 11px;
           font-weight: 600;
           color: ${NODE_TEXT_PRIMARY};

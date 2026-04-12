@@ -393,7 +393,8 @@ export const InPageHeader: Story = {
         <h1
           className="text-3xl font-bold text-white mb-4"
           style={{
-            fontFamily: "quasimoda, acumin-pro, Montserrat, sans-serif",
+            fontFamily:
+              "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
           }}
         >
           Organigram KCVV Elewijt
