@@ -22,6 +22,7 @@ import { resolve } from "node:path";
 // SectionStack loading components
 // ---------------------------------------------------------------------------
 import ClubLoading from "../club/loading";
+import HulpLoading from "../hulp/loading";
 import JeugdLoading from "../jeugd/loading";
 import PloegenLoading from "../ploegen/loading";
 import SponsorsLoading from "../sponsors/loading";
@@ -29,7 +30,6 @@ import SponsorsLoading from "../sponsors/loading";
 // ---------------------------------------------------------------------------
 // Non-SectionStack loading components
 // ---------------------------------------------------------------------------
-import HulpLoading from "../hulp/loading";
 import EventsLoading from "../events/loading";
 import KalenderLoading from "../kalender/loading";
 import NieuwsLoading from "../nieuws/loading";
@@ -64,6 +64,12 @@ const sectionStackRoutes: SectionStackRoute[] = [
     Loading: ClubLoading,
     expectedTransitions: 3,
     expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
+  },
+  {
+    name: "/hulp",
+    Loading: HulpLoading,
+    expectedTransitions: 1,
+    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100"],
   },
   {
     name: "/jeugd",
@@ -121,11 +127,6 @@ describe("loading.tsx envelope drift guard", () => {
   }
 
   const nonSectionStackRoutes: NonSectionStackRoute[] = [
-    {
-      name: "/hulp",
-      Loading: HulpLoading,
-      expectedRootClass: "min-h-screen",
-    },
     {
       name: "/events",
       Loading: EventsLoading,
