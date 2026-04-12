@@ -27,25 +27,31 @@ import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repo
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Hulp & Contact | KCVV Elewijt",
-  description:
-    "Vind snel de juiste contactpersoon voor jouw vraag. Stel je vraag of blader door de categorieën.",
-  keywords: [
-    "hulp",
-    "contact",
-    "vraag",
-    "verantwoordelijke",
-    "wie contacteren",
-    "KCVV Elewijt",
-  ],
-  openGraph: {
-    title: "Hulp & Contact - KCVV Elewijt",
-    description: "Vind snel de juiste contactpersoon voor jouw vraag",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = `${SITE_CONFIG.siteUrl}/hulp`;
+
+  return {
+    title: "Hulp & Contact | KCVV Elewijt",
+    description:
+      "Vind snel de juiste contactpersoon voor jouw vraag. Stel je vraag of blader door de categorieën.",
+    keywords: [
+      "hulp",
+      "contact",
+      "vraag",
+      "verantwoordelijke",
+      "wie contacteren",
+      "KCVV Elewijt",
+    ],
+    alternates: { canonical },
+    openGraph: {
+      title: "Hulp & Contact - KCVV Elewijt",
+      description: "Vind snel de juiste contactpersoon voor jouw vraag",
+      type: "website",
+      url: canonical,
+      images: [DEFAULT_OG_IMAGE],
+    },
+  };
+}
 
 /**
  * Suspense fallback — search input shell + skeleton grid.
