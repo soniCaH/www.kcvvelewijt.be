@@ -313,9 +313,9 @@ function FinishedLine({ match }: { match: UpcomingMatch }) {
     <>
       <span className="text-white/60 text-xs">{dateStr}</span>
       <span className="font-bold">{match.homeTeam.name}</span>
-      <span className="font-mono font-bold">{match.homeTeam.score}</span>
+      <span className="font-mono font-bold">{match.homeTeam.score ?? "-"}</span>
       <span className="text-white/50">–</span>
-      <span className="font-mono font-bold">{match.awayTeam.score}</span>
+      <span className="font-mono font-bold">{match.awayTeam.score ?? "-"}</span>
       <span className="font-bold">{match.awayTeam.name}</span>
     </>
   );
@@ -425,17 +425,13 @@ Closes #1269 (partial)"
 
 ---
 
-## Task 4: Refactor homepage to use shared utility
+## Task 4: Document homepage fetch decision
 
 **Files:**
 
-- Modify: `apps/web/src/app/page.tsx` (lines 112-153)
+- Modify: `docs/prd/first-team-match-strip.md` (discovered unknowns)
 
-The acceptance criterion says "shared server utility hoists `BffService.getNextMatches()` + `mapMatchesToUpcomingMatches()` for reuse between homepage and root layout." Replace the inline Effect pipeline on the homepage with a call to `getFirstTeamNextMatch()`.
-
-Note: the homepage also needs the full `matches` array for `MatchesSliderSection`, so we can't fully replace the BFF call. But we can use the shared utility for `nextMatch` and keep the existing call for the slider. Actually — the existing call already returns all matches, and the slider uses `upcomingMatches` (the mapped array). The shared utility only returns the first match.
-
-**Decision:** Keep the homepage's existing `getNextMatches()` call for the slider data. The shared utility is for the layout only. The acceptance criterion is satisfied because the shared utility exists and is used by the `(main)` layout — the homepage continues to use its own call because it needs the full array. Document this in the PRD discovered unknowns.
+The shared utility `getFirstTeamNextMatch()` is used only by the `(main)` layout. The homepage retains its existing `BffService.getNextMatches()` + `mapMatchesToUpcomingMatches()` pipeline because `MatchesSliderSection` needs the full matches array, not just the first match. No homepage code change is needed — document this decision in the PRD discovered unknowns.
 
 ### Step 1: No code change needed
 
