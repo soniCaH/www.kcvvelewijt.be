@@ -132,10 +132,10 @@
   /* Font Families
      - Montserrat & IBM Plex Mono: self-hosted via next/font/google (CSS vars injected on <html>)
      - Quasimoda & Stenciletta: loaded via Adobe Typekit (afterInteractive) */
-  --font-family-title: quasimoda, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-family-body: var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-family-alt: stenciletta, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-family-mono: var(--font-ibm-plex-mono), Consolas, "Liberation Mono", Courier, monospace;
+  --font-family-title: quasimoda, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-body: var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-alt: stenciletta, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-mono: var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier", monospace;
 
   /* Font Sizes with Line Heights */
   --font-size-xs: 0.75rem;      /* 12px */
@@ -477,8 +477,7 @@
 /* Scoped to #cc-main so specificity beats the library's :root defaults
    regardless of CSS chunk load order (library CSS loads dynamically). */
 #cc-main {
-  --cc-font-family: var(--font-montserrat), -apple-system, system-ui, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --cc-font-family: var(--font-family-body);
 
   /* Surface — black base */
   --cc-bg: var(--color-kcvv-black);

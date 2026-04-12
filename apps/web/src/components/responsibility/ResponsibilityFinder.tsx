@@ -1064,8 +1064,7 @@ function ResultCard({
               <h3
                 className="text-2xl font-bold text-gray-900"
                 style={{
-                  fontFamily:
-                    "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
+                  fontFamily: "var(--font-family-title)",
                 }}
               >
                 {path.question}
