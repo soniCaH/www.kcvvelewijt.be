@@ -89,6 +89,17 @@ import {
   Pause,
   Play,
 
+  // Zoom & Viewport
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  Expand,
+  Minimize,
+
+  // Actions
+  Download,
+
   // Misc
   Plus,
   Zap,
@@ -182,6 +193,17 @@ export const icons = {
   // Media controls
   pause: Pause,
   play: Play,
+
+  // Zoom & Viewport
+  "zoom-in": ZoomIn,
+  "zoom-out": ZoomOut,
+  maximize2: Maximize2,
+  minimize2: Minimize2,
+  expand: Expand,
+  minimize: Minimize,
+
+  // Actions
+  download: Download,
 
   // Misc
   plus: Plus,
@@ -323,6 +345,17 @@ export {
   // Media controls
   Pause,
   Play,
+
+  // Zoom & Viewport
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  Expand,
+  Minimize,
+
+  // Actions
+  Download,
 
   // Misc
   Plus,
