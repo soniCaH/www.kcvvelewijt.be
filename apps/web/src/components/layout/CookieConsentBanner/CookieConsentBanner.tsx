@@ -17,6 +17,9 @@ export function CookieConsentBanner() {
   useEffect(() => {
     let isMounted = true;
 
+    // Dynamically load library CSS — keeps it out of the critical path
+    import("vanilla-cookieconsent/dist/cookieconsent.css");
+
     CookieConsent.run({
       categories: {
         necessary: {
