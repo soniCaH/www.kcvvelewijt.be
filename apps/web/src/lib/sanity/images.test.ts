@@ -35,28 +35,28 @@ describe("Sanity CDN image constants", () => {
   }
 
   it("hero images use w=1600", () => {
-    expect(images.HISTORY_24_25_HERO).toContain("w=1600");
-    expect(images.ULTRAS_HEADER_HERO).toContain("w=1600");
+    expect(images.HISTORY_24_25_HERO).toMatch(/[?&]w=1600(&|$)/);
+    expect(images.ULTRAS_HEADER_HERO).toMatch(/[?&]w=1600(&|$)/);
   });
 
   it("timeline images use w=1024", () => {
-    expect(images.HISTORY_52_53).toContain("w=1024");
-    expect(images.HISTORY_58_59).toContain("w=1024");
-    expect(images.HISTORY_63_64).toContain("w=1024");
-    expect(images.HISTORY_FUSIE).toContain("w=1024");
-    expect(images.HISTORY_BVB).toContain("w=1024");
-    expect(images.HISTORY_2018).toContain("w=1024");
-    expect(images.HISTORY_2022).toContain("w=1024");
-    expect(images.HISTORY_24_25).toContain("w=1024");
+    expect(images.HISTORY_52_53).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_58_59).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_63_64).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_FUSIE).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_BVB).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_2018).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_2022).toMatch(/[?&]w=1024(&|$)/);
+    expect(images.HISTORY_24_25).toMatch(/[?&]w=1024(&|$)/);
   });
 
   it("editorial card images use w=900", () => {
-    expect(images.HISTORY_24_25_CARD).toContain("w=900");
-    expect(images.ULTRAS_HEADER_CARD).toContain("w=900");
+    expect(images.HISTORY_24_25_CARD).toMatch(/[?&]w=900(&|$)/);
+    expect(images.ULTRAS_HEADER_CARD).toMatch(/[?&]w=900(&|$)/);
   });
 
   it("ultras content images use w=1440", () => {
-    expect(images.ULTRAS_KAMPIOEN).toContain("w=1440");
-    expect(images.ULTRAS_SJR).toContain("w=1440");
+    expect(images.ULTRAS_KAMPIOEN).toMatch(/[?&]w=1440(&|$)/);
+    expect(images.ULTRAS_SJR).toMatch(/[?&]w=1440(&|$)/);
   });
 });
