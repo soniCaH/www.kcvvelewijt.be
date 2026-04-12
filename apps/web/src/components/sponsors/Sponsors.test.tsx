@@ -52,6 +52,10 @@ describe("Sponsors", () => {
     },
   ];
 
+  const expectedAltTexts = mockSponsors.map(
+    (s) => `${s.name} — sponsor KCVV Elewijt`,
+  );
+
   describe("Rendering", () => {
     it("renders section with default title", () => {
       render(<Sponsors sponsors={mockSponsors} />);
@@ -90,23 +94,10 @@ describe("Sponsors", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
       const logos = screen.getAllByRole("img");
-      expect(logos).toHaveLength(4);
-      expect(logos[0]).toHaveAttribute(
-        "alt",
-        "Sponsor One — sponsor KCVV Elewijt",
-      );
-      expect(logos[1]).toHaveAttribute(
-        "alt",
-        "Sponsor Two — sponsor KCVV Elewijt",
-      );
-      expect(logos[2]).toHaveAttribute(
-        "alt",
-        "Sponsor Three — sponsor KCVV Elewijt",
-      );
-      expect(logos[3]).toHaveAttribute(
-        "alt",
-        "Sponsor Four — sponsor KCVV Elewijt",
-      );
+      expect(logos).toHaveLength(mockSponsors.length);
+      logos.forEach((logo, i) => {
+        expect(logo).toHaveAttribute("alt", expectedAltTexts[i]);
+      });
     });
 
     it('renders "View All" link by default', () => {
@@ -240,18 +231,9 @@ describe("Sponsors", () => {
     it("has descriptive alt text for all logos including club name", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
-      expect(
-        screen.getByAltText("Sponsor One — sponsor KCVV Elewijt"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByAltText("Sponsor Two — sponsor KCVV Elewijt"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByAltText("Sponsor Three — sponsor KCVV Elewijt"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByAltText("Sponsor Four — sponsor KCVV Elewijt"),
-      ).toBeInTheDocument();
+      for (const alt of expectedAltTexts) {
+        expect(screen.getByAltText(alt)).toBeInTheDocument();
+      }
     });
 
     it("has descriptive aria-labels for external links", () => {
