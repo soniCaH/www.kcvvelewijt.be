@@ -112,8 +112,6 @@ The only new code is:
 
 ## 8. Discovered unknowns section (filled during implementation)
 
-_Empty — to be filled during Ralph loop._
-
-```
-- [date] Discovered: [what was found] → [action taken: new issue #N / PRD updated / resolved inline]
+```text
+- [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline
 ```
