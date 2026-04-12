@@ -7,6 +7,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { formatSponsorAlt } from "../formatSponsorAlt";
 import type { Sponsor } from "../Sponsors";
 
 const sizeMap = {
@@ -44,7 +45,7 @@ export const SponsorCard = ({
     >
       <Image
         src={sponsor.logo}
-        alt={sponsor.name}
+        alt={formatSponsorAlt(sponsor.name)}
         width={image.width}
         height={image.height}
         className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"

@@ -8,6 +8,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { formatSponsorAlt } from "../formatSponsorAlt";
 
 const sizeMap = {
   xs: { width: 80, height: 53 },
@@ -41,7 +42,7 @@ export const SponsorLogo = ({
   const img = (
     <Image
       src={logo}
-      alt={name}
+      alt={formatSponsorAlt(name)}
       width={width}
       height={height}
       className={cn("object-contain", className)}

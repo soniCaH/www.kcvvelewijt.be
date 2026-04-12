@@ -52,6 +52,10 @@ describe("Sponsors", () => {
     },
   ];
 
+  const expectedAltTexts = mockSponsors.map(
+    (s) => `${s.name} — sponsor KCVV Elewijt`,
+  );
+
   describe("Rendering", () => {
     it("renders section with default title", () => {
       render(<Sponsors sponsors={mockSponsors} />);
@@ -86,15 +90,14 @@ describe("Sponsors", () => {
       expect(screen.getByText("Thank you to our sponsors")).toBeInTheDocument();
     });
 
-    it("renders all sponsor logos", () => {
+    it("renders all sponsor logos with descriptive alt text", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
       const logos = screen.getAllByRole("img");
-      expect(logos).toHaveLength(4);
-      expect(logos[0]).toHaveAttribute("alt", "Sponsor One");
-      expect(logos[1]).toHaveAttribute("alt", "Sponsor Two");
-      expect(logos[2]).toHaveAttribute("alt", "Sponsor Three");
-      expect(logos[3]).toHaveAttribute("alt", "Sponsor Four");
+      expect(logos).toHaveLength(mockSponsors.length);
+      logos.forEach((logo, i) => {
+        expect(logo).toHaveAttribute("alt", expectedAltTexts[i]);
+      });
     });
 
     it('renders "View All" link by default', () => {
@@ -225,13 +228,12 @@ describe("Sponsors", () => {
       expect(heading).toHaveTextContent("Onze sponsors");
     });
 
-    it("has descriptive alt text for all logos", () => {
+    it("has descriptive alt text for all logos including club name", () => {
       render(<Sponsors sponsors={mockSponsors} />);
 
-      expect(screen.getByAltText("Sponsor One")).toBeInTheDocument();
-      expect(screen.getByAltText("Sponsor Two")).toBeInTheDocument();
-      expect(screen.getByAltText("Sponsor Three")).toBeInTheDocument();
-      expect(screen.getByAltText("Sponsor Four")).toBeInTheDocument();
+      for (const alt of expectedAltTexts) {
+        expect(screen.getByAltText(alt)).toBeInTheDocument();
+      }
     });
 
     it("has descriptive aria-labels for external links", () => {
@@ -276,7 +278,9 @@ describe("Sponsors", () => {
 
       render(<Sponsors sponsors={specialSponsors} />);
 
-      expect(screen.getByAltText("Café & Bar")).toBeInTheDocument();
+      expect(
+        screen.getByAltText("Café & Bar — sponsor KCVV Elewijt"),
+      ).toBeInTheDocument();
     });
   });
 });

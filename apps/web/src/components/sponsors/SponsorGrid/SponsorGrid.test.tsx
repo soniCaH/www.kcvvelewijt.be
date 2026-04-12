@@ -30,11 +30,15 @@ const sponsors: Sponsor[] = [
 ];
 
 describe("SponsorGrid", () => {
-  it("renders all sponsors", () => {
+  it("renders all sponsors with descriptive alt text", () => {
     render(<SponsorGrid sponsors={sponsors} />);
 
-    expect(screen.getByAltText("Sponsor A")).toBeInTheDocument();
-    expect(screen.getByAltText("Sponsor B")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Sponsor A — sponsor KCVV Elewijt"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Sponsor B — sponsor KCVV Elewijt"),
+    ).toBeInTheDocument();
   });
 
   it("returns null for empty sponsors", () => {
