@@ -1,4 +1,5 @@
 import { EditorialCard } from "../EditorialCard/EditorialCard";
+import { HISTORY_24_25_CARD, ULTRAS_HEADER_CARD } from "@/lib/sanity/images";
 
 interface CardData {
   href: string;
@@ -19,7 +20,7 @@ const cards: CardData[] = [
       "Van een bescheiden begin op een modderig veld tot een bruisende club met honderden leden. Ontdek het verhaal van KCVV.",
     arrowText: "Lees meer",
     featured: true,
-    backgroundImage: "/images/history/history-24-25.jpg",
+    backgroundImage: HISTORY_24_25_CARD,
   },
   {
     href: "/club/bestuur",
@@ -40,7 +41,7 @@ const cards: CardData[] = [
     tag: "Ultras",
     title: "De 12de man",
     arrowText: "Meer info",
-    backgroundImage: "/images/ultras/header-ultras.jpg",
+    backgroundImage: ULTRAS_HEADER_CARD,
   },
   {
     href: "/club/angels",

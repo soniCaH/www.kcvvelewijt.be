@@ -5,6 +5,17 @@ import {
   type SectionConfig,
 } from "@/components/design-system/SectionStack/SectionStack";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
+import {
+  HISTORY_52_53,
+  HISTORY_58_59,
+  HISTORY_63_64,
+  HISTORY_FUSIE,
+  HISTORY_BVB,
+  HISTORY_2018,
+  HISTORY_2022,
+  HISTORY_24_25,
+  HISTORY_24_25_HERO,
+} from "@/lib/sanity/images";
 
 function TimelineCard({
   date,
@@ -266,7 +277,7 @@ function TimelineContent() {
 
       {/* Image: SK Elewijt kampioen 52-53 */}
       <TimelineImage
-        src="/images/history/history-52-53.png"
+        src={HISTORY_52_53}
         alt="SK Elewijt kampioen 52-53"
         caption={
           <>
@@ -285,7 +296,7 @@ function TimelineContent() {
 
       {/* Image: SK Elewijt kampioen 58-59 */}
       <TimelineImage
-        src="/images/history/history-58-59.png"
+        src={HISTORY_58_59}
         alt="SK Elewijt kampioen 58-59"
         caption={
           <>
@@ -317,7 +328,7 @@ function TimelineContent() {
 
       {/* Image: FC Elewijt kampioen 63-64 */}
       <TimelineImage
-        src="/images/history/history-63-64.png"
+        src={HISTORY_63_64}
         alt="FC Elewijt kampioen 63-64"
         caption={
           <>
@@ -336,7 +347,7 @@ function TimelineContent() {
 
       {/* Image: Fusieclub VV Elewijt */}
       <TimelineImage
-        src="/images/history/history-fusie.png"
+        src={HISTORY_FUSIE}
         alt="De fusieclub VV Elewijt"
         caption={
           <p>
@@ -386,7 +397,7 @@ function TimelineContent() {
 
       {/* Image: Beker van Brabant */}
       <TimelineImage
-        src="/images/history/history-bvb.png"
+        src={HISTORY_BVB}
         alt="Crossing Elewijt won de beker van Brabant in 1988"
         caption={
           <p>
@@ -438,7 +449,7 @@ function TimelineContent() {
 
       {/* Image: Kampioen 2018-2019 */}
       <TimelineImage
-        src="/images/history/history-2018.jpeg"
+        src={HISTORY_2018}
         alt="KCVV Elewijt speelt kampioen in 2018-2019 met 79 punten op 90"
         caption={
           <p className="font-semibold">
@@ -467,7 +478,7 @@ function TimelineContent() {
 
       {/* Image: Promotie eerste provinciale */}
       <TimelineImage
-        src="/images/history/history-2022.jpeg"
+        src={HISTORY_2022}
         alt="KCVV Elewijt promoveert via eindronde naar eerste provinciale"
         caption={
           <p className="font-semibold">
@@ -523,7 +534,7 @@ function TimelineContent() {
 
       {/* Image: Kampioen 2024-2025 */}
       <TimelineImage
-        src="/images/history/history-24-25.jpg"
+        src={HISTORY_24_25}
         alt="KCVV Elewijt kampioen 2024-2025 in eerste provinciale"
         caption={
           <>
@@ -593,7 +604,7 @@ export function HistoryContent() {
       paddingBottom: "pb-0",
       content: (
         <PageHero
-          image="/images/history/history-24-25.jpg"
+          image={HISTORY_24_25_HERO}
           imageAlt="KCVV Elewijt kampioen 2024-2025"
           label="Onze club"
           headline={

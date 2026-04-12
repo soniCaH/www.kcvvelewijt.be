@@ -4,6 +4,11 @@ import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageHero } from "@/components/design-system/PageHero";
+import {
+  ULTRAS_HEADER_HERO,
+  ULTRAS_KAMPIOEN,
+  ULTRAS_SJR,
+} from "@/lib/sanity/images";
 
 export const metadata: Metadata = {
   title: "KCVV Ultras | KCVV Elewijt",
@@ -29,7 +34,7 @@ export default function UltrasPage() {
         ])}
       />
       <PageHero
-        image="/images/ultras/header-ultras.jpg"
+        image={ULTRAS_HEADER_HERO}
         imageAlt="KCVV Ultra's sfeeractie"
         label="Supporters"
         headline={
@@ -67,7 +72,7 @@ export default function UltrasPage() {
 
           <div className="my-6">
             <Image
-              src="/images/ultras/ultras-kampioen.jpeg"
+              src={ULTRAS_KAMPIOEN}
               alt="KCVV Ultra's op de kampioenenmatch in 3e provinciale"
               width={1440}
               height={810}
@@ -126,7 +131,7 @@ export default function UltrasPage() {
 
           <div className="my-6">
             <Image
-              src="/images/ultras/ultras-sjr.jpg"
+              src={ULTRAS_SJR}
               alt="KCVV Ultra's schijt-je-rijk affiche"
               width={1440}
               height={810}
