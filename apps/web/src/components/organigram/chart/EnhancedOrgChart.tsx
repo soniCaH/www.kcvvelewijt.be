@@ -35,8 +35,8 @@ import {
   Expand,
   Minimize,
   Download,
-} from "lucide-react";
-import { Menu } from "@/lib/icons";
+  Menu,
+} from "@/lib/icons";
 import { DepartmentFilter } from "../shared/DepartmentFilter";
 import { MobileNavigationDrawer } from "./MobileNavigationDrawer";
 import { ContactOverlay } from "./ContactOverlay";

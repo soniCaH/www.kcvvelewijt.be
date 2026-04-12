@@ -13,7 +13,10 @@ import {
   Trophy, Activity, CircleDot, Flag, Timer, RectangleVertical, Square,
   Heart, Shield,
   Handshake, LayoutGrid, Network,
-  Pause, Play, Plus, Zap,
+  Pause, Play,
+  ZoomIn, ZoomOut, Maximize2, Minimize2, Expand, Minimize,
+  Download,
+  Plus, Zap,
 } from 'lucide-react';
 
 <Meta title="Foundation/Spacing & Icons" />
@@ -211,6 +214,19 @@ Use the `<Icon>` component or import directly from `@/lib/icons`.
 <IconGrid label="Media Controls" icons={[
   { Icon: Pause, name: 'pause' },
   { Icon: Play, name: 'play' },
+]} />
+
+<IconGrid label="Zoom & Viewport" icons={[
+  { Icon: ZoomIn, name: 'zoom-in' },
+  { Icon: ZoomOut, name: 'zoom-out' },
+  { Icon: Maximize2, name: 'maximize2' },
+  { Icon: Minimize2, name: 'minimize2' },
+  { Icon: Expand, name: 'expand' },
+  { Icon: Minimize, name: 'minimize' },
+]} />
+
+<IconGrid label="Actions" icons={[
+  { Icon: Download, name: 'download' },
 ]} />
 
 <IconGrid label="Misc" icons={[
