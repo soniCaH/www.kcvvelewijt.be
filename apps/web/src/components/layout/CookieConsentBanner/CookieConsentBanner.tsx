@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import "vanilla-cookieconsent/dist/cookieconsent.css";
 import * as CookieConsent from "vanilla-cookieconsent";
 import { updateConsentState } from "@/lib/analytics/gtm-consent";
 
@@ -17,6 +16,9 @@ function syncConsentState() {
 export function CookieConsentBanner() {
   useEffect(() => {
     let isMounted = true;
+
+    // Dynamically load library CSS — keeps it out of the critical path
+    import("vanilla-cookieconsent/dist/cookieconsent.css");
 
     CookieConsent.run({
       categories: {

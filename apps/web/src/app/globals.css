@@ -472,9 +472,9 @@
 }
 
 /* ===== vanilla-cookieconsent Theme — KCVV Elewijt ===== */
-/* Placed on :root (after library import) so cascade position wins over the
-   library's own :root defaults, covering both the consent and preferences modal. */
-:root {
+/* Scoped to #cc-main so specificity beats the library's :root defaults
+   regardless of CSS chunk load order (library CSS loads dynamically). */
+#cc-main {
   --cc-font-family: "Montserrat", "-apple-system", system-ui, "BlinkMacSystemFont",
     "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
 
