@@ -394,8 +394,7 @@ export function ResponsibilityFinder({
         <div className="flex flex-wrap items-center gap-3 text-2xl md:text-4xl font-bold text-kcvv-gray-blue mb-8">
           <span
             style={{
-              fontFamily:
-                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
+              fontFamily: "var(--font-family-title)",
             }}
           >
             Ik ben
@@ -462,8 +461,7 @@ export function ResponsibilityFinder({
 
           <span
             style={{
-              fontFamily:
-                "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
+              fontFamily: "var(--font-family-title)",
             }}
           >
             en ik

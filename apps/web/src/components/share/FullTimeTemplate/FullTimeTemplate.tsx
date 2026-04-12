@@ -1,10 +1,10 @@
 import React from "react";
-import { CAPTURE_WIDTH, CAPTURE_HEIGHT } from "../constants";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import {
+  BODY_FONT,
+  CAPTURE_HEIGHT,
+  CAPTURE_WIDTH,
+  TITLE_FONT,
+} from "../constants";
 const TORN_BOTTOM_CLIP = `polygon(
   0% 40%, 2% 38%, 5% 41%, 8% 38%, 11% 41%, 14% 38%,
   17% 41%, 20% 38%, 23% 41%, 26% 38%, 29% 41%,
@@ -104,7 +104,7 @@ export function FullTimeTemplate({
           position: "absolute",
           top: "180px",
           left: "80px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "380px",
           lineHeight: 1,
@@ -198,7 +198,7 @@ export function FullTimeTemplate({
           position: "absolute",
           top: "640px",
           left: "80px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: m.headlineSize,
           lineHeight: 0.84,
@@ -228,7 +228,7 @@ export function FullTimeTemplate({
       >
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: m.accent,
@@ -240,7 +240,7 @@ export function FullTimeTemplate({
         </div>
         <div
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "68px",
             color: "white",
@@ -254,7 +254,7 @@ export function FullTimeTemplate({
           <>
             <div
               style={{
-                fontFamily: BODY,
+                fontFamily: BODY_FONT,
                 fontWeight: 800,
                 fontSize: "36px",
                 color: m.accent,
@@ -265,7 +265,7 @@ export function FullTimeTemplate({
             </div>
             <div
               style={{
-                fontFamily: TITLE,
+                fontFamily: TITLE_FONT,
                 fontWeight: 900,
                 fontSize: "68px",
                 color: "rgba(255,255,255,0.65)",
@@ -293,7 +293,7 @@ export function FullTimeTemplate({
       >
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "32px",
             color: "rgba(255,255,255,0.35)",
@@ -325,7 +325,7 @@ export function FullTimeTemplate({
         />
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.48)",
@@ -364,7 +364,7 @@ export function FullTimeTemplate({
         />
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "26px",
             color: "rgba(255,255,255,0.38)",

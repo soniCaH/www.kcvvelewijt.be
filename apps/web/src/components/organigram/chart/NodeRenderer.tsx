@@ -15,7 +15,9 @@
 import type { OrgChartNode } from "@/types/organigram";
 
 // Design-token equivalents used as literal values because d3-org-chart renders
-// raw HTML strings where CSS custom properties are not available.
+// raw HTML strings where most CSS custom properties are not reliably available.
+// Exception: --font-family-mono IS used via var() in node styles (phone/email
+// badges) because the rendered HTML lives inside the DOM where :root vars apply.
 const NODE_ACCENT_COLOR = "#4acf52";
 const NODE_ACCENT_GRADIENT_END = "#41b147";
 const NODE_TEXT_PRIMARY = "#31404b";

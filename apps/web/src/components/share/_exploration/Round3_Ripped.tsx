@@ -6,11 +6,7 @@
  * Quasimoda 900 for all display type. Bright green (#4acf52) for accents only.
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 const TORN_CLIP = `polygon(
   0% 22%,
@@ -88,7 +84,7 @@ export function Round3_Ripped({
             left: 0,
             right: 0,
             textAlign: "center",
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: `${size}px`,
             lineHeight: 0.84,
@@ -159,7 +155,7 @@ export function Round3_Ripped({
             left: 0,
             right: 0,
             textAlign: "center",
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "680px",
             lineHeight: 1,
@@ -181,7 +177,7 @@ export function Round3_Ripped({
           right: 0,
           transform: "translateY(-55%)",
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "500px",
           lineHeight: 0.84,
@@ -224,7 +220,7 @@ export function Round3_Ripped({
           left: "-200px",
           top: "50%",
           transform: "translateY(-50%) rotate(-90deg)",
-          fontFamily: BODY,
+          fontFamily: BODY_FONT,
           fontWeight: 900,
           fontSize: "42px",
           letterSpacing: "0.25em",
@@ -244,7 +240,7 @@ export function Round3_Ripped({
           right: "-200px",
           top: "50%",
           transform: "translateY(-50%) rotate(90deg)",
-          fontFamily: BODY,
+          fontFamily: BODY_FONT,
           fontWeight: 900,
           fontSize: "42px",
           letterSpacing: "0.25em",
@@ -278,7 +274,7 @@ export function Round3_Ripped({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             letterSpacing: "0.12em",
@@ -308,7 +304,7 @@ export function Round3_Ripped({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "130px",
             lineHeight: 1,
@@ -320,7 +316,7 @@ export function Round3_Ripped({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "36px",
             color: "rgba(255,255,255,0.5)",

@@ -12,11 +12,7 @@
  * - Dark green footer with match context
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 /** Organic blob clip-path for right photo zone — wavy left edge, top to ~54% height */
 const SIDE_BLOB_CLIP = `polygon(
@@ -116,7 +112,7 @@ export function Round4_SideBlob({
             position: "absolute",
             top: "80px",
             right: "40px",
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "560px",
             lineHeight: 1,
@@ -211,7 +207,7 @@ export function Round4_SideBlob({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.45)",
@@ -233,7 +229,7 @@ export function Round4_SideBlob({
       >
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: "#4acf52",
@@ -248,7 +244,7 @@ export function Round4_SideBlob({
         {/* GOAL in white — extends beyond blob boundary */}
         <div
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "300px",
             lineHeight: 0.84,
@@ -265,7 +261,7 @@ export function Round4_SideBlob({
         {/* ! in bright green — anchors in the black zone */}
         <div
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "230px",
             lineHeight: 0.84,
@@ -301,7 +297,7 @@ export function Round4_SideBlob({
         >
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "24px",
               color: "rgba(255,255,255,0.42)",
@@ -314,7 +310,7 @@ export function Round4_SideBlob({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               lineHeight: 1,
@@ -346,7 +342,7 @@ export function Round4_SideBlob({
         >
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "24px",
               color: "rgba(255,255,255,0.42)",
@@ -359,7 +355,7 @@ export function Round4_SideBlob({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "110px",
               lineHeight: 1,
@@ -378,7 +374,7 @@ export function Round4_SideBlob({
           position: "absolute",
           top: "1120px",
           left: "40px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "420px",
           lineHeight: 1,
@@ -406,7 +402,7 @@ export function Round4_SideBlob({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "25px",
             color: "rgba(255,255,255,0.42)",
@@ -418,7 +414,7 @@ export function Round4_SideBlob({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "66px",
             lineHeight: 1.05,
@@ -431,7 +427,7 @@ export function Round4_SideBlob({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "36px",
             color: "#4acf52",
@@ -455,7 +451,7 @@ export function Round4_SideBlob({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 500,
             fontSize: "30px",
             color: "rgba(255,255,255,0.3)",
@@ -509,7 +505,7 @@ export function Round4_SideBlob({
       >
         <div
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "52px",
             color: "white",
@@ -522,7 +518,7 @@ export function Round4_SideBlob({
         </div>
         <div
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "32px",
             color: "#4acf52",

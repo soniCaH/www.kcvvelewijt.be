@@ -1,9 +1,5 @@
 import React from "react";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 const TORN_BOTTOM_CLIP = `polygon(
   0% 40%, 2% 38%, 5% 41%, 8% 38%, 11% 41%, 14% 38%,
   17% 41%, 20% 38%, 23% 41%, 26% 38%, 29% 41%,
@@ -191,7 +187,7 @@ export function YellowCardKcvvTemplate({
           position: "absolute",
           top: "640px",
           left: "80px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "245px",
           lineHeight: 0.84,
@@ -224,7 +220,7 @@ export function YellowCardKcvvTemplate({
         <img src="/images/kcvv-logo.png" alt="KCVV" width={88} height={88} />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.48)",
@@ -250,7 +246,7 @@ export function YellowCardKcvvTemplate({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: ACCENT_COLOR,
@@ -262,7 +258,7 @@ export function YellowCardKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "74px",
             lineHeight: 1,
@@ -275,7 +271,7 @@ export function YellowCardKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "40px",
             color: ACCENT_COLOR,
@@ -303,7 +299,7 @@ export function YellowCardKcvvTemplate({
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "24px",
               color: "rgba(255,255,255,0.45)",
@@ -313,7 +309,7 @@ export function YellowCardKcvvTemplate({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               color: "white",
@@ -351,7 +347,7 @@ export function YellowCardKcvvTemplate({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "54px",
             color: "white",
@@ -362,7 +358,7 @@ export function YellowCardKcvvTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "32px",
             color: "#4acf52",
@@ -396,7 +392,7 @@ export function YellowCardKcvvTemplate({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "26px",
             color: "rgba(255,255,255,0.38)",

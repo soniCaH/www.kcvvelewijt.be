@@ -9,11 +9,7 @@
  * All match info lives in the generous dark green space.
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 /** Torn-paper clip for the lower dark-green zone — jagged top edge at ~40% height */
 const TORN_BOTTOM_CLIP = `polygon(
@@ -98,7 +94,7 @@ export function Round4_TornDown({
               left: 0,
               right: 0,
               textAlign: "center",
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "520px",
               lineHeight: 0.9,
@@ -207,7 +203,7 @@ export function Round4_TornDown({
           left: 0,
           right: 0,
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "530px",
           lineHeight: 0.84,
@@ -229,7 +225,7 @@ export function Round4_TornDown({
           left: 0,
           right: 0,
           textAlign: "center",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "490px",
           lineHeight: 0.84,
@@ -266,7 +262,7 @@ export function Round4_TornDown({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.48)",
@@ -284,7 +280,7 @@ export function Round4_TornDown({
           left: "-205px",
           top: "50%",
           transform: "translateY(-50%) rotate(-90deg)",
-          fontFamily: BODY,
+          fontFamily: BODY_FONT,
           fontWeight: 900,
           fontSize: "38px",
           letterSpacing: "0.26em",
@@ -313,7 +309,7 @@ export function Round4_TornDown({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: "rgba(255,255,255,0.5)",
@@ -325,7 +321,7 @@ export function Round4_TornDown({
         </span>
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "200px",
             lineHeight: 0.88,
@@ -362,7 +358,7 @@ export function Round4_TornDown({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: "rgba(255,255,255,0.5)",
@@ -374,7 +370,7 @@ export function Round4_TornDown({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "72px",
             lineHeight: 1,
@@ -411,7 +407,7 @@ export function Round4_TornDown({
         />
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "90px",
             color: "#4acf52",
@@ -437,7 +433,7 @@ export function Round4_TornDown({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "30px",
             color: "rgba(255,255,255,0.45)",

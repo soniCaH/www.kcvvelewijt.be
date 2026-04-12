@@ -1,9 +1,5 @@
 import React from "react";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 const TORN_POLYGON =
   "polygon(0% 40%, 2% 38%, 5% 41%, 8% 38%, 11% 41%, 14% 38%, 17% 41%, 20% 38%, 23% 41%, 26% 38%, 29% 41%, 32% 38%, 35% 41%, 38% 38%, 41% 41%, 44% 38%, 47% 41%, 50% 38%, 53% 41%, 56% 38%, 59% 41%, 62% 38%, 65% 41%, 68% 38%, 71% 41%, 74% 38%, 77% 41%, 80% 38%, 83% 41%, 86% 38%, 89% 41%, 92% 38%, 95% 41%, 98% 38%, 100% 40%, 100% 100%, 0% 100%)";
@@ -35,7 +31,7 @@ export function GoalOpponentTemplate({
         background: "#0d1810",
         position: "relative",
         overflow: "hidden",
-        fontFamily: BODY,
+        fontFamily: BODY_FONT,
       }}
     >
       {/* ── Upper zone: subtle radial gradient (no photo) ── */}
@@ -187,7 +183,7 @@ export function GoalOpponentTemplate({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.28)",
@@ -204,7 +200,7 @@ export function GoalOpponentTemplate({
           position: "absolute",
           left: "80px",
           top: "635px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "260px",
           color: "rgba(255,255,255,0.35)",
@@ -233,7 +229,7 @@ export function GoalOpponentTemplate({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.35)",
@@ -245,7 +241,7 @@ export function GoalOpponentTemplate({
         </span>
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "160px",
             color: "rgba(255,255,255,0.5)",
@@ -257,7 +253,7 @@ export function GoalOpponentTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "36px",
             color: "rgba(255,255,255,0.28)",
@@ -284,7 +280,7 @@ export function GoalOpponentTemplate({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "50px",
             color: "rgba(255,255,255,0.45)",
@@ -296,7 +292,7 @@ export function GoalOpponentTemplate({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "30px",
             color: "rgba(255,255,255,0.25)",
@@ -334,7 +330,7 @@ export function GoalOpponentTemplate({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "26px",
             color: "rgba(255,255,255,0.2)",

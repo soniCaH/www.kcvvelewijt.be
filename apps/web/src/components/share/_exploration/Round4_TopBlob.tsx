@@ -10,11 +10,7 @@
  * - Bright green bottom bar with match name + chevron marks
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 /** Organic blob clip-path for the photo zone — jagged bottom, slight top irregularity */
 const BLOB_CLIP = `polygon(
@@ -150,7 +146,7 @@ export function Round4_TopBlob({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.45)",
@@ -218,7 +214,7 @@ export function Round4_TopBlob({
           >
             <span
               style={{
-                fontFamily: TITLE,
+                fontFamily: TITLE_FONT,
                 fontWeight: 900,
                 fontSize: "420px",
                 color: "rgba(0,0,0,0.18)",
@@ -259,7 +255,7 @@ export function Round4_TopBlob({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "380px",
             color: "white",
@@ -270,7 +266,7 @@ export function Round4_TopBlob({
         </span>
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "380px",
             color: "#008755",
@@ -303,7 +299,7 @@ export function Round4_TopBlob({
         >
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "28px",
               color: "rgba(255,255,255,0.5)",
@@ -315,7 +311,7 @@ export function Round4_TopBlob({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               lineHeight: 1,
@@ -327,7 +323,7 @@ export function Round4_TopBlob({
           </span>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 700,
               fontSize: "38px",
               color: "rgba(255,255,255,0.7)",
@@ -361,7 +357,7 @@ export function Round4_TopBlob({
           />
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "88px",
               color: "white",
@@ -383,7 +379,7 @@ export function Round4_TopBlob({
         >
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "28px",
               color: "rgba(255,255,255,0.5)",
@@ -395,7 +391,7 @@ export function Round4_TopBlob({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               lineHeight: 1,
@@ -407,7 +403,7 @@ export function Round4_TopBlob({
           </span>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 700,
               fontSize: "38px",
               color: "#4acf52",
@@ -465,7 +461,7 @@ export function Round4_TopBlob({
         >
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "58px",
               color: "white",
@@ -478,7 +474,7 @@ export function Round4_TopBlob({
           </span>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 700,
               fontSize: "34px",
               color: "#4acf52",

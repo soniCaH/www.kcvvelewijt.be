@@ -12,11 +12,7 @@
  * - Match name at the very bottom
  */
 import type { ExplorationProps } from "./StyleA_StackedType";
-
-const TITLE: React.CSSProperties["fontFamily"] =
-  "quasimoda, -apple-system, system-ui, Montserrat, Verdana, sans-serif";
-const BODY: React.CSSProperties["fontFamily"] =
-  'montserrat, "Helvetica Neue", Arial, sans-serif';
+import { BODY_FONT, TITLE_FONT } from "../constants";
 
 /** Torn-paper clip for the dark-green lower zone — jagged top edge at ~40% height */
 const TORN_BOTTOM_CLIP = `polygon(
@@ -98,7 +94,7 @@ export function Round5_TornLeft({
               position: "absolute",
               top: "-20px",
               right: "20px",
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "580px",
               lineHeight: 0.9,
@@ -228,7 +224,7 @@ export function Round5_TornLeft({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "28px",
             color: "rgba(255,255,255,0.48)",
@@ -246,7 +242,7 @@ export function Round5_TornLeft({
           position: "absolute",
           top: "635px",
           left: "80px",
-          fontFamily: TITLE,
+          fontFamily: TITLE_FONT,
           fontWeight: 900,
           fontSize: "260px",
           lineHeight: 0.84,
@@ -278,7 +274,7 @@ export function Round5_TornLeft({
       >
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "26px",
             color: "#4acf52",
@@ -290,7 +286,7 @@ export function Round5_TornLeft({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 800,
             fontSize: "74px",
             lineHeight: 1,
@@ -303,7 +299,7 @@ export function Round5_TornLeft({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "40px",
             color: "#4acf52",
@@ -331,7 +327,7 @@ export function Round5_TornLeft({
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "24px",
               color: "rgba(255,255,255,0.45)",
@@ -344,7 +340,7 @@ export function Round5_TornLeft({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "160px",
               lineHeight: 1,
@@ -370,7 +366,7 @@ export function Round5_TornLeft({
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span
             style={{
-              fontFamily: BODY,
+              fontFamily: BODY_FONT,
               fontWeight: 800,
               fontSize: "24px",
               color: "rgba(255,255,255,0.45)",
@@ -383,7 +379,7 @@ export function Round5_TornLeft({
           </span>
           <span
             style={{
-              fontFamily: TITLE,
+              fontFamily: TITLE_FONT,
               fontWeight: 900,
               fontSize: "110px",
               lineHeight: 1,
@@ -413,7 +409,7 @@ export function Round5_TornLeft({
       >
         <span
           style={{
-            fontFamily: TITLE,
+            fontFamily: TITLE_FONT,
             fontWeight: 900,
             fontSize: "54px",
             color: "white",
@@ -426,7 +422,7 @@ export function Round5_TornLeft({
         </span>
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 600,
             fontSize: "32px",
             color: "#4acf52",
@@ -463,7 +459,7 @@ export function Round5_TornLeft({
         />
         <span
           style={{
-            fontFamily: BODY,
+            fontFamily: BODY_FONT,
             fontWeight: 700,
             fontSize: "26px",
             color: "rgba(255,255,255,0.38)",
