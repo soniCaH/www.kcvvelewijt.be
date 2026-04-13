@@ -114,4 +114,5 @@ The only new code is:
 
 ```text
 - [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline
+- [2026-04-13] GTM manual step: create triggers for `firstteam_strip_clicked` and `firstteam_strip_dismissed` events. Add DLVs for `source`, `match_id`, `match_status` and map into the GA4 Event tag parameter fields. Existing `firstteam_strip_` regex pattern does not exist yet — add a new trigger matching `firstteam_strip_.*`.
 ```

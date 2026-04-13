@@ -3,11 +3,11 @@ import { render } from "@testing-library/react";
 import { MatchStripSkeleton } from "./MatchStripSkeleton";
 
 describe("MatchStripSkeleton", () => {
-  it("renders a pulsing placeholder bar", () => {
+  it("renders a pulsing placeholder bar that respects reduced motion", () => {
     const { container } = render(<MatchStripSkeleton />);
     const skeleton = container.firstElementChild;
     expect(skeleton).toBeInTheDocument();
-    expect(skeleton?.className).toContain("animate-pulse");
+    expect(skeleton?.className).toContain("motion-safe:animate-pulse");
   });
 
   it("reserves the same height as the real strip (min-h-[40px])", () => {
