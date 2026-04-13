@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import type { UpcomingMatch } from "@/components/match/types";
@@ -9,17 +9,24 @@ import { formatWidgetDate } from "@/lib/utils/dates";
 
 const STORAGE_KEY = "matchStripDismissed";
 
-function getInitialDismissed(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(STORAGE_KEY) === "true";
-}
+const listeners = new Set<() => void>();
+const subscribeDismissed = (callback: () => void) => {
+  listeners.add(callback);
+  return () => listeners.delete(callback);
+};
+const getSnapshot = () => sessionStorage.getItem(STORAGE_KEY) === "true";
+const getServerSnapshot = () => false;
 
 export interface MatchStripClientProps {
   match: UpcomingMatch | null;
 }
 
 export function MatchStripClient({ match }: MatchStripClientProps) {
-  const [isDismissed, setIsDismissed] = useState(getInitialDismissed);
+  const isDismissed = useSyncExternalStore(
+    subscribeDismissed,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
   if (isDismissed || !match) return null;
 
@@ -29,7 +36,7 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
 
   const handleDismiss = () => {
     sessionStorage.setItem(STORAGE_KEY, "true");
-    setIsDismissed(true);
+    listeners.forEach((fn) => fn());
   };
 
   return (
