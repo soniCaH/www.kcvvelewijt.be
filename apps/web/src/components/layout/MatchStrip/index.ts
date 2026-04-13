@@ -1,2 +1,3 @@
-export { MatchStrip } from "./MatchStrip";
-export type { MatchStripProps } from "./MatchStrip";
+export { MatchStripClient } from "./MatchStripClient";
+export type { MatchStripClientProps } from "./MatchStripClient";
+export { MatchStripSkeleton } from "./MatchStripSkeleton";
