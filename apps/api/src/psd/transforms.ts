@@ -473,7 +473,7 @@ export function transformFootbalistoMatchDetail(
     competition: resolveCompetitionLabel(general.competitionType),
     lineup,
     events,
-    hasReport: general.viewGameReport,
+    hasReport: general.viewGameReport ?? false,
   };
 }
 

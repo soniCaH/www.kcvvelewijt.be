@@ -1287,6 +1287,34 @@ describe("PsdService.getMatchDetail - resilient decoding", () => {
       expect(result.right.events![0]?.type).toBe("goal");
     }
   });
+
+  it("handles null viewGameReport, lineup, and events for unplayed matches", async () => {
+    const futureMatchResponse = {
+      general: {
+        ...rawDetailResponse.general,
+        viewGameReport: null,
+        goalsHomeTeam: null,
+        goalsAwayTeam: null,
+        status: 0,
+      },
+      lineup: null,
+      substitutes: null,
+      events: null,
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => futureMatchResponse,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(42));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.hasReport).toBe(false);
+      expect(result.right.lineup).toBeUndefined();
+      expect(result.right.events).toBeUndefined();
+    }
+  });
 });
 
 describe("PsdService.getPlayerStats", () => {

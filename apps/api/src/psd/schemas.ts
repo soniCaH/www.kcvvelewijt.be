@@ -118,7 +118,7 @@ export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetai
   awayTeamId: S.optional(S.NullOr(S.Number)),
   // PSD returns either an object {id,name,type} or a plain string for match detail
   competitionType: S.optional(S.NullOr(S.Union(PsdCompetitionType, S.String))),
-  viewGameReport: S.Boolean,
+  viewGameReport: S.NullOr(S.Boolean),
   status: S.Number,
   cancelled: S.optional(S.NullOr(S.Boolean)),
 }) {}
@@ -127,9 +127,9 @@ export class FootbalistoMatchDetailResponse extends S.Class<FootbalistoMatchDeta
   "FootbalistoMatchDetailResponse",
 )({
   general: FootbalistoMatchDetailGeneral,
-  lineup: S.optional(FootbalistoLineup),
-  substitutes: S.optional(FootbalistoLineup),
-  events: S.optional(S.Array(S.Unknown)),
+  lineup: S.optional(S.NullOr(FootbalistoLineup)),
+  substitutes: S.optional(S.NullOr(FootbalistoLineup)),
+  events: S.optional(S.NullOr(S.Array(S.Unknown))),
 }) {}
 
 export class PsdSeason extends S.Class<PsdSeason>("PsdSeason")({

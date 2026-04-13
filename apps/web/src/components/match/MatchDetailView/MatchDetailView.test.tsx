@@ -135,7 +135,7 @@ describe("MatchDetailView", () => {
   });
 
   describe("match statuses", () => {
-    it("renders scheduled match correctly", () => {
+    it("renders scheduled match with 'Nog niet gespeeld' placeholder", () => {
       render(
         <MatchDetailView
           {...defaultProps}
@@ -144,9 +144,16 @@ describe("MatchDetailView", () => {
           status="scheduled"
           homeLineup={[]}
           awayLineup={[]}
+          hasReport={false}
         />,
       );
       expect(screen.getByText("VS")).toBeInTheDocument();
+      expect(screen.getByText("Nog niet gespeeld")).toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Geen opstellingen beschikbaar voor deze wedstrijd.",
+        ),
+      ).not.toBeInTheDocument();
     });
 
     it("renders forfeited match correctly", () => {

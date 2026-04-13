@@ -25,6 +25,31 @@ describe("FootbalistoMatchDetailResponse", () => {
     expect(result.general.id).toBe(1);
     expect(result.lineup).toBeUndefined();
   });
+
+  it("decodes a response with null lineup, substitutes, events, and viewGameReport", () => {
+    const raw = {
+      general: {
+        id: 2,
+        date: "2026-05-15 20:00",
+        homeClub: { id: 123, name: "KCVV Elewijt" },
+        awayClub: { id: 456, name: "Opponent FC" },
+        goalsHomeTeam: null,
+        goalsAwayTeam: null,
+        competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+        viewGameReport: null,
+        status: 0,
+      },
+      lineup: null,
+      substitutes: null,
+      events: null,
+    };
+    const result = S.decodeUnknownSync(FootbalistoMatchDetailResponse)(raw);
+    expect(result.general.id).toBe(2);
+    expect(result.lineup).toBeNull();
+    expect(result.substitutes).toBeNull();
+    expect(result.events).toBeNull();
+    expect(result.general.viewGameReport).toBeNull();
+  });
 });
 
 describe("FootbalistoRankingArray", () => {
