@@ -263,16 +263,14 @@ export default async function HomePage() {
     content: (
       <MatchesSliderSection matches={sliderMatches} highlightTeamId={1235} />
     ),
-    transition: { type: "diagonal", direction: "right" },
   };
 
   const youthSection: SectionConfig = {
     key: "youth",
     bg: "kcvv-green-dark",
-    content: <YouthSection />,
+    content: <YouthSection prevBgColor="#1E2024" nextBgColor="#f3f4f6" />,
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
-    transition: { type: "diagonal", direction: "left" },
   };
 
   const bannerSlotCSection: SectionConfig | null = banners.bannerSlotC

@@ -16,8 +16,9 @@ export const Default: Story = {
   args: {},
 };
 
-/** Shows the YouthSection sandwiched between sections with diagonal transitions,
- *  verifying that the background image covers the diagonal transition areas. */
+/** Shows the YouthSection sandwiched between sections. Both the top and bottom
+ *  diagonals are rendered inside the component so the background image shows
+ *  through the transparent triangles. No SectionTransition needed around it. */
 export const WithDiagonalTransitions: Story = {
   render: () => (
     <SectionStack
@@ -30,15 +31,13 @@ export const WithDiagonalTransitions: Story = {
               Previous section (kcvv-black)
             </div>
           ),
-          transition: { type: "diagonal", direction: "right" },
         },
         {
           key: "youth",
           bg: "kcvv-green-dark",
-          content: <YouthSection />,
+          content: <YouthSection prevBgColor="#1E2024" nextBgColor="#f3f4f6" />,
           paddingTop: "pt-0",
           paddingBottom: "pb-0",
-          transition: { type: "diagonal", direction: "left" },
         },
         {
           key: "after",
