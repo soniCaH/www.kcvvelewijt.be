@@ -148,12 +148,45 @@ Phase 3: Organigram usage — all events from taxonomy table above → #899
 4. In GTM: add GA4 Event tags for each custom event (can be done incrementally per phase)
 5. Set `NEXT_PUBLIC_GTM_ID` in Vercel environment variables (production only)
 
-## 8. Open Questions
+## 8. GTM Architecture — Catch-All Pattern
+
+All KCVV custom events share a single trigger + tag pair instead of per-feature
+triggers. This keeps the GTM workspace manageable as new features are added.
+
+### Trigger: `Custom Event — KCVV Analytics`
+
+| Field              | Value                                                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| Trigger type       | Custom Event                                                                                        |
+| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_` |
+| Use regex matching | checked                                                                                             |
+| Fires on           | All Custom Events                                                                                   |
+
+### Tag: `GA4 Event — KCVV Custom Events`
+
+| Field      | Value                                                         |
+| ---------- | ------------------------------------------------------------- |
+| Tag type   | Google Analytics: GA4 Event                                   |
+| Event Name | `{{Event}}` (built-in variable — resolves to the exact event) |
+| Parameters | All `dlv - *` variables mapped by snake_case name             |
+
+### When a new feature adds events
+
+1. Pick a unique `snake_case` prefix for the feature (e.g., `firstteam_strip_`)
+2. Add the prefix to the trigger regex (append `\|newprefix_`)
+3. If the events use **new** parameters not yet in the DLV list, create new
+   Data Layer Variables (`dlv - param_name`) and add them to the tag's
+   Event Parameters
+4. If the parameters are **new** to GA4, register them as custom dimensions
+   (Admin → Data display → Custom definitions)
+5. Test with GTM Preview + GA4 DebugView, then publish
+
+## 9. Open Questions
 
 - `[ ]` **Dwell-time thresholds**: 5s/15s/30s proposed for responsibility finder. Are these reasonable or should we start with just one threshold (e.g., 10s)?
 - `[ ]` **`responsibility_abandon` definition**: Fire on route change only, or also on browser back/tab close? `beforeunload` is unreliable — consider only tracking in-app navigation.
 - `[ ]` **#430 (responsibility analytics)**: This existing issue defines 4 GA4 events that overlap with Phase 1. Close #430 as superseded by this PRD, or keep it as a reminder to configure the corresponding GTM tags?
 
-## 9. Discovered Unknowns
+## 10. Discovered Unknowns
 
 _Filled during implementation._

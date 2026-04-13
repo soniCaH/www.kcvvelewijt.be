@@ -129,9 +129,11 @@ All event payloads use **snake_case** (`match_id`, `match_status`, `source`). Th
 
 ### GTM configuration
 
-- [ ] **Trigger**: Create a custom event trigger matching regex `firstteam_strip_.*` (covers both events and future strip events)
-- [ ] **DLVs**: Create Data Layer Variables for `source`, `match_id`, `match_status`
-- [ ] **GA4 Event tag**: Map DLVs `source`, `match_id`, `match_status` into the GA4 Event tag's parameter fields using the same snake_case names
+Uses the catch-all pattern documented in `docs/prd/analytics.md` § 8.
+
+- [x] **DLVs**: `dlv - source`, `dlv - match_id`, `dlv - match_status` — already exist
+- [x] **Tag**: `GA4 Event — KCVV Custom Events` — already forwards `{{Event}}` + all DLVs
+- [ ] **Trigger**: Add `firstteam_strip_` to the `Custom Event — KCVV Analytics` regex
 
 ### GA4 custom dimensions
 

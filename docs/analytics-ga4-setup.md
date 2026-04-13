@@ -581,6 +581,7 @@ download context is needed.
 | Organigram            | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`                                                                                                                                         |
 | Related content       | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                                    |
 | Homepage              | `homepage_match_widget_clicked`                                                                                                                                                                                                                                                     |
+| Match strip           | `firstteam_strip_clicked`, `firstteam_strip_dismissed`                                                                                                                                                                                                                              |
 | Downloads (auto)      | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                          |
 
 ### Where to find each report
@@ -600,6 +601,7 @@ download context is needed.
 | Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                 |
 | Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position               |
 | Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status           |
+| Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status  |
 | All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)              |
 | Realtime events                      | Reports → Realtime                            | Live event counts                            |
 | DebugView                            | Configure → DebugView                         | Individual session event timeline            |
