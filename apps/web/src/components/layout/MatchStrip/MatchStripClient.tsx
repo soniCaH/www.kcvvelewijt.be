@@ -1,10 +1,11 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import type { UpcomingMatch } from "@/components/match/types";
 import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { formatWidgetDate } from "@/lib/utils/dates";
 
 const STORAGE_KEY = "matchStripDismissed";
@@ -28,22 +29,75 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
     getServerSnapshot,
   );
 
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  const handleDismiss = useCallback(() => {
+    if (sessionStorage.getItem(STORAGE_KEY) === "true") return;
+    trackEvent("firstteam_strip_dismissed");
+    sessionStorage.setItem(STORAGE_KEY, "true");
+    listeners.forEach((fn) => fn());
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleDismiss();
+        return;
+      }
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+      const container = stripRef.current;
+      if (!container) return;
+
+      const focusable = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      const currentIndex = focusable.indexOf(
+        document.activeElement as HTMLElement,
+      );
+      if (currentIndex === -1) return;
+
+      e.preventDefault();
+      const next =
+        e.key === "ArrowRight"
+          ? focusable[(currentIndex + 1) % focusable.length]
+          : focusable[(currentIndex - 1 + focusable.length) % focusable.length];
+      next?.focus();
+    },
+    [handleDismiss],
+  );
+
   if (isDismissed || !match) return null;
 
   const isFinished =
     match.status === "finished" || match.status === "forfeited";
   const href = `/wedstrijd/${match.id}`;
 
-  const handleDismiss = () => {
-    sessionStorage.setItem(STORAGE_KEY, "true");
-    listeners.forEach((fn) => fn());
+  const handleClick = () => {
+    trackEvent("firstteam_strip_clicked", {
+      source: "match_strip",
+      match_id: match.id,
+      match_status: match.status,
+    });
   };
 
+  const ariaLabel = isFinished
+    ? `Laatste uitslag: ${match.homeTeam.name} ${match.homeTeam.score ?? "-"}-${match.awayTeam.score ?? "-"} ${match.awayTeam.name}`
+    : buildScheduledAriaLabel(match);
+
   return (
-    <div className="bg-kcvv-green-dark text-white min-h-[40px]">
+    <div
+      ref={stripRef}
+      onKeyDown={handleKeyDown}
+      className="bg-kcvv-green-dark text-white min-h-[40px]"
+    >
       <div className="flex items-center min-h-[40px]">
         <Link
           href={href}
+          onClick={handleClick}
+          aria-label={ariaLabel}
           className="flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-kcvv-green-dark-hover transition-colors min-h-[40px]"
         >
           {isFinished ? (
@@ -82,6 +136,17 @@ function FinishedLine({ match }: { match: UpcomingMatch }) {
       <span className="font-bold">{match.awayTeam.name}</span>
     </>
   );
+}
+
+function buildScheduledAriaLabel(match: UpcomingMatch): string {
+  const opponent =
+    match.homeTeam.id === KCVV_FIRST_TEAM_CLUB_ID
+      ? match.awayTeam.name
+      : match.homeTeam.name;
+  const dateStr = formatWidgetDate(match.date);
+  return match.time
+    ? `Volgende wedstrijd: vs ${opponent}, ${dateStr} ${match.time}`
+    : `Volgende wedstrijd: vs ${opponent}, ${dateStr}`;
 }
 
 function ScheduledLine({ match }: { match: UpcomingMatch }) {
