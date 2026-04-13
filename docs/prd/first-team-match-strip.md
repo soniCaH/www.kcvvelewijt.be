@@ -55,7 +55,7 @@ Renders on all routes except `/` (homepage already has the full MatchWidget).
 
 ### Phase 3: Analytics + accessibility (#1271)
 
-- Fire `firstteam_strip_clicked` event with `{ source: "match_strip", matchId, matchStatus }` — reuse existing analytics hook pattern
+- Fire `firstteam_strip_clicked` event with `{ source: "match_strip", match_id, match_status }` — reuse existing analytics hook pattern
 - Fire `firstteam_strip_dismissed` event
 - `aria-label` on the strip link: "Laatste uitslag: KCVV 2-1 Opponent" or "Volgende wedstrijd: vs Opponent, zaterdag 20:00"
 - Keyboard navigable (it's a link, so this should come free)
@@ -114,5 +114,35 @@ The only new code is:
 
 ```text
 - [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline
-- [2026-04-13] GTM manual step: create triggers for `firstteam_strip_clicked` and `firstteam_strip_dismissed` events. Add DLVs for `source`, `match_id`, `match_status` and map into the GA4 Event tag parameter fields. Existing `firstteam_strip_` regex pattern does not exist yet — add a new trigger matching `firstteam_strip_.*`.
 ```
+
+## 9. Analytics closure checklist
+
+All event payloads use **snake_case** (`match_id`, `match_status`, `source`). This applies to `trackEvent` calls, GTM DLVs, GA4 Event tag parameter fields, and GA4 custom dimensions.
+
+### Event taxonomy
+
+| Event name                  | Trigger             | Parameters                                          |
+| --------------------------- | ------------------- | --------------------------------------------------- |
+| `firstteam_strip_clicked`   | Click on strip link | `source: "match_strip"`, `match_id`, `match_status` |
+| `firstteam_strip_dismissed` | Click dismiss (×)   | _(none)_                                            |
+
+### GTM configuration
+
+- [ ] **Trigger**: Create a custom event trigger matching regex `firstteam_strip_.*` (covers both events and future strip events)
+- [ ] **DLVs**: Create Data Layer Variables for `source`, `match_id`, `match_status`
+- [ ] **GA4 Event tag**: Map DLVs `source`, `match_id`, `match_status` into the GA4 Event tag's parameter fields using the same snake_case names
+
+### GA4 custom dimensions
+
+- [ ] Register `source` as a custom dimension (event-scoped) in GA4 → Admin → Data display → Custom definitions (if not already registered from other features)
+- [ ] Register `match_id` as a custom dimension (event-scoped)
+- [ ] Register `match_status` as a custom dimension (event-scoped)
+
+### GA4 Explorations
+
+- [ ] Create or update a "Match Strip Engagement" exploration with: event count by event name, breakdown by `match_status`, click-through rate (`firstteam_strip_clicked` / strip impressions if tracked)
+
+### PII verification
+
+- [ ] Confirm no PII in event parameters: `match_id` is a public PSD match identifier (not internal), `match_status` is an enum, `source` is a static string — **no hashing required**

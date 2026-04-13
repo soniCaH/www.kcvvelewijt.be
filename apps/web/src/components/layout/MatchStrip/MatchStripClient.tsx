@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import type { UpcomingMatch } from "@/components/match/types";
@@ -29,6 +29,46 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
     getServerSnapshot,
   );
 
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  const handleDismiss = useCallback(() => {
+    if (sessionStorage.getItem(STORAGE_KEY) === "true") return;
+    trackEvent("firstteam_strip_dismissed");
+    sessionStorage.setItem(STORAGE_KEY, "true");
+    listeners.forEach((fn) => fn());
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleDismiss();
+        return;
+      }
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+      const container = stripRef.current;
+      if (!container) return;
+
+      const focusable = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      const currentIndex = focusable.indexOf(
+        document.activeElement as HTMLElement,
+      );
+      if (currentIndex === -1) return;
+
+      e.preventDefault();
+      const next =
+        e.key === "ArrowRight"
+          ? focusable[(currentIndex + 1) % focusable.length]
+          : focusable[(currentIndex - 1 + focusable.length) % focusable.length];
+      next?.focus();
+    },
+    [handleDismiss],
+  );
+
   if (isDismissed || !match) return null;
 
   const isFinished =
@@ -43,18 +83,16 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
     });
   };
 
-  const handleDismiss = () => {
-    trackEvent("firstteam_strip_dismissed");
-    sessionStorage.setItem(STORAGE_KEY, "true");
-    listeners.forEach((fn) => fn());
-  };
-
   const ariaLabel = isFinished
     ? `Laatste uitslag: ${match.homeTeam.name} ${match.homeTeam.score ?? "-"}-${match.awayTeam.score ?? "-"} ${match.awayTeam.name}`
     : buildScheduledAriaLabel(match);
 
   return (
-    <div className="bg-kcvv-green-dark text-white min-h-[40px]">
+    <div
+      ref={stripRef}
+      onKeyDown={handleKeyDown}
+      className="bg-kcvv-green-dark text-white min-h-[40px]"
+    >
       <div className="flex items-center min-h-[40px]">
         <Link
           href={href}
