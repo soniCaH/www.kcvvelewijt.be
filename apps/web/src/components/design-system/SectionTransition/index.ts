@@ -1,4 +1,8 @@
-export { SectionTransition } from "./SectionTransition";
+export {
+  SectionTransition,
+  DIAGONAL_HEIGHT,
+  BG_COLOR,
+} from "./SectionTransition";
 export type {
   SectionTransitionProps,
   SectionBg,

@@ -34,7 +34,7 @@ export interface SectionTransitionProps {
 // NOTE: Use resolved hex values, not CSS custom properties — SVG fill rendering
 // uses a different pipeline from CSS background-color, and CSS variables in SVG
 // attributes can produce sub-pixel color mismatches visible as a 1px seam line.
-const BG_COLOR: Record<SectionBg, string> = {
+export const BG_COLOR: Record<SectionBg, string> = {
   white: "#ffffff",
   "gray-100": "#f3f4f6",
   "kcvv-black": "#1E2024",
@@ -70,7 +70,7 @@ function shiftY(points: string, dy: number): string {
     .join(" ");
 }
 
-const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
+export const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
 
 export function SectionTransition({

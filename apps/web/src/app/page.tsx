@@ -268,7 +268,7 @@ export default async function HomePage() {
   const youthSection: SectionConfig = {
     key: "youth",
     bg: "kcvv-green-dark",
-    content: <YouthSection prevBgColor="#1E2024" nextBgColor="#f3f4f6" />,
+    content: <YouthSection prevBg="kcvv-black" nextBg="gray-100" />,
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
   };

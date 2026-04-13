@@ -1,28 +1,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
-
-const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
+import {
+  DIAGONAL_HEIGHT,
+  BG_COLOR,
+  type SectionBg,
+} from "@/components/design-system/SectionTransition";
 
 export interface YouthSectionProps {
   className?: string;
-  /** Hex color for the top diagonal's previous-section triangle. */
-  prevBgColor?: string;
-  /** Hex color for the bottom diagonal's next-section triangle. */
-  nextBgColor?: string;
+  /** Background key for the section above (top diagonal). */
+  prevBg?: SectionBg;
+  /** Background key for the section below (bottom diagonal). */
+  nextBg?: SectionBg;
 }
 
 export const YouthSection = ({
   className,
-  prevBgColor = "#1E2024",
-  nextBgColor = "#f3f4f6",
+  prevBg = "kcvv-black",
+  nextBg = "gray-100",
 }: YouthSectionProps) => {
+  const prevBgColor = BG_COLOR[prevBg];
+  const nextBgColor = BG_COLOR[nextBg];
+
   return (
     <section
       className={cn("relative bg-kcvv-green-dark text-left", className)}
       style={{
         marginTop: `calc(-1 * ${DIAGONAL_HEIGHT})`,
-        marginBottom: `calc(-1 * ${DIAGONAL_HEIGHT})`,
+        paddingBottom: DIAGONAL_HEIGHT,
       }}
     >
       {/* Background image — covers the full section including both diagonal
@@ -117,10 +123,10 @@ export const YouthSection = ({
         </Link>
       </div>
 
-      {/* Bottom diagonal — transparent upper-left so the image shows through,
-          next section color in the lower-right triangle (direction "left"). */}
+      {/* Bottom diagonal — absolutely positioned in the padding area so it
+          does not push the next section down with a negative margin. */}
       <div
-        className="relative z-20"
+        className="absolute inset-x-0 bottom-0 z-20"
         style={{ height: DIAGONAL_HEIGHT }}
         aria-hidden="true"
       >
