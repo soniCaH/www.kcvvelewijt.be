@@ -299,19 +299,11 @@ export default async function HomePage() {
 
   const sponsorsSection: SectionConfig = {
     key: "sponsors",
-    bg: "kcvv-green-dark",
+    bg: "kcvv-black",
     content: <SponsorsSection />,
     paddingTop: "pt-8",
     paddingBottom: "pb-8",
     transition: { type: "diagonal", direction: "left" },
-  };
-
-  const preFooterSection: SectionConfig = {
-    key: "pre-footer",
-    bg: "gray-100",
-    content: <></>,
-    paddingTop: "pt-12",
-    paddingBottom: "pb-12",
   };
 
   return (
@@ -334,7 +326,6 @@ export default async function HomePage() {
           bannerSlotCSection,
           webshopSection,
           sponsorsSection,
-          preFooterSection,
         ]}
       />
     </>
