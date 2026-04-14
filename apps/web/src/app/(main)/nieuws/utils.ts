@@ -5,6 +5,18 @@ export interface PaginatedArticles {
   hasMore: boolean;
 }
 
+export function deduplicateById(
+  articles: ArticleVM[],
+  existingIds: ReadonlySet<string>,
+): ArticleVM[] {
+  const seen = new Set(existingIds);
+  return articles.filter((a) => {
+    if (seen.has(a.id)) return false;
+    seen.add(a.id);
+    return true;
+  });
+}
+
 export function paginateResults(
   articles: ArticleVM[],
   limit: number,

@@ -5,6 +5,7 @@ import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
 import { formatArticleDate } from "@/lib/utils/dates";
 import type { PaginatedArticles } from "./utils";
+import { deduplicateById } from "./utils";
 import { BATCH_SIZE, INITIAL_TOTAL } from "./constants";
 
 interface Category {
@@ -47,6 +48,13 @@ export function NewsListingClient({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const categoryRequestId = useRef(0);
   const isLoadingRef = useRef(false);
+  const featuredIdsRef = useRef(new Set(initialFeatured.map((a) => a.id)));
+  const featuredCountRef = useRef(initialFeatured.length);
+
+  useEffect(() => {
+    featuredIdsRef.current = new Set(featuredArticles.map((a) => a.id));
+    featuredCountRef.current = featuredArticles.length;
+  }, [featuredArticles]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || isLoadingRef.current) return;
@@ -57,7 +65,7 @@ export function NewsListingClient({
 
     try {
       const category = activeCategory === "all" ? undefined : activeCategory;
-      const offset = featuredArticles.length + gridArticles.length;
+      const offset = featuredCountRef.current + gridArticles.length;
 
       const result = await fetchArticles({
         offset,
@@ -68,7 +76,13 @@ export function NewsListingClient({
       // Discard if a category switch happened while loading
       if (requestId !== categoryRequestId.current) return;
 
-      setGridArticles((prev) => [...prev, ...result.articles]);
+      setGridArticles((prev) => {
+        const existingIds = new Set([
+          ...featuredIdsRef.current,
+          ...prev.map((a) => a.id),
+        ]);
+        return [...prev, ...deduplicateById(result.articles, existingIds)];
+      });
       setHasMore(result.hasMore);
     } catch (err) {
       if (requestId !== categoryRequestId.current) return;
@@ -86,13 +100,7 @@ export function NewsListingClient({
         setIsLoading(false);
       }
     }
-  }, [
-    hasMore,
-    activeCategory,
-    featuredArticles.length,
-    gridArticles.length,
-    fetchArticles,
-  ]);
+  }, [hasMore, activeCategory, gridArticles.length, fetchArticles]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -133,8 +141,10 @@ export function NewsListingClient({
         // Ignore stale responses from superseded category switches
         if (requestId !== categoryRequestId.current) return;
 
-        const featured = result.articles.slice(0, 3);
-        const grid = result.articles.slice(3);
+        const uniqueArticles = deduplicateById(result.articles, new Set());
+        const featured = uniqueArticles.slice(0, 3);
+        const featuredIds = new Set(featured.map((a) => a.id));
+        const grid = deduplicateById(uniqueArticles.slice(3), featuredIds);
 
         setFeaturedArticles(featured);
         setGridArticles(grid);
