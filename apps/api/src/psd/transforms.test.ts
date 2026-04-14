@@ -245,35 +245,80 @@ describe("transformPsdGame — ownClubId fallback for is_home", () => {
 });
 
 describe("mapCompetitionLabel", () => {
-  it("maps LEAGUE to 'Competitie'", () => {
-    expect(mapCompetitionLabel("LEAGUE", "3de Nationale")).toBe("Competitie");
+  describe("prefers PSD name over type-code mapping for all types", () => {
+    it("uses name for LEAGUE when available", () => {
+      expect(mapCompetitionLabel("LEAGUE", "3de Nationale")).toBe(
+        "3de Nationale",
+      );
+    });
+
+    it("uses name for OFFICIAL when available", () => {
+      expect(mapCompetitionLabel("OFFICIAL", "3de Provinciale C")).toBe(
+        "3de Provinciale C",
+      );
+    });
+
+    it("uses name for CUP when available", () => {
+      expect(mapCompetitionLabel("CUP", "Beker van Brabant")).toBe(
+        "Beker van Brabant",
+      );
+    });
+
+    it("uses name for FRIENDLY when available", () => {
+      expect(mapCompetitionLabel("FRIENDLY", "Oefenwedstrijd")).toBe(
+        "Oefenwedstrijd",
+      );
+    });
+
+    it("uses name for TOURNAMENT when available", () => {
+      expect(mapCompetitionLabel("TOURNAMENT", "Paastornooi")).toBe(
+        "Paastornooi",
+      );
+    });
+
+    it("uses name for INTERNATIONAL when available", () => {
+      expect(mapCompetitionLabel("INTERNATIONAL", "UEFA Nations League")).toBe(
+        "UEFA Nations League",
+      );
+    });
+
+    it("ignores whitespace-only name", () => {
+      expect(mapCompetitionLabel("OFFICIAL", "   ")).toBe("Competitie");
+    });
   });
 
-  it("maps CUP to the PSD name when available", () => {
-    expect(mapCompetitionLabel("CUP", "Beker van Brabant")).toBe(
-      "Beker van Brabant",
-    );
+  describe("falls back to Dutch label when name is absent", () => {
+    it("maps LEAGUE to 'Competitie'", () => {
+      expect(mapCompetitionLabel("LEAGUE", null)).toBe("Competitie");
+    });
+
+    it("maps OFFICIAL to 'Competitie'", () => {
+      expect(mapCompetitionLabel("OFFICIAL", null)).toBe("Competitie");
+    });
+
+    it("maps CUP to 'Beker'", () => {
+      expect(mapCompetitionLabel("CUP", null)).toBe("Beker");
+    });
+
+    it("maps FRIENDLY to 'Vriendschappelijk'", () => {
+      expect(mapCompetitionLabel("FRIENDLY", null)).toBe("Vriendschappelijk");
+    });
+
+    it("maps TOURNAMENT to 'Tornooi'", () => {
+      expect(mapCompetitionLabel("TOURNAMENT", null)).toBe("Tornooi");
+    });
+
+    it("maps INTERNATIONAL to 'Internationaal'", () => {
+      expect(mapCompetitionLabel("INTERNATIONAL", null)).toBe("Internationaal");
+    });
+
+    it("falls back to raw type for truly unknown codes", () => {
+      expect(mapCompetitionLabel("SOMETHING_NEW", null)).toBe("SOMETHING_NEW");
+    });
   });
 
-  it("maps CUP to 'Beker' when name is null", () => {
-    expect(mapCompetitionLabel("CUP", null)).toBe("Beker");
-  });
-
-  it("maps FRIENDLY to 'Vriendschappelijk'", () => {
-    expect(mapCompetitionLabel("FRIENDLY", null)).toBe("Vriendschappelijk");
-  });
-
-  it("uses name for unknown types when available", () => {
-    expect(mapCompetitionLabel("OFFICIAL", "3de Provinciale C")).toBe(
-      "3de Provinciale C",
-    );
-  });
-
-  it("falls back to raw type for OFFICIAL without name", () => {
-    expect(mapCompetitionLabel("OFFICIAL", null)).toBe("OFFICIAL");
-  });
-
-  it("falls back to raw type for unknown types without name", () => {
-    expect(mapCompetitionLabel("INTERLAND", null)).toBe("INTERLAND");
+  it("is case-insensitive on the type code", () => {
+    expect(mapCompetitionLabel("official", null)).toBe("Competitie");
+    expect(mapCompetitionLabel("Official", null)).toBe("Competitie");
   });
 });

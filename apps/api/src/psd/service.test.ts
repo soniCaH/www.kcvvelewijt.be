@@ -165,7 +165,7 @@ describe("PsdService.getTeamMatches", () => {
       expect(result.right[0]?.id).toBe(101);
       expect(result.right[0]?.status).toBe("finished");
       expect(result.right[0]?.home_team.name).toBe("KCVV Elewijt");
-      expect(result.right[0]?.competition).toBe("Competitie");
+      expect(result.right[0]?.competition).toBe("3de Nationale");
       // Contract boundary: validate transform output against api-contract schema
       expect(() => S.decodeUnknownSync(Match)(result.right[0])).not.toThrow();
     }

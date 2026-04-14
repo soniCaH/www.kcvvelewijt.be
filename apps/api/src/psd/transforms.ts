@@ -19,27 +19,25 @@ import {
 
 // ─── Competition label helpers ────────────────────────────────────────────────
 
-/**
- * Map a PSD competition type code + optional name to a Dutch display label.
- *
- * - LEAGUE → "Competitie"
- * - CUP    → PSD name when available (e.g. "Beker van Brabant"), else "Beker"
- * - FRIENDLY → "Vriendschappelijk"
- * - Unknown type codes fall back to the raw type string.
- */
 export function mapCompetitionLabel(
   type: string,
   name?: string | null,
 ): string {
+  if (name?.trim()) return name.trim();
   switch (type.toUpperCase()) {
     case "LEAGUE":
+    case "OFFICIAL":
       return "Competitie";
     case "CUP":
-      return name?.trim() || "Beker";
+      return "Beker";
     case "FRIENDLY":
       return "Vriendschappelijk";
+    case "TOURNAMENT":
+      return "Tornooi";
+    case "INTERNATIONAL":
+      return "Internationaal";
     default:
-      return name?.trim() || type;
+      return type;
   }
 }
 
