@@ -15,10 +15,10 @@ export const WebshopSection = ({ className }: WebshopSectionProps) => {
     >
       <div className="max-w-4xl mx-auto px-4 md:px-8">
         <Image
-          src="/images/jerseys.svg"
+          src="/images/jerseys.png"
           alt="Clubkledij — drie truien van KCVV Elewijt"
-          width={672}
-          height={420}
+          width={1280}
+          height={720}
           className="max-w-2xl w-full mx-auto mb-8"
           priority={false}
         />

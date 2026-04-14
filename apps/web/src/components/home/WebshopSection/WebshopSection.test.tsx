@@ -47,7 +47,7 @@ describe("WebshopSection", () => {
     render(<WebshopSection />);
     const img = screen.getByAltText(/clubkledij/i);
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute("src");
+    expect(img.getAttribute("src")).toContain("jerseys.png");
   });
 
   it("renders the CTA with design system button classes", () => {
