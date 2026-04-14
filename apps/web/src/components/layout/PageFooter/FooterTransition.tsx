@@ -18,6 +18,7 @@ import type { SectionBg } from "@/components/design-system/SectionTransition/Sec
  * here so the transition picks up the matching color.
  */
 const STATIC_FROM: Partial<Record<string, SectionBg>> = {
+  "/": "kcvv-black",
   "/sponsors": "kcvv-black",
   "/club/geschiedenis": "kcvv-black",
   "/club/organigram": "kcvv-black",
@@ -31,7 +32,7 @@ const DYNAMIC_FROM: ReadonlyArray<{ pattern: RegExp; from: SectionBg }> = [
   { pattern: /^\/ploegen\/[^/]+$/, from: "kcvv-black" },
 ];
 
-function resolveFrom(pathname: string): SectionBg {
+export function resolveFrom(pathname: string): SectionBg {
   const staticMatch = STATIC_FROM[pathname];
   if (staticMatch) return staticMatch;
   const dynamicMatch = DYNAMIC_FROM.find((entry) =>
