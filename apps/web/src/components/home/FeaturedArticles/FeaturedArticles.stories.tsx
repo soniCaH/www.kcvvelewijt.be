@@ -177,6 +177,32 @@ export const ManyTags: Story = {
 };
 
 /**
+ * Worst-case content: longest tag + 2-line title + 3-line description + date.
+ * Used for visual regression testing at wide viewports (1440px–2560px)
+ * to verify no overlap between the text block and the dot navigation.
+ */
+export const WorstCaseContent: Story = {
+  args: {
+    articles: [
+      {
+        href: "/nieuws/worst-case",
+        title:
+          "Definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is officieel bekendgemaakt",
+        description:
+          "De Koninklijke Belgische Voetbalbond heeft vandaag de definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS bekendgemaakt. KCVV Elewijt komt uit in reeks A samen met enkele bekende tegenstanders uit de buurt. De volledige kalender wordt later deze maand gepubliceerd.",
+        imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Worst+Case",
+        imageAlt: "Worst-case content test",
+        date: "20 juni 2025",
+        dateIso: "2025-06-20",
+        tags: [{ name: "Competitie & Reeksindeling" }],
+      },
+      ...mockArticles.slice(0, 2),
+    ],
+    autoRotate: false,
+  },
+};
+
+/**
  * Empty state (no articles)
  */
 export const Empty: Story = {

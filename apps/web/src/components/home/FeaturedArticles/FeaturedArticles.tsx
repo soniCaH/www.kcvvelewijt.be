@@ -202,7 +202,7 @@ export const FeaturedArticles = ({
         </div>
 
         {/* Content Overlay — padded away from sidebar on desktop */}
-        <div className="relative z-10 h-full flex items-start pt-10 md:pt-14 lg:items-center lg:pt-0 px-4 lg:px-10">
+        <div className="relative z-10 h-full flex items-start pt-10 md:pt-14 lg:items-end lg:pt-0 lg:pb-[calc(clamp(2rem,6vw,5rem)+3rem)] px-4 lg:px-10">
           <Link
             href={activeArticle.href}
             className="group flex flex-col justify-center max-w-lg lg:max-w-xl"
