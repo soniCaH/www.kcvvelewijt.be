@@ -42,4 +42,18 @@ describe("WebshopSection", () => {
       }
     });
   });
+
+  it("renders the jerseys image above the text", () => {
+    render(<WebshopSection />);
+    const img = screen.getByAltText(/clubkledij/i);
+    expect(img).toBeInTheDocument();
+    expect(img.getAttribute("src")).toContain("jerseys.png");
+  });
+
+  it("renders the CTA with design system button classes", () => {
+    render(<WebshopSection />);
+    const link = screen.getByRole("link", { name: /naar de webshop/i });
+    // Design system primary button uses bg-kcvv-green-bright
+    expect(link.className).toContain("bg-kcvv-green-bright");
+  });
 });
