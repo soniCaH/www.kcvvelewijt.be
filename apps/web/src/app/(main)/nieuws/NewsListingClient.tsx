@@ -144,8 +144,7 @@ export function NewsListingClient({
 
         const uniqueArticles = deduplicateById(result.articles, new Set());
         const featured = uniqueArticles.slice(0, 3);
-        const featuredIds = new Set(featured.map((a) => a.id));
-        const grid = deduplicateById(uniqueArticles.slice(3), featuredIds);
+        const grid = uniqueArticles.slice(3);
 
         setFeaturedArticles(featured);
         setGridArticles(grid);
