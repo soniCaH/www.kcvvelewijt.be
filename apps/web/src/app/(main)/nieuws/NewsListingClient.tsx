@@ -45,7 +45,7 @@ export function NewsListingClient({
     message: string;
     retry: () => void;
   } | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [sentinelNode, setSentinelNode] = useState<HTMLDivElement | null>(null);
   const categoryRequestId = useRef(0);
   const isLoadingRef = useRef(false);
   const featuredIdsRef = useRef(new Set(initialFeatured.map((a) => a.id)));
@@ -102,10 +102,10 @@ export function NewsListingClient({
     }
   }, [hasMore, activeCategory, fetchArticles]);
 
-  // Intersection Observer for infinite scroll
+  // Intersection Observer for infinite scroll — reattaches whenever the
+  // sentinel DOM node changes (remount via hasMore/isLoading/error toggling).
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinelNode) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -116,9 +116,9 @@ export function NewsListingClient({
       { rootMargin: "200px" },
     );
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [loadMore]);
+    observer.observe(sentinelNode);
+    return () => observer.unobserve(sentinelNode);
+  }, [sentinelNode, loadMore]);
 
   // Category change handler
   const handleCategoryChange = useCallback(
@@ -277,7 +277,7 @@ export function NewsListingClient({
 
         {/* Intersection Observer sentinel */}
         {hasMore && !isLoading && !error && (
-          <div ref={sentinelRef} className="h-4" aria-hidden="true" />
+          <div ref={setSentinelNode} className="h-4" aria-hidden="true" />
         )}
       </div>
     </div>
