@@ -49,11 +49,10 @@ export function NewsListingClient({
   const categoryRequestId = useRef(0);
   const isLoadingRef = useRef(false);
   const featuredIdsRef = useRef(new Set(initialFeatured.map((a) => a.id)));
-  const featuredCountRef = useRef(initialFeatured.length);
+  const nextOffsetRef = useRef(initialFeatured.length + initialArticles.length);
 
   useEffect(() => {
     featuredIdsRef.current = new Set(featuredArticles.map((a) => a.id));
-    featuredCountRef.current = featuredArticles.length;
   }, [featuredArticles]);
 
   const loadMore = useCallback(async () => {
@@ -65,7 +64,7 @@ export function NewsListingClient({
 
     try {
       const category = activeCategory === "all" ? undefined : activeCategory;
-      const offset = featuredCountRef.current + gridArticles.length;
+      const offset = nextOffsetRef.current;
 
       const result = await fetchArticles({
         offset,
@@ -83,6 +82,7 @@ export function NewsListingClient({
         ]);
         return [...prev, ...deduplicateById(result.articles, existingIds)];
       });
+      nextOffsetRef.current += result.articles.length;
       setHasMore(result.hasMore);
     } catch (err) {
       if (requestId !== categoryRequestId.current) return;
@@ -100,7 +100,7 @@ export function NewsListingClient({
         setIsLoading(false);
       }
     }
-  }, [hasMore, activeCategory, gridArticles.length, fetchArticles]);
+  }, [hasMore, activeCategory, fetchArticles]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -123,6 +123,7 @@ export function NewsListingClient({
   // Category change handler
   const handleCategoryChange = useCallback(
     async (category: string) => {
+      if (category === activeCategory) return;
       const prevCategory = activeCategory;
       const requestId = ++categoryRequestId.current;
       setActiveCategory(category);
@@ -148,6 +149,7 @@ export function NewsListingClient({
 
         setFeaturedArticles(featured);
         setGridArticles(grid);
+        nextOffsetRef.current = result.articles.length;
         setHasMore(result.hasMore);
 
         // Update URL and scroll only after successful fetch

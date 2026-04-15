@@ -190,13 +190,15 @@ describe("NewsListingClient", () => {
     ];
     const grid = [makeArticle({ id: "a4", title: "Fourth Article" })];
 
-    // Category change returns results where article a1 appears again at position 4
+    // Duplicate "c1" appears within the first three items so the pre-split
+    // dedup path (deduplicateById on the whole result before slicing into
+    // featured/grid) is exercised.
     mockFetchArticles.mockResolvedValue({
       articles: [
         makeArticle({ id: "c1", title: "Cat One" }),
+        makeArticle({ id: "c1", title: "Cat One" }), // duplicate within featured slice
         makeArticle({ id: "c2", title: "Cat Two" }),
         makeArticle({ id: "c3", title: "Cat Three" }),
-        makeArticle({ id: "c1", title: "Cat One" }), // duplicate
         makeArticle({ id: "c4", title: "Cat Four" }),
       ],
       hasMore: false,
