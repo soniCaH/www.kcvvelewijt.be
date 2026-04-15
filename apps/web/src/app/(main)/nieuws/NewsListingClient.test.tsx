@@ -121,6 +121,109 @@ describe("NewsListingClient", () => {
     });
   });
 
+  it("deduplicates articles returned by loadMore against featured and grid", async () => {
+    const featured = [
+      makeArticle({ id: "a1", title: "Article One" }),
+      makeArticle({ id: "a2", title: "Article Two" }),
+      makeArticle({ id: "a3", title: "Article Three" }),
+    ];
+    const grid = [
+      makeArticle({ id: "a4", title: "Article Four" }),
+      makeArticle({ id: "a5", title: "Article Five" }),
+      makeArticle({ id: "a6", title: "Article Six" }),
+    ];
+
+    // loadMore returns a mix of duplicates (a3, a6) and new articles (a7, a8)
+    mockFetchArticles.mockResolvedValue({
+      articles: [
+        makeArticle({ id: "a3", title: "Article Three" }),
+        makeArticle({ id: "a6", title: "Article Six" }),
+        makeArticle({ id: "a7", title: "Article Seven" }),
+        makeArticle({ id: "a8", title: "Article Eight" }),
+      ],
+      hasMore: false,
+    });
+
+    render(
+      <NewsListingClient
+        featuredArticles={featured}
+        initialArticles={grid}
+        categories={categories}
+        hasMore={true}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+
+    // Trigger the IntersectionObserver
+    if (intersectionCallback) {
+      intersectionCallback([{ isIntersecting: true }]);
+    }
+
+    // New articles should appear, duplicates should not create extra DOM nodes
+    await waitFor(() => {
+      expect(screen.getByText("Article Seven")).toBeInTheDocument();
+      expect(screen.getByText("Article Eight")).toBeInTheDocument();
+    });
+
+    // Verify no duplicate IDs in the rendered output
+    const allArticleTitles = [
+      "Article One",
+      "Article Two",
+      "Article Three",
+      "Article Four",
+      "Article Five",
+      "Article Six",
+      "Article Seven",
+      "Article Eight",
+    ];
+    for (const title of allArticleTitles) {
+      const elements = screen.getAllByText(title);
+      expect(elements).toHaveLength(1);
+    }
+  });
+
+  it("deduplicates articles after category change", async () => {
+    const featured = [
+      makeArticle({ id: "a1", title: "First Article" }),
+      makeArticle({ id: "a2", title: "Second Article" }),
+      makeArticle({ id: "a3", title: "Third Article" }),
+    ];
+    const grid = [makeArticle({ id: "a4", title: "Fourth Article" })];
+
+    // Duplicate "c1" appears within the first three items so the pre-split
+    // dedup path (deduplicateById on the whole result before slicing into
+    // featured/grid) is exercised.
+    mockFetchArticles.mockResolvedValue({
+      articles: [
+        makeArticle({ id: "c1", title: "Cat One" }),
+        makeArticle({ id: "c1", title: "Cat One" }), // duplicate within featured slice
+        makeArticle({ id: "c2", title: "Cat Two" }),
+        makeArticle({ id: "c3", title: "Cat Three" }),
+        makeArticle({ id: "c4", title: "Cat Four" }),
+      ],
+      hasMore: false,
+    });
+
+    render(
+      <NewsListingClient
+        featuredArticles={featured}
+        initialArticles={grid}
+        categories={categories}
+        hasMore={false}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Jeugd" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Cat Four")).toBeInTheDocument();
+    });
+
+    // Cat One should appear exactly once (featured), not also in the grid
+    expect(screen.getAllByText("Cat One")).toHaveLength(1);
+  });
+
   it("shows loading indicator while fetching", async () => {
     // Make fetchArticles hang
     let resolvePromise: (value: unknown) => void;
