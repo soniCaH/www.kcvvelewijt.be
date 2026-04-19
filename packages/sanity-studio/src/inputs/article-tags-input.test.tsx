@@ -160,4 +160,15 @@ describe('ArticleTagsInput', () => {
 
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('swallows a bare comma keystroke so it cannot land in the input', () => {
+    const onChange = vi.fn<(event: FakePatchEvent) => void>()
+    const props = makeProps({onChange})
+    render(<ArticleTagsInput {...props} />)
+    const input = screen.getByTestId('tags-autocomplete') as HTMLInputElement
+    const prevented = !fireEvent.keyDown(input, {key: ','})
+
+    expect(prevented).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })

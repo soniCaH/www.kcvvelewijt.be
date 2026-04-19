@@ -1,32 +1,39 @@
+import type {ComponentType} from 'react'
+import {
+  type ArrayOfPrimitivesInputProps,
+  type SchemaTypeDefinition,
+  defineField,
+  defineType,
+} from 'sanity'
 import {describe, expect, it} from 'vitest'
 import {applyArticleTagsInput} from './apply-article-tags-input'
 
-const StubComponent = () => null
+const StubComponent: ComponentType<ArrayOfPrimitivesInputProps<string>> = () => null
 
-const makeSchemaTypes = () => [
-  {
+const makeSchemaTypes = (): SchemaTypeDefinition[] => [
+  defineType({
     name: 'article',
     type: 'document',
     fields: [
-      {name: 'title', type: 'string'},
-      {
+      defineField({name: 'title', type: 'string'}),
+      defineField({
         name: 'tags',
         type: 'array',
         of: [{type: 'string'}],
         options: {layout: 'tags'},
-      },
+      }),
     ],
-  },
-  {
+  }),
+  defineType({
     name: 'player',
     type: 'document',
-    fields: [{name: 'name', type: 'string'}],
-  },
+    fields: [defineField({name: 'name', type: 'string'})],
+  }),
 ]
 
 describe('applyArticleTagsInput', () => {
   it('sets components.input on the article tags field', () => {
-    const result = applyArticleTagsInput(makeSchemaTypes() as never, StubComponent as never)
+    const result = applyArticleTagsInput(makeSchemaTypes(), StubComponent)
     const article = result.find((t) => t.name === 'article') as unknown as {
       fields: Array<{name: string; components?: {input?: unknown}}>
     }
@@ -36,7 +43,7 @@ describe('applyArticleTagsInput', () => {
 
   it('leaves every other schema type untouched', () => {
     const original = makeSchemaTypes()
-    const result = applyArticleTagsInput(original as never, StubComponent as never)
+    const result = applyArticleTagsInput(original, StubComponent)
     const player = result.find((t) => t.name === 'player')
     expect(player).toEqual(original[1])
   })
@@ -44,12 +51,12 @@ describe('applyArticleTagsInput', () => {
   it('does not mutate the input schemaTypes array', () => {
     const original = makeSchemaTypes()
     const snapshot = structuredClone(original)
-    applyArticleTagsInput(original as never, StubComponent as never)
+    applyArticleTagsInput(original, StubComponent)
     expect(original).toEqual(snapshot)
   })
 
   it('preserves every other field on the article type', () => {
-    const result = applyArticleTagsInput(makeSchemaTypes() as never, StubComponent as never)
+    const result = applyArticleTagsInput(makeSchemaTypes(), StubComponent)
     const article = result.find((t) => t.name === 'article') as unknown as {
       fields: Array<{name: string; type: string}>
     }
@@ -58,20 +65,22 @@ describe('applyArticleTagsInput', () => {
   })
 
   it('is a no-op when no article type is present', () => {
-    const input = [{name: 'player', type: 'document', fields: []}]
-    const result = applyArticleTagsInput(input as never, StubComponent as never)
+    const input: SchemaTypeDefinition[] = [
+      defineType({name: 'player', type: 'document', fields: []}),
+    ]
+    const result = applyArticleTagsInput(input, StubComponent)
     expect(result).toEqual(input)
   })
 
   it('is a no-op when the article type has no tags field', () => {
-    const input = [
-      {
+    const input: SchemaTypeDefinition[] = [
+      defineType({
         name: 'article',
         type: 'document',
-        fields: [{name: 'title', type: 'string'}],
-      },
+        fields: [defineField({name: 'title', type: 'string'})],
+      }),
     ]
-    const result = applyArticleTagsInput(input as never, StubComponent as never)
+    const result = applyArticleTagsInput(input, StubComponent)
     expect(result).toEqual(input)
   })
 })

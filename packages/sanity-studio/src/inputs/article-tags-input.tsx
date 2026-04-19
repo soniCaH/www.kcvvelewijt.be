@@ -80,8 +80,8 @@ export function ArticleTagsInput(props: ArrayOfPrimitivesInputProps<string>): JS
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' || event.key === ',') {
-      if (draft.trim() === '') return
       event.preventDefault()
+      if (draft.trim() === '') return
       appendTag(draft)
       return
     }
