@@ -1,13 +1,21 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /
+    directory: "/" # root of your monorepo
     schedule:
       interval: weekly
-    open-pull-requests-limit: 0
+
+    open-pull-requests-limit: 5
+
     labels:
       - dependencies
       - security
+
     commit-message:
       prefix: "fix(deps)"
       include: scope
+
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
