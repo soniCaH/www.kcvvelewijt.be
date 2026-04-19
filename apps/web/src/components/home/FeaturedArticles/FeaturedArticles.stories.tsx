@@ -177,6 +177,30 @@ export const ManyTags: Story = {
 };
 
 /**
+ * Long hero title — demonstrates the `line-clamp-3` truncation that keeps the
+ * category tag fully visible even when editors enter a very long title.
+ */
+export const LongTitle: Story = {
+  args: {
+    articles: [
+      {
+        href: "/nieuws/long-title",
+        title:
+          "Definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is officieel bekendgemaakt en staat online",
+        description:
+          "De Koninklijke Belgische Voetbalbond heeft vandaag de definitieve reeksindeling voor het seizoen 2025-2026 bekendgemaakt.",
+        imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Long+Title",
+        imageAlt: "Long title clamp demo",
+        date: "20 juni 2025",
+        dateIso: "2025-06-20",
+        tags: [{ name: "Competitie" }],
+      },
+    ],
+    autoRotate: false,
+  },
+};
+
+/**
  * Worst-case content: longest tag + 2-line title + 3-line description + date.
  * Used for visual regression testing at wide viewports (1440px–2560px)
  * to verify no overlap between the text block and the dot navigation.
