@@ -2,6 +2,11 @@
 
 import { useEffect } from "react";
 import * as CookieConsent from "vanilla-cookieconsent";
+// Import the library CSS statically — do NOT switch to a dynamic `import()` inside the effect.
+// CookieConsent.run() injects the modal and focuses its accept button synchronously; if the CSS
+// has not yet resolved, the modal has no `position: fixed` and lives inline at the bottom of the
+// <body>, which causes the browser to scroll-into-view to the footer on first load (issue #1313).
+import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { updateConsentState } from "@/lib/analytics/gtm-consent";
 
 // Tracks whether CookieConsent.run() has resolved; used by CookiePreferencesButton
@@ -16,9 +21,6 @@ function syncConsentState() {
 export function CookieConsentBanner() {
   useEffect(() => {
     let isMounted = true;
-
-    // Dynamically load library CSS — keeps it out of the critical path
-    import("vanilla-cookieconsent/dist/cookieconsent.css");
 
     CookieConsent.run({
       categories: {
