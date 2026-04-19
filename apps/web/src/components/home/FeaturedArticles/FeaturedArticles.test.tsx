@@ -451,6 +451,33 @@ describe("FeaturedArticles", () => {
     ).toBeInTheDocument();
   });
 
+  it("truncates long titles with line-clamp-3 and keeps the tag visible", () => {
+    const longTitleArticle: FeaturedArticle = {
+      href: "/nieuws/long-title",
+      title:
+        "Definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is officieel bekendgemaakt en staat online",
+      description: "Short description",
+      imageUrl: "/images/long.jpg",
+      imageAlt: "Long title image",
+      date: "20 juni 2025",
+      tags: [{ name: "Competitie" }],
+    };
+
+    render(
+      <FeaturedArticles articles={[longTitleArticle]} autoRotate={false} />,
+    );
+
+    // Tag/badge must remain visible regardless of title length
+    expect(screen.getByText("Competitie")).toBeInTheDocument();
+
+    // Hero title must carry the line-clamp-2 utility so it truncates at 3 lines
+    const heading = screen.getByRole("heading", {
+      name: longTitleArticle.title,
+      level: 2,
+    });
+    expect(heading).toHaveClass("line-clamp-3");
+  });
+
   it("pauses auto-rotation on mouse hover and resumes on mouse leave", () => {
     render(
       <FeaturedArticles

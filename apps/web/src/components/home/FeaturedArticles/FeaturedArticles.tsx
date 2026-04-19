@@ -198,7 +198,7 @@ export const FeaturedArticles = ({
             />
           )}
           {/* Dark gradient: strong on left (where text sits), fades right toward sidebar */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/20" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/55 to-black/20" />
         </div>
 
         {/* Content Overlay — padded away from sidebar on desktop */}
@@ -213,7 +213,7 @@ export const FeaturedArticles = ({
               </span>
             )}
 
-            <h2 className="frontpage__featured_article__title font-title text-white! text-[clamp(1.75rem,5.5vw,5rem)]! font-black! leading-[1.02]! tracking-tight mb-5! group-hover:text-white/75! transition-colors">
+            <h2 className="frontpage__featured_article__title font-title text-white! text-[clamp(1.75rem,5.5vw,5rem)]! font-black! leading-[1.02]! tracking-tight mb-5! group-hover:text-white/75! transition-colors line-clamp-3">
               {activeArticle.title}
             </h2>
 
