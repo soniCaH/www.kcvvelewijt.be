@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabled": false,
+  "enabled": true,
   "extends": [
     "config:recommended",
     ":semanticCommits",
@@ -176,6 +176,6 @@
   "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
   "postUpdateOptions": ["pnpmDedupe"],
   "prCreation": "immediate",
-  "prConcurrentLimit": 3,
+  "prConcurrentLimit": 1,
   "rebaseWhen": "behind-base-branch"
 }
