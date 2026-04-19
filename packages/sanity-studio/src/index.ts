@@ -1,4 +1,10 @@
 export {LinkToPsdAction} from './actions/link-to-psd'
+export {
+  ArticleTagsInput,
+  applyArticleTagsInput,
+  canonicalizeTagInput,
+  matchTagCandidates,
+} from './inputs'
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
 export {
