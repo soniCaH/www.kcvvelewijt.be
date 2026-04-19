@@ -10,6 +10,7 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | Sanity Studio       | `apps/studio/`             | sanity.io          |
 | Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          |
 | Sanity schemas      | `packages/sanity-schemas/` | (library)          |
+| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          |
 | API contract        | `packages/api-contract/`   | (library)          |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers |
 
