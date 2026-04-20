@@ -17,6 +17,7 @@ export {searchFeedback} from './searchFeedback'
 export {banner} from './banner'
 export {homePage} from './homePage'
 export {jeugdLandingPage} from './jeugdLandingPage'
+export {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 
 import {player} from './player'
 import {team, trainingDay} from './team'
@@ -34,6 +35,7 @@ import {searchFeedback} from './searchFeedback'
 import {banner} from './banner'
 import {homePage} from './homePage'
 import {jeugdLandingPage} from './jeugdLandingPage'
+import {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 
 export const schemaTypes = [
   player,
@@ -53,4 +55,5 @@ export const schemaTypes = [
   banner,
   homePage,
   jeugdLandingPage,
+  matchesSliderPlaceholder,
 ]

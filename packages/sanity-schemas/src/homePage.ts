@@ -25,6 +25,12 @@ export const homePage = defineType({
       type: 'reference',
       to: [{type: 'banner'}],
     }),
+    defineField({
+      name: 'matchesSliderPlaceholder',
+      title: 'Placeholder wedstrijdenblok',
+      type: 'matchesSliderPlaceholder',
+      description: 'Optioneel. Getoond wanneer er geen aankomende wedstrijden zijn.',
+    }),
   ],
   preview: {
     prepare() {
