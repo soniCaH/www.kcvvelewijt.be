@@ -3,10 +3,9 @@ import { render, screen } from "@testing-library/react";
 import { SocialLinks } from "./SocialLinks";
 
 describe("SocialLinks", () => {
-  it("renders all three social links", () => {
+  it("renders Facebook and Instagram social links", () => {
     render(<SocialLinks />);
     expect(screen.getByLabelText("Facebook")).toBeInTheDocument();
-    expect(screen.getByLabelText("Twitter")).toBeInTheDocument();
     expect(screen.getByLabelText("Instagram")).toBeInTheDocument();
   });
 
@@ -25,7 +24,7 @@ describe("SocialLinks", () => {
   it("inline variant has ≥44×44 tap area on each social link", () => {
     render(<SocialLinks variant="inline" />);
     const links = screen.getAllByRole("link");
-    expect(links.length).toBeGreaterThanOrEqual(3);
+    expect(links.length).toBeGreaterThanOrEqual(2);
     for (const link of links) {
       expect(link).toHaveClass("min-h-11", "min-w-11");
     }
@@ -60,14 +59,6 @@ describe("SocialLinks", () => {
     expect(screen.getByLabelText("Facebook")).toHaveAttribute(
       "href",
       "https://facebook.com/KCVVElewijt/",
-    );
-  });
-
-  it("has correct Twitter URL", () => {
-    render(<SocialLinks />);
-    expect(screen.getByLabelText("Twitter")).toHaveAttribute(
-      "href",
-      "https://twitter.com/kcvve",
     );
   });
 

@@ -8,10 +8,6 @@ describe("root layout metadata", () => {
     expect(url.href).toBe("https://www.kcvvelewijt.be/");
   });
 
-  it("SITE_CONFIG.twitterHandle is configured for twitter cards", () => {
-    expect(SITE_CONFIG.twitterHandle).toBe("kcvve");
-  });
-
   it("includes openGraph.images matching DEFAULT_OG_IMAGE in root metadata", () => {
     const og = metadata.openGraph as { images?: unknown[] };
     expect(og.images).toBeDefined();

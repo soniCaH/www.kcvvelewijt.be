@@ -7,7 +7,7 @@
  */
 
 import { Icon } from "@/components/design-system";
-import { Facebook, Twitter, Instagram } from "@/lib/icons";
+import { Facebook, Instagram } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
 
 export interface SocialLinksProps {
@@ -36,11 +36,6 @@ const socialLinks = [
     name: "Facebook",
     url: "https://facebook.com/KCVVElewijt/",
     icon: Facebook,
-  },
-  {
-    name: "Twitter",
-    url: "https://twitter.com/kcvve",
-    icon: Twitter,
   },
   {
     name: "Instagram",

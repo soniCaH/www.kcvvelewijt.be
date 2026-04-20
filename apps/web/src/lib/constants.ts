@@ -16,7 +16,6 @@ export const SITE_CONFIG = {
   description:
     "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
   siteUrl: "https://www.kcvvelewijt.be",
-  twitterHandle: "kcvve",
   fbAppId: "679332239478086",
   stamnummer: 55,
 } as const;

@@ -6,7 +6,7 @@
  * Features:
  * - QR code generation linking to player profile
  * - Copy profile URL to clipboard
- * - Social share buttons (Facebook, X/Twitter)
+ * - Social share button (Facebook)
  * - Download QR code as image
  * - Multiple display variants (default, compact, printable)
  */
@@ -89,12 +89,6 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
       const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`;
       window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
     }, [profileUrl]);
-
-    const handleShareTwitter = useCallback(() => {
-      const text = `Bekijk het spelersprofiel van ${playerName} bij ${teamName}`;
-      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}`;
-      window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
-    }, [profileUrl, playerName, teamName]);
 
     const handleDownloadQR = useCallback(() => {
       if (!qrRef.current) return;
@@ -257,21 +251,6 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
                 <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z" />
               </svg>
             </button>
-
-            <button
-              onClick={handleShareTwitter}
-              className="p-2 rounded-md bg-black text-white hover:bg-gray-800 transition-colors"
-              aria-label="Delen op X"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </button>
           </div>
         </div>
       );
@@ -358,40 +337,22 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
             )}
           </button>
 
-          {/* Social share buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleShareFacebook}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-[#1877f2] text-white hover:bg-[#166fe5] transition-colors"
-              aria-label="Delen op Facebook"
+          {/* Social share button */}
+          <button
+            onClick={handleShareFacebook}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-[#1877f2] text-white hover:bg-[#166fe5] transition-colors"
+            aria-label="Delen op Facebook"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z" />
-              </svg>
-              Facebook
-            </button>
-
-            <button
-              onClick={handleShareTwitter}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-black text-white hover:bg-gray-800 transition-colors"
-              aria-label="Delen op X"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              X
-            </button>
-          </div>
+              <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z" />
+            </svg>
+            Facebook
+          </button>
 
           {/* Download QR button */}
           {showQR && (

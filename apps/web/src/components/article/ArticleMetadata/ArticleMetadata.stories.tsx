@@ -46,7 +46,6 @@ export const Default: Story = {
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/belangrijke-overwinning",
       title: "KCVV Elewijt behaalt belangrijke overwinning",
-      twitterHandle: "@kcvve",
       hashtags: ["voetbal", "kcvv"],
     },
   },
@@ -98,7 +97,6 @@ export const InContext: Story = {
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/nieuwe-speler",
       title: "Nieuwe speler aangekondigd",
-      twitterHandle: "@kcvve",
       hashtags: ["transfer", "kcvv"],
     },
   },
