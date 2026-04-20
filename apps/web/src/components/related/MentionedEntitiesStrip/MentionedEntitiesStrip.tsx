@@ -157,7 +157,6 @@ function EntityCard({
       <Link
         href={href}
         onClick={onClick}
-        data-related-entity={entity.type}
         className={cn(
           baseClasses,
           "transition-all duration-200 hover:border-kcvv-green-bright/60 hover:shadow-card-hover hover:-translate-y-0.5",
@@ -168,11 +167,7 @@ function EntityCard({
     );
   }
 
-  return (
-    <div className={baseClasses} data-related-entity={entity.type}>
-      {inner}
-    </div>
-  );
+  return <div className={baseClasses}>{inner}</div>;
 }
 
 export const MentionedEntitiesStrip = ({

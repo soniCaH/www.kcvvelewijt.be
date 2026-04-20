@@ -155,10 +155,12 @@ export const RelatedContentSection = ({
     position: number,
     className?: string,
   ) => (
+    // Click tracking relies on bubbling from the inner <Link> anchor inside
+    // NewsCard. Keyboard Enter on a focused link dispatches a native click, so
+    // no extra role / tabIndex / onKeyDown is needed on this wrapper.
     <div
       key={item.id}
       onClick={() => handleContentClick(item, position)}
-      data-related-card={item.type}
       className="contents"
     >
       <NewsCard

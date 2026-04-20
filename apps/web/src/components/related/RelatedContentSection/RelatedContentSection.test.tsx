@@ -145,7 +145,7 @@ describe("RelatedContentSection", () => {
         article("ed", "editorial", "Editorial"),
       ];
 
-      const { container } = render(
+      render(
         <RelatedContentSection
           items={items}
           pageType="article"
@@ -153,12 +153,12 @@ describe("RelatedContentSection", () => {
         />,
       );
 
-      const cards = container.querySelectorAll("[data-related-card]");
-      const titles = Array.from(cards).map((c) => c.textContent ?? "");
+      const links = screen.getAllByRole("link");
+      const titles = links.map((a) => a.getAttribute("aria-label") ?? "");
 
       // Editorial comes first — lead slot
-      expect(titles[0]).toContain("Editorial");
-      expect(titles[1]).toContain("AI");
+      expect(titles[0]).toBe("Editorial");
+      expect(titles[1]).toBe("AI");
     });
   });
 
