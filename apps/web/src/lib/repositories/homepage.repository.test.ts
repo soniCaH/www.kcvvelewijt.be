@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
-import type { HOMEPAGE_BANNERS_QUERY_RESULT } from "../sanity/sanity.types";
+import type {
+  HOMEPAGE_BANNERS_QUERY_RESULT,
+  HOMEPAGE_PLACEHOLDER_QUERY_RESULT,
+} from "../sanity/sanity.types";
 
 // Mock the sanity client before importing the repository
 vi.mock("../sanity/client", () => ({
@@ -14,8 +17,10 @@ import {
   HOMEPAGE_BANNERS_QUERY,
   HomepageRepository,
   HomepageRepositoryLive,
+  toPlaceholderVM,
   type HomepageBannersVM,
   type BannerSlotVM,
+  type MatchesSliderPlaceholderVM,
 } from "./homepage.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,6 +149,121 @@ describe("HomepageRepository", () => {
       );
 
       expect(banners.bannerSlotA).toBeNull();
+    });
+  });
+
+  describe("getPlaceholder", () => {
+    it("returns null when homepage document is missing", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      const placeholder = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getPlaceholder();
+        }),
+      );
+
+      expect(placeholder).toBeNull();
+    });
+
+    it("returns null when matchesSliderPlaceholder is not set", async () => {
+      mockFetch.mockResolvedValueOnce({ matchesSliderPlaceholder: null });
+
+      const placeholder = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getPlaceholder();
+        }),
+      );
+
+      expect(placeholder).toBeNull();
+    });
+
+    it("maps all fields correctly when fully populated", async () => {
+      mockFetch.mockResolvedValueOnce({
+        matchesSliderPlaceholder: {
+          nextSeasonKickoff: "2026-08-10",
+          announcementText: "Kalender 25-26 volgende week online",
+          announcementHref: "https://example.com/kalender",
+          highlightImage: {
+            alt: "Supporters op de Driesstraat",
+            asset: {
+              _id: "image-abc",
+              url: "https://cdn.sanity.io/images/abc.jpg",
+              lqip: "data:image/jpeg;base64,/9j...",
+              dimensions: { width: 1920, height: 1080 },
+            },
+          },
+        },
+      });
+
+      const placeholder = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getPlaceholder();
+        }),
+      );
+
+      expect(placeholder).toEqual<MatchesSliderPlaceholderVM>({
+        nextSeasonKickoff: new Date("2026-08-10"),
+        announcementText: "Kalender 25-26 volgende week online",
+        announcementHref: "https://example.com/kalender",
+        highlightImage: {
+          alt: "Supporters op de Driesstraat",
+          url: "https://cdn.sanity.io/images/abc.jpg",
+          lqip: "data:image/jpeg;base64,/9j...",
+          width: 1920,
+          height: 1080,
+        },
+      });
+    });
+
+    it("omits highlightImage when alt is missing", () => {
+      const result = toPlaceholderVM({
+        matchesSliderPlaceholder: {
+          nextSeasonKickoff: null,
+          announcementText: null,
+          announcementHref: null,
+          highlightImage: {
+            alt: null,
+            asset: {
+              _id: "image-x",
+              url: "https://cdn.sanity.io/images/x.jpg",
+              lqip: null,
+              dimensions: null,
+            },
+          },
+        },
+      } as HOMEPAGE_PLACEHOLDER_QUERY_RESULT);
+
+      expect(result?.highlightImage).toBeUndefined();
+    });
+
+    it("omits nextSeasonKickoff when not set", () => {
+      const result = toPlaceholderVM({
+        matchesSliderPlaceholder: {
+          nextSeasonKickoff: null,
+          announcementText: "Later meer info",
+          announcementHref: null,
+          highlightImage: null,
+        },
+      } as HOMEPAGE_PLACEHOLDER_QUERY_RESULT);
+
+      expect(result?.nextSeasonKickoff).toBeUndefined();
+      expect(result?.announcementText).toBe("Later meer info");
+    });
+
+    it("accepts past kickoff dates (business logic filters, not the decoder)", () => {
+      const result = toPlaceholderVM({
+        matchesSliderPlaceholder: {
+          nextSeasonKickoff: "2024-08-10",
+          announcementText: null,
+          announcementHref: null,
+          highlightImage: null,
+        },
+      } as HOMEPAGE_PLACEHOLDER_QUERY_RESULT);
+
+      expect(result?.nextSeasonKickoff).toEqual(new Date("2024-08-10"));
     });
   });
 });
