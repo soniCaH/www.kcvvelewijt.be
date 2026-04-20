@@ -28,9 +28,6 @@ export const YouthSection = ({
       className={cn("relative bg-kcvv-green-dark text-left", className)}
       style={{
         marginTop: `calc(-1 * ${DIAGONAL_HEIGHT})`,
-        // -1px seam guard — mirrors SectionTransition.tsx; without it a
-        // sub-pixel hairline shows between the bottom diagonal and next section.
-        marginBottom: "-1px",
         paddingBottom: DIAGONAL_HEIGHT,
       }}
     >
