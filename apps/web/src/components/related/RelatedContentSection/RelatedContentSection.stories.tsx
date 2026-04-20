@@ -146,6 +146,10 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  args: {
+    pageType: "article",
+    pageSlug: "verslag-derby",
+  },
   decorators: [
     (Story) => (
       <div className="bg-kcvv-white">

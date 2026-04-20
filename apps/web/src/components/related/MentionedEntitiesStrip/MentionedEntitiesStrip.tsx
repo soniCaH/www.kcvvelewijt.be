@@ -18,6 +18,12 @@ export type MentionedEntity =
 export interface MentionedEntitiesStripProps {
   entities: MentionedEntity[];
   className?: string;
+  /**
+   * Fired when an entity card is clicked. Position is 1-indexed within the
+   * strip. Staff entities without a route never fire — they render as a
+   * non-interactive div.
+   */
+  onEntityClick?: (entity: MentionedEntity, position: number) => void;
 }
 
 const TYPE_LABEL: Record<MentionedEntity["type"], string> = {
@@ -109,7 +115,13 @@ function Thumbnail({ entity }: { entity: MentionedEntity }) {
   );
 }
 
-function EntityCard({ entity }: { entity: MentionedEntity }) {
+function EntityCard({
+  entity,
+  onClick,
+}: {
+  entity: MentionedEntity;
+  onClick?: () => void;
+}) {
   const href = getHref(entity);
   const name = getName(entity);
   const meta = getMeta(entity);
@@ -144,6 +156,8 @@ function EntityCard({ entity }: { entity: MentionedEntity }) {
     return (
       <Link
         href={href}
+        onClick={onClick}
+        data-related-entity={entity.type}
         className={cn(
           baseClasses,
           "transition-all duration-200 hover:border-kcvv-green-bright/60 hover:shadow-card-hover hover:-translate-y-0.5",
@@ -154,12 +168,17 @@ function EntityCard({ entity }: { entity: MentionedEntity }) {
     );
   }
 
-  return <div className={baseClasses}>{inner}</div>;
+  return (
+    <div className={baseClasses} data-related-entity={entity.type}>
+      {inner}
+    </div>
+  );
 }
 
 export const MentionedEntitiesStrip = ({
   entities,
   className,
+  onEntityClick,
 }: MentionedEntitiesStripProps) => {
   if (entities.length === 0) return null;
 
@@ -172,8 +191,14 @@ export const MentionedEntitiesStrip = ({
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {entities.map((entity) => (
-          <EntityCard key={entity.id} entity={entity} />
+        {entities.map((entity, index) => (
+          <EntityCard
+            key={entity.id}
+            entity={entity}
+            onClick={
+              onEntityClick ? () => onEntityClick(entity, index + 1) : undefined
+            }
+          />
         ))}
       </div>
     </section>
