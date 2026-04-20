@@ -100,51 +100,63 @@ function buildFeaturedEventStub(event: EventVM): FeaturedEventStub {
 }
 
 export default async function HomePage() {
-  const [articlesResult, matchesResult, eventResult, bannersResult] =
-    await Promise.all([
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          const all = yield* repo.findAll();
-          return all.slice(0, 9);
-        }).pipe(Effect.catchAll(() => Effect.succeed([]))),
+  const [
+    articlesResult,
+    matchesResult,
+    eventResult,
+    bannersResult,
+    matchesSliderPlaceholderResult,
+  ] = await Promise.all([
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* ArticleRepository;
+        const all = yield* repo.findAll();
+        return all.slice(0, 9);
+      }).pipe(Effect.catchAll(() => Effect.succeed([]))),
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getNextMatches();
+      }).pipe(
+        Effect.catchAll((error) => {
+          console.error("[HomePage] Failed to fetch matches:", error);
+          return Effect.succeed([]);
+        }),
       ),
-      runPromise(
-        Effect.gen(function* () {
-          const bff = yield* BffService;
-          return yield* bff.getNextMatches();
-        }).pipe(
-          Effect.catchAll((error) => {
-            console.error("[HomePage] Failed to fetch matches:", error);
-            return Effect.succeed([]);
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* EventRepository;
+        return yield* repo.findNextFeatured();
+      }).pipe(Effect.catchAll(() => Effect.succeed(null))),
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* HomepageRepository;
+        return yield* repo.getBanners();
+      }).pipe(
+        Effect.catchAll(() =>
+          Effect.succeed({
+            bannerSlotA: null,
+            bannerSlotB: null,
+            bannerSlotC: null,
           }),
         ),
       ),
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* EventRepository;
-          return yield* repo.findNextFeatured();
-        }).pipe(Effect.catchAll(() => Effect.succeed(null))),
-      ),
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* HomepageRepository;
-          return yield* repo.getBanners();
-        }).pipe(
-          Effect.catchAll(() =>
-            Effect.succeed({
-              bannerSlotA: null,
-              bannerSlotB: null,
-              bannerSlotC: null,
-            }),
-          ),
-        ),
-      ),
-    ]);
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* HomepageRepository;
+        return yield* repo.getPlaceholder();
+      }).pipe(Effect.catchAll(() => Effect.succeed(null))),
+    ),
+  ]);
 
   const articles = articlesResult;
   const matches = matchesResult;
   const banners = bannersResult;
+  const matchesSliderPlaceholder = matchesSliderPlaceholderResult;
 
   const featuredArticles = toHomepageArticles(articles.slice(0, 3));
   const newsGridArticles = toHomepageArticles(articles.slice(3, 9));
@@ -261,7 +273,11 @@ export default async function HomePage() {
     key: "matches-slider",
     bg: "kcvv-black",
     content: (
-      <MatchesSliderSection matches={sliderMatches} highlightTeamId={1235} />
+      <MatchesSliderSection
+        matches={sliderMatches}
+        highlightTeamId={1235}
+        placeholder={matchesSliderPlaceholder}
+      />
     ),
   };
 
