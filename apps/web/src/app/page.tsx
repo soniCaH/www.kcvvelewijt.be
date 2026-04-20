@@ -281,7 +281,7 @@ export default async function HomePage() {
     ),
     // The heading's cap-height makes the default pt-20/pb-20 read bottom-tight.
     // Bump the bottom so the cards don't crash into the diagonal.
-    paddingBottom: "pb-24",
+    paddingBottom: "pb-32",
   };
 
   const youthSection: SectionConfig = {
