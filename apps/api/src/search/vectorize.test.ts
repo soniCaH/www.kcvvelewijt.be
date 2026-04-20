@@ -93,6 +93,53 @@ describe("VectorizeService", () => {
     expect(matches[0]!.metadata?.["slug"]).toBe("kantine");
   });
 
+  it("preserves all string metadata fields (including imageUrl) on query", async () => {
+    const mockIndex = {
+      upsert: async () => ({ mutationId: "m", count: 1 }),
+      query: async () => ({
+        matches: [
+          {
+            id: "doc-abc",
+            score: 0.9,
+            metadata: {
+              slug: "kcvv-wint",
+              type: "article",
+              title: "KCVV wint",
+              excerpt: "Groenwit wint de derby.",
+              imageUrl:
+                "https://cdn.sanity.io/images/vhb33jaz/production/x.jpg",
+              tags: "A-Ploeg",
+            },
+          },
+        ],
+      }),
+    } as unknown as VectorizeIndex;
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    const matches = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.query(Array(1024).fill(0.1), {
+          topK: 5,
+          returnMetadata: "all",
+        });
+      }).pipe(Effect.provide(layer)),
+    );
+
+    // Regression: the service used to hand-roll a whitelist of four fields
+    // (slug/type/title/excerpt), silently dropping imageUrl and any other
+    // present fields. It must now forward every string-valued key.
+    expect(matches[0]!.metadata?.["imageUrl"]).toBe(
+      "https://cdn.sanity.io/images/vhb33jaz/production/x.jpg",
+    );
+    expect(matches[0]!.metadata?.["tags"]).toBe("A-Ploeg");
+    expect(matches[0]!.metadata?.["slug"]).toBe("kcvv-wint");
+    expect(matches[0]!.metadata?.["type"]).toBe("article");
+  });
+
   it("fails with VectorizeError when upsert throws", async () => {
     const failIndex = {
       upsert: async () => {

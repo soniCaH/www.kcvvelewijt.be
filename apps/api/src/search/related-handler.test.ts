@@ -227,4 +227,88 @@ describe("handleRelated", () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.id).toBe("doc-1");
   });
+
+  it("forwards imageUrl from Vectorize metadata to the response", async () => {
+    const result = await Effect.runPromise(
+      handleRelated({ id: "doc-abc", limit: 3 }).pipe(
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock({
+              stored: [{ id: "doc-abc", values: FAKE_VECTOR, metadata: {} }],
+              matches: [
+                {
+                  id: "doc-abc",
+                  score: 1.0,
+                  metadata: {
+                    slug: "self",
+                    type: "article",
+                    title: "Self",
+                    excerpt: "",
+                  },
+                },
+                {
+                  id: "doc-with-image",
+                  score: 0.9,
+                  metadata: {
+                    slug: "with-image",
+                    type: "article",
+                    title: "With image",
+                    excerpt: "",
+                    imageUrl:
+                      "https://cdn.sanity.io/images/vhb33jaz/production/abc.jpg",
+                  },
+                },
+              ],
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.imageUrl).toBe(
+      "https://cdn.sanity.io/images/vhb33jaz/production/abc.jpg",
+    );
+  });
+
+  it("returns imageUrl as null when Vectorize metadata lacks the field", async () => {
+    const result = await Effect.runPromise(
+      handleRelated({ id: "doc-abc", limit: 3 }).pipe(
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock({
+              stored: [{ id: "doc-abc", values: FAKE_VECTOR, metadata: {} }],
+              matches: [
+                {
+                  id: "doc-abc",
+                  score: 1.0,
+                  metadata: {
+                    slug: "self",
+                    type: "article",
+                    title: "Self",
+                    excerpt: "",
+                  },
+                },
+                {
+                  id: "doc-no-image",
+                  score: 0.9,
+                  metadata: {
+                    slug: "no-image",
+                    type: "article",
+                    title: "No image",
+                    excerpt: "",
+                  },
+                },
+              ],
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.imageUrl).toBeNull();
+  });
 });
