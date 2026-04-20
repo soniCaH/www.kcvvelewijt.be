@@ -3,7 +3,7 @@ import { Schema as S } from "effect";
 export class RelatedRequest extends S.Class<RelatedRequest>("RelatedRequest")({
   id: S.String.pipe(S.minLength(1)),
   limit: S.optional(S.Int.pipe(S.between(1, 5))).pipe(
-    S.withDefaults({ constructor: () => 4, decoding: () => 4 }),
+    S.withDefaults({ constructor: () => 3, decoding: () => 3 }),
   ),
 }) {}
 
