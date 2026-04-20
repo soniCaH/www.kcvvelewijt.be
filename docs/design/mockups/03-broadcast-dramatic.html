@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Direction 3 — Broadcast Dramatic · KCVV Elewijt</title>
+
+    <!--
+      Font proxy substitutions (Adobe Typekit is not accessible in this throwaway mockup):
+        - Quasimoda        -> DM Sans (Google Fonts) for titles / numerals
+        - Montserrat       -> Montserrat (Google Fonts) for body copy
+        - IBM Plex Mono    -> IBM Plex Mono (Google Fonts) for kickers / labels
+      No Stenciletta is used in Direction 3.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,500&family=IBM+Plex+Mono:wght@400;500&family=Montserrat:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind v4 browser build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <style type="text/tailwindcss">
+      @theme {
+        --color-kcvv-green-bright: #4acf52;
+        --color-kcvv-green-dark: #008755;
+        --color-kcvv-green-100: rgba(74, 207, 82, 0.25);
+        --color-kcvv-black: #1e2024;
+        --color-kcvv-dark-blue: #1e2836;
+        --color-kcvv-gray-blue: #31404b;
+        --color-kcvv-gray-dark: #292c31;
+        --color-kcvv-gray: #62656a;
+        --color-kcvv-gray-light: #cccccc;
+        --color-kcvv-white: #fefefe;
+        --color-foundation-gray-light: #edeff4;
+        --color-kcvv-alert: #cc4b37;
+        --color-kcvv-warning: #ffae00;
+        --color-kcvv-success: #3adb76;
+
+        --font-family-title: "DM Sans", system-ui, sans-serif;
+        --font-family-body: "Montserrat", system-ui, sans-serif;
+        --font-family-mono: "IBM Plex Mono", monospace;
+
+        --letter-spacing-label: 0.14em;
+        --letter-spacing-caps: 0.08em;
+
+        --max-width-inner: 60rem;
+        --max-width-inner-lg: 70rem;
+        --max-width-outer: 90rem;
+      }
+    </style>
+
+    <style>
+      /* Base styling */
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Montserrat", system-ui, sans-serif;
+        color: #1e2024;
+        background: #1e2024;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .font-title {
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+      .font-body {
+        font-family: "Montserrat", system-ui, sans-serif;
+      }
+      .font-mono {
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* Featured border — 4rem x 2px green-bright bar */
+      .featured-border {
+        position: relative;
+      }
+      .featured-border::before {
+        content: "";
+        display: block;
+        width: 4rem;
+        height: 2px;
+        background: #4acf52;
+        margin-bottom: 1.25rem;
+      }
+
+      /* Full-bleed utility */
+      .full-bleed {
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+      }
+
+      /* Editorial card overlay — black 95% bottom → 10% top */
+      .editorial-card-overlay--default {
+        background: linear-gradient(
+          to top,
+          rgba(30, 32, 36, 0.95) 0%,
+          rgba(30, 32, 36, 0.5) 40%,
+          rgba(30, 32, 36, 0.1) 100%
+        );
+      }
+
+      /* Rim-light radial gradient behind player cutouts */
+      .rim-light-green {
+        background: radial-gradient(
+          ellipse 60% 55% at 50% 65%,
+          rgba(74, 207, 82, 0.12) 0%,
+          rgba(74, 207, 82, 0.06) 35%,
+          transparent 65%
+        );
+      }
+
+      /* Soft radial green glow behind `key` qaBlock answer */
+      .quote-glow {
+        position: relative;
+      }
+      .quote-glow::before {
+        content: "";
+        position: absolute;
+        inset: -20% -10%;
+        background: radial-gradient(
+          ellipse 60% 70% at 50% 50%,
+          rgba(74, 207, 82, 0.15) 0%,
+          transparent 70%
+        );
+        z-index: 0;
+        pointer-events: none;
+      }
+      .quote-glow > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Green edge glow — shadow-green-20 */
+      .shadow-green-20 {
+        box-shadow: 0 0 20px 4px rgba(74, 207, 82, 0.2);
+      }
+
+      /* Dark photo placeholder — top-to-bottom black → kcvv-dark-blue */
+      .dark-photo-placeholder {
+        background: linear-gradient(135deg, #1e2024 0%, #1e2836 100%);
+      }
+
+      /* Subtle event gradient — kcvv-black TL to kcvv-dark-blue BR */
+      .event-gradient {
+        background: linear-gradient(135deg, #1e2024 0%, #1e2836 100%);
+      }
+
+      /* Drop shadow for cutouts */
+      .cutout-shadow {
+        filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.6));
+      }
+
+      /* Fade-up animation — 500ms cubic-bezier(0.22,1,0.36,1) */
+      .fade-up {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+          transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .fade-up.in-view {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Quote glyph grow-in: scales 0.6 → 1.0, opacity 0 → 0.25 over 700ms */
+      .quote-glyph {
+        opacity: 0;
+        transform: scale(0.6);
+        transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+          transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .quote-glyph.in-view {
+        opacity: 0.25;
+        transform: scale(1);
+      }
+
+      /* Related card hover: scale photo 1.03, green top border fade-in */
+      .related-card {
+        position: relative;
+        overflow: hidden;
+        transition: box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .related-card::after {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 1px;
+        background: #4acf52;
+        opacity: 0;
+        transition: opacity 300ms ease;
+      }
+      .related-card .related-card__photo {
+        transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .related-card:hover .related-card__photo {
+        transform: scale(1.03);
+      }
+      .related-card:hover {
+        box-shadow: 0 0 20px 4px rgba(74, 207, 82, 0.2);
+      }
+      .related-card:hover::after {
+        opacity: 1;
+      }
+
+      /* Section divider label */
+      .section-divider {
+        border-top: 1px solid rgba(254, 254, 254, 0.1);
+      }
+
+      /* Letter spacing helpers (for places where Tailwind v4 arbitraries feel noisy) */
+      .tracking-label {
+        letter-spacing: 0.14em;
+      }
+      .tracking-caps {
+        letter-spacing: 0.08em;
+      }
+
+      /* Hero headline clamp — Quasimoda/DM Sans 700, hero clamp, line-height 0.9 */
+      .text-hero {
+        font-size: clamp(3rem, 7vw, 5.5rem);
+        line-height: 0.9;
+      }
+
+      /* Stat-size type — 2.5rem */
+      .text-stat {
+        font-size: 2.5rem;
+        line-height: 1;
+      }
+
+      /* Date numeral — 6rem */
+      .text-date-numeral {
+        font-size: 6rem;
+        line-height: 0.9;
+        font-weight: 700;
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+
+      /* Blockquote glyph for light body */
+      .light-blockquote {
+        position: relative;
+        padding-top: 2rem;
+        padding-left: 5rem;
+      }
+      .light-blockquote::before {
+        content: "\201C";
+        position: absolute;
+        top: -2rem;
+        left: -1.5rem;
+        font-family: "DM Sans", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 15rem;
+        line-height: 1;
+        color: rgba(74, 207, 82, 0.18);
+        pointer-events: none;
+      }
+
+      /* Quote panel glyph — 15rem, green-bright at 25% opacity, pulled top-left */
+      .dark-quote-glyph {
+        position: absolute;
+        top: -2rem;
+        left: -1.5rem;
+        font-family: "DM Sans", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 15rem;
+        line-height: 1;
+        color: rgba(74, 207, 82, 0.25);
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* Rapid-fire grid dividers */
+      .rapid-fire-cell {
+        border-right: 1px solid rgba(254, 254, 254, 0.1);
+        border-bottom: 1px solid rgba(254, 254, 254, 0.1);
+      }
+      .rapid-fire-cell:nth-child(2n) {
+        border-right: none;
+      }
+      @media (max-width: 767px) {
+        .rapid-fire-cell {
+          border-right: none !important;
+        }
+      }
+
+      /* Custom list bullet — green-bright 6px square */
+      ul.kcvv-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      ul.kcvv-list li {
+        position: relative;
+        padding-left: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      ul.kcvv-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.7em;
+        width: 6px;
+        height: 6px;
+        background: #4acf52;
+      }
+
+      /* Links on cream body */
+      a.kcvv-link {
+        color: #008755;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+        transition: text-decoration-thickness 150ms ease;
+      }
+      a.kcvv-link:hover {
+        text-decoration-thickness: 2px;
+      }
+
+      /* Reduced motion — kill all fades/transitions */
+      @media (prefers-reduced-motion: reduce) {
+        .fade-up,
+        .fade-up.in-view,
+        .quote-glyph,
+        .quote-glyph.in-view,
+        .related-card,
+        .related-card .related-card__photo {
+          transition: none !important;
+          transform: none !important;
+          opacity: 1 !important;
+        }
+        .quote-glyph.in-view {
+          opacity: 0.25 !important;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="bg-[var(--color-kcvv-black)] text-[var(--color-kcvv-white)]">
+    <!-- =========================================================
+         STICKY NAV STRIP — direction label + exhibit anchors
+         ========================================================= -->
+    <nav
+      class="sticky top-0 z-50 bg-[var(--color-kcvv-black)] border-b border-white/10"
+    >
+      <div
+        class="mx-auto flex max-w-[var(--max-width-outer)] items-center justify-between gap-6 px-6 py-3"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >Broadcast Dramatic</span
+          >
+          <span
+            class="hidden font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)] sm:inline"
+            >Direction 03 · Mockup</span
+          >
+        </div>
+        <ul
+          class="flex flex-wrap items-center gap-3 font-mono text-[0.65rem] uppercase tracking-label text-[var(--color-kcvv-gray-light)] sm:gap-5 sm:text-xs"
+        >
+          <li>
+            <a
+              href="#exhibit-a"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >A · Interview</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-b"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >B · Announcement</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-c"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >C · Transfer</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-d"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >D · Transfer stack</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-e"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >E · Event hero</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-f"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >F · Event overview</a
+            >
+          </li>
+          <li>
+            <a
+              href="#exhibit-g"
+              class="hover:text-[var(--color-kcvv-green-bright)]"
+              >G · Related</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Reusable SVG defs: player silhouette, lucide icons -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <!-- Simple football player silhouette: head + shoulders + torso -->
+        <symbol id="player-silhouette" viewBox="0 0 200 320">
+          <path
+            d="M100 15c-18 0-32 15-32 35s14 35 32 35 32-15 32-35-14-35-32-35zM60 95c-10 0-18 7-20 17l-8 55c-1 7 4 13 11 13h14l6 130c0 6 5 10 11 10h72c6 0 11-4 11-10l6-130h14c7 0 12-6 11-13l-8-55c-2-10-10-17-20-17-15 12-31 18-47 18s-32-6-47-18z"
+            fill="#101114"
+          />
+          <!-- Rim highlight on left shoulder -->
+          <path
+            d="M60 95c-10 0-18 7-20 17l-8 55c-1 7 4 13 11 13h14"
+            fill="none"
+            stroke="rgba(74,207,82,0.35)"
+            stroke-width="2"
+          />
+          <!-- Subtle jersey highlight -->
+          <path
+            d="M80 135l-4 120h48l-4-120z"
+            fill="#1a1c20"
+            opacity="0.6"
+          />
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- =========================================================
+         EXHIBIT A — INTERVIEW ARTICLE (dark top-to-bottom)
+         ========================================================= -->
+    <section id="exhibit-a" class="bg-[var(--color-kcvv-black)]">
+      <!-- Interview hero: 90vh, dark, cutout right third, rim-light behind -->
+      <header
+        class="relative flex min-h-[90vh] w-full overflow-hidden bg-[var(--color-kcvv-black)]"
+      >
+        <!-- Top chrome: wordmark left, share/save right -->
+        <div
+          class="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-6 py-5 md:px-10"
+        >
+          <span
+            class="font-title text-lg font-bold tracking-caps text-white/60"
+            >KCVV ELEWIJT</span
+          >
+          <div class="flex items-center gap-4 text-white">
+            <!-- Share2 -->
+            <button
+              aria-label="Share"
+              class="transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
+            <!-- Bookmark -->
+            <button
+              aria-label="Save"
+              class="transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Radial rim-light layer behind cutout -->
+        <div
+          class="rim-light-green pointer-events-none absolute inset-y-0 right-0 z-0 w-full md:w-2/3"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Cutout, bottom-aligned, right third -->
+        <div
+          class="pointer-events-none absolute inset-y-0 right-0 z-10 flex items-end justify-end pr-6 md:pr-16 lg:w-2/3"
+          aria-hidden="true"
+        >
+          <svg
+            class="cutout-shadow h-[75vh] max-h-[720px] w-auto"
+            viewBox="0 0 200 320"
+            preserveAspectRatio="xMidYEnd meet"
+          >
+            <use href="#player-silhouette"></use>
+          </svg>
+        </div>
+
+        <!-- Hero text: bottom-left block -->
+        <div
+          class="relative z-20 mx-auto flex w-full max-w-[var(--max-width-outer)] flex-col justify-between px-6 py-24 md:px-10"
+        >
+          <!-- Top-right kicker -->
+          <div class="self-end text-right">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              INTERVIEW&nbsp;&nbsp;---
+            </div>
+            <div
+              class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)] ml-auto"
+            ></div>
+            <div
+              class="mt-3 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+            >
+              14 APRIL 2026
+            </div>
+          </div>
+
+          <!-- Bottom-left stack -->
+          <div class="mt-auto max-w-[36rem] fade-up">
+            <p
+              class="font-title text-[1.75rem] italic font-medium leading-tight text-[var(--color-kcvv-gray-light)]"
+            >
+              "Ik voetbal nog altijd met schrik in de buik."
+            </p>
+            <h1
+              class="mt-6 font-title text-hero font-bold uppercase text-[var(--color-kcvv-white)]"
+            >
+              Jeroen<br />Van Den Berghe
+            </h1>
+            <p
+              class="mt-6 font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+            >
+              #9 · Attacker
+            </p>
+
+            <!-- Metadata bar INSIDE hero (dark) -->
+            <div class="mt-10 border-t border-white/10 pt-5">
+              <div
+                class="flex flex-wrap items-center justify-between gap-4 font-mono text-xs uppercase tracking-label"
+              >
+                <div class="text-[var(--color-kcvv-gray-light)]">
+                  NEWS
+                  <span class="mx-2 text-[var(--color-kcvv-green-bright)]">/</span>
+                  <span class="text-[var(--color-kcvv-green-bright)]"
+                    >INTERVIEWS</span
+                  >
+                </div>
+                <div class="text-[var(--color-kcvv-gray-light)]">
+                  <span class="font-title text-sm normal-case font-medium"
+                    >14 april 2026</span
+                  >
+                  <span class="mx-3 text-[var(--color-kcvv-green-bright)]"
+                    >---</span
+                  >
+                  <span class="font-title text-sm normal-case font-medium"
+                    >Jeroen Aerts</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Interview body (STAYS DARK — interviews are the cinematic exception) -->
+      <div class="bg-[var(--color-kcvv-black)] px-6 py-20 md:px-10">
+        <div class="mx-auto max-w-[42rem]">
+          <p
+            class="font-body text-lg leading-relaxed text-[var(--color-kcvv-white)] fade-up"
+          >
+            Jeroen Van Den Berghe zit achteraan in de kleedkamer, de handen nog
+            wit van de magnesium. Dertien minuten na affluiten, en zijn adem is
+            nog niet terug. Twee jaar geleden was hij een belofte. Vanavond is
+            hij de man die KCVV naar de winterstop trok met een hattrick in
+            Harelbeke.
+          </p>
+          <p
+            class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)] fade-up"
+          >
+            "Ik denk niet dat ik ooit wenden aan dit gevoel," zegt hij, en hij
+            bedoelt niet de overwinning. Hij bedoelt de stilte van een
+            kleedkamer die net een gebruld stadion was. Een cinematografisch
+            hiaat tussen wat gebeurd is en wat ervan zal blijven.
+          </p>
+          <p
+            class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)] fade-up"
+          >
+            Wat volgt is een gesprek over bange ochtenden, over de kern die hem
+            adopteerde toen hij zeventien was, en over een vader die nog altijd
+            op hetzelfde plekje op tribune 2 blijft zitten.
+          </p>
+        </div>
+
+        <!-- qaBlock — ALL FOUR TAG TREATMENTS -->
+        <div class="mx-auto mt-16 max-w-[42rem] space-y-12">
+          <!-- STANDARD pair 01 -->
+          <div class="fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              Q:
+            </div>
+            <p
+              class="mt-2 font-body text-base font-medium text-[var(--color-kcvv-gray-light)]"
+            >
+              Hoe voelde jouw eerste wedstrijd in het eerste elftal?
+            </p>
+            <p
+              class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)]"
+            >
+              Ik voelde me klaar. Twee jaar in de A-kern wachten op een kans,
+              en dan begint het echt. Adrenaline eerst, daarna een soort rust
+              die ik nergens anders vind.
+            </p>
+          </div>
+
+          <!-- STANDARD pair 02 -->
+          <div class="fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              Q:
+            </div>
+            <p
+              class="mt-2 font-body text-base font-medium text-[var(--color-kcvv-gray-light)]"
+            >
+              Wat zei de coach voor de aftrap?
+            </p>
+            <p
+              class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)]"
+            >
+              Niet veel. Hij keek me aan en zei: "Speel zoals je speelt op
+              training." Dat is alles. Een zin. Ik heb er elke wedstrijd nog
+              aan gedacht.
+            </p>
+          </div>
+
+          <!-- KEY — promoted answer -->
+          <div class="quote-glow fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              Q:
+            </div>
+            <p
+              class="mt-2 font-body text-base font-medium text-[var(--color-kcvv-gray-light)]"
+            >
+              Wat houdt jou scherp op dit niveau?
+            </p>
+            <p
+              class="mt-6 font-title text-3xl italic font-medium leading-snug text-[var(--color-kcvv-white)]"
+            >
+              Ik voetbal nog altijd met schrik in de buik. Dat is het enige wat
+              mij scherp houdt.
+            </p>
+            <div
+              class="mt-6 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+            ></div>
+          </div>
+
+          <!-- STANDARD pair 03 -->
+          <div class="fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              Q:
+            </div>
+            <p
+              class="mt-2 font-body text-base font-medium text-[var(--color-kcvv-gray-light)]"
+            >
+              Hoe ga je om met die schrik op wedstrijddag?
+            </p>
+            <p
+              class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)]"
+            >
+              Ik wandel. Anderhalf uur door Elewijt, de oude kerk, het kanaal.
+              Geen muziek, geen telefoon. De schrik mag er zijn, maar ik wil
+              niet dat ze groter wordt dan ik ben.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUOTE pair — full-bleed black panel -->
+      <div
+        class="full-bleed relative overflow-hidden bg-[var(--color-kcvv-black)] px-6 py-24 md:px-10 md:py-36"
+      >
+        <!-- Subject cutout behind, bottom-right, 40vh 25% opacity -->
+        <div
+          class="pointer-events-none absolute inset-y-0 right-0 z-0 hidden items-end opacity-25 md:flex"
+          aria-hidden="true"
+        >
+          <svg
+            class="h-[40vh] w-auto"
+            viewBox="0 0 200 320"
+            preserveAspectRatio="xMidYEnd meet"
+          >
+            <use href="#player-silhouette"></use>
+          </svg>
+        </div>
+
+        <div
+          class="relative z-10 mx-auto max-w-[var(--max-width-inner)]"
+        >
+          <div class="relative">
+            <span class="dark-quote-glyph quote-glyph" aria-hidden="true">
+              &ldquo;
+            </span>
+            <blockquote
+              class="relative pl-4 md:pl-12 fade-up font-title text-4xl font-medium leading-tight text-[var(--color-kcvv-white)] md:text-[2.75rem]"
+            >
+              Ik voetbal nog altijd met schrik in de buik. Dat is het enige
+              wat mij scherp houdt.
+            </blockquote>
+            <div
+              class="relative mt-10 pl-4 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)] md:pl-12"
+            >
+              <span class="text-[var(--color-kcvv-green-bright)]">---</span>
+              &nbsp;&nbsp;JEROEN VAN DEN BERGHE, #9
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STANDARD pair 04 + RAPID-FIRE -->
+      <div class="bg-[var(--color-kcvv-black)] px-6 py-20 md:px-10">
+        <div class="mx-auto max-w-[42rem] space-y-12">
+          <div class="fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              Q:
+            </div>
+            <p
+              class="mt-2 font-body text-base font-medium text-[var(--color-kcvv-gray-light)]"
+            >
+              Hoe zie je het einde van dit seizoen?
+            </p>
+            <p
+              class="mt-6 font-body text-lg leading-relaxed text-[var(--color-kcvv-white)]"
+            >
+              Met dezelfde schrik en hetzelfde plezier. Ik wil winnen. Ik wil
+              niet voelen dat ik klaar ben, want zodra ik klaar ben, is het
+              voorbij.
+            </p>
+          </div>
+        </div>
+
+        <!-- RAPID-FIRE group — 2-col on desk, 1-col mobile -->
+        <div class="mx-auto mt-20 max-w-[var(--max-width-inner)]">
+          <div
+            class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+          >
+            RAPID FIRE&nbsp;&nbsp;---
+          </div>
+          <div
+            class="mt-6 grid grid-cols-1 border-l border-t border-white/10 md:grid-cols-2"
+          >
+            <div class="rapid-fire-cell p-6">
+              <div
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+              >
+                Favoriete spits?
+              </div>
+              <p
+                class="mt-3 font-title text-xl font-medium text-[var(--color-kcvv-white)]"
+              >
+                Lewandowski.
+              </p>
+            </div>
+            <div class="rapid-fire-cell p-6">
+              <div
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+              >
+                Beste moment in shirt?
+              </div>
+              <p
+                class="mt-3 font-title text-xl font-medium text-[var(--color-kcvv-white)]"
+              >
+                Titelviering 2019.
+              </p>
+            </div>
+            <div class="rapid-fire-cell p-6">
+              <div
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+              >
+                Pre-match ritueel?
+              </div>
+              <p
+                class="mt-3 font-title text-xl font-medium text-[var(--color-kcvv-white)]"
+              >
+                Wandelen, in stilte.
+              </p>
+            </div>
+            <div class="rapid-fire-cell p-6">
+              <div
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+              >
+                Laatste nummer gehoord?
+              </div>
+              <p
+                class="mt-3 font-title text-xl font-medium text-[var(--color-kcvv-white)]"
+              >
+                Bon Iver — Holocene.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT B — ANNOUNCEMENT (dark hero → cream body)
+         ========================================================= -->
+    <section id="exhibit-b">
+      <!-- Announcement hero: 70vh, dark photo, editorial-card-overlay -->
+      <header
+        class="relative flex min-h-[70vh] w-full overflow-hidden bg-[var(--color-kcvv-black)]"
+      >
+        <!-- Dark photo placeholder behind -->
+        <div
+          class="dark-photo-placeholder absolute inset-0 z-0"
+          aria-hidden="true"
+        ></div>
+        <!-- Editorial card overlay -->
+        <div
+          class="editorial-card-overlay--default absolute inset-0 z-10"
+          aria-hidden="true"
+        ></div>
+
+        <div
+          class="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-6 py-5 md:px-10"
+        >
+          <span
+            class="font-title text-lg font-bold tracking-caps text-white/60"
+            >KCVV ELEWIJT</span
+          >
+          <button
+            aria-label="Share"
+            class="text-white transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div
+          class="relative z-20 mx-auto flex w-full max-w-[var(--max-width-outer)] flex-col justify-end px-6 py-16 md:px-10"
+        >
+          <div class="max-w-[48rem] fade-up">
+            <div
+              class="font-mono text-xs uppercase tracking-label"
+            >
+              <span class="text-[var(--color-kcvv-green-bright)]"
+                >CLUBNIEUWS</span
+              >
+              <span class="mx-2 text-[var(--color-kcvv-green-bright)]">---</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">14 APRIL 2026</span>
+            </div>
+            <h1
+              class="mt-6 font-title text-hero font-bold leading-[0.9] text-[var(--color-kcvv-white)]"
+            >
+              Nieuwe kunstgrasmat<br />klaar voor het<br />seizoen 2026.
+            </h1>
+          </div>
+          <!-- Dark metadata bar inside hero -->
+          <div class="mt-10 max-w-[48rem] border-t border-white/10 pt-5">
+            <div
+              class="flex flex-wrap items-center justify-between gap-4 font-mono text-xs uppercase tracking-label"
+            >
+              <div class="text-[var(--color-kcvv-gray-light)]">
+                <span class="text-[var(--color-kcvv-green-bright)]">NEWS</span>
+                <span class="mx-2">/</span>
+                <span>CLUBNIEUWS</span>
+              </div>
+              <div class="text-[var(--color-kcvv-gray-light)]">
+                <span class="font-title text-sm normal-case font-medium"
+                  >14 april 2026</span
+                >
+                <span class="mx-3 text-[var(--color-kcvv-green-bright)]"
+                  >---</span
+                >
+                <span class="font-title text-sm normal-case font-medium"
+                  >Ann De Backer</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CREAM body — announcements transition to light -->
+      <div class="bg-[var(--color-foundation-gray-light)] px-6 py-20 md:px-10">
+        <div class="mx-auto max-w-[var(--max-width-inner)]">
+          <div class="mx-auto max-w-[42rem]">
+            <p
+              class="font-body text-lg leading-relaxed text-[var(--color-kcvv-gray-dark)] fade-up"
+            >
+              Na drie maanden werken ligt de nieuwe kunstgrasmat van het
+              Gemeentelijk Stadion Elewijt klaar voor het seizoen 2026. Het
+              project, mogelijk gemaakt door de gemeente Zemst en een
+              substantiële bijdrage van onze
+              <a href="#" class="kcvv-link">hoofdsponsors</a>, markeert het
+              begin van een nieuwe fase voor de accommodatie.
+            </p>
+
+            <h2
+              class="featured-border mt-12 font-title text-3xl font-bold leading-snug text-[var(--color-kcvv-gray-blue)] fade-up"
+            >
+              Wat verandert er concreet?
+            </h2>
+            <p
+              class="mt-4 font-body text-lg leading-relaxed text-[var(--color-kcvv-gray-dark)] fade-up"
+            >
+              De nieuwe mat voldoet aan de meest recente FIFA Quality Pro
+              standaarden en verlengt de speelbare uren op een gemiddelde
+              herfstweek met 38%. Voor onze jeugdwerking betekent dat in de
+              praktijk: minder afgelastingen, meer eenheidstraining en betere
+              doorstroming naar het eerste elftal.
+            </p>
+
+            <h3
+              class="mt-10 font-title text-xl font-medium text-[var(--color-kcvv-gray-blue)] fade-up"
+            >
+              Gebruiksafspraken voor de eerste weken
+            </h3>
+            <ul
+              class="kcvv-list mt-4 font-body text-lg leading-relaxed text-[var(--color-kcvv-gray-dark)] fade-up"
+            >
+              <li>Enkel voetbalschoenen met AG- of TF-zolen zijn toegelaten.</li>
+              <li>
+                Geen kauwgom of glazen flessen op de mat — boetes lopen van €25
+                op.
+              </li>
+              <li>
+                Training tussen 21u30 en 07u00 niet mogelijk wegens
+                onderhoudscyclus.
+              </li>
+            </ul>
+
+            <blockquote
+              class="light-blockquote mt-14 font-title text-2xl italic font-medium leading-snug text-[var(--color-kcvv-gray-blue)] fade-up"
+            >
+              Een veld is een infrastructuurwerk, ja. Maar in de praktijk is
+              het vooral een belofte aan elke jonge speler dat ze woensdag
+              avond kunnen blijven trainen, ook als het regent.
+            </blockquote>
+
+            <p
+              class="mt-12 font-body text-lg leading-relaxed text-[var(--color-kcvv-gray-dark)] fade-up"
+            >
+              De officiële opening vindt plaats op zondag 26 april met een
+              tornooi voor de jeugdafdeling en een exhibitiematch tussen het
+              eerste elftal en een seniorenselectie van KV Mechelen. Meer
+              details volgen de komende dagen op onze
+              <a href="#" class="kcvv-link">evenementenpagina</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT C — TRANSFER ARTICLE (hero = feature, 85vh dark)
+         ========================================================= -->
+    <section id="exhibit-c" class="bg-[var(--color-kcvv-black)]">
+      <header
+        class="relative flex min-h-[85vh] w-full flex-col overflow-hidden bg-[var(--color-kcvv-black)]"
+      >
+        <!-- Top chrome -->
+        <div
+          class="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-6 py-5 md:px-10"
+        >
+          <span
+            class="font-title text-lg font-bold tracking-caps text-white/60"
+            >KCVV ELEWIJT</span
+          >
+          <button
+            aria-label="Share"
+            class="text-white transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Top-left kicker -->
+        <div
+          class="relative z-20 mx-auto w-full max-w-[var(--max-width-outer)] px-6 pt-24 md:px-10"
+        >
+          <div
+            class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+          >
+            TRANSFER&nbsp;&nbsp;---&nbsp;&nbsp;INCOMING
+          </div>
+          <div
+            class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+          ></div>
+        </div>
+
+        <!-- Centered cutout with rim-light -->
+        <div class="relative z-10 flex flex-1 items-end justify-center">
+          <div class="rim-light-green pointer-events-none absolute inset-0"></div>
+          <svg
+            class="cutout-shadow relative h-[55vh] max-h-[520px] w-auto"
+            viewBox="0 0 200 320"
+            preserveAspectRatio="xMidYEnd meet"
+            aria-hidden="true"
+          >
+            <use href="#player-silhouette"></use>
+          </svg>
+        </div>
+
+        <!-- Lower-third strip -->
+        <div
+          class="relative z-20 mx-auto w-full max-w-[var(--max-width-inner-lg)] px-6 pb-16 md:px-10"
+        >
+          <!-- Hairline rule with from-logo / arrow / KCVV logo -->
+          <div
+            class="flex items-center justify-between border-t border-white/10 pt-6"
+          >
+            <!-- From-club flat circle -->
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-[#6b2a2a] font-title text-sm font-bold text-white"
+              >
+                RC
+              </div>
+              <span
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+                >RC HARELBEKE</span
+              >
+            </div>
+            <!-- ArrowRight -->
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4acf52"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+            <!-- KCVV logo flat circle -->
+            <div class="flex items-center gap-3">
+              <span
+                class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+                >KCVV ELEWIJT</span
+              >
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-kcvv-green-dark)] font-title text-sm font-bold text-white"
+              >
+                KC
+              </div>
+            </div>
+          </div>
+
+          <!-- Name + data -->
+          <div class="mt-10">
+            <h1
+              class="font-title text-hero font-bold text-[var(--color-kcvv-white)] fade-up"
+            >
+              Robbe Janssens
+            </h1>
+            <div
+              class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3 md:items-baseline"
+            >
+              <div
+                class="text-stat font-title font-bold text-[var(--color-kcvv-green-bright)]"
+              >
+                24
+              </div>
+              <div
+                class="font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+              >
+                Midfielder
+              </div>
+              <div
+                class="font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+              >
+                From RC Harelbeke
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT D — TRANSFER OVERVIEW STACK (3 cards)
+         ========================================================= -->
+    <section
+      id="exhibit-d"
+      class="bg-[var(--color-kcvv-black)] px-6 py-20 md:px-10"
+    >
+      <div class="mx-auto max-w-[var(--max-width-inner-lg)]">
+        <div
+          class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+        >
+          TRANSFERS&nbsp;&nbsp;---&nbsp;&nbsp;OVERZICHT
+        </div>
+        <div class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"></div>
+        <h2
+          class="mt-6 font-title text-3xl font-bold text-[var(--color-kcvv-white)]"
+        >
+          Laatste transferbewegingen
+        </h2>
+
+        <ul class="mt-10 divide-y divide-white/10">
+          <!-- INCOMING — green-bright ring -->
+          <li class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-6 py-5">
+            <div
+              class="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-kcvv-gray-blue)] ring-2 ring-[var(--color-kcvv-green-bright)]"
+            >
+              <svg
+                class="h-12 w-12"
+                viewBox="0 0 200 320"
+                preserveAspectRatio="xMidYMid meet"
+                aria-hidden="true"
+              >
+                <use href="#player-silhouette"></use>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="font-title text-xl font-bold text-[var(--color-kcvv-white)]"
+              >
+                Robbe Janssens
+              </div>
+              <div
+                class="mt-1 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+              >
+                FROM RC HARELBEKE
+              </div>
+            </div>
+            <div
+              class="text-stat font-title font-bold text-[var(--color-kcvv-green-bright)]"
+            >
+              24
+            </div>
+            <div
+              class="font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+            >
+              Midfielder
+            </div>
+            <svg
+              class="text-[var(--color-kcvv-gray-light)] transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </li>
+
+          <!-- OUTGOING — kcvv-alert ring -->
+          <li class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-6 py-5">
+            <div
+              class="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-kcvv-gray-blue)] ring-2 ring-[var(--color-kcvv-alert)]"
+            >
+              <svg
+                class="h-12 w-12"
+                viewBox="0 0 200 320"
+                preserveAspectRatio="xMidYMid meet"
+                aria-hidden="true"
+              >
+                <use href="#player-silhouette"></use>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="font-title text-xl font-bold text-[var(--color-kcvv-white)]"
+              >
+                Thomas De Smet
+              </div>
+              <div
+                class="mt-1 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+              >
+                TO KV MECHELEN
+              </div>
+            </div>
+            <div
+              class="text-stat font-title font-bold text-[var(--color-kcvv-green-bright)]"
+            >
+              21
+            </div>
+            <div
+              class="font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+            >
+              Defender
+            </div>
+            <svg
+              class="text-[var(--color-kcvv-gray-light)] transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </li>
+
+          <!-- EXTENSION — kcvv-warning ring -->
+          <li class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-6 py-5">
+            <div
+              class="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-kcvv-gray-blue)] ring-2 ring-[var(--color-kcvv-warning)]"
+            >
+              <svg
+                class="h-12 w-12"
+                viewBox="0 0 200 320"
+                preserveAspectRatio="xMidYMid meet"
+                aria-hidden="true"
+              >
+                <use href="#player-silhouette"></use>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="font-title text-xl font-bold text-[var(--color-kcvv-white)]"
+              >
+                Jeroen Van Den Berghe
+              </div>
+              <div
+                class="mt-1 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+              >
+                UNTIL 2028
+              </div>
+            </div>
+            <div
+              class="text-stat font-title font-bold text-[var(--color-kcvv-green-bright)]"
+            >
+              27
+            </div>
+            <div
+              class="font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+            >
+              Attacker
+            </div>
+            <!-- RefreshCw icon for extension (per spec 2.3) -->
+            <svg
+              class="text-[var(--color-kcvv-warning)]"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path
+                d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+              ></path>
+            </svg>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT E — EVENT ARTICLE HERO (85vh gradient)
+         ========================================================= -->
+    <section id="exhibit-e">
+      <header
+        class="event-gradient relative flex min-h-[85vh] w-full overflow-hidden"
+      >
+        <!-- Top chrome -->
+        <div
+          class="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-6 py-5 md:px-10"
+        >
+          <span
+            class="font-title text-lg font-bold tracking-caps text-white/60"
+            >KCVV ELEWIJT</span
+          >
+          <button
+            aria-label="Share"
+            class="text-white transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div
+          class="relative z-20 mx-auto flex w-full max-w-[var(--max-width-outer)] flex-col justify-center px-6 py-24 md:px-10"
+        >
+          <div class="max-w-[56rem]">
+            <!-- Kicker -->
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              EVENT&nbsp;&nbsp;---&nbsp;&nbsp;FIRST TEAM
+            </div>
+            <div
+              class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+            ></div>
+
+            <!-- Countdown kicker (≤7 days per §7.1) -->
+            <div
+              class="mt-8 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              IN 3 DAGEN
+            </div>
+
+            <!-- Massive stacked date — 26 / 04 at 6rem each -->
+            <div class="mt-4 flex items-start gap-8">
+              <div class="flex flex-col">
+                <div class="flex">
+                  <span class="text-date-numeral text-[var(--color-kcvv-white)]"
+                    >2</span
+                  >
+                  <span class="text-date-numeral text-[var(--color-kcvv-white)]"
+                    >6</span
+                  >
+                </div>
+                <div class="mt-2 flex">
+                  <span class="text-date-numeral text-[var(--color-kcvv-white)]"
+                    >0</span
+                  >
+                  <span class="text-date-numeral text-[var(--color-kcvv-white)]"
+                    >4</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <h1
+              class="mt-10 font-title text-[2rem] font-bold uppercase leading-[1] text-[var(--color-kcvv-white)] md:text-5xl"
+            >
+              Opening Night
+            </h1>
+            <!-- Featured-border underline between title and venue -->
+            <div
+              class="mt-5 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+            ></div>
+            <p
+              class="mt-5 font-title text-sm font-medium uppercase tracking-caps text-[var(--color-kcvv-gray-light)]"
+            >
+              Gemeentelijk Stadion Elewijt
+            </p>
+
+            <!-- CTA -->
+            <a
+              href="#"
+              class="mt-10 inline-flex items-center gap-3 bg-[var(--color-kcvv-green-bright)] px-6 py-4 font-title text-sm font-bold uppercase tracking-caps text-[var(--color-kcvv-black)] transition-shadow hover:shadow-green-20"
+            >
+              Koop tickets
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </header>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT F — EVENT OVERVIEW (2 stacked cards)
+         ========================================================= -->
+    <section
+      id="exhibit-f"
+      class="bg-[var(--color-kcvv-black)] px-6 py-20 md:px-10"
+    >
+      <div class="mx-auto max-w-[var(--max-width-inner-lg)]">
+        <div
+          class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+        >
+          EVENTS&nbsp;&nbsp;---&nbsp;&nbsp;AGENDA
+        </div>
+        <div
+          class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+        ></div>
+        <h2
+          class="mt-6 font-title text-3xl font-bold text-[var(--color-kcvv-white)]"
+        >
+          Komende evenementen
+        </h2>
+
+        <ul class="mt-10 divide-y divide-white/10">
+          <li
+            class="grid grid-cols-[4rem_1fr_auto] items-center gap-6 py-5"
+          >
+            <div class="flex flex-col leading-[0.9]">
+              <span
+                class="font-title text-4xl font-bold text-[var(--color-kcvv-white)]"
+                >26</span
+              >
+              <span
+                class="font-title text-4xl font-bold text-[var(--color-kcvv-white)]"
+                >04</span
+              >
+            </div>
+            <div>
+              <div
+                class="font-title text-xl font-bold text-[var(--color-kcvv-white)]"
+              >
+                Opening Night
+              </div>
+              <div
+                class="mt-1 font-body text-base text-[var(--color-kcvv-gray-light)]"
+              >
+                Gemeentelijk Stadion Elewijt
+              </div>
+              <div
+                class="mt-2 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+              >
+                FIRST TEAM&nbsp;&nbsp;---&nbsp;&nbsp;BEKER VAN BELGIE
+              </div>
+            </div>
+            <a
+              href="#"
+              class="inline-flex items-center gap-2 font-title text-sm font-medium text-[var(--color-kcvv-green-bright)] hover:underline"
+            >
+              Tickets
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </li>
+
+          <li
+            class="grid grid-cols-[4rem_1fr_auto] items-center gap-6 py-5"
+          >
+            <div class="flex flex-col leading-[0.9]">
+              <span
+                class="font-title text-4xl font-bold text-[var(--color-kcvv-white)]"
+                >03</span
+              >
+              <span
+                class="font-title text-4xl font-bold text-[var(--color-kcvv-white)]"
+                >05</span
+              >
+            </div>
+            <div>
+              <div
+                class="font-title text-xl font-bold text-[var(--color-kcvv-white)]"
+              >
+                Jeugdtornooi Bovenbouw
+              </div>
+              <div
+                class="mt-1 font-body text-base text-[var(--color-kcvv-gray-light)]"
+              >
+                Terrein B · Elewijt
+              </div>
+              <div
+                class="mt-2 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+              >
+                YOUTH BOVENBOUW&nbsp;&nbsp;---&nbsp;&nbsp;CLUBTORNOOI
+              </div>
+            </div>
+            <a
+              href="#"
+              class="inline-flex items-center gap-2 font-title text-sm font-medium text-[var(--color-kcvv-green-bright)] hover:underline"
+            >
+              Inschrijven
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider bg-[var(--color-kcvv-black)] py-6 text-center">
+      <span
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+        >— Next exhibit —</span
+      >
+    </div>
+
+    <!-- =========================================================
+         EXHIBIT G — RELATED CONTENT SLIDER (3 cards)
+         ========================================================= -->
+    <section
+      id="exhibit-g"
+      class="bg-[var(--color-kcvv-black)] px-6 py-20 md:px-10"
+    >
+      <div class="mx-auto max-w-[var(--max-width-outer)]">
+        <div class="flex items-center justify-between">
+          <div>
+            <div
+              class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+            >
+              GERELATEERD&nbsp;&nbsp;---&nbsp;&nbsp;LEES VERDER
+            </div>
+            <div
+              class="mt-2 h-[2px] w-16 bg-[var(--color-kcvv-green-bright)]"
+            ></div>
+            <h2
+              class="mt-6 font-title text-3xl font-bold text-[var(--color-kcvv-white)]"
+            >
+              Meer verhalen uit Elewijt
+            </h2>
+          </div>
+          <div
+            class="hidden items-center gap-2 font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)] md:flex"
+          >
+            <button
+              aria-label="Previous"
+              class="transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span>1 / 3</span>
+            <button
+              aria-label="Next"
+              class="transition-colors hover:text-[var(--color-kcvv-green-bright)]"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1px white/10% vertical dividers between cards (not gutters) -->
+        <div
+          class="mt-10 grid grid-cols-1 divide-y divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0"
+        >
+          <!-- Card 1 -->
+          <a href="#" class="related-card group block pr-0 md:pr-6">
+            <div
+              class="relative aspect-video w-full overflow-hidden bg-[var(--color-kcvv-black)]"
+            >
+              <div
+                class="related-card__photo dark-photo-placeholder absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="editorial-card-overlay--default absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="absolute bottom-0 left-0 right-0 p-5"
+              >
+                <div
+                  class="font-mono text-[0.65rem] uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+                >
+                  INTERVIEW
+                </div>
+                <h3
+                  class="mt-3 font-title text-xl font-bold leading-tight text-[var(--color-kcvv-white)]"
+                >
+                  Jeroen Aerts over zijn eerste seizoen als hoofdcoach
+                </h3>
+              </div>
+            </div>
+          </a>
+
+          <!-- Card 2 -->
+          <a href="#" class="related-card group block px-0 md:px-6">
+            <div
+              class="relative aspect-video w-full overflow-hidden bg-[var(--color-kcvv-black)]"
+            >
+              <div
+                class="related-card__photo dark-photo-placeholder absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="editorial-card-overlay--default absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="absolute bottom-0 left-0 right-0 p-5"
+              >
+                <div
+                  class="font-mono text-[0.65rem] uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+                >
+                  MATCH REPORT
+                </div>
+                <h3
+                  class="mt-3 font-title text-xl font-bold leading-tight text-[var(--color-kcvv-white)]"
+                >
+                  3-0 in Harelbeke: Van Den Berghe tekent hattrick
+                </h3>
+              </div>
+            </div>
+          </a>
+
+          <!-- Card 3 -->
+          <a href="#" class="related-card group block pl-0 md:pl-6">
+            <div
+              class="relative aspect-video w-full overflow-hidden bg-[var(--color-kcvv-black)]"
+            >
+              <div
+                class="related-card__photo dark-photo-placeholder absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="editorial-card-overlay--default absolute inset-0"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="absolute bottom-0 left-0 right-0 p-5"
+              >
+                <div
+                  class="font-mono text-[0.65rem] uppercase tracking-label text-[var(--color-kcvv-green-bright)]"
+                >
+                  CLUBNIEUWS
+                </div>
+                <h3
+                  class="mt-3 font-title text-xl font-bold leading-tight text-[var(--color-kcvv-white)]"
+                >
+                  Nieuwe kunstgrasmat klaar voor het seizoen 2026
+                </h3>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer spacer -->
+    <footer
+      class="border-t border-white/10 bg-[var(--color-kcvv-black)] px-6 py-10 text-center md:px-10"
+    >
+      <div
+        class="font-mono text-xs uppercase tracking-label text-[var(--color-kcvv-gray-light)]"
+      >
+        DIRECTION 03 · BROADCAST DRAMATIC · THROWAWAY MOCKUP
+      </div>
+    </footer>
+
+    <!--
+      Motion spec:
+        - Body paragraphs and hero text fade up 24px over 500ms cubic-bezier(0.22,1,0.36,1)
+        - Quote glyph scales 0.6 -> 1.0 and fades 0 -> 0.25 opacity over 700ms on scroll-enter
+        - Interview hero image is specced to parallax 0.92x at max 80px drift (disabled <768px) — not implemented in mockup
+        - Related card hover: photo scale 1.03, green top border fade-in, green edge glow
+        - All motion disabled under prefers-reduced-motion (CSS block above)
+    -->
+    <script>
+      (function () {
+        if (
+          typeof window === "undefined" ||
+          !("IntersectionObserver" in window)
+        ) {
+          // Fallback: show final state immediately
+          document
+            .querySelectorAll(".fade-up, .quote-glyph")
+            .forEach((el) => el.classList.add("in-view"));
+          return;
+        }
+
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        if (reduced) {
+          document
+            .querySelectorAll(".fade-up, .quote-glyph")
+            .forEach((el) => el.classList.add("in-view"));
+          return;
+        }
+
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("in-view");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: "0px 0px -5% 0px" }
+        );
+
+        document
+          .querySelectorAll(".fade-up, .quote-glyph")
+          .forEach((el) => io.observe(el));
+      })();
+    </script>
+  </body>
+</html>

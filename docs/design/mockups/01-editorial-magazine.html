@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction 1 — Editorial Magazine · KCVV Elewijt</title>
+
+    <!--
+      Font proxy substitutions (Adobe Typekit not available in mockup):
+        - DM Sans       proxies Quasimoda (title)
+        - Montserrat    is the actual body family
+        - Bungee        proxies Stenciletta (alt / stencil display)
+        - IBM Plex Mono is the actual mono family
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Montserrat:wght@400;500;700&family=Bungee&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <style type="text/tailwindcss">
+      @theme {
+        --color-kcvv-green-bright: #4acf52;
+        --color-kcvv-green-dark: #008755;
+        --color-kcvv-green-100: rgba(74, 207, 82, 0.25);
+        --color-kcvv-black: #1e2024;
+        --color-kcvv-dark-blue: #1e2836;
+        --color-kcvv-gray-blue: #31404b;
+        --color-kcvv-gray-dark: #292c31;
+        --color-kcvv-gray: #62656a;
+        --color-kcvv-gray-light: #cccccc;
+        --color-kcvv-white: #fefefe;
+        --color-foundation-gray-light: #edeff4;
+        --color-kcvv-alert: #cc4b37;
+        --color-kcvv-warning: #ffae00;
+        --color-kcvv-success: #3adb76;
+
+        --font-family-title: "DM Sans", system-ui, sans-serif;
+        --font-family-body: "Montserrat", system-ui, sans-serif;
+        --font-family-alt: "Bungee", system-ui, sans-serif;
+        --font-family-mono: "IBM Plex Mono", monospace;
+
+        --letter-spacing-label: 0.14em;
+        --letter-spacing-caps: 0.08em;
+
+        --max-width-inner: 60rem;
+        --max-width-inner-lg: 70rem;
+        --max-width-outer: 90rem;
+      }
+
+      html,
+      body {
+        background: var(--color-kcvv-white);
+        color: var(--color-kcvv-gray-dark);
+        font-family: var(--font-family-body);
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* 4rem x 2px green accent bar, leading a kicker row */
+      .featured-border::before {
+        content: "";
+        display: inline-block;
+        width: 4rem;
+        height: 2px;
+        background: var(--color-kcvv-green-bright);
+        vertical-align: middle;
+        margin-right: 0.75rem;
+      }
+
+      /* Breaks out of the 60rem inner column to go edge-to-edge */
+      .full-bleed {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+      }
+
+      /* Article body wrapper — narrow measure */
+      .prose-article {
+        max-width: 65ch;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .prose-article > p {
+        font-family: var(--font-family-body);
+        font-weight: 400;
+        font-size: 1.125rem;
+        line-height: 1.6;
+        color: var(--color-kcvv-gray-dark);
+        margin-bottom: 1.25em;
+      }
+
+      /* Drop-cap on the first paragraph only */
+      .prose-article > p:first-of-type::first-letter {
+        font-family: var(--font-family-title);
+        font-weight: 700;
+        font-size: 5.5rem;
+        line-height: 0.85;
+        float: left;
+        padding-right: 0.75rem;
+        padding-top: 0.5rem;
+        color: var(--color-kcvv-green-bright);
+      }
+
+      .prose-article h2 {
+        font-family: var(--font-family-title);
+        font-weight: 700;
+        font-size: 1.875rem;
+        line-height: 1.2;
+        color: var(--color-kcvv-gray-blue);
+        margin-top: 4rem;
+        margin-bottom: 1rem;
+      }
+
+      .prose-article h2::before {
+        content: "";
+        display: block;
+        width: 4rem;
+        height: 2px;
+        background: var(--color-kcvv-green-bright);
+        margin-bottom: 1.25rem;
+      }
+
+      .prose-article h3 {
+        font-family: var(--font-family-title);
+        font-weight: 500;
+        font-size: 1.25rem;
+        line-height: 1.25;
+        color: var(--color-kcvv-gray-blue);
+        margin-top: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .font-alt {
+        font-family: var(--font-family-alt);
+      }
+      .font-title {
+        font-family: var(--font-family-title);
+      }
+      .font-body {
+        font-family: var(--font-family-body);
+      }
+      .font-mono {
+        font-family: var(--font-family-mono);
+      }
+
+      .ls-label {
+        letter-spacing: var(--letter-spacing-label);
+      }
+      .ls-caps {
+        letter-spacing: var(--letter-spacing-caps);
+      }
+    </style>
+  </head>
+
+  <body class="text-[var(--color-kcvv-gray-dark)]">
+    <!-- ============================================================= -->
+    <!-- Sticky nav strip                                               -->
+    <!-- ============================================================= -->
+    <nav
+      class="sticky top-0 z-50 bg-[var(--color-kcvv-black)] text-[var(--color-kcvv-white)]"
+    >
+      <div
+        class="mx-auto flex max-w-[var(--max-width-outer)] flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3 text-xs"
+      >
+        <span
+          class="font-alt uppercase ls-label text-[var(--color-kcvv-green-bright)]"
+          >Editorial Magazine</span
+        >
+        <span class="text-[var(--color-kcvv-gray-light)]">|</span>
+        <a href="#exhibit-a" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">A · Interview</a>
+        <a href="#exhibit-b" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">B · Transfer hero</a>
+        <a href="#exhibit-c" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">C · Transfer overview</a>
+        <a href="#exhibit-d" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">D · Event hero</a>
+        <a href="#exhibit-e" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">E · Event overview</a>
+        <a href="#exhibit-f" class="font-mono uppercase ls-caps hover:text-[var(--color-kcvv-green-bright)]">F · Related slider</a>
+      </div>
+    </nav>
+
+    <!-- Reusable SVG assets (player silhouette) -->
+    <svg width="0" height="0" class="absolute" aria-hidden="true">
+      <defs>
+        <symbol id="player-silhouette" viewBox="0 0 200 260">
+          <!-- simple head + shoulders + torso cutout -->
+          <path
+            fill="#1E2836"
+            d="M100 20c-18 0-32 14-32 32s14 34 32 34 32-16 32-34-14-32-32-32zm-58 100c-14 10-22 28-22 52v88h160v-88c0-24-8-42-22-52-12-8-26-12-40-12h-4c-2 10-14 18-14 18s-12-8-14-18h-4c-14 0-28 4-40 12z"
+          />
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT A — Interview article (full top-to-bottom)             -->
+    <!-- ============================================================= -->
+    <section id="exhibit-a">
+      <article class="pt-14 pb-24">
+        <!-- Hero column -->
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <!-- Back link -->
+          <a
+            href="#"
+            class="inline-flex items-center gap-1 text-sm text-[var(--color-kcvv-gray)] hover:text-[var(--color-kcvv-green-dark)]"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Terug naar nieuws
+          </a>
+
+          <!-- Interview hero -->
+          <header class="mt-10 grid gap-12 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <!-- Kicker -->
+              <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+                <span>Interview</span>
+                <span class="mx-3 text-[var(--color-kcvv-gray-light)]">|</span>
+                <span class="font-mono ls-caps">#9 · Aanvaller</span>
+              </div>
+
+              <!-- Headline -->
+              <h1 class="mt-8 font-title font-bold text-[clamp(2rem,4.5vw,3.5rem)] leading-[0.95] tracking-[-0.01em] text-[var(--color-kcvv-gray-blue)]">
+                Winnen in Elewijt voelt anders.
+              </h1>
+
+              <!-- Subject subtitle -->
+              <p class="mt-4 font-title font-normal text-2xl text-[var(--color-kcvv-gray)]">
+                Jonas Verhoeven
+              </p>
+
+              <!-- Byline -->
+              <p class="mt-6 text-sm text-[var(--color-kcvv-gray-dark)]">
+                <span class="font-medium">Redactie KCVV</span>
+                <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                <span class="font-mono text-xs">7 min lezen</span>
+              </p>
+            </div>
+
+            <!-- Portrait 4:5 -->
+            <div class="w-full md:w-[280px]">
+              <div
+                class="aspect-[4/5] w-full overflow-hidden rounded-[4px] bg-gradient-to-b from-[var(--color-kcvv-gray-blue)] to-[var(--color-kcvv-dark-blue)] flex items-end justify-center"
+              >
+                <svg class="w-4/5 h-4/5" viewBox="0 0 200 260" preserveAspectRatio="xMidYEnd meet" aria-hidden="true">
+                  <use href="#player-silhouette" />
+                </svg>
+              </div>
+              <p class="mt-3 text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                Portret · Sportpark Elewijt, april 2026
+              </p>
+            </div>
+          </header>
+
+          <!-- Metadata bar -->
+          <div
+            class="mt-14 flex items-center justify-between border-t border-b border-[var(--color-kcvv-gray-light)] py-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]"
+          >
+            <div class="flex items-center gap-3">
+              <span>19.04.2026</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>Redactie KCVV</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>7 min lezen</span>
+            </div>
+            <div class="flex items-center gap-4 text-[var(--color-kcvv-gray-blue)]">
+              <a href="#" aria-label="Share" class="hover:text-[var(--color-kcvv-green-dark)]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </a>
+              <a href="#" aria-label="Facebook" class="hover:text-[var(--color-kcvv-green-dark)]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+              <a href="#" aria-label="X" class="hover:text-[var(--color-kcvv-green-dark)]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21l-6.52 7.45L22 22h-6.828l-4.77-6.238L4.8 22H2l7.04-8.045L2 2h6.914l4.335 5.73L18.244 2zm-2.395 18h1.79L7.25 4H5.332l10.517 16z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Body prose -->
+          <div class="prose-article mt-16">
+            <p>
+              Jonas Verhoeven zit tegen een paal van de oude tribune,
+              handen nog groen van het gemaaid gras. Het zonlicht valt
+              door de houten latten op zijn gezicht. Hij lacht voor hij
+              antwoordt — alsof hij de vraag al verwachtte. "Ik ben hier
+              graag," zegt hij eenvoudig. Er zit geen cliché in. Alleen
+              een man die na vijf seizoenen nog altijd vijf minuten
+              vroeger op training is dan de rest van de kleedkamer.
+            </p>
+            <p>
+              De zondag na de beslissende match thuis tegen Londerzeel
+              ging hij gewoon mee naar de barbecue bij zijn ouders.
+              Geen speciale viering, geen camera's, geen stad. "Dat is
+              wat het hier fijn maakt," zegt hij. "Je speelt, je wint,
+              je rijdt vijf minuten en je bent thuis." Voor iemand die
+              drie seizoenen lang elke dag richting Sclessin pendelde,
+              klinkt die zin als een bevrijding.
+            </p>
+
+            <h2>Een ander soort week</h2>
+            <p>
+              De week na een winst voelt in Elewijt anders dan elders.
+              Er is geen media-druk, geen cameraploeg die woensdag
+              opdaagt. Er is een trainer die gewoon de volgende match
+              op het bord zet en vraagt of iedereen goed heeft geslapen.
+              "En dan ga je trainen," lacht Jonas. "Dat is het. Geen
+              theater. Gewoon voetbal."
+            </p>
+
+            <h3>De dorpse drempel</h3>
+            <p>
+              Er is natuurlijk ook een keerzijde. Een winkelbezoek kost
+              je drie kwartier extra omdat iedereen even iets wil
+              zeggen. Maar zelfs dat — hij haalt zijn schouders op —
+              hoort erbij. "Ze menen het hier. Als iemand zegt dat ze
+              je goed bezig vinden, dan is dat zo. Dat merk je."
+            </p>
+          </div>
+
+          <!-- =============================================== -->
+          <!-- qaBlock sequence                                 -->
+          <!-- =============================================== -->
+
+          <!-- standard 01 -->
+          <div class="prose-article mt-20">
+            <div class="flex items-start gap-6">
+              <span class="font-title font-bold text-5xl leading-[0.9] text-[var(--color-kcvv-green-bright)] shrink-0 w-16">01.</span>
+              <div class="flex-1">
+                <h4 class="font-title font-bold text-xl leading-[1.3] text-[var(--color-kcvv-gray-blue)] mb-3">
+                  Hoe voelde de week na de winst aan?
+                </h4>
+                <p class="text-lg leading-[1.6] text-[var(--color-kcvv-gray-dark)]">
+                  Relaxed, eigenlijk. Ik heb zondag met de familie
+                  gebarbecued en verder niets gedaan. Dat mag ook eens.
+                  Een week zonder interview, zonder analyse op
+                  televisie — dat is een luxe die je als speler in
+                  Luik niet hebt.
+                </p>
+              </div>
+            </div>
+            <hr class="mt-10 mb-10 border-t border-[var(--color-kcvv-gray-light)]" />
+          </div>
+
+          <!-- standard 02 -->
+          <div class="prose-article">
+            <div class="flex items-start gap-6">
+              <span class="font-title font-bold text-5xl leading-[0.9] text-[var(--color-kcvv-green-bright)] shrink-0 w-16">02.</span>
+              <div class="flex-1">
+                <h4 class="font-title font-bold text-xl leading-[1.3] text-[var(--color-kcvv-gray-blue)] mb-3">
+                  Wat was het grootste verschil toen je hier
+                  aankwam?
+                </h4>
+                <p class="text-lg leading-[1.6] text-[var(--color-kcvv-gray-dark)]">
+                  De stilte op de parking. In Luik stond er na elke
+                  training iemand, soms vijf mensen. Hier rijd je
+                  gewoon weg. Je denkt eerst dat er iets mis is, en dan
+                  besef je: nee, dit is gewoon de norm.
+                </p>
+              </div>
+            </div>
+            <hr class="mt-10 mb-10 border-t border-[var(--color-kcvv-gray-light)]" />
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- key Q&A — full-bleed on cream                     -->
+        <!-- =============================================== -->
+        <div class="full-bleed bg-[var(--color-foundation-gray-light)] py-32 my-16">
+          <div class="mx-auto max-w-[var(--max-width-inner-lg)] px-10 grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] items-center">
+            <div>
+              <p class="text-xs uppercase ls-label text-[var(--color-kcvv-gray)] font-medium mb-6">
+                Over winnen in je eigen dorp
+              </p>
+              <div class="w-full max-w-[360px]">
+                <svg viewBox="0 0 200 260" class="w-full" aria-hidden="true">
+                  <use href="#player-silhouette" />
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div class="max-w-[40rem]">
+                <hr class="border-t border-[var(--color-kcvv-gray-light)]" />
+                <p class="py-8 font-title font-normal text-[clamp(1.75rem,3.5vw,2.5rem)] leading-[1.25] text-[var(--color-kcvv-gray-blue)]">
+                  Winnen in Elewijt voelt anders. Dat merk je pas als
+                  je hier een jaar bent.
+                </p>
+                <hr class="border-t border-[var(--color-kcvv-gray-light)]" />
+                <p class="mt-6 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray-blue)]">
+                  03. Jonas Verhoeven
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <!-- standard 03 -->
+          <div class="prose-article">
+            <div class="flex items-start gap-6">
+              <span class="font-title font-bold text-5xl leading-[0.9] text-[var(--color-kcvv-green-bright)] shrink-0 w-16">04.</span>
+              <div class="flex-1">
+                <h4 class="font-title font-bold text-xl leading-[1.3] text-[var(--color-kcvv-gray-blue)] mb-3">
+                  En die mentaliteit — waar komt ze vandaan?
+                </h4>
+                <p class="text-lg leading-[1.6] text-[var(--color-kcvv-gray-dark)]">
+                  Van de mensen zelf. De voorzitter staat elke match
+                  bij de ingang. De jeugdtrainer komt helpen opruimen
+                  na een tornooi. Dat is niet iets dat je decreteert,
+                  dat groeit. Als je daarin terechtkomt, ga je er vanzelf
+                  in mee.
+                </p>
+              </div>
+            </div>
+            <hr class="mt-10 mb-10 border-t border-[var(--color-kcvv-gray-light)]" />
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- quote — standalone dramatic                      -->
+        <!-- =============================================== -->
+        <div class="full-bleed py-40">
+          <div class="mx-auto max-w-[var(--max-width-inner)] px-10 text-center">
+            <p class="font-alt text-sm uppercase ls-label text-[var(--color-kcvv-green-dark)]">
+              In het kort
+            </p>
+            <div class="mt-10 mx-auto max-w-[50ch]">
+              <hr class="border-t border-[var(--color-kcvv-gray-light)]" />
+              <p class="py-10 font-title font-medium text-[clamp(2rem,4vw,3rem)] leading-[1.25] text-[var(--color-kcvv-gray-blue)]">
+                We spelen voor het dorp. Punt.
+              </p>
+              <hr class="border-t border-[var(--color-kcvv-gray-light)]" />
+            </div>
+            <p class="mt-8 text-sm font-medium uppercase ls-caps text-[var(--color-kcvv-gray)]">
+              — Jonas Verhoeven
+            </p>
+          </div>
+        </div>
+
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <!-- standard 04 -->
+          <div class="prose-article">
+            <div class="flex items-start gap-6">
+              <span class="font-title font-bold text-5xl leading-[0.9] text-[var(--color-kcvv-green-bright)] shrink-0 w-16">05.</span>
+              <div class="flex-1">
+                <h4 class="font-title font-bold text-xl leading-[1.3] text-[var(--color-kcvv-gray-blue)] mb-3">
+                  Waar wil je staan binnen twee jaar?
+                </h4>
+                <p class="text-lg leading-[1.6] text-[var(--color-kcvv-gray-dark)]">
+                  Nog altijd hier. Een titel erbij. En een rol als
+                  iemand die de jonge gasten uit de jeugd meeneemt —
+                  dat begint stilaan te spelen in mijn hoofd.
+                </p>
+              </div>
+            </div>
+            <hr class="mt-10 mb-10 border-t border-[var(--color-kcvv-gray-light)]" />
+          </div>
+
+          <!-- rapid-fire -->
+          <div class="prose-article mt-16">
+            <p class="featured-border font-alt text-xs uppercase ls-label text-[var(--color-kcvv-green-dark)] mb-8">
+              <span>Rapid Fire</span>
+            </p>
+            <div class="grid grid-cols-[1fr_1.3fr] gap-8 max-sm:grid-cols-1">
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+
+              <p class="font-title font-medium text-base text-[var(--color-kcvv-gray-blue)] py-4">
+                Koffie of thee?
+              </p>
+              <p class="font-body text-base text-[var(--color-kcvv-gray-dark)] py-4">
+                Koffie. Zwart. Voor de training.
+              </p>
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+
+              <p class="font-title font-medium text-base text-[var(--color-kcvv-gray-blue)] py-4">
+                Favoriete ploeg als kind?
+              </p>
+              <p class="font-body text-base text-[var(--color-kcvv-gray-dark)] py-4">
+                Club Brugge. Sorry, iedereen.
+              </p>
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+
+              <p class="font-title font-medium text-base text-[var(--color-kcvv-gray-blue)] py-4">
+                Beste maat in de kleedkamer?
+              </p>
+              <p class="font-body text-base text-[var(--color-kcvv-gray-dark)] py-4">
+                Seppe. Hij zwijgt nooit.
+              </p>
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+
+              <p class="font-title font-medium text-base text-[var(--color-kcvv-gray-blue)] py-4">
+                Doel na de match?
+              </p>
+              <p class="font-body text-base text-[var(--color-kcvv-gray-dark)] py-4">
+                Frituur. Stoofvlees. Geen discussie.
+              </p>
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+
+              <p class="font-title font-medium text-base text-[var(--color-kcvv-gray-blue)] py-4">
+                Beste stadionherinnering?
+              </p>
+              <p class="font-body text-base text-[var(--color-kcvv-gray-dark)] py-4">
+                Mei 2024. 3-2 in de laatste minuut tegen Tempo.
+              </p>
+              <div class="col-span-2 max-sm:col-span-1 border-t border-[var(--color-kcvv-gray-light)]"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ================= Divider ================= -->
+    <div class="bg-[var(--color-foundation-gray-light)] py-12 text-center">
+      <p class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray)]">
+        — Next exhibit —
+      </p>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT B — Transfer hero + feature card                       -->
+    <!-- ============================================================= -->
+    <section id="exhibit-b">
+      <article class="pt-14 pb-24">
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <a
+            href="#"
+            class="inline-flex items-center gap-1 text-sm text-[var(--color-kcvv-gray)] hover:text-[var(--color-kcvv-green-dark)]"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Terug naar nieuws
+          </a>
+
+          <!-- Transfer typographic hero -->
+          <header class="mt-10">
+            <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+              <span>Transfer</span>
+              <span class="mx-3 text-[var(--color-kcvv-gray-light)]">|</span>
+              <span class="font-mono ls-caps text-[var(--color-kcvv-green-dark)]">Incoming</span>
+            </div>
+
+            <h1 class="mt-8 font-title font-bold text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[0.95] tracking-[-0.01em] text-[var(--color-kcvv-gray-blue)]">
+              Maxim Breugelmans.
+            </h1>
+
+            <div class="mt-10 max-w-[34rem] border-t border-b border-[var(--color-kcvv-gray-light)] divide-y divide-[var(--color-kcvv-gray-light)]">
+              <div class="grid grid-cols-[5rem_1fr] items-center py-4">
+                <span class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">from</span>
+                <span class="font-title font-medium text-xl uppercase ls-caps text-[var(--color-kcvv-gray-blue)]">Standard Luik</span>
+              </div>
+              <div class="grid grid-cols-[5rem_1fr] items-center py-4">
+                <span class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">to</span>
+                <span class="font-title font-medium text-xl uppercase ls-caps text-[var(--color-kcvv-gray-blue)]">KCVV Elewijt</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- metadata bar -->
+          <div class="mt-10 flex items-center justify-between border-t border-b border-[var(--color-kcvv-gray-light)] py-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+            <div class="flex items-center gap-3">
+              <span>18.04.2026</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>Sportieve cel</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>3 min lezen</span>
+            </div>
+            <div class="flex items-center gap-4 text-[var(--color-kcvv-gray-blue)]">
+              <a href="#" aria-label="Share" class="hover:text-[var(--color-kcvv-green-dark)]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature transferFact card — full-bleed -->
+        <div class="full-bleed mt-16 border-t border-b border-[var(--color-kcvv-gray-light)] py-16 bg-[var(--color-kcvv-white)]">
+          <div class="mx-auto max-w-[var(--max-width-inner-lg)] px-10 grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-end">
+            <!-- cutout -->
+            <div class="flex justify-center md:justify-start">
+              <svg viewBox="0 0 200 260" class="h-[420px] object-contain" aria-hidden="true">
+                <use href="#player-silhouette" />
+              </svg>
+            </div>
+            <!-- detail column -->
+            <div>
+              <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-green-dark)]">
+                <span>Incoming</span>
+              </div>
+              <h2 class="mt-6 font-title font-bold text-5xl leading-[0.95] text-[var(--color-kcvv-gray-blue)]">
+                Maxim Breugelmans
+              </h2>
+              <p class="mt-4 text-sm uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                27 jaar <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span> Middenvelder
+              </p>
+
+              <!-- from / to block -->
+              <div class="mt-8 divide-y divide-[var(--color-kcvv-gray-light)] border-t border-b border-[var(--color-kcvv-gray-light)]">
+                <!-- from row (other club) -->
+                <div class="py-5">
+                  <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                    from
+                  </p>
+                  <div class="mt-2 flex items-center gap-4">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-gray-blue)] font-title font-bold text-xs uppercase text-white">SL</span>
+                    <span class="font-title font-medium text-2xl text-[var(--color-kcvv-gray-blue)]">Standard Luik</span>
+                  </div>
+                </div>
+                <!-- to row (KCVV, with green accent bar) -->
+                <div class="py-5 relative pl-3">
+                  <span class="absolute left-0 top-4 bottom-4 w-[2px] bg-[var(--color-kcvv-green-bright)]"></span>
+                  <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                    to
+                  </p>
+                  <div class="mt-2 flex items-center gap-4">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-green-bright)] font-title font-bold text-xs uppercase text-white">KC</span>
+                    <span class="font-title font-medium text-2xl text-[var(--color-kcvv-gray-blue)]">KCVV Elewijt</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- note -->
+              <p class="mt-6 font-title font-normal text-xl text-[var(--color-kcvv-gray-dark)]">
+                Blij om thuis te zijn. Dit is een ambitie die klopt.
+              </p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ================= Divider ================= -->
+    <div class="bg-[var(--color-foundation-gray-light)] py-12 text-center">
+      <p class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray)]">
+        — Next exhibit —
+      </p>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT C — Transfer overview stack                             -->
+    <!-- ============================================================= -->
+    <section id="exhibit-c">
+      <article class="pt-14 pb-24">
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <p class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)] mb-6">
+            <span>Transferupdate · voorjaar 2026</span>
+          </p>
+          <h2 class="font-title font-bold text-4xl text-[var(--color-kcvv-gray-blue)] mb-10 leading-tight">
+            Drie bewegingen in een stille week.
+          </h2>
+
+          <div class="prose-article">
+            <!-- incoming -->
+            <div class="grid grid-cols-[7rem_1fr] items-start gap-6 border-t border-b border-[var(--color-kcvv-gray-light)] py-4">
+              <p class="font-title font-medium text-xs uppercase ls-label text-[var(--color-kcvv-green-dark)] pt-1">
+                Incoming
+              </p>
+              <div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <p class="font-title font-bold text-xl text-[var(--color-kcvv-gray-blue)]">
+                    Ibrahim Diallo
+                  </p>
+                  <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                    22 · AANV
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center gap-3 text-base text-[var(--color-kcvv-gray-dark)]">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-gray-blue)] font-title font-bold text-[9px] uppercase text-white">TV</span>
+                  <span>Tempo Vorselaar</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-kcvv-gray)]"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-green-bright)] font-title font-bold text-[9px] uppercase text-white">KC</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- outgoing -->
+            <div class="grid grid-cols-[7rem_1fr] items-start gap-6 border-b border-[var(--color-kcvv-gray-light)] py-4">
+              <p class="font-title font-medium text-xs uppercase ls-label text-[var(--color-kcvv-gray) pt-1 text-[var(--color-kcvv-gray)]">
+                Outgoing
+              </p>
+              <div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <p class="font-title font-bold text-xl text-[var(--color-kcvv-gray-blue)]">
+                    Simon Peeters
+                  </p>
+                  <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                    29 · VRD
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center gap-3 text-base text-[var(--color-kcvv-gray-dark)]">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-green-bright)] font-title font-bold text-[9px] uppercase text-white">KC</span>
+                  <span>KCVV Elewijt</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-kcvv-gray)]"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-gray-blue)] font-title font-bold text-[9px] uppercase text-white">RK</span>
+                  <span>Racing Kampenhout</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- extension -->
+            <div class="grid grid-cols-[7rem_1fr] items-start gap-6 border-b border-[var(--color-kcvv-gray-light)] py-4">
+              <p class="font-title font-medium text-xs uppercase ls-label text-[var(--color-kcvv-green-dark)] pt-1">
+                Extension
+              </p>
+              <div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <p class="font-title font-bold text-xl text-[var(--color-kcvv-gray-blue)]">
+                    Lukas Vermeir
+                  </p>
+                  <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                    24 · MV
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center gap-3 text-base text-[var(--color-kcvv-gray-dark)]">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-[2px] bg-[var(--color-kcvv-green-bright)] font-title font-bold text-[9px] uppercase text-white">KC</span>
+                  <span>KCVV Elewijt</span>
+                  <span class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">until 30/06/2028</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ================= Divider ================= -->
+    <div class="bg-[var(--color-foundation-gray-light)] py-12 text-center">
+      <p class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray)]">
+        — Next exhibit —
+      </p>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT D — Event article hero + feature card                   -->
+    <!-- ============================================================= -->
+    <section id="exhibit-d">
+      <article class="pt-14 pb-24">
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <a
+            href="#"
+            class="inline-flex items-center gap-1 text-sm text-[var(--color-kcvv-gray)] hover:text-[var(--color-kcvv-green-dark)]"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Terug naar nieuws
+          </a>
+
+          <!-- Event hero -->
+          <header class="mt-10">
+            <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+              <span>Event</span>
+              <span class="mx-3 text-[var(--color-kcvv-gray-light)]">|</span>
+              <span class="font-mono ls-caps text-[var(--color-kcvv-green-dark)]">Jeugd</span>
+            </div>
+
+            <h1 class="mt-8 font-title font-bold text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[0.95] tracking-[-0.01em] text-[var(--color-kcvv-gray-blue)]">
+              Lentetornooi U13 — zaterdag in Elewijt.
+            </h1>
+
+            <!-- date block -->
+            <div class="mt-10 grid grid-cols-[auto_1fr] gap-6 items-end max-w-[30rem]">
+              <div class="text-[var(--color-kcvv-gray-blue)]">
+                <div class="font-title font-bold text-[5rem] leading-[0.9]">27</div>
+                <div class="mt-2 text-xl uppercase ls-label font-medium">April</div>
+                <hr class="mt-2 border-t border-[var(--color-kcvv-gray-light)] w-24" />
+                <div class="mt-2 font-mono text-sm text-[var(--color-kcvv-gray)]">2026</div>
+              </div>
+              <div class="pb-2">
+                <p class="text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                  zaterdag
+                  <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                  10u00
+                  <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                  Sportpark Elewijt
+                </p>
+              </div>
+            </div>
+          </header>
+
+          <!-- metadata bar -->
+          <div class="mt-14 flex items-center justify-between border-t border-b border-[var(--color-kcvv-gray-light)] py-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+            <div class="flex items-center gap-3">
+              <span>15.04.2026</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>Jeugdcel</span>
+              <span class="text-[var(--color-kcvv-gray-light)]">·</span>
+              <span>2 min lezen</span>
+            </div>
+            <div class="flex items-center gap-4 text-[var(--color-kcvv-gray-blue)]">
+              <a href="#" aria-label="Share" class="hover:text-[var(--color-kcvv-green-dark)]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event feature card — full-bleed -->
+        <div class="full-bleed mt-16 border-t border-b border-[var(--color-kcvv-gray-light)] py-16">
+          <div class="mx-auto max-w-[var(--max-width-inner-lg)] px-10">
+            <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-green-dark)] mb-10">
+              <span>Event</span>
+              <span class="mx-3 text-[var(--color-kcvv-gray-light)]">|</span>
+              <span class="font-mono ls-caps text-[var(--color-kcvv-green-dark)]">Jeugd</span>
+            </div>
+
+            <div class="grid gap-10 md:grid-cols-[auto_1fr]">
+              <!-- date block -->
+              <div class="flex gap-8 md:pr-10 md:border-r md:border-[var(--color-kcvv-gray-light)]">
+                <div class="text-[var(--color-kcvv-gray-blue)]">
+                  <div class="font-title font-bold text-[6rem] leading-[0.85]">27</div>
+                  <div class="mt-2 text-xl uppercase ls-label font-medium">April</div>
+                  <div class="mt-1 font-mono text-sm text-[var(--color-kcvv-gray)]">2026</div>
+                </div>
+              </div>
+
+              <!-- detail -->
+              <div>
+                <h2 class="font-title font-bold text-4xl text-[var(--color-kcvv-gray-blue)]">
+                  Lentetornooi U13
+                </h2>
+                <div class="mt-6 space-y-2 text-sm uppercase ls-caps text-[var(--color-kcvv-gray-dark)]">
+                  <p>zaterdag <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span> 10u00 - 17u00</p>
+                  <p>Sportpark Elewijt</p>
+                  <p>Driesstraat 14, Elewijt</p>
+                </div>
+                <p class="mt-8 text-lg leading-[1.6] text-[var(--color-kcvv-gray-dark)] max-w-[45ch]">
+                  Open voor spelers geboren in 2013 en 2014. Inschrijven
+                  kan per ploeg via onderstaande link — plaatsen zijn
+                  beperkt tot 16 teams.
+                </p>
+                <p class="mt-8">
+                  <a
+                    href="#"
+                    class="inline-flex items-center gap-2 font-title font-bold text-base uppercase ls-caps text-[var(--color-kcvv-green-dark)] border-b border-[var(--color-kcvv-green-bright)] pb-1 hover:border-b-2"
+                  >
+                    Inschrijven
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ================= Divider ================= -->
+    <div class="bg-[var(--color-foundation-gray-light)] py-12 text-center">
+      <p class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray)]">
+        — Next exhibit —
+      </p>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT E — Event overview                                      -->
+    <!-- ============================================================= -->
+    <section id="exhibit-e">
+      <article class="pt-14 pb-24">
+        <div class="mx-auto max-w-[var(--max-width-inner)] px-10 max-md:px-3">
+          <p class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)] mb-6">
+            <span>Kalender · Mei 2026</span>
+          </p>
+          <h2 class="font-title font-bold text-4xl text-[var(--color-kcvv-gray-blue)] mb-10 leading-tight">
+            Twee data om in te prikken.
+          </h2>
+
+          <div class="prose-article">
+            <!-- event overview 1 -->
+            <div class="grid grid-cols-[5rem_1fr_auto] items-center gap-6 border-t border-b border-[var(--color-kcvv-gray-light)] py-4">
+              <div>
+                <p class="font-title font-bold text-xl text-[var(--color-kcvv-gray-blue)]">
+                  04 MEI
+                </p>
+                <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                  maandag
+                </p>
+              </div>
+              <div>
+                <p class="font-title font-bold text-lg text-[var(--color-kcvv-gray-blue)]">
+                  Seizoensafsluiter 1e elftal
+                </p>
+                <p class="mt-1 text-sm uppercase ls-caps text-[var(--color-kcvv-gray-dark)]">
+                  Sportpark Elewijt
+                  <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                  19u00
+                </p>
+              </div>
+              <a
+                href="#"
+                class="inline-flex items-center gap-2 font-title font-bold text-sm uppercase ls-caps text-[var(--color-kcvv-green-dark)] border-b border-[var(--color-kcvv-green-bright)] pb-0.5 hover:border-b-2"
+              >
+                Reserveer
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+
+            <!-- event overview 2 -->
+            <div class="grid grid-cols-[5rem_1fr_auto] items-center gap-6 border-b border-[var(--color-kcvv-gray-light)] py-4">
+              <div>
+                <p class="font-title font-bold text-xl text-[var(--color-kcvv-gray-blue)]">
+                  18 MEI
+                </p>
+                <p class="font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                  maandag
+                </p>
+              </div>
+              <div>
+                <p class="font-title font-bold text-lg text-[var(--color-kcvv-gray-blue)]">
+                  Algemene ledenvergadering
+                </p>
+                <p class="mt-1 text-sm uppercase ls-caps text-[var(--color-kcvv-gray-dark)]">
+                  Clubhuis
+                  <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                  20u00
+                  <span class="mx-2 text-[var(--color-kcvv-gray-light)]">·</span>
+                  Leden enkel
+                </p>
+              </div>
+              <a
+                href="#"
+                class="inline-flex items-center gap-2 font-title font-bold text-sm uppercase ls-caps text-[var(--color-kcvv-green-dark)] border-b border-[var(--color-kcvv-green-bright)] pb-0.5 hover:border-b-2"
+              >
+                Agenda
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ================= Divider ================= -->
+    <div class="bg-[var(--color-foundation-gray-light)] py-12 text-center">
+      <p class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray)]">
+        — Next exhibit —
+      </p>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- EXHIBIT F — Related content slider                              -->
+    <!-- ============================================================= -->
+    <section id="exhibit-f" class="bg-[var(--color-foundation-gray-light)] py-24">
+      <div class="mx-auto max-w-[var(--max-width-inner-lg)] px-10 max-md:px-3">
+        <p class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+          <span>Meer uit het archief</span>
+        </p>
+        <div class="mt-4 flex items-end justify-between">
+          <h2 class="font-title font-bold text-4xl text-[var(--color-kcvv-gray-blue)]">
+            Lees verder.
+          </h2>
+          <div class="flex items-center gap-3 text-[var(--color-kcvv-gray-blue)]">
+            <button aria-label="Vorige" class="hover:text-[var(--color-kcvv-green-dark)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button aria-label="Volgende" class="hover:text-[var(--color-kcvv-green-dark)]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-10 grid gap-8 md:grid-cols-3 divide-x divide-[var(--color-kcvv-gray-light)]">
+          <!-- card 1 -->
+          <div class="group bg-[var(--color-kcvv-white)] rounded-[4px] md:pl-0 md:pr-8">
+            <div class="aspect-[16/10] rounded-[4px] bg-gradient-to-br from-[var(--color-kcvv-gray-blue)] to-[var(--color-kcvv-dark-blue)] flex items-center justify-center">
+              <span class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray-light)]">Hero image</span>
+            </div>
+            <div class="p-5">
+              <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+                <span>Wedstrijd</span>
+              </div>
+              <h3 class="mt-4 font-title font-bold text-lg leading-tight text-[var(--color-kcvv-gray-blue)] relative inline-block after:content-[''] after:block after:h-[2px] after:w-0 after:bg-[var(--color-kcvv-green-bright)] after:transition-[width] group-hover:after:w-full">
+                3-2 in de slotminuten: het wonder tegen Tempo.
+              </h3>
+              <p class="mt-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                12.04.2026
+              </p>
+            </div>
+          </div>
+
+          <!-- card 2 -->
+          <div class="group bg-[var(--color-kcvv-white)] rounded-[4px] md:px-8">
+            <div class="aspect-[16/10] rounded-[4px] bg-gradient-to-br from-[var(--color-kcvv-gray-blue)] to-[var(--color-kcvv-dark-blue)] flex items-center justify-center">
+              <span class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray-light)]">Hero image</span>
+            </div>
+            <div class="p-5">
+              <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+                <span>Jeugd</span>
+              </div>
+              <h3 class="mt-4 font-title font-bold text-lg leading-tight text-[var(--color-kcvv-gray-blue)] relative inline-block after:content-[''] after:block after:h-[2px] after:w-0 after:bg-[var(--color-kcvv-green-bright)] after:transition-[width] group-hover:after:w-full">
+                Hoe Onderbouw een nieuw trainingsritme kreeg.
+              </h3>
+              <p class="mt-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                08.04.2026
+              </p>
+            </div>
+          </div>
+
+          <!-- card 3 -->
+          <div class="group bg-[var(--color-kcvv-white)] rounded-[4px] md:pr-0 md:pl-8">
+            <div class="aspect-[16/10] rounded-[4px] bg-gradient-to-br from-[var(--color-kcvv-gray-blue)] to-[var(--color-kcvv-dark-blue)] flex items-center justify-center">
+              <span class="font-alt text-xs uppercase ls-label text-[var(--color-kcvv-gray-light)]">Hero image</span>
+            </div>
+            <div class="p-5">
+              <div class="featured-border text-xs uppercase ls-label font-medium text-[var(--color-kcvv-gray-blue)]">
+                <span>Club</span>
+              </div>
+              <h3 class="mt-4 font-title font-bold text-lg leading-tight text-[var(--color-kcvv-gray-blue)] relative inline-block after:content-[''] after:block after:h-[2px] after:w-0 after:bg-[var(--color-kcvv-green-bright)] after:transition-[width] group-hover:after:w-full">
+                Een nieuw hoofdstuk voor het clubhuis.
+              </h3>
+              <p class="mt-3 font-mono text-xs uppercase ls-caps text-[var(--color-kcvv-gray)]">
+                01.04.2026
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- Footer                                                          -->
+    <!-- ============================================================= -->
+    <footer class="bg-[var(--color-kcvv-black)] text-[var(--color-kcvv-gray-light)] py-10">
+      <div class="mx-auto max-w-[var(--max-width-outer)] px-6 flex flex-wrap items-center justify-between gap-4 text-xs">
+        <p class="font-alt uppercase ls-label text-[var(--color-kcvv-green-bright)]">
+          Editorial Magazine · mockup
+        </p>
+        <p class="font-mono ls-caps">
+          KCVV Elewijt · direction 1 of 3 · throwaway preview
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
