@@ -72,7 +72,10 @@ function deriveImpressionSource(
 }
 
 function getHref(item: ContentItem): string {
-  return item.type === "article" ? `/nieuws/${item.slug}` : `/${item.slug}`;
+  // Page documents are served at /club/[slug] — see apps/web/src/app/(main)/club/[slug]/page.tsx.
+  return item.type === "article"
+    ? `/nieuws/${item.slug}`
+    : `/club/${item.slug}`;
 }
 
 function getEntityTargetSlug(entity: MentionedEntity): string {

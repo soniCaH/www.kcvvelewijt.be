@@ -242,5 +242,27 @@ describe("RelatedContentSection", () => {
       expect(screen.getByText("Artikel")).toBeInTheDocument();
       expect(screen.getByText("Pagina")).toBeInTheDocument();
     });
+
+    it("links article items to /nieuws/{slug} and page items to /club/{slug}", () => {
+      // Page documents are served at /club/[slug] in the app router.
+      // Regression: the old slider linked pages to /{slug}, which 404'd for
+      // every page not accidentally living at the site root.
+      render(
+        <RelatedContentSection
+          items={[
+            article("a1", "editorial", "Een artikel"),
+            page("p1", "editorial"),
+          ]}
+          pageType="article"
+          pageSlug="host"
+        />,
+      );
+
+      const articleLink = screen.getByRole("link", { name: "Een artikel" });
+      expect(articleLink.getAttribute("href")).toBe("/nieuws/slug-a1");
+
+      const pageLink = screen.getByRole("link", { name: "Pagina p1" });
+      expect(pageLink.getAttribute("href")).toBe("/club/pagina-p1");
+    });
   });
 });

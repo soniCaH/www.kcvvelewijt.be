@@ -93,7 +93,8 @@ function resolveInternalLinkHref(ref?: InternalLinkReference): string {
     case "article":
       return ref.slug ? `/nieuws/${ref.slug}` : "#";
     case "page":
-      return ref.slug ? `/${ref.slug}` : "#";
+      // Page documents are served at /club/[slug] — see apps/web/src/app/(main)/club/[slug]/page.tsx.
+      return ref.slug ? `/club/${ref.slug}` : "#";
     default:
       return "#";
   }
