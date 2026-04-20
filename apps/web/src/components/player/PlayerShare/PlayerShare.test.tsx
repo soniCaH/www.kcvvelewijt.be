@@ -99,6 +99,14 @@ describe("PlayerShare", () => {
       ).toBeInTheDocument();
     });
 
+    it("does not render a Twitter/X share button", () => {
+      render(<PlayerShare {...defaultProps} />);
+
+      expect(
+        screen.queryByRole("button", { name: /twitter|x|delen op x/i }),
+      ).not.toBeInTheDocument();
+    });
+
     it("renders download QR button when QR is shown", () => {
       render(<PlayerShare {...defaultProps} showQR />);
 

@@ -470,7 +470,7 @@ describe("FeaturedArticles", () => {
     // Tag/badge must remain visible regardless of title length
     expect(screen.getByText("Competitie")).toBeInTheDocument();
 
-    // Hero title must carry the line-clamp-2 utility so it truncates at 3 lines
+    // Hero title must carry the line-clamp-3 utility so it truncates at 3 lines
     const heading = screen.getByRole("heading", {
       name: longTitleArticle.title,
       level: 2,

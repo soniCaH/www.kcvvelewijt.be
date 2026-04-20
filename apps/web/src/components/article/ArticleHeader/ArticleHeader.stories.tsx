@@ -68,7 +68,6 @@ export const WithContent: Story = {
         category={{ name: "Transfers", href: "/nieuws?categorie=Transfers" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/transfers",
-          title: args.title,
         }}
       />
       <div className="max-w-inner-lg mx-auto px-6 py-8">

@@ -24,8 +24,6 @@ export interface ArticleMetadataProps {
   /** Share configuration */
   shareConfig?: {
     url: string;
-    title: string;
-    hashtags?: string[];
   };
   /** Additional CSS classes */
   className?: string;

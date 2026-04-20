@@ -9,7 +9,6 @@ describe("ArticleMetadata", () => {
     category: { name: "Eerste ploeg", href: "/nieuws?categorie=eerste-ploeg" },
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/test",
-      title: "Test Article",
     },
   };
 

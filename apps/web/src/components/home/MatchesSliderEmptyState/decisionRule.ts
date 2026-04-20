@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import type { MatchesSliderPlaceholderVM } from "@/lib/repositories/homepage.repository";
 
 export type ResolvedContent =
@@ -22,20 +23,14 @@ export type ResolvedContent =
       href?: string;
     };
 
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const CLUB_ZONE = "Europe/Brussels";
 
-function calendarDaysBetween(from: Date, to: Date): number {
-  const fromUtc = Date.UTC(
-    from.getUTCFullYear(),
-    from.getUTCMonth(),
-    from.getUTCDate(),
-  );
-  const toUtc = Date.UTC(
-    to.getUTCFullYear(),
-    to.getUTCMonth(),
-    to.getUTCDate(),
-  );
-  return Math.round((toUtc - fromUtc) / MS_PER_DAY);
+// Calendar-days diff anchored to the club's local zone so a 23:30 UTC "now"
+// (00:30 Brussels) reads the same calendar date as 01:30 UTC the next day.
+function clubCalendarDaysBetween(from: Date, to: Date): number {
+  const fromDay = DateTime.fromJSDate(from, { zone: CLUB_ZONE }).startOf("day");
+  const toDay = DateTime.fromJSDate(to, { zone: CLUB_ZONE }).startOf("day");
+  return Math.round(toDay.diff(fromDay, "days").days);
 }
 
 export function resolveContent(
@@ -47,7 +42,7 @@ export function resolveContent(
   const href = placeholder?.announcementHref;
 
   if (kickoff) {
-    const daysUntil = calendarDaysBetween(now, kickoff);
+    const daysUntil = clubCalendarDaysBetween(now, kickoff);
     if (daysUntil === 0) {
       return {
         mode: "today",

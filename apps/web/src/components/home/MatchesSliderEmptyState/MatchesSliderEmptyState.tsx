@@ -112,8 +112,16 @@ const MainLines = ({ content }: { content: ResolvedContent }) => {
           )}
         </>
       );
+    default:
+      return assertUnreachable(content);
   }
 };
+
+function assertUnreachable(x: never): never {
+  throw new Error(
+    `Unhandled MatchesSliderEmptyState mode: ${JSON.stringify(x)}`,
+  );
+}
 
 const Title = ({
   children,
@@ -122,12 +130,14 @@ const Title = ({
   children: React.ReactNode;
   "aria-label"?: string;
 }) => (
-  <p
+  // h3 sits under the SectionHeader's h2 ("Wedstrijden"), giving the empty
+  // state a proper outline entry without duplicating the section heading.
+  <h3
     className="font-title text-3xl font-black leading-tight tracking-tight text-white md:text-5xl lg:text-6xl"
     aria-label={ariaLabel}
   >
     {children}
-  </p>
+  </h3>
 );
 
 const Secondary = ({ children }: { children: React.ReactNode }) => (

@@ -24,7 +24,7 @@ describe("SocialLinks", () => {
   it("inline variant has ≥44×44 tap area on each social link", () => {
     render(<SocialLinks variant="inline" />);
     const links = screen.getAllByRole("link");
-    expect(links.length).toBeGreaterThanOrEqual(2);
+    expect(links).toHaveLength(2);
     for (const link of links) {
       expect(link).toHaveClass("min-h-11", "min-w-11");
     }

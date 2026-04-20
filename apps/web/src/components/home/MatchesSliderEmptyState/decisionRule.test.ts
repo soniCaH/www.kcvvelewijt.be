@@ -91,6 +91,17 @@ describe("resolveContent", () => {
     expect(result.secondary).toBe("Kalender volgende week online");
   });
 
+  it("anchors the day diff to Europe/Brussels, not UTC", () => {
+    // 22:30 UTC on 2026-08-09 is already 00:30 Brussels on 2026-08-10 (CEST, UTC+2).
+    // A Brussels user sees "seizoen start vandaag" rather than "Nog 1 dag".
+    const lateNightNow = new Date("2026-08-09T22:30:00Z");
+    const result = resolveContent(
+      { nextSeasonKickoff: new Date("2026-08-10T00:00:00Z") },
+      lateNightNow,
+    );
+    expect(result.mode).toBe("today");
+  });
+
   it("today mode carries announcement as secondary when both set", () => {
     const result = resolveContent(
       {

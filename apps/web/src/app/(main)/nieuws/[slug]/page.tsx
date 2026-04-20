@@ -119,8 +119,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const shareConfig = {
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
-    title: article.title,
-    hashtags: tags,
   };
 
   const hasEditorialArticles =
