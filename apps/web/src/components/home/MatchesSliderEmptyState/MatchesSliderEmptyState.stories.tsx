@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchesSliderEmptyState } from "./MatchesSliderEmptyState";
 
 const meta = {
-  title: "Features/Home/MatchesSliderEmptyState",
+  title: "Features/Homepage/MatchesSliderEmptyState",
   component: MatchesSliderEmptyState,
   tags: ["autodocs"],
   parameters: {
@@ -23,14 +23,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const SplitBaseline: Story = {
-  args: {
-    layout: "split",
-  },
-};
-
-export const CenteredBaseline: Story = {
-  args: {
-    layout: "centered",
-  },
-};
+export const Baseline: Story = {};
