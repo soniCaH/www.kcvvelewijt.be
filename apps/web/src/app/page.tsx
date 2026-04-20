@@ -279,10 +279,9 @@ export default async function HomePage() {
         placeholder={matchesSliderPlaceholder}
       />
     ),
-    // SectionHeader contributes mb-10 on top, so the visual top gap reads
-    // larger than the default pt-20/pb-20 symmetry would suggest. Trim the
-    // bottom to compensate.
-    paddingBottom: "pb-16",
+    // The heading's cap-height makes the default pt-20/pb-20 read bottom-tight.
+    // Bump the bottom so the cards don't crash into the diagonal.
+    paddingBottom: "pb-24",
   };
 
   const youthSection: SectionConfig = {
