@@ -61,11 +61,20 @@ export const Announcement: Story = {
   },
 };
 
-export const AnnouncementWithLink: Story = {
+export const AnnouncementWithExternalLink: Story = {
   args: {
     placeholder: {
       announcementText: "Kalender 25-26 volgende week online",
       announcementHref: "https://www.kcvvelewijt.be/kalender",
+    },
+  },
+};
+
+export const AnnouncementWithInternalLink: Story = {
+  args: {
+    placeholder: {
+      announcementText: "Kalender 25-26 volgende week online",
+      announcementHref: "/kalender",
     },
   },
 };

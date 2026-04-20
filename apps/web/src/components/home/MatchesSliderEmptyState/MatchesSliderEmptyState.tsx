@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 import { ExternalLink, Facebook } from "@/lib/icons";
 import { EXTERNAL_LINKS } from "@/lib/constants";
@@ -100,16 +101,7 @@ const MainLines = ({ content }: { content: ResolvedContent }) => {
         <>
           <Title>{content.text}</Title>
           <Secondary>{MOTTO}</Secondary>
-          {content.href && (
-            <a
-              href={content.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-semibold text-kcvv-green-bright underline-offset-4 hover:underline"
-            >
-              Meer info
-            </a>
-          )}
+          {content.href && <AnnouncementLink href={content.href} />}
         </>
       );
     default:
@@ -149,6 +141,33 @@ const Secondary = ({ children }: { children: React.ReactNode }) => (
 const AnnouncementNote = ({ text }: { text: string }) => (
   <p className="text-sm text-white/60 md:text-base">{text}</p>
 );
+
+// Sanity's announcementHref allows relative URLs (allowRelative: true).
+// Render internal paths via next/link for client-side navigation +
+// prefetching; external URLs get the standard new-tab anchor.
+const AnnouncementLink = ({ href }: { href: string }) => {
+  const linkClasses =
+    "text-sm font-semibold text-kcvv-green-bright underline-offset-4 hover:underline";
+
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} className={linkClasses}>
+        Meer info
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={linkClasses}
+    >
+      Meer info
+    </a>
+  );
+};
 
 const CTAButtons = () => (
   <div className="flex flex-col gap-3 sm:flex-row">
