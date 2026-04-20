@@ -103,29 +103,36 @@ export const RelatedContentSection = ({
 }: RelatedContentSectionProps) => {
   const hasFired = useRef(false);
 
+  const { content, entities } = partitionItems(items);
+  const displayedContent = content.slice(0, 6);
+
   useEffect(() => {
-    if (hasFired.current || items.length === 0) return;
+    if (hasFired.current) return;
+
+    // Impression metrics track what the user actually sees, not the raw
+    // input: content is capped at 6 slots (lead + right-stack + overflow),
+    // entities always render in full via the strip.
+    const { content: c, entities: e } = partitionItems(items);
+    const displayed = [...c.slice(0, 6), ...e];
+    if (displayed.length === 0) return;
     hasFired.current = true;
 
-    const contentTypes = [...new Set(items.map((i) => i.type))].join(",");
+    const contentTypes = [...new Set(displayed.map((i) => i.type))].join(",");
 
     trackEvent("related_content_shown", {
-      source: deriveImpressionSource(items),
-      count: items.length,
+      source: deriveImpressionSource(displayed),
+      count: displayed.length,
       content_types: contentTypes,
       page_type: pageType,
       page_slug: pageSlug,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const { content, entities } = partitionItems(items);
+  }, [items, pageType, pageSlug]);
 
   if (content.length === 0 && entities.length === 0) return null;
 
-  const lead = content[0];
-  const rightStack = content.slice(1, 3);
-  const overflow = content.slice(3, 6);
+  const lead = displayedContent[0];
+  const rightStack = displayedContent.slice(1, 3);
+  const overflow = displayedContent.slice(3, 6);
 
   const handleContentClick = (item: ContentItem, position: number) => {
     trackEvent("related_content_click", {

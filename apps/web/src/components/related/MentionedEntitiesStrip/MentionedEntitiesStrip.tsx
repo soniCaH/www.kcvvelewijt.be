@@ -82,7 +82,7 @@ function Thumbnail({ entity }: { entity: MentionedEntity }) {
       <div className="relative h-full aspect-square flex-shrink-0 overflow-hidden bg-kcvv-green-dark/10">
         <Image
           src={entity.imageUrl}
-          alt={getName(entity)}
+          alt=""
           fill
           className={cn(
             "transition-transform duration-300 group-hover:scale-105",

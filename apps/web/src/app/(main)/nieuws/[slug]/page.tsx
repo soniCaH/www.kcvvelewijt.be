@@ -138,6 +138,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         return yield* bff.getRelated(article.id);
       }).pipe(
         Effect.map(mapBffRelatedItems),
+        // Broad catch is intentional: this route uses generateStaticParams,
+        // so the BFF is called at build time for every article. Build
+        // workers (local dev, CI, Vercel) may not reach the Worker, and
+        // rendering must still succeed without a related-items block.
+        // Related content is editorial polish, not load-bearing — falling
+        // back to [] is preferable to failing the article page render.
         Effect.catchAll(() => Effect.succeed([])),
       ),
     );

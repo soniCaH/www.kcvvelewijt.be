@@ -126,42 +126,27 @@ describe("RelatedContentSection — analytics", () => {
       });
     });
 
-    it("content_types reflects insertion order, not sort order (stable against sort refactors)", () => {
-      // Swapping source doesn't change insertion order of `items`, so the
-      // content_types string stays locked to the order the caller passed in.
-      // This encodes the policy: content_types is a "what was present" list,
-      // not a "what was rendered in what order" list.
-      const ordered = [article, pageItem, player];
-      const reordered = [player, article, pageItem];
-
-      const { unmount } = render(
-        <RelatedContentSection
-          items={ordered}
-          pageType="article"
-          pageSlug="t"
-        />,
-      );
-      const firstCall = trackEventMock.mock.calls[0]![1] as {
-        content_types: string;
-      };
-      unmount();
-      trackEventMock.mockClear();
-
+    it("content_types follows rendered order (content before entities, not alphabetical)", () => {
+      // Impression tracks what the UI renders: content cards (article/page)
+      // come first in the section; entities (player/team/staff) follow in
+      // the strip in input order.
       render(
         <RelatedContentSection
-          items={reordered}
+          items={[team, player, article]}
           pageType="article"
           pageSlug="t"
         />,
       );
-      const secondCall = trackEventMock.mock.calls[0]![1] as {
-        content_types: string;
-      };
 
-      // Types present in both are the same set — after sort by type name
-      expect(firstCall.content_types.split(",").sort()).toEqual(
-        secondCall.content_types.split(",").sort(),
+      const call = trackEventMock.mock.calls.find(
+        (c) => c[0] === "related_content_shown",
       );
+      const payload = call?.[1] as { content_types: string };
+
+      // Partition-ordered: article (content) first, then team, player
+      // (entities in input order). An accidental alpha-sort would produce
+      // "article,player,team" — direct equality rejects that.
+      expect(payload.content_types).toBe("article,team,player");
     });
 
     it("deduplicates content_types when multiple items share a type", () => {
