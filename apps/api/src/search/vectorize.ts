@@ -77,6 +77,9 @@ export const VectorizeServiceLive = Layer.effect(
               for (const [key, value] of Object.entries(rawMeta)) {
                 if (typeof value === "string") metadata[key] = value;
               }
+              if (Object.keys(metadata).length === 0) {
+                return { id: m.id, score: m.score };
+              }
               return { id: m.id, score: m.score, metadata };
             });
           },
