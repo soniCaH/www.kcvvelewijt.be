@@ -19,6 +19,22 @@ export const article = defineType({
   ],
   fields: [
     defineField({
+      name: "articleType",
+      title: "Article type",
+      type: "string",
+      options: {
+        list: [
+          { title: "Interview", value: "interview" },
+          { title: "Announcement", value: "announcement" },
+          { title: "Transfer", value: "transfer" },
+          { title: "Event", value: "event" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "announcement",
+      validation: (r) => r.required(),
+    }),
+    defineField({
       name: "title",
       title: "Title",
       type: "string",
@@ -114,6 +130,7 @@ export const article = defineType({
         { type: "articleImage" },
         { type: "fileAttachment" },
         { type: "htmlTable" },
+        { type: "qaBlock" },
       ],
     }),
     defineField({

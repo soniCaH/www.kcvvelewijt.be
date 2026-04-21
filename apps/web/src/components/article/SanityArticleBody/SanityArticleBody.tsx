@@ -13,6 +13,7 @@ import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
 import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
+import { QaBlock, type QaBlockValue } from "@/components/article/QaBlock";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -165,6 +166,7 @@ const components: PortableTextComponents = {
     htmlTable: HtmlTableBlock,
     image: ArticleImageBlock,
     articleImage: ArticleImageBlock,
+    qaBlock: ({ value }: { value: QaBlockValue }) => <QaBlock value={value} />,
   },
   block: {
     blockquote: ({ children }) => (

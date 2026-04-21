@@ -24,6 +24,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -175,35 +176,54 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           })}
         />
       )}
-      <ArticleHeader
-        title={article.title}
-        imageUrl={article.coverImageUrl ?? undefined}
-        imageAlt={article.title}
-        category={primaryCategory?.name}
-        date={
-          article.publishedAt
-            ? formatArticleDate(new Date(article.publishedAt))
-            : undefined
-        }
-        author="KCVV Elewijt"
-      />
+      {article.articleType === "interview" ? (
+        <InterviewTemplate
+          title={article.title}
+          coverImageUrl={article.coverImageUrl}
+          publishedDate={
+            article.publishedAt
+              ? formatArticleDate(new Date(article.publishedAt))
+              : undefined
+          }
+          category={primaryCategory}
+          shareConfig={shareConfig}
+          body={(article.body as PortableTextBlock[] | null) ?? null}
+        />
+      ) : (
+        <>
+          <ArticleHeader
+            title={article.title}
+            imageUrl={article.coverImageUrl ?? undefined}
+            imageAlt={article.title}
+            category={primaryCategory?.name}
+            date={
+              article.publishedAt
+                ? formatArticleDate(new Date(article.publishedAt))
+                : undefined
+            }
+            author="KCVV Elewijt"
+          />
 
-      <ArticleMetadata
-        author="KCVV Elewijt"
-        date={
-          article.publishedAt
-            ? formatArticleDate(new Date(article.publishedAt))
-            : undefined
-        }
-        category={primaryCategory}
-        shareConfig={shareConfig}
-      />
+          <ArticleMetadata
+            author="KCVV Elewijt"
+            date={
+              article.publishedAt
+                ? formatArticleDate(new Date(article.publishedAt))
+                : undefined
+            }
+            category={primaryCategory}
+            shareConfig={shareConfig}
+          />
 
-      <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
-        {Array.isArray(article.body) && article.body.length > 0 && (
-          <SanityArticleBody content={article.body as PortableTextBlock[]} />
-        )}
-      </main>
+          <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
+            {Array.isArray(article.body) && article.body.length > 0 && (
+              <SanityArticleBody
+                content={article.body as PortableTextBlock[]}
+              />
+            )}
+          </main>
+        </>
+      )}
 
       <RelatedContentSection
         items={relatedItems}

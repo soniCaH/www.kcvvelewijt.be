@@ -48,6 +48,7 @@ function makeArticleDetailRow(
     publishedAt: "2026-03-20T10:00:00Z",
     featured: true,
     tags: ["Eerste ploeg"],
+    articleType: "announcement",
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
     body: [
       {
