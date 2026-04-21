@@ -2,6 +2,7 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleHeader } from "../ArticleHeader";
 import { ArticleMetadata } from "../ArticleMetadata";
 import { SanityArticleBody } from "../SanityArticleBody/SanityArticleBody";
+import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
 export interface InterviewTemplateProps {
   title: string;
@@ -10,6 +11,12 @@ export interface InterviewTemplateProps {
   category?: { name: string; href: string };
   shareConfig: { url: string };
   body: PortableTextBlock[] | null;
+  /**
+   * Resolved from the article's `subject` field. Forwarded to
+   * `SanityArticleBody` so the qaBlock `key` and `quote` pair treatments
+   * can render attribution + photo without re-fetching the reference.
+   */
+  subject?: SubjectValue | null;
 }
 
 // Byline for Phase 1 — Phase 3 (#1329) replaces this with the author
@@ -31,6 +38,7 @@ export const InterviewTemplate = ({
   category,
   shareConfig,
   body,
+  subject = null,
 }: InterviewTemplateProps) => {
   return (
     <>
@@ -52,7 +60,7 @@ export const InterviewTemplate = ({
 
       <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
         {Array.isArray(body) && body.length > 0 && (
-          <SanityArticleBody content={body} />
+          <SanityArticleBody content={body} subject={subject} />
         )}
       </main>
     </>

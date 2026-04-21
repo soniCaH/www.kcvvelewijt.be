@@ -35,6 +35,14 @@ export const article = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: "subject",
+      title: "Subject (interview only)",
+      type: "subject",
+      description:
+        "Person the interview is about. Drives the kicker in the hero, the attribution on `key` and `quote` qaBlock pairs, and JSON-LD metadata.",
+      hidden: ({ parent }) => parent?.articleType !== "interview",
+    }),
+    defineField({
       name: "title",
       title: "Title",
       type: "string",

@@ -39,6 +39,22 @@ export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
   "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  subject{
+    kind,
+    playerRef->{
+      _id, firstName, lastName, jerseyNumber, position,
+      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      psdId
+    },
+    staffRef->{
+      _id, firstName, lastName, functionTitle,
+      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
+    },
+    customName,
+    customRole,
+    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
+  },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
   relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {

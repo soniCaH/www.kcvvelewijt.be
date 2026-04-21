@@ -188,6 +188,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           category={primaryCategory}
           shareConfig={shareConfig}
           body={(article.body as PortableTextBlock[] | null) ?? null}
+          subject={article.subject ?? null}
         />
       ) : (
         <>

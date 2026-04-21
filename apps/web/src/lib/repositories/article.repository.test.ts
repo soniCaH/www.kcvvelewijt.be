@@ -49,6 +49,7 @@ function makeArticleDetailRow(
     featured: true,
     tags: ["Eerste ploeg"],
     articleType: "announcement",
+    subject: null,
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
     body: [
       {
