@@ -87,7 +87,7 @@ const KeyAttribution = ({
     )}
   >
     {resolved.jerseyNumber != null ? (
-      <span aria-hidden="true" className="font-mono text-kcvv-green-dark">
+      <span className="font-mono text-kcvv-green-dark">
         #{resolved.jerseyNumber}
       </span>
     ) : null}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { PortableText, type PortableTextBlock } from "@portabletext/react";
 import {
   SubjectAttribution,
@@ -24,19 +24,38 @@ const DURATION_MS = 700;
  * The question is intentionally not rendered — the glyph + quote + subject
  * attribution carry the meaning.
  */
-const prefersReducedMotion = (): boolean => {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+// External-store hooks for `useSyncExternalStore`. They keep the component
+// SSR-safe (server snapshot is always `false`) and let us read the OS
+// preference without a `setState` inside an effect.
+const subscribeReducedMotion = (onChange: () => void): (() => void) => {
+  if (typeof window === "undefined") return () => {};
+  const mql = window.matchMedia(MOTION_QUERY);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
 };
+
+const getReducedMotionSnapshot = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOTION_QUERY).matches;
+};
+
+const getReducedMotionServerSnapshot = (): boolean => false;
 
 export const QaPairQuote = ({ answer, subject }: QaPairQuoteProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Resolve reduced-motion once per mount so `reducedMotion` and the initial
-  // value of `entered` cannot disagree, and to avoid the
-  // react-hooks/set-state-in-effect warning that a lazy effect-based read
-  // would trigger.
-  const [reducedMotion] = useState<boolean>(() => prefersReducedMotion());
-  const [entered, setEntered] = useState<boolean>(() => reducedMotion);
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot,
+  );
+  // Observer-driven flag. Derive the visible `entered` state in render so
+  // we never need a `setState` inside the effect body (which would trip
+  // react-hooks/set-state-in-effect). The observer callback still flips
+  // the flag — that's a platform callback, not effect-body setState.
+  const [observerFired, setObserverFired] = useState(false);
+  const entered = reducedMotion || observerFired;
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -47,7 +66,7 @@ export const QaPairQuote = ({ answer, subject }: QaPairQuoteProps) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          setEntered(true);
+          setObserverFired(true);
           observer.disconnect();
         }
       },
@@ -61,7 +80,10 @@ export const QaPairQuote = ({ answer, subject }: QaPairQuoteProps) => {
     <section
       ref={containerRef}
       data-testid="qa-pair-quote"
-      className="full-bleed bg-[var(--color-foundation-gray-light)] py-20 md:py-40 relative overflow-hidden"
+      // `my-10` matches the breathing zone used by the `key` breakout so the
+      // top and bottom margins around full-bleed cream bands are symmetric
+      // with the standard-pair rhythm.
+      className="full-bleed bg-[var(--color-foundation-gray-light)] py-20 md:py-40 my-10 relative overflow-hidden"
     >
       <span
         aria-hidden="true"

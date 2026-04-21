@@ -45,8 +45,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Gallery: Story = {
   args: { subject: playerSubject, variant: "quote" },
-  render: () => (
+  render: (args) => (
     <div className="flex flex-col gap-10 bg-[var(--color-foundation-gray-light)] p-12">
+      <Row label="args (control-driven)">
+        <SubjectAttribution {...args} />
+      </Row>
       <Row label="player — quote">
         <SubjectAttribution subject={playerSubject} variant="quote" />
       </Row>
@@ -71,10 +74,10 @@ export const Gallery: Story = {
 
 export const PhotoBoundedBox: Story = {
   args: { subject: playerSubject, variant: "quote" },
-  render: () => (
+  render: (args) => (
     <div className="flex gap-8 bg-white p-8">
-      <Column label="player (psdImage)">
-        <SubjectPhoto subject={playerSubject} className="w-[200px]" />
+      <Column label="args (control-driven)">
+        <SubjectPhoto subject={args.subject} className="w-[200px]" />
       </Column>
       <Column label="staff (photo)">
         <SubjectPhoto subject={staffSubject} className="w-[200px]" />

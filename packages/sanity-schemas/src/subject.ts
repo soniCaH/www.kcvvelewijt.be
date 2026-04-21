@@ -70,6 +70,13 @@ export const subject = defineType({
       type: 'image',
       options: {hotspot: true},
       hidden: ({parent}) => parent?.kind !== 'custom',
+      validation: (r) =>
+        r.custom((val, ctx) => {
+          const parent = ctx.parent as {kind?: string} | undefined
+          return parent?.kind === 'custom' && !val
+            ? 'A photo is required for custom subjects — QaPairKey renders a portrait column that would otherwise be empty.'
+            : true
+        }),
     }),
     defineField({
       name: 'customRole',
@@ -104,6 +111,12 @@ export const subject = defineType({
       customName,
       customPhoto,
     }) {
+      if (!kind) {
+        return {
+          title: 'Subject (kind not set)',
+          subtitle: 'Subject — unknown',
+        }
+      }
       if (kind === 'player') {
         const name = [playerFirst, playerLast].filter(Boolean).join(' ')
         return {
@@ -120,10 +133,16 @@ export const subject = defineType({
           media: staffPhoto,
         }
       }
+      if (kind === 'custom') {
+        return {
+          title: customName || 'Custom subject (no name)',
+          subtitle: 'Subject — custom',
+          media: customPhoto,
+        }
+      }
       return {
-        title: customName || 'Custom subject (no name)',
-        subtitle: 'Subject — custom',
-        media: customPhoto,
+        title: 'Subject (unknown kind)',
+        subtitle: `Subject — ${kind}`,
       }
     },
   },

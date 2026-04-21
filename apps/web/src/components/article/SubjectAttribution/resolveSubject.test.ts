@@ -116,4 +116,13 @@ describe("resolveSubject", () => {
     expect(resolveSubject(undefined)).toBeNull();
     expect(resolveSubject({})).toBeNull();
   });
+
+  it("returns null when kind is an unrecognised discriminator value", () => {
+    expect(
+      resolveSubject({
+        kind: "legacy-type" as unknown as "player",
+        customName: "Should not be resolved",
+      }),
+    ).toBeNull();
+  });
 });

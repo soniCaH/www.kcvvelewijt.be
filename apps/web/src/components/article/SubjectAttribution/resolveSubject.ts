@@ -73,12 +73,18 @@ export function resolveSubject(
     };
   }
 
-  const name = subject.customName?.trim() ?? "";
-  if (!name) return null;
-  return {
-    name,
-    role: subject.customRole ?? "",
-    photoUrl: subject.customPhotoUrl ?? null,
-    jerseyNumber: null,
-  };
+  if (subject.kind === "custom") {
+    const name = subject.customName?.trim() ?? "";
+    if (!name) return null;
+    return {
+      name,
+      role: subject.customRole ?? "",
+      photoUrl: subject.customPhotoUrl ?? null,
+      jerseyNumber: null,
+    };
+  }
+
+  // Unknown discriminator (legacy data, failed migration, bad cast). Do not
+  // silently fall through to a branch — the caller must handle null.
+  return null;
 }

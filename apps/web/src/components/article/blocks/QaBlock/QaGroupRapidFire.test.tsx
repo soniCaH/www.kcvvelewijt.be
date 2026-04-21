@@ -41,11 +41,31 @@ describe("QaGroupRapidFire", () => {
     );
 
     expect(screen.getByTestId("qa-group-rapid-fire")).toBeInTheDocument();
-    expect(screen.getByText("Sneltrein")).toBeInTheDocument();
-    expect(screen.getByText("Koffie of thee?")).toBeInTheDocument();
-    expect(screen.getByText("Koffie. Zwart.")).toBeInTheDocument();
-    expect(screen.getByText("Messi.")).toBeInTheDocument();
-    expect(screen.getByText("Regen.")).toBeInTheDocument();
+
+    // Assert document order by collapsing the rendered text and looking up
+    // each landmark index — guards against a future refactor that
+    // accidentally reverses or shuffles pairs.
+    const flow = screen.getByTestId("qa-group-rapid-fire").textContent ?? "";
+    const positions = [
+      "Sneltrein",
+      "Koffie of thee?",
+      "Koffie. Zwart.",
+      "Messi of Ronaldo?",
+      "Messi.",
+      "Regen of sneeuw?",
+      "Regen.",
+    ].map((needle) => flow.indexOf(needle));
+
+    positions.forEach((pos, i) => {
+      expect(
+        pos,
+        `"${positions[i]}" must appear in the rendered flow`,
+      ).toBeGreaterThanOrEqual(0);
+    });
+    // Each landmark appears strictly after the previous one.
+    for (let i = 1; i < positions.length; i++) {
+      expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+    }
   });
 
   it("renders exactly N-1 separators between N pairs", () => {

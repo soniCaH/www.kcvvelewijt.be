@@ -42,7 +42,10 @@ export const ARTICLE_BY_SLUG_QUERY =
   subject{
     kind,
     playerRef->{
-      _id, firstName, lastName, jerseyNumber, position,
+      _id, firstName, lastName, jerseyNumber,
+      // position + psdId are reserved for Phase 3 (#1329): interview hero
+      // kicker + byline link. Unused by Phase 2 attribution components.
+      position,
       "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
       "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
       psdId

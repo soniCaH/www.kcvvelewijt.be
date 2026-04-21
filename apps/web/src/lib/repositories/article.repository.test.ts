@@ -257,6 +257,35 @@ describe("ArticleRepository", () => {
       expect(a.body).toEqual(row.body);
     });
 
+    it("round-trips a populated player subject unchanged on the detail VM", async () => {
+      const populatedSubject = {
+        kind: "player" as const,
+        playerRef: {
+          _id: "player-psd-1673",
+          firstName: "Maxim",
+          lastName: "Breugelmans",
+          jerseyNumber: 9,
+          position: "Aanvaller" as const,
+          transparentImageUrl: null,
+          psdImageUrl: "https://cdn.sanity.io/psd.webp",
+          psdId: "1673",
+        },
+        staffRef: null,
+        customName: null,
+        customRole: null,
+        customPhotoUrl: null,
+      };
+      const row = makeArticleDetailRow({ subject: populatedSubject });
+      mockFetch.mockResolvedValueOnce(row);
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test-article-detail");
+        }),
+      );
+      expect(result!.subject).toEqual(populatedSubject);
+    });
+
     it("passes through every articleType enum value and null without transformation", async () => {
       for (const value of [
         "interview",
