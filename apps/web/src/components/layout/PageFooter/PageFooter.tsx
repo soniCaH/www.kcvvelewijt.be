@@ -112,7 +112,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
             </a>
             <div className="flex gap-2.5 mt-5 max-md:justify-center">
               <a
-                href="https://facebook.com/KCVVElewijt/"
+                href={EXTERNAL_LINKS.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="KCVV Elewijt op Facebook"
@@ -121,7 +121,7 @@ export const PageFooter = ({ className }: PageFooterProps) => {
                 <Facebook className="w-[18px] h-[18px]" />
               </a>
               <a
-                href="https://www.instagram.com/kcvve"
+                href={EXTERNAL_LINKS.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="KCVV Elewijt op Instagram"

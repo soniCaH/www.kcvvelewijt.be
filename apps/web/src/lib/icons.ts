@@ -31,7 +31,6 @@ import {
 
   // Social
   Facebook,
-  Twitter,
   Instagram,
 
   // Content & Document
@@ -134,7 +133,6 @@ export const icons = {
 
   // Social
   facebook: Facebook,
-  twitter: Twitter,
   instagram: Instagram,
 
   // Content & Document
@@ -286,7 +284,6 @@ export {
 
   // Social
   Facebook,
-  Twitter,
   Instagram,
 
   // Content & Document

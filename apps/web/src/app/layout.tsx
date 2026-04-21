@@ -45,11 +45,6 @@ export const metadata: Metadata = {
   openGraph: {
     images: [DEFAULT_OG_IMAGE],
   },
-  twitter: {
-    card: "summary_large_image",
-    site: `@${SITE_CONFIG.twitterHandle}`,
-    creator: `@${SITE_CONFIG.twitterHandle}`,
-  },
 };
 
 // Phase 4: Mobile viewport configuration with safe area support

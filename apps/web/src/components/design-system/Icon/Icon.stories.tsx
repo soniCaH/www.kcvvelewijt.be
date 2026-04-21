@@ -14,7 +14,6 @@ import {
   Phone,
   Mail,
   Facebook,
-  Twitter,
   Instagram,
   ArrowRight,
   Search,
@@ -201,7 +200,6 @@ export const SocialIcons: Story = {
   render: () => (
     <div className="flex gap-4">
       <Icon icon={Facebook} size="lg" color="muted" />
-      <Icon icon={Twitter} size="lg" color="muted" />
       <Icon icon={Instagram} size="lg" color="muted" />
     </div>
   ),

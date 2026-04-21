@@ -16,7 +16,6 @@ export const SITE_CONFIG = {
   description:
     "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
   siteUrl: "https://www.kcvvelewijt.be",
-  twitterHandle: "kcvve",
   fbAppId: "679332239478086",
   stamnummer: 55,
 } as const;
@@ -52,6 +51,9 @@ export const KCVV_FIRST_TEAM_CLUB_ID = 1235;
 // External Links
 export const EXTERNAL_LINKS = {
   webshop: "https://www.brandsfit.com/kcvvelewijt/nl-eu",
+  psdDashboard: "https://kcvv.prosoccerdata.com/dashboard",
+  facebook: "https://facebook.com/KCVVElewijt/",
+  instagram: "https://www.instagram.com/kcvve",
 } as const;
 
 // Image Aspect Ratios

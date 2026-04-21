@@ -152,8 +152,6 @@ export const Default: Story = {
         category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/overwinning-derby",
-          title: "KCVV Elewijt wint met 3-1 in spannende derby",
-          hashtags: ["kcvv", "derby"],
         }}
       />
 
@@ -207,7 +205,6 @@ export const WithoutImage: Story = {
         category={{ name: "Training", href: "/nieuws?categorie=training" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/trainingsschema",
-          title: "Trainingsschema aangepast voor winterstop",
         }}
       />
 
@@ -251,8 +248,6 @@ export const LongArticle: Story = {
         category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/seizoensoverzicht",
-          title: "Seizoensoverzicht 2024-2025: Een analyse van onze prestaties",
-          hashtags: ["kcvv", "analyse", "seizoen"],
         }}
       />
 

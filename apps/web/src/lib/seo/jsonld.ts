@@ -15,7 +15,7 @@ interface JsonLdDocument {
   [key: string]: unknown;
 }
 
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, EXTERNAL_LINKS } from "@/lib/constants";
 
 const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
 
@@ -70,7 +70,7 @@ export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
     url: SITE_CONFIG.siteUrl,
     logo: LOGO_URL,
     foundingDate: "1924",
-    sameAs: ["https://www.facebook.com/KCVVElewijt"],
+    sameAs: [EXTERNAL_LINKS.facebook, EXTERNAL_LINKS.instagram],
     sport: "Soccer",
     address: {
       "@type": "PostalAddress",

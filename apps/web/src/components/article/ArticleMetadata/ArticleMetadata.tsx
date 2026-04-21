@@ -7,8 +7,8 @@
 
 import Link from "next/link";
 import { Icon } from "@/components/design-system";
-import { Facebook, Twitter } from "@/lib/icons";
-import { FacebookShareButton, TwitterShareButton } from "react-share";
+import { Facebook } from "@/lib/icons";
+import { FacebookShareButton } from "react-share";
 import { cn } from "@/lib/utils/cn";
 
 export interface ArticleMetadataProps {
@@ -24,9 +24,6 @@ export interface ArticleMetadataProps {
   /** Share configuration */
   shareConfig?: {
     url: string;
-    title: string;
-    twitterHandle?: string;
-    hashtags?: string[];
   };
   /** Additional CSS classes */
   className?: string;
@@ -93,16 +90,6 @@ export const ArticleMetadata = ({
               >
                 <Icon icon={Facebook} size="xs" />
               </FacebookShareButton>
-              <TwitterShareButton
-                url={shareConfig.url}
-                title={shareConfig.title}
-                via={shareConfig.twitterHandle?.replace("@", "")}
-                hashtags={shareConfig.hashtags}
-                aria-label="Delen op X"
-                className="text-gray-400 hover:text-kcvv-black transition-colors"
-              >
-                <Icon icon={Twitter} size="xs" />
-              </TwitterShareButton>
             </div>
           )}
         </div>

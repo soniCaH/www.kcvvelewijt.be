@@ -91,13 +91,20 @@ describe("PlayerShare", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders social share buttons", () => {
+    it("renders Facebook share button", () => {
       render(<PlayerShare {...defaultProps} />);
 
       expect(
         screen.getByRole("button", { name: /facebook/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /x/i })).toBeInTheDocument();
+    });
+
+    it("does not render a Twitter/X share button", () => {
+      render(<PlayerShare {...defaultProps} />);
+
+      expect(
+        screen.queryByRole("button", { name: /twitter|x|delen op x/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("renders download QR button when QR is shown", () => {
@@ -165,32 +172,6 @@ describe("PlayerShare", () => {
         "noopener,noreferrer,width=600,height=400",
       );
     });
-
-    it("opens Twitter share dialog when clicked", () => {
-      render(<PlayerShare {...defaultProps} />);
-
-      const twitterButton = screen.getByRole("button", { name: /x/i });
-      fireEvent.click(twitterButton);
-
-      expect(mockWindowOpen).toHaveBeenCalledWith(
-        expect.stringContaining("twitter.com/intent/tweet"),
-        "_blank",
-        "noopener,noreferrer,width=600,height=400",
-      );
-    });
-
-    it("includes player name in Twitter share text", () => {
-      render(<PlayerShare {...defaultProps} />);
-
-      const twitterButton = screen.getByRole("button", { name: /x/i });
-      fireEvent.click(twitterButton);
-
-      expect(mockWindowOpen).toHaveBeenCalledWith(
-        expect.stringContaining("Chiel%20Bertens"),
-        "_blank",
-        "noopener,noreferrer,width=600,height=400",
-      );
-    });
   });
 
   describe("compact variant", () => {
@@ -246,19 +227,6 @@ describe("PlayerShare", () => {
 
       expect(mockWindowOpen).toHaveBeenCalledWith(
         expect.stringContaining("facebook.com/sharer"),
-        "_blank",
-        "noopener,noreferrer,width=600,height=400",
-      );
-    });
-
-    it("opens Twitter share dialog in compact variant", () => {
-      render(<PlayerShare {...defaultProps} variant="compact" />);
-
-      const twitterButton = screen.getByRole("button", { name: /x/i });
-      fireEvent.click(twitterButton);
-
-      expect(mockWindowOpen).toHaveBeenCalledWith(
-        expect.stringContaining("twitter.com/intent/tweet"),
         "_blank",
         "noopener,noreferrer,width=600,height=400",
       );

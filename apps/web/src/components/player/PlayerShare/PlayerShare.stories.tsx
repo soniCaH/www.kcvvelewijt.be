@@ -21,7 +21,7 @@ Share component for player profiles with QR code generation.
 Features:
 - QR code linking to player profile
 - Copy profile URL to clipboard
-- Social share buttons (Facebook, X/Twitter)
+- Social share button (Facebook)
 - Download QR code as image
 - Print-optimized layout option
         `,

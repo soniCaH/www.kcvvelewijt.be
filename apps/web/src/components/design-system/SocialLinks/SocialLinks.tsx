@@ -7,7 +7,8 @@
  */
 
 import { Icon } from "@/components/design-system";
-import { Facebook, Twitter, Instagram } from "@/lib/icons";
+import { EXTERNAL_LINKS } from "@/lib/constants";
+import { Facebook, Instagram } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
 
 export interface SocialLinksProps {
@@ -32,21 +33,8 @@ export interface SocialLinksProps {
 }
 
 const socialLinks = [
-  {
-    name: "Facebook",
-    url: "https://facebook.com/KCVVElewijt/",
-    icon: Facebook,
-  },
-  {
-    name: "Twitter",
-    url: "https://twitter.com/kcvve",
-    icon: Twitter,
-  },
-  {
-    name: "Instagram",
-    url: "https://www.instagram.com/kcvve",
-    icon: Instagram,
-  },
+  { name: "Facebook", url: EXTERNAL_LINKS.facebook, icon: Facebook },
+  { name: "Instagram", url: EXTERNAL_LINKS.instagram, icon: Instagram },
 ];
 
 /**

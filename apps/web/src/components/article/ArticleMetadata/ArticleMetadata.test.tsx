@@ -9,7 +9,6 @@ describe("ArticleMetadata", () => {
     category: { name: "Eerste ploeg", href: "/nieuws?categorie=eerste-ploeg" },
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/test",
-      title: "Test Article",
     },
   };
 
@@ -48,9 +47,15 @@ describe("ArticleMetadata", () => {
 
   it("renders share buttons as icon-only (no text labels)", () => {
     render(<ArticleMetadata {...defaultProps} />);
-    // Should NOT have "Facebook" or "Twitter" text labels
+    // Should NOT have "Facebook" text label
     expect(screen.queryByText("Facebook")).not.toBeInTheDocument();
-    expect(screen.queryByText("Twitter")).not.toBeInTheDocument();
+  });
+
+  it("renders a Facebook share button inside the share section", () => {
+    render(<ArticleMetadata {...defaultProps} />);
+    expect(
+      screen.getByRole("button", { name: "Delen op Facebook" }),
+    ).toBeInTheDocument();
   });
 
   it("renders share label visible on tablet+ (sr-only on mobile)", () => {
