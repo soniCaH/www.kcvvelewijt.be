@@ -248,7 +248,11 @@ export const SanityArticleBody = ({
   return (
     <div
       className={cn(
-        "prose prose-lg max-w-none px-3 py-3 lg:px-0",
+        // Design §5.2 / §7.2 — body reading column constrained to 65 ch
+        // and centred inside the 60 rem `max-w-inner-lg` main wrapper.
+        // `full-bleed` children (qaBlock key/quote) still break out to
+        // 100 vw because the wrapper is mx-auto centred.
+        "prose prose-lg max-w-[65ch] mx-auto px-3 py-3 lg:px-0",
         "prose-headings:font-title prose-headings:font-bold prose-headings:text-kcvv-black",
         "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",

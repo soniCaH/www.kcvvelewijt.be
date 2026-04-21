@@ -10,6 +10,7 @@ describe("resolveSubject", () => {
           firstName: "Maxim",
           lastName: "Breugelmans",
           jerseyNumber: 9,
+          position: "Middenvelder",
           transparentImageUrl: "https://cdn.sanity.io/transparent.webp",
           psdImageUrl: "https://cdn.sanity.io/psd.webp",
         },
@@ -19,7 +20,22 @@ describe("resolveSubject", () => {
         role: "#9",
         photoUrl: "https://cdn.sanity.io/transparent.webp",
         jerseyNumber: 9,
+        position: "Middenvelder",
       });
+    });
+
+    it("returns null position for players without a field position", () => {
+      const resolved = resolveSubject({
+        kind: "player",
+        playerRef: {
+          firstName: "Maxim",
+          lastName: "Breugelmans",
+          jerseyNumber: 9,
+          position: null,
+          psdImageUrl: "https://cdn.sanity.io/psd.webp",
+        },
+      });
+      expect(resolved?.position).toBeNull();
     });
 
     it("falls back to psdImage when transparentImage is missing (90% case)", () => {
@@ -80,6 +96,7 @@ describe("resolveSubject", () => {
         role: "Hoofdcoach A-ploeg",
         photoUrl: "https://cdn.sanity.io/staff.webp",
         jerseyNumber: null,
+        position: null,
       });
     });
 
@@ -101,6 +118,7 @@ describe("resolveSubject", () => {
         role: "Oud-speler",
         photoUrl: "https://cdn.sanity.io/custom.webp",
         jerseyNumber: null,
+        position: null,
       });
     });
 

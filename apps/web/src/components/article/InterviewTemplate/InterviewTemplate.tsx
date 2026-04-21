@@ -1,6 +1,6 @@
 import type { PortableTextBlock } from "@portabletext/react";
-import { ArticleHeader } from "../ArticleHeader";
 import { ArticleMetadata } from "../ArticleMetadata";
+import { InterviewHero } from "../InterviewHero";
 import { SanityArticleBody } from "../SanityArticleBody/SanityArticleBody";
 import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
@@ -8,54 +8,55 @@ export interface InterviewTemplateProps {
   title: string;
   coverImageUrl?: string | null;
   publishedDate?: string;
-  category?: { name: string; href: string };
-  shareConfig: { url: string };
+  readingTime?: string;
+  shareConfig: { url: string; title?: string };
   body: PortableTextBlock[] | null;
   /**
-   * Resolved from the article's `subject` field. Forwarded to
-   * `SanityArticleBody` so the qaBlock `key` and `quote` pair treatments
-   * can render attribution + photo without re-fetching the reference.
+   * Resolved from the article's `subject` field. Drives the InterviewHero
+   * kicker (jersey + position), subtitle (full name), and the key/quote
+   * qaBlock attribution blocks. When absent, the hero collapses to
+   * `INTERVIEW` + title only.
    */
   subject?: SubjectValue | null;
 }
 
-// Byline for Phase 1 — Phase 3 (#1329) replaces this with the author
-// resolved from the article's `subject` field.
+// Byline — Phase 4 (#1330) may wire this to an editor-authored field when
+// ghost-written articles are introduced. For interviews the club is the
+// implicit author.
 const AUTHOR = "KCVV Elewijt";
 
 /**
- * Phase 1 tracer for the interview template. Structurally identical to the
- * legacy renderer (header + metadata + body) — the unique 4:5 portrait hero,
- * subject kicker, and related-slider integration ship in Phase 3 (#1329).
- *
- * Its value at this phase is proving the `articleType` dispatch end-to-end
- * and giving the Phase 3 work a stable landing site.
+ * Phase 3 (#1329): full interview template.
+ * - `InterviewHero` — subject-driven kicker, subtitle (full name), title
+ *   `clamp(2rem,4.5vw,3.5rem)`, 4:5 portrait crop of the cover image.
+ * - `ArticleMetadata` — design §7.6 (mono small-caps facts + Share2 +
+ *   Facebook share icons).
+ * - `SanityArticleBody` — body with subject threaded down so the
+ *   `key`/`quote` qaBlock pairs can render attribution + photo.
  */
 export const InterviewTemplate = ({
   title,
   coverImageUrl,
   publishedDate,
-  category,
+  readingTime,
   shareConfig,
   body,
   subject = null,
 }: InterviewTemplateProps) => {
   return (
     <>
-      <ArticleHeader
+      <InterviewHero
         title={title}
-        imageUrl={coverImageUrl ?? undefined}
-        imageAlt={title}
-        category={category?.name}
-        date={publishedDate}
-        author={AUTHOR}
+        subject={subject}
+        coverImageUrl={coverImageUrl}
       />
 
       <ArticleMetadata
         author={AUTHOR}
         date={publishedDate}
-        category={category}
+        readingTime={readingTime}
         shareConfig={shareConfig}
+        className="mt-10"
       />
 
       <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">

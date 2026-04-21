@@ -9,6 +9,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
+import { computeReadingTime } from "@/lib/utils/reading-time";
 import {
   mapEditorialArticles,
   mapBffRelatedItems,
@@ -122,6 +123,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
   };
 
+  const readingTime = computeReadingTime(article.body ?? null);
+
   const hasEditorialArticles =
     article.relatedArticles && article.relatedArticles.length > 0;
 
@@ -179,14 +182,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {article.articleType === "interview" ? (
         <InterviewTemplate
           title={article.title}
-          coverImageUrl={article.coverImageUrl}
+          coverImageUrl={article.coverImagePortraitUrl ?? article.coverImageUrl}
           publishedDate={
             article.publishedAt
               ? formatArticleDate(new Date(article.publishedAt))
               : undefined
           }
-          category={primaryCategory}
-          shareConfig={shareConfig}
+          readingTime={readingTime}
+          shareConfig={{ url: shareConfig.url, title: article.title }}
           body={(article.body as PortableTextBlock[] | null) ?? null}
           subject={article.subject ?? null}
         />
@@ -212,8 +215,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 ? formatArticleDate(new Date(article.publishedAt))
                 : undefined
             }
-            category={primaryCategory}
-            shareConfig={shareConfig}
+            readingTime={readingTime}
+            shareConfig={{ url: shareConfig.url, title: article.title }}
           />
 
           <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">

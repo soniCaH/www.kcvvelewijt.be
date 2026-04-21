@@ -645,7 +645,7 @@ trigger: IntersectionObserver, threshold 0.15, rootMargin '0px 0px -10% 0px'
 
 - Single row, 1px `kcvv-gray-light` rule above and below.
 - Left cluster: mono, `text-xs`, uppercase, `tracking-[var(--letter-spacing-caps)]`, `kcvv-gray`.
-- Right: Lucide `Share2`, `Facebook`, `twitter-x` from the curated icon set (`apps/web/src/lib/icons.ts`), 16px, `kcvv-gray-blue`, hover `kcvv-green-dark`. No filled buttons, no circles.
+- Right: Lucide `Share2` (native Web Share API with a Facebook-URL fallback on desktop) and `Facebook` from the curated icon set (`apps/web/src/lib/icons.ts`), 16px, `kcvv-gray-blue`, hover `kcvv-green-dark`. No filled buttons, no circles. **No Twitter/X icon** — KCVV does not have a Twitter/X account (see `reference_club_identity`). Instagram is not a share target either (no URL-share deeplink), so the cluster is Share2 + Facebook only.
 
 ### 7.7 Related content slider
 

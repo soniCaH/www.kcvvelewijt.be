@@ -12,7 +12,12 @@ import { SPONSORS_QUERY } from "./sponsor.repository";
 import { ORGANIGRAM_NODES_QUERY } from "./staff.repository";
 import { TEAMS_QUERY, TEAM_BY_SLUG_QUERY } from "./team.repository";
 
-const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp", "fit=max"];
+// `fit=max` is the usual value (constrain-within, no crop). Hotspot-aware
+// portrait crops use `fit=crop&crop=focalpoint` instead — either is valid
+// CDN sizing, the core requirement is that every image URL opts in to
+// Sanity's transform pipeline.
+const FIT_PATTERN = /fit=(max|crop)/;
+const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp"];
 
 /**
  * Extracts all `"fieldName": ...asset->url` or `"url": url` projections from a GROQ query,
@@ -72,6 +77,10 @@ describe("Sanity image CDN optimization", () => {
             `${name} field "${field}" should include "${param}"`,
           ).toContain(param);
         }
+        expect(
+          projection,
+          `${name} field "${field}" should include fit=max or fit=crop`,
+        ).toMatch(FIT_PATTERN);
       }
     });
   }

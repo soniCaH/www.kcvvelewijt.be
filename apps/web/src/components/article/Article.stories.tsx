@@ -149,7 +149,7 @@ export const Default: Story = {
       <ArticleMetadata
         author="Tom Redactie"
         date="15 januari 2025"
-        category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
+        readingTime="4 min lezen"
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/overwinning-derby",
         }}
@@ -202,7 +202,7 @@ export const WithoutImage: Story = {
       <ArticleMetadata
         author="Club Secretariaat"
         date="20 december 2024"
-        category={{ name: "Training", href: "/nieuws?categorie=training" }}
+        readingTime="2 min lezen"
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/trainingsschema",
         }}
@@ -245,7 +245,7 @@ export const LongArticle: Story = {
       <ArticleMetadata
         author="Marc Analyse"
         date="18 december 2024"
-        category={{ name: "A-Ploeg", href: "/nieuws?categorie=a-ploeg" }}
+        readingTime="4 min lezen"
         shareConfig={{
           url: "https://kcvvelewijt.be/nieuws/seizoensoverzicht",
         }}

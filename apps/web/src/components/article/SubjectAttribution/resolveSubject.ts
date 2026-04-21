@@ -2,6 +2,8 @@ export interface SubjectPlayerRef {
   firstName?: string | null;
   lastName?: string | null;
   jerseyNumber?: number | null;
+  /** Field position (e.g. "Middenvelder"). Used by the InterviewHero kicker. */
+  position?: string | null;
   transparentImageUrl?: string | null;
   psdImageUrl?: string | null;
 }
@@ -28,6 +30,8 @@ export interface ResolvedSubject {
   photoUrl: string | null;
   /** Present only for `kind='player'`. Other kinds return null. */
   jerseyNumber: number | null;
+  /** Present only for `kind='player'` when set on the player document. */
+  position: string | null;
 }
 
 /**
@@ -57,6 +61,7 @@ export function resolveSubject(
       role: p.jerseyNumber != null ? `#${p.jerseyNumber}` : "",
       photoUrl: p.transparentImageUrl ?? p.psdImageUrl ?? null,
       jerseyNumber: p.jerseyNumber ?? null,
+      position: p.position ?? null,
     };
   }
 
@@ -70,6 +75,7 @@ export function resolveSubject(
       role: s.functionTitle ?? "",
       photoUrl: s.photoUrl ?? null,
       jerseyNumber: null,
+      position: null,
     };
   }
 
@@ -81,6 +87,7 @@ export function resolveSubject(
       role: subject.customRole ?? "",
       photoUrl: subject.customPhotoUrl ?? null,
       jerseyNumber: null,
+      position: null,
     };
   }
 

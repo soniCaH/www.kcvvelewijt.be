@@ -51,6 +51,7 @@ function makeArticleDetailRow(
     articleType: "announcement",
     subject: null,
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
+    coverImagePortraitUrl: "https://cdn.sanity.io/cover-portrait.webp",
     body: [
       {
         _key: "k1",
