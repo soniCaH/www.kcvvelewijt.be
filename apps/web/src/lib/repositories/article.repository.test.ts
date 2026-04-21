@@ -48,6 +48,7 @@ function makeArticleDetailRow(
     publishedAt: "2026-03-20T10:00:00Z",
     featured: true,
     tags: ["Eerste ploeg"],
+    articleType: "announcement",
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
     body: [
       {
@@ -250,8 +251,29 @@ describe("ArticleRepository", () => {
       expect(a.publishedAt).toBe("2026-03-20T10:00:00Z");
       expect(a.featured).toBe(true);
       expect(a.tags).toEqual(["Eerste ploeg"]);
+      expect(a.articleType).toBe("announcement");
       expect(a.coverImageUrl).toBe("https://cdn.sanity.io/cover.webp");
       expect(a.body).toEqual(row.body);
+    });
+
+    it("passes through every articleType enum value and null without transformation", async () => {
+      for (const value of [
+        "interview",
+        "announcement",
+        "transfer",
+        "event",
+        null,
+      ] as const) {
+        const row = makeArticleDetailRow({ articleType: value });
+        mockFetch.mockResolvedValueOnce(row);
+        const result = await runWithRepo(
+          Effect.gen(function* () {
+            const repo = yield* ArticleRepository;
+            return yield* repo.findBySlug("test-article-detail");
+          }),
+        );
+        expect(result!.articleType).toBe(value);
+      }
     });
 
     it("maps related articles on detail VM", async () => {
