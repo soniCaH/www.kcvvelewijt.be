@@ -7,8 +7,12 @@ import { VectorizeService } from "./vectorize";
  * fields on matches, even when `returnMetadata: "all"` is set. Non-indexed
  * fields (notably `imageUrl` and `excerpt`) come back undefined. `getByIds`
  * preserves all stored metadata — so we query for IDs+scores, then look the
- * metadata up via getByIds. Two round trips, but the wire payload stays
- * consistent regardless of which metadata indexes exist on the index.
+ * metadata up via getByIds.
+ *
+ * Filtering (responsibility neighbours, etc.) happens *post-hydration* so
+ * that it reads from the authoritative stored metadata rather than the
+ * truncated query-side view. That keeps the handler correct even if a
+ * metadata index is dropped or its property name changes.
  */
 export const handleRelated = (request: {
   id: string;
@@ -25,23 +29,23 @@ export const handleRelated = (request: {
       .query(vector, { topK: request.limit * 3 + 1, returnMetadata: "all" })
       .pipe(Effect.orDie);
 
-    // Score is what query returns; fetch full metadata for the candidates.
+    // Preserve query-side score ordering; only drop the self match up front
+    // (cheap id comparison, no metadata dependency).
     const scoreById = new Map(matches.map((m) => [m.id, m.score]));
     const candidateIds = matches
-      .filter((m) => m.id !== request.id)
-      .filter((m) => m.metadata?.["type"] !== "responsibility")
-      .slice(0, request.limit)
-      .map((m) => m.id);
+      .map((m) => m.id)
+      .filter((id) => id !== request.id);
 
     if (candidateIds.length === 0) return [];
 
     const enriched = yield* vectorize.getByIds(candidateIds).pipe(Effect.orDie);
-
-    // Preserve the score-descending order from `matches`.
     const byId = new Map(enriched.map((r) => [r.id, r]));
+
     return candidateIds
       .map((id) => byId.get(id))
       .filter((r): r is NonNullable<typeof r> => r != null)
+      .filter((r) => r.metadata["type"] !== "responsibility")
+      .slice(0, request.limit)
       .map((r) => {
         const meta = r.metadata;
         const rawType = meta["type"];

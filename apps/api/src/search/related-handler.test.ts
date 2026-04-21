@@ -151,6 +151,58 @@ describe("handleRelated", () => {
     expect(result[0]!.id).toBe("doc-article");
   });
 
+  it("filters responsibilities using stored metadata even when query match metadata lacks the type field", async () => {
+    // Defensive: if the metadata index on `type` ever disappears, the query
+    // binding stops returning that field. The handler must still filter
+    // responsibilities out — it reads from the authoritative stored metadata
+    // fetched via getByIds, not the (potentially truncated) query metadata.
+    const matches: VectorizeMatch[] = [
+      { id: "doc-abc", score: 1.0, metadata: {} }, // query metadata empty
+      { id: "doc-resp", score: 0.9, metadata: {} },
+      { id: "doc-article", score: 0.8, metadata: {} },
+    ];
+
+    const result = await Effect.runPromise(
+      handleRelated({ id: "doc-abc", limit: 3 }).pipe(
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock({
+              matches,
+              stored: [
+                { id: "doc-abc", values: FAKE_VECTOR, metadata: {} },
+                {
+                  id: "doc-resp",
+                  values: FAKE_VECTOR,
+                  metadata: {
+                    slug: "resp",
+                    type: "responsibility",
+                    title: "Resp",
+                    excerpt: "",
+                  },
+                },
+                {
+                  id: "doc-article",
+                  values: FAKE_VECTOR,
+                  metadata: {
+                    slug: "art",
+                    type: "article",
+                    title: "Art",
+                    excerpt: "",
+                  },
+                },
+              ],
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe("doc-article");
+    expect(result[0]!.type).toBe("article");
+  });
+
   it("excludes responsibility type items from results", async () => {
     const matches: VectorizeMatch[] = [
       {
