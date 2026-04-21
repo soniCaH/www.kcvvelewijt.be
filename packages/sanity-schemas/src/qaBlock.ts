@@ -47,7 +47,9 @@ export const qaPair = defineType({
     prepare({question, tag}) {
       return {
         title: question ?? 'Untitled Q&A pair',
-        subtitle: tag ? `Tag: ${tag}` : 'Tag: standard',
+        // Distinguish an explicitly-set `standard` from an unset tag so
+        // editors can see at a glance whether the field has been touched.
+        subtitle: tag ? `Tag: ${tag}` : 'Tag: — (defaults to standard)',
       }
     },
   },

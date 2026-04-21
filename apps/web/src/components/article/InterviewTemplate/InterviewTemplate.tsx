@@ -12,6 +12,10 @@ export interface InterviewTemplateProps {
   body: PortableTextBlock[] | null;
 }
 
+// Byline for Phase 1 — Phase 3 (#1329) replaces this with the author
+// resolved from the article's `subject` field.
+const AUTHOR = "KCVV Elewijt";
+
 /**
  * Phase 1 tracer for the interview template. Structurally identical to the
  * legacy renderer (header + metadata + body) — the unique 4:5 portrait hero,
@@ -36,11 +40,11 @@ export const InterviewTemplate = ({
         imageAlt={title}
         category={category?.name}
         date={publishedDate}
-        author="KCVV Elewijt"
+        author={AUTHOR}
       />
 
       <ArticleMetadata
-        author="KCVV Elewijt"
+        author={AUTHOR}
         date={publishedDate}
         category={category}
         shareConfig={shareConfig}

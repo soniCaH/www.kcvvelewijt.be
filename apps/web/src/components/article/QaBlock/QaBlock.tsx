@@ -23,7 +23,11 @@ export const QaBlock = ({ value }: { value: QaBlockValue }) => {
   if (pairs.length === 0) return null;
 
   return (
-    <div className="my-12" data-testid="qa-block">
+    // `not-prose` opts out of the parent `.prose prose-lg` cascade in
+    // SanityArticleBody. Without it, descendant `<p>` tags inherit prose-p
+    // margins/colors and blow the pair rhythm past the design's 40 px above
+    // + 40 px below rule spacing.
+    <div className="not-prose my-12" data-testid="qa-block">
       {pairs.map((pair, i) => {
         const isLast = i === pairs.length - 1;
         return (

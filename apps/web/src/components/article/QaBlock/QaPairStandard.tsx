@@ -15,7 +15,9 @@ export const QaPairStandard = ({
 }: QaPairStandardProps) => {
   return (
     <div
-      className="grid gap-3 md:grid-cols-[4rem_1fr] md:gap-x-16 md:gap-y-0"
+      // Baseline-align the numeral to the question per design §6.1 so the
+      // "01." descender line sits on the same baseline as the question text.
+      className="grid gap-3 md:grid-cols-[4rem_1fr] md:gap-x-16 md:gap-y-0 md:items-baseline"
       data-testid="qa-pair-standard"
     >
       <div
