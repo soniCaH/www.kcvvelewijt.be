@@ -150,7 +150,7 @@ export function SectionTransition({
         data-testid="section-transition"
         data-height={height}
         data-margin-top={marginTop}
-        className={cn("relative w-full", className)}
+        className={cn("relative w-full pointer-events-none", className)}
         style={style}
       >
         {/* Single SVG spans both halves — no mid-seam gap possible. */}
@@ -196,7 +196,7 @@ export function SectionTransition({
       data-testid="section-transition"
       data-height={height}
       data-margin-top={marginTop}
-      className={cn("relative w-full", className)}
+      className={cn("relative w-full pointer-events-none", className)}
       style={style}
     >
       <svg

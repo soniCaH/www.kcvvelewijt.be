@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Facebook, Instagram } from "@/lib/icons";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
 import { DirectionsLink } from "./DirectionsLink";
-import { FooterTransition } from "./FooterTransition";
 import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
 import { cn } from "@/lib/utils/cn";
 import { EXTERNAL_LINKS } from "@/lib/constants";
@@ -26,8 +25,26 @@ export const PageFooter = ({ className }: PageFooterProps) => {
 
   return (
     <div className={cn(className)}>
-      {/* Diagonal: adapts based on the last section of the current page */}
-      <FooterTransition />
+      {/*
+        Self-owning diagonal into the green footer.
+
+        `overlap="full"` pulls the transition up by DIAGONAL_HEIGHT so the
+        strip physically sits over the last body section and its upper
+        triangle is left transparent — whatever color that section paints
+        shows through. The footer therefore composes cleanly against every
+        page with no pathname registry or per-page `from` color.
+
+        `from="transparent"` documents intent only: in overlap mode
+        `SectionTransition` ignores the `from` prop and always paints the
+        upper triangle transparent. Do not try to "fix" this by changing it.
+      */}
+      <SectionTransition
+        from="transparent"
+        to="kcvv-green-dark"
+        type="diagonal"
+        direction="left"
+        overlap="full"
+      />
 
       {/* Zone 1 — Green hero */}
       <div className="bg-kcvv-green-dark">
