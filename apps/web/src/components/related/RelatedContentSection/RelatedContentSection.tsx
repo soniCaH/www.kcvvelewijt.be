@@ -202,14 +202,10 @@ export const RelatedContentSection = ({
 
       {content.length > 0 && (
         <section>
-          <header className="flex items-baseline gap-3 mb-3">
+          <header className="mb-3">
             <h2 className="text-2xl md:text-3xl font-bold text-kcvv-black tracking-tight">
               Gerelateerd
             </h2>
-            <span className="text-sm text-kcvv-gray font-medium">
-              {content.length}{" "}
-              {content.length === 1 ? "onderwerp" : "onderwerpen"}
-            </span>
           </header>
           <div
             className="h-[3px] w-12 bg-kcvv-green-bright mb-6"

@@ -200,32 +200,6 @@ describe("RelatedContentSection", () => {
     });
   });
 
-  describe("pluralisation", () => {
-    it("uses 'onderwerp' for a single content item", () => {
-      render(
-        <RelatedContentSection
-          items={[article("1")]}
-          pageType="article"
-          pageSlug="test"
-        />,
-      );
-
-      expect(screen.getByText("1 onderwerp")).toBeInTheDocument();
-    });
-
-    it("uses 'onderwerpen' for multiple content items", () => {
-      render(
-        <RelatedContentSection
-          items={[article("1"), article("2")]}
-          pageType="article"
-          pageSlug="test"
-        />,
-      );
-
-      expect(screen.getByText("2 onderwerpen")).toBeInTheDocument();
-    });
-  });
-
   describe("badges", () => {
     it("renders 'Artikel' / 'Pagina' badges, not category labels", () => {
       render(
