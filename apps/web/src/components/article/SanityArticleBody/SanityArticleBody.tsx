@@ -13,7 +13,12 @@ import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
 import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
-import { QaBlock, type QaBlockValue } from "@/components/article/QaBlock";
+import { useMemo } from "react";
+import {
+  QaBlock,
+  type QaBlockValue,
+} from "@/components/article/blocks/QaBlock";
+import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -147,85 +152,99 @@ function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
   );
 }
 
-const components: PortableTextComponents = {
-  types: {
-    fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
-      if (!value.fileUrl) return null;
-      return (
-        <div className="my-4">
-          <DownloadButton
-            href={value.fileUrl}
-            label={value.label}
-            mimeType={value.fileMimeType}
-            fileSize={value.fileSize}
-            fileName={value.fileOriginalFilename}
-          />
-        </div>
-      );
-    },
-    htmlTable: HtmlTableBlock,
-    image: ArticleImageBlock,
-    articleImage: ArticleImageBlock,
-    qaBlock: ({ value }: { value: QaBlockValue }) => <QaBlock value={value} />,
-  },
-  block: {
-    blockquote: ({ children }) => (
-      <blockquote>
-        <p>{children}</p>
-      </blockquote>
-    ),
-  },
-  marks: {
-    link: ({ children, value }) => {
-      const href: string = value?.href ?? "#";
-      const isExternal = href.startsWith("http");
-      return (
-        <a
-          href={href}
-          target={isExternal ? "_blank" : undefined}
-          rel={isExternal ? "noopener noreferrer" : undefined}
-          className="content-link"
-        >
-          {children}
-          {isExternal && (
-            <>
-              <ExternalLinkIcon
-                aria-hidden="true"
-                className="ml-0.5 inline-block align-baseline opacity-60"
-                size="0.75em"
-              />
-              <span className="sr-only"> (opens in new tab)</span>
-            </>
-          )}
-        </a>
-      );
-    },
-    internalLink: ({
-      children,
-      value,
-    }: {
-      children: ReactNode;
-      value?: InternalLinkValue;
-    }) => {
-      const href = resolveInternalLinkHref(value?.reference);
-      return (
-        <Link href={href} className="content-link">
-          {children}
-        </Link>
-      );
-    },
-  },
-};
-
 export interface SanityArticleBodyProps {
   content: PortableTextBlock[];
   className?: string;
+  /**
+   * Article-level subject passed into `qaBlock` so the `key` and `quote`
+   * pair treatments can render the shared attribution + photo. Not used
+   * when rendering non-interview articles (subject will be null).
+   */
+  subject?: SubjectValue | null;
 }
 
 export const SanityArticleBody = ({
   content,
   className,
+  subject = null,
 }: SanityArticleBodyProps) => {
+  // Rebuild the components map whenever `subject` changes so qaBlock sees
+  // the current article's subject without reaching for a context provider.
+  const components = useMemo<PortableTextComponents>(
+    () => ({
+      types: {
+        fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
+          if (!value.fileUrl) return null;
+          return (
+            <div className="my-4">
+              <DownloadButton
+                href={value.fileUrl}
+                label={value.label}
+                mimeType={value.fileMimeType}
+                fileSize={value.fileSize}
+                fileName={value.fileOriginalFilename}
+              />
+            </div>
+          );
+        },
+        htmlTable: HtmlTableBlock,
+        image: ArticleImageBlock,
+        articleImage: ArticleImageBlock,
+        qaBlock: ({ value }: { value: QaBlockValue }) => (
+          <QaBlock value={value} subject={subject} />
+        ),
+      },
+      block: {
+        blockquote: ({ children }) => (
+          <blockquote>
+            <p>{children}</p>
+          </blockquote>
+        ),
+      },
+      marks: {
+        link: ({ children, value }) => {
+          const href: string = value?.href ?? "#";
+          const isExternal = href.startsWith("http");
+          return (
+            <a
+              href={href}
+              target={isExternal ? "_blank" : undefined}
+              rel={isExternal ? "noopener noreferrer" : undefined}
+              className="content-link"
+            >
+              {children}
+              {isExternal && (
+                <>
+                  <ExternalLinkIcon
+                    aria-hidden="true"
+                    className="ml-0.5 inline-block align-baseline opacity-60"
+                    size="0.75em"
+                  />
+                  <span className="sr-only"> (opens in new tab)</span>
+                </>
+              )}
+            </a>
+          );
+        },
+        internalLink: ({
+          children,
+          value,
+        }: {
+          children: ReactNode;
+          value?: InternalLinkValue;
+        }) => {
+          const href = resolveInternalLinkHref(value?.reference);
+          return (
+            <Link href={href} className="content-link">
+              {children}
+            </Link>
+          );
+        },
+      },
+    }),
+    [subject],
+  );
+
   return (
     <div
       className={cn(
