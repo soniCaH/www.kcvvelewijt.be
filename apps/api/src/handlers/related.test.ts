@@ -119,13 +119,26 @@ describe("getRelatedHandler", () => {
       return Effect.succeed(undefined);
     });
 
+    // getByIds has to answer twice: first for the self-vector (to grab the
+    // query embedding), then for the candidate ids (to enrich metadata).
+    const enrichRecords = threeItems.map((m) => ({
+      id: m.id,
+      values: FAKE_VECTOR,
+      metadata: m.metadata as Record<string, string>,
+    }));
+    const getByIdsFirst = (ids: string[]) =>
+      Effect.succeed(
+        ids.includes("doc-1")
+          ? [{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }]
+          : enrichRecords.filter((r) => ids.includes(r.id)),
+      );
+
     // First call: limit 1 — should store all 3 results and return 1
     const result1 = await runWithProviders(
       getRelatedHandler({ id: "doc-1", limit: 1 }),
       makeCacheMock({ set }),
       makeVectorizeMock({
-        getByIds: () =>
-          Effect.succeed([{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }]),
+        getByIds: getByIdsFirst,
         query: () => Effect.succeed(threeItems),
       }),
     );
@@ -156,23 +169,33 @@ describe("getRelatedHandler", () => {
     const set = vi.fn(() => Effect.succeed(undefined));
     const FAKE_VECTOR = Array(1024).fill(0.1);
 
+    const metadata = {
+      slug: "art",
+      type: "article",
+      title: "Art",
+      excerpt: "Ex",
+    };
+
+    const getByIds = (ids: string[]) =>
+      Effect.succeed(
+        ids.includes("doc-1")
+          ? [{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }]
+          : ids.includes("doc-2")
+            ? [{ id: "doc-2", values: FAKE_VECTOR, metadata }]
+            : [],
+      );
+
     const result = await runWithProviders(
       getRelatedHandler({ id: "doc-1", limit: 4 }),
       makeCacheMock({ set }),
       makeVectorizeMock({
-        getByIds: () =>
-          Effect.succeed([{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }]),
+        getByIds,
         query: () =>
           Effect.succeed([
             {
               id: "doc-2",
               score: 0.8,
-              metadata: {
-                slug: "art",
-                type: "article",
-                title: "Art",
-                excerpt: "Ex",
-              },
+              metadata: { type: "article" },
             },
           ]),
       }),
