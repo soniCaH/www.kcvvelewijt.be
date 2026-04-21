@@ -70,31 +70,17 @@ export const VectorizeServiceLive = Layer.effect(
                 | Record<string, unknown>
                 | null
                 | undefined;
-              return {
-                id: m.id,
-                score: m.score,
-                metadata:
-                  rawMeta != null
-                    ? {
-                        slug:
-                          typeof rawMeta["slug"] === "string"
-                            ? rawMeta["slug"]
-                            : "",
-                        type:
-                          typeof rawMeta["type"] === "string"
-                            ? rawMeta["type"]
-                            : "",
-                        title:
-                          typeof rawMeta["title"] === "string"
-                            ? rawMeta["title"]
-                            : "",
-                        excerpt:
-                          typeof rawMeta["excerpt"] === "string"
-                            ? rawMeta["excerpt"]
-                            : "",
-                      }
-                    : undefined,
-              };
+              if (rawMeta == null) {
+                return { id: m.id, score: m.score };
+              }
+              const metadata: Record<string, string> = {};
+              for (const [key, value] of Object.entries(rawMeta)) {
+                if (typeof value === "string") metadata[key] = value;
+              }
+              if (Object.keys(metadata).length === 0) {
+                return { id: m.id, score: m.score };
+              }
+              return { id: m.id, score: m.score, metadata };
             });
           },
           catch: (cause) =>

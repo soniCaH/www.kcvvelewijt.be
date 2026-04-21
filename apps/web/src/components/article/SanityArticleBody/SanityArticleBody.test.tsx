@@ -600,7 +600,7 @@ describe("SanityArticleBody internalLink", () => {
     expect(link!.getAttribute("href")).toBe("/nieuws/some-article");
   });
 
-  it("renders page reference as link to /{slug}", () => {
+  it("renders page reference as link to /club/{slug}", () => {
     const { container } = render(
       <SanityArticleBody
         content={[
@@ -614,7 +614,7 @@ describe("SanityArticleBody internalLink", () => {
 
     const link = container.querySelector("a");
     expect(link).toBeInTheDocument();
-    expect(link!.getAttribute("href")).toBe("/about");
+    expect(link!.getAttribute("href")).toBe("/club/about");
   });
 
   it("renders with content-link class and no icon", () => {

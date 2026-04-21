@@ -7,7 +7,7 @@ import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { VectorizeService } from "../search/vectorize";
 import { WorkerEnvTag } from "../env";
 
-const DEFAULT_LIMIT = 4;
+const DEFAULT_LIMIT = 3;
 const MAX_LIMIT = 5; // upper bound from S.between(1, 5) in api-contract
 
 const relatedCache = TypedKvCache(S.Array(RelatedItem));

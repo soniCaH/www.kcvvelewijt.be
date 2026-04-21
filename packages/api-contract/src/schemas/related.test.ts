@@ -8,7 +8,7 @@ describe("RelatedRequest", () => {
       S.decodeUnknown(RelatedRequest)({ id: "doc-abc123" }),
     );
     expect(result.id).toBe("doc-abc123");
-    expect(result.limit).toBe(4);
+    expect(result.limit).toBe(3);
   });
 
   it("accepts request with explicit limit", async () => {

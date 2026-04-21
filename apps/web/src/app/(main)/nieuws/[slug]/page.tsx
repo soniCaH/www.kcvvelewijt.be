@@ -24,7 +24,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { ArticleHeader, ArticleMetadata } from "@/components/article";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
-import { RelatedContentSlider } from "@/components/related/RelatedContentSlider/RelatedContentSlider";
+import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
 
@@ -136,6 +136,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         return yield* bff.getRelated(article.id);
       }).pipe(
         Effect.map(mapBffRelatedItems),
+        // Broad catch is intentional: this route uses generateStaticParams,
+        // so the BFF is called at build time for every article. Build
+        // workers (local dev, CI, Vercel) may not reach the Worker, and
+        // rendering must still succeed without a related-items block.
+        // Related content is editorial polish, not load-bearing — falling
+        // back to [] is preferable to failing the article page render.
         Effect.catchAll(() => Effect.succeed([])),
       ),
     );
@@ -193,19 +199,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         shareConfig={shareConfig}
       />
 
-      <div className="mb-6 lg:mb-10">
-        <main className="w-full max-w-inner-lg mx-auto px-6">
-          {Array.isArray(article.body) && article.body.length > 0 && (
-            <SanityArticleBody content={article.body as PortableTextBlock[]} />
-          )}
-        </main>
+      <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
+        {Array.isArray(article.body) && article.body.length > 0 && (
+          <SanityArticleBody content={article.body as PortableTextBlock[]} />
+        )}
+      </main>
 
-        <RelatedContentSlider
-          items={relatedItems}
-          pageType="article"
-          pageSlug={article.slug}
-        />
-      </div>
+      <RelatedContentSection
+        items={relatedItems}
+        pageType="article"
+        pageSlug={article.slug}
+      />
     </>
   );
 }

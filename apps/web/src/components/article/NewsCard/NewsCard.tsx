@@ -163,7 +163,19 @@ export const NewsCard = ({
           }
         />
       ) : (
-        <div className="absolute inset-0 bg-kcvv-black" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-kcvv-green-dark via-kcvv-black to-kcvv-black"
+          aria-hidden="true"
+        >
+          {/* Diagonal accent stripe — brand motif */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, transparent 0, transparent 24px, var(--color-kcvv-green-bright) 24px, var(--color-kcvv-green-bright) 25px)",
+            }}
+          />
+        </div>
       )}
 
       {/* Bottom gradient for text legibility */}

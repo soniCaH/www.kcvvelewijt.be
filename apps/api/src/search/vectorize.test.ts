@@ -93,6 +93,97 @@ describe("VectorizeService", () => {
     expect(matches[0]!.metadata?.["slug"]).toBe("kantine");
   });
 
+  it("preserves all string metadata fields (including imageUrl) on query", async () => {
+    const mockIndex = {
+      upsert: async () => ({ mutationId: "m", count: 1 }),
+      query: async () => ({
+        matches: [
+          {
+            id: "doc-abc",
+            score: 0.9,
+            metadata: {
+              slug: "kcvv-wint",
+              type: "article",
+              title: "KCVV wint",
+              excerpt: "Groenwit wint de derby.",
+              imageUrl:
+                "https://cdn.sanity.io/images/vhb33jaz/production/x.jpg",
+              tags: "A-Ploeg",
+              // Non-string entries must be dropped by the service: the
+              // wire type is Record<string, string>, so callers never have
+              // to typeof-guard numeric or nested values.
+              views: 42,
+              published: true,
+              nested: { foo: "bar" },
+            },
+          },
+        ],
+      }),
+    } as unknown as VectorizeIndex;
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    const matches = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.query(Array(1024).fill(0.1), {
+          topK: 5,
+          returnMetadata: "all",
+        });
+      }).pipe(Effect.provide(layer)),
+    );
+
+    // Regression: the service used to hand-roll a whitelist of four fields
+    // (slug/type/title/excerpt), silently dropping imageUrl and any other
+    // present fields. It must now forward every string-valued key.
+    expect(matches[0]!.metadata?.["imageUrl"]).toBe(
+      "https://cdn.sanity.io/images/vhb33jaz/production/x.jpg",
+    );
+    expect(matches[0]!.metadata?.["tags"]).toBe("A-Ploeg");
+    expect(matches[0]!.metadata?.["slug"]).toBe("kcvv-wint");
+    expect(matches[0]!.metadata?.["type"]).toBe("article");
+    // Non-string entries are filtered out
+    expect(matches[0]!.metadata?.["views"]).toBeUndefined();
+    expect(matches[0]!.metadata?.["published"]).toBeUndefined();
+    expect(matches[0]!.metadata?.["nested"]).toBeUndefined();
+  });
+
+  it("omits the metadata property when no string-valued fields are present", async () => {
+    // Shape parity with the null-metadata case: `matches[0].metadata` must
+    // be undefined, not an empty object. Callers already handle both via
+    // `?.[key] ?? null`, but the wire shape should be consistent.
+    const mockIndex = {
+      upsert: async () => ({ mutationId: "m", count: 1 }),
+      query: async () => ({
+        matches: [
+          {
+            id: "doc-numbers-only",
+            score: 0.7,
+            metadata: { views: 42, published: true } as Record<string, unknown>,
+          },
+        ],
+      }),
+    } as unknown as VectorizeIndex;
+
+    const layer = VectorizeServiceLive.pipe(
+      Layer.provide(makeEnvLayer(mockIndex)),
+    );
+
+    const matches = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* VectorizeService;
+        return yield* svc.query(Array(1024).fill(0.1), {
+          topK: 5,
+          returnMetadata: "all",
+        });
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(matches[0]!.metadata).toBeUndefined();
+  });
+
   it("fails with VectorizeError when upsert throws", async () => {
     const failIndex = {
       upsert: async () => {
