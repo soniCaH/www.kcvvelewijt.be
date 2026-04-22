@@ -28,7 +28,7 @@ describe("TransferStrip", () => {
     expect(strip).toHaveTextContent("Derde Amateur");
   });
 
-  it("outgoing: arrow and label use kcvv-warning (amber) — departure signalled without alarm", () => {
+  it("outgoing: arrow and label use kcvv-warning (amber), KCVV sits on the VAN side and the other club on the NAAR side", () => {
     render(
       <TransferStrip
         feature={{
@@ -43,6 +43,17 @@ describe("TransferStrip", () => {
     expect(arrow).toHaveClass("text-kcvv-warning");
     expect(label).toHaveClass("text-kcvv-warning");
     expect(label).toHaveTextContent(/Uitgaand/i);
+
+    // Verify the direction-resolver contract: outgoing = KCVV → other,
+    // so KCVV renders under the VAN label and the other club under NAAR,
+    // in that order in the DOM.
+    const strip = screen.getByTestId("transfer-strip");
+    const stripText = strip.textContent ?? "";
+    const kcvvIdx = stripText.indexOf("KCVV Elewijt");
+    const otherIdx = stripText.indexOf("KV Mechelen");
+    expect(kcvvIdx).toBeGreaterThan(-1);
+    expect(otherIdx).toBeGreaterThan(-1);
+    expect(kcvvIdx).toBeLessThan(otherIdx);
   });
 
   it("extension: no arrow rendered; centered KCVV block + VERLENGD label + TOT date", () => {

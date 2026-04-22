@@ -37,6 +37,18 @@ const DATASET = process.env.SANITY_DATASET ?? "staging";
 const ARTICLE_ID = "article-phase-5-transfer-tracer";
 const SLUG = "phase-5-tracer-transfer-moves";
 
+// Safety net — refuse to write a tracer article to the production dataset
+// unless the operator explicitly opts in. Matches the convention used by
+// `scripts/board-cleanup/` and `scripts/staff-cleanup/`.
+if (DATASET === "production" && process.env.SANITY_ALLOW_PRODUCTION !== "1") {
+  console.error(
+    "Refusing to seed the transfer tracer into production — this article " +
+      "is staging-only. Re-run with SANITY_DATASET=staging, or set " +
+      "SANITY_ALLOW_PRODUCTION=1 if you truly meant to write to prod.",
+  );
+  process.exit(1);
+}
+
 // Stable placeholder logo — uploaded once and re-used on subsequent runs via
 // `originalFilename` lookup so re-running the seed doesn't orphan assets.
 const OPPONENT_LOGO_FILENAME = "seed-phase-5-opponent-logo.png";

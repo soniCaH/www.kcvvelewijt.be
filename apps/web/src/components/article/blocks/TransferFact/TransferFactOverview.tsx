@@ -57,112 +57,122 @@ export const TransferFactOverview = ({
       data-testid="transfer-overview"
       data-direction={resolved.direction}
       className={cn(
-        "not-prose border-t border-kcvv-gray-light py-6",
-        "grid gap-x-6 gap-y-3",
-        "md:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1.2fr)_auto] md:items-center",
+        // Break out of the 65 ch prose column so the 4-column horizontal
+        // layout has canvas room on wide desktops. Each row uses the same
+        // `max-w-outer` inner container, so rule lines across consecutive
+        // rows align naturally.
+        "full-bleed not-prose border-t border-kcvv-gray-light py-6",
         className,
       )}
     >
       <div
-        data-testid="transfer-overview-kicker"
         className={cn(
-          "flex items-center gap-2 text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
-          kickerClass,
+          "mx-auto grid max-w-outer px-6",
+          "gap-x-6 gap-y-3",
+          "md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1.2fr)_auto] md:items-center md:gap-x-8",
         )}
       >
-        <span
-          aria-hidden="true"
-          className={cn("inline-block h-[2px] w-6 shrink-0", accentBgClass)}
-        />
-        <span>{resolved.kickerLabel}</span>
-      </div>
-
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        {playerName && (
-          <span
-            data-testid="transfer-overview-name"
-            className="font-title font-bold text-xl text-kcvv-gray-blue"
-          >
-            {playerName}
-          </span>
-        )}
-        {metaParts.length > 0 && (
-          <span
-            data-testid="transfer-overview-meta"
-            className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray"
-          >
-            {metaParts.map((part, i) => (
-              <span key={part}>
-                {i > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="mx-2 text-kcvv-gray-light"
-                  >
-                    ·
-                  </span>
-                )}
-                {part}
-              </span>
-            ))}
-          </span>
-        )}
-      </div>
-
-      {resolved.kind === "extension" ? (
         <div
-          data-testid="transfer-overview-kcvv-only"
-          className="flex items-center gap-2 text-base text-kcvv-gray-blue"
-        >
-          {resolved.kcvvOnly.logoUrl && (
-            <Image
-              src={resolved.kcvvOnly.logoUrl}
-              alt=""
-              width={20}
-              height={20}
-              className="h-5 w-5 object-contain"
-            />
+          data-testid="transfer-overview-kicker"
+          className={cn(
+            "flex items-center gap-2 text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
+            kickerClass,
           )}
-          <span>{resolved.kcvvOnly.name}</span>
-        </div>
-      ) : (
-        <div
-          data-testid="transfer-overview-clubs"
-          className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-gray-blue"
         >
-          <span className="flex items-center gap-2">
-            {resolved.from.logoUrl && (
-              <Image
-                src={resolved.from.logoUrl}
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 object-contain"
-              />
-            )}
-            {resolved.from.name}
-          </span>
-          <Icon icon={ArrowRight} size="xs" className={arrowClass} />
-          <span className="flex items-center gap-2">
-            {resolved.to.logoUrl && (
-              <Image
-                src={resolved.to.logoUrl}
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 object-contain"
-              />
-            )}
-            {resolved.to.name}
-          </span>
+          <span
+            aria-hidden="true"
+            className={cn("inline-block h-[2px] w-6 shrink-0", accentBgClass)}
+          />
+          <span>{resolved.kickerLabel}</span>
         </div>
-      )}
 
-      <p
-        data-testid="transfer-overview-status"
-        className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray md:text-right"
-      >
-        {statusLabel}
-      </p>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          {playerName && (
+            <span
+              data-testid="transfer-overview-name"
+              className="font-title font-bold text-xl text-kcvv-gray-blue"
+            >
+              {playerName}
+            </span>
+          )}
+          {metaParts.length > 0 && (
+            <span
+              data-testid="transfer-overview-meta"
+              className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray"
+            >
+              {metaParts.map((part, i) => (
+                <span key={part}>
+                  {i > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="mx-2 text-kcvv-gray-light"
+                    >
+                      ·
+                    </span>
+                  )}
+                  {part}
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
+
+        {resolved.kind === "extension" ? (
+          <div
+            data-testid="transfer-overview-kcvv-only"
+            className="flex items-center gap-2 text-base text-kcvv-gray-blue"
+          >
+            {resolved.kcvvOnly.logoUrl && (
+              <Image
+                src={resolved.kcvvOnly.logoUrl}
+                alt=""
+                width={20}
+                height={20}
+                className="h-5 w-5 object-contain"
+              />
+            )}
+            <span>{resolved.kcvvOnly.name}</span>
+          </div>
+        ) : (
+          <div
+            data-testid="transfer-overview-clubs"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-gray-blue"
+          >
+            <span className="flex items-center gap-2">
+              {resolved.from.logoUrl && (
+                <Image
+                  src={resolved.from.logoUrl}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 object-contain"
+                />
+              )}
+              {resolved.from.name}
+            </span>
+            <Icon icon={ArrowRight} size="xs" className={arrowClass} />
+            <span className="flex items-center gap-2">
+              {resolved.to.logoUrl && (
+                <Image
+                  src={resolved.to.logoUrl}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 object-contain"
+                />
+              )}
+              {resolved.to.name}
+            </span>
+          </div>
+        )}
+
+        <p
+          data-testid="transfer-overview-status"
+          className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray md:text-right"
+        >
+          {statusLabel}
+        </p>
+      </div>
     </section>
   );
 };

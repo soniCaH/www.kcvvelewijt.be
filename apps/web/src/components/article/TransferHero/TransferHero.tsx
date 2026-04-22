@@ -60,6 +60,9 @@ export const TransferHero = ({
       ].filter((x): x is string => typeof x === "string" && x.length > 0)
     : [];
 
+  // Trim both the note and its attribution so a draft with whitespace-only
+  // content doesn't ship an empty blockquote.
+  const trimmedNote = feature?.note?.trim() || null;
   const attribution = feature?.noteAttribution?.trim()
     ? feature.noteAttribution.trim()
     : feature?.playerName?.trim();
@@ -122,13 +125,13 @@ export const TransferHero = ({
             </p>
           )}
 
-          {feature?.note && (
+          {trimmedNote && (
             <figure
               data-testid="transfer-hero-note"
               className="mt-8 border-l-2 border-kcvv-green-bright pl-5"
             >
               <blockquote className="font-title italic text-xl leading-[1.45] text-kcvv-gray-blue">
-                &ldquo;{feature.note}&rdquo;
+                &ldquo;{trimmedNote}&rdquo;
               </blockquote>
               {attribution && (
                 <figcaption

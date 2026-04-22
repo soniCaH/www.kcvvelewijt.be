@@ -65,6 +65,19 @@ export const transferFact = defineType({
       type: 'string',
       description: 'Required for incoming/outgoing; leave empty for extension.',
       hidden: ({parent}) => parent?.direction === 'extension',
+      validation: (r) =>
+        r.custom((value, ctx) => {
+          const parent = ctx.parent as {direction?: string} | undefined
+          const direction = parent?.direction
+          if (
+            direction &&
+            direction !== 'extension' &&
+            (typeof value !== 'string' || !value.trim())
+          ) {
+            return 'Other club name is required for incoming and outgoing transfers.'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'otherClubLogo',

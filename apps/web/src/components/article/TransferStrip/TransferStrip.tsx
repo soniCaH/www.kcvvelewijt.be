@@ -37,16 +37,25 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
       <section
         data-testid="transfer-strip"
         data-direction="extension"
-        className={cn("w-full max-w-inner-lg mx-auto px-6 py-10", className)}
+        className={cn(
+          // Break out of the 70 rem body column — on a 1440 px+ screen
+          // the strip needs wider canvas than the reading width.
+          "full-bleed py-10",
+          className,
+        )}
       >
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className="mx-auto flex max-w-outer flex-col items-center gap-3 px-6 text-center">
           <p
             className="text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)] text-kcvv-green-dark"
             data-testid="transfer-strip-label"
           >
-            Verlengd
+            {resolved.kickerLabel}
           </p>
-          <ClubBlock side={resolved.kcvvOnly} context={feature.kcvvContext} />
+          <ClubBlock
+            side={resolved.kcvvOnly}
+            context={feature.kcvvContext}
+            align="center"
+          />
           {resolved.until && (
             <p
               data-testid="transfer-strip-until"
@@ -77,9 +86,15 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
     <section
       data-testid="transfer-strip"
       data-direction={resolved.direction}
-      className={cn("w-full max-w-inner-lg mx-auto px-6 py-10", className)}
+      className={cn(
+        // Break out of the 70 rem body column for breathing room on
+        // wide desktops; the horizontal van → naar composition needs
+        // the canvas to read comfortably.
+        "full-bleed py-10",
+        className,
+      )}
     >
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-6 gap-y-4">
+      <div className="mx-auto grid max-w-outer grid-cols-[1fr_auto_1fr] items-center gap-x-10 gap-y-4 px-6 md:gap-x-16">
         <div className="text-right">
           <p className="mb-2 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray">
             Van
@@ -109,7 +124,7 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
             )}
             data-testid="transfer-strip-label"
           >
-            {resolved.direction === "incoming" ? "Inkomend" : "Uitgaand"}
+            {resolved.kickerLabel}
           </p>
         </div>
 
@@ -127,20 +142,23 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
 interface ClubBlockProps {
   side: TransferSide;
   context?: string;
-  align?: "left" | "right";
+  align?: "left" | "right" | "center";
 }
 
 function ClubBlock({ side, context, align = "left" }: ClubBlockProps) {
-  const isRight = align === "right";
+  const alignmentClass =
+    align === "right"
+      ? "items-end text-right"
+      : align === "center"
+        ? "items-center text-center"
+        : "items-start text-left";
   return (
-    <div
-      className={cn(
-        "flex flex-col",
-        isRight ? "items-end text-right" : "items-start text-left",
-      )}
-    >
+    <div className={cn("flex flex-col", alignmentClass)}>
       <div
-        className={cn("flex items-center gap-3", isRight && "flex-row-reverse")}
+        className={cn(
+          "flex items-center gap-3",
+          align === "right" && "flex-row-reverse",
+        )}
       >
         {side.logoUrl && (
           <Image

@@ -243,9 +243,7 @@ No `intro` or `outro` field. Editors place intro/outro prose as regular paragrap
 
 ### 4.4 `transferFact` block type
 
-_Status note: the initial spec below has drifted during Phase 5. The shipped fields are `direction`, `playerName`, `position`, `age`, `otherClubName`, `otherClubLogo`, `otherClubContext`, `kcvvContext`, `until`, `note`, `noteAttribution`. The original `playerPhoto` field is gone — the hero sources its portrait from `article.coverImage` (same projection the interview hero uses). Context subtitles land under each club on the horizontal strip (see §5.3 + §8.1)._
-
-New file: `packages/sanity-schemas/src/transferFact.ts`.
+New file: `packages/sanity-schemas/src/transferFact.ts`. The shipped schema has eleven fields — direction-scoped ones use Sanity's `hidden` guard so the Studio form only shows what applies. `otherClubName` is required when `direction` is not `extension`.
 
 ```typescript
 export const transferFact = defineType({
@@ -258,9 +256,9 @@ export const transferFact = defineType({
       type: "string",
       options: {
         list: [
-          { title: "Incoming", value: "incoming" },
-          { title: "Outgoing", value: "outgoing" },
-          { title: "Extension", value: "extension" },
+          { title: "Inkomend — other → KCVV", value: "incoming" },
+          { title: "Uitgaand — KCVV → other", value: "outgoing" },
+          { title: "Verlengd — stays at KCVV", value: "extension" },
         ],
         layout: "radio",
       },
@@ -270,11 +268,6 @@ export const transferFact = defineType({
       name: "playerName",
       type: "string",
       validation: (r) => r.required(),
-    }),
-    defineField({
-      name: "playerPhoto",
-      type: "image",
-      options: { hotspot: true },
     }),
     defineField({
       name: "position",
@@ -289,8 +282,15 @@ export const transferFact = defineType({
     defineField({
       name: "otherClubName",
       type: "string",
-      description: "Required for incoming/outgoing; leave empty for extension.",
       hidden: ({ parent }) => parent?.direction === "extension",
+      validation: (r) =>
+        r.custom((value, ctx) => {
+          const dir = (ctx.parent as { direction?: string } | undefined)
+            ?.direction;
+          return dir && dir !== "extension" && !value?.trim()
+            ? "Other club name is required for incoming and outgoing transfers."
+            : true;
+        }),
     }),
     defineField({
       name: "otherClubLogo",
@@ -298,10 +298,23 @@ export const transferFact = defineType({
       hidden: ({ parent }) => parent?.direction === "extension",
     }),
     defineField({
+      name: "otherClubContext",
+      type: "string",
+      description:
+        'Short subtitle beneath the other club on the van/naar strip — e.g. "Jupiler Pro League · U23".',
+      hidden: ({ parent }) => parent?.direction === "extension",
+    }),
+    defineField({
+      name: "kcvvContext",
+      type: "string",
+      description:
+        'Short subtitle beneath the KCVV row — e.g. "Derde Amateur · A-ploeg · #8".',
+    }),
+    defineField({
       name: "until",
       type: "string",
       description:
-        'Display string, e.g. "2028" or "tot einde seizoen 2027-28".',
+        'Display string for extensions — "2028" or "einde seizoen 2027-28".',
       hidden: ({ parent }) => parent?.direction !== "extension",
     }),
     defineField({
@@ -309,13 +322,20 @@ export const transferFact = defineType({
       type: "text",
       rows: 2,
       validation: (r) => r.max(140),
-      description: "Optional colour line.",
+      description:
+        "Optional pull-quote rendered in the hero (first transferFact only). Max 140 chars.",
+    }),
+    defineField({
+      name: "noteAttribution",
+      type: "string",
+      description:
+        "Optional byline override for the pull-quote (e.g. a coach or board quote). Defaults to `playerName` when empty.",
     }),
   ],
 });
 ```
 
-The KCVV side is auto-rendered (logo + name) based on `direction`. Editors never fill in "KCVV" themselves.
+The KCVV side is auto-rendered (logo + name + `kcvvContext` subtitle) based on `direction`. Editors never fill in "KCVV" themselves. The hero portrait is sourced from `article.coverImage` via the same hotspot projection the interview hero uses — `transferFact` carries no image of its own.
 
 ### 4.5 `eventFact` block type
 
