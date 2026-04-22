@@ -106,7 +106,14 @@ export const InterviewHero = ({
         >
           <Image
             src={coverImageUrl}
-            alt={title}
+            // The h1 already carries the title and the subtitle carries the
+            // subject name; repeating `title` here made screen readers
+            // announce the same string twice. When a subject is resolvable
+            // we describe the portrait explicitly (adds "Portret van …" —
+            // info not in the h1/subtitle), otherwise the image is purely
+            // decorative relative to the adjacent text and alt="" lets AT
+            // skip it.
+            alt={resolved?.name ? `Portret van ${resolved.name}` : ""}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 640px"

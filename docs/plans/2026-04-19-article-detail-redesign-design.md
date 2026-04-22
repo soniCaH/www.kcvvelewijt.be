@@ -812,6 +812,17 @@ Per `apps/web/CLAUDE.md`'s Analytics Checklist, any user-facing change must incl
 
 Hash article IDs via `hashMemberId` helper. Sanitize any editorial strings. Update GTM + GA4 custom dimensions as part of the implementation PR, not this design.
 
+### Closure checklist — analytics sign-off before merging the implementation PR
+
+Every implementation PR that adds or modifies events in this section must have all of the following ticked in the PR body before merge:
+
+- [ ] **GTM registration:** triggers and tag templates added for each new event in the KCVV GTM workspace. Link the GTM version in the PR.
+- [ ] **GA4 custom dimensions:** any new event parameter registered as a custom dimension in GA4 (User- or Event-scope as appropriate). Screenshot of the GA4 admin view in the PR.
+- [ ] **Explorations updated:** rebuild or adjust the affected GA4 explorations / reports so the new events/dimensions flow into existing editorial dashboards. Link the exploration in the PR.
+- [ ] **PII verification sign-off:** confirm in the PR body that no raw personally-identifiable information flows into any event parameter. Article IDs must be hashed via `hashMemberId`; editor-authored strings (titles, excerpts, quote text) must not be sent at all. Include a single-line attestation like `PII check: all article IDs hashed, no editorial strings in params — <handle>`.
+
+No new event may land on main until all four boxes are checked — this matches the existing `apps/web/CLAUDE.md` Analytics Checklist and the `feedback_analytics_prd_requirement` memory.
+
 ---
 
 ## 12. SEO / structured data
