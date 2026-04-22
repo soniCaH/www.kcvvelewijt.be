@@ -111,8 +111,7 @@ www.kcvvelewijt.be/
 │   └── api/              # Cloudflare Workers BFF (Wrangler)
 ├── packages/
 │   └── api-contract/     # Shared Effect schemas + HttpApi definitions
-├── scripts/
-│   └── drupal-to-sanity/ # One-off Drupal → Sanity migration scripts
+├── scripts/              # Maintenance + one-off scripts
 ├── docs/plans/           # Architecture decision records
 ├── .claude/              # Claude Code configuration + skills
 ├── turbo.json            # Turborepo pipeline
