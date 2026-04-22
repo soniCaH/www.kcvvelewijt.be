@@ -378,7 +378,7 @@ export function UnifiedSearchBar({
     <div className={`relative ${className}`}>
       {/* Search Input */}
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-kcvv-gray">
+        <div className="text-kcvv-gray absolute top-1/2 left-3 -translate-y-1/2">
           <Search size={20} />
         </div>
         <input
@@ -389,13 +389,7 @@ export function UnifiedSearchBar({
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="
-            w-full pl-10 pr-10 py-3
-            bg-white border-2 border-gray-200 rounded-lg
-            text-kcvv-gray-blue placeholder-kcvv-gray
-            focus:outline-none focus:border-kcvv-green
-            transition-colors duration-200
-          "
+          className="text-kcvv-gray-blue placeholder-kcvv-gray focus:border-kcvv-green w-full rounded-lg border-2 border-gray-200 bg-white py-3 pr-10 pl-10 transition-colors duration-200 focus:outline-none"
           aria-label="Zoeken"
           aria-autocomplete="list"
           aria-controls={showResults ? "search-results" : undefined}
@@ -408,7 +402,7 @@ export function UnifiedSearchBar({
         {value && (
           <button
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-kcvv-gray hover:text-kcvv-gray-dark transition-colors"
+            className="text-kcvv-gray hover:text-kcvv-gray-dark absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
             aria-label="Wissen"
           >
             <X size={20} />
@@ -422,11 +416,7 @@ export function UnifiedSearchBar({
           ref={dropdownRef}
           id="search-results"
           role="listbox"
-          className="
-            absolute z-50 w-full mt-2
-            bg-white border-2 border-gray-200 rounded-lg shadow-lg
-            max-h-96 overflow-y-auto
-          "
+          className="absolute z-50 mt-2 max-h-96 w-full overflow-y-auto rounded-lg border-2 border-gray-200 bg-white shadow-lg"
         >
           {searchResults.map((result, index) => {
             const isSelected = index === selectedIndex;
@@ -446,45 +436,40 @@ export function UnifiedSearchBar({
                   onMouseEnter={() => setSelectedIndex(index)}
                   role="option"
                   aria-selected={isSelected}
-                  className={`
-                    w-full px-4 py-3 flex items-center gap-3
-                    text-left transition-colors cursor-pointer
-                    ${isSelected ? "bg-kcvv-green/10" : "hover:bg-gray-50"}
-                    border-b border-gray-100 last:border-b-0
-                  `}
+                  className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors ${isSelected ? "bg-kcvv-green/10" : "hover:bg-gray-50"} border-b border-gray-100 last:border-b-0`}
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full border-2 border-kcvv-green overflow-hidden bg-white">
+                  <div className="border-kcvv-green h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border-2 bg-white">
                     <Image
                       src={imageUrl}
                       alt={displayName}
                       width={40}
                       height={40}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "/images/logo-flat.png";
                       }}
                     />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <User
                         size={14}
                         className="text-kcvv-green flex-shrink-0"
                       />
-                      <span className="font-semibold text-kcvv-gray-blue">
+                      <span className="text-kcvv-gray-blue font-semibold">
                         {displayName}
                       </span>
                     </div>
-                    <p className="text-sm text-kcvv-gray truncate">
+                    <p className="text-kcvv-gray truncate text-sm">
                       {member.title}
                     </p>
                     {matchedFields.length > 0 && (
-                      <div className="flex gap-1 mt-1">
+                      <div className="mt-1 flex gap-1">
                         {matchedFields.map((field) => (
                           <span
                             key={field}
-                            className="text-xs px-1.5 py-0.5 bg-kcvv-green/10 text-kcvv-green rounded"
+                            className="bg-kcvv-green/10 text-kcvv-green rounded px-1.5 py-0.5 text-xs"
                           >
                             {field}
                           </span>
@@ -506,36 +491,31 @@ export function UnifiedSearchBar({
                   onMouseEnter={() => setSelectedIndex(index)}
                   role="option"
                   aria-selected={isSelected}
-                  className={`
-                    w-full px-4 py-3 flex items-start gap-3
-                    text-left transition-colors cursor-pointer
-                    ${isSelected ? "bg-kcvv-green/10" : "hover:bg-gray-50"}
-                    border-b border-gray-100 last:border-b-0
-                  `}
+                  className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors ${isSelected ? "bg-kcvv-green/10" : "hover:bg-gray-50"} border-b border-gray-100 last:border-b-0`}
                 >
-                  <div className="flex-shrink-0 mt-0.5">
+                  <div className="mt-0.5 flex-shrink-0">
                     <CircleHelp size={20} className="text-kcvv-green" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <span
                         className={`text-xs font-semibold ${categoryInfo.colorClass}`}
                       >
                         {categoryInfo.label}
                       </span>
                     </div>
-                    <p className="font-medium text-kcvv-gray-blue text-sm">
+                    <p className="text-kcvv-gray-blue text-sm font-medium">
                       {path.question}
                     </p>
-                    <p className="text-xs text-kcvv-gray mt-1 line-clamp-1">
+                    <p className="text-kcvv-gray mt-1 line-clamp-1 text-xs">
                       {path.summary}
                     </p>
                     {matchedFields.length > 0 && (
-                      <div className="flex gap-1 mt-1">
+                      <div className="mt-1 flex gap-1">
                         {matchedFields.map((field) => (
                           <span
                             key={field}
-                            className="text-xs px-1.5 py-0.5 bg-kcvv-green/10 text-kcvv-green rounded"
+                            className="bg-kcvv-green/10 text-kcvv-green rounded px-1.5 py-0.5 text-xs"
                           >
                             {field}
                           </span>
@@ -554,16 +534,12 @@ export function UnifiedSearchBar({
       {showResults && value.trim().length > 0 && searchResults.length === 0 && (
         <div
           ref={dropdownRef}
-          className="
-            absolute z-50 w-full mt-2
-            bg-white border-2 border-gray-200 rounded-lg shadow-lg
-            px-4 py-6 text-center
-          "
+          className="absolute z-50 mt-2 w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-6 text-center shadow-lg"
         >
           <p className="text-kcvv-gray">
             Geen resultaten gevonden voor &quot;{value}&quot;
           </p>
-          <p className="text-sm text-kcvv-gray mt-1">
+          <p className="text-kcvv-gray mt-1 text-sm">
             Probeer een andere zoekterm
           </p>
         </div>

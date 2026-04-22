@@ -114,8 +114,8 @@ export const AllVariants: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-sm text-foundation-gray-dark w-10">sm</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-foundation-gray-dark w-10 text-sm">sm</span>
         <Badge size="sm" variant="default">
           Default
         </Badge>
@@ -138,8 +138,8 @@ export const AllSizes: Story = {
           Live
         </Badge>
       </div>
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-sm text-foundation-gray-dark w-10">md</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-foundation-gray-dark w-10 text-sm">md</span>
         <Badge size="md" variant="default">
           Default
         </Badge>
@@ -199,7 +199,7 @@ export const WithDot: Story = {
  */
 export const MatchStatuses: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-wrap items-center gap-2">
       <Badge variant="live">Live</Badge>
       <Badge variant="warning">Uitgesteld</Badge>
       <Badge variant="alert">Afgelast</Badge>

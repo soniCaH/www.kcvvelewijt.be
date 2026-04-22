@@ -41,7 +41,7 @@ export const InterviewHero = ({
   return (
     <header
       className={cn(
-        "w-full max-w-inner-lg mx-auto px-6 pt-10 md:pt-16",
+        "max-w-inner-lg mx-auto w-full px-6 pt-10 md:pt-16",
         className,
       )}
       data-testid="interview-hero"
@@ -50,8 +50,8 @@ export const InterviewHero = ({
         <p
           className={cn(
             "mb-6 flex flex-wrap items-center gap-x-3 gap-y-1",
-            "text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)] text-kcvv-green-dark",
-            "before:content-[''] before:block before:w-16 before:h-[2px] before:bg-kcvv-green-bright before:mr-1",
+            "text-kcvv-green-dark text-xs font-semibold tracking-[var(--letter-spacing-label)] uppercase",
+            "before:bg-kcvv-green-bright before:mr-1 before:block before:h-[2px] before:w-16 before:content-['']",
           )}
           data-testid="interview-hero-kicker"
         >
@@ -66,7 +66,7 @@ export const InterviewHero = ({
                   {i > 0 && (
                     <span
                       aria-hidden="true"
-                      className="mr-1 text-kcvv-gray-light"
+                      className="text-kcvv-gray-light mr-1"
                     >
                       ·
                     </span>
@@ -79,7 +79,7 @@ export const InterviewHero = ({
         </p>
 
         <h1
-          className="font-title font-bold text-kcvv-gray-blue leading-[1.05] text-[clamp(2rem,4.5vw,3.5rem)]"
+          className="font-title text-kcvv-gray-blue text-[clamp(2rem,4.5vw,3.5rem)] leading-[1.05] font-bold"
           data-testid="interview-hero-title"
           aria-describedby={
             resolved?.name ? "interview-hero-subject" : undefined
@@ -91,7 +91,7 @@ export const InterviewHero = ({
         {resolved?.name && (
           <p
             id="interview-hero-subject"
-            className="mt-4 font-title font-normal text-kcvv-gray-dark text-2xl"
+            className="font-title text-kcvv-gray-dark mt-4 text-2xl font-normal"
             data-testid="interview-hero-subtitle"
           >
             {resolved.name}
@@ -101,7 +101,7 @@ export const InterviewHero = ({
 
       {coverImageUrl && (
         <div
-          className="mt-10 relative w-full max-w-[40rem] mx-auto aspect-[4/5] overflow-hidden rounded-[4px] bg-kcvv-gray-light/30"
+          className="bg-kcvv-gray-light/30 relative mx-auto mt-10 aspect-[4/5] w-full max-w-[40rem] overflow-hidden rounded-[4px]"
           data-testid="interview-hero-image"
         >
           <Image

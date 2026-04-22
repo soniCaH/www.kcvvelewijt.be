@@ -43,7 +43,7 @@ export function AnswerCard({
       <button
         type="button"
         onClick={onBackClick}
-        className="mb-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-gray hover:text-kcvv-black"
+        className="text-kcvv-gray hover:text-kcvv-black mb-6 inline-flex items-center gap-2 text-sm font-bold tracking-[0.05em] uppercase"
       >
         <ChevronLeft className="h-4 w-4" />
         Terug naar overzicht
@@ -58,14 +58,14 @@ export function AnswerCard({
         </div>
         <div>
           <div
-            className={`text-xs font-bold uppercase tracking-[0.15em] ${meta.color}`}
+            className={`text-xs font-bold tracking-[0.15em] uppercase ${meta.color}`}
           >
             {meta.label}
           </div>
-          <h2 className="mt-1 font-title text-3xl font-black uppercase leading-tight text-kcvv-black md:text-4xl">
+          <h2 className="font-title text-kcvv-black mt-1 text-3xl leading-tight font-black uppercase md:text-4xl">
             {path.question}
           </h2>
-          <p className="mt-2 text-base text-kcvv-gray">{path.summary}</p>
+          <p className="text-kcvv-gray mt-2 text-base">{path.summary}</p>
         </div>
       </div>
 
@@ -74,16 +74,16 @@ export function AnswerCard({
         <ContactCard contact={contact} onContactClick={onContactClick} />
 
         <div>
-          <div className="mb-4 text-[0.625rem] font-bold uppercase tracking-[0.15em] text-kcvv-gray">
+          <div className="text-kcvv-gray mb-4 text-[0.625rem] font-bold tracking-[0.15em] uppercase">
             Wat te doen
           </div>
           <ol className="space-y-3">
             {path.steps.map((step, i) => (
               <li key={i} className="flex gap-4">
-                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-kcvv-green-bright font-title text-sm font-black text-kcvv-black">
+                <span className="bg-kcvv-green-bright font-title text-kcvv-black flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-black">
                   {i + 1}
                 </span>
-                <span className="pt-0.5 text-sm leading-relaxed text-kcvv-black">
+                <span className="text-kcvv-black pt-0.5 text-sm leading-relaxed">
                   {step.description}
                   {step.link && (
                     <>
@@ -91,7 +91,7 @@ export function AnswerCard({
                       <a
                         href={step.link}
                         onClick={() => onStepLinkClick?.(i)}
-                        className="text-kcvv-green-dark underline hover:text-kcvv-green-bright"
+                        className="text-kcvv-green-dark hover:text-kcvv-green-bright underline"
                         target={
                           step.link.startsWith("http") ? "_blank" : undefined
                         }

@@ -125,18 +125,18 @@ function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
         tabIndex={0}
         className={cn(
           "overflow-x-auto",
-          "focus:outline-2 focus:outline-kcvv-green focus:outline-offset-2",
+          "focus:outline-kcvv-green focus:outline-2 focus:outline-offset-2",
           "[&>table]:w-full [&>table]:border-collapse [&>table]:text-sm",
           "[&>table>thead]:bg-table-header-bg",
-          "[&>table_th]:border [&>table_th]:border-table-border-header [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:font-semibold",
-          "[&>table_td]:border [&>table_td]:border-table-border [&>table_td]:p-2 [&>table_td]:align-top",
+          "[&>table_th]:border-table-border-header [&>table_th]:border [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:font-semibold",
+          "[&>table_td]:border-table-border [&>table_td]:border [&>table_td]:p-2 [&>table_td]:align-top",
           "[&>table>tbody>tr:nth-child(odd)_td]:bg-white",
           "[&>table>tbody>tr:nth-child(even)_td]:bg-table-row-even",
           canScrollRight && [
             "[&>table_td:first-child]:sticky [&>table_td:first-child]:left-0 [&>table_td:first-child]:z-10",
             "[&>table>tbody>tr:nth-child(odd)>td:first-child]:bg-white",
             "[&>table>tbody>tr:nth-child(even)>td:first-child]:bg-table-row-even",
-            "[&>table_th:first-child]:sticky [&>table_th:first-child]:left-0 [&>table_th:first-child]:z-20 [&>table_th:first-child]:bg-table-header-bg",
+            "[&>table_th:first-child]:bg-table-header-bg [&>table_th:first-child]:sticky [&>table_th:first-child]:left-0 [&>table_th:first-child]:z-20",
             "[&>table_td:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
             "[&>table_th:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
           ],
@@ -252,7 +252,7 @@ export const SanityArticleBody = ({
         // and centred inside the 60 rem `max-w-inner-lg` main wrapper.
         // `full-bleed` children (qaBlock key/quote) still break out to
         // 100 vw because the wrapper is mx-auto centred.
-        "prose prose-lg max-w-[65ch] mx-auto px-3 py-3 lg:px-0",
+        "prose prose-lg mx-auto max-w-[65ch] px-3 py-3 lg:px-0",
         "prose-headings:font-title prose-headings:font-bold prose-headings:text-kcvv-black",
         "prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-xl",
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",

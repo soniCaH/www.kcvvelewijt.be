@@ -398,8 +398,8 @@ export function UnifiedOrganigramClient({
       <ScreenReaderAnnouncer message={announcement} />
 
       {/* Unified Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-bold text-kcvv-gray-blue mb-3">
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h3 className="text-kcvv-gray-blue mb-3 text-lg font-bold">
           Zoek een persoon of hulpvraag
         </h3>
         <UnifiedSearchBar
@@ -414,7 +414,7 @@ export function UnifiedOrganigramClient({
       </div>
 
       {/* View Toggle - Desktop Only (Mobile uses bottom nav) */}
-      <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:block">
         <FilterTabs
           tabs={viewTabs}
           activeTab={activeView}
@@ -423,7 +423,7 @@ export function UnifiedOrganigramClient({
         />
 
         {/* View Description */}
-        <div className="mt-3 text-sm text-kcvv-gray text-center lg:text-left">
+        <div className="text-kcvv-gray mt-3 text-center text-sm lg:text-left">
           {activeView === "cards" && (
             <p>
               Bekijk de clubstructuur in overzichtelijke kaartjes. Klik op een
@@ -453,10 +453,10 @@ export function UnifiedOrganigramClient({
       <div
         id="organigram-main-content"
         tabIndex={-1}
-        className={`focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2 ${
+        className={`focus:ring-kcvv-green focus:ring-2 focus:ring-offset-2 focus:outline-none ${
           activeView === "chart" || activeView === "cards"
             ? ""
-            : "bg-white rounded-xl shadow-sm border border-gray-200"
+            : "rounded-xl border border-gray-200 bg-white shadow-sm"
         } ${
           activeView === "responsibilities"
             ? "overflow-visible"
@@ -479,8 +479,8 @@ export function UnifiedOrganigramClient({
             fallback={
               <div className="flex items-center justify-center py-24">
                 <div className="text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-kcvv-green border-t-transparent rounded-full animate-spin mb-3" />
-                  <p className="text-sm text-kcvv-gray">Diagram laden...</p>
+                  <div className="border-kcvv-green mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                  <p className="text-kcvv-gray text-sm">Diagram laden...</p>
                 </div>
               </div>
             }
@@ -499,8 +499,8 @@ export function UnifiedOrganigramClient({
               fallback={
                 <div className="flex items-center justify-center py-24">
                   <div className="text-center">
-                    <div className="inline-block w-8 h-8 border-4 border-kcvv-green border-t-transparent rounded-full animate-spin mb-3" />
-                    <p className="text-sm text-kcvv-gray">
+                    <div className="border-kcvv-green mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                    <p className="text-kcvv-gray text-sm">
                       Hulpsysteem laden...
                     </p>
                   </div>

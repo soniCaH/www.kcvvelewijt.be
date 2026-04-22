@@ -43,14 +43,14 @@ export function CalendarWeek({
   return (
     <div>
       {/* Navigation header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <button
           onClick={onPrevWeek}
           aria-label="Vorige week"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
         >
           <svg
-            className="w-5 h-5"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -69,10 +69,10 @@ export function CalendarWeek({
         <button
           onClick={onNextWeek}
           aria-label="Volgende week"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
         >
           <svg
-            className="w-5 h-5"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -97,7 +97,7 @@ export function CalendarWeek({
           return (
             <div key={day} data-testid={`week-col-${day}`} className="min-h-32">
               {/* Column header */}
-              <div className="text-center text-sm font-semibold text-gray-600 pb-2 border-b border-gray-200 mb-2">
+              <div className="mb-2 border-b border-gray-200 pb-2 text-center text-sm font-semibold text-gray-600">
                 {SHORT_DAYS[i]} {dt.day}
               </div>
 
@@ -116,7 +116,7 @@ export function CalendarWeek({
                     <>
                       {/* Team label */}
                       {match.team && (
-                        <div className="text-[9px] font-bold uppercase tracking-wider text-kcvv-green-bright truncate mb-0.5">
+                        <div className="text-kcvv-green-bright mb-0.5 truncate text-[9px] font-bold tracking-wider uppercase">
                           {match.team}
                         </div>
                       )}
@@ -127,20 +127,20 @@ export function CalendarWeek({
                       >
                         <span
                           className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            "h-1.5 w-1.5 shrink-0 rounded-full",
                             isHome
                               ? "bg-kcvv-green-bright"
-                              : "border border-kcvv-green-bright",
+                              : "border-kcvv-green-bright border",
                           )}
                         />
-                        <span className="text-xs font-medium text-gray-700 truncate">
+                        <span className="truncate text-xs font-medium text-gray-700">
                           {opponent.name}
                         </span>
                       </div>
                       {/* Time + status */}
-                      <div className="flex items-center gap-1 mt-0.5">
+                      <div className="mt-0.5 flex items-center gap-1">
                         {match.time && (
-                          <span className="text-[10px] text-gray-400 font-medium">
+                          <span className="text-[10px] font-medium text-gray-400">
                             {match.time}
                           </span>
                         )}
@@ -175,7 +175,7 @@ export function CalendarWeek({
                   <Link
                     key={event.id}
                     href={event.href}
-                    className="block bg-blue-50 border border-blue-200 rounded p-1.5 text-[10px] font-medium text-blue-800 hover:bg-blue-100 transition-colors truncate"
+                    className="block truncate rounded border border-blue-200 bg-blue-50 p-1.5 text-[10px] font-medium text-blue-800 transition-colors hover:bg-blue-100"
                   >
                     {event.title}
                   </Link>

@@ -162,7 +162,7 @@ function InfoPanel({
     <div className="space-y-8">
       {hasContactInfo && (
         <section className="prose prose-gray max-w-none">
-          <h2 className="text-2xl font-bold mb-4">Contactinformatie</h2>
+          <h2 className="mb-4 text-2xl font-bold">Contactinformatie</h2>
           <div
             dangerouslySetInnerHTML={{
               __html: sanitizeHtml(contactInfo!, PROSE_SANITIZE_OPTIONS),
@@ -173,7 +173,7 @@ function InfoPanel({
 
       {showStaffInInfo && (
         <section>
-          <h2 className="text-2xl font-bold mb-4">Technische Staf</h2>
+          <h2 className="mb-4 text-2xl font-bold">Technische Staf</h2>
           <TeamRoster
             players={[]}
             staff={staff}
@@ -284,7 +284,7 @@ export function TeamDetail({
                 download={calendarFilename}
                 aria-label={`Download kalender (.ics) voor ${header.name}`}
                 rel="noopener"
-                className="inline-flex items-center gap-1.5 text-sm text-kcvv-green-bright hover:underline"
+                className="text-kcvv-green-bright inline-flex items-center gap-1.5 text-sm hover:underline"
               >
                 Voeg toe aan kalender
               </a>
@@ -349,7 +349,7 @@ export function TeamDetail({
       key: "tabs",
       bg: "gray-100",
       content: (
-        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
+        <div className="max-w-inner-lg mx-auto px-4 md:px-10">
           <Suspense
             fallback={
               <div className="flex justify-center py-12">

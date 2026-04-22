@@ -67,15 +67,15 @@ export function PageHero({
       <div
         className={`relative z-10 flex items-end ${size === "compact" ? "min-h-[35vh]" : "min-h-[60vh]"}`}
       >
-        <div className="max-w-inner-lg mx-auto px-4 md:px-10 pt-10 pb-16 md:pt-16 md:pb-24 w-full">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-white/50 mb-6">
-            <span className="block w-5 h-0.5 bg-kcvv-green" />
+        <div className="max-w-inner-lg mx-auto w-full px-4 pt-10 pb-16 md:px-10 md:pt-16 md:pb-24">
+          <div className="tracking-label mb-6 flex items-center gap-2 text-xs font-extrabold text-white/50 uppercase">
+            <span className="bg-kcvv-green block h-0.5 w-5" />
             {label}
           </div>
-          <h1 className="font-title font-black text-white uppercase leading-hero mb-6 text-hero">
+          <h1 className="font-title leading-hero text-hero mb-6 font-black text-white uppercase">
             {headline}
           </h1>
-          <p className="text-lg text-white/60 leading-loose max-w-lg">{body}</p>
+          <p className="max-w-lg text-lg leading-loose text-white/60">{body}</p>
           {cta && (
             <div className="mt-8">
               <LinkButton href={cta.href} variant="primary" withArrow>

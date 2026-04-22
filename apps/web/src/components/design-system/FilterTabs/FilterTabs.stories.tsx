@@ -104,8 +104,8 @@ function InteractiveFilterTabs(args: FilterTabsProps) {
   return (
     <div className="space-y-6">
       <FilterTabs {...args} activeTab={activeTab} onChange={setActiveTab} />
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <p className="text-sm font-medium text-kcvv-gray-blue">
+      <div className="rounded-lg bg-gray-50 p-4">
+        <p className="text-kcvv-gray-blue text-sm font-medium">
           Selected: <span className="text-kcvv-green-bright">{activeTab}</span>
         </p>
       </div>
@@ -361,7 +361,7 @@ export const SizeComparison: Story = {
   render: () => (
     <div className="space-y-8">
       <div>
-        <h3 className="text-sm font-semibold text-kcvv-gray-blue mb-3">
+        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
           Small
         </h3>
         <FilterTabs
@@ -373,7 +373,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-kcvv-gray-blue mb-3">
+        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
           Medium (Default)
         </h3>
         <FilterTabs
@@ -385,7 +385,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-kcvv-gray-blue mb-3">
+        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
           Large
         </h3>
         <FilterTabs

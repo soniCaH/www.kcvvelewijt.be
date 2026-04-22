@@ -45,23 +45,23 @@ function DayDots({
   if (!hasHome && !hasAway && !hasEvent) return null;
 
   return (
-    <div className="flex gap-0.5 justify-center mt-0.5">
+    <div className="mt-0.5 flex justify-center gap-0.5">
       {hasHome && (
         <span
           data-testid={`dot-home-${day}`}
-          className="w-1.5 h-1.5 rounded-full bg-kcvv-green-bright"
+          className="bg-kcvv-green-bright h-1.5 w-1.5 rounded-full"
         />
       )}
       {hasAway && (
         <span
           data-testid={`dot-away-${day}`}
-          className="w-1.5 h-1.5 rounded-full border border-kcvv-green-bright"
+          className="border-kcvv-green-bright h-1.5 w-1.5 rounded-full border"
         />
       )}
       {hasEvent && (
         <span
           data-testid={`dot-event-${day}`}
-          className="w-1.5 h-1.5 rounded-full bg-blue-500"
+          className="h-1.5 w-1.5 rounded-full bg-blue-500"
         />
       )}
     </div>
@@ -85,10 +85,10 @@ function DayPanel({
   );
 
   return (
-    <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300">
+    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 transition-all duration-300">
       <h3
         data-testid="day-panel-heading"
-        className="text-lg font-semibold text-gray-800 mb-4 capitalize"
+        className="mb-4 text-lg font-semibold text-gray-800 capitalize"
       >
         {formatted}
       </h3>
@@ -128,7 +128,7 @@ function DayPanel({
             <Link
               key={event.id}
               href={event.href}
-              className="block bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors"
+              className="block rounded-lg border border-blue-200 bg-blue-50 p-3 transition-colors hover:bg-blue-100"
             >
               <span className="text-sm font-medium text-blue-800">
                 {event.title}
@@ -166,14 +166,14 @@ export function CalendarMonth({
   return (
     <div>
       {/* Navigation header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <button
           onClick={onPrevMonth}
           aria-label="Vorige maand"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
         >
           <svg
-            className="w-5 h-5"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -192,10 +192,10 @@ export function CalendarMonth({
         <button
           onClick={onNextMonth}
           aria-label="Volgende maand"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
         >
           <svg
-            className="w-5 h-5"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -211,11 +211,11 @@ export function CalendarMonth({
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="mb-1 grid grid-cols-7">
         {DAY_HEADERS.map((h) => (
           <div
             key={h}
-            className="text-center text-xs font-semibold text-gray-500 py-2"
+            className="py-2 text-center text-xs font-semibold text-gray-500"
           >
             {h}
           </div>
@@ -239,11 +239,11 @@ export function CalendarMonth({
                 { locale: "nl-BE" },
               )}
               className={cn(
-                "flex flex-col items-center py-2 px-1 rounded-lg text-sm transition-colors",
+                "flex flex-col items-center rounded-lg px-1 py-2 text-sm transition-colors",
                 !isCurrentMonth && "text-gray-300",
                 isCurrentMonth && !isSelected && !isToday && "text-gray-700",
                 isToday && !isSelected && "bg-gray-100 font-semibold",
-                isSelected && "bg-kcvv-green-bright text-white font-semibold",
+                isSelected && "bg-kcvv-green-bright font-semibold text-white",
               )}
             >
               <span>{dt.day}</span>

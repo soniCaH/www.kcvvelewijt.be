@@ -51,9 +51,9 @@ export const SearchResults = ({
 
   if (filteredResults.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-        <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-bold text-gray-blue mb-2">
+      <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+        <div className="mb-4 text-6xl">🔍</div>
+        <h3 className="text-gray-blue mb-2 text-xl font-bold">
           Geen resultaten gevonden
         </h3>
         <p className="text-gray-dark">
@@ -67,11 +67,11 @@ export const SearchResults = ({
     <div className="space-y-6">
       {/* Results Count */}
       <div className="text-gray-dark">
-        <span className="font-semibold text-gray-blue">
+        <span className="text-gray-blue font-semibold">
           {filteredResults.length}
         </span>{" "}
         {filteredResults.length === 1 ? "resultaat" : "resultaten"} voor &quot;
-        <span className="font-semibold text-gray-blue">{query}</span>&quot;
+        <span className="text-gray-blue font-semibold">{query}</span>&quot;
       </div>
 
       {/* Results List */}

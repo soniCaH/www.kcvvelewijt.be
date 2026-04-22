@@ -59,7 +59,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <Story />
       </div>
     ),
@@ -169,19 +169,19 @@ export const ColorVariants: Story = {
   },
   render: () => (
     <div className="flex gap-8">
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <NumberBadge value={7} color="green" size="md" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Green (Players)
         </span>
       </div>
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <NumberBadge value="T1" color="navy" size="md" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Navy (Staff)
         </span>
       </div>
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <NumberBadge value="U15" color="blue" size="md" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Blue (Youth)
@@ -203,19 +203,19 @@ export const SizeVariants: Story = {
   },
   render: () => (
     <div className="flex gap-8">
-      <div className="group relative w-40 h-40 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-40 w-40 overflow-hidden">
         <NumberBadge value={7} color="green" size="sm" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Small
         </span>
       </div>
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <NumberBadge value={7} color="green" size="md" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Medium
         </span>
       </div>
-      <div className="group relative w-50 h-50 bg-foundation-gray-light overflow-hidden">
+      <div className="group bg-foundation-gray-light relative h-50 w-50 overflow-hidden">
         <NumberBadge value={7} color="green" size="lg" />
         <span className="absolute bottom-2 left-2 text-xs text-gray-600">
           Large

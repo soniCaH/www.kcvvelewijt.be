@@ -300,17 +300,17 @@ export function JeugdEditorialGrid({
   return (
     <div className="max-w-inner-lg mx-auto px-4 md:px-10">
       <div className="mb-12">
-        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-kcvv-gray mb-3">
-          <span className="block w-5 h-0.5 bg-kcvv-green" />
+        <div className="tracking-label text-kcvv-gray mb-3 flex items-center gap-2 text-xs font-extrabold uppercase">
+          <span className="bg-kcvv-green block h-0.5 w-5" />
           Ontdek onze jeugd
         </div>
-        <h2 className="font-title font-extrabold text-kcvv-gray-blue text-3xl md:text-5xl">
+        <h2 className="font-title text-kcvv-gray-blue text-3xl font-extrabold md:text-5xl">
           Alles op één plek
         </h2>
       </div>
       <div
         data-testid="jeugd-editorial-grid"
-        className="grid grid-cols-12 gap-5 max-desk:grid-cols-2 max-sm:grid-cols-1"
+        className="max-desk:grid-cols-2 grid grid-cols-12 gap-5 max-sm:grid-cols-1"
       >
         {items.map((item) => (
           <div key={item.key} className={item.position}>

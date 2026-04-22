@@ -123,7 +123,7 @@ const mockBanner = {
 /** SponsorsSection is async — inline mock with same markup */
 const SponsorsSectionContent = () => (
   <section className="py-6">
-    <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <div className="mx-auto max-w-7xl px-4 md:px-8">
       <SectionHeader
         title="Onze sponsors"
         linkText="Alle partners"

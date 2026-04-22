@@ -72,7 +72,7 @@ export const AnnouncementTemplate = ({
       />
 
       {hasBody && (
-        <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
+        <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
           <ArticleBodyMotion>
             <SanityArticleBody className="article-body" content={body} />
           </ArticleBodyMotion>

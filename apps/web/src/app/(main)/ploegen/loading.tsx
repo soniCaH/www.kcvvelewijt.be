@@ -13,12 +13,12 @@ function HeroSkeleton() {
   return (
     <div className="relative h-[70vh] min-h-[500px] animate-pulse">
       <div className="absolute inset-0 bg-gray-800" />
-      <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 z-10">
-        <div className="max-w-5xl mx-auto space-y-4">
+      <div className="absolute right-0 bottom-0 left-0 z-10 p-8 md:p-12">
+        <div className="mx-auto max-w-5xl space-y-4">
           <div className="h-4 w-24 rounded bg-white/10" />
           <div className="h-12 w-72 rounded bg-white/10" />
           <div className="h-5 w-48 rounded bg-white/15" />
-          <div className="h-10 w-40 rounded bg-white/10 mt-4" />
+          <div className="mt-4 h-10 w-40 rounded bg-white/10" />
         </div>
       </div>
     </div>
@@ -27,14 +27,14 @@ function HeroSkeleton() {
 
 function FeaturedCardSkeleton() {
   return (
-    <div className="max-w-5xl mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-pulse">
+    <div className="mx-auto max-w-5xl px-4">
+      <div className="grid animate-pulse grid-cols-1 items-center gap-8 md:grid-cols-2">
         <div className="aspect-[4/3] rounded-sm bg-gray-200" />
         <div className="space-y-4">
           <div className="h-4 w-24 rounded bg-gray-200" />
           <div className="h-8 w-48 rounded bg-gray-200" />
           <div className="h-5 w-64 rounded bg-gray-200" />
-          <div className="h-10 w-36 rounded bg-gray-200 mt-2" />
+          <div className="mt-2 h-10 w-36 rounded bg-gray-200" />
         </div>
       </div>
     </div>
@@ -43,12 +43,12 @@ function FeaturedCardSkeleton() {
 
 function YouthDirectorySkeleton() {
   return (
-    <div className="max-w-5xl mx-auto px-4 space-y-8 animate-pulse">
+    <div className="mx-auto max-w-5xl animate-pulse space-y-8 px-4">
       <div className="h-8 w-48 rounded bg-white/10" />
       {Array.from({ length: 3 }).map((_, div) => (
         <div key={div} className="space-y-4">
           <div className="h-6 w-32 rounded bg-white/10" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-20 rounded-sm bg-white/10" />
             ))}
@@ -61,10 +61,10 @@ function YouthDirectorySkeleton() {
 
 function CtaSkeleton() {
   return (
-    <div className="max-w-3xl mx-auto px-4 text-center animate-pulse space-y-4">
-      <div className="h-8 w-64 rounded bg-gray-200 mx-auto" />
-      <div className="h-5 w-96 max-w-full rounded bg-gray-200 mx-auto" />
-      <div className="h-10 w-32 rounded bg-gray-200 mx-auto mt-4" />
+    <div className="mx-auto max-w-3xl animate-pulse space-y-4 px-4 text-center">
+      <div className="mx-auto h-8 w-64 rounded bg-gray-200" />
+      <div className="mx-auto h-5 w-96 max-w-full rounded bg-gray-200" />
+      <div className="mx-auto mt-4 h-10 w-32 rounded bg-gray-200" />
     </div>
   );
 }

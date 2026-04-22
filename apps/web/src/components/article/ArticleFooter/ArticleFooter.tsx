@@ -68,8 +68,8 @@ export const ArticleFooter = ({
 
   return (
     <div className={cn("bg-kcvv-green-bright mt-4", "py-6", className)}>
-      <section className="w-full max-w-inner-lg mx-auto px-3 lg:px-0">
-        <h3 className="uppercase text-white mb-4">Gerelateerde inhoud</h3>
+      <section className="max-w-inner-lg mx-auto w-full px-3 lg:px-0">
+        <h3 className="mb-4 text-white uppercase">Gerelateerde inhoud</h3>
 
         <div
           className={cn(
@@ -88,14 +88,14 @@ export const ArticleFooter = ({
               )}
             >
               {/* Content type icon */}
-              <div className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-kcvv-green-dark text-white text-sm">
+              <div className="bg-kcvv-green-dark flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm text-white">
                 <Icon icon={contentTypeIcons[item.type]} size="xs" />
               </div>
 
               {/* Link */}
               <Link
                 href={item.href}
-                className="text-white flex-1 break-words relative transition-all duration-400"
+                className="relative flex-1 break-words text-white transition-all duration-400"
                 style={{
                   color: "#FFF",
                   textDecoration: "underline",

@@ -38,10 +38,10 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Screen header (hidden on print) */}
-      <div className="print:hidden bg-linear-to-br from-green-main via-green-hover to-green-dark-hover text-white py-10 px-4">
-        <div className="max-w-3xl mx-auto flex items-start justify-between gap-4">
+      <div className="from-green-main via-green-hover to-green-dark-hover bg-linear-to-br px-4 py-10 text-white print:hidden">
+        <div className="mx-auto flex max-w-3xl items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-5xl font-bold font-title mb-2">
+            <h1 className="font-title mb-2 text-3xl font-bold md:text-5xl">
               Scheurkalender
             </h1>
             <p className="text-white/90">
@@ -52,9 +52,9 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 print:px-0 print:py-4">
+      <div className="mx-auto max-w-3xl px-4 py-8 print:px-0 print:py-4">
         {/* Print header (visible only on print) */}
-        <div className="hidden print:block mb-6 text-center border-b-2 border-black pb-4">
+        <div className="mb-6 hidden border-b-2 border-black pb-4 text-center print:block">
           <h1 className="text-2xl font-bold">
             KCVV Elewijt — Wedstrijdkalender
           </h1>
@@ -64,7 +64,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
         </div>
 
         {!hasMatches ? (
-          <div className="text-center py-16">
+          <div className="py-16 text-center">
             <p className="text-gray-500">
               Geen aankomende wedstrijden gevonden.
             </p>
@@ -74,7 +74,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
             {days.map(({ key, label, matches }) => (
               <div key={key} className="print:break-inside-avoid">
                 {/* Date header */}
-                <div className="bg-green-main text-white px-4 py-2 rounded-lg print:rounded-none print:bg-gray-800 mb-2">
+                <div className="bg-green-main mb-2 rounded-lg px-4 py-2 text-white print:rounded-none print:bg-gray-800">
                   <span className="font-bold capitalize">{label}</span>
                 </div>
 
@@ -83,24 +83,24 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
                   {matches.map((match) => (
                     <div
                       key={match.id}
-                      className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg print:rounded-none print:bg-white print:border-b print:border-gray-200"
+                      className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 print:rounded-none print:border-b print:border-gray-200 print:bg-white"
                     >
                       {/* Time */}
-                      <div className="w-12 text-sm font-mono text-gray-500 shrink-0">
+                      <div className="w-12 shrink-0 font-mono text-sm text-gray-500">
                         {match.time ?? "—"}
                       </div>
 
                       {/* Squad label */}
                       {match.squadLabel && (
                         <div className="w-20 shrink-0">
-                          <span className="text-xs font-semibold text-green-main bg-green-main/10 px-2 py-0.5 rounded print:bg-transparent print:text-black">
+                          <span className="text-green-main bg-green-main/10 rounded px-2 py-0.5 text-xs font-semibold print:bg-transparent print:text-black">
                             {match.squadLabel}
                           </span>
                         </div>
                       )}
 
                       {/* Home team */}
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <div className="flex min-w-0 flex-1 items-center gap-1.5">
                         {match.homeTeam.logo && (
                           <Image
                             src={match.homeTeam.logo}
@@ -108,19 +108,19 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
                             aria-hidden="true"
                             width={20}
                             height={20}
-                            className="object-contain shrink-0 print:hidden"
+                            className="shrink-0 object-contain print:hidden"
                           />
                         )}
-                        <span className="text-sm font-medium truncate">
+                        <span className="truncate text-sm font-medium">
                           {match.homeTeam.name}
                         </span>
                       </div>
 
-                      <span className="text-xs text-gray-400 shrink-0">vs</span>
+                      <span className="shrink-0 text-xs text-gray-400">vs</span>
 
                       {/* Away team */}
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                        <span className="text-sm font-medium truncate text-right">
+                      <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5">
+                        <span className="truncate text-right text-sm font-medium">
                           {match.awayTeam.name}
                         </span>
                         {match.awayTeam.logo && (
@@ -130,7 +130,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
                             aria-hidden="true"
                             width={20}
                             height={20}
-                            className="object-contain shrink-0 print:hidden"
+                            className="shrink-0 object-contain print:hidden"
                           />
                         )}
                       </div>
@@ -146,7 +146,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
         <div className="mt-8 print:hidden">
           <Link
             href="/kalender"
-            className="text-sm text-gray-500 hover:text-green-main transition-colors"
+            className="hover:text-green-main text-sm text-gray-500 transition-colors"
           >
             ← Terug naar kalender
           </Link>

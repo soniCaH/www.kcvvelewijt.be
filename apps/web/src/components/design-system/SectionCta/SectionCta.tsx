@@ -22,9 +22,9 @@ export function SectionCta({
 }: SectionCtaProps) {
   const isDark = variant === "dark";
   return (
-    <div className="max-w-[40rem] mx-auto px-4 md:px-10 text-center">
+    <div className="mx-auto max-w-[40rem] px-4 text-center md:px-10">
       <h2
-        className={`font-title font-extrabold mb-3 ${
+        className={`font-title mb-3 font-extrabold ${
           isDark ? "text-white" : "text-kcvv-black"
         }`}
         style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}
@@ -33,7 +33,7 @@ export function SectionCta({
       </h2>
 
       <p
-        className={`text-sm mb-8 leading-relaxed ${
+        className={`mb-8 text-sm leading-relaxed ${
           isDark ? "text-white/75" : "text-kcvv-gray"
         }`}
       >

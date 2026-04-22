@@ -50,19 +50,7 @@ export function SkipLink({
     <a
       href={`#${targetId}`}
       onClick={handleClick}
-      className={`
-        fixed top-4 left-4 z-[9999]
-        px-6 py-3
-        bg-kcvv-green-bright text-white
-        font-semibold text-sm
-        rounded-lg
-        shadow-lg
-        transition-transform
-        focus:translate-y-0
-        -translate-y-24
-        focus:outline-none focus:ring-4 focus:ring-kcvv-green focus:ring-offset-2
-        ${className}
-      `}
+      className={`bg-kcvv-green-bright focus:ring-kcvv-green fixed top-4 left-4 z-[9999] -translate-y-24 rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform focus:translate-y-0 focus:ring-4 focus:ring-offset-2 focus:outline-none ${className} `}
     >
       {label}
     </a>

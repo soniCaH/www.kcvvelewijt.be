@@ -24,7 +24,7 @@ function YellowCardIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 12 16"
-      className={cn("w-3 h-4", className)}
+      className={cn("h-4 w-3", className)}
       aria-label="Gele kaart"
       role="img"
     >
@@ -49,7 +49,7 @@ function RedCardIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 12 16"
-      className={cn("w-3 h-4", className)}
+      className={cn("h-4 w-3", className)}
       aria-label="Rode kaart"
       role="img"
     >
@@ -74,7 +74,7 @@ function DoubleYellowCardIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 18 16"
-      className={cn("w-4.5 h-4", className)}
+      className={cn("h-4 w-4.5", className)}
       aria-label="Tweede gele kaart"
       role="img"
     >
@@ -186,7 +186,7 @@ export function MatchLineup({
   if (isLoading) {
     return (
       <div className={cn("space-y-6", className)}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <LineupSkeleton />
           <LineupSkeleton />
         </div>
@@ -197,7 +197,7 @@ export function MatchLineup({
   // No lineups available
   if (homeLineup.length === 0 && awayLineup.length === 0) {
     return (
-      <div className={cn("text-center py-8", className)}>
+      <div className={cn("py-8 text-center", className)}>
         <p className="text-gray-500">
           Geen opstellingen beschikbaar voor deze wedstrijd.
         </p>
@@ -207,11 +207,11 @@ export function MatchLineup({
 
   return (
     <div className={cn("space-y-6", className)}>
-      <h2 className="text-2xl font-bold text-gray-900 font-title">
+      <h2 className="font-title text-2xl font-bold text-gray-900">
         Opstellingen
       </h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Home Team */}
         <TeamLineup teamName={homeTeamName} players={homeLineup} side="home" />
 
@@ -259,18 +259,18 @@ function TeamLineup({
   return (
     <div className={cn("rounded-lg border p-4", bgColor, borderColor)}>
       {/* Team name header */}
-      <h3 className="text-lg font-bold text-gray-900 mb-4 font-title">
+      <h3 className="font-title mb-4 text-lg font-bold text-gray-900">
         {teamName}
       </h3>
 
       {players.length === 0 ? (
-        <p className="text-gray-500 text-sm">Geen opstelling beschikbaar</p>
+        <p className="text-sm text-gray-500">Geen opstelling beschikbaar</p>
       ) : (
         <div className="space-y-4">
           {/* Starters */}
           {starters.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 Basiself ({starters.length})
               </h4>
               <div className="space-y-1">
@@ -288,7 +288,7 @@ function TeamLineup({
           {/* Substitutes */}
           {substitutes.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 Invallers ({substitutes.length})
               </h4>
               <div className="space-y-1">
@@ -335,7 +335,7 @@ function PlayerRow({
   return (
     <div className="flex items-center gap-3 py-1.5">
       {/* Substitution status icon */}
-      <span className="w-4 flex items-center justify-center">
+      <span className="flex w-4 items-center justify-center">
         {wasSubbedOut && (
           <ArrowDown
             className="text-red-500"
@@ -356,7 +356,7 @@ function PlayerRow({
       {player.number !== undefined && (
         <span
           className={cn(
-            "w-7 h-7 flex items-center justify-center text-xs font-bold rounded",
+            "flex h-7 w-7 items-center justify-center rounded text-xs font-bold",
             numberBg,
           )}
         >
@@ -365,11 +365,11 @@ function PlayerRow({
       )}
 
       {/* Player name */}
-      <span className="flex-1 text-sm text-gray-900 flex items-center gap-1.5">
+      <span className="flex flex-1 items-center gap-1.5 text-sm text-gray-900">
         <span>
           {player.name}
           {player.isCaptain && (
-            <span className="ml-1.5 text-xs font-semibold text-kcvv-green-bright">
+            <span className="text-kcvv-green-bright ml-1.5 text-xs font-semibold">
               (C)
             </span>
           )}
@@ -393,13 +393,13 @@ function PlayerRow({
  */
 function LineupSkeleton() {
   return (
-    <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
-      <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4" />
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200" />
       <div className="space-y-2">
         {Array.from({ length: 11 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 flex-1 bg-gray-200 rounded animate-pulse" />
+            <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
+            <div className="h-4 flex-1 animate-pulse rounded bg-gray-200" />
           </div>
         ))}
       </div>

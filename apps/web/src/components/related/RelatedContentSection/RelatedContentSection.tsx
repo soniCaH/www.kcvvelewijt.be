@@ -189,7 +189,7 @@ export const RelatedContentSection = ({
   return (
     <div
       className={cn(
-        "max-w-inner-lg mx-auto px-4 lg:px-0 mt-12 mb-10 space-y-10",
+        "max-w-inner-lg mx-auto mt-12 mb-10 space-y-10 px-4 lg:px-0",
         className,
       )}
     >
@@ -203,17 +203,17 @@ export const RelatedContentSection = ({
       {content.length > 0 && (
         <section>
           <header className="mb-3">
-            <h2 className="text-2xl md:text-3xl font-bold text-kcvv-black tracking-tight">
+            <h2 className="text-kcvv-black text-2xl font-bold tracking-tight md:text-3xl">
               Gerelateerd
             </h2>
           </header>
           <div
-            className="h-[3px] w-12 bg-kcvv-green-bright mb-6"
+            className="bg-kcvv-green-bright mb-6 h-[3px] w-12"
             aria-hidden="true"
           />
 
           {lead && (
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="md:col-span-2">
                 {renderCard(lead, "featured", 1)}
               </div>
@@ -233,7 +233,7 @@ export const RelatedContentSection = ({
           )}
 
           {overflow.length > 0 && (
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <section className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
               {overflow.map((item, idx) =>
                 renderCard(item, "standard", idx + 4),
               )}

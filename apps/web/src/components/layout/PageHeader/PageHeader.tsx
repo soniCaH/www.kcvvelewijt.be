@@ -54,22 +54,22 @@ export const PageHeader = ({
     <>
       <header className={cn("relative z-50", className)}>
         {/* Dark nav background with subtle bottom border */}
-        <nav className="fixed top-[3px] left-0 right-0 z-50 h-16 transition-[height] duration-300 bg-kcvv-black border-b border-white/[0.06]">
+        <nav className="bg-kcvv-black fixed top-[3px] right-0 left-0 z-50 h-16 border-b border-white/[0.06] transition-[height] duration-300">
           {/* Mobile Header */}
-          <div className="lg:hidden h-full relative">
+          <div className="relative h-full lg:hidden">
             {/* Hamburger Button - left 34px */}
             <button
               ref={hamburgerRef}
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Toggle navigation menu"
-              className="absolute left-[34px] top-1/2 -translate-y-1/2 text-white min-h-11 min-w-11 flex items-center justify-center"
+              className="absolute top-1/2 left-[34px] flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-white"
             >
               <Menu size={20} className="inline-block" />
             </button>
 
             {/* Mobile Logo - centered */}
-            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-3">
+            <Link href="/" className="absolute top-3 left-1/2 -translate-x-1/2">
               <Image
                 src="/images/logos/kcvv-logo.png"
                 alt="KCVV ELEWIJT"
@@ -84,16 +84,16 @@ export const PageHeader = ({
             <Link
               href="/zoeken"
               aria-label="Search"
-              className="absolute right-[34px] top-1/2 -translate-y-1/2 text-white min-h-11 min-w-11 flex items-center justify-center"
+              className="absolute top-1/2 right-[34px] flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-white"
             >
               <Search size={20} className="inline-block" />
             </Link>
           </div>
 
           {/* Desktop Header */}
-          <div className="hidden lg:flex h-full max-w-[1440px] mx-auto px-4 xl:px-8 justify-between items-center gap-12">
+          <div className="mx-auto hidden h-full max-w-[1440px] items-center justify-between gap-12 px-4 lg:flex xl:px-8">
             {/* Desktop Logo */}
-            <Link href="/" className="flex items-center mr-2">
+            <Link href="/" className="mr-2 flex items-center">
               <Image
                 src="/images/logos/kcvv-logo.png"
                 alt="KCVV ELEWIJT"
@@ -110,17 +110,17 @@ export const PageHeader = ({
             </Suspense>
 
             {/* Desktop Utility Group */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex shrink-0 items-center gap-3">
               <Link
                 href="/zoeken"
                 aria-label="Search"
-                className="text-white/70 hover:text-white transition-colors"
+                className="text-white/70 transition-colors hover:text-white"
               >
                 <Search size={16} />
               </Link>
               <Link
                 href="/club/inschrijven"
-                className="border border-kcvv-green/60 text-white text-sm font-semibold px-4 py-1.5 rounded-sm hover:border-kcvv-green hover:text-kcvv-green transition-colors whitespace-nowrap"
+                className="border-kcvv-green/60 hover:border-kcvv-green hover:text-kcvv-green rounded-sm border px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-colors"
               >
                 Word lid
               </Link>

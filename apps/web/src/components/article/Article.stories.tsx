@@ -155,7 +155,7 @@ export const Default: Story = {
         }}
       />
 
-      <main className="w-full max-w-inner-lg mx-auto px-6">
+      <main className="max-w-inner-lg mx-auto w-full px-6">
         <SanityArticleBody content={sampleArticleContent} />
       </main>
 
@@ -181,7 +181,7 @@ export const Default: Story = {
 
       <div className="bg-gray-100 pt-8 pb-16">
         <div className="max-w-inner-lg mx-auto px-6">
-          <h2 className="text-2xl font-bold mb-4">Andere Artikelen</h2>
+          <h2 className="mb-4 text-2xl font-bold">Andere Artikelen</h2>
           <p className="text-gray-600">
             Hier komen andere artikelen of widgets...
           </p>
@@ -208,7 +208,7 @@ export const WithoutImage: Story = {
         }}
       />
 
-      <main className="w-full max-w-inner-lg mx-auto px-6">
+      <main className="max-w-inner-lg mx-auto w-full px-6">
         <SanityArticleBody content={sampleArticleContent} />
       </main>
 
@@ -251,7 +251,7 @@ export const LongArticle: Story = {
         }}
       />
 
-      <main className="w-full max-w-inner-lg mx-auto px-6">
+      <main className="max-w-inner-lg mx-auto w-full px-6">
         <SanityArticleBody content={sampleArticleContent} />
       </main>
 

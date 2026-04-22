@@ -107,7 +107,7 @@ export function MobileNavigationDrawer({
       {/* Backdrop Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -115,41 +115,24 @@ export function MobileNavigationDrawer({
 
       {/* Drawer */}
       <div
-        className={`
-          fixed bottom-0 left-0 right-0 z-50
-          bg-white
-          rounded-t-2xl
-          shadow-2xl
-          transition-transform duration-300 ease-out
-          ${isOpen ? "translate-y-0" : "translate-y-full"}
-          lg:hidden
-          ${className}
-        `}
+        className={`fixed right-0 bottom-0 left-0 z-50 rounded-t-2xl bg-white shadow-2xl transition-transform duration-300 ease-out ${isOpen ? "translate-y-0" : "translate-y-full"} lg:hidden ${className} `}
         style={{
           maxHeight: "85vh",
         }}
       >
         {/* Drawer Handle */}
         <div className="flex justify-center pt-3 pb-2" aria-hidden="true">
-          <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          <div className="h-1 w-12 rounded-full bg-gray-300" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-kcvv-gray-blue font-heading">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+          <h2 className="text-kcvv-gray-blue font-heading text-lg font-bold">
             Navigatie
           </h2>
           <button
             onClick={onClose}
-            className="
-              w-8 h-8
-              flex items-center justify-center
-              text-kcvv-gray-dark hover:text-kcvv-gray-blue
-              hover:bg-gray-100
-              rounded-full
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            "
+            className="text-kcvv-gray-dark hover:text-kcvv-gray-blue focus:ring-kcvv-green flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             aria-label="Sluiten"
           >
             <X size={20} />
@@ -162,7 +145,7 @@ export function MobileNavigationDrawer({
           style={{ height: "calc(85vh - 80px)" }}
         >
           {/* Filters (Fixed) */}
-          <div className="flex-shrink-0 px-4 pt-4 pb-3 space-y-3 border-b border-gray-100">
+          <div className="flex-shrink-0 space-y-3 border-b border-gray-100 px-4 pt-4 pb-3">
             {/* Search Bar */}
             <SearchBar
               value={searchQuery}
@@ -188,14 +171,14 @@ export function MobileNavigationDrawer({
           <div className="flex-1 overflow-y-auto">
             {searchResults.length === 0 ? (
               /* Empty State */
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-3xl text-kcvv-gray">🔍</span>
+              <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                  <span className="text-kcvv-gray text-3xl">🔍</span>
                 </div>
-                <p className="text-base font-semibold text-kcvv-gray-blue mb-1">
+                <p className="text-kcvv-gray-blue mb-1 text-base font-semibold">
                   Geen resultaten
                 </p>
-                <p className="text-sm text-kcvv-gray">
+                <p className="text-kcvv-gray text-sm">
                   Probeer een andere zoekopdracht
                 </p>
               </div>
@@ -206,16 +189,7 @@ export function MobileNavigationDrawer({
                   <button
                     key={member.id}
                     onClick={() => handleMemberClick(member)}
-                    className="
-                      w-full px-4 py-3
-                      flex items-center gap-3
-                      hover:bg-gray-50
-                      active:bg-gray-100
-                      transition-colors
-                      text-left
-                      border-b border-gray-100 last:border-0
-                      focus:outline-none focus:bg-gray-50
-                    "
+                    className="flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none active:bg-gray-100"
                   >
                     {/* Profile Image */}
                     <div className="flex-shrink-0">
@@ -229,7 +203,7 @@ export function MobileNavigationDrawer({
                         alt={member.members[0]?.name ?? member.title}
                         width={48}
                         height={48}
-                        className="rounded-full object-cover border-2 border-kcvv-green"
+                        className="border-kcvv-green rounded-full border-2 object-cover"
                         onError={() =>
                           setImageErrors((prev) => ({
                             ...prev,
@@ -240,30 +214,20 @@ export function MobileNavigationDrawer({
                     </div>
 
                     {/* Member Info */}
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       {/* Name */}
-                      <p className="font-semibold text-kcvv-gray-blue text-sm truncate">
+                      <p className="text-kcvv-gray-blue truncate text-sm font-semibold">
                         {member.members[0]?.name ?? member.title}
                       </p>
 
                       {/* Title */}
-                      <p className="text-xs text-kcvv-gray truncate">
+                      <p className="text-kcvv-gray truncate text-xs">
                         {member.title}
                       </p>
 
                       {/* Position Badge */}
                       {member.roleCode && (
-                        <span
-                          className="
-                            inline-block mt-1
-                            px-2 py-0.5
-                            bg-kcvv-green/10
-                            text-kcvv-green
-                            rounded
-                            text-xs font-semibold font-mono
-                            leading-tight
-                          "
-                        >
+                        <span className="bg-kcvv-green/10 text-kcvv-green mt-1 inline-block rounded px-2 py-0.5 font-mono text-xs leading-tight font-semibold">
                           {member.roleCode}
                         </span>
                       )}
@@ -292,8 +256,8 @@ export function MobileNavigationDrawer({
 
           {/* Results Count Footer */}
           {searchResults.length > 0 && (
-            <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 bg-gray-50">
-              <p className="text-xs text-kcvv-gray text-center">
+            <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 px-4 py-3">
+              <p className="text-kcvv-gray text-center text-xs">
                 {searchResults.length === 1
                   ? "1 lid gevonden"
                   : `${searchResults.length} leden gevonden`}

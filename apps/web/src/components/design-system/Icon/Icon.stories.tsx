@@ -83,27 +83,27 @@ export const AllSizes: Story = {
     <div className="flex items-center gap-4">
       <div className="text-center">
         <Icon icon={Activity} size="xs" />
-        <div className="text-xs mt-2 text-gray-600">xs</div>
+        <div className="mt-2 text-xs text-gray-600">xs</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} size="sm" />
-        <div className="text-xs mt-2 text-gray-600">sm</div>
+        <div className="mt-2 text-xs text-gray-600">sm</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} size="md" />
-        <div className="text-xs mt-2 text-gray-600">md</div>
+        <div className="mt-2 text-xs text-gray-600">md</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} size="lg" />
-        <div className="text-xs mt-2 text-gray-600">lg</div>
+        <div className="mt-2 text-xs text-gray-600">lg</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} size="xl" />
-        <div className="text-xs mt-2 text-gray-600">xl</div>
+        <div className="mt-2 text-xs text-gray-600">xl</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} size="2xl" />
-        <div className="text-xs mt-2 text-gray-600">2xl</div>
+        <div className="mt-2 text-xs text-gray-600">2xl</div>
       </div>
     </div>
   ),
@@ -118,31 +118,31 @@ export const AllColors: Story = {
     <div className="flex flex-wrap gap-6">
       <div className="text-center">
         <Icon icon={Activity} color="current" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">current</div>
+        <div className="mt-2 text-xs text-gray-600">current</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="primary" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">primary</div>
+        <div className="mt-2 text-xs text-gray-600">primary</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="secondary" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">secondary</div>
+        <div className="mt-2 text-xs text-gray-600">secondary</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="success" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">success</div>
+        <div className="mt-2 text-xs text-gray-600">success</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="warning" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">warning</div>
+        <div className="mt-2 text-xs text-gray-600">warning</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="error" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">error</div>
+        <div className="mt-2 text-xs text-gray-600">error</div>
       </div>
       <div className="text-center">
         <Icon icon={Activity} color="muted" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">muted</div>
+        <div className="mt-2 text-xs text-gray-600">muted</div>
       </div>
     </div>
   ),
@@ -157,23 +157,23 @@ export const CommonIcons: Story = {
     <div className="grid grid-cols-5 gap-4">
       <div className="text-center">
         <Icon icon={Activity} size="lg" color="primary" />
-        <div className="text-xs mt-2 text-gray-600">Football</div>
+        <div className="mt-2 text-xs text-gray-600">Football</div>
       </div>
       <div className="text-center">
         <Icon icon={Trophy} size="lg" color="primary" />
-        <div className="text-xs mt-2 text-gray-600">Trophy</div>
+        <div className="mt-2 text-xs text-gray-600">Trophy</div>
       </div>
       <div className="text-center">
         <Icon icon={Users} size="lg" color="primary" />
-        <div className="text-xs mt-2 text-gray-600">Team</div>
+        <div className="mt-2 text-xs text-gray-600">Team</div>
       </div>
       <div className="text-center">
         <Icon icon={Calendar} size="lg" color="primary" />
-        <div className="text-xs mt-2 text-gray-600">Calendar</div>
+        <div className="mt-2 text-xs text-gray-600">Calendar</div>
       </div>
       <div className="text-center">
         <Icon icon={MapPin} size="lg" color="primary" />
-        <div className="text-xs mt-2 text-gray-600">Location</div>
+        <div className="mt-2 text-xs text-gray-600">Location</div>
       </div>
     </div>
   ),
@@ -211,7 +211,7 @@ export const SocialIcons: Story = {
 export const NavigationIcons: Story = {
   args: { icon: Activity },
   render: () => (
-    <div className="flex gap-4 items-center">
+    <div className="flex items-center gap-4">
       <Icon icon={Search} size="md" />
       <Icon icon={Menu} size="md" />
       <Icon icon={X} size="md" />

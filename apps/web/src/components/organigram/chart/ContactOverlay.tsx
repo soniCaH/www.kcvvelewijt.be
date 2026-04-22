@@ -83,23 +83,14 @@ export function ContactOverlay({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+        className="fixed inset-0 z-40 bg-black/20 lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div
         ref={overlayRef}
-        className={`
-          fixed z-50
-          bg-white
-          rounded-xl
-          shadow-2xl
-          border-2 border-gray-200
-          animate-in fade-in slide-in-from-bottom-2
-          duration-200
-          ${className}
-        `}
+        className={`animate-in fade-in slide-in-from-bottom-2 fixed z-50 rounded-xl border-2 border-gray-200 bg-white shadow-2xl duration-200 ${className} `}
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
@@ -110,7 +101,7 @@ export function ContactOverlay({
         aria-label={`Contactinformatie voor ${member.title}`}
       >
         {/* Header — position title always shown */}
-        <div className="flex items-start gap-3 p-4 border-b border-gray-100">
+        <div className="flex items-start gap-3 border-b border-gray-100 p-4">
           {!isVacant && !isShared && (
             <div className="flex-shrink-0">
               <Image
@@ -122,38 +113,38 @@ export function ContactOverlay({
                 alt={displayName}
                 width={64}
                 height={64}
-                className="rounded-full object-cover border-2 border-kcvv-green"
+                className="border-kcvv-green rounded-full border-2 object-cover"
                 onError={() => setImageError(true)}
               />
             </div>
           )}
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             {isVacant ? (
               <>
-                <h3 className="font-bold text-kcvv-gray-blue text-base leading-tight mb-1 font-heading">
+                <h3 className="text-kcvv-gray-blue font-heading mb-1 text-base leading-tight font-bold">
                   {member.title}
                 </h3>
-                <p className="text-sm text-gray-400 font-semibold">
+                <p className="text-sm font-semibold text-gray-400">
                   Vacante functie
                 </p>
               </>
             ) : isShared ? (
-              <h3 className="font-bold text-kcvv-gray-blue text-base leading-tight mb-1 font-heading">
+              <h3 className="text-kcvv-gray-blue font-heading mb-1 text-base leading-tight font-bold">
                 {member.title}
               </h3>
             ) : (
               <>
-                <h3 className="font-bold text-kcvv-gray-blue text-base leading-tight mb-1 font-heading">
+                <h3 className="text-kcvv-gray-blue font-heading mb-1 text-base leading-tight font-bold">
                   {displayName}
                 </h3>
-                <p className="text-sm text-kcvv-gray leading-snug">
+                <p className="text-kcvv-gray text-sm leading-snug">
                   {member.title}
                 </p>
               </>
             )}
             {member.roleCode && (
-              <span className="inline-block mt-2 px-2 py-0.5 bg-kcvv-green/10 text-kcvv-green rounded text-xs font-semibold font-mono leading-tight">
+              <span className="bg-kcvv-green/10 text-kcvv-green mt-2 inline-block rounded px-2 py-0.5 font-mono text-xs leading-tight font-semibold">
                 {member.roleCode}
               </span>
             )}
@@ -161,7 +152,7 @@ export function ContactOverlay({
 
           <button
             onClick={onClose}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-kcvv-gray-dark hover:text-kcvv-gray-blue hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2"
+            className="text-kcvv-gray-dark hover:text-kcvv-gray-blue focus:ring-kcvv-green flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             aria-label="Sluiten"
           >
             <X size={18} />
@@ -173,7 +164,7 @@ export function ContactOverlay({
           {isVacant ? (
             /* Vacant — description only */
             member.description && (
-              <p className="text-sm text-gray-500 leading-relaxed">
+              <p className="text-sm leading-relaxed text-gray-500">
                 {member.description}
               </p>
             )
@@ -203,7 +194,7 @@ export function ContactOverlay({
                 onViewDetails(member);
                 onClose();
               }}
-              className="w-full px-4 py-2.5 bg-kcvv-green hover:bg-kcvv-green-hover text-white rounded-lg font-semibold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2"
+              className="bg-kcvv-green hover:bg-kcvv-green-hover focus:ring-kcvv-green w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
               Volledige details
             </button>
@@ -216,9 +207,9 @@ export function ContactOverlay({
 
 function MemberContactBlock({ member }: { member: OrgChartMember }) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-kcvv-gray-blue truncate">
+    <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-2">
+      <div className="min-w-0 flex-1">
+        <p className="text-kcvv-gray-blue truncate text-sm font-semibold">
           {member.name}
         </p>
         <ContactQuickActions
@@ -232,7 +223,7 @@ function MemberContactBlock({ member }: { member: OrgChartMember }) {
       {member.href && (
         <Link
           href={member.href}
-          className="text-xs text-kcvv-green hover:text-kcvv-green-hover font-medium whitespace-nowrap"
+          className="text-kcvv-green hover:text-kcvv-green-hover text-xs font-medium whitespace-nowrap"
         >
           Profiel bekijken
         </Link>

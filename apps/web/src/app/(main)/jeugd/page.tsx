@@ -123,13 +123,13 @@ export default async function JeugdPage() {
             />
           ),
           teams: (
-            <div className="max-w-[70rem] mx-auto px-4 md:px-10">
+            <div className="mx-auto max-w-[70rem] px-4 md:px-10">
               <div className="mb-10">
-                <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-label text-white/50 mb-3">
-                  <span className="block w-5 h-0.5 bg-kcvv-green" />
+                <div className="tracking-label mb-3 flex items-center gap-2 text-[0.6875rem] font-extrabold text-white/50 uppercase">
+                  <span className="bg-kcvv-green block h-0.5 w-5" />
                   Onze ploegen
                 </div>
-                <h2 className="font-title font-extrabold text-white text-3xl md:text-4xl uppercase leading-tight">
+                <h2 className="font-title text-3xl leading-tight font-extrabold text-white uppercase md:text-4xl">
                   Van U6 tot U21
                 </h2>
               </div>

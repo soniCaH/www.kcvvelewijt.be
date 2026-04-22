@@ -28,7 +28,7 @@ export const HeaderContainer: Story = {
   render: () => (
     <header className="bg-kcvv-green-bright relative">
       <div
-        className="h-20 lg:h-[7.5rem] fixed top-0 left-0 right-0 z-[11]"
+        className="fixed top-0 right-0 left-0 z-[11] h-20 lg:h-[7.5rem]"
         style={{
           backgroundImage: "url(/images/header-pattern.png)",
           backgroundRepeat: "no-repeat",
@@ -37,7 +37,7 @@ export const HeaderContainer: Story = {
           backgroundColor: "#4acf52",
         }}
       >
-        <div className="flex items-center justify-center h-full text-white text-sm">
+        <div className="flex h-full items-center justify-center text-sm text-white">
           Container with green background + pattern
         </div>
       </div>
@@ -60,10 +60,10 @@ export const LogoDesktop: Story = {
           alt="KCVV ELEWIJT"
           width={112}
           height={112}
-          className="h-28 w-auto mr-2 transition-all duration-300"
+          className="mr-2 h-28 w-auto transition-all duration-300"
           priority
         />
-        <span className="text-white text-xs">Desktop logo (7rem height)</span>
+        <span className="text-xs text-white">Desktop logo (7rem height)</span>
       </div>
     </div>
   ),
@@ -84,10 +84,10 @@ export const LogoMobile: Story = {
           alt="KCVV ELEWIJT"
           width={100}
           height={100}
-          className="w-[100px] h-auto"
+          className="h-auto w-[100px]"
           priority
         />
-        <span className="text-white text-xs">Mobile logo (100px width)</span>
+        <span className="text-xs text-white">Mobile logo (100px width)</span>
       </div>
     </div>
   ),
@@ -107,19 +107,19 @@ export const NavigationItemDefault: Story = {
   render: () => (
     <div className="bg-kcvv-green-bright p-8">
       <nav>
-        <ul className="flex gap-6 items-center">
-          <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
-            <a href="#" className="text-white no-underline whitespace-nowrap">
+        <ul className="flex items-center gap-6">
+          <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
+            <a href="#" className="whitespace-nowrap text-white no-underline">
               Club
             </a>
           </li>
-          <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
-            <a href="#" className="text-white no-underline whitespace-nowrap">
+          <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
+            <a href="#" className="whitespace-nowrap text-white no-underline">
               Nieuws
             </a>
           </li>
-          <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
-            <a href="#" className="text-white no-underline whitespace-nowrap">
+          <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
+            <a href="#" className="whitespace-nowrap text-white no-underline">
               Ploegen
             </a>
           </li>
@@ -168,34 +168,34 @@ export const NavigationItemHover: Story = {
       />
       <div className="bg-kcvv-green-bright p-8">
         <nav>
-          <ul className="flex gap-6 items-center list-none m-0 p-0">
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+          <ul className="m-0 flex list-none items-center gap-6 p-0">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-nav-link-hover text-white no-underline whitespace-nowrap"
+                className="story-nav-link-hover whitespace-nowrap text-white no-underline"
               >
                 Hover Me
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-nav-link-hover text-white no-underline whitespace-nowrap"
+                className="story-nav-link-hover whitespace-nowrap text-white no-underline"
               >
                 Another Link
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-nav-link-hover text-white no-underline whitespace-nowrap"
+                className="story-nav-link-hover whitespace-nowrap text-white no-underline"
               >
                 Third Link
               </a>
             </li>
           </ul>
         </nav>
-        <p className="text-white text-xs mt-4 opacity-75">
+        <p className="mt-4 text-xs text-white opacity-75">
           Hover over the links above to see the underline animate from center
         </p>
       </div>
@@ -235,34 +235,34 @@ export const NavigationItemActive: Story = {
       />
       <div className="bg-kcvv-green-bright p-8">
         <nav>
-          <ul className="flex gap-6 items-center list-none m-0 p-0">
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+          <ul className="m-0 flex list-none items-center gap-6 p-0">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="text-white no-underline whitespace-nowrap opacity-60"
+                className="whitespace-nowrap text-white no-underline opacity-60"
               >
                 Home
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-nav-link-active text-white no-underline whitespace-nowrap"
+                className="story-nav-link-active whitespace-nowrap text-white no-underline"
               >
                 Nieuws
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="text-white no-underline whitespace-nowrap opacity-60"
+                className="whitespace-nowrap text-white no-underline opacity-60"
               >
                 Ploegen
               </a>
             </li>
           </ul>
         </nav>
-        <p className="text-white text-xs mt-4 opacity-75">
+        <p className="mt-4 text-xs text-white opacity-75">
           &quot;Nieuws&quot; is the active page with permanent underline
         </p>
       </div>
@@ -301,34 +301,34 @@ export const DropdownTrigger: Story = {
       />
       <div className="bg-kcvv-green-bright p-8">
         <nav>
-          <ul className="flex gap-6 items-center list-none m-0 p-0">
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+          <ul className="m-0 flex list-none items-center gap-6 p-0">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-dropdown-trigger text-white no-underline whitespace-nowrap"
+                className="story-dropdown-trigger whitespace-nowrap text-white no-underline"
               >
                 Ploegen
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-dropdown-trigger text-white no-underline whitespace-nowrap"
+                className="story-dropdown-trigger whitespace-nowrap text-white no-underline"
               >
                 Info
               </a>
             </li>
-            <li className="text-[0.7rem] xl:text-[0.875rem] uppercase font-bold">
+            <li className="text-[0.7rem] font-bold uppercase xl:text-[0.875rem]">
               <a
                 href="#"
-                className="story-dropdown-trigger text-white no-underline whitespace-nowrap"
+                className="story-dropdown-trigger whitespace-nowrap text-white no-underline"
               >
                 De club
               </a>
             </li>
           </ul>
         </nav>
-        <p className="text-white text-xs mt-4 opacity-75">
+        <p className="mt-4 text-xs text-white opacity-75">
           Dropdown indicators (chevron-down icons) after menu items
         </p>
       </div>
@@ -348,12 +348,12 @@ export const DropdownSubmenu: Story = {
   render: () => (
     <div className="bg-gray-100 p-8">
       <div className="inline-block">
-        <div className="bg-[#1E2024] border border-gray-700 min-w-[200px]">
-          <ul className="list-none m-0 p-0">
+        <div className="min-w-[200px] border border-gray-700 bg-[#1E2024]">
+          <ul className="m-0 list-none p-0">
             <li>
               <a
                 href="#"
-                className="block px-7 py-3 text-white text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 hover:text-kcvv-green-bright"
+                className="hover:text-kcvv-green-bright block px-7 py-3 text-[0.6875rem] font-bold text-white uppercase no-underline transition-colors duration-300"
               >
                 Eerste Ploeg
               </a>
@@ -361,7 +361,7 @@ export const DropdownSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="block px-7 py-3 text-white text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 hover:text-kcvv-green-bright"
+                className="hover:text-kcvv-green-bright block px-7 py-3 text-[0.6875rem] font-bold text-white uppercase no-underline transition-colors duration-300"
               >
                 Beloften
               </a>
@@ -369,7 +369,7 @@ export const DropdownSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="block px-7 py-3 text-white text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 hover:text-kcvv-green-bright"
+                className="hover:text-kcvv-green-bright block px-7 py-3 text-[0.6875rem] font-bold text-white uppercase no-underline transition-colors duration-300"
               >
                 U21
               </a>
@@ -377,7 +377,7 @@ export const DropdownSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="block px-7 py-3 text-white text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 hover:text-kcvv-green-bright"
+                className="hover:text-kcvv-green-bright block px-7 py-3 text-[0.6875rem] font-bold text-white uppercase no-underline transition-colors duration-300"
               >
                 U19
               </a>
@@ -397,14 +397,14 @@ export const DropdownSubmenu: Story = {
  */
 export const HamburgerButton: Story = {
   render: () => (
-    <div className="bg-kcvv-green-bright h-20 relative">
+    <div className="bg-kcvv-green-bright relative h-20">
       <button
-        className="absolute left-[34px] top-[calc((5rem-16px)/2)] text-white text-base w-6 h-6 flex items-center justify-center"
+        className="absolute top-[calc((5rem-16px)/2)] left-[34px] flex h-6 w-6 items-center justify-center text-base text-white"
         aria-label="Toggle navigation menu"
       >
         <Menu size={16} />
       </button>
-      <div className="flex items-center justify-center h-full text-white text-xs">
+      <div className="flex h-full items-center justify-center text-xs text-white">
         Mobile header with hamburger at left
       </div>
     </div>
@@ -421,14 +421,14 @@ export const HamburgerButton: Story = {
  */
 export const SearchButton: Story = {
   render: () => (
-    <div className="bg-kcvv-green-bright h-20 relative">
+    <div className="bg-kcvv-green-bright relative h-20">
       <button
-        className="absolute right-[34px] top-[calc((5rem-16px)/2)] text-white text-base w-6 h-6 flex items-center justify-center"
+        className="absolute top-[calc((5rem-16px)/2)] right-[34px] flex h-6 w-6 items-center justify-center text-base text-white"
         aria-label="Search"
       >
         <Search size={16} />
       </button>
-      <div className="flex items-center justify-center h-full text-white text-xs">
+      <div className="flex h-full items-center justify-center text-xs text-white">
         Mobile header with search at right
       </div>
     </div>
@@ -472,11 +472,11 @@ export const MobileMenuItem: Story = {
         }}
       />
       <div className="bg-[#1E2024] p-8">
-        <ul className="list-none m-0 p-0">
+        <ul className="m-0 list-none p-0">
           <li>
             <a
               href="#"
-              className="story-mobile-nav-link block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#292c31] no-underline"
+              className="story-mobile-nav-link block border-b border-[#292c31] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
             >
               Home
             </a>
@@ -484,7 +484,7 @@ export const MobileMenuItem: Story = {
           <li>
             <a
               href="#"
-              className="story-mobile-nav-link active block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#292c31] no-underline"
+              className="story-mobile-nav-link active block border-b border-[#292c31] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
             >
               Nieuws
             </a>
@@ -492,13 +492,13 @@ export const MobileMenuItem: Story = {
           <li>
             <a
               href="#"
-              className="story-mobile-nav-link block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#292c31] no-underline"
+              className="story-mobile-nav-link block border-b border-[#292c31] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
             >
               Ploegen
             </a>
           </li>
         </ul>
-        <p className="text-white text-xs mt-4 opacity-75">
+        <p className="mt-4 text-xs text-white opacity-75">
           Hover over links or see &quot;Nieuws&quot; with 4px green left border
           (active state)
         </p>
@@ -549,7 +549,7 @@ export const MobileMenuSubmenu: Story = {
       <div className="bg-[#1E2024] p-8">
         {/* Parent Item */}
         <div className="mb-0">
-          <button className="w-full flex items-center justify-between px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#292c31] text-left">
+          <button className="flex w-full items-center justify-between border-b border-[#292c31] px-8 py-4 text-left text-[0.6875rem] font-bold text-white uppercase">
             <span>Ploegen</span>
             <span className="text-xs">▼</span>
           </button>
@@ -557,17 +557,17 @@ export const MobileMenuSubmenu: Story = {
 
         {/* Submenu (Expanded) */}
         <div
-          className="bg-[#292c31] list-none m-0 p-0"
+          className="m-0 list-none bg-[#292c31] p-0"
           style={{
             boxShadow:
               "inset 0 7px 9px -7px #1E2024, inset 0 -7px 9px -7px #1E2024",
           }}
         >
-          <ul className="list-none m-0 p-0">
+          <ul className="m-0 list-none p-0">
             <li>
               <a
                 href="#"
-                className="story-mobile-submenu-link block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline"
+                className="story-mobile-submenu-link block border-b border-[#62656A] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
               >
                 A-Ploeg
               </a>
@@ -575,7 +575,7 @@ export const MobileMenuSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="story-mobile-submenu-link active block px-8 py-4 text-kcvv-green-bright text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline"
+                className="story-mobile-submenu-link active text-kcvv-green-bright block border-b border-[#62656A] px-8 py-4 text-[0.6875rem] font-bold uppercase no-underline"
               >
                 B-Ploeg
               </a>
@@ -583,7 +583,7 @@ export const MobileMenuSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="story-mobile-submenu-link block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline"
+                className="story-mobile-submenu-link block border-b border-[#62656A] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
               >
                 U21
               </a>
@@ -591,7 +591,7 @@ export const MobileMenuSubmenu: Story = {
             <li>
               <a
                 href="#"
-                className="story-mobile-submenu-link block px-8 py-4 text-white text-[0.6875rem] uppercase font-bold border-b border-[#62656A] no-underline"
+                className="story-mobile-submenu-link block border-b border-[#62656A] px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline"
               >
                 U19
               </a>
@@ -599,7 +599,7 @@ export const MobileMenuSubmenu: Story = {
           </ul>
         </div>
 
-        <p className="text-white text-xs mt-4 opacity-75">
+        <p className="mt-4 text-xs text-white opacity-75">
           Submenu accordion with darker background (#292c31 - dark gray) and
           inset shadows. &quot;B-Ploeg&quot; is active with green text and 4px
           left border.

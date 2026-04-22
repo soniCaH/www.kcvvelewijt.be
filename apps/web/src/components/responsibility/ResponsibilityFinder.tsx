@@ -391,7 +391,7 @@ export function ResponsibilityFinder({
     <div className={`responsibility-finder ${compact ? "compact" : ""}`}>
       {/* Question Builder - Inline Sentence */}
       <div className="question-builder">
-        <div className="flex flex-wrap items-center gap-3 text-2xl md:text-4xl font-bold text-kcvv-gray-blue mb-8">
+        <div className="text-kcvv-gray-blue mb-8 flex flex-wrap items-center gap-3 text-2xl font-bold md:text-4xl">
           <span
             style={{
               fontFamily: "var(--font-family-title)",
@@ -404,7 +404,7 @@ export function ResponsibilityFinder({
           <div className="role-dropdown-container relative inline-block">
             <button
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="min-h-11 min-w-11 px-4 py-2 border-b-4 text-kcvv-gray-blue transition-all inline-flex items-center gap-2 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+              className="text-kcvv-gray-blue focus-visible:ring-kcvv-green inline-flex min-h-11 min-w-11 items-center gap-2 rounded border-b-4 px-4 py-2 font-bold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               style={{
                 fontFamily: "Montserrat, sans-serif",
                 borderBottomColor: "var(--color-kcvv-green-bright)",
@@ -416,7 +416,7 @@ export function ResponsibilityFinder({
                   )?.label.toLowerCase() ?? selectedRole)
                 : "een..."}
               <ChevronDown
-                className={`w-5 h-5 transition-transform ${showRoleDropdown ? "rotate-180" : ""}`}
+                className={`h-5 w-5 transition-transform ${showRoleDropdown ? "rotate-180" : ""}`}
                 strokeWidth={2}
               />
             </button>
@@ -424,7 +424,7 @@ export function ResponsibilityFinder({
             {showRoleDropdown && (
               <div
                 ref={dropdownRef}
-                className="absolute z-50 top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[200px] animate-fadeIn"
+                className="animate-fadeIn absolute top-full left-0 z-50 mt-2 min-w-[200px] rounded-lg border-2 border-gray-200 bg-white shadow-xl"
               >
                 {ROLE_OPTIONS.map((role, idx) => {
                   const isSelected = selectedRole === role.value;
@@ -432,14 +432,7 @@ export function ResponsibilityFinder({
                     <button
                       key={role.value}
                       onClick={() => handleRoleSelect(role.value)}
-                      className={`
-                        w-full text-left px-4 min-h-11 py-3 text-lg font-medium transition-colors
-                        flex items-center justify-between
-                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-inset
-                        ${isSelected ? "" : "hover:bg-gray-50"}
-                        ${idx === ROLE_OPTIONS.length - 1 ? "rounded-b-lg" : ""}
-                        ${idx === 0 ? "rounded-t-lg" : ""}
-                      `}
+                      className={`focus-visible:ring-kcvv-green flex min-h-11 w-full items-center justify-between px-4 py-3 text-left text-lg font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset ${isSelected ? "" : "hover:bg-gray-50"} ${idx === ROLE_OPTIONS.length - 1 ? "rounded-b-lg" : ""} ${idx === 0 ? "rounded-t-lg" : ""} `}
                       style={{
                         fontFamily: "Montserrat, sans-serif",
                         color: isSelected ? "#ffffff" : "#374151",
@@ -450,7 +443,7 @@ export function ResponsibilityFinder({
                     >
                       <span>{role.label}</span>
                       {isSelected && (
-                        <Check className="w-5 h-5 flex-shrink-0" />
+                        <Check className="h-5 w-5 flex-shrink-0" />
                       )}
                     </button>
                   );
@@ -471,7 +464,7 @@ export function ResponsibilityFinder({
         {/* Onboarding Hints — shown before role selection */}
         {showOnboardingHints && resolvedHints.length > 0 && (
           <div className="mb-8">
-            <p className="text-sm text-kcvv-gray mb-3">
+            <p className="text-kcvv-gray mb-3 text-sm">
               Of klik op een veelgestelde vraag:
             </p>
             <div className="flex flex-wrap gap-3">
@@ -479,7 +472,7 @@ export function ResponsibilityFinder({
                 <button
                   key={hint.slug}
                   onClick={() => handleHintClick(hint.path)}
-                  className="min-h-11 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-kcvv-green hover:text-kcvv-green transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                  className="hover:border-kcvv-green hover:text-kcvv-green focus-visible:ring-kcvv-green min-h-11 rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   {hint.path.question}
                 </button>
@@ -491,10 +484,10 @@ export function ResponsibilityFinder({
         {/* Question Input */}
         {selectedRole && (
           <div className="question-input suggestions-container relative">
-            <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-kcvv-gray group-focus-within:text-kcvv-green transition-colors pointer-events-none">
+            <div className="group relative">
+              <div className="text-kcvv-gray group-focus-within:text-kcvv-green pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 transition-colors">
                 <svg
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -529,7 +522,7 @@ export function ResponsibilityFinder({
                 onFocus={() => setShowSuggestions(true)}
                 onKeyDown={handleInputKeyDown}
                 placeholder="typ je vraag..."
-                className="w-full text-xl md:text-2xl font-medium pl-14 py-4 pr-14 border-2 border-kcvv-gray-light rounded-lg focus:outline-none focus:border-kcvv-green focus:ring-2 focus:ring-kcvv-green/20 placeholder:text-kcvv-gray placeholder:font-normal transition-all duration-300 shadow-sm hover:shadow-md bg-white"
+                className="border-kcvv-gray-light focus:border-kcvv-green focus:ring-kcvv-green/20 placeholder:text-kcvv-gray w-full rounded-lg border-2 bg-white py-4 pr-14 pl-14 text-xl font-medium shadow-sm transition-all duration-300 placeholder:font-normal hover:shadow-md focus:ring-2 focus:outline-none md:text-2xl"
                 style={{ fontFamily: "Montserrat, sans-serif" }}
               />
 
@@ -540,7 +533,7 @@ export function ResponsibilityFinder({
                     setActiveDescendantIdx(-1);
                     inputRef.current?.focus();
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-kcvv-gray hover:text-white hover:bg-red-500 transition-all duration-200 rounded-full hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green"
+                  className="text-kcvv-gray focus-visible:ring-kcvv-green absolute top-1/2 right-3 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 hover:bg-red-500 hover:text-white focus-visible:ring-2 focus-visible:outline-none"
                   aria-label="Clear search"
                 >
                   <X size={20} />
@@ -549,8 +542,8 @@ export function ResponsibilityFinder({
 
               {/* Loading State */}
               {showSuggestions && questionText && semanticLoading && (
-                <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-xl p-4 text-center animate-fadeIn">
-                  <p className="text-sm text-kcvv-gray">Zoeken...</p>
+                <div className="animate-fadeIn absolute z-50 mt-3 w-full rounded-xl border-2 border-gray-200 bg-white p-4 text-center shadow-xl">
+                  <p className="text-kcvv-gray text-sm">Zoeken...</p>
                 </div>
               )}
 
@@ -559,12 +552,12 @@ export function ResponsibilityFinder({
                 questionText &&
                 !semanticLoading &&
                 suggestions.length === 0 && (
-                  <div className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-xl p-6 text-center animate-fadeIn">
-                    <div className="text-5xl mb-3">🔍</div>
-                    <h3 className="text-lg font-bold text-kcvv-gray-blue mb-1">
+                  <div className="animate-fadeIn absolute z-50 mt-3 w-full rounded-xl border-2 border-gray-200 bg-white p-6 text-center shadow-xl">
+                    <div className="mb-3 text-5xl">🔍</div>
+                    <h3 className="text-kcvv-gray-blue mb-1 text-lg font-bold">
                       Geen resultaten gevonden
                     </h3>
-                    <p className="text-sm text-kcvv-gray">
+                    <p className="text-kcvv-gray text-sm">
                       Probeer een andere zoekterm of selecteer een andere rol
                     </p>
                   </div>
@@ -575,15 +568,15 @@ export function ResponsibilityFinder({
                 semanticAnswer &&
                 !semanticLoading &&
                 !selectedResult && (
-                  <div className="bg-kcvv-success/10 border border-kcvv-success/25 rounded-xl p-5 mt-3 mb-1">
-                    <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-kcvv-green-dark uppercase tracking-wide">
-                      <Sparkles className="w-3 h-3" />
+                  <div className="bg-kcvv-success/10 border-kcvv-success/25 mt-3 mb-1 rounded-xl border p-5">
+                    <div className="text-kcvv-green-dark mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                      <Sparkles className="h-3 w-3" />
                       AI-antwoord
                     </div>
                     <p className="text-kcvv-gray-blue text-sm leading-relaxed">
                       {semanticAnswer}
                     </p>
-                    <p className="text-xs text-kcvv-gray mt-3">
+                    <p className="text-kcvv-gray mt-3 text-xs">
                       Gegenereerd door AI · Controleer altijd bij de
                       contactpersoon
                     </p>
@@ -595,7 +588,7 @@ export function ResponsibilityFinder({
                 <div
                   id="suggestion-listbox"
                   role="listbox"
-                  className="absolute z-50 w-full mt-3 bg-white border-2 border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-y-auto animate-fadeIn"
+                  className="animate-fadeIn absolute z-50 mt-3 max-h-96 w-full overflow-y-auto rounded-xl border-2 border-gray-200 bg-white shadow-2xl"
                 >
                   {suggestions.map((suggestion, idx) => {
                     const colors =
@@ -612,12 +605,7 @@ export function ResponsibilityFinder({
                         onClick={() =>
                           handleSuggestionClick(suggestion.path, idx)
                         }
-                        className={`
-                          w-full text-left px-5 min-h-11 py-4 transition-all duration-200 cursor-pointer
-                          ${idx !== 0 ? "border-t border-gray-100" : ""}
-                          ${isActive ? "bg-gray-100" : "hover:bg-gray-50"} group relative overflow-hidden
-                          ${idx === 0 ? "rounded-t-xl" : ""} ${idx === suggestions.length - 1 ? "rounded-b-xl" : ""}
-                        `}
+                        className={`min-h-11 w-full cursor-pointer px-5 py-4 text-left transition-all duration-200 ${idx !== 0 ? "border-t border-gray-100" : ""} ${isActive ? "bg-gray-100" : "hover:bg-gray-50"} group relative overflow-hidden ${idx === 0 ? "rounded-t-xl" : ""} ${idx === suggestions.length - 1 ? "rounded-b-xl" : ""} `}
                         style={{
                           borderLeft: `3px solid ${isActive ? colors.accent : "transparent"}`,
                         }}
@@ -637,7 +625,7 @@ export function ResponsibilityFinder({
                           }
                         }}
                       >
-                        <div className="flex items-start gap-4 ml-1">
+                        <div className="ml-1 flex items-start gap-4">
                           <div className="flex-shrink-0">
                             {suggestion.path.icon &&
                               (() => {
@@ -645,7 +633,7 @@ export function ResponsibilityFinder({
                                   suggestion.path.icon,
                                 );
                                 return (
-                                  <div className="w-10 h-10 flex items-center justify-center">
+                                  <div className="flex h-10 w-10 items-center justify-center">
                                     <IconComponent
                                       size={24}
                                       className={colors.text}
@@ -655,21 +643,21 @@ export function ResponsibilityFinder({
                                 );
                               })()}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="text-base font-semibold text-gray-900">
                               {suggestion.path.question}
                             </div>
-                            <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                            <div className="mt-1 line-clamp-2 text-sm text-gray-600">
                               {suggestion.path.summary}
                             </div>
-                            <div className="flex gap-2 mt-2 flex-wrap">
+                            <div className="mt-2 flex flex-wrap gap-2">
                               <span
-                                className={`text-xs px-2 py-0.5 border ${colors.text} rounded-md font-medium uppercase tracking-wide`}
+                                className={`border px-2 py-0.5 text-xs ${colors.text} rounded-md font-medium tracking-wide uppercase`}
                                 style={{ borderColor: colors.accent }}
                               >
                                 {suggestion.path.category}
                               </span>
-                              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md flex items-center gap-1">
+                              <span className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                                 <User size={12} />
                                 {getContactLabel(
                                   suggestion.path.primaryContact,
@@ -677,7 +665,7 @@ export function ResponsibilityFinder({
                               </span>
                             </div>
                           </div>
-                          <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
                             <ArrowRight size={20} className="text-gray-400" />
                           </div>
                         </div>
@@ -694,19 +682,19 @@ export function ResponsibilityFinder({
       {/* Selected Result with aria-live */}
       <div aria-live="polite">
         {selectedResult && (
-          <div className="mt-8 animate-fadeIn">
+          <div className="animate-fadeIn mt-8">
             {/* Navigation Buttons */}
-            <div className="flex gap-3 mb-4">
+            <div className="mb-4 flex gap-3">
               <button
                 onClick={handleBack}
-                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                className="focus-visible:ring-kcvv-green inline-flex min-h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 <ArrowLeft size={16} />
                 Terug
               </button>
               <button
                 onClick={handleReset}
-                className="min-h-11 px-4 py-2 inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2"
+                className="focus-visible:ring-kcvv-green inline-flex min-h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 <RotateCcw size={16} />
                 Opnieuw beginnen
@@ -737,20 +725,20 @@ export function ResponsibilityFinder({
             {selectedVectorId && <RelatedPaths sanityId={selectedVectorId} />}
 
             {/* Fallback Contact Block */}
-            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-5">
-              <h4 className="font-bold text-gray-900 mb-3">
+            <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-5">
+              <h4 className="mb-3 font-bold text-gray-900">
                 Staat jouw vraag er niet bij?
               </h4>
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/club/contact"
-                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                  className="text-kcvv-green hover:text-kcvv-green-hover focus-visible:ring-kcvv-green inline-flex min-h-11 items-center gap-2 rounded px-4 py-2 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   Neem contact op
                 </Link>
                 <Link
                   href="/club/organigram"
-                  className="min-h-11 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-kcvv-green hover:text-kcvv-green-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2 rounded"
+                  className="text-kcvv-green hover:text-kcvv-green-hover focus-visible:ring-kcvv-green inline-flex min-h-11 items-center gap-2 rounded px-4 py-2 text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   Bekijk het organigram
                 </Link>
@@ -804,7 +792,7 @@ function ContactDisplay({
                     onClick={() =>
                       analytics.trackContactClicked(pathId, "email")
                     }
-                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                    className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-1 text-sm font-medium hover:underline"
                   >
                     <svg
                       className={iconSize}
@@ -830,7 +818,7 @@ function ContactDisplay({
                     onClick={() =>
                       analytics.trackContactClicked(pathId, "phone")
                     }
-                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                    className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-1 text-sm font-medium hover:underline"
                   >
                     <svg
                       className={iconSize}
@@ -862,7 +850,7 @@ function ContactDisplay({
                       analytics.trackOrganigramLink(pathId, member.id);
                       onMemberSelect(member.id);
                     }}
-                    className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                    className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-1 text-sm font-medium hover:underline"
                   >
                     <svg
                       className={iconSize}
@@ -955,7 +943,7 @@ function ContactDisplay({
               <a
                 href={`mailto:${contact.email}`}
                 onClick={() => analytics.trackContactClicked(pathId, "email")}
-                className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-1 text-sm font-medium hover:underline"
               >
                 <svg
                   className={iconSize}
@@ -979,7 +967,7 @@ function ContactDisplay({
               <a
                 href={`tel:${contact.phone}`}
                 onClick={() => analytics.trackContactClicked(pathId, "phone")}
-                className="text-kcvv-green hover:text-kcvv-green-hover hover:underline inline-flex items-center gap-1 text-sm font-medium"
+                className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-1 text-sm font-medium hover:underline"
               >
                 <svg
                   className={iconSize}
@@ -1042,15 +1030,15 @@ function ResultCard({
   }, [path.id, path.category, startDwell, stopDwell]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
+    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
       <div className="p-6">
         {/* Header */}
-        <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-100">
+        <div className="mb-6 flex items-start gap-4 border-b border-gray-100 pb-6">
           {path.icon &&
             (() => {
               const IconComponent = getIcon(path.icon);
               return (
-                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center">
                   <IconComponent
                     size={32}
                     className={colors.text}
@@ -1060,7 +1048,7 @@ function ResultCard({
               );
             })()}
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <h3
                 className="text-2xl font-bold text-gray-900"
                 style={{
@@ -1070,7 +1058,7 @@ function ResultCard({
                 {path.question}
               </h3>
               <span
-                className={`text-xs px-2 py-0.5 border ${colors.text} rounded-md font-medium uppercase tracking-wide`}
+                className={`border px-2 py-0.5 text-xs ${colors.text} rounded-md font-medium tracking-wide uppercase`}
                 style={{ borderColor: colors.accent }}
               >
                 {path.category}
@@ -1081,9 +1069,9 @@ function ResultCard({
         </div>
 
         {/* Primary Contact */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-6">
-          <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-5">
+          <h4 className="mb-3 flex items-center gap-2 font-bold text-gray-900">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100">
               <User size={16} className="text-gray-600" />
             </div>
             Contactpersoon
@@ -1099,8 +1087,8 @@ function ResultCard({
 
         {/* Steps */}
         <div>
-          <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+          <h4 className="mb-4 flex items-center gap-2 font-bold text-gray-900">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100">
               <Clipboard size={16} className="text-gray-600" />
             </div>
             Wat moet je doen?
@@ -1114,10 +1102,10 @@ function ResultCard({
               return (
                 <li
                   key={stepIdx}
-                  className={`flex gap-3 group ${isHighlightedJc ? "bg-kcvv-green/5 -mx-2 px-2 py-1 rounded-lg ring-1 ring-kcvv-green/20" : ""}`}
+                  className={`group flex gap-3 ${isHighlightedJc ? "bg-kcvv-green/5 ring-kcvv-green/20 -mx-2 rounded-lg px-2 py-1 ring-1" : ""}`}
                 >
                   <div
-                    className="flex-shrink-0 w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold shadow-md transition-transform group-hover:scale-110"
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg font-bold text-white shadow-md transition-transform group-hover:scale-110"
                     style={{
                       backgroundColor: isHighlightedJc
                         ? "var(--color-kcvv-green)"
@@ -1127,7 +1115,7 @@ function ResultCard({
                     {stepIdx + 1}
                   </div>
                   <div className="flex-1 pt-1">
-                    <p className="text-gray-700 text-sm leading-relaxed">
+                    <p className="text-sm leading-relaxed text-gray-700">
                       {step.description}
                     </p>
                     {safeStepLink && (
@@ -1136,10 +1124,10 @@ function ResultCard({
                         onClick={() =>
                           analytics.trackStepLinkClicked(path.id, stepIdx)
                         }
-                        className="text-kcvv-green hover:text-kcvv-green-hover hover:underline text-sm inline-flex items-center gap-1 mt-2 font-medium"
+                        className="text-kcvv-green hover:text-kcvv-green-hover mt-2 inline-flex items-center gap-1 text-sm font-medium hover:underline"
                       >
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -1155,7 +1143,7 @@ function ResultCard({
                       </a>
                     )}
                     {step.contact && (
-                      <div className="mt-2 text-sm bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
                         <ContactDisplay
                           contact={step.contact}
                           pathId={path.id}
@@ -1191,14 +1179,14 @@ function TeamSelector({
   onTeamSelect: (teamId: string) => void;
 }) {
   return (
-    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
+    <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-5">
       <label
         htmlFor="team-selector"
-        className="block font-bold text-gray-900 mb-2"
+        className="mb-2 block font-bold text-gray-900"
       >
         Selecteer je ploeg
       </label>
-      <p className="text-sm text-gray-600 mb-3">
+      <p className="mb-3 text-sm text-gray-600">
         Om de juiste contactpersoon te tonen, moeten we weten bij welke ploeg je
         hoort.
       </p>
@@ -1206,7 +1194,7 @@ function TeamSelector({
         id="team-selector"
         value={selectedTeamId}
         onChange={(e) => onTeamSelect(e.target.value)}
-        className="w-full max-w-sm px-4 py-2 min-h-11 border-2 border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:outline-none focus:border-kcvv-green focus:ring-2 focus:ring-kcvv-green/20"
+        className="focus:border-kcvv-green focus:ring-kcvv-green/20 min-h-11 w-full max-w-sm rounded-lg border-2 border-gray-300 bg-white px-4 py-2 font-medium text-gray-900 focus:ring-2 focus:outline-none"
       >
         <option value="">Kies een ploeg...</option>
         {teams.map((team) => (

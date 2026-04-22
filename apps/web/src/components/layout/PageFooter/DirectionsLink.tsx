@@ -13,7 +13,7 @@ export const DirectionsLink = () => (
     target="_blank"
     rel="noopener noreferrer"
     onClick={() => trackEvent("directions_clicked", { source: "footer" })}
-    className="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
+    className="hover:text-kcvv-green-bright inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-white/70 transition-colors"
   >
     <Icon icon={MapPin} size="sm" />
     Routebeschrijving

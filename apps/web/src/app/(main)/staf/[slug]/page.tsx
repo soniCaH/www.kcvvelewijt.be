@@ -113,20 +113,20 @@ export default async function StafPage({ params }: StaffPageProps) {
         })}
       />
       {/* Hero section */}
-      <section className="bg-gradient-to-br from-kcvv-gray-light to-white">
-        <div className="max-w-4xl mx-auto px-4 py-12 flex flex-col sm:flex-row items-center sm:items-start gap-8">
+      <section className="from-kcvv-gray-light bg-gradient-to-br to-white">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 px-4 py-12 sm:flex-row sm:items-start">
           {/* Photo */}
           {member.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={member.imageUrl}
               alt={fullName}
-              className="w-40 h-40 rounded-full object-cover object-top shadow-lg flex-shrink-0"
+              className="h-40 w-40 flex-shrink-0 rounded-full object-cover object-top shadow-lg"
             />
           ) : (
-            <div className="w-40 h-40 rounded-full bg-kcvv-gray/20 flex items-center justify-center flex-shrink-0">
+            <div className="bg-kcvv-gray/20 flex h-40 w-40 flex-shrink-0 items-center justify-center rounded-full">
               <svg
-                className="w-20 h-20 text-kcvv-gray/50"
+                className="text-kcvv-gray/50 h-20 w-20"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -144,21 +144,21 @@ export default async function StafPage({ params }: StaffPageProps) {
 
           {/* Info */}
           <div className="text-center sm:text-left">
-            <h1 className="text-3xl sm:text-4xl font-bold text-kcvv-gray-dark">
+            <h1 className="text-kcvv-gray-dark text-3xl font-bold sm:text-4xl">
               <span className="font-semibold">{member.firstName}</span>{" "}
               <span className="font-light">{member.lastName}</span>
             </h1>
 
             {/* Contact info */}
             {(member.email || member.phone) && (
-              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 {member.email && (
                   <a
                     href={`mailto:${member.email}`}
-                    className="inline-flex items-center gap-2 text-kcvv-gray hover:text-kcvv-green-bright transition-colors"
+                    className="text-kcvv-gray hover:text-kcvv-green-bright inline-flex items-center gap-2 transition-colors"
                   >
                     <svg
-                      className="w-4 h-4"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -177,10 +177,10 @@ export default async function StafPage({ params }: StaffPageProps) {
                 {member.phone && (
                   <a
                     href={`tel:${member.phone}`}
-                    className="inline-flex items-center gap-2 text-kcvv-gray hover:text-kcvv-green-bright transition-colors"
+                    className="text-kcvv-gray hover:text-kcvv-green-bright inline-flex items-center gap-2 transition-colors"
                   >
                     <svg
-                      className="w-4 h-4"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -204,34 +204,34 @@ export default async function StafPage({ params }: StaffPageProps) {
 
       {/* Bio */}
       {member.bio && member.bio.length > 0 && (
-        <section className="max-w-4xl mx-auto px-4 py-8">
+        <section className="mx-auto max-w-4xl px-4 py-8">
           <SanityArticleBody content={member.bio as PortableTextBlock[]} />
         </section>
       )}
 
       {/* Organigram positions */}
       {member.organigramPositions.length > 0 && (
-        <section className="max-w-4xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-semibold text-kcvv-gray-dark flex items-center gap-2 mb-4">
-            <Network className="w-5 h-5" aria-hidden="true" />
+        <section className="mx-auto max-w-4xl px-4 py-8">
+          <h2 className="text-kcvv-gray-dark mb-4 flex items-center gap-2 text-xl font-semibold">
+            <Network className="h-5 w-5" aria-hidden="true" />
             Posities in het organigram
           </h2>
           <ul className="space-y-2">
             {member.organigramPositions.map((pos) => (
               <li
                 key={pos._id}
-                className="flex items-center gap-3 rounded-lg border border-kcvv-gray-light/50 bg-white px-4 py-3"
+                className="border-kcvv-gray-light/50 flex items-center gap-3 rounded-lg border bg-white px-4 py-3"
               >
                 {pos.roleCode && (
-                  <span className="inline-flex items-center justify-center rounded bg-kcvv-green-bright/10 px-2 py-0.5 text-xs font-semibold text-kcvv-green-bright">
+                  <span className="bg-kcvv-green-bright/10 text-kcvv-green-bright inline-flex items-center justify-center rounded px-2 py-0.5 text-xs font-semibold">
                     {pos.roleCode}
                   </span>
                 )}
-                <span className="font-medium text-kcvv-gray-dark">
+                <span className="text-kcvv-gray-dark font-medium">
                   {pos.title}
                 </span>
                 {pos.department && (
-                  <span className="ml-auto text-xs text-kcvv-gray">
+                  <span className="text-kcvv-gray ml-auto text-xs">
                     {pos.department}
                   </span>
                 )}
@@ -243,24 +243,24 @@ export default async function StafPage({ params }: StaffPageProps) {
 
       {/* Responsibility paths */}
       {member.responsibilityPaths.length > 0 && (
-        <section className="max-w-4xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-semibold text-kcvv-gray-dark flex items-center gap-2 mb-4">
-            <CircleHelp className="w-5 h-5" aria-hidden="true" />
+        <section className="mx-auto max-w-4xl px-4 py-8">
+          <h2 className="text-kcvv-gray-dark mb-4 flex items-center gap-2 text-xl font-semibold">
+            <CircleHelp className="h-5 w-5" aria-hidden="true" />
             Verantwoordelijkheden
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {member.responsibilityPaths.map((path) => (
               <Link
                 key={path.slug}
                 href={`/hulp?pad=${path.slug}`}
-                className="flex items-start gap-3 rounded-lg border border-kcvv-gray-light/50 bg-white px-4 py-3 transition-colors hover:border-kcvv-green-bright/30 hover:bg-kcvv-green-bright/5"
+                className="border-kcvv-gray-light/50 hover:border-kcvv-green-bright/30 hover:bg-kcvv-green-bright/5 flex items-start gap-3 rounded-lg border bg-white px-4 py-3 transition-colors"
               >
                 <div className="min-w-0">
-                  <span className="font-medium text-kcvv-gray-dark">
+                  <span className="text-kcvv-gray-dark font-medium">
                     {path.title}
                   </span>
                   {path.category && (
-                    <span className="mt-0.5 block text-xs text-kcvv-gray">
+                    <span className="text-kcvv-gray mt-0.5 block text-xs">
                       {path.category}
                     </span>
                   )}
@@ -275,7 +275,7 @@ export default async function StafPage({ params }: StaffPageProps) {
         articles={relatedArticles}
         pageType="staff"
         pageSlug={slug}
-        className="max-w-4xl mx-auto px-4 pb-8"
+        className="mx-auto max-w-4xl px-4 pb-8"
       />
     </>
   );

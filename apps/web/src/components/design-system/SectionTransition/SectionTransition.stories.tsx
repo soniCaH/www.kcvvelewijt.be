@@ -168,9 +168,9 @@ export const OverlapNone: Story = {
   decorators: [
     (Story) => (
       <div>
-        <div className="w-full h-32 bg-kcvv-black" />
+        <div className="bg-kcvv-black h-32 w-full" />
         <Story />
-        <div className="w-full h-32 bg-gray-100" />
+        <div className="h-32 w-full bg-gray-100" />
       </div>
     ),
   ],
@@ -188,9 +188,9 @@ export const OverlapHalf: Story = {
   decorators: [
     (Story) => (
       <div className="relative">
-        <div className="w-full h-32 bg-kcvv-black relative z-0" />
+        <div className="bg-kcvv-black relative z-0 h-32 w-full" />
         <Story />
-        <div className="w-full h-32 bg-gray-100" />
+        <div className="h-32 w-full bg-gray-100" />
       </div>
     ),
   ],
@@ -208,9 +208,9 @@ export const OverlapFull: Story = {
   decorators: [
     (Story) => (
       <div className="relative">
-        <div className="w-full h-32 bg-kcvv-black relative z-0" />
+        <div className="bg-kcvv-black relative z-0 h-32 w-full" />
         <Story />
-        <div className="w-full h-32 bg-gray-100" />
+        <div className="h-32 w-full bg-gray-100" />
       </div>
     ),
   ],

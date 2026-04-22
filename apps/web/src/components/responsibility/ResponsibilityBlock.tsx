@@ -29,12 +29,12 @@ export function ResponsibilityBlock() {
   }
 
   return (
-    <section className="bg-gradient-to-br from-green-main/5 to-green-hover/5 py-16 px-4">
-      <div className="max-w-5xl mx-auto">
+    <section className="from-green-main/5 to-green-hover/5 bg-gradient-to-br px-4 py-16">
+      <div className="mx-auto max-w-5xl">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="mb-10 text-center">
           <h2
-            className="text-3xl md:text-5xl font-bold text-gray-blue mb-4"
+            className="text-gray-blue mb-4 text-3xl font-bold md:text-5xl"
             style={{
               fontFamily:
                 "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -42,7 +42,7 @@ export function ResponsibilityBlock() {
           >
             Hoe kunnen we je helpen?
           </h2>
-          <p className="text-lg md:text-xl text-gray-dark max-w-2xl mx-auto">
+          <p className="text-gray-dark mx-auto max-w-2xl text-lg md:text-xl">
             Vind snel de juiste contactpersoon voor jouw vraag
           </p>
         </div>
@@ -52,7 +52,7 @@ export function ResponsibilityBlock() {
           onSubmit={handleSubmit}
           role="search"
           aria-label="Hulp zoeken"
-          className="bg-white rounded-2xl shadow-xl p-6 md:p-10"
+          className="rounded-2xl bg-white p-6 shadow-xl md:p-10"
         >
           <HulpSearchInput
             value={query}
@@ -64,7 +64,7 @@ export function ResponsibilityBlock() {
           <div className="mt-8 text-center">
             <Link
               href="/hulp"
-              className="inline-flex items-center gap-2 text-green-main hover:text-green-hover font-semibold transition-colors"
+              className="text-green-main hover:text-green-hover inline-flex items-center gap-2 font-semibold transition-colors"
             >
               Bekijk alle veelgestelde vragen
               <ChevronRight size={16} />
@@ -73,24 +73,24 @@ export function ResponsibilityBlock() {
         </form>
 
         {/* Quick Links */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           <Link
             href="/club/organigram"
-            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
+            className="rounded-card hover:shadow-card-hover group relative overflow-hidden bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1"
           >
             <div
-              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
               aria-hidden="true"
             />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
+              <div className="bg-green-main/10 text-green-main group-hover:bg-green-main flex h-10 w-10 items-center justify-center rounded-full transition-colors group-hover:text-white">
                 <Users size={20} />
               </div>
               <div>
-                <div className="font-semibold text-gray-blue group-hover:text-green-main">
+                <div className="text-gray-blue group-hover:text-green-main font-semibold">
                   Organigram
                 </div>
-                <div className="text-xs text-gray-medium">
+                <div className="text-gray-medium text-xs">
                   Alle bestuursleden
                 </div>
               </div>
@@ -99,42 +99,42 @@ export function ResponsibilityBlock() {
 
           <Link
             href="/club/contact"
-            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
+            className="rounded-card hover:shadow-card-hover group relative overflow-hidden bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1"
           >
             <div
-              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
               aria-hidden="true"
             />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
+              <div className="bg-green-main/10 text-green-main group-hover:bg-green-main flex h-10 w-10 items-center justify-center rounded-full transition-colors group-hover:text-white">
                 <Mail size={20} />
               </div>
               <div>
-                <div className="font-semibold text-gray-blue group-hover:text-green-main">
+                <div className="text-gray-blue group-hover:text-green-main font-semibold">
                   Contact
                 </div>
-                <div className="text-xs text-gray-medium">Algemene info</div>
+                <div className="text-gray-medium text-xs">Algemene info</div>
               </div>
             </div>
           </Link>
 
           <Link
             href="/club/inschrijven"
-            className="relative overflow-hidden bg-white rounded-card p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group"
+            className="rounded-card hover:shadow-card-hover group relative overflow-hidden bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1"
           >
             <div
-              className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+              className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
               aria-hidden="true"
             />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-main/10 rounded-full flex items-center justify-center text-green-main group-hover:bg-green-main group-hover:text-white transition-colors">
+              <div className="bg-green-main/10 text-green-main group-hover:bg-green-main flex h-10 w-10 items-center justify-center rounded-full transition-colors group-hover:text-white">
                 <UserPlus size={20} />
               </div>
               <div>
-                <div className="font-semibold text-gray-blue group-hover:text-green-main">
+                <div className="text-gray-blue group-hover:text-green-main font-semibold">
                   Inschrijven
                 </div>
-                <div className="text-xs text-gray-medium">Word lid</div>
+                <div className="text-gray-medium text-xs">Word lid</div>
               </div>
             </div>
           </Link>

@@ -42,7 +42,7 @@ export const MatchesSliderEmptyState = ({
         />
       </div>
 
-      <span className="text-xs font-semibold uppercase tracking-[0.15em] text-kcvv-green-bright md:text-sm">
+      <span className="text-kcvv-green-bright text-xs font-semibold tracking-[0.15em] uppercase md:text-sm">
         {content.eyebrow}
       </span>
 
@@ -125,7 +125,7 @@ const Title = ({
   // h3 sits under the SectionHeader's h2 ("Wedstrijden"), giving the empty
   // state a proper outline entry without duplicating the section heading.
   <h3
-    className="font-title text-3xl font-black leading-tight tracking-tight text-white md:text-5xl lg:text-6xl"
+    className="font-title text-3xl leading-tight font-black tracking-tight text-white md:text-5xl lg:text-6xl"
     aria-label={ariaLabel}
   >
     {children}

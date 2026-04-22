@@ -87,35 +87,35 @@ export function MatchHeader({
     return (
       <div
         className={cn(
-          "relative bg-gradient-to-br from-kcvv-green-dark to-kcvv-green-bright py-8 lg:py-12",
+          "from-kcvv-green-dark to-kcvv-green-bright relative bg-gradient-to-br py-8 lg:py-12",
           className,
         )}
       >
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-6">
             {/* Competition skeleton */}
-            <div className="h-6 w-32 bg-white/20 rounded-full animate-pulse" />
+            <div className="h-6 w-32 animate-pulse rounded-full bg-white/20" />
 
             {/* Teams skeleton */}
-            <div className="flex items-center justify-center gap-4 lg:gap-8 w-full max-w-3xl">
+            <div className="flex w-full max-w-3xl items-center justify-center gap-4 lg:gap-8">
               {/* Home team */}
-              <div className="flex flex-col items-center gap-3 flex-1">
-                <div className="w-16 h-16 lg:w-24 lg:h-24 bg-white/20 rounded-full animate-pulse" />
-                <div className="h-5 w-24 bg-white/20 rounded animate-pulse" />
+              <div className="flex flex-1 flex-col items-center gap-3">
+                <div className="h-16 w-16 animate-pulse rounded-full bg-white/20 lg:h-24 lg:w-24" />
+                <div className="h-5 w-24 animate-pulse rounded bg-white/20" />
               </div>
 
               {/* Score */}
-              <div className="h-16 w-32 bg-white/20 rounded-lg animate-pulse" />
+              <div className="h-16 w-32 animate-pulse rounded-lg bg-white/20" />
 
               {/* Away team */}
-              <div className="flex flex-col items-center gap-3 flex-1">
-                <div className="w-16 h-16 lg:w-24 lg:h-24 bg-white/20 rounded-full animate-pulse" />
-                <div className="h-5 w-24 bg-white/20 rounded animate-pulse" />
+              <div className="flex flex-1 flex-col items-center gap-3">
+                <div className="h-16 w-16 animate-pulse rounded-full bg-white/20 lg:h-24 lg:w-24" />
+                <div className="h-5 w-24 animate-pulse rounded bg-white/20" />
               </div>
             </div>
 
             {/* Date skeleton */}
-            <div className="h-5 w-40 bg-white/20 rounded animate-pulse" />
+            <div className="h-5 w-40 animate-pulse rounded bg-white/20" />
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@ export function MatchHeader({
   return (
     <div
       className={cn(
-        "relative bg-gradient-to-br from-kcvv-green-dark to-kcvv-green-bright py-8 lg:py-12",
+        "from-kcvv-green-dark to-kcvv-green-bright relative bg-gradient-to-br py-8 lg:py-12",
         className,
       )}
     >
@@ -133,30 +133,30 @@ export function MatchHeader({
         <div className="flex flex-col items-center gap-6">
           {/* Competition badge */}
           {competition && (
-            <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 text-white text-sm font-semibold backdrop-blur-sm">
+            <span className="inline-flex items-center rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
               {competition}
             </span>
           )}
 
           {/* Teams and Score */}
-          <div className="flex items-center justify-center gap-4 lg:gap-8 w-full max-w-3xl">
+          <div className="flex w-full max-w-3xl items-center justify-center gap-4 lg:gap-8">
             {/* Home Team */}
             <TeamDisplay team={homeTeam} side="home" />
 
             {/* Score or VS */}
             <div className="flex flex-col items-center gap-2">
               {hasScore ? (
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
-                  <span className="text-4xl lg:text-5xl font-bold text-white font-mono">
+                <div className="flex items-center gap-3 rounded-lg bg-white/10 px-6 py-3 backdrop-blur-sm">
+                  <span className="font-mono text-4xl font-bold text-white lg:text-5xl">
                     {typeof homeTeam.score === "number" ? homeTeam.score : "–"}
                   </span>
                   <span className="text-2xl text-white/60">-</span>
-                  <span className="text-4xl lg:text-5xl font-bold text-white font-mono">
+                  <span className="font-mono text-4xl font-bold text-white lg:text-5xl">
                     {typeof awayTeam.score === "number" ? awayTeam.score : "–"}
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center justify-center w-20 h-14">
+                <div className="flex h-14 w-20 items-center justify-center">
                   <span className="text-2xl font-bold text-white/80">VS</span>
                 </div>
               )}
@@ -168,22 +168,22 @@ export function MatchHeader({
 
           {/* Status badges */}
           {isPostponed && (
-            <div className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500/20 border border-orange-400/50">
-              <span className="text-orange-100 font-semibold text-sm uppercase tracking-wide">
+            <div className="inline-flex items-center rounded-md border border-orange-400/50 bg-orange-500/20 px-4 py-2">
+              <span className="text-sm font-semibold tracking-wide text-orange-100 uppercase">
                 Uitgesteld
               </span>
             </div>
           )}
           {isStopped && (
-            <div className="inline-flex items-center px-4 py-2 rounded-md bg-orange-500/20 border border-orange-400/50">
-              <span className="text-orange-100 font-semibold text-sm uppercase tracking-wide">
+            <div className="inline-flex items-center rounded-md border border-orange-400/50 bg-orange-500/20 px-4 py-2">
+              <span className="text-sm font-semibold tracking-wide text-orange-100 uppercase">
                 Gestopt
               </span>
             </div>
           )}
           {isForfeited && (
-            <div className="inline-flex items-center px-4 py-2 rounded-md bg-gray-500/20 border border-gray-400/50">
-              <span className="text-gray-100 font-semibold text-sm uppercase tracking-wide">
+            <div className="inline-flex items-center rounded-md border border-gray-400/50 bg-gray-500/20 px-4 py-2">
+              <span className="text-sm font-semibold tracking-wide text-gray-100 uppercase">
                 FF
               </span>
             </div>
@@ -193,7 +193,7 @@ export function MatchHeader({
           {!isPostponed && !isStopped && (
             <div className="text-center text-white/90">
               <div className="font-semibold">{formatMatchDate(date)}</div>
-              {time && <div className="text-white/70 text-sm">{time}</div>}
+              {time && <div className="text-sm text-white/70">{time}</div>}
             </div>
           )}
         </div>
@@ -218,24 +218,24 @@ function TeamDisplay({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-3 flex-1",
+        "flex flex-1 flex-col items-center gap-3",
         side === "home" ? "lg:items-end" : "lg:items-start",
       )}
     >
       {/* Team logo */}
-      <div className="w-16 h-16 lg:w-24 lg:h-24 flex items-center justify-center bg-white/10 rounded-full p-2 backdrop-blur-sm">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 p-2 backdrop-blur-sm lg:h-24 lg:w-24">
         {team.logo ? (
           <Image
             src={team.logo}
             alt={`${team.name} logo`}
             width={80}
             height={80}
-            className="object-contain w-full h-full"
+            className="h-full w-full object-contain"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center">
             <svg
-              className="w-8 h-8 lg:w-12 lg:h-12 text-white/40"
+              className="h-8 w-8 text-white/40 lg:h-12 lg:w-12"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -250,7 +250,7 @@ function TeamDisplay({
       {/* Team name */}
       <span
         className={cn(
-          "text-white font-semibold text-sm lg:text-base text-center",
+          "text-center text-sm font-semibold text-white lg:text-base",
           side === "home" ? "lg:text-right" : "lg:text-left",
         )}
       >

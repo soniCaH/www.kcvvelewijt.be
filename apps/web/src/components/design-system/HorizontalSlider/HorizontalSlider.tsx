@@ -63,7 +63,7 @@ export const HorizontalSlider = ({
       {title && (
         <h3
           className={cn(
-            "text-lg font-bold mb-3",
+            "mb-3 text-lg font-bold",
             theme === "dark" ? "text-kcvv-white" : "text-kcvv-black",
           )}
         >
@@ -77,17 +77,17 @@ export const HorizontalSlider = ({
             type="button"
             onClick={() => scroll("left")}
             className={cn(
-              "flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10",
-              "w-10 h-10 items-center justify-center transition-colors",
+              "absolute top-1/2 left-0 z-10 flex -translate-x-5 -translate-y-1/2",
+              "h-10 w-10 items-center justify-center transition-colors",
               theme === "dark"
-                ? "bg-kcvv-black border border-kcvv-green-bright/50 rounded-sm hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright"
-                : "bg-white rounded-full shadow-md hover:bg-gray-50",
+                ? "bg-kcvv-black border-kcvv-green-bright/50 hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright rounded-sm border"
+                : "rounded-full bg-white shadow-md hover:bg-gray-50",
             )}
             aria-label="Scroll naar links"
           >
             <ChevronLeft
               className={cn(
-                "w-5 h-5",
+                "h-5 w-5",
                 theme === "dark"
                   ? "text-kcvv-green-bright"
                   : "text-kcvv-green-dark",
@@ -100,10 +100,10 @@ export const HorizontalSlider = ({
           ref={scrollRef}
           onScroll={checkScroll}
           data-slot="scroll-track"
-          className="overflow-x-auto pb-2 scroll-smooth"
+          className="overflow-x-auto scroll-smooth pb-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          <div className="flex gap-3 min-w-max">{children}</div>
+          <div className="flex min-w-max gap-3">{children}</div>
         </div>
 
         {canScrollRight && (
@@ -111,17 +111,17 @@ export const HorizontalSlider = ({
             type="button"
             onClick={() => scroll("right")}
             className={cn(
-              "flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10",
-              "w-10 h-10 items-center justify-center transition-colors",
+              "absolute top-1/2 right-0 z-10 flex translate-x-5 -translate-y-1/2",
+              "h-10 w-10 items-center justify-center transition-colors",
               theme === "dark"
-                ? "bg-kcvv-black border border-kcvv-green-bright/50 rounded-sm hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright"
-                : "bg-white rounded-full shadow-md hover:bg-gray-50",
+                ? "bg-kcvv-black border-kcvv-green-bright/50 hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright rounded-sm border"
+                : "rounded-full bg-white shadow-md hover:bg-gray-50",
             )}
             aria-label="Scroll naar rechts"
           >
             <ChevronRight
               className={cn(
-                "w-5 h-5",
+                "h-5 w-5",
                 theme === "dark"
                   ? "text-kcvv-green-bright"
                   : "text-kcvv-green-dark",

@@ -109,7 +109,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {leadingIcon && (
             <div
               className={cn(
-                "absolute top-1/2 -translate-y-1/2 text-foundation-gray-dark pointer-events-none",
+                "text-foundation-gray-dark pointer-events-none absolute top-1/2 -translate-y-1/2",
                 iconSize[size],
               )}
             >
@@ -125,10 +125,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={hasHelper ? helperId : undefined}
             className={cn(
               // Base
-              "w-full rounded-[0.25em] border bg-white font-body",
+              "font-body w-full rounded-[0.25em] border bg-white",
               "text-kcvv-gray-dark placeholder:text-foundation-gray-dark",
               "transition-all duration-200",
-              "focus:outline-hidden focus:ring-2 focus:ring-offset-0",
+              "focus:ring-2 focus:ring-offset-0 focus:outline-hidden",
 
               // Default border + focus
               !error &&
@@ -139,7 +139,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 "border-kcvv-alert focus:border-kcvv-alert focus:ring-kcvv-alert/20",
 
               // Disabled
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-foundation-gray-light",
+              "disabled:bg-foundation-gray-light disabled:cursor-not-allowed disabled:opacity-50",
 
               // Size
               sizeClasses[size],
@@ -155,7 +155,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {trailingIcon && (
             <div
               className={cn(
-                "absolute top-1/2 -translate-y-1/2 text-foundation-gray-dark pointer-events-none",
+                "text-foundation-gray-dark pointer-events-none absolute top-1/2 -translate-y-1/2",
                 trailingIconSize[size],
               )}
             >
@@ -165,12 +165,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p id={helperId} className="mt-1.5 text-sm text-kcvv-alert">
+          <p id={helperId} className="text-kcvv-alert mt-1.5 text-sm">
             {error}
           </p>
         )}
         {!error && hint && (
-          <p id={helperId} className="mt-1.5 text-sm text-foundation-gray-dark">
+          <p id={helperId} className="text-foundation-gray-dark mt-1.5 text-sm">
             {hint}
           </p>
         )}

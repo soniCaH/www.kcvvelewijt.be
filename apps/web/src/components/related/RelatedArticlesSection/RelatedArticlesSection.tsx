@@ -40,13 +40,13 @@ export const RelatedArticlesSection = ({
 
   return (
     <section className={className}>
-      <h3 className="text-lg font-bold mb-4">Gerelateerd</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h3 className="mb-4 text-lg font-bold">Gerelateerd</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((article, index) => (
           <Link
             key={article.id}
             href={`/nieuws/${article.slug}`}
-            className="group block overflow-hidden rounded-lg border border-gray-200 hover:border-kcvv-green-bright transition-colors"
+            className="group hover:border-kcvv-green-bright block overflow-hidden rounded-lg border border-gray-200 transition-colors"
             onClick={() => {
               trackEvent("related_content_click", {
                 source: "reference",
@@ -64,18 +64,18 @@ export const RelatedArticlesSection = ({
                   src={article.coverImageUrl}
                   alt={article.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
             )}
             <div className="p-3">
-              <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-kcvv-green-dark transition-colors">
+              <h4 className="group-hover:text-kcvv-green-dark line-clamp-2 text-sm font-semibold transition-colors">
                 {article.title}
               </h4>
               {article.publishedAt && (
                 <time
-                  className="text-xs text-gray-500 mt-1 block"
+                  className="mt-1 block text-xs text-gray-500"
                   dateTime={article.publishedAt}
                 >
                   {new Date(article.publishedAt).toLocaleDateString("nl-BE", {

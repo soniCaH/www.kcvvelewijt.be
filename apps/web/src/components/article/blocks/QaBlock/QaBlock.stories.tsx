@@ -34,7 +34,7 @@ const meta = {
   },
   tags: ["autodocs"],
   render: (args) => (
-    <div className="max-w-[65ch] mx-auto">
+    <div className="mx-auto max-w-[65ch]">
       <QaBlock {...args} />
     </div>
   ),

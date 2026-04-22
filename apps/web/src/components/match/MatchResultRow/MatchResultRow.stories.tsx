@@ -169,7 +169,7 @@ export const WithoutLogos: Story = {
 };
 
 const darkBgDecorator = (Story: () => React.ReactNode) => (
-  <div className="bg-kcvv-black p-8 -m-4">
+  <div className="bg-kcvv-black -m-4 p-8">
     <Story />
   </div>
 );

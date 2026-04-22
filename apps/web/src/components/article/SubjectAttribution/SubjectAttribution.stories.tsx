@@ -98,7 +98,7 @@ function Row({
 }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
+      <p className="mb-2 text-xs tracking-wide text-gray-400 uppercase">
         {label}
       </p>
       {children}
@@ -115,7 +115,7 @@ function Column({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="text-xs tracking-wide text-gray-400 uppercase">{label}</p>
       {children}
     </div>
   );

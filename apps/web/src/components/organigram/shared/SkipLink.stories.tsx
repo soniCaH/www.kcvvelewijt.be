@@ -27,7 +27,7 @@ function renderWithTarget(args: ComponentProps<typeof SkipLink>) {
       <div
         id={args.targetId}
         tabIndex={-1}
-        className="mt-4 p-4 bg-foundation-gray-light rounded"
+        className="bg-foundation-gray-light mt-4 rounded p-4"
       >
         Organigram content
       </div>

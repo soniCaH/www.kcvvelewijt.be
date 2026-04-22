@@ -24,18 +24,18 @@ export function StyleA_StackedType({
   return (
     <div
       style={{ width: "1080px", height: "1920px" }}
-      className="relative overflow-hidden bg-kcvv-black"
+      className="bg-kcvv-black relative overflow-hidden"
     >
       {/* Paint-splatter green glow overlays */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(ellipse 100% 55% at 25% 38%, rgba(74,207,82,0.18) 0%, transparent 70%)",
         }}
       />
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(ellipse 70% 35% at 75% 65%, rgba(74,207,82,0.10) 0%, transparent 65%)",
@@ -44,7 +44,7 @@ export function StyleA_StackedType({
 
       {/* Diagonal slash accents */}
       <div
-        className="absolute pointer-events-none"
+        className="pointer-events-none absolute"
         style={{
           top: "360px",
           left: "-120px",
@@ -55,7 +55,7 @@ export function StyleA_StackedType({
         }}
       />
       <div
-        className="absolute pointer-events-none"
+        className="pointer-events-none absolute"
         style={{
           top: "520px",
           right: "-80px",
@@ -66,7 +66,7 @@ export function StyleA_StackedType({
         }}
       />
       <div
-        className="absolute pointer-events-none"
+        className="pointer-events-none absolute"
         style={{
           bottom: "480px",
           left: "-60px",
@@ -86,7 +86,7 @@ export function StyleA_StackedType({
           style={{ width: "96px", height: "96px", objectFit: "contain" }}
         />
         <span
-          className="font-montserrat font-bold uppercase tracking-widest"
+          className="font-montserrat font-bold tracking-widest uppercase"
           style={{ color: "rgba(255,255,255,0.55)", fontSize: "30px" }}
         >
           @kcvvelewijt
@@ -95,7 +95,7 @@ export function StyleA_StackedType({
 
       {/* Player name rotated — left edge */}
       <div
-        className="absolute font-montserrat font-black uppercase whitespace-nowrap"
+        className="font-montserrat absolute font-black whitespace-nowrap uppercase"
         style={{
           left: "-210px",
           top: "50%",
@@ -110,7 +110,7 @@ export function StyleA_StackedType({
 
       {/* Player name rotated — right edge */}
       <div
-        className="absolute font-montserrat font-black uppercase whitespace-nowrap"
+        className="font-montserrat absolute font-black whitespace-nowrap uppercase"
         style={{
           right: "-210px",
           top: "50%",
@@ -125,7 +125,7 @@ export function StyleA_StackedType({
 
       {/* Stacked GOAL! text — fills frame */}
       <div
-        className="absolute left-0 right-0 flex flex-col items-center"
+        className="absolute right-0 left-0 flex flex-col items-center"
         style={{ top: "160px", lineHeight: 0.82 }}
       >
         {(["GOAL!", "GOAL!", "GOAL!"] as const).map((word, i) => (
@@ -171,7 +171,7 @@ export function StyleA_StackedType({
       ) : (
         /* No photo: big shirt number instead */
         <div
-          className="absolute font-stenciletta text-center"
+          className="font-stenciletta absolute text-center"
           style={{
             top: "680px",
             left: "50%",
@@ -187,7 +187,7 @@ export function StyleA_StackedType({
 
       {/* Bottom panel: score + match name */}
       <div
-        className="absolute bottom-0 left-0 right-0 flex flex-col items-center"
+        className="absolute right-0 bottom-0 left-0 flex flex-col items-center"
         style={{
           background: "rgba(10,12,14,0.90)",
           borderTop: "5px solid #4acf52",
@@ -202,7 +202,7 @@ export function StyleA_StackedType({
           {score}
         </span>
         <span
-          className="font-montserrat font-semibold text-center"
+          className="font-montserrat text-center font-semibold"
           style={{ fontSize: "38px", color: "rgba(255,255,255,0.65)" }}
         >
           {matchName}

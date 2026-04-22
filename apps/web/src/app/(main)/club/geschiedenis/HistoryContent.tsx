@@ -25,13 +25,13 @@ function TimelineCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm">
+    <div className="border-kcvv-green-bright rounded-sm border-l-4 bg-white p-6 shadow-sm">
       {date && (
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-kcvv-green-dark">
+        <p className="text-kcvv-green-dark mb-2 text-xs font-bold tracking-[0.15em] uppercase">
           {date}
         </p>
       )}
-      <div className="text-sm leading-relaxed text-kcvv-black">{children}</div>
+      <div className="text-kcvv-black text-sm leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -49,20 +49,20 @@ function TimelineItem({
     <div className="relative mb-10 md:flex md:items-start md:justify-between">
       {/* Left content */}
       <div
-        className={`w-full md:w-[45%] ${side === "right" ? "hidden md:block md:invisible" : ""}`}
+        className={`w-full md:w-[45%] ${side === "right" ? "hidden md:invisible md:block" : ""}`}
       >
         {side === "left" && <TimelineCard date={date}>{children}</TimelineCard>}
       </div>
 
       {/* Timeline dot */}
       <div
-        className="absolute left-1/2 hidden h-4 w-4 -translate-x-1/2 rounded-full bg-kcvv-green-bright shadow-[0_0_0_4px_rgba(243,244,246,1)] md:block"
+        className="bg-kcvv-green-bright absolute left-1/2 hidden h-4 w-4 -translate-x-1/2 rounded-full shadow-[0_0_0_4px_rgba(243,244,246,1)] md:block"
         aria-hidden="true"
       />
 
       {/* Right content */}
       <div
-        className={`w-full md:w-[45%] ${side === "left" ? "hidden md:block md:invisible" : ""}`}
+        className={`w-full md:w-[45%] ${side === "left" ? "hidden md:invisible md:block" : ""}`}
       >
         {side === "right" && (
           <TimelineCard date={date}>{children}</TimelineCard>
@@ -84,7 +84,7 @@ function TimelineImage({
   return (
     <div className="my-12">
       <figure>
-        <div className="relative w-full aspect-[16/9]">
+        <div className="relative aspect-[16/9] w-full">
           <Image
             src={src}
             alt={alt}
@@ -93,7 +93,7 @@ function TimelineImage({
             className="object-contain"
           />
         </div>
-        <figcaption className="text-center text-sm text-gray-600 mt-4 px-4">
+        <figcaption className="mt-4 px-4 text-center text-sm text-gray-600">
           {caption}
         </figcaption>
       </figure>
@@ -106,7 +106,7 @@ function TimelineSection({ children }: { children: React.ReactNode }) {
     <div className="relative py-4">
       {/* Vertical green line */}
       <div
-        className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-1 -translate-x-0.5 bg-kcvv-green-bright/40 md:block"
+        className="bg-kcvv-green-bright/40 pointer-events-none absolute inset-y-0 left-1/2 hidden w-1 -translate-x-0.5 md:block"
         aria-hidden="true"
       />
       {children}
@@ -583,7 +583,7 @@ function TimelineContent() {
 
       {/* Credits */}
       <div className="mt-12 px-4">
-        <h3 className="text-xl font-bold border-l-4 border-kcvv-green-bright pl-4 mb-4">
+        <h3 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
           Credits
         </h3>
         <p>

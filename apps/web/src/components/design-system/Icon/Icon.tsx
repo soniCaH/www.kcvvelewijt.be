@@ -88,7 +88,7 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(
       <span
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center shrink-0",
+          "inline-flex shrink-0 items-center justify-center",
           className,
         )}
         {...props}

@@ -159,7 +159,7 @@ export const FullPageSpinner = ({
   size = "xl",
 }: FullPageSpinnerProps) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
       <Spinner size={size} label={label} />
     </div>
   );

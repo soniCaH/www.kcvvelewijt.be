@@ -77,7 +77,7 @@ export function BrandedTabs({
         aria-label={ariaLabel}
         data-scroll-container
         className={cn(
-          "flex gap-8 border-b border-gray-200 overflow-x-auto scrollbar-hide",
+          "scrollbar-hide flex gap-8 overflow-x-auto border-b border-gray-200",
           /* scrollbar-hide: @utility in globals.css — hides native scrollbar across all browsers */
           canScrollLeft ? "pl-12" : "pl-0",
           canScrollRight ? "pr-12" : "pr-0",
@@ -99,13 +99,13 @@ export function BrandedTabs({
               onClick={() => handleSelect(tab.id)}
               onKeyDown={handleKeyDown}
               className={cn(
-                "border-b-4 px-1 py-4 text-sm font-bold uppercase tracking-[0.05em] whitespace-nowrap flex-shrink-0",
+                "flex-shrink-0 border-b-4 px-1 py-4 text-sm font-bold tracking-[0.05em] whitespace-nowrap uppercase",
                 "transition-all duration-200",
                 "active:scale-[0.98]",
-                "focus-visible:ring-2 focus-visible:ring-kcvv-green-bright focus-visible:ring-offset-2 focus-visible:outline-none",
+                "focus-visible:ring-kcvv-green-bright focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                 isActive
                   ? "border-kcvv-green-bright text-kcvv-green-dark"
-                  : "border-transparent text-kcvv-gray-blue hover:text-kcvv-black active:bg-kcvv-green-dark/10",
+                  : "text-kcvv-gray-blue hover:text-kcvv-black active:bg-kcvv-green-dark/10 border-transparent",
               )}
             >
               {tab.label}

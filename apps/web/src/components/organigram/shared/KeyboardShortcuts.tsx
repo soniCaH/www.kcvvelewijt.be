@@ -161,7 +161,7 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
         onClick={() => setIsOpen(false)}
         aria-hidden="true"
       />
@@ -170,21 +170,13 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
       <div
         ref={modalRef}
         tabIndex={-1}
-        className={`
-          fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-          z-50
-          bg-white rounded-xl shadow-2xl
-          max-w-2xl w-full mx-4
-          max-h-[90vh] overflow-y-auto
-          focus:outline-none
-          ${className}
-        `}
+        className={`fixed top-1/2 left-1/2 z-50 mx-4 max-h-[90vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl bg-white shadow-2xl focus:outline-none ${className} `}
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-shortcuts-title"
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
+        <div className="sticky top-0 flex items-center justify-between rounded-t-xl border-b border-gray-200 bg-white px-6 py-4">
           <div className="flex items-center gap-3">
             <CircleHelp
               size={24}
@@ -193,20 +185,14 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
             />
             <h2
               id="keyboard-shortcuts-title"
-              className="text-xl font-bold text-kcvv-gray-blue"
+              className="text-kcvv-gray-blue text-xl font-bold"
             >
               Sneltoetsen
             </h2>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="
-              w-10 h-10 flex items-center justify-center
-              text-kcvv-gray hover:text-kcvv-gray-blue
-              hover:bg-gray-100 rounded-full
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            "
+            className="text-kcvv-gray hover:text-kcvv-gray-blue focus:ring-kcvv-green flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             aria-label="Sluit sneltoetsen venster"
           >
             <X size={20} />
@@ -214,16 +200,16 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6 space-y-8">
+        <div className="space-y-8 px-6 py-6">
           {/* Info */}
-          <p className="text-sm text-kcvv-gray">
+          <p className="text-kcvv-gray text-sm">
             Gebruik deze sneltoetsen om sneller te navigeren door het
             organigram. Druk op{" "}
-            <kbd className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 font-mono text-xs font-semibold text-kcvv-gray-dark bg-white border-2 border-kcvv-gray-light rounded shadow-sm">
+            <kbd className="text-kcvv-gray-dark border-kcvv-gray-light inline-flex h-6 min-w-6 items-center justify-center rounded border-2 bg-white px-1.5 font-mono text-xs font-semibold shadow-sm">
               ?
             </kbd>{" "}
             om dit venster te openen, of{" "}
-            <kbd className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 font-mono text-xs font-semibold text-kcvv-gray-dark bg-white border-2 border-kcvv-gray-light rounded shadow-sm">
+            <kbd className="text-kcvv-gray-dark border-kcvv-gray-light inline-flex h-6 min-w-6 items-center justify-center rounded border-2 bg-white px-1.5 font-mono text-xs font-semibold shadow-sm">
               Esc
             </kbd>{" "}
             om te sluiten.
@@ -232,23 +218,23 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
           {/* Shortcut Groups */}
           {shortcutGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="text-sm font-semibold text-kcvv-gray-blue mb-3 uppercase tracking-wide">
+              <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold tracking-wide uppercase">
                 {group.title}
               </h3>
               <div className="space-y-2">
                 {group.shortcuts.map((shortcut, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-2 px-3 rounded hover:bg-gray-50"
+                    className="flex items-center justify-between rounded px-3 py-2 hover:bg-gray-50"
                   >
-                    <span className="text-sm text-kcvv-gray-dark">
+                    <span className="text-kcvv-gray-dark text-sm">
                       {shortcut.description}
                     </span>
                     <div className="flex items-center gap-2">
                       {shortcut.keys.map((key, keyIndex) => (
                         <kbd
                           key={keyIndex}
-                          className="inline-flex items-center justify-center min-w-8 h-8 px-2 font-mono text-sm font-semibold text-kcvv-gray-dark bg-white border-2 border-kcvv-gray-light rounded shadow-sm"
+                          className="text-kcvv-gray-dark border-kcvv-gray-light inline-flex h-8 min-w-8 items-center justify-center rounded border-2 bg-white px-2 font-mono text-sm font-semibold shadow-sm"
                         >
                           {key}
                         </kbd>
@@ -262,11 +248,11 @@ export function KeyboardShortcuts({ className = "" }: KeyboardShortcutsProps) {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-xl">
-          <p className="text-xs text-kcvv-gray text-center">
+        <div className="sticky bottom-0 rounded-b-xl border-t border-gray-200 bg-gray-50 px-6 py-4">
+          <p className="text-kcvv-gray text-center text-xs">
             💡 Tip: Deze sneltoetsen werken alleen wanneer je niet in een
             invoerveld typt. Druk op{" "}
-            <kbd className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 font-mono text-xs font-semibold text-kcvv-gray-dark bg-white border-2 border-kcvv-gray-light rounded shadow-sm">
+            <kbd className="text-kcvv-gray-dark border-kcvv-gray-light inline-flex h-6 min-w-6 items-center justify-center rounded border-2 bg-white px-1.5 font-mono text-xs font-semibold shadow-sm">
               ?
             </kbd>{" "}
             voor deze hulp.

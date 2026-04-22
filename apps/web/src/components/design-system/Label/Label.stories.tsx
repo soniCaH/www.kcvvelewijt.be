@@ -92,7 +92,7 @@ export const WithInputAndHint: Story = {
  */
 export const ContactForm: Story = {
   render: () => (
-    <div className="flex flex-col gap-5 w-96">
+    <div className="flex w-96 flex-col gap-5">
       <div>
         <Label htmlFor="cf-name" required>
           Naam

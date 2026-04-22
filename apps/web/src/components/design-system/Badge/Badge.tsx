@@ -103,7 +103,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded font-medium font-body",
+        "font-body inline-flex items-center rounded font-medium",
         sizeClasses[size],
         variantClasses[variant],
         className,
@@ -112,7 +112,7 @@ export function Badge({
       {showDot && (
         <span
           className={cn(
-            "rounded-full shrink-0",
+            "shrink-0 rounded-full",
             dotSize[size],
             dotColorClass,
             variant === "live" && "animate-pulse",

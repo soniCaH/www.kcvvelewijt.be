@@ -42,18 +42,18 @@ export function EventCard({
     <Link
       href={href}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-card bg-white",
-        "border border-foundation-gray-light shadow-sm",
-        "transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1",
+        "group rounded-card relative flex flex-col overflow-hidden bg-white",
+        "border-foundation-gray-light border shadow-sm",
+        "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
         className,
       )}
     >
       <div
-        className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+        className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
         aria-hidden="true"
       />
       {/* Image */}
-      <div className="relative h-48 overflow-hidden bg-[#edeff4] flex-shrink-0">
+      <div className="relative h-48 flex-shrink-0 overflow-hidden bg-[#edeff4]">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -68,7 +68,7 @@ export function EventCard({
             className="absolute inset-0 flex items-center justify-center"
           >
             <svg
-              className="w-16 h-16 text-gray-300"
+              className="h-16 w-16 text-gray-300"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -86,10 +86,10 @@ export function EventCard({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="flex flex-1 flex-col p-4">
         {/* Date */}
         {date && (
-          <div className="flex items-center gap-1 text-xs text-green-main font-semibold mb-2">
+          <div className="text-green-main mb-2 flex items-center gap-1 text-xs font-semibold">
             <time dateTime={date.toISOString()}>{formatEventDate(date)}</time>
             {endDate && (
               <span data-testid="event-end-date">
@@ -100,7 +100,7 @@ export function EventCard({
         )}
 
         {/* Title */}
-        <h3 className="text-base font-bold text-gray-900 leading-snug mb-1 group-hover:text-green-main transition-colors line-clamp-2">
+        <h3 className="group-hover:text-green-main mb-1 line-clamp-2 text-base leading-snug font-bold text-gray-900 transition-colors">
           {title}
         </h3>
 
@@ -108,10 +108,10 @@ export function EventCard({
         {location && (
           <p
             data-testid="event-location"
-            className="text-xs text-gray-500 mb-2 flex items-center gap-1"
+            className="mb-2 flex items-center gap-1 text-xs text-gray-500"
           >
             <svg
-              className="w-3 h-3 shrink-0"
+              className="h-3 w-3 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -138,7 +138,7 @@ export function EventCard({
         {excerpt && (
           <p
             data-testid="event-excerpt"
-            className="text-sm text-gray-600 line-clamp-3 mt-auto"
+            className="mt-auto line-clamp-3 text-sm text-gray-600"
           >
             {excerpt}
           </p>

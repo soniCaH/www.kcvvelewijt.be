@@ -71,17 +71,17 @@ export function ClubEditorialGrid() {
   return (
     <div className="max-w-inner-lg mx-auto px-4 md:px-10">
       <div className="mb-12">
-        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-label text-kcvv-gray mb-3">
-          <span className="block w-5 h-0.5 bg-kcvv-green" />
+        <div className="tracking-label text-kcvv-gray mb-3 flex items-center gap-2 text-xs font-extrabold uppercase">
+          <span className="bg-kcvv-green block h-0.5 w-5" />
           Ontdek onze club
         </div>
-        <h2 className="font-title font-extrabold text-kcvv-gray-blue text-3xl md:text-5xl">
+        <h2 className="font-title text-kcvv-gray-blue text-3xl font-extrabold md:text-5xl">
           Meer dan een voetbalclub
         </h2>
       </div>
       <div
         data-testid="editorial-grid"
-        className="grid grid-cols-12 gap-5 grid-rows-[auto_auto_auto] max-desk:grid-cols-2 max-sm:grid-cols-1"
+        className="max-desk:grid-cols-2 grid grid-cols-12 grid-rows-[auto_auto_auto] gap-5 max-sm:grid-cols-1"
       >
         {cards.map((card, index) => (
           <div key={card.href} className={gridPositions[index]}>

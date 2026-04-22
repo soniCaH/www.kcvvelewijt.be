@@ -205,7 +205,7 @@ export function NewsListingClient({
   return (
     <div className="w-full">
       {/* Sticky filter bar */}
-      <div className="sticky top-0 z-30 bg-kcvv-dark-bg/95 backdrop-blur-sm border-b border-white/10 py-3">
+      <div className="bg-kcvv-dark-bg/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
         <div className="max-w-inner-lg mx-auto px-3 lg:px-0">
           <CategoryFilters
             categories={categories}
@@ -218,10 +218,10 @@ export function NewsListingClient({
         </div>
       </div>
 
-      <div className="max-w-inner-lg mx-auto px-3 lg:px-0 py-6">
+      <div className="max-w-inner-lg mx-auto px-3 py-6 lg:px-0">
         {/* Featured split: 2fr | 1fr */}
         {featuredArticles.length > 0 && (
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Main featured article — 2fr */}
             <div className="md:col-span-2">
               {featuredArticles[0] &&
@@ -240,18 +240,18 @@ export function NewsListingClient({
 
         {/* Grid of listing cards */}
         {gridArticles.length > 0 && (
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <section className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {gridArticles.map((article) => renderCard(article, "listing"))}
           </section>
         )}
 
         {/* Error state with retry */}
         {error && (
-          <div className="text-center py-4">
-            <p className="text-red-400 mb-2">{error.message}</p>
+          <div className="py-4 text-center">
+            <p className="mb-2 text-red-400">{error.message}</p>
             <button
               type="button"
-              className="text-sm text-kcvv-green-bright underline hover:no-underline"
+              className="text-kcvv-green-bright text-sm underline hover:no-underline"
               onClick={error.retry}
             >
               Opnieuw proberen
@@ -261,7 +261,7 @@ export function NewsListingClient({
 
         {/* Empty state */}
         {isEmpty && !error && (
-          <p className="text-center text-gray-400 py-12">
+          <p className="py-12 text-center text-gray-400">
             Geen artikelen gevonden voor deze categorie.
           </p>
         )}
@@ -269,7 +269,7 @@ export function NewsListingClient({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-center py-8" role="status">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-kcvv-green-bright border-t-transparent" />
+            <div className="border-kcvv-green-bright h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
             <span className="sr-only">Laden...</span>
           </div>
         )}

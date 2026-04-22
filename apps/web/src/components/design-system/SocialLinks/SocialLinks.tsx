@@ -73,7 +73,7 @@ export const SocialLinks = ({
     return (
       <ul
         className={cn(
-          "flex list-none m-0 p-0",
+          "m-0 flex list-none p-0",
           direction === "horizontal" ? "flex-row gap-3" : "flex-col gap-2",
           className,
         )}
@@ -88,7 +88,7 @@ export const SocialLinks = ({
               className={cn(
                 "flex items-center justify-center rounded-full",
                 "border-2 border-[#787C80] text-white",
-                "transition-all duration-300 hover:border-kcvv-green-bright",
+                "hover:border-kcvv-green-bright transition-all duration-300",
                 sizeConfig.container,
               )}
             >
@@ -116,7 +116,7 @@ export const SocialLinks = ({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={link.name}
-          className="min-h-11 min-w-11 p-2 flex items-center justify-center text-white hover:text-kcvv-green-bright transition-colors"
+          className="hover:text-kcvv-green-bright flex min-h-11 min-w-11 items-center justify-center p-2 text-white transition-colors"
         >
           <Icon icon={link.icon} size={size} />
         </a>

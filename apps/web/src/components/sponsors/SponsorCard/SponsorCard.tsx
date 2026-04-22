@@ -38,7 +38,7 @@ export const SponsorCard = ({
   const card = (
     <div
       className={cn(
-        "group relative aspect-[3/2] rounded-card flex items-center justify-center overflow-hidden",
+        "group rounded-card relative flex aspect-[3/2] items-center justify-center overflow-hidden",
         "p-[8%]",
         className,
       )}
@@ -48,7 +48,7 @@ export const SponsorCard = ({
         alt={formatSponsorAlt(sponsor.name)}
         width={image.width}
         height={image.height}
-        className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+        className="h-full w-full object-contain grayscale transition-all duration-300 group-hover:grayscale-0"
       />
     </div>
   );
@@ -68,7 +68,7 @@ export const SponsorCard = ({
         card
       )}
       {showName && (
-        <p className="text-center text-xs text-gray-600 mt-2 font-medium">
+        <p className="mt-2 text-center text-xs font-medium text-gray-600">
           {sponsor.name}
         </p>
       )}

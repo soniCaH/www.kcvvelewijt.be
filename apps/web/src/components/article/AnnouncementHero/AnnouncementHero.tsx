@@ -64,7 +64,7 @@ export const AnnouncementHero = ({
   return (
     <header
       className={cn(
-        "w-full max-w-inner-lg mx-auto px-6 pt-10 md:pt-16",
+        "max-w-inner-lg mx-auto w-full px-6 pt-10 md:pt-16",
         className,
       )}
       data-testid="announcement-hero"
@@ -74,8 +74,8 @@ export const AnnouncementHero = ({
           <p
             className={cn(
               "mb-6 flex flex-wrap items-center gap-x-3 gap-y-1",
-              "text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)] text-kcvv-green-dark",
-              "before:content-[''] before:block before:w-16 before:h-[2px] before:bg-kcvv-green-bright before:mr-1 before:shrink-0",
+              "text-kcvv-green-dark text-xs font-semibold tracking-[var(--letter-spacing-label)] uppercase",
+              "before:bg-kcvv-green-bright before:mr-1 before:block before:h-[2px] before:w-16 before:shrink-0 before:content-['']",
             )}
             data-testid="announcement-hero-kicker"
           >
@@ -93,7 +93,7 @@ export const AnnouncementHero = ({
         )}
 
         <h1
-          className="font-title font-bold text-kcvv-gray-blue leading-[0.95] text-[clamp(2.5rem,5.5vw,4.5rem)]"
+          className="font-title text-kcvv-gray-blue text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[0.95] font-bold"
           data-testid="announcement-hero-title"
         >
           {title}
@@ -102,7 +102,7 @@ export const AnnouncementHero = ({
 
       {coverImageUrl && (
         <div
-          className="mt-10 relative w-full aspect-[16/9] overflow-hidden rounded-[4px] bg-kcvv-gray-light/30"
+          className="bg-kcvv-gray-light/30 relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-[4px]"
           data-testid="announcement-hero-image"
         >
           <Image

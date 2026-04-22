@@ -49,10 +49,10 @@ export default function UltrasPage() {
         }}
       />
 
-      <main className="mx-auto max-w-inner-lg px-4 py-8 content">
+      <main className="max-w-inner-lg content mx-auto px-4 py-8">
         {/* Wie zijn we */}
         <section className="mb-8">
-          <h2 className="mb-4 border-l-4 border-kcvv-green-bright pl-4 text-xl font-bold">
+          <h2 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
             Wie zijn we
           </h2>
           <p>
@@ -97,7 +97,7 @@ export default function UltrasPage() {
 
         {/* Wat doen we */}
         <section className="mb-8">
-          <h2 className="mb-4 border-l-4 border-kcvv-green-bright pl-4 text-xl font-bold">
+          <h2 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
             Wat doen we
           </h2>
           <blockquote>
@@ -143,7 +143,7 @@ export default function UltrasPage() {
 
         {/* Lid worden */}
         <section>
-          <h2 className="mb-4 border-l-4 border-kcvv-green-bright pl-4 text-xl font-bold">
+          <h2 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
             Lid worden
           </h2>
           <p>

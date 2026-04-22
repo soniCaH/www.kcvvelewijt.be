@@ -10,13 +10,13 @@ export default function StaffDetailLoading() {
         Stafprofiel laden...
       </span>
       {/* Staff hero — photo + name + contact */}
-      <div className="bg-gradient-to-br from-kcvv-gray-light to-white">
-        <div className="max-w-4xl mx-auto px-4 py-12 flex flex-col sm:flex-row items-center sm:items-start gap-8 animate-pulse">
-          <div className="w-40 h-40 rounded-full bg-gray-300 flex-shrink-0" />
+      <div className="from-kcvv-gray-light bg-gradient-to-br to-white">
+        <div className="mx-auto flex max-w-4xl animate-pulse flex-col items-center gap-8 px-4 py-12 sm:flex-row sm:items-start">
+          <div className="h-40 w-40 flex-shrink-0 rounded-full bg-gray-300" />
           <div className="flex-1 space-y-4 text-center sm:text-left">
-            <div className="h-8 w-48 rounded bg-gray-300 mx-auto sm:mx-0" />
-            <div className="h-5 w-32 rounded bg-gray-200 mx-auto sm:mx-0" />
-            <div className="flex gap-3 mt-4 justify-center sm:justify-start">
+            <div className="mx-auto h-8 w-48 rounded bg-gray-300 sm:mx-0" />
+            <div className="mx-auto h-5 w-32 rounded bg-gray-200 sm:mx-0" />
+            <div className="mt-4 flex justify-center gap-3 sm:justify-start">
               <div className="h-8 w-8 rounded bg-gray-200" />
               <div className="h-8 w-8 rounded bg-gray-200" />
             </div>
@@ -25,7 +25,7 @@ export default function StaffDetailLoading() {
       </div>
 
       {/* Bio section */}
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4 animate-pulse">
+      <div className="mx-auto max-w-3xl animate-pulse space-y-4 px-4 py-8">
         <div className="h-6 w-24 rounded bg-gray-200" />
         <div className="h-5 w-full rounded bg-gray-200" />
         <div className="h-5 w-full rounded bg-gray-200" />
@@ -33,8 +33,8 @@ export default function StaffDetailLoading() {
       </div>
 
       {/* Positions */}
-      <div className="max-w-3xl mx-auto px-4 py-4 animate-pulse">
-        <div className="h-6 w-32 rounded bg-gray-200 mb-4" />
+      <div className="mx-auto max-w-3xl animate-pulse px-4 py-4">
+        <div className="mb-4 h-6 w-32 rounded bg-gray-200" />
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -46,17 +46,17 @@ export default function StaffDetailLoading() {
       </div>
 
       {/* Related articles */}
-      <div className="border-t border-gray-200 bg-gray-50 mt-8">
-        <div className="max-w-5xl mx-auto px-4 py-8 animate-pulse">
-          <div className="h-6 w-40 rounded bg-gray-200 mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-8 border-t border-gray-200 bg-gray-50">
+        <div className="mx-auto max-w-5xl animate-pulse px-4 py-8">
+          <div className="mb-4 h-6 w-40 rounded bg-gray-200" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-sm bg-white border border-gray-200 shadow-sm overflow-hidden"
+                className="overflow-hidden rounded-sm border border-gray-200 bg-white shadow-sm"
               >
                 <div className="aspect-[3/2] bg-gray-200" />
-                <div className="p-3 space-y-2">
+                <div className="space-y-2 p-3">
                   <div className="h-4 w-full rounded bg-gray-200" />
                   <div className="h-3 w-1/2 rounded bg-gray-200" />
                 </div>

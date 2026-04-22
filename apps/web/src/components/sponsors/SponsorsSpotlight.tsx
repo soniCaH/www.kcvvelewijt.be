@@ -58,18 +58,18 @@ export const SponsorsSpotlight = ({
   const activeSponsor = sponsors[activeIndex];
 
   return (
-    <div className={cn("bg-kcvv-green-dark text-white py-12 px-6", className)}>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">In de kijker</h2>
+    <div className={cn("bg-kcvv-green-dark px-6 py-12 text-white", className)}>
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-8 text-center">
+          <h2 className="mb-2 text-2xl font-bold text-white">In de kijker</h2>
           <p className="text-white/70">Onze featured partners</p>
         </div>
 
         <div className="relative">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 md:p-12">
-            <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="rounded-lg bg-white/10 p-8 backdrop-blur-sm md:p-12">
+            <div className="flex flex-col items-center gap-8 md:flex-row">
               {/* Logo */}
-              <div className="flex-shrink-0 w-64 h-48 relative">
+              <div className="relative h-48 w-64 flex-shrink-0">
                 <Image
                   src={activeSponsor.logo}
                   alt={formatSponsorAlt(activeSponsor.name)}
@@ -81,11 +81,11 @@ export const SponsorsSpotlight = ({
 
               {/* Content */}
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-3xl font-bold text-white mb-4">
+                <h3 className="mb-4 text-3xl font-bold text-white">
                   {activeSponsor.name}
                 </h3>
                 {activeSponsor.description && (
-                  <p className="text-lg text-white/80 mb-6">
+                  <p className="mb-6 text-lg text-white/80">
                     {activeSponsor.description}
                   </p>
                 )}
@@ -94,11 +94,11 @@ export const SponsorsSpotlight = ({
                     href={activeSponsor.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-kcvv-green-dark rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                    className="text-kcvv-green-dark inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold transition-colors hover:bg-gray-100"
                   >
                     Bezoek website
                     <svg
-                      className="w-5 h-5"
+                      className="h-5 w-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -118,15 +118,15 @@ export const SponsorsSpotlight = ({
 
           {/* Navigation dots */}
           {sponsors.length > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="mt-6 flex justify-center gap-2">
               {sponsors.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveIndex(index)}
                   className={cn(
-                    "w-3 h-3 rounded-full transition-all",
+                    "h-3 w-3 rounded-full transition-all",
                     index === activeIndex
-                      ? "bg-white w-8"
+                      ? "w-8 bg-white"
                       : "bg-white/30 hover:bg-white/50",
                   )}
                   aria-label={`Ga naar sponsor ${index + 1}`}

@@ -160,7 +160,7 @@ export const AllVariants: Story = {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <Button variant="primary">Primary</Button>
       <Button variant="secondary">Secondary</Button>
       <Button variant="ghost">Ghost</Button>
@@ -177,7 +177,7 @@ export const AllSizes: Story = {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <Button size="sm">Small Button</Button>
       <Button size="md">Medium Button</Button>
       <Button size="lg">Large Button</Button>
@@ -193,7 +193,7 @@ export const WithArrowVariants: Story = {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <Button variant="primary" withArrow>
         Primary with Arrow
       </Button>
@@ -215,16 +215,16 @@ export const Examples: Story = {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col gap-6 max-w-md">
+    <div className="flex max-w-md flex-col gap-6">
       <div>
-        <h3 className="font-bold mb-2 text-kcvv-gray-blue">Call to Action</h3>
+        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Call to Action</h3>
         <Button variant="primary" size="lg" withArrow fullWidth>
           Join KCVV Elewijt
         </Button>
       </div>
 
       <div>
-        <h3 className="font-bold mb-2 text-kcvv-gray-blue">Article Actions</h3>
+        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Article Actions</h3>
         <div className="flex gap-2">
           <Button variant="primary" size="sm">
             Read Article
@@ -236,7 +236,7 @@ export const Examples: Story = {
       </div>
 
       <div>
-        <h3 className="font-bold mb-2 text-kcvv-gray-blue">Form Buttons</h3>
+        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Form Buttons</h3>
         <div className="flex gap-2">
           <Button type="submit" variant="primary">
             Submit
@@ -248,7 +248,7 @@ export const Examples: Story = {
       </div>
 
       <div>
-        <h3 className="font-bold mb-2 text-kcvv-gray-blue">Navigation</h3>
+        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Navigation</h3>
         <Button variant="link" withArrow>
           View All News
         </Button>

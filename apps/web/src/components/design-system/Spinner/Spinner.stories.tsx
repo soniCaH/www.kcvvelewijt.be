@@ -58,7 +58,7 @@ export const Secondary: Story = {
  */
 export const White: Story = {
   render: () => (
-    <div className="bg-kcvv-gray-dark p-8 rounded">
+    <div className="bg-kcvv-gray-dark rounded p-8">
       <Spinner variant="white" />
     </div>
   ),
@@ -72,19 +72,19 @@ export const AllSizes: Story = {
     <div className="flex items-end gap-8">
       <div className="text-center">
         <Spinner size="sm" />
-        <div className="text-xs mt-2 text-gray-600">Small</div>
+        <div className="mt-2 text-xs text-gray-600">Small</div>
       </div>
       <div className="text-center">
         <Spinner size="md" />
-        <div className="text-xs mt-2 text-gray-600">Medium</div>
+        <div className="mt-2 text-xs text-gray-600">Medium</div>
       </div>
       <div className="text-center">
         <Spinner size="lg" />
-        <div className="text-xs mt-2 text-gray-600">Large</div>
+        <div className="mt-2 text-xs text-gray-600">Large</div>
       </div>
       <div className="text-center">
         <Spinner size="xl" />
-        <div className="text-xs mt-2 text-gray-600">Extra Large</div>
+        <div className="mt-2 text-xs text-gray-600">Extra Large</div>
       </div>
     </div>
   ),
@@ -121,7 +121,7 @@ export const InCard: Story = {
  */
 export const Centered: Story = {
   render: () => (
-    <div className="w-96 h-64 border border-gray-200 rounded flex items-center justify-center">
+    <div className="flex h-64 w-96 items-center justify-center rounded border border-gray-200">
       <Spinner size="lg" label="Loading content..." />
     </div>
   ),
@@ -142,9 +142,9 @@ export const CustomLabel: Story = {
  */
 export const FullPage: Story = {
   render: () => (
-    <div className="relative w-96 h-64 border border-gray-200 rounded overflow-hidden">
+    <div className="relative h-64 w-96 overflow-hidden rounded border border-gray-200">
       <div className="p-4">
-        <h3 className="font-bold mb-2">Page Content</h3>
+        <h3 className="mb-2 font-bold">Page Content</h3>
         <p className="text-gray-600">This content is behind the overlay.</p>
       </div>
       <FullPageSpinner />
@@ -166,7 +166,7 @@ export const LoadingStates: Story = {
       </div>
 
       <div className="rounded border border-gray-200 p-4">
-        <div className="flex flex-col items-center py-8 gap-3">
+        <div className="flex flex-col items-center gap-3 py-8">
           <Spinner size="md" />
           <span className="text-sm text-gray-600">Center loading state</span>
         </div>
@@ -174,10 +174,10 @@ export const LoadingStates: Story = {
 
       <div className="rounded border border-gray-200 p-4">
         <div className="space-y-3">
-          <div className="h-4 bg-gray-200 rounded animate-pulse" />
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5" />
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/5" />
-          <div className="flex items-center gap-2 mt-4">
+          <div className="h-4 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-4/5 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-3/5 animate-pulse rounded bg-gray-200" />
+          <div className="mt-4 flex items-center gap-2">
             <Spinner size="sm" />
             <span className="text-sm text-gray-600">Loading more...</span>
           </div>
@@ -207,19 +207,19 @@ export const LogoSizes: Story = {
     <div className="flex items-end gap-8">
       <div className="text-center">
         <Spinner variant="logo" size="sm" />
-        <div className="text-xs mt-2 text-gray-600">Small</div>
+        <div className="mt-2 text-xs text-gray-600">Small</div>
       </div>
       <div className="text-center">
         <Spinner variant="logo" size="md" />
-        <div className="text-xs mt-2 text-gray-600">Medium</div>
+        <div className="mt-2 text-xs text-gray-600">Medium</div>
       </div>
       <div className="text-center">
         <Spinner variant="logo" size="lg" />
-        <div className="text-xs mt-2 text-gray-600">Large</div>
+        <div className="mt-2 text-xs text-gray-600">Large</div>
       </div>
       <div className="text-center">
         <Spinner variant="logo" size="xl" />
-        <div className="text-xs mt-2 text-gray-600">Extra Large</div>
+        <div className="mt-2 text-xs text-gray-600">Extra Large</div>
       </div>
     </div>
   ),
@@ -233,16 +233,16 @@ export const SpinnerComparison: Story = {
   render: () => (
     <div className="grid grid-cols-2 gap-8">
       <div className="flex flex-col items-center gap-4">
-        <h4 className="font-bold text-sm">SVG Spinner</h4>
+        <h4 className="text-sm font-bold">SVG Spinner</h4>
         <Spinner variant="primary" size="lg" />
-        <p className="text-xs text-gray-600 text-center max-w-xs">
+        <p className="max-w-xs text-center text-xs text-gray-600">
           Generic circular spinner (fast, lightweight)
         </p>
       </div>
       <div className="flex flex-col items-center gap-4">
-        <h4 className="font-bold text-sm">Logo Spinner</h4>
+        <h4 className="text-sm font-bold">Logo Spinner</h4>
         <Spinner variant="logo" size="lg" />
-        <p className="text-xs text-gray-600 text-center max-w-xs">
+        <p className="max-w-xs text-center text-xs text-gray-600">
           KCVV branded spinner (page loads, branded experiences)
         </p>
       </div>

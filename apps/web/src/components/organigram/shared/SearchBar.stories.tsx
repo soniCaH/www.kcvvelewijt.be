@@ -389,9 +389,9 @@ export const InPageHeader: Story = {
     const [value, setValue] = useState("");
 
     return (
-      <div className="bg-gradient-to-br from-kcvv-green to-kcvv-green-hover p-8 rounded-lg">
+      <div className="from-kcvv-green to-kcvv-green-hover rounded-lg bg-gradient-to-br p-8">
         <h1
-          className="text-3xl font-bold text-white mb-4"
+          className="mb-4 text-3xl font-bold text-white"
           style={{
             fontFamily:
               "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -437,14 +437,11 @@ export const WithFilters: Story = {
             <button
               key={value}
               onClick={() => setDepartment(value)}
-              className={`
-                px-4 py-2 rounded-lg font-medium transition-all
-                ${
-                  department === value
-                    ? "bg-kcvv-green text-white shadow-md"
-                    : "bg-gray-100 text-kcvv-gray-dark hover:bg-gray-200"
-                }
-              `}
+              className={`rounded-lg px-4 py-2 font-medium transition-all ${
+                department === value
+                  ? "bg-kcvv-green text-white shadow-md"
+                  : "text-kcvv-gray-dark bg-gray-100 hover:bg-gray-200"
+              } `}
             >
               {label}
             </button>
@@ -460,7 +457,7 @@ export const WithFilters: Story = {
         />
 
         {/* Results Count */}
-        <p className="text-sm text-kcvv-gray">
+        <p className="text-kcvv-gray text-sm">
           {filteredMembers.length} leden {search && `gevonden voor "${search}"`}
         </p>
       </div>
@@ -552,7 +549,7 @@ export const LargeDataset: Story = {
           showAutocomplete={true}
           maxResults={10}
         />
-        <p className="text-sm text-kcvv-gray">
+        <p className="text-kcvv-gray text-sm">
           Dataset: 50 members (showing max 10 results)
         </p>
       </div>

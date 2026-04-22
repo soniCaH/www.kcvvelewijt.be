@@ -86,18 +86,18 @@ export function MemberDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-kcvv-green to-kcvv-green-hover p-6 text-white rounded-t-xl">
+        <div className="from-kcvv-green to-kcvv-green-hover relative rounded-t-xl bg-gradient-to-r p-6 text-white">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30"
             aria-label="Close"
           >
             <span className="text-2xl leading-none">&times;</span>
@@ -110,7 +110,7 @@ export function MemberDetailsModal({
                 alt={primaryMember?.name ?? member.title}
                 width={96}
                 height={96}
-                className="w-24 h-24 rounded-full border-4 border-white/30 object-cover"
+                className="h-24 w-24 rounded-full border-4 border-white/30 object-cover"
                 onError={() => {
                   if (primaryMember?.imageUrl)
                     handleImageError(primaryMember.imageUrl);
@@ -120,24 +120,24 @@ export function MemberDetailsModal({
             <div>
               {isVacant ? (
                 <>
-                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
-                  <p className="text-white/70 text-lg font-semibold">
+                  <h2 className="mb-1 text-2xl font-bold">{member.title}</h2>
+                  <p className="text-lg font-semibold text-white/70">
                     Vacante functie
                   </p>
                 </>
               ) : isShared ? (
                 <>
-                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
-                  <p className="text-white/90 text-sm">
+                  <h2 className="mb-1 text-2xl font-bold">{member.title}</h2>
+                  <p className="text-sm text-white/90">
                     {member.members.length} personen
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold mb-1">{member.title}</h2>
+                  <h2 className="mb-1 text-2xl font-bold">{member.title}</h2>
                   {primaryMember?.name &&
                     primaryMember.name !== member.title && (
-                      <p className="text-white/90 text-lg">
+                      <p className="text-lg text-white/90">
                         {primaryMember.name}
                       </p>
                     )}
@@ -145,7 +145,7 @@ export function MemberDetailsModal({
               )}
               {member.roleCode && (
                 <span
-                  className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-md text-sm font-semibold tracking-wide"
+                  className="mt-2 inline-block rounded-md bg-white/20 px-3 py-1 text-sm font-semibold tracking-wide backdrop-blur-sm"
                   style={{ fontFamily: "var(--font-family-mono)" }}
                 >
                   {member.roleCode}
@@ -156,11 +156,11 @@ export function MemberDetailsModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-6">
           {/* Shared: per-member contact blocks */}
           {isShared && (
             <div>
-              <h3 className="text-lg font-bold text-gray-blue mb-3">Leden</h3>
+              <h3 className="text-gray-blue mb-3 text-lg font-bold">Leden</h3>
               <div className="space-y-4">
                 {member.members.map((m) => (
                   <MemberCard
@@ -215,7 +215,7 @@ export function MemberDetailsModal({
             member.department !== "algemeen" && (
               <div>
                 <SectionHeading>Afdeling</SectionHeading>
-                <span className="inline-block px-4 py-2 bg-kcvv-green/10 text-kcvv-green rounded-lg font-medium">
+                <span className="bg-kcvv-green/10 text-kcvv-green inline-block rounded-lg px-4 py-2 font-medium">
                   {member.department === "hoofdbestuur"
                     ? "Hoofdbestuur"
                     : "Jeugdbestuur"}
@@ -229,7 +229,7 @@ export function MemberDetailsModal({
               <SectionHeading>
                 Hulpvragen ({linkedResponsibilities.length})
               </SectionHeading>
-              <p className="text-sm text-gray-dark mb-3">
+              <p className="text-gray-dark mb-3 text-sm">
                 Je kan deze persoon contacteren voor:
               </p>
               <div className="space-y-2">
@@ -239,7 +239,7 @@ export function MemberDetailsModal({
                     <button
                       key={path.id}
                       onClick={() => onViewResponsibility?.(path.id)}
-                      className={`w-full text-left p-3 rounded-lg border-2 transition-all hover:shadow-md ${categoryInfo.bgClass}`}
+                      className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:shadow-md ${categoryInfo.bgClass}`}
                     >
                       <div className="flex items-start gap-3">
                         <span
@@ -247,11 +247,11 @@ export function MemberDetailsModal({
                         >
                           {categoryInfo.label}
                         </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-blue">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-gray-blue text-sm font-medium">
                             {path.question}
                           </p>
-                          <p className="text-xs text-gray-dark mt-1 line-clamp-2">
+                          <p className="text-gray-dark mt-1 line-clamp-2 text-xs">
                             {path.summary}
                           </p>
                         </div>
@@ -265,14 +265,14 @@ export function MemberDetailsModal({
 
           {/* Link to full profile — single member */}
           {!isVacant && !isShared && primaryMember?.href && (
-            <div className="pt-4 border-t border-gray-light">
+            <div className="border-gray-light border-t pt-4">
               <Link
                 href={primaryMember.href}
-                className="inline-flex items-center gap-2 text-kcvv-green hover:text-kcvv-green-hover font-semibold transition-colors"
+                className="text-kcvv-green hover:text-kcvv-green-hover inline-flex items-center gap-2 font-semibold transition-colors"
               >
                 <span>Bekijk volledig profiel</span>
                 <svg
-                  className="w-4 h-4"
+                  className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -290,10 +290,10 @@ export function MemberDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
+        <div className="flex justify-end rounded-b-xl bg-gray-50 px-6 py-4">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-kcvv-green text-white font-semibold rounded-lg hover:bg-kcvv-green-hover transition-colors"
+            className="bg-kcvv-green hover:bg-kcvv-green-hover rounded-lg px-6 py-2 font-semibold text-white transition-colors"
           >
             Sluiten
           </button>
@@ -304,7 +304,7 @@ export function MemberDetailsModal({
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-lg font-bold text-gray-blue mb-3">{children}</h3>;
+  return <h3 className="text-gray-blue mb-3 text-lg font-bold">{children}</h3>;
 }
 
 function ContactRow({
@@ -324,7 +324,7 @@ function ContactRow({
   return (
     <div className="flex items-center gap-3">
       <svg
-        className="w-5 h-5 text-kcvv-green flex-shrink-0"
+        className="text-kcvv-green h-5 w-5 flex-shrink-0"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -338,7 +338,7 @@ function ContactRow({
       </svg>
       <a
         href={href}
-        className="text-kcvv-green hover:text-kcvv-green-hover hover:underline transition-colors"
+        className="text-kcvv-green hover:text-kcvv-green-hover transition-colors hover:underline"
       >
         {label}
       </a>
@@ -356,19 +356,19 @@ function MemberCard({
   onImageError: (url: string) => void;
 }) {
   return (
-    <div className="flex items-start gap-4 p-3 rounded-lg bg-gray-50 border border-gray-100">
+    <div className="flex items-start gap-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
       <Image
         src={resolveImage(member.imageUrl)}
         alt={member.name ?? "Lid foto"}
         width={56}
         height={56}
-        className="w-14 h-14 rounded-full border-2 border-kcvv-green object-cover flex-shrink-0"
+        className="border-kcvv-green h-14 w-14 flex-shrink-0 rounded-full border-2 object-cover"
         onError={() => {
           if (member.imageUrl) onImageError(member.imageUrl);
         }}
       />
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-kcvv-gray-blue text-base">
+      <div className="min-w-0 flex-1">
+        <p className="text-kcvv-gray-blue text-base font-bold">
           {member.name ?? "Naamloos lid"}
         </p>
         <div className="mt-1 space-y-1">
@@ -390,11 +390,11 @@ function MemberCard({
         {member.href && (
           <Link
             href={member.href}
-            className="inline-flex items-center gap-1 mt-2 text-sm text-kcvv-green hover:text-kcvv-green-hover font-semibold transition-colors"
+            className="text-kcvv-green hover:text-kcvv-green-hover mt-2 inline-flex items-center gap-1 text-sm font-semibold transition-colors"
           >
             <span>Bekijk volledig profiel</span>
             <svg
-              className="w-3 h-3"
+              className="h-3 w-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

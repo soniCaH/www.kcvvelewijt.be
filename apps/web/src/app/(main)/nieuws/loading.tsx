@@ -7,24 +7,24 @@ export default function NewsLoading() {
   return (
     <div className="w-full">
       {/* Sticky filter bar skeleton */}
-      <div className="sticky top-0 z-30 bg-kcvv-dark-bg/95 backdrop-blur-sm border-b border-white/10 py-3">
-        <div className="max-w-inner-lg mx-auto px-3 lg:px-0 flex gap-2">
+      <div className="bg-kcvv-dark-bg/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
+        <div className="max-w-inner-lg mx-auto flex gap-2 px-3 lg:px-0">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-8 w-20 rounded-full bg-white/10 animate-pulse"
+              className="h-8 w-20 animate-pulse rounded-full bg-white/10"
             />
           ))}
         </div>
       </div>
 
-      <div className="max-w-inner-lg mx-auto px-3 lg:px-0 py-6">
+      <div className="max-w-inner-lg mx-auto px-3 py-6 lg:px-0">
         {/* Featured split: 2fr | 1fr */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Main featured card — 2fr */}
           <div className="md:col-span-2">
-            <div className="relative aspect-[3/2] rounded-sm bg-gray-200 animate-pulse overflow-hidden">
-              <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
+            <div className="relative aspect-[3/2] animate-pulse overflow-hidden rounded-sm bg-gray-200">
+              <div className="absolute right-0 bottom-0 left-0 space-y-2 p-4">
                 <div className="h-4 w-16 rounded bg-gray-300" />
                 <div className="h-6 w-3/4 rounded bg-gray-300" />
                 <div className="h-4 w-1/3 rounded bg-gray-300" />
@@ -36,10 +36,10 @@ export default function NewsLoading() {
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-sm bg-white border border-gray-200 shadow-sm animate-pulse overflow-hidden"
+                className="flex-1 animate-pulse overflow-hidden rounded-sm border border-gray-200 bg-white shadow-sm"
               >
                 <div className="h-32 bg-gray-200" />
-                <div className="p-3 space-y-2">
+                <div className="space-y-2 p-3">
                   <div className="h-4 w-16 rounded bg-gray-200" />
                   <div className="h-5 w-full rounded bg-gray-200" />
                   <div className="h-3 w-1/3 rounded bg-gray-200" />
@@ -50,14 +50,14 @@ export default function NewsLoading() {
         </section>
 
         {/* Grid of listing cards */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <section className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-sm bg-white border border-gray-200 shadow-sm animate-pulse overflow-hidden"
+              className="animate-pulse overflow-hidden rounded-sm border border-gray-200 bg-white shadow-sm"
             >
               <div className="aspect-[3/2] bg-gray-200" />
-              <div className="p-4 space-y-2">
+              <div className="space-y-2 p-4">
                 <div className="h-4 w-16 rounded bg-gray-200" />
                 <div className="h-5 w-full rounded bg-gray-200" />
                 <div className="h-5 w-2/3 rounded bg-gray-200" />

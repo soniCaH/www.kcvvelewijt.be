@@ -76,16 +76,16 @@ export const PlayerTeamHistory = forwardRef<
         aria-label="Teamgeschiedenis laden..."
         {...props}
       >
-        <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+        <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
           Teamgeschiedenis
         </h3>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-4">
-              <div className="w-3 h-3 rounded-full bg-gray-300 mt-1.5" />
+              <div className="mt-1.5 h-3 w-3 rounded-full bg-gray-300" />
               <div className="flex-1 space-y-2">
-                <div className="h-5 w-32 bg-gray-300 rounded" />
-                <div className="h-4 w-24 bg-gray-200 rounded" />
+                <div className="h-5 w-32 rounded bg-gray-300" />
+                <div className="h-4 w-24 rounded bg-gray-200" />
               </div>
             </div>
           ))}
@@ -98,7 +98,7 @@ export const PlayerTeamHistory = forwardRef<
   if (entries.length === 0) {
     return (
       <div ref={ref} className={cn(className)} {...props}>
-        <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+        <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
           Teamgeschiedenis
         </h3>
         <p className="text-kcvv-gray text-sm">
@@ -110,14 +110,14 @@ export const PlayerTeamHistory = forwardRef<
 
   return (
     <div ref={ref} className={cn(className)} {...props}>
-      <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+      <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
         Teamgeschiedenis
       </h3>
 
       <div className="relative">
         {/* Timeline line */}
         <div
-          className="absolute left-1.5 top-2 bottom-2 w-0.5 bg-gray-200"
+          className="absolute top-2 bottom-2 left-1.5 w-0.5 bg-gray-200"
           aria-hidden="true"
         />
 
@@ -131,7 +131,7 @@ export const PlayerTeamHistory = forwardRef<
               {/* Timeline dot */}
               <div
                 className={cn(
-                  "relative z-10 w-3 h-3 rounded-full mt-1.5 ring-2 ring-white",
+                  "relative z-10 mt-1.5 h-3 w-3 rounded-full ring-2 ring-white",
                   entry.isCurrent ? "bg-kcvv-green-bright" : "bg-gray-400",
                 )}
                 aria-hidden="true"
@@ -142,7 +142,7 @@ export const PlayerTeamHistory = forwardRef<
                 <Link
                   href={`/ploegen/${entry.teamSlug}`}
                   className={cn(
-                    "font-medium hover:text-kcvv-green-bright transition-colors",
+                    "hover:text-kcvv-green-bright font-medium transition-colors",
                     entry.isCurrent
                       ? "text-kcvv-green-bright"
                       : "text-kcvv-gray-dark",
@@ -150,11 +150,11 @@ export const PlayerTeamHistory = forwardRef<
                 >
                   {entry.teamName}
                 </Link>
-                <p className="text-sm text-kcvv-gray">
+                <p className="text-kcvv-gray text-sm">
                   {formatDateRange(entry.startDate, entry.endDate)}
                 </p>
                 {entry.isCurrent && index === 0 && (
-                  <span className="inline-block mt-1 text-xs font-medium text-white bg-kcvv-green-bright rounded px-2 py-0.5">
+                  <span className="bg-kcvv-green-bright mt-1 inline-block rounded px-2 py-0.5 text-xs font-medium text-white">
                     Huidig team
                   </span>
                 )}

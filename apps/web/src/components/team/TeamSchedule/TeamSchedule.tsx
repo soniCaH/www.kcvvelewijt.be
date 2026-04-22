@@ -53,24 +53,24 @@ export function TeamSchedule({
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="bg-white border border-gray-200 rounded-lg p-4"
+            className="rounded-lg border border-gray-200 bg-white p-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
+                <div className="h-4 w-12 animate-pulse rounded bg-gray-200" />
               </div>
-              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
             </div>
             <div className="mt-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+                <div className="h-4 w-28 animate-pulse rounded bg-gray-200" />
               </div>
-              <div className="h-6 w-16 bg-gray-200 rounded animate-pulse" />
+              <div className="h-6 w-16 animate-pulse rounded bg-gray-200" />
               <div className="flex items-center gap-2">
-                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
-                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-4 w-28 animate-pulse rounded bg-gray-200" />
+                <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@ export function TeamSchedule({
     return (
       <div
         className={cn(
-          "text-center py-8 text-gray-500 bg-gray-50 rounded-lg",
+          "rounded-lg bg-gray-50 py-8 text-center text-gray-500",
           className,
         )}
       >

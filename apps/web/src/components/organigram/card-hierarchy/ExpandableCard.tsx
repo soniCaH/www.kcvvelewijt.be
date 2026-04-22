@@ -119,16 +119,7 @@ export function ExpandableCard({
           {hasChildren && (
             <button
               onClick={handleToggle}
-              className="
-                flex-shrink-0 mt-4
-                w-8 h-8
-                flex items-center justify-center
-                bg-white border-2 border-gray-200 rounded-full
-                text-kcvv-gray-dark
-                hover:bg-kcvv-green hover:border-kcvv-green hover:text-white
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark hover:bg-kcvv-green hover:border-kcvv-green focus:ring-kcvv-green mt-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-200 bg-white transition-all duration-200 hover:text-white focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label={
                 expanded
                   ? `Inklappen: ${member.members[0]?.name ?? member.title}`
@@ -148,7 +139,7 @@ export function ExpandableCard({
           {!hasChildren && <div className="w-8" aria-hidden="true" />}
 
           {/* Member Card */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <ContactCard
               member={member}
               variant="detailed"
@@ -167,16 +158,13 @@ export function ExpandableCard({
       {/* Nested Children (with animation) */}
       {hasChildren && (
         <div
-          className={`
-            overflow-hidden transition-all duration-300 ease-in-out
-            ${expanded ? "max-h-[10000px] opacity-100" : "max-h-0 opacity-0"}
-          `}
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? "max-h-[10000px] opacity-100" : "max-h-0 opacity-0"} `}
         >
           <div className="mt-3 space-y-3">
             {renderChildren
               ? renderChildren(directReports, depth + 1)
               : directReports.map((child) => (
-                  <div key={child.id} className="text-sm text-kcvv-gray">
+                  <div key={child.id} className="text-kcvv-gray text-sm">
                     {child.members[0]?.name ?? child.title}
                   </div>
                 ))}

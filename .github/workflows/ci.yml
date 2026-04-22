@@ -31,6 +31,9 @@ jobs:
       - name: Lint
         run: npx turbo lint --filter=@kcvv/web
 
+      - name: Unused dependencies (knip)
+        run: pnpm run knip
+
       - name: Type check
         run: npx turbo type-check --filter=@kcvv/web
 

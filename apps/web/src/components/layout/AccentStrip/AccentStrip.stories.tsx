@@ -46,7 +46,7 @@ export const OnDarkBackground: Story = {
   },
   render: () => (
     <div
-      className="min-h-[80px] bg-kcvv-black"
+      className="bg-kcvv-black min-h-[80px]"
       style={{ transform: "translateX(0)" }}
     >
       <AccentStrip />

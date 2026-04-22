@@ -17,11 +17,11 @@ export function StyleC_VintageSportsCard({
   return (
     <div
       style={{ width: "1080px", height: "1920px", background: "#F2EDE3" }}
-      className="relative overflow-hidden flex flex-col"
+      className="relative flex flex-col overflow-hidden"
     >
       {/* Grain overlay — simulated with CSS noise */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")",
@@ -34,7 +34,7 @@ export function StyleC_VintageSportsCard({
 
       {/* ── Top band: KCVV green ── */}
       <div
-        className="relative shrink-0 bg-kcvv-green-bright flex items-center justify-between"
+        className="bg-kcvv-green-bright relative flex shrink-0 items-center justify-between"
         style={{ height: "160px", padding: "0 72px" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -50,7 +50,7 @@ export function StyleC_VintageSportsCard({
           55
         </span>
         <span
-          className="font-montserrat font-black text-kcvv-black uppercase tracking-widest"
+          className="font-montserrat text-kcvv-black font-black tracking-widest uppercase"
           style={{ fontSize: "32px" }}
         >
           Elewijt
@@ -59,7 +59,7 @@ export function StyleC_VintageSportsCard({
 
       {/* ── Shirt number corner badge ── */}
       <div
-        className="absolute font-stenciletta text-kcvv-black"
+        className="font-stenciletta text-kcvv-black absolute"
         style={{
           top: "132px",
           left: "72px",
@@ -73,7 +73,7 @@ export function StyleC_VintageSportsCard({
 
       {/* ── GOAL label — diagonal ── */}
       <div
-        className="absolute font-stenciletta"
+        className="font-stenciletta absolute"
         style={{
           top: "200px",
           left: "-40px",
@@ -98,7 +98,7 @@ export function StyleC_VintageSportsCard({
 
       {/* ── Player photo zone ── */}
       <div
-        className="relative flex-1 min-h-0"
+        className="relative min-h-0 flex-1"
         style={{ background: "#1E2024" }}
       >
         {celebrationImageUrl ? (
@@ -107,7 +107,7 @@ export function StyleC_VintageSportsCard({
             src={celebrationImageUrl}
             alt={playerName}
             crossOrigin="anonymous"
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 h-full w-full"
             style={{
               objectFit: "cover",
               objectPosition: "top center",
@@ -135,7 +135,7 @@ export function StyleC_VintageSportsCard({
 
         {/* GOAL! stamp — bottom right of photo zone */}
         <div
-          className="absolute font-stenciletta text-kcvv-green-bright"
+          className="font-stenciletta text-kcvv-green-bright absolute"
           style={{
             bottom: "40px",
             right: "56px",
@@ -149,7 +149,7 @@ export function StyleC_VintageSportsCard({
 
         {/* Shirt number — bottom left of photo zone */}
         <div
-          className="absolute font-stenciletta text-white"
+          className="font-stenciletta absolute text-white"
           style={{
             bottom: "40px",
             left: "56px",
@@ -170,7 +170,7 @@ export function StyleC_VintageSportsCard({
 
       {/* ── Player name section ── */}
       <div
-        className="relative shrink-0 flex flex-col"
+        className="relative flex shrink-0 flex-col"
         style={{
           background: "#F2EDE3",
           padding: "56px 72px",
@@ -178,7 +178,7 @@ export function StyleC_VintageSportsCard({
         }}
       >
         <span
-          className="font-montserrat font-black text-kcvv-black uppercase"
+          className="font-montserrat text-kcvv-black font-black uppercase"
           style={{ fontSize: "78px", lineHeight: 1, letterSpacing: "0.04em" }}
         >
           {playerName}
@@ -186,7 +186,7 @@ export function StyleC_VintageSportsCard({
 
         <div className="flex items-center gap-[48px]">
           <span
-            className="font-montserrat font-black text-kcvv-black"
+            className="font-montserrat text-kcvv-black font-black"
             style={{ fontSize: "52px" }}
           >
             {score}
@@ -196,7 +196,7 @@ export function StyleC_VintageSportsCard({
             style={{ width: "3px", height: "48px", opacity: 0.3 }}
           />
           <span
-            className="font-montserrat font-semibold text-kcvv-black"
+            className="font-montserrat text-kcvv-black font-semibold"
             style={{ fontSize: "44px", opacity: 0.55 }}
           >
             {minute}&apos;
@@ -206,7 +206,7 @@ export function StyleC_VintageSportsCard({
             style={{ width: "3px", height: "48px", opacity: 0.3 }}
           />
           <span
-            className="font-montserrat font-medium text-kcvv-black"
+            className="font-montserrat text-kcvv-black font-medium"
             style={{ fontSize: "32px", opacity: 0.45 }}
           >
             {matchName}
@@ -216,11 +216,11 @@ export function StyleC_VintageSportsCard({
 
       {/* ── Bottom KCVV black bar ── */}
       <div
-        className="shrink-0 bg-kcvv-black flex items-center justify-center"
+        className="bg-kcvv-black flex shrink-0 items-center justify-center"
         style={{ height: "96px" }}
       >
         <span
-          className="font-montserrat font-bold text-kcvv-green-bright uppercase tracking-widest"
+          className="font-montserrat text-kcvv-green-bright font-bold tracking-widest uppercase"
           style={{ fontSize: "30px" }}
         >
           @kcvvelewijt

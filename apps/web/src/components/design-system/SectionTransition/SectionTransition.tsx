@@ -150,14 +150,14 @@ export function SectionTransition({
         data-testid="section-transition"
         data-height={height}
         data-margin-top={marginTop}
-        className={cn("relative w-full pointer-events-none", className)}
+        className={cn("pointer-events-none relative w-full", className)}
         style={style}
       >
         {/* Single SVG spans both halves — no mid-seam gap possible. */}
         <svg
           viewBox="0 0 100 200"
           preserveAspectRatio="none"
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 h-full w-full"
         >
           {/* Upper half (y 0–100): from → via */}
           <polygon
@@ -196,13 +196,13 @@ export function SectionTransition({
       data-testid="section-transition"
       data-height={height}
       data-margin-top={marginTop}
-      className={cn("relative w-full pointer-events-none", className)}
+      className={cn("pointer-events-none relative w-full", className)}
       style={style}
     >
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 h-full w-full"
       >
         <polygon
           data-testid="st-from"

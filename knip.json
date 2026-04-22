@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {
+      "ignoreDependencies": ["prettier-plugin-tailwindcss"]
+    },
+    "apps/api": {
+      "ignoreBinaries": ["jq"]
+    },
+    "apps/studio": {
+      "entry": ["sanity.config.ts", "sanity.cli.ts", "structure.ts"],
+      "ignoreDependencies": ["prettier"]
+    },
+    "apps/studio-staging": {
+      "entry": ["sanity.config.ts", "sanity.cli.ts", "structure.ts"],
+      "ignoreDependencies": ["prettier"]
+    }
+  }
+}

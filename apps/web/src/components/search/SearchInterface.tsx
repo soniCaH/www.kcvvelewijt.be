@@ -287,7 +287,7 @@ export const SearchInterface = ({
 
           {/* Error State */}
           {error && !isLoading && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
               <p className="text-red-800">{error}</p>
             </div>
           )}
@@ -306,32 +306,32 @@ export const SearchInterface = ({
 
       {/* Help Text - Show when query is too short */}
       {query.trim().length < 2 && (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <h2 className="text-xl font-bold text-gray-blue mb-4">
+        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
+          <h2 className="text-gray-blue mb-4 text-xl font-bold">
             Wat wil je zoeken?
           </h2>
           <p className="text-gray-dark mb-6">
             Typ minimaal 2 karakters om te zoeken naar nieuws, spelers, teams en
             meer.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-blue mb-2">
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-lg bg-gray-50 p-4">
+              <h3 className="text-gray-blue mb-2 font-semibold">
                 📰 Nieuwsartikelen
               </h3>
-              <p className="text-sm text-gray-dark">
+              <p className="text-gray-dark text-sm">
                 Zoek op titel, inhoud of tags
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-blue mb-2">⚽ Spelers</h3>
-              <p className="text-sm text-gray-dark">
+            <div className="rounded-lg bg-gray-50 p-4">
+              <h3 className="text-gray-blue mb-2 font-semibold">⚽ Spelers</h3>
+              <p className="text-gray-dark text-sm">
                 Vind spelers op naam of positie
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-blue mb-2">🏆 Teams</h3>
-              <p className="text-sm text-gray-dark">
+            <div className="rounded-lg bg-gray-50 p-4">
+              <h3 className="text-gray-blue mb-2 font-semibold">🏆 Teams</h3>
+              <p className="text-gray-dark text-sm">
                 Zoek teams op naam of leeftijdsgroep
               </p>
             </div>

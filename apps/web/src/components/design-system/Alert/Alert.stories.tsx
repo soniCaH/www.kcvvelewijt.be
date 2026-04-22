@@ -64,7 +64,7 @@ export const Error: Story = {
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-3 w-125">
+    <div className="flex w-125 flex-col gap-3">
       <Alert variant="info">
         Inschrijvingen voor het nieuwe seizoen zijn open.
       </Alert>
@@ -89,7 +89,7 @@ export const WithTitle: Story = {
 
 export const WithTitleAllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-3 w-125">
+    <div className="flex w-125 flex-col gap-3">
       <Alert variant="info" title="Info">
         Inschrijvingen voor het nieuwe seizoen zijn open.
       </Alert>
@@ -121,7 +121,7 @@ export const Dismissible: Story = {
             Inschrijvingen voor het nieuwe seizoen zijn open.
           </Alert>
         ) : (
-          <p className="text-sm text-foundation-gray-dark">Alert gesloten.</p>
+          <p className="text-foundation-gray-dark text-sm">Alert gesloten.</p>
         )}
       </div>
     );
@@ -176,7 +176,7 @@ export const FormSuccess: Story = {
             op.
           </Alert>
         ) : (
-          <p className="text-sm text-foundation-gray-dark">
+          <p className="text-foundation-gray-dark text-sm">
             Bevestiging gesloten.
           </p>
         )}

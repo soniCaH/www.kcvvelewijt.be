@@ -83,12 +83,12 @@ export const QaPairQuote = ({ answer, subject }: QaPairQuoteProps) => {
       // `my-10` matches the breathing zone used by the `key` breakout so the
       // top and bottom margins around full-bleed cream bands are symmetric
       // with the standard-pair rhythm.
-      className="full-bleed bg-[var(--color-foundation-gray-light)] py-20 md:py-40 my-10 relative overflow-hidden"
+      className="full-bleed relative my-10 overflow-hidden bg-[var(--color-foundation-gray-light)] py-20 md:py-40"
     >
       <span
         aria-hidden="true"
         data-testid="qa-pair-quote-glyph"
-        className="pointer-events-none absolute left-1/2 top-1/2 font-title font-bold leading-none text-kcvv-green-bright text-[12rem] md:text-[24rem]"
+        className="font-title text-kcvv-green-bright pointer-events-none absolute top-1/2 left-1/2 text-[12rem] leading-none font-bold md:text-[24rem]"
         style={{
           opacity: entered ? FINAL_OPACITY : 0,
           transform: `translate(-50%, -50%) scale(${entered ? 1 : 0.85})`,
@@ -103,7 +103,7 @@ export const QaPairQuote = ({ answer, subject }: QaPairQuoteProps) => {
       <div className="relative z-10 mx-auto max-w-[42ch] px-6 text-center">
         <div
           data-testid="qa-pair-quote-text"
-          className="font-title font-medium text-kcvv-gray-blue leading-[1.2] text-[clamp(2rem,4vw,3rem)]"
+          className="font-title text-kcvv-gray-blue text-[clamp(2rem,4vw,3rem)] leading-[1.2] font-medium"
         >
           <PortableText value={answer} />
         </div>

@@ -114,7 +114,7 @@ const DepartmentFilterWithState = (args: Partial<DepartmentFilterProps>) => {
       />
 
       {/* Selected Department Info */}
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="rounded-lg bg-gray-50 p-4">
         <p className="text-sm text-gray-600">
           <strong>Selected:</strong>{" "}
           {value === "all" ? "Alle afdelingen" : value}
@@ -191,7 +191,7 @@ export const AllVariants: Story = {
     return (
       <div className="space-y-8">
         <div>
-          <h3 className="text-sm font-semibold text-gray-600 mb-2">Tabs</h3>
+          <h3 className="mb-2 text-sm font-semibold text-gray-600">Tabs</h3>
           <DepartmentFilter
             value={tabsValue}
             onChange={setTabsValue}
@@ -201,7 +201,7 @@ export const AllVariants: Story = {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-gray-600 mb-2">Pills</h3>
+          <h3 className="mb-2 text-sm font-semibold text-gray-600">Pills</h3>
           <DepartmentFilter
             value={pillsValue}
             onChange={setPillsValue}
@@ -211,7 +211,7 @@ export const AllVariants: Story = {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-gray-600 mb-2">Buttons</h3>
+          <h3 className="mb-2 text-sm font-semibold text-gray-600">Buttons</h3>
           <DepartmentFilter
             value={buttonsValue}
             onChange={setButtonsValue}
@@ -362,7 +362,7 @@ export const WithSearchBar: Story = {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Zoek in geselecteerde afdeling..."
-          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-kcvv-green focus:outline-none"
+          className="focus:border-kcvv-green w-full rounded-lg border-2 border-gray-200 px-4 py-2 focus:outline-none"
         />
 
         <div className="text-sm text-gray-600">
@@ -380,9 +380,9 @@ export const InPageHeader: Story = {
     >("all");
 
     return (
-      <div className="bg-gradient-to-br from-kcvv-green to-kcvv-green-hover p-8 rounded-lg">
+      <div className="from-kcvv-green to-kcvv-green-hover rounded-lg bg-gradient-to-br p-8">
         <h1
-          className="text-3xl font-bold text-white mb-6"
+          className="mb-6 text-3xl font-bold text-white"
           style={{
             fontFamily:
               "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -391,7 +391,7 @@ export const InPageHeader: Story = {
           Organigram KCVV Elewijt
         </h1>
 
-        <div className="bg-white rounded-lg p-4">
+        <div className="rounded-lg bg-white p-4">
           <DepartmentFilter
             value={department}
             onChange={setDepartment}
@@ -436,7 +436,7 @@ export const ScrollBehavior: Story = {
 
     return (
       <div className="max-w-md">
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="mb-4 text-sm text-gray-600">
           On small viewports, scroll arrows will appear. Try resizing your
           browser!
         </p>

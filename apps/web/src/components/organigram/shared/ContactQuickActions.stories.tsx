@@ -125,7 +125,7 @@ export const AllSizes: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-semibold mb-2 text-gray-600">Small (sm)</p>
+        <p className="mb-2 text-sm font-semibold text-gray-600">Small (sm)</p>
         <ContactQuickActions
           email="small@kcvvelewijt.be"
           phone="+32 470 12 34 56"
@@ -134,7 +134,7 @@ export const AllSizes: Story = {
         />
       </div>
       <div>
-        <p className="text-sm font-semibold mb-2 text-gray-600">
+        <p className="mb-2 text-sm font-semibold text-gray-600">
           Medium (md) - Default
         </p>
         <ContactQuickActions
@@ -145,7 +145,7 @@ export const AllSizes: Story = {
         />
       </div>
       <div>
-        <p className="text-sm font-semibold mb-2 text-gray-600">Large (lg)</p>
+        <p className="mb-2 text-sm font-semibold text-gray-600">Large (lg)</p>
         <ContactQuickActions
           email="large@kcvvelewijt.be"
           phone="+32 470 12 34 56"
@@ -195,14 +195,14 @@ export const PhoneFormatNoSpaces: Story = {
 
 export const InMemberCard: Story = {
   render: () => (
-    <div className="bg-white rounded-lg border-2 border-gray-200 p-4 max-w-sm">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-12 h-12 rounded-full bg-kcvv-green/20 flex items-center justify-center text-kcvv-green font-bold">
+    <div className="max-w-sm rounded-lg border-2 border-gray-200 bg-white p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="bg-kcvv-green/20 text-kcvv-green flex h-12 w-12 items-center justify-center rounded-full font-bold">
           JJ
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-kcvv-gray-blue">Jan Janssens</h3>
-          <p className="text-sm text-kcvv-gray-dark">Voorzitter</p>
+          <h3 className="text-kcvv-gray-blue font-bold">Jan Janssens</h3>
+          <p className="text-kcvv-gray-dark text-sm">Voorzitter</p>
         </div>
       </div>
       <ContactQuickActions
@@ -240,13 +240,13 @@ export const InCompactList: Story = {
       ].map((member, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200"
+          className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3"
         >
           <div className="flex-1">
-            <p className="font-semibold text-sm text-kcvv-gray-blue">
+            <p className="text-kcvv-gray-blue text-sm font-semibold">
               {member.name}
             </p>
-            <p className="text-xs text-kcvv-gray-dark">{member.role}</p>
+            <p className="text-kcvv-gray-dark text-xs">{member.role}</p>
           </div>
           <ContactQuickActions
             email={member.email}
@@ -325,7 +325,7 @@ export const MultiplePhoneFormats: Story = {
   render: () => (
     <div className="space-y-4">
       <div>
-        <p className="text-xs text-gray-600 mb-1">Standard: +32 470 12 34 56</p>
+        <p className="mb-1 text-xs text-gray-600">Standard: +32 470 12 34 56</p>
         <ContactQuickActions
           phone="+32 470 12 34 56"
           name="Standard Format"
@@ -333,7 +333,7 @@ export const MultiplePhoneFormats: Story = {
         />
       </div>
       <div>
-        <p className="text-xs text-gray-600 mb-1">Dashes: +32-470-12-34-56</p>
+        <p className="mb-1 text-xs text-gray-600">Dashes: +32-470-12-34-56</p>
         <ContactQuickActions
           phone="+32-470-12-34-56"
           name="Dash Format"
@@ -341,11 +341,11 @@ export const MultiplePhoneFormats: Story = {
         />
       </div>
       <div>
-        <p className="text-xs text-gray-600 mb-1">No spaces: +32470123456</p>
+        <p className="mb-1 text-xs text-gray-600">No spaces: +32470123456</p>
         <ContactQuickActions phone="+32470123456" name="No Spaces" size="md" />
       </div>
       <div>
-        <p className="text-xs text-gray-600 mb-1">
+        <p className="mb-1 text-xs text-gray-600">
           Brackets: +32 (470) 12 34 56
         </p>
         <ContactQuickActions
@@ -369,7 +369,7 @@ export const OnDarkBackground: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-gray-900 p-8 rounded-lg">
+      <div className="rounded-lg bg-gray-900 p-8">
         <Story />
       </div>
     ),

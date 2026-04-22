@@ -15,17 +15,17 @@ export interface SponsorEmptyStateProps {
 
 export const SponsorEmptyState = ({ className }: SponsorEmptyStateProps) => {
   return (
-    <div className={cn("text-center py-16 px-6", className)}>
+    <div className={cn("px-6 py-16 text-center", className)}>
       {/* Illustration */}
-      <div className="max-w-md mx-auto mb-8">
-        <div className="relative w-64 h-64 mx-auto">
+      <div className="mx-auto mb-8 max-w-md">
+        <div className="relative mx-auto h-64 w-64">
           {/* Football field illustration using emoji and shapes */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-green-200">
             <div className="text-center">
-              <div className="text-8xl mb-4 opacity-30">⚽</div>
+              <div className="mb-4 text-8xl opacity-30">⚽</div>
               <div className="flex justify-center gap-8 opacity-20">
-                <div className="w-16 h-16 border-4 border-gray-400 rounded" />
-                <div className="w-16 h-16 border-4 border-gray-400 rounded" />
+                <div className="h-16 w-16 rounded border-4 border-gray-400" />
+                <div className="h-16 w-16 rounded border-4 border-gray-400" />
               </div>
             </div>
           </div>
@@ -33,10 +33,10 @@ export const SponsorEmptyState = ({ className }: SponsorEmptyStateProps) => {
       </div>
 
       {/* Message */}
-      <h3 className="text-2xl font-bold text-kcvv-gray-blue mb-4">
+      <h3 className="text-kcvv-gray-blue mb-4 text-2xl font-bold">
         Nog geen sponsors beschikbaar
       </h3>
-      <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+      <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-600">
         We zijn op zoek naar partners die onze club willen steunen. Word één van
         de eerste sponsors en versterk uw zichtbaarheid in de regio!
       </p>
@@ -44,10 +44,10 @@ export const SponsorEmptyState = ({ className }: SponsorEmptyStateProps) => {
       {/* CTA Button */}
       <Link
         href="/contact"
-        className="inline-flex items-center gap-2 px-8 py-4 bg-kcvv-green-bright text-white rounded-lg font-semibold text-lg hover:bg-kcvv-green transition-colors shadow-lg"
+        className="bg-kcvv-green-bright hover:bg-kcvv-green inline-flex items-center gap-2 rounded-lg px-8 py-4 text-lg font-semibold text-white shadow-lg transition-colors"
       >
         <svg
-          className="w-6 h-6"
+          className="h-6 w-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

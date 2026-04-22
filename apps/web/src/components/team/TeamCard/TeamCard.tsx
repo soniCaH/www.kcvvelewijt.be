@@ -84,7 +84,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
         <div
           ref={ref as Ref<HTMLDivElement>}
           className={cn(
-            "relative overflow-hidden bg-white rounded-card border border-foundation-gray-light shadow-sm animate-pulse",
+            "rounded-card border-foundation-gray-light relative animate-pulse overflow-hidden border bg-white shadow-sm",
             isCompact ? "h-[200px]" : "h-[280px]",
             className,
           )}
@@ -93,9 +93,9 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
           <div
             className={cn("bg-gray-200", isCompact ? "h-[120px]" : "h-[160px]")}
           />
-          <div className="p-4 space-y-2">
-            <div className="h-6 bg-gray-200 rounded w-3/4" />
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="space-y-2 p-4">
+            <div className="h-6 w-3/4 rounded bg-gray-200" />
+            <div className="h-4 w-1/2 rounded bg-gray-200" />
           </div>
         </div>
       );
@@ -129,10 +129,10 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
         <Link
           href={href}
           className={cn(
-            "relative flex flex-col overflow-hidden rounded-card h-full",
-            "no-underline text-inherit",
+            "rounded-card relative flex h-full flex-col overflow-hidden",
+            "text-inherit no-underline",
             "bg-white",
-            "border border-foundation-gray-light",
+            "border-foundation-gray-light border",
             "shadow-sm",
             "transition-all duration-300",
             "hover:shadow-card-hover hover:-translate-y-1",
@@ -141,13 +141,13 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
           aria-label={`Bekijk team ${name}${tagline ? `, ${tagline}` : ""}${ageGroup ? `, leeftijdsgroep ${ageGroup}` : ""}`}
         >
           <div
-            className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+            className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
             aria-hidden="true"
           />
           {/* Image Section - fixed height */}
           <div
             className={cn(
-              "relative overflow-hidden bg-gray-100 flex-shrink-0",
+              "relative flex-shrink-0 overflow-hidden bg-gray-100",
               isCompact ? "h-[120px]" : "h-[160px]",
             )}
           >
@@ -164,7 +164,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
                 <Users
                   className={cn(
                     "text-gray-300",
-                    isCompact ? "w-14 h-14" : "w-16 h-16",
+                    isCompact ? "h-14 w-14" : "h-16 w-16",
                   )}
                   aria-hidden="true"
                 />
@@ -184,8 +184,8 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
                   data-testid="team-badge"
                   className={cn(
                     "absolute top-3 left-3",
-                    "px-3 py-1 rounded-sm",
-                    "text-sm font-bold uppercase tracking-wide",
+                    "rounded-sm px-3 py-1",
+                    "text-sm font-bold tracking-wide uppercase",
                     flatBadgeColors[teamType],
                   )}
                 >
@@ -199,8 +199,8 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
                 data-testid="team-badge"
                 className={cn(
                   "absolute top-3 left-3",
-                  "px-3 py-1 rounded-sm",
-                  "text-xs font-medium uppercase tracking-wide",
+                  "rounded-sm px-3 py-1",
+                  "text-xs font-medium tracking-wide uppercase",
                   flatBadgeColors.club,
                 )}
               >
@@ -210,11 +210,11 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
           </div>
 
           {/* Content Section - grows to fill remaining space */}
-          <div className={cn("p-4 flex-1 flex flex-col", isCompact && "p-3")}>
+          <div className={cn("flex flex-1 flex-col p-4", isCompact && "p-3")}>
             {/* Team Name */}
             <h3
               className={cn(
-                "font-bold text-gray-900 leading-tight",
+                "leading-tight font-bold text-gray-900",
                 isCompact ? "text-base" : "text-lg",
               )}
               style={{
@@ -229,7 +229,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
             {tagline && (
               <p
                 className={cn(
-                  "text-gray-600 mt-1",
+                  "mt-1 text-gray-600",
                   isCompact ? "text-xs" : "text-sm",
                   "line-clamp-1",
                 )}
@@ -242,7 +242,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
             {coach && (
               <div
                 className={cn(
-                  "flex items-center gap-2 mt-3",
+                  "mt-3 flex items-center gap-2",
                   "text-gray-600",
                   isCompact ? "text-xs" : "text-sm",
                 )}
@@ -256,7 +256,7 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
                     className="rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-4 h-4" aria-hidden="true" />
+                  <User className="h-4 w-4" aria-hidden="true" />
                 )}
                 <span className="truncate">{coach.name}</span>
               </div>
@@ -266,11 +266,11 @@ export const TeamCard = forwardRef<HTMLElement, TeamCardProps>(
             {record && (
               <div
                 className={cn(
-                  "flex items-center gap-3 mt-3",
+                  "mt-3 flex items-center gap-3",
                   "text-xs font-medium",
                 )}
               >
-                <Trophy className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                <Trophy className="h-4 w-4 text-gray-400" aria-hidden="true" />
                 <span className="text-green-600" title="Gewonnen">
                   {record.wins}W
                 </span>

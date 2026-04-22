@@ -76,10 +76,10 @@ export const ArticleMetadata = ({
   return (
     <nav
       aria-label="Artikelinfo"
-      className={cn("w-full border-y border-kcvv-gray-light py-3", className)}
+      className={cn("border-kcvv-gray-light w-full border-y py-3", className)}
     >
-      <div className="w-full max-w-inner-lg mx-auto px-6 flex flex-wrap items-center justify-between gap-y-2">
-        <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray">
+      <div className="max-w-inner-lg mx-auto flex w-full flex-wrap items-center justify-between gap-y-2 px-6">
+        <ul className="text-kcvv-gray flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
           {facts.map((fact, i) => (
             <li key={`${i}-${fact}`} className="flex items-center gap-x-3">
               {i > 0 && (

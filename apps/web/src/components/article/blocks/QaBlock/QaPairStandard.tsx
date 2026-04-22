@@ -21,15 +21,15 @@ export const QaPairStandard = ({
       <div
         aria-hidden="true"
         data-testid="qa-pair-numeral"
-        className="font-title font-bold text-5xl leading-[0.9] text-kcvv-green-bright"
+        className="font-title text-kcvv-green-bright text-5xl leading-[0.9] font-bold"
       >
         {formatNumeral(index)}
       </div>
       <div>
-        <p className="font-title font-bold text-xl leading-[1.3] text-kcvv-gray-blue mb-3">
+        <p className="font-title text-kcvv-gray-blue mb-3 text-xl leading-[1.3] font-bold">
           {question}
         </p>
-        <div className="text-lg leading-[1.6] text-kcvv-gray-dark [&>p+p]:mt-4">
+        <div className="text-kcvv-gray-dark text-lg leading-[1.6] [&>p+p]:mt-4">
           <PortableText value={answer} />
         </div>
       </div>

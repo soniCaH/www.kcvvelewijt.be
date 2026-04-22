@@ -74,23 +74,23 @@ function formatMinute(minute: number, additionalTime?: number): string {
 function EventIcon({ type }: { type: MatchEvent["type"] }) {
   switch (type) {
     case "goal":
-      return <CircleDot className="w-4 h-4" aria-label="Doelpunt" />;
+      return <CircleDot className="h-4 w-4" aria-label="Doelpunt" />;
     case "yellow_card":
       return (
         <Square
-          className="w-3 h-4 fill-yellow-400 text-yellow-500"
+          className="h-4 w-3 fill-yellow-400 text-yellow-500"
           aria-label="Gele kaart"
         />
       );
     case "red_card":
       return (
         <Square
-          className="w-3 h-4 fill-red-500 text-red-600"
+          className="h-4 w-3 fill-red-500 text-red-600"
           aria-label="Rode kaart"
         />
       );
     case "substitution":
-      return <ArrowLeftRight className="w-4 h-4" aria-label="Wissel" />;
+      return <ArrowLeftRight className="h-4 w-4" aria-label="Wissel" />;
     default:
       return null;
   }
@@ -125,9 +125,9 @@ export function MatchEvents({
       <div className={cn("space-y-4", className)}>
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center gap-4">
-            <div className="h-6 w-10 bg-gray-200 rounded animate-pulse" />
-            <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse" />
-            <div className="h-6 flex-1 bg-gray-200 rounded animate-pulse" />
+            <div className="h-6 w-10 animate-pulse rounded bg-gray-200" />
+            <div className="h-6 w-6 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-6 flex-1 animate-pulse rounded bg-gray-200" />
           </div>
         ))}
       </div>
@@ -156,7 +156,7 @@ export function MatchEvents({
   // Empty state
   if (filteredEvents.length === 0) {
     return (
-      <div role="status" className={cn("text-center py-8", className)}>
+      <div role="status" className={cn("py-8 text-center", className)}>
         <p className="text-gray-500">
           Nog geen gebeurtenissen in deze wedstrijd.
         </p>
@@ -170,15 +170,15 @@ export function MatchEvents({
     const awayEvents = filteredEvents.filter((e) => e.team === "away");
 
     return (
-      <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6", className)}>
+      <div className={cn("grid grid-cols-1 gap-6 md:grid-cols-2", className)}>
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-gray-900">
             {homeTeamName}
           </h3>
           <EventList events={homeEvents} showIcons={showIcons} side="home" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-gray-900">
             {awayTeamName}
           </h3>
           <EventList events={awayEvents} showIcons={showIcons} side="away" />
@@ -216,14 +216,14 @@ function EventList({
   side: "home" | "away";
 }) {
   if (events.length === 0) {
-    return <p className="text-gray-500 text-sm">Geen gebeurtenissen</p>;
+    return <p className="text-sm text-gray-500">Geen gebeurtenissen</p>;
   }
 
   return (
     <div className="space-y-2">
       {events.map((event) => (
         <div key={event.id} className="flex items-center gap-3 text-sm">
-          <span className="font-mono text-gray-500 w-10">
+          <span className="w-10 font-mono text-gray-500">
             {formatMinute(event.minute, event.additionalTime)}
           </span>
           {showIcons && (
@@ -268,12 +268,12 @@ function EventRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 py-2 px-3 rounded-lg",
+        "flex items-center gap-3 rounded-lg px-3 py-2",
         isHome ? "bg-kcvv-green-bright/5" : "bg-gray-50",
       )}
     >
       {/* Minute */}
-      <span className="font-mono text-sm text-gray-500 w-12 flex-shrink-0">
+      <span className="w-12 flex-shrink-0 font-mono text-sm text-gray-500">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
 
@@ -291,11 +291,11 @@ function EventRow({
       )}
 
       {/* Description */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <span className="text-sm text-gray-900">
           <EventDescription event={event} />
         </span>
-        <span className="text-xs text-gray-500 ml-2">{teamName}</span>
+        <span className="ml-2 text-xs text-gray-500">{teamName}</span>
       </div>
     </div>
   );
@@ -311,10 +311,10 @@ function EventDescription({ event }: { event: MatchEvent }) {
         <>
           <span className="font-semibold">{event.player}</span>
           {event.isPenalty && (
-            <span className="text-gray-500 text-xs ml-1">(pen)</span>
+            <span className="ml-1 text-xs text-gray-500">(pen)</span>
           )}
           {event.isOwnGoal && (
-            <span className="text-red-500 text-xs ml-1">(e.d.)</span>
+            <span className="ml-1 text-xs text-red-500">(e.d.)</span>
           )}
           {event.assist && (
             <span className="text-gray-500"> (assist: {event.assist})</span>
@@ -328,7 +328,7 @@ function EventDescription({ event }: { event: MatchEvent }) {
       return (
         <>
           <span className="text-green-600">{event.playerIn}</span>
-          <span className="text-gray-400 mx-1">⟷</span>
+          <span className="mx-1 text-gray-400">⟷</span>
           <span className="text-red-600">{event.playerOut}</span>
         </>
       );

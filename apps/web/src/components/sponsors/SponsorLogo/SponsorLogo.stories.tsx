@@ -97,7 +97,7 @@ export const DarkBackground: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-[#1E2024] p-6 rounded">
+      <div className="rounded bg-[#1E2024] p-6">
         <Story />
       </div>
     ),
