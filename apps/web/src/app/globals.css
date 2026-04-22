@@ -526,16 +526,18 @@
 
 /* ===== Phase 5 (#1331): Transfer overview stack =============================
 
-   Consecutive `transferFact` overview rows form a single continuous dark
-   band. The FIRST row in a group carries its `my-10` breathing space above
-   (separating it from the preceding prose / `Ander transfernieuws` heading);
-   subsequent rows in the same stack strip their top margin so only the
-   1 px white-alpha rule inside the row divides them. The last row in the
-   group naturally keeps its `mb-10` bottom space separating it from the
-   prose that follows.
+   Consecutive `transferFact` overview rows fuse into a single seamless
+   dark band. The outer rows in a group keep 2.5 rem breathing space
+   against the surrounding prose; rows INSIDE the group strip both the
+   top margin of the row and the bottom margin of its predecessor so the
+   dark surface flows edge-to-edge with no white slivers between rows.
 
-   Tailwind arbitrary-variant syntax for sibling selectors gets noisy with
-   attribute selectors, so the rules live here where they stay readable. */
+   `:has(+ X)` peels the trailing gap off any overview that is itself
+   followed by another overview. Safari 15.4+, Chrome 105+, Firefox 121+
+   all support it — same baseline the rest of the site targets.
+
+   Tailwind arbitrary-variant syntax for sibling + `:has()` selectors
+   gets noisy with attribute selectors, so the rules live here. */
 [data-testid='transfer-overview'] {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
@@ -543,6 +545,12 @@
 
 [data-testid='transfer-overview'] + [data-testid='transfer-overview'] {
   margin-top: 0;
+}
+
+[data-testid='transfer-overview']:has(
+  + [data-testid='transfer-overview']
+) {
+  margin-bottom: 0;
 }
 
 
