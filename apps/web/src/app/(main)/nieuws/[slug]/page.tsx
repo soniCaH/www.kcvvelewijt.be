@@ -23,8 +23,7 @@ import {
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
 } from "@/lib/seo/jsonld";
-import { ArticleHeader, ArticleMetadata } from "@/components/article";
-import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
@@ -194,39 +193,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           subject={article.subject ?? null}
         />
       ) : (
-        <>
-          <ArticleHeader
-            title={article.title}
-            imageUrl={article.coverImageUrl ?? undefined}
-            imageAlt={article.title}
-            category={primaryCategory?.name}
-            date={
-              article.publishedAt
-                ? formatArticleDate(new Date(article.publishedAt))
-                : undefined
-            }
-            author="KCVV Elewijt"
-          />
-
-          <ArticleMetadata
-            author="KCVV Elewijt"
-            date={
-              article.publishedAt
-                ? formatArticleDate(new Date(article.publishedAt))
-                : undefined
-            }
-            readingTime={readingTime}
-            shareConfig={{ url: shareConfig.url, title: article.title }}
-          />
-
-          <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
-            {Array.isArray(article.body) && article.body.length > 0 && (
-              <SanityArticleBody
-                content={article.body as PortableTextBlock[]}
-              />
-            )}
-          </main>
-        </>
+        <AnnouncementTemplate
+          title={article.title}
+          category={primaryCategory?.name}
+          coverImageUrl={article.coverImageUrl ?? undefined}
+          publishedDate={
+            article.publishedAt
+              ? formatArticleDate(new Date(article.publishedAt))
+              : undefined
+          }
+          readingTime={readingTime}
+          shareConfig={{ url: shareConfig.url, title: article.title }}
+          body={(article.body as PortableTextBlock[] | null) ?? null}
+        />
       )}
 
       <RelatedContentSection

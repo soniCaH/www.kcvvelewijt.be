@@ -258,7 +258,10 @@ export const SanityArticleBody = ({
         "prose-p:leading-relaxed prose-p:text-kcvv-gray-dark",
         /* prose-a: fallback for <a> tags not rendered via marks (e.g. inside htmlTable raw HTML) */
         "prose-a:text-kcvv-green-dark prose-a:decoration-kcvv-green/30 prose-a:underline-offset-2 hover:prose-a:text-kcvv-green hover:prose-a:decoration-kcvv-green",
-        /* blockquote styles handled by .prose blockquote in globals.css */
+        /* Blockquote: legacy `.prose blockquote` glyph treatment in
+           globals.css by default; announcement/transfer templates pass
+           `className="article-body"` which swaps to the §7.4 rule-framed
+           treatment via `.article-body blockquote`. */
         "prose-table:w-full prose-th:bg-table-header-bg prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-table-border prose-td:p-2",
         className,
       )}
