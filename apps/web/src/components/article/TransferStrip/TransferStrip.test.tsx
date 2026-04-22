@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { TransferStrip } from "./TransferStrip";
 
 describe("TransferStrip", () => {
@@ -27,9 +27,13 @@ describe("TransferStrip", () => {
     expect(strip).toHaveTextContent("Jupiler Pro League");
     expect(strip).toHaveTextContent("Derde Amateur");
     // The van/naar/inkomend labels are intentionally absent — the arrow
-    // direction + colour carries the semantic.
-    expect(strip).not.toHaveTextContent(/^van$/i);
-    expect(strip).not.toHaveTextContent(/^naar$/i);
+    // direction + colour carries the semantic. `within(strip).queryByText`
+    // looks for a child element whose text is exactly the label (not a
+    // substring of the strip's concatenated content), so the assertion
+    // genuinely fails if a standalone label node ever re-appears.
+    expect(within(strip).queryByText(/^van$/i)).toBeNull();
+    expect(within(strip).queryByText(/^naar$/i)).toBeNull();
+    expect(within(strip).queryByText(/^inkomend$/i)).toBeNull();
   });
 
   it("outgoing: arrow in kcvv-warning (amber) with KCVV on the from side and the other club on the to side", () => {

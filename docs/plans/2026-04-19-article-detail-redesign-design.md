@@ -48,12 +48,12 @@ Article detail pages become **content-type aware**. One of four `articleType` va
 
 Four types, driven by a new `articleType` enum on the `article` document. Order reflects editorial priority.
 
-| Type           | What it covers                                                   | Signature treatment                                                       |
-| -------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `interview`    | Q&A profiles of players, staff, volunteers                       | `qaBlock` body, `subject` attribution, 4:5 portrait hero                  |
-| `announcement` | General-purpose news, club updates, facility, sponsor, editorial | Drop-cap on first paragraph, calm 16:9 hero image, rule-framed blockquote |
-| `transfer`     | Single or overview transfer news                                 | Typographic-only hero, `transferFact` feature + overview blocks           |
-| `event`        | Tournaments, stages, club events, youth days                     | Serif-style date block hero, `eventFact` feature + overview blocks        |
+| Type           | What it covers                                                   | Signature treatment                                                                                        |
+| -------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `interview`    | Q&A profiles of players, staff, volunteers                       | `qaBlock` body, `subject` attribution, 4:5 portrait hero                                                   |
+| `announcement` | General-purpose news, club updates, facility, sponsor, editorial | Drop-cap on first paragraph, calm 16:9 hero image, rule-framed blockquote                                  |
+| `transfer`     | Single or overview transfer news                                 | Two-column hero from `article.coverImage`, horizontal van → naar strip, dark `transferFact` overview stack |
+| `event`        | Tournaments, stages, club events, youth days                     | Serif-style date block hero, `eventFact` feature + overview blocks                                         |
 
 **Routing:** one `/nieuws/[slug]` route, one React page component that dispatches to a type-specific template based on `article.articleType`. Do not split into separate routes.
 
@@ -785,7 +785,7 @@ There is no separate "feature card" component. The first `transferFact` in a `tr
 
 The direction is single-column, narrow-measure by design. Mobile is the home viewport, not an afterthought.
 
-- All full-bleed blocks (`key`, `quote`, transferFact feature, eventFact feature) collapse to vertical stacks and keep their full-bleed band. Rules re-flow inside the new column.
+- All full-bleed blocks (`key`, `quote`, the `transferFact` dark overview stack, the `eventFact` feature + overviews) collapse to vertical stacks and keep their full-bleed band. Rules re-flow inside the new column.
 - Display type uses clamp() throughout — e.g. headline `clamp(2.5rem,5.5vw,4.5rem)` scales from 2.5rem on a 360px screen to 4.5rem on a 1440px monitor without a breakpoint override.
 - `standard` qaBlock: numeral drops above the question on its own line (not in a gutter).
 - `rapid-fire`: collapses to single column; each pair becomes question (Quasimoda 500, `text-sm kcvv-green-dark`) stacked over answer (`text-base`), 1px rule between pairs.
@@ -802,22 +802,29 @@ Per `apps/web/CLAUDE.md`, every new component lands in `src/components/article/`
 ```text
 apps/web/src/components/article/
   ArticleDetailPage/               # top-level dispatcher (renders one of the four templates)
-  InterviewTemplate/
-  AnnouncementTemplate/
-  TransferTemplate/
-  EventTemplate/
-  ArticleHeader/                   # existing — refactor into four hero variants
-  SanityArticleBody/               # existing — extended to render qaBlock, transferFact, eventFact
+  InterviewTemplate/               # ships
+  AnnouncementTemplate/            # ships
+  TransferTemplate/                # ships
+  EventTemplate/                   # Phase 6
+  InterviewHero/                   # ships
+  AnnouncementHero/                # ships
+  TransferHero/                    # ships — two-column, article.coverImage on the right
+  TransferStrip/                   # ships — horizontal van → naar below the metadata bar
+  ArticleBodyMotion/               # ships — §7.5 fade-up wrapper
+  ArticleMetadata/                 # ships — §7.6 metadata bar
+  SanityArticleBody/               # existing — extended to render qaBlock + transferFact
   blocks/
     QaBlock/                       # renders qaBlock + all 4 tag treatments
     QaPairStandard/
     QaPairKey/
     QaPairQuote/                   # includes the decorative glyph + motion
     QaGroupRapidFire/              # consecutive rapid-fire collation
-    TransferFactFeature/
-    TransferFactOverview/
-    EventFactFeature/
-    EventFactOverview/
+    TransferFact/                  # dark overview-row variant only; the
+                                    # feature/hero content is absorbed by
+                                    # TransferHero + TransferStrip — there
+                                    # is no separate `TransferFactFeature`.
+    EventFactFeature/              # Phase 6
+    EventFactOverview/             # Phase 6
   SubjectAttribution/              # shared attribution block used by key + quote
 ```
 
