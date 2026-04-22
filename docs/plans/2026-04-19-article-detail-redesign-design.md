@@ -243,6 +243,8 @@ No `intro` or `outro` field. Editors place intro/outro prose as regular paragrap
 
 ### 4.4 `transferFact` block type
 
+_Status note: the initial spec below has drifted during Phase 5. The shipped fields are `direction`, `playerName`, `position`, `age`, `otherClubName`, `otherClubLogo`, `otherClubContext`, `kcvvContext`, `until`, `note`, `noteAttribution`. The original `playerPhoto` field is gone — the hero sources its portrait from `article.coverImage` (same projection the interview hero uses). Context subtitles land under each club on the horizontal strip (see §5.3 + §8.1)._
+
 New file: `packages/sanity-schemas/src/transferFact.ts`.
 
 ```typescript
@@ -452,29 +454,48 @@ Same frame as announcement, with three differences:
 
 ### 5.3 `transfer` template
 
-Typographic hero only — no image.
+Two-column hero with a horizontal van → naar strip beneath the metadata bar.
 
 ```text
 < Terug naar nieuws
 
----- TRANSFER | INCOMING
+┌─────────────────────────────────┬──────────────────────┐
+│ ---- TRANSFER | INKOMEND        │                      │
+│                                 │   [ 4:5 portrait     │
+│ Maxim Breugelmans               │     crop of          │
+│                                 │     article          │
+│ 27 jaar · Middenvelder          │     .coverImage ]    │
+│                                 │                      │
+│ │ "Blij om thuis te zijn.       │                      │
+│ │  Elewijt voelt onmiddellijk   │                      │
+│ │  vertrouwd."                  │                      │
+│ │ — MAXIM BREUGELMANS           │                      │
+└─────────────────────────────────┴──────────────────────┘
 
-Maxim Breugelmans
--------------------------------
-27 jaar · Middenvelder
+───── metadata bar ─────
 
-from    STANDARD LUIK
-to      KCVV ELEWIJT
+               VAN      [ → ]      NAAR
+        Standard Luik  INKOMEND   KCVV Elewijt
+        Jupiler Pro…              Derde Amateur · #8
 
------ metadata bar -----
+[ body paragraphs ]
 
-[ feature transferFact card — full-bleed, first body block, see §8.1 ]
+---- Ander transfernieuws
 
-[ body paragraphs / additional transferFact overview blocks ]
+[ overview rows for other transferFact blocks ]
+
+[ closing paragraphs ]
 ```
 
-- Headline slot renders a programmatic from/to composition at display size (same type scale as announcement headline, but structured as a from/to block).
-- The first `transferFact` block in the body renders as the **feature variant**; all subsequent blocks render as overview cards. See §8.
+- **Hero (white, no cream band)**:
+  - Left column — kicker bar (`TRANSFER | INKOMEND/UITGAAND/VERLENGD`), Quasimoda 700 `clamp(2.5rem,5.5vw,4.5rem)` player-name h1, `27 jaar · Middenvelder` meta row, optional pull-quote (Quasimoda 400 italic `text-xl`, 2 px green left rule, em-dash attribution defaulting to `playerName` or the optional `noteAttribution` override).
+  - Right column — 4:5 hotspot portrait from `article.coverImage` via the existing `coverImagePortraitUrl` GROQ projection (same treatment the interview hero uses). Pattern/texture is baked into the editor-supplied image; no frontend compositing.
+  - No byline row under the title — author + date + reading time live in the §7.6 metadata bar per the cross-template rule.
+- **Transfer strip** (below the metadata bar, see §8.1):
+  - Horizontal `VAN → label → NAAR` composition. Direction label `Inkomend` / `Uitgaand` / `Verlengd` beneath the arrow.
+  - Colours: incoming = `kcvv-green-bright`; outgoing = `kcvv-warning` (amber — reported without alarm); extension = `kcvv-green-dark` label with **no arrow** (the absence of direction is the signal).
+  - Each club carries a context subtitle (`otherClubContext` / `kcvvContext` — free-text league/level/jersey, e.g. `Jupiler Pro League · U23` or `Derde Amateur · A-ploeg · #8`).
+- **First transferFact is absorbed by the hero + strip** — the template filters it out of the body so it doesn't render a second time. Subsequent transferFact blocks render inline as `TransferFactOverview` rows (§8.1), typically beneath an editor-authored `Ander transfernieuws` H2 (no auto-injected section header; editors control placement via a regular H2 block).
 
 ### 5.4 `event` template
 
@@ -661,53 +682,41 @@ Cream band (`--color-foundation-gray-light`) full-bleed at the end of every arti
 
 ### 8.1 `transferFact`
 
-**Feature variant** (first `transferFact` block in the body, and only when `articleType='transfer'`):
+There is no separate "feature card" component. The first `transferFact` in a `transfer` article is absorbed by `TransferHero` + `TransferStrip` (see §5.3). Subsequent `transferFact` blocks render as `TransferFactOverview` rows inline in the body.
+
+**Transfer strip** (horizontal, rendered beneath the §7.6 metadata bar in a `transfer` article):
 
 ```text
-+-------------------------------------------------------------------+
-|   [ player cutout ]    ---- INCOMING                              |
-|                                                                   |
-|                        Maxim Breugelmans                          |
-|                        -----------------------------              |
-|                        27 jaar · Middenvelder                     |
-|                                                                   |
-|                        from                                       |
-|                        [logo] STANDARD LUIK                       |
-|                        ----- 1px rule -----                       |
-|                        to                                         |
-|                        |  [logo] KCVV ELEWIJT                     |
-|                                                                   |
-|                        "Blij om thuis te zijn."                   |
-+-------------------------------------------------------------------+
+             VAN            [ → ]         NAAR
+      Standard Luik       INKOMEND       KCVV Elewijt
+      Jupiler Pro…                       Derde Amateur · #8
 ```
 
-- Full-bleed, content capped at `max-w-[70rem]`. `py-16` desktop, `py-8` mobile. 1px top + bottom `kcvv-gray-light` rules.
-- Grid: `grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-10`. Cutout column: `playerPhoto` at max 420px, `object-contain`, bottom-aligned. No frame, no shadow, no rim-light.
-- Kicker: `.featured-border::before` + `INCOMING`/`OUTGOING`/`EXTENSION` in `text-xs uppercase tracking-[var(--letter-spacing-label)] font-500 kcvv-green-dark`.
-- Player name: Quasimoda 700, `text-5xl`, `leading-[0.95]`, `kcvv-gray-blue`.
-- Age + position: `text-sm uppercase tracking-[var(--letter-spacing-caps)] kcvv-gray`, middle-dot separator.
-- From/to: mono label (`from`/`to`/`until`) above a club row with 32px logo + Quasimoda 500 `text-2xl kcvv-gray-blue` name. 1px `kcvv-gray-light` rule between from and to.
-- **KCVV side** gets a 2px `kcvv-green-bright` left accent bar (4px inset).
-- Direction rules:
-  - `incoming`: from = `otherClubName`, to = KCVV. KCVV row has the accent.
-  - `outgoing`: from = KCVV, to = `otherClubName`. KCVV row has the accent.
-  - `extension`: single row `KCVV ELEWIJT` + mono `until ${until}` line beneath. Accent bar on the row.
-- Note: Quasimoda 400, `text-xl`, `kcvv-gray-dark`, `mt-4`. No quote glyph, no rules.
+- Width: `max-w-inner-lg` container, `py-10`.
+- Grid: `grid-cols-[1fr_auto_1fr] items-center`. Left side right-aligned, right side left-aligned.
+- Each side: mono small-caps `VAN` / `NAAR` label above a club block — Quasimoda 700 `text-2xl` club name (KCVV side in `kcvv-green-dark`, other side in `kcvv-gray-blue`) + 28 px logo + optional `otherClubContext` / `kcvvContext` subtitle in mono small-caps `kcvv-gray`.
+- Middle: Lucide `ArrowRight` at 24 px, colour-coded per direction:
+  - `incoming` → `kcvv-green-bright` arrow + `kcvv-green-dark` label `Inkomend`.
+  - `outgoing` → `kcvv-warning` (amber, `#ffae00`) arrow + label `Uitgaand`. Reuses the existing semantic palette — warm enough to flag a departure, not alarmed like alert-red.
+  - `extension` → **no arrow**. Middle collapses to a centered single-KCVV block with a `Verlengd` label and a `tot {until}` mono line beneath. Extension has no counterparty so direction makes no sense.
 
-**Overview variant** (subsequent `transferFact` blocks or those inside an `articleType='announcement'` article):
+**Overview variant** (subsequent `transferFact` blocks, or a `transferFact` inside an `articleType='announcement'` article):
 
 ```text
-+-----------------------------------------------------------+
-|  INCOMING    Maxim Breugelmans            27 · MF         |
-|              [logo] Standard Luik  ->  [logo] KCVV        |
-+-----------------------------------------------------------+
+┌──────────────────────────────────────────────────────────────────┐
+│ ─── VERLENGD    Koen Dewaele  29 · KEEPER   [logo] KCVV  TOT 2028 │
+├──────────────────────────────────────────────────────────────────┤
+│ ─── UITGAAND    Bart Peeters  31 · VERD     [logo] KCVV → [logo]  │
+│                                              KV Mechelen  TRANSFER │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-- Body-column width (`max-w-[65ch]`), 1px top + bottom `kcvv-gray-light` borders, `py-4`, no side borders, no radius. Stacks flush (subsequent cards use `border-b` only).
-- Left kicker column `w-[7rem]`: direction label `text-xs`. Incoming/extension in `kcvv-green-dark`; outgoing in `kcvv-gray` (reported, not celebrated — no red pill, per the rejection list).
-- Right column, row 1: name Quasimoda 700 `text-xl kcvv-gray-blue` + right-aligned age/position meta in mono small-caps.
-- Right column, row 2: 20px logo + club name `text-base`, Lucide `ArrowRight` 14px in `kcvv-gray`, 20px logo + club name. Extension collapses to `[logo] KCVV ELEWIJT` + `until ${until}` in mono.
-- No player cutout in overview variant.
+- Single-row grid on md+: `grid-cols-[7rem_minmax(0,1fr)_minmax(0,1.2fr)_auto]` with `gap-x-6`. Stacks to a flex column on mobile.
+- 1 px top rule (`border-kcvv-gray-light`), no side borders, no radius — rows flow flush together.
+- **Slot 1 — kicker**: `INKOMEND` / `UITGAAND` / `VERLENGD` preceded by a `h-[2px] w-6` accent bar. Colour per direction: incoming/extension = `kcvv-green-dark`, outgoing = `kcvv-warning` (amber).
+- **Slot 2 — player + meta**: Quasimoda 700 `text-xl kcvv-gray-blue` name + mono small-caps `age · position`.
+- **Slot 3 — clubs inline**: logo + name → Lucide `ArrowRight` 16 px (colour matches the kicker colour) → logo + name. Extension collapses to `[logo] KCVV ELEWIJT` only.
+- **Slot 4 — status label**: mono small-caps `kcvv-gray` right-aligned. `tot {until}` on extensions, `transfer` otherwise.
 
 ### 8.2 `eventFact`
 

@@ -196,6 +196,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       ) : article.articleType === "transfer" ? (
         <TransferTemplate
           title={article.title}
+          coverImageUrl={article.coverImagePortraitUrl ?? article.coverImageUrl}
           publishedDate={
             article.publishedAt
               ? formatArticleDate(new Date(article.publishedAt))

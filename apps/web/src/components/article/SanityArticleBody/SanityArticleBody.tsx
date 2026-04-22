@@ -19,7 +19,6 @@ import {
   type QaBlockValue,
 } from "@/components/article/blocks/QaBlock";
 import {
-  TransferFactFeature,
   TransferFactOverview,
   type TransferFactValue,
 } from "@/components/article/blocks/TransferFact";
@@ -166,32 +165,16 @@ export interface SanityArticleBodyProps {
    * when rendering non-interview articles (subject will be null).
    */
   subject?: SubjectValue | null;
-  /**
-   * `_key` of the `transferFact` block that should render as the feature
-   * variant (full-bleed, player cutout + from/to). All other
-   * `transferFact` blocks render as overview cards. Computed by
-   * `TransferTemplate` from the article body; leave undefined for
-   * non-transfer articles — every transferFact then renders as overview.
-   *
-   * TODO (Phase 6, #1332): the upcoming `eventFact` block follows the
-   * same first-is-feature / rest-are-overview pattern. When adding the
-   * second caller, replace this type-specific prop with a generic
-   * body-block pre-processor that annotates the winning block with a
-   * `_variant: "feature"` marker — keeps `SanityArticleBody` agnostic
-   * of which article type owns the feature slot.
-   */
-  featureTransferKey?: string;
 }
 
 export const SanityArticleBody = ({
   content,
   className,
   subject = null,
-  featureTransferKey,
 }: SanityArticleBodyProps) => {
-  // Rebuild the components map whenever `subject` or the feature-transfer
-  // key changes so the per-block renderers see the current article state
-  // without reaching for a context provider.
+  // Rebuild the components map whenever `subject` changes so per-block
+  // renderers see the current article state without reaching for a
+  // context provider.
   const components = useMemo<PortableTextComponents>(
     () => ({
       types: {
@@ -215,12 +198,14 @@ export const SanityArticleBody = ({
         qaBlock: ({ value }: { value: QaBlockValue }) => (
           <QaBlock value={value} subject={subject} />
         ),
-        transferFact: ({ value }: { value: TransferFactValue }) =>
-          featureTransferKey && value._key === featureTransferKey ? (
-            <TransferFactFeature value={value} />
-          ) : (
-            <TransferFactOverview value={value} />
-          ),
+        transferFact: ({ value }: { value: TransferFactValue }) => (
+          // In the transfer template, the first transferFact is absorbed
+          // by the hero — the template filters it out of the body before
+          // this renderer runs. Any surviving transferFact here is a
+          // second-or-later block (or lives inside a non-transfer article)
+          // and always renders as an overview card.
+          <TransferFactOverview value={value} />
+        ),
       },
       block: {
         blockquote: ({ children }) => (
@@ -270,7 +255,7 @@ export const SanityArticleBody = ({
         },
       },
     }),
-    [subject, featureTransferKey],
+    [subject],
   );
 
   return (

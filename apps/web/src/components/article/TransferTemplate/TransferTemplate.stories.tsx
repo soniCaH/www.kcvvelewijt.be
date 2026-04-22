@@ -25,14 +25,15 @@ const incomingFeature = {
   _key: "tf-incoming-feature",
   direction: "incoming",
   playerName: "Maxim Breugelmans",
-  playerPhotoUrl:
-    "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80",
   position: "Middenvelder",
   age: 27,
   otherClubName: "Standard Luik",
   otherClubLogoUrl:
     "https://upload.wikimedia.org/wikipedia/en/2/25/Standard_Li%C3%A8ge_logo.svg",
+  otherClubContext: "Jupiler Pro League · U23",
+  kcvvContext: "Derde Amateur · A-ploeg · #8",
   note: "Blij om thuis te zijn. Elewijt voelt onmiddellijk vertrouwd.",
+  noteAttribution: "Maxim Breugelmans",
 } as unknown as PortableTextBlock;
 
 const extensionOverview = {
@@ -65,7 +66,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 5 (#1331) — full transfer article composition. `TransferHero` (no image) + §7.6 metadata bar + body with one feature transferFact block and two overview cards. Demonstrates the three directions (incoming feature, extension overview, outgoing overview) in the same page.",
+          "Phase 5 (#1331) — full transfer article composition. Hero absorbs the first transferFact (kicker + h1 + meta + pull-quote + cover portrait). The §7.6 metadata bar is followed by a horizontal `TransferStrip` (van → direction → naar) that carries context subtitles. Subsequent transferFacts render inline beneath an editor-authored `Ander transfernieuws` H2.",
       },
     },
   },
@@ -78,6 +79,8 @@ type Story = StoryObj<typeof meta>;
 export const FullComposition: Story = {
   args: {
     title: "Maxim Breugelmans versterkt Elewijt",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=1000&q=80&fit=crop",
     publishedDate: "19 April 2026",
     readingTime: "3 min lezen",
     shareConfig: {
@@ -94,13 +97,13 @@ export const FullComposition: Story = {
         "p2",
         "De afgelopen seizoenen speelde hij 130 matchen bij Standard Luik en toonde hij zich een betrouwbare organisator in het middenveld.",
       ),
-      heading("h1", "Verdere transferbeweging"),
-      paragraph(
-        "p3",
-        "Daarnaast verlengt de club het contract van doelman Koen Dewaele tot 2028, en neemt Bart Peeters afscheid na vier seizoenen.",
-      ),
+      heading("h1", "Ander transfernieuws"),
       extensionOverview,
       outgoingOverview,
+      paragraph(
+        "p3",
+        "Daarnaast bedankt de club Bart Peeters voor vier seizoenen trouwe inzet en wenst hem veel succes in Mechelen. Keeper Koen Dewaele blijft de nummer 1 tot en met 2028.",
+      ),
     ],
   },
 };
@@ -108,6 +111,7 @@ export const FullComposition: Story = {
 export const WithoutTransferFact: Story = {
   args: {
     title: "Transferupdate volgt",
+    coverImageUrl: null,
     publishedDate: "19 April 2026",
     shareConfig: {
       url: "https://kcvvelewijt.be/nieuws/transferupdate",
@@ -115,7 +119,7 @@ export const WithoutTransferFact: Story = {
     body: [
       paragraph(
         "p1",
-        "Hieronder zonder een gestructureerd transferFact-blok: de hero gebruikt de articletitel als h1 en het body blijft normale prose.",
+        "Hieronder zonder een gestructureerd transferFact-blok: de hero gebruikt de articletitel als h1, er is geen strip en de body blijft normale prose.",
       ),
     ],
   },

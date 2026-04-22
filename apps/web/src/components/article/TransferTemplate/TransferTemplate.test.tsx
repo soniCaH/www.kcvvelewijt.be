@@ -75,11 +75,22 @@ describe("TransferTemplate", () => {
       "Maxim Breugelmans",
     );
     expect(screen.getByTestId("transfer-hero-kicker").textContent).toMatch(
-      /Transfer.*Incoming/i,
+      /Transfer.*Inkomend/i,
     );
   });
 
-  it("first transferFact renders as feature — second as overview", () => {
+  it("renders the transfer strip below the metadata bar when a feature transferFact exists", () => {
+    render(
+      <TransferTemplate
+        title="Ignored"
+        shareConfig={{ url: "https://kcvvelewijt.be/nieuws/m" }}
+        body={[incoming as unknown as PortableTextBlock]}
+      />,
+    );
+    expect(screen.getByTestId("transfer-strip")).toBeInTheDocument();
+  });
+
+  it("first transferFact is absorbed by the hero (no duplicate overview), second renders as overview", () => {
     render(
       <TransferTemplate
         title="Ignored"
@@ -91,11 +102,10 @@ describe("TransferTemplate", () => {
         ]}
       />,
     );
-    expect(screen.getByTestId("transfer-feature")).toBeInTheDocument();
-    // Overview for the second transferFact. Feature has data-testid
-    // transfer-feature; overview has transfer-overview — confirms the
-    // dispatch picked the right variant per _key.
-    expect(screen.getByTestId("transfer-overview")).toBeInTheDocument();
+    // Only one `transfer-overview` block — the second transferFact. The
+    // first must not render as an overview (it lives in the hero).
+    const overviews = screen.getAllByTestId("transfer-overview");
+    expect(overviews).toHaveLength(1);
     expect(screen.getByTestId("transfer-overview-name")).toHaveTextContent(
       "Outgoing Player",
     );
@@ -112,7 +122,8 @@ describe("TransferTemplate", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Nieuwe Transfer",
     );
-    expect(screen.queryByTestId("transfer-feature")).toBeNull();
+    // No feature = no strip.
+    expect(screen.queryByTestId("transfer-strip")).toBeNull();
   });
 
   it("renders the metadata bar (date · author · reading time)", () => {

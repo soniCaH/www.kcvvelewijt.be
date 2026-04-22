@@ -11,19 +11,20 @@ export interface TransferFactOverviewProps {
 
 /**
  * Design §8.1 — overview variant of a `transferFact` block. Rendered for
- * subsequent transferFact blocks in a transfer article (the first one
- * renders as `TransferFactFeature`), or inline anywhere inside an
- * announcement body.
+ * subsequent transferFact blocks in a transfer article (the first one is
+ * absorbed by the hero + strip), or inline inside an announcement.
  *
- * Body-column width, 1 px top + bottom rules, no side borders, no radius.
- * Two rows:
- *   1. kicker (direction) · name · right-aligned age · position meta
- *   2. from→to club composition (or a single KCVV row + `until` on
- *      extensions)
+ * Single horizontal row (flex on mobile → grid on md), 1 px top rule,
+ * four slots:
  *
- * Outgoing direction renders the kicker in `kcvv-gray` — reported, not
- * celebrated (no red pill; the direction rejected that treatment during
- * the brainstorm).
+ *   [kicker]   [player + meta]   [clubs inline]   [status]
+ *
+ * Colour rules per direction:
+ *   - `incoming`  kicker = `kcvv-green-dark`, arrow = `kcvv-green-bright`.
+ *   - `outgoing`  kicker = `kcvv-warning` (amber — reported, not alarmed).
+ *     Arrow = `kcvv-warning`.
+ *   - `extension` kicker = `kcvv-green-dark`. No arrow — single KCVV row
+ *     + `TOT {until}` status label on the right.
  */
 export const TransferFactOverview = ({
   value,
@@ -37,28 +38,46 @@ export const TransferFactOverview = ({
     position,
   ].filter((x): x is string => typeof x === "string" && x.length > 0);
 
+  const isOutgoing = resolved.direction === "outgoing";
+  const kickerClass = isOutgoing ? "text-kcvv-warning" : "text-kcvv-green-dark";
+  const arrowClass = isOutgoing
+    ? "text-kcvv-warning"
+    : "text-kcvv-green-bright";
+  const accentBgClass = isOutgoing ? "bg-kcvv-warning" : "bg-kcvv-green-bright";
+
+  const statusLabel =
+    resolved.kind === "extension"
+      ? resolved.until
+        ? `tot ${resolved.until}`
+        : "verlengd"
+      : "transfer";
+
   return (
     <section
       data-testid="transfer-overview"
+      data-direction={resolved.direction}
       className={cn(
-        "not-prose my-6 grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2",
-        "border-y border-kcvv-gray-light py-4 max-w-[65ch]",
+        "not-prose border-t border-kcvv-gray-light py-6",
+        "grid gap-x-6 gap-y-3",
+        "md:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1.2fr)_auto] md:items-center",
         className,
       )}
     >
-      <p
+      <div
         data-testid="transfer-overview-kicker"
         className={cn(
-          "text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
-          resolved.direction === "outgoing"
-            ? "text-kcvv-gray"
-            : "text-kcvv-green-dark",
+          "flex items-center gap-2 text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
+          kickerClass,
         )}
       >
-        {resolved.kickerLabel}
-      </p>
+        <span
+          aria-hidden="true"
+          className={cn("inline-block h-[2px] w-6 shrink-0", accentBgClass)}
+        />
+        <span>{resolved.kickerLabel}</span>
+      </div>
 
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         {playerName && (
           <span
             data-testid="transfer-overview-name"
@@ -89,32 +108,21 @@ export const TransferFactOverview = ({
         )}
       </div>
 
-      <div aria-hidden="true" />
-      {resolved.kcvvOnly ? (
-        <div className="flex flex-col">
-          <div
-            data-testid="transfer-overview-kcvv-only"
-            className="flex items-center gap-2 text-base text-kcvv-gray-blue"
-          >
-            {resolved.kcvvOnly.logoUrl && (
-              <Image
-                src={resolved.kcvvOnly.logoUrl}
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 object-contain"
-              />
-            )}
-            <span>{resolved.kcvvOnly.name}</span>
-          </div>
-          {resolved.until && (
-            <span
-              data-testid="transfer-overview-until"
-              className="mt-1 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray"
-            >
-              tot {resolved.until}
-            </span>
+      {resolved.kind === "extension" ? (
+        <div
+          data-testid="transfer-overview-kcvv-only"
+          className="flex items-center gap-2 text-base text-kcvv-gray-blue"
+        >
+          {resolved.kcvvOnly.logoUrl && (
+            <Image
+              src={resolved.kcvvOnly.logoUrl}
+              alt=""
+              width={20}
+              height={20}
+              className="h-5 w-5 object-contain"
+            />
           )}
+          <span>{resolved.kcvvOnly.name}</span>
         </div>
       ) : (
         <div
@@ -122,32 +130,39 @@ export const TransferFactOverview = ({
           className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-gray-blue"
         >
           <span className="flex items-center gap-2">
-            {resolved.from!.logoUrl && (
+            {resolved.from.logoUrl && (
               <Image
-                src={resolved.from!.logoUrl}
+                src={resolved.from.logoUrl}
                 alt=""
                 width={20}
                 height={20}
                 className="h-5 w-5 object-contain"
               />
             )}
-            {resolved.from!.name}
+            {resolved.from.name}
           </span>
-          <Icon icon={ArrowRight} size="xs" className="text-kcvv-gray" />
+          <Icon icon={ArrowRight} size="xs" className={arrowClass} />
           <span className="flex items-center gap-2">
-            {resolved.to!.logoUrl && (
+            {resolved.to.logoUrl && (
               <Image
-                src={resolved.to!.logoUrl}
+                src={resolved.to.logoUrl}
                 alt=""
                 width={20}
                 height={20}
                 className="h-5 w-5 object-contain"
               />
             )}
-            {resolved.to!.name}
+            {resolved.to.name}
           </span>
         </div>
       )}
+
+      <p
+        data-testid="transfer-overview-status"
+        className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray md:text-right"
+      >
+        {statusLabel}
+      </p>
     </section>
   );
 };

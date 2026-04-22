@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { TransferHero } from "./TransferHero";
 
 describe("TransferHero", () => {
-  it("renders the kicker as `TRANSFER | INCOMING` for an incoming transfer", () => {
+  it("renders the kicker as `TRANSFER | INKOMEND` for an incoming transfer", () => {
     render(
       <TransferHero
         feature={{
@@ -15,7 +15,7 @@ describe("TransferHero", () => {
     );
     const kicker = screen.getByTestId("transfer-hero-kicker");
     const text = (kicker.textContent ?? "").replace(/\s+/g, " ").trim();
-    expect(text).toMatch(/Transfer\s*\|\s*Incoming/i);
+    expect(text).toMatch(/Transfer\s*\|\s*Inkomend/i);
   });
 
   it("renders the player name as the h1", () => {
@@ -33,7 +33,7 @@ describe("TransferHero", () => {
     );
   });
 
-  it("renders age + position as a subline when both are present", () => {
+  it("renders age + position as a meta row inside the hero", () => {
     render(
       <TransferHero
         feature={{
@@ -45,12 +45,74 @@ describe("TransferHero", () => {
         }}
       />,
     );
-    const sub = screen.getByTestId("transfer-hero-subtitle");
-    expect(sub.textContent).toMatch(/27 jaar/);
-    expect(sub.textContent).toMatch(/Middenvelder/i);
+    const meta = screen.getByTestId("transfer-hero-meta");
+    expect(meta.textContent).toMatch(/27 jaar/);
+    expect(meta.textContent).toMatch(/Middenvelder/i);
   });
 
-  it("incoming: renders from=other · to=KCVV in the hero composition", () => {
+  it("renders a pull-quote when `note` is present, attributed to the player by default", () => {
+    render(
+      <TransferHero
+        feature={{
+          direction: "incoming",
+          playerName: "Maxim Breugelmans",
+          otherClubName: "Standard Luik",
+          note: "Blij om thuis te zijn.",
+        }}
+      />,
+    );
+    const note = screen.getByTestId("transfer-hero-note");
+    expect(note).toHaveTextContent("Blij om thuis te zijn.");
+    expect(
+      screen.getByTestId("transfer-hero-note-attribution"),
+    ).toHaveTextContent("Maxim Breugelmans");
+  });
+
+  it("uses `noteAttribution` as the byline override when provided", () => {
+    render(
+      <TransferHero
+        feature={{
+          direction: "incoming",
+          playerName: "Maxim Breugelmans",
+          otherClubName: "Standard Luik",
+          note: "Sterke aanwinst.",
+          noteAttribution: "Sportieve cel",
+        }}
+      />,
+    );
+    expect(
+      screen.getByTestId("transfer-hero-note-attribution"),
+    ).toHaveTextContent("Sportieve cel");
+  });
+
+  it("omits the pull-quote entirely when `note` is empty", () => {
+    render(
+      <TransferHero
+        feature={{
+          direction: "incoming",
+          playerName: "Maxim Breugelmans",
+          otherClubName: "Standard Luik",
+        }}
+      />,
+    );
+    expect(screen.queryByTestId("transfer-hero-note")).toBeNull();
+  });
+
+  it("renders the 4:5 cover portrait when coverImageUrl is provided", () => {
+    render(
+      <TransferHero
+        feature={{
+          direction: "incoming",
+          playerName: "Maxim",
+          otherClubName: "Standard Luik",
+        }}
+        coverImageUrl="https://cdn.sanity.io/cover.webp"
+      />,
+    );
+    expect(screen.getByTestId("transfer-hero-image")).toBeInTheDocument();
+  });
+
+  it("omits the image when coverImageUrl is missing", () => {
     render(
       <TransferHero
         feature={{
@@ -60,52 +122,28 @@ describe("TransferHero", () => {
         }}
       />,
     );
-    const from = screen.getByTestId("transfer-hero-from");
-    const to = screen.getByTestId("transfer-hero-to");
-    expect(from).toHaveTextContent("Standard Luik");
-    expect(to).toHaveTextContent(/KCVV/i);
+    expect(screen.queryByTestId("transfer-hero-image")).toBeNull();
   });
 
-  it("outgoing: swaps sides — from=KCVV · to=other", () => {
-    render(
-      <TransferHero
-        feature={{
-          direction: "outgoing",
-          playerName: "Jan",
-          otherClubName: "KV Mechelen",
-        }}
-      />,
-    );
-    expect(screen.getByTestId("transfer-hero-from")).toHaveTextContent(/KCVV/i);
-    expect(screen.getByTestId("transfer-hero-to")).toHaveTextContent(
-      "KV Mechelen",
-    );
-  });
-
-  it("extension: collapses to a single KCVV row + 'until' label, no from→to", () => {
-    render(
-      <TransferHero
-        feature={{
-          direction: "extension",
-          playerName: "Jan",
-          until: "2028",
-        }}
-      />,
-    );
-    expect(screen.queryByTestId("transfer-hero-from")).toBeNull();
-    expect(screen.queryByTestId("transfer-hero-to")).toBeNull();
-    expect(screen.getByTestId("transfer-hero-kcvv-only")).toHaveTextContent(
-      /KCVV/i,
-    );
-    expect(screen.getByTestId("transfer-hero-until")).toHaveTextContent("2028");
-  });
-
-  it("falls back to headline-only composition when no feature transferFact is provided", () => {
+  it("falls back to the article title when no feature transferFact is provided", () => {
     render(<TransferHero feature={null} fallbackTitle="Nieuwe transfer" />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Nieuwe transfer",
     );
-    expect(screen.queryByTestId("transfer-hero-from")).toBeNull();
-    expect(screen.queryByTestId("transfer-hero-kcvv-only")).toBeNull();
+    expect(screen.queryByTestId("transfer-hero-meta")).toBeNull();
+    expect(screen.queryByTestId("transfer-hero-note")).toBeNull();
+  });
+
+  it("h1 never renders as an empty string even when all three signals are missing", () => {
+    render(
+      <TransferHero
+        feature={{ direction: "incoming", playerName: "   " }}
+        fallbackTitle="   "
+      />,
+    );
+    // Defaults to the literal 'Transfer' so the page always has a heading.
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /Transfer/,
+    );
   });
 });

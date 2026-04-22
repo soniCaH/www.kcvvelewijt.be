@@ -9,11 +9,12 @@ describe("resolveTransfer", () => {
       otherClubName: "Standard Luik",
       otherClubLogoUrl: "https://cdn/std.png",
     });
-    expect(out.from?.name).toBe("Standard Luik");
-    expect(out.from?.isKcvv).toBe(false);
-    expect(out.to?.name).toBe(KCVV_CLUB_NAME);
-    expect(out.to?.isKcvv).toBe(true);
-    expect(out.kickerLabel).toBe("Incoming");
+    if (out.kind !== "pair") throw new Error("expected pair kind");
+    expect(out.from.name).toBe("Standard Luik");
+    expect(out.from.isKcvv).toBe(false);
+    expect(out.to.name).toBe(KCVV_CLUB_NAME);
+    expect(out.to.isKcvv).toBe(true);
+    expect(out.kickerLabel).toBe("Inkomend");
   });
 
   it("outgoing: from = KCVV, to = other club (KCVV is the source)", () => {
@@ -22,11 +23,12 @@ describe("resolveTransfer", () => {
       playerName: "Jan",
       otherClubName: "KV Mechelen",
     });
-    expect(out.from?.name).toBe(KCVV_CLUB_NAME);
-    expect(out.from?.isKcvv).toBe(true);
-    expect(out.to?.name).toBe("KV Mechelen");
-    expect(out.to?.isKcvv).toBe(false);
-    expect(out.kickerLabel).toBe("Outgoing");
+    if (out.kind !== "pair") throw new Error("expected pair kind");
+    expect(out.from.name).toBe(KCVV_CLUB_NAME);
+    expect(out.from.isKcvv).toBe(true);
+    expect(out.to.name).toBe("KV Mechelen");
+    expect(out.to.isKcvv).toBe(false);
+    expect(out.kickerLabel).toBe("Uitgaand");
   });
 
   it("extension: collapses to a single KCVV row + until label, no from/to", () => {
@@ -35,17 +37,17 @@ describe("resolveTransfer", () => {
       playerName: "Jan",
       until: "2028",
     });
-    expect(out.from).toBeUndefined();
-    expect(out.to).toBeUndefined();
-    expect(out.kcvvOnly?.isKcvv).toBe(true);
+    if (out.kind !== "extension") throw new Error("expected extension kind");
+    expect(out.kcvvOnly.isKcvv).toBe(true);
     expect(out.until).toBe("2028");
-    expect(out.kickerLabel).toBe("Extension");
+    expect(out.kickerLabel).toBe("Verlengd");
   });
 
   it("defaults to incoming when direction is missing — graceful fallback for drafts", () => {
     const out = resolveTransfer({ playerName: "Anoniem" });
+    if (out.kind !== "pair") throw new Error("expected pair kind");
     expect(out.direction).toBe("incoming");
-    expect(out.to?.isKcvv).toBe(true);
+    expect(out.to.isKcvv).toBe(true);
   });
 
   it("other-club logo falls back to null when not provided by the editor", () => {
@@ -53,6 +55,7 @@ describe("resolveTransfer", () => {
       direction: "incoming",
       otherClubName: "Club X",
     });
-    expect(out.from?.logoUrl).toBeNull();
+    if (out.kind !== "pair") throw new Error("expected pair kind");
+    expect(out.from.logoUrl).toBeNull();
   });
 });

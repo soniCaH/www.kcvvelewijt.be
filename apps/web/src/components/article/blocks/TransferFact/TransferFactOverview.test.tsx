@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { TransferFactOverview } from "./TransferFactOverview";
 
 describe("TransferFactOverview", () => {
-  it("incoming: kicker uses green-dark colour class", () => {
+  it("incoming: kicker uses green-dark colour class and reads 'Inkomend'", () => {
     render(
       <TransferFactOverview
         value={{
@@ -15,10 +15,10 @@ describe("TransferFactOverview", () => {
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
     expect(kicker).toHaveClass("text-kcvv-green-dark");
-    expect(kicker).toHaveTextContent(/INCOMING/i);
+    expect(kicker).toHaveTextContent(/Inkomend/i);
   });
 
-  it("outgoing: kicker uses gray colour class (reported, not celebrated — no red pill)", () => {
+  it("outgoing: kicker uses kcvv-warning (amber) — reported, not alarmed", () => {
     render(
       <TransferFactOverview
         value={{
@@ -29,9 +29,9 @@ describe("TransferFactOverview", () => {
       />,
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
-    expect(kicker).toHaveClass("text-kcvv-gray");
+    expect(kicker).toHaveClass("text-kcvv-warning");
     expect(kicker).not.toHaveClass("text-kcvv-green-dark");
-    expect(kicker).toHaveTextContent(/OUTGOING/i);
+    expect(kicker).toHaveTextContent(/Uitgaand/i);
   });
 
   it("renders the player name and the age/position meta row", () => {
@@ -54,7 +54,7 @@ describe("TransferFactOverview", () => {
     expect(meta.textContent).toMatch(/Middenvelder/i);
   });
 
-  it("renders the from→to club row with both names", () => {
+  it("renders the from→to club row with both names and a 'transfer' status label", () => {
     render(
       <TransferFactOverview
         value={{
@@ -67,9 +67,12 @@ describe("TransferFactOverview", () => {
     const row = screen.getByTestId("transfer-overview-clubs");
     expect(row).toHaveTextContent("Standard Luik");
     expect(row).toHaveTextContent(/KCVV/i);
+    expect(screen.getByTestId("transfer-overview-status")).toHaveTextContent(
+      /transfer/i,
+    );
   });
 
-  it("extension: single KCVV row + 'until' line, no from→to arrow row", () => {
+  it("extension: single KCVV row + TOT status label, no from→to arrow row", () => {
     render(
       <TransferFactOverview
         value={{
@@ -82,8 +85,8 @@ describe("TransferFactOverview", () => {
     expect(screen.queryByTestId("transfer-overview-clubs")).toBeNull();
     const solo = screen.getByTestId("transfer-overview-kcvv-only");
     expect(solo).toHaveTextContent(/KCVV/i);
-    expect(screen.getByTestId("transfer-overview-until")).toHaveTextContent(
-      "2028",
+    expect(screen.getByTestId("transfer-overview-status")).toHaveTextContent(
+      /tot 2028/i,
     );
   });
 });
