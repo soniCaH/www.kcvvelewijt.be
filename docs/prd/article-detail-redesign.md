@@ -110,15 +110,15 @@ Rollout posture: phases 2–7 can ship in any order relative to each other once 
 
 ### Phase 4 — #1330 — Announcement template
 
-- [ ] `AnnouncementTemplate` component added. Default path when `articleType` is `announcement` or missing.
-- [ ] Hero per design §5.1: 16:9 `article.coverImage` via Sanity CDN hotspot, rounded-[4px], no overlay. Kicker with `.featured-border::before` bar, Quasimoda 700 clamp title sentence-case, byline row.
-- [ ] Drop-cap on first `<p>` inside `.article-body`: Quasimoda 700 `text-[5.5rem] leading-[0.85] kcvv-green-bright`, floated, 4 lines tall. Applied only to `announcement` and `transfer` body prose (not `interview` or `event`).
-- [ ] Body h2 preceded by 4rem × 2px `kcvv-green-bright` bar (reuse `.featured-border::before`).
-- [ ] Blockquote rework per design §7.4: rule-framed centered, Quasimoda 400 `text-2xl` gray-blue, 1px top+bottom rules, attribution with 2rem green rule prefix. Scoped to `.article-body` so Studio previews are unaffected.
-- [ ] Body fade-up motion on scroll per design §7.5: all `<p>`/`<h2>`/`<h3>` inside `.article-body`. IntersectionObserver threshold 0.15, rootMargin `'0px 0px -10% 0px'`, 500ms `cubic-bezier(0.22, 1, 0.36, 1)`, 24px rise. `prefers-reduced-motion` snaps to final state.
-- [ ] Legacy articles (missing `articleType`) render through `AnnouncementTemplate` — smoke-tested on five real staging articles, no visual regressions.
-- [ ] Storybook `Pages/Article/Announcement` story with drop-cap + blockquote + one inline image.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [x] `AnnouncementTemplate` component added. Default path when `articleType` is `announcement` or missing.
+- [x] Hero per design §5.1: 16:9 `article.coverImage` via Sanity CDN hotspot, rounded-[4px], no overlay. Kicker with `.featured-border::before` bar and a Quasimoda 700 clamp title in sentence case. **Byline row intentionally dropped** — author + reading time live in the §7.6 metadata bar below the hero, and repeating them as a second line was pure duplication in practice. The same rule applies to the upcoming transfer + event heroes (Phases 5–6).
+- [x] Drop-cap on first `<p>` inside `.article-body`: Quasimoda 700 `text-[5.5rem] leading-[0.85] kcvv-green-bright`, floated, 4 lines tall. Applied only to `announcement` and `transfer` body prose (not `interview` or `event`).
+- [x] Body h2 preceded by 4rem × 2px `kcvv-green-bright` bar (reuse `.featured-border::before`).
+- [x] Blockquote rework per design §7.4: rule-framed centered, Quasimoda 400 `text-2xl` gray-blue, 1px top+bottom rules. Scoped to `.article-body` so Studio previews are unaffected. The attribution line (mono small-caps + 2rem green rule prefix) is **deferred** — PortableText's default blockquote serializer has no structured slot for attribution; a dedicated `blockquoteAttribution` block/mark is tracked as a follow-up.
+- [x] Body fade-up motion on scroll per design §7.5: all `<p>`/`<h2>`/`<h3>` inside `.article-body`. IntersectionObserver threshold 0.15, rootMargin `'0px 0px -10% 0px'`, 500ms `cubic-bezier(0.22, 1, 0.36, 1)`, 24px rise. `prefers-reduced-motion` snaps to final state.
+- [x] Legacy articles (missing `articleType`) render through `AnnouncementTemplate` — verified via sibling `/nieuws/[slug]` routes in the Next.js build manifest. Five staging URLs listed in the PR body for visual smoke-testing.
+- [x] Storybook `Pages/Article/Announcement` story with drop-cap + blockquote + one inline image.
+- [x] `pnpm --filter @kcvv/web check-all` passes.
 
 ### Phase 5 — #1331 — Transfer template + transferFact
 

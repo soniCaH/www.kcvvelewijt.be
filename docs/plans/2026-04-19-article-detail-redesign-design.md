@@ -422,12 +422,9 @@ Shared across all types:
 Een nieuw hoofdstuk
 voor het eerste elftal.
 
-By Redactie KCVV  ·  4 min lezen
-
 [ HERO IMAGE 16:9 — rounded-[4px], no overlay, no shadow ]
-Caption in small caps, kcvv-gray
 
------ metadata bar -----
+----- metadata bar (date · author · reading time · share) -----
 
 [ Drop-cap paragraph ]
 
@@ -441,6 +438,7 @@ Caption in small caps, kcvv-gray
 - Hero image: `article.coverImage` at 16:9 via Sanity CDN hotspot crop. Max width `max-w-[60rem]`. No gradient overlay, no diagonal cut.
 - Kicker: `.featured-border::before` 4rem × 2px `kcvv-green-bright` bar, then category label + date in `text-xs uppercase tracking-[var(--letter-spacing-label)]`.
 - Headline: `font-[var(--font-family-title)] font-700 text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[0.95] text-[var(--color-kcvv-gray-blue)]`. Sentence case.
+- **No byline row under the headline.** Author + reading time are shown once in the §7.6 metadata bar rendered immediately below the hero image — duplicating them as a hero byline reads as noise in practice. This rule applies to **every** article template (announcement, interview, transfer, event): the metadata bar is the single source of truth for `author`, `date`, `reading time` and share controls.
 - Body: see §6. Drop-cap on first paragraph.
 
 ### 5.2 `interview` template

@@ -411,6 +411,119 @@
 }
 
 
+/* ===== Article body — announcement / transfer templates (#1330) =====
+
+   Scoped to `.article-body` so the Sanity Studio `.prose` previews and the
+   interview template (qaBlock-only body) remain untouched. The class is
+   applied to the `SanityArticleBody` wrapper from the announcement /
+   transfer templates only — see AnnouncementTemplate for the attachment
+   point. */
+
+/* §7.3 — Drop-cap on the first paragraph. Floated Quasimoda 700 glyph at
+   5.5rem, ~4 lines tall, `kcvv-green-bright`. */
+.article-body > p:first-of-type::first-letter {
+  font-family: var(--font-family-title);
+  font-weight: 700;
+  font-size: 5.5rem;
+  line-height: 0.85;
+  float: left;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  color: var(--color-kcvv-green-bright);
+}
+
+/* Section heading bar — reuses the `.featured-border::before` geometry
+   (4rem × 2px green-bright) so every `<h2>` inside `.article-body` carries
+   a short rule above it. Scoped here rather than on `.featured-border`
+   itself so editors do not have to opt in per-heading. */
+.article-body h2 {
+  position: relative;
+  padding-top: 0.75rem;
+}
+
+.article-body h2::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4rem;
+  border-top: 2px solid var(--color-kcvv-green-bright);
+}
+
+/* §7.4 — Blockquote rework. Rule-framed, centered, no leading `"` glyph.
+   Overrides the legacy `.prose blockquote` treatment when inside the
+   `.article-body` scope. */
+.article-body blockquote {
+  font-family: var(--font-family-title);
+  font-weight: 400;
+  font-style: normal;
+  font-size: var(--font-size-2xl);
+  line-height: 1.4;
+  color: var(--color-kcvv-gray-blue);
+  text-align: center;
+  max-width: 50ch;
+  margin: 3rem auto;
+  padding: 2rem 0;
+  border-top: 1px solid var(--color-kcvv-gray-light);
+  border-bottom: 1px solid var(--color-kcvv-gray-light);
+  /* Unset the legacy `.prose blockquote` overflow/position so the old
+     glyph geometry has no effect. */
+  overflow: visible;
+  position: static;
+}
+
+/* Erase the legacy 15rem `"` glyph inside the article-body scope. The
+   decorative glyph is reserved for the `quote` qaBlock treatment. */
+.article-body blockquote::before {
+  content: none;
+}
+
+.article-body blockquote > p:first-child {
+  margin-top: 0;
+}
+
+.article-body blockquote > p:last-child {
+  margin-bottom: 0;
+}
+
+/* Attribution after the quote is intentionally unstyled in this phase.
+   Design §7.4 specifies a mono small-caps attribution line with a 2rem ×
+   2px green rule prefix, but Sanity's blockquote has no structured slot
+   for attribution today — every styling attempt based on `em:last-child`
+   or `<cite>` would target markup PortableText's default serializer does
+   not reliably emit. A dedicated `blockquoteAttribution` mark or a
+   structured block is tracked for a follow-up phase; for now, attribution
+   paragraphs written below the quote render as normal prose. */
+
+/* §7.5 — Body fade-up motion. The `article-body-motion` class is applied
+   by `ArticleBodyMotion` on mount, and the `--entered` modifier is added
+   when the element crosses the IntersectionObserver threshold. */
+.article-body-motion {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-body-motion.article-body-motion--entered {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Safety net for users whose JS initialises the observer before the
+     media-query check resolves — any element that picked up the base
+     class must still render at its final state. */
+  .article-body-motion {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+
 /* ===== Phase 4: Mobile Optimizations ===== */
 
 /* Safe Area Insets for Modern Mobile Devices */
