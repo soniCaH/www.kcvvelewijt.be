@@ -21,18 +21,18 @@
     "@kcvv/sanity-schemas": "workspace:*",
     "@kcvv/sanity-studio": "workspace:*",
     "@sanity/icons": "3.7.4",
-    "@sanity/vision": "5.18.0",
+    "@sanity/vision": "5.22.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "sanity": "5.18.0",
-    "styled-components": "6.3.12"
+    "sanity": "5.22.0",
+    "styled-components": "6.4.1"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "6.0.0",
     "@types/react": "19.2.14",
-    "eslint": "9.39.4",
+    "eslint": "10.2.1",
     "prettier": "3.8.3",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   },
   "prettier": {
     "semi": false,
