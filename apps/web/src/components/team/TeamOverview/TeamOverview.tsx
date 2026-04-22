@@ -14,7 +14,7 @@
  * - Empty state handling
  */
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { getYouthDivision } from "@/lib/utils/group-teams";
 import { TeamCard, type TeamCardProps } from "../TeamCard";
@@ -96,11 +96,12 @@ export function TeamOverview({
   const [activeFilter, setActiveFilter] = useState<
     "all" | "senior" | "youth" | "club"
   >(teamType);
+  const [prevTeamType, setPrevTeamType] = useState(teamType);
 
-  // Sync activeFilter when teamType prop changes
-  useEffect(() => {
+  if (prevTeamType !== teamType) {
+    setPrevTeamType(teamType);
     setActiveFilter(teamType);
-  }, [teamType]);
+  }
 
   // Filter teams by type
   const filteredTeams = useMemo(() => {

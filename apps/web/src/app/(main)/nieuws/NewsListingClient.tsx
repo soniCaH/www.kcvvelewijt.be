@@ -50,6 +50,8 @@ export function NewsListingClient({
   const isLoadingRef = useRef(false);
   const featuredIdsRef = useRef(new Set(initialFeatured.map((a) => a.id)));
   const nextOffsetRef = useRef(initialFeatured.length + initialArticles.length);
+  const loadMoreRef = useRef<() => void>(() => {});
+  const handleCategoryChangeRef = useRef<(category: string) => void>(() => {});
 
   useEffect(() => {
     featuredIdsRef.current = new Set(featuredArticles.map((a) => a.id));
@@ -91,7 +93,7 @@ export function NewsListingClient({
         message: "Artikelen laden mislukt.",
         retry: () => {
           setError(null);
-          loadMore();
+          loadMoreRef.current();
         },
       });
     } finally {
@@ -165,7 +167,7 @@ export function NewsListingClient({
           message: "Artikelen laden mislukt.",
           retry: () => {
             setError(null);
-            handleCategoryChange(category);
+            handleCategoryChangeRef.current(category);
           },
         });
       } finally {
@@ -176,6 +178,11 @@ export function NewsListingClient({
     },
     [activeCategory, fetchArticles],
   );
+
+  useEffect(() => {
+    loadMoreRef.current = loadMore;
+    handleCategoryChangeRef.current = handleCategoryChange;
+  }, [loadMore, handleCategoryChange]);
 
   const renderCard = (
     article: ArticleVM,

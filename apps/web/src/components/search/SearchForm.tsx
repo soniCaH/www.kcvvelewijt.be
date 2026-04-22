@@ -5,7 +5,7 @@
  * Search input field with submit button
  */
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import { Icon } from "@/components/design-system";
 import { Search, X } from "lucide-react";
 
@@ -38,11 +38,12 @@ export const SearchForm = ({
   placeholder = "Zoek nieuws, spelers, teams...",
 }: SearchFormProps) => {
   const [value, setValue] = useState(initialValue);
+  const [prevInitialValue, setPrevInitialValue] = useState(initialValue);
 
-  // Sync with initialValue changes
-  useEffect(() => {
+  if (prevInitialValue !== initialValue) {
+    setPrevInitialValue(initialValue);
     setValue(initialValue);
-  }, [initialValue]);
+  }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

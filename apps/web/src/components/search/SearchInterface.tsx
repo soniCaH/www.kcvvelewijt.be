@@ -36,31 +36,36 @@ export interface SearchInterfaceProps {
  * Main search interface component
  */
 export const SearchInterface = ({
-  initialQuery = "",
-  initialType,
+  // Props accepted for backward compatibility but ignored — URL is the
+  // source of truth (see "Initial Props" tests).
+  initialQuery: _initialQuery,
+  initialType: _initialType,
 }: SearchInterfaceProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const analytics = useSearchAnalytics();
 
-  // Validate and get initial values from URL
-  const urlQuery = searchParams.get("q") || initialQuery;
-  const rawUrlType = searchParams.get("type");
+  // URL is the source of truth for query + active type; `initialQuery` /
+  // `initialType` props are ignored when the URL has no params (documented by
+  // the "Initial Props" tests).
   const allowedTypes: SearchResultType[] = [
     "article",
     "player",
     "staff",
     "team",
   ];
-  const urlType =
-    rawUrlType && allowedTypes.includes(rawUrlType as SearchResultType)
-      ? (rawUrlType as SearchResultType)
-      : initialType;
+  const currentUrlQueryValue = searchParams.get("q") || "";
+  const currentRawUrlTypeValue = searchParams.get("type");
+  const currentUrlTypeValue =
+    currentRawUrlTypeValue &&
+    allowedTypes.includes(currentRawUrlTypeValue as SearchResultType)
+      ? (currentRawUrlTypeValue as SearchResultType)
+      : undefined;
 
   // State
-  const [query, setQuery] = useState(urlQuery);
+  const [query, setQuery] = useState(currentUrlQueryValue);
   const [activeType, setActiveType] = useState<SearchResultType | "all">(
-    urlType || "all",
+    currentUrlTypeValue || "all",
   );
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -208,39 +213,35 @@ export const SearchInterface = ({
   );
 
   /**
-   * Sync state with URL params (handles back/forward navigation)
+   * Sync state with URL params (handles back/forward navigation).
+   * Adjust state during render to avoid cascading effect-driven setStates.
    */
-  useEffect(() => {
-    const currentUrlQuery = searchParams.get("q") || "";
-    const currentRawUrlType = searchParams.get("type");
-    const currentUrlType =
-      currentRawUrlType &&
-      allowedTypes.includes(currentRawUrlType as SearchResultType)
-        ? (currentRawUrlType as SearchResultType)
-        : undefined;
+  const [trackedSearchParams, setTrackedSearchParams] = useState(searchParams);
 
-    // Update query state if different
-    if (currentUrlQuery !== query) {
-      setQuery(currentUrlQuery);
+  if (trackedSearchParams !== searchParams) {
+    setTrackedSearchParams(searchParams);
+    if (currentUrlQueryValue !== query) {
+      setQuery(currentUrlQueryValue);
     }
-
-    // Update type state if different
-    const newActiveType = currentUrlType || "all";
+    const newActiveType = currentUrlTypeValue || "all";
     if (newActiveType !== activeType) {
       setActiveType(newActiveType);
     }
+  }
 
-    // Perform search if query is valid
-    if (currentUrlQuery && currentUrlQuery.trim().length >= 2) {
-      performSearch(currentUrlQuery);
-    } else if (!currentUrlQuery) {
-      // Clear results if no query
-      setResults([]);
-      setTotalCount(0);
-      setError(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  /**
+   * Perform search whenever the URL query changes. Routed through a ref so
+   * the React Compiler does not treat `performSearch`'s synchronous setState
+   * calls as effect-level cascading renders.
+   */
+  const performSearchRef = useRef(performSearch);
+  useEffect(() => {
+    performSearchRef.current = performSearch;
+  }, [performSearch]);
+
+  useEffect(() => {
+    performSearchRef.current(currentUrlQueryValue);
+  }, [currentUrlQueryValue]);
 
   /**
    * Cleanup: abort any in-flight requests on unmount
