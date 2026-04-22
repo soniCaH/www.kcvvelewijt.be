@@ -25,6 +25,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
+import { TransferTemplate } from "@/components/article/TransferTemplate";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -191,6 +192,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           shareConfig={{ url: shareConfig.url, title: article.title }}
           body={(article.body as PortableTextBlock[] | null) ?? null}
           subject={article.subject ?? null}
+        />
+      ) : article.articleType === "transfer" ? (
+        <TransferTemplate
+          title={article.title}
+          publishedDate={
+            article.publishedAt
+              ? formatArticleDate(new Date(article.publishedAt))
+              : undefined
+          }
+          readingTime={readingTime}
+          shareConfig={{ url: shareConfig.url, title: article.title }}
+          body={(article.body as PortableTextBlock[] | null) ?? null}
         />
       ) : (
         <AnnouncementTemplate
