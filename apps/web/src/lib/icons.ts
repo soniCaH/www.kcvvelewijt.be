@@ -32,6 +32,7 @@ import {
   // Social
   Facebook,
   Instagram,
+  Share2,
 
   // Content & Document
   FileText,
@@ -134,6 +135,7 @@ export const icons = {
   // Social
   facebook: Facebook,
   instagram: Instagram,
+  share: Share2,
 
   // Content & Document
   "file-text": FileText,
@@ -285,6 +287,7 @@ export {
   // Social
   Facebook,
   Instagram,
+  Share2,
 
   // Content & Document
   FileText,

@@ -645,7 +645,7 @@ trigger: IntersectionObserver, threshold 0.15, rootMargin '0px 0px -10% 0px'
 
 - Single row, 1px `kcvv-gray-light` rule above and below.
 - Left cluster: mono, `text-xs`, uppercase, `tracking-[var(--letter-spacing-caps)]`, `kcvv-gray`.
-- Right: Lucide `Share2`, `Facebook`, `twitter-x` from the curated icon set (`apps/web/src/lib/icons.ts`), 16px, `kcvv-gray-blue`, hover `kcvv-green-dark`. No filled buttons, no circles.
+- Right: Lucide `Share2` (native Web Share API with a Facebook-URL fallback on desktop) and `Facebook` from the curated icon set (`apps/web/src/lib/icons.ts`), 16px, `kcvv-gray-blue`, hover `kcvv-green-dark`. No filled buttons, no circles. **No Twitter/X icon** — KCVV does not have a Twitter/X account (see `reference_club_identity`). Instagram is not a share target either (no URL-share deeplink), so the cluster is Share2 + Facebook only.
 
 ### 7.7 Related content slider
 
@@ -805,12 +805,23 @@ Per `apps/web/CLAUDE.md`'s Analytics Checklist, any user-facing change must incl
 | Event                   | Trigger                      | Parameters                                                         |
 | ----------------------- | ---------------------------- | ------------------------------------------------------------------ |
 | `article_view`          | Article detail page mount    | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind` |
-| `article_share`         | Share icon click             | `article_type`, `article_id_hashed`, `channel` (facebook/x/copy)   |
+| `article_share`         | Share icon click             | `article_type`, `article_id_hashed`, `channel` (native/facebook)   |
 | `related_article_click` | Related slider card click    | `article_type`, `related_article_id_hashed`, `position`            |
 | `transfer_cta_click`    | Transfer CTA (if applicable) | `article_id_hashed`, `direction`                                   |
 | `event_cta_click`       | Event ticket/signup link     | `article_id_hashed`, `event_date`, `has_ticket_url`                |
 
 Hash article IDs via `hashMemberId` helper. Sanitize any editorial strings. Update GTM + GA4 custom dimensions as part of the implementation PR, not this design.
+
+### Closure checklist — analytics sign-off before merging the implementation PR
+
+Every implementation PR that adds or modifies events in this section must have all of the following ticked in the PR body before merge:
+
+- [ ] **GTM registration:** triggers and tag templates added for each new event in the KCVV GTM workspace. Link the GTM version in the PR.
+- [ ] **GA4 custom dimensions:** any new event parameter registered as a custom dimension in GA4 (User- or Event-scope as appropriate). Screenshot of the GA4 admin view in the PR.
+- [ ] **Explorations updated:** rebuild or adjust the affected GA4 explorations / reports so the new events/dimensions flow into existing editorial dashboards. Link the exploration in the PR.
+- [ ] **PII verification sign-off:** confirm in the PR body that no raw personally-identifiable information flows into any event parameter. Article IDs must be hashed via `hashMemberId`; editor-authored strings (titles, excerpts, quote text) must not be sent at all. Include a single-line attestation like `PII check: all article IDs hashed, no editorial strings in params — <handle>`.
+
+No new event may land on main until all four boxes are checked — this matches the existing `apps/web/CLAUDE.md` Analytics Checklist and the `feedback_analytics_prd_requirement` memory.
 
 ---
 

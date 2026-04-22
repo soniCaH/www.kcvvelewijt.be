@@ -51,6 +51,7 @@ function makeArticleDetailRow(
     articleType: "announcement",
     subject: null,
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
+    coverImagePortraitUrl: "https://cdn.sanity.io/cover-portrait.webp",
     body: [
       {
         _key: "k1",
@@ -254,6 +255,9 @@ describe("ArticleRepository", () => {
       expect(a.tags).toEqual(["Eerste ploeg"]);
       expect(a.articleType).toBe("announcement");
       expect(a.coverImageUrl).toBe("https://cdn.sanity.io/cover.webp");
+      expect(a.coverImagePortraitUrl).toBe(
+        "https://cdn.sanity.io/cover-portrait.webp",
+      );
       expect(a.body).toEqual(row.body);
     });
 

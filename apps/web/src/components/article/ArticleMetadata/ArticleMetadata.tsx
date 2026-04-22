@@ -1,98 +1,118 @@
 "use client";
 
-/**
- * ArticleMetadata Component
- * Inline horizontal bar with breadcrumb navigation, date, author, and share icons
- */
-
-import Link from "next/link";
 import { Icon } from "@/components/design-system";
-import { Facebook } from "@/lib/icons";
-import { FacebookShareButton } from "react-share";
+import { Facebook, Share2 } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
 
 export interface ArticleMetadataProps {
-  /** Article author name */
+  /** Article author name (e.g. "Redactie KCVV"). */
   author: string;
-  /** Publication date (formatted string) */
+  /** Publication date formatted for display (e.g. "19.04.2026"). */
   date?: string;
-  /** Primary category for breadcrumb */
-  category?: {
-    name: string;
-    href: string;
-  };
-  /** Share configuration */
+  /** Reading time, e.g. "4 min lezen". Optional — omitted when empty. */
+  readingTime?: string;
+  /** Share configuration — URL to share. When provided, Share2 + Facebook icons render. */
   shareConfig?: {
     url: string;
+    /** Title used by `navigator.share()`. Falls back to `author` when absent. */
+    title?: string;
   };
   /** Additional CSS classes */
   className?: string;
 }
 
+const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
+
 /**
- * Article metadata bar — horizontal layout below the hero.
- * Breadcrumb left, date + author + share icons right.
+ * Design §7.6 — article metadata bar. Single row with 1px `kcvv-gray-light`
+ * rules above and below. Left cluster: date · author · reading time, mono
+ * small-caps. Right cluster: share icons (Share2 for the Web Share API,
+ * Facebook for direct sharing). No breadcrumb — that role belongs to the
+ * "< Terug naar nieuws" back link on the hero and the type-specific kicker.
+ *
+ * No Twitter/X icon — KCVV has no Twitter/X account (see club-identity memory).
+ * Instagram is not a URL-share target either, so the cluster stays at Share2 + Facebook.
  */
 export const ArticleMetadata = ({
   author,
   date,
-  category,
+  readingTime,
   shareConfig,
   className,
 }: ArticleMetadataProps) => {
+  const facts = [date, author, readingTime].filter(
+    (x): x is string => typeof x === "string" && x.length > 0,
+  );
+
+  // Synchronously branch on Web Share availability so the fallback
+  // `window.open` runs inside the user-gesture tick (avoids Chromium's
+  // popup-blocker on desktop). `navigator.share`'s promise rejection is
+  // treated as a dismissal and NOT a trigger for opening another window —
+  // the Facebook `<a>` next to this button is the explicit non-native
+  // alternative for users who cancel the native sheet.
+  const handleNativeShare = () => {
+    if (!shareConfig) return;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator
+        .share({
+          title: shareConfig.title ?? author,
+          url: shareConfig.url,
+        })
+        .catch(() => {
+          // User dismissed the sheet — leave the click as a no-op. The
+          // sibling Facebook link remains available.
+        });
+      return;
+    }
+    // Fallback when Web Share API is unavailable (most desktop browsers).
+    // Runs in the same click event tick, so the popup is allowed.
+    window.open(
+      `${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   return (
     <nav
-      aria-label="Article info"
-      className={cn(
-        "w-full border-b border-gray-200 py-3 px-6 text-sm text-gray-600",
-        className,
-      )}
+      aria-label="Artikelinfo"
+      className={cn("w-full border-y border-kcvv-gray-light py-3", className)}
     >
-      <div className="w-full max-w-inner-lg mx-auto flex flex-wrap items-center justify-between gap-y-2">
-        {/* Breadcrumb — left */}
-        <div className="flex items-center gap-1.5">
-          <Link
-            href="/nieuws"
-            className="text-kcvv-green-bright hover:underline"
-          >
-            Nieuws
-          </Link>
-          {category && (
-            <>
-              <span className="text-gray-400" aria-hidden="true">
-                ›
-              </span>
-              <Link
-                href={category.href}
-                className="text-kcvv-green-bright hover:underline"
-              >
-                {category.name}
-              </Link>
-            </>
-          )}
-        </div>
+      <div className="w-full max-w-inner-lg mx-auto px-6 flex flex-wrap items-center justify-between gap-y-2">
+        <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray">
+          {facts.map((fact, i) => (
+            <li key={`${i}-${fact}`} className="flex items-center gap-x-3">
+              {i > 0 && (
+                <span aria-hidden="true" className="text-kcvv-gray-light">
+                  ·
+                </span>
+              )}
+              <span>{fact}</span>
+            </li>
+          ))}
+        </ul>
 
-        {/* Right side: date, author, share */}
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          {date && <span>{date}</span>}
-          {author && <span>{author}</span>}
-
-          {shareConfig && (
-            <div className="flex items-center gap-2">
-              <span className="sr-only md:not-sr-only text-gray-400">
-                Delen:
-              </span>
-              {/* Facebook brand blue #3b5998 — third-party brand color exception */}
-              <FacebookShareButton
-                url={shareConfig.url}
-                aria-label="Delen op Facebook"
-                className="text-gray-400 hover:text-[#3b5998] transition-colors"
-              >
-                <Icon icon={Facebook} size="xs" />
-              </FacebookShareButton>
-            </div>
-          )}
-        </div>
+        {shareConfig && (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleNativeShare}
+              aria-label="Delen"
+              className="text-kcvv-gray-blue hover:text-kcvv-green-dark transition-colors"
+            >
+              <Icon icon={Share2} size="xs" />
+            </button>
+            <a
+              href={`${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Delen op Facebook"
+              className="text-kcvv-gray-blue hover:text-kcvv-green-dark transition-colors"
+            >
+              <Icon icon={Facebook} size="xs" />
+            </a>
+          </div>
+        )}
       </div>
     </nav>
   );

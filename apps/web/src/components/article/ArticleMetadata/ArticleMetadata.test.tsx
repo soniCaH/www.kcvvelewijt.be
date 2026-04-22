@@ -2,88 +2,69 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ArticleMetadata } from "./ArticleMetadata";
 
+const defaultProps = {
+  author: "Redactie KCVV",
+  date: "19.04.2026",
+  readingTime: "4 min lezen",
+  shareConfig: {
+    url: "https://kcvvelewijt.be/nieuws/test",
+  },
+};
+
 describe("ArticleMetadata", () => {
-  const defaultProps = {
-    author: "Jan Janssens",
-    date: "15/01/2025",
-    category: { name: "Eerste ploeg", href: "/nieuws?categorie=eerste-ploeg" },
-    shareConfig: {
-      url: "https://kcvvelewijt.be/nieuws/test",
-    },
-  };
-
-  it("renders breadcrumb with News link and category", () => {
+  it("renders the facts row in design order (date, author, reading time)", () => {
     render(<ArticleMetadata {...defaultProps} />);
-    // "News" breadcrumb link
-    const newsLink = screen.getByRole("link", { name: "Nieuws" });
-    expect(newsLink).toHaveAttribute("href", "/nieuws");
-    // Category breadcrumb link
-    const categoryLink = screen.getByRole("link", { name: "Eerste ploeg" });
-    expect(categoryLink).toHaveAttribute(
+    const navText = (
+      screen.getByRole("navigation", { name: "Artikelinfo" }).textContent ?? ""
+    ).replace(/\s+/g, " ");
+    expect(navText.indexOf("19.04.2026")).toBeGreaterThanOrEqual(0);
+    expect(navText.indexOf("Redactie KCVV")).toBeGreaterThan(
+      navText.indexOf("19.04.2026"),
+    );
+    expect(navText.indexOf("4 min lezen")).toBeGreaterThan(
+      navText.indexOf("Redactie KCVV"),
+    );
+  });
+
+  it("omits missing facts — shows only author when date and readingTime are empty", () => {
+    render(<ArticleMetadata author="Redactie KCVV" />);
+    const nav = screen.getByRole("navigation", { name: "Artikelinfo" });
+    expect(nav).toHaveTextContent("Redactie KCVV");
+    expect(nav.textContent ?? "").not.toContain("·");
+  });
+
+  it("renders a native share button and a Facebook share link when shareConfig is set", () => {
+    render(<ArticleMetadata {...defaultProps} />);
+    expect(screen.getByRole("button", { name: "Delen" })).toBeInTheDocument();
+    const facebookLink = screen.getByRole("link", {
+      name: "Delen op Facebook",
+    });
+    expect(facebookLink).toHaveAttribute(
       "href",
-      "/nieuws?categorie=eerste-ploeg",
+      "https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkcvvelewijt.be%2Fnieuws%2Ftest",
     );
+    expect(facebookLink).toHaveAttribute("target", "_blank");
   });
 
-  it("renders breadcrumb separator between News and category", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    expect(screen.getByText("›")).toBeInTheDocument();
-  });
-
-  it("renders the author name", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    expect(screen.getByText(/Jan Janssens/)).toBeInTheDocument();
-  });
-
-  it("renders the date", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    expect(screen.getByText("15/01/2025")).toBeInTheDocument();
-  });
-
-  it("renders as a nav element for breadcrumb semantics", () => {
-    const { container } = render(<ArticleMetadata {...defaultProps} />);
-    expect(container.querySelector("nav")).toBeInTheDocument();
-  });
-
-  it("renders share buttons as icon-only (no text labels)", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    // Should NOT have "Facebook" text label
-    expect(screen.queryByText("Facebook")).not.toBeInTheDocument();
-  });
-
-  it("renders a Facebook share button inside the share section", () => {
-    render(<ArticleMetadata {...defaultProps} />);
+  it("does not render share cluster without shareConfig", () => {
+    render(<ArticleMetadata author="Redactie KCVV" date="19.04.2026" />);
+    expect(screen.queryByRole("button", { name: "Delen" })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "Delen op Facebook" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("link", { name: "Delen op Facebook" }),
+    ).toBeNull();
   });
 
-  it("renders share label visible on tablet+ (sr-only on mobile)", () => {
-    render(<ArticleMetadata {...defaultProps} />);
-    const shareLabel = screen.getByText("Delen:");
-    expect(shareLabel).toBeInTheDocument();
-    // Hidden on mobile, visible on md+
-    expect(shareLabel).toHaveClass("sr-only");
-    expect(shareLabel).toHaveClass("md:not-sr-only");
+  it("renders as a nav element with the metadata-bar label", () => {
+    const { container } = render(<ArticleMetadata {...defaultProps} />);
+    const nav = container.querySelector("nav");
+    expect(nav).toHaveAttribute("aria-label", "Artikelinfo");
   });
 
-  it("does not render share section without shareConfig", () => {
-    render(
-      <ArticleMetadata
-        author="Test"
-        date="01/01/2025"
-        category={defaultProps.category}
-      />,
-    );
-    expect(screen.queryByText("Delen:")).not.toBeInTheDocument();
-  });
-
-  it("renders breadcrumb-only when no category provided", () => {
-    render(<ArticleMetadata author="Test" date="01/01/2025" />);
-    const newsLink = screen.getByRole("link", { name: "Nieuws" });
-    expect(newsLink).toBeInTheDocument();
-    // No category link, no separator
-    expect(screen.queryByText("›")).not.toBeInTheDocument();
+  it("applies border-y kcvv-gray-light so rules appear above AND below", () => {
+    const { container } = render(<ArticleMetadata {...defaultProps} />);
+    const nav = container.querySelector("nav");
+    expect(nav).toHaveClass("border-y");
+    expect(nav).toHaveClass("border-kcvv-gray-light");
   });
 
   it("applies custom className", () => {
@@ -91,12 +72,5 @@ describe("ArticleMetadata", () => {
       <ArticleMetadata {...defaultProps} className="custom-metadata" />,
     );
     expect(container.querySelector("nav")).toHaveClass("custom-metadata");
-  });
-
-  it("does not use sidebar layout classes", () => {
-    const { container } = render(<ArticleMetadata {...defaultProps} />);
-    const nav = container.querySelector("nav");
-    expect(nav).not.toHaveClass("lg:max-w-[20rem]");
-    expect(nav).not.toHaveClass("lg:border-l");
   });
 });
