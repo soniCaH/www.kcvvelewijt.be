@@ -14,17 +14,20 @@ export interface TransferFactOverviewProps {
  * subsequent transferFact blocks in a transfer article (the first one is
  * absorbed by the hero + strip), or inline inside an announcement.
  *
- * Single horizontal row (flex on mobile → grid on md), 1 px top rule,
- * four slots:
+ * Horizontal row on a full-bleed dark band. Four slots on md+:
  *
  *   [kicker]   [player + meta]   [clubs inline]   [status]
  *
+ * Consecutive transferFact rows stack into one continuous dark section
+ * with subtle white-alpha rules between them — mirrors the editorial
+ * "moment" treatment the interview qaBlock cream bands use, inverted.
+ *
  * Colour rules per direction:
- *   - `incoming`  kicker = `kcvv-green-dark`, arrow = `kcvv-green-bright`.
- *   - `outgoing`  kicker = `kcvv-warning` (amber — reported, not alarmed).
- *     Arrow = `kcvv-warning`.
- *   - `extension` kicker = `kcvv-green-dark`. No arrow — single KCVV row
- *     + `TOT {until}` status label on the right.
+ *   - `incoming`  kicker + arrow = `kcvv-green-bright` (pops on dark).
+ *   - `outgoing`  kicker + arrow = `kcvv-warning` (amber — reported, not
+ *     alarmed).
+ *   - `extension` kicker = `kcvv-green-bright`. No arrow — single KCVV
+ *     row + `TOT {until}` status label on the right.
  */
 export const TransferFactOverview = ({
   value,
@@ -39,8 +42,7 @@ export const TransferFactOverview = ({
   ].filter((x): x is string => typeof x === "string" && x.length > 0);
 
   const isOutgoing = resolved.direction === "outgoing";
-  const kickerClass = isOutgoing ? "text-kcvv-warning" : "text-kcvv-green-dark";
-  const arrowClass = isOutgoing
+  const accentClass = isOutgoing
     ? "text-kcvv-warning"
     : "text-kcvv-green-bright";
   const accentBgClass = isOutgoing ? "bg-kcvv-warning" : "bg-kcvv-green-bright";
@@ -57,11 +59,12 @@ export const TransferFactOverview = ({
       data-testid="transfer-overview"
       data-direction={resolved.direction}
       className={cn(
-        // Break out of the 65 ch prose column so the 4-column horizontal
-        // layout has canvas room on wide desktops. Each row uses the same
-        // `max-w-outer` inner container, so rule lines across consecutive
-        // rows align naturally.
-        "full-bleed not-prose border-t border-kcvv-gray-light py-6",
+        // Break out of the 65 ch prose column so consecutive rows share
+        // one continuous dark band. Each row uses the same `max-w-outer`
+        // inner container, so the column grid aligns row-to-row.
+        "full-bleed not-prose bg-kcvv-gray-dark py-6",
+        // White-alpha top rule separates stacked rows without shouting.
+        "border-t border-kcvv-white/10",
         className,
       )}
     >
@@ -76,7 +79,7 @@ export const TransferFactOverview = ({
           data-testid="transfer-overview-kicker"
           className={cn(
             "flex items-center gap-2 text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
-            kickerClass,
+            accentClass,
           )}
         >
           <span
@@ -86,11 +89,11 @@ export const TransferFactOverview = ({
           <span>{resolved.kickerLabel}</span>
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <div className="flex flex-col gap-1">
           {playerName && (
             <span
               data-testid="transfer-overview-name"
-              className="font-title font-bold text-xl text-kcvv-gray-blue"
+              className="font-title font-bold text-xl text-kcvv-white"
             >
               {playerName}
             </span>
@@ -98,14 +101,14 @@ export const TransferFactOverview = ({
           {metaParts.length > 0 && (
             <span
               data-testid="transfer-overview-meta"
-              className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray"
+              className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-light"
             >
               {metaParts.map((part, i) => (
                 <span key={part}>
                   {i > 0 && (
                     <span
                       aria-hidden="true"
-                      className="mx-2 text-kcvv-gray-light"
+                      className="mx-2 text-kcvv-white/30"
                     >
                       ·
                     </span>
@@ -120,7 +123,7 @@ export const TransferFactOverview = ({
         {resolved.kind === "extension" ? (
           <div
             data-testid="transfer-overview-kcvv-only"
-            className="flex items-center gap-2 text-base text-kcvv-gray-blue"
+            className="flex items-center gap-2 text-base text-kcvv-white"
           >
             {resolved.kcvvOnly.logoUrl && (
               <Image
@@ -136,7 +139,7 @@ export const TransferFactOverview = ({
         ) : (
           <div
             data-testid="transfer-overview-clubs"
-            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-gray-blue"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-white"
           >
             <span className="flex items-center gap-2">
               {resolved.from.logoUrl && (
@@ -150,7 +153,7 @@ export const TransferFactOverview = ({
               )}
               {resolved.from.name}
             </span>
-            <Icon icon={ArrowRight} size="xs" className={arrowClass} />
+            <Icon icon={ArrowRight} size="xs" className={accentClass} />
             <span className="flex items-center gap-2">
               {resolved.to.logoUrl && (
                 <Image
@@ -168,7 +171,7 @@ export const TransferFactOverview = ({
 
         <p
           data-testid="transfer-overview-status"
-          className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray md:text-right"
+          className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-light md:text-right"
         >
           {statusLabel}
         </p>

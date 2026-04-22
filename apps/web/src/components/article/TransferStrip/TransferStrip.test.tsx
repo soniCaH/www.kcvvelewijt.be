@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { TransferStrip } from "./TransferStrip";
 
 describe("TransferStrip", () => {
-  it("incoming: renders van=other + naar=KCVV, label INKOMEND, green arrow", () => {
+  it("incoming: renders other club on the from side, KCVV on the to side, with a green arrow between", () => {
     render(
       <TransferStrip
         feature={{
@@ -17,18 +17,22 @@ describe("TransferStrip", () => {
     );
     const strip = screen.getByTestId("transfer-strip");
     expect(strip).toHaveAttribute("data-direction", "incoming");
-    expect(screen.getByTestId("transfer-strip-label")).toHaveTextContent(
-      /Inkomend/i,
-    );
     const arrow = screen.getByTestId("transfer-strip-arrow");
     expect(arrow).toHaveClass("text-kcvv-green-bright");
+    // Arrow carries the direction label in a data attribute — useful for
+    // analytics/assistive inspection without rendering duplicate copy.
+    expect(arrow).toHaveAttribute("data-label", "Inkomend");
     expect(strip).toHaveTextContent("Standard Luik");
     expect(strip).toHaveTextContent(/KCVV Elewijt/i);
     expect(strip).toHaveTextContent("Jupiler Pro League");
     expect(strip).toHaveTextContent("Derde Amateur");
+    // The van/naar/inkomend labels are intentionally absent — the arrow
+    // direction + colour carries the semantic.
+    expect(strip).not.toHaveTextContent(/^van$/i);
+    expect(strip).not.toHaveTextContent(/^naar$/i);
   });
 
-  it("outgoing: arrow and label use kcvv-warning (amber), KCVV sits on the VAN side and the other club on the NAAR side", () => {
+  it("outgoing: arrow in kcvv-warning (amber) with KCVV on the from side and the other club on the to side", () => {
     render(
       <TransferStrip
         feature={{
@@ -39,14 +43,12 @@ describe("TransferStrip", () => {
       />,
     );
     const arrow = screen.getByTestId("transfer-strip-arrow");
-    const label = screen.getByTestId("transfer-strip-label");
     expect(arrow).toHaveClass("text-kcvv-warning");
-    expect(label).toHaveClass("text-kcvv-warning");
-    expect(label).toHaveTextContent(/Uitgaand/i);
+    expect(arrow).toHaveAttribute("data-label", "Uitgaand");
 
     // Verify the direction-resolver contract: outgoing = KCVV → other,
-    // so KCVV renders under the VAN label and the other club under NAAR,
-    // in that order in the DOM.
+    // so KCVV renders on the from side and the other club on the to
+    // side — in that order in the DOM.
     const strip = screen.getByTestId("transfer-strip");
     const stripText = strip.textContent ?? "";
     const kcvvIdx = stripText.indexOf("KCVV Elewijt");
@@ -56,7 +58,7 @@ describe("TransferStrip", () => {
     expect(kcvvIdx).toBeLessThan(otherIdx);
   });
 
-  it("extension: no arrow rendered; centered KCVV block + VERLENGD label + TOT date", () => {
+  it("extension: no arrow, centered KCVV block + VERLENGD label + TOT date", () => {
     render(
       <TransferStrip
         feature={{
@@ -69,8 +71,9 @@ describe("TransferStrip", () => {
     );
     const strip = screen.getByTestId("transfer-strip");
     expect(strip).toHaveAttribute("data-direction", "extension");
-    // No arrow on extensions — the absence of direction IS the signal.
     expect(screen.queryByTestId("transfer-strip-arrow")).toBeNull();
+    // Extension keeps the `VERLENGD` label — there is no arrow to carry
+    // the direction, so the label is the signal.
     expect(screen.getByTestId("transfer-strip-label")).toHaveTextContent(
       /Verlengd/i,
     );
@@ -103,8 +106,6 @@ describe("TransferStrip", () => {
       />,
     );
     const strip = screen.getByTestId("transfer-strip");
-    // Still renders the club names — context subtitles are purely
-    // additive when provided.
     expect(strip).toHaveTextContent("Club");
     expect(strip).toHaveTextContent(/KCVV Elewijt/i);
   });

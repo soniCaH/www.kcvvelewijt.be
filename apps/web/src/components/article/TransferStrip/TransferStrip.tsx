@@ -73,7 +73,6 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
   const arrowClass = isOutgoing
     ? "text-kcvv-warning"
     : "text-kcvv-green-bright";
-  const labelClass = isOutgoing ? "text-kcvv-warning" : "text-kcvv-green-dark";
 
   const fromContext = resolved.from.isKcvv
     ? feature.kcvvContext
@@ -95,45 +94,23 @@ export const TransferStrip = ({ feature, className }: TransferStripProps) => {
       )}
     >
       <div className="mx-auto grid max-w-outer grid-cols-[1fr_auto_1fr] items-center gap-x-10 gap-y-4 px-6 md:gap-x-16">
-        <div className="text-right">
-          <p className="mb-2 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray">
-            Van
-          </p>
-          <div className="flex justify-end">
-            <ClubBlock
-              side={resolved.from}
-              context={fromContext}
-              align="right"
-            />
-          </div>
+        <div className="flex justify-end">
+          <ClubBlock side={resolved.from} context={fromContext} align="right" />
         </div>
 
         <div
-          className="flex flex-col items-center gap-2"
+          className="flex items-center justify-center"
           data-testid="transfer-strip-middle"
         >
           <ArrowRight
             aria-hidden="true"
-            className={cn("h-6 w-6", arrowClass)}
+            className={cn("h-8 w-8", arrowClass)}
             data-testid="transfer-strip-arrow"
+            data-label={resolved.kickerLabel}
           />
-          <p
-            className={cn(
-              "font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)]",
-              labelClass,
-            )}
-            data-testid="transfer-strip-label"
-          >
-            {resolved.kickerLabel}
-          </p>
         </div>
 
-        <div>
-          <p className="mb-2 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray">
-            Naar
-          </p>
-          <ClubBlock side={resolved.to} context={toContext} />
-        </div>
+        <ClubBlock side={resolved.to} context={toContext} />
       </div>
     </section>
   );

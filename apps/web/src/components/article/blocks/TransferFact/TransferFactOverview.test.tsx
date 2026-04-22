@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { TransferFactOverview } from "./TransferFactOverview";
 
 describe("TransferFactOverview", () => {
-  it("incoming: kicker uses green-dark colour class and reads 'Inkomend'", () => {
+  it("incoming: kicker uses green-bright colour class on the dark section and reads 'Inkomend'", () => {
     render(
       <TransferFactOverview
         value={{
@@ -14,7 +14,7 @@ describe("TransferFactOverview", () => {
       />,
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
-    expect(kicker).toHaveClass("text-kcvv-green-dark");
+    expect(kicker).toHaveClass("text-kcvv-green-bright");
     expect(kicker).toHaveTextContent(/Inkomend/i);
   });
 
@@ -30,8 +30,25 @@ describe("TransferFactOverview", () => {
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
     expect(kicker).toHaveClass("text-kcvv-warning");
-    expect(kicker).not.toHaveClass("text-kcvv-green-dark");
+    expect(kicker).not.toHaveClass("text-kcvv-green-bright");
     expect(kicker).toHaveTextContent(/Uitgaand/i);
+  });
+
+  it("renders on a full-bleed dark band — consecutive rows stack into one continuous section", () => {
+    const { container } = render(
+      <TransferFactOverview
+        value={{
+          direction: "incoming",
+          playerName: "Jan",
+          otherClubName: "Standard Luik",
+        }}
+      />,
+    );
+    const section = container.querySelector(
+      "[data-testid='transfer-overview']",
+    );
+    expect(section).toHaveClass("bg-kcvv-gray-dark");
+    expect(section).toHaveClass("full-bleed");
   });
 
   it("renders the player name and the age/position meta row", () => {

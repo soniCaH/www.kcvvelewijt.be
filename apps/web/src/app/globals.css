@@ -524,6 +524,28 @@
 }
 
 
+/* ===== Phase 5 (#1331): Transfer overview stack =============================
+
+   Consecutive `transferFact` overview rows form a single continuous dark
+   band. The FIRST row in a group carries its `my-10` breathing space above
+   (separating it from the preceding prose / `Ander transfernieuws` heading);
+   subsequent rows in the same stack strip their top margin so only the
+   1 px white-alpha rule inside the row divides them. The last row in the
+   group naturally keeps its `mb-10` bottom space separating it from the
+   prose that follows.
+
+   Tailwind arbitrary-variant syntax for sibling selectors gets noisy with
+   attribute selectors, so the rules live here where they stay readable. */
+[data-testid='transfer-overview'] {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+[data-testid='transfer-overview'] + [data-testid='transfer-overview'] {
+  margin-top: 0;
+}
+
+
 /* ===== Phase 4: Mobile Optimizations ===== */
 
 /* Safe Area Insets for Modern Mobile Devices */
