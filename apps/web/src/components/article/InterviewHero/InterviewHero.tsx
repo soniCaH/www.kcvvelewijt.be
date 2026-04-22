@@ -64,7 +64,10 @@ export const InterviewHero = ({
               {kickerParts.meta.map((meta, i) => (
                 <span key={`${i}-${meta}`}>
                   {i > 0 && (
-                    <span aria-hidden="true" className="text-kcvv-gray-light">
+                    <span
+                      aria-hidden="true"
+                      className="mr-1 text-kcvv-gray-light"
+                    >
                       ·
                     </span>
                   )}

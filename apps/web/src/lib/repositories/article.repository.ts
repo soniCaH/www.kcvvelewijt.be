@@ -39,9 +39,11 @@ export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
   "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
-  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). Relies
-  // on the hotspot set by the editor on coverImage (hotspot: true in schema).
-  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint",
+  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The
+  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;
+  // passing crop=focalpoint alone silently falls back to centre crop.
+  // Coalesce to 0.5 so images without a set hotspot degrade to centre.
+  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
   subject{
     kind,
     playerRef->{

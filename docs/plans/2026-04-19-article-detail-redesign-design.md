@@ -805,7 +805,7 @@ Per `apps/web/CLAUDE.md`'s Analytics Checklist, any user-facing change must incl
 | Event                   | Trigger                      | Parameters                                                         |
 | ----------------------- | ---------------------------- | ------------------------------------------------------------------ |
 | `article_view`          | Article detail page mount    | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind` |
-| `article_share`         | Share icon click             | `article_type`, `article_id_hashed`, `channel` (facebook/x/copy)   |
+| `article_share`         | Share icon click             | `article_type`, `article_id_hashed`, `channel` (native/facebook)   |
 | `related_article_click` | Related slider card click    | `article_type`, `related_article_id_hashed`, `position`            |
 | `transfer_cta_click`    | Transfer CTA (if applicable) | `article_id_hashed`, `direction`                                   |
 | `event_cta_click`       | Event ticket/signup link     | `article_id_hashed`, `event_date`, `has_ticket_url`                |

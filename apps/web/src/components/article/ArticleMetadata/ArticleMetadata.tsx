@@ -14,7 +14,7 @@ export interface ArticleMetadataProps {
   /** Share configuration — URL to share. When provided, Share2 + Facebook icons render. */
   shareConfig?: {
     url: string;
-    /** Title used by `navigator.share()`. Falls back to the URL hostname when absent. */
+    /** Title used by `navigator.share()`. Falls back to `author` when absent. */
     title?: string;
   };
   /** Additional CSS classes */
