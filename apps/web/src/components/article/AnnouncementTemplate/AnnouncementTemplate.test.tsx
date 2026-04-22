@@ -72,7 +72,7 @@ describe("AnnouncementTemplate", () => {
     );
   });
 
-  it("renders the body inside an .article-body container so the drop-cap and blockquote rules apply", () => {
+  it("renders the body inside an .article-body container with the first <p> as a direct child so the drop-cap selector resolves", () => {
     const { container } = render(
       <AnnouncementTemplate
         title="Title"
@@ -83,10 +83,15 @@ describe("AnnouncementTemplate", () => {
 
     const articleBody = container.querySelector(".article-body");
     expect(articleBody).not.toBeNull();
-    // The first paragraph rendered by PortableText must be a direct child of
-    // the `.article-body > .prose` container so `.article-body > p:first-of-type`
-    // drop-cap selector is guaranteed to resolve.
-    expect(articleBody?.querySelector("p")).not.toBeNull();
+    // Drop-cap rule targets `.article-body > p:first-of-type::first-letter`,
+    // so the <p> must be a direct child — not a nested descendant. In this
+    // template `.article-body` is applied to the same div that carries
+    // `.prose`, so PortableText's top-level block emits <p> as a direct
+    // child. Guard against a future refactor inserting an intermediate
+    // wrapper that would silently break the drop-cap.
+    expect(
+      articleBody!.querySelector(":scope > p:first-of-type"),
+    ).not.toBeNull();
   });
 
   it("renders nothing for the body when body is null or empty", () => {

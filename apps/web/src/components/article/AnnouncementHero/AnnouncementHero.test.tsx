@@ -49,21 +49,10 @@ describe("AnnouncementHero", () => {
     expect(screen.queryByTestId("announcement-hero-image")).toBeNull();
   });
 
-  it("renders the byline with author and reading time", () => {
+  it("does not render a byline row — author + reading time live in the §7.6 metadata bar below the hero", () => {
     render(
-      <AnnouncementHero
-        title="Title"
-        author="Redactie KCVV"
-        readingTime="4 min lezen"
-      />,
+      <AnnouncementHero title="Title" category="Nieuws" date="19 April 2026" />,
     );
-    const byline = screen.getByTestId("announcement-hero-byline");
-    const text = (byline.textContent ?? "").replace(/\s+/g, " ").trim();
-    expect(text).toMatch(/Redactie KCVV.*4 min lezen/);
-  });
-
-  it("omits the byline when neither author nor reading time is provided", () => {
-    render(<AnnouncementHero title="Title" />);
     expect(screen.queryByTestId("announcement-hero-byline")).toBeNull();
   });
 });

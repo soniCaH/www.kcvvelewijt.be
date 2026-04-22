@@ -18,16 +18,20 @@ export interface AnnouncementTemplateProps {
 }
 
 // Announcements are implicitly club-authored until we wire an editor field
-// in a follow-up phase (see PRD #1330 open questions). The byline + metadata
-// row both default to the club banner.
+// in a follow-up phase (see PRD #1330 open questions). The metadata bar
+// defaults to the club banner.
 const AUTHOR = "KCVV Elewijt";
 
 /**
  * Phase 4 (#1330) — the default article template.
  *
  * Composition:
- * 1. `AnnouncementHero` — design §5.1 (kicker + title + byline + 16:9 cover).
- * 2. `ArticleMetadata` — design §7.6 metadata bar.
+ * 1. `AnnouncementHero` — design §5.1 (kicker + title + 16:9 cover). No
+ *    byline row: author + reading time live in the §7.6 metadata bar
+ *    rendered immediately below, so repeating them on the hero was pure
+ *    duplication.
+ * 2. `ArticleMetadata` — design §7.6 metadata bar (date · author ·
+ *    reading time + share controls).
  * 3. `ArticleBodyMotion` wrapping `SanityArticleBody` inside an
  *    `.article-body` container, so:
  *      - §7.3 drop-cap applies to the first `<p>`
@@ -56,10 +60,7 @@ export const AnnouncementTemplate = ({
         title={title}
         category={category}
         date={publishedDate}
-        author={AUTHOR}
-        readingTime={readingTime}
         coverImageUrl={coverImageUrl}
-        imageAlt={title}
       />
 
       <ArticleMetadata

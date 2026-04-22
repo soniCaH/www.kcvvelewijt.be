@@ -14,14 +14,7 @@ export interface AnnouncementHeroProps {
    */
   date?: string;
   /**
-   * Byline author (e.g. "Redactie KCVV"). Announcements render the club
-   * as the implicit author when absent.
-   */
-  author?: string;
-  /** Reading time, e.g. "4 min lezen". Shown in the byline when present. */
-  readingTime?: string;
-  /**
-   * 16:9 cover image URL. When absent the hero renders headline + byline
+   * 16:9 cover image URL. When absent the hero renders kicker + title
    * only, matching design §5.1's "no overlay, no shadow" ethos.
    */
   coverImageUrl?: string | null;
@@ -39,8 +32,16 @@ export interface AnnouncementHeroProps {
 /**
  * Design §5.1 — the baseline announcement hero. 16:9 hotspot crop of the
  * cover image, no overlay, rounded-[4px], with a kicker (category · date)
- * above a Quasimoda 700 clamped display title in sentence case and a
- * mono small-caps byline row below.
+ * above a Quasimoda 700 clamped display title in sentence case.
+ *
+ * The byline row shown in the original §5.1 mock-up (`By Redactie KCVV ·
+ * 4 min lezen`) is intentionally omitted: the §7.6 metadata bar rendered
+ * immediately below the hero already carries author + date + reading
+ * time + share controls, and a second line restating author + reading
+ * time was pure duplication in practice. The interview hero follows the
+ * same rule. Apply this principle to the upcoming transfer + event
+ * heroes too — the metadata bar is the single source of truth for these
+ * three facts.
  *
  * The interview hero (`InterviewHero`) diverges on: kicker composition
  * (subject jersey + position), subtitle line, and a 4:5 portrait crop.
@@ -52,16 +53,11 @@ export const AnnouncementHero = ({
   title,
   category,
   date,
-  author,
-  readingTime,
   coverImageUrl,
   imageAlt,
   className,
 }: AnnouncementHeroProps) => {
   const kickerParts = [category, date].filter(
-    (x): x is string => typeof x === "string" && x.length > 0,
-  );
-  const bylineParts = [author, readingTime].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
 
@@ -102,27 +98,6 @@ export const AnnouncementHero = ({
         >
           {title}
         </h1>
-
-        {bylineParts.length > 0 && (
-          <p
-            className="mt-5 font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray"
-            data-testid="announcement-hero-byline"
-          >
-            {bylineParts.map((part, i) => (
-              <span key={part}>
-                {i > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="mx-3 text-kcvv-gray-light"
-                  >
-                    ·
-                  </span>
-                )}
-                {part}
-              </span>
-            ))}
-          </p>
-        )}
       </div>
 
       {coverImageUrl && (

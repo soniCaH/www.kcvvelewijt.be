@@ -111,7 +111,7 @@ Rollout posture: phases 2–7 can ship in any order relative to each other once 
 ### Phase 4 — #1330 — Announcement template
 
 - [x] `AnnouncementTemplate` component added. Default path when `articleType` is `announcement` or missing.
-- [x] Hero per design §5.1: 16:9 `article.coverImage` via Sanity CDN hotspot, rounded-[4px], no overlay. Kicker with `.featured-border::before` bar, Quasimoda 700 clamp title sentence-case, byline row.
+- [x] Hero per design §5.1: 16:9 `article.coverImage` via Sanity CDN hotspot, rounded-[4px], no overlay. Kicker with `.featured-border::before` bar and a Quasimoda 700 clamp title in sentence case. **Byline row intentionally dropped** — author + reading time live in the §7.6 metadata bar below the hero, and repeating them as a second line was pure duplication in practice. The same rule applies to the upcoming transfer + event heroes (Phases 5–6).
 - [x] Drop-cap on first `<p>` inside `.article-body`: Quasimoda 700 `text-[5.5rem] leading-[0.85] kcvv-green-bright`, floated, 4 lines tall. Applied only to `announcement` and `transfer` body prose (not `interview` or `event`).
 - [x] Body h2 preceded by 4rem × 2px `kcvv-green-bright` bar (reuse `.featured-border::before`).
 - [x] Blockquote rework per design §7.4: rule-framed centered, Quasimoda 400 `text-2xl` gray-blue, 1px top+bottom rules. Scoped to `.article-body` so Studio previews are unaffected. The attribution line (mono small-caps + 2rem green rule prefix) is **deferred** — PortableText's default blockquote serializer has no structured slot for attribution; a dedicated `blockquoteAttribution` block/mark is tracked as a follow-up.
