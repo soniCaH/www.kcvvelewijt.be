@@ -63,13 +63,18 @@ export function UrlTabs({
     urlTab && validTabs.includes(urlTab) ? urlTab : defaultValue;
 
   const [activeTab, setActiveTab] = React.useState(initialTab);
+  const [trackedSearchParams, setTrackedSearchParams] =
+    React.useState(searchParams);
 
-  // Sync state when URL changes (e.g., browser back/forward)
-  React.useEffect(() => {
-    const urlTab = searchParams.get(paramName);
-    const newTab = urlTab && validTabs.includes(urlTab) ? urlTab : defaultValue;
-    setActiveTab(newTab);
-  }, [searchParams, paramName, validTabs, defaultValue]);
+  if (trackedSearchParams !== searchParams) {
+    setTrackedSearchParams(searchParams);
+    const nextUrlTab = searchParams.get(paramName);
+    const nextTab =
+      nextUrlTab && validTabs.includes(nextUrlTab) ? nextUrlTab : defaultValue;
+    if (nextTab !== activeTab) {
+      setActiveTab(nextTab);
+    }
+  }
 
   // Update URL when tab changes
   const handleTabChange = React.useCallback(
