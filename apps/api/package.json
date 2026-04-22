@@ -18,7 +18,7 @@
   "dependencies": {
     "@effect/platform": "0.96.0",
     "@kcvv/api-contract": "workspace:*",
-    "@sanity/client": "7.20.0",
+    "@sanity/client": "7.21.0",
     "effect": "3.21.1"
   },
   "devDependencies": {
