@@ -69,17 +69,17 @@ function ContactCtaCard({
       role={role}
       className={
         centered
-          ? "mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 text-center shadow-sm md:p-8"
-          : "mx-auto max-w-2xl rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm md:p-8"
+          ? "border-kcvv-green-bright mx-auto max-w-2xl rounded-sm border-l-4 bg-white p-6 text-center shadow-sm md:p-8"
+          : "border-kcvv-green-bright mx-auto max-w-2xl rounded-sm border-l-4 bg-white p-6 shadow-sm md:p-8"
       }
     >
-      <h2 className="font-title text-2xl font-bold uppercase leading-tight text-kcvv-black">
+      <h2 className="font-title text-kcvv-black text-2xl leading-tight font-bold uppercase">
         {heading}
       </h2>
-      <p className="mt-2 text-sm text-kcvv-gray">{body}</p>
+      <p className="text-kcvv-gray mt-2 text-sm">{body}</p>
       <a
         href="mailto:info@kcvvelewijt.be"
-        className="mt-4 inline-flex items-center gap-2 rounded-sm bg-kcvv-green-bright px-5 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-black transition-colors hover:bg-kcvv-green-dark hover:text-white"
+        className="bg-kcvv-green-bright text-kcvv-black hover:bg-kcvv-green-dark mt-4 inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-bold tracking-[0.05em] uppercase transition-colors hover:text-white"
       >
         Contact opnemen
       </a>
@@ -322,7 +322,7 @@ export function HulpPage({ paths }: HulpPageProps) {
         <p
           role="status"
           aria-live="polite"
-          className="text-center text-sm text-kcvv-gray"
+          className="text-kcvv-gray text-center text-sm"
         >
           Typ minstens {MIN_QUERY_LENGTH} letters…
         </p>
@@ -349,7 +349,7 @@ export function HulpPage({ paths }: HulpPageProps) {
         // alle categorieën", so the categories must actually be visible.
         return (
           <div className="space-y-12">
-            <p className="text-center text-sm text-kcvv-gray">
+            <p className="text-kcvv-gray text-center text-sm">
               Er ging iets mis bij het zoeken. Probeer het opnieuw of blader
               door de categorieën hieronder.
             </p>
@@ -364,7 +364,7 @@ export function HulpPage({ paths }: HulpPageProps) {
       if (filteredPaths.length === 0) {
         return (
           <div role="status" aria-live="polite" className="space-y-12">
-            <p className="text-center text-sm text-kcvv-gray">
+            <p className="text-kcvv-gray text-center text-sm">
               Geen resultaten voor &quot;{executedQuery}&quot;. Blader hieronder
               door alle categorieën.
             </p>
@@ -404,7 +404,7 @@ export function HulpPage({ paths }: HulpPageProps) {
     <>
       <div>
         <HulpSearchInput value={searchQuery} onChange={setSearchQuery} />
-        <p className="mt-3 text-center text-xs text-kcvv-gray">
+        <p className="text-kcvv-gray mt-3 text-center text-xs">
           Tip: probeer trefwoorden zoals <em>inschrijving</em>,{" "}
           <em>sportongeval</em>, of <em>transfer</em>.
         </p>

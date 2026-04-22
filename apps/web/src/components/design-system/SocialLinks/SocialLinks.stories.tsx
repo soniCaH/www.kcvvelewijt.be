@@ -108,17 +108,17 @@ export const InlineVertical: Story = {
  */
 export const Sizes: Story = {
   render: () => (
-    <div className="bg-black p-8 space-y-6">
+    <div className="space-y-6 bg-black p-8">
       <div>
-        <p className="text-white text-sm mb-2">Small</p>
+        <p className="mb-2 text-sm text-white">Small</p>
         <SocialLinks variant="inline" size="sm" />
       </div>
       <div>
-        <p className="text-white text-sm mb-2">Medium</p>
+        <p className="mb-2 text-sm text-white">Medium</p>
         <SocialLinks variant="inline" size="md" />
       </div>
       <div>
-        <p className="text-white text-sm mb-2">Large</p>
+        <p className="mb-2 text-sm text-white">Large</p>
         <SocialLinks variant="inline" size="lg" />
       </div>
     </div>
@@ -131,17 +131,17 @@ export const Sizes: Story = {
  */
 export const CircleSizes: Story = {
   render: () => (
-    <div className="bg-black p-8 space-y-6">
+    <div className="space-y-6 bg-black p-8">
       <div>
-        <p className="text-white text-sm mb-2">Small (24px)</p>
+        <p className="mb-2 text-sm text-white">Small (24px)</p>
         <SocialLinks variant="circle" size="sm" />
       </div>
       <div>
-        <p className="text-white text-sm mb-2">Medium (32px - Default)</p>
+        <p className="mb-2 text-sm text-white">Medium (32px - Default)</p>
         <SocialLinks variant="circle" size="md" />
       </div>
       <div>
-        <p className="text-white text-sm mb-2">Large (40px)</p>
+        <p className="mb-2 text-sm text-white">Large (40px)</p>
         <SocialLinks variant="circle" size="lg" />
       </div>
     </div>

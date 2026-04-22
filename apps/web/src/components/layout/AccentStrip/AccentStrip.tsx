@@ -7,6 +7,6 @@
 export const AccentStrip = () => (
   <div
     aria-hidden="true"
-    className="fixed top-0 left-0 right-0 h-[3px] bg-kcvv-green-bright z-[51]"
+    className="bg-kcvv-green-bright fixed top-0 right-0 left-0 z-[51] h-[3px]"
   />
 );

@@ -33,7 +33,7 @@ type Story = StoryObj<typeof meta>;
 export const DiagonalTransition: Story = {
   render: () => (
     <div className="w-[800px]">
-      <div className="h-32 bg-gray-100 flex items-center justify-center">
+      <div className="flex h-32 items-center justify-center bg-gray-100">
         <p className="text-gray-600">Page content (gray-100)</p>
       </div>
       <SectionTransition
@@ -42,7 +42,7 @@ export const DiagonalTransition: Story = {
         type="diagonal"
         direction="left"
       />
-      <div className="h-32 bg-kcvv-green-dark" />
+      <div className="bg-kcvv-green-dark h-32" />
     </div>
   ),
 };
@@ -53,9 +53,9 @@ export const DiagonalTransition: Story = {
  */
 export const GreenHeroZone: Story = {
   render: () => (
-    <div className="w-[800px] bg-kcvv-green-dark">
+    <div className="bg-kcvv-green-dark w-[800px]">
       <div className="max-w-outer mx-auto px-10 pt-12 pb-10 text-right">
-        <p className="font-title font-black text-kcvv-black uppercase leading-[0.9] tracking-tight text-[clamp(3rem,10vw,8rem)]">
+        <p className="font-title text-kcvv-black text-[clamp(3rem,10vw,8rem)] leading-[0.9] font-black tracking-tight uppercase">
           KCVV Elewijt
         </p>
       </div>
@@ -87,8 +87,8 @@ export const ClubCrestLogo: Story = {
  */
 export const ClubLinksColumn: Story = {
   render: () => (
-    <div className="bg-kcvv-black p-8 w-[300px]">
-      <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+    <div className="bg-kcvv-black w-[300px] p-8">
+      <p className="font-title mb-[1.125rem] text-[0.6875rem] font-extrabold tracking-[0.16em] text-white/50 uppercase">
         Club
       </p>
       <ul className="flex flex-col gap-2.5">
@@ -97,7 +97,7 @@ export const ClubLinksColumn: Story = {
             <li key={label}>
               <Link
                 href="#"
-                className="text-[0.8125rem] leading-snug text-white/55 hover:text-kcvv-green-bright transition-colors"
+                className="hover:text-kcvv-green-bright text-[0.8125rem] leading-snug text-white/55 transition-colors"
               >
                 {label}
               </Link>
@@ -115,35 +115,35 @@ export const ClubLinksColumn: Story = {
  */
 export const ContactColumn: Story = {
   render: () => (
-    <div className="bg-kcvv-black p-8 w-[300px]">
-      <p className="font-title text-[0.6875rem] font-extrabold uppercase tracking-[0.16em] text-white/50 mb-[1.125rem]">
+    <div className="bg-kcvv-black w-[300px] p-8">
+      <p className="font-title mb-[1.125rem] text-[0.6875rem] font-extrabold tracking-[0.16em] text-white/50 uppercase">
         Contact
       </p>
-      <p className="text-[0.8125rem] text-white/55 leading-relaxed mb-4">
+      <p className="mb-4 text-[0.8125rem] leading-relaxed text-white/55">
         Driesstraat 32
         <br />
         1982 Elewijt
       </p>
       <a
         href="mailto:info@kcvvelewijt.be"
-        className="text-[0.8125rem] font-semibold text-white/70 hover:text-kcvv-green-bright transition-colors"
+        className="hover:text-kcvv-green-bright text-[0.8125rem] font-semibold text-white/70 transition-colors"
       >
         info@kcvvelewijt.be
       </a>
-      <div className="flex gap-2.5 mt-5">
+      <div className="mt-5 flex gap-2.5">
         <a
           href="#"
           aria-label="Facebook"
-          className="text-white/30 hover:text-kcvv-green-bright transition-colors"
+          className="hover:text-kcvv-green-bright text-white/30 transition-colors"
         >
-          <Facebook className="w-[18px] h-[18px]" />
+          <Facebook className="h-[18px] w-[18px]" />
         </a>
         <a
           href="#"
           aria-label="Instagram"
-          className="text-white/30 hover:text-kcvv-green-bright transition-colors"
+          className="hover:text-kcvv-green-bright text-white/30 transition-colors"
         >
-          <Instagram className="w-[18px] h-[18px]" />
+          <Instagram className="h-[18px] w-[18px]" />
         </a>
       </div>
     </div>
@@ -157,14 +157,14 @@ export const ContactColumn: Story = {
 export const BottomBar: Story = {
   render: () => (
     <div className="bg-kcvv-black w-[800px]">
-      <div className="border-t border-white/6 flex items-center justify-center gap-6 px-8 py-3.5 text-[0.6875rem] text-white/35 tracking-wide">
+      <div className="flex items-center justify-center gap-6 border-t border-white/6 px-8 py-3.5 text-[0.6875rem] tracking-wide text-white/35">
         <span>© {new Date().getFullYear()} KCVV Elewijt</span>
         <span className="text-white/12" aria-hidden="true">
           ·
         </span>
         <a
           href="#"
-          className="text-[0.6875rem] text-white/35 hover:text-white/65 transition-colors"
+          className="text-[0.6875rem] text-white/35 transition-colors hover:text-white/65"
         >
           Privacyverklaring
         </a>
@@ -173,7 +173,7 @@ export const BottomBar: Story = {
         </span>
         <button
           type="button"
-          className="text-[0.6875rem] text-white/35 hover:text-white/65 transition-colors cursor-pointer bg-transparent border-0 p-0"
+          className="cursor-pointer border-0 bg-transparent p-0 text-[0.6875rem] text-white/35 transition-colors hover:text-white/65"
         >
           Cookie-instellingen
         </button>

@@ -55,18 +55,11 @@ export function MobileBottomNav({
 }: MobileBottomNavProps) {
   return (
     <nav
-      className={`
-        fixed bottom-0 left-0 right-0 z-40
-        bg-white border-t border-gray-200
-        shadow-2xl
-        lg:hidden
-        safe-bottom
-        ${className}
-      `}
+      className={`safe-bottom fixed right-0 bottom-0 left-0 z-40 border-t border-gray-200 bg-white shadow-2xl lg:hidden ${className} `}
       role="navigation"
       aria-label="Hoofdnavigatie"
     >
-      <div className="flex items-center justify-around h-16 pb-safe">
+      <div className="pb-safe flex h-16 items-center justify-around">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.value;
           const IconComponent = tab.icon;
@@ -75,20 +68,11 @@ export function MobileBottomNav({
             <button
               key={tab.value}
               onClick={() => onChange(tab.value)}
-              className={`
-                flex flex-col items-center justify-center
-                gap-1
-                flex-1
-                h-full
-                min-w-0
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-inset focus:ring-kcvv-green
-                ${
-                  isActive
-                    ? "text-kcvv-green-bright bg-kcvv-green-bright/5"
-                    : "text-kcvv-gray hover:text-kcvv-green-bright hover:bg-gray-50"
-                }
-              `}
+              className={`focus:ring-kcvv-green flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1 transition-colors focus:ring-2 focus:outline-none focus:ring-inset ${
+                isActive
+                  ? "text-kcvv-green-bright bg-kcvv-green-bright/5"
+                  : "text-kcvv-gray hover:text-kcvv-green-bright hover:bg-gray-50"
+              } `}
               aria-current={isActive ? "page" : undefined}
               aria-label={`${tab.label}${isActive ? " (huidige weergave)" : ""}`}
               type="button"
@@ -105,10 +89,7 @@ export function MobileBottomNav({
 
               {/* Label */}
               <span
-                className={`
-                  text-xs font-medium truncate w-full text-center px-2
-                  ${isActive ? "font-semibold" : ""}
-                `}
+                className={`w-full truncate px-2 text-center text-xs font-medium ${isActive ? "font-semibold" : ""} `}
               >
                 {tab.label}
               </span>

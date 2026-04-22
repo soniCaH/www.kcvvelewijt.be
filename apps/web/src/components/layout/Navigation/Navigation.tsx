@@ -96,8 +96,8 @@ export const Navigation = ({
   };
 
   return (
-    <nav ref={navRef} className={cn("flex grow max-w-[90%]", className)}>
-      <ul className="flex items-center justify-between grow flex-nowrap list-none m-0 p-0">
+    <nav ref={navRef} className={cn("flex max-w-[90%] grow", className)}>
+      <ul className="m-0 flex grow list-none flex-nowrap items-center justify-between p-0">
         {menuItems.map((item, index) => {
           const active = isActive(item.href) || hasActiveChild(item);
           const hasDropdown = item.children && item.children.length > 0;
@@ -107,14 +107,14 @@ export const Navigation = ({
           return (
             <li
               key={item.href}
-              className="inline-block relative"
+              className="relative inline-block"
               onMouseEnter={() => hasDropdown && setOpenDropdown(item.href)}
               onMouseLeave={() => setOpenDropdown(null)}
             >
               <Link
                 href={item.href}
                 className={cn(
-                  "text-[0.7rem] xl:text-[0.875rem] uppercase font-bold text-white whitespace-nowrap no-underline py-2 px-2 transition-all duration-300",
+                  "px-2 py-2 text-[0.7rem] font-bold whitespace-nowrap text-white uppercase no-underline transition-all duration-300 xl:text-[0.875rem]",
                   hasDropdown ? "dropdown-trigger" : "nav-link",
                   active && !hasDropdown && "active",
                 )}
@@ -126,11 +126,11 @@ export const Navigation = ({
               {hasDropdown && openDropdown === item.href && (
                 <div
                   className={cn(
-                    "absolute top-full mt-0 min-w-[200px] bg-kcvv-black border border-gray-700 z-10",
+                    "bg-kcvv-black absolute top-full z-10 mt-0 min-w-[200px] border border-gray-700",
                     isNearEnd ? "right-0" : "left-0",
                   )}
                 >
-                  <ul className="list-none m-0 p-0">
+                  <ul className="m-0 list-none p-0">
                     {item.children?.map((child) => {
                       const childActive = isActive(child.href);
 
@@ -139,10 +139,10 @@ export const Navigation = ({
                           <Link
                             href={child.href}
                             className={cn(
-                              "block px-7 py-3 text-[0.6875rem] uppercase font-bold no-underline transition-colors duration-300 text-left",
+                              "block px-7 py-3 text-left text-[0.6875rem] font-bold uppercase no-underline transition-colors duration-300",
                               childActive
                                 ? "text-kcvv-green-bright"
-                                : "text-white hover:text-kcvv-green-bright",
+                                : "hover:text-kcvv-green-bright text-white",
                             )}
                           >
                             {child.label}

@@ -86,29 +86,29 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
           aria-label="Statistieken laden..."
           {...props}
         >
-          <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+          <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
             Statistieken
           </h3>
           <div className="overflow-x-auto">
             <div className="min-w-[500px]">
               {/* Header skeleton */}
               <div
-                className="flex gap-4 py-2 border-b border-gray-200"
+                className="flex gap-4 border-b border-gray-200 py-2"
                 data-testid="stats-skeleton-header"
               >
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-4 w-16 bg-gray-300 rounded" />
+                  <div key={i} className="h-4 w-16 rounded bg-gray-300" />
                 ))}
               </div>
               {/* Row skeletons */}
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="flex gap-4 py-3 border-b border-gray-100"
+                  className="flex gap-4 border-b border-gray-100 py-3"
                   data-testid="stats-skeleton-row"
                 >
                   {[1, 2, 3, 4, 5, 6].map((j) => (
-                    <div key={j} className="h-4 w-16 bg-gray-200 rounded" />
+                    <div key={j} className="h-4 w-16 rounded bg-gray-200" />
                   ))}
                 </div>
               ))}
@@ -122,7 +122,7 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
     if (stats.length === 0) {
       return (
         <div ref={ref} className={cn(className)} {...props}>
-          <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+          <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
             Statistieken
           </h3>
           <p className="text-kcvv-gray text-sm">
@@ -136,38 +136,38 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
     if (position === "outfield") {
       return (
         <div ref={ref} className={cn(className)} {...props}>
-          <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+          <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
             Statistieken
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-left">
-                  <th className="py-2 pr-4 font-medium text-kcvv-gray-dark">
+                  <th className="text-kcvv-gray-dark py-2 pr-4 font-medium">
                     Seizoen
                   </th>
-                  <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                  <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                     Wed
                   </th>
-                  <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                  <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                     Goals
                   </th>
-                  <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                  <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                     Assists
                   </th>
-                  <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                  <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                     <span
-                      className="inline-block w-3 h-3 bg-yellow-400 rounded-sm"
+                      className="inline-block h-3 w-3 rounded-sm bg-yellow-400"
                       aria-label="Gele kaarten"
                     />
                   </th>
-                  <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                  <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                     <span
-                      className="inline-block w-3 h-3 bg-red-500 rounded-sm"
+                      className="inline-block h-3 w-3 rounded-sm bg-red-500"
                       aria-label="Rode kaarten"
                     />
                   </th>
-                  <th className="py-2 pl-2 font-medium text-kcvv-gray-dark text-right">
+                  <th className="text-kcvv-gray-dark py-2 pl-2 text-right font-medium">
                     Speeltijd
                   </th>
                 </tr>
@@ -181,25 +181,25 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
                       key={stat.season}
                       className="border-b border-gray-100 hover:bg-gray-50"
                     >
-                      <td className="py-3 pr-4 font-medium text-kcvv-gray-dark">
+                      <td className="text-kcvv-gray-dark py-3 pr-4 font-medium">
                         {stat.season}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray">
+                      <td className="text-kcvv-gray px-2 py-3 text-center">
                         {stat.matches}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray">
+                      <td className="text-kcvv-gray px-2 py-3 text-center">
                         {outfieldStat.goals}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray">
+                      <td className="text-kcvv-gray px-2 py-3 text-center">
                         {outfieldStat.assists}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray">
+                      <td className="text-kcvv-gray px-2 py-3 text-center">
                         {stat.yellowCards}
                       </td>
-                      <td className="py-3 px-2 text-center text-kcvv-gray">
+                      <td className="text-kcvv-gray px-2 py-3 text-center">
                         {stat.redCards}
                       </td>
-                      <td className="py-3 pl-2 text-right text-kcvv-gray">
+                      <td className="text-kcvv-gray py-3 pl-2 text-right">
                         {formatMinutes(stat.minutesPlayed)}
                       </td>
                     </tr>
@@ -215,41 +215,41 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
     // Goalkeeper table
     return (
       <div ref={ref} className={cn(className)} {...props}>
-        <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-4">
+        <h3 className="text-kcvv-gray-dark mb-4 text-lg font-semibold">
           Statistieken
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[500px] text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-left">
-                <th className="py-2 pr-4 font-medium text-kcvv-gray-dark">
+                <th className="text-kcvv-gray-dark py-2 pr-4 font-medium">
                   Seizoen
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   Wed
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   Clean sheets
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   Tegendoelpunten
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   Reddingen
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   <span
-                    className="inline-block w-3 h-3 bg-yellow-400 rounded-sm"
+                    className="inline-block h-3 w-3 rounded-sm bg-yellow-400"
                     aria-label="Gele kaarten"
                   />
                 </th>
-                <th className="py-2 px-2 font-medium text-kcvv-gray-dark text-center">
+                <th className="text-kcvv-gray-dark px-2 py-2 text-center font-medium">
                   <span
-                    className="inline-block w-3 h-3 bg-red-500 rounded-sm"
+                    className="inline-block h-3 w-3 rounded-sm bg-red-500"
                     aria-label="Rode kaarten"
                   />
                 </th>
-                <th className="py-2 pl-2 font-medium text-kcvv-gray-dark text-right">
+                <th className="text-kcvv-gray-dark py-2 pl-2 text-right font-medium">
                   Speeltijd
                 </th>
               </tr>
@@ -262,28 +262,28 @@ export const PlayerStats = forwardRef<HTMLDivElement, PlayerStatsProps>(
                     key={stat.season}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
-                    <td className="py-3 pr-4 font-medium text-kcvv-gray-dark">
+                    <td className="text-kcvv-gray-dark py-3 pr-4 font-medium">
                       {stat.season}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.matches}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.cleanSheets}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.goalsConceded}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.saves}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.yellowCards}
                     </td>
-                    <td className="py-3 px-2 text-center text-kcvv-gray">
+                    <td className="text-kcvv-gray px-2 py-3 text-center">
                       {stat.redCards}
                     </td>
-                    <td className="py-3 pl-2 text-right text-kcvv-gray">
+                    <td className="text-kcvv-gray py-3 pl-2 text-right">
                       {formatMinutes(stat.minutesPlayed)}
                     </td>
                   </tr>

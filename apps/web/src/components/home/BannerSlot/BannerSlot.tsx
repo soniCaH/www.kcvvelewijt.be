@@ -49,7 +49,7 @@ export const BannerSlot = ({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="block max-w-7xl mx-auto px-4 md:px-8 py-8"
+          className="mx-auto block max-w-7xl px-4 py-8 md:px-8"
         >
           {inner}
         </a>
@@ -59,7 +59,7 @@ export const BannerSlot = ({
 
   return (
     <div className="bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">{inner}</div>
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">{inner}</div>
     </div>
   );
 };

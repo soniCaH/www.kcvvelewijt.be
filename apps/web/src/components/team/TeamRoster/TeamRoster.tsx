@@ -156,7 +156,7 @@ export function TeamRoster({
       >
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
+            <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
             <div className={GRID_CLASSES}>
               {Array.from({ length: i === 1 ? 2 : i === 4 ? 3 : 4 }).map(
                 (_, j) => (
@@ -182,7 +182,7 @@ export function TeamRoster({
     return (
       <div
         className={cn(
-          "flex items-center justify-center py-12 text-gray-500 text-center",
+          "flex items-center justify-center py-12 text-center text-gray-500",
           className,
         )}
       >
@@ -196,7 +196,7 @@ export function TeamRoster({
     showStaff && staff.length > 0 ? (
       <section className="mt-12">
         {staffSectionLabel != null && (
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 font-title">
+          <h3 className="font-title mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
             {staffSectionLabel}
             <span className="text-sm font-normal text-gray-500">
               ({staff.length})
@@ -229,7 +229,7 @@ export function TeamRoster({
         <div className="space-y-10">
           {groupedPlayers.map(([position, positionPlayers]) => (
             <section key={position}>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 font-title">
+              <h3 className="font-title mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                 {getPositionLabel(position, positionPlayers.length)}
                 <span className="text-sm font-normal text-gray-500">
                   ({positionPlayers.length})

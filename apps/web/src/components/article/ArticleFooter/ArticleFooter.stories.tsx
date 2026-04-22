@@ -163,8 +163,8 @@ export const InContext: Story = {
     <div className="min-h-screen bg-white">
       {/* Article content */}
       <div className="max-w-inner-lg mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold mb-4">Article Title</h2>
-        <p className="text-gray-700 mb-4">
+        <h2 className="mb-4 text-2xl font-bold">Article Title</h2>
+        <p className="mb-4 text-gray-700">
           Dit is het einde van het artikel. Hieronder volgt de sectie met
           gerelateerde inhoud.
         </p>

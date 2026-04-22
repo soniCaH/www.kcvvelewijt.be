@@ -79,7 +79,7 @@ function Thumbnail({ entity }: { entity: MentionedEntity }) {
 
   if (entity.imageUrl) {
     return (
-      <div className="relative h-full aspect-square flex-shrink-0 overflow-hidden bg-kcvv-green-dark/10">
+      <div className="bg-kcvv-green-dark/10 relative aspect-square h-full flex-shrink-0 overflow-hidden">
         <Image
           src={entity.imageUrl}
           alt=""
@@ -96,9 +96,9 @@ function Thumbnail({ entity }: { entity: MentionedEntity }) {
 
   if (isTeam) {
     return (
-      <div className="relative h-full aspect-square flex-shrink-0 bg-kcvv-green-dark flex items-center justify-center">
+      <div className="bg-kcvv-green-dark relative flex aspect-square h-full flex-shrink-0 items-center justify-center">
         <Users
-          className="w-7 h-7 text-kcvv-green-bright"
+          className="text-kcvv-green-bright h-7 w-7"
           strokeWidth={2}
           aria-hidden="true"
         />
@@ -107,8 +107,8 @@ function Thumbnail({ entity }: { entity: MentionedEntity }) {
   }
 
   return (
-    <div className="relative h-full aspect-square flex-shrink-0 bg-kcvv-green-dark flex items-center justify-center">
-      <span className="text-base font-extrabold text-kcvv-green-bright tracking-wider">
+    <div className="bg-kcvv-green-dark relative flex aspect-square h-full flex-shrink-0 items-center justify-center">
+      <span className="text-kcvv-green-bright text-base font-extrabold tracking-wider">
         {getInitials(entity)}
       </span>
     </div>
@@ -129,19 +129,19 @@ function EntityCard({
   const inner = (
     <>
       <div
-        className="absolute top-0 inset-x-0 h-[2px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+        className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[2px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
         aria-hidden="true"
       />
       <Thumbnail entity={entity} />
-      <div className="flex flex-col justify-center px-3 py-2 min-w-0 flex-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-kcvv-green-dark leading-none mb-1">
+      <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">
+        <span className="text-kcvv-green-dark mb-1 text-[10px] leading-none font-bold tracking-wider uppercase">
           {TYPE_LABEL[entity.type]}
         </span>
-        <span className="text-sm font-bold text-kcvv-black truncate leading-tight">
+        <span className="text-kcvv-black truncate text-sm leading-tight font-bold">
           {name}
         </span>
         {meta && (
-          <span className="text-xs text-kcvv-gray truncate leading-tight mt-0.5">
+          <span className="text-kcvv-gray mt-0.5 truncate text-xs leading-tight">
             {meta}
           </span>
         )}
@@ -159,7 +159,7 @@ function EntityCard({
         onClick={onClick}
         className={cn(
           baseClasses,
-          "transition-all duration-200 hover:border-kcvv-green-bright/60 hover:shadow-card-hover hover:-translate-y-0.5",
+          "hover:border-kcvv-green-bright/60 hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5",
         )}
       >
         {inner}
@@ -180,12 +180,12 @@ export const MentionedEntitiesStrip = ({
   return (
     <section className={cn("w-full", className)}>
       <header className="mb-4">
-        <h3 className="border-l-2 border-kcvv-green-bright pl-2 text-kcvv-green-dark text-xs font-bold uppercase tracking-wider">
+        <h3 className="border-kcvv-green-bright text-kcvv-green-dark border-l-2 pl-2 text-xs font-bold tracking-wider uppercase">
           In dit artikel
         </h3>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {entities.map((entity, index) => (
           <EntityCard
             key={entity.id}

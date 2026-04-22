@@ -29,15 +29,15 @@ export function CategorySection({
 
   return (
     <section>
-      <div className="mb-6 flex items-center gap-3 border-l-4 border-kcvv-green-bright pl-4">
+      <div className="border-kcvv-green-bright mb-6 flex items-center gap-3 border-l-4 pl-4">
         <Icon className={`h-7 w-7 shrink-0 ${meta.color}`} />
         {/* `!` modifiers force the size + font over the global h1-h6 cascade
             in globals.css (which sets h3 to 24px / font-title /
             kcvv-gray-blue by default). Same pattern as SectionHeader. */}
-        <h3 className="font-body! text-xl! font-black! uppercase tracking-tight! leading-none! text-kcvv-black! mb-0!">
+        <h3 className="font-body! text-kcvv-black! mb-0! text-xl! leading-none! font-black! tracking-tight! uppercase">
           {meta.label}
         </h3>
-        <span className="text-sm font-normal text-kcvv-gray">
+        <span className="text-kcvv-gray text-sm font-normal">
           ({paths.length})
         </span>
       </div>

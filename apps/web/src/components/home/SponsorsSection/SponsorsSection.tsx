@@ -9,7 +9,7 @@ export interface SponsorsSectionProps {
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
   return (
     <section className={cn("py-6", className)}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeader
           title="Onze sponsors"
           linkText="Alle partners"

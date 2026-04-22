@@ -35,14 +35,14 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(
       <label
         ref={ref}
         className={cn(
-          "block text-sm font-semibold text-kcvv-gray-blue mb-1.5",
+          "text-kcvv-gray-blue mb-1.5 block text-sm font-semibold",
           className,
         )}
         {...props}
       >
         {children}
         {required && (
-          <span className="ml-1 text-kcvv-alert" aria-hidden="true">
+          <span className="text-kcvv-alert ml-1" aria-hidden="true">
             *
           </span>
         )}

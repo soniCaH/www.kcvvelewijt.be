@@ -59,7 +59,7 @@ export const Default: Story = {
   },
   render: (args) => (
     <UrlTabs {...args}>
-      <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+      <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
         <Tabs.Trigger value="info" className={tabTriggerClass}>
           Info
         </Tabs.Trigger>
@@ -107,7 +107,7 @@ export const PreSelectedFromUrl: Story = {
   },
   render: (args) => (
     <UrlTabs {...args}>
-      <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+      <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
         <Tabs.Trigger value="info" className={tabTriggerClass}>
           Info
         </Tabs.Trigger>
@@ -145,7 +145,7 @@ export const WithCustomParam: Story = {
   },
   render: (args) => (
     <UrlTabs {...args}>
-      <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+      <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
         <Tabs.Trigger value="club" className={tabTriggerClass}>
           Club
         </Tabs.Trigger>
@@ -183,7 +183,7 @@ export const MultipleTabGroups: Story = {
   render: () => (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="font-title font-bold text-kcvv-gray-blue mb-2">
+        <h3 className="font-title text-kcvv-gray-blue mb-2 font-bold">
           Ploeg A — param: <code className="font-mono text-sm">?tab=</code>
         </h3>
         <UrlTabs
@@ -191,7 +191,7 @@ export const MultipleTabGroups: Story = {
           validTabs={["info", "wedstrijden"]}
           paramName="tab"
         >
-          <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+          <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
             <Tabs.Trigger value="info" className={tabTriggerClass}>
               Info
             </Tabs.Trigger>
@@ -209,7 +209,7 @@ export const MultipleTabGroups: Story = {
       </div>
 
       <div>
-        <h3 className="font-title font-bold text-kcvv-gray-blue mb-2">
+        <h3 className="font-title text-kcvv-gray-blue mb-2 font-bold">
           Ploeg B — param: <code className="font-mono text-sm">?sectie=</code>
         </h3>
         <UrlTabs
@@ -217,7 +217,7 @@ export const MultipleTabGroups: Story = {
           validTabs={["info", "standen"]}
           paramName="sectie"
         >
-          <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+          <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
             <Tabs.Trigger value="info" className={tabTriggerClass}>
               Info
             </Tabs.Trigger>
@@ -249,7 +249,7 @@ export const Playground: Story = {
   },
   render: (args) => (
     <UrlTabs {...args}>
-      <Tabs.List className="flex border-b border-gray-200 mb-4 gap-1">
+      <Tabs.List className="mb-4 flex gap-1 border-b border-gray-200">
         <Tabs.Trigger value="tab-1" className={tabTriggerClass}>
           Tab 1
         </Tabs.Trigger>

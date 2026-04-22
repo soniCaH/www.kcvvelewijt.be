@@ -112,21 +112,21 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
           {...props}
         >
           {/* Hero skeleton */}
-          <div className="relative bg-gray-200 h-[400px] lg:h-[500px]">
+          <div className="relative h-[400px] bg-gray-200 lg:h-[500px]">
             <div className="absolute bottom-8 left-6 space-y-4">
-              <div className="h-12 w-64 bg-gray-300 rounded" />
-              <div className="h-8 w-48 bg-gray-300 rounded" />
-              <div className="h-6 w-32 bg-gray-300 rounded" />
+              <div className="h-12 w-64 rounded bg-gray-300" />
+              <div className="h-8 w-48 rounded bg-gray-300" />
+              <div className="h-6 w-32 rounded bg-gray-300" />
             </div>
           </div>
           {/* Content skeleton */}
-          <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="h-24 bg-gray-200 rounded-lg" />
-              <div className="h-24 bg-gray-200 rounded-lg" />
-              <div className="h-24 bg-gray-200 rounded-lg" />
+          <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="h-24 rounded-lg bg-gray-200" />
+              <div className="h-24 rounded-lg bg-gray-200" />
+              <div className="h-24 rounded-lg bg-gray-200" />
             </div>
-            <div className="h-48 bg-gray-200 rounded-lg" />
+            <div className="h-48 rounded-lg bg-gray-200" />
           </div>
         </div>
       );
@@ -138,14 +138,14 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
         <div
           ref={ref}
           className={cn(
-            "flex flex-col items-center justify-center min-h-[400px] p-8 text-center",
+            "flex min-h-[400px] flex-col items-center justify-center p-8 text-center",
             className,
           )}
           role="alert"
           {...props}
         >
           <svg
-            className="w-16 h-16 text-red-500 mb-4"
+            className="mb-4 h-16 w-16 text-red-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -158,11 +158,11 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <p className="text-lg text-kcvv-gray-dark mb-4">{error}</p>
+          <p className="text-kcvv-gray-dark mb-4 text-lg">{error}</p>
           {onRetry && (
             <button
               onClick={onRetry}
-              className="px-6 py-2 bg-kcvv-green-bright text-white rounded-lg hover:bg-kcvv-green transition-colors"
+              className="bg-kcvv-green-bright hover:bg-kcvv-green rounded-lg px-6 py-2 text-white transition-colors"
             >
               Opnieuw proberen
             </button>
@@ -174,7 +174,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
     return (
       <div ref={ref} className={cn("player-profile", className)} {...props}>
         {/* Hero Section */}
-        <section className="relative bg-[#edeff4] overflow-hidden">
+        <section className="relative overflow-hidden bg-[#edeff4]">
           {/* Background gradient */}
           <div
             className="absolute inset-0 z-0"
@@ -185,15 +185,15 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
             aria-hidden="true"
           />
 
-          <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 lg:py-12">
-            <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8">
+          <div className="relative z-10 mx-auto max-w-6xl px-4 py-8 lg:py-12">
+            <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-end">
               {/* Left side - Name and info */}
-              <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
+              <div className="order-2 flex-1 text-center lg:order-1 lg:text-left">
                 {/* Captain badge */}
                 {isCaptain && (
-                  <span className="inline-flex items-center gap-1 mb-2 text-xs font-medium uppercase tracking-wide text-white bg-kcvv-green-bright rounded px-2 py-1">
+                  <span className="bg-kcvv-green-bright mb-2 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium tracking-wide text-white uppercase">
                     <svg
-                      className="w-3 h-3"
+                      className="h-3 w-3"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       aria-hidden="true"
@@ -211,7 +211,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                 {/* Player name */}
                 <h1 className="mb-2">
                   <span
-                    className="block text-4xl lg:text-6xl uppercase font-semibold text-kcvv-gray-blue"
+                    className="text-kcvv-gray-blue block text-4xl font-semibold uppercase lg:text-6xl"
                     style={{
                       fontFamily:
                         "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -221,7 +221,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                     {firstName}
                   </span>
                   <span
-                    className="block text-4xl lg:text-6xl uppercase font-thin text-kcvv-gray-blue"
+                    className="text-kcvv-gray-blue block text-4xl font-thin uppercase lg:text-6xl"
                     style={{
                       fontFamily:
                         "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -233,7 +233,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                 </h1>
 
                 {/* Position and team */}
-                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-2 text-kcvv-gray">
+                <div className="text-kcvv-gray flex flex-col items-center gap-2 sm:flex-row lg:items-start">
                   <span className="font-medium">{position}</span>
                   <span className="hidden sm:inline" aria-hidden="true">
                     •
@@ -247,7 +247,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                 {/* Jersey number behind photo */}
                 {number !== undefined && (
                   <div
-                    className="absolute -left-4 lg:-left-8 top-0 z-0 select-none"
+                    className="absolute top-0 -left-4 z-0 select-none lg:-left-8"
                     style={{
                       fontFamily: "stenciletta, sans-serif",
                       fontSize: "clamp(8rem, 20vw, 14rem)",
@@ -266,7 +266,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                 )}
 
                 {/* Player photo */}
-                <div className="relative z-10 w-[280px] h-[350px] lg:w-[350px] lg:h-[440px]">
+                <div className="relative z-10 h-[350px] w-[280px] lg:h-[440px] lg:w-[350px]">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -277,9 +277,9 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
                       priority
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded">
+                    <div className="absolute inset-0 flex items-center justify-center rounded bg-gray-200">
                       <svg
-                        className="w-24 h-24 text-gray-400"
+                        className="h-24 w-24 text-gray-400"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                         aria-hidden="true"
@@ -295,7 +295,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
 
           {/* Bottom gradient overlay */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-16 z-20 pointer-events-none"
+            className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-16"
             style={{
               background: "linear-gradient(0deg, white 0%, transparent 100%)",
             }}
@@ -304,7 +304,7 @@ export const PlayerProfile = forwardRef<HTMLDivElement, PlayerProfileProps>(
         </section>
 
         {/* Content Section */}
-        <section className="max-w-4xl mx-auto px-4 py-8">
+        <section className="mx-auto max-w-4xl px-4 py-8">
           {/* Bio section */}
           <PlayerBio
             birthDate={birthDate}

@@ -8,7 +8,7 @@ import { HorizontalSlider } from "./HorizontalSlider";
 
 const SampleCard = ({ label, color }: { label: string; color: string }) => (
   <div
-    className="w-64 h-32 shrink-0 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+    className="flex h-32 w-64 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-white"
     style={{ backgroundColor: color }}
   >
     {label}

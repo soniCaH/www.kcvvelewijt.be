@@ -85,11 +85,11 @@ const EnhancedOrgChartWithState = (args: Partial<EnhancedOrgChartProps>) => {
 
       {/* Selected Member Info */}
       {selectedMember && (
-        <div className="mt-6 p-4 bg-kcvv-green/10 rounded-lg border-2 border-kcvv-green">
-          <p className="text-sm font-semibold text-kcvv-gray-blue mb-1">
+        <div className="bg-kcvv-green/10 border-kcvv-green mt-6 rounded-lg border-2 p-4">
+          <p className="text-kcvv-gray-blue mb-1 text-sm font-semibold">
             Last Selected:
           </p>
-          <p className="text-sm text-kcvv-gray-dark">
+          <p className="text-kcvv-gray-dark text-sm">
             {selectedMember.members[0]?.name ?? selectedMember.title} -{" "}
             {selectedMember.title}
           </p>
@@ -137,7 +137,7 @@ export const SearchAndZoom: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Try searching for &quot;trainer&quot; or &quot;keeper&quot; - the
           chart will automatically zoom to the matching member
         </p>
@@ -168,7 +168,7 @@ export const MobileNavigation: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           On mobile: Tap &quot;Navigatie&quot; button to open bottom drawer with
           searchable member list
         </p>
@@ -237,7 +237,7 @@ export const FilteredHoofdbestuur: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Showing only Hoofdbestuur members (use Department Filter to switch) -
           The component handles filtering internally to maintain hierarchy
         </p>
@@ -265,7 +265,7 @@ export const FilteredJeugdbestuur: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Showing only Jeugdbestuur members - The component handles filtering
           internally to maintain hierarchy
         </p>
@@ -295,7 +295,7 @@ export const ZoomControls: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Use zoom controls (bottom right): Zoom In, Zoom Out, Fit View. Also
           try expand/collapse all buttons.
         </p>
@@ -431,7 +431,7 @@ export const SmallDataset: Story = {
 
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Small dataset (10 members) - easier to see full hierarchy at once
         </p>
         <EnhancedOrgChart
@@ -486,7 +486,7 @@ export const LargeDataset: Story = {
 
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           Large dataset (60 members) to test performance and zoom/pan
           functionality
         </p>
@@ -531,11 +531,11 @@ export const InteractionExample: Story = {
 
         {/* Interaction History */}
         {interactionHistory.length > 0 && (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-semibold text-kcvv-gray-blue mb-2">
+          <div className="rounded-lg bg-gray-50 p-4">
+            <h3 className="text-kcvv-gray-blue mb-2 text-sm font-semibold">
               Interaction History
             </h3>
-            <ul className="text-xs text-kcvv-gray-dark space-y-1">
+            <ul className="text-kcvv-gray-dark space-y-1 text-xs">
               {interactionHistory.slice(-5).map((item, i) => (
                 <li key={i}>
                   {i + 1}. {item}
@@ -543,7 +543,7 @@ export const InteractionExample: Story = {
               ))}
             </ul>
             {interactionHistory.length > 5 && (
-              <p className="text-xs text-kcvv-gray mt-2">
+              <p className="text-kcvv-gray mt-2 text-xs">
                 ... and {interactionHistory.length - 5} more
               </p>
             )}
@@ -673,7 +673,7 @@ export const DeepHierarchy: Story = {
 
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           7-level deep hierarchy to test vertical scaling and expand/collapse
         </p>
         <EnhancedOrgChart
@@ -702,7 +702,7 @@ export const EnhancedVsCurrent: Story = {
   render: () => {
     return (
       <div>
-        <p className="text-sm text-kcvv-gray mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-kcvv-gray mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
           <strong>Key Enhancements over current OrgChart.tsx:</strong>
           <br />
           ✅ Mobile navigation drawer for easier browsing

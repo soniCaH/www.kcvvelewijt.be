@@ -113,27 +113,27 @@ export function MatchTeaser({
     return (
       <div
         className={cn(
-          "border rounded",
-          isDark ? "bg-white/8 border-white/8" : "bg-white border-gray-200",
+          "rounded border",
+          isDark ? "border-white/8 bg-white/8" : "border-gray-200 bg-white",
           isCompact ? "p-5" : "p-4",
           className,
         )}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
+            <div className="h-4 w-12 animate-pulse rounded bg-gray-200" />
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
           </div>
-          <div className="h-6 w-12 bg-gray-200 rounded animate-pulse" />
+          <div className="h-6 w-12 animate-pulse rounded bg-gray-200" />
           <div className="flex items-center gap-2">
-            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-            <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           </div>
         </div>
       </div>
@@ -153,11 +153,11 @@ export function MatchTeaser({
     // COMPACT VARIANT — vertical team stack
     <>
       {/* Header: team label left + date right */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         {teamLabel ? (
           <span
             data-testid="team-label"
-            className="text-xs font-bold uppercase tracking-label text-kcvv-green-bright"
+            className="tracking-label text-kcvv-green-bright text-xs font-bold uppercase"
           >
             {teamLabel}
           </span>
@@ -175,7 +175,7 @@ export function MatchTeaser({
       </div>
 
       {/* Home team */}
-      <div className="flex items-center gap-3 h-10">
+      <div className="flex h-10 items-center gap-3">
         <CompactLogo
           team={homeTeam}
           isHighlighted={isHomeHighlighted}
@@ -183,7 +183,7 @@ export function MatchTeaser({
         />
         <span
           className={cn(
-            "text-[13px] font-semibold truncate",
+            "truncate text-[13px] font-semibold",
             isDark
               ? isHomeHighlighted
                 ? "text-white"
@@ -198,7 +198,7 @@ export function MatchTeaser({
       </div>
 
       {/* "vs" separator — indented past logo */}
-      <div className="pl-11 flex items-center">
+      <div className="flex items-center pl-11">
         <span
           className={cn(
             "text-sm font-bold",
@@ -210,7 +210,7 @@ export function MatchTeaser({
       </div>
 
       {/* Away team */}
-      <div className="flex items-center gap-3 h-10 mb-5">
+      <div className="mb-5 flex h-10 items-center gap-3">
         <CompactLogo
           team={awayTeam}
           isHighlighted={isAwayHighlighted}
@@ -218,7 +218,7 @@ export function MatchTeaser({
         />
         <span
           className={cn(
-            "text-[13px] font-semibold truncate",
+            "truncate text-[13px] font-semibold",
             isDark
               ? isAwayHighlighted
                 ? "text-white"
@@ -235,7 +235,7 @@ export function MatchTeaser({
       {/* Divider */}
       <div
         className={cn(
-          "border-t mb-3",
+          "mb-3 border-t",
           isDark ? "border-white/10" : "border-gray-100",
         )}
       />
@@ -264,14 +264,14 @@ export function MatchTeaser({
       {teamLabel && (
         <div
           data-testid="team-label"
-          className="mb-1 text-xs font-bold uppercase tracking-widest text-kcvv-green-bright"
+          className="text-kcvv-green-bright mb-1 text-xs font-bold tracking-widest uppercase"
         >
           {teamLabel}
         </div>
       )}
 
       {/* Header: Date, time, status */}
-      <div className="flex items-center justify-between text-sm mb-3">
+      <div className="mb-3 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <span
             className={cn(
@@ -289,7 +289,7 @@ export function MatchTeaser({
           <MatchStatusBadge status={status} isDark={isDark} />
         </div>
         {venue && (
-          <span className="text-gray-500 text-xs hidden sm:block">{venue}</span>
+          <span className="hidden text-xs text-gray-500 sm:block">{venue}</span>
         )}
       </div>
 
@@ -305,7 +305,7 @@ export function MatchTeaser({
 
         <div className="shrink-0 px-3">
           {hasScore ? (
-            <div className="flex items-center gap-2 font-mono font-bold text-lg">
+            <div className="flex items-center gap-2 font-mono text-lg font-bold">
               <span
                 className={cn(
                   isHomeHighlighted && score.home > score.away
@@ -389,14 +389,14 @@ function CompactLogo({
         alt=""
         width={32}
         height={32}
-        className="w-8 h-8 shrink-0 object-contain"
+        className="h-8 w-8 shrink-0 object-contain"
       />
     );
   }
   return (
     <div
       className={cn(
-        "w-8 h-8 shrink-0 flex items-center justify-center text-sm font-bold rounded-full",
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
         isHighlighted
           ? isDark
             ? "bg-kcvv-green/20 text-kcvv-green-bright"
@@ -432,7 +432,7 @@ function TeamDisplay({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 flex-1 min-w-0",
+        "flex min-w-0 flex-1 items-center gap-2",
         side === "away" && "flex-row-reverse",
       )}
     >
@@ -442,13 +442,13 @@ function TeamDisplay({
           alt={`${team.name} logo`}
           width={logoSize}
           height={logoSize}
-          className="object-contain shrink-0"
+          className="shrink-0 object-contain"
         />
       ) : (
         <div
           className={cn(
-            "rounded-full flex items-center justify-center shrink-0",
-            compact ? "w-6 h-6" : "w-8 h-8",
+            "flex shrink-0 items-center justify-center rounded-full",
+            compact ? "h-6 w-6" : "h-8 w-8",
             isDark ? "bg-white/15" : "bg-gray-200",
           )}
         >

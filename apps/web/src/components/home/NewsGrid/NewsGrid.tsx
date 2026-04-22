@@ -55,7 +55,7 @@ export const NewsGrid = ({
 
   return (
     <section className={className}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeader
           title={title}
           linkText={showViewAll ? "Alle berichten" : undefined}
@@ -63,7 +63,7 @@ export const NewsGrid = ({
         />
 
         {/* 1 featured + 2 standard grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
           {/* Featured slot — event (if provided) or first article */}
           {featuredEvent ? (
             <NewsCard
@@ -103,7 +103,7 @@ export const NewsGrid = ({
                   imageAlt={article.imageAlt}
                   badge={article.tags?.[0]?.name}
                   date={article.date}
-                  className="md:flex-1 md:aspect-auto"
+                  className="md:aspect-auto md:flex-1"
                 />
               ))}
             </div>

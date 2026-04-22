@@ -362,9 +362,9 @@ export function EnhancedOrgChart({
   if (isLoading) {
     return (
       <div className={`space-y-6 ${className}`}>
-        <div className="h-12 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-12 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="h-12 animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-12 animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-96 animate-pulse rounded-lg bg-gray-100" />
       </div>
     );
   }
@@ -386,14 +386,14 @@ export function EnhancedOrgChart({
       </div>
 
       {/* Controls Bar */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Left: Results Count */}
-        <p className="text-sm text-kcvv-gray">
+        <p className="text-kcvv-gray text-sm">
           {filteredMembers.length === 0 ? (
             "Geen resultaten"
           ) : (
             <>
-              <span className="font-semibold text-kcvv-gray-blue">
+              <span className="text-kcvv-gray-blue font-semibold">
                 {filteredMembers.length}
               </span>{" "}
               {filteredMembers.length === 1 ? "lid" : "leden"}
@@ -402,38 +402,21 @@ export function EnhancedOrgChart({
         </p>
 
         {/* Right: Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Mobile Navigation Button */}
           <button
             onClick={() => setIsMobileDrawerOpen(true)}
-            className="
-              lg:hidden
-              px-3 py-2
-              flex items-center gap-2
-              text-sm font-medium text-white
-              bg-kcvv-green hover:bg-kcvv-green-hover
-              rounded-lg
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            "
+            className="bg-kcvv-green hover:bg-kcvv-green-hover focus:ring-kcvv-green flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none lg:hidden"
           >
             <Menu size={18} />
             <span>Navigatie</span>
           </button>
 
           {/* Expand/Collapse All (Desktop) */}
-          <div className="hidden lg:flex gap-2">
+          <div className="hidden gap-2 lg:flex">
             <button
               onClick={handleExpandAll}
-              className="
-                px-3 py-2
-                flex items-center gap-2
-                text-xs font-medium text-kcvv-gray-dark
-                bg-gray-100 hover:bg-gray-200
-                rounded-lg
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Alles uitklappen"
             >
               <Expand size={16} />
@@ -441,15 +424,7 @@ export function EnhancedOrgChart({
             </button>
             <button
               onClick={handleCollapseAll}
-              className="
-                px-3 py-2
-                flex items-center gap-2
-                text-xs font-medium text-kcvv-gray-dark
-                bg-gray-100 hover:bg-gray-200
-                rounded-lg
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Alles inklappen"
             >
               <Minimize size={16} />
@@ -460,16 +435,7 @@ export function EnhancedOrgChart({
           {/* Export Button */}
           <button
             onClick={handleExportImage}
-            className="
-              flex
-              px-3 py-2
-              items-center gap-2
-              text-xs font-medium text-kcvv-gray-dark
-              bg-gray-100 hover:bg-gray-200
-              rounded-lg
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            "
+            className="text-kcvv-gray-dark focus:ring-kcvv-green flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             aria-label="Exporteren als afbeelding"
           >
             <Download size={16} />
@@ -479,16 +445,7 @@ export function EnhancedOrgChart({
           {/* Fullscreen Toggle (Desktop) */}
           <button
             onClick={handleFullscreenToggle}
-            className="
-              hidden lg:flex
-              px-3 py-2
-              items-center gap-2
-              text-xs font-medium text-kcvv-gray-dark
-              bg-gray-100 hover:bg-gray-200
-              rounded-lg
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            "
+            className="text-kcvv-gray-dark focus:ring-kcvv-green hidden items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none lg:flex"
             aria-label={
               isFullscreen ? "Volledig scherm verlaten" : "Volledig scherm"
             }
@@ -501,14 +458,14 @@ export function EnhancedOrgChart({
       {/* Chart Container */}
       {filteredMembers.length === 0 ? (
         /* Empty State */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <span className="text-3xl text-kcvv-gray">🔍</span>
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-16 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+            <span className="text-kcvv-gray text-3xl">🔍</span>
           </div>
-          <p className="text-lg font-semibold text-kcvv-gray-blue mb-2">
+          <p className="text-kcvv-gray-blue mb-2 text-lg font-semibold">
             Geen leden in deze afdeling
           </p>
-          <p className="text-sm text-kcvv-gray max-w-md">
+          <p className="text-kcvv-gray max-w-md text-sm">
             Probeer een andere afdeling.
           </p>
         </div>
@@ -528,54 +485,24 @@ export function EnhancedOrgChart({
           />
 
           {/* Zoom Controls (Fixed Bottom Right) */}
-          <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+          <div className="absolute right-4 bottom-4 z-10 flex flex-col gap-2">
             <button
               onClick={handleZoomIn}
-              className="
-                w-12 h-12
-                flex items-center justify-center
-                bg-white hover:bg-gray-50
-                text-kcvv-gray-dark
-                rounded-lg
-                shadow-lg
-                border-2 border-gray-200
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-lg transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Inzoomen"
             >
               <ZoomIn size={20} />
             </button>
             <button
               onClick={handleZoomOut}
-              className="
-                w-12 h-12
-                flex items-center justify-center
-                bg-white hover:bg-gray-50
-                text-kcvv-gray-dark
-                rounded-lg
-                shadow-lg
-                border-2 border-gray-200
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-lg transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Uitzoomen"
             >
               <ZoomOut size={20} />
             </button>
             <button
               onClick={handleFitView}
-              className="
-                w-12 h-12
-                flex items-center justify-center
-                bg-white hover:bg-gray-50
-                text-kcvv-gray-dark
-                rounded-lg
-                shadow-lg
-                border-2 border-gray-200
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-lg transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Pas aan"
             >
               <Maximize2 size={20} />

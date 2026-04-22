@@ -119,14 +119,14 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
       )}
     >
       {/* Icon */}
-      <div className={cn("shrink-0 mt-0.5", config.titleColor)}>
+      <div className={cn("mt-0.5 shrink-0", config.titleColor)}>
         {config.icon}
       </div>
 
       {/* Body */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {title && (
-          <p className={cn("font-semibold text-sm mb-0.5", config.titleColor)}>
+          <p className={cn("mb-0.5 text-sm font-semibold", config.titleColor)}>
             {title}
           </p>
         )}
@@ -140,8 +140,8 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
           onClick={() => onDismiss?.()}
           aria-label="Sluit melding"
           className={cn(
-            "shrink-0 -mt-0.5 -mr-1 p-1 rounded transition-colors",
-            "hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-kcvv-green-bright focus:ring-offset-1",
+            "-mt-0.5 -mr-1 shrink-0 rounded p-1 transition-colors",
+            "focus:ring-kcvv-green-bright hover:bg-black/10 focus:ring-2 focus:ring-offset-1 focus:outline-none",
             config.titleColor,
           )}
         >

@@ -135,7 +135,7 @@ export function CalendarWidget({
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-2">
         {/* View tabs — segmented control */}
-        <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
+        <div className="inline-flex overflow-hidden rounded-lg border border-gray-300">
           {VIEW_TABS.map((tab) => (
             <button
               key={tab.value}
@@ -158,16 +158,16 @@ export function CalendarWidget({
           onClick={() => setSubscribePanelOpen((prev) => !prev)}
           aria-expanded={subscribePanelOpen}
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors border",
+            "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
             subscribePanelOpen
-              ? "bg-gray-50 border-gray-400 text-gray-900"
-              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50",
+              ? "border-gray-400 bg-gray-50 text-gray-900"
+              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
           )}
         >
           Abonneer
           <svg
             className={cn(
-              "w-4 h-4 transition-transform",
+              "h-4 w-4 transition-transform",
               subscribePanelOpen && "rotate-180",
             )}
             fill="none"
@@ -233,17 +233,17 @@ export function CalendarWidget({
       )}
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-gray-500 pt-4 border-t border-gray-200">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-gray-200 pt-4 text-xs text-gray-500">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-kcvv-green-bright" />
+          <span className="bg-kcvv-green-bright h-2 w-2 rounded-full" />
           <span>Thuiswedstrijd</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full border border-kcvv-green-bright" />
+          <span className="border-kcvv-green-bright h-2 w-2 rounded-full border" />
           <span>Uitwedstrijd</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          <span className="h-2 w-2 rounded-full bg-blue-500" />
           <span>Evenement</span>
         </div>
       </div>

@@ -69,7 +69,7 @@ export const Large: Story = {
 
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-4 w-64">
+    <div className="flex w-64 flex-col gap-4">
       <Select size="sm" placeholder="Small (sm)">
         <option value="1">Optie 1</option>
       </Select>
@@ -141,7 +141,7 @@ export const WithLabel: Story = {
  */
 export const FilterPanel: Story = {
   render: () => (
-    <div className="grid grid-cols-2 gap-4 w-[500px]">
+    <div className="grid w-[500px] grid-cols-2 gap-4">
       <div>
         <Label htmlFor="fp-tier">Niveau</Label>
         <Select id="fp-tier" placeholder="Alle sponsors">

@@ -22,13 +22,13 @@ export function ScrollArrowButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "absolute top-1/2 -translate-y-1/2 z-10",
-        "w-10 h-10 rounded-full shadow-md",
+        "absolute top-1/2 z-10 -translate-y-1/2",
+        "h-10 w-10 rounded-full shadow-md",
         "flex items-center justify-center",
         "transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-kcvv-green-bright focus:ring-offset-2",
+        "focus:ring-kcvv-green-bright focus:ring-2 focus:ring-offset-2 focus:outline-none",
         variant === "light"
-          ? "bg-white text-kcvv-green-bright hover:bg-kcvv-green-bright hover:text-white"
+          ? "text-kcvv-green-bright hover:bg-kcvv-green-bright bg-white hover:text-white"
           : "bg-white/20 text-white hover:bg-white/30",
         positionClass,
         className,

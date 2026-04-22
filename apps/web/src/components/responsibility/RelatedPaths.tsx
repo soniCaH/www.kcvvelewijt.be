@@ -27,7 +27,7 @@ export function RelatedPaths({ sanityId, limit }: RelatedPathsProps) {
 
   return (
     <div className="mt-4">
-      <h4 className="text-sm font-semibold text-[var(--color-text-muted)] mb-2">
+      <h4 className="mb-2 text-sm font-semibold text-[var(--color-text-muted)]">
         Zie ook
       </h4>
       <ul className="space-y-1">

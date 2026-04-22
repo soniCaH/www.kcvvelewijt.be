@@ -81,7 +81,7 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
         <div
           ref={ref}
           className={cn(
-            "bg-foundation-gray-light rounded-lg p-6 text-center text-kcvv-gray",
+            "bg-foundation-gray-light text-kcvv-gray rounded-lg p-6 text-center",
             className,
           )}
           {...props}
@@ -95,31 +95,31 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
       <div ref={ref} className={cn("space-y-6", className)} {...props}>
         {/* Info grid */}
         {hasAnyInfo && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Birth date */}
             {birthDate && (
-              <div className="bg-white border border-foundation-gray-light rounded-lg p-4">
-                <div className="flex items-center gap-2 text-kcvv-green-bright mb-1">
+              <div className="border-foundation-gray-light rounded-lg border bg-white p-4">
+                <div className="text-kcvv-green-bright mb-1 flex items-center gap-2">
                   <Calendar size={16} />
-                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray">
+                  <span className="text-kcvv-gray text-xs font-medium tracking-wide uppercase">
                     Geboortedatum
                   </span>
                 </div>
-                <div className="font-semibold text-kcvv-gray-dark">
+                <div className="text-kcvv-gray-dark font-semibold">
                   {formattedBirthDate}
                 </div>
                 {age !== null && (
-                  <div className="text-sm text-kcvv-gray">{age} jaar</div>
+                  <div className="text-kcvv-gray text-sm">{age} jaar</div>
                 )}
               </div>
             )}
 
             {/* Membership period */}
             {joinDate && (
-              <div className="bg-white border border-foundation-gray-light rounded-lg p-4">
-                <div className="flex items-center gap-2 text-kcvv-green-bright mb-1">
+              <div className="border-foundation-gray-light rounded-lg border bg-white p-4">
+                <div className="text-kcvv-green-bright mb-1 flex items-center gap-2">
                   <svg
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -133,14 +133,14 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-xs font-medium uppercase tracking-wide text-kcvv-gray">
+                  <span className="text-kcvv-gray text-xs font-medium tracking-wide uppercase">
                     {isCurrentPlayer ? "Bij KCVV sinds" : "Periode bij KCVV"}
                   </span>
                 </div>
-                <div className="font-semibold text-kcvv-gray-dark">
+                <div className="text-kcvv-gray-dark font-semibold">
                   {formattedJoinDate}
                   {!isCurrentPlayer && formattedLeaveDate && (
-                    <span className="font-normal text-kcvv-gray">
+                    <span className="text-kcvv-gray font-normal">
                       {" — "}
                       {formattedLeaveDate}
                     </span>
@@ -153,14 +153,14 @@ export const PlayerBio = forwardRef<HTMLDivElement, PlayerBioProps>(
 
         {/* Biography text */}
         {biography && (
-          <div className="bg-white border border-foundation-gray-light rounded-lg p-6">
+          <div className="border-foundation-gray-light rounded-lg border bg-white p-6">
             <h3
-              className="text-lg font-semibold text-kcvv-gray-blue mb-3"
+              className="text-kcvv-gray-blue mb-3 text-lg font-semibold"
               style={{ fontFamily: "var(--font-family-title)" }}
             >
               Over de speler
             </h3>
-            <div className="prose prose-sm max-w-none text-kcvv-gray-dark">
+            <div className="prose prose-sm text-kcvv-gray-dark max-w-none">
               {biography.split("\n\n").map((paragraph, index) => (
                 <p key={index} className="mb-3 last:mb-0">
                   {paragraph}

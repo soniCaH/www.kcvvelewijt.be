@@ -19,7 +19,7 @@ export const MatchesSliderSection = ({
 }: MatchesSliderSectionProps) => {
   return (
     <section className={className}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeader
           title="Wedstrijden"
           linkText="Alle wedstrijden"

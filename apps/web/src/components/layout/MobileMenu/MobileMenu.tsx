@@ -101,8 +101,8 @@ export const MobileMenu = ({
       {/* Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/50 z-50 transition-opacity duration-300",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+          "fixed inset-0 z-50 bg-black/50 transition-opacity duration-300",
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
         aria-hidden="true"
@@ -111,7 +111,7 @@ export const MobileMenu = ({
       {/* Menu Panel */}
       <nav
         className={cn(
-          "fixed top-0 left-0 h-full w-[280px] bg-kcvv-black z-50",
+          "bg-kcvv-black fixed top-0 left-0 z-50 h-full w-[280px]",
           "transform transition-transform duration-500 ease-in-out",
           "shadow-[0_0_10px_rgba(0,0,0,0.7)]",
           "flex flex-col",
@@ -121,7 +121,7 @@ export const MobileMenu = ({
         aria-label="Mobile navigation"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4">
           <Link href="/" onClick={onClose}>
             <Image
               src="/images/logo-flat.png"
@@ -135,14 +135,14 @@ export const MobileMenu = ({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="min-h-11 min-w-11 flex items-center justify-center text-white hover:text-kcvv-green-bright transition-colors"
+            className="hover:text-kcvv-green-bright flex min-h-11 min-w-11 items-center justify-center text-white transition-colors"
           >
             <Icon icon={X} size="lg" />
           </button>
         </div>
 
         {/* Stadion quick action */}
-        <div className="px-4 py-3 border-b border-white/10">
+        <div className="border-b border-white/10 px-4 py-3">
           <Link
             href="/club/contact"
             onClick={() => {
@@ -152,7 +152,7 @@ export const MobileMenu = ({
               }
               trackEvent("directions_clicked", { source: "mobile_menu" });
             }}
-            className="inline-flex items-center gap-2 text-[0.6875rem] uppercase font-bold text-white hover:text-kcvv-green-bright transition-colors"
+            className="hover:text-kcvv-green-bright inline-flex items-center gap-2 text-[0.6875rem] font-bold text-white uppercase transition-colors"
           >
             <Icon icon={MapPin} size="sm" />
             Stadion
@@ -161,7 +161,7 @@ export const MobileMenu = ({
 
         {/* Menu Items — scrollable area, keeps social footer always visible below */}
         <div className="flex-1 overflow-y-auto">
-          <ul className="list-none m-0 p-0">
+          <ul className="m-0 list-none p-0">
             {menuItems.map((item) => {
               const active = isActive(item.href);
               const hasChildren = item.children && item.children.length > 0;
@@ -176,7 +176,7 @@ export const MobileMenu = ({
                         onClick={() => toggleSubmenu(item.href)}
                         aria-expanded={isSubmenuOpen}
                         className={cn(
-                          "mobile-nav-link w-full flex items-center justify-between px-8 py-4 text-left border-b border-kcvv-gray-dark text-white text-[0.6875rem] uppercase font-bold transition-colors",
+                          "mobile-nav-link border-kcvv-gray-dark flex w-full items-center justify-between border-b px-8 py-4 text-left text-[0.6875rem] font-bold text-white uppercase transition-colors",
                           active && "active",
                         )}
                       >
@@ -199,7 +199,7 @@ export const MobileMenu = ({
                         )}
                       >
                         <ul
-                          className="list-none m-0 p-0 bg-kcvv-gray-dark"
+                          className="bg-kcvv-gray-dark m-0 list-none p-0"
                           style={{
                             boxShadow:
                               "inset 0 7px 9px -7px var(--color-kcvv-black), inset 0 -7px 9px -7px var(--color-kcvv-black)",
@@ -213,10 +213,10 @@ export const MobileMenu = ({
                                 <Link
                                   href={child.href}
                                   className={cn(
-                                    "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-kcvv-gray no-underline transition-colors",
+                                    "mobile-nav-link border-kcvv-gray block border-b px-8 py-4 text-[0.6875rem] font-bold uppercase no-underline transition-colors",
                                     childActive
                                       ? "text-kcvv-green-bright active"
-                                      : "text-white hover:text-kcvv-green-bright",
+                                      : "hover:text-kcvv-green-bright text-white",
                                   )}
                                 >
                                   {child.label}
@@ -231,7 +231,7 @@ export const MobileMenu = ({
                     <Link
                       href={item.href}
                       className={cn(
-                        "mobile-nav-link block px-8 py-4 text-[0.6875rem] uppercase font-bold border-b border-kcvv-gray-dark text-white no-underline transition-colors",
+                        "mobile-nav-link border-kcvv-gray-dark block border-b px-8 py-4 text-[0.6875rem] font-bold text-white uppercase no-underline transition-colors",
                         active && "active",
                       )}
                     >
@@ -245,7 +245,7 @@ export const MobileMenu = ({
         </div>
 
         {/* Social Links — outside scroll area so they never overlap menu items */}
-        <div className="shrink-0 p-6 border-t border-white/10">
+        <div className="shrink-0 border-t border-white/10 p-6">
           <div className="flex items-center justify-center">
             <SocialLinks variant="inline" size="md" />
           </div>

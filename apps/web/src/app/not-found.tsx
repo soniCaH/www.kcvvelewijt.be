@@ -3,17 +3,17 @@ import { LinkButton } from "@/components/design-system";
 
 export default function NotFound() {
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
-      <div className="text-center max-w-md">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
+      <div className="max-w-md text-center">
         <div className="mb-6">
           <CircleHelp
-            className="w-24 h-24 mx-auto text-kcvv-gray opacity-50"
+            className="text-kcvv-gray mx-auto h-24 w-24 opacity-50"
             strokeWidth={1.5}
             aria-hidden="true"
           />
         </div>
 
-        <h1 className="text-3xl font-bold text-kcvv-gray-dark mb-4">
+        <h1 className="text-kcvv-gray-dark mb-4 text-3xl font-bold">
           Pagina niet gevonden
         </h1>
 
@@ -22,9 +22,9 @@ export default function NotFound() {
           URL of keer terug naar de homepage.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <LinkButton href="/" size="lg">
-            <Home className="w-5 h-5" aria-hidden="true" />
+            <Home className="h-5 w-5" aria-hidden="true" />
             Naar home
           </LinkButton>
         </div>

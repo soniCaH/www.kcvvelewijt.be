@@ -40,7 +40,7 @@ export const ArticleHeader = ({
   return (
     <header
       className={cn(
-        "relative w-full aspect-[3/2] max-h-[75vh] min-h-[50vh] overflow-hidden",
+        "relative aspect-[3/2] max-h-[75vh] min-h-[50vh] w-full overflow-hidden",
         !imageUrl && "bg-kcvv-black",
         className,
       )}
@@ -69,32 +69,32 @@ export const ArticleHeader = ({
 
       {/* Green accent line at bottom */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-[3px] bg-kcvv-green-bright"
+        className="bg-kcvv-green-bright absolute right-0 bottom-0 left-0 h-[3px]"
         aria-hidden="true"
       />
 
       {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col justify-end pb-10 pt-6 px-6 md:px-10 lg:px-12">
-        <div className="w-full max-w-inner-lg mx-auto">
+      <div className="absolute inset-0 flex flex-col justify-end px-6 pt-6 pb-10 md:px-10 lg:px-12">
+        <div className="max-w-inner-lg mx-auto w-full">
           {/* Category badge — px-2.5 (10px) matches token, py-[3px] sits between py-0.5 (2px) and py-1 (4px) for optical alignment */}
           {category && (
-            <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-xs font-bold uppercase tracking-widest px-2.5 py-[3px] rounded-sm mb-4">
+            <span className="bg-kcvv-green-bright text-kcvv-black! mb-4 inline-block rounded-sm px-2.5 py-[3px] text-xs font-bold tracking-widest uppercase">
               {category}
             </span>
           )}
 
           {/* Title — intentional responsive clamp override: fluid sizing between mobile (1.75rem) and desktop (4rem) to match homepage hero */}
-          <h1 className="font-title text-white! text-[clamp(1.75rem,5.5vw,4rem)]! font-black! leading-[1.02]! tracking-tight m-0 max-w-[75%]">
+          <h1 className="font-title m-0 max-w-[75%] text-[clamp(1.75rem,5.5vw,4rem)]! leading-[1.02]! font-black! tracking-tight text-white!">
             {title}
           </h1>
 
           {/* Date + Author */}
           {(date || author) && (
-            <div className="flex items-center gap-4 mt-5 text-sm text-white/60">
+            <div className="mt-5 flex items-center gap-4 text-sm text-white/60">
               {date && (
                 <span className="flex items-center gap-1.5">
                   <span
-                    className="inline-block w-3 h-[1px] bg-kcvv-green-bright"
+                    className="bg-kcvv-green-bright inline-block h-[1px] w-3"
                     aria-hidden="true"
                   />
                   {date}
@@ -103,7 +103,7 @@ export const ArticleHeader = ({
               {author && (
                 <span className="flex items-center gap-1.5">
                   <span
-                    className="inline-block w-3 h-[1px] bg-kcvv-green-bright"
+                    className="bg-kcvv-green-bright inline-block h-[1px] w-3"
                     aria-hidden="true"
                   />
                   {author}

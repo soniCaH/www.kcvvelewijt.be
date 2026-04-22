@@ -125,16 +125,16 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           aria-label="Delen laden..."
           {...props}
         >
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="h-5 w-32 bg-gray-300 rounded mb-4" />
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="mb-4 h-5 w-32 rounded bg-gray-300" />
             {showQR && (
-              <div className="w-32 h-32 bg-gray-200 rounded mx-auto mb-4" />
+              <div className="mx-auto mb-4 h-32 w-32 rounded bg-gray-200" />
             )}
             <div className="space-y-2">
-              <div className="h-10 bg-gray-200 rounded" />
+              <div className="h-10 rounded bg-gray-200" />
               <div className="flex gap-2">
-                <div className="h-10 flex-1 bg-gray-200 rounded" />
-                <div className="h-10 flex-1 bg-gray-200 rounded" />
+                <div className="h-10 flex-1 rounded bg-gray-200" />
+                <div className="h-10 flex-1 rounded bg-gray-200" />
               </div>
             </div>
           </div>
@@ -153,13 +153,13 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           )}
           {...props}
         >
-          <h3 className="text-xl font-semibold text-kcvv-gray-dark mb-1">
+          <h3 className="text-kcvv-gray-dark mb-1 text-xl font-semibold">
             {playerName}
           </h3>
-          <p className="text-sm text-kcvv-gray mb-4">{teamName}</p>
+          <p className="text-kcvv-gray mb-4 text-sm">{teamName}</p>
 
           {showQR && (
-            <div ref={qrRef} className="inline-block mb-4">
+            <div ref={qrRef} className="mb-4 inline-block">
               <QRCodeSVG
                 value={profileUrl}
                 size={160}
@@ -171,7 +171,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
             </div>
           )}
 
-          <p className="text-xs text-kcvv-gray break-all">{profileUrl}</p>
+          <p className="text-kcvv-gray text-xs break-all">{profileUrl}</p>
         </div>
       );
     }
@@ -182,7 +182,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
         <div
           ref={ref}
           className={cn(
-            "bg-white rounded-lg border border-gray-200 p-3",
+            "rounded-lg border border-gray-200 bg-white p-3",
             className,
           )}
           {...props}
@@ -191,17 +191,17 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
             <button
               onClick={handleCopyLink}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 copied
                   ? "bg-kcvv-green-bright text-white"
-                  : "bg-gray-100 text-kcvv-gray-dark hover:bg-gray-200",
+                  : "text-kcvv-gray-dark bg-gray-100 hover:bg-gray-200",
               )}
               aria-label={copied ? "Link gekopieerd" : "Kopieer link"}
             >
               {copied ? (
                 <>
                   <svg
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -219,7 +219,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
               ) : (
                 <>
                   <svg
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -239,11 +239,11 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
 
             <button
               onClick={handleShareFacebook}
-              className="p-2 rounded-md bg-[#1877f2] text-white hover:bg-[#166fe5] transition-colors"
+              className="rounded-md bg-[#1877f2] p-2 text-white transition-colors hover:bg-[#166fe5]"
               aria-label="Delen op Facebook"
             >
               <svg
-                className="w-5 h-5"
+                className="h-5 w-5"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -261,20 +261,20 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-white rounded-lg border border-gray-200 p-4",
+          "rounded-lg border border-gray-200 bg-white p-4",
           className,
         )}
         {...props}
       >
-        <h3 className="text-lg font-semibold text-kcvv-gray-dark mb-1">
+        <h3 className="text-kcvv-gray-dark mb-1 text-lg font-semibold">
           Deel dit profiel
         </h3>
-        <p className="text-sm text-kcvv-gray mb-4">
+        <p className="text-kcvv-gray mb-4 text-sm">
           {playerName} • {teamName}
         </p>
 
         {showQR && (
-          <div ref={qrRef} className="flex justify-center mb-4">
+          <div ref={qrRef} className="mb-4 flex justify-center">
             <QRCodeSVG
               value={profileUrl}
               size={128}
@@ -291,17 +291,17 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           <button
             onClick={handleCopyLink}
             className={cn(
-              "w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-colors",
+              "flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors",
               copied
                 ? "bg-kcvv-green-bright text-white"
-                : "bg-gray-100 text-kcvv-gray-dark hover:bg-gray-200",
+                : "text-kcvv-gray-dark bg-gray-100 hover:bg-gray-200",
             )}
             aria-label={copied ? "Link gekopieerd" : "Kopieer profiel link"}
           >
             {copied ? (
               <>
                 <svg
-                  className="w-4 h-4"
+                  className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -319,7 +319,7 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
             ) : (
               <>
                 <svg
-                  className="w-4 h-4"
+                  className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -340,11 +340,11 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           {/* Social share button */}
           <button
             onClick={handleShareFacebook}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-[#1877f2] text-white hover:bg-[#166fe5] transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-[#1877f2] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#166fe5]"
             aria-label="Delen op Facebook"
           >
             <svg
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -358,11 +358,11 @@ export const PlayerShare = forwardRef<HTMLDivElement, PlayerShareProps>(
           {showQR && (
             <button
               onClick={handleDownloadQR}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md border border-gray-300 text-kcvv-gray-dark hover:bg-gray-50 transition-colors"
+              className="text-kcvv-gray-dark flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50"
               aria-label="Download QR code"
             >
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

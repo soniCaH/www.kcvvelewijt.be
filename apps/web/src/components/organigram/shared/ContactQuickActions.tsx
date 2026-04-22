@@ -82,7 +82,7 @@ export function ContactQuickActions({
     <div className={`flex items-center gap-2 ${className}`}>
       {/* Email Button */}
       {email && (
-        <div className="relative group">
+        <div className="group relative">
           <a
             href={`mailto:${email}`}
             onClick={(e) => e.stopPropagation()}
@@ -90,15 +90,7 @@ export function ContactQuickActions({
               e.preventDefault();
               handleCopy(email, "email");
             }}
-            className={`
-              ${sizeClasses[size]}
-              flex items-center justify-center
-              bg-kcvv-green/10 text-kcvv-green
-              hover:bg-kcvv-green hover:text-white
-              rounded-full
-              transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            `}
+            className={` ${sizeClasses[size]} bg-kcvv-green/10 text-kcvv-green hover:bg-kcvv-green focus:ring-kcvv-green flex items-center justify-center rounded-full transition-all duration-200 hover:text-white focus:ring-2 focus:ring-offset-2 focus:outline-none`}
             aria-label={`Email ${name}`}
             title={copiedEmail ? "Gekopieerd!" : email}
           >
@@ -106,7 +98,7 @@ export function ContactQuickActions({
           </a>
 
           {/* Tooltip */}
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+          <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
             {copiedEmail ? "Gekopieerd!" : email}
           </div>
         </div>
@@ -114,7 +106,7 @@ export function ContactQuickActions({
 
       {/* Phone Button */}
       {phone && (
-        <div className="relative group">
+        <div className="group relative">
           <a
             href={`tel:${phone}`}
             onClick={(e) => e.stopPropagation()}
@@ -122,15 +114,7 @@ export function ContactQuickActions({
               e.preventDefault();
               handleCopy(phone, "phone");
             }}
-            className={`
-              ${sizeClasses[size]}
-              flex items-center justify-center
-              bg-kcvv-green/10 text-kcvv-green
-              hover:bg-kcvv-green hover:text-white
-              rounded-full
-              transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-            `}
+            className={` ${sizeClasses[size]} bg-kcvv-green/10 text-kcvv-green hover:bg-kcvv-green focus:ring-kcvv-green flex items-center justify-center rounded-full transition-all duration-200 hover:text-white focus:ring-2 focus:ring-offset-2 focus:outline-none`}
             aria-label={`Bel ${name}`}
             title={copiedPhone ? "Gekopieerd!" : phone}
           >
@@ -138,7 +122,7 @@ export function ContactQuickActions({
           </a>
 
           {/* Tooltip */}
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+          <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
             {copiedPhone ? "Gekopieerd!" : phone}
           </div>
         </div>
@@ -146,21 +130,13 @@ export function ContactQuickActions({
 
       {/* WhatsApp Button */}
       {phone && whatsappPhone && (
-        <div className="relative group">
+        <div className="group relative">
           <a
             href={`https://wa.me/${whatsappPhone.startsWith("+") ? whatsappPhone.slice(1) : whatsappPhone}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className={`
-              ${sizeClasses[size]}
-              flex items-center justify-center
-              bg-[#25D366]/10 text-[#25D366]
-              hover:bg-[#25D366] hover:text-white
-              rounded-full
-              transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2
-            `}
+            className={` ${sizeClasses[size]} flex items-center justify-center rounded-full bg-[#25D366]/10 text-[#25D366] transition-all duration-200 hover:bg-[#25D366] hover:text-white focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:outline-none`}
             aria-label={`WhatsApp ${name}`}
             title="WhatsApp"
           >
@@ -168,7 +144,7 @@ export function ContactQuickActions({
           </a>
 
           {/* Tooltip */}
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+          <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
             WhatsApp
           </div>
         </div>

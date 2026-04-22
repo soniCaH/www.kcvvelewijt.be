@@ -25,7 +25,7 @@ export const YouthSection = ({
 
   return (
     <section
-      className={cn("relative bg-kcvv-green-dark text-left", className)}
+      className={cn("bg-kcvv-green-dark relative text-left", className)}
       style={{
         marginTop: `calc(-1 * ${DIAGONAL_HEIGHT})`,
         paddingBottom: DIAGONAL_HEIGHT,
@@ -48,8 +48,8 @@ export const YouthSection = ({
         <div
           className={cn(
             "absolute inset-0",
-            "bg-gradient-to-b from-kcvv-green-dark/90 via-kcvv-green-dark/75 to-kcvv-green-dark/50",
-            "md:bg-gradient-to-r md:from-kcvv-green-dark/90 md:via-kcvv-green-dark/75 md:to-kcvv-green-dark/50",
+            "from-kcvv-green-dark/90 via-kcvv-green-dark/75 to-kcvv-green-dark/50 bg-gradient-to-b",
+            "md:from-kcvv-green-dark/90 md:via-kcvv-green-dark/75 md:to-kcvv-green-dark/50 md:bg-gradient-to-r",
           )}
         />
       </div>
@@ -82,14 +82,14 @@ export const YouthSection = ({
       {/* Content — left-aligned editorial block */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
         {/* Section label */}
-        <p className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-label text-white/70">
+        <p className="tracking-label mb-6 flex items-center gap-2 text-[11px] font-bold text-white/70 uppercase">
           <span aria-hidden="true" className="block h-0.5 w-5 bg-white/50" />
           Jeugdwerking
         </p>
 
         {/* Editorial title */}
         <h2
-          className="mb-6 font-title font-black uppercase leading-[0.95] text-white"
+          className="font-title mb-6 leading-[0.95] font-black text-white uppercase"
           style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
         >
           De toekomst
@@ -104,14 +104,14 @@ export const YouthSection = ({
         </p>
 
         {/* Stats line */}
-        <p className="mb-8 text-sm font-bold uppercase tracking-wider text-white">
+        <p className="mb-8 text-sm font-bold tracking-wider text-white uppercase">
           220+ spelers · 16 ploegen
         </p>
 
         {/* CTA */}
         <Link
           href="/jeugd"
-          className="group inline-flex items-center gap-2 rounded-sm bg-white px-6 py-3 text-sm font-bold uppercase tracking-wider text-kcvv-black transition-colors hover:bg-kcvv-green"
+          className="group text-kcvv-black hover:bg-kcvv-green inline-flex items-center gap-2 rounded-sm bg-white px-6 py-3 text-sm font-bold tracking-wider uppercase transition-colors"
         >
           Ontdek onze jeugd
           <span

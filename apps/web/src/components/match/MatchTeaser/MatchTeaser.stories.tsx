@@ -233,7 +233,7 @@ export const Loading: Story = {
  */
 export const List: StoryObj<typeof MatchTeaser> = {
   render: () => (
-    <div className="space-y-3 w-full max-w-md">
+    <div className="w-full max-w-md space-y-3">
       <MatchTeaser
         homeTeam={kcvv}
         awayTeam={{

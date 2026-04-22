@@ -16,11 +16,11 @@ export function StyleB_SplitPanel({
   return (
     <div
       style={{ width: "1080px", height: "1920px" }}
-      className="relative overflow-hidden bg-kcvv-black flex flex-col"
+      className="bg-kcvv-black relative flex flex-col overflow-hidden"
     >
       {/* ── KCVV green accent top bar ── */}
       <div
-        className="shrink-0 bg-kcvv-green-bright flex items-center px-[64px]"
+        className="bg-kcvv-green-bright flex shrink-0 items-center px-[64px]"
         style={{ height: "120px" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -30,13 +30,13 @@ export function StyleB_SplitPanel({
           style={{ width: "80px", height: "80px", objectFit: "contain" }}
         />
         <span
-          className="font-montserrat font-black text-kcvv-black uppercase tracking-widest ml-[32px]"
+          className="font-montserrat text-kcvv-black ml-[32px] font-black tracking-widest uppercase"
           style={{ fontSize: "36px" }}
         >
           KCVV Elewijt
         </span>
         <span
-          className="font-montserrat font-bold text-kcvv-black ml-auto"
+          className="font-montserrat text-kcvv-black ml-auto font-bold"
           style={{ fontSize: "28px", opacity: 0.65 }}
         >
           @kcvvelewijt
@@ -44,7 +44,7 @@ export function StyleB_SplitPanel({
       </div>
 
       {/* ── Main split area ── */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex min-h-0 flex-1">
         {/* Left column — content */}
         <div
           className="relative flex flex-col justify-between"
@@ -58,7 +58,7 @@ export function StyleB_SplitPanel({
         >
           {/* Club pattern watermark */}
           <div
-            className="absolute inset-0 pointer-events-none"
+            className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage: "url(/images/header-pattern.png)",
               backgroundSize: "380px auto",
@@ -70,7 +70,7 @@ export function StyleB_SplitPanel({
 
           {/* Vertical GOAL label */}
           <div
-            className="relative font-stenciletta text-kcvv-green-bright"
+            className="font-stenciletta text-kcvv-green-bright relative"
             style={{
               fontSize: "160px",
               lineHeight: 0.85,
@@ -133,7 +133,7 @@ export function StyleB_SplitPanel({
               src={celebrationImageUrl}
               alt={playerName}
               crossOrigin="anonymous"
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 h-full w-full"
               style={{ objectFit: "cover", objectPosition: "top center" }}
             />
           ) : (
@@ -154,7 +154,7 @@ export function StyleB_SplitPanel({
                 }}
               />
               <span
-                className="font-montserrat font-bold uppercase tracking-widest"
+                className="font-montserrat font-bold tracking-widest uppercase"
                 style={{ fontSize: "28px", color: "rgba(255,255,255,0.2)" }}
               >
                 Live photo
@@ -164,7 +164,7 @@ export function StyleB_SplitPanel({
 
           {/* Green edge glow */}
           <div
-            className="absolute inset-y-0 left-0 w-[6px] bg-kcvv-green-bright opacity-50"
+            className="bg-kcvv-green-bright absolute inset-y-0 left-0 w-[6px] opacity-50"
             aria-hidden="true"
           />
         </div>
@@ -172,11 +172,11 @@ export function StyleB_SplitPanel({
 
       {/* ── Bottom match-name bar ── */}
       <div
-        className="shrink-0 bg-kcvv-green-bright flex items-center justify-center px-[64px]"
+        className="bg-kcvv-green-bright flex shrink-0 items-center justify-center px-[64px]"
         style={{ height: "120px" }}
       >
         <span
-          className="font-montserrat font-black text-kcvv-black text-center uppercase tracking-wider"
+          className="font-montserrat text-kcvv-black text-center font-black tracking-wider uppercase"
           style={{ fontSize: "38px" }}
         >
           {matchName}

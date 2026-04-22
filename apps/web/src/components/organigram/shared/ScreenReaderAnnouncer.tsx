@@ -74,10 +74,7 @@ export function ScreenReaderAnnouncer({
       role="status"
       aria-live={politeness}
       aria-atomic="true"
-      className={`
-        sr-only
-        ${className}
-      `}
+      className={`sr-only ${className} `}
     >
       {message}
     </div>

@@ -62,14 +62,14 @@ export function StaffCard({
   return (
     <article
       className={cn(
-        "staff-card group relative flex h-full flex-col overflow-hidden rounded-sm bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-card-hover",
+        "staff-card group hover:shadow-card-hover relative flex h-full flex-col overflow-hidden rounded-sm bg-white shadow-sm transition-all hover:-translate-y-1",
         className,
       )}
       title={fullName}
     >
       {/* Hover top accent bar */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] origin-center scale-x-0 bg-kcvv-green-bright transition-transform duration-300 ease-out group-hover:scale-x-100"
+        className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] origin-center scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100"
         aria-hidden="true"
       />
 
@@ -105,7 +105,7 @@ export function StaffCard({
 
         {badge && (
           <div
-            className="pointer-events-none absolute right-3 z-10 select-none font-black leading-none text-kcvv-gray-blue"
+            className="text-kcvv-gray-blue pointer-events-none absolute right-3 z-10 leading-none font-black select-none"
             style={{
               bottom: "-1rem",
               fontFamily: "stenciletta, sans-serif",
@@ -120,11 +120,11 @@ export function StaffCard({
       </div>
 
       {/* Name section */}
-      <div className="flex-1 px-4 pb-5 pt-3">
-        <div className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-kcvv-gray-blue">
+      <div className="flex-1 px-4 pt-3 pb-5">
+        <div className="text-kcvv-gray-blue text-[0.625rem] font-bold tracking-[0.15em] uppercase">
           {role}
         </div>
-        <h3 className="mt-1 font-title text-lg uppercase leading-tight text-kcvv-black">
+        <h3 className="font-title text-kcvv-black mt-1 text-lg leading-tight uppercase">
           <span className="font-semibold">{firstName}</span>
           <br />
           <span className="font-thin">{lastName}</span>

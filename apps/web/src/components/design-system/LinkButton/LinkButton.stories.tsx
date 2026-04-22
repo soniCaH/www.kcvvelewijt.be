@@ -80,7 +80,7 @@ export const AllVariants: Story = {
     children: "Link",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <LinkButton href="/example" variant="primary">
         Primary
       </LinkButton>
@@ -102,7 +102,7 @@ export const AllSizes: Story = {
     children: "Link",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <LinkButton href="/example" size="sm">
         Small Link
       </LinkButton>
@@ -121,7 +121,7 @@ export const WithArrowVariants: Story = {
     children: "Link",
   },
   render: () => (
-    <div className="flex flex-col gap-4 items-start">
+    <div className="flex flex-col items-start gap-4">
       <LinkButton href="/example" variant="primary" withArrow>
         Primary with Arrow
       </LinkButton>

@@ -73,9 +73,9 @@ export const NumberBadge = forwardRef<HTMLDivElement, NumberBadgeProps>(
         ref={ref}
         className={cn(
           "number-badge",
-          "absolute z-[5] pointer-events-none",
+          "pointer-events-none absolute z-[5]",
           "transition-all duration-300 ease-in-out",
-          animated && "group-hover:scale-110 group-hover:origin-top-left",
+          animated && "group-hover:origin-top-left group-hover:scale-110",
           // Size-specific positioning (lg matches left/top margins for player cards)
           size === "sm" && "top-[8px] left-[12px]",
           size === "md" && "top-[10px] left-[12px]",

@@ -23,9 +23,9 @@ function MockSection({
 }) {
   return (
     <div
-      className={`max-w-7xl mx-auto px-4 md:px-8 flex items-center ${height}`}
+      className={`mx-auto flex max-w-7xl items-center px-4 md:px-8 ${height}`}
     >
-      <span className="text-sm font-bold uppercase tracking-widest opacity-50">
+      <span className="text-sm font-bold tracking-widest uppercase opacity-50">
         {label}
       </span>
     </div>

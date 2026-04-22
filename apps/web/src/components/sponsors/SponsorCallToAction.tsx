@@ -18,18 +18,18 @@ export const SponsorCallToAction = ({
   className,
 }: SponsorCallToActionProps) => {
   return (
-    <div className={cn("text-white py-16 px-6", className)}>
+    <div className={cn("px-6 py-16 text-white", className)}>
       <div className="max-w-inner mx-auto text-center">
-        <h2 className="font-title font-extrabold uppercase text-white text-5xl mb-4">
+        <h2 className="font-title mb-4 text-5xl font-extrabold text-white uppercase">
           Word sponsor
         </h2>
-        <p className="text-sm text-white/70 mb-8 leading-relaxed">
+        <p className="mb-8 text-sm leading-relaxed text-white/70">
           Steun onze club en word partner van KCVV Elewijt.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href="mailto:sponsoring@kcvvelewijt.be"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-kcvv-black rounded font-medium text-base hover:bg-gray-200 transition-all duration-300"
+            className="group text-kcvv-black inline-flex items-center justify-center gap-2 rounded bg-white px-8 py-3 text-base font-medium transition-all duration-300 hover:bg-gray-200"
           >
             Contact opnemen
             <ArrowRight
@@ -40,7 +40,7 @@ export const SponsorCallToAction = ({
           </a>
           <Link
             href="/contact"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-white text-white rounded font-medium text-base hover:bg-white/10 transition-all duration-300"
+            className="group inline-flex items-center justify-center gap-2 rounded border-2 border-white px-8 py-3 text-base font-medium text-white transition-all duration-300 hover:bg-white/10"
           >
             Meer informatie
             <ArrowRight

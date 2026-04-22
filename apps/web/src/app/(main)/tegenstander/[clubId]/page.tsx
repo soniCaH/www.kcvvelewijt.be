@@ -165,17 +165,17 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
       {/* W/D/L summary */}
       <div className="mb-8 grid grid-cols-5 gap-2 rounded-xl bg-[var(--color-surface)] p-4 text-center">
         <div>
-          <p className="text-2xl font-bold text-kcvv-success">{summary.wins}</p>
+          <p className="text-kcvv-success text-2xl font-bold">{summary.wins}</p>
           <p className="text-xs text-[var(--color-muted)]">W</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-kcvv-warning">
+          <p className="text-kcvv-warning text-2xl font-bold">
             {summary.draws}
           </p>
           <p className="text-xs text-[var(--color-muted)]">G</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-kcvv-alert">{summary.losses}</p>
+          <p className="text-kcvv-alert text-2xl font-bold">{summary.losses}</p>
           <p className="text-xs text-[var(--color-muted)]">V</p>
         </div>
         <div>

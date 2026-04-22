@@ -79,11 +79,11 @@ export function CalendarSubscribePanel({
   return (
     <div
       data-testid="subscribe-panel"
-      className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+      className="mb-4 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
     >
       {/* Team selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="mb-2 block text-sm font-medium text-gray-700">
           Teams
         </label>
         <div className="flex flex-wrap gap-2">
@@ -92,13 +92,13 @@ export function CalendarSubscribePanel({
             .map((team) => (
               <span
                 key={team.id}
-                className="inline-flex items-center gap-1 bg-kcvv-green-bright text-white text-sm px-3 py-1 rounded-full"
+                className="bg-kcvv-green-bright inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm text-white"
               >
                 {team.label}
                 <button
                   onClick={() => removeTeam(team.id)}
                   aria-label={`${team.label} ×`}
-                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                  className="flex h-4 w-4 items-center justify-center rounded-full text-xs hover:bg-white/20"
                 >
                   ×
                 </button>
@@ -110,7 +110,7 @@ export function CalendarSubscribePanel({
                 if (e.target.value) addTeam(e.target.value);
                 e.target.value = "";
               }}
-              className="text-sm border border-gray-300 rounded-full px-3 py-1 text-gray-600"
+              className="rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-600"
               aria-label="Team toevoegen"
             >
               <option value="">+ voeg toe</option>
@@ -128,7 +128,7 @@ export function CalendarSubscribePanel({
       <div>
         <label
           htmlFor="side-filter"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="mb-1 block text-sm font-medium text-gray-700"
         >
           Filter
         </label>
@@ -137,7 +137,7 @@ export function CalendarSubscribePanel({
           value={side}
           onChange={(e) => setSide(e.target.value as Side)}
           aria-label="Filter"
-          className="block w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:w-auto"
         >
           <option value="all">Alle wedstrijden</option>
           <option value="home">Alleen thuiswedstrijden</option>
@@ -152,7 +152,7 @@ export function CalendarSubscribePanel({
           readOnly
           value={webcalUrl}
           data-testid="webcal-url"
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 font-mono"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-gray-600"
         />
       </div>
 
@@ -160,13 +160,13 @@ export function CalendarSubscribePanel({
       <div className="flex flex-wrap gap-3">
         <button
           onClick={handleCopy}
-          className="inline-flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
         >
           {copied ? "Gekopieerd" : "Kopieer link"}
         </button>
         <button
           onClick={() => setShowQR((prev) => !prev)}
-          className="inline-flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
         >
           {showQR ? "Verberg QR-code" : "Toon QR-code"}
         </button>

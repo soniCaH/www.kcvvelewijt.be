@@ -94,10 +94,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             aria-describedby={hasHelper ? helperId : undefined}
             className={cn(
               // Base
-              "w-full appearance-none rounded-[0.25em] border bg-white font-body",
+              "font-body w-full appearance-none rounded-[0.25em] border bg-white",
               "text-kcvv-gray-dark",
-              "transition-all duration-200 cursor-pointer",
-              "focus:outline-none focus:ring-2 focus:ring-offset-0",
+              "cursor-pointer transition-all duration-200",
+              "focus:ring-2 focus:ring-offset-0 focus:outline-none",
 
               // Default border + focus
               !error &&
@@ -108,7 +108,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                 "border-kcvv-alert focus:border-kcvv-alert focus:ring-kcvv-alert/20",
 
               // Disabled
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-foundation-gray-light",
+              "disabled:bg-foundation-gray-light disabled:cursor-not-allowed disabled:opacity-50",
 
               // Size
               sizeClasses[size],
@@ -127,7 +127,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
           <div
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 pointer-events-none text-foundation-gray-dark",
+              "text-foundation-gray-dark pointer-events-none absolute top-1/2 -translate-y-1/2",
               iconPosition[size],
             )}
           >
@@ -136,12 +136,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {error && (
-          <p id={helperId} className="mt-1.5 text-sm text-kcvv-alert">
+          <p id={helperId} className="text-kcvv-alert mt-1.5 text-sm">
             {error}
           </p>
         )}
         {!error && hint && (
-          <p id={helperId} className="mt-1.5 text-sm text-foundation-gray-dark">
+          <p id={helperId} className="text-foundation-gray-dark mt-1.5 text-sm">
             {hint}
           </p>
         )}

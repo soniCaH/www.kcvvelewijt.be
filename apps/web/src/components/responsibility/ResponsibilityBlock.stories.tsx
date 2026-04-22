@@ -54,23 +54,23 @@ export const Tablet: Story = {
 export const WithPageContext: Story = {
   render: () => (
     <div>
-      <header className="bg-green-main text-white p-6">
-        <div className="max-w-7xl mx-auto">
+      <header className="bg-green-main p-6 text-white">
+        <div className="mx-auto max-w-7xl">
           <h1 className="text-3xl font-bold">KCVV Elewijt</h1>
         </div>
       </header>
 
-      <section className="bg-gradient-to-br from-green-dark to-green-main text-white py-20 px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-5xl font-bold mb-4">Welkom bij KCVV Elewijt</h2>
+      <section className="from-green-dark to-green-main bg-gradient-to-br px-4 py-20 text-white">
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="mb-4 text-5xl font-bold">Welkom bij KCVV Elewijt</h2>
           <p className="text-xl">Jouw voetbalclub in het hart van Elewijt</p>
         </div>
       </section>
 
       <ResponsibilityBlock />
 
-      <footer className="bg-black text-white p-6 mt-12">
-        <div className="max-w-7xl mx-auto text-center">
+      <footer className="mt-12 bg-black p-6 text-white">
+        <div className="mx-auto max-w-7xl text-center">
           <p className="text-sm">© 2025 KCVV Elewijt</p>
         </div>
       </footer>

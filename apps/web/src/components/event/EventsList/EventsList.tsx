@@ -12,12 +12,12 @@ export interface EventsListProps {
 
 function EventCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-sm bg-white border border-foundation-gray-light shadow-sm animate-pulse">
+    <div className="border-foundation-gray-light flex animate-pulse flex-col overflow-hidden rounded-sm border bg-white shadow-sm">
       <div className="h-48 bg-gray-200" />
-      <div className="p-4 space-y-2">
-        <div className="h-3 bg-gray-200 rounded w-2/3" />
-        <div className="h-5 bg-gray-200 rounded w-full" />
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
+      <div className="space-y-2 p-4">
+        <div className="h-3 w-2/3 rounded bg-gray-200" />
+        <div className="h-5 w-full rounded bg-gray-200" />
+        <div className="h-4 w-1/2 rounded bg-gray-200" />
       </div>
     </div>
   );
@@ -48,7 +48,7 @@ export function EventsList({
     return (
       <div
         className={cn(
-          "flex items-center justify-center py-12 text-gray-500 text-center",
+          "flex items-center justify-center py-12 text-center text-gray-500",
           className,
         )}
       >

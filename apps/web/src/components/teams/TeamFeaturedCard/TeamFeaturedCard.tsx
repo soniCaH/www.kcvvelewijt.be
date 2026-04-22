@@ -10,8 +10,8 @@ export interface TeamFeaturedCardProps {
 
 export function TeamFeaturedCard({ team, label }: TeamFeaturedCardProps) {
   return (
-    <div className="max-w-[70rem] mx-auto px-4 md:px-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 bg-white rounded-sm overflow-hidden shadow-sm">
+    <div className="mx-auto max-w-[70rem] px-4 md:px-10">
+      <div className="grid grid-cols-1 overflow-hidden rounded-sm bg-white shadow-sm md:grid-cols-2">
         {/* Left column — Photo */}
         <div className="relative min-h-[220px] md:min-h-[340px]">
           {team.teamImageUrl ? (
@@ -23,26 +23,26 @@ export function TeamFeaturedCard({ team, label }: TeamFeaturedCardProps) {
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-br from-kcvv-green-dark/30 to-transparent" />
+              <div className="from-kcvv-green-dark/30 absolute inset-0 bg-gradient-to-br to-transparent" />
             </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <Users className="w-16 h-16 text-gray-300" aria-hidden="true" />
+              <Users className="h-16 w-16 text-gray-300" aria-hidden="true" />
             </div>
           )}
         </div>
 
         {/* Right column — Content */}
-        <div className="p-8 md:p-12 flex flex-col justify-center">
+        <div className="flex flex-col justify-center p-8 md:p-12">
           {/* Label */}
-          <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-kcvv-gray mb-4">
-            <span className="block w-5 h-0.5 bg-kcvv-green" />
+          <div className="text-kcvv-gray mb-4 flex items-center gap-2 text-[0.6875rem] font-extrabold tracking-[0.14em] uppercase">
+            <span className="bg-kcvv-green block h-0.5 w-5" />
             {label}
           </div>
 
           {/* Team name */}
           <h2
-            className="font-title font-black text-kcvv-gray-blue uppercase leading-none mb-3"
+            className="font-title text-kcvv-gray-blue mb-3 leading-none font-black uppercase"
             style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
           >
             {team.name}
@@ -50,7 +50,7 @@ export function TeamFeaturedCard({ team, label }: TeamFeaturedCardProps) {
 
           {/* Division */}
           {team.divisionFull && (
-            <p className="text-[0.9375rem] text-kcvv-gray mb-6">
+            <p className="text-kcvv-gray mb-6 text-[0.9375rem]">
               {team.divisionFull}
             </p>
           )}
@@ -58,7 +58,7 @@ export function TeamFeaturedCard({ team, label }: TeamFeaturedCardProps) {
           {/* CTA */}
           <Link
             href={`/ploegen/${team.slug}`}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-kcvv-black text-white font-bold text-[0.8125rem] uppercase tracking-[0.08em] rounded-sm w-fit transition-colors hover:bg-kcvv-green-dark"
+            className="bg-kcvv-black hover:bg-kcvv-green-dark inline-flex w-fit items-center gap-2 rounded-sm px-6 py-3 text-[0.8125rem] font-bold tracking-[0.08em] text-white uppercase transition-colors"
           >
             Bekijk de ploeg →
           </Link>

@@ -74,7 +74,7 @@ export const Large: Story = {
 
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-4 w-80">
+    <div className="flex w-80 flex-col gap-4">
       <Input size="sm" placeholder="Small (sm)" />
       <Input size="md" placeholder="Medium (md) — default" />
       <Input size="lg" placeholder="Large (lg)" />
@@ -159,7 +159,7 @@ export const SearchField: Story = {
  */
 export const ContactFormExample: Story = {
   render: () => (
-    <div className="flex flex-col gap-5 w-96">
+    <div className="flex w-96 flex-col gap-5">
       <Input placeholder="Voornaam" defaultValue="Kevin" />
       <Input
         type="email"

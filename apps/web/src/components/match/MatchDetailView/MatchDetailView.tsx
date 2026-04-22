@@ -82,10 +82,10 @@ export function MatchDetailView({
         />
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-40 animate-pulse" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="h-96 bg-gray-200 rounded animate-pulse" />
-              <div className="h-96 bg-gray-200 rounded animate-pulse" />
+            <div className="h-8 w-40 animate-pulse rounded bg-gray-200" />
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div className="h-96 animate-pulse rounded bg-gray-200" />
+              <div className="h-96 animate-pulse rounded bg-gray-200" />
             </div>
           </div>
         </div>
@@ -106,11 +106,11 @@ export function MatchDetailView({
       />
 
       {/* Match Content */}
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto space-y-8 px-4 py-8">
         {backUrl && (
           <Link
             href={backUrl}
-            className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-green-main transition-colors"
+            className="hover:text-green-main inline-flex items-center gap-1 text-sm text-gray-500 transition-colors"
           >
             <span aria-hidden="true">←</span> Terug naar wedstrijden
           </Link>
@@ -118,9 +118,9 @@ export function MatchDetailView({
         {/* Match Report Indicator - see issue #575 for link implementation */}
         {hasReport && status === "finished" && (
           <div className="flex items-center justify-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-kcvv-green-bright/10 text-kcvv-green-dark rounded-full text-sm font-medium">
+            <span className="bg-kcvv-green-bright/10 text-kcvv-green-dark inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -141,7 +141,7 @@ export function MatchDetailView({
 
         {status === "scheduled" ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-500 text-sm">Nog niet gespeeld</p>
+            <p className="text-sm text-gray-500">Nog niet gespeeld</p>
           </div>
         ) : (
           <>
@@ -156,7 +156,7 @@ export function MatchDetailView({
             {/* Events Section */}
             {events !== undefined && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
                   Wedstrijdgebeurtenissen
                 </h2>
                 <MatchEvents

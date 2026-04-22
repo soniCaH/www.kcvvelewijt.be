@@ -8,7 +8,7 @@ export interface YouthTeamsDirectoryProps {
 
 export function YouthTeamsDirectory({ divisions }: YouthTeamsDirectoryProps) {
   return (
-    <div className="max-w-[70rem] mx-auto px-4 md:px-10">
+    <div className="mx-auto max-w-[70rem] px-4 md:px-10">
       <SectionHeader
         title="Jeugdploegen"
         linkText="Jeugdwerking"
@@ -22,9 +22,9 @@ export function YouthTeamsDirectory({ divisions }: YouthTeamsDirectoryProps) {
           className={i < divisions.length - 1 ? "mb-10" : undefined}
         >
           {/* Group title */}
-          <div className="font-title font-bold text-sm uppercase tracking-[0.1em] text-white/45 mb-4 flex items-center gap-3">
+          <div className="font-title mb-4 flex items-center gap-3 text-sm font-bold tracking-[0.1em] text-white/45 uppercase">
             {division.label} ({division.range})
-            <span className="flex-1 h-px bg-white/10" />
+            <span className="h-px flex-1 bg-white/10" />
           </div>
 
           {/* Team grid */}
@@ -34,24 +34,24 @@ export function YouthTeamsDirectory({ divisions }: YouthTeamsDirectoryProps) {
                 <Link
                   key={team._id}
                   href={`/ploegen/${team.slug}`}
-                  className="flex items-center gap-4 px-5 py-4 bg-white/8 border border-white/8 rounded-sm no-underline transition-colors hover:bg-white/[0.14] hover:border-white/15"
+                  className="flex items-center gap-4 rounded-sm border border-white/8 bg-white/8 px-5 py-4 no-underline transition-colors hover:border-white/15 hover:bg-white/[0.14]"
                 >
                   {/* Badge circle */}
-                  <div className="flex items-center justify-center w-12 h-12 bg-kcvv-green/15 rounded-full shrink-0">
-                    <span className="font-title font-black text-sm text-kcvv-green">
+                  <div className="bg-kcvv-green/15 flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
+                    <span className="font-title text-kcvv-green text-sm font-black">
                       {team.age}
                     </span>
                   </div>
 
                   {/* Team name */}
-                  <span className="font-title font-bold text-[0.9375rem] text-white truncate">
+                  <span className="font-title truncate text-[0.9375rem] font-bold text-white">
                     {team.name}
                   </span>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="text-white/30 text-sm">Geen ploegen</p>
+            <p className="text-sm text-white/30">Geen ploegen</p>
           )}
         </div>
       ))}

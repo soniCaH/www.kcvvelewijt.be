@@ -6,7 +6,7 @@ const MAP_TITLE = "Locatie KCVV Elewijt - Driesstraat 30, 1982 Elewijt";
 
 export function MapEmbed() {
   return (
-    <div className="rounded-xl overflow-hidden shadow-sm border border-gray-200 min-h-[300px]">
+    <div className="min-h-[300px] overflow-hidden rounded-xl border border-gray-200 shadow-sm">
       <iframe
         title={MAP_TITLE}
         src={MAP_SRC}

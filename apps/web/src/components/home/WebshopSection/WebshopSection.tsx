@@ -11,22 +11,22 @@ export interface WebshopSectionProps {
 export const WebshopSection = ({ className }: WebshopSectionProps) => {
   return (
     <section
-      className={cn("bg-gray-100 py-16 md:py-20 text-center", className)}
+      className={cn("bg-gray-100 py-16 text-center md:py-20", className)}
     >
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
+      <div className="mx-auto max-w-4xl px-4 md:px-8">
         <Image
           src="/images/jerseys.png"
           alt="Clubkledij — drie truien van KCVV Elewijt"
           width={1280}
           height={720}
-          className="max-w-2xl w-full mx-auto mb-8"
+          className="mx-auto mb-8 w-full max-w-2xl"
           priority={false}
         />
-        <div className="max-w-2xl mx-auto">
-          <h2 className="font-title text-2xl md:text-3xl font-black text-kcvv-black uppercase tracking-tight mb-4">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="font-title text-kcvv-black mb-4 text-2xl font-black tracking-tight uppercase md:text-3xl">
             Clubkledij
           </h2>
-          <p className="text-base text-gray-600 leading-relaxed mb-8">
+          <p className="mb-8 text-base leading-relaxed text-gray-600">
             Van extra kousen tot een volledig clubpakket — ontdek ons volledige
             aanbod aan clubkledij en accessoires.
           </p>

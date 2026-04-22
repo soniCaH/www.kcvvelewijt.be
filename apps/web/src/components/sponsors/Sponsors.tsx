@@ -81,7 +81,7 @@ export const Sponsors = ({
     <section className={cn("py-8", className)}>
       {/* Section Header */}
       <div className="mb-6">
-        <h3 className={cn("text-xl font-bold mb-2", textColorClass)}>
+        <h3 className={cn("mb-2 text-xl font-bold", textColorClass)}>
           {title}
         </h3>
         {description && (
@@ -99,7 +99,7 @@ export const Sponsors = ({
         <Link
           href={viewAllHref}
           className={cn(
-            "inline-block mt-6 text-sm hover:underline",
+            "mt-6 inline-block text-sm hover:underline",
             variant === "dark"
               ? "text-kcvv-green-bright"
               : "text-kcvv-green-dark",

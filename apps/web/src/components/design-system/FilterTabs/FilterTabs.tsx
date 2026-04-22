@@ -143,16 +143,11 @@ export function FilterTabs({
         <span className={IconComponent ? "ml-2" : ""}>{tab.label}</span>
         {showCounts && typeof tab.count !== "undefined" && (
           <span
-            className={`
-              ${currentSize.badge}
-              rounded-full
-              font-semibold
-              ${
-                isActive
-                  ? "bg-white/20 text-white"
-                  : "bg-kcvv-green-bright/10 text-kcvv-green-bright group-hover:bg-white/20 group-hover:text-white"
-              }
-            `}
+            className={` ${currentSize.badge} rounded-full font-semibold ${
+              isActive
+                ? "bg-white/20 text-white"
+                : "bg-kcvv-green-bright/10 text-kcvv-green-bright group-hover:bg-white/20 group-hover:text-white"
+            } `}
             style={{ fontFamily: "var(--font-family-mono)" }}
           >
             {tab.count}
@@ -206,12 +201,7 @@ export function FilterTabs({
         ref={scrollRef}
         role="tablist"
         aria-label={ariaLabel}
-        className={`
-          flex gap-2 overflow-x-auto scroll-smooth
-          ${canScrollLeft ? (size === "sm" ? "pl-10" : size === "lg" ? "pl-14" : "pl-12") : "pl-0"}
-          ${canScrollRight ? (size === "sm" ? "pr-10" : size === "lg" ? "pr-14" : "pr-12") : "pr-0"}
-          scrollbar-hide
-        `}
+        className={`flex gap-2 overflow-x-auto scroll-smooth ${canScrollLeft ? (size === "sm" ? "pl-10" : size === "lg" ? "pl-14" : "pl-12") : "pl-0"} ${canScrollRight ? (size === "sm" ? "pr-10" : size === "lg" ? "pr-14" : "pr-12") : "pr-0"} scrollbar-hide`}
       >
         {tabs.map(renderTab)}
       </div>

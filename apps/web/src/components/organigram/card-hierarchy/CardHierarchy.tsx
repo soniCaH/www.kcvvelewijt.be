@@ -308,13 +308,13 @@ export function CardHierarchy({
   if (isLoading) {
     return (
       <div className={`space-y-6 ${className}`}>
-        <div className="h-12 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="h-12 animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-12 animate-pulse rounded-lg bg-gray-100" />
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-32 bg-gray-100 rounded-lg animate-pulse"
+              className="h-32 animate-pulse rounded-lg bg-gray-100"
               style={{ marginLeft: `${(i % 3) * 16}px` }}
             />
           ))}
@@ -351,12 +351,12 @@ export function CardHierarchy({
       {/* Controls Bar */}
       <div className="flex items-center justify-between">
         {/* Results Count */}
-        <p className="text-sm text-kcvv-gray">
+        <p className="text-kcvv-gray text-sm">
           {searchResults.length === 0 ? (
             "Geen resultaten"
           ) : (
             <>
-              <span className="font-semibold text-kcvv-gray-blue">
+              <span className="text-kcvv-gray-blue font-semibold">
                 {searchResults.length}
               </span>{" "}
               {searchResults.length === 1 ? "lid" : "leden"}
@@ -373,44 +373,22 @@ export function CardHierarchy({
 
         {/* Controls: Expand/Collapse + Export */}
         {searchResults.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={handleExpandAll}
-              className="
-                px-3 py-1.5
-                text-xs font-medium text-kcvv-gray-dark
-                bg-gray-100 hover:bg-gray-200
-                rounded-lg
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
               Alles uitklappen
             </button>
             <button
               onClick={handleCollapseAll}
-              className="
-                px-3 py-1.5
-                text-xs font-medium text-kcvv-gray-dark
-                bg-gray-100 hover:bg-gray-200
-                rounded-lg
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
               Alles inklappen
             </button>
             <button
               onClick={handleExportImage}
-              className="
-                px-3 py-1.5
-                flex items-center gap-1.5
-                text-xs font-medium text-kcvv-gray-dark
-                bg-gray-100 hover:bg-gray-200
-                rounded-lg
-                transition-colors
-                focus:outline-none focus:ring-2 focus:ring-kcvv-green focus:ring-offset-2
-              "
+              className="text-kcvv-gray-dark focus:ring-kcvv-green flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
               aria-label="Exporteren als afbeelding"
             >
               <Download size={14} />
@@ -425,16 +403,16 @@ export function CardHierarchy({
           offscreen white container further down (search for fixed -left-). */}
       <div ref={hierarchyContainerRef}>
         {searchResults.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl text-kcvv-gray">🔍</span>
+          <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <span className="text-kcvv-gray text-3xl">🔍</span>
             </div>
-            <p className="text-lg font-semibold text-kcvv-gray-blue mb-2">
+            <p className="text-kcvv-gray-blue mb-2 text-lg font-semibold">
               {searchQuery
                 ? `Geen resultaten voor "${searchQuery}"`
                 : "Geen leden in deze afdeling"}
             </p>
-            <p className="text-sm text-kcvv-gray max-w-md">
+            <p className="text-kcvv-gray max-w-md text-sm">
               Probeer een andere zoekopdracht of filter
             </p>
           </div>
@@ -456,7 +434,7 @@ export function CardHierarchy({
       <div
         id="export-org-chart-container"
         ref={exportChartContainerRef}
-        className="fixed -left-[9999px] top-0 w-[1200px] h-[800px] bg-white"
+        className="fixed top-0 -left-[9999px] h-[800px] w-[1200px] bg-white"
         aria-hidden="true"
       />
     </div>

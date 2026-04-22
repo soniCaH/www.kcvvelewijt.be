@@ -277,9 +277,9 @@ export const AllRoles: Story = {
         Users can select from these roles to filter relevant questions:
       </p>
       <ResponsibilityFinder {...args} />
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        <h4 className="font-bold mb-2">Role Types:</h4>
-        <ul className="list-disc list-inside space-y-1 text-sm">
+      <div className="mt-4 rounded-lg bg-gray-50 p-4">
+        <h4 className="mb-2 font-bold">Role Types:</h4>
+        <ul className="list-inside list-disc space-y-1 text-sm">
           <li>
             <strong>Speler</strong> - Active players
           </li>
@@ -347,21 +347,21 @@ export const SizeComparison: Story = {
   render: (args) => (
     <div className="space-y-12">
       <div>
-        <h3 className="text-2xl font-bold mb-4">Full Size (Default)</h3>
-        <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg">
+        <h3 className="mb-4 text-2xl font-bold">Full Size (Default)</h3>
+        <div className="rounded-lg border-2 border-dashed border-gray-300 p-6">
           <ResponsibilityFinder {...args} />
         </div>
-        <p className="mt-2 text-sm text-gray-medium">
+        <p className="text-gray-medium mt-2 text-sm">
           Large typography (4xl-6xl) for dedicated /hulp page
         </p>
       </div>
 
       <div>
-        <h3 className="text-2xl font-bold mb-4">Compact Size</h3>
-        <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg bg-green-main/5">
+        <h3 className="mb-4 text-2xl font-bold">Compact Size</h3>
+        <div className="bg-green-main/5 rounded-lg border-2 border-dashed border-gray-300 p-6">
           <ResponsibilityFinder {...args} compact />
         </div>
-        <p className="mt-2 text-sm text-gray-medium">
+        <p className="text-gray-medium mt-2 text-sm">
           Smaller typography (2xl-4xl) for homepage integration
         </p>
       </div>
@@ -385,18 +385,18 @@ export const HomepageIntegration: Story = {
     compact: true,
   },
   render: (args) => (
-    <section className="bg-gradient-to-br from-green-main/5 to-green-hover/5 py-16 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-blue mb-4">
+    <section className="from-green-main/5 to-green-hover/5 bg-gradient-to-br px-4 py-16">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-12 text-center">
+          <h2 className="text-gray-blue mb-4 text-3xl font-bold md:text-5xl">
             Hoe kunnen we je helpen?
           </h2>
-          <p className="text-lg md:text-xl text-gray-dark max-w-2xl mx-auto">
+          <p className="text-gray-dark mx-auto max-w-2xl text-lg md:text-xl">
             Vind snel de juiste contactpersoon voor jouw vraag
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+        <div className="rounded-2xl bg-white p-6 shadow-xl md:p-10">
           <ResponsibilityFinder {...args} />
         </div>
 
@@ -429,7 +429,7 @@ export const DarkMode: Story = {
   args: {},
   decorators: [
     (Story) => (
-      <div className="bg-gray-900 p-8 rounded-lg">
+      <div className="rounded-lg bg-gray-900 p-8">
         <Story />
       </div>
     ),
@@ -560,46 +560,46 @@ export const CategoryColorCoding: Story = {
   render: (args) => (
     <div className="space-y-8">
       <div>
-        <h3 className="text-2xl font-bold mb-4">Category Color System</h3>
+        <h3 className="mb-4 text-2xl font-bold">Category Color System</h3>
         <p className="text-gray-dark mb-6">
           Each category gets distinct colors for quick visual recognition:
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-blue-50 border-2 border-blue-400 rounded-lg">
-            <div className="text-blue-700 font-bold">Commercieel</div>
-            <div className="text-sm text-gray-600 mt-1">Blue theme</div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <div className="rounded-lg border-2 border-blue-400 bg-blue-50 p-4">
+            <div className="font-bold text-blue-700">Commercieel</div>
+            <div className="mt-1 text-sm text-gray-600">Blue theme</div>
           </div>
 
-          <div className="p-4 bg-red-50 border-2 border-red-400 rounded-lg">
-            <div className="text-red-700 font-bold">Medisch</div>
-            <div className="text-sm text-gray-600 mt-1">Red theme</div>
+          <div className="rounded-lg border-2 border-red-400 bg-red-50 p-4">
+            <div className="font-bold text-red-700">Medisch</div>
+            <div className="mt-1 text-sm text-gray-600">Red theme</div>
           </div>
 
-          <div className="p-4 bg-purple-50 border-2 border-purple-400 rounded-lg">
-            <div className="text-purple-700 font-bold">Administratief</div>
-            <div className="text-sm text-gray-600 mt-1">Purple theme</div>
+          <div className="rounded-lg border-2 border-purple-400 bg-purple-50 p-4">
+            <div className="font-bold text-purple-700">Administratief</div>
+            <div className="mt-1 text-sm text-gray-600">Purple theme</div>
           </div>
 
-          <div className="p-4 bg-orange-50 border-2 border-orange-400 rounded-lg">
-            <div className="text-orange-700 font-bold">Gedrag</div>
-            <div className="text-sm text-gray-600 mt-1">Orange theme</div>
+          <div className="rounded-lg border-2 border-orange-400 bg-orange-50 p-4">
+            <div className="font-bold text-orange-700">Gedrag</div>
+            <div className="mt-1 text-sm text-gray-600">Orange theme</div>
           </div>
 
-          <div className="p-4 bg-gray-50 border-2 border-gray-400 rounded-lg">
-            <div className="text-gray-700 font-bold">Algemeen</div>
-            <div className="text-sm text-gray-600 mt-1">Gray theme</div>
+          <div className="rounded-lg border-2 border-gray-400 bg-gray-50 p-4">
+            <div className="font-bold text-gray-700">Algemeen</div>
+            <div className="mt-1 text-sm text-gray-600">Gray theme</div>
           </div>
 
-          <div className="p-4 bg-green-50 border-2 border-green-600 rounded-lg">
-            <div className="text-green-700 font-bold">Sportief</div>
-            <div className="text-sm text-gray-600 mt-1">Green theme</div>
+          <div className="rounded-lg border-2 border-green-600 bg-green-50 p-4">
+            <div className="font-bold text-green-700">Sportief</div>
+            <div className="mt-1 text-sm text-gray-600">Green theme</div>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-2xl font-bold mb-4">In Practice</h3>
+        <h3 className="mb-4 text-2xl font-bold">In Practice</h3>
         <p className="text-gray-dark mb-4">
           Select a role and search to see colors in action:
         </p>
@@ -663,13 +663,13 @@ export const EmptyStateDesign: Story = {
   args: {},
   render: () => (
     <div className="space-y-6">
-      <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg">
-        <div className="bg-white border-2 border-gray-200 rounded-xl shadow-xl p-6 text-center">
-          <div className="text-5xl mb-3">🔍</div>
-          <h3 className="text-lg font-bold text-kcvv-gray-blue mb-1">
+      <div className="rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <div className="rounded-xl border-2 border-gray-200 bg-white p-6 text-center shadow-xl">
+          <div className="mb-3 text-5xl">🔍</div>
+          <h3 className="text-kcvv-gray-blue mb-1 text-lg font-bold">
             Geen resultaten gevonden
           </h3>
-          <p className="text-sm text-gray-medium">
+          <p className="text-gray-medium text-sm">
             Probeer een andere zoekterm of selecteer een andere rol
           </p>
         </div>

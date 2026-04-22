@@ -160,7 +160,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         stats={playerStats ?? []}
       />
 
-      <section className="max-w-4xl mx-auto px-4 pb-8">
+      <section className="mx-auto max-w-4xl px-4 pb-8">
         <PlayerShare
           playerName={fullName}
           playerSlug={slug}
@@ -173,7 +173,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         articles={relatedArticles}
         pageType="player"
         pageSlug={slug}
-        className="max-w-4xl mx-auto px-4 pb-8"
+        className="mx-auto max-w-4xl px-4 pb-8"
       />
     </>
   );

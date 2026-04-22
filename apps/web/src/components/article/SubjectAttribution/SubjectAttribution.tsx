@@ -52,13 +52,13 @@ const QuoteAttribution = ({
   <div
     data-testid="subject-attribution-quote"
     className={cn(
-      "flex items-center justify-center gap-4 text-sm uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-dark",
+      "text-kcvv-gray-dark flex items-center justify-center gap-4 text-sm tracking-[var(--letter-spacing-caps)] uppercase",
       className,
     )}
   >
     <span
       aria-hidden="true"
-      className="inline-block h-0.5 w-8 bg-kcvv-green-bright"
+      className="bg-kcvv-green-bright inline-block h-0.5 w-8"
     />
     <span className="font-body font-medium">
       {resolved.name}
@@ -82,12 +82,12 @@ const KeyAttribution = ({
   <div
     data-testid="subject-attribution-key"
     className={cn(
-      "flex items-baseline gap-3 text-sm uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-dark",
+      "text-kcvv-gray-dark flex items-baseline gap-3 text-sm tracking-[var(--letter-spacing-caps)] uppercase",
       className,
     )}
   >
     {resolved.jerseyNumber != null ? (
-      <span className="font-mono text-kcvv-green-dark">
+      <span className="text-kcvv-green-dark font-mono">
         #{resolved.jerseyNumber}
       </span>
     ) : null}
@@ -128,7 +128,7 @@ export const SubjectPhoto = ({
     <div
       data-testid="subject-photo"
       className={cn(
-        "relative aspect-[4/5] w-full overflow-hidden rounded-md bg-kcvv-gray-light/30",
+        "bg-kcvv-gray-light/30 relative aspect-[4/5] w-full overflow-hidden rounded-md",
         className,
       )}
     >

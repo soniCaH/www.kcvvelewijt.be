@@ -33,15 +33,15 @@ export const SectionHeader = ({
   const isDark = variant === "dark";
 
   return (
-    <header className={cn("flex items-end justify-between mb-10", className)}>
+    <header className={cn("mb-10 flex items-end justify-between", className)}>
       <Heading
         className={cn(
           // Font — font-body! forces Montserrat over the global h1-h6 font-family rule
           "font-body! font-black!",
           // Size, spacing, decoration
-          "text-[clamp(1.8rem,4vw,2.8rem)]! uppercase tracking-[-0.03em]! leading-none! mb-0!",
+          "mb-0! text-[clamp(1.8rem,4vw,2.8rem)]! leading-none! tracking-[-0.03em]! uppercase",
           // Green left accent bar
-          "pl-4 border-l-4 border-kcvv-green-bright",
+          "border-kcvv-green-bright border-l-4 pl-4",
           // Colour
           isDark ? "text-white!" : "text-kcvv-black!",
         )}
@@ -53,7 +53,7 @@ export const SectionHeader = ({
         <Link
           href={linkHref}
           className={cn(
-            "group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] transition-colors",
+            "group inline-flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase transition-colors",
             isDark
               ? "text-white/80 hover:text-white"
               : "text-kcvv-green-dark hover:text-kcvv-green-bright",

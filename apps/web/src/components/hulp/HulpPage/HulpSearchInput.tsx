@@ -25,7 +25,7 @@ export function HulpSearchInput({
 }: HulpSearchInputProps) {
   return (
     <div className="relative mx-auto w-full max-w-2xl">
-      <div className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-kcvv-gray">
+      <div className="text-kcvv-gray pointer-events-none absolute inset-y-0 left-5 flex items-center">
         <Search className="h-6 w-6" />
       </div>
       <input
@@ -34,7 +34,7 @@ export function HulpSearchInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel}
-        className="w-full rounded-sm border border-gray-200 bg-white py-5 pl-14 pr-5 text-base text-kcvv-black shadow-md placeholder:text-kcvv-gray focus:border-kcvv-green-bright focus:outline-none focus:ring-2 focus:ring-kcvv-green-bright/30"
+        className="text-kcvv-black placeholder:text-kcvv-gray focus:border-kcvv-green-bright focus:ring-kcvv-green-bright/30 w-full rounded-sm border border-gray-200 bg-white py-5 pr-5 pl-14 text-base shadow-md focus:ring-2 focus:outline-none"
       />
     </div>
   );

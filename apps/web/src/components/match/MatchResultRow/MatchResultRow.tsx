@@ -89,16 +89,16 @@ export function MatchResultRow({
     <Link
       href={href}
       className={cn(
-        "block rounded-card p-4 transition-shadow",
+        "rounded-card block p-4 transition-shadow",
         isDark
           ? cn(
               "bg-white/[0.03] hover:bg-white/[0.07]",
-              isNext && "ring-2 ring-kcvv-green-bright/30",
+              isNext && "ring-kcvv-green-bright/30 ring-2",
             )
           : cn(
-              "bg-white border hover:shadow-md",
+              "border bg-white hover:shadow-md",
               isNext
-                ? "border-kcvv-green-bright ring-2 ring-kcvv-green-bright/20"
+                ? "border-kcvv-green-bright ring-kcvv-green-bright/20 ring-2"
                 : "border-gray-200",
               result && resultBorderLight[result],
             ),
@@ -107,7 +107,7 @@ export function MatchResultRow({
       {/* Header row: date, time, competition (sm+ only — footer shows it on mobile).
          Competition is intentionally hidden on mobile (hidden sm:block) to avoid
          duplication with the footer line. Do NOT remove sm:block. */}
-      <div className="flex items-center justify-between text-sm mb-3">
+      <div className="mb-3 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <span
             className={cn(
@@ -126,7 +126,7 @@ export function MatchResultRow({
           {isNext && (
             <span
               className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium",
+                "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
                 isDark
                   ? "bg-kcvv-green-bright text-kcvv-black"
                   : "bg-kcvv-green-bright text-white",
@@ -139,7 +139,7 @@ export function MatchResultRow({
         {match.competition && (
           <span
             className={cn(
-              "text-xs hidden sm:block",
+              "hidden text-xs sm:block",
               isDark ? "text-white/40" : "text-gray-500",
             )}
           >
@@ -151,19 +151,19 @@ export function MatchResultRow({
       {/* Match row: teams and score */}
       <div className="flex items-center justify-between">
         {/* Home team */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {match.homeTeam.logo ? (
             <Image
               src={match.homeTeam.logo}
               alt={`${match.homeTeam.name} logo`}
               width={32}
               height={32}
-              className="object-contain flex-shrink-0"
+              className="flex-shrink-0 object-contain"
             />
           ) : (
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
                 isDark ? "bg-white/10" : "bg-gray-200",
               )}
             >
@@ -196,7 +196,7 @@ export function MatchResultRow({
         {/* Score or VS */}
         <div className="flex-shrink-0 px-4">
           {homeScore !== undefined && awayScore !== undefined ? (
-            <div className="flex items-center gap-2 font-mono font-bold text-lg">
+            <div className="flex items-center gap-2 font-mono text-lg font-bold">
               <span
                 className={cn(
                   isDark ? "text-white" : undefined,
@@ -236,10 +236,10 @@ export function MatchResultRow({
         </div>
 
         {/* Away team */}
-        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           <span
             className={cn(
-              "truncate text-sm text-right",
+              "truncate text-right text-sm",
               isDark
                 ? isMember && !isHome
                   ? "font-semibold text-white"
@@ -257,12 +257,12 @@ export function MatchResultRow({
               alt={`${match.awayTeam.name} logo`}
               width={32}
               height={32}
-              className="object-contain flex-shrink-0"
+              className="flex-shrink-0 object-contain"
             />
           ) : (
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
                 isDark ? "bg-white/10" : "bg-gray-200",
               )}
             >
@@ -280,10 +280,10 @@ export function MatchResultRow({
 
         {/* Result badge */}
         {result && (
-          <div className="flex-shrink-0 ml-3">
+          <div className="ml-3 flex-shrink-0">
             <span
               className={cn(
-                "inline-block text-[11px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-sm",
+                "inline-block rounded-sm px-2 py-0.5 text-[11px] font-bold tracking-[0.06em] uppercase",
                 resultBadgeConfig[result].className,
               )}
             >

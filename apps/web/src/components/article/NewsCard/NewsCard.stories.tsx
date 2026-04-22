@@ -102,7 +102,7 @@ export const ListingGrid: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="grid grid-cols-3 gap-6 max-w-5xl">
+      <div className="grid max-w-5xl grid-cols-3 gap-6">
         <Story />
         <NewsCard
           title="Spelersvoorstelling seizoen 2025-2026"

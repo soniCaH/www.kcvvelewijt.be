@@ -25,11 +25,11 @@ type Story = StoryObj<typeof meta>;
 // tokens are ever retuned.
 const SurfaceTemplate = ({ surface }: { surface: SectionBg }) => (
   <div
-    className="min-h-screen flex flex-col"
+    className="flex min-h-screen flex-col"
     style={{ backgroundColor: BG_COLOR[surface] }}
     data-testid={`surface-${surface}`}
   >
-    <div className="flex-1 min-h-[240px]" />
+    <div className="min-h-[240px] flex-1" />
     <PageFooter />
   </div>
 );

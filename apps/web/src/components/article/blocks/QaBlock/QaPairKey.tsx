@@ -22,7 +22,7 @@ const QuestionLabel = ({
 }) => (
   <p
     className={cn(
-      "text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)] text-kcvv-green-dark",
+      "text-kcvv-green-dark text-xs font-semibold tracking-[var(--letter-spacing-label)] uppercase",
       className,
     )}
   >
@@ -60,11 +60,11 @@ export const QaPairKey = ({ question, answer, subject }: QaPairKeyProps) => {
       // breathing zone against the surrounding standard pairs — matches the
       // 40 px rhythm between consecutive standards (hr my-10) so that the
       // top and bottom margins of breakout blocks are visibly equal.
-      className="full-bleed bg-[var(--color-foundation-gray-light)] py-16 md:py-32 my-10"
+      className="full-bleed my-10 bg-[var(--color-foundation-gray-light)] py-16 md:py-32"
     >
       <div
         className={cn(
-          "max-w-inner-lg mx-auto px-6 grid gap-10 md:gap-16 md:items-center",
+          "max-w-inner-lg mx-auto grid gap-10 px-6 md:items-center md:gap-16",
           hasPhoto && "md:grid-cols-[minmax(0,35%)_1fr]",
         )}
       >
@@ -79,8 +79,8 @@ export const QaPairKey = ({ question, answer, subject }: QaPairKeyProps) => {
           {!hasPhoto && (
             <QuestionLabel className="mb-6">{question}</QuestionLabel>
           )}
-          <div className="border-y border-kcvv-gray-light py-8 max-w-[40rem]">
-            <div className="font-title font-normal text-kcvv-gray-blue leading-[1.25] text-[clamp(1.75rem,3.5vw,2.5rem)]">
+          <div className="border-kcvv-gray-light max-w-[40rem] border-y py-8">
+            <div className="font-title text-kcvv-gray-blue text-[clamp(1.75rem,3.5vw,2.5rem)] leading-[1.25] font-normal">
               <PortableText value={answer} />
             </div>
           </div>

@@ -22,17 +22,17 @@ export function ContactCard({ contact, onContactClick }: ContactCardProps) {
   const hasName = contact.name.trim().length > 0;
   const hasRole = contact.role.trim().length > 0;
   return (
-    <div className="rounded-sm border-l-4 border-kcvv-green-bright bg-white p-6 shadow-sm">
-      <div className="mb-1 text-[0.625rem] font-bold uppercase tracking-[0.15em] text-kcvv-green-dark">
+    <div className="border-kcvv-green-bright rounded-sm border-l-4 bg-white p-6 shadow-sm">
+      <div className="text-kcvv-green-dark mb-1 text-[0.625rem] font-bold tracking-[0.15em] uppercase">
         Contactpersoon
       </div>
       {hasName && (
-        <div className="font-title text-2xl font-bold text-kcvv-black">
+        <div className="font-title text-kcvv-black text-2xl font-bold">
           {contact.name}
         </div>
       )}
       {hasRole && contact.role !== contact.name && (
-        <div className="mt-1 text-sm text-kcvv-gray">{contact.role}</div>
+        <div className="text-kcvv-gray mt-1 text-sm">{contact.role}</div>
       )}
 
       {(contact.email || contact.phone) && (
@@ -41,9 +41,9 @@ export function ContactCard({ contact, onContactClick }: ContactCardProps) {
             <a
               href={`mailto:${contact.email}`}
               onClick={() => onContactClick?.("email")}
-              className="inline-flex items-center gap-2 text-kcvv-black hover:text-kcvv-green-bright"
+              className="text-kcvv-black hover:text-kcvv-green-bright inline-flex items-center gap-2"
             >
-              <Mail className="h-4 w-4 text-kcvv-green-dark" />
+              <Mail className="text-kcvv-green-dark h-4 w-4" />
               {contact.email}
             </a>
           )}
@@ -51,9 +51,9 @@ export function ContactCard({ contact, onContactClick }: ContactCardProps) {
             <a
               href={`tel:${contact.phone.replace(/\s/g, "")}`}
               onClick={() => onContactClick?.("phone")}
-              className="inline-flex items-center gap-2 text-kcvv-black hover:text-kcvv-green-bright"
+              className="text-kcvv-black hover:text-kcvv-green-bright inline-flex items-center gap-2"
             >
-              <Phone className="h-4 w-4 text-kcvv-green-dark" />
+              <Phone className="text-kcvv-green-dark h-4 w-4" />
               {contact.phone}
             </a>
           )}
@@ -63,7 +63,7 @@ export function ContactCard({ contact, onContactClick }: ContactCardProps) {
       {contact.organigramHref && (
         <Link
           href={contact.organigramHref}
-          className="mt-4 inline-flex items-center gap-1 text-sm font-bold uppercase tracking-[0.05em] text-kcvv-green-dark hover:text-kcvv-green-bright"
+          className="text-kcvv-green-dark hover:text-kcvv-green-bright mt-4 inline-flex items-center gap-1 text-sm font-bold tracking-[0.05em] uppercase"
         >
           Bekijk in organigram
           <ChevronRight className="h-4 w-4" />

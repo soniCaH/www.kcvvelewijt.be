@@ -62,11 +62,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-describedby={hasHelper ? helperId : undefined}
           className={cn(
             // Base
-            "w-full rounded-[0.25em] border bg-white font-body",
+            "font-body w-full rounded-[0.25em] border bg-white",
             "px-4 py-2.5 text-base",
             "text-kcvv-gray-dark placeholder:text-foundation-gray-dark",
             "transition-all duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-offset-0",
+            "focus:ring-2 focus:ring-offset-0 focus:outline-none",
 
             // Default border + focus
             !error &&
@@ -77,7 +77,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               "border-kcvv-alert focus:border-kcvv-alert focus:ring-kcvv-alert/20",
 
             // Disabled
-            "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-foundation-gray-light",
+            "disabled:bg-foundation-gray-light disabled:cursor-not-allowed disabled:opacity-50",
 
             // Resize
             resizeClass[resize],
@@ -88,12 +88,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {error && (
-          <p id={helperId} className="mt-1.5 text-sm text-kcvv-alert">
+          <p id={helperId} className="text-kcvv-alert mt-1.5 text-sm">
             {error}
           </p>
         )}
         {!error && hint && (
-          <p id={helperId} className="mt-1.5 text-sm text-foundation-gray-dark">
+          <p id={helperId} className="text-foundation-gray-dark mt-1.5 text-sm">
             {hint}
           </p>
         )}

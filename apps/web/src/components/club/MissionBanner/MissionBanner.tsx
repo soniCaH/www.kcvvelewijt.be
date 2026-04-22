@@ -12,17 +12,17 @@ export function MissionBanner({
   attribution = DEFAULT_ATTRIBUTION,
 }: MissionBannerProps = {}) {
   return (
-    <div className="max-w-inner mx-auto px-4 md:px-10 text-center">
+    <div className="max-w-inner mx-auto px-4 text-center md:px-10">
       <div
-        className="text-5xl text-white/20 mb-6 leading-none font-title"
+        className="font-title mb-6 text-5xl leading-none text-white/20"
         aria-hidden="true"
       >
         {"\u201C"}
       </div>
-      <p className="font-title font-bold text-white leading-normal text-xl md:text-4xl mb-6">
+      <p className="font-title mb-6 text-xl leading-normal font-bold text-white md:text-4xl">
         {quote}
       </p>
-      <p className="text-sm font-semibold text-white/50 uppercase tracking-caps">
+      <p className="tracking-caps text-sm font-semibold text-white/50 uppercase">
         {attribution}
       </p>
     </div>

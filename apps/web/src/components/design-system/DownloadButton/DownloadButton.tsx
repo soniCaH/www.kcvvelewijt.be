@@ -195,8 +195,8 @@ export const DownloadButton = ({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group flex items-center gap-4 rounded-lg border border-foundation-gray-light bg-white shadow-sm",
-        "transition-all duration-300 hover:bg-gray-50 hover:shadow-lg hover:scale-[1.02]",
+        "group border-foundation-gray-light flex items-center gap-4 rounded-lg border bg-white shadow-sm",
+        "transition-all duration-300 hover:scale-[1.02] hover:bg-gray-50 hover:shadow-lg",
         "overflow-hidden no-underline",
         className,
       )}

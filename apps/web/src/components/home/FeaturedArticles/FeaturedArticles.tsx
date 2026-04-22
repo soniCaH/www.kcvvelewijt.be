@@ -177,14 +177,14 @@ export const FeaturedArticles = ({
       role="region"
       aria-roledescription="carousel"
       aria-label="Uitgelichte artikelen"
-      className="frontpage__featured_articles w-full bg-kcvv-black relative overflow-hidden focus-visible:outline-2 focus-visible:outline-kcvv-green-bright focus-visible:outline-offset-0"
+      className="frontpage__featured_articles bg-kcvv-black focus-visible:outline-kcvv-green-bright relative w-full overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-0"
     >
       {/* Screen reader live region — announces active article on change */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {activeArticle.title}
       </div>
 
-      <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
+      <div className="relative h-[400px] w-full md:h-[500px] lg:h-[600px]">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           {activeArticle.imageUrl && (
@@ -202,23 +202,23 @@ export const FeaturedArticles = ({
         </div>
 
         {/* Content Overlay — padded away from sidebar on desktop */}
-        <div className="relative z-10 h-full flex items-start pt-10 md:pt-14 lg:items-end lg:pt-0 lg:pb-[calc(clamp(2rem,6vw,5rem)+3rem)] px-4 lg:px-10">
+        <div className="relative z-10 flex h-full items-start px-4 pt-10 md:pt-14 lg:items-end lg:px-10 lg:pt-0 lg:pb-[calc(clamp(2rem,6vw,5rem)+3rem)]">
           <Link
             href={activeArticle.href}
-            className="group flex flex-col justify-center max-w-lg lg:max-w-xl"
+            className="group flex max-w-lg flex-col justify-center lg:max-w-xl"
           >
             {activeArticle.tags && activeArticle.tags[0] && (
-              <span className="inline-block bg-kcvv-green-bright text-kcvv-black! text-[10px] font-bold uppercase tracking-widest px-[10px] py-[3px] rounded-sm mb-4 w-fit">
+              <span className="bg-kcvv-green-bright text-kcvv-black! mb-4 inline-block w-fit rounded-sm px-[10px] py-[3px] text-[10px] font-bold tracking-widest uppercase">
                 {activeArticle.tags[0].name}
               </span>
             )}
 
-            <h2 className="frontpage__featured_article__title font-title text-white! text-[clamp(1.75rem,5.5vw,5rem)]! font-black! leading-[1.02]! tracking-tight mb-5! group-hover:text-white/75! transition-colors line-clamp-3">
+            <h2 className="frontpage__featured_article__title font-title mb-5! line-clamp-3 text-[clamp(1.75rem,5.5vw,5rem)]! leading-[1.02]! font-black! tracking-tight text-white! transition-colors group-hover:text-white/75!">
               {activeArticle.title}
             </h2>
 
             {activeArticle.description && (
-              <p className="frontpage__featured_article__title__description text-white/75 text-[1.1rem] leading-[1.55] mb-5 line-clamp-3">
+              <p className="frontpage__featured_article__title__description mb-5 line-clamp-3 text-[1.1rem] leading-[1.55] text-white/75">
                 {activeArticle.description}
               </p>
             )}
@@ -236,14 +236,14 @@ export const FeaturedArticles = ({
 
         {/* Navigation Dots + Pause Button */}
         {articles.length > 1 && (
-          <div className="absolute bottom-[calc(clamp(2rem,6vw,5rem)+0.75rem)] left-4 lg:left-10 z-20 flex items-center gap-2">
+          <div className="absolute bottom-[calc(clamp(2rem,6vw,5rem)+0.75rem)] left-4 z-20 flex items-center gap-2 lg:left-10">
             {/* Pause/Play toggle — WCAG 2.2.2 */}
             {autoRotate && (
               <button
                 type="button"
                 onClick={handleUserPauseToggle}
                 className={cn(
-                  "p-1 rounded-full transition-all",
+                  "rounded-full p-1 transition-all",
                   isUserPaused
                     ? "bg-white/20 text-white"
                     : "bg-transparent text-white/40 hover:text-white/80",
@@ -253,9 +253,9 @@ export const FeaturedArticles = ({
                 }
               >
                 {isUserPaused ? (
-                  <Play className="w-2.5 h-2.5" aria-hidden="true" />
+                  <Play className="h-2.5 w-2.5" aria-hidden="true" />
                 ) : (
-                  <Pause className="w-2.5 h-2.5" aria-hidden="true" />
+                  <Pause className="h-2.5 w-2.5" aria-hidden="true" />
                 )}
               </button>
             )}
@@ -276,8 +276,8 @@ export const FeaturedArticles = ({
                     className={cn(
                       "relative block overflow-hidden rounded-full transition-all",
                       index === clampedIndex
-                        ? "w-10 h-3 bg-white/25"
-                        : "w-3 h-3 bg-white/40 group-hover:bg-white/65",
+                        ? "h-3 w-10 bg-white/25"
+                        : "h-3 w-3 bg-white/40 group-hover:bg-white/65",
                     )}
                   >
                     {/* Progress fill — animates via CSS keyframe when autoRotate is on.
@@ -287,7 +287,7 @@ export const FeaturedArticles = ({
                       <span
                         key={resumeGen}
                         className={cn(
-                          "absolute inset-0 rounded-full bg-kcvv-green-bright",
+                          "bg-kcvv-green-bright absolute inset-0 rounded-full",
                           autoRotate && "carousel-progress-fill",
                         )}
                         style={
@@ -312,24 +312,24 @@ export const FeaturedArticles = ({
 
         {/* Side Article Panel (Desktop only) — floating cards over the image */}
         {articles.length > 1 && (
-          <div className="hidden lg:flex absolute right-4 top-0 bottom-0 w-80 flex-col justify-center gap-3 z-20">
+          <div className="absolute top-0 right-4 bottom-0 z-20 hidden w-80 flex-col justify-center gap-3 lg:flex">
             {articles.map((article, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => setActiveIndex(index)}
                 className={cn(
-                  "frontpage__featured_article group flex items-start gap-3 p-3 rounded-sm transition-all cursor-pointer text-left border backdrop-blur-sm",
+                  "frontpage__featured_article group flex cursor-pointer items-start gap-3 rounded-sm border p-3 text-left backdrop-blur-sm transition-all",
                   index === clampedIndex
                     ? "frontpage__featured_article--active bg-kcvv-black/90 border-kcvv-green-bright"
-                    : "bg-black/65 border-white/10 hover:bg-black/80 hover:border-white/25",
+                    : "border-white/10 bg-black/65 hover:border-white/25 hover:bg-black/80",
                 )}
                 aria-label={`Ga naar artikel: ${article.title}`}
                 aria-current={index === clampedIndex ? "true" : undefined}
               >
                 {/* Thumbnail */}
                 {article.imageUrl && (
-                  <div className="relative w-14 h-14 shrink-0 rounded overflow-hidden">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded">
                     <Image
                       src={article.imageUrl}
                       alt=""
@@ -341,12 +341,12 @@ export const FeaturedArticles = ({
                 )}
 
                 {/* Title + date */}
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-white! text-xs font-semibold line-clamp-3 leading-snug group-hover:text-kcvv-green-bright! transition-colors">
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <span className="group-hover:text-kcvv-green-bright! line-clamp-3 text-xs leading-snug font-semibold text-white! transition-colors">
                     {article.title}
                   </span>
                   <time
-                    className="text-white/50 text-xs"
+                    className="text-xs text-white/50"
                     dateTime={article.dateIso}
                   >
                     {article.date}

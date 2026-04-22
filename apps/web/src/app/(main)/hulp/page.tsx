@@ -136,7 +136,7 @@ export default function HulpPageRoute() {
             key: "content",
             bg: "gray-100",
             content: (
-              <div className="mx-auto max-w-inner-lg space-y-12 px-4 md:px-10">
+              <div className="max-w-inner-lg mx-auto space-y-12 px-4 md:px-10">
                 <Suspense fallback={<HulpSkeleton />}>
                   <HulpContent />
                 </Suspense>

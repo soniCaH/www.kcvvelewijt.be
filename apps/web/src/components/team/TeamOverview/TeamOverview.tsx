@@ -170,7 +170,7 @@ export function TeamOverview({
     return (
       <div
         className={cn(
-          "grid gap-4 auto-rows-fr",
+          "grid auto-rows-fr gap-4",
           isCompact
             ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
@@ -197,7 +197,7 @@ export function TeamOverview({
       <div
         className={cn(
           "flex items-center justify-center py-12",
-          isDark ? "text-white/60 text-center" : "text-gray-500 text-center",
+          isDark ? "text-center text-white/60" : "text-center text-gray-500",
           className,
         )}
       >
@@ -207,14 +207,14 @@ export function TeamOverview({
   }
 
   const filterButtons = showFilters && (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className="mb-6 flex flex-wrap gap-2">
       {(["all", "senior", "youth", "club"] as const).map((filter) => (
         <button
           key={filter}
           onClick={() => setActiveFilter(filter)}
           aria-pressed={activeFilter === filter}
           className={cn(
-            "px-4 py-2 rounded-sm text-sm font-medium transition-colors",
+            "rounded-sm px-4 py-2 text-sm font-medium transition-colors",
             activeFilter === filter
               ? "bg-kcvv-green-bright text-white"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200",
@@ -239,7 +239,7 @@ export function TeamOverview({
             <section key={category}>
               <h3
                 className={cn(
-                  "text-lg font-bold mb-4 font-title",
+                  "font-title mb-4 text-lg font-bold",
                   isDark ? "text-white" : "text-gray-900",
                 )}
               >
@@ -247,7 +247,7 @@ export function TeamOverview({
               </h3>
               <div
                 className={cn(
-                  "grid gap-4 auto-rows-fr",
+                  "grid auto-rows-fr gap-4",
                   isCompact
                     ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                     : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
@@ -274,7 +274,7 @@ export function TeamOverview({
       {filterButtons}
       <div
         className={cn(
-          "grid gap-4 auto-rows-fr",
+          "grid auto-rows-fr gap-4",
           isCompact
             ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",

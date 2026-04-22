@@ -71,7 +71,7 @@ export const WithContent: Story = {
         }}
       />
       <div className="max-w-inner-lg mx-auto px-6 py-8">
-        <p className="text-gray-700 mb-4">
+        <p className="mb-4 text-gray-700">
           KCVV Elewijt heeft deze week twee nieuwe spelers aangetrokken voor het
           komende seizoen. De club is verheugd om deze nieuwe talenten te
           verwelkomen.

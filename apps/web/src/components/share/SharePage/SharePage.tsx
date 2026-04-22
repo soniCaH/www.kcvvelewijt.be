@@ -361,8 +361,8 @@ export function SharePage({ matches, players }: SharePageProps) {
     "font-montserrat font-semibold text-sm uppercase tracking-wide text-kcvv-black";
 
   return (
-    <div className="flex flex-col gap-6 py-8 px-4 max-w-2xl mx-auto">
-      <h1 className="font-montserrat font-black text-3xl text-kcvv-black">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+      <h1 className="font-montserrat text-kcvv-black text-3xl font-black">
         Story Generator
       </h1>
 
@@ -377,10 +377,10 @@ export function SharePage({ matches, players }: SharePageProps) {
               key={t.id}
               onClick={() => handleTemplateChange(t.id)}
               aria-pressed={selectedTemplateId === t.id}
-              className={`flex flex-col items-center gap-1 p-3 rounded-sm border-2 text-sm font-montserrat font-semibold transition-colors min-h-[72px] ${
+              className={`font-montserrat flex min-h-[72px] flex-col items-center gap-1 rounded-sm border-2 p-3 text-sm font-semibold transition-colors ${
                 selectedTemplateId === t.id
                   ? "border-kcvv-green bg-kcvv-green/10 text-kcvv-green"
-                  : "border-gray-200 bg-white text-kcvv-black hover:border-kcvv-green/50"
+                  : "text-kcvv-black hover:border-kcvv-green/50 border-gray-200 bg-white"
               }`}
             >
               <t.icon
@@ -398,7 +398,7 @@ export function SharePage({ matches, players }: SharePageProps) {
         <label
           id="match-label"
           htmlFor="match-input"
-          className={`${labelClass} block mb-2`}
+          className={`${labelClass} mb-2 block`}
         >
           Wedstrijd
         </label>
@@ -425,7 +425,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           <label
             id="score-label"
             htmlFor="score-input"
-            className={`${labelClass} block mb-2`}
+            className={`${labelClass} mb-2 block`}
           >
             Score
           </label>
@@ -445,7 +445,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           <label
             id="minute-label"
             htmlFor="minute-input"
-            className={`${labelClass} block mb-2`}
+            className={`${labelClass} mb-2 block`}
           >
             Minuut
           </label>
@@ -474,7 +474,7 @@ export function SharePage({ matches, players }: SharePageProps) {
             className={`${inputClass} mb-2`}
           />
           <div
-            className="max-h-48 overflow-y-auto border border-gray-200 rounded-sm"
+            className="max-h-48 overflow-y-auto rounded-sm border border-gray-200"
             role="listbox"
             aria-label="Spelers"
           >
@@ -484,13 +484,13 @@ export function SharePage({ matches, players }: SharePageProps) {
                 role="option"
                 aria-selected={selectedPlayerId === p.id}
                 onClick={() => setSelectedPlayerId(p.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2 text-left font-montserrat text-sm transition-colors ${
+                className={`font-montserrat flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors ${
                   selectedPlayerId === p.id
                     ? "bg-kcvv-green/10 text-kcvv-green"
-                    : "hover:bg-gray-50 text-kcvv-black"
+                    : "text-kcvv-black hover:bg-gray-50"
                 }`}
               >
-                <span className="font-bold text-lg min-w-[2rem] text-center">
+                <span className="min-w-[2rem] text-center text-lg font-bold">
                   {p.number ?? "—"}
                 </span>
                 <span>
@@ -508,7 +508,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           <label
             id="mood-label"
             htmlFor="mood-select"
-            className={`${labelClass} block mb-2`}
+            className={`${labelClass} mb-2 block`}
           >
             Resultaat
           </label>
@@ -535,7 +535,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           height: `${PREVIEW_HEIGHT}px`,
           overflow: "hidden",
         }}
-        className="shadow-lg rounded-sm self-center"
+        className="self-center rounded-sm shadow-lg"
       >
         <div
           style={{
@@ -556,7 +556,7 @@ export function SharePage({ matches, players }: SharePageProps) {
       </div>
 
       {exportError && (
-        <p role="alert" className="text-red-600 font-montserrat text-sm">
+        <p role="alert" className="font-montserrat text-sm text-red-600">
           {exportError}
         </p>
       )}
@@ -564,7 +564,7 @@ export function SharePage({ matches, players }: SharePageProps) {
       <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="bg-kcvv-green-bright hover:bg-kcvv-green-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
+        className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGenerating ? "Generating…" : "Genereer"}
       </button>
@@ -575,20 +575,20 @@ export function SharePage({ matches, players }: SharePageProps) {
           <img
             src={previewUrl}
             alt="Generated preview"
-            className="max-w-full rounded-sm shadow-lg self-center"
+            className="max-w-full self-center rounded-sm shadow-lg"
           />
 
           {canShareFiles ? (
             <button
               onClick={handleShare}
-              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
+              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors"
             >
               Delen
             </button>
           ) : (
             <button
               onClick={handleDownload}
-              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover text-white font-montserrat font-bold text-lg px-10 py-4 rounded-sm transition-colors"
+              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors"
             >
               Download PNG
             </button>

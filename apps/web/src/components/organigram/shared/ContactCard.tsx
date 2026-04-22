@@ -64,15 +64,7 @@ export function ContactCard({
 
   return (
     <div
-      className={`
-        relative overflow-hidden
-        bg-white rounded-card border-2 border-gray-200
-        shadow-sm ${onClick ? "hover:shadow-card-hover" : "hover:shadow-md"}
-        transition-all duration-300 ease-in-out
-        ${onClick ? "cursor-pointer hover:border-kcvv-green hover:-translate-y-1" : ""}
-        ${variantClasses[variant]}
-        ${className}
-      `}
+      className={`rounded-card relative overflow-hidden border-2 border-gray-200 bg-white shadow-sm ${onClick ? "hover:shadow-card-hover" : "hover:shadow-md"} transition-all duration-300 ease-in-out ${onClick ? "hover:border-kcvv-green cursor-pointer hover:-translate-y-1" : ""} ${variantClasses[variant]} ${className} `}
       onClick={() => onClick?.(member)}
       data-testid={testId}
       role={onClick ? "button" : undefined}
@@ -85,10 +77,10 @@ export function ContactCard({
       }}
     >
       {/* Green accent bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-kcvv-green to-kcvv-green-hover rounded-t-xl" />
+      <div className="from-kcvv-green to-kcvv-green-hover absolute top-0 right-0 left-0 h-1 rounded-t-xl bg-gradient-to-r" />
 
       {/* Content wrapper */}
-      <div className="flex flex-1 gap-4 mt-1">
+      <div className="mt-1 flex flex-1 gap-4">
         {/* Profile Image */}
         <div className="flex-shrink-0">
           <Image
@@ -96,7 +88,7 @@ export function ContactCard({
             alt={displayName}
             width={imageSize[variant]}
             height={imageSize[variant]}
-            className="rounded-full object-cover border-2 border-kcvv-green"
+            className="border-kcvv-green rounded-full border-2 object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "/images/logo-flat.png";
@@ -105,14 +97,10 @@ export function ContactCard({
         </div>
 
         {/* Text Content */}
-        <div className="flex-1 flex flex-col justify-center min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
           {/* Name */}
           <h3
-            className={`
-              font-bold text-kcvv-gray-blue
-              ${variant === "compact" ? "text-sm" : "text-base md:text-lg"}
-              truncate
-            `}
+            className={`text-kcvv-gray-blue font-bold ${variant === "compact" ? "text-sm" : "text-base md:text-lg"} truncate`}
             style={{
               fontFamily:
                 "quasimoda, -apple-system, system-ui, Montserrat, sans-serif",
@@ -123,10 +111,7 @@ export function ContactCard({
 
           {/* Title */}
           <p
-            className={`
-              text-kcvv-gray-dark
-              ${variant === "compact" ? "text-xs line-clamp-1" : "text-sm line-clamp-2"}
-            `}
+            className={`text-kcvv-gray-dark ${variant === "compact" ? "line-clamp-1 text-xs" : "line-clamp-2 text-sm"} `}
           >
             {member.title}
           </p>
@@ -134,7 +119,7 @@ export function ContactCard({
           {/* Position Badge */}
           {member.roleCode && variant !== "compact" && (
             <span
-              className="inline-block mt-2 px-2 py-1 bg-kcvv-green/10 text-kcvv-green rounded text-xs font-semibold self-start"
+              className="bg-kcvv-green/10 text-kcvv-green mt-2 inline-block self-start rounded px-2 py-1 text-xs font-semibold"
               style={{ fontFamily: "var(--font-family-mono)" }}
             >
               {member.roleCode}
@@ -145,7 +130,7 @@ export function ContactCard({
           {showDepartment &&
             member.department &&
             member.department !== "algemeen" && (
-              <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-kcvv-gray-dark rounded text-xs self-start">
+              <span className="text-kcvv-gray-dark mt-1 inline-block self-start rounded bg-gray-100 px-2 py-1 text-xs">
                 {member.department === "hoofdbestuur"
                   ? "Hoofdbestuur"
                   : "Jeugdbestuur"}
@@ -154,9 +139,9 @@ export function ContactCard({
 
           {/* Responsibility Indicator */}
           {responsibilityCount > 0 && variant !== "compact" && (
-            <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-1 bg-kcvv-green/10 text-kcvv-green rounded text-xs font-medium self-start">
+            <div className="bg-kcvv-green/10 text-kcvv-green mt-2 inline-flex items-center gap-1.5 self-start rounded px-2 py-1 text-xs font-medium">
               <svg
-                className="w-3.5 h-3.5"
+                className="h-3.5 w-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -180,12 +165,12 @@ export function ContactCard({
           {showQuickActions &&
             variant !== "compact" &&
             (primaryMember?.email || primaryMember?.phone) && (
-              <div className="flex gap-2 mt-3">
+              <div className="mt-3 flex gap-2">
                 {primaryMember?.email && (
                   <a
                     href={`mailto:${primaryMember.email}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-xs text-kcvv-green hover:text-kcvv-green-hover hover:underline"
+                    className="text-kcvv-green hover:text-kcvv-green-hover text-xs hover:underline"
                     aria-label={`Email ${displayName}`}
                   >
                     ✉️ Email
@@ -195,7 +180,7 @@ export function ContactCard({
                   <a
                     href={`tel:${primaryMember.phone}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-xs text-kcvv-green hover:text-kcvv-green-hover hover:underline"
+                    className="text-kcvv-green hover:text-kcvv-green-hover text-xs hover:underline"
                     aria-label={`Call ${displayName}`}
                   >
                     📞 Bel
@@ -208,8 +193,8 @@ export function ContactCard({
 
       {/* Expand/Collapse Indicator */}
       {showExpandIndicator && hasChildren && (
-        <div className="absolute bottom-3 right-3">
-          <div className="w-8 h-8 bg-kcvv-green rounded-full flex items-center justify-center shadow-md">
+        <div className="absolute right-3 bottom-3">
+          <div className="bg-kcvv-green flex h-8 w-8 items-center justify-center rounded-full shadow-md">
             {isExpanded ? (
               <ChevronUp size={20} className="text-white" strokeWidth={2.5} />
             ) : (
@@ -221,7 +206,7 @@ export function ContactCard({
 
       {/* Click Hint (for cards with expand) */}
       {showExpandIndicator && hasChildren && variant !== "compact" && (
-        <p className="absolute bottom-2 left-3 text-[10px] text-kcvv-gray opacity-70 pointer-events-none">
+        <p className="text-kcvv-gray pointer-events-none absolute bottom-2 left-3 text-[10px] opacity-70">
           Klik om {isExpanded ? "in" : "uit"} te klappen
         </p>
       )}

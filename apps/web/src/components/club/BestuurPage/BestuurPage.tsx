@@ -128,8 +128,8 @@ export function BestuurPage({
       key: "about",
       bg: "gray-100",
       content: (
-        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
-          <div className="max-w-3xl border-l-4 border-kcvv-green-bright pl-6">
+        <div className="max-w-inner-lg mx-auto px-4 md:px-10">
+          <div className="border-kcvv-green-bright max-w-3xl border-l-4 pl-6">
             <div
               className="prose prose-gray"
               dangerouslySetInnerHTML={{
@@ -148,7 +148,7 @@ export function BestuurPage({
       key: "members",
       bg: "kcvv-black",
       content: (
-        <div className="mx-auto max-w-inner-lg px-4 md:px-10">
+        <div className="max-w-inner-lg mx-auto px-4 md:px-10">
           <SectionHeader title={header.name} variant="dark" />
           <TeamRoster
             players={players}

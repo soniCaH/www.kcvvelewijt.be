@@ -7,12 +7,12 @@ import Link from "next/link";
 
 export default function StafNotFound() {
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
-      <div className="text-center max-w-md">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
+      <div className="max-w-md text-center">
         {/* Icon */}
         <div className="mb-6">
           <svg
-            className="w-24 h-24 mx-auto text-kcvv-gray opacity-50"
+            className="text-kcvv-gray mx-auto h-24 w-24 opacity-50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -28,7 +28,7 @@ export default function StafNotFound() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl font-bold text-kcvv-gray-dark mb-4">
+        <h1 className="text-kcvv-gray-dark mb-4 text-3xl font-bold">
           Stafmedewerker niet gevonden
         </h1>
 
@@ -39,13 +39,13 @@ export default function StafNotFound() {
         </p>
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
             href="/club/organigram"
-            className="inline-flex items-center justify-center px-6 py-3 bg-kcvv-green-bright text-white font-medium rounded-lg hover:bg-kcvv-green transition-colors"
+            className="bg-kcvv-green-bright hover:bg-kcvv-green inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium text-white transition-colors"
           >
             <svg
-              className="w-5 h-5 mr-2"
+              className="mr-2 h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -63,10 +63,10 @@ export default function StafNotFound() {
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-kcvv-gray-dark font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="text-kcvv-gray-dark inline-flex items-center justify-center rounded-lg border border-gray-300 px-6 py-3 font-medium transition-colors hover:bg-gray-50"
           >
             <svg
-              className="w-5 h-5 mr-2"
+              className="mr-2 h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

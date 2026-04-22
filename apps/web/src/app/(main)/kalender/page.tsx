@@ -142,7 +142,7 @@ export default async function CalendarPage() {
         size="compact"
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <CalendarWidget
           matches={data.matches}
           events={data.events}

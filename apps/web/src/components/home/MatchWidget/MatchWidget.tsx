@@ -69,11 +69,11 @@ export function MatchWidget({
       <Link
         href={href}
         onClick={handleClick}
-        className="block px-4 py-4 md:px-8 md:py-6 max-w-7xl mx-auto rounded-lg transition-shadow hover:shadow-lg active:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="mx-auto block max-w-7xl rounded-lg px-4 py-4 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:opacity-90 md:px-8 md:py-6"
       >
         {/* Overline — left-aligned, single leading rule */}
-        <p className="flex items-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-label text-white/50">
-          <span aria-hidden="true" className="block w-5 h-0.5 bg-white/30" />
+        <p className="tracking-label mb-6 flex items-center gap-2 text-[11px] font-bold text-white/50 uppercase">
+          <span aria-hidden="true" className="block h-0.5 w-5 bg-white/30" />
           VOLGENDE WEDSTRIJD · {teamLabel}
         </p>
 
@@ -101,7 +101,7 @@ export function MatchWidget({
 
             {!isPostponed && !isForfeited && hasScore && (
               <span
-                className="font-mono font-black text-white leading-none tracking-[-0.04em]"
+                className="font-mono leading-none font-black tracking-[-0.04em] text-white"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 {match.homeTeam.score} – {match.awayTeam.score}
@@ -110,7 +110,7 @@ export function MatchWidget({
 
             {!isPostponed && !isFinished && (
               <span
-                className="font-title font-black text-kcvv-green-bright leading-none tracking-[-0.04em]"
+                className="font-title text-kcvv-green-bright leading-none font-black tracking-[-0.04em]"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 VS
@@ -119,7 +119,7 @@ export function MatchWidget({
 
             {!isPostponed && isFinished && !isForfeited && !hasScore && (
               <span
-                className="font-mono font-black text-white leading-none tracking-[-0.04em]"
+                className="font-mono leading-none font-black tracking-[-0.04em] text-white"
                 style={{ fontSize: "clamp(1.75rem, 8vw, 4rem)" }}
               >
                 FT
@@ -128,12 +128,12 @@ export function MatchWidget({
 
             {/* Date · time + competition badge */}
             {!isPostponed && (
-              <div className="flex flex-col items-center gap-1 mt-1 w-[36vw] sm:w-auto">
-                <span className="text-[11px] sm:text-[13px] font-semibold text-white/70 text-center">
+              <div className="mt-1 flex w-[36vw] flex-col items-center gap-1 sm:w-auto">
+                <span className="text-center text-[11px] font-semibold text-white/70 sm:text-[13px]">
                   {dateTime}
                 </span>
                 {match.competition && (
-                  <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.1em] bg-white/10 text-white/40 px-2 sm:px-2.5 py-0.5 rounded-sm text-center leading-snug">
+                  <span className="rounded-sm bg-white/10 px-2 py-0.5 text-center text-[9px] leading-snug font-semibold tracking-[0.1em] text-white/40 uppercase sm:px-2.5 sm:text-[11px]">
                     {match.competition}
                     {match.venue ? ` · ${match.venue}` : ""}
                   </span>
@@ -142,7 +142,7 @@ export function MatchWidget({
             )}
 
             {isPostponed && match.competition && (
-              <span className="text-[11px] font-semibold uppercase tracking-[0.1em] bg-white/10 text-white/40 px-2.5 py-0.5 rounded-sm">
+              <span className="rounded-sm bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.1em] text-white/40 uppercase">
                 {match.competition}
               </span>
             )}
@@ -183,7 +183,7 @@ function TeamColumn({ team, align }: TeamColumnProps) {
       <TeamLogo logo={team.logo} name={team.name} />
       <span
         className={cn(
-          "font-title font-extrabold uppercase text-white line-clamp-2 leading-tight tracking-[-0.02em]",
+          "font-title line-clamp-2 leading-tight font-extrabold tracking-[-0.02em] text-white uppercase",
           isHome ? "text-right" : "text-left",
         )}
         style={{ fontSize: "clamp(0.875rem, 4vw, 1.6rem)" }}
@@ -210,7 +210,7 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
     .join("");
 
   return (
-    <div className="relative w-12 h-12 sm:w-[72px] sm:h-[72px] flex items-center justify-center rounded bg-white/10 border-2 border-white/15 shrink-0 overflow-hidden">
+    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border-2 border-white/15 bg-white/10 sm:h-[72px] sm:w-[72px]">
       {logo ? (
         <Image
           src={logo}
@@ -220,7 +220,7 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
           sizes="(max-width: 640px) 64px, 72px"
         />
       ) : (
-        <span className="text-kcvv-green-bright font-black text-2xl">
+        <span className="text-kcvv-green-bright text-2xl font-black">
           {initials}
         </span>
       )}
@@ -236,7 +236,7 @@ function TeamLogo({ logo, name }: { logo?: string; name: string }) {
  */
 function StatusBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-400 px-3 py-1 rounded-sm">
+    <span className="rounded-sm bg-orange-500/15 px-3 py-1 text-xs font-bold tracking-wider text-orange-400 uppercase">
       {children}
     </span>
   );

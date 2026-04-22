@@ -45,16 +45,16 @@ export function SponsorsPage({
 
   const headerContent = (
     <div className="max-w-inner-lg mx-auto px-4 md:px-10">
-      <div className="flex items-center gap-2 text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-white/50 mb-4">
-        <span className="block w-5 h-0.5 bg-kcvv-green" aria-hidden="true" />
+      <div className="mb-4 flex items-center gap-2 text-[0.6875rem] font-extrabold tracking-[0.14em] text-white/50 uppercase">
+        <span className="bg-kcvv-green block h-0.5 w-5" aria-hidden="true" />
         KCVV Elewijt
       </div>
-      <h1 className="font-title font-black text-white uppercase text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] mb-4">
+      <h1 className="font-title mb-4 text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] font-black text-white uppercase">
         Onze sponsors
       </h1>
       <p
         data-testid="sponsors-intro"
-        className="max-w-2xl text-white/60 text-lg"
+        className="max-w-2xl text-lg text-white/60"
       >
         KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
         Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
@@ -64,7 +64,7 @@ export function SponsorsPage({
   );
 
   const gridContent = (
-    <div className="max-w-inner-lg mx-auto px-4 md:px-10 py-10 space-y-8">
+    <div className="max-w-inner-lg mx-auto space-y-8 px-4 py-10 md:px-10">
       {totalSponsors === 0 && !hasSpotlight && <SponsorEmptyState />}
 
       {goldSponsors.length > 0 && (

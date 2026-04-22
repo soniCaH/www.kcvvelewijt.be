@@ -71,7 +71,7 @@ function FormBadge({ result }: { result: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded",
+        "inline-flex h-5 w-5 items-center justify-center rounded text-xs font-bold",
         colors[result] || "bg-gray-300 text-gray-700",
       )}
     >
@@ -110,63 +110,63 @@ export function TeamStandings({
         <table className="w-full text-sm">
           <thead className="bg-kcvv-green-dark text-white">
             <tr>
-              <th className="px-2 py-3 text-left w-10">#</th>
+              <th className="w-10 px-2 py-3 text-left">#</th>
               <th className="px-2 py-3 text-left">Team</th>
-              <th className="px-2 py-3 text-center w-10">P</th>
-              <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+              <th className="w-10 px-2 py-3 text-center">P</th>
+              <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
                 W
               </th>
-              <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+              <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
                 D
               </th>
-              <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+              <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
                 L
               </th>
-              <th className="px-2 py-3 text-center w-12 hidden lg:table-cell">
+              <th className="hidden w-12 px-2 py-3 text-center lg:table-cell">
                 G+
               </th>
-              <th className="px-2 py-3 text-center w-12 hidden lg:table-cell">
+              <th className="hidden w-12 px-2 py-3 text-center lg:table-cell">
                 G-
               </th>
-              <th className="px-2 py-3 text-center w-12">+/-</th>
-              <th className="px-2 py-3 text-center w-12 font-bold">Pts</th>
+              <th className="w-12 px-2 py-3 text-center">+/-</th>
+              <th className="w-12 px-2 py-3 text-center font-bold">Pts</th>
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: 6 }).map((_, i) => (
               <tr key={i} className="border-b border-gray-200">
                 <td className="px-2 py-3">
-                  <div className="h-4 w-6 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
                 <td className="px-2 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse" />
-                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-6 w-6 animate-pulse rounded-full bg-gray-200" />
+                    <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
                   </div>
                 </td>
                 <td className="px-2 py-3 text-center">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
+                <td className="hidden px-2 py-3 text-center md:table-cell">
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
+                <td className="hidden px-2 py-3 text-center md:table-cell">
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
+                <td className="hidden px-2 py-3 text-center md:table-cell">
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
-                <td className="px-2 py-3 text-center hidden lg:table-cell">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
+                <td className="hidden px-2 py-3 text-center lg:table-cell">
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
-                <td className="px-2 py-3 text-center hidden lg:table-cell">
-                  <div className="h-4 w-6 mx-auto bg-gray-200 rounded animate-pulse" />
-                </td>
-                <td className="px-2 py-3 text-center">
-                  <div className="h-4 w-8 mx-auto bg-gray-200 rounded animate-pulse" />
+                <td className="hidden px-2 py-3 text-center lg:table-cell">
+                  <div className="mx-auto h-4 w-6 animate-pulse rounded bg-gray-200" />
                 </td>
                 <td className="px-2 py-3 text-center">
-                  <div className="h-4 w-8 mx-auto bg-gray-200 rounded animate-pulse" />
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200" />
+                </td>
+                <td className="px-2 py-3 text-center">
+                  <div className="mx-auto h-4 w-8 animate-pulse rounded bg-gray-200" />
                 </td>
               </tr>
             ))}
@@ -181,7 +181,7 @@ export function TeamStandings({
     return (
       <div
         className={cn(
-          "text-center py-8 text-gray-500 bg-gray-50 rounded-lg",
+          "rounded-lg bg-gray-50 py-8 text-center text-gray-500",
           className,
         )}
       >
@@ -198,28 +198,28 @@ export function TeamStandings({
       <table className="w-full text-sm">
         <thead className="bg-kcvv-green-dark text-white">
           <tr>
-            <th className="px-2 py-3 text-left w-10">#</th>
+            <th className="w-10 px-2 py-3 text-left">#</th>
             <th className="px-2 py-3 text-left">Team</th>
-            <th className="px-2 py-3 text-center w-10">P</th>
-            <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+            <th className="w-10 px-2 py-3 text-center">P</th>
+            <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
               W
             </th>
-            <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+            <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
               D
             </th>
-            <th className="px-2 py-3 text-center w-10 hidden md:table-cell">
+            <th className="hidden w-10 px-2 py-3 text-center md:table-cell">
               L
             </th>
-            <th className="px-2 py-3 text-center w-12 hidden lg:table-cell">
+            <th className="hidden w-12 px-2 py-3 text-center lg:table-cell">
               G+
             </th>
-            <th className="px-2 py-3 text-center w-12 hidden lg:table-cell">
+            <th className="hidden w-12 px-2 py-3 text-center lg:table-cell">
               G-
             </th>
-            <th className="px-2 py-3 text-center w-12">+/-</th>
-            <th className="px-2 py-3 text-center w-12 font-bold">Pts</th>
+            <th className="w-12 px-2 py-3 text-center">+/-</th>
+            <th className="w-12 px-2 py-3 text-center font-bold">Pts</th>
             {showForm && (
-              <th className="px-2 py-3 text-center w-28 hidden sm:table-cell">
+              <th className="hidden w-28 px-2 py-3 text-center sm:table-cell">
                 Vorm
               </th>
             )}
@@ -234,7 +234,7 @@ export function TeamStandings({
                 className={cn(
                   "border-b border-gray-200 transition-colors",
                   isHighlighted
-                    ? "bg-kcvv-green-bright text-white font-semibold"
+                    ? "bg-kcvv-green-bright font-semibold text-white"
                     : "hover:bg-gray-50",
                 )}
               >
@@ -254,7 +254,7 @@ export function TeamStandings({
                     ) : (
                       <div
                         className={cn(
-                          "w-6 h-6 rounded-full flex items-center justify-center",
+                          "flex h-6 w-6 items-center justify-center rounded-full",
                           isHighlighted ? "bg-white/20" : "bg-gray-200",
                         )}
                       >
@@ -263,25 +263,25 @@ export function TeamStandings({
                         </span>
                       </div>
                     )}
-                    <span className="truncate max-w-[120px] sm:max-w-none">
+                    <span className="max-w-[120px] truncate sm:max-w-none">
                       {entry.teamName}
                     </span>
                   </div>
                 </td>
                 <td className="px-2 py-3 text-center">{entry.played}</td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
+                <td className="hidden px-2 py-3 text-center md:table-cell">
                   {entry.won}
                 </td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
+                <td className="hidden px-2 py-3 text-center md:table-cell">
                   {entry.drawn}
                 </td>
-                <td className="px-2 py-3 text-center hidden md:table-cell">
+                <td className="hidden px-2 py-3 text-center md:table-cell">
                   {entry.lost}
                 </td>
-                <td className="px-2 py-3 text-center hidden lg:table-cell">
+                <td className="hidden px-2 py-3 text-center lg:table-cell">
                   {entry.goalsFor}
                 </td>
-                <td className="px-2 py-3 text-center hidden lg:table-cell">
+                <td className="hidden px-2 py-3 text-center lg:table-cell">
                   {entry.goalsAgainst}
                 </td>
                 <td className="px-2 py-3 text-center">
@@ -293,7 +293,7 @@ export function TeamStandings({
                   {entry.points}
                 </td>
                 {showForm && (
-                  <td className="px-2 py-3 hidden sm:table-cell">
+                  <td className="hidden px-2 py-3 sm:table-cell">
                     {isHighlighted && entry.form ? (
                       <div className="flex items-center justify-center gap-1">
                         {entry.form.split("").map((result, i) => (
@@ -305,7 +305,7 @@ export function TeamStandings({
                       // exposes recent results for our own teams), so
                       // opponent rows show a placeholder em-dash instead.
                       <div
-                        className="text-center text-xs text-kcvv-gray/50"
+                        className="text-kcvv-gray/50 text-center text-xs"
                         aria-label="Geen vormgegevens beschikbaar"
                       >
                         —

@@ -95,7 +95,7 @@ export const QaBlock = ({ value, subject = null }: QaBlockProps) => {
               {needsRule && (
                 <hr
                   aria-hidden="true"
-                  className="my-10 border-t border-kcvv-gray-light"
+                  className="border-kcvv-gray-light my-10 border-t"
                 />
               )}
               <QaPairStandard

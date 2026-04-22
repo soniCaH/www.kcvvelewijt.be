@@ -8,6 +8,7 @@
     "test": "turbo test",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
+    "knip": "knip --include dependencies,devDependencies,optionalPeerDependencies,unlisted,binaries",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -15,8 +16,10 @@
     "@commitlint/config-conventional": "20.5.0",
     "eslint": "9.39.4",
     "husky": "9.1.7",
+    "knip": "5.68.0",
     "lint-staged": "16.4.0",
     "prettier": "3.8.3",
+    "prettier-plugin-tailwindcss": "0.7.2",
     "turbo": "2.8.20"
   },
   "pnpm": {

@@ -47,16 +47,16 @@ export const NewsCard = ({
     return (
       <article
         className={cn(
-          "relative group overflow-hidden rounded-card bg-white flex flex-col h-full",
+          "group rounded-card relative flex h-full flex-col overflow-hidden bg-white",
           href &&
-            "transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover",
+            "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
           className,
         )}
       >
         {/* Green top-border: hidden by default, expands from center on hover */}
         {href && (
           <div
-            className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+            className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
             aria-hidden="true"
           />
         )}
@@ -83,34 +83,34 @@ export const NewsCard = ({
               src={imageUrl}
               alt={imageAlt ?? title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           </div>
         ) : (
           <div
-            className="aspect-[3/2] bg-kcvv-green-dark"
+            className="bg-kcvv-green-dark aspect-[3/2]"
             aria-hidden="true"
             data-testid="listing-image-fallback"
           />
         )}
 
         {/* Content below image */}
-        <div className="p-4 pointer-events-none flex flex-col flex-1">
+        <div className="pointer-events-none flex flex-1 flex-col p-4">
           {badge && (
-            <span className="block border-l-2 border-kcvv-green-bright pl-2 text-kcvv-green-bright text-xs font-bold uppercase tracking-wider mb-2">
+            <span className="border-kcvv-green-bright text-kcvv-green-bright mb-2 block border-l-2 pl-2 text-xs font-bold tracking-wider uppercase">
               {badge}
             </span>
           )}
 
           <div className="flex-1">
-            <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3 text-base!">
+            <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! mb-0! line-clamp-3 text-base! leading-snug! font-bold! transition-colors">
               {title}
             </Heading>
           </div>
 
           {date && (
-            <div className="border-t border-gray-200 mt-3 pt-3 text-gray-500 text-xs">
+            <div className="mt-3 border-t border-gray-200 pt-3 text-xs text-gray-500">
               <time>{date}</time>
             </div>
           )}
@@ -122,9 +122,9 @@ export const NewsCard = ({
   return (
     <article
       className={cn(
-        "relative group overflow-hidden rounded-card bg-kcvv-black",
+        "group rounded-card bg-kcvv-black relative overflow-hidden",
         href &&
-          "transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover",
+          "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
         "aspect-[3/2]",
         className,
       )}
@@ -132,7 +132,7 @@ export const NewsCard = ({
       {/* Green top-border: hidden by default, expands from center on hover */}
       {href && (
         <div
-          className="absolute top-0 inset-x-0 h-[3px] bg-kcvv-green-bright z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out"
+          className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
           aria-hidden="true"
         />
       )}
@@ -155,7 +155,7 @@ export const NewsCard = ({
           src={imageUrl}
           alt={imageAlt ?? title}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes={
             isFeatured
               ? "(max-width: 768px) 100vw, 66vw"
@@ -164,7 +164,7 @@ export const NewsCard = ({
         />
       ) : (
         <div
-          className="absolute inset-0 bg-gradient-to-br from-kcvv-green-dark via-kcvv-black to-kcvv-black"
+          className="from-kcvv-green-dark via-kcvv-black to-kcvv-black absolute inset-0 bg-gradient-to-br"
           aria-hidden="true"
         >
           {/* Diagonal accent stripe — brand motif */}
@@ -180,26 +180,26 @@ export const NewsCard = ({
 
       {/* Bottom gradient for text legibility */}
       <div
-        className="absolute inset-0 bg-gradient-to-t from-kcvv-black/90 to-transparent"
+        className="from-kcvv-black/90 absolute inset-0 bg-gradient-to-t to-transparent"
         aria-hidden="true"
       />
 
       {/* Content overlay — outside <Link> so article a { color } can't bleed in */}
       <div
         className={cn(
-          "absolute bottom-0 left-0 right-0 pointer-events-none",
+          "pointer-events-none absolute right-0 bottom-0 left-0",
           isFeatured ? "p-6 md:p-8" : "p-5",
         )}
       >
         {badge && (
-          <span className="block border-l-2 border-kcvv-green-bright pl-2 text-kcvv-green-bright text-xs font-bold uppercase tracking-wider mb-2">
+          <span className="border-kcvv-green-bright text-kcvv-green-bright mb-2 block border-l-2 pl-2 text-xs font-bold tracking-wider uppercase">
             {badge}
           </span>
         )}
 
         <Heading
           className={cn(
-            "font-body text-white! group-hover:text-white/75! transition-colors font-bold! leading-snug! mb-0! line-clamp-3",
+            "font-body mb-0! line-clamp-3 leading-snug! font-bold! text-white! transition-colors group-hover:text-white/75!",
             isFeatured ? "text-2xl!" : "text-base!",
           )}
         >
@@ -208,30 +208,30 @@ export const NewsCard = ({
 
         {/* Footer bar: date+time on left, countdown chip on right */}
         {(countdown ?? date ?? eventDate ?? eventTime) && (
-          <div className="border-t border-white/20 mt-3 pt-3 text-white/60 text-xs flex justify-between items-center">
+          <div className="mt-3 flex items-center justify-between border-t border-white/20 pt-3 text-xs text-white/60">
             <div className="flex items-center gap-3">
               {eventDate && (
                 <time className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden />
+                  <Calendar className="h-3 w-3 flex-shrink-0" aria-hidden />
                   {eventDate}
                 </time>
               )}
               {eventTime && (
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 flex-shrink-0" aria-hidden />
+                  <Clock className="h-3 w-3 flex-shrink-0" aria-hidden />
                   {eventTime}
                 </span>
               )}
               {!eventDate && !eventTime && date && <time>{date}</time>}
             </div>
             {countdown && (
-              <span className="text-xs uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-sm font-medium text-white/70">
+              <span className="rounded-sm bg-white/10 px-2 py-0.5 text-xs font-medium tracking-wider text-white/70 uppercase">
                 {countdown}
               </span>
             )}
             {isExternal && !countdown && (
               <ExternalLink
-                className="w-3 h-3 flex-shrink-0 text-white/40"
+                className="h-3 w-3 flex-shrink-0 text-white/40"
                 aria-hidden
               />
             )}

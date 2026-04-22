@@ -49,54 +49,54 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-main via-green-hover to-green-dark-hover text-white py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 font-title">
+      <div className="from-green-main via-green-hover to-green-dark-hover bg-gradient-to-br px-4 py-16 text-white">
+        <div className="mx-auto max-w-5xl">
+          <h1 className="font-title mb-4 text-4xl font-bold md:text-6xl">
             Contact
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl">
+          <p className="max-w-3xl text-xl text-white/90 md:text-2xl">
             Heb je een vraag? We helpen je graag verder.
           </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-12 space-y-10">
+      <div className="mx-auto max-w-5xl space-y-10 px-4 py-12">
         {/* Club info + map */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Club details */}
-          <div className="bg-white rounded-xl shadow-sm p-8 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-blue font-title">
+          <div className="space-y-6 rounded-xl bg-white p-8 shadow-sm">
+            <h2 className="text-gray-blue font-title text-2xl font-bold">
               Clubgegevens
             </h2>
 
             <div className="flex items-start gap-3">
               <MapPin
-                className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                 aria-hidden="true"
               />
               <div>
-                <p className="font-semibold text-gray-blue">Adres</p>
+                <p className="text-gray-blue font-semibold">Adres</p>
                 <p className="text-gray-dark">Driesstraat 30</p>
                 <p className="text-gray-dark">1982 Elewijt (Zemst)</p>
                 <a
                   href="https://maps.google.com/?q=Driesstraat+30,+1982+Elewijt"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-green-main hover:text-green-hover mt-1"
+                  className="text-green-main hover:text-green-hover mt-1 inline-flex items-center gap-1 text-sm"
                 >
                   Routebeschrijving
-                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
                 </a>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <Mail
-                className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                 aria-hidden="true"
               />
               <div>
-                <p className="font-semibold text-gray-blue">E-mail</p>
+                <p className="text-gray-blue font-semibold">E-mail</p>
                 <a
                   href="mailto:info@kcvvelewijt.be"
                   className="text-green-main hover:text-green-hover hover:underline"
@@ -106,21 +106,21 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100 space-y-3">
+            <div className="space-y-3 border-t border-gray-100 pt-4">
               <Link
                 href="/hulp"
-                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-green-main/5 transition-colors group"
+                className="hover:bg-green-main/5 group flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors"
               >
                 <div>
-                  <p className="font-semibold text-gray-blue text-sm">
+                  <p className="text-gray-blue text-sm font-semibold">
                     Weet je niet wie je moet contacteren?
                   </p>
-                  <p className="text-xs text-gray-dark">
+                  <p className="text-gray-dark text-xs">
                     Gebruik onze hulpvinder
                   </p>
                 </div>
                 <span
-                  className="text-green-main group-hover:translate-x-0.5 transition-transform"
+                  className="text-green-main transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
                 >
                   →
@@ -128,18 +128,18 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               </Link>
               <Link
                 href="/club/organigram"
-                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-green-main/5 transition-colors group"
+                className="hover:bg-green-main/5 group flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors"
               >
                 <div>
-                  <p className="font-semibold text-gray-blue text-sm">
+                  <p className="text-gray-blue text-sm font-semibold">
                     Bekijk het volledige organigram
                   </p>
-                  <p className="text-xs text-gray-dark">
+                  <p className="text-gray-dark text-xs">
                     Alle bestuursleden en contactgegevens
                   </p>
                 </div>
                 <span
-                  className="text-green-main group-hover:translate-x-0.5 transition-transform"
+                  className="text-green-main transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
                 >
                   →
@@ -155,24 +155,24 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
         {/* Key contacts */}
         {hasKeyContacts && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-blue font-title mb-6">
+            <h2 className="text-gray-blue font-title mb-6 text-2xl font-bold">
               Snelle contacten
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {keyContacts.map((contact, index) => (
                 <div
                   key={`${contact.role}-${contact.email}-${index}`}
-                  className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
+                  className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
                 >
-                  <p className="text-xs font-semibold text-green-main uppercase tracking-wide mb-1">
+                  <p className="text-green-main mb-1 text-xs font-semibold tracking-wide uppercase">
                     {contact.role}
                   </p>
-                  <p className="font-bold text-gray-blue">{contact.name}</p>
+                  <p className="text-gray-blue font-bold">{contact.name}</p>
                   <a
                     href={`mailto:${contact.email}`}
-                    className="inline-flex items-center gap-1.5 text-sm text-green-main hover:text-green-hover hover:underline mt-2"
+                    className="text-green-main hover:text-green-hover mt-2 inline-flex items-center gap-1.5 text-sm hover:underline"
                   >
-                    <Mail className="w-4 h-4" aria-hidden="true" />
+                    <Mail className="h-4 w-4" aria-hidden="true" />
                     {contact.email}
                   </a>
                 </div>
@@ -183,29 +183,29 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
 
         {/* Contact categories */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-blue font-title mb-6">
+          <h2 className="text-gray-blue font-title mb-6 text-2xl font-bold">
             Contacteer ons per categorie
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {CONTACT_CATEGORIES.map((cat) => (
               <a
                 key={cat.email}
                 href={`mailto:${cat.email}`}
-                className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-green-main hover:shadow-md transition-all group"
+                className="hover:border-green-main group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
                   <Mail
-                    className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                    className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                     aria-hidden="true"
                   />
                   <div>
-                    <p className="font-bold text-gray-blue group-hover:text-green-main transition-colors">
+                    <p className="text-gray-blue group-hover:text-green-main font-bold transition-colors">
                       {cat.label}
                     </p>
-                    <p className="text-sm text-gray-dark mb-1">
+                    <p className="text-gray-dark mb-1 text-sm">
                       {cat.description}
                     </p>
-                    <p className="text-sm text-green-main">{cat.email}</p>
+                    <p className="text-green-main text-sm">{cat.email}</p>
                   </div>
                 </div>
               </a>
@@ -215,21 +215,21 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
 
         {/* Matchday & venue info */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-blue font-title mb-6">
+          <h2 className="text-gray-blue font-title mb-6 text-2xl font-bold">
             Kom naar ons
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Parking */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-start gap-3">
                 <CircleParking
-                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="font-bold text-gray-blue mb-2">Parking</p>
+                  <p className="text-gray-blue mb-2 font-bold">Parking</p>
                   {/* TODO: add gemeente Zemst parking plan URL once confirmed */}
-                  <p className="text-sm text-gray-dark">
+                  <p className="text-gray-dark text-sm">
                     Parkeren kan aan het voetbalveld en rondom het Van Innis
                     sportpark. Een gedetailleerd parkeerplan vind je op de
                     website van de gemeente Zemst.
@@ -239,35 +239,35 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </div>
 
             {/* Entry prices */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-start gap-3">
                 <Ticket
-                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="font-bold text-gray-blue mb-2">Inkom</p>
-                  <table className="w-full text-sm text-gray-dark">
+                  <p className="text-gray-blue mb-2 font-bold">Inkom</p>
+                  <table className="text-gray-dark w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-100">
-                        <th className="text-left py-1 font-semibold">
+                        <th className="py-1 text-left font-semibold">
                           Wedstrijd
                         </th>
-                        <th className="text-right py-1 font-semibold">Prijs</th>
+                        <th className="py-1 text-right font-semibold">Prijs</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="border-b border-gray-50">
                         <td className="py-1">Jeugd</td>
-                        <td className="text-right py-1">€3</td>
+                        <td className="py-1 text-right">€3</td>
                       </tr>
                       <tr className="border-b border-gray-50">
                         <td className="py-1">B-ploeg</td>
-                        <td className="text-right py-1">€5</td>
+                        <td className="py-1 text-right">€5</td>
                       </tr>
                       <tr>
                         <td className="py-1">A-ploeg</td>
-                        <td className="text-right py-1">€10</td>
+                        <td className="py-1 text-right">€10</td>
                       </tr>
                     </tbody>
                   </table>
@@ -276,22 +276,22 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </div>
 
             {/* Canteen */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-start gap-3">
                 <Coffee
-                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="font-bold text-gray-blue mb-2">Kantine</p>
-                  <p className="text-sm text-gray-dark mb-2">
+                  <p className="text-gray-blue mb-2 font-bold">Kantine</p>
+                  <p className="text-gray-dark mb-2 text-sm">
                     De kantine is open op trainingsdagen:
                   </p>
-                  <ul className="text-sm text-gray-dark space-y-1">
+                  <ul className="text-gray-dark space-y-1 text-sm">
                     <li>Woensdag &amp; vrijdag: vanaf 18u00</li>
                     <li>Donderdag: vanaf 20u00</li>
                   </ul>
-                  <p className="text-sm text-gray-dark mt-2">
+                  <p className="text-gray-dark mt-2 text-sm">
                     Op wedstrijddagen zijn er geen vaste uren.
                   </p>
                 </div>
@@ -299,17 +299,17 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </div>
 
             {/* Accessibility */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-start gap-3">
                 <Accessibility
-                  className="w-5 h-5 text-green-main mt-0.5 flex-shrink-0"
+                  className="text-green-main mt-0.5 h-5 w-5 flex-shrink-0"
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="font-bold text-gray-blue mb-2">
+                  <p className="text-gray-blue mb-2 font-bold">
                     Toegankelijkheid
                   </p>
-                  <p className="text-sm text-gray-dark">
+                  <p className="text-gray-dark text-sm">
                     Het sportpark is toegankelijk voor rolstoelgebruikers. Er
                     zijn 2 voorbehouden parkeerplaatsen beschikbaar.
                   </p>

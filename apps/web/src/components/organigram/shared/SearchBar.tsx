@@ -190,7 +190,7 @@ export function SearchBar({
       {/* Input */}
       <div className="relative">
         {/* Search Icon */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-kcvv-gray pointer-events-none">
+        <div className="text-kcvv-gray pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
           <Search size={20} />
         </div>
 
@@ -203,14 +203,7 @@ export function SearchBar({
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="
-            w-full pl-12 pr-12 py-3
-            border-2 border-gray-200
-            rounded-lg
-            focus:border-kcvv-green focus:outline-none focus:ring-2 focus:ring-kcvv-green/20
-            transition-all duration-200
-            text-kcvv-gray-blue placeholder-kcvv-gray
-          "
+          className="focus:border-kcvv-green focus:ring-kcvv-green/20 text-kcvv-gray-blue placeholder-kcvv-gray w-full rounded-lg border-2 border-gray-200 py-3 pr-12 pl-12 transition-all duration-200 focus:ring-2 focus:outline-none"
           aria-label="Zoek in organigram"
           aria-autocomplete="list"
           aria-controls={showDropdown ? "search-results" : undefined}
@@ -220,12 +213,7 @@ export function SearchBar({
         {value && (
           <button
             onClick={handleClear}
-            className="
-              absolute right-4 top-1/2 -translate-y-1/2
-              text-kcvv-gray hover:text-kcvv-gray-dark
-              transition-colors
-              focus:outline-none focus:ring-2 focus:ring-kcvv-green rounded-full
-            "
+            className="text-kcvv-gray hover:text-kcvv-gray-dark focus:ring-kcvv-green absolute top-1/2 right-4 -translate-y-1/2 rounded-full transition-colors focus:ring-2 focus:outline-none"
             aria-label="Wis zoekopdracht"
             type="button"
           >
@@ -240,14 +228,7 @@ export function SearchBar({
           ref={dropdownRef}
           id="search-results"
           role="listbox"
-          className="
-            absolute top-full left-0 right-0 mt-2
-            bg-white rounded-lg border-2 border-gray-200
-            shadow-lg
-            max-h-80 overflow-y-auto
-            z-50
-            animate-in fade-in slide-in-from-top-2 duration-200
-          "
+          className="animate-in fade-in slide-in-from-top-2 absolute top-full right-0 left-0 z-50 mt-2 max-h-80 overflow-y-auto rounded-lg border-2 border-gray-200 bg-white shadow-lg duration-200"
         >
           {searchResults.map((result, index) => (
             <button
@@ -256,20 +237,14 @@ export function SearchBar({
               aria-selected={index === selectedIndex}
               onClick={() => handleSelect(result.member)}
               onMouseEnter={() => setSelectedIndex(index)}
-              className={`
-                w-full px-4 py-3 text-left
-                flex items-center gap-3
-                border-b border-gray-100 last:border-b-0
-                transition-colors
-                ${
-                  index === selectedIndex
-                    ? "bg-kcvv-green/10 border-l-4 border-l-kcvv-green"
-                    : "hover:bg-gray-50"
-                }
-              `}
+              className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 ${
+                index === selectedIndex
+                  ? "bg-kcvv-green/10 border-l-kcvv-green border-l-4"
+                  : "hover:bg-gray-50"
+              } `}
             >
               {/* Profile Image or Initials */}
-              <div className="w-10 h-10 rounded-full bg-kcvv-green/20 flex items-center justify-center text-kcvv-green font-semibold text-sm flex-shrink-0">
+              <div className="bg-kcvv-green/20 text-kcvv-green flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold">
                 {(result.member.members[0]?.name ?? result.member.title)
                   .split(" ")
                   .map((n: string) => n[0])
@@ -279,24 +254,24 @@ export function SearchBar({
               </div>
 
               {/* Text Content */}
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-kcvv-gray-blue text-sm truncate">
+              <div className="min-w-0 flex-1">
+                <div className="text-kcvv-gray-blue truncate text-sm font-semibold">
                   {result.member.members[0]?.name ?? result.member.title}
                 </div>
-                <div className="text-xs text-kcvv-gray-dark truncate">
+                <div className="text-kcvv-gray-dark truncate text-xs">
                   {result.member.title}
                 </div>
               </div>
 
               {/* Match Badges */}
-              <div className="flex gap-1 flex-shrink-0">
+              <div className="flex flex-shrink-0 gap-1">
                 {result.matchedFields.includes("name") && (
-                  <span className="text-[10px] px-1.5 py-0.5 bg-kcvv-green/20 text-kcvv-green rounded">
+                  <span className="bg-kcvv-green/20 text-kcvv-green rounded px-1.5 py-0.5 text-[10px]">
                     naam
                   </span>
                 )}
                 {result.matchedFields.includes("title") && (
-                  <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/20 text-blue-600 rounded">
+                  <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-blue-600">
                     functie
                   </span>
                 )}
@@ -311,15 +286,7 @@ export function SearchBar({
         value.trim() &&
         searchResults.length === 0 &&
         showAutocomplete && (
-          <div
-            className="
-            absolute top-full left-0 right-0 mt-2
-            bg-white rounded-lg border-2 border-gray-200
-            shadow-lg p-4
-            text-center text-kcvv-gray
-            z-50
-          "
-          >
+          <div className="text-kcvv-gray absolute top-full right-0 left-0 z-50 mt-2 rounded-lg border-2 border-gray-200 bg-white p-4 text-center shadow-lg">
             Geen resultaten voor &quot;{value}&quot;
           </div>
         )}

@@ -19,11 +19,11 @@ export const QaGroupRapidFire = ({ pairs }: QaGroupRapidFireProps) => {
     <section data-testid="qa-group-rapid-fire" className="my-12">
       <header className="mb-6 flex items-center gap-2">
         <span aria-hidden="true" className="flex items-center gap-1">
-          <span className="block h-0.5 w-2 bg-kcvv-green-bright" />
-          <span className="block h-0.5 w-2 bg-kcvv-green-bright" />
-          <span className="block h-0.5 w-2 bg-kcvv-green-bright" />
+          <span className="bg-kcvv-green-bright block h-0.5 w-2" />
+          <span className="bg-kcvv-green-bright block h-0.5 w-2" />
+          <span className="bg-kcvv-green-bright block h-0.5 w-2" />
         </span>
-        <span className="ml-2 font-title font-bold text-xs uppercase tracking-[var(--letter-spacing-label)] text-kcvv-green-dark">
+        <span className="font-title text-kcvv-green-dark ml-2 text-xs font-bold tracking-[var(--letter-spacing-label)] uppercase">
           Sneltrein
         </span>
       </header>
@@ -34,14 +34,14 @@ export const QaGroupRapidFire = ({ pairs }: QaGroupRapidFireProps) => {
             {i > 0 && (
               <hr
                 aria-hidden="true"
-                className="my-6 border-t border-kcvv-gray-light"
+                className="border-kcvv-gray-light my-6 border-t"
               />
             )}
             <div className="grid gap-3 md:grid-cols-[1fr_1.3fr] md:gap-8">
-              <p className="font-title font-medium text-base text-kcvv-gray-blue">
+              <p className="font-title text-kcvv-gray-blue text-base font-medium">
                 {pair.question ?? ""}
               </p>
-              <div className="font-body font-normal text-base text-kcvv-gray-dark [&>p+p]:mt-3">
+              <div className="font-body text-kcvv-gray-dark text-base font-normal [&>p+p]:mt-3">
                 <PortableText value={pair.answer ?? []} />
               </div>
             </div>

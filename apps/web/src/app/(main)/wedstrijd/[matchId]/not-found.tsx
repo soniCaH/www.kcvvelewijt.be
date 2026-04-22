@@ -15,24 +15,24 @@ import Link from "next/link";
  */
 export default function MatchNotFound() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="text-center space-y-6 px-4">
-        <h1 className="text-4xl font-bold text-gray-900 font-title">
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="space-y-6 px-4 text-center">
+        <h1 className="font-title text-4xl font-bold text-gray-900">
           Wedstrijd niet gevonden
         </h1>
-        <p className="text-lg text-gray-600 max-w-md mx-auto">
+        <p className="mx-auto max-w-md text-lg text-gray-600">
           De wedstrijd die je zoekt bestaat niet of is niet meer beschikbaar.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
             href="/kalender"
-            className="inline-flex items-center justify-center px-6 py-3 bg-green-main text-white font-semibold rounded-lg hover:bg-green-hover transition-colors"
+            className="bg-green-main hover:bg-green-hover inline-flex items-center justify-center rounded-lg px-6 py-3 font-semibold text-white transition-colors"
           >
             Bekijk wedstrijdkalender
           </Link>
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-gray-400 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:border-gray-400"
           >
             Terug naar home
           </Link>

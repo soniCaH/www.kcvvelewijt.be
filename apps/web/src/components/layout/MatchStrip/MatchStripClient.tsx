@@ -91,14 +91,14 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
     <div
       ref={stripRef}
       onKeyDown={handleKeyDown}
-      className="bg-kcvv-green-dark text-white min-h-[40px]"
+      className="bg-kcvv-green-dark min-h-[40px] text-white"
     >
-      <div className="flex items-center min-h-[40px]">
+      <div className="flex min-h-[40px] items-center">
         <Link
           href={href}
           onClick={handleClick}
           aria-label={ariaLabel}
-          className="flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-kcvv-green-dark-hover transition-colors min-h-[40px]"
+          className="hover:bg-kcvv-green-dark-hover flex min-h-[40px] flex-1 items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors"
         >
           {isFinished ? (
             <FinishedLine match={match} />
@@ -106,7 +106,7 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
             <ScheduledLine match={match} />
           )}
           {match.competition && (
-            <span className="hidden md:inline text-white/60 text-xs before:content-['·'] before:mx-2 before:text-white/40">
+            <span className="hidden text-xs text-white/60 before:mx-2 before:text-white/40 before:content-['·'] md:inline">
               {match.competition}
             </span>
           )}
@@ -115,7 +115,7 @@ export function MatchStripClient({ match }: MatchStripClientProps) {
           type="button"
           onClick={handleDismiss}
           aria-label="Verberg wedstrijdstrip"
-          className="flex items-center justify-center px-3 py-2 text-white/60 hover:text-white transition-colors min-h-[40px]"
+          className="flex min-h-[40px] items-center justify-center px-3 py-2 text-white/60 transition-colors hover:text-white"
         >
           <X size={16} />
         </button>
@@ -128,7 +128,7 @@ function FinishedLine({ match }: { match: UpcomingMatch }) {
   const dateStr = formatWidgetDate(match.date);
   return (
     <>
-      <span className="text-white/60 text-xs">{dateStr}</span>
+      <span className="text-xs text-white/60">{dateStr}</span>
       <span className="font-bold">{match.homeTeam.name}</span>
       <span className="font-mono font-bold">{match.homeTeam.score ?? "-"}</span>
       <span className="text-white/50">–</span>
@@ -162,7 +162,7 @@ function ScheduledLine({ match }: { match: UpcomingMatch }) {
     <>
       <span className="text-white/80">Volgende:</span>
       <span className="truncate font-bold">vs {opponent}</span>
-      <span className="text-white/60 text-xs shrink-0">{timeStr}</span>
+      <span className="shrink-0 text-xs text-white/60">{timeStr}</span>
     </>
   );
 }
