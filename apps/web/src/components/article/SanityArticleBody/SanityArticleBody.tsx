@@ -18,6 +18,10 @@ import {
   QaBlock,
   type QaBlockValue,
 } from "@/components/article/blocks/QaBlock";
+import {
+  TransferFactOverview,
+  type TransferFactValue,
+} from "@/components/article/blocks/TransferFact";
 import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -168,8 +172,9 @@ export const SanityArticleBody = ({
   className,
   subject = null,
 }: SanityArticleBodyProps) => {
-  // Rebuild the components map whenever `subject` changes so qaBlock sees
-  // the current article's subject without reaching for a context provider.
+  // Rebuild the components map whenever `subject` changes so per-block
+  // renderers see the current article state without reaching for a
+  // context provider.
   const components = useMemo<PortableTextComponents>(
     () => ({
       types: {
@@ -192,6 +197,14 @@ export const SanityArticleBody = ({
         articleImage: ArticleImageBlock,
         qaBlock: ({ value }: { value: QaBlockValue }) => (
           <QaBlock value={value} subject={subject} />
+        ),
+        transferFact: ({ value }: { value: TransferFactValue }) => (
+          // In the transfer template, the first transferFact is absorbed
+          // by the hero — the template filters it out of the body before
+          // this renderer runs. Any surviving transferFact here is a
+          // second-or-later block (or lives inside a non-transfer article)
+          // and always renders as an overview card.
+          <TransferFactOverview value={value} />
         ),
       },
       block: {

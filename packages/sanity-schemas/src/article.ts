@@ -139,6 +139,7 @@ export const article = defineType({
         { type: "fileAttachment" },
         { type: "htmlTable" },
         { type: "qaBlock" },
+        { type: "transferFact" },
       ],
     }),
     defineField({

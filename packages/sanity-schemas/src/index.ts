@@ -9,6 +9,7 @@ export {validateOrganigramMember} from './validation/organigram-members'
 export {article} from './article'
 export {articleImage} from './articleImage'
 export {qaBlock, qaPair} from './qaBlock'
+export {transferFact} from './transferFact'
 export {subject} from './subject'
 export {sponsor} from './sponsor'
 export {event} from './event'
@@ -29,6 +30,7 @@ import {responsibility} from './responsibility'
 import {article} from './article'
 import {articleImage} from './articleImage'
 import {qaBlock, qaPair} from './qaBlock'
+import {transferFact} from './transferFact'
 import {subject} from './subject'
 import {sponsor} from './sponsor'
 import {event} from './event'
@@ -52,6 +54,7 @@ export const schemaTypes = [
   articleImage,
   qaBlock,
   qaPair,
+  transferFact,
   subject,
   sponsor,
   event,

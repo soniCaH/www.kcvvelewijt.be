@@ -122,16 +122,15 @@ Rollout posture: phases 2–7 can ship in any order relative to each other once 
 
 ### Phase 5 — #1331 — Transfer template + transferFact
 
-- [ ] New schema: `packages/sanity-schemas/src/transferFact.ts` per design §4.4 with all fields and conditional `hidden` guards.
-- [ ] `article.body` accepts `{type: 'transferFact'}`.
-- [ ] `TransferTemplate` renders the typographic hero per §5.3 (no image): kicker `TRANSFER | ${directionUppercase}`, programmatic from/to composition at display size.
-- [ ] `TransferFactFeature` component matches design §8.1: full-bleed, player cutout column, from/to block with KCVV side auto-rendered (logo + name) and 2px green accent bar on the KCVV row. Note field when present.
-- [ ] `TransferFactOverview` component matches design §8.1: body-column width, 1px top+bottom rules, `w-[7rem]` kicker, name row + logo row. Outgoing direction in `kcvv-gray` (not red — rejected in design).
-- [ ] Direction rules respected: `incoming` = other→KCVV, `outgoing` = KCVV→other, `extension` = KCVV only + `until`.
-- [ ] Storybook stories: feature and overview, one per direction (9 stories total), plus a composed `TransferTemplate` story.
-- [ ] Vitest test: each direction renders the KCVV side auto-filled without an editor-provided KCVV club name.
-- [ ] Integration test: `articleType='transfer'` + three `transferFact` blocks → first renders as feature, remaining two as overview cards.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [x] New schema: `packages/sanity-schemas/src/transferFact.ts` with `direction`, `playerName`, `position`, `age`, `otherClubName`, `otherClubLogo`, `otherClubContext`, `kcvvContext`, `until`, `note`, `noteAttribution`. Conditional `hidden` guards on fields scoped to specific directions.
+- [x] `article.body` accepts `{type: 'transferFact'}`.
+- [x] `TransferTemplate` renders the two-column hero per §5.3 (kicker + h1 + meta + pull-quote on the left, 4:5 `article.coverImage` portrait on the right). Sources the portrait via the `coverImagePortraitUrl` GROQ projection the interview hero uses — `transferFact.playerPhoto` no longer exists.
+- [x] `TransferStrip` renders beneath the §7.6 metadata bar with the horizontal van → direction → naar composition. Colours: incoming = `kcvv-green-bright`, outgoing = `kcvv-warning` (amber), extension = `kcvv-green-dark` label with no arrow. Context subtitles from `otherClubContext` / `kcvvContext`.
+- [x] `TransferFactOverview` renders a single horizontal 4-column row (kicker · player + meta · clubs inline · status label) with Dutch labels `INKOMEND` / `UITGAAND` / `VERLENGD`. Status reads `tot {until}` on extensions, `transfer` otherwise.
+- [x] Direction rules respected: `incoming` = other→KCVV, `outgoing` = KCVV→other, `extension` = KCVV only + `until`. `resolveTransfer` returns a discriminated union (`kind: "pair" | "extension"`) so the compiler enforces which side is populated without runtime non-null asserts.
+- [x] Storybook stories: overview × 3 directions + composed `TransferTemplate` × 2 (full + no-transferFact fallback). The standalone feature-card component is removed — it was absorbed into the hero + strip.
+- [x] Vitest tests: each direction renders the KCVV side auto-filled without an editor-provided KCVV club name; feature transferFact is absorbed by the hero (filtered from body rendering); second transferFact renders as an overview row; pull-quote attribution defaults to `playerName` unless `noteAttribution` overrides.
+- [x] `pnpm --filter @kcvv/web check-all` passes.
 
 ### Phase 6 — #1332 — Event template + eventFact
 
