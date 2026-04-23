@@ -24,7 +24,7 @@
     "migration:create": "node scripts/migration-create.js"
   },
   "dependencies": {
-    "@effect/platform": "0.96.0",
+    "@effect/platform": "0.96.1",
     "@kcvv/api-contract": "workspace:*",
     "@portabletext/react": "6.0.3",
     "@radix-ui/react-tabs": "1.1.13",
