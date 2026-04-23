@@ -34,6 +34,13 @@ const DATASET = process.env.SANITY_DATASET ?? "staging";
 const ARTICLE_ID = "article-phase-6-event-tracer";
 const SLUG = "phase-6-tracer-event-moves";
 
+// Stable cover-image placeholder — reuse an existing staging asset
+// (one of the player psd images) so the tracer has a 16:9-ish landscape
+// on the hero without uploading a dedicated file each seed run. Real
+// articles ship an editor-supplied landscape asset used for TV + Facebook.
+const COVER_IMAGE_ASSET_REF =
+  "image-902b92c6fbed708cec758ed4f5848f0f3d848416-350x350-jpg";
+
 if (DATASET === "production" && process.env.SANITY_ALLOW_PRODUCTION !== "1") {
   console.error(
     "Refusing to seed the event tracer into production — this article " +
@@ -172,6 +179,10 @@ try {
     publishAt: new Date("2026-04-22T08:00:00Z").toISOString(),
     featured: false,
     tags: ["Jeugd", "Evenementen"],
+    coverImage: {
+      _type: "image",
+      asset: { _type: "reference", _ref: COVER_IMAGE_ASSET_REF },
+    },
     body: [
       lentetornooi,
       paragraph(

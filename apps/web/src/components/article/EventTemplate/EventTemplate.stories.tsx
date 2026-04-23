@@ -89,6 +89,8 @@ type Story = StoryObj<typeof meta>;
 export const FullComposition: Story = {
   args: {
     title: "Lentetornooi U13 — zaterdag in Elewijt",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1600&q=80&fit=max",
     publishedDate: "19 April 2026",
     readingTime: "2 min lezen",
     shareConfig: {

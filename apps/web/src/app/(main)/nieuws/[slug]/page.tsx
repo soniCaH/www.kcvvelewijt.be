@@ -86,6 +86,7 @@ function renderTemplate(args: RenderTemplateArgs) {
       return (
         <EventTemplate
           title={args.title}
+          coverImageUrl={args.coverImageUrl}
           publishedDate={args.publishedDate}
           readingTime={args.readingTime}
           shareConfig={shareConfig}

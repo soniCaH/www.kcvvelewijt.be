@@ -65,15 +65,19 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
     <section
       data-testid="event-strip"
       className={cn(
-        // Break out of the 70 rem body column so the date block + copy
-        // column breathe on wide desktops.
+        // Align with the 70 rem hero + metadata bar so the event page
+        // reads as a single indented column rather than three different
+        // widths. The dark `EventFactOverview` stack below the strip
+        // still breaks out wider (`max-w-outer`) — that's the deliberate
+        // canvas moment. Full-bleed rules preserve the edge-to-edge
+        // top/bottom borders across the viewport.
         "full-bleed border-kcvv-gray-light border-y py-10 md:py-16",
         className,
       )}
     >
       <div
         className={cn(
-          "max-w-outer mx-auto grid px-6",
+          "max-w-inner-lg mx-auto grid px-6",
           "gap-8 md:gap-10",
           "md:grid-cols-[auto_minmax(0,1fr)]",
         )}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import type { EventFactValue } from "@/components/article/blocks/EventFact";
 
@@ -15,19 +16,32 @@ export interface EventHeroProps {
    * the strip below the metadata bar).
    */
   title: string;
+  /**
+   * 16:9 landscape cover image from `article.coverImage`. Same crop
+   * the announcement hero uses — event articles always upload a
+   * landscape image because the same asset doubles as the TV-screen
+   * and Facebook-event graphic.
+   */
+  coverImageUrl?: string | null;
   className?: string;
 }
 
 /**
- * Design §5.4 — event hero. Typographic only (no image): kicker +
- * article title. The serif-style date block and metadata live on the
- * `EventStrip` beneath the §7.6 metadata bar, mirroring the Phase 5
- * transfer hero/strip split so facts appear exactly once per page.
+ * Design §5.4 — event hero. Kicker + article title, followed by the
+ * editor-supplied 16:9 landscape cover. The serif-style date block and
+ * metadata live on the `EventStrip` beneath the §7.6 metadata bar,
+ * mirroring the Phase 5 transfer hero/strip split so facts appear
+ * exactly once per page.
  *
  * Kicker composition: `EVENT | ${ageGroup || competitionTag}` when a
  * feature eventFact is present; bare `EVENT` otherwise.
  */
-export const EventHero = ({ feature, title, className }: EventHeroProps) => {
+export const EventHero = ({
+  feature,
+  title,
+  coverImageUrl,
+  className,
+}: EventHeroProps) => {
   const kickerMeta =
     feature?.ageGroup?.trim() || feature?.competitionTag?.trim();
 
@@ -69,6 +83,22 @@ export const EventHero = ({ feature, title, className }: EventHeroProps) => {
           {h1}
         </h1>
       </div>
+
+      {coverImageUrl && (
+        <div
+          data-testid="event-hero-image"
+          className="bg-kcvv-gray-light/30 relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-[4px]"
+        >
+          <Image
+            src={coverImageUrl}
+            alt={feature?.title ?? ""}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 960px"
+            className="object-cover object-center"
+          />
+        </div>
+      )}
     </header>
   );
 };

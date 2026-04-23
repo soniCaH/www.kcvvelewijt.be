@@ -55,6 +55,30 @@ describe("EventHero", () => {
     expect(text).toMatch(/^Event$/i);
   });
 
+  it("renders the 16:9 landscape cover image when coverImageUrl is provided", () => {
+    render(
+      <EventHero
+        title="Lentetornooi"
+        feature={{
+          title: "Lentetornooi U13",
+          date: "2026-04-25",
+        }}
+        coverImageUrl="https://cdn.sanity.io/cover.webp"
+      />,
+    );
+    expect(screen.getByTestId("event-hero-image")).toBeInTheDocument();
+  });
+
+  it("omits the cover image when coverImageUrl is missing or null", () => {
+    render(
+      <EventHero
+        title="Lentetornooi"
+        feature={{ title: "Lentetornooi U13", date: "2026-04-25" }}
+      />,
+    );
+    expect(screen.queryByTestId("event-hero-image")).toBeNull();
+  });
+
   it("renders the article title as the h1", () => {
     render(
       <EventHero

@@ -8,6 +8,12 @@ import type { EventFactValue } from "@/components/article/blocks/EventFact";
 
 export interface EventTemplateProps {
   title: string;
+  /**
+   * 16:9 landscape cover image. Same `article.coverImage` projection
+   * announcement uses — events always upload landscape for TV +
+   * Facebook reuse.
+   */
+  coverImageUrl?: string | null;
   publishedDate?: string;
   readingTime?: string;
   shareConfig: { url: string; title?: string };
@@ -47,6 +53,7 @@ const isEventFact = (
  */
 export const EventTemplate = ({
   title,
+  coverImageUrl,
   publishedDate,
   readingTime,
   shareConfig,
@@ -66,7 +73,11 @@ export const EventTemplate = ({
 
   return (
     <>
-      <EventHero feature={firstEventFact ?? null} title={title} />
+      <EventHero
+        feature={firstEventFact ?? null}
+        title={title}
+        coverImageUrl={coverImageUrl}
+      />
 
       <ArticleMetadata
         author={AUTHOR}
