@@ -524,32 +524,40 @@
 }
 
 
-/* ===== Phase 5 (#1331): Transfer overview stack =============================
+/* ===== Phases 5 + 6 (#1331, #1332): Overview-row stack =======================
 
-   Consecutive `transferFact` overview rows fuse into a single seamless
-   dark band. The outer rows in a group keep 2.5 rem breathing space
-   against the surrounding prose; rows INSIDE the group strip both the
-   top margin of the row and the bottom margin of its predecessor so the
-   dark surface flows edge-to-edge with no white slivers between rows.
+   Consecutive `transferFact` / `eventFact` overview rows fuse into a
+   single seamless dark band. The outer rows in a group keep 2.5 rem
+   breathing space against the surrounding prose; rows INSIDE the group
+   strip both the top margin of the row and the bottom margin of its
+   predecessor so the dark surface flows edge-to-edge with no white
+   slivers between rows.
 
    `:has(+ X)` peels the trailing gap off any overview that is itself
    followed by another overview. Safari 15.4+, Chrome 105+, Firefox 121+
    all support it — same baseline the rest of the site targets.
 
-   Tailwind arbitrary-variant syntax for sibling + `:has()` selectors
-   gets noisy with attribute selectors, so the rules live here. */
-[data-testid='transfer-overview'] {
+   The selector list groups both overview variants so a mixed stack
+   (transferFact followed by eventFact, etc.) also flows seamlessly. */
+[data-testid='transfer-overview'],
+[data-testid='event-overview'] {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
 }
 
-[data-testid='transfer-overview'] + [data-testid='transfer-overview'] {
+[data-testid='transfer-overview']
+  + :is([data-testid='transfer-overview'], [data-testid='event-overview']),
+[data-testid='event-overview']
+  + :is([data-testid='transfer-overview'], [data-testid='event-overview']) {
   margin-top: 0;
 }
 
 [data-testid='transfer-overview']:has(
-  + [data-testid='transfer-overview']
-) {
+    + :is([data-testid='transfer-overview'], [data-testid='event-overview'])
+  ),
+[data-testid='event-overview']:has(
+    + :is([data-testid='transfer-overview'], [data-testid='event-overview'])
+  ) {
   margin-bottom: 0;
 }
 

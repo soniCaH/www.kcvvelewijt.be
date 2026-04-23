@@ -22,6 +22,10 @@ import {
   TransferFactOverview,
   type TransferFactValue,
 } from "@/components/article/blocks/TransferFact";
+import {
+  EventFactOverview,
+  type EventFactValue,
+} from "@/components/article/blocks/EventFact";
 import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -205,6 +209,14 @@ export const SanityArticleBody = ({
           // second-or-later block (or lives inside a non-transfer article)
           // and always renders as an overview card.
           <TransferFactOverview value={value} />
+        ),
+        eventFact: ({ value }: { value: EventFactValue }) => (
+          // Same absorption pattern as transferFact: the event template
+          // filters the first eventFact out of the body and renders it
+          // via `EventStrip` beneath the metadata bar. Every surviving
+          // eventFact here is a follow-up / inline-in-announcement
+          // block and renders as a dark-band overview row.
+          <EventFactOverview value={value} />
         ),
       },
       block: {

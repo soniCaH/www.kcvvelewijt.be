@@ -140,6 +140,7 @@ export const article = defineType({
         { type: "htmlTable" },
         { type: "qaBlock" },
         { type: "transferFact" },
+        { type: "eventFact" },
       ],
     }),
     defineField({

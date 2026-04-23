@@ -26,6 +26,7 @@ import {
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { TransferTemplate } from "@/components/article/TransferTemplate";
+import { EventTemplate } from "@/components/article/EventTemplate";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -197,6 +198,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <TransferTemplate
           title={article.title}
           coverImageUrl={article.coverImagePortraitUrl ?? article.coverImageUrl}
+          publishedDate={
+            article.publishedAt
+              ? formatArticleDate(new Date(article.publishedAt))
+              : undefined
+          }
+          readingTime={readingTime}
+          shareConfig={{ url: shareConfig.url, title: article.title }}
+          body={(article.body as PortableTextBlock[] | null) ?? null}
+        />
+      ) : article.articleType === "event" ? (
+        <EventTemplate
+          title={article.title}
           publishedDate={
             article.publishedAt
               ? formatArticleDate(new Date(article.publishedAt))

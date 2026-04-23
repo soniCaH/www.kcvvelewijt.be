@@ -53,7 +53,7 @@ Four types, driven by a new `articleType` enum on the `article` document. Order 
 | `interview`    | Q&A profiles of players, staff, volunteers                       | `qaBlock` body, `subject` attribution, 4:5 portrait hero                                                   |
 | `announcement` | General-purpose news, club updates, facility, sponsor, editorial | Drop-cap on first paragraph, calm 16:9 hero image, rule-framed blockquote                                  |
 | `transfer`     | Single or overview transfer news                                 | Two-column hero from `article.coverImage`, horizontal van → naar strip, dark `transferFact` overview stack |
-| `event`        | Tournaments, stages, club events, youth days                     | Serif-style date block hero, `eventFact` feature + overview blocks                                         |
+| `event`        | Tournaments, stages, club events, youth days                     | Typographic hero + full-bleed `EventStrip` (serif-style date block + CTA), dark `eventFact` overview stack |
 
 **Routing:** one `/nieuws/[slug]` route, one React page component that dispatches to a type-specific template based on `article.articleType`. Do not split into separate routes.
 
@@ -519,26 +519,43 @@ Two-column hero with a horizontal van → naar strip beneath the metadata bar.
 
 ### 5.4 `event` template
 
+Hero is typographic only — kicker + article title. The serif-style date
+block + metadata + CTA live on `EventStrip` beneath the §7.6 metadata
+bar so facts appear exactly once per page, mirroring the Phase 5
+transfer hero/strip split.
+
 ```text
 < Terug naar nieuws
 
----- EVENT | JEUGD
+---- EVENT | U13
 
 Lentetornooi U13 — zaterdag in Elewijt.
 
-27         APRIL
-----       2026
-zaterdag · 10u00 · Sportpark Elewijt
+───── metadata bar ─────
 
------ metadata bar -----
+┌──────────┬─────────────────────────────────────────────┐
+│ 27       │ Lentetornooi U13                            │
+│ APRIL    │ zaterdag · 10:00 - 17:00                    │
+│ 2026     │ Sportpark Elewijt · Driesstraat 14, Elewijt │
+│          │                                             │
+│          │ Open voor spelers geboren in 2013 en 2014.  │
+│          │                                             │
+│          │ Inschrijven  →                              │
+└──────────┴─────────────────────────────────────────────┘
 
-[ feature eventFact card — full-bleed, first body block, see §8.2 ]
+[ body paragraphs ]
 
-[ body paragraphs / additional eventFact overview blocks ]
+---- Andere evenementen
+
+[ eventFact overview rows on the dark band ]
+
+[ closing paragraphs ]
 ```
 
-- Kicker `EVENT | ${ageGroup || competitionTag}`.
-- Below the headline: **serif-style date block** — day numeral at `text-[5rem]`, month uppercase `text-xl` with `tracking-[var(--letter-spacing-label)]`, year and metadata in mono small caps. Horizontal 1px rule in `kcvv-gray-light` between day and month labels.
+- **Hero** — `.featured-border::before` 4 rem × 2 px green bar, `EVENT | ${ageGroup || competitionTag}` kicker, Quasimoda 700 clamp title. Stays inside the `max-w-inner-lg` reading column so the headline sits in the same narrative rhythm as announcement/interview titles.
+- **EventStrip** (below the §7.6 metadata bar, full-bleed, `max-w-outer` inner): 2-column grid. Left column carries the serif-style date block — day at `font-title font-bold text-[5rem] md:text-[6rem] leading-[0.85] kcvv-gray-blue`, month in Dutch uppercase (`januari … december`) `text-xl tracking-[var(--letter-spacing-label)]`, year in mono small-caps `kcvv-gray`. On md+, a vertical 1 px `kcvv-gray-light` rule sits on the right edge of the date column. Right column stacks: title (Quasimoda 700 `text-3xl md:text-4xl`), weekday · time-range, location · address, optional Portable-Text note (Montserrat 400 `text-lg leading-[1.6]`), optional CTA link.
+- **CTA**: Quasimoda 700 uppercase tracking-caps `kcvv-green-dark`, 1 px `kcvv-green-bright` underline that thickens to 2 px on hover, Lucide `ArrowRight` 4 × 4. Rendered only when `eventFact.ticketUrl` is set. Label defaults to Dutch "Inschrijven" when `ticketLabel` is blank.
+- The first `eventFact` in the body is absorbed by `EventStrip` — the template filters it out of the body before rendering so it doesn't render twice. Subsequent `eventFact` blocks render inline as `EventFactOverview` rows (§8.2), typically beneath an editor-authored `Andere evenementen` H2.
 
 ---
 
@@ -740,44 +757,29 @@ There is no separate "feature card" component. The first `transferFact` in a `tr
 
 ### 8.2 `eventFact`
 
-**Feature variant** (first `eventFact` block in the body, and only when `articleType='event'`):
+There is no separate "feature card" component. The first `eventFact` in
+an `event` article is absorbed by `EventStrip` (see §5.4). Subsequent
+`eventFact` blocks render as `EventFactOverview` rows on the shared
+dark band (same treatment as `TransferFactOverview`).
+
+**Overview variant** (subsequent `eventFact` blocks, or an `eventFact`
+inside an `articleType='announcement'` article):
 
 ```text
-+-------------------------------------------------------------------+
-|   ---- EVENT | JEUGD                                              |
-|                                                                   |
-|   27                                       Lentetornooi U13       |
-|   APRIL    ----------------------------                           |
-|   2026     zaterdag · 10u00 - 17u00                               |
-|            Sportpark Elewijt                                      |
-|            Driesstraat 14, Elewijt                                |
-|                                                                   |
-|            Open voor spelers geboren in 2013 en 2014.             |
-|                                                                   |
-|            Inschrijven  >                                         |
-+-------------------------------------------------------------------+
+┌────────────────────────────────────────────────────────────────────┐
+│ 27 apr      Lentetornooi U13                 Inschrijven →         │
+│ maandag     10:00 - 17:00 · Sportpark Elewijt · U13                │
+├────────────────────────────────────────────────────────────────────┤
+│ 27 apr      Afterparty                        Boek je plek →       │
+│ maandag     20:00 · Kantine KCVV · Clubfeest                       │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-- Full-bleed, `max-w-[70rem]` inner, `py-16` desktop, `py-8` mobile, 1px top/bottom rules.
-- Date block left: day Quasimoda 700 `text-[6rem] leading-[0.85] kcvv-gray-blue`, month uppercase `text-xl tracking-[var(--letter-spacing-label)]`, year mono `text-sm kcvv-gray`. Vertical 1px `kcvv-gray-light` rule on the right of the date block.
-- Title Quasimoda 700 `text-4xl kcvv-gray-blue`.
-- Metadata rows in `text-sm uppercase tracking-[var(--letter-spacing-caps)] kcvv-gray-dark`, middle-dot separators.
-- Note: Montserrat 400, `text-lg leading-[1.6] kcvv-gray-dark`.
-- CTA: text link (not a button). Quasimoda 700, `text-base`, uppercase, `tracking-[var(--letter-spacing-caps)] kcvv-green-dark`, 1px `kcvv-green-bright` underline, Lucide `ArrowRight` 14px trailing. Hover: underline thickens to 2px.
-
-**Overview variant**:
-
-```text
-+-----------------------------------------------------------+
-|  27 APR    Lentetornooi U13              Inschrijven >    |
-|  zaterdag  Sportpark Elewijt · U13                        |
-+-----------------------------------------------------------+
-```
-
-- Same 1px-rule stack as `transferFact` overview.
-- Left column `w-[5rem]`: `27 APR` in Quasimoda 700 `text-xl kcvv-gray-blue` over weekday in mono `text-xs`.
-- Middle: title Quasimoda 700 `text-lg` over metadata line in small-caps.
-- Right: CTA link, same spec as feature at `text-sm`.
+- Single-row grid on md+: `grid-cols-[6rem_minmax(0,1fr)_auto]` with `gap-x-8`. Stacks to a flex column on mobile.
+- Full-bleed `kcvv-gray-dark` band; 1 px `kcvv-white/10` top rule. Consecutive eventFact/transferFact rows fuse into one seamless dark section via the sibling CSS in `globals.css`.
+- **Slot 1 — date cluster**: `27 apr` in Quasimoda 700 `text-xl kcvv-white` over Dutch weekday in mono small-caps `kcvv-gray-light`. `Datum volgt` placeholder when the date is missing or malformed.
+- **Slot 2 — title + metadata**: title (Quasimoda 700 `text-lg kcvv-white`) over a meta line in mono small-caps `kcvv-gray-light` — time range · location · ageGroup/competitionTag.
+- **Slot 3 — CTA**: same Lucide `ArrowRight` + underline spec as the feature strip at `text-sm`. `ticketLabel` defaults to Dutch "Inschrijven"; hidden entirely when `ticketUrl` is unset.
 
 ---
 
@@ -823,8 +825,10 @@ apps/web/src/components/article/
                                     # feature/hero content is absorbed by
                                     # TransferHero + TransferStrip — there
                                     # is no separate `TransferFactFeature`.
-    EventFactFeature/              # Phase 6
-    EventFactOverview/             # Phase 6
+    EventFact/                     # same pattern — dark overview-row
+                                    # variant only. The feature content
+                                    # is absorbed by EventHero + EventStrip;
+                                    # no `EventFactFeature` component.
   SubjectAttribution/              # shared attribution block used by key + quote
 ```
 
