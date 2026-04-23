@@ -88,7 +88,7 @@ describe('validateRespondentKey', () => {
         parent: {tag: 'key'},
         document: interviewDoc(['a', 'b']),
       }),
-    ).toBe('Selected respondent is no longer one of the article subjects')
+    ).toBe('Deze respondent staat niet meer in de lijst van subjects')
   })
 
   it('treats missing tag as standard (skips)', () => {

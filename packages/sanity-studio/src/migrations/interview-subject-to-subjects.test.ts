@@ -77,6 +77,28 @@ describe('migrateInterviewSubjectToSubjects', () => {
     expect(migrateInterviewSubjectToSubjects(doc, stableKey)).toBeUndefined()
   })
 
+  it('wraps a legacy subject even when subjects[] is already set but empty', () => {
+    const legacy = {kind: 'player', playerRef: {_ref: 'p-1'}}
+    const doc: InterviewArticleDoc = {
+      _id: 'empty-subjects-legacy',
+      subjects: [],
+      subject: legacy,
+    }
+    const patches = migrateInterviewSubjectToSubjects(doc, stableKey)
+    expect(patches).toEqual([
+      at('subjects', set([{_key: 'fixed-migration-key', kind: 'player', playerRef: {_ref: 'p-1'}}])),
+      at('subject', unset()),
+    ])
+  })
+
+  it('ignores a legacy subject that is an array (malformed)', () => {
+    const doc: InterviewArticleDoc = {
+      _id: 'array-subject',
+      subject: [{kind: 'player'}],
+    }
+    expect(migrateInterviewSubjectToSubjects(doc, stableKey)).toBeUndefined()
+  })
+
   it('uses the injected genKey function (determinism for testing)', () => {
     const legacy = {kind: 'player', playerRef: {_ref: 'p-1'}}
     const doc: InterviewArticleDoc = {_id: 'key-test', subject: legacy}

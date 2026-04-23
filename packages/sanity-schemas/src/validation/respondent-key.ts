@@ -41,6 +41,6 @@ export function validateRespondentKey(
 
   if (typeof value !== 'string' || value === '') return 'Kies wie dit gezegd heeft'
   if (!subjects.some((s) => s?._key === value))
-    return 'Selected respondent is no longer one of the article subjects'
+    return 'Deze respondent staat niet meer in de lijst van subjects'
   return true
 }

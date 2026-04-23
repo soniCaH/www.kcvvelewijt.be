@@ -99,7 +99,7 @@ const LUC: IndexedSubject = {
 const playerFullPhoto: IndexedSubject = {
   ...playerFull,
   playerRef: {
-    ...playerFull.playerRef!,
+    ...(playerFull.playerRef ?? {}),
     psdImageUrl:
       "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80",
   },

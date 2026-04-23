@@ -202,58 +202,74 @@ Narrow `body[]` as `Array<PortableTextBlock | QaPairBlock>` at the repository bo
 
 ---
 
-## Summary of AC changes to fold into #1358
+## Summary of AC changes applied to #1358
 
-Paste-ready deltas for the issue body:
+The review's decisions R1–R7 (including R2a's correction to local-key
+storage) have all been folded into the #1358 issue body. This section
+describes — at a glance — what shifted, in plain language; the issue
+body carries the authoritative acceptance criteria.
 
-**Under "Hero mocks" → "Typography":**
+**Hero mocks → Typography (R1):**
 
-- Replace `The `| POSITION`segment only appears for N=1.`| PANEL` replaces it for N≥3. N=2 has no suffix.` with `The `| #N · POSITION`meta only appears when N=1 and the sole subject is a player. All other cases — N=1 non-player, N=2, N=3, N=4 — render bare`INTERVIEW`.`
-- Strike every reference to `| PANEL` in the hero mocks.
+- Meta slot (`| #N · POSITION`) renders only when N=1 and the sole
+  subject is a player. All other cases render bare `INTERVIEW`. Every
+  `| PANEL` reference removed from the hero mocks.
 
-**Under "`key` pair attribution" → "Multi-subject, `respondent` unset":** delete this subsection entirely. The required-publish validator makes this state unreachable.
+**`key` pair attribution (R2):**
 
-**Under "Schema changes":**
+- The fallback subsection "Multi-subject, respondent unset" is deleted.
+  The required-publish validator makes that state unreachable.
 
-- `qaPair.respondent?: reference to a subject` → keep the question-mark (optional in the schema) but add: `Required (validator) when the parent article has `subjects.length >= 2`and the pair's`tag`is`'key'`or`'quote'`. Hidden when `tag`is`'standard'`or`'rapid-fire'`.`
+**Schema changes (R2, R2a, R3):**
 
-**Under "Acceptance criteria" → "Schema":**
+- `qaPair.respondentKey: string` stores the `_key` of a `subjects[]`
+  item. A custom Studio picker (`RespondentPicker`) reads
+  `document.subjects[]` and scopes the dropdown to those subjects.
+- Validator: required when `subjects.length >= 2` and
+  `tag in {'key','quote'}`; also guards that `respondentKey` matches
+  some `subjects[]._key`.
+- Hidden in the Studio form when `tag in {'standard','rapid-fire'}`.
 
-- Replace the warning-based `respondent` AC with the required-based version (blocks publish).
+**Runtime (R4, R7):**
 
-**Under "Acceptance criteria" → "Runtime (apps/web)":**
+- GROQ projects `subjects[]` with a shared `SUBJECT_PROJECTION` fragment
+  (same shape as the pre-#1358 single-subject projection, plus `_key`).
+- `body[_type == 'qaPair']` returns `respondentKey` as a scalar; no
+  server-side deref (`subject` is an embedded object type, so
+  references can't target it). Resolution happens client-side via
+  `article.subjects.find(s => s._key === pair.respondentKey)` — the
+  helper `resolvePairRespondent` lives in the SubjectAttribution
+  module and is consumed by `QaBlock`.
+- `body[]` narrows `qaPair` blocks to a typed `QaPairBlock` carrying
+  `respondentKey?: string` (present only when `tag in {'key','quote'}`;
+  required by the validator when N≥2).
+- `InterviewHero` renders gracefully (title + subtitle, no portraits)
+  when `subjects.length === 0` despite the schema forbidding it.
 
-- Remove: `New helper `resolvePairRespondent(pair, article)`returns`resolveSubject(pair.respondent) ?? resolveSubject(article.subjects[0])`.`
-- Add: `GROQ `body[]`projection expands`\_type == 'qaPair'`entries with a full`respondent->{...}`subtree matching the existing`subject`projection shape. Share the GROQ fragment between`subjects[]`and`body[].respondent->`.`
-- Add: `Runtime `body[]`type narrows`qaPair`blocks to a`QaPairBlock`type with a dereferenced`respondent`(or`null`when tag is`standard`/`rapid-fire` or N=1).`
-- Add: `InterviewHero renders gracefully (title + subtitle only) when `subjects.length === 0`, even though the schema forbids it.`
+**Seeds & Stories (R5):**
 
-**Under "Acceptance criteria" → "Seeds & Stories":**
+- Storybook: `Features/Articles/InterviewHero/{Single,Duo,Trio,Panel}`
+  plus `Pages/Article/Interview/{Single,Duo,Trio,Panel}` — 8 stories
+  total across atomic + composition layers.
 
-- Storybook AC becomes 8 stories total: `Features/Articles/InterviewHero/{Single,Duo,Trio,Panel}` AND `Pages/Article/Interview/{Single,Duo,Trio,Panel}`.
+**Analytics (R6):**
 
-**New section "Analytics":**
+- `article_view` payload extended with `subject_count` (1–4) on
+  interview articles; omitted on other types.
+- GTM + GA4: add the custom dimension.
+- Integration test asserts the dimension on interview views.
 
-```markdown
-## Analytics
+**Migration — testing:**
 
-- `article_view` event payload extended with `subject_count: 1 | 2 | 3 | 4` (null/omitted for non-interview articles, per the pattern established in #1333).
-- GTM: custom dimension added to the existing `article_view` GA4 event tag.
-- GA4 property: `subject_count` registered as a custom dimension.
-- Test: `article_view` integration test asserts `subject_count === subjects.length` on interview articles.
-```
+- Unit test covers: legacy `{ subject }` → `{ subjects: [subject] }`;
+  already-migrated `{ subjects }` → skipped; empty `subjects[]` +
+  legacy → wrap into subjects[] (data preservation); malformed array
+  `subject` → skipped; `subjects[]` with dangling legacy subject →
+  clean up the legacy field.
 
-**New section "Migration — testing":**
+**References:**
 
-```markdown
-- Unit test for the migration script exercising: old `{ subject }` → new `{ subjects: [subject] }`; already-migrated `{ subjects }` → skipped; malformed shape → logged and skipped.
-```
-
-**New section under "References":**
-
-```markdown
-- Design review: `docs/design/interview-multi-subject-review.md`
-```
+- Design review lives at `docs/design/interview-multi-subject-review.md`.
 
 ---
 

@@ -116,8 +116,14 @@ describe("InterviewHero — N=1 (single subject)", () => {
     expect(screen.queryByTestId("interview-hero-portrait-grid")).toBeNull();
   });
 
-  it("tolerates null/undefined subjects and renders title only", () => {
+  it("tolerates null subjects and renders title only", () => {
     render(<InterviewHero title="Title" subjects={null} />);
+    expect(screen.getByTestId("interview-hero-title")).toBeInTheDocument();
+    expect(screen.queryByTestId("interview-hero-subtitle")).toBeNull();
+  });
+
+  it("tolerates undefined subjects and renders title only", () => {
+    render(<InterviewHero title="Title" subjects={undefined} />);
     expect(screen.getByTestId("interview-hero-title")).toBeInTheDocument();
     expect(screen.queryByTestId("interview-hero-subtitle")).toBeNull();
   });

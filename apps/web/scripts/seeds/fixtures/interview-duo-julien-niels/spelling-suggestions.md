@@ -93,6 +93,7 @@ Verb placement and `goei` → `goede`:
 - `"een paar jaar geleden"` at start of sentence → capitalise `"Een paar jaar geleden"`.
 - `"whatsapp groep"` → **"WhatsApp-groep"** (brand name capitalisation + hyphen).
 - `"waar dat het steen was"` → `"waar Het Steen was"` ("dat" na "waar" is regionaal; Het Steen is a proper noun — capitalise).
+- `"dat de mensen 't steen niet kende"` → `"dat de mensen 't Steen niet kenden"` (plural subject "mensen" needs plural verb "kenden").
 - `"tot op vandaag nog als inside joke meegaat"` — clean up:
 
 > "Een paar jaar geleden vroeg er iemand in onze WhatsApp-groep waar Het Steen was. Nillie kon niet geloven dat de mensen 't Steen niet kende. Nillie antwoordde toen 'links en de steenweg af' — een moment waar iedereen in de groep om kon lachen, en dat tot op vandaag nog als inside joke meegaat."

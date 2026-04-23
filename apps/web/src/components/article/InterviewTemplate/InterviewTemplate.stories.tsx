@@ -198,16 +198,43 @@ export const Single: Story = {
   },
 };
 
+/**
+ * Clone the FullComposition body and override every `key`/`quote` pair
+ * with a respondentKey rotated across `respondentKeys`. Ensures the
+ * multi-subject stories actually exercise per-pair attribution instead
+ * of inheriting the single-subject layout.
+ */
+function bodyWithRotatedRespondents(
+  respondentKeys: string[],
+): PortableTextBlock[] {
+  const base = FullComposition.args?.body as PortableTextBlock[] | undefined;
+  if (!Array.isArray(base)) return [];
+  return base.map((block) => {
+    if ((block as { _type?: string })._type !== "qaBlock") return block;
+    const qaBlock = block as unknown as {
+      _key: string;
+      _type: "qaBlock";
+      pairs: Array<Record<string, unknown>>;
+    };
+    let rotationIdx = 0;
+    const pairs = qaBlock.pairs.map((pair) => {
+      const tag = pair.tag as string | undefined;
+      if (tag !== "key" && tag !== "quote") return pair;
+      const respondentKey = respondentKeys[rotationIdx % respondentKeys.length];
+      rotationIdx += 1;
+      return { ...pair, respondentKey };
+    });
+    return { ...qaBlock, pairs } as unknown as PortableTextBlock;
+  });
+}
+
 export const Duo: Story = {
   name: "Duo / N=2",
   args: {
     ...FullComposition.args,
     title: "Afscheid duo: Maxim en Jeroen sluiten vijf seizoenen af.",
-    // Keep the full qaBlock suite from FullComposition. For duo, set the
-    // respondentKey on key/quote pairs to exercise per-pair attribution —
-    // real authoring requires it, and it lets the story faithfully render
-    // the side-by-side hero + alternating cutout treatment.
     subjects: [MAXIM, JEROEN],
+    body: bodyWithRotatedRespondents([MAXIM._key!, JEROEN._key!]),
   },
 };
 
@@ -217,6 +244,7 @@ export const Trio: Story = {
     ...FullComposition.args,
     title: "Drie generaties, één shirt.",
     subjects: [MAXIM, JEROEN, THOMAS],
+    body: bodyWithRotatedRespondents([MAXIM._key!, JEROEN._key!, THOMAS._key!]),
   },
 };
 
@@ -226,5 +254,11 @@ export const Panel: Story = {
     ...FullComposition.args,
     title: "Vier generaties over hetzelfde shirt.",
     subjects: [MAXIM, JEROEN, THOMAS, LUC],
+    body: bodyWithRotatedRespondents([
+      MAXIM._key!,
+      JEROEN._key!,
+      THOMAS._key!,
+      LUC._key!,
+    ]),
   },
 };

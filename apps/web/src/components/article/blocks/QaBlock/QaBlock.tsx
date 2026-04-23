@@ -45,6 +45,10 @@ type Unit =
   | { kind: "quote"; pair: QaPairValue }
   | { kind: "rapid-fire"; pairs: QaPairValue[] };
 
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled QaBlock unit kind: ${JSON.stringify(value)}`);
+};
+
 const isBreakoutTag = (tag?: string): tag is "key" | "quote" =>
   tag === "key" || tag === "quote";
 
@@ -148,12 +152,19 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
           );
         }
 
-        return (
-          <QaGroupRapidFire
-            key={unit.pairs[0]?._key ?? `rf-${i}`}
-            pairs={unit.pairs}
-          />
-        );
+        if (unit.kind === "rapid-fire") {
+          return (
+            <QaGroupRapidFire
+              key={unit.pairs[0]?._key ?? `rf-${i}`}
+              pairs={unit.pairs}
+            />
+          );
+        }
+
+        // Exhaustiveness: forces a compile error if a new Unit kind lands
+        // without a corresponding branch. The assertion is unreachable at
+        // runtime given the type; kept as a belt-and-braces fallback.
+        return assertNever(unit);
       })}
     </div>
   );

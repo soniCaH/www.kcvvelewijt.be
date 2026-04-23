@@ -127,17 +127,24 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
         if (!key) return null
         const label = labelForSubject(subject)
         const id = `${elementProps.id}-option-${index}`
+        // Forward Sanity's elementProps to the FIRST radio only — Studio
+        // uses them to manage focus (tab-into this field, validation
+        // highlight, etc.). Later radios keep their own id/name wiring.
+        const isFirst = index === 0
         return (
           <Flex key={key} align="center" gap={3}>
             <Radio
-              id={id}
+              id={isFirst ? elementProps.id : id}
               name={elementProps.id}
               value={key}
               checked={value === key}
               onChange={handleChange}
               disabled={readOnly}
+              ref={isFirst ? elementProps.ref : undefined}
+              onFocus={isFirst ? elementProps.onFocus : undefined}
+              onBlur={isFirst ? elementProps.onBlur : undefined}
             />
-            <Text as="label" htmlFor={id} size={1}>
+            <Text as="label" htmlFor={isFirst ? elementProps.id : id} size={1}>
               {label}
             </Text>
           </Flex>

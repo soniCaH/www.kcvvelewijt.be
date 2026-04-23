@@ -217,7 +217,9 @@ function PortraitGrid({ subjects }: { subjects: ResolvedEntry[] }) {
       ? "grid-cols-2 max-w-[40rem]"
       : count === 3
         ? "grid-cols-3 max-w-[48rem]"
-        : "grid-cols-2 max-w-[40rem]"; // N=4
+        : // N=4: 2×2 grid. Wider container so each 4:5 portrait keeps
+          // visual parity with the N=2 layout instead of shrinking to half.
+          "grid-cols-2 max-w-[48rem]";
 
   return (
     <div

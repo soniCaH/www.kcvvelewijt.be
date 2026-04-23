@@ -40,17 +40,24 @@ export function migrateInterviewSubjectToSubjects(
   doc: InterviewArticleDoc,
   genKey: () => string = defaultGenKey,
 ): Patch[] | undefined {
-  const hasSubjectsArray = Array.isArray(doc.subjects)
+  const subjectsArr = Array.isArray(doc.subjects) ? doc.subjects : null
+  // Arrays are `typeof === 'object'` — exclude them explicitly so a malformed
+  // `subject: [...]` doesn't get spread as a numeric-indexed object.
   const legacySubject =
-    doc.subject && typeof doc.subject === 'object' ? (doc.subject as Record<string, unknown>) : null
+    doc.subject && typeof doc.subject === 'object' && !Array.isArray(doc.subject)
+      ? (doc.subject as Record<string, unknown>)
+      : null
 
-  // Already migrated — clean up legacy field if it stuck around.
-  if (hasSubjectsArray) {
+  // Already migrated with at least one entry — clean up lingering legacy field.
+  if (subjectsArr !== null && subjectsArr.length > 0) {
     if (legacySubject !== null) return [at('subject', unset())]
     return undefined
   }
 
-  // Fresh migration: wrap the legacy object into an array with a _key.
+  // Empty subjects[] + legacy object → wrap the legacy (data preservation).
+  // The partial-state (subjects field set but empty, while legacy subject
+  // holds the authored data) has been observed after half-applied manual
+  // edits; treat it the same as a fresh migration.
   if (legacySubject !== null) {
     const wrapped: Record<string, unknown> = {
       _key: genKey(),

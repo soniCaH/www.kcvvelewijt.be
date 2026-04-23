@@ -40,6 +40,9 @@ const PROJECT_ID = "vhb33jaz";
 const DATASET = process.env.SANITY_DATASET ?? "staging";
 const ARTICLE_ID = "article-1358-interview-duo-julien-niels";
 const SLUG = "afscheid-duo-julien-en-niels-zes-seizoenen-b-ploeg";
+// Stable publishAt so re-running the seed doesn't bump the article's
+// publication time on staging (idempotency).
+const PUBLISH_AT = "2026-04-24T10:00:00.000Z";
 
 // Stable subject _keys — must match the `respondentKey` values on
 // body[].qaPair entries so the RespondentPicker resolution works on
@@ -394,7 +397,7 @@ async function main() {
     title:
       "Afscheid duo: Julien en Niels sluiten zes seizoenen B-ploeg af",
     slug: { _type: "slug", current: SLUG },
-    publishAt: new Date().toISOString(),
+    publishAt: PUBLISH_AT,
     featured: false,
     tags: ["Interview", "B-ploeg"],
     subjects: [
