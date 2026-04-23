@@ -21,10 +21,10 @@
     "@kcvv/sanity-schemas": "workspace:*",
     "@kcvv/sanity-studio": "workspace:*",
     "@sanity/icons": "3.7.4",
-    "@sanity/vision": "5.18.0",
+    "@sanity/vision": "5.22.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "sanity": "5.18.0",
+    "sanity": "5.22.0",
     "styled-components": "6.3.12"
   },
   "devDependencies": {
