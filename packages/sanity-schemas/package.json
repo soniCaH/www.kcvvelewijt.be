@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@sanity/icons": "3.7.4",
-    "sanity": "5.18.0",
+    "sanity": "5.22.0",
     "typescript": "5.9.3"
   }
 }
