@@ -7,10 +7,12 @@ import {
   buildPersonJsonLd,
   buildSportsTeamJsonLd,
   buildSportsEventJsonLd,
+  buildEventJsonLd,
   type NewsArticleInput,
   type PersonInput,
   type SportsTeamInput,
   type SportsEventInput,
+  type EventJsonLdInput,
 } from "./jsonld";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON-LD tests assert on runtime shape, not compile-time types
@@ -123,6 +125,48 @@ describe("buildNewsArticleJsonLd", () => {
       "@type": "Organization",
       name: "KCVV Elewijt",
     });
+  });
+
+  it("emits `about: Person` when subject is provided (interview branch)", () => {
+    const result = buildNewsArticleJsonLd({
+      ...input,
+      about: {
+        name: "Jan Janssen",
+        url: "https://www.kcvvelewijt.be/spelers/123",
+        image: "https://cdn.sanity.io/images/test/jan.webp",
+        jobTitle: "Aanvaller",
+      },
+    }) as AnyJsonLd;
+
+    expect(result.about).toBeDefined();
+    expect(result.about["@type"]).toBe("Person");
+    expect(result.about.name).toBe("Jan Janssen");
+    expect(result.about.url).toBe("https://www.kcvvelewijt.be/spelers/123");
+    expect(result.about.image).toBe(
+      "https://cdn.sanity.io/images/test/jan.webp",
+    );
+    expect(result.about.jobTitle).toBe("Aanvaller");
+  });
+
+  it("omits `about` when subject is not provided", () => {
+    const result = buildNewsArticleJsonLd(input) as AnyJsonLd;
+    expect(result.about).toBeUndefined();
+  });
+
+  it("emits `about: Person` without url when subject has no URL (staff/custom)", () => {
+    const result = buildNewsArticleJsonLd({
+      ...input,
+      about: {
+        name: "Piet Pieters",
+        jobTitle: "Jeugdcoördinator",
+        image: "https://cdn.sanity.io/images/test/piet.webp",
+      },
+    }) as AnyJsonLd;
+
+    expect(result.about["@type"]).toBe("Person");
+    expect(result.about.name).toBe("Piet Pieters");
+    expect(result.about.url).toBeUndefined();
+    expect(result.about.jobTitle).toBe("Jeugdcoördinator");
   });
 });
 
@@ -328,5 +372,85 @@ describe("buildSportsEventJsonLd", () => {
   it("omits location when venue is not provided", () => {
     const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
     expect(result.location).toBeUndefined();
+  });
+});
+
+describe("buildEventJsonLd", () => {
+  const base: EventJsonLdInput = {
+    name: "Lentetornooi U13",
+    startDate: "2026-04-27",
+    url: "https://www.kcvvelewijt.be/nieuws/lentetornooi-u13",
+  };
+
+  it("returns a valid Event schema", () => {
+    const result = buildEventJsonLd(base) as AnyJsonLd;
+
+    expect(result["@context"]).toBe("https://schema.org");
+    expect(result["@type"]).toBe("Event");
+    expect(result.name).toBe("Lentetornooi U13");
+    expect(result.startDate).toBe("2026-04-27");
+    expect(result.url).toBe(
+      "https://www.kcvvelewijt.be/nieuws/lentetornooi-u13",
+    );
+  });
+
+  it("omits endDate / location / image when not provided", () => {
+    const result = buildEventJsonLd(base) as AnyJsonLd;
+    expect(result.endDate).toBeUndefined();
+    expect(result.location).toBeUndefined();
+    expect(result.image).toBeUndefined();
+  });
+
+  it("includes endDate when provided", () => {
+    const result = buildEventJsonLd({
+      ...base,
+      endDate: "2026-04-29",
+    }) as AnyJsonLd;
+    expect(result.endDate).toBe("2026-04-29");
+  });
+
+  it("emits Place location with address when location + address are provided", () => {
+    const result = buildEventJsonLd({
+      ...base,
+      location: "Sportpark Elewijt",
+      address: "Driesstraat 39, 1982 Elewijt",
+    }) as AnyJsonLd;
+
+    expect(result.location["@type"]).toBe("Place");
+    expect(result.location.name).toBe("Sportpark Elewijt");
+    expect(result.location.address["@type"]).toBe("PostalAddress");
+    expect(result.location.address.streetAddress).toBe(
+      "Driesstraat 39, 1982 Elewijt",
+    );
+  });
+
+  it("emits Place location without address when only location is provided", () => {
+    const result = buildEventJsonLd({
+      ...base,
+      location: "Kantine KCVV",
+    }) as AnyJsonLd;
+
+    expect(result.location["@type"]).toBe("Place");
+    expect(result.location.name).toBe("Kantine KCVV");
+    expect(result.location.address).toBeUndefined();
+  });
+
+  it("defaults eventStatus to EventScheduled", () => {
+    const result = buildEventJsonLd(base) as AnyJsonLd;
+    expect(result.eventStatus).toBe("https://schema.org/EventScheduled");
+  });
+
+  it("includes image when provided", () => {
+    const result = buildEventJsonLd({
+      ...base,
+      image: "https://cdn.sanity.io/images/test/event.webp",
+    }) as AnyJsonLd;
+    expect(result.image).toBe("https://cdn.sanity.io/images/test/event.webp");
+  });
+
+  it("includes organizer as KCVV Elewijt Organization", () => {
+    const result = buildEventJsonLd(base) as AnyJsonLd;
+    expect(result.organizer["@type"]).toBe("Organization");
+    expect(result.organizer.name).toBe("KCVV Elewijt");
   });
 });

@@ -1,5 +1,6 @@
 import type {
   BreadcrumbList,
+  Event as EventSchema,
   FAQPage,
   MergeLeafTypes,
   NewsArticle,
@@ -8,14 +9,14 @@ import type {
   WithContext,
 } from "schema-dts";
 
+import { SITE_CONFIG, EXTERNAL_LINKS } from "@/lib/constants";
+
 /** Loose JSON-LD document type — allows arbitrary Schema.org properties */
 interface JsonLdDocument {
   "@context": "https://schema.org";
   "@type": string;
   [key: string]: unknown;
 }
-
-import { SITE_CONFIG, EXTERNAL_LINKS } from "@/lib/constants";
 
 const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
 
@@ -53,6 +54,20 @@ export function buildBreadcrumbJsonLd(
   };
 }
 
+/**
+ * Shape for the `about: Person` branch of NewsArticle. `url` is optional
+ * — staff and custom subjects don't currently carry a resolvable URL in
+ * the article projection (staff page slug = psdId, not yet selected by
+ * `articles.groq`). Player subjects always carry psdId so their URL is
+ * built at the call site.
+ */
+export interface PersonAboutInput {
+  name: string;
+  url?: string;
+  image?: string;
+  jobTitle?: string;
+}
+
 export interface NewsArticleInput {
   headline: string;
   datePublished: string;
@@ -60,6 +75,12 @@ export interface NewsArticleInput {
   author?: string;
   image?: string;
   url: string;
+  /**
+   * Optional subject person — used for interview articles to emit
+   * `about: { @type: Person }`. schema.org has no canonical Interview
+   * type; Google accepts NewsArticle + about:Person as the fallback.
+   */
+  about?: PersonAboutInput;
 }
 
 export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
@@ -105,6 +126,17 @@ export function buildNewsArticleJsonLd(
       },
     },
     url: input.url,
+    ...(input.about
+      ? {
+          about: {
+            "@type": "Person" as const,
+            name: input.about.name,
+            url: input.about.url,
+            image: input.about.image,
+            jobTitle: input.about.jobTitle,
+          },
+        }
+      : {}),
   };
 }
 
@@ -196,6 +228,64 @@ export function buildFAQPageJsonLd(
         text: entry.answer,
       },
     })),
+  };
+}
+
+export interface EventJsonLdInput {
+  name: string;
+  /** ISO date (YYYY-MM-DD) or ISO datetime — consumers pass through eventFact.date as-is. */
+  startDate: string;
+  /** Optional ISO end date/time. */
+  endDate?: string;
+  /** Venue / room name. When present, location is emitted as Place. */
+  location?: string;
+  /** Street address — nested under the Place when location is set. */
+  address?: string;
+  url: string;
+  image?: string;
+}
+
+/**
+ * Schema.org `Event` for editorial event articles (tournaments, parties,
+ * training camps). Distinct from `buildSportsEventJsonLd` which models
+ * matches as `SportsEvent`.
+ *
+ * Populated from the first `eventFact` block in the article body via
+ * the article page route.
+ */
+export function buildEventJsonLd(
+  input: EventJsonLdInput,
+): WithContext<EventSchema> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: input.name,
+    startDate: input.startDate,
+    ...(input.endDate !== undefined ? { endDate: input.endDate } : {}),
+    url: input.url,
+    eventStatus: "https://schema.org/EventScheduled",
+    ...(input.image !== undefined ? { image: input.image } : {}),
+    organizer: {
+      "@type": "Organization",
+      name: SITE_CONFIG.title,
+      url: SITE_CONFIG.siteUrl,
+    },
+    ...(input.location !== undefined
+      ? {
+          location: {
+            "@type": "Place" as const,
+            name: input.location,
+            ...(input.address !== undefined
+              ? {
+                  address: {
+                    "@type": "PostalAddress" as const,
+                    streetAddress: input.address,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
   };
 }
 

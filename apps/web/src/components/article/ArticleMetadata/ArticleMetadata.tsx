@@ -3,6 +3,7 @@
 import { Icon } from "@/components/design-system";
 import { Facebook, Share2 } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
+import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 
 export interface ArticleMetadataProps {
   /** Article author name (e.g. "Redactie KCVV"). */
@@ -17,6 +18,14 @@ export interface ArticleMetadataProps {
     /** Title used by `navigator.share()`. Falls back to `author` when absent. */
     title?: string;
   };
+  /**
+   * Sanity document id of the article — hashed before emission. Required to
+   * emit `article_share` analytics; when absent, share clicks fire without
+   * analytics (used by stories/tests that render ArticleMetadata in isolation).
+   */
+  articleId?: string;
+  /** `articleType` from the article document — used as the `article_type` event param. */
+  articleType?: string | null;
   /** Additional CSS classes */
   className?: string;
 }
@@ -38,11 +47,19 @@ export const ArticleMetadata = ({
   date,
   readingTime,
   shareConfig,
+  articleId,
+  articleType,
   className,
 }: ArticleMetadataProps) => {
+  const { trackArticleShare } = useArticleAnalytics();
   const facts = [date, author, readingTime].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
+
+  const trackShare = (channel: "native" | "facebook") => {
+    if (!articleId) return;
+    trackArticleShare({ articleType, articleId, channel });
+  };
 
   // Synchronously branch on Web Share availability so the fallback
   // `window.open` runs inside the user-gesture tick (avoids Chromium's
@@ -53,6 +70,7 @@ export const ArticleMetadata = ({
   const handleNativeShare = () => {
     if (!shareConfig) return;
     if (typeof navigator !== "undefined" && navigator.share) {
+      trackShare("native");
       navigator
         .share({
           title: shareConfig.title ?? author,
@@ -65,7 +83,9 @@ export const ArticleMetadata = ({
       return;
     }
     // Fallback when Web Share API is unavailable (most desktop browsers).
-    // Runs in the same click event tick, so the popup is allowed.
+    // Runs in the same click event tick, so the popup is allowed. Emits
+    // the `facebook` channel because the fallback is a Facebook sharer.
+    trackShare("facebook");
     window.open(
       `${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`,
       "_blank",
@@ -107,6 +127,7 @@ export const ArticleMetadata = ({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Delen op Facebook"
+              onClick={() => trackShare("facebook")}
               className="text-kcvv-gray-blue hover:text-kcvv-green-dark transition-colors"
             >
               <Icon icon={Facebook} size="xs" />

@@ -22,11 +22,15 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
+  buildEventJsonLd,
+  type PersonAboutInput,
+  type EventJsonLdInput,
 } from "@/lib/seo/jsonld";
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { TransferTemplate } from "@/components/article/TransferTemplate";
 import { EventTemplate } from "@/components/article/EventTemplate";
+import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -45,6 +49,7 @@ interface ArticlePageProps {
  */
 interface RenderTemplateArgs {
   articleType: string | null | undefined;
+  articleId: string;
   title: string;
   category?: string;
   coverImageUrl?: string;
@@ -69,6 +74,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           shareConfig={shareConfig}
           body={args.body}
           subject={args.subject}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     case "transfer":
@@ -80,6 +87,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     case "event":
@@ -91,6 +100,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     // Missing or unknown articleType falls through to announcement —
@@ -105,6 +116,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
   }
@@ -234,6 +247,98 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ...mapMentionedTeams(article.mentionedTeams ?? undefined),
   ];
 
+  // Interview branch (§12): emit the baseline NewsArticle with `about:
+  // Person` so Google can resolve the subject of the article. schema.org
+  // has no canonical Interview type — NewsArticle + about:Person is the
+  // fallback Google's Rich Results Test accepts. Only player + staff
+  // subjects produce a Person; custom names resolve without a profile URL
+  // so the `about.url` may be absent.
+  const about: PersonAboutInput | undefined = (() => {
+    if (article.articleType !== "interview") return undefined;
+    const subject = article.subject;
+    if (!subject?.kind) return undefined;
+    if (subject.kind === "player") {
+      const p = subject.playerRef;
+      if (!p) return undefined;
+      const name = [p.firstName, p.lastName].filter(Boolean).join(" ").trim();
+      if (!name) return undefined;
+      return {
+        name,
+        url: p.psdId ? `${SITE_CONFIG.siteUrl}/spelers/${p.psdId}` : undefined,
+        image: p.transparentImageUrl ?? p.psdImageUrl ?? undefined,
+        jobTitle: p.position ?? undefined,
+      };
+    }
+    if (subject.kind === "staff") {
+      const s = subject.staffRef;
+      if (!s) return undefined;
+      const name = [s.firstName, s.lastName].filter(Boolean).join(" ").trim();
+      if (!name) return undefined;
+      return {
+        name,
+        image: s.photoUrl ?? undefined,
+        jobTitle: s.functionTitle ?? undefined,
+      };
+    }
+    const name = subject.customName?.trim() ?? "";
+    if (!name) return undefined;
+    return {
+      name,
+      image: subject.customPhotoUrl ?? undefined,
+      jobTitle: subject.customRole ?? undefined,
+    };
+  })();
+
+  // Event branch (§12): pull the first `eventFact` block out of the body
+  // and map it to schema.org Event. Distinct from SportsEvent (matches).
+  // Keeps the article page independent of block-renderer internals —
+  // only a `.find(_type === "eventFact")` dispatch is needed here.
+  const eventJsonLd: EventJsonLdInput | undefined = (() => {
+    if (article.articleType !== "event") return undefined;
+    const body = article.body as Array<
+      PortableTextBlock & { _type?: string }
+    > | null;
+    if (!Array.isArray(body)) return undefined;
+    const ev = body.find(
+      (
+        b,
+      ): b is PortableTextBlock & {
+        _type: "eventFact";
+        title?: string;
+        date?: string;
+        endDate?: string;
+        startTime?: string;
+        endTime?: string;
+        location?: string;
+        address?: string;
+      } => b._type === "eventFact",
+    );
+    if (!ev) return undefined;
+    if (!ev.date) return undefined;
+    const name = ev.title?.trim() || article.title;
+    // Combine date (YYYY-MM-DD) with HH:MM time when present. Without
+    // the time, Google resolves bare dates to 00:00 UTC and misrepresents
+    // the event. Europe/Brussels is +01:00 in winter, +02:00 in summer —
+    // we don't know which applies at the time the page renders, so we
+    // emit a local-floating ISO (no TZ suffix) which Google accepts and
+    // renders in the viewer's locale.
+    const withTime = (date?: string, time?: string): string | undefined => {
+      if (!date) return undefined;
+      const cleanTime = time?.trim();
+      if (!cleanTime) return date;
+      return `${date}T${cleanTime}:00`;
+    };
+    return {
+      name,
+      startDate: withTime(ev.date, ev.startTime) ?? ev.date,
+      endDate: withTime(ev.endDate ?? ev.date, ev.endTime),
+      location: ev.location,
+      address: ev.address,
+      url: shareConfig.url,
+      image: article.coverImageUrl ?? undefined,
+    };
+  })();
+
   return (
     <>
       <JsonLd
@@ -252,11 +357,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             author: "KCVV Elewijt",
             image: article.coverImageUrl ?? undefined,
             url: shareConfig.url,
+            about,
           })}
         />
       )}
+      {eventJsonLd && <JsonLd data={buildEventJsonLd(eventJsonLd)} />}
+      <ArticleViewTracker
+        articleId={article.id}
+        articleType={article.articleType}
+        hasSubject={about !== undefined}
+        subjectKind={article.subject?.kind ?? undefined}
+      />
       {renderTemplate({
         articleType: article.articleType,
+        articleId: article.id,
         title: article.title,
         category: primaryCategory?.name,
         // Pass both projections separately — each template picks the
@@ -279,6 +393,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         items={relatedItems}
         pageType="article"
         pageSlug={article.slug}
+        sourceArticleType={article.articleType}
       />
     </>
   );

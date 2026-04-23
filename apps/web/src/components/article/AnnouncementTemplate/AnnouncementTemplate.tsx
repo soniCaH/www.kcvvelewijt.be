@@ -15,6 +15,10 @@ export interface AnnouncementTemplateProps {
   readingTime?: string;
   shareConfig: { url: string; title?: string };
   body: PortableTextBlock[] | null;
+  /** Sanity document id — threaded to ArticleMetadata for `article_share` analytics. */
+  articleId?: string;
+  /** Article type (for analytics param `article_type`). */
+  articleType?: string | null;
 }
 
 // Announcements are implicitly club-authored until we wire an editor field
@@ -51,6 +55,8 @@ export const AnnouncementTemplate = ({
   readingTime,
   shareConfig,
   body,
+  articleId,
+  articleType,
 }: AnnouncementTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
 
@@ -68,6 +74,8 @@ export const AnnouncementTemplate = ({
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
+        articleId={articleId}
+        articleType={articleType}
         className="mt-10"
       />
 

@@ -80,6 +80,24 @@ All events use `snake_case`. Parameters follow GA4 conventions where possible.
 | `organigram_department_filtered` | User changes department filter | `department`                                                                                 |
 | `organigram_export_png`          | User exports chart as PNG      | —                                                                                            |
 
+### Article detail (Priority 4 — "what do readers do on article pages?")
+
+Driven by the article-detail redesign (#1327 → #1334). Hook: `useArticleAnalytics`.
+Article ids are hashed via `hashMemberId`; no editorial strings flow into params.
+
+| Event Name              | Trigger                        | Parameters                                                              |
+| ----------------------- | ------------------------------ | ----------------------------------------------------------------------- |
+| `article_view`          | Article detail page mount      | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind?`     |
+| `article_share`         | Share icon click               | `article_type`, `article_id_hashed`, `channel` ("native" \| "facebook") |
+| `related_article_click` | Related grid card click        | `article_type`, `related_article_id_hashed`, `position`                 |
+| `event_cta_click`       | Event ticket/signup link click | `article_id_hashed`, `event_date`, `has_ticket_url`                     |
+
+`article_type` normalises to `announcement` when the Sanity field is null
+(legacy articles). `subject_kind` is only emitted when `has_subject=true`.
+`related_article_click` fires alongside the page-agnostic
+`related_content_click` so BI continuity with non-article source pages is
+preserved.
+
 ## 4. Tracer Bullet
 
 GTM script integration + consent gating + one test event:
@@ -155,12 +173,12 @@ triggers. This keeps the GTM workspace manageable as new features are added.
 
 ### Trigger: `Custom Event — KCVV Analytics`
 
-| Field              | Value                                                                                               |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| Trigger type       | Custom Event                                                                                        |
-| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_` |
-| Use regex matching | checked                                                                                             |
-| Fires on           | All Custom Events                                                                                   |
+| Field              | Value                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger type       | Custom Event                                                                                                                                |
+| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_cta_` |
+| Use regex matching | checked                                                                                                                                     |
+| Fires on           | All Custom Events                                                                                                                           |
 
 ### Tag: `GA4 Event — KCVV Custom Events`
 

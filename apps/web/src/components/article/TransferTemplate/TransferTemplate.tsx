@@ -22,6 +22,10 @@ export interface TransferTemplateProps {
   readingTime?: string;
   shareConfig: { url: string; title?: string };
   body: PortableTextBlock[] | null;
+  /** Sanity document id — threaded to ArticleMetadata for `article_share` analytics. */
+  articleId?: string;
+  /** Article type (for analytics param `article_type`). */
+  articleType?: string | null;
 }
 
 // Transfer articles are implicitly club-authored — same pattern the
@@ -58,6 +62,8 @@ export const TransferTemplate = ({
   readingTime,
   shareConfig,
   body,
+  articleId,
+  articleType,
 }: TransferTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
   const firstTransferFact: TransferFactValue | undefined = hasBody
@@ -86,13 +92,15 @@ export const TransferTemplate = ({
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
+        articleId={articleId}
+        articleType={articleType}
         className="mt-10"
       />
 
       {firstTransferFact && <TransferStrip feature={firstTransferFact} />}
 
       {hasRemainingBody && (
-        <main className="w-full max-w-inner-lg mx-auto px-6 mb-6 lg:mb-10">
+        <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
           <ArticleBodyMotion>
             <SanityArticleBody
               className="article-body"

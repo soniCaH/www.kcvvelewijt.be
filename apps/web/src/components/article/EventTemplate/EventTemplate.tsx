@@ -18,6 +18,10 @@ export interface EventTemplateProps {
   readingTime?: string;
   shareConfig: { url: string; title?: string };
   body: PortableTextBlock[] | null;
+  /** Sanity document id — threaded to ArticleMetadata for `article_share` and EventStrip for `event_cta_click`. */
+  articleId?: string;
+  /** Article type (for analytics param `article_type`). */
+  articleType?: string | null;
 }
 
 // Event articles are implicitly club-authored — same pattern the other
@@ -58,6 +62,8 @@ export const EventTemplate = ({
   readingTime,
   shareConfig,
   body,
+  articleId,
+  articleType,
 }: EventTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
   const firstEventFact: EventFactValue | undefined = hasBody
@@ -84,10 +90,14 @@ export const EventTemplate = ({
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
+        articleId={articleId}
+        articleType={articleType}
         className="mt-10"
       />
 
-      {firstEventFact && <EventStrip feature={firstEventFact} />}
+      {firstEventFact && (
+        <EventStrip feature={firstEventFact} articleId={articleId} />
+      )}
 
       {hasRemainingBody && (
         <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">

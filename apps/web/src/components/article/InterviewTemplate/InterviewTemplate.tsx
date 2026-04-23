@@ -18,6 +18,10 @@ export interface InterviewTemplateProps {
    * `INTERVIEW` + title only.
    */
   subject?: SubjectValue | null;
+  /** Sanity document id — threaded to ArticleMetadata for `article_share` analytics. */
+  articleId?: string;
+  /** Article type (for analytics param `article_type`). */
+  articleType?: string | null;
 }
 
 // Byline — Phase 4 (#1330) may wire this to an editor-authored field when
@@ -42,6 +46,8 @@ export const InterviewTemplate = ({
   shareConfig,
   body,
   subject = null,
+  articleId,
+  articleType,
 }: InterviewTemplateProps) => {
   return (
     <>
@@ -56,6 +62,8 @@ export const InterviewTemplate = ({
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
+        articleId={articleId}
+        articleType={articleType}
         className="mt-10"
       />
 
