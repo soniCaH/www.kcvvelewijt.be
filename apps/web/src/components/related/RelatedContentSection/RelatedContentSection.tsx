@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils/cn";
 import { NewsCard } from "@/components/article/NewsCard/NewsCard";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 import {
   MentionedEntitiesStrip,
   type MentionedEntity,
@@ -20,6 +21,16 @@ export interface RelatedContentSectionProps {
   items: RelatedContentItem[];
   pageType: RelatedPageType;
   pageSlug: string;
+  /**
+   * `articleType` of the source article. Only set when the source page is
+   * an article detail — used to emit the design §11 `related_article_click`
+   * event alongside the existing generic `related_content_click`. The two
+   * events coexist: `related_content_click` stays page-agnostic for BI
+   * continuity across the /spelers, /staf, /ploegen pages that also use
+   * this component, while `related_article_click` is scoped to article →
+   * article navigation per the design.
+   */
+  sourceArticleType?: string | null;
   className?: string;
 }
 
@@ -72,7 +83,6 @@ function deriveImpressionSource(
 }
 
 function getHref(item: ContentItem): string {
-  // Page documents are served at /club/[slug] — see apps/web/src/app/(main)/club/[slug]/page.tsx.
   return item.type === "article"
     ? `/nieuws/${item.slug}`
     : `/club/${item.slug}`;
@@ -102,9 +112,11 @@ export const RelatedContentSection = ({
   items,
   pageType,
   pageSlug,
+  sourceArticleType,
   className,
 }: RelatedContentSectionProps) => {
   const hasFired = useRef(false);
+  const { trackRelatedArticleClick } = useArticleAnalytics();
 
   const { content, entities } = partitionItems(items);
   const displayedContent = content.slice(0, 6);
@@ -146,6 +158,20 @@ export const RelatedContentSection = ({
       page_type: pageType,
       page_slug: pageSlug,
     });
+    // Design §11: the typed article→article variant carries the source
+    // article type + hashed related id. Fires only when both source page
+    // and target are articles.
+    if (
+      pageType === "article" &&
+      item.type === "article" &&
+      sourceArticleType !== undefined
+    ) {
+      trackRelatedArticleClick({
+        articleType: sourceArticleType,
+        relatedArticleId: item.id,
+        position,
+      });
+    }
   };
 
   const handleEntityClick = (entity: MentionedEntity, position: number) => {

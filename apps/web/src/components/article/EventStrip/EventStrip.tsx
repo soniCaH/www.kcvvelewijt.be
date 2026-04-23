@@ -3,6 +3,7 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { ArrowRight, ExternalLink } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
+import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 import {
   DEFAULT_TICKET_LABEL,
   resolveEventRange,
@@ -11,6 +12,12 @@ import {
 
 export interface EventStripProps {
   feature: EventFactValue;
+  /**
+   * Sanity document id of the surrounding article. Required for
+   * `event_cta_click` analytics; when absent the CTA still renders and
+   * opens the ticket URL, it just doesn't emit an event (used by stories).
+   */
+  articleId?: string;
   className?: string;
 }
 
@@ -51,13 +58,27 @@ const NOTE_COMPONENTS: PortableTextComponents = {
  * CTA: rendered only when `ticketUrl` is set. Ticket label defaults to
  * Dutch "Inschrijven" when the editor leaves it blank.
  */
-export const EventStrip = ({ feature, className }: EventStripProps) => {
+export const EventStrip = ({
+  feature,
+  articleId,
+  className,
+}: EventStripProps) => {
+  const { trackEventCtaClick } = useArticleAnalytics();
   const range = resolveEventRange(
     feature.date,
     feature.endDate,
     feature.sessions,
   );
   const ticketLabel = feature.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
+
+  const handleCtaClick = () => {
+    if (!articleId) return;
+    trackEventCtaClick({
+      articleId,
+      eventDate: feature.date ?? "",
+      hasTicketUrl: Boolean(feature.ticketUrl),
+    });
+  };
 
   const startTime = feature.startTime?.trim() || undefined;
   const endTime = feature.endTime?.trim() || undefined;
@@ -318,6 +339,7 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
               href={feature.ticketUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleCtaClick}
               className={cn(
                 "mt-2 inline-flex items-baseline gap-1 self-start",
                 "font-title text-base font-bold tracking-[var(--letter-spacing-caps)] uppercase",

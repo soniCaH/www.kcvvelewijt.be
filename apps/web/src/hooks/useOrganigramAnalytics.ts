@@ -1,19 +1,13 @@
 import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
+import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import type { OrgChartNode } from "@/types/organigram";
 
 type ViewType = "cards" | "chart" | "responsibilities";
 type ViewSource = "tab" | "swipe" | "keyboard";
 
-/** djb2 hash — non-reversible, synchronous, no external deps */
-export function hashMemberId(id: string): string {
-  let hash = 5381;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) + hash + id.charCodeAt(i)) | 0;
-  }
-  return (hash >>> 0).toString(16);
-}
+export { hashMemberId };
 
 export function useOrganigramAnalytics() {
   const trackViewChanged = useCallback((view: ViewType, source: ViewSource) => {

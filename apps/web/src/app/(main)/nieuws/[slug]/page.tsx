@@ -22,11 +22,17 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
+  buildEventJsonLd,
 } from "@/lib/seo/jsonld";
+import {
+  buildAboutFromSubject,
+  buildEventJsonLdInput,
+} from "@/lib/seo/article-jsonld";
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { TransferTemplate } from "@/components/article/TransferTemplate";
 import { EventTemplate } from "@/components/article/EventTemplate";
+import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -45,6 +51,7 @@ interface ArticlePageProps {
  */
 interface RenderTemplateArgs {
   articleType: string | null | undefined;
+  articleId: string;
   title: string;
   category?: string;
   coverImageUrl?: string;
@@ -69,6 +76,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           shareConfig={shareConfig}
           body={args.body}
           subject={args.subject}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     case "transfer":
@@ -80,6 +89,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     case "event":
@@ -91,6 +102,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
     // Missing or unknown articleType falls through to announcement —
@@ -105,6 +118,8 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
+          articleId={args.articleId}
+          articleType={args.articleType}
         />
       );
   }
@@ -234,6 +249,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ...mapMentionedTeams(article.mentionedTeams ?? undefined),
   ];
 
+  const about = buildAboutFromSubject(article);
+  const eventJsonLd = buildEventJsonLdInput(article, shareConfig.url);
+
   return (
     <>
       <JsonLd
@@ -252,11 +270,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             author: "KCVV Elewijt",
             image: article.coverImageUrl ?? undefined,
             url: shareConfig.url,
+            about,
           })}
         />
       )}
+      {eventJsonLd && <JsonLd data={buildEventJsonLd(eventJsonLd)} />}
+      <ArticleViewTracker
+        articleId={article.id}
+        articleType={article.articleType}
+        hasSubject={about !== undefined}
+        subjectKind={about ? (article.subject?.kind ?? undefined) : undefined}
+      />
       {renderTemplate({
         articleType: article.articleType,
+        articleId: article.id,
         title: article.title,
         category: primaryCategory?.name,
         // Pass both projections separately — each template picks the
@@ -279,6 +306,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         items={relatedItems}
         pageType="article"
         pageSlug={article.slug}
+        sourceArticleType={article.articleType}
       />
     </>
   );

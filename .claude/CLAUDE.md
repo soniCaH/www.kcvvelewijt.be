@@ -38,6 +38,10 @@ App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `pack
 - **Scaffold from a peer, not from scratch:** Before writing any `package.json` or `tsconfig.json`, open the nearest sibling package's copies and reconcile every field. Use `packages/api-contract/` as the reference for library packages in this monorepo.
 - **Audit `turbo.json` after every new package:** For every script in the new package, add or verify a task entry. Source-only packages (no build output) must have `"outputs": []` to prevent Turbo from expecting `dist/**`.
 
+### Scaffold Individual Builders / Hooks From a Peer
+
+Before writing a new JSON-LD builder, `use*Analytics` hook, repository, or any single file landing in a folder with ≥ 2 existing peers, grep the peers first and mirror: return type (e.g. `WithContext<T>` vs a loose document), import ordering, how optional fields are omitted (spread-conditional vs direct undefined), and param-shape conventions. Peer-drift was the most frequent review-flag class in #1333 (5 of 22 items) — one grep of `buildXxxJsonLd` or `use*Analytics` would have caught all five.
+
 ### Promoting a Nested Directory to a Workspace Member
 
 After `git mv <nested-dir> <new-path>`:
