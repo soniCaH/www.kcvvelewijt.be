@@ -258,9 +258,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleType: article.articleType,
         title: article.title,
         category: primaryCategory?.name,
+        // Pass both projections separately — each template picks the
+        // aspect it needs (Interview + Transfer take the 4:5 portrait,
+        // Announcement takes the 16:9 wide). No cross-fallback: if a
+        // template's preferred projection is null the template renders
+        // without an image rather than cropping the wrong aspect.
         coverImageUrl: article.coverImageUrl ?? undefined,
-        coverImagePortraitUrl:
-          article.coverImagePortraitUrl ?? article.coverImageUrl,
+        coverImagePortraitUrl: article.coverImagePortraitUrl ?? undefined,
         publishedDate: article.publishedAt
           ? formatArticleDate(new Date(article.publishedAt))
           : undefined,
