@@ -134,14 +134,14 @@ Rollout posture: phases 2–7 can ship in any order relative to each other once 
 
 ### Phase 6 — #1332 — Event template + eventFact
 
-- [ ] New schema: `packages/sanity-schemas/src/eventFact.ts` per design §4.5.
-- [ ] `article.body` accepts `{type: 'eventFact'}`.
-- [ ] `EventTemplate` renders the serif-style date-block hero per §5.4.
-- [ ] `EventFactFeature` matches design §8.2: full-bleed, date block left with vertical 1px rule, title + metadata stack, Note PT, text-link CTA with Lucide `ArrowRight`.
-- [ ] `EventFactOverview` matches design §8.2: body-column-width 1px-rule stack, `w-[5rem]` date column, CTA link right-aligned.
-- [ ] CTA behavior: if `ticketUrl` missing, CTA hidden.
-- [ ] Storybook stories: feature and overview, plus composed `EventTemplate`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [x] New schema: `packages/sanity-schemas/src/eventFact.ts` with `title`, `date`, `startTime`, `endTime`, `location`, `address`, `ageGroup`, `competitionTag`, `ticketUrl`, `ticketLabel` (initialValue `"Inschrijven"`), `capacity`, `note` (Portable Text).
+- [x] `article.body` accepts `{type: 'eventFact'}`.
+- [x] `EventTemplate` renders the typographic hero per §5.4 (kicker `EVENT | ageGroup/competitionTag` + article title). The serif-style date block + title + metadata + note + CTA live on `EventStrip` beneath the §7.6 metadata bar — mirrors the Phase 5 transfer hero/strip split so facts appear exactly once per page.
+- [x] `EventStrip` matches design §8.2 feature: full-bleed, 2-column grid with date block left (day at clamp `text-[5rem]`/`text-[6rem]`, month in Dutch uppercase, year in mono small-caps) + vertical `kcvv-gray-light` rule, title + metadata stack + Portable-Text note + text-link CTA with Lucide `ArrowRight`.
+- [x] `EventFactOverview` matches design §8.2 overview treatment, reshaped to the dark-band stack treatment introduced for `TransferFactOverview` (3-column grid: date cluster · title + metadata · CTA). Sibling CSS rules in `globals.css` fuse consecutive transferFact/eventFact rows into one seamless dark band; mixed stacks (transferFact → eventFact) flow the same way.
+- [x] CTA behaviour: `ticketUrl` missing → CTA hidden on both the strip and the overview row. `ticketLabel` defaults to Dutch "Inschrijven" when blank.
+- [x] Storybook stories: `Features/Articles/EventFact/Overview` × 4 (with-CTA, with-custom-label, without-CTA, no-date-yet) + composed `Pages/Article/Event` × 2 (full composition, no-eventFact fallback).
+- [x] `pnpm --filter @kcvv/web check-all` passes.
 
 ### Phase 7 — #1333 — Related slider restyle + JSON-LD + analytics
 

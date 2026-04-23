@@ -10,6 +10,7 @@ export {article} from './article'
 export {articleImage} from './articleImage'
 export {qaBlock, qaPair} from './qaBlock'
 export {transferFact} from './transferFact'
+export {eventFact} from './eventFact'
 export {subject} from './subject'
 export {sponsor} from './sponsor'
 export {event} from './event'
@@ -31,6 +32,7 @@ import {article} from './article'
 import {articleImage} from './articleImage'
 import {qaBlock, qaPair} from './qaBlock'
 import {transferFact} from './transferFact'
+import {eventFact} from './eventFact'
 import {subject} from './subject'
 import {sponsor} from './sponsor'
 import {event} from './event'
@@ -55,6 +57,7 @@ export const schemaTypes = [
   qaBlock,
   qaPair,
   transferFact,
+  eventFact,
   subject,
   sponsor,
   event,

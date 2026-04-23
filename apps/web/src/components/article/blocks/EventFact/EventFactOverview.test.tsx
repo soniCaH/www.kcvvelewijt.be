@@ -1,0 +1,186 @@
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { EventFactOverview } from "./EventFactOverview";
+
+describe("EventFactOverview", () => {
+  it("renders the Dutch-formatted date cluster (day + short month + weekday)", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Lentetornooi U13",
+          date: "2026-04-27",
+        }}
+      />,
+    );
+    const dateCell = screen.getByTestId("event-overview-date");
+    expect(dateCell.textContent).toMatch(/27/);
+    expect(dateCell.textContent).toMatch(/apr/i);
+    // 2026-04-27 is a Monday.
+    expect(dateCell.textContent).toMatch(/maandag/i);
+  });
+
+  it("renders on a full-bleed dark band so consecutive rows stack into one section", () => {
+    const { container } = render(
+      <EventFactOverview
+        value={{ title: "Lentetornooi", date: "2026-04-27" }}
+      />,
+    );
+    const section = container.querySelector("[data-testid='event-overview']");
+    expect(section).toHaveClass("bg-kcvv-gray-dark");
+    expect(section).toHaveClass("full-bleed");
+  });
+
+  it("renders the title + time + location + age-group metadata line", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Lentetornooi U13",
+          date: "2026-04-27",
+          startTime: "10:00",
+          endTime: "17:00",
+          location: "Sportpark Elewijt",
+          ageGroup: "U13",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-overview-title")).toHaveTextContent(
+      "Lentetornooi U13",
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    expect(meta.textContent).toMatch(/10:00 - 17:00/);
+    expect(meta.textContent).toMatch(/Sportpark Elewijt/i);
+    expect(meta.textContent).toMatch(/U13/);
+  });
+
+  it("falls back to `competitionTag` when `ageGroup` is missing", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Clubfeest",
+          date: "2026-04-27",
+          competitionTag: "Clubfeest",
+        }}
+      />,
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    expect(meta.textContent).toMatch(/Clubfeest/i);
+  });
+
+  it("renders the CTA link with the default label when `ticketLabel` is unset", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Lentetornooi",
+          date: "2026-04-27",
+          ticketUrl: "https://kcvvelewijt.be/inschrijven",
+        }}
+      />,
+    );
+    const cta = screen.getByTestId("event-overview-cta");
+    expect(cta).toHaveTextContent(/Inschrijven/i);
+    expect(cta).toHaveAttribute("href", "https://kcvvelewijt.be/inschrijven");
+    expect(cta).toHaveAttribute("target", "_blank");
+  });
+
+  it("uses the editor-authored `ticketLabel` when provided", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Lentetornooi",
+          date: "2026-04-27",
+          ticketUrl: "https://kcvvelewijt.be/inschrijven",
+          ticketLabel: "Boek je plek",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-overview-cta")).toHaveTextContent(
+      /Boek je plek/,
+    );
+  });
+
+  it("hides the CTA when `ticketUrl` is unset", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Lentetornooi",
+          date: "2026-04-27",
+        }}
+      />,
+    );
+    expect(screen.queryByTestId("event-overview-cta")).toBeNull();
+  });
+
+  it("renders the `Datum volgt` placeholder when the date is missing", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Datum volgt",
+          date: "",
+        }}
+      />,
+    );
+    const dateCell = screen.getByTestId("event-overview-date");
+    expect(dateCell.textContent).toMatch(/Datum volgt/i);
+  });
+
+  it("renders the `Datum volgt` placeholder when the date is malformed", () => {
+    // `resolveEventDate` is Luxon-backed, so invalid months/days reject
+    // cleanly instead of silently rolling over. Covers the
+    // non-existent-calendar-date regression from Phase 6 review.
+    render(
+      <EventFactOverview
+        value={{
+          title: "Ongeldige datum",
+          date: "2020-13-01",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-overview-date").textContent).toMatch(
+      /Datum volgt/i,
+    );
+  });
+
+  it("skips the time row on recurring events — the date cell already carries the span", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Steakfestijn",
+          sessions: [
+            { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+            { date: "2026-11-21", startTime: "17:00", endTime: "23:00" },
+            { date: "2026-11-22", startTime: "11:30", endTime: "15:00" },
+          ],
+          location: "Kantine KCVV",
+          competitionTag: "Clubfeest",
+        }}
+      />,
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    // No time / session-count — the date column handles the when.
+    expect(meta.textContent).not.toMatch(/18:00/);
+    expect(meta.textContent).not.toMatch(/sessies/i);
+    // Meta still carries the where + category.
+    expect(meta.textContent).toMatch(/Kantine KCVV/);
+    expect(meta.textContent).toMatch(/Clubfeest/i);
+    // Date column should show the span with 3-letter weekday abbreviations.
+    const dateCell = screen.getByTestId("event-overview-date");
+    expect(dateCell.textContent).toMatch(/20/);
+    expect(dateCell.textContent).toMatch(/22/);
+    expect(dateCell.textContent).toMatch(/vri\s*–\s*zon/i);
+  });
+
+  it("falls back to `competitionTag` when `ageGroup` is an empty string", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Clubfeest",
+          date: "2026-04-27",
+          ageGroup: "",
+          competitionTag: "Clubfeest",
+        }}
+      />,
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    expect(meta.textContent).toMatch(/Clubfeest/i);
+  });
+});

@@ -26,12 +26,88 @@ import {
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { TransferTemplate } from "@/components/article/TransferTemplate";
+import { EventTemplate } from "@/components/article/EventTemplate";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
+import type { SubjectValue } from "@/components/article/SubjectAttribution";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
+}
+
+/**
+ * Per-type template dispatch. Extracted out of the JSX so the nested
+ * ternary (four branches, each with its own prop shape) doesn't bloat
+ * the page body. Keyed on `articleType` with a default renderer for
+ * missing/unknown types → `AnnouncementTemplate` (the fallback path
+ * per PRD §3).
+ */
+interface RenderTemplateArgs {
+  articleType: string | null | undefined;
+  title: string;
+  category?: string;
+  coverImageUrl?: string;
+  coverImagePortraitUrl?: string | null;
+  publishedDate?: string;
+  readingTime?: string;
+  shareUrl: string;
+  body: PortableTextBlock[] | null;
+  subject: SubjectValue | null;
+}
+
+function renderTemplate(args: RenderTemplateArgs) {
+  const shareConfig = { url: args.shareUrl, title: args.title };
+  switch (args.articleType) {
+    case "interview":
+      return (
+        <InterviewTemplate
+          title={args.title}
+          coverImageUrl={args.coverImagePortraitUrl}
+          publishedDate={args.publishedDate}
+          readingTime={args.readingTime}
+          shareConfig={shareConfig}
+          body={args.body}
+          subject={args.subject}
+        />
+      );
+    case "transfer":
+      return (
+        <TransferTemplate
+          title={args.title}
+          coverImageUrl={args.coverImagePortraitUrl}
+          publishedDate={args.publishedDate}
+          readingTime={args.readingTime}
+          shareConfig={shareConfig}
+          body={args.body}
+        />
+      );
+    case "event":
+      return (
+        <EventTemplate
+          title={args.title}
+          coverImageUrl={args.coverImageUrl}
+          publishedDate={args.publishedDate}
+          readingTime={args.readingTime}
+          shareConfig={shareConfig}
+          body={args.body}
+        />
+      );
+    // Missing or unknown articleType falls through to announcement —
+    // matches the PRD §3 legacy-article fallback rule.
+    default:
+      return (
+        <AnnouncementTemplate
+          title={args.title}
+          category={args.category}
+          coverImageUrl={args.coverImageUrl}
+          publishedDate={args.publishedDate}
+          readingTime={args.readingTime}
+          shareConfig={shareConfig}
+          body={args.body}
+        />
+      );
+  }
 }
 
 /**
@@ -179,48 +255,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           })}
         />
       )}
-      {article.articleType === "interview" ? (
-        <InterviewTemplate
-          title={article.title}
-          coverImageUrl={article.coverImagePortraitUrl ?? article.coverImageUrl}
-          publishedDate={
-            article.publishedAt
-              ? formatArticleDate(new Date(article.publishedAt))
-              : undefined
-          }
-          readingTime={readingTime}
-          shareConfig={{ url: shareConfig.url, title: article.title }}
-          body={(article.body as PortableTextBlock[] | null) ?? null}
-          subject={article.subject ?? null}
-        />
-      ) : article.articleType === "transfer" ? (
-        <TransferTemplate
-          title={article.title}
-          coverImageUrl={article.coverImagePortraitUrl ?? article.coverImageUrl}
-          publishedDate={
-            article.publishedAt
-              ? formatArticleDate(new Date(article.publishedAt))
-              : undefined
-          }
-          readingTime={readingTime}
-          shareConfig={{ url: shareConfig.url, title: article.title }}
-          body={(article.body as PortableTextBlock[] | null) ?? null}
-        />
-      ) : (
-        <AnnouncementTemplate
-          title={article.title}
-          category={primaryCategory?.name}
-          coverImageUrl={article.coverImageUrl ?? undefined}
-          publishedDate={
-            article.publishedAt
-              ? formatArticleDate(new Date(article.publishedAt))
-              : undefined
-          }
-          readingTime={readingTime}
-          shareConfig={{ url: shareConfig.url, title: article.title }}
-          body={(article.body as PortableTextBlock[] | null) ?? null}
-        />
-      )}
+      {renderTemplate({
+        articleType: article.articleType,
+        title: article.title,
+        category: primaryCategory?.name,
+        // Pass both projections separately — each template picks the
+        // aspect it needs (Interview + Transfer take the 4:5 portrait,
+        // Announcement takes the 16:9 wide). No cross-fallback: if a
+        // template's preferred projection is null the template renders
+        // without an image rather than cropping the wrong aspect.
+        coverImageUrl: article.coverImageUrl ?? undefined,
+        coverImagePortraitUrl: article.coverImagePortraitUrl ?? undefined,
+        publishedDate: article.publishedAt
+          ? formatArticleDate(new Date(article.publishedAt))
+          : undefined,
+        readingTime,
+        shareUrl: shareConfig.url,
+        body: (article.body as PortableTextBlock[] | null) ?? null,
+        subject: article.subject ?? null,
+      })}
 
       <RelatedContentSection
         items={relatedItems}

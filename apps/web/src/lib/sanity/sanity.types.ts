@@ -222,6 +222,47 @@ export type Subject = {
   customRole?: string;
 };
 
+export type EventFact = {
+  _type: "eventFact";
+  title?: string;
+  date?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  sessions?: Array<{
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    _type: "session";
+    _key: string;
+  }>;
+  location?: string;
+  address?: string;
+  ageGroup?: string;
+  competitionTag?: string;
+  ticketUrl?: string;
+  ticketLabel?: string;
+  capacity?: number;
+  note?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal";
+    listItem?: never;
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+};
+
 export type TransferFact = {
   _type: "transferFact";
   direction?: "incoming" | "outgoing" | "extension";
@@ -385,6 +426,9 @@ export type Article = {
     | ({
         _key: string;
       } & TransferFact)
+    | ({
+        _key: string;
+      } & EventFact)
   >;
   relatedArticles?: Array<
     {
@@ -855,6 +899,7 @@ export type AllSanitySchemaTypes =
   | PlayerReference
   | StaffMemberReference
   | Subject
+  | EventFact
   | TransferFact
   | QaPair
   | QaBlock
@@ -978,6 +1023,53 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+      }
+    | {
+        _key: string;
+        _type: "eventFact";
+        title?: string;
+        date?: string;
+        endDate?: string;
+        startTime?: string;
+        endTime?: string;
+        sessions?: Array<{
+          date?: string;
+          startTime?: string;
+          endTime?: string;
+          _type: "session";
+          _key: string;
+        }>;
+        location?: string;
+        address?: string;
+        ageGroup?: string;
+        competitionTag?: string;
+        ticketUrl?: string;
+        ticketLabel?: string;
+        capacity?: number;
+        note?: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "normal";
+          listItem?: never;
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        }>;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        markDefs: null;
       }
     | {
         _key: string;
@@ -1212,6 +1304,54 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileOriginalFilename: null;
         asset: null;
         otherClubLogoUrl: null;
+      }
+    | {
+        _key: string;
+        _type: "eventFact";
+        title?: string;
+        date?: string;
+        endDate?: string;
+        startTime?: string;
+        endTime?: string;
+        sessions?: Array<{
+          date?: string;
+          startTime?: string;
+          endTime?: string;
+          _type: "session";
+          _key: string;
+        }>;
+        location?: string;
+        address?: string;
+        ageGroup?: string;
+        competitionTag?: string;
+        ticketUrl?: string;
+        ticketLabel?: string;
+        capacity?: number;
+        note?: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "normal";
+          listItem?: never;
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        }>;
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        otherClubLogoUrl: null;
+        markDefs: null;
       }
     | {
         _key: string;
