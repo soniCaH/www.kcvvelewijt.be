@@ -131,9 +131,13 @@ export function buildNewsArticleJsonLd(
           about: {
             "@type": "Person" as const,
             name: input.about.name,
-            url: input.about.url,
-            image: input.about.image,
-            jobTitle: input.about.jobTitle,
+            ...(input.about.url !== undefined ? { url: input.about.url } : {}),
+            ...(input.about.image !== undefined
+              ? { image: input.about.image }
+              : {}),
+            ...(input.about.jobTitle !== undefined
+              ? { jobTitle: input.about.jobTitle }
+              : {}),
           },
         }
       : {}),

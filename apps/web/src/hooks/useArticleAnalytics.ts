@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
-import { hashMemberId } from "./useOrganigramAnalytics";
+import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
 export type ArticleType = "announcement" | "interview" | "transfer" | "event";
 export type ShareChannel = "native" | "facebook";
@@ -91,10 +91,11 @@ export function useArticleAnalytics() {
       // articles. Carrying the param keeps the event shape consistent with
       // the other three article_* events so GA4 explorations can pivot on
       // `article_type` uniformly.
+      const cleanEventDate = eventDate.trim();
       trackEvent("event_cta_click", {
         article_type: "event",
         article_id_hashed: hashMemberId(articleId),
-        event_date: eventDate,
+        ...(cleanEventDate ? { event_date: cleanEventDate } : {}),
         has_ticket_url: hasTicketUrl,
       });
     },

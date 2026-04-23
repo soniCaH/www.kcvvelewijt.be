@@ -7,7 +7,7 @@ vi.mock("@/lib/analytics/track-event", () => ({
 
 import { trackEvent } from "@/lib/analytics/track-event";
 import { useArticleAnalytics } from "./useArticleAnalytics";
-import { hashMemberId } from "./useOrganigramAnalytics";
+import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
 const mockTrackEvent = vi.mocked(trackEvent);
 
@@ -168,6 +168,24 @@ describe("useArticleAnalytics", () => {
         article_id_hashed: hashMemberId("evt-3"),
         event_date: "2026-05-01",
         has_ticket_url: false,
+      });
+    });
+
+    it("omits event_date when eventDate is empty or whitespace", () => {
+      const { result } = renderHook(() => useArticleAnalytics());
+
+      act(() => {
+        result.current.trackEventCtaClick({
+          articleId: "evt-4",
+          eventDate: "",
+          hasTicketUrl: true,
+        });
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("event_cta_click", {
+        article_type: "event",
+        article_id_hashed: hashMemberId("evt-4"),
+        has_ticket_url: true,
       });
     });
   });

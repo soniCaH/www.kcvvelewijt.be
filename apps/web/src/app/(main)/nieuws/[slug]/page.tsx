@@ -280,13 +280,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         jobTitle: s.functionTitle ?? undefined,
       };
     }
-    const name = subject.customName?.trim() ?? "";
-    if (!name) return undefined;
-    return {
-      name,
-      image: subject.customPhotoUrl ?? undefined,
-      jobTitle: subject.customRole ?? undefined,
-    };
+    if (subject.kind === "custom") {
+      const name = subject.customName?.trim() ?? "";
+      if (!name) return undefined;
+      return {
+        name,
+        image: subject.customPhotoUrl ?? undefined,
+        jobTitle: subject.customRole ?? undefined,
+      };
+    }
+    // Unknown discriminator — do not silently fall through to a branch.
+    return undefined;
   })();
 
   // Event branch (§12): pull the first `eventFact` block out of the body
@@ -328,10 +332,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       if (!cleanTime) return date;
       return `${date}T${cleanTime}:00`;
     };
+    // Only emit endDate when the editor explicitly set endDate or endTime.
+    // Synthesising a bare-date endDate alongside a timed startDate causes
+    // Google to resolve the end to 00:00 on that day → "ends before it
+    // starts" — same-day events with only startTime would show as negative
+    // duration in rich results. Schema.org treats an absent endDate as
+    // "unknown end / full day" which is safer.
+    const endDate =
+      ev.endDate || ev.endTime
+        ? withTime(ev.endDate ?? ev.date, ev.endTime)
+        : undefined;
     return {
       name,
       startDate: withTime(ev.date, ev.startTime) ?? ev.date,
-      endDate: withTime(ev.endDate ?? ev.date, ev.endTime),
+      endDate,
       location: ev.location,
       address: ev.address,
       url: shareConfig.url,
@@ -366,7 +380,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleId={article.id}
         articleType={article.articleType}
         hasSubject={about !== undefined}
-        subjectKind={article.subject?.kind ?? undefined}
+        subjectKind={about ? (article.subject?.kind ?? undefined) : undefined}
       />
       {renderTemplate({
         articleType: article.articleType,
