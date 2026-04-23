@@ -73,8 +73,11 @@ describe("EventHero", () => {
 
   it("never renders an empty h1 — falls back to `Event` when title is blank", () => {
     render(<EventHero title="   " feature={null} />);
+    // Anchor the regex so the fallback must be exactly "Event" — a
+    // future refactor that changes the fallback to "Events coming soon"
+    // would otherwise slip through.
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      /Event/,
+      /^Event$/,
     );
   });
 });

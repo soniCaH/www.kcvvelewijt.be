@@ -106,7 +106,7 @@ const lentetornooi = {
   _key: "evt-feature",
   _type: "eventFact",
   title: "Lentetornooi U13",
-  date: "2026-04-27",
+  date: "2026-04-25",
   startTime: "10:00",
   endTime: "17:00",
   location: "Sportpark Elewijt",
@@ -126,7 +126,7 @@ const afterparty = {
   _key: "evt-afterparty",
   _type: "eventFact",
   title: "Afterparty",
-  date: "2026-04-27",
+  date: "2026-04-25",
   startTime: "20:00",
   location: "Kantine KCVV",
   competitionTag: "Clubfeest",
@@ -167,14 +167,16 @@ try {
     articleType: "event",
     title: "Lentetornooi U13 — zaterdag in Elewijt",
     slug: { _type: "slug", current: SLUG },
-    publishAt: new Date("2026-04-23T08:00:00Z").toISOString(),
+    // Backdate publishAt so the article clears the GROQ `publishAt <= now()`
+    // filter regardless of build/timezone clock drift on the preview.
+    publishAt: new Date("2026-04-22T08:00:00Z").toISOString(),
     featured: false,
     tags: ["Jeugd", "Evenementen"],
     body: [
       lentetornooi,
       paragraph(
         "p1",
-        "Zaterdag 27 april verwelkomen we acht ploegen voor het traditionele lentetornooi. Vijf velden, vier poules, één grote dag voor de U13-kern.",
+        "Zaterdag 25 april verwelkomen we acht ploegen voor het traditionele lentetornooi. Vijf velden, vier poules, één grote dag voor de U13-kern.",
       ),
       paragraph(
         "p2",

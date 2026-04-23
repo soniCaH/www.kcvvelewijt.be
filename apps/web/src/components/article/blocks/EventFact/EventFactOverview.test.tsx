@@ -110,7 +110,7 @@ describe("EventFactOverview", () => {
     expect(screen.queryByTestId("event-overview-cta")).toBeNull();
   });
 
-  it("renders `tbd` in the date column when the date is missing or malformed", () => {
+  it("renders the `Datum volgt` placeholder when the date is missing", () => {
     render(
       <EventFactOverview
         value={{
@@ -120,6 +120,38 @@ describe("EventFactOverview", () => {
       />,
     );
     const dateCell = screen.getByTestId("event-overview-date");
-    expect(dateCell.textContent).toMatch(/tbd/i);
+    expect(dateCell.textContent).toMatch(/Datum volgt/i);
+  });
+
+  it("renders the `Datum volgt` placeholder when the date is malformed", () => {
+    // `resolveEventDate` is Luxon-backed, so invalid months/days reject
+    // cleanly instead of silently rolling over. Covers the
+    // non-existent-calendar-date regression from Phase 6 review.
+    render(
+      <EventFactOverview
+        value={{
+          title: "Ongeldige datum",
+          date: "2020-13-01",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-overview-date").textContent).toMatch(
+      /Datum volgt/i,
+    );
+  });
+
+  it("falls back to `competitionTag` when `ageGroup` is an empty string", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Clubfeest",
+          date: "2026-04-27",
+          ageGroup: "",
+          competitionTag: "Clubfeest",
+        }}
+      />,
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    expect(meta.textContent).toMatch(/Clubfeest/i);
   });
 });

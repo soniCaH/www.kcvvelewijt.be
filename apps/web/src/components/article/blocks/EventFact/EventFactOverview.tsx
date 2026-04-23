@@ -36,11 +36,15 @@ export const EventFactOverview = ({
   const resolvedDate = resolveEventDate(value.date);
   const timeRange = formatTimeRange(value.startTime, value.endTime);
 
-  const metaParts = [
-    timeRange,
-    value.location,
-    value.ageGroup ?? value.competitionTag,
-  ].filter((x): x is string => typeof x === "string" && x.length > 0);
+  // Prefer the age group when it has real content; fall back to the
+  // competition tag otherwise. `??` alone would let an empty-string
+  // `ageGroup` suppress the tag, which editors hit when they clear the
+  // field without also clearing the value.
+  const ageOrCompetition = value.ageGroup?.trim() || value.competitionTag;
+
+  const metaParts = [timeRange, value.location, ageOrCompetition].filter(
+    (x): x is string => typeof x === "string" && x.length > 0,
+  );
 
   const ticketLabel = value.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
 
@@ -84,7 +88,7 @@ export const EventFactOverview = ({
             className="text-kcvv-white flex flex-col"
           >
             <span className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
-              tbd
+              Datum volgt
             </span>
           </div>
         )}

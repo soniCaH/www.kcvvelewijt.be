@@ -34,7 +34,7 @@ const lentetornooi = {
   _type: "eventFact",
   _key: "evt-feature",
   title: "Lentetornooi U13",
-  date: "2026-04-27",
+  date: "2026-04-25",
   startTime: "10:00",
   endTime: "17:00",
   location: "Sportpark Elewijt",
@@ -51,7 +51,7 @@ const afterparty = {
   _type: "eventFact",
   _key: "evt-after",
   title: "Afterparty",
-  date: "2026-04-27",
+  date: "2026-04-25",
   startTime: "20:00",
   location: "Kantine KCVV",
   competitionTag: "Clubfeest",
@@ -99,7 +99,7 @@ export const FullComposition: Story = {
       lentetornooi,
       paragraph(
         "p1",
-        "Zaterdag 27 april verwelkomen we acht ploegen voor het traditionele lentetornooi. Vijf velden, vier poules, één grote dag voor de U13-kern.",
+        "Zaterdag 25 april verwelkomen we acht ploegen voor het traditionele lentetornooi. Vijf velden, vier poules, één grote dag voor de U13-kern.",
       ),
       paragraph(
         "p2",

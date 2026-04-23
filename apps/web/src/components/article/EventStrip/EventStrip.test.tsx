@@ -124,6 +124,22 @@ describe("EventStrip", () => {
     expect(cta).toHaveTextContent(/Inschrijven/i);
   });
 
+  it("falls back to `Inschrijven` when `ticketLabel` is whitespace-only — exercises the trim path", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Lentetornooi",
+          date: "2026-04-27",
+          ticketUrl: "https://kcvvelewijt.be/inschrijven",
+          ticketLabel: "   ",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-strip-cta")).toHaveTextContent(
+      /Inschrijven/i,
+    );
+  });
+
   it("uses the editor-authored ticketLabel when set", () => {
     render(
       <EventStrip
