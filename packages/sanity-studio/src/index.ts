@@ -8,6 +8,11 @@ export {
   applyRespondentPicker,
 } from './inputs'
 export {schemaTypes} from './schema-types'
+export {
+  default as interviewSubjectToSubjectsMigration,
+  migrateInterviewSubjectToSubjects,
+} from './migrations/interview-subject-to-subjects'
+export type {InterviewArticleDoc} from './migrations/interview-subject-to-subjects'
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
 export {
