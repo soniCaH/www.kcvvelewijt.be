@@ -49,7 +49,7 @@ function makeArticleDetailRow(
     featured: true,
     tags: ["Eerste ploeg"],
     articleType: "announcement",
-    subject: null,
+    subjects: null,
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
     coverImagePortraitUrl: "https://cdn.sanity.io/cover-portrait.webp",
     body: [
@@ -265,8 +265,9 @@ describe("ArticleRepository", () => {
       expect(a.body).toEqual(row.body);
     });
 
-    it("round-trips a populated player subject unchanged on the detail VM", async () => {
+    it("round-trips a populated player subject unchanged inside subjects[]", async () => {
       const populatedSubject = {
+        _key: "maxim-key",
         kind: "player" as const,
         playerRef: {
           _id: "player-psd-1673",
@@ -283,7 +284,7 @@ describe("ArticleRepository", () => {
         customRole: null,
         customPhotoUrl: null,
       };
-      const row = makeArticleDetailRow({ subject: populatedSubject });
+      const row = makeArticleDetailRow({ subjects: [populatedSubject] });
       mockFetch.mockResolvedValueOnce(row);
       const result = await runWithRepo(
         Effect.gen(function* () {
@@ -291,7 +292,7 @@ describe("ArticleRepository", () => {
           return yield* repo.findBySlug("test-article-detail");
         }),
       );
-      expect(result!.subject).toEqual(populatedSubject);
+      expect(result!.subjects).toEqual([populatedSubject]);
     });
 
     it("passes through every articleType enum value and null without transformation", async () => {

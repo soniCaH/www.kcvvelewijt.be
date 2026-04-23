@@ -15,10 +15,12 @@ describe("buildAboutFromSubject", () => {
     const result = buildAboutFromSubject({
       ...baseArticle,
       articleType: "event",
-      subject: {
-        kind: "player",
-        playerRef: { firstName: "Jan", lastName: "Janssen" },
-      },
+      subjects: [
+        {
+          kind: "player",
+          playerRef: { firstName: "Jan", lastName: "Janssen" },
+        },
+      ],
     });
     expect(result).toBeUndefined();
   });
@@ -28,7 +30,7 @@ describe("buildAboutFromSubject", () => {
       buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: null,
+        subjects: null,
       }),
     ).toBeUndefined();
   });
@@ -38,7 +40,7 @@ describe("buildAboutFromSubject", () => {
       buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: { kind: null },
+        subjects: [{ kind: null }],
       }),
     ).toBeUndefined();
   });
@@ -48,17 +50,19 @@ describe("buildAboutFromSubject", () => {
       const result = buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: {
-          kind: "player",
-          playerRef: {
-            firstName: "Jan",
-            lastName: "Janssen",
-            psdId: "123",
-            position: "Keeper",
-            transparentImageUrl: "https://cdn/jan-transparent.webp",
-            psdImageUrl: "https://cdn/jan-psd.webp",
+        subjects: [
+          {
+            kind: "player",
+            playerRef: {
+              firstName: "Jan",
+              lastName: "Janssen",
+              psdId: "123",
+              position: "Keeper",
+              transparentImageUrl: "https://cdn/jan-transparent.webp",
+              psdImageUrl: "https://cdn/jan-psd.webp",
+            },
           },
-        },
+        ],
       });
       expect(result).toEqual({
         name: "Jan Janssen",
@@ -72,14 +76,16 @@ describe("buildAboutFromSubject", () => {
       const result = buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: {
-          kind: "player",
-          playerRef: {
-            firstName: "A",
-            lastName: "B",
-            psdImageUrl: "https://cdn/b.webp",
+        subjects: [
+          {
+            kind: "player",
+            playerRef: {
+              firstName: "A",
+              lastName: "B",
+              psdImageUrl: "https://cdn/b.webp",
+            },
           },
-        },
+        ],
       });
       expect(result?.image).toBe("https://cdn/b.webp");
     });
@@ -88,10 +94,12 @@ describe("buildAboutFromSubject", () => {
       const result = buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: {
-          kind: "player",
-          playerRef: { firstName: "A", lastName: "B" },
-        },
+        subjects: [
+          {
+            kind: "player",
+            playerRef: { firstName: "A", lastName: "B" },
+          },
+        ],
       });
       expect(result?.name).toBe("A B");
       expect(result?.url).toBeUndefined();
@@ -102,7 +110,7 @@ describe("buildAboutFromSubject", () => {
         buildAboutFromSubject({
           ...baseArticle,
           articleType: "interview",
-          subject: { kind: "player", playerRef: null },
+          subjects: [{ kind: "player", playerRef: null }],
         }),
       ).toBeUndefined();
     });
@@ -112,10 +120,12 @@ describe("buildAboutFromSubject", () => {
         buildAboutFromSubject({
           ...baseArticle,
           articleType: "interview",
-          subject: {
-            kind: "player",
-            playerRef: { firstName: null, lastName: null },
-          },
+          subjects: [
+            {
+              kind: "player",
+              playerRef: { firstName: null, lastName: null },
+            },
+          ],
         }),
       ).toBeUndefined();
     });
@@ -126,15 +136,17 @@ describe("buildAboutFromSubject", () => {
       const result = buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: {
-          kind: "staff",
-          staffRef: {
-            firstName: "Piet",
-            lastName: "Pieters",
-            functionTitle: "Jeugdcoördinator",
-            photoUrl: "https://cdn/piet.webp",
+        subjects: [
+          {
+            kind: "staff",
+            staffRef: {
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: "Jeugdcoördinator",
+              photoUrl: "https://cdn/piet.webp",
+            },
           },
-        },
+        ],
       });
       expect(result).toEqual({
         name: "Piet Pieters",
@@ -149,7 +161,7 @@ describe("buildAboutFromSubject", () => {
         buildAboutFromSubject({
           ...baseArticle,
           articleType: "interview",
-          subject: { kind: "staff", staffRef: null },
+          subjects: [{ kind: "staff", staffRef: null }],
         }),
       ).toBeUndefined();
     });
@@ -160,12 +172,14 @@ describe("buildAboutFromSubject", () => {
       const result = buildAboutFromSubject({
         ...baseArticle,
         articleType: "interview",
-        subject: {
-          kind: "custom",
-          customName: "Ann Externe",
-          customRole: "Gastspreker",
-          customPhotoUrl: "https://cdn/ann.webp",
-        },
+        subjects: [
+          {
+            kind: "custom",
+            customName: "Ann Externe",
+            customRole: "Gastspreker",
+            customPhotoUrl: "https://cdn/ann.webp",
+          },
+        ],
       });
       expect(result).toEqual({
         name: "Ann Externe",
@@ -179,7 +193,7 @@ describe("buildAboutFromSubject", () => {
         buildAboutFromSubject({
           ...baseArticle,
           articleType: "interview",
-          subject: { kind: "custom", customName: "   " },
+          subjects: [{ kind: "custom", customName: "   " }],
         }),
       ).toBeUndefined();
     });
@@ -190,7 +204,7 @@ describe("buildAboutFromSubject", () => {
       ...baseArticle,
       articleType: "interview",
       // Cast past the union to simulate a future kind we haven't added yet.
-      subject: { kind: "team" as unknown as "custom" },
+      subjects: [{ kind: "team" as unknown as "custom" }],
     });
     expect(result).toBeUndefined();
   });

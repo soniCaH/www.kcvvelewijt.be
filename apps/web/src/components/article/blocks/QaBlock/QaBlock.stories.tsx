@@ -52,6 +52,11 @@ const playerSubject: SubjectValue = {
   },
 };
 
+// Stories render a single-subject article — the subjects[] prop mirrors
+// runtime behaviour where SanityArticleBody / QaBlock receive the full
+// article.subjects[] array, even when there's only one entry.
+const singleSubject = [{ _key: "maxim-k", ...playerSubject }];
+
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -100,7 +105,7 @@ export const SinglePair: Story = {
 
 export const MixedTagSuite: Story = {
   args: {
-    subject: playerSubject,
+    subjects: singleSubject,
     value: {
       pairs: [
         {

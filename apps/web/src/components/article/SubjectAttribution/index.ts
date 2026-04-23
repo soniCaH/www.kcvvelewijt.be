@@ -4,9 +4,10 @@ export type {
   SubjectAttributionVariant,
   SubjectPhotoProps,
 } from "./SubjectAttribution";
-export { resolveSubject } from "./resolveSubject";
+export { resolveSubject, resolvePairRespondent } from "./resolveSubject";
 export type {
   SubjectValue,
+  IndexedSubject,
   ResolvedSubject,
   SubjectPlayerRef,
   SubjectStaffRef,

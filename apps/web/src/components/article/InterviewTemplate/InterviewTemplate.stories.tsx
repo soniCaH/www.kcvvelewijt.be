@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { InterviewTemplate } from "./InterviewTemplate";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 const block = (text: string, key: string): PortableTextBlock => ({
   _type: "block",
@@ -13,7 +13,8 @@ const block = (text: string, key: string): PortableTextBlock => ({
 
 const answer = (text: string, key: string) => [block(text, key)];
 
-const playerSubject: SubjectValue = {
+const MAXIM: IndexedSubject = {
+  _key: "maxim-k",
   kind: "player",
   playerRef: {
     firstName: "Maxim",
@@ -23,6 +24,48 @@ const playerSubject: SubjectValue = {
     transparentImageUrl: null,
     psdImageUrl:
       "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=600&q=80",
+  },
+};
+
+const JEROEN: IndexedSubject = {
+  _key: "jeroen-k",
+  kind: "player",
+  playerRef: {
+    firstName: "Jeroen",
+    lastName: "Van den Berghe",
+    jerseyNumber: 5,
+    position: "Verdediger",
+    transparentImageUrl: null,
+    psdImageUrl:
+      "https://images.unsplash.com/photo-1568572933382-74d440642117?w=600&q=80",
+  },
+};
+
+const THOMAS: IndexedSubject = {
+  _key: "thomas-k",
+  kind: "player",
+  playerRef: {
+    firstName: "Thomas",
+    lastName: "Peeters",
+    jerseyNumber: 11,
+    position: "Aanvaller",
+    transparentImageUrl: null,
+    psdImageUrl:
+      "https://images.unsplash.com/photo-1605235186583-a65c4f4d1c3a?w=600&q=80",
+  },
+};
+
+const LUC: IndexedSubject = {
+  _key: "luc-k",
+  kind: "player",
+  playerRef: {
+    firstName: "Luc",
+    lastName: "Janssens",
+    jerseyNumber: 3,
+    position: "Keeper",
+    transparentImageUrl: null,
+    psdImageUrl:
+      "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=600&q=80",
   },
 };
 
@@ -56,7 +99,7 @@ export const FullComposition: Story = {
       url: "https://kcvvelewijt.be/nieuws/phase-3-tracer",
       title: "Maxim Breugelmans interview",
     },
-    subject: playerSubject,
+    subjects: [MAXIM],
     body: [
       {
         _type: "block",
@@ -140,6 +183,48 @@ export const WithoutCoverImage: Story = {
 export const WithoutSubject: Story = {
   args: {
     ...FullComposition.args,
-    subject: null,
+    subjects: null,
+  },
+};
+
+// Rename the N=1 baseline to match #1358 naming. FullComposition stays as
+// the legacy story name; the `Single` export below is the canonical
+// anchor for the new N=1/2/3/4 variants.
+
+export const Single: Story = {
+  name: "Single / N=1 baseline",
+  args: {
+    ...FullComposition.args,
+  },
+};
+
+export const Duo: Story = {
+  name: "Duo / N=2",
+  args: {
+    ...FullComposition.args,
+    title: "Afscheid duo: Maxim en Jeroen sluiten vijf seizoenen af.",
+    // Keep the full qaBlock suite from FullComposition. For duo, set the
+    // respondentKey on key/quote pairs to exercise per-pair attribution —
+    // real authoring requires it, and it lets the story faithfully render
+    // the side-by-side hero + alternating cutout treatment.
+    subjects: [MAXIM, JEROEN],
+  },
+};
+
+export const Trio: Story = {
+  name: "Trio / N=3 panel",
+  args: {
+    ...FullComposition.args,
+    title: "Drie generaties, één shirt.",
+    subjects: [MAXIM, JEROEN, THOMAS],
+  },
+};
+
+export const Panel: Story = {
+  name: "Panel / N=4 max cap",
+  args: {
+    ...FullComposition.args,
+    title: "Vier generaties over hetzelfde shirt.",
+    subjects: [MAXIM, JEROEN, THOMAS, LUC],
   },
 };

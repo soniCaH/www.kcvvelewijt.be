@@ -24,6 +24,43 @@ export interface SubjectValue {
   customPhotoUrl?: string | null;
 }
 
+/**
+ * Array-item variant: carries the `_key` that Sanity auto-generates on
+ * `article.subjects[]` entries. Used for matching `qaPair.respondentKey`
+ * back to the subject that authored a given `key` or `quote` pair.
+ */
+export interface IndexedSubject extends SubjectValue {
+  _key?: string | null;
+}
+
+/**
+ * Resolve which subject a specific `qaPair` is attributed to. On
+ * single-subject interviews, the lone subject always wins — even when the
+ * editor never set `respondentKey`. On multi-subject interviews, the
+ * Studio validator guarantees `respondentKey` is set on `key`/`quote`
+ * pairs before publish; absent or unresolvable values here mean the
+ * article was authored before the schema required it (or a subject was
+ * removed after the fact) and the helper returns `null`.
+ */
+export function resolvePairRespondent(
+  respondentKey: string | null | undefined,
+  subjects: IndexedSubject[] | null | undefined,
+): SubjectValue | null {
+  const arr = Array.isArray(subjects) ? subjects : [];
+  if (arr.length === 0) return null;
+  if (respondentKey) {
+    const match = arr.find((s) => s?._key === respondentKey);
+    if (match) return match;
+  }
+  // Single-subject: the sole subject is always the respondent.
+  if (arr.length === 1) return arr[0] ?? null;
+  // Multi-subject with an unresolvable respondentKey. The schema validator
+  // blocks publish in this state, so this branch is reached only by
+  // legacy/pre-migration docs. Render without attribution rather than
+  // guessing a respondent.
+  return null;
+}
+
 export interface ResolvedSubject {
   name: string;
   role: string;

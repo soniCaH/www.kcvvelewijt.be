@@ -26,7 +26,7 @@ import {
   EventFactOverview,
   type EventFactValue,
 } from "@/components/article/blocks/EventFact";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -164,19 +164,21 @@ export interface SanityArticleBodyProps {
   content: PortableTextBlock[];
   className?: string;
   /**
-   * Article-level subject passed into `qaBlock` so the `key` and `quote`
-   * pair treatments can render the shared attribution + photo. Not used
-   * when rendering non-interview articles (subject will be null).
+   * Article-level subjects (`article.subjects[]`). Passed into `qaBlock`
+   * so each `key`/`quote` pair can resolve its `respondentKey` against
+   * these subjects and render the correct per-pair attribution + photo.
+   * On single-subject interviews this is a one-element array; non-
+   * interview articles pass `null`.
    */
-  subject?: SubjectValue | null;
+  subjects?: IndexedSubject[] | null;
 }
 
 export const SanityArticleBody = ({
   content,
   className,
-  subject = null,
+  subjects = null,
 }: SanityArticleBodyProps) => {
-  // Rebuild the components map whenever `subject` changes so per-block
+  // Rebuild the components map whenever `subjects` changes so per-block
   // renderers see the current article state without reaching for a
   // context provider.
   const components = useMemo<PortableTextComponents>(
@@ -200,7 +202,7 @@ export const SanityArticleBody = ({
         image: ArticleImageBlock,
         articleImage: ArticleImageBlock,
         qaBlock: ({ value }: { value: QaBlockValue }) => (
-          <QaBlock value={value} subject={subject} />
+          <QaBlock value={value} subjects={subjects} />
         ),
         transferFact: ({ value }: { value: TransferFactValue }) => (
           // In the transfer template, the first transferFact is absorbed
@@ -267,7 +269,7 @@ export const SanityArticleBody = ({
         },
       },
     }),
-    [subject],
+    [subjects],
   );
 
   return (

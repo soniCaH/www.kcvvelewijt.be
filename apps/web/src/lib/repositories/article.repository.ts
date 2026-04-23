@@ -44,7 +44,12 @@ export const ARTICLE_BY_SLUG_QUERY =
   // passing crop=focalpoint alone silently falls back to centre crop.
   // Coalesce to 0.5 so images without a set hotspot degrade to centre.
   "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
-  subject{
+  // Multi-subject interviews (#1358): subjects[] replaces the single
+  // subject object. Array items carry _key so qaPair.respondentKey can
+  // match against them client-side in SanityArticleBody. Projection
+  // shape per-item matches the former subject projection exactly.
+  subjects[]{
+    _key,
     kind,
     playerRef->{
       _id, firstName, lastName, jerseyNumber,

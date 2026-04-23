@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 import type { PortableTextBlock } from "@portabletext/react";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import {
+  resolvePairRespondent,
+  type IndexedSubject,
+} from "@/components/article/SubjectAttribution";
 import { QaPairStandard } from "./QaPairStandard";
 import { QaPairKey } from "./QaPairKey";
 import { QaPairQuote } from "./QaPairQuote";
@@ -11,6 +14,13 @@ export interface QaPairValue {
   question?: string;
   answer?: PortableTextBlock[];
   tag?: string;
+  /**
+   * Points at the `_key` of one of `article.subjects[]`. Required on
+   * multi-subject interviews' `key`/`quote` pairs; auto-resolved to
+   * `subjects[0]` on single-subject interviews. Populated by the
+   * `RespondentPicker` custom Studio input.
+   */
+  respondentKey?: string;
 }
 
 export interface QaBlockValue {
@@ -20,11 +30,13 @@ export interface QaBlockValue {
 export interface QaBlockProps {
   value: QaBlockValue;
   /**
-   * Article-level subject (resolved via `resolveSubject`). Required for
-   * `key` and `quote` pairs to render attribution and photos; ignored by
-   * `standard` and `rapid-fire`.
+   * Article-level subjects (from `article.subjects[]`). Each entry carries
+   * the `_key` that `qaPair.respondentKey` points at, so `key`/`quote`
+   * pairs can resolve to the right attribution in duo/panel interviews.
+   * On single-subject interviews, the sole subject is used regardless of
+   * `respondentKey`. Ignored by `standard` and `rapid-fire` pairs.
    */
-  subject?: SubjectValue | null;
+  subjects?: IndexedSubject[] | null;
 }
 
 type Unit =
@@ -76,7 +88,7 @@ function groupPairs(pairs: QaPairValue[]): Unit[] {
  * Standard pairs are numbered sequentially across the block (01., 02., …);
  * breakout units do not participate in the numeral counter.
  */
-export const QaBlock = ({ value, subject = null }: QaBlockProps) => {
+export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
   const pairs = value.pairs ?? [];
   if (pairs.length === 0) return null;
 
@@ -108,22 +120,30 @@ export const QaBlock = ({ value, subject = null }: QaBlockProps) => {
         }
 
         if (unit.kind === "key") {
+          const respondent = resolvePairRespondent(
+            unit.pair.respondentKey,
+            subjects,
+          );
           return (
             <QaPairKey
               key={unit.pair._key ?? `key-${i}`}
               question={unit.pair.question ?? ""}
               answer={unit.pair.answer ?? []}
-              subject={subject}
+              subject={respondent}
             />
           );
         }
 
         if (unit.kind === "quote") {
+          const respondent = resolvePairRespondent(
+            unit.pair.respondentKey,
+            subjects,
+          );
           return (
             <QaPairQuote
               key={unit.pair._key ?? `quote-${i}`}
               answer={unit.pair.answer ?? []}
-              subject={subject}
+              subject={respondent}
             />
           );
         }

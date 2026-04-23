@@ -36,7 +36,7 @@ import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -60,7 +60,7 @@ interface RenderTemplateArgs {
   readingTime?: string;
   shareUrl: string;
   body: PortableTextBlock[] | null;
-  subject: SubjectValue | null;
+  subjects: IndexedSubject[] | null;
 }
 
 function renderTemplate(args: RenderTemplateArgs) {
@@ -75,7 +75,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
-          subject={args.subject}
+          subjects={args.subjects}
           articleId={args.articleId}
           articleType={args.articleType}
         />
@@ -279,7 +279,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleId={article.id}
         articleType={article.articleType}
         hasSubject={about !== undefined}
-        subjectKind={about ? (article.subject?.kind ?? undefined) : undefined}
+        subjectKind={
+          about ? (article.subjects?.[0]?.kind ?? undefined) : undefined
+        }
+        subjectCount={article.subjects?.length ?? 0}
       />
       {renderTemplate({
         articleType: article.articleType,
@@ -299,7 +302,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         readingTime,
         shareUrl: shareConfig.url,
         body: (article.body as PortableTextBlock[] | null) ?? null,
-        subject: article.subject ?? null,
+        subjects: article.subjects ?? null,
       })}
 
       <RelatedContentSection
