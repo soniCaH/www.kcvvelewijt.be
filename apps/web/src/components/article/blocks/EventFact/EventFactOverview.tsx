@@ -149,7 +149,10 @@ export const EventFactOverview = ({
               className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
             >
               {metaParts.map((part, i) => (
-                <span key={part}>
+                // Composite key — two parts could collide on the same
+                // string (e.g. `U13 · U13` when editor accidentally
+                // duplicates a label).
+                <span key={`${i}-${part}`}>
                   {i > 0 && (
                     <span
                       aria-hidden="true"

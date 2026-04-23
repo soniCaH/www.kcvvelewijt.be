@@ -68,9 +68,9 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
   // would be meaningless.
   const hasTimeRow = range.kind !== "sessions" && Boolean(startTime || endTime);
 
-  const whereParts = [feature.location, feature.address].filter(
-    (x): x is string => typeof x === "string" && x.length > 0,
-  );
+  const whereParts = [feature.location, feature.address]
+    .map((x) => (typeof x === "string" ? x.trim() : x))
+    .filter((x): x is string => typeof x === "string" && x.length > 0);
 
   return (
     <section
@@ -242,9 +242,14 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
                 "grid-cols-[auto_auto_auto_auto_auto] items-baseline justify-start",
               )}
             >
-              {range.sessions.map((session) => (
+              {range.sessions.map((session, index) => (
                 <li
-                  key={session._key ?? session.date.dateIso}
+                  // `_key` is the stable identifier for Sanity array
+                  // items. Fall back to `<date>-<index>` rather than the
+                  // date alone so two sessions on the same calendar day
+                  // (e.g. morning + evening session) don't collide on
+                  // key and trigger unstable reconciliation.
+                  key={session._key ?? `${session.date.dateIso}-${index}`}
                   data-testid="event-strip-session-row"
                   className="contents"
                 >
