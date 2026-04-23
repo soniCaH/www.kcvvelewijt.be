@@ -1,12 +1,11 @@
 "use client";
 
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
-import { ArrowRight } from "@/lib/icons";
+import { ArrowRight, ExternalLink } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
 import {
   DEFAULT_TICKET_LABEL,
-  formatTimeRange,
-  resolveEventDate,
+  resolveEventRange,
   type EventFactValue,
 } from "@/components/article/blocks/EventFact";
 
@@ -29,34 +28,46 @@ const NOTE_COMPONENTS: PortableTextComponents = {
  * Design §5.4 + §8.2 — horizontal event strip. Renders beneath the §7.6
  * metadata bar and describes the event at display scale:
  *
- *   27           Lentetornooi U13
- *   APRIL    │   zaterdag · 10:00 – 17:00
- *   2026     │   Sportpark Elewijt · Driesstraat 14
- *            │
- *            │   Open voor spelers geboren in 2013 en 2014.
- *            │
- *            │   Inschrijven →
+ *   25         │   Lentetornooi U13
+ *   APRIL      │
+ *   2026       │   10:00  →  17:00            ← display scale
+ *   zaterdag   │
+ *              │   Sportpark Elewijt · Driesstraat 14, Elewijt
+ *              │   Open voor spelers geboren in 2013 en 2014.
+ *              │   Inschrijven →
  *
- * Two-column grid on md+: serif-style date block on the left + vertical
- * 1 px `kcvv-gray-light` rule, title + metadata + note + CTA on the
- * right. Full-bleed like `TransferStrip` so it has canvas room on wide
- * desktops; the hero stays within the 70 rem body column to keep the
- * reading rhythm intact.
+ * Two-column grid on md+: serif-style date block on the left (day,
+ * long month, year, weekday) + vertical 1 px `kcvv-gray-light` rule,
+ * right column stacks title → display-scale time range → location meta
+ * → note → CTA. The time range mirrors `TransferStrip`'s club → club
+ * composition: the two most important facts render at display scale
+ * with a direction arrow between.
  *
- * CTA behaviour: rendered only when `ticketUrl` is set. The ticket
- * label defaults to Dutch "Inschrijven" when the editor leaves it blank.
+ * Time row rules:
+ *   - both start + end → `10:00 → 17:00` with a Lucide arrow in green
+ *   - only start      → `10:00` alone
+ *   - neither         → row omitted (date block carries the schedule)
+ *
+ * CTA: rendered only when `ticketUrl` is set. Ticket label defaults to
+ * Dutch "Inschrijven" when the editor leaves it blank.
  */
 export const EventStrip = ({ feature, className }: EventStripProps) => {
-  const resolvedDate = resolveEventDate(feature.date);
-  const timeRange = formatTimeRange(feature.startTime, feature.endTime);
+  const range = resolveEventRange(
+    feature.date,
+    feature.endDate,
+    feature.sessions,
+  );
   const ticketLabel = feature.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
 
-  // The top line beneath the title pairs the weekday with the time
-  // range when both are present; either alone is acceptable.
-  const whenParts = [
-    resolvedDate.hasDate ? resolvedDate.weekday : null,
-    timeRange,
-  ].filter((x): x is string => typeof x === "string" && x.length > 0);
+  const startTime = feature.startTime?.trim() || undefined;
+  const endTime = feature.endTime?.trim() || undefined;
+
+  // Show the top-level time row ONLY for non-recurring events. When
+  // `sessions` is populated, each session renders its own time range
+  // inside the session list, so a single display-scale top-level time
+  // would be meaningless.
+  const hasTimeRow = range.kind !== "sessions" && Boolean(startTime || endTime);
+
   const whereParts = [feature.location, feature.address].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
@@ -87,22 +98,92 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
           data-testid="event-strip-date"
           className={cn("md:border-kcvv-gray-light flex md:border-r md:pr-10")}
         >
-          {resolvedDate.hasDate ? (
+          {range.kind === "single" && (
             <time
-              dateTime={resolvedDate.dateIso}
+              dateTime={range.date.dateIso}
               className="flex flex-col items-start"
             >
               <span className="font-title text-kcvv-gray-blue text-[5rem] leading-[0.85] font-bold md:text-[6rem]">
-                {resolvedDate.day}
+                {range.date.day}
               </span>
               <span className="font-title text-kcvv-gray-blue mt-2 text-xl font-bold tracking-[var(--letter-spacing-label)] uppercase">
-                {resolvedDate.monthLong}
+                {range.date.monthLong}
               </span>
               <span className="text-kcvv-gray mt-1 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase">
-                {resolvedDate.year}
+                {range.date.year}
+              </span>
+              <span
+                data-testid="event-strip-date-weekday"
+                className="text-kcvv-gray mt-2 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
+              >
+                {range.date.weekday}
               </span>
             </time>
-          ) : (
+          )}
+          {(range.kind === "range" || range.kind === "sessions") && (
+            <div
+              data-testid={
+                range.kind === "sessions"
+                  ? "event-strip-date-sessions"
+                  : "event-strip-date-range"
+              }
+              className="flex flex-col items-start"
+            >
+              {range.sameMonth ? (
+                <>
+                  {/* Same-month: huge `25 – 26` composition keeps the display
+                      scale while signalling the two-day span. */}
+                  <span className="font-title text-kcvv-gray-blue text-[5rem] leading-[0.85] font-bold md:text-[6rem]">
+                    <time dateTime={range.start.dateIso}>
+                      {range.start.day}
+                    </time>
+                    <span className="text-kcvv-gray-light mx-2">–</span>
+                    <time dateTime={range.end.dateIso}>{range.end.day}</time>
+                  </span>
+                  <span className="font-title text-kcvv-gray-blue mt-2 text-xl font-bold tracking-[var(--letter-spacing-label)] uppercase">
+                    {range.start.monthLong}
+                  </span>
+                  <span className="text-kcvv-gray mt-1 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase">
+                    {range.start.year}
+                  </span>
+                  <span
+                    data-testid="event-strip-date-weekday"
+                    className="text-kcvv-gray mt-2 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
+                  >
+                    {range.start.weekday} – {range.end.weekday}
+                  </span>
+                </>
+              ) : (
+                <>
+                  {/* Cross-month (or cross-year): compact "day month →
+                      day month" composition at the title scale. Display-size
+                      day numerals would overflow the 2-column strip on
+                      cross-month labels. */}
+                  <span className="font-title text-kcvv-gray-blue text-3xl leading-[1.05] font-bold md:text-4xl">
+                    <time dateTime={range.start.dateIso}>
+                      {range.start.day} {range.start.monthShort.toUpperCase()}
+                    </time>
+                    <span className="text-kcvv-gray-light mx-2">–</span>
+                    <time dateTime={range.end.dateIso}>
+                      {range.end.day} {range.end.monthShort.toUpperCase()}
+                    </time>
+                  </span>
+                  <span className="text-kcvv-gray mt-2 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase">
+                    {range.sameYear
+                      ? range.start.year
+                      : `${range.start.year} – ${range.end.year}`}
+                  </span>
+                  <span
+                    data-testid="event-strip-date-weekday"
+                    className="text-kcvv-gray mt-2 font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
+                  >
+                    {range.start.weekday} – {range.end.weekday}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+          {range.kind === "none" && (
             <span
               data-testid="event-strip-date-tbd"
               className="text-kcvv-gray font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
@@ -123,25 +204,78 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
             </h2>
           )}
 
-          {whenParts.length > 0 && (
-            <p
-              data-testid="event-strip-when"
-              className="text-kcvv-gray-dark font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
+          {hasTimeRow && (
+            <div
+              data-testid="event-strip-time"
+              className="flex items-center gap-3 md:gap-5"
             >
-              {whenParts.map((part, i) => (
-                <span key={part}>
-                  {i > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="text-kcvv-gray-light mx-2"
-                    >
-                      ·
-                    </span>
-                  )}
-                  {part}
+              {startTime && (
+                <span className="font-title text-kcvv-gray-blue text-3xl leading-none font-bold md:text-4xl">
+                  {startTime}
                 </span>
+              )}
+              {startTime && endTime && (
+                <ArrowRight
+                  aria-hidden="true"
+                  className="text-kcvv-green-bright h-6 w-6 shrink-0 md:h-8 md:w-8"
+                />
+              )}
+              {endTime && (
+                <span className="font-title text-kcvv-gray-blue text-3xl leading-none font-bold md:text-4xl">
+                  {endTime}
+                </span>
+              )}
+            </div>
+          )}
+
+          {range.kind === "sessions" && (
+            <ul
+              data-testid="event-strip-sessions"
+              // Grid lays the weekday / date / start-time / arrow /
+              // end-time into five fixed columns so the values line up
+              // row-to-row. `tabular-nums` on the time columns locks
+              // digit widths — without it, proportional digits shift
+              // the arrow column horizontally (`11:30` narrower than
+              // `18:00`).
+              className={cn(
+                "border-kcvv-gray-light grid gap-x-4 gap-y-2 border-t pt-4",
+                "grid-cols-[auto_auto_auto_auto_auto] items-baseline justify-start",
+              )}
+            >
+              {range.sessions.map((session) => (
+                <li
+                  key={session._key ?? session.date.dateIso}
+                  data-testid="event-strip-session-row"
+                  className="contents"
+                >
+                  <span className="text-kcvv-gray-dark font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+                    {session.date.weekday.slice(0, 2)}
+                  </span>
+                  <time
+                    dateTime={session.date.dateIso}
+                    className="text-kcvv-gray-dark font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
+                  >
+                    {session.date.day} {session.date.monthShort}
+                  </time>
+                  <span className="font-title text-kcvv-gray-blue text-lg leading-none font-bold tabular-nums md:text-xl">
+                    {session.startTime ?? (
+                      <span className="text-kcvv-gray-light">–</span>
+                    )}
+                  </span>
+                  <span className="flex items-center justify-center">
+                    {session.startTime && session.endTime && (
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="text-kcvv-green-bright h-4 w-4 shrink-0"
+                      />
+                    )}
+                  </span>
+                  <span className="font-title text-kcvv-gray-blue text-lg leading-none font-bold tabular-nums md:text-xl">
+                    {session.endTime ?? ""}
+                  </span>
+                </li>
               ))}
-            </p>
+            </ul>
           )}
 
           {whereParts.length > 0 && (
@@ -150,7 +284,9 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
               className="text-kcvv-gray-dark font-mono text-sm tracking-[var(--letter-spacing-caps)] uppercase"
             >
               {whereParts.map((part, i) => (
-                <span key={part}>
+                // Composite key — belt and braces for the unlikely case
+                // where location and address collide on the same string.
+                <span key={`${i}-${part}`}>
                   {i > 0 && (
                     <span
                       aria-hidden="true"
@@ -178,14 +314,19 @@ export const EventStrip = ({ feature, className }: EventStripProps) => {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "mt-2 inline-flex items-center gap-2 self-start",
+                "mt-2 inline-flex items-baseline gap-1 self-start",
                 "font-title text-base font-bold tracking-[var(--letter-spacing-caps)] uppercase",
                 "text-kcvv-green-dark decoration-kcvv-green-bright underline decoration-1 underline-offset-4",
                 "transition-[text-decoration-thickness] duration-150 hover:decoration-2",
               )}
             >
               {ticketLabel}
-              <ArrowRight aria-hidden="true" className="h-4 w-4" />
+              <ExternalLink
+                aria-hidden="true"
+                className="ml-0.5 inline-block align-baseline opacity-60"
+                size="0.75em"
+              />
+              <span className="sr-only"> (opens in new tab)</span>
             </a>
           )}
         </div>

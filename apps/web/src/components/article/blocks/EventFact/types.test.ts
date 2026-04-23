@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   resolveEventDate,
+  resolveEventRange,
   formatTimeRange,
   DEFAULT_TICKET_LABEL,
 } from "./types";
@@ -68,6 +69,119 @@ describe("formatTimeRange", () => {
   it("returns undefined when both are missing — caller skips the slot", () => {
     expect(formatTimeRange(undefined, undefined)).toBeUndefined();
     expect(formatTimeRange("", "")).toBeUndefined();
+  });
+});
+
+describe("resolveEventRange", () => {
+  it("returns `none` when the start date is missing or invalid", () => {
+    expect(resolveEventRange(undefined, "2026-04-26").kind).toBe("none");
+    expect(resolveEventRange("2027-02-29", "2027-03-01").kind).toBe("none");
+  });
+
+  it("returns `single` when endDate is absent", () => {
+    const out = resolveEventRange("2026-04-25");
+    expect(out.kind).toBe("single");
+  });
+
+  it("returns `single` when endDate equals the start date", () => {
+    const out = resolveEventRange("2026-04-25", "2026-04-25");
+    expect(out.kind).toBe("single");
+  });
+
+  it("returns `single` when endDate is invalid — start date still renders", () => {
+    const out = resolveEventRange("2026-04-25", "not-a-date");
+    expect(out.kind).toBe("single");
+  });
+
+  it("treats an inverted endDate as `single` rather than silently reversing", () => {
+    // The schema validates `endDate >= date`, but drafts can slip
+    // through. Safer to render the start date alone than to reverse
+    // the range without the editor's consent.
+    const out = resolveEventRange("2026-04-25", "2026-04-20");
+    expect(out.kind).toBe("single");
+  });
+
+  it("returns `range` with sameMonth=true for a weekend within one month", () => {
+    const out = resolveEventRange("2026-04-25", "2026-04-26");
+    if (out.kind !== "range") throw new Error("expected range");
+    expect(out.start.day).toBe("25");
+    expect(out.end.day).toBe("26");
+    expect(out.sameMonth).toBe(true);
+    expect(out.sameYear).toBe(true);
+  });
+
+  it("returns `range` with sameMonth=false for cross-month events", () => {
+    const out = resolveEventRange("2026-04-30", "2026-05-02");
+    if (out.kind !== "range") throw new Error("expected range");
+    expect(out.sameMonth).toBe(false);
+    expect(out.sameYear).toBe(true);
+  });
+
+  it("returns `range` with sameYear=false for cross-year events", () => {
+    const out = resolveEventRange("2026-12-30", "2027-01-02");
+    if (out.kind !== "range") throw new Error("expected range");
+    expect(out.sameMonth).toBe(false);
+    expect(out.sameYear).toBe(false);
+  });
+
+  describe("with sessions", () => {
+    it("returns `sessions` for two or more valid sessions — sorted chronologically", () => {
+      // Sessions entered out of order — resolver must sort them so
+      // the span is deterministic and UI rendering is predictable.
+      const out = resolveEventRange(undefined, undefined, [
+        { date: "2026-11-21", startTime: "17:00", endTime: "23:00" },
+        { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+        { date: "2026-11-22", startTime: "11:30", endTime: "15:00" },
+      ]);
+      if (out.kind !== "sessions") throw new Error("expected sessions");
+      expect(out.sessions).toHaveLength(3);
+      expect(out.sessions[0].date.day).toBe("20");
+      expect(out.sessions[1].date.day).toBe("21");
+      expect(out.sessions[2].date.day).toBe("22");
+      expect(out.start.day).toBe("20");
+      expect(out.end.day).toBe("22");
+      expect(out.sameMonth).toBe(true);
+      expect(out.sameYear).toBe(true);
+    });
+
+    it("collapses a one-session array to `single` kind", () => {
+      const out = resolveEventRange(undefined, undefined, [
+        { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+      ]);
+      expect(out.kind).toBe("single");
+    });
+
+    it("ignores session rows with an invalid date but keeps the valid ones", () => {
+      const out = resolveEventRange(undefined, undefined, [
+        { date: "not-a-date" },
+        { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+        { date: "2027-02-29" },
+        { date: "2026-11-21", startTime: "17:00", endTime: "23:00" },
+      ]);
+      if (out.kind !== "sessions") throw new Error("expected sessions");
+      expect(out.sessions).toHaveLength(2);
+    });
+
+    it("sessions override top-level date / endDate — precedence is correct", () => {
+      const out = resolveEventRange("2028-01-01", "2028-01-05", [
+        { date: "2026-11-20", startTime: "18:00" },
+        { date: "2026-11-21", startTime: "17:00" },
+      ]);
+      if (out.kind !== "sessions") throw new Error("expected sessions");
+      expect(out.start.year).toBe("2026");
+      expect(out.end.year).toBe("2026");
+    });
+
+    it("falls back to top-level date/endDate when every session is invalid", () => {
+      // Safety net — an editor might leave session rows empty while
+      // filling the top-level date. The resolver shouldn't drop into
+      // `none` just because sessions is a non-empty array of junk.
+      const out = resolveEventRange("2026-04-25", undefined, [
+        { date: "invalid" },
+        { date: "" },
+      ]);
+      expect(out.kind).toBe("single");
+    });
   });
 });
 

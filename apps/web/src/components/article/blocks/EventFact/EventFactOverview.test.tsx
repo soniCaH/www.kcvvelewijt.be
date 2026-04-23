@@ -140,6 +140,35 @@ describe("EventFactOverview", () => {
     );
   });
 
+  it("skips the time row on recurring events — the date cell already carries the span", () => {
+    render(
+      <EventFactOverview
+        value={{
+          title: "Steakfestijn",
+          sessions: [
+            { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+            { date: "2026-11-21", startTime: "17:00", endTime: "23:00" },
+            { date: "2026-11-22", startTime: "11:30", endTime: "15:00" },
+          ],
+          location: "Kantine KCVV",
+          competitionTag: "Clubfeest",
+        }}
+      />,
+    );
+    const meta = screen.getByTestId("event-overview-meta");
+    // No time / session-count — the date column handles the when.
+    expect(meta.textContent).not.toMatch(/18:00/);
+    expect(meta.textContent).not.toMatch(/sessies/i);
+    // Meta still carries the where + category.
+    expect(meta.textContent).toMatch(/Kantine KCVV/);
+    expect(meta.textContent).toMatch(/Clubfeest/i);
+    // Date column should show the span with 3-letter weekday abbreviations.
+    const dateCell = screen.getByTestId("event-overview-date");
+    expect(dateCell.textContent).toMatch(/20/);
+    expect(dateCell.textContent).toMatch(/22/);
+    expect(dateCell.textContent).toMatch(/vri\s*–\s*zon/i);
+  });
+
   it("falls back to `competitionTag` when `ageGroup` is an empty string", () => {
     render(
       <EventFactOverview

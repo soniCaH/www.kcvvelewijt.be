@@ -25,21 +25,85 @@ export const eventFact = defineType({
     }),
     defineField({
       name: 'date',
-      title: 'Date',
+      title: 'Start date',
       type: 'date',
+      description: 'Calendar day the event starts.',
       validation: (r) => r.required(),
+    }),
+    defineField({
+      name: 'endDate',
+      title: 'End date',
+      type: 'date',
+      description:
+        'Optional. Fill only for multi-day events (weekend tornooi, school-holiday camp). Must be on or after the start date.',
+      validation: (r) =>
+        r.custom((value, ctx) => {
+          if (typeof value !== 'string' || value.length === 0) return true
+          const parent = ctx.parent as {date?: string} | undefined
+          const start = parent?.date
+          if (typeof start !== 'string' || start.length === 0) return true
+          return value >= start
+            ? true
+            : 'End date must be on or after the start date.'
+        }),
     }),
     defineField({
       name: 'startTime',
       title: 'Start time',
       type: 'string',
-      description: 'HH:mm (e.g. "10:00")',
+      description:
+        'HH:mm (e.g. "10:00"). Use for simple single-day or continuous multi-day events. Leave empty when `sessions` (per-day schedule) is filled.',
     }),
     defineField({
       name: 'endTime',
       title: 'End time',
       type: 'string',
-      description: 'HH:mm (e.g. "17:00")',
+      description:
+        'HH:mm (e.g. "17:00"). Use for simple single-day or continuous multi-day events. Leave empty when `sessions` (per-day schedule) is filled.',
+    }),
+    defineField({
+      name: 'sessions',
+      title: 'Per-day schedule (recurring events)',
+      description:
+        'Use for recurring events where each day has its own hours (e.g. a steakfestijn: vrijdag 18:00–22:00, zaterdag 17:00–23:00, zondag 11:30–15:00). Leave empty for single-day or continuous multi-day events — the top-level date/time fields handle those.',
+      type: 'array',
+      of: [
+        defineField({
+          name: 'session',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'date',
+              type: 'date',
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: 'startTime',
+              type: 'string',
+              description: 'HH:mm',
+            }),
+            defineField({
+              name: 'endTime',
+              type: 'string',
+              description: 'HH:mm',
+            }),
+          ],
+          preview: {
+            select: {
+              date: 'date',
+              startTime: 'startTime',
+              endTime: 'endTime',
+            },
+            prepare({date, startTime, endTime}) {
+              const range = [startTime, endTime].filter(Boolean).join(' – ')
+              return {
+                title: date ?? 'Sessie',
+                subtitle: range || 'geen tijden ingevuld',
+              }
+            },
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'location',

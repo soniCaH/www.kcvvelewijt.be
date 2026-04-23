@@ -19,6 +19,94 @@ describe("EventStrip", () => {
     expect(dateBlock.textContent).toMatch(/2026/);
   });
 
+  it("renders a same-month range as `25 – 26 APRIL 2026` at display scale", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Pinksterweekend tornooi",
+          date: "2026-04-25",
+          endDate: "2026-04-26",
+        }}
+      />,
+    );
+    const range = screen.getByTestId("event-strip-date-range");
+    expect(range.textContent).toMatch(/25\s*–\s*26/);
+    expect(range.textContent).toMatch(/april/i);
+    expect(range.textContent).toMatch(/2026/);
+    // Weekday line spans both days.
+    const weekday = screen.getByTestId("event-strip-date-weekday");
+    expect(weekday.textContent).toMatch(/zaterdag\s*–\s*zondag/i);
+  });
+
+  it("renders a cross-month range compactly: `25 APR – 2 MEI`", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Bi-monthly camp",
+          date: "2026-04-30",
+          endDate: "2026-05-02",
+        }}
+      />,
+    );
+    const range = screen.getByTestId("event-strip-date-range");
+    expect(range.textContent).toMatch(/30\s*apr/i);
+    expect(range.textContent).toMatch(/2\s*mei/i);
+    expect(range.textContent).toMatch(/2026/);
+  });
+
+  it("renders a sessions list when the feature has multiple per-day schedules", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Steakfestijn",
+          sessions: [
+            { date: "2026-11-21", startTime: "17:00", endTime: "23:00" },
+            { date: "2026-11-20", startTime: "18:00", endTime: "22:00" },
+            { date: "2026-11-22", startTime: "11:30", endTime: "15:00" },
+          ],
+          location: "Kantine KCVV",
+        }}
+      />,
+    );
+    // Date column renders the same same-month range layout as
+    // continuous multi-day events.
+    expect(screen.getByTestId("event-strip-date-sessions")).toBeInTheDocument();
+    expect(screen.queryByTestId("event-strip-date-range")).toBeNull();
+
+    // Three session rows, rendered in chronological order (20 → 21 → 22)
+    // even though the editor entered them out of order.
+    const rows = screen.getAllByTestId("event-strip-session-row");
+    expect(rows).toHaveLength(3);
+    const rowTexts = rows.map((r) => r.textContent ?? "");
+    expect(rowTexts[0]).toMatch(/20/);
+    expect(rowTexts[0]).toMatch(/18:00/);
+    expect(rowTexts[1]).toMatch(/21/);
+    expect(rowTexts[1]).toMatch(/17:00/);
+    expect(rowTexts[2]).toMatch(/22/);
+    expect(rowTexts[2]).toMatch(/11:30/);
+
+    // The single display-scale time row is suppressed — each session
+    // carries its own hours.
+    expect(screen.queryByTestId("event-strip-time")).toBeNull();
+  });
+
+  it("treats endDate equal to date as single-day (no range rendering)", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Lentetornooi",
+          date: "2026-04-25",
+          endDate: "2026-04-25",
+        }}
+      />,
+    );
+    expect(screen.queryByTestId("event-strip-date-range")).toBeNull();
+    expect(screen.getByTestId("event-strip-date")).toHaveTextContent(/25/);
+    expect(screen.getByTestId("event-strip-date-weekday")).toHaveTextContent(
+      /^zaterdag$/i,
+    );
+  });
+
   it("renders a 'Datum volgt' placeholder when the date is missing", () => {
     render(
       <EventStrip
@@ -44,20 +132,65 @@ describe("EventStrip", () => {
     );
   });
 
-  it("combines weekday + time range on the `when` row when both are present", () => {
+  it("renders the weekday inside the date column", () => {
     render(
       <EventStrip
         feature={{
           title: "Lentetornooi",
-          date: "2026-04-27",
+          date: "2026-04-25",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("event-strip-date-weekday")).toHaveTextContent(
+      /zaterdag/i,
+    );
+  });
+
+  it("renders both start and end time at display scale with a direction arrow", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Lentetornooi",
+          date: "2026-04-25",
           startTime: "10:00",
           endTime: "17:00",
         }}
       />,
     );
-    const when = screen.getByTestId("event-strip-when");
-    expect(when.textContent).toMatch(/maandag/i);
-    expect(when.textContent).toMatch(/10:00 - 17:00/);
+    const time = screen.getByTestId("event-strip-time");
+    expect(time).toHaveTextContent(/10:00/);
+    expect(time).toHaveTextContent(/17:00/);
+    // The arrow between them — rendered inline as the Lucide SVG. Find
+    // it by looking for an svg child of the time row.
+    expect(time.querySelector("svg")).not.toBeNull();
+  });
+
+  it("renders only the start time (no arrow) when the end time is missing", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Training",
+          date: "2026-04-25",
+          startTime: "18:30",
+        }}
+      />,
+    );
+    const time = screen.getByTestId("event-strip-time");
+    expect(time).toHaveTextContent(/18:30/);
+    // No arrow when there is only one time anchor.
+    expect(time.querySelector("svg")).toBeNull();
+  });
+
+  it("omits the time row entirely when neither start nor end time is set", () => {
+    render(
+      <EventStrip
+        feature={{
+          title: "Jeugd barbecue",
+          date: "2026-04-25",
+        }}
+      />,
+    );
+    expect(screen.queryByTestId("event-strip-time")).toBeNull();
   });
 
   it("combines location + address on the `where` row", () => {

@@ -226,8 +226,16 @@ export type EventFact = {
   _type: "eventFact";
   title?: string;
   date?: string;
+  endDate?: string;
   startTime?: string;
   endTime?: string;
+  sessions?: Array<{
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    _type: "session";
+    _key: string;
+  }>;
   location?: string;
   address?: string;
   ageGroup?: string;
@@ -1021,8 +1029,16 @@ export type ARTICLES_QUERY_RESULT = Array<{
         _type: "eventFact";
         title?: string;
         date?: string;
+        endDate?: string;
         startTime?: string;
         endTime?: string;
+        sessions?: Array<{
+          date?: string;
+          startTime?: string;
+          endTime?: string;
+          _type: "session";
+          _key: string;
+        }>;
         location?: string;
         address?: string;
         ageGroup?: string;
@@ -1294,8 +1310,16 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         _type: "eventFact";
         title?: string;
         date?: string;
+        endDate?: string;
         startTime?: string;
         endTime?: string;
+        sessions?: Array<{
+          date?: string;
+          startTime?: string;
+          endTime?: string;
+          _type: "session";
+          _key: string;
+        }>;
         location?: string;
         address?: string;
         ageGroup?: string;

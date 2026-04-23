@@ -1,9 +1,9 @@
-import { ArrowRight } from "@/lib/icons";
+import { ExternalLink } from "@/lib/icons";
 import { cn } from "@/lib/utils/cn";
 import {
   DEFAULT_TICKET_LABEL,
   formatTimeRange,
-  resolveEventDate,
+  resolveEventRange,
   type EventFactValue,
 } from "./types";
 
@@ -33,7 +33,7 @@ export const EventFactOverview = ({
   value,
   className,
 }: EventFactOverviewProps) => {
-  const resolvedDate = resolveEventDate(value.date);
+  const range = resolveEventRange(value.date, value.endDate, value.sessions);
   const timeRange = formatTimeRange(value.startTime, value.endTime);
 
   // Prefer the age group when it has real content; fall back to the
@@ -42,7 +42,13 @@ export const EventFactOverview = ({
   // field without also clearing the value.
   const ageOrCompetition = value.ageGroup?.trim() || value.competitionTag;
 
-  const metaParts = [timeRange, value.location, ageOrCompetition].filter(
+  // For single-day events the time row belongs in the meta. Multi-day
+  // continuous events + recurring events let the date column carry
+  // the span — no count in the meta (it'd be redundant with the date
+  // column's visible range, and `N sessies` reads poorly in Dutch).
+  const timeMeta = range.kind === "single" ? timeRange : undefined;
+
+  const metaParts = [timeMeta, value.location, ageOrCompetition].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
 
@@ -65,24 +71,59 @@ export const EventFactOverview = ({
         className={cn(
           "max-w-outer mx-auto grid px-6",
           "gap-x-6 gap-y-3",
-          "md:grid-cols-[6rem_minmax(0,1fr)_auto] md:items-center md:gap-x-8",
+          // Date column widened from `6rem` → `9rem` so cross-month
+          // and multi-day ranges (e.g. `31 JUL – 2 AUG` + weekday
+          // pair) fit on one line instead of wrapping to three.
+          "md:grid-cols-[9rem_minmax(0,1fr)_auto] md:items-center md:gap-x-8",
         )}
       >
-        {resolvedDate.hasDate ? (
+        {range.kind === "single" && (
           <time
             data-testid="event-overview-date"
-            dateTime={resolvedDate.dateIso}
+            dateTime={range.date.dateIso}
             className="text-kcvv-white flex flex-col"
           >
             <span className="font-title text-xl leading-[0.95] font-bold">
-              {resolvedDate.day}{" "}
-              <span className="uppercase">{resolvedDate.monthShort}</span>
+              {range.date.day}{" "}
+              <span className="uppercase">{range.date.monthShort}</span>
             </span>
             <span className="text-kcvv-gray-light mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
-              {resolvedDate.weekday}
+              {range.date.weekday}
             </span>
           </time>
-        ) : (
+        )}
+        {(range.kind === "range" || range.kind === "sessions") && (
+          <div
+            data-testid="event-overview-date"
+            className="text-kcvv-white flex flex-col"
+          >
+            <span className="font-title text-xl leading-[0.95] font-bold">
+              <time dateTime={range.start.dateIso}>
+                {range.start.day}
+                {!range.sameMonth && (
+                  <span className="uppercase"> {range.start.monthShort}</span>
+                )}
+              </time>
+              <span className="text-kcvv-white/40 mx-1">–</span>
+              <time dateTime={range.end.dateIso}>
+                {range.end.day}{" "}
+                <span className="uppercase">
+                  {range.sameMonth
+                    ? range.start.monthShort
+                    : range.end.monthShort}
+                </span>
+              </time>
+            </span>
+            <span className="text-kcvv-gray-light mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+              {/* 3-letter weekday abbreviations so ranges stay on one
+                  line in the narrow date column (e.g. "vr – zo" vs
+                  "vrijdag – zondag"). */}
+              {range.start.weekday.slice(0, 3)} –{" "}
+              {range.end.weekday.slice(0, 3)}
+            </span>
+          </div>
+        )}
+        {range.kind === "none" && (
           <div
             data-testid="event-overview-date"
             className="text-kcvv-white flex flex-col"
@@ -131,13 +172,18 @@ export const EventFactOverview = ({
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "font-title inline-flex items-center gap-2 text-sm font-bold tracking-[var(--letter-spacing-caps)] uppercase",
+              "font-title inline-flex items-baseline gap-1 text-sm font-bold tracking-[var(--letter-spacing-caps)] uppercase",
               "text-kcvv-green-bright decoration-kcvv-green-bright underline decoration-1 underline-offset-4",
               "transition-[text-decoration-thickness] duration-150 hover:decoration-2",
             )}
           >
             {ticketLabel}
-            <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            <ExternalLink
+              aria-hidden="true"
+              className="ml-0.5 inline-block align-baseline opacity-60"
+              size="0.75em"
+            />
+            <span className="sr-only"> (opens in new tab)</span>
           </a>
         ) : (
           // Grid spacer — keeps the CTA column present so adjacent rows

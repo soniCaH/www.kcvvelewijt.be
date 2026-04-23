@@ -107,13 +107,14 @@ function noteBlock(key, text) {
   ];
 }
 
-// Feature eventFact — absorbed by the strip. Exercises every field at
-// once so the full visual is on the preview.
+// Continuous multi-day overview row. Keeps the same-month range layout
+// exercised on the overview stack (as opposed to the strip).
 const lentetornooi = {
   _key: "evt-feature",
   _type: "eventFact",
   title: "Lentetornooi U13",
   date: "2026-04-25",
+  endDate: "2026-04-26",
   startTime: "10:00",
   endTime: "17:00",
   location: "Sportpark Elewijt",
@@ -124,7 +125,7 @@ const lentetornooi = {
   capacity: 64,
   note: noteBlock(
     "evt-feature-note",
-    "Open voor spelers geboren in 2013 en 2014. Wedstrijden en finales, met afsluiting op het terras.",
+    "Open voor spelers geboren in 2013 en 2014. Twee dagen wedstrijden en finales, met afsluiting op het terras.",
   ),
 };
 
@@ -153,6 +154,53 @@ const training = {
   ageGroup: "Senioren",
 };
 
+// Feature eventFact — recurring event with per-day schedules. Drives
+// the strip: date column shows the `20 – 22 NOV` range, right column
+// lists each session (Fri 18:00→22:00, Sat 17:00→23:00, Sun
+// 11:30→15:00) at display scale.
+const steakfestijn = {
+  _key: "evt-steakfestijn",
+  _type: "eventFact",
+  title: "Steakfestijn 2026",
+  location: "Kantine KCVV",
+  address: "Driesstraat 14, Elewijt",
+  competitionTag: "Clubfeest",
+  ticketUrl: "https://kcvvelewijt.be/steakfestijn",
+  sessions: [
+    {
+      _key: "s-fri",
+      date: "2026-11-20",
+      startTime: "18:00",
+      endTime: "22:00",
+    },
+    {
+      _key: "s-sat",
+      date: "2026-11-21",
+      startTime: "17:00",
+      endTime: "23:00",
+    },
+    {
+      _key: "s-sun",
+      date: "2026-11-22",
+      startTime: "11:30",
+      endTime: "15:00",
+    },
+  ],
+};
+
+// Overview row — cross-month multi-day range. Exercises the compact
+// `31 JUL – 2 AUG` layout on the overview stack.
+const zomerkamp = {
+  _key: "evt-zomerkamp",
+  _type: "eventFact",
+  title: "Jeugdkamp Elewijt",
+  date: "2026-07-31",
+  endDate: "2026-08-02",
+  location: "Sportpark Elewijt",
+  ageGroup: "U7 – U11",
+  ticketUrl: "https://kcvvelewijt.be/zomerkamp",
+};
+
 // Overview row — no date set. Exercises the `Datum volgt` branch.
 const openVraag = {
   _key: "evt-tbd",
@@ -172,7 +220,7 @@ try {
     _id: ARTICLE_ID,
     _type: "article",
     articleType: "event",
-    title: "Lentetornooi U13 — zaterdag in Elewijt",
+    title: "Steakfestijn 2026 — drie dagen tafelen voor de club",
     slug: { _type: "slug", current: SLUG },
     // Backdate publishAt so the article clears the GROQ `publishAt <= now()`
     // filter regardless of build/timezone clock drift on the preview.
@@ -184,20 +232,22 @@ try {
       asset: { _type: "reference", _ref: COVER_IMAGE_ASSET_REF },
     },
     body: [
-      lentetornooi,
+      steakfestijn,
       paragraph(
         "p1",
-        "Zaterdag 25 april verwelkomen we acht ploegen voor het traditionele lentetornooi. Vijf velden, vier poules, één grote dag voor de U13-kern.",
+        "Van vrijdag 20 tot zondag 22 november staat de kantine opnieuw in het teken van het jaarlijkse steakfestijn. Drie dagen vol biefstuk, frietjes en vriendschap — ten voordele van de jeugdwerking.",
       ),
       paragraph(
         "p2",
-        "De organisatie voorziet drinken en versnaperingen. Supporters zijn welkom de hele dag door — ook voor de finale om 16u30.",
+        "Per sessie zijn er aparte openingsuren. Reserveer op voorhand via de link hierboven; walk-ins zijn welkom zolang er tafels vrij zijn.",
       ),
       // Editor-authored section header — renders via the `.article-body`
       // H2 treatment (green 4 rem × 2 px bar above).
       heading("h-andere-evenementen", "Andere evenementen"),
+      lentetornooi,
       afterparty,
       training,
+      zomerkamp,
       openVraag,
       paragraph(
         "p3",
