@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {validateRespondentKey} from './validation/respondent-key'
 
 export const qaPair = defineType({
   name: 'qaPair',
@@ -40,6 +41,34 @@ export const qaPair = defineType({
         ],
       },
       initialValue: 'standard',
+    }),
+    defineField({
+      name: 'respondentKey',
+      title: 'Respondent',
+      description:
+        "Voor duo- en panel-interviews: kies wie dit gezegd heeft. Verplicht op key- en quote-pairs wanneer het artikel 2 of meer subjects heeft. Verborgen op standard en rapid-fire.",
+      // String storing the `_key` of one of `article.subjects[]`. Cannot be a
+      // Sanity reference — `subject` is an embedded object type, not a
+      // document, so references can't target it. Client-side resolution
+      // happens via `article.subjects.find(s => s._key === pair.respondentKey)`
+      // at the repository boundary. The custom Studio input (`RespondentPicker`
+      // in `@kcvv/sanity-studio`) reads document.subjects[] and renders a
+      // dropdown scoped to the article's subjects — editors never pick from
+      // the global player pool.
+      type: 'string',
+      hidden: ({parent}) => {
+        const tag = (parent as {tag?: string} | undefined)?.tag ?? 'standard'
+        return !['key', 'quote'].includes(tag)
+      },
+      validation: (r) =>
+        r.custom((val, ctx) =>
+          validateRespondentKey(val, {
+            parent: ctx.parent as {tag?: string} | undefined,
+            document: ctx.document as
+              | {articleType?: string; subjects?: Array<{_key?: string}>}
+              | undefined,
+          }),
+        ),
     }),
   ],
   preview: {
