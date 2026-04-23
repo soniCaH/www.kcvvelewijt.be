@@ -23,9 +23,11 @@ import {
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
   buildEventJsonLd,
-  type PersonAboutInput,
-  type EventJsonLdInput,
 } from "@/lib/seo/jsonld";
+import {
+  buildAboutFromSubject,
+  buildEventJsonLdInput,
+} from "@/lib/seo/article-jsonld";
 import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
 import { InterviewTemplate } from "@/components/article/InterviewTemplate";
 import { TransferTemplate } from "@/components/article/TransferTemplate";
@@ -247,111 +249,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ...mapMentionedTeams(article.mentionedTeams ?? undefined),
   ];
 
-  // Interview branch (§12): emit the baseline NewsArticle with `about:
-  // Person` so Google can resolve the subject of the article. schema.org
-  // has no canonical Interview type — NewsArticle + about:Person is the
-  // fallback Google's Rich Results Test accepts. Only player + staff
-  // subjects produce a Person; custom names resolve without a profile URL
-  // so the `about.url` may be absent.
-  const about: PersonAboutInput | undefined = (() => {
-    if (article.articleType !== "interview") return undefined;
-    const subject = article.subject;
-    if (!subject?.kind) return undefined;
-    if (subject.kind === "player") {
-      const p = subject.playerRef;
-      if (!p) return undefined;
-      const name = [p.firstName, p.lastName].filter(Boolean).join(" ").trim();
-      if (!name) return undefined;
-      return {
-        name,
-        url: p.psdId ? `${SITE_CONFIG.siteUrl}/spelers/${p.psdId}` : undefined,
-        image: p.transparentImageUrl ?? p.psdImageUrl ?? undefined,
-        jobTitle: p.position ?? undefined,
-      };
-    }
-    if (subject.kind === "staff") {
-      const s = subject.staffRef;
-      if (!s) return undefined;
-      const name = [s.firstName, s.lastName].filter(Boolean).join(" ").trim();
-      if (!name) return undefined;
-      return {
-        name,
-        image: s.photoUrl ?? undefined,
-        jobTitle: s.functionTitle ?? undefined,
-      };
-    }
-    if (subject.kind === "custom") {
-      const name = subject.customName?.trim() ?? "";
-      if (!name) return undefined;
-      return {
-        name,
-        image: subject.customPhotoUrl ?? undefined,
-        jobTitle: subject.customRole ?? undefined,
-      };
-    }
-    // Unknown discriminator — do not silently fall through to a branch.
-    return undefined;
-  })();
-
-  // Event branch (§12): pull the first `eventFact` block out of the body
-  // and map it to schema.org Event. Distinct from SportsEvent (matches).
-  // Keeps the article page independent of block-renderer internals —
-  // only a `.find(_type === "eventFact")` dispatch is needed here.
-  const eventJsonLd: EventJsonLdInput | undefined = (() => {
-    if (article.articleType !== "event") return undefined;
-    const body = article.body as Array<
-      PortableTextBlock & { _type?: string }
-    > | null;
-    if (!Array.isArray(body)) return undefined;
-    const ev = body.find(
-      (
-        b,
-      ): b is PortableTextBlock & {
-        _type: "eventFact";
-        title?: string;
-        date?: string;
-        endDate?: string;
-        startTime?: string;
-        endTime?: string;
-        location?: string;
-        address?: string;
-      } => b._type === "eventFact",
-    );
-    if (!ev) return undefined;
-    if (!ev.date) return undefined;
-    const name = ev.title?.trim() || article.title;
-    // Combine date (YYYY-MM-DD) with HH:MM time when present. Without
-    // the time, Google resolves bare dates to 00:00 UTC and misrepresents
-    // the event. Europe/Brussels is +01:00 in winter, +02:00 in summer —
-    // we don't know which applies at the time the page renders, so we
-    // emit a local-floating ISO (no TZ suffix) which Google accepts and
-    // renders in the viewer's locale.
-    const withTime = (date?: string, time?: string): string | undefined => {
-      if (!date) return undefined;
-      const cleanTime = time?.trim();
-      if (!cleanTime) return date;
-      return `${date}T${cleanTime}:00`;
-    };
-    // Only emit endDate when the editor explicitly set endDate or endTime.
-    // Synthesising a bare-date endDate alongside a timed startDate causes
-    // Google to resolve the end to 00:00 on that day → "ends before it
-    // starts" — same-day events with only startTime would show as negative
-    // duration in rich results. Schema.org treats an absent endDate as
-    // "unknown end / full day" which is safer.
-    const endDate =
-      ev.endDate || ev.endTime
-        ? withTime(ev.endDate ?? ev.date, ev.endTime)
-        : undefined;
-    return {
-      name,
-      startDate: withTime(ev.date, ev.startTime) ?? ev.date,
-      endDate,
-      location: ev.location,
-      address: ev.address,
-      url: shareConfig.url,
-      image: article.coverImageUrl ?? undefined,
-    };
-  })();
+  const about = buildAboutFromSubject(article);
+  const eventJsonLd = buildEventJsonLdInput(article, shareConfig.url);
 
   return (
     <>
