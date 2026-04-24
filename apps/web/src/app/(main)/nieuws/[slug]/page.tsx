@@ -35,6 +35,7 @@ import { EventTemplate } from "@/components/article/EventTemplate";
 import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
+import { FooterSafeArea } from "@/components/design-system";
 import type { PortableTextBlock } from "@portabletext/react";
 import {
   resolveSubject,
@@ -326,6 +327,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         pageSlug={article.slug}
         sourceArticleType={article.articleType}
       />
+      <FooterSafeArea />
     </>
   );
 }

@@ -58,7 +58,7 @@ export default async function EventsPage() {
     .map(toEventsListItem);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white pb-[var(--footer-diagonal)]">
       {/* Hero */}
       <div className="from-green-main via-green-hover to-green-dark-hover bg-linear-to-br px-4 py-16 text-white">
         <div className="mx-auto max-w-5xl">

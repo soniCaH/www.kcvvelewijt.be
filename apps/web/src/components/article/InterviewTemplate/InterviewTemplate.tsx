@@ -68,11 +68,11 @@ export const InterviewTemplate = ({
         className="mt-10"
       />
 
-      <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
         {Array.isArray(body) && body.length > 0 && (
           <SanityArticleBody content={body} subjects={subjects} />
         )}
-      </main>
+      </div>
     </>
   );
 };

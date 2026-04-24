@@ -14,6 +14,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
 import { INITIAL_TOTAL } from "./constants";
+import { FooterSafeArea } from "@/components/design-system";
 
 interface NewsPageProps {
   searchParams: Promise<{ categorie?: string }>;
@@ -84,6 +85,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         initialCategory={categorySlug}
         fetchArticles={fetchArticlesAction}
       />
+      <FooterSafeArea />
     </>
   );
 }

@@ -11,6 +11,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
+import { FooterSafeArea } from "@/components/design-system";
 
 export const metadata: Metadata = {
   title: "Contact | KCVV Elewijt",
@@ -51,6 +52,7 @@ export default async function ContactPageRoute() {
         ])}
       />
       <ContactPage keyContacts={keyContacts} />
+      <FooterSafeArea />
     </>
   );
 }

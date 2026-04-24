@@ -15,6 +15,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { TeamDetail } from "@/components/team/TeamDetail";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { FooterSafeArea } from "@/components/design-system";
 import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { transformMatchToSchedule, transformRankingToStandings } from "./utils";
@@ -195,6 +196,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         pageSlug={slug}
         className="mx-auto max-w-4xl px-4 pb-8"
       />
+      <FooterSafeArea />
     </>
   );
 }

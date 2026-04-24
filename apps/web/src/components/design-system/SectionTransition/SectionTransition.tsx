@@ -42,6 +42,16 @@ export const BG_COLOR: Record<SectionBg, string> = {
   transparent: "transparent",
 };
 
+// Tailwind class counterpart of BG_COLOR — shared by `SectionStack` and
+// `FooterSafeArea` so new `SectionBg` values only need to be added here.
+export const BG_CLASS: Record<SectionBg, string> = {
+  white: "bg-white",
+  "gray-100": "bg-gray-100",
+  "kcvv-black": "bg-kcvv-black",
+  "kcvv-green-dark": "bg-kcvv-green-dark",
+  transparent: "bg-transparent",
+};
+
 // SVG polygon points — exact same corners as the old clip-path polygons,
 // but rendered via SVG with shape-rendering="crispEdges" to eliminate
 // the anti-aliasing fringe that clip-path produces.
@@ -70,7 +80,15 @@ function shiftY(points: string, dy: number): string {
     .join(" ");
 }
 
-export const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
+// DIAGONAL_HEIGHT is sourced from the `--footer-diagonal` custom property
+// in globals.css — the single source of truth consumed by this component,
+// by `SectionStack`'s `reserveFooterSafeArea` behavior (last-section bg
+// extension), and by the `FooterSafeArea` primitive. The browser resolves
+// the var at render time inside inline styles and `calc()` strings, so the
+// exported constant composes cleanly wherever the numeric value is used.
+// `DIAGONAL_HALF` is a local-only token used by `overlap="half"` and does
+// not currently have a global CSS counterpart.
+export const DIAGONAL_HEIGHT = "var(--footer-diagonal)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
 
 export function SectionTransition({

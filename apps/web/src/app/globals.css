@@ -48,6 +48,10 @@
   --max-width--inner: 60rem;
   --padding--mobile: 0.75rem;
   --padding--desktop: 2.5rem;
+
+  /* Single source of truth for the diagonal seam used by SectionTransition
+     and reserved as the page-bottom safe area by the root <main> wrapper. */
+  --footer-diagonal: clamp(2rem, 6vw, 5rem);
 }
 
 /* KCVV Logo Spinner Animation (matches Gatsby site) */

@@ -49,7 +49,7 @@ export default function UltrasPage() {
         }}
       />
 
-      <main className="max-w-inner-lg content mx-auto px-4 py-8">
+      <article className="max-w-inner-lg content mx-auto px-4 pt-8 pb-[calc(2rem+var(--footer-diagonal))]">
         {/* Wie zijn we */}
         <section className="mb-8">
           <h2 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
@@ -159,7 +159,7 @@ export default function UltrasPage() {
             facebook.com/KCVV.ULTRAS.55
           </a>
         </section>
-      </main>
+      </article>
     </>
   );
 }

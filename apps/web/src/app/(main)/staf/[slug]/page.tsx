@@ -17,6 +17,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { FooterSafeArea } from "@/components/design-system";
 
 interface StaffPageProps {
   params: Promise<{ slug: string }>;
@@ -277,6 +278,7 @@ export default async function StafPage({ params }: StaffPageProps) {
         pageSlug={slug}
         className="mx-auto max-w-4xl px-4 pb-8"
       />
+      <FooterSafeArea />
     </>
   );
 }

@@ -16,6 +16,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { PlayerProfile, PlayerShare } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { FooterSafeArea } from "@/components/design-system";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -175,6 +176,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         pageSlug={slug}
         className="mx-auto max-w-4xl px-4 pb-8"
       />
+      <FooterSafeArea />
     </>
   );
 }

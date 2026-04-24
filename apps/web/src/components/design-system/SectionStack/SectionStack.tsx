@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 import { cn } from "@/lib/utils/cn";
-import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
+import {
+  BG_CLASS,
+  SectionTransition,
+} from "@/components/design-system/SectionTransition/SectionTransition";
 import type {
   SectionBg,
   SectionTransitionConfig,
@@ -20,17 +23,21 @@ export interface SectionConfig {
 export interface SectionStackProps {
   sections: (SectionConfig | null | false | undefined)[];
   className?: string;
+  /**
+   * When true (default), the last section's outer wrapper reserves a
+   * footer-diagonal-sized safe area on its bottom so the section's bg
+   * extends through the `PageFooter`'s `overlap="full"` diagonal. Set
+   * to `false` when the stack is not the final element before the
+   * footer (e.g. a nested stack with content below). See #1360.
+   */
+  reserveFooterSafeArea?: boolean;
 }
 
-const BG_CLASS: Record<SectionBg, string> = {
-  white: "bg-white",
-  "gray-100": "bg-gray-100",
-  "kcvv-black": "bg-kcvv-black",
-  "kcvv-green-dark": "bg-kcvv-green-dark",
-  transparent: "bg-transparent",
-};
-
-export function SectionStack({ sections, className }: SectionStackProps) {
+export function SectionStack({
+  sections,
+  className,
+  reserveFooterSafeArea = true,
+}: SectionStackProps) {
   const filtered = sections.filter(Boolean) as SectionConfig[];
 
   return (
@@ -45,6 +52,7 @@ export function SectionStack({ sections, className }: SectionStackProps) {
           next !== undefined &&
           section.transition !== undefined &&
           section.bg !== next.bg;
+        const isLast = i === filtered.length - 1;
 
         return (
           // Fragment keeps the key while allowing the transition to sit
@@ -53,12 +61,21 @@ export function SectionStack({ sections, className }: SectionStackProps) {
           // affect when the NEXT section div starts, eliminating sub-pixel
           // seam gaps between sections.
           <Fragment key={section.key ?? i}>
-            <div className={cn("w-full", BG_CLASS[section.bg])}>
-              {/* Section content wrapper */}
+            <div
+              className={cn(
+                "w-full",
+                BG_CLASS[section.bg],
+                isLast &&
+                  reserveFooterSafeArea &&
+                  "pb-[var(--footer-diagonal)]",
+              )}
+            >
+              {/* Section content wrapper — bg is owned by the outer
+                  wrapper so the last-section footer-safe-area padding
+                  sits inside the same colored surface. */}
               <div
                 className={cn(
                   "w-full",
-                  BG_CLASS[section.bg],
                   section.paddingTop ?? "pt-20",
                   section.paddingBottom ?? "pb-20",
                   hasOverlap && "relative z-0",
