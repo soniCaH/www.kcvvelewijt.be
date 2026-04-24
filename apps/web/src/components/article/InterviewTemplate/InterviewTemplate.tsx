@@ -2,7 +2,7 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleMetadata } from "../ArticleMetadata";
 import { InterviewHero } from "../InterviewHero";
 import { SanityArticleBody } from "../SanityArticleBody/SanityArticleBody";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 export interface InterviewTemplateProps {
   title: string;
@@ -12,12 +12,13 @@ export interface InterviewTemplateProps {
   shareConfig: { url: string; title?: string };
   body: PortableTextBlock[] | null;
   /**
-   * Resolved from the article's `subject` field. Drives the InterviewHero
-   * kicker (jersey + position), subtitle (full name), and the key/quote
-   * qaBlock attribution blocks. When absent, the hero collapses to
-   * `INTERVIEW` + title only.
+   * Article subjects from `article.subjects[]` (1–4). Drives the hero
+   * layout (single portrait / duo / trio / panel), the kicker meta slot
+   * (only on N=1 players), the Dutch-Oxford-joined subtitle, and the
+   * `key`/`quote` qaBlock attribution via per-pair `respondentKey`
+   * resolution in `SanityArticleBody`.
    */
-  subject?: SubjectValue | null;
+  subjects?: IndexedSubject[] | null;
   /** Sanity document id — threaded to ArticleMetadata for `article_share` analytics. */
   articleId?: string;
   /** Article type (for analytics param `article_type`). */
@@ -45,7 +46,7 @@ export const InterviewTemplate = ({
   readingTime,
   shareConfig,
   body,
-  subject = null,
+  subjects = null,
   articleId,
   articleType,
 }: InterviewTemplateProps) => {
@@ -53,7 +54,7 @@ export const InterviewTemplate = ({
     <>
       <InterviewHero
         title={title}
-        subject={subject}
+        subjects={subjects}
         coverImageUrl={coverImageUrl}
       />
 
@@ -69,7 +70,7 @@ export const InterviewTemplate = ({
 
       <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
         {Array.isArray(body) && body.length > 0 && (
-          <SanityArticleBody content={body} subject={subject} />
+          <SanityArticleBody content={body} subjects={subjects} />
         )}
       </main>
     </>

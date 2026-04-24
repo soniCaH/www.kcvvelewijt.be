@@ -36,7 +36,10 @@ import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import type { PortableTextBlock } from "@portabletext/react";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import {
+  resolveSubject,
+  type IndexedSubject,
+} from "@/components/article/SubjectAttribution";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -60,7 +63,7 @@ interface RenderTemplateArgs {
   readingTime?: string;
   shareUrl: string;
   body: PortableTextBlock[] | null;
-  subject: SubjectValue | null;
+  subjects: IndexedSubject[] | null;
 }
 
 function renderTemplate(args: RenderTemplateArgs) {
@@ -75,7 +78,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           readingTime={args.readingTime}
           shareConfig={shareConfig}
           body={args.body}
-          subject={args.subject}
+          subjects={args.subjects}
           articleId={args.articleId}
           articleType={args.articleType}
         />
@@ -252,6 +255,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const about = buildAboutFromSubject(article);
   const eventJsonLd = buildEventJsonLdInput(article, shareConfig.url);
 
+  // Analytics flags derive from the same resolved-subjects list the hero
+  // filters on — so subjectCount/subjectKind reflect what the UI actually
+  // renders, not the raw subjects[]. A broken player ref makes both the
+  // hero and analytics report one fewer subject. Prevents the paired-
+  // source drift called out in apps/web CLAUDE.md §72 / #1333.
+  const resolvedSubjects = (article.subjects ?? []).filter(
+    (s) => resolveSubject(s) !== null,
+  );
+  const hasSubject = about !== undefined && resolvedSubjects.length > 0;
+  const subjectKind = hasSubject
+    ? (resolvedSubjects[0]?.kind ?? undefined)
+    : undefined;
+  const subjectCount = hasSubject ? resolvedSubjects.length : 0;
+
   return (
     <>
       <JsonLd
@@ -278,8 +295,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <ArticleViewTracker
         articleId={article.id}
         articleType={article.articleType}
-        hasSubject={about !== undefined}
-        subjectKind={about ? (article.subject?.kind ?? undefined) : undefined}
+        hasSubject={hasSubject}
+        subjectKind={subjectKind}
+        subjectCount={subjectCount}
       />
       {renderTemplate({
         articleType: article.articleType,
@@ -299,7 +317,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         readingTime,
         shareUrl: shareConfig.url,
         body: (article.body as PortableTextBlock[] | null) ?? null,
-        subject: article.subject ?? null,
+        subjects: article.subjects ?? null,
       })}
 
       <RelatedContentSection

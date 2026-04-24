@@ -28,6 +28,13 @@ interface ArticleViewInput {
   hasSubject: boolean;
   /** Only relevant when hasSubject is true. */
   subjectKind?: "player" | "staff" | "custom";
+  /**
+   * Interview subject count (1–4). Emitted as `subject_count` on
+   * interview articles; omitted on other types so the GA4 dimension
+   * stays unambiguous. Undefined or zero on interviews is omitted too
+   * (defensive — schema requires ≥1 subject on interview publish).
+   */
+  subjectCount?: number;
 }
 
 interface ArticleShareInput {
@@ -52,12 +59,24 @@ interface EventCtaClickInput {
 
 export function useArticleAnalytics() {
   const trackArticleView = useCallback(
-    ({ articleType, articleId, hasSubject, subjectKind }: ArticleViewInput) => {
+    ({
+      articleType,
+      articleId,
+      hasSubject,
+      subjectKind,
+      subjectCount,
+    }: ArticleViewInput) => {
+      const type = normaliseType(articleType);
+      const emitCount =
+        type === "interview" &&
+        typeof subjectCount === "number" &&
+        subjectCount > 0;
       trackEvent("article_view", {
-        article_type: normaliseType(articleType),
+        article_type: type,
         article_id_hashed: hashMemberId(articleId),
         has_subject: hasSubject,
         ...(hasSubject && subjectKind ? { subject_kind: subjectKind } : {}),
+        ...(emitCount ? { subject_count: subjectCount } : {}),
       });
     },
     [],

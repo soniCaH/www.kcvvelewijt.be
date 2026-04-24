@@ -18,7 +18,6 @@
     "sanity"
   ],
   "dependencies": {
-    "@kcvv/sanity-schemas": "workspace:*",
     "@kcvv/sanity-studio": "workspace:*",
     "@sanity/icons": "3.7.4",
     "@sanity/vision": "5.22.0",

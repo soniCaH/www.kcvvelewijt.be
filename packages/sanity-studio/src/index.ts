@@ -4,7 +4,15 @@ export {
   applyArticleTagsInput,
   canonicalizeTagInput,
   matchTagCandidates,
+  RespondentPicker,
+  applyRespondentPicker,
 } from './inputs'
+export {schemaTypes} from './schema-types'
+export {
+  default as interviewSubjectToSubjectsMigration,
+  migrateInterviewSubjectToSubjects,
+} from './migrations/interview-subject-to-subjects'
+export type {InterviewArticleDoc} from './migrations/interview-subject-to-subjects'
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
 export {
@@ -16,3 +24,7 @@ export {
   prepareResponsibilityPreview,
 } from './preview/responsibility-preview'
 export {validateOrganigramMember} from './validation/organigram-members'
+export {validateSubjectsCount} from './validation/subjects-count'
+export type {SubjectsCountContext} from './validation/subjects-count'
+export {validateRespondentKey} from './validation/respondent-key'
+export type {RespondentKeyContext} from './validation/respondent-key'

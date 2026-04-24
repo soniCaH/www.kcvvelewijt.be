@@ -1,6 +1,10 @@
 import { Fragment } from "react";
 import type { PortableTextBlock } from "@portabletext/react";
-import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import { cn } from "@/lib/utils/cn";
+import {
+  resolvePairRespondent,
+  type IndexedSubject,
+} from "@/components/article/SubjectAttribution";
 import { QaPairStandard } from "./QaPairStandard";
 import { QaPairKey } from "./QaPairKey";
 import { QaPairQuote } from "./QaPairQuote";
@@ -11,6 +15,13 @@ export interface QaPairValue {
   question?: string;
   answer?: PortableTextBlock[];
   tag?: string;
+  /**
+   * Points at the `_key` of one of `article.subjects[]`. Required on
+   * multi-subject interviews' `key`/`quote` pairs; auto-resolved to
+   * `subjects[0]` on single-subject interviews. Populated by the
+   * `RespondentPicker` custom Studio input.
+   */
+  respondentKey?: string;
 }
 
 export interface QaBlockValue {
@@ -20,11 +31,13 @@ export interface QaBlockValue {
 export interface QaBlockProps {
   value: QaBlockValue;
   /**
-   * Article-level subject (resolved via `resolveSubject`). Required for
-   * `key` and `quote` pairs to render attribution and photos; ignored by
-   * `standard` and `rapid-fire`.
+   * Article-level subjects (from `article.subjects[]`). Each entry carries
+   * the `_key` that `qaPair.respondentKey` points at, so `key`/`quote`
+   * pairs can resolve to the right attribution in duo/panel interviews.
+   * On single-subject interviews, the sole subject is used regardless of
+   * `respondentKey`. Ignored by `standard` and `rapid-fire` pairs.
    */
-  subject?: SubjectValue | null;
+  subjects?: IndexedSubject[] | null;
 }
 
 type Unit =
@@ -32,6 +45,10 @@ type Unit =
   | { kind: "key"; pair: QaPairValue }
   | { kind: "quote"; pair: QaPairValue }
   | { kind: "rapid-fire"; pairs: QaPairValue[] };
+
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled QaBlock unit kind: ${JSON.stringify(value)}`);
+};
 
 const isBreakoutTag = (tag?: string): tag is "key" | "quote" =>
   tag === "key" || tag === "quote";
@@ -76,14 +93,28 @@ function groupPairs(pairs: QaPairValue[]): Unit[] {
  * Standard pairs are numbered sequentially across the block (01., 02., …);
  * breakout units do not participate in the numeral counter.
  */
-export const QaBlock = ({ value, subject = null }: QaBlockProps) => {
+export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
   const pairs = value.pairs ?? [];
   if (pairs.length === 0) return null;
 
   const units = groupPairs(pairs);
 
   return (
-    <div className="not-prose my-12" data-testid="qa-block">
+    <div
+      // Adjacent cream-band breakouts (key↔key / key↔quote / quote↔key /
+      // quote↔quote) should butt against each other — a white strip
+      // between two full-bleed sections reads as a broken rhythm. The
+      // arbitrary selectors below zero the top margin on the trailing
+      // breakout and the bottom margin on the leading breakout. Limited
+      // to `section[data-testid^=qa-pair-]` so QaPairStandard (a div)
+      // and QaGroupRapidFire are unaffected.
+      className={cn(
+        "not-prose my-12",
+        "[&>section[data-testid^=qa-pair-]+section[data-testid^=qa-pair-]]:!mt-0",
+        "[&>section[data-testid^=qa-pair-]:has(+section[data-testid^=qa-pair-])]:!mb-0",
+      )}
+      data-testid="qa-block"
+    >
       {units.map((unit, i) => {
         const prev = units[i - 1];
         const needsRule =
@@ -108,32 +139,47 @@ export const QaBlock = ({ value, subject = null }: QaBlockProps) => {
         }
 
         if (unit.kind === "key") {
+          const respondent = resolvePairRespondent(
+            unit.pair.respondentKey,
+            subjects,
+          );
           return (
             <QaPairKey
               key={unit.pair._key ?? `key-${i}`}
               question={unit.pair.question ?? ""}
               answer={unit.pair.answer ?? []}
-              subject={subject}
+              subject={respondent}
             />
           );
         }
 
         if (unit.kind === "quote") {
+          const respondent = resolvePairRespondent(
+            unit.pair.respondentKey,
+            subjects,
+          );
           return (
             <QaPairQuote
               key={unit.pair._key ?? `quote-${i}`}
               answer={unit.pair.answer ?? []}
-              subject={subject}
+              subject={respondent}
             />
           );
         }
 
-        return (
-          <QaGroupRapidFire
-            key={unit.pairs[0]?._key ?? `rf-${i}`}
-            pairs={unit.pairs}
-          />
-        );
+        if (unit.kind === "rapid-fire") {
+          return (
+            <QaGroupRapidFire
+              key={unit.pairs[0]?._key ?? `rf-${i}`}
+              pairs={unit.pairs}
+            />
+          );
+        }
+
+        // Exhaustiveness: forces a compile error if a new Unit kind lands
+        // without a corresponding branch. The assertion is unreachable at
+        // runtime given the type; kept as a belt-and-braces fallback.
+        return assertNever(unit);
       })}
     </div>
   );

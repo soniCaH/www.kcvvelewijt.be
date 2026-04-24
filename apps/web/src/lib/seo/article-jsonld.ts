@@ -30,16 +30,23 @@ interface ArticleSubjectLike {
 export interface ArticleForSeo {
   title: string;
   articleType?: string | null;
-  subject?: ArticleSubjectLike | null;
+  subjects?: ArticleSubjectLike[] | null;
   body?: unknown;
   coverImageUrl?: string | null;
 }
 
 /**
  * Interview branch (design §12): derive the `about: Person` input for the
- * NewsArticle JSON-LD from the article's subject. schema.org has no
- * canonical Interview type — NewsArticle + about:Person is the fallback
+ * NewsArticle JSON-LD from the article's first subject. schema.org has
+ * no canonical Interview type — NewsArticle + about:Person is the fallback
  * Google's Rich Results Test accepts.
+ *
+ * Multi-subject interviews (#1358): only the first subject drives the
+ * JSON-LD `about` today. Co-subject JSON-LD (emitting `about` as an
+ * array of Persons) is tracked as a future SEO polish — Google handles
+ * the multi-Person shape, but the upstream `PersonAboutInput` type and
+ * the `NewsArticle` builder accept a single Person; expanding both is
+ * out of scope for this issue.
  *
  * Player subjects resolve with a profile URL (/spelers/{psdId}). Staff
  * and custom subjects resolve without a URL — the article projection
@@ -51,7 +58,8 @@ export function buildAboutFromSubject(
   article: ArticleForSeo,
 ): PersonAboutInput | undefined {
   if (article.articleType !== "interview") return undefined;
-  const subject = article.subject;
+  const subjects = Array.isArray(article.subjects) ? article.subjects : [];
+  const subject = subjects[0] ?? null;
   if (!subject?.kind) return undefined;
   if (subject.kind === "player") {
     const p = subject.playerRef;

@@ -8,6 +8,15 @@ export interface ArticleViewTrackerProps {
   articleType: string | null | undefined;
   hasSubject: boolean;
   subjectKind?: "player" | "staff" | "custom";
+  /**
+   * Number of subjects on interview articles (1–4). Emitted as the
+   * `subject_count` dimension on `article_view` — lets editorial slice
+   * engagement by single-subject vs duo vs panel formats. Emitted as 0
+   * when the article has no subjects (non-interview or malformed
+   * interview); `useArticleAnalytics` omits the dimension on non-
+   * interview article types so GA4 reports don't fragment.
+   */
+  subjectCount?: number;
 }
 
 /**
@@ -25,6 +34,7 @@ export const ArticleViewTracker = ({
   articleType,
   hasSubject,
   subjectKind,
+  subjectCount,
 }: ArticleViewTrackerProps) => {
   const { trackArticleView } = useArticleAnalytics();
   const hasFired = useRef(false);
@@ -32,7 +42,13 @@ export const ArticleViewTracker = ({
   useEffect(() => {
     if (hasFired.current) return;
     hasFired.current = true;
-    trackArticleView({ articleType, articleId, hasSubject, subjectKind });
+    trackArticleView({
+      articleType,
+      articleId,
+      hasSubject,
+      subjectKind,
+      subjectCount,
+    });
     // Fire-once-per-mount semantics — the ref guard is the dedup. An
     // explicit empty deps array communicates that to readers and satisfies
     // the linter (React Hook has missing deps is expected here).

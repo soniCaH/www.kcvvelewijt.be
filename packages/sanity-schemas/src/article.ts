@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {LinkIcon, UserIcon} from '@sanity/icons'
+import {validateSubjectsCount} from './validation/subjects-count'
 
 export const article = defineType({
   name: "article",
@@ -35,12 +36,19 @@ export const article = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
-      name: "subject",
-      title: "Subject (interview only)",
-      type: "subject",
+      name: "subjects",
+      title: "Subjects (interview only)",
+      type: "array",
+      of: [{ type: "subject" }],
       description:
-        "Person the interview is about. Drives the kicker in the hero, the attribution on `key` and `quote` qaBlock pairs, and JSON-LD metadata.",
+        "Persons the interview is about. For duo/panel interviews, list 2–4. Drives the hero layout (N=1 single portrait / N=2 side-by-side / N=3 trio / N=4 2×2 grid), per-pair attribution on `key` and `quote` pairs, and JSON-LD metadata.",
       hidden: ({ parent }) => parent?.articleType !== "interview",
+      validation: (r) =>
+        r.custom((subjects, ctx) =>
+          validateSubjectsCount(subjects, {
+            document: ctx.document as { articleType?: string } | undefined,
+          }),
+        ),
     }),
     defineField({
       name: "title",
