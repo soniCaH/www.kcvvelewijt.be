@@ -47,10 +47,26 @@ describe("VideoBlock", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("returns null when the asset URL is missing (undefined)", () => {
+  it("returns null when the asset URL is null", () => {
     const { container } = render(
       <VideoBlock value={withAsset({ url: null })} />,
     );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("returns null when the asset URL key is absent entirely", () => {
+    // withAsset() defaults include a `url`. Strip it to simulate a
+    // GROQ projection that returned a videoAsset object without the
+    // `url` field — `typeof src !== "string"` must still catch it.
+    const value: VideoBlockValue = {
+      _type: "videoBlock",
+      videoAsset: {
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "highlights.mp4",
+      },
+    };
+    const { container } = render(<VideoBlock value={value} />);
     expect(container.firstChild).toBeNull();
   });
 });

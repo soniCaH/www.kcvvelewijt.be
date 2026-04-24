@@ -75,35 +75,84 @@ const client = createClient({
   useCdn: false,
 });
 
+// Don't let a slow mirror hang CI.
+const FETCH_TIMEOUT_MS = 60_000;
+
+async function fetchWithTimeout(url, init = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function inferContentType(url, headerValue) {
+  // Prefer the server-reported MIME type; fall back to the URL extension.
+  // Schema currently accepts video/mp4 and video/webm — anything else is
+  // an editorial error, so we fail loudly instead of guessing.
+  if (typeof headerValue === "string" && /^video\//.test(headerValue)) {
+    return headerValue.split(";")[0].trim();
+  }
+  const match = /\.(mp4|webm)(?:\?|#|$)/i.exec(url);
+  if (match) return match[1].toLowerCase() === "webm" ? "video/webm" : "video/mp4";
+  return "video/mp4";
+}
+
 async function ensureVideoAsset() {
-  // Check if the asset already exists under the same filename — Sanity
-  // dedups by content hash, but the cheapest lookup is by filename we
-  // control.
+  // Filename is the cheap fingerprint — Sanity content-hash-dedups anyway,
+  // but the filename lookup is the shortest query. We cross-check the
+  // remote Content-Length to catch the "same filename, different fixture"
+  // case before reusing a stale asset.
   const existing = await client.fetch(
     `*[_type == "sanity.fileAsset" && originalFilename == $filename][0]{_id, originalFilename, size}`,
     { filename: VIDEO_FILENAME },
   );
   if (existing?._id) {
-    console.log(
-      ` · Reusing existing asset ${existing._id} (${existing.size} bytes)`,
-    );
-    return existing._id;
+    try {
+      const head = await fetchWithTimeout(VIDEO_URL, { method: "HEAD" });
+      const remoteSize = Number(head.headers.get("content-length") ?? NaN);
+      if (
+        Number.isFinite(remoteSize) &&
+        remoteSize > 0 &&
+        remoteSize === existing.size
+      ) {
+        console.log(
+          ` · Reusing existing asset ${existing._id} (${existing.size} bytes, content-length matches remote)`,
+        );
+        return existing._id;
+      }
+      console.log(
+        ` · Existing asset ${existing._id} (${existing.size} bytes) does not match remote size (${remoteSize || "unknown"}) — re-uploading.`,
+      );
+    } catch (err) {
+      console.log(
+        ` · HEAD check failed (${err instanceof Error ? err.message : "unknown"}); re-uploading to be safe.`,
+      );
+    }
   }
 
   console.log(` · Fetching video fixture from ${VIDEO_URL}…`);
-  const response = await fetch(VIDEO_URL);
+  const response = await fetchWithTimeout(VIDEO_URL);
   if (!response.ok) {
     console.error(
       `Failed to fetch fixture video: HTTP ${response.status}. Set SEED_VIDEO_URL to a reachable MP4 URL.`,
     );
     process.exit(1);
   }
+  const contentType = inferContentType(
+    VIDEO_URL,
+    response.headers.get("content-type"),
+  );
   const buffer = Buffer.from(await response.arrayBuffer());
-  console.log(` · Uploading ${buffer.byteLength} bytes to Sanity…`);
+  console.log(
+    ` · Uploading ${buffer.byteLength} bytes to Sanity as ${contentType}…`,
+  );
 
   const uploaded = await client.assets.upload("file", buffer, {
     filename: VIDEO_FILENAME,
-    contentType: "video/mp4",
+    contentType,
   });
   console.log(` · Uploaded asset ${uploaded._id}`);
   return uploaded._id;

@@ -44,14 +44,18 @@ export const Playground: Story = {
 };
 
 export const UploadOnly: Story = {
-  name: "Upload only (tracer)",
+  name: "Upload only — mimeType fallback",
   args: {
     value: {
       _type: "videoBlock",
       videoAsset: {
         url: SAMPLE_MP4_URL,
         size: 5_242_880,
-        mimeType: "video/mp4",
+        // Deliberately null — exercises the `<source type>` fallback in
+        // VideoBlock.tsx (defaults to video/mp4). Mirrors real Sanity
+        // uploads where the asset sometimes lands without a server-
+        // reported MIME type.
+        mimeType: null,
         originalFilename: "highlights.mp4",
       },
     },
@@ -60,7 +64,7 @@ export const UploadOnly: Story = {
     docs: {
       description: {
         story:
-          "Tracer-bullet render: a single uploaded MP4 rendered via the native HTML5 <video> element. No embed, no poster, no caption — Phase 1 only.",
+          "Tracer-bullet render with `mimeType: null` on the asset — exercises the video/mp4 fallback branch in the serializer. Distinct from Playground, which ships a fully-populated asset.",
       },
     },
   },

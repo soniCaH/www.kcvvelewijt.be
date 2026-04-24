@@ -66,11 +66,14 @@ cd "$WORKTREE_PATH"
 pnpm install
 ```
 
-Comment on the issue:
+Flip the issue label from `ready` to `in-progress` and comment on the issue:
 
 ```bash
+gh issue edit $ISSUE_NUM --remove-label "ready" --add-label "in-progress"
 gh issue comment $ISSUE_NUM --body "Starting implementation on branch \`${BRANCH}\`. Worktree: \`${WORKTREE_PATH}\`"
 ```
+
+The label transition is mandatory — the `in-progress` label is how anyone (human or automation) discovers what's being worked on via `gh issue list --label in-progress`.
 
 ## Step 3 — Read & Understand
 
@@ -129,6 +132,14 @@ gh pr create \
   --body "Closes #${ISSUE_NUM}\n\n## Changes\n\n- ...\n\n## Testing\n\n- All checks pass\n- Manual test: ..." \
   --label "ready-for-review"
 ```
+
+4. Flip the issue label from `in-progress` to `ready-for-review`:
+
+```bash
+gh issue edit $ISSUE_NUM --remove-label "in-progress" --add-label "ready-for-review"
+```
+
+The PR's `--label` flag labels the PR, not the issue — the `gh issue edit` above is the one that updates the issue. Skipping it leaves the issue stuck on `in-progress` (or, worse, still on `ready`) and mis-represents the pipeline state in dashboards / `gh issue list` queries.
 
 **Wait for human review before merging.** (Ralph handles this — not you.)
 
@@ -206,4 +217,5 @@ Both must be true for Ralph to pick it up. Use `/spec` to refine underspecified 
 - Never start a second issue before the current PR is open
 - Never commit directly to main
 - Never skip the quality gate
+- Never skip the label transitions in Step 2 and Step 6 — `ready` → `in-progress` at worktree creation, `in-progress` → `ready-for-review` at PR open
 - If blocked, set the blockedBy relationship via GraphQL (see "If Blocked" above) and propose the next issue
