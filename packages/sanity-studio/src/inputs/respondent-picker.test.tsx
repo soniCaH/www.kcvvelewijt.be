@@ -14,7 +14,6 @@ vi.mock('sanity', () => {
   return {
     PatchEvent,
     set: (value: unknown) => ({type: 'set', value}),
-    unset: () => ({type: 'unset'}),
     useClient: () => mockClient,
     useFormValue: (path: unknown[]) => {
       const first = Array.isArray(path) ? path[0] : undefined

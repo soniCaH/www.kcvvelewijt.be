@@ -4,7 +4,6 @@ import {
   PatchEvent,
   set,
   type StringInputProps,
-  unset,
   useClient,
   useFormValue,
 } from 'sanity'
@@ -109,12 +108,12 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
   }
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextKey = event.currentTarget.value
-    if (!nextKey) {
-      onChange(PatchEvent.from(unset()))
-      return
-    }
-    onChange(PatchEvent.from(set(nextKey)))
+    // Radio inputs always fire with their `value` prop as the event value,
+    // and every radio in this picker has a non-empty `_key` as its value.
+    // No "clear" affordance exists yet — if one ships, route it through
+    // onChange(PatchEvent.from(unset())) explicitly rather than piggy-
+    // backing on handleChange.
+    onChange(PatchEvent.from(set(event.currentTarget.value)))
   }
 
   if (subjects.length === 0) {

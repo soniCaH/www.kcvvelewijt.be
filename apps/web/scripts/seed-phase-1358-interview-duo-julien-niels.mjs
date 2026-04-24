@@ -229,14 +229,6 @@ async function main() {
       ],
     }),
 
-    // QUOTE — Niels's dramatic closer on the Perk goal.
-    pair({
-      question: "De 3-2 tegen Perk",
-      tag: "quote",
-      respondentKey: KEY_NIELS,
-      answer: [p("Hiervoor speel je voetbal.")],
-    }),
-
     // Q4 — Moment buiten het veld.
     pair({
       question:
@@ -294,7 +286,10 @@ async function main() {
       ],
     }),
 
-    // Q7 — Reünie verhaal. Standard for both Q+A, then a Niels quote.
+    // Q7 — Reünie verhaal. Both answers as one standard pair with
+    // inline attribution; Niels's "halfdood geschopt" line is folded
+    // into his paragraph here rather than getting its own quote
+    // breakout, to keep the Niels attribution count balanced.
     pair({
       question:
         "Over twintig jaar zitten jullie samen op een reünie. Welk verhaal over de ander vertel je sowieso opnieuw?",
@@ -304,17 +299,9 @@ async function main() {
           "Julien",
           "Een paar jaar geleden vroeg er iemand in onze WhatsApp-groep waar Het Steen was. Nillie kon niet geloven dat de mensen 't Steen niet kenden. Hij antwoordde toen: 'links en de steenweg af'. Dat was een moment waar iedereen in de groep om kon lachen, en het gaat tot op vandaag nog mee als inside joke.",
         ),
-      ],
-    }),
-
-    // QUOTE — Niels's "halfdood geschopt" moment.
-    pair({
-      question: "Over Jul op het veld",
-      tag: "quote",
-      respondentKey: KEY_NIELS,
-      answer: [
-        p(
-          "Een van de honderden keren dat Jul zich liet vallen alsof hij halfdood geschopt werd, en na 2 minuten verder speelde alsof er niets aan de hand was.",
+        attributedP(
+          "Niels",
+          "Eén van de honderden keren dat Jul zich liet vallen alsof hij halfdood geschopt werd — en na twee minuten verder speelde alsof er niets aan de hand was.",
         ),
       ],
     }),
@@ -368,31 +355,6 @@ async function main() {
       ],
     }),
 
-    // Rapid-fire — short alternating prompts (fabricated, editor can swap).
-    pair({
-      question: "Pasta of frieten?",
-      tag: "rapid-fire",
-      answer: [attributedP("Julien", "Frieten."), attributedP("Niels", "Pasta.")],
-    }),
-    pair({
-      question: "Thuis of uit?",
-      tag: "rapid-fire",
-      answer: [attributedP("Julien", "Thuis."), attributedP("Niels", "Thuis.")],
-    }),
-    pair({
-      question: "Favoriete training stuk?",
-      tag: "rapid-fire",
-      answer: [
-        attributedP("Julien", "Partijtje."),
-        attributedP("Niels", "Shooting oefening."),
-      ],
-    }),
-    pair({
-      question: "Eerste drankje na de match?",
-      tag: "rapid-fire",
-      answer: [attributedP("Julien", "Biertje."), attributedP("Niels", "Cola.")],
-    }),
-
     // QUOTE — Julien's closing wish (shared-closer single-speaker form).
     pair({
       question: "Eén gezamenlijke boodschap voor de supporters van groen-wit?",
@@ -435,6 +397,24 @@ async function main() {
         _key: "qa-block",
         _type: "qaBlock",
         pairs,
+      },
+      // Closing note from the editorial team — splits the final pull-
+      // quote from the metadata footer so the article doesn't end on a
+      // cream-band cliff edge. Warm but restrained.
+      {
+        _key: "closing-note",
+        _type: "block",
+        style: "normal",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            _key: "closing-note-span",
+            marks: [],
+            text:
+              "Julien en Niels, bedankt voor zes mooie seizoenen bij KCVV Elewijt. Jullie maakten van de B-ploeg wat ze geworden is: een hechte vriendengroep en — zoals Niels het zelf het best verwoordt — de plezantste compagnie in de reeks. De deur blijft altijd openstaan: voor een match in de tribune, een pint in de kantine, of gewoon om eens langs te komen. Tot snel, en veel succes in wat komt.",
+          },
+        ],
       },
     ],
   };

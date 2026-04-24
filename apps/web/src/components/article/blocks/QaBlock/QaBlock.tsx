@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import type { PortableTextBlock } from "@portabletext/react";
+import { cn } from "@/lib/utils/cn";
 import {
   resolvePairRespondent,
   type IndexedSubject,
@@ -99,7 +100,21 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
   const units = groupPairs(pairs);
 
   return (
-    <div className="not-prose my-12" data-testid="qa-block">
+    <div
+      // Adjacent cream-band breakouts (key↔key / key↔quote / quote↔key /
+      // quote↔quote) should butt against each other — a white strip
+      // between two full-bleed sections reads as a broken rhythm. The
+      // arbitrary selectors below zero the top margin on the trailing
+      // breakout and the bottom margin on the leading breakout. Limited
+      // to `section[data-testid^=qa-pair-]` so QaPairStandard (a div)
+      // and QaGroupRapidFire are unaffected.
+      className={cn(
+        "not-prose my-12",
+        "[&>section[data-testid^=qa-pair-]+section[data-testid^=qa-pair-]]:!mt-0",
+        "[&>section[data-testid^=qa-pair-]:has(+section[data-testid^=qa-pair-])]:!mb-0",
+      )}
+      data-testid="qa-block"
+    >
       {units.map((unit, i) => {
         const prev = units[i - 1];
         const needsRule =
