@@ -13,14 +13,19 @@ import {
   MapPin,
   Phone,
   Mail,
-  Facebook,
-  Instagram,
   ArrowRight,
   Search,
   Menu,
   X,
   ChevronDown,
 } from "lucide-react";
+// Facebook + Instagram come from our inline BrandIcons module — Lucide v1
+// dropped the brand-logo exports. The BrandIcons signature is
+// LucideIcon-compatible (forwardRef, size/className/...svg props).
+import {
+  FacebookBrandIcon as Facebook,
+  InstagramBrandIcon as Instagram,
+} from "./BrandIcons";
 
 const meta = {
   title: "UI/Icon",
