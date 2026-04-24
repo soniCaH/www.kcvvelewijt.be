@@ -7,7 +7,7 @@
     "seed": "tsx src/seed-responsibilities.ts"
   },
   "dependencies": {
-    "@sanity/client": "7.21.0"
+    "@sanity/client": "7.22.0"
   },
   "devDependencies": {
     "tsx": "4.21.0"
