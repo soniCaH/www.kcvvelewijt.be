@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { VideoBlock, type VideoBlockValue } from "./VideoBlock";
 
@@ -68,5 +68,113 @@ describe("VideoBlock", () => {
     };
     const { container } = render(<VideoBlock value={value} />);
     expect(container.firstChild).toBeNull();
+  });
+});
+
+describe("VideoBlock — embed path (Phase 2)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders a privacy-enhanced YouTube iframe when embedUrl is a YouTube URL", () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        }}
+      />,
+    );
+    const iframe = screen.getByTestId(
+      "video-block-iframe",
+    ) as HTMLIFrameElement;
+    expect(iframe.getAttribute("src")).toBe(
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    );
+    const wrapper = screen.getByTestId("video-block");
+    expect(wrapper.dataset.source).toBe("embed");
+    expect(wrapper.dataset.provider).toBe("youtube");
+  });
+
+  it("renders the player.vimeo.com iframe when embedUrl is a Vimeo URL", () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://vimeo.com/123456789",
+        }}
+      />,
+    );
+    const iframe = screen.getByTestId(
+      "video-block-iframe",
+    ) as HTMLIFrameElement;
+    expect(iframe.getAttribute("src")).toBe(
+      "https://player.vimeo.com/video/123456789",
+    );
+    expect(screen.getByTestId("video-block").dataset.provider).toBe("vimeo");
+  });
+
+  it("forwards loading=lazy + referrerPolicy on the iframe", () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://youtu.be/dQw4w9WgXcQ",
+        }}
+      />,
+    );
+    const iframe = screen.getByTestId("video-block-iframe");
+    expect(iframe.getAttribute("loading")).toBe("lazy");
+    expect(iframe.getAttribute("referrerpolicy")).toBe(
+      "strict-origin-when-cross-origin",
+    );
+  });
+
+  it("renders a neutral fallback (no iframe) for an unsupported host", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://dailymotion.com/video/x1234abcd",
+        }}
+      />,
+    );
+    expect(screen.queryByTestId("video-block-iframe")).toBeNull();
+    const wrapper = screen.getByTestId("video-block");
+    expect(wrapper.dataset.source).toBe("embed-unknown");
+    expect(screen.getByText(/provider niet ondersteund/i)).toBeTruthy();
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("does NOT interpolate the raw URL into the DOM for an unsupported host (XSS guard)", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const suspicious = "https://evil.example.com/watch?v=dQw4w9WgXcQ";
+    const { container } = render(
+      <VideoBlock value={{ _type: "videoBlock", embedUrl: suspicious }} />,
+    );
+    expect(container.innerHTML).not.toContain(suspicious);
+    expect(container.innerHTML).not.toContain("evil.example.com");
+  });
+
+  it("prefers embedUrl over videoAsset when both are populated (defensive)", () => {
+    // Normally the Sanity XOR validator makes this state unreachable,
+    // but the runtime must still pick a single deterministic path.
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          videoAsset: {
+            url: "https://cdn.sanity.io/files/vhb33jaz/staging/other.mp4",
+            size: 1_000_000,
+            mimeType: "video/mp4",
+            originalFilename: "other.mp4",
+          },
+        }}
+      />,
+    );
+    expect(screen.getByTestId("video-block").dataset.source).toBe("embed");
+    expect(screen.queryByTestId("video-block-video")).toBeNull();
   });
 });

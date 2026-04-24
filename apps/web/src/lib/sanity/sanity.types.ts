@@ -325,6 +325,7 @@ export type VideoBlock = {
     media?: unknown;
     _type: "file";
   };
+  embedUrl?: string;
 };
 
 export type ArticleImage = {
@@ -1173,6 +1174,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
           media?: unknown;
           _type: "file";
         };
+        embedUrl?: string;
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1488,6 +1490,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
           media?: unknown;
           _type: "file";
         };
+        embedUrl?: string;
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
