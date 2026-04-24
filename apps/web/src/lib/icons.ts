@@ -8,6 +8,10 @@
  */
 
 import {
+  FacebookBrandIcon as Facebook,
+  InstagramBrandIcon as Instagram,
+} from "@/components/design-system/Icon/BrandIcons";
+import {
   // Navigation & UI
   Menu,
   X,
@@ -29,9 +33,8 @@ import {
   ThumbsUp,
   ThumbsDown,
 
-  // Social
-  Facebook,
-  Instagram,
+  // Social (Facebook + Instagram brand logos come from ./BrandIcons —
+  // Lucide v1 dropped its brand exports for trademark reasons.)
   Share2,
 
   // Content & Document
@@ -106,6 +109,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+// Re-export BrandIcons under their Lucide-compatible names. `icons.facebook`,
+// `icons.instagram`, and the named `Facebook`/`Instagram` exports below
+// continue to work for every call site that used them pre-v1.
+export { Facebook, Instagram };
+
 /**
  * Icon components map
  * Used to get icon component by name string
@@ -132,7 +140,7 @@ export const icons = {
   "thumbs-up": ThumbsUp,
   "thumbs-down": ThumbsDown,
 
-  // Social
+  // Social (Facebook/Instagram are inline-SVG brand components — see ./BrandIcons)
   facebook: Facebook,
   instagram: Instagram,
   share: Share2,
@@ -284,9 +292,7 @@ export {
   ThumbsUp,
   ThumbsDown,
 
-  // Social
-  Facebook,
-  Instagram,
+  // Social (Facebook + Instagram re-exported at the top of the file from ./BrandIcons)
   Share2,
 
   // Content & Document
