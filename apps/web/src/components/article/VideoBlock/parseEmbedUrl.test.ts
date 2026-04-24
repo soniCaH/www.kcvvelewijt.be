@@ -45,6 +45,12 @@ describe("parseEmbedUrl", () => {
         provider: "youtube",
         videoId: "abc-DEF_123",
       });
+      expect(
+        parseEmbedUrl("https://www.youtube.com/live/Some_Live-ID123"),
+      ).toEqual({
+        provider: "youtube",
+        videoId: "Some_Live-ID123",
+      });
     });
 
     it("returns null when the v= param is missing or empty", () => {

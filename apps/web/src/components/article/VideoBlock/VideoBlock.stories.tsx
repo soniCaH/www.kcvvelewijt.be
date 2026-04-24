@@ -95,11 +95,12 @@ export const EmbedYoutube: Story = {
   args: {
     value: {
       _type: "videoBlock",
-      // Google's "Chrome Dino" short — a stable, club-unrelated public
-      // video good enough to demonstrate the iframe path. Editors will
-      // paste their own URL; this fixture just proves the parser maps
-      // watch URLs to the youtube-nocookie.com/embed/<id> iframe.
-      embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      // "Me at the zoo" (jNQXAC9IVRw) — the first video ever uploaded to
+      // YouTube (2005, by co-founder Jawed Karim). A stable, club-
+      // unrelated public fixture used here to demonstrate that the
+      // parser maps watch URLs to the youtube-nocookie.com/embed/<id>
+      // iframe.
+      embedUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
     },
   },
   parameters: {
@@ -117,7 +118,7 @@ export const EmbedYoutubeShort: Story = {
   args: {
     value: {
       _type: "videoBlock",
-      embedUrl: "https://youtu.be/dQw4w9WgXcQ?t=30",
+      embedUrl: "https://youtu.be/jNQXAC9IVRw?t=30",
     },
   },
   parameters: {

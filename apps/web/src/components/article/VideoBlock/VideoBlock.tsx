@@ -68,6 +68,10 @@ function renderUpload(value: VideoBlockValue, className: string | undefined) {
 
 // ─── Embed path (Phase 2) ────────────────────────────────────────────────
 
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled VideoProvider: ${JSON.stringify(value)}`);
+};
+
 function embedSrc(provider: VideoProvider, videoId: string): string {
   switch (provider) {
     case "youtube":
@@ -76,6 +80,8 @@ function embedSrc(provider: VideoProvider, videoId: string): string {
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
     case "vimeo":
       return `https://player.vimeo.com/video/${encodeURIComponent(videoId)}`;
+    default:
+      return assertNever(provider);
   }
 }
 
@@ -85,6 +91,8 @@ function embedTitle(provider: VideoProvider): string {
       return "YouTube-video";
     case "vimeo":
       return "Vimeo-video";
+    default:
+      return assertNever(provider);
   }
 }
 
