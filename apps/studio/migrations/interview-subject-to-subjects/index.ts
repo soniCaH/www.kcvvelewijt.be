@@ -3,9 +3,9 @@
  * for multi-subject interview support (#1358). Idempotent: already-migrated
  * docs are skipped; dangling legacy `subject` fields are cleaned up.
  *
- * Logic + tests live in `@kcvv/sanity-studio` so the migration can be
- * unit-tested against synthetic documents. This file is the Sanity CLI
- * entry point.
+ * Logic + tests live in `@kcvv/sanity-studio/migrations` so the migration
+ * can be unit-tested against synthetic documents. This file is the Sanity
+ * CLI entry point.
  *
  * Dry-run first:
  *   npx sanity@latest migration run interview-subject-to-subjects --project vhb33jaz --dataset staging --dry-run
@@ -14,6 +14,6 @@
  *   npx sanity@latest migration run interview-subject-to-subjects --project vhb33jaz --dataset staging
  *   npx sanity@latest migration run interview-subject-to-subjects --project vhb33jaz --dataset production
  */
-import {interviewSubjectToSubjectsMigration} from '@kcvv/sanity-studio'
+import {interviewSubjectToSubjectsMigration} from '@kcvv/sanity-studio/migrations'
 
 export default interviewSubjectToSubjectsMigration
