@@ -87,3 +87,83 @@ export const MissingAsset: Story = {
     },
   },
 };
+
+// ─── Phase 2 — embed URL stories (#1364) ──────────────────────────────────
+
+export const EmbedYoutube: Story = {
+  name: "Embed — YouTube",
+  args: {
+    value: {
+      _type: "videoBlock",
+      // "Me at the zoo" (jNQXAC9IVRw) — the first video ever uploaded to
+      // YouTube (2005, by co-founder Jawed Karim). A stable, club-
+      // unrelated public fixture used here to demonstrate that the
+      // parser maps watch URLs to the youtube-nocookie.com/embed/<id>
+      // iframe.
+      embedUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Renders the privacy-enhanced YouTube iframe (`youtube-nocookie.com/embed/<id>`) inside a 16:9 container. The serializer pulls the video ID from the `v=` query param via `parseEmbedUrl`.",
+      },
+    },
+  },
+};
+
+export const EmbedYoutubeShort: Story = {
+  name: "Embed — YouTube (youtu.be)",
+  args: {
+    value: {
+      _type: "videoBlock",
+      embedUrl: "https://youtu.be/jNQXAC9IVRw?t=30",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Short-form `youtu.be/<id>` URLs resolve to the same iframe as their watch-URL equivalents. Trailing query params (`t=...`, `feature=...`) are ignored.",
+      },
+    },
+  },
+};
+
+export const EmbedVimeo: Story = {
+  name: "Embed — Vimeo",
+  args: {
+    value: {
+      _type: "videoBlock",
+      // Vimeo staff-picks short — public, ad-free, with a stable ID.
+      embedUrl: "https://vimeo.com/824804225",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Renders the `player.vimeo.com/video/<id>` iframe inside a 16:9 container. Vimeo URLs are recognised via the numeric first path segment.",
+      },
+    },
+  },
+};
+
+export const EmbedUnknownProvider: Story = {
+  name: "Embed — unknown provider (fallback)",
+  args: {
+    value: {
+      _type: "videoBlock",
+      embedUrl: "https://dailymotion.com/video/x1234abcd",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`parseEmbedUrl` rejects anything outside the YouTube/Vimeo allowlist. The serializer logs a `console.warn` (visible in the browser console) and renders a neutral Dutch-language fallback. The raw URL is **never** injected into the DOM, guarding against XSS and open-redirect risks.",
+      },
+    },
+  },
+};
