@@ -70,9 +70,12 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
   <SpacingRow token="spacing-15" value="3.75rem" px="60px" />
   <SpacingRow token="spacing-17_5" value="4.375rem" px="70px" />
   <SpacingRow token="spacing-22_5" value="5.625rem" px="90px" />
+  <SpacingRow token="--footer-diagonal" value="clamp(2rem, 6vw, 5rem)" px="80px" />
 </div>
 
 > `spacing-35` (35rem) is the hero image height — too wide to show inline.
+>
+> `--footer-diagonal` is a responsive CSS custom property (`clamp(2rem, 6vw, 5rem)` → 32–80px). The bar shows its maximum. Used as `var(--footer-diagonal)` by `SectionTransition` (diagonal height), `SectionStack`'s `reserveFooterSafeArea` behavior, and the `FooterSafeArea` primitive to extend the last section's background through the `PageFooter` diagonal overlap zone.
 
 ---
 

@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 import { cn } from "@/lib/utils/cn";
-import { SectionTransition } from "@/components/design-system/SectionTransition/SectionTransition";
+import {
+  BG_CLASS,
+  SectionTransition,
+} from "@/components/design-system/SectionTransition/SectionTransition";
 import type {
   SectionBg,
   SectionTransitionConfig,
@@ -29,14 +32,6 @@ export interface SectionStackProps {
    */
   reserveFooterSafeArea?: boolean;
 }
-
-const BG_CLASS: Record<SectionBg, string> = {
-  white: "bg-white",
-  "gray-100": "bg-gray-100",
-  "kcvv-black": "bg-kcvv-black",
-  "kcvv-green-dark": "bg-kcvv-green-dark",
-  transparent: "bg-transparent",
-};
 
 export function SectionStack({
   sections,
@@ -75,11 +70,12 @@ export function SectionStack({
                   "pb-[var(--footer-diagonal)]",
               )}
             >
-              {/* Section content wrapper */}
+              {/* Section content wrapper — bg is owned by the outer
+                  wrapper so the last-section footer-safe-area padding
+                  sits inside the same colored surface. */}
               <div
                 className={cn(
                   "w-full",
-                  BG_CLASS[section.bg],
                   section.paddingTop ?? "pt-20",
                   section.paddingBottom ?? "pb-20",
                   hasOverlap && "relative z-0",

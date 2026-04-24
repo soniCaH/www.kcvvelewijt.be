@@ -132,6 +132,11 @@ export default async function CalendarPage() {
   const data = await fetchCalendarData();
 
   return (
+    // `pb-[var(--footer-diagonal)]` on the root wrapper (instead of a
+    // trailing <FooterSafeArea />) lets `bg-gray-100` extend through the
+    // footer-diagonal overlap zone — the overlap's transparent upper
+    // triangle then reveals the page's own gray surface rather than
+    // white body. See #1360.
     <div className="min-h-screen bg-gray-100 pb-[var(--footer-diagonal)]">
       <PageHero
         image="/images/youth-trainers.jpg"

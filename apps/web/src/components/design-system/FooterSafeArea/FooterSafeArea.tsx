@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/cn";
+import { BG_CLASS } from "@/components/design-system/SectionTransition/SectionTransition";
 import type { SectionBg } from "@/components/design-system/SectionTransition/SectionTransition";
 
 export interface FooterSafeAreaProps {
@@ -14,14 +15,6 @@ export interface FooterSafeAreaProps {
   bg?: SectionBg;
   className?: string;
 }
-
-const BG_CLASS: Record<SectionBg, string> = {
-  white: "bg-white",
-  "gray-100": "bg-gray-100",
-  "kcvv-black": "bg-kcvv-black",
-  "kcvv-green-dark": "bg-kcvv-green-dark",
-  transparent: "bg-transparent",
-};
 
 /**
  * Reserves a footer-diagonal-sized safe area at the end of a page so the

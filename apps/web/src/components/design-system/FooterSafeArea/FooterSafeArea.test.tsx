@@ -16,4 +16,11 @@ describe("FooterSafeArea", () => {
     const el = container.firstElementChild as HTMLElement;
     expect(el.className).toContain("bg-kcvv-black");
   });
+
+  it("merges caller-supplied className", () => {
+    const { container } = render(<FooterSafeArea className="my-extra-class" />);
+    const el = container.firstElementChild as HTMLElement;
+    expect(el.className).toContain("my-extra-class");
+    expect(el.className).toContain("h-[var(--footer-diagonal)]");
+  });
 });
