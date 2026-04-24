@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MockBackdrop } from "../storybook-mocks";
 import { SectionStack } from "./SectionStack";
 import type { SectionConfig } from "./SectionStack";
 
@@ -266,21 +267,8 @@ export const AlternatingDirections: Story = {
 // ─── Backdrop story ───────────────────────────────────────────────────────────
 //
 // A single backdropped section flanked by plain siblings, so reviewers can
-// verify the backdrop extends into both adjacent diagonal strips. The CSS
-// gradient stands in for a real photo to keep the story deterministic.
-
-function MockPhotoBackdrop() {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 20% 30%, rgba(255,215,0,0.35), transparent 55%), radial-gradient(circle at 80% 70%, rgba(0,135,85,0.55), transparent 60%), linear-gradient(135deg, #0a1a14 0%, #1e2024 50%, #0a1a14 100%)",
-      }}
-    />
-  );
-}
+// verify the backdrop extends into both adjacent diagonal strips. The mock
+// visual is shared with `UI/SectionTransition` via `../storybook-mocks`.
 
 export const BackdroppedSection: Story = {
   name: "Backdrop — single section flanked by plain siblings (§5.1, §5.6)",
@@ -293,7 +281,7 @@ export const BackdroppedSection: Story = {
       },
       {
         bg: "kcvv-green-dark",
-        backdrop: <MockPhotoBackdrop />,
+        backdrop: <MockBackdrop />,
         content: (
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-white md:px-8">
             <span className="text-xs font-bold tracking-widest uppercase opacity-70">

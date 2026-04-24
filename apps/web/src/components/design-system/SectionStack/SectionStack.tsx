@@ -75,6 +75,7 @@ export function SectionStack({
           prev.bg !== section.bg;
         const isLast = i === filtered.length - 1;
         const hasBackdrop = section.backdrop !== undefined;
+        const hasNextBackdrop = next?.backdrop !== undefined;
 
         return (
           // Fragment keeps the key while allowing the transition to sit
@@ -155,7 +156,7 @@ export function SectionStack({
                 }
                 overlap={section.transition!.overlap}
                 revealFrom={hasBackdrop || undefined}
-                revealTo={next.backdrop !== undefined || undefined}
+                revealTo={hasNextBackdrop || undefined}
               />
             )}
           </Fragment>

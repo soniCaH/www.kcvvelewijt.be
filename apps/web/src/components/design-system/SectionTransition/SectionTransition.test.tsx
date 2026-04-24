@@ -368,7 +368,7 @@ describe("SectionTransition", () => {
       expect(toPolygon.getAttribute("fill")).toBe("transparent");
     });
 
-    it("overlap=half: FROM stays transparent (existing behavior preserved via revealFrom !== false path)", () => {
+    it("overlap=half: FROM stays transparent (existing overlap behavior preserved)", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"

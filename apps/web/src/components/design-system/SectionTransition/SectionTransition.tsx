@@ -29,16 +29,19 @@ export interface SectionTransitionProps {
   overlap?: TransitionOverlap;
   /**
    * Make the FROM triangle transparent so the previous section's backdrop
-   * shows through. Auto-set by SectionStack when the FROM section has
-   * a backdrop. Do not set manually in consumer code.
+   * shows through. Auto-set by `SectionStack` when the FROM section has a
+   * backdrop. Do not set manually in consumer code. Typed `true | undefined`
+   * to enforce the auto-propagation contract (PRD §3.2, §8) — consumers
+   * cannot opt out of the existing overlap-transparent FROM behavior.
    */
-  revealFrom?: boolean;
+  revealFrom?: true;
   /**
-   * Make the TO triangle transparent so the next section's backdrop
-   * shows through. Auto-set by SectionStack when the TO section has
-   * a backdrop. Do not set manually in consumer code.
+   * Make the TO triangle transparent so the next section's backdrop shows
+   * through. Auto-set by `SectionStack` when the TO section has a backdrop.
+   * Do not set manually in consumer code. Typed `true | undefined` — see
+   * `revealFrom`.
    */
-  revealTo?: boolean;
+  revealTo?: true;
   className?: string;
 }
 
@@ -182,26 +185,22 @@ export function SectionTransition({
   // §5.3 — reveal-fill composition for the outer (from/to) polygons.
   //
   // FROM triangle:
-  //   revealFrom === true                          → transparent (backdrop reveal)
-  //   isOverlap && revealFrom !== false            → transparent (existing overlap behavior)
-  //   otherwise                                    → BG_COLOR[from]
+  //   revealFrom → transparent (backdrop reveal, auto-propagated by SectionStack)
+  //   isOverlap  → transparent (existing overlap behavior — hero / sponsor header
+  //                shows through the upper triangle)
+  //   otherwise  → BG_COLOR[from]
   //
   // TO triangle:
-  //   revealTo === true → transparent
-  //   otherwise         → BG_COLOR[to]
+  //   revealTo → transparent
+  //   otherwise → BG_COLOR[to]
   //
   // Reveal flags override the fill on their side only — they never cross
   // triangles. In double-diagonal, the `via` (mid) polygons are always opaque
-  // (§5.4 — via is a color transition layer, not a reveal surface).
-  let fromFill: string;
-  if (revealFrom === true) {
-    fromFill = "transparent";
-  } else if (isOverlap && revealFrom !== false) {
-    fromFill = "transparent";
-  } else {
-    fromFill = BG_COLOR[from];
-  }
-  const toFill = revealTo === true ? "transparent" : BG_COLOR[to];
+  // (§5.4 — via is a color transition layer, not a reveal surface). `revealFrom`
+  // and `revealTo` are typed `true | undefined`, so a truthy check is
+  // sufficient — there is no `false` escape hatch.
+  const fromFill = revealFrom || isOverlap ? "transparent" : BG_COLOR[from];
+  const toFill = revealTo ? "transparent" : BG_COLOR[to];
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";

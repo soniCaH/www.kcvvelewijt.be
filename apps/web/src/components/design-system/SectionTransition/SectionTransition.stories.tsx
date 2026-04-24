@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MockBackdrop } from "../storybook-mocks";
 import { SectionTransition } from "./SectionTransition";
 
 const meta = {
@@ -229,25 +230,8 @@ export const OverlapFull: Story = {
 // ABOVE the transition so the effect of revealFrom / revealTo is visually
 // verifiable. Consumers should not set these flags manually; `SectionStack`
 // derives them from neighbor `backdrop` presence. The stories wire them
-// explicitly so the primitive is reviewable in isolation. A CSS gradient is
-// used instead of a remote photo to keep stories deterministic and CSP-safe.
-
-function MockBackdrop({ label }: { label: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 20% 30%, rgba(255,215,0,0.35), transparent 55%), radial-gradient(circle at 80% 70%, rgba(0,135,85,0.45), transparent 60%), linear-gradient(135deg, #1e2024 0%, #0a1a14 50%, #1e2024 100%)",
-      }}
-    >
-      <span className="absolute top-4 right-4 text-xs font-bold tracking-widest text-white uppercase opacity-70">
-        {label}
-      </span>
-    </div>
-  );
-}
+// explicitly so the primitive is reviewable in isolation. The mock visual is
+// shared with `UI/SectionStack` via `../storybook-mocks`.
 
 export const BackgroundedFrom: Story = {
   name: "Reveal — FROM (previous section has backdrop)",
