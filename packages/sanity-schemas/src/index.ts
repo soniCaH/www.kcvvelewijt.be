@@ -12,6 +12,7 @@ export {validateRespondentKey} from './validation/respondent-key'
 export type {RespondentKeyContext} from './validation/respondent-key'
 export {article} from './article'
 export {articleImage} from './articleImage'
+export {videoBlock} from './videoBlock'
 export {qaBlock, qaPair} from './qaBlock'
 export {transferFact} from './transferFact'
 export {eventFact} from './eventFact'
@@ -34,6 +35,7 @@ import {organigramNode} from './organigramNode'
 import {responsibility} from './responsibility'
 import {article} from './article'
 import {articleImage} from './articleImage'
+import {videoBlock} from './videoBlock'
 import {qaBlock, qaPair} from './qaBlock'
 import {transferFact} from './transferFact'
 import {eventFact} from './eventFact'
@@ -58,6 +60,7 @@ export const schemaTypes = [
   responsibility,
   article,
   articleImage,
+  videoBlock,
   qaBlock,
   qaPair,
   transferFact,

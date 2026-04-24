@@ -37,7 +37,7 @@
  */
 
 import { createClient } from "@sanity/client";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -56,6 +56,15 @@ const PUBLISH_AT = "2026-04-23T10:00:00.000Z";
 // re-runs. Never change once published.
 const KEY_JULIEN = "julien-k";
 const KEY_NIELS = "niels-k";
+
+// Niels's RC Meldert penalty save clip — filmed by his schoonvader and
+// mentioned in his Q9 answer. The seed uploads the file on first run and
+// reuses the dedup'd asset by `originalFilename` thereafter. Override
+// the local path via NIELS_CLIP_PATH if your copy lives elsewhere.
+const NIELS_CLIP_FILENAME = "niels-gosselin-rc-meldert-penalty-save.mp4";
+const NIELS_CLIP_PATH =
+  process.env.NIELS_CLIP_PATH ??
+  join(homedir(), "Downloads", "57c7dcd0-874e-462b-89aa-e8cc3e928217.mp4");
 
 if (DATASET === "production" && process.env.SANITY_ALLOW_PRODUCTION !== "1") {
   console.error(
@@ -132,6 +141,37 @@ const pair = ({ question, answer, tag, respondentKey }) => {
   return entry;
 };
 
+// ─── Video asset: upload once, reuse by filename thereafter ──────────────
+
+async function ensureNielsClipAsset() {
+  const existing = await client.fetch(
+    `*[_type == "sanity.fileAsset" && originalFilename == $filename][0]{_id, size}`,
+    { filename: NIELS_CLIP_FILENAME },
+  );
+  if (existing?._id) {
+    console.log(
+      ` · Reusing existing Niels clip asset ${existing._id} (${existing.size} bytes)`,
+    );
+    return existing._id;
+  }
+  if (!existsSync(NIELS_CLIP_PATH)) {
+    console.error(
+      `Niels clip not found at ${NIELS_CLIP_PATH}. Set NIELS_CLIP_PATH to the local MP4 path, or place the file at the default location.`,
+    );
+    process.exit(1);
+  }
+  const buffer = readFileSync(NIELS_CLIP_PATH);
+  console.log(
+    ` · Uploading Niels clip (${buffer.byteLength} bytes from ${NIELS_CLIP_PATH})…`,
+  );
+  const uploaded = await client.assets.upload("file", buffer, {
+    filename: NIELS_CLIP_FILENAME,
+    contentType: "video/mp4",
+  });
+  console.log(` · Uploaded ${uploaded._id}`);
+  return uploaded._id;
+}
+
 // ─── Lookup: resolve player docs by firstName + lastName ─────────────────
 
 async function resolvePlayer(firstName, lastName) {
@@ -173,6 +213,8 @@ async function main() {
   console.log(
     ` · Resolved Niels Gosselin → ${niels._id} (#${niels.jerseyNumber})`,
   );
+
+  const nielsClipAssetId = await ensureNielsClipAsset();
 
   const pairs = [
     // Q1 — Both 3-word self-descriptions.
@@ -415,6 +457,32 @@ async function main() {
               "Julien en Niels, bedankt voor zes mooie seizoenen bij KCVV Elewijt. Jullie maakten van de B-ploeg wat ze geworden is: een hechte vriendengroep en — zoals Niels het zelf het best verwoordt — de plezantste compagnie in de reeks. De deur blijft altijd openstaan: voor een match in de tribune, een pint in de kantine, of gewoon om eens langs te komen. Tot snel, en veel succes in wat komt.",
           },
         ],
+      },
+      // Epilogue paragraph + videoBlock. Closes the article with the
+      // actual RC Meldert penalty-save clip Niels talks about in his
+      // Q9 answer — filmed by his schoonvader, now on the page.
+      {
+        _key: "clip-intro",
+        _type: "block",
+        style: "normal",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            _key: "clip-intro-span",
+            marks: [],
+            text:
+              "De fameuze 'save' — met dank aan de schoonvader van Niels voor de opname. Oordeel zelf of de vlag terecht omhoog ging.",
+          },
+        ],
+      },
+      {
+        _key: "clip-video",
+        _type: "videoBlock",
+        uploadedFile: {
+          _type: "file",
+          asset: { _type: "reference", _ref: nielsClipAssetId },
+        },
       },
     ],
   };
