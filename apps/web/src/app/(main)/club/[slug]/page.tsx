@@ -54,7 +54,7 @@ export default async function DynamicClubPage({ params }: Props) {
         body=""
         size="compact"
       />
-      <div className="max-w-inner-lg content mx-auto px-4 py-8">
+      <div className="max-w-inner-lg content mx-auto px-4 pt-8 pb-[calc(2rem+var(--footer-diagonal))]">
         <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
       </div>
     </>

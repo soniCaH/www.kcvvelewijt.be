@@ -27,7 +27,7 @@ export const metadata: Metadata = {
  */
 export default function SearchPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pb-[var(--footer-diagonal)]">
       {/* Hero Section */}
       <div className="from-green-main via-green-hover to-green-dark-hover bg-gradient-to-br px-4 py-16 text-white">
         <div className="mx-auto max-w-5xl">

@@ -16,6 +16,7 @@ import {
   buildSportsEventJsonLd,
 } from "@/lib/seo/jsonld";
 import { MatchDetailView } from "@/components/match/MatchDetailView";
+import { FooterSafeArea } from "@/components/design-system";
 import {
   transformHomeTeam,
   transformAwayTeam,
@@ -180,6 +181,7 @@ export default async function MatchPage({
         hasReport={match.hasReport}
         backUrl={backUrl ?? undefined}
       />
+      <FooterSafeArea />
     </>
   );
 }

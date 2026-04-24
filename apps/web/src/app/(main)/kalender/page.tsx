@@ -132,7 +132,7 @@ export default async function CalendarPage() {
   const data = await fetchCalendarData();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 pb-[var(--footer-diagonal)]">
       <PageHero
         image="/images/youth-trainers.jpg"
         imageAlt="KCVV jeugdtraining"

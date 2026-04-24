@@ -119,9 +119,12 @@ export default async function RootLayout({
         <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         <AccentStrip />
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        {/* pb reserves the footer diagonal's safe area so no route ends up
-            with content clipped behind the green wedge. See #1360. */}
-        <main className="pb-[var(--footer-diagonal)]">{children}</main>
+        {/* The footer's overlap="full" diagonal lifts over the last
+            DIAGONAL_HEIGHT of content — each page's final section is
+            responsible for extending its bg through that zone (see
+            SectionStack's last-section padding and the per-page fixes
+            for non-stack pages). See #1360. */}
+        <main>{children}</main>
         <PageFooter />
         <CookieConsentBanner />
       </body>

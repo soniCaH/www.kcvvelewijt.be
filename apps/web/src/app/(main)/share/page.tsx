@@ -12,6 +12,7 @@ import type {
   MatchOption,
   PlayerForShare,
 } from "@/components/share/SharePage/SharePage";
+import { FooterSafeArea } from "@/components/design-system";
 
 export const metadata: Metadata = {
   title: "Story Generator | KCVV Elewijt",
@@ -76,5 +77,10 @@ async function fetchSharePageData(): Promise<{
 
 export default async function ShareRoute() {
   const { matches, players } = await fetchSharePageData();
-  return <SharePage matches={matches} players={players} />;
+  return (
+    <>
+      <SharePage matches={matches} players={players} />
+      <FooterSafeArea />
+    </>
+  );
 }

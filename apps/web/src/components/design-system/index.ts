@@ -96,3 +96,7 @@ export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
 // BrandedTabs
 export { BrandedTabs } from "./BrandedTabs";
 export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
+
+// FooterSafeArea
+export { FooterSafeArea } from "./FooterSafeArea";
+export type { FooterSafeAreaProps } from "./FooterSafeArea";
