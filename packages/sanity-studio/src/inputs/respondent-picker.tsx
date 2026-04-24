@@ -28,6 +28,13 @@ interface ResolvedPerson {
   lastName?: string
 }
 
+// Module-level empty-subjects sentinel. `useFormValue(['subjects'])` returns
+// undefined on articles that haven't set subjects yet; falling back to `?? []`
+// inline would mint a new array every render, churning the refIds `useMemo`
+// and looping the fetch `useEffect`. A shared constant keeps the reference
+// stable so the memo + effect skip work when there's nothing to do.
+const EMPTY_SUBJECTS: SubjectItem[] = []
+
 /**
  * Custom input for `qaPair.respondentKey`. Reads the parent article's
  * `subjects[]` via `useFormValue(['subjects'])` and renders a radio list
@@ -51,7 +58,8 @@ interface ResolvedPerson {
  */
 export function RespondentPicker(props: StringInputProps): JSX.Element {
   const {value, onChange, readOnly, elementProps} = props
-  const subjects = (useFormValue(['subjects']) as SubjectItem[] | undefined) ?? []
+  const subjects =
+    (useFormValue(['subjects']) as SubjectItem[] | undefined) ?? EMPTY_SUBJECTS
   const client = useClient({apiVersion: API_VERSION})
   const [resolved, setResolved] = useState<ResolvedPerson[]>([])
 

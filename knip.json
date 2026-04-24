@@ -8,11 +8,11 @@
       "ignoreBinaries": ["jq"]
     },
     "apps/studio": {
-      "entry": ["sanity.config.ts", "sanity.cli.ts", "structure.ts"],
+      "entry": ["structure.ts"],
       "ignoreDependencies": ["prettier"]
     },
     "apps/studio-staging": {
-      "entry": ["sanity.config.ts", "sanity.cli.ts", "structure.ts"],
+      "entry": ["structure.ts"],
       "ignoreDependencies": ["prettier"]
     }
   }

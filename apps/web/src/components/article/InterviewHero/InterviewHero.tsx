@@ -32,10 +32,10 @@ export interface InterviewHeroProps {
  *   - N=1 with a player subject: `INTERVIEW | #9 · MIDDENVELDER`
  *     (falls through to bare `INTERVIEW` if jersey/position missing)
  *   - N=1 with staff or custom subject: `INTERVIEW`
- *   - N≥2 (any mix): `INTERVIEW` — the subtitle row (Dutch-Oxford-joined
- *     subject names) carries the duo/panel character on its own.
+ *   - N≥2 (any mix): `INTERVIEW` — the subtitle row (name list) carries
+ *     the duo/panel character on its own.
  *
- * Subtitle Dutch Oxford join:
+ * Subtitle formatting (standard Dutch):
  *   - N=1: sole subject's name ("Maxim Breugelmans")
  *   - N=2: "A & B" ("Maxim Breugelmans & Jeroen Van den Berghe")
  *   - N=3+: "A, B, … en Z" ("Max, Jeroen en Thomas")
@@ -159,14 +159,13 @@ function buildKickerParts(
 // ─── Subtitle ─────────────────────────────────────────────────────────────
 
 /**
- * Dutch Oxford-style name join:
+ * Standard Dutch conjunction formatting for a name list:
+ *   0 →  ""   (subtitle row skipped upstream)
  *   1 →  "A"
  *   2 →  "A & B"
  *   3+ → "A, B, … en Z"
  *
- * Empty or single-name arrays fall through to the obvious values. Empty
- * input returns an empty string so the subtitle row is simply not
- * rendered (InterviewHero guards on truthiness).
+ * Dutch does not use an Oxford-style comma before "en".
  */
 function joinNamesDutch(names: string[]): string {
   if (names.length === 0) return "";
@@ -241,7 +240,12 @@ function PortraitGrid({ subjects }: { subjects: ResolvedEntry[] }) {
                 alt={resolved.name ? `Portret van ${resolved.name}` : ""}
                 fill
                 priority={i < 2}
-                sizes="(max-width: 768px) 50vw, 320px"
+                // One-size-fits-N: cells range ~256–384 px at desktop across
+                // N=2/3/4; 400 px covers the largest and lets Next/Image
+                // serve slightly oversized on tighter grids — an acceptable
+                // trade-off versus pushing count-specific arithmetic into a
+                // runtime sizes string.
+                sizes="(max-width: 768px) 50vw, 400px"
                 className="object-cover object-center"
               />
             )}

@@ -25,7 +25,12 @@
  *
  * Usage (from `apps/web` so `@sanity/client` resolves via the workspace):
  *
+ *   # Token: either set SANITY_API_TOKEN or rely on `sanity login` in ~/.config/sanity/config.json.
+ *   # Dataset: SANITY_DATASET defaults to "staging".
+ *   # Production guard: production writes require SANITY_ALLOW_PRODUCTION=1.
+ *
  *   SANITY_API_TOKEN=<write-token> node scripts/seed-phase-1358-interview-duo-julien-niels.mjs
+ *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 node scripts/seed-phase-1358-interview-duo-julien-niels.mjs
  *
  * Revert after the feature branch merges:
  *   sanity documents delete --dataset=staging article-1358-interview-duo-julien-niels
@@ -40,9 +45,11 @@ const PROJECT_ID = "vhb33jaz";
 const DATASET = process.env.SANITY_DATASET ?? "staging";
 const ARTICLE_ID = "article-1358-interview-duo-julien-niels";
 const SLUG = "afscheid-duo-julien-en-niels-zes-seizoenen-b-ploeg";
-// Stable publishAt so re-running the seed doesn't bump the article's
-// publication time on staging (idempotency).
-const PUBLISH_AT = "2026-04-24T10:00:00.000Z";
+// Stable publishAt in the past so (a) re-running the seed doesn't bump
+// the article's publication time on staging (idempotency) and (b) the
+// article passes the `publishAt <= now()` filter on the news overview
+// immediately. Pick a date that predates the PR's staging deploy.
+const PUBLISH_AT = "2026-04-23T10:00:00.000Z";
 
 // Stable subject _keys — must match the `respondentKey` values on
 // body[].qaPair entries so the RespondentPicker resolution works on
@@ -128,17 +135,26 @@ const pair = ({ question, answer, tag, respondentKey }) => {
 // ─── Lookup: resolve player docs by firstName + lastName ─────────────────
 
 async function resolvePlayer(firstName, lastName) {
-  const doc = await client.fetch(
-    `*[_type == "player" && firstName == $first && lastName == $last][0]{_id, firstName, lastName, jerseyNumber}`,
+  const docs = await client.fetch(
+    `*[_type == "player" && firstName == $first && lastName == $last]{_id, firstName, lastName, jerseyNumber}`,
     { first: firstName, last: lastName },
   );
-  if (!doc) {
+  if (!Array.isArray(docs) || docs.length === 0) {
     console.error(
       `Player not found: ${firstName} ${lastName}. Make sure the player documents exist in the ${DATASET} dataset before seeding.`,
     );
     process.exit(1);
   }
-  return doc;
+  if (docs.length > 1) {
+    console.error(
+      `Player name collision in ${DATASET}: multiple documents match ${firstName} ${lastName}. Refusing to pick an arbitrary one — the seed's respondentKey would point at a specific subject.`,
+    );
+    for (const hit of docs) {
+      console.error(`  · ${hit._id} (#${hit.jerseyNumber ?? "?"})`);
+    }
+    process.exit(1);
+  }
+  return docs[0];
 }
 
 // ─── Main seed payload ───────────────────────────────────────────────────
@@ -426,10 +442,10 @@ async function main() {
   await client.createOrReplace(doc);
 
   console.log(`✓ Seeded ${ARTICLE_ID}`);
-  console.log(`  Staging URL:`);
   console.log(
-    `    https://www.kcvvelewijt.be/nieuws/${SLUG}?sanity-staging=1`,
+    `  Preview (Vercel previews always read the ${DATASET} dataset):`,
   );
+  console.log(`    /nieuws/${SLUG}`);
   console.log(`  Document id: ${ARTICLE_ID}`);
 }
 

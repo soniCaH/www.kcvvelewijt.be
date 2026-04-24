@@ -91,9 +91,7 @@ qaPair.respondentKey?: string  // _key of a subjects[] item
 - No data staleness for `kind=custom` subjects (no duplication; the editor-maintained subject data lives at article.subjects[] only).
 - Aligns with the planned Studio UX rework (`project_sanity_studio_ux_rework`).
 
-**Cost:** ~60–100 LOC custom Studio input component at `packages/sanity-schemas/src/components/RespondentPicker.tsx` (or equivalent workspace package if Studio UI is separated). Per `project_sanity_studio_ux_rework`, this is the direction the codebase is moving anyway.
-
-**Note on the package boundary:** `packages/sanity-schemas` is intentionally React-free (per project memory). The `RespondentPicker` React component must live in a workspace package that Studio imports — either `packages/sanity-studio` (planned Studio UI package) or the Studio app itself. Decide at implementation: if `packages/sanity-studio` already exists, put it there; otherwise, put it in `apps/studio-staging/components/` first, co-locate in `apps/studio/components/` when the schema lands, and plan the package extraction in a follow-up.
+**Shipped location:** the `RespondentPicker` React component lives in the `@kcvv/sanity-studio` package at `packages/sanity-studio/src/inputs/respondent-picker.tsx`, with the apply-helper (`applyRespondentPicker`) beside it. `packages/sanity-schemas` stays React-free — the schema declares `qaPair.respondentKey` as a plain string field and the picker is grafted on by the Studio apps via the standard composition pattern (`applyRespondentPicker(baseSchemaTypes, RespondentPicker)`).
 
 ### R3 — Hide `respondent` field when tag is not key/quote (recommendation, no input needed)
 
@@ -143,7 +141,7 @@ subjects[] ${SUBJECT_PROJECTION}
 **AC changes:**
 
 - Acceptance criterion under "Runtime (apps/web)" becomes: the GROQ projection extracts `SUBJECT_PROJECTION`; `subjects[]` uses the fragment; `body[_type == 'qaPair']` projects `respondentKey` (scalar).
-- Helper: `resolveRespondent(pair, article)` returns `article.subjects.find(s => s._key === pair.respondentKey) ?? null`. Non-null guaranteed when the pair is `key`/`quote` on an N≥2 article (schema validator guards this); null otherwise.
+- Helper: `resolvePairRespondent(pair.respondentKey, article.subjects)` returns `article.subjects.find(s => s._key === respondentKey) ?? subjects[0] (single-subject fallback) ?? null`. Non-null when the pair is `key`/`quote` on a published article (schema validator guards N≥2; N=1 auto-resolves to the sole subject).
 
 ### R5 — Storybook: both atomic and composition layers (decided)
 
@@ -196,7 +194,7 @@ Narrow `body[]` as `Array<PortableTextBlock | QaPairBlock>` at the repository bo
 ## Minor items (no input needed)
 
 - **Defensive N=0 fallback.** Schema guarantees `subjects.length >= 1`, but runtime `InterviewHero` should still render gracefully (title + subtitle only, no portrait grid) if an interview document somehow arrives with `subjects: []`. One branch, no portrait frames.
-- **Migration unit test.** The idempotent shape-detection branch of `apps/web/scripts/migrations/<timestamp>-interview-subject-to-subjects.ts` needs a unit test exercising: old shape → new; new shape → skipped; malformed shape → logged and skipped. Spec has acceptance criteria for the run; it doesn't require the test.
+- **Migration unit test.** The shape-detection logic lives at `packages/sanity-studio/src/migrations/interview-subject-to-subjects.ts` (invoked by Sanity CLI via one-line re-exports at `apps/studio/migrations/interview-subject-to-subjects/index.ts` and `apps/studio-staging/migrations/interview-subject-to-subjects/index.ts`). Unit test alongside the pure function exercises: legacy `{subject}` → `{subjects:[subject]}`; already-migrated `{subjects}` → skipped; empty `subjects[]` + legacy → wrap (data preservation); malformed array-as-subject → skipped; `subjects[]` + dangling legacy → clean the legacy field.
 - **Seeds: re-verify fixture availability.** The N=2/3/4 seed plan depends on finding four PSD-clean players. Confirm availability before implementation starts; if three usable players aren't queued for retirement/farewell pieces, use player+staff combos for N=3/4 rather than block on data.
 - **Ubiquitous language.** Add entries for `Subject` (retaining existing meaning: the person an interview is about) and `Respondent` (the subject who answered a specific pair). Lives at `docs/ubiquitous-language.md` — the glossary currently has no entry for either. Keeps the `subjects` / `respondent` distinction clear for future reviewers.
 

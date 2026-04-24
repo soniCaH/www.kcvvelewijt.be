@@ -198,11 +198,19 @@ export const Single: Story = {
   },
 };
 
+/** Safe accessor for story fixture `_key` values — the `_key` field is
+ *  optional on the shared `IndexedSubject` type but always set on story
+ *  fixtures. Using a fallback string keeps the call sites free of `!`
+ *  non-null assertions that could theoretically explode at module load. */
+const keyOf = (s: IndexedSubject, fallback: string): string =>
+  s._key ?? fallback;
+
 /**
  * Clone the FullComposition body and override every `key`/`quote` pair
- * with a respondentKey rotated across `respondentKeys`. Ensures the
- * multi-subject stories actually exercise per-pair attribution instead
- * of inheriting the single-subject layout.
+ * with a respondentKey rotated across `respondentKeys`. Extends the
+ * qaBlock with extra synthetic `key` pairs so every supplied subject
+ * appears at least once even when the base body has fewer attributed
+ * pairs than subjects (trio + panel).
  */
 function bodyWithRotatedRespondents(
   respondentKeys: string[],
@@ -224,6 +232,25 @@ function bodyWithRotatedRespondents(
       rotationIdx += 1;
       return { ...pair, respondentKey };
     });
+
+    // Ensure every subject shows up at least once. If the base body's
+    // key/quote count is fewer than respondentKeys.length, append
+    // synthetic `key` pairs for the uncovered subjects — enough to prove
+    // the per-pair attribution swap visually in trio/panel stories.
+    for (let i = rotationIdx; i < respondentKeys.length; i += 1) {
+      pairs.push({
+        _key: `panel-extra-${i}`,
+        _type: "qaPair",
+        tag: "key",
+        question: "Een extra key-treatment",
+        answer: answer(
+          "Extra pair toegevoegd door de story om alle panel-leden te tonen.",
+          `panel-extra-${i}-a`,
+        ),
+        respondentKey: respondentKeys[i],
+      });
+    }
+
     return { ...qaBlock, pairs } as unknown as PortableTextBlock;
   });
 }
@@ -234,7 +261,10 @@ export const Duo: Story = {
     ...FullComposition.args,
     title: "Afscheid duo: Maxim en Jeroen sluiten vijf seizoenen af.",
     subjects: [MAXIM, JEROEN],
-    body: bodyWithRotatedRespondents([MAXIM._key!, JEROEN._key!]),
+    body: bodyWithRotatedRespondents([
+      keyOf(MAXIM, "maxim-k"),
+      keyOf(JEROEN, "jeroen-k"),
+    ]),
   },
 };
 
@@ -244,7 +274,11 @@ export const Trio: Story = {
     ...FullComposition.args,
     title: "Drie generaties, één shirt.",
     subjects: [MAXIM, JEROEN, THOMAS],
-    body: bodyWithRotatedRespondents([MAXIM._key!, JEROEN._key!, THOMAS._key!]),
+    body: bodyWithRotatedRespondents([
+      keyOf(MAXIM, "maxim-k"),
+      keyOf(JEROEN, "jeroen-k"),
+      keyOf(THOMAS, "thomas-k"),
+    ]),
   },
 };
 
@@ -255,10 +289,10 @@ export const Panel: Story = {
     title: "Vier generaties over hetzelfde shirt.",
     subjects: [MAXIM, JEROEN, THOMAS, LUC],
     body: bodyWithRotatedRespondents([
-      MAXIM._key!,
-      JEROEN._key!,
-      THOMAS._key!,
-      LUC._key!,
+      keyOf(MAXIM, "maxim-k"),
+      keyOf(JEROEN, "jeroen-k"),
+      keyOf(THOMAS, "thomas-k"),
+      keyOf(LUC, "luc-k"),
     ]),
   },
 };
