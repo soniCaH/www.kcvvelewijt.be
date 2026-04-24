@@ -262,3 +262,60 @@ export const AlternatingDirections: Story = {
     ],
   },
 };
+
+// ─── Backdrop story ───────────────────────────────────────────────────────────
+//
+// A single backdropped section flanked by plain siblings, so reviewers can
+// verify the backdrop extends into both adjacent diagonal strips. The CSS
+// gradient stands in for a real photo to keep the story deterministic.
+
+function MockPhotoBackdrop() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 20% 30%, rgba(255,215,0,0.35), transparent 55%), radial-gradient(circle at 80% 70%, rgba(0,135,85,0.55), transparent 60%), linear-gradient(135deg, #0a1a14 0%, #1e2024 50%, #0a1a14 100%)",
+      }}
+    />
+  );
+}
+
+export const BackdroppedSection: Story = {
+  name: "Backdrop — single section flanked by plain siblings (§5.1, §5.6)",
+  args: {
+    sections: [
+      {
+        bg: "gray-100",
+        content: <MockSection label="Plain section (gray-100)" />,
+        transition: { type: "diagonal", direction: "left" },
+      },
+      {
+        bg: "kcvv-green-dark",
+        backdrop: <MockPhotoBackdrop />,
+        content: (
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-white md:px-8">
+            <span className="text-xs font-bold tracking-widest uppercase opacity-70">
+              Backdropped section
+            </span>
+            <span className="text-2xl font-bold">
+              Content sits at z-10 above the backdrop
+            </span>
+            <span className="text-sm opacity-80">
+              The gradient visible in the diagonal strips above and below this
+              section is the <code>backdrop</code> extending past its own
+              wrapper into adjacent <code>SectionTransition</code> areas via
+              auto-propagated <code>revealFrom</code> / <code>revealTo</code>.
+            </span>
+          </div>
+        ),
+        transition: { type: "diagonal", direction: "left" },
+      },
+      {
+        bg: "gray-100",
+        content: <MockSection label="Plain section (gray-100)" />,
+      },
+    ],
+  },
+};

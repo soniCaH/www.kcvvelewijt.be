@@ -27,6 +27,18 @@ export interface SectionTransitionProps {
   direction: "left" | "right";
   via?: SectionBg;
   overlap?: TransitionOverlap;
+  /**
+   * Make the FROM triangle transparent so the previous section's backdrop
+   * shows through. Auto-set by SectionStack when the FROM section has
+   * a backdrop. Do not set manually in consumer code.
+   */
+  revealFrom?: boolean;
+  /**
+   * Make the TO triangle transparent so the next section's backdrop
+   * shows through. Auto-set by SectionStack when the TO section has
+   * a backdrop. Do not set manually in consumer code.
+   */
+  revealTo?: boolean;
   className?: string;
 }
 
@@ -98,10 +110,13 @@ export function SectionTransition({
   direction,
   via,
   overlap = "none",
+  revealFrom,
+  revealTo,
   className,
 }: SectionTransitionProps) {
   const isDouble = type === "double-diagonal";
   const isOverlap = overlap !== "none";
+  const isRevealing = Boolean(revealFrom || revealTo);
 
   // For overlap cases, extend height and marginTop by 1px so the SVG bleeds 1px
   // into the previous section. This covers the sub-pixel gap that appears at the
@@ -111,7 +126,11 @@ export function SectionTransition({
   // section's own background area.
   let height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
   let marginTop = "0";
-  let zIndex = "";
+  // §5.1 — z-index discipline. Non-overlap transitions now need z-index: 1 so
+  // that a neighbor section's backdrop (absolutely positioned with negative
+  // top/bottom) cannot paint above the opaque triangle. Overlap transitions
+  // keep z-index: 10 per existing behavior.
+  let zIndex = "1";
 
   if (overlap === "half") {
     marginTop = isDouble
@@ -129,35 +148,60 @@ export function SectionTransition({
     zIndex = "10";
   }
 
-  // Wrapper background strategy:
+  // Wrapper background strategy (§5.2 — binary rule):
   //
   // The SVG is composited over the wrapper div background. Transparent pixels in
-  // the SVG (including any 1-px fringe crispEdges leaves at polygon edges) reveal
-  // the wrapper background — so the background doubles as a seam guard without
-  // needing explicit <rect> elements that would bleed through the FROM area.
+  // the SVG reveal the wrapper background — so the background doubles as a seam
+  // guard for non-reveal cases.
   //
-  // Non-overlap: solid TO color. The opaque FROM polygon hides it in the FROM
-  //   area; the TO color seals any sub-pixel gap at the SVG bottom where the
-  //   page background (white) would otherwise show.
-  //
-  // Overlap: the FROM polygon is TRANSPARENT so the hero image shows through.
-  //   A step gradient is transparent at the top (FROM area stays clear) and
-  //   switches to TO color at 98% (seals the last ~2 px at the SVG bottom).
+  //   1. Reveal mode (any reveal flag truthy) → transparent. If the wrapper were
+  //      painted in BG_COLOR[to], the to-color would leak through a transparent
+  //      FROM triangle where the neighbor's backdrop should show — wrong.
+  //   2. Overlap + no reveal → step gradient (transparent at top, BG_COLOR[to]
+  //      at 98%) preserves the existing hero-reveal behavior and seals the
+  //      bottom edge.
+  //   3. Otherwise → solid BG_COLOR[to]. The opaque FROM polygon hides it in
+  //      the FROM area; the TO color seals sub-pixel gaps at the SVG bottom.
+  let background: string;
+  if (isRevealing) {
+    background = "transparent";
+  } else if (isOverlap) {
+    background = `linear-gradient(to bottom, transparent 98%, ${BG_COLOR[to]} 98%)`;
+  } else {
+    background = BG_COLOR[to];
+  }
+
   const style: React.CSSProperties = {
     height,
     marginTop,
     marginBottom: "-1px",
-    background: isOverlap
-      ? `linear-gradient(to bottom, transparent 98%, ${BG_COLOR[to]} 98%)`
-      : BG_COLOR[to],
+    background,
+    zIndex,
   };
-  if (zIndex) style.zIndex = zIndex;
 
-  // For overlap transitions the FROM polygon must be transparent — the section
-  // behind the transition (hero image, sponsor header, etc.) should be visible
-  // through the upper-triangle area. For non-overlap transitions the FROM polygon
-  // is painted explicitly so it doesn't depend on what happens to be behind it.
-  const fromFill = isOverlap ? "transparent" : BG_COLOR[from];
+  // §5.3 — reveal-fill composition for the outer (from/to) polygons.
+  //
+  // FROM triangle:
+  //   revealFrom === true                          → transparent (backdrop reveal)
+  //   isOverlap && revealFrom !== false            → transparent (existing overlap behavior)
+  //   otherwise                                    → BG_COLOR[from]
+  //
+  // TO triangle:
+  //   revealTo === true → transparent
+  //   otherwise         → BG_COLOR[to]
+  //
+  // Reveal flags override the fill on their side only — they never cross
+  // triangles. In double-diagonal, the `via` (mid) polygons are always opaque
+  // (§5.4 — via is a color transition layer, not a reveal surface).
+  let fromFill: string;
+  if (revealFrom === true) {
+    fromFill = "transparent";
+  } else if (isOverlap && revealFrom !== false) {
+    fromFill = "transparent";
+  } else {
+    fromFill = BG_COLOR[from];
+  }
+  const toFill = revealTo === true ? "transparent" : BG_COLOR[to];
 
   if (isDouble) {
     const opposite: "left" | "right" = direction === "left" ? "right" : "left";
@@ -177,7 +221,8 @@ export function SectionTransition({
           preserveAspectRatio="none"
           className="absolute inset-0 h-full w-full"
         >
-          {/* Upper half (y 0–100): from → via */}
+          {/* Upper half (y 0–100): from → via. §5.4 — revealFrom affects the
+              upper FROM polygon only; the via polygon stays opaque. */}
           <polygon
             data-testid="st-upper-from"
             points={SVG_FROM[direction]}
@@ -190,7 +235,8 @@ export function SectionTransition({
             fill={BG_COLOR[midColor]}
             shapeRendering="crispEdges"
           />
-          {/* Lower half (y 100–200): via → to (opposite direction) */}
+          {/* Lower half (y 100–200): via → to (opposite direction). §5.4 —
+              revealTo affects the lower TO polygon only; via stays opaque. */}
           <polygon
             data-testid="st-lower-from"
             points={shiftY(SVG_FROM[opposite], 100)}
@@ -200,7 +246,7 @@ export function SectionTransition({
           <polygon
             data-testid="st-lower-to"
             points={shiftY(SVG_TO[opposite], 100)}
-            fill={BG_COLOR[to]}
+            fill={toFill}
             shapeRendering="crispEdges"
           />
         </svg>
@@ -231,7 +277,7 @@ export function SectionTransition({
         <polygon
           data-testid="st-to"
           points={SVG_TO[direction]}
-          fill={BG_COLOR[to]}
+          fill={toFill}
           shapeRendering="crispEdges"
         />
       </svg>

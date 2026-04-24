@@ -223,4 +223,247 @@ describe("SectionStack", () => {
     );
     expect(reserved).toBeNull();
   });
+
+  // Backdrop support (PRD §5.1, §5.6, §6 AC)
+  describe("backdrop", () => {
+    it("renders backdrop node with aria-hidden and pointer-events-none", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            makeSection("gray-100", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const backdrop = getByTestId("backdrop-node");
+      const layer = backdrop.parentElement as HTMLElement;
+      expect(layer.getAttribute("aria-hidden")).toBe("true");
+      expect(layer.className).toContain("pointer-events-none");
+    });
+
+    it("does not render a backdrop wrapper when backdrop is absent", () => {
+      const { container } = render(
+        <SectionStack sections={[makeSection("gray-100", "A")]} />,
+      );
+      const layers = container.querySelectorAll(
+        "[data-testid='section-backdrop']",
+      );
+      expect(layers).toHaveLength(0);
+    });
+
+    it("positions backdrop absolutely with z-0 inside the section wrapper", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.className).toContain("absolute");
+      expect(layer.className).toContain("z-0");
+    });
+
+    // happy-dom strips calc() from inline style properties, so verify those
+    // computed values via data-* attributes the component exposes (consistent
+    // with the SectionTransition data-height / data-margin-top pattern).
+    it("backdrop top extends by footer-diagonal when a previous transition exists (§5.1)", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            makeSection("gray-100", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-top")).toBe(
+        "calc(-1 * var(--footer-diagonal))",
+      );
+    });
+
+    it("backdrop top is 0 when no previous transition exists — first section (§5.6)", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "A"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+            makeSection("gray-100", "B"),
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-top")).toBe("0");
+    });
+
+    it("backdrop bottom extends by footer-diagonal when a next transition exists", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "A", {
+                type: "diagonal",
+                direction: "left",
+              }),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+            makeSection("gray-100", "B"),
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-bottom")).toBe(
+        "calc(-1 * var(--footer-diagonal))",
+      );
+    });
+
+    it("backdrop bottom is 0 when no next transition exists — last section (§5.6)", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            makeSection("gray-100", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-bottom")).toBe("0");
+    });
+
+    it("backdrop bottom remains 0 when the next section shares the same bg (no transition rendered)", () => {
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "A", {
+                type: "diagonal",
+                direction: "left",
+              }),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+            makeSection("kcvv-green-dark", "B"),
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-bottom")).toBe("0");
+    });
+
+    it("auto-propagates revealTo on previous section's transition when current section has backdrop (§6 AC)", () => {
+      const { container } = render(
+        <SectionStack
+          sections={[
+            makeSection("gray-100", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      // Only one transition between A → B. The TO triangle should be transparent.
+      const toPolygon = container.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(toPolygon.getAttribute("fill")).toBe("transparent");
+    });
+
+    it("auto-propagates revealFrom on next section's transition when current section has backdrop", () => {
+      const { container } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "A", {
+                type: "diagonal",
+                direction: "left",
+              }),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+            makeSection("gray-100", "B"),
+          ]}
+        />,
+      );
+      const fromPolygon = container.querySelector(
+        "[data-testid='st-from']",
+      ) as SVGPolygonElement;
+      expect(fromPolygon.getAttribute("fill")).toBe("transparent");
+    });
+
+    it("does not set reveal flags on transitions whose neighbors have no backdrop", () => {
+      const { container } = render(
+        <SectionStack
+          sections={[
+            makeSection("kcvv-black", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            makeSection("gray-100", "B"),
+          ]}
+        />,
+      );
+      const fromPolygon = container.querySelector(
+        "[data-testid='st-from']",
+      ) as SVGPolygonElement;
+      const toPolygon = container.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      // FROM is opaque BG_COLOR[kcvv-black], TO is opaque BG_COLOR[gray-100]
+      expect(fromPolygon.getAttribute("fill")).toBe("#1E2024");
+      expect(toPolygon.getAttribute("fill")).toBe("#f3f4f6");
+    });
+
+    it("two consecutive backdropped sections: adjacent transition is fully transparent (§5.5)", () => {
+      const { container } = render(
+        <SectionStack
+          sections={[
+            {
+              ...makeSection("kcvv-green-dark", "A", {
+                type: "diagonal",
+                direction: "left",
+              }),
+              backdrop: <div data-testid="backdrop-a">A-BACKDROP</div>,
+            },
+            {
+              ...makeSection("kcvv-black", "B"),
+              backdrop: <div data-testid="backdrop-b">B-BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const fromPolygon = container.querySelector(
+        "[data-testid='st-from']",
+      ) as SVGPolygonElement;
+      const toPolygon = container.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(fromPolygon.getAttribute("fill")).toBe("transparent");
+      expect(toPolygon.getAttribute("fill")).toBe("transparent");
+    });
+  });
 });
