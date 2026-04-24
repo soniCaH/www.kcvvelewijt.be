@@ -318,6 +318,15 @@ export type QaBlock = {
   >;
 };
 
+export type VideoBlock = {
+  _type: "videoBlock";
+  uploadedFile?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
+  };
+};
+
 export type ArticleImage = {
   _type: "articleImage";
   image?: {
@@ -419,6 +428,9 @@ export type Article = {
     | ({
         _key: string;
       } & ArticleImage)
+    | ({
+        _key: string;
+      } & VideoBlock)
     | ({
         _key: string;
       } & FileAttachment)
@@ -908,6 +920,7 @@ export type AllSanitySchemaTypes =
   | TransferFact
   | QaPair
   | QaBlock
+  | VideoBlock
   | ArticleImage
   | TeamReference
   | ArticleReference
@@ -934,7 +947,7 @@ export type AllSanitySchemaTypes =
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLES_QUERY
-// Query: *[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }}
+// Query: *[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }}
 export type ARTICLES_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
@@ -963,6 +976,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: {
           url: string | null;
         } | null;
+        videoAsset: null;
         markDefs: null;
       }
     | {
@@ -1028,6 +1042,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
       }
     | {
         _key: string;
@@ -1074,6 +1089,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         markDefs: null;
       }
     | {
@@ -1090,6 +1106,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: string | null;
         fileOriginalFilename: string | null;
         asset: null;
+        videoAsset: null;
         markDefs: null;
       }
     | {
@@ -1101,6 +1118,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         markDefs: null;
       }
     | {
@@ -1116,6 +1134,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         markDefs: null;
       }
     | {
@@ -1143,6 +1162,28 @@ export type ARTICLES_QUERY_RESULT = Array<{
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
+        markDefs: null;
+      }
+    | {
+        _key: string;
+        _type: "videoBlock";
+        uploadedFile?: {
+          asset?: SanityFileAssetReference;
+          media?: unknown;
+          _type: "file";
+        };
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        videoAsset: {
+          url: string | null;
+          size: number | null;
+          mimeType: string | null;
+          originalFilename: string | null;
+        } | null;
         markDefs: null;
       }
   > | null;
@@ -1181,7 +1222,7 @@ export type RELATED_ARTICLES_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLE_BY_SLUG_QUERY
-// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;  // passing crop=focalpoint alone silently falls back to centre crop.  // Coalesce to 0.5 so images without a set hotspot degrade to centre.  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),  // Multi-subject interviews (#1358): subjects[] replaces the single  // subject object. Array items carry _key so qaPair.respondentKey can  // match against them client-side in SanityArticleBody. Projection  // shape per-item matches the former subject projection exactly.  subjects[]{    _key,    kind,    playerRef->{      _id, firstName, lastName, jerseyNumber,      // position + psdId are reserved for Phase 3 (#1329): interview hero      // kicker + byline link. Unused by Phase 2 attribution components.      position,      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      psdId    },    staffRef->{      _id, firstName, lastName, functionTitle,      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"    },    customName,    customRole,    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
+// Query: *[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;  // passing crop=focalpoint alone silently falls back to centre crop.  // Coalesce to 0.5 so images without a set hotspot degrade to centre.  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),  // Multi-subject interviews (#1358): subjects[] replaces the single  // subject object. Array items carry _key so qaPair.respondentKey can  // match against them client-side in SanityArticleBody. Projection  // shape per-item matches the former subject projection exactly.  subjects[]{    _key,    kind,    playerRef->{      _id, firstName, lastName, jerseyNumber,      // position + psdId are reserved for Phase 3 (#1329): interview hero      // kicker + byline link. Unused by Phase 2 attribution components.      position,      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      psdId    },    staffRef->{      _id, firstName, lastName, functionTitle,      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"    },    customName,    customRole,    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {    _id, firstName, lastName, position,    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    psdId  },  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {    _id, name,    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "slug": slug.current  },  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {    _id, firstName, lastName,    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"  }}
 export type ARTICLE_BY_SLUG_QUERY_RESULT = {
   id: string;
   updatedAt: string;
@@ -1243,6 +1284,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         asset: {
           url: string | null;
         } | null;
+        videoAsset: null;
         otherClubLogoUrl: null;
         markDefs: null;
       }
@@ -1309,6 +1351,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: null;
       }
     | {
@@ -1356,6 +1399,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: null;
         markDefs: null;
       }
@@ -1373,6 +1417,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: string | null;
         fileOriginalFilename: string | null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: null;
         markDefs: null;
       }
@@ -1385,6 +1430,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: null;
         markDefs: null;
       }
@@ -1401,6 +1447,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: null;
         markDefs: null;
       }
@@ -1429,7 +1476,30 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: null;
         fileOriginalFilename: null;
         asset: null;
+        videoAsset: null;
         otherClubLogoUrl: string | null;
+        markDefs: null;
+      }
+    | {
+        _key: string;
+        _type: "videoBlock";
+        uploadedFile?: {
+          asset?: SanityFileAssetReference;
+          media?: unknown;
+          _type: "file";
+        };
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: null;
+        videoAsset: {
+          url: string | null;
+          size: number | null;
+          mimeType: string | null;
+          originalFilename: string | null;
+        } | null;
+        otherClubLogoUrl: null;
         markDefs: null;
       }
   > | null;
@@ -2088,11 +2158,11 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }\n}': ARTICLES_QUERY_RESULT;
+    '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }\n}': ARTICLES_QUERY_RESULT;
     'array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
-    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The\n  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;\n  // passing crop=focalpoint alone silently falls back to centre crop.\n  // Coalesce to 0.5 so images without a set hotspot degrade to centre.\n  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  // Multi-subject interviews (#1358): subjects[] replaces the single\n  // subject object. Array items carry _key so qaPair.respondentKey can\n  // match against them client-side in SanityArticleBody. Projection\n  // shape per-item matches the former subject projection exactly.\n  subjects[]{\n    _key,\n    kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber,\n      // position + psdId are reserved for Phase 3 (#1329): interview hero\n      // kicker + byline link. Unused by Phase 2 attribution components.\n      position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName,\n    customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The\n  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;\n  // passing crop=focalpoint alone silently falls back to centre crop.\n  // Coalesce to 0.5 so images without a set hotspot degrade to centre.\n  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  // Multi-subject interviews (#1358): subjects[] replaces the single\n  // subject object. Array items carry _key so qaPair.respondentKey can\n  // match against them client-side in SanityArticleBody. Projection\n  // shape per-item matches the former subject projection exactly.\n  subjects[]{\n    _key,\n    kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber,\n      // position + psdId are reserved for Phase 3 (#1329): interview hero\n      // kicker + byline link. Unused by Phase 2 attribution components.\n      position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName,\n    customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "event"] | order(dateStart asc) {\n  "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,\n  "href": coalesce(externalLink.url, "#"),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;

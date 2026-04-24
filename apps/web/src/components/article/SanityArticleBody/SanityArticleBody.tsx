@@ -26,6 +26,10 @@ import {
   EventFactOverview,
   type EventFactValue,
 } from "@/components/article/blocks/EventFact";
+import {
+  VideoBlock,
+  type VideoBlockValue,
+} from "@/components/article/VideoBlock";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -219,6 +223,9 @@ export const SanityArticleBody = ({
           // eventFact here is a follow-up / inline-in-announcement
           // block and renders as a dark-band overview row.
           <EventFactOverview value={value} />
+        ),
+        videoBlock: ({ value }: { value: VideoBlockValue }) => (
+          <VideoBlock value={value} />
         ),
       },
       block: {

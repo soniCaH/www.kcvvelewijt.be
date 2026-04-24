@@ -144,6 +144,7 @@ export const article = defineType({
           },
         },
         { type: "articleImage" },
+        { type: "videoBlock" },
         { type: "fileAttachment" },
         { type: "htmlTable" },
         { type: "qaBlock" },
