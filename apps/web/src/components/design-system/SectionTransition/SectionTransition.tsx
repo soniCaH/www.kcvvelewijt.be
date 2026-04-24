@@ -70,7 +70,10 @@ function shiftY(points: string, dy: number): string {
     .join(" ");
 }
 
-export const DIAGONAL_HEIGHT = "clamp(2rem, 6vw, 5rem)";
+// Sourced from `--footer-diagonal` in globals.css — single source of truth
+// shared with the root <main> wrapper's safe-area reservation. The browser
+// resolves the var at render time inside inline styles and calc() strings.
+export const DIAGONAL_HEIGHT = "var(--footer-diagonal)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
 
 export function SectionTransition({

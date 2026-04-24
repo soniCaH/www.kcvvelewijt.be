@@ -100,14 +100,14 @@ export const EventTemplate = ({
       )}
 
       {hasRemainingBody && (
-        <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
           <ArticleBodyMotion>
             <SanityArticleBody
               className="article-body"
               content={bodyWithoutFeature}
             />
           </ArticleBodyMotion>
-        </main>
+        </div>
       )}
     </>
   );

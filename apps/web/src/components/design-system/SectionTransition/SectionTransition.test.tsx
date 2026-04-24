@@ -19,7 +19,7 @@ describe("SectionTransition", () => {
       expect(container.firstChild).toHaveAttribute("aria-hidden", "true");
     });
 
-    it("applies clamp height for diagonal", () => {
+    it("applies diagonal height via --footer-diagonal CSS var", () => {
       const { container } = render(
         <SectionTransition
           from="kcvv-black"
@@ -29,7 +29,7 @@ describe("SectionTransition", () => {
         />,
       );
       const el = container.firstChild as HTMLElement;
-      expect(el.getAttribute("data-height")).toBe("clamp(2rem, 6vw, 5rem)");
+      expect(el.getAttribute("data-height")).toBe("var(--footer-diagonal)");
     });
 
     it("renders SVG with crispEdges for direction=left", () => {
@@ -116,7 +116,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-margin-top")).toBe(
-        "calc(-1 * clamp(2rem, 6vw, 5rem) - 1px)",
+        "calc(-1 * var(--footer-diagonal) - 1px)",
       );
     });
 
@@ -161,7 +161,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-height")).toBe(
-        "calc(2 * clamp(2rem, 6vw, 5rem))",
+        "calc(2 * var(--footer-diagonal))",
       );
     });
 
@@ -232,7 +232,7 @@ describe("SectionTransition", () => {
       );
       const el = container.firstChild as HTMLElement;
       expect(el.getAttribute("data-margin-top")).toBe(
-        "calc(-1 * clamp(2rem, 6vw, 5rem) - 1px)",
+        "calc(-1 * var(--footer-diagonal) - 1px)",
       );
     });
   });

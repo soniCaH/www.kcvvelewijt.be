@@ -80,11 +80,11 @@ export const AnnouncementTemplate = ({
       />
 
       {hasBody && (
-        <main className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
           <ArticleBodyMotion>
             <SanityArticleBody className="article-body" content={body} />
           </ArticleBodyMotion>
-        </main>
+        </div>
       )}
     </>
   );

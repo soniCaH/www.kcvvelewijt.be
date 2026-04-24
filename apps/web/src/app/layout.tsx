@@ -119,7 +119,9 @@ export default async function RootLayout({
         <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         <AccentStrip />
         <PageHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        {children}
+        {/* pb reserves the footer diagonal's safe area so no route ends up
+            with content clipped behind the green wedge. See #1360. */}
+        <main className="pb-[var(--footer-diagonal)]">{children}</main>
         <PageFooter />
         <CookieConsentBanner />
       </body>

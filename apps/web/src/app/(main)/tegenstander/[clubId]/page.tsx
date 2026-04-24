@@ -143,7 +143,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   const totalPlayed = summary.wins + summary.draws + summary.losses;
 
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-8">
+    <div className="container mx-auto max-w-3xl px-4 py-8">
       {/* Opponent header */}
       <div className="mb-6 flex items-center gap-4">
         {opponentLogo && (
@@ -241,6 +241,6 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           );
         })}
       </ul>
-    </main>
+    </div>
   );
 }
