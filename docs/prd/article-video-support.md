@@ -99,6 +99,34 @@ Phases 2 and 3 are independent after the tracer bullet — they could be worked 
 - [ ] Vitest regression test for the dedup guard (fires exactly once across multiple `play` events)
 - [ ] `pnpm --filter @kcvv/web check-all` passes
 
+## 5b. Analytics (Phase 4 — #1366)
+
+**Event taxonomy.** Two events fire from `<VideoBlock>` on article surfaces only (`/nieuws/[slug]`); both omitted when the block lives outside an article (staff bio, club page).
+
+| Event                    | Trigger                         | Path supported |
+| ------------------------ | ------------------------------- | -------------- |
+| `article_video_play`     | First user engagement per video | upload + embed |
+| `article_video_complete` | `<video>` `ended` event         | upload only    |
+
+Both events carry the same parameter shape:
+
+| Parameter        | Type    | Values                                                         |
+| ---------------- | ------- | -------------------------------------------------------------- |
+| `article_slug`   | string  | The host article's URL slug                                    |
+| `video_source`   | string  | `"upload"` or `"embed"`                                        |
+| `video_provider` | string  | `"native"` (uploads) / `"youtube"` / `"vimeo"`                 |
+| `video_position` | integer | 1-indexed position of the `videoBlock` within the article body |
+
+**Privacy contract.** No raw or hashed Sanity `_id`s, no asset URLs, no original filenames. `article_slug` is the only article-level identifier — same posture as the rest of the analytics surface (`useArticleAnalytics`).
+
+**Dedup.** `article_video_play` fires at most once per video per page view. The dedup ref lives inside `useVideoAnalytics` so each `<VideoBlock>` instance has its own counter; navigation between articles starts fresh.
+
+**Embed engagement detection.** Provider iframes (YouTube/Vimeo) do not expose `play` / `ended` events without postMessage wiring (`YT.Player`, Vimeo Player SDK), which is explicitly out of scope. The serializer uses the standard `window` blur + `document.activeElement === iframe` heuristic to detect first interaction. This is best-effort by design; promoting to true play detection is a separate issue if/when the provider SDKs land.
+
+**GTM / GA4 manual steps (publish-time).** All three new dimensions are created automatically via `scripts/create-ga4-dimensions.mjs`. GTM still needs three new Data Layer Variables (`video_source`, `video_provider`, `video_position`) and the GA4 Event tag must be extended with two trigger names (`article_video_play`, `article_video_complete`) and the three params mapped onto event-parameter fields. Documented in the #1366 PR body.
+
+**GA4 exploration default.** One new "Video engagement" exploration with rows = `article_slug`, columns = `video_source`, values = play count + complete-rate (complete events / play events for `video_source = upload`). Per-article position breakdown is a secondary breakdown (`video_position`).
+
 ## 6. Effect Schema / api-contract Changes
 
 **None for Phase 1–3.** Articles are served from Sanity via the existing `SanityService` — `videoBlock` flows through `PortableTextBlock[]` as an opaque object whose shape is handled by the PortableText serializer, not by a typed API contract. No new HttpApi endpoint, no `packages/api-contract` change.
@@ -117,6 +145,8 @@ One Sanity GROQ consideration: the article projection in `SanityService` must be
 - [ ] **Staging seed ID documentation convention** — confirm the PR-body pattern used by the article-detail redesign seed scripts and mirror it. Will be resolved by reading the most recent similar PR during Phase 1.
 
 ## 8. Discovered Unknowns (filled during implementation)
+
+- [2026-04-25] **Embed `play` detection without postMessage** — Phase 4 acceptance criteria requires `article_video_play` to fire for embeds, but the PRD §4 also forbids postMessage wiring. Resolved inline by using the documented `window` blur + `document.activeElement === iframe` heuristic. Best-effort; documented in §5b.
 
 <!-- Appended during Ralph loop when implementation surfaces something unexpected. Format:
      - [YYYY-MM-DD] Discovered: <finding> → <action: new issue #N / PRD updated / resolved inline>

@@ -22,6 +22,8 @@ export interface EventTemplateProps {
   articleId?: string;
   /** Article type (for analytics param `article_type`). */
   articleType?: string | null;
+  /** Article slug — threaded to `SanityArticleBody` so embedded `videoBlock`s carry `article_slug` in their analytics events (#1366). */
+  articleSlug?: string;
 }
 
 const isEventFact = (
@@ -59,6 +61,7 @@ export const EventTemplate = ({
   body,
   articleId,
   articleType,
+  articleSlug,
 }: EventTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
   const firstEventFact: EventFactValue | undefined = hasBody
@@ -99,6 +102,7 @@ export const EventTemplate = ({
             <SanityArticleBody
               className="article-body"
               content={bodyWithoutFeature}
+              articleSlug={articleSlug}
             />
           </ArticleBodyMotion>
         </div>

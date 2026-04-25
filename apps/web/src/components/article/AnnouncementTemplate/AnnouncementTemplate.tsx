@@ -19,6 +19,8 @@ export interface AnnouncementTemplateProps {
   articleId?: string;
   /** Article type (for analytics param `article_type`). */
   articleType?: string | null;
+  /** Article slug — threaded to `SanityArticleBody` so embedded `videoBlock`s carry `article_slug` in their analytics events (#1366). */
+  articleSlug?: string;
 }
 
 /**
@@ -52,6 +54,7 @@ export const AnnouncementTemplate = ({
   body,
   articleId,
   articleType,
+  articleSlug,
 }: AnnouncementTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
 
@@ -76,7 +79,11 @@ export const AnnouncementTemplate = ({
       {hasBody && (
         <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
           <ArticleBodyMotion>
-            <SanityArticleBody className="article-body" content={body} />
+            <SanityArticleBody
+              className="article-body"
+              content={body}
+              articleSlug={articleSlug}
+            />
           </ArticleBodyMotion>
         </div>
       )}

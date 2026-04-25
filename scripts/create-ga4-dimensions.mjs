@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Creates all 23 KCVV custom dimensions in GA4 via the Analytics Admin API.
+ * Creates all 26 KCVV custom dimensions in GA4 via the Analytics Admin API.
  *
  * Prerequisites:
  *   1. gcloud CLI installed and authenticated:
@@ -49,6 +49,9 @@ const dimensions = [
   { parameterName: "match_id",          displayName: "Match ID" },
   { parameterName: "match_status",      displayName: "Match status" },
   { parameterName: "destination",       displayName: "Destination" },
+  { parameterName: "video_source",      displayName: "Video source" },
+  { parameterName: "video_provider",    displayName: "Video provider" },
+  { parameterName: "video_position",    displayName: "Video position" },
 ];
 
 let token;

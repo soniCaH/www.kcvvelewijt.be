@@ -24,6 +24,8 @@ export interface InterviewTemplateProps {
   articleId?: string;
   /** Article type (for analytics param `article_type`). */
   articleType?: string | null;
+  /** Article slug — threaded to `SanityArticleBody` so embedded `videoBlock`s carry `article_slug` in their analytics events (#1366). */
+  articleSlug?: string;
 }
 
 /**
@@ -54,6 +56,7 @@ export const InterviewTemplate = ({
   subjects = null,
   articleId,
   articleType,
+  articleSlug,
 }: InterviewTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
 
@@ -81,6 +84,7 @@ export const InterviewTemplate = ({
               className="article-body"
               content={body}
               subjects={subjects}
+              articleSlug={articleSlug}
             />
           </ArticleBodyMotion>
         </div>
