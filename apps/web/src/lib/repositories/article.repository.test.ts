@@ -100,6 +100,7 @@ function makeArticleDetailRow(
         name: "Eerste ploeg",
         imageUrl: "https://cdn.sanity.io/team.webp",
         slug: "eerste-ploeg",
+        tagline: null,
       },
     ],
     mentionedStaffMembers: [
@@ -108,6 +109,7 @@ function makeArticleDetailRow(
         firstName: "Piet",
         lastName: "Pieters",
         imageUrl: "https://cdn.sanity.io/staff.webp",
+        role: null,
       },
     ],
     ...overrides,
@@ -367,6 +369,7 @@ describe("ArticleRepository", () => {
         name: "Eerste ploeg",
         imageUrl: "https://cdn.sanity.io/team.webp",
         slug: "eerste-ploeg",
+        tagline: null,
       });
 
       expect(result!.mentionedStaffMembers).toHaveLength(1);
@@ -375,6 +378,7 @@ describe("ArticleRepository", () => {
         firstName: "Piet",
         lastName: "Pieters",
         imageUrl: "https://cdn.sanity.io/staff.webp",
+        role: null,
       });
     });
 

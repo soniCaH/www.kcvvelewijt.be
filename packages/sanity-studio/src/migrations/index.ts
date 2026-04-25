@@ -9,3 +9,12 @@ export {
   migrateInterviewSubjectToSubjects,
 } from './interview-subject-to-subjects'
 export type {InterviewArticleDoc} from './interview-subject-to-subjects'
+
+export {
+  default as mergeRelatedArticlesIntoRelatedContentMigration,
+  migrateMergeRelatedArticlesIntoRelatedContent,
+} from './merge-related-articles-into-related-content'
+export type {
+  ArticleDoc as RelatedContentArticleDoc,
+  RelatedRef,
+} from './merge-related-articles-into-related-content'

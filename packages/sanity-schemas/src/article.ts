@@ -162,12 +162,55 @@ export const article = defineType({
       name: "relatedContent",
       title: "Related content",
       description:
-        "Curated mix of related items shown alongside the article. Phase 1 tracer (#1316) accepts articles and players; Phase 2 (#1317) extends to teams and staff. Curated entries dedupe against entities mentioned inline in the body — the curated pick wins.",
+        "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams of staf die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
       type: "array",
+      validation: (r) =>
+        r.max(8).custom((items: { _ref?: string }[] | undefined) => {
+          if (!items?.length) return true
+          const seen = new Set<string>()
+          // Return per-row markers so Sanity highlights the offending entry
+          // instead of flagging the whole field — duplicates are usually
+          // editor mistakes that benefit from precise targeting.
+          const errors: Array<{ message: string; path: [number] }> = []
+          for (const [i, item] of items.entries()) {
+            if (!item._ref) continue
+            if (seen.has(item._ref)) {
+              errors.push({
+                message: `Item ${item._ref} verschijnt meer dan één keer.`,
+                path: [i],
+              })
+              continue
+            }
+            seen.add(item._ref)
+          }
+          return errors.length > 0 ? errors : true
+        }),
       of: [
         {
           type: "reference",
-          to: [{ type: "article" }, { type: "player" }],
+          to: [
+            { type: "article" },
+            { type: "player" },
+            { type: "team" },
+            { type: "staffMember" },
+          ],
+          // Self-reference filter: prune the host article (and its draft twin)
+          // out of the article picker so editors can't relate an article to
+          // itself. Article _id is unique across types, so filtering on _id
+          // is safe even though the picker spans multiple document types.
+          options: {
+            filter: ({ document }) => {
+              if (!document?._id) return {}
+              const publishedId = document._id.replace(/^drafts\./, "")
+              return {
+                filter: "_id != $self && _id != $draftSelf",
+                params: {
+                  self: publishedId,
+                  draftSelf: `drafts.${publishedId}`,
+                },
+              }
+            },
+          },
         },
       ],
     }),

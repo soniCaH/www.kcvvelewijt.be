@@ -120,6 +120,16 @@ const team: RelatedTeamItem = {
   tagline: "3e Nationale A",
 };
 
+const curatedTeam: RelatedTeamItem = {
+  type: "team",
+  source: "editorial",
+  id: "t-2",
+  name: "U17 — Wit",
+  slug: "u17-wit",
+  imageUrl: "https://picsum.photos/seed/team-u17/300/200",
+  tagline: "Provinciaal",
+};
+
 const staff: RelatedStaffItem = {
   type: "staff",
   source: "reference",
@@ -128,6 +138,16 @@ const staff: RelatedStaffItem = {
   lastName: "Vermeulen",
   role: "Hoofdtrainer",
   imageUrl: "https://picsum.photos/seed/marc/200/200",
+};
+
+const curatedStaff: RelatedStaffItem = {
+  type: "staff",
+  source: "editorial",
+  id: "s-2",
+  firstName: "Sofie",
+  lastName: "De Backer",
+  role: "Jeugdcoördinator",
+  imageUrl: "https://picsum.photos/seed/sofie/200/200",
 };
 
 const meta = {
@@ -166,6 +186,8 @@ const allItems: RelatedContentItem[] = [
   ...articles,
   ...pages,
   ...players,
+  curatedTeam,
+  curatedStaff,
   team,
   staff,
 ];
@@ -173,6 +195,14 @@ const allItems: RelatedContentItem[] = [
 export const FullMix: Story = {
   args: {
     items: allItems,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates the Phase 2 (#1317) curated + auto-derived blend: editor-curated team and staff entries (source: 'editorial') alongside body-mentioned team and staff (source: 'reference'). Page composition feeds curated and auto into mergeRelatedItems(); ids overlapping between the two collapse to a single curated card.",
+      },
+    },
   },
 };
 
@@ -184,7 +214,7 @@ export const ContentOnly: Story = {
 
 export const EntitiesOnly: Story = {
   args: {
-    items: [...players, team, staff],
+    items: [...players, curatedTeam, team, curatedStaff, staff],
   },
 };
 
