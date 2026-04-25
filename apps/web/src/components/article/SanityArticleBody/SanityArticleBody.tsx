@@ -175,13 +175,40 @@ export interface SanityArticleBodyProps {
    * interview articles pass `null`.
    */
   subjects?: IndexedSubject[] | null;
+  /**
+   * Article slug — threaded into `videoBlock` so the Phase 4 (#1366)
+   * `article_video_play` / `article_video_complete` analytics events can
+   * carry `article_slug`. Omit on non-article surfaces (staff bio, club
+   * page); video analytics is suppressed in that case.
+   */
+  articleSlug?: string;
 }
 
 export const SanityArticleBody = ({
   content,
   className,
   subjects = null,
+  articleSlug,
 }: SanityArticleBodyProps) => {
+  // Pre-compute the 1-indexed position of every videoBlock in the body so
+  // `article_video_play` can carry `video_position`. The map is keyed on
+  // the PortableText `_key` (stable per Sanity block) — we can't rely on
+  // serializer call order because PortableText's renderer doesn't expose
+  // an index parameter.
+  const videoBlockPositions = useMemo(() => {
+    const map = new Map<string, number>();
+    let i = 0;
+    for (const block of content) {
+      if (
+        block._type === "videoBlock" &&
+        typeof block._key === "string" &&
+        block._key.length > 0
+      ) {
+        map.set(block._key, ++i);
+      }
+    }
+    return map;
+  }, [content]);
   // Rebuild the components map whenever `subjects` changes so per-block
   // renderers see the current article state without reaching for a
   // context provider.
@@ -224,8 +251,20 @@ export const SanityArticleBody = ({
           // block and renders as a dark-band overview row.
           <EventFactOverview value={value} />
         ),
-        videoBlock: ({ value }: { value: VideoBlockValue }) => (
-          <VideoBlock value={value} />
+        videoBlock: ({
+          value,
+        }: {
+          value: VideoBlockValue & { _key?: string };
+        }) => (
+          <VideoBlock
+            value={value}
+            articleSlug={articleSlug}
+            videoPosition={
+              typeof value._key === "string"
+                ? videoBlockPositions.get(value._key)
+                : undefined
+            }
+          />
         ),
       },
       block: {
@@ -276,7 +315,7 @@ export const SanityArticleBody = ({
         },
       },
     }),
-    [subjects],
+    [subjects, articleSlug, videoBlockPositions],
   );
 
   return (

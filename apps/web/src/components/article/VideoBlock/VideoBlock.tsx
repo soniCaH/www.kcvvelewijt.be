@@ -1,4 +1,6 @@
+import { useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils/cn";
+import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
 import { parseEmbedUrl, type VideoProvider } from "./parseEmbedUrl";
 
 export interface VideoBlockValue {
@@ -18,6 +20,29 @@ export interface VideoBlockValue {
 export interface VideoBlockProps {
   value: VideoBlockValue;
   className?: string;
+  /**
+   * Article slug for `article_video_play` / `article_video_complete`
+   * analytics events. Omit on non-article surfaces (staff bio, club page)
+   * — analytics is suppressed when either `articleSlug` or `videoPosition`
+   * is missing.
+   */
+  articleSlug?: string;
+  /** 1-indexed position of this block within the article body. */
+  videoPosition?: number;
+}
+
+interface AnalyticsContext {
+  articleSlug: string;
+  videoPosition: number;
+}
+
+function resolveAnalyticsContext(
+  articleSlug: string | undefined,
+  videoPosition: number | undefined,
+): AnalyticsContext | null {
+  if (typeof articleSlug !== "string" || articleSlug.length === 0) return null;
+  if (typeof videoPosition !== "number" || videoPosition <= 0) return null;
+  return { articleSlug, videoPosition };
 }
 
 /**
@@ -31,6 +56,14 @@ export interface VideoBlockProps {
  *  - `fullBleed` opt-in that drops the rounded corners and breaks out
  *    of the prose column via `.full-bleed` (mirrors `articleImage`)
  *
+ * Phase 4 (#1366) wires `article_video_play` / `article_video_complete`
+ * analytics. The upload path binds `onPlay` / `onEnded` directly. The
+ * embed path uses a `window` blur + `document.activeElement === iframe`
+ * heuristic — the standard fallback when provider postMessage APIs
+ * (`YT.Player`, Vimeo Player SDK) are out of scope. Both paths require an
+ * `articleSlug` + `videoPosition`; non-article surfaces (staff bio, club
+ * page) omit them and emit no events.
+ *
  * Exactly one of `videoAsset` / `embedUrl` is ever populated (enforced
  * by the Sanity XOR validator) — `embedUrl` takes precedence if both
  * happened to arrive somehow, since an explicit editor-authored link is
@@ -41,13 +74,20 @@ export interface VideoBlockProps {
  * render a neutral DOM fallback — never inject a raw URL into an
  * iframe/src attribute.
  */
-export function VideoBlock({ value, className }: VideoBlockProps) {
+export function VideoBlock({
+  value,
+  className,
+  articleSlug,
+  videoPosition,
+}: VideoBlockProps) {
+  const analyticsContext = resolveAnalyticsContext(articleSlug, videoPosition);
   const embed =
     typeof value.embedUrl === "string" && value.embedUrl.length > 0
       ? value.embedUrl
       : null;
-  if (embed !== null) return renderEmbed(value, embed, className);
-  return renderUpload(value, className);
+  if (embed !== null)
+    return renderEmbed(value, embed, className, analyticsContext);
+  return renderUpload(value, className, analyticsContext);
 }
 
 // ─── Shared figure helpers ──────────────────────────────────────────────
@@ -91,7 +131,11 @@ function VideoCaption({ caption }: { caption: string }) {
 
 // ─── Upload path ────────────────────────────────────────────────────────
 
-function renderUpload(value: VideoBlockValue, className: string | undefined) {
+function renderUpload(
+  value: VideoBlockValue,
+  className: string | undefined,
+  analyticsContext: AnalyticsContext | null,
+) {
   const src = value.videoAsset?.url;
   if (typeof src !== "string" || src.length === 0) return null;
   const mimeType = value.videoAsset?.mimeType ?? undefined;
@@ -107,22 +151,65 @@ function renderUpload(value: VideoBlockValue, className: string | undefined) {
       data-testid="video-block"
       data-source="upload"
     >
-      <video
-        controls
-        // Phase 3: poster is the only thing the browser fetches until
-        // the reader actually presses play. preload="none" + a poster
-        // image keeps the article weight tiny on first paint.
-        preload="none"
-        poster={posterUrl}
-        className="aspect-video h-auto w-full"
-        data-testid="video-block-video"
-      >
-        <source src={src} type={mimeType ?? "video/mp4"} />
-        Je browser ondersteunt geen HTML5-video. Download het bestand via de
-        link.
-      </video>
+      <UploadVideo
+        src={src}
+        mimeType={mimeType}
+        posterUrl={posterUrl}
+        analyticsContext={analyticsContext}
+      />
       {caption !== null && <VideoCaption caption={caption} />}
     </figure>
+  );
+}
+
+interface UploadVideoProps {
+  src: string;
+  mimeType: string | undefined;
+  posterUrl: string | undefined;
+  analyticsContext: AnalyticsContext | null;
+}
+
+function UploadVideo({
+  src,
+  mimeType,
+  posterUrl,
+  analyticsContext,
+}: UploadVideoProps) {
+  const { trackVideoPlay, trackVideoComplete } = useVideoAnalytics();
+  const handlePlay = useCallback(() => {
+    if (analyticsContext === null) return;
+    trackVideoPlay({
+      articleSlug: analyticsContext.articleSlug,
+      videoSource: "upload",
+      videoProvider: "native",
+      videoPosition: analyticsContext.videoPosition,
+    });
+  }, [analyticsContext, trackVideoPlay]);
+  const handleEnded = useCallback(() => {
+    if (analyticsContext === null) return;
+    trackVideoComplete({
+      articleSlug: analyticsContext.articleSlug,
+      videoSource: "upload",
+      videoProvider: "native",
+      videoPosition: analyticsContext.videoPosition,
+    });
+  }, [analyticsContext, trackVideoComplete]);
+  return (
+    <video
+      controls
+      // Phase 3: poster is the only thing the browser fetches until
+      // the reader actually presses play. preload="none" + a poster
+      // image keeps the article weight tiny on first paint.
+      preload="none"
+      poster={posterUrl}
+      className="aspect-video h-auto w-full"
+      data-testid="video-block-video"
+      onPlay={handlePlay}
+      onEnded={handleEnded}
+    >
+      <source src={src} type={mimeType ?? "video/mp4"} />
+      Je browser ondersteunt geen HTML5-video. Download het bestand via de link.
+    </video>
   );
 }
 
@@ -160,6 +247,7 @@ function renderEmbed(
   value: VideoBlockValue,
   url: string,
   className: string | undefined,
+  analyticsContext: AnalyticsContext | null,
 ) {
   const fullBleed = value.fullBleed === true;
   const caption = trimmedCaption(value);
@@ -203,18 +291,71 @@ function renderEmbed(
           iframe covers the full box. allow="…" enables in-frame
           fullscreen + picture-in-picture on providers that support it. */}
       <div className="relative aspect-video w-full">
-        <iframe
+        <EmbedIframe
           src={src}
           title={embedTitle(parsed.provider)}
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-          className="absolute inset-0 h-full w-full border-0"
-          data-testid="video-block-iframe"
+          provider={parsed.provider}
+          analyticsContext={analyticsContext}
         />
       </div>
       {caption !== null && <VideoCaption caption={caption} />}
     </figure>
+  );
+}
+
+interface EmbedIframeProps {
+  src: string;
+  title: string;
+  provider: VideoProvider;
+  analyticsContext: AnalyticsContext | null;
+}
+
+function EmbedIframe({
+  src,
+  title,
+  provider,
+  analyticsContext,
+}: EmbedIframeProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { trackVideoPlay } = useVideoAnalytics();
+
+  useEffect(() => {
+    if (analyticsContext === null) return;
+    const handleBlur = () => {
+      // Standard heuristic for detecting embed-iframe interaction without
+      // provider postMessage wiring: clicking the iframe blurs the parent
+      // window and makes the iframe the active element. The hook's own
+      // dedup ref guarantees we still fire `article_video_play` exactly
+      // once even if the user clicks the iframe several times.
+      if (
+        iframeRef.current !== null &&
+        document.activeElement === iframeRef.current
+      ) {
+        trackVideoPlay({
+          articleSlug: analyticsContext.articleSlug,
+          videoSource: "embed",
+          videoProvider: provider,
+          videoPosition: analyticsContext.videoPosition,
+        });
+      }
+    };
+    window.addEventListener("blur", handleBlur);
+    return () => {
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [analyticsContext, provider, trackVideoPlay]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={src}
+      title={title}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin"
+      className="absolute inset-0 h-full w-full border-0"
+      data-testid="video-block-iframe"
+    />
   );
 }

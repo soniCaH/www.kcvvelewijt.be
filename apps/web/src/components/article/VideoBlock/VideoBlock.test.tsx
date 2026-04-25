@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+
+vi.mock("@/lib/analytics/track-event", () => ({
+  trackEvent: vi.fn(),
+}));
+
+import { trackEvent } from "@/lib/analytics/track-event";
 import { VideoBlock, type VideoBlockValue } from "./VideoBlock";
+
+const mockTrackEvent = vi.mocked(trackEvent);
 
 const withAsset = (
   overrides: Partial<NonNullable<VideoBlockValue["videoAsset"]>> = {},
@@ -273,5 +281,160 @@ describe("VideoBlock — Phase 3 polish (#1365)", () => {
     const figure = screen.getByTestId("video-block");
     expect(figure.className).toContain("full-bleed");
     expect(figure.className).toContain("rounded-none");
+  });
+});
+
+describe("VideoBlock — analytics (#1366 Phase 4)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("upload path: fires `article_video_play` once on the first play event", () => {
+    render(
+      <VideoBlock
+        value={withAsset()}
+        articleSlug="kcvv-vs-boechout"
+        videoPosition={1}
+      />,
+    );
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.play(video);
+    expect(mockTrackEvent).toHaveBeenCalledWith("article_video_play", {
+      article_slug: "kcvv-vs-boechout",
+      video_source: "upload",
+      video_provider: "native",
+      video_position: 1,
+    });
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("upload path: dedups multiple `play` events to a single `article_video_play`", () => {
+    render(
+      <VideoBlock
+        value={withAsset()}
+        articleSlug="highlights"
+        videoPosition={2}
+      />,
+    );
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.play(video);
+    fireEvent.play(video);
+    fireEvent.play(video);
+    const playCalls = mockTrackEvent.mock.calls.filter(
+      ([name]) => name === "article_video_play",
+    );
+    expect(playCalls).toHaveLength(1);
+  });
+
+  it("upload path: fires `article_video_complete` on the `ended` event", () => {
+    render(
+      <VideoBlock
+        value={withAsset()}
+        articleSlug="highlights"
+        videoPosition={1}
+      />,
+    );
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.ended(video);
+    expect(mockTrackEvent).toHaveBeenCalledWith("article_video_complete", {
+      article_slug: "highlights",
+      video_source: "upload",
+      video_provider: "native",
+      video_position: 1,
+    });
+  });
+
+  it("does NOT fire any analytics when articleSlug is missing (non-article context, e.g. staff bio)", () => {
+    render(<VideoBlock value={withAsset()} videoPosition={1} />);
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.play(video);
+    fireEvent.ended(video);
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("does NOT fire any analytics when videoPosition is missing", () => {
+    render(<VideoBlock value={withAsset()} articleSlug="some-article" />);
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.play(video);
+    fireEvent.ended(video);
+    expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it("embed path (YouTube): fires `article_video_play` once when the iframe receives focus", async () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        }}
+        articleSlug="trainer-interview"
+        videoPosition={3}
+      />,
+    );
+    const iframe = screen.getByTestId("video-block-iframe");
+    // Simulate the user clicking the iframe: parent window blurs and the
+    // iframe becomes the active element. This is the documented heuristic
+    // for detecting embed engagement without provider postMessage wiring.
+    iframe.focus();
+    await act(async () => {
+      window.dispatchEvent(new Event("blur"));
+    });
+    expect(mockTrackEvent).toHaveBeenCalledWith("article_video_play", {
+      article_slug: "trainer-interview",
+      video_source: "embed",
+      video_provider: "youtube",
+      video_position: 3,
+    });
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("embed path: dedups multiple iframe-focus + blur cycles to one `article_video_play`", async () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        }}
+        articleSlug="trainer-interview"
+        videoPosition={3}
+      />,
+    );
+    const iframe = screen.getByTestId("video-block-iframe");
+    iframe.focus();
+    await act(async () => {
+      window.dispatchEvent(new Event("blur"));
+    });
+    iframe.focus();
+    await act(async () => {
+      window.dispatchEvent(new Event("blur"));
+    });
+    iframe.focus();
+    await act(async () => {
+      window.dispatchEvent(new Event("blur"));
+    });
+    const playCalls = mockTrackEvent.mock.calls.filter(
+      ([name]) => name === "article_video_play",
+    );
+    expect(playCalls).toHaveLength(1);
+  });
+
+  it("embed path: window blur with a different active element does NOT fire", async () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://vimeo.com/123456789",
+        }}
+        articleSlug="highlights"
+        videoPosition={1}
+      />,
+    );
+    // No iframe focus — simulate generic window blur (e.g. user tabbing
+    // away from the browser). The heuristic must only fire when the iframe
+    // is the active element.
+    await act(async () => {
+      window.dispatchEvent(new Event("blur"));
+    });
+    expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 });

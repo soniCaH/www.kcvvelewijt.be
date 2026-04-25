@@ -58,6 +58,7 @@ interface ArticlePageProps {
 interface RenderTemplateArgs {
   articleType: string | null | undefined;
   articleId: string;
+  articleSlug: string;
   title: string;
   category?: string;
   coverImageUrl?: string;
@@ -84,6 +85,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           subjects={args.subjects}
           articleId={args.articleId}
           articleType={args.articleType}
+          articleSlug={args.articleSlug}
         />
       );
     case "transfer":
@@ -97,6 +99,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           body={args.body}
           articleId={args.articleId}
           articleType={args.articleType}
+          articleSlug={args.articleSlug}
         />
       );
     case "event":
@@ -110,6 +113,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           body={args.body}
           articleId={args.articleId}
           articleType={args.articleType}
+          articleSlug={args.articleSlug}
         />
       );
     // Missing or unknown articleType falls through to announcement —
@@ -126,6 +130,7 @@ function renderTemplate(args: RenderTemplateArgs) {
           body={args.body}
           articleId={args.articleId}
           articleType={args.articleType}
+          articleSlug={args.articleSlug}
         />
       );
   }
@@ -308,6 +313,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {renderTemplate({
         articleType: article.articleType,
         articleId: article.id,
+        articleSlug: article.slug,
         title: article.title,
         category: primaryCategory?.name,
         // Pass both projections separately — each template picks the

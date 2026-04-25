@@ -26,6 +26,8 @@ export interface TransferTemplateProps {
   articleId?: string;
   /** Article type (for analytics param `article_type`). */
   articleType?: string | null;
+  /** Article slug — threaded to `SanityArticleBody` so embedded `videoBlock`s carry `article_slug` in their analytics events (#1366). */
+  articleSlug?: string;
 }
 
 const isTransferFact = (
@@ -60,6 +62,7 @@ export const TransferTemplate = ({
   body,
   articleId,
   articleType,
+  articleSlug,
 }: TransferTemplateProps) => {
   const hasBody = Array.isArray(body) && body.length > 0;
   const firstTransferFact: TransferFactValue | undefined = hasBody
@@ -100,6 +103,7 @@ export const TransferTemplate = ({
             <SanityArticleBody
               className="article-body"
               content={bodyWithoutFeature}
+              articleSlug={articleSlug}
             />
           </ArticleBodyMotion>
         </div>
