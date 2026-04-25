@@ -64,8 +64,9 @@ function makeArticleDetailRow(
         fileMimeType: null,
         fileOriginalFilename: null,
         asset: null,
-        // videoBlock projection — null for non-videoBlock body entries.
+        // videoBlock projections — null for non-videoBlock body entries.
         videoAsset: null,
+        videoPosterUrl: null,
         // transferFact projections — null for non-transferFact blocks (the
         // GROQ `select(_type == "transferFact" => …, null)` produces these
         // on every body element of the projected union).

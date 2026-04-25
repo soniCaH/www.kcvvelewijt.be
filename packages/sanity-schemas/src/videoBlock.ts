@@ -31,11 +31,20 @@ function extractHost(raw: string): string | null {
 }
 
 /**
+ * Soft-warning threshold for uploaded video files. Above this size the
+ * editor sees a yellow banner suggesting an H.264 re-encode but can
+ * still save and publish — Sanity's CDN will serve large files, the
+ * concern is reader bandwidth, not correctness.
+ */
+const SOFT_MAX_VIDEO_BYTES = 150 * 1024 * 1024
+
+/**
  * Phase 1 tracer (#1363) introduced `uploadedFile`. Phase 2 (#1364) adds
  * the `embedUrl` escape hatch for YouTube/Vimeo links — exactly one of
  * the two must be set, enforced via a Rule.custom on the object. The
- * preview falls back to whichever is populated. Phase 3 will layer on
- * poster/caption/lazy-load/fullBleed.
+ * preview falls back to whichever is populated. Phase 3 (#1365) layers
+ * on `poster`, `caption`, `fullBleed`, and a non-blocking size warning
+ * on the upload.
  */
 export const videoBlock = defineType({
   name: 'videoBlock',
@@ -51,6 +60,34 @@ export const videoBlock = defineType({
       },
       description:
         'Upload een MP4 of WebM (H.264 1080p ~2–3 Mbps aanbevolen). Gebruik dit OF "Embed URL" — niet beide.',
+      // Soft-warning size guard. The validator returns {level: 'warning'}
+      // so the editor can still save / publish — bandwidth-heavy uploads
+      // are flagged, not blocked. Size lives on the asset document, so
+      // we deref via the validation context's client (matches the
+      // organigram-members pattern in the validation/ folder). A
+      // transient fetch failure swallows to `true` rather than surfacing
+      // as a generic validation error — the goal is a hint, not a gate.
+      validation: (Rule) =>
+        Rule.custom(async (value, context) => {
+          const ref = (value as {asset?: {_ref?: string}} | undefined)?.asset
+            ?._ref
+          if (!ref) return true
+          const client = context.getClient({apiVersion: '2024-01-01'})
+          const asset = await client
+            .fetch<{size?: number} | null>(`*[_id == $id][0]{ size }`, {
+              id: ref,
+            })
+            .catch(() => null)
+          const size = asset?.size
+          if (typeof size === 'number' && size > SOFT_MAX_VIDEO_BYTES) {
+            return {
+              level: 'warning',
+              message:
+                'Dit bestand is erg groot. Encodeer naar 1080p H.264 ~2–3 Mbps voor je uploadt.',
+            }
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'embedUrl',
@@ -68,6 +105,28 @@ export const videoBlock = defineType({
             ? true
             : 'Alleen YouTube of Vimeo links zijn toegestaan (https://youtube.com, https://youtu.be, https://vimeo.com).'
         }),
+    }),
+    defineField({
+      name: 'poster',
+      title: 'Poster',
+      type: 'image',
+      options: {hotspot: true},
+      description:
+        'Optionele afbeelding die getoond wordt vóór het afspelen. Voorkomt dat de browser videobytes downloadt tot de bezoeker op play drukt.',
+    }),
+    defineField({
+      name: 'caption',
+      title: 'Onderschrift',
+      type: 'string',
+      description: 'Optioneel onderschrift dat onder de video verschijnt.',
+    }),
+    defineField({
+      name: 'fullBleed',
+      title: 'Full bleed',
+      type: 'boolean',
+      description:
+        'Strek de video over de volle breedte van het scherm (geen afgeronde hoeken).',
+      initialValue: false,
     }),
   ],
   // Object-level XOR: exactly one of uploadedFile / embedUrl must be set.

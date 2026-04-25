@@ -2,19 +2,22 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { VideoBlock } from "./VideoBlock";
 
 /**
- * Tracer-bullet render for `videoBlock` (#1363). Phase 1 exposes the
- * minimal upload path — a bare `<video controls>` pointing at a Sanity
- * file asset URL. Phase 2 will add the embed stories
- * (`EmbedYoutube`/`EmbedVimeo`) and Phase 3 will add
- * `WithPosterAndCaption` / `FullBleed`.
+ * Phase 1 (#1363) shipped the upload path; Phase 2 (#1364) added the
+ * YouTube/Vimeo embed allowlist; Phase 3 (#1365) layers on poster
+ * image, caption, lazy-load, fullBleed and a 150 MB soft-warning size
+ * guard. The stories below cover all three phases so reviewers can
+ * eyeball the matrix without bouncing between branches.
  *
  * The fixture video is the public-domain "Big Buck Bunny" trailer hosted
  * on Google's gtv-videos-bucket — a long-standing open reference clip
  * used across the web video testing ecosystem, picked here so the story
- * doesn't depend on any private or ephemeral asset.
+ * doesn't depend on any private or ephemeral asset. Poster fixtures use
+ * picsum.photos with stable seeds so the same image renders every time.
  */
 const SAMPLE_MP4_URL =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+const SAMPLE_POSTER_URL =
+  "https://picsum.photos/seed/kcvv-video-poster/1280/720";
 
 const meta = {
   title: "Features/Articles/VideoBlock",
@@ -163,6 +166,62 @@ export const EmbedUnknownProvider: Story = {
       description: {
         story:
           "`parseEmbedUrl` rejects anything outside the YouTube/Vimeo allowlist. The serializer logs a `console.warn` (visible in the browser console) and renders a neutral Dutch-language fallback. The raw URL is **never** injected into the DOM, guarding against XSS and open-redirect risks.",
+      },
+    },
+  },
+};
+
+// ─── Phase 3 — poster, caption, fullBleed (#1365) ─────────────────────────
+
+export const WithPosterAndCaption: Story = {
+  name: "Upload — poster + caption",
+  args: {
+    value: {
+      _type: "videoBlock",
+      videoAsset: {
+        url: SAMPLE_MP4_URL,
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "highlights.mp4",
+      },
+      videoPosterUrl: SAMPLE_POSTER_URL,
+      caption:
+        "Samenvatting: KCVV Elewijt — KFC Boechout (3–1). Beelden: club.",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Phase 3 (#1365) — `preload="none"` plus a hotspot-aware poster image means the browser fetches one JPEG and waits. The MP4 is only requested after the reader presses play. The caption is rendered as a `<figcaption>` directly under the video frame.',
+      },
+    },
+  },
+};
+
+export const FullBleed: Story = {
+  name: "Upload — fullBleed",
+  args: {
+    value: {
+      _type: "videoBlock",
+      videoAsset: {
+        url: SAMPLE_MP4_URL,
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "highlights.mp4",
+      },
+      videoPosterUrl: SAMPLE_POSTER_URL,
+      caption:
+        "Volledige breedte — geen afgeronde hoeken, breekt uit de leestkolom.",
+      fullBleed: true,
+    },
+  },
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          "`fullBleed: true` drops the rounded `4px` corners and applies the `.full-bleed` class so the figure breaks out of the centred 65ch prose column to the full viewport width. Mirrors `articleImage`'s full-bleed behaviour. Captions still render below the media frame.",
       },
     },
   },
