@@ -168,14 +168,22 @@ export const article = defineType({
         r.max(8).custom((items: { _ref?: string }[] | undefined) => {
           if (!items?.length) return true
           const seen = new Set<string>()
-          for (const item of items) {
+          // Return per-row markers so Sanity highlights the offending entry
+          // instead of flagging the whole field — duplicates are usually
+          // editor mistakes that benefit from precise targeting.
+          const errors: Array<{ message: string; path: [number] }> = []
+          for (const [i, item] of items.entries()) {
             if (!item._ref) continue
             if (seen.has(item._ref)) {
-              return `Item ${item._ref} verschijnt meer dan één keer.`
+              errors.push({
+                message: `Item ${item._ref} verschijnt meer dan één keer.`,
+                path: [i],
+              })
+              continue
             }
             seen.add(item._ref)
           }
-          return true
+          return errors.length > 0 ? errors : true
         }),
       of: [
         {

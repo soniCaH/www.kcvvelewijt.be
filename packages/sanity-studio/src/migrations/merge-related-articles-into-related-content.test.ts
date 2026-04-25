@@ -128,6 +128,31 @@ describe('migrateMergeRelatedArticlesIntoRelatedContent', () => {
     ])
   })
 
+  it('dedupes legacy refs against each other before merging (defends against malformed input)', () => {
+    const doc: ArticleDoc = {
+      _id: 'duplicate-legacy-refs',
+      relatedArticles: [
+        {_type: 'reference', _ref: 'art-1'},
+        {_type: 'reference', _ref: 'art-1'},
+        {_type: 'reference', _ref: 'art-2'},
+      ],
+    }
+    const patches = migrateMergeRelatedArticlesIntoRelatedContent(
+      doc,
+      stableKey(),
+    )
+    expect(patches).toEqual([
+      at(
+        'relatedContent',
+        set([
+          {_key: 'key-1', _type: 'reference', _ref: 'art-1'},
+          {_key: 'key-2', _type: 'reference', _ref: 'art-2'},
+        ]),
+      ),
+      at('relatedArticles', unset()),
+    ])
+  })
+
   it('is idempotent: re-running on an already-migrated doc returns undefined', () => {
     const doc: ArticleDoc = {
       _id: 'already-migrated',

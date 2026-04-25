@@ -65,18 +65,23 @@ export function migrateMergeRelatedArticlesIntoRelatedContent(
   if (legacy.length === 0) return undefined
 
   const existing = takeRelatedRefs(doc.relatedContent)
-  const existingRefs = new Set(existing.map((item) => item._ref))
+  const seenRefs = new Set(existing.map((item) => item._ref))
 
-  const additions = legacy
-    .filter((item) => !existingRefs.has(item._ref))
-    .map((item) => ({
-      // Regenerate `_key` so two arrays merging never collide. Original
-      // `_key`s in `relatedArticles` are scoped to that array — Sanity
-      // requires uniqueness within the destination array.
-      _key: genKey(),
-      _type: 'reference' as const,
-      _ref: item._ref!,
-    }))
+  // Dedupe legacy refs against `existing` AND against each other on the way
+  // through. A legacy array containing two refs to the same article (rare
+  // but possible — Sanity HTTP writes bypass Studio's UI guard) would
+  // otherwise produce two `relatedContent` entries with the same `_ref` and
+  // trip the new array-level dedupe validator on the next save.
+  const additions: Array<{_key: string; _type: 'reference'; _ref: string}> = []
+  for (const item of legacy) {
+    const ref = item._ref!
+    if (seenRefs.has(ref)) continue
+    seenRefs.add(ref)
+    // Regenerate `_key` so two arrays merging never collide. Original
+    // `_key`s in `relatedArticles` are scoped to that array — Sanity
+    // requires uniqueness within the destination array.
+    additions.push({_key: genKey(), _type: 'reference', _ref: ref})
+  }
 
   const merged = [...existing, ...additions]
 
