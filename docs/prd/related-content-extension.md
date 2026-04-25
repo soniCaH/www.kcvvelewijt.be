@@ -74,7 +74,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [x] Staging studio (`apps/studio-staging`) lets an editor pick a player as related on an article.
 - [x] GROQ projection in `apps/web/src/lib/repositories/article.repository.ts` reads `relatedContent[]->` with `_type`-conditional field selection.
 - [x] `mergeRelatedItems()` dedupes by `_id` between curated `relatedContent` and auto-derived `mentionedPlayers` (unit test).
-- [ ] Test article on staging renders Related section with the curated player card. _(Run `node apps/web/scripts/seed-phase-1316-related-content-tracer.mjs` and visit `/nieuws/phase-1316-tracer-curated-related-content` on staging.)_
+- [x] Test article on staging renders Related section with the curated player card. _(Seeded as `article-phase-1316-related-content-tracer` — visit `/nieuws/phase-1316-tracer-curated-related-content` on staging.)_
 - [x] `pnpm --filter @kcvv/web check-all` passes.
 
 ### Phase 2 — Full explicit curation
