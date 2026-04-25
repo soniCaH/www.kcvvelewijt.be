@@ -45,11 +45,12 @@ const ARTICLE_SITEMAP_QUERY = `*[_type == "article" && defined(slug.current) && 
   "updatedAt": _updatedAt
 }`;
 
-// Events surface in the sitemap if their end-of-life is in the future.
-// "Non-expired" === dateEnd > now() when dateEnd is set, otherwise
-// dateStart > now() — past events drop off automatically once the
-// sitemap is regenerated.
-const EVENT_SITEMAP_QUERY = `*[_type == "event" && defined(slug.current) && coalesce(dateEnd, dateStart) > now()] | order(dateStart asc) {
+// Events surface in the sitemap until their end-of-life is in the past.
+// `coalesce(dateEnd, dateStart) > $cutoff` with a 24h grace window keeps
+// same-day events (which often omit `dateEnd`) listed throughout the day
+// they're happening — the cutoff is computed in JS because GROQ has no
+// portable subtract-duration helper across Sanity API versions.
+const EVENT_SITEMAP_QUERY = `*[_type == "event" && defined(slug.current) && coalesce(dateEnd, dateStart) > $cutoff] | order(dateStart asc) {
   "slug": slug.current,
   "updatedAt": _updatedAt
 }`;
@@ -67,10 +68,14 @@ const TEAM_SITEMAP_QUERY = `*[_type == "team" && archived != true && showInNavig
   psdId
 }`;
 
-async function fetchFromSanity<T>(query: string, label: string): Promise<T[]> {
+async function fetchFromSanity<T>(
+  query: string,
+  label: string,
+  params?: Record<string, unknown>,
+): Promise<T[]> {
   try {
     const { sanityClient } = await import("@/lib/sanity/client");
-    return await sanityClient.fetch<T[]>(query);
+    return await sanityClient.fetch<T[]>(query, params ?? {});
   } catch (error) {
     console.error(`[sitemap] ${label} failed:`, error);
     return [];
@@ -150,7 +155,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ARTICLE_SITEMAP_QUERY,
       "fetchArticleSlugs",
     ),
-    fetchFromSanity<EventSitemapRow>(EVENT_SITEMAP_QUERY, "fetchEventSlugs"),
+    fetchFromSanity<EventSitemapRow>(EVENT_SITEMAP_QUERY, "fetchEventSlugs", {
+      cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    }),
     fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
     fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
     fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),

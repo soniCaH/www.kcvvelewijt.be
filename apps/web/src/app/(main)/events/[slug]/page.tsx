@@ -16,7 +16,9 @@ import { buildBreadcrumbJsonLd, buildEventJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { formatLongDate, formatDate } from "@/lib/utils/dates";
 import { FooterSafeArea } from "@/components/design-system";
-import { ChevronLeft, ExternalLink } from "@/lib/icons";
+import { ChevronLeft } from "@/lib/icons";
+
+import { EventCtaButton } from "./EventCtaButton";
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -152,15 +154,11 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
         {externalLinkUrl && (
           <div className="flex justify-center">
-            <a
+            <EventCtaButton
               href={externalLinkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-kcvv-green-bright hover:bg-kcvv-green inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium text-white transition-colors"
-            >
-              {externalLinkLabel}
-              <ExternalLink className="ml-2 h-5 w-5" aria-hidden="true" />
-            </a>
+              label={externalLinkLabel}
+              eventSlug={event.slug}
+            />
           </div>
         )}
       </main>

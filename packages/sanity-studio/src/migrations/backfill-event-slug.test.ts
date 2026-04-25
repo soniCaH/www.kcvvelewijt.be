@@ -97,6 +97,23 @@ describe('migrateBackfillEventSlug', () => {
     ])
   })
 
+  it('does not regenerate when the same doc already has the slug we would have allocated', () => {
+    const seen = new Set<string>()
+    expect(
+      migrateBackfillEventSlug({_id: 'first', title: 'Spaghetti-avond'}, seen),
+    ).toEqual([at('slug', set({_type: 'slug', current: 'spaghetti-avond'}))])
+    expect(
+      migrateBackfillEventSlug(
+        {
+          _id: 'second',
+          title: 'Spaghetti-avond',
+          slug: {_type: 'slug', current: 'spaghetti-avond'},
+        },
+        seen,
+      ),
+    ).toBeUndefined()
+  })
+
   it('appends -2, -3 suffixes for repeat titles within a single run', () => {
     const seen = new Set<string>()
     expect(
