@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "build": "tsc --build",
+    "type-check": "tsgo --noEmit",
+    "build": "tsgo --build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,6 +20,7 @@
     "effect": "3.21.2"
   },
   "devDependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260421.2",
     "typescript": "6.0.3",
     "vitest": "4.1.5"
   }

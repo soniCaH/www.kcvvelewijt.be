@@ -61,6 +61,10 @@ Before the final commit on any branch, re-read every plan/doc file touched and v
 
 - **Always add language identifiers to fenced code blocks** in plan/doc/markdown files (e.g. ` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). Bare ` ``` ` blocks fail MD040 and are consistently flagged in code review.
 
+### TypeScript Compiler — Dual-Install (tsgo + tsc)
+
+`@typescript/native-preview` (`tsgo`) is the primary type-checker and runs every workspace's `type-check` script (and `packages/api-contract`'s `build`). Classic `typescript` (`tsc`) stays installed in every workspace because `typescript-eslint`, `knip`, `@sanity/cli` typegen, and Next.js's `next build` all resolve the `typescript` package name and consume its (unstable) compiler API. **Do not remove `typescript` from any workspace.** Revisit this split after TypeScript 7.0 GA (est. July 2026).
+
 ## Issue Tracking
 
 Current work lives in GitHub Issues. Check status: `gh issue list --label in-progress`

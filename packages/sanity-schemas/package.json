@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "build": "tsc --noEmit"
+    "type-check": "tsgo --noEmit",
+    "build": "tsgo --noEmit"
   },
   "peerDependencies": {
     "@sanity/icons": "3.7.4",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@sanity/icons": "3.7.4",
+    "@typescript/native-preview": "7.0.0-dev.20260421.2",
     "sanity": "5.22.0",
     "typescript": "6.0.3"
   }
