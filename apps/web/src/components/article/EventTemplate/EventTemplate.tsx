@@ -24,11 +24,6 @@ export interface EventTemplateProps {
   articleType?: string | null;
 }
 
-// Event articles are implicitly club-authored — same pattern the other
-// templates use. The §7.6 metadata bar is the single source of truth for
-// author + date + reading time.
-const AUTHOR = "KCVV Elewijt";
-
 const isEventFact = (
   block: PortableTextBlock,
 ): block is PortableTextBlock & EventFactValue =>
@@ -86,7 +81,6 @@ export const EventTemplate = ({
       />
 
       <ArticleMetadata
-        author={AUTHOR}
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}

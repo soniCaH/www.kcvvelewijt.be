@@ -73,4 +73,20 @@ describe("ArticleMetadata", () => {
     );
     expect(container.querySelector("nav")).toHaveClass("custom-metadata");
   });
+
+  it("falls back to the club default author when none is supplied", () => {
+    // The four article templates all render the same implicit club author
+    // until an editor-authored byline field lands. Defaulting inside
+    // ArticleMetadata removes per-template `const AUTHOR = "KCVV Elewijt"`
+    // duplication. See #1361 cross-template polish.
+    render(
+      <ArticleMetadata
+        date="19.04.2026"
+        readingTime="6 min lezen"
+        shareConfig={{ url: "https://kcvvelewijt.be/nieuws/test" }}
+      />,
+    );
+    const nav = screen.getByRole("navigation", { name: "Artikelinfo" });
+    expect(nav).toHaveTextContent("KCVV Elewijt");
+  });
 });

@@ -28,10 +28,6 @@ export interface TransferTemplateProps {
   articleType?: string | null;
 }
 
-// Transfer articles are implicitly club-authored — same pattern the
-// announcement + interview templates use.
-const AUTHOR = "KCVV Elewijt";
-
 const isTransferFact = (
   block: PortableTextBlock,
 ): block is PortableTextBlock & TransferFactValue =>
@@ -88,7 +84,6 @@ export const TransferTemplate = ({
       />
 
       <ArticleMetadata
-        author={AUTHOR}
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
