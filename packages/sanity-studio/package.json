@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
+    "type-check": "tsgo --noEmit",
     "build": "pnpm type-check",
     "test": "vitest run",
     "test:watch": "vitest",
