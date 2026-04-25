@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "build": "tsc --build",
+    "type-check": "tsgo --noEmit",
+    "build": "tsgo --build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
