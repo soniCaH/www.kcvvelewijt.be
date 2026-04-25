@@ -178,3 +178,100 @@ describe("VideoBlock — embed path (Phase 2)", () => {
     expect(screen.queryByTestId("video-block-video")).toBeNull();
   });
 });
+
+describe("VideoBlock — Phase 3 polish (#1365)", () => {
+  it("upload path: <video> uses preload='none' so no MP4 bytes load until the reader presses play", () => {
+    render(<VideoBlock value={withAsset()} />);
+    const video = screen.getByTestId("video-block-video");
+    expect(video.getAttribute("preload")).toBe("none");
+  });
+
+  it("upload path: forwards videoPosterUrl to the <video poster> attribute", () => {
+    render(
+      <VideoBlock
+        value={{
+          ...withAsset(),
+          videoPosterUrl:
+            "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
+        }}
+      />,
+    );
+    const video = screen.getByTestId("video-block-video");
+    expect(video.getAttribute("poster")).toBe(
+      "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
+    );
+  });
+
+  it("upload path: omits the poster attribute when videoPosterUrl is empty/null", () => {
+    render(<VideoBlock value={{ ...withAsset(), videoPosterUrl: "" }} />);
+    const video = screen.getByTestId("video-block-video");
+    expect(video.getAttribute("poster")).toBeNull();
+  });
+
+  it("renders a <figcaption> when caption is non-empty (upload path)", () => {
+    render(
+      <VideoBlock
+        value={{
+          ...withAsset(),
+          caption: "Match highlights — KCVV vs Boechout",
+        }}
+      />,
+    );
+    const caption = screen.getByTestId("video-block-caption");
+    expect(caption.tagName).toBe("FIGCAPTION");
+    expect(caption.textContent).toBe("Match highlights — KCVV vs Boechout");
+  });
+
+  it("renders a <figcaption> when caption is non-empty (embed path)", () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+          caption: "First-ever YouTube upload",
+        }}
+      />,
+    );
+    const caption = screen.getByTestId("video-block-caption");
+    expect(caption.textContent).toBe("First-ever YouTube upload");
+  });
+
+  it("does not render a <figcaption> when caption is missing or whitespace-only", () => {
+    const { rerender } = render(<VideoBlock value={withAsset()} />);
+    expect(screen.queryByTestId("video-block-caption")).toBeNull();
+
+    rerender(<VideoBlock value={{ ...withAsset(), caption: "   " }} />);
+    expect(screen.queryByTestId("video-block-caption")).toBeNull();
+  });
+
+  it("fullBleed=false (default): figure carries rounded-[4px] without full-bleed", () => {
+    render(<VideoBlock value={withAsset()} />);
+    const figure = screen.getByTestId("video-block");
+    expect(figure.className).toContain("rounded-[4px]");
+    expect(figure.className).not.toContain("full-bleed");
+    expect(figure.className).not.toContain("rounded-none");
+  });
+
+  it("fullBleed=true: figure carries full-bleed + rounded-none, drops rounded-[4px]", () => {
+    render(<VideoBlock value={{ ...withAsset(), fullBleed: true }} />);
+    const figure = screen.getByTestId("video-block");
+    expect(figure.className).toContain("full-bleed");
+    expect(figure.className).toContain("rounded-none");
+    expect(figure.className).not.toContain("rounded-[4px]");
+  });
+
+  it("fullBleed applies on the embed path too", () => {
+    render(
+      <VideoBlock
+        value={{
+          _type: "videoBlock",
+          embedUrl: "https://vimeo.com/123456789",
+          fullBleed: true,
+        }}
+      />,
+    );
+    const figure = screen.getByTestId("video-block");
+    expect(figure.className).toContain("full-bleed");
+    expect(figure.className).toContain("rounded-none");
+  });
+});
