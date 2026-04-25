@@ -108,7 +108,11 @@ describe("useVideoAnalytics", () => {
       expect(keys).not.toContain("original_filename");
     });
 
-    it("dedup guard: multiple play calls fire trackEvent exactly once", () => {
+    it("dedup guard: multiple play calls fire trackEvent once with the FIRST call's payload", () => {
+      // Distinct payloads per call so the assertion verifies that the
+      // dedup guard preserves the *first* call's params — catches a
+      // hypothetical regression where a later call could overwrite the
+      // captured payload before emit.
       const { result } = renderHook(() => useVideoAnalytics());
 
       act(() => {
@@ -119,24 +123,26 @@ describe("useVideoAnalytics", () => {
           videoPosition: 1,
         });
         result.current.trackVideoPlay({
-          articleSlug: "kcvv-vs-boechout",
-          videoSource: "upload",
-          videoProvider: "native",
-          videoPosition: 1,
+          articleSlug: "trainer-interview",
+          videoSource: "embed",
+          videoProvider: "youtube",
+          videoPosition: 2,
         });
         result.current.trackVideoPlay({
-          articleSlug: "kcvv-vs-boechout",
-          videoSource: "upload",
-          videoProvider: "native",
-          videoPosition: 1,
+          articleSlug: "highlights",
+          videoSource: "embed",
+          videoProvider: "vimeo",
+          videoPosition: 3,
         });
       });
 
       expect(mockTrackEvent).toHaveBeenCalledTimes(1);
-      expect(mockTrackEvent).toHaveBeenCalledWith(
-        "article_video_play",
-        expect.any(Object),
-      );
+      expect(mockTrackEvent).toHaveBeenCalledWith("article_video_play", {
+        article_slug: "kcvv-vs-boechout",
+        video_source: "upload",
+        video_provider: "native",
+        video_position: 1,
+      });
     });
   });
 

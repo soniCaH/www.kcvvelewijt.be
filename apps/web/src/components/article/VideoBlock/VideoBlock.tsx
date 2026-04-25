@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
 import { parseEmbedUrl, type VideoProvider } from "./parseEmbedUrl";
@@ -80,7 +80,10 @@ export function VideoBlock({
   articleSlug,
   videoPosition,
 }: VideoBlockProps) {
-  const analyticsContext = resolveAnalyticsContext(articleSlug, videoPosition);
+  const analyticsContext = useMemo(
+    () => resolveAnalyticsContext(articleSlug, videoPosition),
+    [articleSlug, videoPosition],
+  );
   const embed =
     typeof value.embedUrl === "string" && value.embedUrl.length > 0
       ? value.embedUrl

@@ -344,6 +344,35 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
     });
   });
 
+  it("upload path: each `ended` event fires `article_video_complete` (no dedup)", () => {
+    // Pins the asymmetric design: `trackVideoPlay` dedups (one play per page
+    // view), `trackVideoComplete` does not (each natural completion / replay
+    // is a real, separate event).
+    render(
+      <VideoBlock
+        value={withAsset()}
+        articleSlug="highlights"
+        videoPosition={1}
+      />,
+    );
+    const video = screen.getByTestId("video-block-video");
+    fireEvent.ended(video);
+    fireEvent.ended(video);
+    fireEvent.ended(video);
+    const completeCalls = mockTrackEvent.mock.calls.filter(
+      ([name]) => name === "article_video_complete",
+    );
+    expect(completeCalls).toHaveLength(3);
+    for (const call of completeCalls) {
+      expect(call[1]).toEqual({
+        article_slug: "highlights",
+        video_source: "upload",
+        video_provider: "native",
+        video_position: 1,
+      });
+    }
+  });
+
   it("does NOT fire any analytics when articleSlug is missing (non-article context, e.g. staff bio)", () => {
     render(<VideoBlock value={withAsset()} videoPosition={1} />);
     const video = screen.getByTestId("video-block-video");
