@@ -70,6 +70,24 @@ export const ARTICLE_BY_SLUG_QUERY =
   },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
   relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedContent[]->{
+    _type,
+    _id,
+    ...select(_type == "article" => {
+      "title": coalesce(title, ""),
+      "slug": coalesce(slug.current, ""),
+      "publishedAt": publishAt,
+      unpublishAt,
+      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+    }),
+    ...select(_type == "player" => {
+      firstName,
+      lastName,
+      position,
+      "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+      psdId
+    })
+  },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
     _id, firstName, lastName, position,
     "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
@@ -135,14 +153,26 @@ function filterPublishedRelatedArticles(
   row: ARTICLE_BY_SLUG_DETAIL,
 ): ArticleDetailVM {
   const now = new Date().toISOString();
+  // Mirrors the ARTICLE_BY_SLUG_QUERY publish gate: a related ref without a
+  // `publishedAt` is treated as unpublished (it would not appear on the news
+  // index either).
+  const isPublished = (a: {
+    publishedAt: string | null;
+    unpublishAt: string | null;
+  }) => {
+    if (!a.publishedAt || a.publishedAt > now) return false;
+    if (a.unpublishAt && a.unpublishAt <= now) return false;
+    return true;
+  };
   return {
     ...row,
-    relatedArticles:
-      row.relatedArticles?.filter((a) => {
-        if (a.publishedAt && a.publishedAt > now) return false;
-        if (a.unpublishAt && a.unpublishAt <= now) return false;
-        return true;
-      }) ?? null,
+    relatedArticles: row.relatedArticles?.filter(isPublished) ?? null,
+    // Only article entries carry a publish window; non-article curated
+    // refs (player, future team/staff/event) pass through unconditionally.
+    relatedContent:
+      row.relatedContent?.filter(
+        (item) => item._type !== "article" || isPublished(item),
+      ) ?? null,
   };
 }
 

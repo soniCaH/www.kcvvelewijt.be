@@ -82,6 +82,7 @@ function makeArticleDetailRow(
         coverImageUrl: "https://cdn.sanity.io/related.webp",
       },
     ],
+    relatedContent: null,
     mentionedPlayers: [
       {
         _id: "player-1",
@@ -489,6 +490,47 @@ describe("ArticleRepository", () => {
 
       expect(result!.relatedArticles).toHaveLength(1);
       expect(result!.relatedArticles![0].id).toBe("valid-article");
+    });
+
+    it("filters out unpublished article entries inside relatedContent but keeps players", async () => {
+      const futureDate = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ).toISOString();
+      mockFetch.mockResolvedValueOnce(
+        makeArticleDetailRow({
+          relatedContent: [
+            {
+              _type: "article",
+              _id: "future-art",
+              title: "Future curated",
+              slug: "future-curated",
+              publishedAt: futureDate,
+              unpublishAt: null,
+              coverImageUrl: null,
+            },
+            {
+              _type: "player",
+              _id: "player-9",
+              firstName: "Lukas",
+              lastName: "Vermeulen",
+              position: "Aanvaller",
+              imageUrl: null,
+              psdId: "9001",
+            },
+          ],
+        }),
+      );
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(result!.relatedContent).toEqual([
+        expect.objectContaining({ _type: "player", _id: "player-9" }),
+      ]);
     });
 
     it("filters mixed related articles and preserves order", async () => {

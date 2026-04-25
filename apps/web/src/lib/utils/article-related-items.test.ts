@@ -5,7 +5,13 @@ import {
   mapMentionedPlayers,
   mapMentionedTeams,
   mapMentionedStaff,
+  mapCuratedRelatedContent,
+  mergeRelatedItems,
 } from "./article-related-items";
+import type {
+  RelatedArticleItem,
+  RelatedPlayerItem,
+} from "@/components/related/types";
 
 describe("mapEditorialArticles", () => {
   it("maps RelatedArticleRef[] to RelatedArticleItem[]", () => {
@@ -229,5 +235,216 @@ describe("mapMentionedStaff", () => {
         imageUrl: null,
       },
     ]);
+  });
+});
+
+describe("mapCuratedRelatedContent", () => {
+  it("maps a curated article entry with editorial source", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "article",
+        _id: "art-1",
+        title: "Curated piece",
+        slug: "curated-piece",
+        publishedAt: "2026-04-20T08:00:00Z",
+        unpublishAt: null,
+        coverImageUrl: "https://cdn.example.com/cover.jpg",
+      },
+    ]);
+
+    expect(result).toEqual<RelatedArticleItem[]>([
+      {
+        type: "article",
+        source: "editorial",
+        id: "art-1",
+        title: "Curated piece",
+        slug: "curated-piece",
+        imageUrl: "https://cdn.example.com/cover.jpg",
+        date: "2026-04-20T08:00:00Z",
+        excerpt: null,
+      },
+    ]);
+  });
+
+  it("maps a curated player entry with editorial source", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "player",
+        _id: "player-9",
+        firstName: "Lukas",
+        lastName: "Vermeulen",
+        position: "Aanvaller",
+        imageUrl: "https://cdn.example.com/lukas.jpg",
+        psdId: "9001",
+      },
+    ]);
+
+    expect(result).toEqual<RelatedPlayerItem[]>([
+      {
+        type: "player",
+        source: "editorial",
+        id: "player-9",
+        firstName: "Lukas",
+        lastName: "Vermeulen",
+        position: "Aanvaller",
+        imageUrl: "https://cdn.example.com/lukas.jpg",
+        psdId: "9001",
+      },
+    ]);
+  });
+
+  it("skips curated player entries without psdId (cannot link)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "player",
+        _id: "player-broken",
+        firstName: "Anon",
+        lastName: null,
+        position: null,
+        imageUrl: null,
+        psdId: null,
+      },
+    ]);
+    expect(result).toEqual([]);
+  });
+
+  it("handles undefined and empty inputs", () => {
+    expect(mapCuratedRelatedContent(undefined)).toEqual([]);
+    expect(mapCuratedRelatedContent(null)).toEqual([]);
+    expect(mapCuratedRelatedContent([])).toEqual([]);
+  });
+
+  it("dedupes curated entries that share an _id, keeping the first occurrence", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "article",
+        _id: "art-dup",
+        title: "First copy",
+        slug: "first-copy",
+        publishedAt: "2026-04-20T08:00:00Z",
+        unpublishAt: null,
+        coverImageUrl: null,
+      },
+      {
+        _type: "article",
+        _id: "art-dup",
+        title: "Second copy (should be ignored)",
+        slug: "second-copy",
+        publishedAt: "2026-04-21T08:00:00Z",
+        unpublishAt: null,
+        coverImageUrl: "https://cdn.example.com/should-not-win.jpg",
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      type: "article",
+      id: "art-dup",
+      title: "First copy",
+      slug: "first-copy",
+    });
+  });
+});
+
+describe("mergeRelatedItems", () => {
+  const curatedPlayer: RelatedPlayerItem = {
+    type: "player",
+    source: "editorial",
+    id: "player-1",
+    firstName: "Jan",
+    lastName: "Janssens",
+    position: "Aanvaller",
+    imageUrl: null,
+    psdId: "12345",
+  };
+  const mentionedSamePlayer: RelatedPlayerItem = {
+    ...curatedPlayer,
+    source: "reference",
+  };
+  const mentionedOtherPlayer: RelatedPlayerItem = {
+    type: "player",
+    source: "reference",
+    id: "player-2",
+    firstName: "Piet",
+    lastName: "Pieters",
+    position: "Verdediger",
+    imageUrl: null,
+    psdId: "67890",
+  };
+  const editorialArticle: RelatedArticleItem = {
+    type: "article",
+    source: "editorial",
+    id: "art-1",
+    title: "Article one",
+    slug: "article-one",
+    imageUrl: null,
+    date: null,
+    excerpt: null,
+  };
+
+  it("places curated entries first and drops auto-derived duplicates by id", () => {
+    const result = mergeRelatedItems({
+      curated: [curatedPlayer],
+      auto: [editorialArticle, mentionedSamePlayer, mentionedOtherPlayer],
+    });
+
+    expect(result).toEqual([
+      curatedPlayer,
+      editorialArticle,
+      mentionedOtherPlayer,
+    ]);
+  });
+
+  it("keeps all auto-derived entries when no curated overlap", () => {
+    const result = mergeRelatedItems({
+      curated: [],
+      auto: [editorialArticle, mentionedSamePlayer, mentionedOtherPlayer],
+    });
+
+    expect(result).toEqual([
+      editorialArticle,
+      mentionedSamePlayer,
+      mentionedOtherPlayer,
+    ]);
+  });
+
+  it("returns an empty array when curated and auto are both empty", () => {
+    expect(mergeRelatedItems({ curated: [], auto: [] })).toEqual([]);
+  });
+
+  it("dedupes a curated player against the same player surfaced via mentioned-players", () => {
+    const sharedId = "player-shared";
+    const sharedPsdId = "9999";
+
+    const curated = mapCuratedRelatedContent([
+      {
+        _type: "player",
+        _id: sharedId,
+        firstName: "Shared",
+        lastName: "Player",
+        position: "Middenvelder",
+        imageUrl: null,
+        psdId: sharedPsdId,
+      },
+    ]);
+    const mentioned = mapMentionedPlayers([
+      {
+        _id: sharedId,
+        firstName: "Shared",
+        lastName: "Player",
+        position: "Middenvelder",
+        imageUrl: null,
+        psdId: sharedPsdId,
+      },
+    ]);
+
+    const merged = mergeRelatedItems({ curated, auto: [...mentioned] });
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({
+      type: "player",
+      source: "editorial",
+      id: sharedId,
+    });
   });
 });
