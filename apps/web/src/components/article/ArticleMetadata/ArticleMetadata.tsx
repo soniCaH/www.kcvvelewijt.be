@@ -6,8 +6,13 @@ import { cn } from "@/lib/utils/cn";
 import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 
 export interface ArticleMetadataProps {
-  /** Article author name (e.g. "Redactie KCVV"). */
-  author: string;
+  /**
+   * Article author name (e.g. "Redactie KCVV"). Defaults to the club
+   * banner `"KCVV Elewijt"` — every article template renders this implicit
+   * club author until an editor-authored byline field lands. Pass
+   * explicitly to override (e.g. ghost-written articles).
+   */
+  author?: string;
   /** Publication date formatted for display (e.g. "19.04.2026"). */
   date?: string;
   /** Reading time, e.g. "4 min lezen". Optional — omitted when empty. */
@@ -32,6 +37,8 @@ export interface ArticleMetadataProps {
 
 const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
 
+const DEFAULT_AUTHOR = "KCVV Elewijt";
+
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `kcvv-gray-light`
  * rules above and below. Left cluster: date · author · reading time, mono
@@ -43,7 +50,7 @@ const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
  * Instagram is not a URL-share target either, so the cluster stays at Share2 + Facebook.
  */
 export const ArticleMetadata = ({
-  author,
+  author = DEFAULT_AUTHOR,
   date,
   readingTime,
   shareConfig,

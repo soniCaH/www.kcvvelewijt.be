@@ -1,8 +1,8 @@
 import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleMetadata } from "../ArticleMetadata";
-import { AnnouncementHero } from "../AnnouncementHero";
 import { ArticleBodyMotion } from "../ArticleBodyMotion";
 import { SanityArticleBody } from "../SanityArticleBody/SanityArticleBody";
+import { AnnouncementHero } from "../AnnouncementHero";
 
 export interface AnnouncementTemplateProps {
   title: string;
@@ -20,11 +20,6 @@ export interface AnnouncementTemplateProps {
   /** Article type (for analytics param `article_type`). */
   articleType?: string | null;
 }
-
-// Announcements are implicitly club-authored until we wire an editor field
-// in a follow-up phase (see PRD #1330 open questions). The metadata bar
-// defaults to the club banner.
-const AUTHOR = "KCVV Elewijt";
 
 /**
  * Phase 4 (#1330) — the default article template.
@@ -70,7 +65,6 @@ export const AnnouncementTemplate = ({
       />
 
       <ArticleMetadata
-        author={AUTHOR}
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}

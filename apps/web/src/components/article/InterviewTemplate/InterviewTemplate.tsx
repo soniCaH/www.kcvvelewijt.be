@@ -1,5 +1,6 @@
 import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleMetadata } from "../ArticleMetadata";
+import { ArticleBodyMotion } from "../ArticleBodyMotion";
 import { InterviewHero } from "../InterviewHero";
 import { SanityArticleBody } from "../SanityArticleBody/SanityArticleBody";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
@@ -25,19 +26,23 @@ export interface InterviewTemplateProps {
   articleType?: string | null;
 }
 
-// Byline — Phase 4 (#1330) may wire this to an editor-authored field when
-// ghost-written articles are introduced. For interviews the club is the
-// implicit author.
-const AUTHOR = "KCVV Elewijt";
-
 /**
  * Phase 3 (#1329): full interview template.
  * - `InterviewHero` — subject-driven kicker, subtitle (full name), title
  *   `clamp(2rem,4.5vw,3.5rem)`, 4:5 portrait crop of the cover image.
  * - `ArticleMetadata` — design §7.6 (mono small-caps facts + Share2 +
  *   Facebook share icons).
- * - `SanityArticleBody` — body with subject threaded down so the
- *   `key`/`quote` qaBlock pairs can render attribution + photo.
+ * - `ArticleBodyMotion` wrapping `SanityArticleBody` inside an
+ *   `.article-body` container — same scope the announcement / transfer /
+ *   event templates use. Design §7.4 blockquote rework and §7.5 fade-up
+ *   motion apply uniformly; §7.3 drop-cap only triggers when the body
+ *   leads with a prose `<p>` (interviews that open with a `qaBlock`
+ *   skip the drop-cap by selector design — `.article-body > p:first-of-type`
+ *   has no match). Q&A pair `<p>` and answer paragraphs gain the
+ *   staggered fade-up reveal as they cross the viewport. Wired in #1361
+ *   as part of the cross-template polish pass. Subjects are threaded
+ *   down so the `key`/`quote` qaBlock pairs can render attribution +
+ *   photo.
  */
 export const InterviewTemplate = ({
   title,
@@ -50,6 +55,8 @@ export const InterviewTemplate = ({
   articleId,
   articleType,
 }: InterviewTemplateProps) => {
+  const hasBody = Array.isArray(body) && body.length > 0;
+
   return (
     <>
       <InterviewHero
@@ -59,7 +66,6 @@ export const InterviewTemplate = ({
       />
 
       <ArticleMetadata
-        author={AUTHOR}
         date={publishedDate}
         readingTime={readingTime}
         shareConfig={shareConfig}
@@ -68,11 +74,17 @@ export const InterviewTemplate = ({
         className="mt-10"
       />
 
-      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
-        {Array.isArray(body) && body.length > 0 && (
-          <SanityArticleBody content={body} subjects={subjects} />
-        )}
-      </div>
+      {hasBody && (
+        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+          <ArticleBodyMotion>
+            <SanityArticleBody
+              className="article-body"
+              content={body}
+              subjects={subjects}
+            />
+          </ArticleBodyMotion>
+        </div>
+      )}
     </>
   );
 };

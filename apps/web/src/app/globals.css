@@ -415,13 +415,13 @@
 }
 
 
-/* ===== Article body — announcement / transfer templates (#1330) =====
+/* ===== Article body — announcement / interview / transfer / event templates =====
 
-   Scoped to `.article-body` so the Sanity Studio `.prose` previews and the
-   interview template (qaBlock-only body) remain untouched. The class is
-   applied to the `SanityArticleBody` wrapper from the announcement /
-   transfer templates only — see AnnouncementTemplate for the attachment
-   point. */
+   Scoped to `.article-body` so the Sanity Studio `.prose` previews remain
+   untouched. The class is applied to the `SanityArticleBody` wrapper from
+   every article template — see each `*Template` for the attachment point.
+   Originally introduced for announcement/transfer in #1330; extended to
+   interview + event as part of the cross-template polish pass in #1361. */
 
 /* §7.3 — Drop-cap on the first paragraph. Floated Quasimoda 700 glyph at
    5.5rem, ~4 lines tall, `kcvv-green-bright`. */
