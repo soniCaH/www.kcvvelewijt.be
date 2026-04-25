@@ -5,7 +5,7 @@ import type { FeaturedEventStub } from "./NewsGrid";
 import { MatchWidget } from "./MatchWidget";
 import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
-import { YouthSection } from "./YouthSection";
+import { YouthSection, YouthBackdrop } from "./YouthSection";
 import { PageFooter } from "@/components/layout/PageFooter";
 import { Sponsors } from "@/components/sponsors/Sponsors";
 import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
@@ -218,8 +218,7 @@ function buildSections(
       key: "youth",
       bg: "kcvv-green-dark",
       content: <YouthSection />,
-      paddingTop: "pt-0",
-      paddingBottom: "pb-0",
+      backdrop: <YouthBackdrop />,
       transition: { type: "diagonal", direction: "left" },
     },
     {
