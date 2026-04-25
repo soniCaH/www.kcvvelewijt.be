@@ -31,9 +31,14 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 function toEventsListItem(event: EventVM): EventsListItem {
+  // Detail page wins by default (PRD §7); the externalLink is exposed as a
+  // CTA on the detail page itself. Events without a slug fall back to the
+  // legacy `event.href` so historical content stays clickable until the
+  // backfill migration runs in production.
+  const detailHref = event.slug ? `/events/${event.slug}` : event.href;
   return {
     title: event.title,
-    href: event.href,
+    href: detailHref,
     date: new Date(event.dateStart),
     endDate: event.dateEnd ? new Date(event.dateEnd) : undefined,
     imageUrl: event.coverImageUrl ?? undefined,

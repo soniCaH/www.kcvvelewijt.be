@@ -18,3 +18,10 @@ export type {
   ArticleDoc as RelatedContentArticleDoc,
   RelatedRef,
 } from './merge-related-articles-into-related-content'
+
+export {
+  default as backfillEventSlugMigration,
+  migrateBackfillEventSlug,
+  slugifyTitle,
+} from './backfill-event-slug'
+export type {EventDoc as BackfillEventSlugDoc} from './backfill-event-slug'
