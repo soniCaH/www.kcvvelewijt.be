@@ -313,6 +313,37 @@ describe("mapCuratedRelatedContent", () => {
     expect(mapCuratedRelatedContent(null)).toEqual([]);
     expect(mapCuratedRelatedContent([])).toEqual([]);
   });
+
+  it("dedupes curated entries that share an _id, keeping the first occurrence", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "article",
+        _id: "art-dup",
+        title: "First copy",
+        slug: "first-copy",
+        publishedAt: "2026-04-20T08:00:00Z",
+        unpublishAt: null,
+        coverImageUrl: null,
+      },
+      {
+        _type: "article",
+        _id: "art-dup",
+        title: "Second copy (should be ignored)",
+        slug: "second-copy",
+        publishedAt: "2026-04-21T08:00:00Z",
+        unpublishAt: null,
+        coverImageUrl: "https://cdn.example.com/should-not-win.jpg",
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      type: "article",
+      id: "art-dup",
+      title: "First copy",
+      slug: "first-copy",
+    });
+  });
 });
 
 describe("mergeRelatedItems", () => {

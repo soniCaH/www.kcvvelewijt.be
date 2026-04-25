@@ -153,11 +153,14 @@ function filterPublishedRelatedArticles(
   row: ARTICLE_BY_SLUG_DETAIL,
 ): ArticleDetailVM {
   const now = new Date().toISOString();
+  // Mirrors the ARTICLE_BY_SLUG_QUERY publish gate: a related ref without a
+  // `publishedAt` is treated as unpublished (it would not appear on the news
+  // index either).
   const isPublished = (a: {
     publishedAt: string | null;
     unpublishAt: string | null;
   }) => {
-    if (a.publishedAt && a.publishedAt > now) return false;
+    if (!a.publishedAt || a.publishedAt > now) return false;
     if (a.unpublishAt && a.unpublishAt <= now) return false;
     return true;
   };
