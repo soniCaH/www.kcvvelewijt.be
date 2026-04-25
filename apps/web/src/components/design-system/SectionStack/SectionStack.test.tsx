@@ -444,6 +444,57 @@ describe("SectionStack", () => {
       expect(fromPolygon.getAttribute("fill")).toBe("transparent");
     });
 
+    it("treats `backdrop: false` as absent (null-marker semantics) — does not propagate reveal flags", () => {
+      // `backdrop={cond && <Layer />}` evaluates to `false` when cond is
+      // falsy. React renders `false` as nothing, so it must not be treated
+      // as a real backdrop — otherwise the adjacent SectionTransition would
+      // get revealTo=true and paint a transparent triangle with no gradient
+      // behind it.
+      const { container, queryByTestId } = render(
+        <SectionStack
+          sections={[
+            makeSection("kcvv-black", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: false,
+            },
+          ]}
+        />,
+      );
+      // No backdrop layer rendered.
+      expect(queryByTestId("section-backdrop")).toBeNull();
+      // TO polygon stays opaque (no revealTo propagation).
+      const toPolygon = container.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(toPolygon.getAttribute("fill")).toBe("#008755");
+    });
+
+    it("treats `backdrop: null` as absent — does not propagate reveal flags", () => {
+      const { queryByTestId, container } = render(
+        <SectionStack
+          sections={[
+            makeSection("kcvv-black", "A", {
+              type: "diagonal",
+              direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: null,
+            },
+          ]}
+        />,
+      );
+      expect(queryByTestId("section-backdrop")).toBeNull();
+      const toPolygon = container.querySelector(
+        "[data-testid='st-to']",
+      ) as SVGPolygonElement;
+      expect(toPolygon.getAttribute("fill")).toBe("#008755");
+    });
+
     it("does not set reveal flags on transitions whose neighbors have no backdrop", () => {
       const { container } = render(
         <SectionStack

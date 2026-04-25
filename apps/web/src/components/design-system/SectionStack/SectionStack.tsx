@@ -74,8 +74,16 @@ export function SectionStack({
           prev.transition !== undefined &&
           prev.bg !== section.bg;
         const isLast = i === filtered.length - 1;
-        const hasBackdrop = section.backdrop !== undefined;
-        const hasNextBackdrop = next?.backdrop !== undefined;
+        // React's null-marker semantics: `false`, `null`, and `undefined`
+        // all render as nothing. Treat them uniformly as "no backdrop" so
+        // common patterns like `backdrop={cond && <Layer />}` (which yields
+        // `false` when `cond` is false) don't propagate reveal flags onto
+        // adjacent transitions and leave their triangles transparent with
+        // nothing behind them.
+        const hasBackdrop =
+          section.backdrop !== false && section.backdrop != null;
+        const hasNextBackdrop =
+          next?.backdrop !== false && next?.backdrop != null;
         // For non-overlap transitions (the common case), the seam-guard
         // `marginBottom: -1px` on `SectionTransition` pulls the next section
         // up by 1px. Without compensation, a backdrop with
