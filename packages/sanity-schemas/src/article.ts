@@ -158,6 +158,19 @@ export const article = defineType({
       type: "array",
       of: [{ type: "reference", to: [{ type: "article" }] }],
     }),
+    defineField({
+      name: "relatedContent",
+      title: "Related content",
+      description:
+        "Curated mix of related items shown alongside the article. Phase 1 tracer (#1316) accepts articles and players; Phase 2 (#1317) extends to teams and staff. Curated entries dedupe against entities mentioned inline in the body — the curated pick wins.",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "article" }, { type: "player" }],
+        },
+      ],
+    }),
   ],
   preview: {
     select: { title: "title", media: "coverImage", publishAt: "publishAt" },

@@ -124,3 +124,74 @@ export function mapMentionedStaff(
     imageUrl: s.imageUrl,
   }));
 }
+
+type CuratedRelatedEntry = NonNullable<
+  ArticleDetailVM["relatedContent"]
+>[number];
+
+export function mapCuratedRelatedContent(
+  items?: ArticleDetailVM["relatedContent"] | null,
+): RelatedContentItem[] {
+  if (!items?.length) return [];
+  const seen = new Set<string>();
+  const mapped: RelatedContentItem[] = [];
+  for (const item of items) {
+    if (seen.has(item._id)) continue;
+    seen.add(item._id);
+    const result = mapCuratedEntry(item);
+    if (result) mapped.push(result);
+  }
+  return mapped;
+}
+
+function mapCuratedEntry(
+  entry: CuratedRelatedEntry,
+): RelatedContentItem | null {
+  if (entry._type === "article") {
+    return {
+      type: "article",
+      source: "editorial",
+      id: entry._id,
+      title: entry.title,
+      slug: entry.slug,
+      imageUrl: entry.coverImageUrl,
+      date: entry.publishedAt,
+      excerpt: null,
+    } satisfies RelatedArticleItem;
+  }
+  // Player without psdId has no link target — skip.
+  if (entry.psdId == null) return null;
+  return {
+    type: "player",
+    source: "editorial",
+    id: entry._id,
+    firstName: entry.firstName,
+    lastName: entry.lastName,
+    position: entry.position,
+    imageUrl: entry.imageUrl,
+    psdId: entry.psdId,
+  } satisfies RelatedPlayerItem;
+}
+
+export interface MergeRelatedItemsInput {
+  curated: RelatedContentItem[];
+  /**
+   * Flat list of every auto-derived related item — articles (editorial or
+   * BFF), pages (BFF only), and entities (mentioned players/teams/staff).
+   * The merge does not care which source produced which item; it only
+   * preserves order and drops duplicates by `id`.
+   */
+  auto: RelatedContentItem[];
+}
+
+/**
+ * Curated entries appear first and win on id collision — any auto-derived
+ * item sharing an id with a curated entry is dropped so the same target
+ * never renders twice.
+ */
+export function mergeRelatedItems(
+  input: MergeRelatedItemsInput,
+): RelatedContentItem[] {
+  const curatedIds = new Set(input.curated.map((c) => c.id));
+  return [...input.curated, ...input.auto.filter((i) => !curatedIds.has(i.id))];
+}

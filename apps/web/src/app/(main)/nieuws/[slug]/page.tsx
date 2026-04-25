@@ -16,6 +16,8 @@ import {
   mapMentionedPlayers,
   mapMentionedTeams,
   mapMentionedStaff,
+  mapCuratedRelatedContent,
+  mergeRelatedItems,
 } from "@/lib/utils/article-related-items";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -246,12 +248,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     );
   }
 
-  const relatedItems: RelatedContentItem[] = [
-    ...articleRelatedItems,
-    ...mapMentionedPlayers(article.mentionedPlayers ?? undefined),
-    ...mapMentionedStaff(article.mentionedStaffMembers ?? undefined),
-    ...mapMentionedTeams(article.mentionedTeams ?? undefined),
-  ];
+  const relatedItems = mergeRelatedItems({
+    curated: mapCuratedRelatedContent(article.relatedContent),
+    auto: [
+      ...articleRelatedItems,
+      ...mapMentionedPlayers(article.mentionedPlayers ?? undefined),
+      ...mapMentionedStaff(article.mentionedStaffMembers ?? undefined),
+      ...mapMentionedTeams(article.mentionedTeams ?? undefined),
+    ],
+  });
 
   const about = buildAboutFromSubject(article);
   const eventJsonLd = buildEventJsonLdInput(article, shareConfig.url);
