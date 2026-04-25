@@ -11,6 +11,8 @@ import {
 import type {
   RelatedArticleItem,
   RelatedPlayerItem,
+  RelatedTeamItem,
+  RelatedStaffItem,
 } from "@/components/related/types";
 
 describe("mapEditorialArticles", () => {
@@ -165,6 +167,7 @@ describe("mapMentionedTeams", () => {
         name: "KCVV Elewijt",
         imageUrl: "https://cdn.example.com/logo.png",
         slug: "kcvv-elewijt",
+        tagline: "3e Nationale A",
       },
     ]);
 
@@ -176,9 +179,22 @@ describe("mapMentionedTeams", () => {
         name: "KCVV Elewijt",
         slug: "kcvv-elewijt",
         imageUrl: "https://cdn.example.com/logo.png",
+        tagline: "3e Nationale A",
+      },
+    ]);
+  });
+
+  it("propagates a null tagline straight through (matches GROQ shape)", () => {
+    const result = mapMentionedTeams([
+      {
+        _id: "team-1",
+        name: "KCVV",
+        imageUrl: null,
+        slug: "kcvv",
         tagline: null,
       },
     ]);
+    expect(result[0]).toMatchObject({ tagline: null });
   });
 
   it("filters null entries and deduplicates", () => {
@@ -187,6 +203,7 @@ describe("mapMentionedTeams", () => {
       name: "KCVV",
       imageUrl: null,
       slug: "kcvv",
+      tagline: null,
     };
     const result = mapMentionedTeams([null, team, team]);
     expect(result).toHaveLength(1);
@@ -200,6 +217,7 @@ describe("mapMentionedStaff", () => {
       firstName: "John",
       lastName: "Doe",
       imageUrl: "https://example.com/photo.jpg",
+      role: null,
     };
     const result = mapMentionedStaff([null, staff, staff]);
     expect(result).toHaveLength(1);
@@ -214,13 +232,14 @@ describe("mapMentionedStaff", () => {
     });
   });
 
-  it("maps Sanity mentioned staff to RelatedStaffItem[]", () => {
+  it("maps Sanity mentioned staff to RelatedStaffItem[] with role from functionTitle", () => {
     const result = mapMentionedStaff([
       {
         _id: "staff-1",
         firstName: "John",
         lastName: "Doe",
         imageUrl: null,
+        role: "Hoofdtrainer",
       },
     ]);
 
@@ -231,7 +250,7 @@ describe("mapMentionedStaff", () => {
         id: "staff-1",
         firstName: "John",
         lastName: "Doe",
-        role: null,
+        role: "Hoofdtrainer",
         imageUrl: null,
       },
     ]);
@@ -312,6 +331,70 @@ describe("mapCuratedRelatedContent", () => {
     expect(mapCuratedRelatedContent(undefined)).toEqual([]);
     expect(mapCuratedRelatedContent(null)).toEqual([]);
     expect(mapCuratedRelatedContent([])).toEqual([]);
+  });
+
+  it("maps a curated team entry with editorial source", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "team",
+        _id: "team-7",
+        name: "Eerste Elftal A",
+        slug: "eerste-elftal-a",
+        imageUrl: "https://cdn.example.com/team-a.png",
+        tagline: "3e Nationale A",
+      },
+    ]);
+
+    expect(result).toEqual<RelatedTeamItem[]>([
+      {
+        type: "team",
+        source: "editorial",
+        id: "team-7",
+        name: "Eerste Elftal A",
+        slug: "eerste-elftal-a",
+        imageUrl: "https://cdn.example.com/team-a.png",
+        tagline: "3e Nationale A",
+      },
+    ]);
+  });
+
+  it("skips a curated team entry without name or slug (cannot route)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "team",
+        _id: "team-broken",
+        name: null,
+        slug: null,
+        imageUrl: null,
+        tagline: null,
+      },
+    ]);
+    expect(result).toEqual([]);
+  });
+
+  it("maps a curated staffMember entry with editorial source", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "staffMember",
+        _id: "staff-3",
+        firstName: "Marc",
+        lastName: "Vermeulen",
+        imageUrl: "https://cdn.example.com/marc.jpg",
+        role: "Hoofdtrainer",
+      },
+    ]);
+
+    expect(result).toEqual<RelatedStaffItem[]>([
+      {
+        type: "staff",
+        source: "editorial",
+        id: "staff-3",
+        firstName: "Marc",
+        lastName: "Vermeulen",
+        role: "Hoofdtrainer",
+        imageUrl: "https://cdn.example.com/marc.jpg",
+      },
+    ]);
   });
 
   it("dedupes curated entries that share an _id, keeping the first occurrence", () => {
@@ -410,6 +493,74 @@ describe("mergeRelatedItems", () => {
 
   it("returns an empty array when curated and auto are both empty", () => {
     expect(mergeRelatedItems({ curated: [], auto: [] })).toEqual([]);
+  });
+
+  it("dedupes a curated team against the same team surfaced via mentioned-teams", () => {
+    const sharedId = "team-shared";
+
+    const curated = mapCuratedRelatedContent([
+      {
+        _type: "team",
+        _id: sharedId,
+        name: "Eerste Elftal A",
+        slug: "eerste-elftal-a",
+        imageUrl: null,
+        tagline: "3e Nationale A",
+      },
+    ]);
+    const mentioned = mapMentionedTeams([
+      {
+        _id: sharedId,
+        name: "Eerste Elftal A",
+        slug: "eerste-elftal-a",
+        imageUrl: null,
+        tagline: null,
+      },
+    ]);
+
+    const merged = mergeRelatedItems({ curated, auto: [...mentioned] });
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({
+      type: "team",
+      source: "editorial",
+      id: sharedId,
+      tagline: "3e Nationale A",
+    });
+  });
+
+  it("dedupes a curated staffMember against the same person surfaced via mentioned-staff", () => {
+    const sharedId = "staff-shared";
+
+    const curated = mapCuratedRelatedContent([
+      {
+        _type: "staffMember",
+        _id: sharedId,
+        firstName: "Marc",
+        lastName: "Vermeulen",
+        imageUrl: null,
+        role: "Hoofdtrainer",
+      },
+    ]);
+    const mentioned = mapMentionedStaff([
+      {
+        _id: sharedId,
+        firstName: "Marc",
+        lastName: "Vermeulen",
+        imageUrl: null,
+        role: null,
+      },
+    ]);
+
+    const merged = mergeRelatedItems({ curated, auto: [...mentioned] });
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({
+      type: "staff",
+      source: "editorial",
+      id: sharedId,
+      role: "Hoofdtrainer",
+    });
   });
 
   it("dedupes a curated player against the same player surfaced via mentioned-players", () => {

@@ -86,6 +86,18 @@ export const ARTICLE_BY_SLUG_QUERY =
       position,
       "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
       psdId
+    }),
+    ...select(_type == "team" => {
+      name,
+      "slug": slug.current,
+      "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
+      tagline
+    }),
+    ...select(_type == "staffMember" => {
+      firstName,
+      lastName,
+      "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
+      "role": functionTitle
     })
   },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
@@ -94,13 +106,14 @@ export const ARTICLE_BY_SLUG_QUERY =
     psdId
   },
   "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {
-    _id, name,
+    _id, name, tagline,
     "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "slug": slug.current
   },
   "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
     _id, firstName, lastName,
-    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max"
+    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    "role": functionTitle
   }
 }`);
 

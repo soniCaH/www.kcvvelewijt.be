@@ -106,7 +106,7 @@ export function mapMentionedTeams(
       name: t.name!,
       slug: t.slug!,
       imageUrl: t.imageUrl,
-      tagline: null,
+      tagline: t.tagline,
     }));
 }
 
@@ -120,7 +120,7 @@ export function mapMentionedStaff(
     id: s._id,
     firstName: s.firstName,
     lastName: s.lastName,
-    role: null,
+    role: s.role,
     imageUrl: s.imageUrl,
   }));
 }
@@ -172,11 +172,35 @@ function mapCuratedEntry(
         imageUrl: entry.imageUrl,
         psdId: entry.psdId,
       } satisfies RelatedPlayerItem;
+    case "team":
+      // Team without name or slug has no card label or route — skip.
+      if (entry.name == null || entry.slug == null) return null;
+      return {
+        type: "team",
+        source: "editorial",
+        id: entry._id,
+        name: entry.name,
+        slug: entry.slug,
+        imageUrl: entry.imageUrl,
+        tagline: entry.tagline,
+      } satisfies RelatedTeamItem;
+    case "staffMember":
+      // No null-guard on firstName/lastName: RelatedStaffItem accepts nulls
+      // and the card component falls back to a placeholder. Mirrors
+      // mapMentionedStaff above — keep the two paths in lockstep.
+      return {
+        type: "staff",
+        source: "editorial",
+        id: entry._id,
+        firstName: entry.firstName,
+        lastName: entry.lastName,
+        role: entry.role,
+        imageUrl: entry.imageUrl,
+      } satisfies RelatedStaffItem;
     default: {
-      // Phase 2+ adds team/staff/event to the schema. The line below makes
-      // typegen widening a compile error here so this function never silently
-      // misclassifies a new type. At runtime any unexpected type is skipped
-      // rather than throwing — render path stays resilient.
+      // Future schema additions (e.g. event in Phase 4) will widen this
+      // union and break the never-assignment, forcing a new case here. At
+      // runtime any unexpected type is skipped rather than throwing.
       const _exhaustive: never = entry;
       void _exhaustive;
       return null;
