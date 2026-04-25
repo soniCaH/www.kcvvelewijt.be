@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MockBackdrop } from "../storybook-mocks";
 import { SectionStack } from "./SectionStack";
 import type { SectionConfig } from "./SectionStack";
 
@@ -258,6 +259,50 @@ export const AlternatingDirections: Story = {
       {
         bg: "gray-100",
         content: <MockSection label="D (gray-100)" />,
+      },
+    ],
+  },
+};
+
+// ─── Backdrop story ───────────────────────────────────────────────────────────
+//
+// A single backdropped section flanked by plain siblings, so reviewers can
+// verify the backdrop extends into both adjacent diagonal strips. The mock
+// visual is shared with `UI/SectionTransition` via `../storybook-mocks`.
+
+export const BackdroppedSection: Story = {
+  name: "Backdrop — single section flanked by plain siblings (§5.1, §5.6)",
+  args: {
+    sections: [
+      {
+        bg: "gray-100",
+        content: <MockSection label="Plain section (gray-100)" />,
+        transition: { type: "diagonal", direction: "left" },
+      },
+      {
+        bg: "kcvv-green-dark",
+        backdrop: <MockBackdrop />,
+        content: (
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-white md:px-8">
+            <span className="text-xs font-bold tracking-widest uppercase opacity-70">
+              Backdropped section
+            </span>
+            <span className="text-2xl font-bold">
+              Content sits at z-10 above the backdrop
+            </span>
+            <span className="text-sm opacity-80">
+              The gradient visible in the diagonal strips above and below this
+              section is the <code>backdrop</code> extending past its own
+              wrapper into adjacent <code>SectionTransition</code> areas via
+              auto-propagated <code>revealFrom</code> / <code>revealTo</code>.
+            </span>
+          </div>
+        ),
+        transition: { type: "diagonal", direction: "left" },
+      },
+      {
+        bg: "gray-100",
+        content: <MockSection label="Plain section (gray-100)" />,
       },
     ],
   },

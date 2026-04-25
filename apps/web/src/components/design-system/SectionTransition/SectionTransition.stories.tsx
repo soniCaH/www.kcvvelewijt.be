@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MockBackdrop } from "../storybook-mocks";
 import { SectionTransition } from "./SectionTransition";
 
 const meta = {
@@ -220,5 +221,181 @@ export const OverlapFull: Story = {
     type: "diagonal",
     direction: "left",
     overlap: "full",
+  },
+};
+
+// ─── Reveal flags (backdrop support) ──────────────────────────────────────────
+//
+// These stories render a mock patterned backdrop in the section BELOW and/or
+// ABOVE the transition so the effect of revealFrom / revealTo is visually
+// verifiable. Consumers should not set these flags manually; `SectionStack`
+// derives them from neighbor `backdrop` presence. The stories wire them
+// explicitly so the primitive is reviewable in isolation. The mock visual is
+// shared with `UI/SectionStack` via `../storybook-mocks`.
+//
+// Each backdrop is wrapped in an absolutely-positioned overflow layer that
+// extends INTO the transition area, mirroring what `SectionStack` does in
+// production. Without this, the transparent reveal triangle would reveal the
+// page background instead of the gradient — which makes the reveal effect
+// invisible. The `+ 1px` mirrors the `SectionStack` seam-guard fix that
+// compensates for `SectionTransition`'s `marginBottom: -1px`.
+//
+// Extension distance:
+//  - Single diagonal: `var(--footer-diagonal)` (the full transition height).
+//  - Double-diagonal: `var(--footer-diagonal) * 2` (both halves) so the
+//    backdrop reaches the opposite section's top — both halves of the
+//    transition can render their reveal/via composition over the gradient.
+
+const SINGLE_OVERFLOW = "calc(-1 * var(--footer-diagonal) + 1px)";
+const DOUBLE_OVERFLOW = "calc(-1 * var(--footer-diagonal) * 2 + 1px)";
+
+export const BackgroundedFrom: Story = {
+  name: "Reveal — FROM (previous section has backdrop)",
+  decorators: [
+    (Story) => (
+      <div>
+        <div className="bg-kcvv-green-dark relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-0"
+            style={{ bottom: SINGLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop above" />
+          </div>
+        </div>
+        <Story />
+        <div className="h-24 w-full bg-gray-100" />
+      </div>
+    ),
+  ],
+  args: {
+    from: "kcvv-green-dark",
+    to: "gray-100",
+    type: "diagonal",
+    direction: "left",
+    revealFrom: true,
+  },
+};
+
+export const BackgroundedTo: Story = {
+  name: "Reveal — TO (next section has backdrop)",
+  decorators: [
+    (Story) => (
+      <div>
+        <div className="bg-kcvv-black h-24 w-full" />
+        <Story />
+        <div className="bg-kcvv-green-dark relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
+            style={{ top: SINGLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop below" />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
+  args: {
+    from: "kcvv-black",
+    to: "kcvv-green-dark",
+    type: "diagonal",
+    direction: "left",
+    revealTo: true,
+  },
+};
+
+export const BackgroundedBoth: Story = {
+  name: "Reveal — FROM + TO (two consecutive backdropped sections)",
+  decorators: [
+    (Story) => (
+      <div>
+        <div className="bg-kcvv-green-dark relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-0"
+            style={{ bottom: SINGLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop above" />
+          </div>
+        </div>
+        <Story />
+        <div className="bg-kcvv-black relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
+            style={{ top: SINGLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop below" />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
+  args: {
+    from: "kcvv-green-dark",
+    to: "kcvv-black",
+    type: "diagonal",
+    direction: "left",
+    revealFrom: true,
+    revealTo: true,
+  },
+};
+
+export const DoubleDiagonalBackgroundedFrom: Story = {
+  name: "Reveal — double-diagonal, FROM only (via stays opaque)",
+  decorators: [
+    (Story) => (
+      <div>
+        <div className="bg-kcvv-black relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-0"
+            style={{ bottom: DOUBLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop above" />
+          </div>
+        </div>
+        <Story />
+        <div className="bg-kcvv-green-dark h-24 w-full" />
+      </div>
+    ),
+  ],
+  args: {
+    from: "kcvv-black",
+    to: "kcvv-green-dark",
+    type: "double-diagonal",
+    direction: "right",
+    via: "white",
+    revealFrom: true,
+  },
+};
+
+export const DoubleDiagonalBackgroundedTo: Story = {
+  name: "Reveal — double-diagonal, TO only (via stays opaque)",
+  decorators: [
+    (Story) => (
+      <div>
+        <div className="bg-kcvv-black h-24 w-full" />
+        <Story />
+        <div className="bg-kcvv-green-dark relative h-40 w-full">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
+            style={{ top: DOUBLE_OVERFLOW }}
+          >
+            <MockBackdrop label="backdrop below" />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
+  args: {
+    from: "kcvv-black",
+    to: "kcvv-green-dark",
+    type: "double-diagonal",
+    direction: "right",
+    via: "white",
+    revealTo: true,
   },
 };

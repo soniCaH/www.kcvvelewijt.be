@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { cn } from "@/lib/utils/cn";
 import {
   BG_CLASS,
+  DIAGONAL_HEIGHT,
   SectionTransition,
 } from "@/components/design-system/SectionTransition/SectionTransition";
 import type {
@@ -14,6 +15,17 @@ export type { SectionBg, SectionTransitionConfig };
 export interface SectionConfig {
   bg: SectionBg;
   content: React.ReactNode;
+  /**
+   * Optional backdrop layer painted full-bleed behind the section content
+   * AND into the top/bottom halves of any adjacent diagonal transitions.
+   * Rendered absolutely positioned at z-0; section content sits at z-10.
+   *
+   * When set, SectionStack automatically sets revealFrom/revealTo on the
+   * adjacent transitions so their triangles on this section's side stay
+   * transparent and the backdrop shows through. See
+   * `docs/prd/section-backdrop-pattern.md` §5.
+   */
+  backdrop?: React.ReactNode;
   paddingTop?: string;
   paddingBottom?: string;
   transition?: SectionTransitionConfig;
@@ -43,6 +55,7 @@ export function SectionStack({
   return (
     <div className={cn("w-full", className)}>
       {filtered.map((section, i) => {
+        const prev = filtered[i - 1];
         const next = filtered[i + 1];
         const hasOverlap =
           section.transition &&
@@ -52,7 +65,42 @@ export function SectionStack({
           next !== undefined &&
           section.transition !== undefined &&
           section.bg !== next.bg;
+        // A transition rendered ABOVE this section means the previous section
+        // fired a transition because its bg differs from ours. This matters
+        // for backdrop extension (§5.6): without a neighbor transition the
+        // backdrop's top/bottom stays at 0 instead of overflowing.
+        const hasPrevTransition =
+          prev !== undefined &&
+          prev.transition !== undefined &&
+          prev.bg !== section.bg;
         const isLast = i === filtered.length - 1;
+        // React's null-marker semantics: `false`, `null`, and `undefined`
+        // all render as nothing. Treat them uniformly as "no backdrop" so
+        // common patterns like `backdrop={cond && <Layer />}` (which yields
+        // `false` when `cond` is false) don't propagate reveal flags onto
+        // adjacent transitions and leave their triangles transparent with
+        // nothing behind them.
+        const hasBackdrop =
+          section.backdrop !== false && section.backdrop != null;
+        const hasNextBackdrop =
+          next?.backdrop !== false && next?.backdrop != null;
+        // For non-overlap transitions (the common case), the seam-guard
+        // `marginBottom: -1px` on `SectionTransition` pulls the next section
+        // up by 1px. Without compensation, a backdrop with
+        // `top: calc(-1 * var(--footer-diagonal))` would overflow exactly
+        // 1px ABOVE the transition top into the previous section, painting
+        // the gradient over the previous section's bg and creating a visible
+        // hairline. The `+ 1px` aligns the backdrop edge with the transition
+        // edge. Overlap transitions don't need this — their geometry already
+        // lands the backdrop's edge at the transition top.
+        const prevTransitionIsNonOverlap =
+          prev?.transition !== undefined &&
+          (prev.transition.overlap === undefined ||
+            prev.transition.overlap === "none");
+        const transitionIsNonOverlap =
+          section.transition !== undefined &&
+          (section.transition.overlap === undefined ||
+            section.transition.overlap === "none");
 
         return (
           // Fragment keeps the key while allowing the transition to sit
@@ -63,22 +111,56 @@ export function SectionStack({
           <Fragment key={section.key ?? i}>
             <div
               className={cn(
-                "w-full",
+                "relative w-full",
                 BG_CLASS[section.bg],
                 isLast &&
                   reserveFooterSafeArea &&
                   "pb-[var(--footer-diagonal)]",
               )}
             >
+              {/* Backdrop layer (§5.1 — z-0 within the section wrapper,
+                  extends into adjacent transition strips via negative top /
+                  bottom when a neighbor transition exists). Auto-propagation
+                  of revealFrom / revealTo on those transitions is handled
+                  below so the triangle on this section's side is transparent
+                  and the backdrop paints through. */}
+              {hasBackdrop &&
+                (() => {
+                  const top = hasPrevTransition
+                    ? prevTransitionIsNonOverlap
+                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
+                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
+                    : "0";
+                  const bottom = showTransition
+                    ? transitionIsNonOverlap
+                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
+                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
+                    : "0";
+                  return (
+                    <div
+                      aria-hidden="true"
+                      data-testid="section-backdrop"
+                      data-top={top}
+                      data-bottom={bottom}
+                      className="pointer-events-none absolute inset-x-0 z-0"
+                      style={{ top, bottom }}
+                    >
+                      {section.backdrop}
+                    </div>
+                  );
+                })()}
+
               {/* Section content wrapper — bg is owned by the outer
                   wrapper so the last-section footer-safe-area padding
-                  sits inside the same colored surface. */}
+                  sits inside the same colored surface. z-10 places
+                  content above the backdrop layer (§5.1). */}
               <div
                 className={cn(
                   "w-full",
                   section.paddingTop ?? "pt-20",
                   section.paddingBottom ?? "pb-20",
-                  hasOverlap && "relative z-0",
+                  (hasBackdrop || hasOverlap) && "relative",
+                  hasBackdrop ? "z-10" : hasOverlap && "z-0",
                 )}
               >
                 {section.content}
@@ -87,7 +169,9 @@ export function SectionStack({
 
             {/* Transition rendered as sibling between sections — NOT inside the
                 current section div. marginBottom: "-1px" on SectionTransition
-                now pulls the next section up by 1px, covering sub-pixel gaps. */}
+                now pulls the next section up by 1px, covering sub-pixel gaps.
+                Reveal flags are derived from neighbor `backdrop` presence:
+                consumers never set them manually (PRD §3.2, §8). */}
             {showTransition && (
               <SectionTransition
                 from={section.bg}
@@ -100,6 +184,8 @@ export function SectionStack({
                     : undefined
                 }
                 overlap={section.transition!.overlap}
+                revealFrom={hasBackdrop || undefined}
+                revealTo={hasNextBackdrop || undefined}
               />
             )}
           </Fragment>
