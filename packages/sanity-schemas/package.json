@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "build": "tsc --noEmit"
+    "type-check": "tsgo --noEmit",
+    "build": "tsgo --noEmit"
   },
   "peerDependencies": {
     "@sanity/icons": "3.7.4",
