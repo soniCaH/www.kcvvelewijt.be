@@ -76,6 +76,23 @@ export function SectionStack({
         const isLast = i === filtered.length - 1;
         const hasBackdrop = section.backdrop !== undefined;
         const hasNextBackdrop = next?.backdrop !== undefined;
+        // For non-overlap transitions (the common case), the seam-guard
+        // `marginBottom: -1px` on `SectionTransition` pulls the next section
+        // up by 1px. Without compensation, a backdrop with
+        // `top: calc(-1 * var(--footer-diagonal))` would overflow exactly
+        // 1px ABOVE the transition top into the previous section, painting
+        // the gradient over the previous section's bg and creating a visible
+        // hairline. The `+ 1px` aligns the backdrop edge with the transition
+        // edge. Overlap transitions don't need this — their geometry already
+        // lands the backdrop's edge at the transition top.
+        const prevTransitionIsNonOverlap =
+          prev?.transition !== undefined &&
+          (prev.transition.overlap === undefined ||
+            prev.transition.overlap === "none");
+        const transitionIsNonOverlap =
+          section.transition !== undefined &&
+          (section.transition.overlap === undefined ||
+            section.transition.overlap === "none");
 
         return (
           // Fragment keeps the key while allowing the transition to sit
@@ -102,10 +119,14 @@ export function SectionStack({
               {hasBackdrop &&
                 (() => {
                   const top = hasPrevTransition
-                    ? `calc(-1 * ${DIAGONAL_HEIGHT})`
+                    ? prevTransitionIsNonOverlap
+                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
+                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
                     : "0";
                   const bottom = showTransition
-                    ? `calc(-1 * ${DIAGONAL_HEIGHT})`
+                    ? transitionIsNonOverlap
+                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
+                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
                     : "0";
                   return (
                     <div

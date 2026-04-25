@@ -276,13 +276,40 @@ describe("SectionStack", () => {
     // happy-dom strips calc() from inline style properties, so verify those
     // computed values via data-* attributes the component exposes (consistent
     // with the SectionTransition data-height / data-margin-top pattern).
-    it("backdrop top extends by footer-diagonal when a previous transition exists (§5.1)", () => {
+    it("backdrop top extends by footer-diagonal when a previous (non-overlap) transition exists, with +1px seam-guard adjustment (§5.1)", () => {
+      // The +1px compensates for SectionTransition's marginBottom: -1px so
+      // the backdrop top aligns exactly with the transition top instead of
+      // overflowing 1px into the previous section as a visible hairline.
       const { getByTestId } = render(
         <SectionStack
           sections={[
             makeSection("gray-100", "A", {
               type: "diagonal",
               direction: "left",
+            }),
+            {
+              ...makeSection("kcvv-green-dark", "B"),
+              backdrop: <div data-testid="backdrop-node">BACKDROP</div>,
+            },
+          ]}
+        />,
+      );
+      const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
+      expect(layer.getAttribute("data-top")).toBe(
+        "calc(-1 * var(--footer-diagonal) + 1px)",
+      );
+    });
+
+    it("backdrop top uses bare footer-diagonal when the previous transition is overlap (no +1px needed)", () => {
+      // Overlap transitions land the backdrop top at the transition top
+      // naturally because of their negative marginTop; no +1px adjustment.
+      const { getByTestId } = render(
+        <SectionStack
+          sections={[
+            makeSection("kcvv-black", "A", {
+              type: "diagonal",
+              direction: "left",
+              overlap: "half",
             }),
             {
               ...makeSection("kcvv-green-dark", "B"),
@@ -313,7 +340,9 @@ describe("SectionStack", () => {
       expect(layer.getAttribute("data-top")).toBe("0");
     });
 
-    it("backdrop bottom extends by footer-diagonal when a next transition exists", () => {
+    it("backdrop bottom extends by footer-diagonal when a next (non-overlap) transition exists, with +1px seam-guard adjustment", () => {
+      // Symmetric to the top adjustment: the +1px lands the backdrop bottom
+      // at the next section's top rather than 1px past it.
       const { getByTestId } = render(
         <SectionStack
           sections={[
@@ -330,7 +359,7 @@ describe("SectionStack", () => {
       );
       const layer = getByTestId("backdrop-node").parentElement as HTMLElement;
       expect(layer.getAttribute("data-bottom")).toBe(
-        "calc(-1 * var(--footer-diagonal))",
+        "calc(-1 * var(--footer-diagonal) + 1px)",
       );
     });
 
