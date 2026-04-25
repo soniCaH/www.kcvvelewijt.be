@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { YouthSection } from "./YouthSection";
+import { YouthBackdrop } from "./YouthBackdrop";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 
 const meta = {
@@ -16,10 +17,11 @@ export const Default: Story = {
   args: {},
 };
 
-/** Shows the YouthSection sandwiched between sections. Both the top and bottom
- *  diagonals are rendered inside the component so the background image shows
- *  through the transparent triangles. No SectionTransition needed around it. */
-export const WithDiagonalTransitions: Story = {
+/** YouthSection sandwiched between sections — diagonals are owned by `SectionStack`
+ *  via `SectionTransition`. The photographic backdrop bleeds into both diagonal
+ *  bands because `revealFrom` / `revealTo` are auto-propagated from the
+ *  `backdrop` prop. */
+export const Sandwiched: Story = {
   render: () => (
     <SectionStack
       sections={[
@@ -31,13 +33,14 @@ export const WithDiagonalTransitions: Story = {
               Previous section (kcvv-black)
             </div>
           ),
+          transition: { type: "diagonal", direction: "right" },
         },
         {
           key: "youth",
           bg: "kcvv-green-dark",
-          content: <YouthSection prevBg="kcvv-black" nextBg="gray-100" />,
-          paddingTop: "pt-0",
-          paddingBottom: "pb-0",
+          content: <YouthSection />,
+          backdrop: <YouthBackdrop />,
+          transition: { type: "diagonal", direction: "left" },
         },
         {
           key: "after",

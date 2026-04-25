@@ -23,6 +23,7 @@ import {
   BannerSlot,
   MatchesSliderSection,
   YouthSection,
+  YouthBackdrop,
   WebshopSection,
   SponsorsSection,
 } from "@/components/home";
@@ -279,17 +280,15 @@ export default async function HomePage() {
         placeholder={matchesSliderPlaceholder}
       />
     ),
-    // The heading's cap-height makes the default pt-20/pb-20 read bottom-tight.
-    // Bump the bottom so the cards don't crash into the diagonal.
-    paddingBottom: "pb-32",
+    transition: { type: "diagonal", direction: "right" },
   };
 
   const youthSection: SectionConfig = {
     key: "youth",
     bg: "kcvv-green-dark",
-    content: <YouthSection prevBg="kcvv-black" nextBg="gray-100" />,
-    paddingTop: "pt-0",
-    paddingBottom: "pb-0",
+    content: <YouthSection />,
+    backdrop: <YouthBackdrop />,
+    transition: { type: "diagonal", direction: "left" },
   };
 
   const bannerSlotCSection: SectionConfig | null = banners.bannerSlotC

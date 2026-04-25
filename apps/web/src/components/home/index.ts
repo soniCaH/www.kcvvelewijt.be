@@ -23,7 +23,7 @@ export type { BannerSlotProps } from "./BannerSlot";
 export { MatchesSliderSection } from "./MatchesSliderSection";
 export type { MatchesSliderSectionProps } from "./MatchesSliderSection";
 
-export { YouthSection } from "./YouthSection";
+export { YouthSection, YouthBackdrop } from "./YouthSection";
 export type { YouthSectionProps } from "./YouthSection";
 
 export { SponsorsSection } from "./SponsorsSection";
