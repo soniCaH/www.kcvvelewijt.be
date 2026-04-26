@@ -30,7 +30,8 @@ pnpm --filter @kcvv/api dev              # wrangler dev (local)
 pnpm --filter @kcvv/api deploy           # deploy to production
 pnpm --filter @kcvv/api deploy:staging   # deploy to staging
 pnpm --filter @kcvv/api test
-pnpm --filter @kcvv/api cache:clear:staging
+pnpm --filter @kcvv/api cache:clear:staging                    # clear all staging KV keys
+pnpm --filter @kcvv/api cache:clear:staging:key "matches:next" # clear a single staging KV key
 ```
 
 ## Deployment
