@@ -14,7 +14,7 @@ An interactive "Hulp" (Help) system that helps visitors quickly find the right c
 ### Current Status
 
 - ✅ 11 questions configured across 6 categories
-- ✅ Data managed via Sanity CMS (`responsibilityPath` document type)
+- ✅ Data managed via Sanity CMS (`responsibility` document type)
 - ✅ Server-side rendered with ISR (revalidate: 3600)
 
 ---
@@ -48,7 +48,7 @@ An interactive "Hulp" (Help) system that helps visitors quickly find the right c
 ### Data Flow
 
 ```text
-Sanity CMS (responsibilityPath docs)
+Sanity CMS (responsibility docs)
   → GROQ query (responsibilityPaths.ts)
   → SanityService.getResponsibilityPaths()
   → mapped to ResponsibilityPath[]
@@ -90,8 +90,8 @@ src/types/responsibility.ts                         # TypeScript interfaces
 
 ### Sanity Schema
 
-Document type: `responsibilityPath`
-Studio path: `apps/studio/schemaTypes/responsibilityPath.ts`
+Document type: `responsibility`
+Studio path: `packages/sanity-schemas/src/responsibility.ts`
 
 ---
 
