@@ -14,7 +14,7 @@ Production Sanity Studio deployed to sanity.io. See the root `.claude/CLAUDE.md`
 ## Where Things Live
 
 - **Schemas** — defined in `packages/sanity-schemas`. Never add `defineType`/`defineField` here.
-- **Studio UI customizations** (Document Actions, custom inputs, structure fragments, validators) — defined in `packages/sanity-studio`. Never add React components here.
+- **Studio UI customizations** (Document Actions, custom inputs, structure fragments, validators) — defined in `packages/sanity-studio`. Do not add Document Actions or general Studio UI React components to `apps/studio`; those belong in `packages/sanity-studio`.
 - **App-level wiring** — `sanity.config.ts` and `structure.ts` assemble the above into a runnable Studio. This is the only place those packages are composed together.
 
 ## sanity.config.ts Rules
