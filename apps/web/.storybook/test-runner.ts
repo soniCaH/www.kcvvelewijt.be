@@ -48,17 +48,34 @@ const config: TestRunnerConfig = {
     };
     if (vrParams.disable) return;
 
-    const viewports: ReadonlyArray<ViewportName> =
-      vrParams.viewports ?? (Object.keys(VIEWPORTS) as ViewportName[]);
+    const allViewportNames = Object.keys(VIEWPORTS) as ViewportName[];
+    const requestedViewports = vrParams.viewports ?? allViewportNames;
+
+    // Fail fast on bad inputs: an empty array is almost certainly a typo (the
+    // story author meant to disable VR via `vr.disable: true` instead), and
+    // unknown names would silently no-op the screenshot — exactly the kind of
+    // silent skip VR is supposed to catch.
+    if (requestedViewports.length === 0) {
+      throw new Error(
+        `[VR] Story "${context.id}" declared parameters.vr.viewports = []. ` +
+          `Use parameters.vr.disable = true to opt out instead.`,
+      );
+    }
+    const unknown = requestedViewports.filter((name) => !(name in VIEWPORTS));
+    if (unknown.length > 0) {
+      throw new Error(
+        `[VR] Story "${context.id}" requested unknown viewport(s): ` +
+          `${unknown.join(", ")}. Valid: ${allViewportNames.join(", ")}.`,
+      );
+    }
 
     await waitForPageReady(page);
     // Belt-and-braces font stabilisation: waitForPageReady covers most cases,
     // but document.fonts.ready guarantees web fonts are committed before paint.
     await page.evaluate(() => document.fonts?.ready);
 
-    for (const name of viewports) {
+    for (const name of requestedViewports) {
       const vp = VIEWPORTS[name];
-      if (!vp) continue;
       await page.setViewportSize(vp);
       await page.evaluate(() => document.fonts?.ready);
       const image = await page.screenshot({

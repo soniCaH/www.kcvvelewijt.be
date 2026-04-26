@@ -90,11 +90,17 @@ jobs:
             core.setOutput('repo', pr.data.head.repo.full_name);
             core.setOutput('sha', pr.data.head.sha);
 
-      - name: Checkout PR branch
+      - name: Checkout PR branch (pinned to resolved SHA)
         uses: actions/checkout@v6
         with:
           repository: ${{ steps.pr.outputs.repo }}
-          ref: ${{ steps.pr.outputs.ref }}
+          # Pin to the SHA we resolved above instead of the mutable branch ref —
+          # if the branch advances between resolution and checkout, we want a
+          # deterministic state. The push step still targets the branch ref, so
+          # the bot's commit lands on top of whatever the branch HEAD is at
+          # push time (git push will fail non-fast-forward if the branch raced
+          # ahead, which is the safe outcome).
+          ref: ${{ steps.pr.outputs.sha }}
           token: ${{ secrets.KCVV_VR_BOT_TOKEN }}
           fetch-depth: 0
 

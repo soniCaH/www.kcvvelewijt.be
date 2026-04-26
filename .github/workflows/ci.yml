@@ -144,6 +144,10 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-noble
       options: --user 0:0
+    env:
+      # The container image already ships browsers under /ms-playwright. Suppress
+      # @playwright/test's postinstall re-download to save ~150 MB and ~1 min.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
