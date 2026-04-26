@@ -1,0 +1,163 @@
+name: VR Baseline Update
+
+# Triggered by a maintainer commenting `@kcvv-bot update-vr-baselines` on a PR.
+# Re-runs the VR suite with --update-snapshots, commits the regenerated PNGs to
+# the PR branch under the kcvv-vr-bot identity, and pushes — which re-triggers
+# the `visual-regression` job to verify the new baselines pass.
+#
+# Bot identity (Phase 1 decision per PRD §15):
+#   PAT-owned bot user `kcvv-vr-bot` with token in secret `KCVV_VR_BOT_TOKEN`.
+#   The token needs `contents: write` scope on this repo (classic PAT or
+#   fine-grained PAT with repository contents read+write). A GitHub App is the
+#   cleaner long-term choice and may replace this in a follow-up.
+#
+# Anti-pattern: this workflow MUST NOT use `[skip ci]` — the visual-regression
+# job needs to run on the resulting commit to verify the new baselines.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  trigger-check:
+    name: Verify trigger
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@kcvv-bot update-vr-baselines')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Verify PR is from the same repo (no forks)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.issue.pull_request.url }}
+        run: |
+          PR_REPO=$(gh api "$PR_URL" --jq '.head.repo.full_name')
+          if [ "$PR_REPO" != "${{ github.repository }}" ]; then
+            echo "::error::Baseline updates are not supported for fork PRs (PR head: $PR_REPO)."
+            exit 1
+          fi
+
+      - name: Verify commenter is a maintainer
+        env:
+          AUTHOR_ASSOC: ${{ github.event.comment.author_association }}
+        run: |
+          case "$AUTHOR_ASSOC" in
+            OWNER|MEMBER|COLLABORATOR) echo "Authorised commenter ($AUTHOR_ASSOC)";;
+            *) echo "::error::Only repo maintainers can trigger baseline updates (got $AUTHOR_ASSOC)"; exit 1;;
+          esac
+
+      - name: React to comment
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes',
+            });
+
+  update-baselines:
+    name: Update baselines
+    needs: trigger-check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    # Same image as the visual-regression job and the local Docker runner.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      options: --user 0:0
+    steps:
+      - name: Resolve PR head
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('ref', pr.data.head.ref);
+            core.setOutput('repo', pr.data.head.repo.full_name);
+            core.setOutput('sha', pr.data.head.sha);
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ steps.pr.outputs.repo }}
+          ref: ${{ steps.pr.outputs.ref }}
+          token: ${{ secrets.KCVV_VR_BOT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm --filter @kcvv/web run vr:build-storybook
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
+
+      - name: Update baselines
+        run: pnpm --filter @kcvv/web run vr:ci:update
+
+      - name: Commit and push baselines
+        env:
+          BOT_USER: kcvv-vr-bot
+          BOT_EMAIL: kcvv-vr-bot@users.noreply.github.com
+        run: |
+          git config user.name "$BOT_USER"
+          git config user.email "$BOT_EMAIL"
+          git add apps/web/test/vr/__snapshots__
+          if git diff --cached --quiet; then
+            echo "No baseline changes to commit."
+            exit 0
+          fi
+          # No [skip ci] — visual-regression must re-run to verify.
+          git commit -m "chore(vr): update baselines
+
+          Triggered by @${{ github.event.comment.user.login }} via comment ${{ github.event.comment.html_url }}."
+          git push origin "HEAD:${{ steps.pr.outputs.ref }}"
+
+      - name: React success
+        if: success()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });
+
+      - name: React failure
+        if: failure()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'confused',
+            });

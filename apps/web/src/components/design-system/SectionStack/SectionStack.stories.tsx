@@ -6,7 +6,8 @@ import type { SectionConfig } from "./SectionStack";
 const meta = {
   title: "UI/SectionStack",
   component: SectionStack,
-  tags: ["autodocs"],
+  // `vr` opts this file into VR — see apps/web/.storybook/test-runner.ts.
+  tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof SectionStack>;
 

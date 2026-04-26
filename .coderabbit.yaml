@@ -1,0 +1,19 @@
+# CodeRabbit config — see https://docs.coderabbit.ai for the full schema.
+#
+# This file primarily exists to keep VR baseline pushes from consuming review
+# quota: PNG-only commits from the kcvv-vr-bot identity should be ignored.
+# See `docs/prd/visual-regression-testing.md` §9 for rationale.
+
+reviews:
+  # PNG baselines and per-failure diff PNGs are not human-reviewable diffs.
+  # (`__diff_output__/` is gitignored, but the filter is defence in depth in
+  # case the rule is bypassed.)
+  path_filters:
+    - "!apps/web/test/vr/__snapshots__/**/*.png"
+    - "!apps/web/test/vr/__diff_output__/**/*.png"
+    - "!apps/web/test/vr/__received_output__/**/*.png"
+
+  auto_review:
+    # Skip auto-review on commits authored by the VR baseline-update bot.
+    ignore_usernames:
+      - "kcvv-vr-bot"

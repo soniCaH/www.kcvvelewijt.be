@@ -11,7 +11,8 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  // `vr` opts this file into VR — see apps/web/.storybook/test-runner.ts.
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof PageFooter>;
 
 export default meta;

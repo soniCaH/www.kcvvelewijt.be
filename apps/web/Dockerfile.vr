@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1
+#
+# Visual-regression runner image. Pinned to match @playwright/test version in
+# apps/web/package.json (1.59.1). When upgrading Playwright bump BOTH the npm
+# dep and this FROM tag together — drift produces silent font-rendering diffs.
+#
+# Build context is the repo root (see apps/web/docker-compose.vr.yml) so the
+# workspace manifests can be copied for a cached pnpm install layer.
+
+FROM mcr.microsoft.com/playwright:v1.59.1-noble
+
+ENV CI=true \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    PNPM_HOME=/root/.local/share/pnpm \
+    PATH=/root/.local/share/pnpm:$PATH
+
+RUN corepack enable \
+    && corepack prepare pnpm@10.33.2 --activate
+
+WORKDIR /work
+
+# Workspace manifests first for a cacheable install layer.
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/web/package.json apps/web/
+COPY apps/api/package.json apps/api/
+COPY apps/studio/package.json apps/studio/
+COPY apps/studio-staging/package.json apps/studio-staging/
+COPY packages/api-contract/package.json packages/api-contract/
+COPY packages/sanity-schemas/package.json packages/sanity-schemas/
+COPY packages/sanity-studio/package.json packages/sanity-studio/
+
+# Only @kcvv/web's node_modules is needed at runtime — narrow the install to
+# its filter graph to keep the image small.
+RUN pnpm install --frozen-lockfile --ignore-scripts \
+    --filter=@kcvv/web... \
+    --filter=@kcvv/api-contract \
+    --filter=@kcvv/sanity-schemas \
+    --filter=@kcvv/sanity-studio
+
+WORKDIR /work/apps/web
+
+# Serves the prebuilt Storybook on 127.0.0.1:6006, waits for it, then runs the
+# test-runner. Extra args (e.g. --update-snapshots) are forwarded via "$@".
+# `vr:run` is defined in apps/web/package.json so the same orchestration works
+# in CI without docker (see .github/workflows/ci.yml visual-regression job).
+# --includeTags vr narrows the suite to story files tagged "vr" in their meta.
+# Phase 1 tags the three tracer-bullet files; Phase 2+ tags additional design
+# system / layout files as their baselines come online.
+#
+# Argument flow:
+#   `docker compose run --rm vr <ARGS>`
+#     → ENTRYPOINT becomes: ["sh","-c","...$*","--", <ARGS>]
+#     → `--` is the script's $0, so $* expands to <ARGS> (e.g. "-u" for
+#       --update-snapshots), appended after `--includeTags vr`.
+#   `pnpm vr:check`  → no extra args, $* is empty.
+#   `pnpm vr:update` → appends `-u`.
+ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --includeTags vr $*\"", "--"]

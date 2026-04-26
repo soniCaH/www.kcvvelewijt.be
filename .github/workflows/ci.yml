@@ -92,6 +92,95 @@ jobs:
       - name: Build Storybook
         run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
 
+      - name: Upload Storybook static
+        uses: actions/upload-artifact@v6
+        with:
+          name: storybook-static
+          path: apps/web/storybook-static
+          retention-days: 1
+          if-no-files-found: error
+
+  visual-regression-changes:
+    name: VR — Detect visual changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      visual: ${{ steps.filter.outputs.visual }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Detect visual paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            visual:
+              - 'apps/web/src/**'
+              - 'apps/web/.storybook/**'
+              - 'apps/web/public/**'
+              - 'apps/web/package.json'
+
+  visual-regression:
+    name: Visual Regression
+    runs-on: ubuntu-latest
+    needs: [build, visual-regression-changes]
+    # Path-filtered on PR (only run when visual paths change), unconditional on
+    # push to main/develop so merge-race regressions are caught on the merge
+    # commit even if the merging PR didn't itself touch visual paths. The
+    # `always()` plus explicit build-success guard is required because
+    # visual-regression-changes is itself PR-only — without `always()` GitHub
+    # would mark this job skipped on push since one of its `needs` was skipped.
+    if: |
+      always() &&
+      needs.build.result == 'success' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && needs.visual-regression-changes.outputs.visual == 'true')
+      )
+    # Pinned to match @playwright/test in apps/web/package.json (1.59.1) and the
+    # local Docker image in apps/web/Dockerfile.vr. Bump all three together —
+    # drift produces silent font-rendering diffs.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      options: --user 0:0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Storybook static
+        uses: actions/download-artifact@v6
+        with:
+          name: storybook-static
+          path: apps/web/storybook-static
+
+      - name: Run visual regression suite
+        run: pnpm --filter @kcvv/web run vr:ci
+
+      - name: Upload diff PNGs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: vr-diff-output
+          path: |
+            apps/web/test/vr/__diff_output__/
+            apps/web/test/vr/__received_output__/
+          if-no-files-found: ignore
+          retention-days: 14
+
   migration-status:
     name: Update Migration Status
     runs-on: ubuntu-latest

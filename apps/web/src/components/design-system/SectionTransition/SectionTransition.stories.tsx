@@ -5,7 +5,8 @@ import { SectionTransition } from "./SectionTransition";
 const meta = {
   title: "UI/SectionTransition",
   component: SectionTransition,
-  tags: ["autodocs"],
+  // `vr` opts this file into VR — see apps/web/.storybook/test-runner.ts.
+  tags: ["autodocs", "vr"],
   args: {
     from: "kcvv-black",
     to: "gray-100",
