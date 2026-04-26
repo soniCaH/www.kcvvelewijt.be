@@ -32,7 +32,7 @@ fi
 
 # Allow writes to docs/, .claude/, scripts/, and root CLAUDE.md on main
 RELATIVE_PATH=$(echo "$FILE_PATH" | sed "s|^$CLAUDE_PROJECT_DIR/||")
-if echo "$RELATIVE_PATH" | grep -qE "^(docs/|\.claude/|scripts/|CLAUDE\.md)"; then
+if echo "$RELATIVE_PATH" | grep -qE "^(docs/|\.claude/|scripts/)|(^|/)CLAUDE\.md$"; then
   exit 0
 fi
 
