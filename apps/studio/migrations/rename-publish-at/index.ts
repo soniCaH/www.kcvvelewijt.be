@@ -15,8 +15,7 @@ export default defineMigration({
 
   migrate: {
     document(doc, _context) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const d = doc as any
+      const d = doc as Record<string, unknown>
 
       if (!('publishAt' in d)) return undefined
 
