@@ -12,6 +12,14 @@ export const event = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      description: 'URL-friendly identifier — auto-generated from the title.',
+      options: {source: 'title', maxLength: 96},
+      validation: (r) => r.required(),
+    }),
+    defineField({
       name: 'dateStart',
       title: 'Start date',
       type: 'datetime',

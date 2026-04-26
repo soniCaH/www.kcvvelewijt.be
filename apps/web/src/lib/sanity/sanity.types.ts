@@ -160,6 +160,7 @@ export type Event = {
   _updatedAt: string;
   _rev: string;
   title?: string;
+  slug?: Slug;
   dateStart?: string;
   dateEnd?: string;
   coverImage?: {
@@ -174,6 +175,12 @@ export type Event = {
     label?: string;
   };
   featuredOnHome?: boolean;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
 };
 
 export type Sponsor = {
@@ -527,12 +534,6 @@ export type Page = {
         _key: string;
       } & FileAttachment)
   >;
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
 };
 
 export type OrganigramNodeReference = {
@@ -931,6 +932,7 @@ export type AllSanitySchemaTypes =
   | SanityFileAssetReference
   | FileAttachment
   | Event
+  | Slug
   | Sponsor
   | PlayerReference
   | StaffMemberReference
@@ -946,7 +948,6 @@ export type AllSanitySchemaTypes =
   | PageReference
   | Article
   | Page
-  | Slug
   | OrganigramNodeReference
   | ResponsibilityReference
   | Responsibility
@@ -1701,10 +1702,11 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: EVENTS_QUERY
-// Query: *[_type == "event"] | order(dateStart asc) {  "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,  "href": coalesce(externalLink.url, "#"),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
+// Query: *[_type == "event"] | order(dateStart asc) {  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,  "href": coalesce(externalLink.url, "#"),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"}
 export type EVENTS_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
+  slug: string | "";
   dateStart: string | "";
   dateEnd: string | null;
   featuredOnHome: false;
@@ -1714,16 +1716,42 @@ export type EVENTS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: NEXT_FEATURED_EVENT_QUERY
-// Query: coalesce(    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    },    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    }  )
+// Query: coalesce(    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    },    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"    }  )
 export type NEXT_FEATURED_EVENT_QUERY_RESULT = {
   id: string;
   title: string | "";
+  slug: string | "";
   dateStart: string | "";
   dateEnd: string | null;
   featuredOnHome: boolean | false;
   href: string | "#";
   coverImageUrl: string | null;
 } | null;
+
+// Source: ../web/src/lib/repositories/event.repository.ts
+// Variable: EVENT_BY_SLUG_QUERY
+// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "dateStart": coalesce(dateStart, ""),  dateEnd,  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",  externalLink}
+export type EVENT_BY_SLUG_QUERY_RESULT = {
+  id: string;
+  updatedAt: string;
+  title: string | "";
+  slug: string | "";
+  dateStart: string | "";
+  dateEnd: string | null;
+  coverImageUrl: string | null;
+  externalLink: {
+    url?: string;
+    label?: string;
+  } | null;
+} | null;
+
+// Source: ../web/src/lib/repositories/event.repository.ts
+// Variable: EVENT_SLUGS_QUERY
+// Query: *[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }
+export type EVENT_SLUGS_QUERY_RESULT = Array<{
+  slug: string | "";
+  updatedAt: string;
+}>;
 
 // Source: ../web/src/lib/repositories/homepage.repository.ts
 // Variable: HOMEPAGE_BANNERS_QUERY
@@ -2266,8 +2294,10 @@ declare module "@sanity/client" {
     '*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;
     '*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The\n  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;\n  // passing crop=focalpoint alone silently falls back to centre crop.\n  // Coalesce to 0.5 so images without a set hotspot degrade to centre.\n  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  // Multi-subject interviews (#1358): subjects[] replaces the single\n  // subject object. Array items carry _key so qaPair.respondentKey can\n  // match against them client-side in SanityArticleBody. Projection\n  // shape per-item matches the former subject projection exactly.\n  subjects[]{\n    _key,\n    kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber,\n      // position + psdId are reserved for Phase 3 (#1329): interview hero\n      // kicker + byline link. Unused by Phase 2 attribution components.\n      position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName,\n    customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  relatedContent[]->{\n    _type,\n    _id,\n    ...select(_type == "article" => {\n      "title": coalesce(title, ""),\n      "slug": coalesce(slug.current, ""),\n      "publishedAt": publishAt,\n      unpublishAt,\n      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n    }),\n    ...select(_type == "player" => {\n      firstName,\n      lastName,\n      position,\n      "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      psdId\n    }),\n    ...select(_type == "team" => {\n      name,\n      "slug": slug.current,\n      "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      tagline\n    }),\n    ...select(_type == "staffMember" => {\n      firstName,\n      lastName,\n      "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      "role": functionTitle\n    })\n  },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name, tagline,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "role": functionTitle\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
-    '*[_type == "event"] | order(dateStart asc) {\n  "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,\n  "href": coalesce(externalLink.url, "#"),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
-    '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
+    '*[_type == "event"] | order(dateStart asc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,\n  "href": coalesce(externalLink.url, "#"),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
+    '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
+    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "dateStart": coalesce(dateStart, ""),\n  dateEnd,\n  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  externalLink\n}': EVENT_BY_SLUG_QUERY_RESULT;
+    '*[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }': EVENT_SLUGS_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          _id,\n          url,\n          "lqip": metadata.lqip,\n          "dimensions": metadata.dimensions\n        }\n      }\n    }\n  }': HOMEPAGE_PLACEHOLDER_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
