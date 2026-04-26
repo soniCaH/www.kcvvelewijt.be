@@ -6,7 +6,7 @@
  * ✅ feat(news): add article detail page
  * ✅ fix(sponsors): resolve logo alignment issue
  * ✅ docs(readme): update setup instructions
- * ✅ migrate(teams): convert teams page to Next.js
+ * ✅ feat(events): add event detail page
  */
 
 module.exports = {
@@ -29,7 +29,6 @@ module.exports = {
         "ci", // CI configuration
         "chore", // Maintenance tasks
         "revert", // Revert previous commit
-        "migrate", // Migration from Gatsby to Next.js
       ],
     ],
 
@@ -40,17 +39,22 @@ module.exports = {
       [
         "news", // News/articles feature
         "matches", // Matches feature
+        "events", // Events feature
         "teams", // Teams feature
         "players", // Players feature
         "sponsors", // Sponsors feature
         "calendar", // Calendar feature
         "ranking", // Ranking feature
+        "search", // Search feature (Vectorize / Workers AI)
+        "sync", // PSD sync pipeline
+        "analytics", // Analytics / GTM / GA4
+        "studio", // Sanity Studio
         "api", // API/data fetching
         "ui", // UI components
         "schema", // Data schemas
-        "migration", // Migration tasks
         "config", // Configuration
         "deps", // Dependencies
+        "deps-dev", // Dev-only dependencies
       ],
     ],
   },
@@ -128,11 +132,6 @@ module.exports = {
             description: "Reverts a previous commit",
             title: "Reverts",
             emoji: "🗑",
-          },
-          migrate: {
-            description: "Migration from Gatsby to Next.js",
-            title: "Migration",
-            emoji: "🔄",
           },
         },
       },
