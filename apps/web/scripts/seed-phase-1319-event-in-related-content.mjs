@@ -75,13 +75,18 @@ console.log(`${label} upserting ${ARTICLE_ID}…`);
 
 try {
   // Resolve the event seeded in #1318. If absent, fall back to any event
-  // that has a slug — the test still exercises the code path.
-  let eventId = EVENT_ID;
-  const eventExists = await client.fetch(
+  // that has a slug — the test still exercises the code path. The query
+  // returns the matched _id string (or undefined when absent), so we use
+  // the fetched value directly rather than re-deriving it.
+  const existingEventId = await client.fetch(
     `*[_id == $id && _type == "event"][0]._id`,
     { id: EVENT_ID },
   );
-  if (!eventExists) {
+  let eventId;
+  if (existingEventId) {
+    eventId = existingEventId;
+    console.log(`${label} curated event _id=${eventId}`);
+  } else {
     const fallback = await client.fetch(
       `*[_type == "event" && defined(slug.current)] | order(_updatedAt desc)[0]._id`,
     );
@@ -94,8 +99,6 @@ try {
     console.log(
       `${label} primary event ${EVENT_ID} not found; using fallback ${fallback}`,
     );
-  } else {
-    console.log(`${label} curated event _id=${eventId}`);
   }
 
   const eventRef = { _type: "reference", _ref: eventId };

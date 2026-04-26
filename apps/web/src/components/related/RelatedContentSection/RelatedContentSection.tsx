@@ -96,6 +96,16 @@ function getHref(item: ContentItem): string {
       return `/events/${item.slug}`;
     case "page":
       return `/club/${item.slug}`;
+    default: {
+      // Exhaustiveness guard per apps/web/CLAUDE.md "Discriminated union
+      // branching must be exhaustive". Adding another type to ContentItem
+      // without a case here breaks the never-assignment at compile time;
+      // a runtime fall-through would surface the bad type in the message.
+      const _exhaustive: never = item;
+      throw new Error(
+        `Unhandled ContentItem type: ${(_exhaustive as { type: string }).type}`,
+      );
+    }
   }
 }
 

@@ -162,7 +162,7 @@ export const article = defineType({
       name: "relatedContent",
       title: "Related content",
       description:
-        "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams of staf die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
+        "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams, staf of evenementen die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
       type: "array",
       validation: (r) =>
         r.max(8).custom((items: { _ref?: string }[] | undefined) => {
