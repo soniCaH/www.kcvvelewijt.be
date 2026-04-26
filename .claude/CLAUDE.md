@@ -27,7 +27,7 @@ App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `pack
 ## Git Workflow
 
 1. **New worktree per issue:** `/ralph create <issue-number>` — never work on main
-2. **Conventional commits:** `type(scope): description` — scopes: news, matches, teams, players, sponsors, calendar, ranking, api, ui, schema, config, deps
+2. **Conventional commits:** `type(scope): description` — scopes: news, matches, events, teams, players, sponsors, calendar, ranking, search, sync, analytics, studio, api, ui, schema, config, deps, deps-dev
 3. **Quality before commit:** `pnpm --filter @kcvv/web lint:fix` then `pnpm --filter @kcvv/web check-all`
 4. **Never:** commit to main, push before checks pass, create PR without asking
 
