@@ -2,7 +2,7 @@
 
 Club website for KCVV Elewijt, a Belgian football club. Built as a Turborepo monorepo with Next.js 16, powered by Sanity CMS and a Cloudflare Workers BFF.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x%20%2B%207--beta-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.x-black)](https://nextjs.org/)
 [![Effect](https://img.shields.io/badge/Effect-Schema-purple)](https://effect.website/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8)](https://tailwindcss.com/)
@@ -11,12 +11,15 @@ Club website for KCVV Elewijt, a Belgian football club. Built as a Turborepo mon
 
 ## Architecture
 
-| App/Package   | Path                     | Host               | Purpose                                |
-| ------------- | ------------------------ | ------------------ | -------------------------------------- |
-| Next.js web   | `apps/web/`              | Vercel             | Club website                           |
-| Sanity Studio | `apps/studio/`           | sanity.io          | CMS admin UI                           |
-| BFF API       | `apps/api/`              | Cloudflare Workers | ProSoccerData proxy + cache (Wrangler) |
-| API contract  | `packages/api-contract/` | (library)          | Shared Effect schemas + HttpApi        |
+| App/Package         | Path                       | Host               | Purpose                                |
+| ------------------- | -------------------------- | ------------------ | -------------------------------------- |
+| Next.js web         | `apps/web/`                | Vercel             | Club website                           |
+| Sanity Studio       | `apps/studio/`             | sanity.io          | CMS admin UI (production)              |
+| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | CMS admin UI (staging)                 |
+| BFF API             | `apps/api/`                | Cloudflare Workers | ProSoccerData proxy + cache (Wrangler) |
+| API contract        | `packages/api-contract/`   | (library)          | Shared Effect schemas + HttpApi        |
+| Sanity schemas      | `packages/sanity-schemas/` | (library)          | Shared Sanity schema definitions       |
+| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Shared Sanity Studio UI components     |
 
 ---
 
@@ -71,7 +74,7 @@ PSD_API_KEY=...
 ### Core
 
 - **[Next.js 16](https://nextjs.org/)** — React framework with App Router + ISR
-- **[TypeScript](https://www.typescriptlang.org/)** — strict mode
+- **[TypeScript 6](https://www.typescriptlang.org/)** — strict mode; `@typescript/native-preview` (tsgo 7-beta) is the primary type-checker, classic `tsc` 6.x stays installed for tooling compatibility (see `CLAUDE.md`)
 - **[React 19](https://react.dev/)** — UI library
 - **[Tailwind CSS v4](https://tailwindcss.com/)** — utility-first styling (primary green `#4acf52`)
 
@@ -101,22 +104,25 @@ PSD_API_KEY=...
 ```text
 www.kcvvelewijt.be/
 ├── apps/
-│   ├── web/              # Next.js 16 club website
+│   ├── web/                  # Next.js 16 club website
 │   │   ├── src/
-│   │   │   ├── app/      # App Router pages
+│   │   │   ├── app/          # App Router pages
 │   │   │   ├── components/   # React components (feature + design system)
-│   │   │   └── lib/      # Effect schemas, services, utils
-│   │   └── CLAUDE.md     # app-specific dev notes
-│   ├── studio/           # Sanity Studio CMS
-│   └── api/              # Cloudflare Workers BFF (Wrangler)
+│   │   │   └── lib/          # Effect schemas, services, utils
+│   │   └── CLAUDE.md         # app-specific dev notes
+│   ├── studio/               # Sanity Studio (production)
+│   ├── studio-staging/       # Sanity Studio (staging)
+│   └── api/                  # Cloudflare Workers BFF (Wrangler)
 ├── packages/
-│   └── api-contract/     # Shared Effect schemas + HttpApi definitions
-├── scripts/              # Maintenance + one-off scripts
-├── docs/plans/           # Architecture decision records
-├── .claude/              # Claude Code configuration + skills
-├── turbo.json            # Turborepo pipeline
-├── pnpm-workspace.yaml   # pnpm workspaces
-└── package.json          # Root scripts + devDependencies
+│   ├── api-contract/         # Shared Effect schemas + HttpApi definitions
+│   ├── sanity-schemas/       # Shared Sanity schema definitions (both studios)
+│   └── sanity-studio/        # Shared Sanity Studio UI components
+├── scripts/                  # Maintenance + one-off scripts
+├── docs/plans/               # Architecture decision records
+├── .claude/                  # Claude Code configuration + skills
+├── turbo.json                # Turborepo pipeline
+├── pnpm-workspace.yaml       # pnpm workspaces
+└── package.json              # Root scripts + devDependencies
 ```
 
 ---
@@ -225,7 +231,8 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 
 - **Web (apps/web):** Vercel — auto-deploys from `main`
 - **BFF (apps/api):** Cloudflare Workers — `pnpm --filter @kcvv/api deploy`
-- **Studio (apps/studio):** sanity.io — `pnpm --filter @kcvv/studio deploy`
+- **Studio production:** sanity.io — `pnpm --filter @kcvv/studio deploy`
+- **Studio staging:** sanity.io — `pnpm --filter @kcvv/studio-staging deploy`
 
 ---
 
@@ -244,7 +251,6 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 ## Links
 
 - **GitHub Issues:** [soniCaH/www.kcvvelewijt.be/issues](https://github.com/soniCaH/www.kcvvelewijt.be/issues)
-- **GitHub Project:** [Platform Overhaul](https://github.com/users/soniCaH/projects/2)
 - **Contact:** [kevin@kcvvelewijt.be](mailto:kevin@kcvvelewijt.be)
 
 ---
