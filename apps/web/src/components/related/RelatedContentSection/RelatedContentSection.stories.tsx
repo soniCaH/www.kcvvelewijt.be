@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { RelatedContentSection } from "./RelatedContentSection";
 import type {
   RelatedArticleItem,
+  RelatedEventItem,
   RelatedPageItem,
   RelatedPlayerItem,
   RelatedTeamItem,
@@ -150,6 +151,28 @@ const curatedStaff: RelatedStaffItem = {
   imageUrl: "https://picsum.photos/seed/sofie/200/200",
 };
 
+const curatedEvent: RelatedEventItem = {
+  type: "event",
+  source: "editorial",
+  id: "e-1",
+  title: "Spaghetti-avond",
+  slug: "spaghetti-avond-2026",
+  dateStart: "2026-05-15T18:00:00Z",
+  dateEnd: "2026-05-15T22:00:00Z",
+  imageUrl: "https://picsum.photos/seed/spaghetti/1200/800",
+};
+
+const curatedEventNoImage: RelatedEventItem = {
+  type: "event",
+  source: "editorial",
+  id: "e-2",
+  title: "Vergadering ouderwerking",
+  slug: "vergadering-ouderwerking",
+  dateStart: "2026-06-01T20:00:00Z",
+  dateEnd: null,
+  imageUrl: null,
+};
+
 const meta = {
   title: "Features/Related/RelatedContentSection",
   component: RelatedContentSection,
@@ -185,6 +208,8 @@ type Story = StoryObj<typeof meta>;
 const allItems: RelatedContentItem[] = [
   ...articles,
   ...pages,
+  curatedEvent,
+  curatedEventNoImage,
   ...players,
   curatedTeam,
   curatedStaff,
@@ -208,7 +233,7 @@ export const FullMix: Story = {
 
 export const ContentOnly: Story = {
   args: {
-    items: [...articles, ...pages],
+    items: [...articles, ...pages, curatedEvent],
   },
 };
 
@@ -248,6 +273,21 @@ export const TypicalArticleFooter: Story = {
         story:
           "Typical real-world mix: 3 related articles, 1 related page, 2 mentioned players, 1 mentioned team. " +
           "Entity strip on top, magazine grid below with no overflow row needed.",
+      },
+    },
+  },
+};
+
+export const WithCuratedEvents: Story = {
+  args: {
+    items: [articles[0]!, curatedEvent, curatedEventNoImage, articles[1]!],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Phase 4 (#1319) — curated events render as content cards alongside articles, with the 'Evenement' badge and a Calendar-icon date footer. " +
+          "Events without a cover image fall back to the standard NewsCard placeholder treatment.",
       },
     },
   },

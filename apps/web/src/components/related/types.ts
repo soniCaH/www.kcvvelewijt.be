@@ -2,7 +2,13 @@
 
 export type RelatedContentSource = "editorial" | "ai" | "reference";
 
-export type RelatedPageType = "article" | "page" | "player" | "team" | "staff";
+export type RelatedPageType =
+  | "article"
+  | "page"
+  | "player"
+  | "team"
+  | "staff"
+  | "event";
 
 export interface RelatedArticleItem {
   type: "article";
@@ -56,9 +62,23 @@ export interface RelatedStaffItem {
   imageUrl: string | null;
 }
 
+export interface RelatedEventItem {
+  type: "event";
+  source: RelatedContentSource;
+  id: string;
+  title: string;
+  slug: string;
+  /** Required ISO datetime — events without a start have nothing to render. */
+  dateStart: string;
+  /** Optional ISO end datetime; same-day single events typically omit it. */
+  dateEnd: string | null;
+  imageUrl: string | null;
+}
+
 export type RelatedContentItem =
   | RelatedArticleItem
   | RelatedPageItem
   | RelatedPlayerItem
   | RelatedTeamItem
-  | RelatedStaffItem;
+  | RelatedStaffItem
+  | RelatedEventItem;

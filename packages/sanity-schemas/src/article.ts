@@ -162,7 +162,7 @@ export const article = defineType({
       name: "relatedContent",
       title: "Related content",
       description:
-        "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams of staf die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
+        "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams, staf of evenementen die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
       type: "array",
       validation: (r) =>
         r.max(8).custom((items: { _ref?: string }[] | undefined) => {
@@ -193,6 +193,7 @@ export const article = defineType({
             { type: "player" },
             { type: "team" },
             { type: "staffMember" },
+            { type: "event" },
           ],
           // Self-reference filter: prune the host article (and its draft twin)
           // out of the article picker so editors can't relate an article to

@@ -17,6 +17,7 @@ import { render, fireEvent, screen } from "@testing-library/react";
 import { RelatedContentSection } from "./RelatedContentSection";
 import type {
   RelatedArticleItem,
+  RelatedEventItem,
   RelatedPageItem,
   RelatedPlayerItem,
   RelatedTeamItem,
@@ -80,6 +81,17 @@ const staff: RelatedStaffItem = {
   firstName: "Piet",
   lastName: "Pieters",
   role: "Trainer",
+  imageUrl: null,
+};
+
+const eventItem: RelatedEventItem = {
+  type: "event",
+  source: "editorial",
+  id: "event-1",
+  title: "Spaghetti-avond",
+  slug: "spaghetti-avond",
+  dateStart: "2026-05-15T18:00:00Z",
+  dateEnd: null,
   imageUrl: null,
 };
 
@@ -243,6 +255,30 @@ describe("RelatedContentSection — analytics", () => {
         source: "reference",
         target_type: "player",
         target_slug: "12345",
+        position: 1,
+        page_type: "article",
+        page_slug: "page-host",
+      });
+    });
+
+    it("fires with target_type='event' and slug for event content clicks", () => {
+      render(
+        <RelatedContentSection
+          items={[eventItem]}
+          pageType="article"
+          pageSlug="page-host"
+        />,
+      );
+
+      trackEventMock.mockClear();
+
+      const link = screen.getByRole("link", { name: eventItem.title });
+      fireEvent.click(link);
+
+      expect(trackEventMock).toHaveBeenCalledWith("related_content_click", {
+        source: "editorial",
+        target_type: "event",
+        target_slug: "spaghetti-avond",
         position: 1,
         page_type: "article",
         page_slug: "page-host",

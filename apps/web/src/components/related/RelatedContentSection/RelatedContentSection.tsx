@@ -13,6 +13,7 @@ import type {
   RelatedArticleItem,
   RelatedContentItem,
   RelatedContentSource,
+  RelatedEventItem,
   RelatedPageItem,
   RelatedPageType,
 } from "../types";
@@ -34,9 +35,13 @@ export interface RelatedContentSectionProps {
   className?: string;
 }
 
-type ContentItem = RelatedArticleItem | RelatedPageItem;
+type ContentItem = RelatedArticleItem | RelatedPageItem | RelatedEventItem;
 
-const CONTENT_TYPES = new Set<RelatedContentItem["type"]>(["article", "page"]);
+const CONTENT_TYPES = new Set<RelatedContentItem["type"]>([
+  "article",
+  "page",
+  "event",
+]);
 const ENTITY_TYPES = new Set<RelatedContentItem["type"]>([
   "player",
   "team",
@@ -52,6 +57,7 @@ const SOURCE_PRIORITY: Record<RelatedContentSource, number> = {
 const TYPE_BADGE: Record<ContentItem["type"], string> = {
   article: "Artikel",
   page: "Pagina",
+  event: "Evenement",
 };
 
 function partitionItems(items: RelatedContentItem[]): {
@@ -83,9 +89,24 @@ function deriveImpressionSource(
 }
 
 function getHref(item: ContentItem): string {
-  return item.type === "article"
-    ? `/nieuws/${item.slug}`
-    : `/club/${item.slug}`;
+  switch (item.type) {
+    case "article":
+      return `/nieuws/${item.slug}`;
+    case "event":
+      return `/events/${item.slug}`;
+    case "page":
+      return `/club/${item.slug}`;
+    default: {
+      // Exhaustiveness guard per apps/web/CLAUDE.md "Discriminated union
+      // branching must be exhaustive". Adding another type to ContentItem
+      // without a case here breaks the never-assignment at compile time;
+      // a runtime fall-through would surface the bad type in the message.
+      const _exhaustive: never = item;
+      throw new Error(
+        `Unhandled ContentItem type: ${(_exhaustive as { type: string }).type}`,
+      );
+    }
+  }
 }
 
 function getEntityTargetSlug(entity: MentionedEntity): string {
@@ -208,6 +229,9 @@ export const RelatedContentSection = ({
         imageAlt={item.title}
         badge={TYPE_BADGE[item.type]}
         date={item.type === "article" ? formatDate(item.date) : undefined}
+        eventDate={
+          item.type === "event" ? formatDate(item.dateStart) : undefined
+        }
       />
     </div>
   );

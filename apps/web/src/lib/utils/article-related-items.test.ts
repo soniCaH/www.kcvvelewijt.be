@@ -10,6 +10,7 @@ import {
 } from "./article-related-items";
 import type {
   RelatedArticleItem,
+  RelatedEventItem,
   RelatedPlayerItem,
   RelatedTeamItem,
   RelatedStaffItem,
@@ -395,6 +396,85 @@ describe("mapCuratedRelatedContent", () => {
         imageUrl: "https://cdn.example.com/marc.jpg",
       },
     ]);
+  });
+
+  it("maps a curated event entry with editorial source", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "event",
+        _id: "event-7",
+        title: "Spaghetti-avond",
+        slug: "spaghetti-avond",
+        dateStart: "2026-05-15T18:00:00Z",
+        dateEnd: "2026-05-15T22:00:00Z",
+        coverImageUrl: "https://cdn.example.com/event.jpg",
+      },
+    ]);
+
+    expect(result).toEqual<RelatedEventItem[]>([
+      {
+        type: "event",
+        source: "editorial",
+        id: "event-7",
+        title: "Spaghetti-avond",
+        slug: "spaghetti-avond",
+        dateStart: "2026-05-15T18:00:00Z",
+        dateEnd: "2026-05-15T22:00:00Z",
+        imageUrl: "https://cdn.example.com/event.jpg",
+      },
+    ]);
+  });
+
+  it("preserves a null dateEnd on a curated event entry", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "event",
+        _id: "event-8",
+        title: "Vergadering",
+        slug: "vergadering",
+        dateStart: "2026-06-01T20:00:00Z",
+        dateEnd: null,
+        coverImageUrl: null,
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      type: "event",
+      dateStart: "2026-06-01T20:00:00Z",
+      dateEnd: null,
+      imageUrl: null,
+    });
+  });
+
+  it("skips a curated event entry without dateStart (cannot render a card body)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "event",
+        _id: "event-broken",
+        title: "Onbekend",
+        slug: "onbekend",
+        dateStart: "",
+        dateEnd: null,
+        coverImageUrl: null,
+      },
+    ]);
+    expect(result).toEqual([]);
+  });
+
+  it("skips a curated event entry without slug (cannot route)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "event",
+        _id: "event-noslug",
+        title: "Onbekend",
+        slug: "",
+        dateStart: "2026-06-01T20:00:00Z",
+        dateEnd: null,
+        coverImageUrl: null,
+      },
+    ]);
+    expect(result).toEqual([]);
   });
 
   it("dedupes curated entries that share an _id, keeping the first occurrence", () => {
