@@ -9,11 +9,11 @@ Studio UI layer consumed by both `apps/studio` (production) and `apps/studio-sta
 | Schema definitions (`defineType`, `defineField`)                            | `packages/sanity-schemas`       |
 | Document Actions, custom inputs, structure builders, validators, migrations | `packages/sanity-studio` ← here |
 
-Never put `defineType`/`defineField` calls here. Never put Document Actions or React components in `packages/sanity-schemas`.
+Never put `defineType`/`defineField` calls in non-schema packages. Do not add Document Actions or general Studio UI React components to `packages/sanity-schemas`. Small schema preview helpers (e.g. the existing `organigramNode-preview` utility) may remain in `packages/sanity-schemas` until they are migrated here.
 
 ## Key Rule: Every Change Ships to Both Studios
 
-Editing any file here updates **both** `apps/studio` and `apps/studio-staging` simultaneously. There is no per-studio UI override. If a UI change requires feature-flagging, it must be expressed in the component logic itself (e.g. conditional on document type or env var), not by forking the package.
+Editing any file here updates **both** `apps/studio` and `apps/studio-staging` simultaneously. Within `packages/sanity-studio`, there is no per-studio UI override. If a UI change requires feature-flagging, it must be expressed in the component logic itself (e.g. conditional on document type or env var), not by forking the package.
 
 ## Structure
 
