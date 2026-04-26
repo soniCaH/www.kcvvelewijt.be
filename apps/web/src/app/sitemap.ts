@@ -40,7 +40,7 @@ interface TeamSitemapRow {
   psdId: string | null;
 }
 
-const ARTICLE_SITEMAP_QUERY = `*[_type == "article" && defined(slug.current) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
+const ARTICLE_SITEMAP_QUERY = `*[_type == "article" && defined(slug.current) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
   "slug": slug.current,
   "updatedAt": _updatedAt
 }`;

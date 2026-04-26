@@ -405,7 +405,7 @@ export type Article = {
   >;
   title?: string;
   slug?: Slug;
-  publishAt?: string;
+  publishedAt?: string;
   unpublishAt?: string;
   featured?: boolean;
   coverImage?: {
