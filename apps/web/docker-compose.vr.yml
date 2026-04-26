@@ -1,0 +1,24 @@
+# Run from apps/web/. Build context is the repo root so the Dockerfile can copy
+# workspace manifests for the cached pnpm install layer.
+#
+# Local prerequisites:
+#   1. Docker Desktop running.
+#   2. `pnpm build-storybook` has produced apps/web/storybook-static/.
+#      (vr:check / vr:update wrap both steps in apps/web/package.json.)
+services:
+  vr:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile.vr
+    image: kcvv-vr-runner:1.59.1
+    init: true
+    working_dir: /work/apps/web
+    volumes:
+      # Test runner config + post-visit hook.
+      - ./.storybook:/work/apps/web/.storybook:ro
+      # Built Storybook served by http-server inside the container.
+      - ./storybook-static:/work/apps/web/storybook-static:ro
+      # Read-write mount for baselines and diff artifacts.
+      - ./test:/work/apps/web/test
+    environment:
+      - CI=true

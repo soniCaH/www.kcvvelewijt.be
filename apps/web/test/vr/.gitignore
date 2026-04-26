@@ -1,0 +1,5 @@
+# Diff PNGs are CI artifacts, not committed source.
+__diff_output__/
+
+# jest-image-snapshot writes the captured "actual" image alongside diffs on failure.
+__received_output__/

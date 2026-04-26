@@ -124,3 +124,146 @@ Structured data builders live in `src/lib/seo/jsonld.ts` and use `schema-dts` ty
 - **Grep before implementing any utility function.** Before writing a sanitization, hashing, or formatting helper, grep `src/lib/` for the function name. If it already exists, import it. Shared analytics utilities live in `src/lib/analytics/`.
 - **Analytics test assertions must encode the privacy policy, not the wire format.** Write `expect(...).toHaveBeenCalledWith("event", { member_id: hashMemberId(id), query_text: sanitizeQuery(q) })` — not the raw input values. A test that passes against a privacy-violating implementation is not a privacy test.
 - **Bug fix commits need a regression test.** If a fix adds a guard condition, add a test case that exercises the unguarded path.
+
+## Visual Regression Testing
+
+Self-hosted Playwright + `@storybook/test-runner`. Baselines live under
+`apps/web/test/vr/__snapshots__/` as `<story-id>--<viewport>.png` and are
+committed to the repo. Background and rationale: `docs/prd/visual-regression-testing.md`.
+
+### Local workflow (Docker required)
+
+Prerequisite: Docker Desktop running. Local runs use the pinned
+`mcr.microsoft.com/playwright:v1.59.1-noble` image so font rendering matches CI
+exactly.
+
+```bash
+# Compare against committed baselines.
+pnpm --filter @kcvv/web run vr:check
+
+# Accept the current rendering as the new baseline (commit the resulting PNGs).
+pnpm --filter @kcvv/web run vr:update
+
+# Print the diff PNG path(s) for a failed story so the Read tool can inspect them.
+pnpm --filter @kcvv/web run vr:diff layout-pagefooter--standalone
+```
+
+`vr:check` and `vr:update` rebuild Storybook first, then run the test-runner
+inside Docker. First run pulls the Playwright image (~1.3 GB). Steady-state run
+time on a warm cache is ~30 s for the Phase 1 tracer-bullet set.
+
+### Path-based triggering
+
+VR runs in CI only when a PR touches one of these globs (path-based, not
+label-based — see PRD §4):
+
+```text
+apps/web/src/**
+apps/web/.storybook/**
+apps/web/public/**
+apps/web/package.json
+```
+
+PRs that change only `apps/api/**`, `packages/**`, or infrastructure don't run
+VR. There is no `visual` label and none should be introduced.
+
+### Decision tree on a failing VR job
+
+When `pnpm vr:check` (or the CI `visual-regression` job) reports a diff:
+
+1. **Read each diff PNG** via the `Read` tool (vision-enabled — Claude sees the
+   actual visual difference). For CI, download the `vr-diff-output` artifact.
+2. **Cross-reference with the issue's acceptance criteria.**
+3. **If the diff aligns with the issue's stated goal** (e.g. the issue says
+   "redesign card shadow" and the diff shows a changed shadow):
+   - Run `pnpm --filter @kcvv/web run vr:update` locally (or post the PR
+     comment `@kcvv-bot update-vr-baselines`).
+   - Commit with message `chore(vr): update baselines — issue #<N>` plus a
+     one-line rationale per changed baseline (`- <story-id>: shadow adjusted
+per AC#3`).
+   - Continue.
+4. **If the diff is unexpected or outside the issue's scope** (e.g. the issue
+   says "fix footer safe area" but the diff shows a changed button colour on an
+   unrelated story):
+   - **Halt.**
+   - Report the unexpected regression to the user as a blocker, including the
+     diff PNG path.
+   - Do **not** auto-update baselines to paper over the regression.
+5. **PR body** must include a `## VR baselines` section enumerating changed
+   baselines and their justifications, so the reviewer sees the intentional
+   visual scope at a glance.
+
+This loop is canonical for any Claude session — Ralph, `/spec`, ad-hoc — not
+Ralph-specific.
+
+### Opt-in via the `vr` tag
+
+The VR suite runs `test-storybook --includeTags vr`, so only story files tagged
+with `vr` in their meta participate. Add the tag at the meta level:
+
+```typescript
+const meta = {
+  title: "UI/SomeComponent",
+  component: SomeComponent,
+  tags: ["autodocs", "vr"],
+} satisfies Meta<typeof SomeComponent>;
+```
+
+Phase 1 tags only `Layout/PageFooter`, `UI/SectionTransition`, and
+`UI/SectionStack`. Phase 2+ broadens this as additional design system / layout
+files come online. Within a tagged file, the `PHASE1_STORIES` allowlist in
+`.storybook/test-runner.ts` selects which exports get baselined — Phase 2
+removes that allowlist.
+
+### Per-story escape hatch
+
+A story can opt out of VR via its meta:
+
+```typescript
+export default {
+  title: "UI/SomeComponent",
+  component: SomeComponent,
+  parameters: {
+    vr: { disable: true },
+  },
+};
+```
+
+Reserved for dev-debug stories only, never for routine opt-out. If a non-debug
+story tempts you to disable VR, that's a signal the story's fixture
+determinism needs fixing instead. A custom viewport set is also supported —
+`parameters.vr.viewports = ["desktop"]` — for stories that only render
+meaningfully at one breakpoint.
+
+### Inspecting diffs
+
+Failed CI runs upload `vr-diff-output` artifacts containing the diff PNG and
+the captured "actual" PNG. Both are vision-readable by Claude's `Read` tool —
+just point it at the file path. Locally, `pnpm --filter @kcvv/web run vr:diff
+<story-id>` prints the on-disk path(s) under
+`apps/web/test/vr/__diff_output__/`.
+
+### Baseline-update bot flow
+
+A maintainer can comment `@kcvv-bot update-vr-baselines` on a PR. The
+`vr-baseline-update.yml` workflow re-runs the suite with `-u`, commits the
+regenerated PNGs to the PR branch as `kcvv-vr-bot`, and pushes. The push
+re-triggers `visual-regression` to verify the new baselines pass. CodeRabbit
+ignores PNG-only commits and the bot identity (see `.coderabbit.yaml` and PRD §9).
+
+**Bot setup (one-time):** see the header comment in
+`.github/workflows/vr-baseline-update.yml` — requires a GitHub user
+`kcvv-vr-bot` with a PAT scoped for `contents: write` on this repo, stored as
+the `KCVV_VR_BOT_TOKEN` secret. Same-repo PRs only; fork PRs are rejected
+explicitly. A GitHub App is the cleaner long-term replacement.
+
+### Anti-patterns
+
+- **No `[skip ci]`** in baseline-update commits. CodeRabbit quota is handled
+  separately; GitHub CI must run to verify the new baselines.
+- **No native Playwright** outside Docker on macOS. Local font rendering
+  diverges from Linux CI and produces false-positive diffs. Always use
+  `vr:check` / `vr:update`.
+- **No baselines committed from macOS or Windows hosts.** Only Docker-local
+  (Linux-matched) or the CI bot.
+- **No `visual` label.** Triggering is path-based; never introduce a label gate.

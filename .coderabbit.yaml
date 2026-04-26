@@ -1,0 +1,22 @@
+# CodeRabbit config — see https://docs.coderabbit.ai for the full schema.
+#
+# This file exists to keep VR baseline pushes from consuming review quota.
+# The mechanism is `path_filters` — when the bot pushes a PNG-only commit,
+# CodeRabbit's incremental review sees zero in-scope files and consumes no
+# quota. See `docs/prd/visual-regression-testing.md` §9 for rationale.
+#
+# We deliberately do NOT use `auto_review.ignore_usernames` for the bot:
+# `ignore_usernames` filters PR *authors*, not commit authors on existing PRs.
+# The bot never authors PRs (it only pushes commits to PRs opened by humans),
+# so the setting would be dead code. CodeRabbit has no native option to skip
+# incremental reviews by commit author — `path_filters` is the only mechanism
+# that works for our flow.
+
+reviews:
+  # PNG baselines and per-failure diff PNGs are not human-reviewable diffs.
+  # (`__diff_output__/` is gitignored, but the filter is defence in depth in
+  # case the rule is bypassed.)
+  path_filters:
+    - "!apps/web/test/vr/__snapshots__/**/*.png"
+    - "!apps/web/test/vr/__diff_output__/**/*.png"
+    - "!apps/web/test/vr/__received_output__/**/*.png"
