@@ -98,6 +98,13 @@ export const ARTICLE_BY_SLUG_QUERY =
       lastName,
       "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
       "role": functionTitle
+    }),
+    ...select(_type == "event" => {
+      "title": coalesce(title, ""),
+      "slug": coalesce(slug.current, ""),
+      "dateStart": coalesce(dateStart, ""),
+      dateEnd,
+      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
     })
   },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {

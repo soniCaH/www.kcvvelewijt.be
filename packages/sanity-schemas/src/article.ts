@@ -193,6 +193,7 @@ export const article = defineType({
             { type: "player" },
             { type: "team" },
             { type: "staffMember" },
+            { type: "event" },
           ],
           // Self-reference filter: prune the host article (and its draft twin)
           // out of the article picker so editors can't relate an article to

@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { RelatedContentSection } from "./RelatedContentSection";
 import type {
   RelatedArticleItem,
+  RelatedEventItem,
   RelatedPageItem,
   RelatedPlayerItem,
   RelatedTeamItem,
@@ -75,6 +76,21 @@ const staff: RelatedStaffItem = {
   role: "Trainer",
   imageUrl: null,
 };
+
+const event = (
+  id: string,
+  source: RelatedEventItem["source"] = "editorial",
+  title = `Evenement ${id}`,
+): RelatedEventItem => ({
+  type: "event",
+  source,
+  id,
+  title,
+  slug: `event-slug-${id}`,
+  dateStart: "2026-05-15T18:00:00Z",
+  dateEnd: null,
+  imageUrl: null,
+});
 
 describe("RelatedContentSection", () => {
   beforeEach(() => {
@@ -237,6 +253,46 @@ describe("RelatedContentSection", () => {
 
       const pageLink = screen.getByRole("link", { name: "Pagina p1" });
       expect(pageLink.getAttribute("href")).toBe("/club/pagina-p1");
+    });
+  });
+
+  describe("event variant", () => {
+    it("treats event items as content (renders the 'Gerelateerd' grid, not the entity strip)", () => {
+      render(
+        <RelatedContentSection
+          items={[event("e1")]}
+          pageType="article"
+          pageSlug="host"
+        />,
+      );
+
+      expect(screen.getByText("Gerelateerd")).toBeInTheDocument();
+      expect(screen.queryByText("In dit artikel")).not.toBeInTheDocument();
+    });
+
+    it("renders the 'Evenement' badge", () => {
+      render(
+        <RelatedContentSection
+          items={[event("e1")]}
+          pageType="article"
+          pageSlug="host"
+        />,
+      );
+
+      expect(screen.getByText("Evenement")).toBeInTheDocument();
+    });
+
+    it("links event items to /events/{slug}", () => {
+      render(
+        <RelatedContentSection
+          items={[event("e1", "editorial", "Spaghetti-avond")]}
+          pageType="article"
+          pageSlug="host"
+        />,
+      );
+
+      const eventLink = screen.getByRole("link", { name: "Spaghetti-avond" });
+      expect(eventLink.getAttribute("href")).toBe("/events/event-slug-e1");
     });
   });
 });

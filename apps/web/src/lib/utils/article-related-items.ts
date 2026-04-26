@@ -4,6 +4,7 @@ import type {
   RelatedPlayerItem,
   RelatedTeamItem,
   RelatedStaffItem,
+  RelatedEventItem,
   RelatedContentItem,
 } from "@/components/related/types";
 import type {
@@ -197,10 +198,31 @@ function mapCuratedEntry(
         role: entry.role,
         imageUrl: entry.imageUrl,
       } satisfies RelatedStaffItem;
+    case "event":
+      // Event without dateStart has no meaningful card body — skip rather
+      // than rendering "Invalid Date". Slug + title are coalesced to "" in
+      // GROQ; an empty slug also has no link target, so guard on both.
+      if (
+        entry.slug == null ||
+        entry.slug === "" ||
+        entry.dateStart == null ||
+        entry.dateStart === ""
+      ) {
+        return null;
+      }
+      return {
+        type: "event",
+        source: "editorial",
+        id: entry._id,
+        title: entry.title,
+        slug: entry.slug,
+        dateStart: entry.dateStart,
+        dateEnd: entry.dateEnd,
+        imageUrl: entry.coverImageUrl,
+      } satisfies RelatedEventItem;
     default: {
-      // Future schema additions (e.g. event in Phase 4) will widen this
-      // union and break the never-assignment, forcing a new case here. At
-      // runtime any unexpected type is skipped rather than throwing.
+      // Exhaustiveness guard — adding another _type to the union breaks
+      // this never-assignment until a new case is added above.
       const _exhaustive: never = entry;
       void _exhaustive;
       return null;
