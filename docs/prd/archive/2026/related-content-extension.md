@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-04-23
+completed_in: "#1314, #1316, #1317, #1318, #1319"
+---
+
 # PRD: Related Content Extension
 
 **Status:** Draft

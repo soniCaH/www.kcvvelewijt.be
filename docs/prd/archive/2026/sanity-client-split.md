@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-04-02
+completed_in: "#1187, #1188"
+---
+
 # PRD: SanityWriteClient — Split Reads from Writes (Projections + Mutations)
 
 **Status**: Ready for implementation

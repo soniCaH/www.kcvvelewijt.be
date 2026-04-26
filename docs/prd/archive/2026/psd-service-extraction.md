@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-04-02
+completed_in: "#1185, #1186"
+---
+
 # PRD: PSD Service Extraction — Separate Transforms from HTTP
 
 **Status**: Ready for implementation

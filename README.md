@@ -166,7 +166,7 @@ Interactive help system — visitors describe their role and question to find th
 
 Interactive organizational chart of the club structure.
 
-**Status:** Implemented — migration to Sanity in progress (#755)
+**Status:** Implemented — fully migrated to Sanity (`organigramNode` + `staffMember`)
 
 ### Design System
 

@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-03-25
+completed_in: "#1049, #1050, #1051, #1052"
+---
+
 # PRD: GitHub Native Issue Relationships
 
 **Status**: Ready for implementation

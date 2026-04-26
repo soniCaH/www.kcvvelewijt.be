@@ -62,7 +62,7 @@ If you plan to allow users to upload SVG files in the future, you **MUST** imple
 #### 1. Server-Side SVG Sanitization
 
 ```typescript
-// Install: npm install isomorphic-dompurify
+// Install: pnpm add isomorphic-dompurify
 import DOMPurify from "isomorphic-dompurify";
 
 function sanitizeSVG(svgContent: string): string {
@@ -88,34 +88,31 @@ function sanitizeSVG(svgContent: string): string {
 
 #### 3. Content Security Policy (CSP)
 
-Add to `next.config.ts` with nonce-based CSP (recommended for Next.js App Router):
+Use Next.js middleware to generate a per-request cryptographically random nonce
+and attach it to the CSP header. **Do not set a static nonce** — the nonce must
+be unique per response or it provides no XSS protection.
+
+See the Next.js docs for the canonical pattern:
+https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
+
+The middleware generates a nonce, passes it to the response header, and uses it
+to allowlist inline scripts/styles:
 
 ```typescript
-// Use middleware to generate nonces per request
-// See: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
-
-headers: async () => [
-  {
-    source: "/(.*)",
-    headers: [
-      {
-        key: "Content-Security-Policy",
-        value: [
-          "default-src 'self'",
-          "img-src 'self' data: https:",
-          "script-src 'self' 'nonce-{NONCE}'",
-          "style-src 'self' 'nonce-{NONCE}'",
-          "object-src 'none'",
-          "base-uri 'self'",
-          "frame-ancestors 'none'",
-        ].join("; "),
-      },
-    ],
-  },
-];
+// middleware.ts (simplified shape — adapt to your nonce generation)
+const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+const cspHeader = [
+  "default-src 'self'",
+  `script-src 'self' 'nonce-${nonce}'`,
+  `style-src 'self' 'nonce-${nonce}'`,
+  "img-src 'self' data: https:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
 ```
 
-**Note:** Avoid using `'unsafe-inline'` or `'unsafe-eval'` as they significantly weaken XSS protection.
+**Note:** Avoid `'unsafe-inline'` or `'unsafe-eval'` — they negate XSS protection.
 
 ## Reporting Security Issues
 

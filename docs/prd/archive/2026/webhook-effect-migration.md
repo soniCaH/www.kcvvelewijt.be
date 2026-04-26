@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-04-02
+completed_in: "#1189, #1190"
+---
+
 # PRD: Webhook Handler — Migrate to Effect
 
 **Status**: Ready for implementation

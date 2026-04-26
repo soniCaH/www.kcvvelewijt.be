@@ -1,3 +1,9 @@
+---
+status: completed
+completed_at: 2026-04-03
+completed_in: "#1191, #1192"
+---
+
 # PRD: Repository Pipeline Simplification — Fewer Transforms, Tighter Projections
 
 **Status**: Ready for implementation

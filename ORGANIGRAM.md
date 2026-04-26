@@ -287,16 +287,13 @@ KCVV Elewijt
 
 ## Future Enhancements
 
-### Option 1: Fetch from Drupal (Dynamic)
+### Option 1: Manage via Sanity (Recommended)
 
-If you want to manage the org structure in Drupal CMS instead of the TypeScript file:
+Staff structure is managed via `organigramNode` documents in Sanity, each linked
+to a `staffMember` document. Non-technical users can update the structure in Sanity
+Studio without touching code.
 
-1. Create a "Board Member" content type in Drupal
-2. Add a DrupalService method to fetch board members
-3. Update the page to fetch data server-side
-4. Benefits: Non-technical users can update via CMS
-
-### Option 2: Keep Static (Current)
+### Option 2: Keep Static (Legacy)
 
 Advantages:
 
@@ -321,7 +318,7 @@ Before going live with real data:
 - [ ] Verify all names are correct
 - [ ] Check all email addresses work
 - [ ] Test all profile photo URLs
-- [ ] Confirm Drupal staff profile links
+- [ ] Confirm Sanity `organigramNode` links to correct `staffMember` documents
 - [ ] Test on mobile device
 - [ ] Test on tablet
 - [ ] Test search functionality
