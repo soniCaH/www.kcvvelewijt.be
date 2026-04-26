@@ -176,7 +176,7 @@ Comprehensive KCVV brand guidelines and component patterns. See `apps/web/CLAUDE
 
 Content for articles, teams, players, organigram, sponsors, and events.
 
-**Status:** Active (~90% migrated from Drupal)
+**Status:** Active — 100% migrated to Sanity
 
 ---
 
@@ -187,7 +187,7 @@ Content for articles, teams, players, organigram, sponsors, and events.
 - **Spacing:** Tailwind v4 scale
 - **Breakpoints:** standard Tailwind (`sm`, `md`, `lg`, `xl`, `2xl`)
 
-See `DESIGN_SYSTEM.md` for full reference.
+See Storybook Foundation stories (`pnpm --filter @kcvv/web storybook`) and `apps/web/CLAUDE.md` Design Conventions section for full reference.
 
 ---
 
@@ -236,7 +236,7 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 - `ACCESSIBILITY_TESTING.md` — Accessibility testing guide
 - `SECURITY.md` — security policies
 - `apps/web/CLAUDE.md` — design system conventions (colors, spacing, Storybook rules)
-- `.claude/CLAUDE.md` — Claude Code project instructions
+- `.claude/CLAUDE.md` — Claude Code project instructions (architecture, git workflow, dev guidelines)
 - `docs/plans/` — architecture decision records
 
 ---

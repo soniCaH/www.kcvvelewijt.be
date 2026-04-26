@@ -91,7 +91,7 @@ src/types/responsibility.ts                         # TypeScript interfaces
 ### Sanity Schema
 
 Document type: `responsibilityPath`
-Studio path: `apps/studio/schemaTypes/responsibilityPath.ts`
+Studio path: `packages/sanity-schemas/src/responsibility.ts`
 
 ---
 

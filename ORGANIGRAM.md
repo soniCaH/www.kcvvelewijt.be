@@ -146,7 +146,7 @@ Edit `/src/data/club-structure.ts` and replace placeholder names with real names
   email: 'voorzitter@kcvvelewijt.be', // ← Add real email
   phone: '+32 123 456 789',           // ← Add phone if available
   imageUrl: '/images/staff/john.jpg', // ← Add profile photo
-  profileUrl: '/staff/john-doe',      // ← Link to Drupal profile
+  profileUrl: '/club/organigram',     // ← Deep link to organigram node (optional)
   parentId: 'club',
 }
 ```
@@ -175,13 +175,9 @@ Add new entries to the `clubStructure` array:
    imageUrl: "/images/staff/firstname-lastname.jpg";
    ```
 
-### 4. Link to Drupal Staff Profiles
+### 4. Link to Staff Profiles
 
-If the person has a Drupal staff profile:
-
-```typescript
-profileUrl: "/staff/firstname-lastname"; // This links to Drupal
-```
+Staff profiles are sourced from Sanity. The `organigramNode` document in Sanity links to a `staffMember` document which holds the canonical profile data. Deep links use the organigram page URL with the member's node ID as a query param.
 
 ---
 
