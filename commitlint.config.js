@@ -5,7 +5,7 @@
  * Examples:
  * ✅ feat(news): add article detail page
  * ✅ fix(sponsors): resolve logo alignment issue
- * ✅ docs(readme): update setup instructions
+ * ✅ docs(config): update setup instructions
  * ✅ feat(events): add event detail page
  */
 
