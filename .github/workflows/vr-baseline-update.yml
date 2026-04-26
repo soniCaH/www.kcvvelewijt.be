@@ -29,6 +29,9 @@ jobs:
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '@kcvv-bot update-vr-baselines')
     runs-on: ubuntu-latest
+    # Cheap gate (one API call + one reaction). 5 min is generous; anything
+    # longer almost certainly means GitHub API itself is degraded.
+    timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: write
@@ -68,6 +71,12 @@ jobs:
     name: Update baselines
     needs: trigger-check
     runs-on: ubuntu-latest
+    # Steady-state run: ~5 min (storybook build ~30 s, install ~1 min,
+    # test-runner with -u ~1 min for 5 stories, commit/push <30 s). 15 min
+    # gives ~3× headroom for cold caches and network blips while still failing
+    # fast on hangs (default GitHub timeout is 6 h — orders of magnitude too
+    # long for a baseline regeneration).
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
