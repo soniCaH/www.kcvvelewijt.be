@@ -33,6 +33,8 @@ function makePage(overrides: Partial<PageVM> = {}): PageVM {
     title: "Downloads",
     slug: "downloads",
     heroImageUrl: null,
+    metaDescription: null,
+    ogImageUrl: null,
     body: [
       {
         _type: "block" as const,

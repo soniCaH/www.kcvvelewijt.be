@@ -26,12 +26,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await fetchPage(slug);
   if (!page) return {};
 
+  const ogImage = page.ogImageUrl
+    ? { url: page.ogImageUrl, alt: page.title }
+    : page.heroImageUrl
+      ? { url: page.heroImageUrl, alt: page.title }
+      : DEFAULT_OG_IMAGE;
+
   return {
     title: `${page.title} | KCVV Elewijt`,
+    description: page.metaDescription ?? undefined,
     openGraph: {
       title: `${page.title} - KCVV Elewijt`,
+      description: page.metaDescription ?? undefined,
       type: "website",
-      images: [DEFAULT_OG_IMAGE],
+      images: [ogImage],
     },
   };
 }

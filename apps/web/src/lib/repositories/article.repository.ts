@@ -38,6 +38,8 @@ export const RELATED_ARTICLES_QUERY =
 export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
   "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  metaDescription,
+  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The
   // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;

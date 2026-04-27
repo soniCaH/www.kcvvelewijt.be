@@ -11,9 +11,8 @@ export const articlePreviewSelect = {
 
 export function prepareArticlePreview(selection: Record<keyof typeof articlePreviewSelect, any>) {
   const {title, media, publishedAt} = selection
-  return {
-    title,
-    subtitle: publishedAt ? new Date(publishedAt).toLocaleDateString('nl-BE') : 'No date',
-    media,
-  }
+  const parsed = typeof publishedAt === 'string' ? new Date(publishedAt) : null
+  const subtitle =
+    parsed && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleDateString('nl-BE') : 'Geen datum'
+  return {title, subtitle, media}
 }
