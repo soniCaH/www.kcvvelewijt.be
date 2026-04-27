@@ -220,9 +220,18 @@ const config: TestRunnerConfig = {
           new Promise((resolve) => setTimeout(resolve, timeoutMs)),
         ]);
       }, IMAGE_LOAD_TIMEOUT_MS);
+      // `fullPage: true` would extend horizontally past `vp.width` whenever
+      // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
+      // that overflow can be a few px wider on Apple Silicon than on x86,
+      // producing size-mismatch failures unrelated to actual rendering.
+      // Clip every screenshot to `vp.width` while still using the full
+      // scrollHeight, so baselines are always exactly viewport-width.
+      const fullHeight = await page.evaluate(
+        () => document.documentElement.scrollHeight,
+      );
       const image = await page.screenshot({
-        fullPage: true,
         animations: "disabled",
+        clip: { x: 0, y: 0, width: vp.width, height: fullHeight },
       });
       expect(image).toMatchImageSnapshot({
         customSnapshotIdentifier: `${context.id}--${name}`,
