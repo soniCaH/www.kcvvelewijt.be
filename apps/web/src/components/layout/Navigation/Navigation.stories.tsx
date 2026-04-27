@@ -31,7 +31,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof Navigation>;
 
 export default meta;

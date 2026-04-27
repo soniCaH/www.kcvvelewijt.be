@@ -7,7 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     image: { control: "text", description: "Background image URL" },
     imageAlt: {

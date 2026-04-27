@@ -31,7 +31,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     onChange: fn(),
   },

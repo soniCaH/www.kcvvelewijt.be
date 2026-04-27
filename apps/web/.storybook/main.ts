@@ -1,7 +1,15 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: [
+    "../src/**/*.mdx",
+    // Foundation MDX is rendered via sibling .stories.tsx wrappers so the
+    // test-runner (which excludes type=docs entries) can baseline them. The
+    // wrappers import each .mdx as a React component — see
+    // src/stories/foundation/<Name>.stories.tsx.
+    "!../src/stories/foundation/**/*.mdx",
+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+  ],
   addons: [
     "@storybook/addon-docs",
     "@storybook/addon-onboarding",

@@ -58,4 +58,7 @@ WORKDIR /work/apps/web
 #       --update-snapshots), appended after `--includeTags vr --excludeTags vr-skip`.
 #   `pnpm vr:check`  → no extra args, $* is empty.
 #   `pnpm vr:update` → appends `-u`.
-ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --includeTags vr --excludeTags vr-skip $*\"", "--"]
+# `--testTimeout 30000` covers the heavier MDX-backed Foundation reference
+# stories (icon catalogue, type scale) — the default 15s flakes when the
+# runner is under load.
+ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 30000 --includeTags vr --excludeTags vr-skip $*\"", "--"]

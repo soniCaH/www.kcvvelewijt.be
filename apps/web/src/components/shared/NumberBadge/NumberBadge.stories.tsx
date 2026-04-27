@@ -36,7 +36,7 @@ const meta = {
       default: "light",
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     value: {
       control: "text",

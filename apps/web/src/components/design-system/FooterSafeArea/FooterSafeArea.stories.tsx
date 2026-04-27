@@ -20,7 +20,7 @@ function Outlined({ children }: { children: ReactNode }) {
 const meta = {
   title: "UI/FooterSafeArea",
   component: FooterSafeArea,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   parameters: {
     layout: "fullscreen",
     docs: {

@@ -24,7 +24,7 @@ const MANY_TABS: BrandedTab[] = [
 const meta = {
   title: "UI/BrandedTabs",
   component: BrandedTabs,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     tabs: TABS,
     activeTabId: "spelers",

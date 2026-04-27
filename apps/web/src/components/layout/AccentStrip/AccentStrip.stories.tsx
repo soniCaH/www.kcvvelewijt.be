@@ -14,7 +14,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof AccentStrip>;
 
 export default meta;

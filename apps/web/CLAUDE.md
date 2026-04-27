@@ -209,11 +209,59 @@ const meta = {
 } satisfies Meta<typeof SomeComponent>;
 ```
 
-Phase 1 tags only `Layout/PageFooter`, `UI/SectionTransition`, and
-`UI/SectionStack`. Phase 2+ broadens this as additional design system / layout
-files come online. Within a tagged file, the `PHASE1_STORIES` allowlist in
-`.storybook/test-runner.ts` selects which exports get baselined — Phase 2
-removes that allowlist.
+Phase 2 expands coverage to every `UI/*`, `Foundation/*`, and `Layout/*` story
+file. Phase 3+ broadens this further as additional `Features/*` come online.
+Tagging is the only filter — the `PHASE1_STORIES` allowlist that previously
+gated specific exports has been removed.
+
+### Foundation MDX wrappers
+
+`@storybook/test-runner` filters out entries whose `type === "docs"`, so MDX
+files registered via `<Meta title=...>` cannot be baselined directly. Each
+`src/stories/foundation/<Name>.mdx` is paired with a sibling `.stories.tsx`
+that imports the MDX as a React component and renders it as a single
+`Reference` story tagged `vr`. The MDX itself is excluded from Storybook's
+stories glob (see `apps/web/.storybook/main.ts`) so it does not register a
+docs entry — only the wrapper story renders it. To document a new Foundation
+page, add both files: the MDX with no `<Meta>` block, and a wrapper following
+the same pattern.
+
+### Determinism stubs (Phase 2)
+
+To stop pixel drift between runs, `apps/web/.storybook/test-runner.ts` installs
+the following stubs before any story renders:
+
+- **`Date` / `Date.now`** — pinned to `2026-01-15T12:00:00.000Z` via an
+  `addInitScript` injected in the runner's `prepare` hook. Stories deriving
+  "today" or relative timestamps render against a fixed instant.
+- **`Math.random`** — replaced with a seeded mulberry32 PRNG (seed
+  `0x1234abcd`). The runner re-seeds before every story (`preVisit` calls
+  `__VR_RESET_PRNG__()`) so consumption order is independent of which other
+  story rendered first in the same `.stories.tsx` file.
+- **CSS animations and transitions** — disabled via a stylesheet injected per
+  story before screenshot. Belt-and-braces alongside Playwright's
+  `animations: "disabled"` screenshot option, which only stops CSS keyframes
+  but not transition firing on viewport resize.
+- **Font loading** — every viewport awaits `document.fonts.ready` after the
+  resize so web fonts are committed before each capture.
+- **Caret blink** — `caret-color: transparent` ensures `<input>` and
+  `<textarea>` stories do not flicker between paint frames.
+- **Next/Image responsive `srcset`** — viewport changes can swap in a
+  different optimized variant after the resize fires. Each viewport waits
+  (capped at 1500ms) for any in-flight `<img>` to finish loading before the
+  screenshot. Broken images log a `[VR] image failed to load: <url>` warning
+  to the runner output so the cause is grep-able from CI logs.
+
+If a story remains non-deterministic after these stubs, fix the story's
+fixtures rather than reaching for `parameters.vr.disable = true`. The escape
+hatch is reserved for genuinely dynamic debug stories, not for masking
+fixable pixel drift.
+
+The `prepare()` hook in `apps/web/.storybook/test-runner.ts` overrides
+`@storybook/test-runner`'s default `defaultPrepare` body. Re-audit it against
+`node_modules/@storybook/test-runner/dist/index.js` after every test-runner
+dep bump — silent drift here breaks the connection-refused error message and
+the determinism guarantees.
 
 ### Per-story escape hatch
 

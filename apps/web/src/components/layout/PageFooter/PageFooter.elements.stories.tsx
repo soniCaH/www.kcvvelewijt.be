@@ -20,7 +20,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta;
 
 export default meta;

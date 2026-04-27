@@ -29,7 +29,7 @@ const meta = {
     seniorTeams: mockSeniorTeams,
     youthTeams: mockYouthTeams,
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof MobileMenu>;
 
 export default meta;
