@@ -34,7 +34,7 @@ export const structure: StructureResolver = (S) =>
         .child(
           S.documentTypeList('article')
             .title('Articles')
-            .defaultOrdering([{field: 'publishAt', direction: 'desc'}]),
+            .defaultOrdering([{field: 'publishedAt', direction: 'desc'}]),
         ),
       S.listItem()
         .title('Sponsors')

@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {LinkIcon, UserIcon} from '@sanity/icons'
+import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
 
 export const article = defineType({
@@ -231,15 +232,7 @@ export const article = defineType({
     }),
   ],
   preview: {
-    select: { title: "title", media: "coverImage", publishedAt: "publishedAt" },
-    prepare({ title, media, publishedAt }) {
-      return {
-        title,
-        subtitle: publishedAt
-          ? new Date(publishedAt).toLocaleDateString("nl-BE")
-          : "No date",
-        media,
-      };
-    },
+    select: articlePreviewSelect,
+    prepare: prepareArticlePreview,
   },
 });
