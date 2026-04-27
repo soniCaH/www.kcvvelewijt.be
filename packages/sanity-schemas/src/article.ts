@@ -162,14 +162,14 @@ export const article = defineType({
       name: "metaDescription",
       title: "Meta description",
       type: "string",
-      description: "Override for SEO meta description and OG description (max 160 characters).",
+      description: "Overschrijving voor SEO meta-omschrijving en OG-omschrijving (max. 160 tekens).",
       validation: (r) => r.max(160),
     }),
     defineField({
       name: "ogImage",
       title: "OG image",
       type: "image",
-      description: "Optional override for the Open Graph image. Falls back to the cover image.",
+      description: "Optionele overschrijving voor de Open Graph-afbeelding. Valt terug op de omslagafbeelding.",
       options: { hotspot: true },
     }),
     defineField({
