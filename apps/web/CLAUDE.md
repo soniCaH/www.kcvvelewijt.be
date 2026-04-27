@@ -209,10 +209,63 @@ const meta = {
 } satisfies Meta<typeof SomeComponent>;
 ```
 
-Phase 2 expands coverage to every `UI/*`, `Foundation/*`, and `Layout/*` story
-file. Phase 3+ broadens this further as additional `Features/*` come online.
+Phase 2 covers every `UI/*`, `Foundation/*`, and `Layout/*` story file.
+Phase 3 (`docs/prd/visual-regression-testing.md` §12 Phase 3 appendix)
+defines a 36-file Include list of `Features/*` components that **must**
+adopt the `vr` tag — but adoption is staged with the upcoming full
+component redesign rather than landed in one big capture. See the next
+section for the per-redesign contract.
+
 Tagging is the only filter — the `PHASE1_STORIES` allowlist that previously
 gated specific exports has been removed.
+
+### Definition of Ready / Done — `Features/*` redesign PRs
+
+A PR that redesigns a `Features/*` component named in the **Phase 3
+Include list** (PRD §12 Phase 3 appendix) is **not done** until VR coverage
+lands with the redesign. This is the contract that keeps Phase 3 honest
+without paying the throwaway-baseline cost up front.
+
+**Definition of Ready** — before opening the redesign PR:
+
+- Confirm the component's story file is in the Phase 3 Include list (see
+  `docs/prd/visual-regression-testing.md` §12 Phase 3 appendix). If it is
+  in the Defer list, no VR adoption is required by this redesign.
+- If the redesign splits or renames an Included story file (e.g.
+  `MatchDetailView.stories.tsx` becomes `MatchDetailHero.stories.tsx` +
+  `MatchDetailBody.stories.tsx`), every resulting story file inherits the
+  `vr` obligation, and the Phase 3 Include list in
+  `docs/prd/visual-regression-testing.md` is updated in the same PR to
+  reflect the new file names.
+- Confirm Docker Desktop is running locally (required for `pnpm vr:update`).
+
+**Definition of Done** — before requesting review on the redesign PR:
+
+1. The redesigned story file's meta has `"vr"` in its `tags` array
+   (`tags: ["autodocs", "vr"]`, or `"vr"` merged into whatever array
+   already exists).
+2. Baselines were captured by running `pnpm vr:update` from `apps/web/`
+   inside the pinned Docker container (never native macOS — see
+   anti-patterns below).
+3. The new
+   `apps/web/test/vr/__snapshots__/features-<area>-<component>--<story>--<viewport>.png`
+   files are committed alongside the redesign code.
+4. CI's `visual-regression` job is green.
+5. Any story that genuinely cannot be made deterministic has
+   `parameters: { vr: { disable: true } }` on **that specific story export
+   only** (never the whole file), with an inline comment explaining the
+   precise non-determinism that fixture pinning could not fix. Crashing
+   stories use `tags: ["vr-skip"]` on the story export instead — see the
+   `vr-skip` section below.
+6. The PR description's "VR baselines" section enumerates which baselines
+   are first-time captures (acceptable) versus updates to existing
+   baselines (must be justified per §10 of the PRD).
+
+If the redesign touches a component **not** in the Include list, no VR
+adoption is required — but the criterion in §12 Phase 3 of the PRD still
+applies: if the failure mode is visual-structural rather than
+data-presentational, propose adding the component to Phase 3 in the same
+PR (doc edit + tag + baselines).
 
 ### Foundation MDX wrappers
 
