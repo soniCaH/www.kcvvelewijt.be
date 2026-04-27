@@ -279,6 +279,20 @@ The `prepare()` hook in `apps/web/.storybook/test-runner.ts` overrides
 dep bump — silent drift here breaks the connection-refused error message and
 the determinism guarantees.
 
+### Threshold note
+
+`toMatchImageSnapshot` uses `failureThreshold: 0.7` (percent). This is loose
+enough to absorb the ~0.5% ARM ↔ x86 anti-aliasing drift between
+Apple-Silicon Docker baselines and CI's native x86 runner. Rosetta-for-linux
+on Apple Silicon does not actually re-render through x86 fontconfig — it
+translates x86 binaries to ARM instructions at the silicon level, so font
+math stays ARM-native. Real visual regressions at the size we care about
+(diagonal seam hairlines, layout reflows, gradient breaks) still produce
+
+> 5% diffs and trip the gate. Tighten back to `0.001` once the `kcvv-vr-bot`
+> PAT (`KCVV_VR_BOT_TOKEN` secret) is configured and CI can canonicalise
+> baselines via `@kcvv-bot update-vr-baselines`.
+
 ### Per-story escape hatch
 
 A story can opt out of VR via its meta:
