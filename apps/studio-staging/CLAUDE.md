@@ -12,8 +12,8 @@ Staging Sanity Studio deployed to sanity.io. Near-mirror of `apps/studio` (produ
 
 ## Where Things Live
 
-- **Schemas** — defined in `packages/sanity-schemas`. Never add `defineType`/`defineField` here.
-- **Studio UI customizations** (Document Actions, custom inputs, structure fragments, validators) — defined in `packages/sanity-studio`. Never add React components here.
+- **Schemas and validation** — defined in `packages/sanity-schemas` (schema types in `packages/sanity-schemas/src/`, validation rules in `packages/sanity-schemas/src/validation/`). Never add `defineType`/`defineField` or validation logic here.
+- **Studio UI customizations** (Document Actions, custom inputs, structure fragments) — defined in `packages/sanity-studio`. Never add React components here.
 - **App-level wiring** — `sanity.config.ts` and `structure.ts` assemble the above into a runnable Studio. This is the only place those packages are composed together.
 
 ## sanity.config.ts — Strict Env Handling
@@ -56,7 +56,7 @@ pnpm --filter @kcvv/studio-staging deploy
 
 `deploy` pushes to the hosted Studio at sanity.io — it does **not** deploy schemas or datasets.
 
-Note: `sanity.cli.ts` currently has no `appId` — a deploy will prompt for one or create a new deployment. Align with production once a stable staging deployment ID is established.
+Note: when `sanity.cli.ts` does not declare an `appId`, `pnpm deploy` will prompt to create or supply one (a new hosted Studio deployment). Once an `appId` is set in `sanity.cli.ts`, subsequent deploys reuse that existing deployment. Align the staging `appId` with production once a stable staging deployment ID is established.
 
 ## No Duplication With Root CLAUDE.md
 
