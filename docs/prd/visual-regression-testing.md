@@ -262,10 +262,10 @@ Determinism work happens once in this phase for the whole repo:
 
 Not every `Features/*` story. Criterion: **include if the story's failure mode is visual-structural (layout, composition, spacing) rather than data-presentational.**
 
-Examples that qualify:
+Examples that qualify (titles below match story-file metas in the repo):
 
-- `Features/Matches/MatchStripSection` (composition across breakpoints)
-- `Features/News/ArticleHero` (editorial layout)
+- `Features/Matches/MatchStripClient` (composition across breakpoints)
+- `Features/Articles/ArticleHeader` / `Features/Articles/InterviewHero` (editorial layout)
 - `Features/Homepage/YouthSection` (backgrounded section — primitive consumer)
 
 Examples that do not:
@@ -273,7 +273,238 @@ Examples that do not:
 - Individual cards rendering a single fixture (unit/RTL tests already cover rendering correctness)
 - Data-driven list items
 
-Curation happens per-domain when the phase is executed.
+Curation happens per-domain when the phase is executed. The Phase 3
+classification of every `Features/*` story file (Include / Defer to Phase 5 /
+Skip) lives in the appendix below.
+
+#### Phase 3 appendix — `Features/*` curation (executed 2026-04-27, issue #1374)
+
+The repo had **103** story files titled `Features/*` at the time of curation.
+Each was classified using the criterion above: layout/composition/spacing risk
+across breakpoints qualifies for Phase 3; pure data-presentational variance
+defers to Phase 5; stories that cannot be stabilised even with fixture
+pinning are skipped via `tags: ["vr-skip"]` on the meta (or
+`parameters.vr.disable = true` per story when only a subset of exports is
+problematic).
+
+##### Staged adoption — captures land with each component redesign
+
+A full visual redesign of every `Features/*` component is queued. Capturing
+baselines today against the pre-redesign rendering would invalidate every
+PNG within weeks, so Phase 3 ships as a **doc-only contract**:
+
+- The Include list below is the binding contract: each listed component
+  **must** add `"vr"` to its meta `tags` array and capture baselines as part
+  of its redesign PR.
+- No `tags: ["vr"]` adds and no baseline captures land on the Phase 3
+  merge commit itself — that work moves to per-component redesign PRs.
+- Defer / Skip classifications are still authoritative — Phase 5 starts from
+  the same list.
+
+This is an **explicit deviation from #1374's acceptance criteria**
+("Baselines captured for every Included story"). The PR body for #1374 calls
+this out and references the imminent redesign as the reason. The infra
+itself is already proven by Phase 1 + 2; Phase 3's load-bearing artifact is
+the curation, not the captures.
+
+##### Include (36 files — must add `tags: ["autodocs", "vr"]` + baselines as part of their redesign PR)
+
+All defaults to the standard mobile/tablet/desktop viewport set unless noted.
+
+The list was deliberately trimmed against a wall-time review (each new file
+adds ~30s to the local Docker capture). Files where the failure mode is
+captured equally well by an adjacent composition were moved to Defer — see
+"Trim rationale" below the Defer list.
+
+**Articles** — editorial composition (hero/footer):
+
+- `Features/Articles/ArticleFooter`
+- `Features/Articles/ArticleHeader`
+- `Features/Articles/InterviewHero`
+
+**Calendar** — month/week grids and event lists:
+
+- `Features/Calendar/CalendarMonth`
+- `Features/Calendar/CalendarWeek`
+- `Features/Calendar/EventsList`
+
+**Club** — editorial grid + mission banner:
+
+- `Features/Club/ClubEditorialGrid`
+- `Features/Club/MissionBanner`
+
+**Homepage** — section-level compositions consumed by the home page-shell:
+
+- `Features/Homepage/BannerSlot`
+- `Features/Homepage/FeaturedArticles`
+- `Features/Homepage/NewsGrid`
+- `Features/Homepage/SponsorsSection`
+- `Features/Homepage/WebshopSection`
+- `Features/Homepage/YouthSection` (also referenced in §12 examples above —
+  same component)
+
+**Hulp / Jeugd** — editorial grids + skeleton loaders (skeletons are
+visual-structural placeholders):
+
+- `Features/Hulp/QuestionCardSkeleton`
+- `Features/Jeugd/JeugdEditorialGrid`
+
+**Matches** — page-level match view, slider, lineup formation, match-strip:
+
+- `Features/Matches/MatchDetailView` (page-level composition)
+- `Features/Matches/MatchLineup` (formation visual on a pitch backdrop)
+- `Features/Matches/MatchStripClient`
+- `Features/Matches/MatchStripSkeleton`
+- `Features/Matches/MatchesSlider`
+
+**Organigram** — hierarchical layouts and overlays:
+
+- `Features/Organigram/UnifiedOrganigram`
+- `Features/Organigram/MemberDetailsModal`
+- `Features/Organigram/ContactOverlay`
+
+**Players** — page-level profile composition only; single-card variants
+defer:
+
+- `Features/Players/PlayerProfile`
+
+**Related** — strip and section compositions:
+
+- `Features/Related/MentionedEntitiesStrip`
+- `Features/Related/RelatedContentSection`
+
+**Search** — results-page compositions per the spec; single-result and
+form/filter UIs defer to Phase 5:
+
+- `Features/Search/SearchInterface`
+- `Features/Search/SearchResults`
+
+**Sponsors** — page + section compositions; per-card and per-logo variants
+defer:
+
+- `Features/Sponsors/SponsorGrid`
+- `Features/Sponsors/SponsorsPage`
+
+**Teams** — page-level overview + roster/standings/schedule grids and the
+youth directory; single team-card variants defer:
+
+- `Features/Teams/TeamOverview`
+- `Features/Teams/TeamRoster`
+- `Features/Teams/TeamSchedule`
+- `Features/Teams/TeamStandings`
+- `Features/Teams/YouthTeamsDirectory`
+
+##### Defer to Phase 5 (67 files)
+
+Either pure data-presentational (single fixture per story, variance is
+text/data only), or a wide state-variance space that wants fixture pinning
+before VR can be useful:
+
+- **Articles**: `ArticleMetadata`, `CategoryFilters`, `EventFact/Overview`,
+  `NewsCard`, `QaBlock` + `QaBlock/QaPairKey` + `QaBlock/QaPairQuote` +
+  `QaBlock/QaGroupRapidFire`, `SanityArticleBody` (long-form portable text —
+  baselines would churn on every PT change), `SubjectAttribution`,
+  `TransferFact/Overview`, `VideoBlock`
+- **Calendar**: `CalendarSubscribePanel` (form panel; multi-step `play()`),
+  `CalendarWidget` (overlaps Month/Week coverage; has `play()` flake risk),
+  `EventCard`
+- **Contact**: `MapEmbed` (third-party Google Maps tile — non-deterministic)
+- **Homepage**: `MatchesSliderSection` (section-shell already covered by
+  Layout/SectionStack from Phase 2; the slider itself is captured via
+  `Features/Matches/MatchesSlider`), `MatchesSliderEmptyState` (10 state
+  variants of an empty-state — high baseline cost, narrow value),
+  `MatchWidget` (single feature widget with `play()`)
+- **Matches**: `MatchEvents` (event-list data variance), `MatchHeader`
+  (status/score/team variants of one layout — already exercised by
+  `MatchDetailView` which embeds it), `MatchResultRow` (single-row card),
+  `MatchTeaser` (15 state variants)
+- **Organigram (utility/widgets + heavy duplicates, defer)**:
+  `CardHierarchy` (18 stories — composed view captured via
+  `UnifiedOrganigram`), `InteractiveChart`/`EnhancedOrgChart` (18 stories —
+  same rationale), `ContactCard`, `ContactQuickActions`, `DepartmentFilter`,
+  `ExpandableCard`, `HierarchyLevel`, `KeyboardShortcuts`, `MobileBottomNav`,
+  `MobileNavigationDrawer`, `ScreenReaderAnnouncer`, `SearchBar`, `SkipLink`,
+  `UnifiedSearchBar`
+- **Players (defer)**: `PlayerBio`, `PlayerCard`, `PlayerShare`,
+  `PlayerStats`, `PlayerTeamHistory`
+- **Responsibility (defer)**: `FeedbackWidget`, `RelatedPaths`,
+  `ResponsibilityBlock` (4 card-composition variants — pin fixtures first
+  alongside the rest of Responsibility), `ResponsibilityFinder` (21
+  interactive states)
+- **Search (defer)**: `SearchFilters`, `SearchForm`, `SearchResult`
+- **Share (defer)**: every `Features/Share/*` template — fixed-canvas
+  social-share renderers; data-driven per match; OG image generation has its
+  own contract testing path
+- **Sponsors (defer)**: `Sponsors`, `SponsorsGrid` (legacy
+  `Sponsors.stories.tsx`), `SponsorsSpotlight`, `SponsorsBlock`,
+  `SponsorCallToAction`, `SponsorCard`, `SponsorEmptyState`, `SponsorLogo`
+- **Teams (defer)**: `TeamCard`, `TeamFeaturedCard`
+
+##### Trim rationale (post-curation review)
+
+The first execution of this curation included 8 additional files. Once the
+local Docker capture wall time was measured (~30s of test-runner time per
+new file at 3 viewports), those 8 were moved to Defer because either:
+
+1. their failure mode is already covered by an embedding composition that
+   stays Included (e.g. `MatchHeader` is exercised by `MatchDetailView`,
+   `MatchesSliderSection` is the shell around `MatchesSlider` which is
+   itself in Layout/SectionStack territory from Phase 2), **or**
+2. their per-file story count is unusually high relative to the
+   visual-structural risk caught (e.g. `CardHierarchy` and
+   `InteractiveChart` ship 18 stories each — `UnifiedOrganigram` covers the
+   composed view at one third the baseline cost), **or**
+3. baseline churn outweighs regression catching (`SanityArticleBody`
+   re-renders on every portable-text update; `MatchesSliderEmptyState` is
+   10 different "empty" variants of a slot that's better tested as one).
+
+The 8 moved files: `Articles/SanityArticleBody`, `Calendar/CalendarWidget`,
+`Homepage/MatchesSliderSection`, `Homepage/MatchesSliderEmptyState`,
+`Matches/MatchHeader`, `Organigram/CardHierarchy`,
+`Organigram/InteractiveChart`, `Responsibility/ResponsibilityBlock`. They
+remain candidates for Phase 5 once fixture pinning lands.
+
+##### Skip (zero today)
+
+No `parameters.vr.disable = true` is preemptively added on a `Features/*`
+story file. Every Included story is expected to be deterministic given the
+Phase 2 stubs (fixed `Date.now`, seeded `Math.random`, animations off, font
+ready, image-load wait). The `vr-skip` precedent on the
+`CardHierarchy/FlatHierarchy` and `UnifiedOrganigram/Empty` exports from
+Phase 2 stays as-is — those crash before `postVisit` and are excluded at
+discovery.
+
+When a redesign PR captures baselines for an Included file, if a specific
+story export turns out to be non-deterministic (e.g. a third-party widget
+that paints its own canvas with a per-frame timestamp), that PR adds
+`parameters: { vr: { disable: true } }` to that specific story export —
+never the entire file — with an inline code comment explaining the precise
+non-determinism that fixture pinning could not fix.
+
+##### Per-component PR checklist (when you redesign an Included component)
+
+When opening a PR that redesigns one of the 36 Included components above,
+the PR must:
+
+1. Change `tags: ["autodocs"]` → `tags: ["autodocs", "vr"]` on the meta of
+   the redesigned story file (or merge `"vr"` into the existing tags array
+   if it already exists).
+2. Run `pnpm vr:update` from `apps/web/` (Docker required) to capture
+   baselines for the now-vr-tagged stories.
+3. Commit the new `apps/web/test/vr/__snapshots__/<story-id>--<viewport>.png`
+   files alongside the redesign code.
+4. Verify CI's `visual-regression` job passes.
+
+The full Definition of Ready / Done — including the "split or rename"
+case, the PR-description "VR baselines" section requirement, and the
+Docker-required reminder — lives in `apps/web/CLAUDE.md` under
+"Definition of Ready / Done — `Features/*` redesign PRs". The four items
+above are the load-bearing acceptance criteria; the CLAUDE.md contract
+is the actionable checklist.
+
+Subsequent visual changes to the same component follow the standard §10
+decision loop — `pnpm vr:check` produces diffs; intentional changes
+re-update baselines; unexpected diffs halt and report.
 
 ### Phase 4 — Real-page compositions
 
