@@ -15,8 +15,9 @@ type ViewportName = keyof typeof VIEWPORTS;
 
 // Fixed timestamp pinned to 2026-01-15T12:00:00.000Z. Stories that derive
 // "today" or relative dates render against this exact moment so baselines
-// don't churn day-to-day.
-const FIXED_NOW_MS = 1768521600000;
+// don't churn day-to-day. Derived from the ISO string at module load so
+// the comment and the runtime value can never drift.
+const FIXED_NOW_MS = Date.parse("2026-01-15T12:00:00.000Z");
 // Seed for the mulberry32 PRNG below — any positive 32-bit integer works;
 // changing it would invalidate every baseline that exercises Math.random.
 const PRNG_SEED = 0x1234abcd;

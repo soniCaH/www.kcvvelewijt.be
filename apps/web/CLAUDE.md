@@ -257,6 +257,22 @@ fixtures rather than reaching for `parameters.vr.disable = true`. The escape
 hatch is reserved for genuinely dynamic debug stories, not for masking
 fixable pixel drift.
 
+Whenever `parameters.vr.disable = true` ships, an adjacent inline comment
+must record the unavoidable source of non-determinism, the steps to
+reproduce it, who approved the opt-out (or a link to the approval ticket /
+PR), and an expected re-evaluation date. Use this template so reviewers can
+validate the opt-out at a glance:
+
+```typescript
+parameters: {
+  // vr.disable: <one-line reason this story cannot be made deterministic>
+  // Repro: <minimal steps that reproduce the non-determinism>
+  // Approved by: @<github-handle> / <issue-or-PR-link>
+  // Re-evaluate: YYYY-MM-DD
+  vr: { disable: true },
+},
+```
+
 The `prepare()` hook in `apps/web/.storybook/test-runner.ts` overrides
 `@storybook/test-runner`'s default `defaultPrepare` body. Re-audit it against
 `node_modules/@storybook/test-runner/dist/index.js` after every test-runner
