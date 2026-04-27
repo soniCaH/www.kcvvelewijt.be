@@ -18,7 +18,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     required: { control: "boolean" },
     htmlFor: { control: "text" },

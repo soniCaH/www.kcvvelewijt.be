@@ -12,7 +12,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta;
 
 export default meta;

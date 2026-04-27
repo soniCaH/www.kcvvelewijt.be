@@ -25,7 +25,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     className: {
       description: "Additional CSS classes to apply to the header",

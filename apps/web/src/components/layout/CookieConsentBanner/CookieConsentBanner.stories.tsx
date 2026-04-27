@@ -106,7 +106,7 @@ const withMockBanner = (visible: boolean): Decorator =>
 const meta = {
   title: "Layout/CookieConsentBanner",
   component: CookieConsentBanner,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   parameters: {
     layout: "fullscreen",
   },

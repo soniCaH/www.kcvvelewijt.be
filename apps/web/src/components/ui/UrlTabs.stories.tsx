@@ -15,7 +15,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   // children is required by UrlTabsProps but always supplied via render()
   args: {
     defaultValue: "tab-1",

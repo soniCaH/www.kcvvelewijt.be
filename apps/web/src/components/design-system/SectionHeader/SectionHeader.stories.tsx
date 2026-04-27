@@ -5,7 +5,7 @@ import { SectionHeader } from "./SectionHeader";
 const meta = {
   title: "UI/SectionHeader",
   component: SectionHeader,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   parameters: {
     layout: "padded",
     docs: {

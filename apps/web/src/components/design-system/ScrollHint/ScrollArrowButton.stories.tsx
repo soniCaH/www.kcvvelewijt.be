@@ -5,7 +5,7 @@ import { ScrollArrowButton } from "./ScrollArrowButton";
 const meta = {
   title: "UI/ScrollArrowButton",
   component: ScrollArrowButton,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     direction: "right",
     onClick: fn(),
