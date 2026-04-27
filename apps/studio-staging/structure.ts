@@ -46,5 +46,58 @@ export const structure: StructureResolver = (S) =>
         .title('Pages')
         .child(S.documentTypeList('page').title('Pages')),
       S.divider(),
+      S.listItem()
+        .title('Banners')
+        .child(S.documentTypeList('banner').title('Banners')),
+      S.listItem()
+        .title('Homepage')
+        .child(
+          S.document()
+            .schemaType('homePage')
+            .documentId('homePage')
+            .title('Homepage configuratie'),
+        ),
+      S.listItem()
+        .title('Jeugd landing page')
+        .child(
+          S.document()
+            .schemaType('jeugdLandingPage')
+            .documentId('jeugdLandingPage')
+            .title('Jeugd landing page configuratie'),
+        ),
+      S.divider(),
       responsibilityStructure(S),
+      S.divider(),
+      S.listItem()
+        .title('📊 Feedback')
+        .child(
+          S.list()
+            .title('Feedback')
+            .items([
+              S.listItem()
+                .title('Alle feedback')
+                .child(
+                  S.documentList()
+                    .title('Alle feedback')
+                    .filter('_type == "searchFeedback"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+              S.listItem()
+                .title('👍 Positief')
+                .child(
+                  S.documentList()
+                    .title('Positief')
+                    .filter('_type == "searchFeedback" && vote == "up"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+              S.listItem()
+                .title('👎 Negatief')
+                .child(
+                  S.documentList()
+                    .title('Negatief')
+                    .filter('_type == "searchFeedback" && vote == "down"')
+                    .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+                ),
+            ]),
+        ),
     ])
