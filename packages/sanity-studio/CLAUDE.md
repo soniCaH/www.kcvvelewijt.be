@@ -61,7 +61,8 @@ src/
 
 - One script per migration in `src/migrations/`
 - Migrations are one-off: run manually via `sanity exec` against the target dataset, then archived (not deleted)
-- Export a default function and any helper types from the migration file; list it in the barrel so consumers can import it programmatically if needed
+- Export a default function and any helper types from the migration file
+- **Never re-export migrations from the root `src/index.ts` barrel.** Migrations import `sanity/migrate`, a Node/CLI-only entry point. With `autoUpdates: true`, the deployed Studio resolves it via `modules.sanity-cdn.com/.../bare/migrate.mjs`, which 404s and crashes both deployed studios with a black screen. Surface migrations through the dedicated `src/migrations/index.ts` sub-barrel and consume them via `@kcvv/sanity-studio/migrations` (the CLI entry points in `apps/studio/migrations/*` already do this)
 
 ## Barrel Export Pattern (`index.ts`)
 
@@ -70,6 +71,7 @@ Everything public is exported by name from `src/index.ts`. Rules:
 - Export the component and its registration helper separately (`ArticleTagsInput` + `applyArticleTagsInput`)
 - Export types with `export type { ... }` to avoid runtime leakage
 - No default exports from the barrel — named only
+- **Migrations are an exception**: they live in the separate `src/migrations/index.ts` sub-barrel (consumed as `@kcvv/sanity-studio/migrations`). See the **Migrations** section below for why mixing them into the root barrel breaks the deployed Studio
 
 ## No Duplication With Root CLAUDE.md
 
