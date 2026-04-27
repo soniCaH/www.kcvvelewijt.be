@@ -174,7 +174,8 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
 
   const description =
-    article.metaDescription ?? `${article.title} — Nieuws van KCVV Elewijt`;
+    article.metaDescription?.trim() ||
+    `${article.title} — Nieuws van KCVV Elewijt`;
   const ogImage = article.ogImageUrl
     ? { url: article.ogImageUrl, alt: article.title }
     : article.coverImageUrl

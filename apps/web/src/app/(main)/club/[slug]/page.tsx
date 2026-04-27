@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await fetchPage(slug);
   if (!page) return {};
 
-  const description = page.metaDescription ?? `${page.title} — KCVV Elewijt`;
+  const description =
+    page.metaDescription?.trim() || `${page.title} — KCVV Elewijt`;
   const ogImage = page.ogImageUrl
     ? { url: page.ogImageUrl, alt: page.title }
     : page.heroImageUrl
