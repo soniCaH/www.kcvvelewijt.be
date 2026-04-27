@@ -8,11 +8,10 @@ export {
   applyRespondentPicker,
 } from './inputs'
 export {schemaTypes} from './schema-types'
-export {
-  default as interviewSubjectToSubjectsMigration,
-  migrateInterviewSubjectToSubjects,
-} from './migrations/interview-subject-to-subjects'
-export type {InterviewArticleDoc} from './migrations/interview-subject-to-subjects'
+// Migrations are intentionally NOT re-exported from this barrel: they import
+// `sanity/migrate`, a Node/CLI-only entry point that 404s on the Studio CDN
+// (`modules.sanity-cdn.com/.../bare/migrate.mjs`) and crashes the deployed
+// Studio at module load. Import migrations via `@kcvv/sanity-studio/migrations`.
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
 export {
