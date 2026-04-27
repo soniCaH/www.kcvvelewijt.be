@@ -20,32 +20,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import type { TeamNavVM } from "@/lib/repositories/team.repository";
-
-const seniorTeams: TeamNavVM[] = [
-  {
-    id: "a-id",
-    name: "Eerste Elftallen A",
-    slug: "eerste-elftallen-a",
-    age: "A",
-    psdId: "100",
-    division: null,
-    divisionFull: null,
-    tagline: null,
-    teamImageUrl: null,
-  },
-  {
-    id: "b-id",
-    name: "Eerste Elftallen B",
-    slug: "eerste-elftallen-b",
-    age: "A",
-    psdId: "101",
-    division: null,
-    divisionFull: null,
-    tagline: null,
-    teamImageUrl: null,
-  },
-];
+import { mockSeniorTeams as seniorTeams } from "../teamNav.mocks";
 
 describe("Navigation", () => {
   beforeEach(() => {

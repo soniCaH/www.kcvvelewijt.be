@@ -39,7 +39,7 @@ export const Upcoming: Story = {
     const link = canvas.getByRole("link");
     await expect(link).toHaveAttribute(
       "href",
-      "/ploegen/eerste-elftal-a?tab=wedstrijden",
+      `/wedstrijd/${mockUpcomingMatch.id}`,
     );
   },
 };

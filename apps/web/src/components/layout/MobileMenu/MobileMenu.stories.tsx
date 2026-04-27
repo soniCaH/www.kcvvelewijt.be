@@ -5,6 +5,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
+import { mockSeniorTeams, mockYouthTeams } from "../teamNav.mocks";
 import { MobileMenu } from "./MobileMenu";
 
 const meta = {
@@ -25,6 +26,8 @@ const meta = {
   args: {
     isOpen: true,
     onClose: fn(),
+    seniorTeams: mockSeniorTeams,
+    youthTeams: mockYouthTeams,
   },
   tags: ["autodocs"],
 } satisfies Meta<typeof MobileMenu>;
@@ -58,9 +61,14 @@ export const Open: Story = {
 };
 
 /**
- * A-Ploeg submenu expanded — play clicks the A-Ploeg toggle button
+ * A-Ploeg submenu expanded — play clicks the A-Ploeg toggle button.
+ * Override seniorTeams to a single team so the assertion stays unambiguous
+ * (each senior team renders its own "Spelers & Staff" link).
  */
 export const OpenWithAPloegsSubmenu: Story = {
+  args: {
+    seniorTeams: mockSeniorTeams.slice(0, 1),
+  },
   parameters: rootNavigation,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -99,9 +107,13 @@ export const OpenWithActiveLink: Story = {
 };
 
 /**
- * Active child link — A-Ploeg submenu expanded, "Spelers & Staff" highlighted
+ * Active child link — A-Ploeg submenu expanded, "Spelers & Staff" highlighted.
+ * Override seniorTeams to a single team so the assertion stays unambiguous.
  */
 export const OpenWithActiveChildLink: Story = {
+  args: {
+    seniorTeams: mockSeniorTeams.slice(0, 1),
+  },
   parameters: {
     nextjs: {
       navigation: {

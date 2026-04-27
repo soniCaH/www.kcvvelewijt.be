@@ -5,12 +5,14 @@
  */
 
 import { SectionStack } from "@/components/design-system";
-import {
-  SponsorsSpotlight,
-  SponsorCallToAction,
-  SponsorEmptyState,
-  SponsorGrid,
-} from "@/components/sponsors";
+// Import each component directly rather than from the @/components/sponsors
+// barrel: that barrel re-exports SponsorsBlock, a server component whose
+// transitive Sanity client (`createClient` at module load) crashes the
+// Storybook chunk with `Configuration must contain projectId`.
+import { SponsorsSpotlight } from "../SponsorsSpotlight";
+import { SponsorCallToAction } from "../SponsorCallToAction";
+import { SponsorEmptyState } from "../SponsorEmptyState";
+import { SponsorGrid } from "../SponsorGrid/SponsorGrid";
 import { getSponsorsSections } from "../getSponsorsSections";
 import type { Sponsor } from "../Sponsors";
 

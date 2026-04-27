@@ -230,6 +230,23 @@ Work:
 
 Exit criterion: a deliberate visual change → CI produces a readable diff artifact → Claude executes the §10 decision loop end-to-end successfully.
 
+### `vr-skip` escape hatch (introduced alongside Phase 1)
+
+Some stories crash the test-runner during render or `play` — a missing fixture
+provider, a `play` step asserting a UI that no longer exists, or an
+intentional edge-case story that exercises an unsupported path of the
+underlying component. Per-story `parameters.vr.disable = true` only suppresses
+screenshot capture in `postVisit`; the runner still visits the page and the
+crash propagates as a test failure.
+
+For these stories, add `tags: ["vr-skip"]` at the story level. The `vr:run`
+script and `Dockerfile.vr` ENTRYPOINT pass `--excludeTags vr-skip` so tagged
+stories are dropped at discovery, before the page is evaluated.
+
+`vr-skip` is intended as a narrow escape hatch — reserve it for stories whose
+crash cannot be addressed by adjusting fixtures alone, and document the reason
+inline. Routine fixture issues should still be fixed in the story.
+
 ### Phase 2 — Design system, Foundation, Layout
 
 All `UI/*`, `Foundation/*`, `Layout/*` stories get baselines. ~30–50 stories.
