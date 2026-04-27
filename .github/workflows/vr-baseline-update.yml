@@ -57,7 +57,7 @@ jobs:
           esac
 
       - name: React to comment
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Resolve PR head
         id: pr
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -155,7 +155,7 @@ jobs:
 
       - name: React success
         if: success()
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
@@ -167,7 +167,7 @@ jobs:
 
       - name: React failure
         if: failure()
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
