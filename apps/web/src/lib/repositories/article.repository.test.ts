@@ -49,6 +49,8 @@ function makeArticleDetailRow(
     featured: true,
     tags: ["Eerste ploeg"],
     articleType: "announcement",
+    metaDescription: null,
+    ogImageUrl: null,
     subjects: null,
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
     coverImagePortraitUrl: "https://cdn.sanity.io/cover-portrait.webp",

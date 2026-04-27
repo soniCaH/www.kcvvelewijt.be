@@ -26,12 +26,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await fetchPage(slug);
   if (!page) return {};
 
+  const description =
+    page.metaDescription?.trim() || `${page.title} — KCVV Elewijt`;
+  const ogImage = page.ogImageUrl
+    ? { url: page.ogImageUrl, alt: page.title }
+    : page.heroImageUrl
+      ? { url: page.heroImageUrl, alt: page.title }
+      : DEFAULT_OG_IMAGE;
+
   return {
     title: `${page.title} | KCVV Elewijt`,
+    description,
     openGraph: {
       title: `${page.title} - KCVV Elewijt`,
+      description,
       type: "website",
-      images: [DEFAULT_OG_IMAGE],
+      images: [ogImage],
     },
   };
 }

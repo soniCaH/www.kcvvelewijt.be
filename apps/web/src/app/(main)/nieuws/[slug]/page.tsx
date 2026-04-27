@@ -173,7 +173,14 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   );
   if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
 
-  const description = `${article.title} — Nieuws van KCVV Elewijt`;
+  const description =
+    article.metaDescription?.trim() ||
+    `${article.title} — Nieuws van KCVV Elewijt`;
+  const ogImage = article.ogImageUrl
+    ? { url: article.ogImageUrl, alt: article.title }
+    : article.coverImageUrl
+      ? { url: article.coverImageUrl, alt: article.title }
+      : DEFAULT_OG_IMAGE;
 
   return {
     title: `${article.title} | KCVV Elewijt`,
@@ -185,9 +192,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       type: "article" as const,
       publishedTime: article.publishedAt ?? undefined,
       authors: ["KCVV Elewijt"],
-      images: article.coverImageUrl
-        ? [{ url: article.coverImageUrl, alt: article.title }]
-        : [DEFAULT_OG_IMAGE],
+      images: [ogImage],
     },
   };
 }

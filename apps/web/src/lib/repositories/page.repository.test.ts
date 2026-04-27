@@ -28,6 +28,8 @@ function makePageRow(
     title: "Praktische Info",
     slug: "praktische-info",
     heroImageUrl: null,
+    metaDescription: null,
+    ogImageUrl: null,
     body: [
       {
         _type: "block",

@@ -13,31 +13,33 @@ import { formatArticleDate } from "../utils/dates";
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
 export const ARTICLES_QUERY =
-  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
 }`);
 
 export const ARTICLE_TAGS_QUERY = defineQuery(
-  `array::unique(*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
+  `array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
 );
 
 export const ARTICLES_PAGINATED_QUERY =
-  defineQuery(`*[_type == "article" && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishAt desc) [$offset...$end] {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 export const RELATED_ARTICLES_QUERY =
-  defineQuery(`*[_type == "article" && references($documentId) && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishAt desc) {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  defineQuery(`*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
 }`);
 
 export const ARTICLE_BY_SLUG_QUERY =
-  defineQuery(`*[_type == "article" && slug.current == $slug && publishAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
-  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  defineQuery(`*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
+  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  metaDescription,
+  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The
   // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;
@@ -69,14 +71,14 @@ export const ARTICLE_BY_SLUG_QUERY =
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
-  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "publishedAt": publishAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
   relatedContent[]->{
     _type,
     _id,
     ...select(_type == "article" => {
       "title": coalesce(title, ""),
       "slug": coalesce(slug.current, ""),
-      "publishedAt": publishAt,
+      publishedAt,
       unpublishAt,
       "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
     }),

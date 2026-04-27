@@ -248,7 +248,7 @@ A news article published on the website.
 | --------------------------- | ----------------------- | ----- |
 | `article` (Sanity document) | Artikel / Nieuwsbericht | —     |
 
-**Visibility:** Time-bound. Visible when `publishAt ≤ now ≤ unpublishAt`.
+**Visibility:** Time-bound. Visible when `publishedAt ≤ now ≤ unpublishAt`.
 
 **Route:** `/nieuws/[slug]` (see [#819])
 
@@ -425,7 +425,7 @@ Each content type has its own visibility logic. There is no universal "published
 
 | Type                       | Visible when...                            |
 | -------------------------- | ------------------------------------------ |
-| Article                    | `publishAt ≤ now ≤ unpublishAt`            |
+| Article                    | `publishedAt ≤ now ≤ unpublishAt`          |
 | Event                      | `dateEnd ≥ now` (or `dateStart` if no end) |
 | Sponsor                    | `active === true`                          |
 | Responsibility             | `active === true`                          |

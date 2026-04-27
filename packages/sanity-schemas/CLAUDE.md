@@ -28,10 +28,27 @@ One grep of `defineType` across the peers prevents the most common review flags.
 
 ## Field Naming Conventions
 
-- `camelCase` for all field names (`publishAt`, `articleType`, `firstName`)
-- Titles are sentence-cased (`"Article type"`, `"Publish at"`)
+- `camelCase` for all field names (`publishedAt`, `articleType`, `firstName`)
+- Titles are sentence-cased (`"Article type"`, `"Published at"`)
 - Boolean fields use affirmative names (`featured`, `archived`, `keeper`) with `initialValue` set where a sensible default exists
 - Date/time fields: use `datetime` for moments, `date` for calendar dates (no time component)
+
+### Image Field Semantic Prefixes
+
+Image fields use semantic prefixes that reflect the content's role — not a generic name like `image` or `mainImage`. Use the closest match from this canonical list:
+
+| Prefix             | Role                                                               | Used in                                       |
+| ------------------ | ------------------------------------------------------------------ | --------------------------------------------- |
+| `coverImage`       | Editorial content image (article, event)                           | `article`, `event`                            |
+| `heroImage`        | Generic page banner                                                | `page`                                        |
+| `teamImage`        | Team squad photo                                                   | `team`                                        |
+| `logo`             | Brand mark                                                         | `sponsor`                                     |
+| `photo`            | Person portrait                                                    | `staffMember`                                 |
+| `psdImage`         | Rectangular player photo — synced from PSD, do not edit            | `player`                                      |
+| `transparentImage` | Transparent-background player photo — synced from PSD, do not edit | `player`                                      |
+| `ogImage`          | Open Graph image override (optional, on all document types)        | `article`, `event`, `page`, `team`, `sponsor` |
+
+New schemas must adopt the closest semantic match from this list. Never invent a new generic name.
 
 ## Validation Rules
 
@@ -73,9 +90,24 @@ Keep `schemaTypes` order stable — reordering changes Studio sidebar ordering f
 
 When renaming or restructuring a field (not just adding a new optional one), a Sanity migration script is required:
 
-- Place migration scripts in `apps/studio/migrations/` (they run against the dataset — not a package concern)
+- Place migration scripts in `apps/studio/migrations/<migration-name>/index.ts` — they run against the dataset, not a package concern
 - Reference the migration in the PR body and list it as a manual step
 - Run staging migration before merging; production migration before or immediately after deploy
+
+### Running a Migration
+
+```bash
+# Dry-run on staging (review patch output, no writes)
+npx sanity@latest migration run <migration-name> --dataset=staging --dry-run
+
+# Run on staging
+npx sanity@latest migration run <migration-name> --dataset=staging
+
+# Run on production (after staging is verified)
+npx sanity@latest migration run <migration-name> --dataset=production
+```
+
+Migrations must be idempotent: re-running them on already-migrated documents must be a no-op.
 
 ## No Duplication With Root CLAUDE.md
 

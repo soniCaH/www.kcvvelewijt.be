@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {LinkIcon, UserIcon} from '@sanity/icons'
+import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
 
 export const article = defineType({
@@ -9,13 +10,13 @@ export const article = defineType({
   orderings: [
     {
       title: "Publish date, newest first",
-      name: "publishAtDesc",
-      by: [{ field: "publishAt", direction: "desc" }],
+      name: "publishedAtDesc",
+      by: [{ field: "publishedAt", direction: "desc" }],
     },
     {
       title: "Publish date, oldest first",
-      name: "publishAtAsc",
-      by: [{ field: "publishAt", direction: "asc" }],
+      name: "publishedAtAsc",
+      by: [{ field: "publishedAt", direction: "asc" }],
     },
   ],
   fields: [
@@ -65,7 +66,7 @@ export const article = defineType({
       options: { source: "title" },
       validation: (r) => r.required(),
     }),
-    defineField({ name: "publishAt", title: "Publish at", type: "datetime" }),
+    defineField({ name: "publishedAt", title: "Published at", type: "datetime" }),
     defineField({
       name: "unpublishAt",
       title: "Unpublish at",
@@ -159,6 +160,20 @@ export const article = defineType({
       of: [{ type: "reference", to: [{ type: "article" }] }],
     }),
     defineField({
+      name: "metaDescription",
+      title: "Meta description",
+      type: "string",
+      description: "Overschrijving voor SEO meta-omschrijving en OG-omschrijving (max. 160 tekens).",
+      validation: (r) => r.max(160),
+    }),
+    defineField({
+      name: "ogImage",
+      title: "OG image",
+      type: "image",
+      description: "Optionele overschrijving voor de Open Graph-afbeelding. Valt terug op de omslagafbeelding.",
+      options: { hotspot: true },
+    }),
+    defineField({
       name: "relatedContent",
       title: "Related content",
       description:
@@ -217,15 +232,7 @@ export const article = defineType({
     }),
   ],
   preview: {
-    select: { title: "title", media: "coverImage", publishAt: "publishAt" },
-    prepare({ title, media, publishAt }) {
-      return {
-        title,
-        subtitle: publishAt
-          ? new Date(publishAt).toLocaleDateString("nl-BE")
-          : "No date",
-        media,
-      };
-    },
+    select: articlePreviewSelect,
+    prepare: prepareArticlePreview,
   },
 });
