@@ -93,7 +93,7 @@ jobs:
         run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
 
       - name: Upload Storybook static
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: storybook-static
           path: apps/web/storybook-static
@@ -166,7 +166,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Storybook static
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: storybook-static
           path: apps/web/storybook-static
@@ -176,7 +176,7 @@ jobs:
 
       - name: Upload diff PNGs on failure
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: vr-diff-output
           path: |
