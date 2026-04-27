@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await fetchPage(slug);
   if (!page) return {};
 
+  const description = page.metaDescription ?? `${page.title} — KCVV Elewijt`;
   const ogImage = page.ogImageUrl
     ? { url: page.ogImageUrl, alt: page.title }
     : page.heroImageUrl
@@ -34,10 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${page.title} | KCVV Elewijt`,
-    description: page.metaDescription ?? undefined,
+    description,
     openGraph: {
       title: `${page.title} - KCVV Elewijt`,
-      description: page.metaDescription ?? undefined,
+      description,
       type: "website",
       images: [ogImage],
     },
