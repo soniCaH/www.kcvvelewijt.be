@@ -235,6 +235,28 @@ determinism needs fixing instead. A custom viewport set is also supported —
 `parameters.vr.viewports = ["desktop"]` — for stories that only render
 meaningfully at one breakpoint.
 
+### `vr-skip` — discovery-time skip for crashing stories
+
+`parameters.vr.disable = true` only suppresses **screenshot capture** in
+`postVisit`; the test-runner still visits the story and runs its `play`
+function. For stories that crash during render or `play` (a missing fixture,
+an inherently broken edge case), tag the story with `vr-skip` so the runner
+excludes it at discovery — before the page is evaluated:
+
+```typescript
+export const FlatHierarchy: Story = {
+  tags: ["vr-skip"],
+  render: () => /* ... */,
+};
+```
+
+The `vr:run` / `vr:run:update` scripts in `apps/web/package.json` (and the
+matching `Dockerfile.vr` ENTRYPOINT) pass `--excludeTags vr-skip` to the
+test-runner so tagged stories never load. Reserve `vr-skip` for stories whose
+crash mode cannot be addressed by adjusting fixtures alone — e.g. an edge-case
+story that intentionally exercises an unsupported path of the underlying
+component or library. Document the reason inline (one comment line).
+
 ### Inspecting diffs
 
 Failed CI runs upload `vr-diff-output` artifacts containing the diff PNG and

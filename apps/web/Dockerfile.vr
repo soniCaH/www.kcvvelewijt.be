@@ -44,6 +44,10 @@ WORKDIR /work/apps/web
 # `vr:run` is defined in apps/web/package.json so the same orchestration works
 # in CI without docker (see .github/workflows/ci.yml visual-regression job).
 # --includeTags vr narrows the suite to story files tagged "vr" in their meta.
+# --excludeTags vr-skip drops individual story exports tagged vr-skip from
+# discovery — needed because per-story `parameters.vr.disable` only suppresses
+# screenshot capture, it does NOT prevent the test-runner from visiting the
+# story (some stories crash during render/play, before postVisit runs).
 # Phase 1 tags the three tracer-bullet files; Phase 2+ tags additional design
 # system / layout files as their baselines come online.
 #
@@ -51,7 +55,7 @@ WORKDIR /work/apps/web
 #   `docker compose run --rm vr <ARGS>`
 #     → ENTRYPOINT becomes: ["sh","-c","...$*","--", <ARGS>]
 #     → `--` is the script's $0, so $* expands to <ARGS> (e.g. "-u" for
-#       --update-snapshots), appended after `--includeTags vr`.
+#       --update-snapshots), appended after `--includeTags vr --excludeTags vr-skip`.
 #   `pnpm vr:check`  → no extra args, $* is empty.
 #   `pnpm vr:update` → appends `-u`.
-ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --includeTags vr $*\"", "--"]
+ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --includeTags vr --excludeTags vr-skip $*\"", "--"]

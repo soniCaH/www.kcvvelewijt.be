@@ -5,6 +5,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
+import { mockSeniorTeams, mockYouthTeams } from "../teamNav.mocks";
 import { Navigation } from "./Navigation";
 
 const meta = {
@@ -18,6 +19,10 @@ const meta = {
           "Desktop horizontal navigation bar with dropdown menus and active state management. Active state derives from the current pathname and search params (mocked via Storybook's Next.js adapter).",
       },
     },
+  },
+  args: {
+    seniorTeams: mockSeniorTeams,
+    youthTeams: mockYouthTeams,
   },
   decorators: [
     (Story) => (
