@@ -215,21 +215,21 @@
   /* ===== Redesign / Cream Surface (Phase 0) ===== */
 
   /* Surface */
-  --color-cream:        #F5F1E6;
-  --color-cream-soft:   #EDE8DA;
+  --color-cream:        #f5f1e6;
+  --color-cream-soft:   #ede8da;
 
   /* Ink */
-  --color-ink:          #0A0A0A;
-  --color-ink-soft:     #1F1F1F;
-  --color-ink-muted:    #6B6B6B;
+  --color-ink:          #0a0a0a;
+  --color-ink-soft:     #1f1f1f;
+  --color-ink-muted:    #6b6b6b;
 
-  /* Brand green (anchored to existing #4ACF52 / #008755) */
-  --color-jersey:       #4ACF52;
+  /* Brand green (anchored to existing #4acf52 / #008755) */
+  --color-jersey:       #4acf52;
   --color-jersey-deep:  #008755;
-  --color-jersey-bright: #22C55E;
+  --color-jersey-bright: #22c55e;
 
   /* Edges */
-  --color-paper-edge:   #D9D2BD;
+  --color-paper-edge:   #d9d2bd;
 }
 
 /* ===== Global Styles ===== */
