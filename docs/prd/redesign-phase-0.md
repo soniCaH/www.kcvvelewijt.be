@@ -75,7 +75,7 @@ Contrast ratios (verified against WCAG AA):
 | -------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ink on cream         | 17.5:1     | AAA all sizes                                                                                                                                                                                |
 | ink-soft on cream    | 14.6:1     | AAA all sizes                                                                                                                                                                                |
-| ink-muted on cream   | 4.7:1      | AA at ≥18pt only                                                                                                                                                                             |
+| ink-muted on cream   | 4.7:1      | AA normal text (just above the 4.5:1 threshold; AAA at ≥18pt)                                                                                                                                |
 | jersey on cream      | 1.8:1      | Decorative only — never text                                                                                                                                                                 |
 | jersey-deep on cream | **4.05:1** | **AA large-text (≥18pt) only** — does NOT meet AA body (4.5:1). Body green-on-cream copy must use `--color-ink` or `--color-ink-soft`; `jersey-deep` is reserved for headings, accents, CTAs |
 | jersey-bright on ink | 8.7:1      | AAA all sizes                                                                                                                                                                                |
@@ -87,8 +87,8 @@ Font roles after redesign — new CSS variables added; existing `--font-family-t
 
 ```css
 @theme {
-  --font-display: "freight-display-pro", Georgia, "Times New Roman", serif;
-  --font-display-big: "freight-big-pro", Georgia, "Times New Roman", serif;
+  --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
+  --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
   /* --font-body and --font-mono are existing; redesign reuses them with role swap */
   --font-body:
     quasimoda, -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
