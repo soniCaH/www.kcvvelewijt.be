@@ -211,6 +211,25 @@
   --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.15);   /* soft elevated card hover */
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-input-focus: 0 0 5px #cacaca;
+
+  /* ===== Redesign / Cream Surface (Phase 0) ===== */
+
+  /* Surface */
+  --color-cream:        #F5F1E6;
+  --color-cream-soft:   #EDE8DA;
+
+  /* Ink */
+  --color-ink:          #0A0A0A;
+  --color-ink-soft:     #1F1F1F;
+  --color-ink-muted:    #6B6B6B;
+
+  /* Brand green (anchored to existing #4ACF52 / #008755) */
+  --color-jersey:       #4ACF52;
+  --color-jersey-deep:  #008755;
+  --color-jersey-bright:#22C55E;
+
+  /* Edges */
+  --color-paper-edge:   #D9D2BD;
 }
 
 /* ===== Global Styles ===== */
