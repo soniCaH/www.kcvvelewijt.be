@@ -101,6 +101,15 @@ export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
 export { FooterSafeArea } from "./FooterSafeArea";
 export type { FooterSafeAreaProps } from "./FooterSafeArea";
 
+// StripedSeam
+export { StripedSeam } from "./StripedSeam";
+export type {
+  StripedSeamProps,
+  StripedSeamDirection,
+  StripedSeamHeight,
+  StripedSeamColorPair,
+} from "./StripedSeam";
+
 // TapeStrip
 export { TapeStrip } from "./TapeStrip";
 export type {
