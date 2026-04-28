@@ -2,9 +2,14 @@
 
 > **Status:** proposed.
 > **Date:** 2026-04-28
+> **Tracking issue:** [#1522](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1522)
+> **Implementation PR (PRD + vr-skip):** [#1520](https://github.com/soniCaH/www.kcvvelewijt.be/pull/1520)
+> **Implementation PR (Playwright suite):** _pending — opens after PR #1520 merges_
+> **Milestone:** `redesign-retro-terrace-fanzine`
 > **Owner:** _you_
 > **Estimate:** 1–2 weeks (sits between redesign Phase 0 and Phase 1 — call it Phase 0.5)
 > **Blocks:** none directly, but unblocks Phase 1 by removing the Pages/* VR flake
+> **Supersedes:** GitHub issues [#1375](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1375) (close on merge), [#1376](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1376) (rescope to component-only on merge)
 
 ---
 
