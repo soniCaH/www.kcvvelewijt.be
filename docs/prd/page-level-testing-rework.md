@@ -63,7 +63,15 @@ Move page-level testing off Storybook + test-runner and onto Playwright running 
    - `/privacy`
    - 404 (request a known-bad slug)
 4. **Per-route assertions** (not per-route screenshot diffs): HTTP 200 (or 404 where expected), `<h1>` present, primary nav rendered, `<footer>` rendered, no `console.error`, no broken `<img>` (`naturalWidth > 0` for all visible images).
-5. **CI integration:** Playwright runs in a separate GitHub Actions job from the existing `visual-regression` job. Same path-based trigger as VR (`apps/web/src/**`, `apps/web/.storybook/**`, `apps/web/public/**`, `apps/web/package.json`). Job name: `e2e`. Failure blocks merge.
+5. **CI integration:** Playwright runs in a separate GitHub Actions job from the existing `visual-regression` job. Job name: `e2e`. Failure blocks merge. The e2e job's path-based trigger is **related to but distinct from VR's** — it must include the e2e suite's own files so PRs that only touch test code or the workflow definition still run the job, and it must drop Storybook-specific paths that don't affect a Playwright-against-Next.js run. Concretely, trigger the `e2e` workflow on changes under:
+
+   - `apps/web/src/**` (production code the e2e tests verify)
+   - `apps/web/public/**` (static assets that affect rendering)
+   - `apps/web/package.json` (dependency changes)
+   - `apps/web/test/e2e/**` (the e2e suite itself, including `playwright.config.ts` and route smoke tests)
+   - `.github/workflows/e2e.yml` (workflow self-changes)
+
+   Notably **excluded** from the e2e trigger (because they're Storybook-only and don't affect this suite): `apps/web/.storybook/**`, the `apps/web/test/vr/**` baseline tree.
 6. **Existing GitHub issues — disposition:**
    - **#1375 "VR Phase 4 — real-page composition coverage"**: close with a comment pointing at this PRD as the supersession path. Page-level visual coverage moves to Playwright; the goal of #1375 is achieved via this rework, not via more Storybook stories.
    - **#1376 "VR Phase 5 — full Storybook coverage via fixture pinning"**: scope-narrow to component-level only. The phrase "full Storybook coverage" originally meant including pages; rewrite the issue body so it covers only `UI/*`, `Features/*`, `Layout/*` fixture pinning and explicitly excludes `Pages/*`. Or close and replace with a tighter follow-up.
