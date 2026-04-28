@@ -20,7 +20,7 @@ The canonical design reference for the entire KCVV Elewijt site redesign. It def
 
 Per-phase PRDs (starting with `docs/prd/redesign-phase-0.md`) are derived from this doc. When the design language evolves, this doc is the source of truth and per-phase PRDs are revised to match.
 
-### What this doc is *not*
+### What this doc is _not_
 
 - Not a PRD. PRDs are per-phase, in `docs/prd/`, and are the artefact issues are opened against.
 - Not an implementation plan. Implementation plans live in `docs/plans/` per phase, after a PRD is locked.
@@ -34,17 +34,17 @@ Per-phase PRDs (starting with `docs/prd/redesign-phase-0.md`) are derived from t
 
 ### What changes vs. today
 
-| Dimension | Today | Target |
-| --- | --- | --- |
-| Default surface | Dark slate / black | Cream `#F5F1E6` (newsprint paper) |
-| Display typography | Quasimoda (used as title) | Freight Display Pro / Big Pro (serif) |
-| Body typography | Montserrat | Quasimoda (role flips: was title, becomes body) |
-| Image treatment | Photographic, full-bleed heroes | Taped polaroid cards, photo-first with illustration fallback |
-| Section transitions | Geometric diagonal solid colour | Diagonal barber-pole stripe (`<StripedSeam>`) |
-| Brand colour role | `#4ACF52` bright green pervasive | Same bright green, but used as accent / tape / CTA — not surface |
-| Card depth | Soft blurred shadows, glass | Hard offset shadows (`4/6/8px 4/6/8px 0 0 ink`) |
-| Numerical values | UI scale, mono | Big-serif drama (`#8`, `28 wedstrijden`, `2374 minuten`) |
-| Editorial voice | Generic CMS prose | Period-terminated headings with single-italic emphasis (`Het rooster.`, `Laatste *nieuws.*`) |
+| Dimension           | Today                            | Target                                                                                       |
+| ------------------- | -------------------------------- | -------------------------------------------------------------------------------------------- |
+| Default surface     | Dark slate / black               | Cream `#F5F1E6` (newsprint paper)                                                            |
+| Display typography  | Quasimoda (used as title)        | Freight Display Pro / Big Pro (serif)                                                        |
+| Body typography     | Montserrat                       | Quasimoda (role flips: was title, becomes body)                                              |
+| Image treatment     | Photographic, full-bleed heroes  | Taped polaroid cards, photo-first with illustration fallback                                 |
+| Section transitions | Geometric diagonal solid colour  | Diagonal barber-pole stripe (`<StripedSeam>`)                                                |
+| Brand colour role   | `#4ACF52` bright green pervasive | Same bright green, but used as accent / tape / CTA — not surface                             |
+| Card depth          | Soft blurred shadows, glass      | Hard offset shadows (`4/6/8px 4/6/8px 0 0 ink`)                                              |
+| Numerical values    | UI scale, mono                   | Big-serif drama (`#8`, `28 wedstrijden`, `2374 minuten`)                                     |
+| Editorial voice     | Generic CMS prose                | Period-terminated headings with single-italic emphasis (`Het rooster.`, `Laatste *nieuws.*`) |
 
 ### Constraints respected (from saved owner preferences)
 
@@ -65,9 +65,9 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 
 ### 2.1 Aesthetic anchors
 
-1. **Cream newsprint surface.** Default page background `#F5F1E6`. Ink-on-cream is the primary contrast pair (~17:1). Dark blocks become *interludes*, not the default — the inverse of the current site.
+1. **Cream newsprint surface.** Default page background `#F5F1E6`. Ink-on-cream is the primary contrast pair (~17:1). Dark blocks become _interludes_, not the default — the inverse of the current site.
 2. **Editorial typography spine.** Display in Freight Display Pro (serif), with italics carrying signature emphasis (`Laatste *nieuws.*`, `In zijn eigen *woorden.*`). Body shifts to Quasimoda. Mono stays IBM Plex.
-3. **Taped paper card pattern.** Content lives in slightly-rotated paper cards (-2.5° / -1.5° / +1° / +2°), green washi tape at corner, hard *offset* shadow (4/6/8px, no blur). Cards layer onto cream like a season programme. **The frame is aspect-agnostic** — the same taped frame holds 16:9 landscape (article/event hero images, the dominant aspect in the Sanity library), square (cropped news thumbs), portrait (player figures, transfer passes, tickets), and text-only (jersey-bg variant from homepage mockup card 2). The mockups skew portrait because the artefacts shown were illustrative; production content is mostly landscape and the frame absorbs both without modification.
+3. **Taped paper card pattern.** Content lives in slightly-rotated paper cards (-2.5° / -1.5° / +1° / +2°), green washi tape at corner, hard _offset_ shadow (4/6/8px, no blur). Cards layer onto cream like a season programme. **The frame is aspect-agnostic** — the same taped frame holds 16:9 landscape (article/event hero images, the dominant aspect in the Sanity library), square (cropped news thumbs), portrait (player figures, transfer passes, tickets), and text-only (jersey-bg variant from homepage mockup card 2). The mockups skew portrait because the artefacts shown were illustrative; production content is mostly landscape and the frame absorbs both without modification.
 4. **Diagonal barber-pole seams.** Between major sections, a striped black/cream band breaks the page. Geometric, not photographic. SVG geometry, never negative margins.
 5. **Hero collage.** Every hero is two-column: serif headline + intro + CTA on the left; a taped-paper artefact on the right (transfer pass, match ticket, interview portrait, jersey illustration).
 6. **Numerical drama.** Big serif numbers as graphic monumentation: `#8`, `28 wedstrijden`, `2374 minuten`, `320 jongens en meisjes`, `4 ⋅ 0`. Numbers carry the page weight where photos used to.
@@ -88,7 +88,7 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 - **Asymmetric polish.** Slight rotation, tape overhang, ticket-stub overflow. The site reads as printed and handled, not as a CMS.
 - **Two-column tension.** Left = words, right = artefact. Recurring composition shape across hero, news cards, schedule, youth, even quote blocks. On mobile, columns stack (artefact above words, by default).
 - **Photo-first, illustration-fallback for figures.** The polaroid frame holds either content. Illustration is reserved for marketing contexts where no specific person is named (youth "320 jongens", retro shirts, generic placeholder). Real photos take precedence in player profile / news cards / interview hero.
-- **Mono for data, serif for voice.** Match scores, dates, stats render in IBM Plex Mono — they are *data*. Names, headlines, quotes render in Freight Display Pro — they are *voice*. The contrast is intentional and load-bearing.
+- **Mono for data, serif for voice.** Match scores, dates, stats render in IBM Plex Mono — they are _data_. Names, headlines, quotes render in Freight Display Pro — they are _voice_. The contrast is intentional and load-bearing.
 - **Rotation alternation in lists.** Card grids cycle through a 4-rotation pool (`-2.5° / -1.5° / +1° / +2°`) via `nth-child(4n+1..4)` so 8-card lists feel pleasantly varied, not metronomic.
 
 ### 2.3 What this isn't
@@ -115,44 +115,44 @@ All tokens live in `apps/web/src/app/globals.css` inside `@theme {}`. Tailwind v
 ```css
 @theme {
   /* Surface */
-  --color-cream:        #F5F1E6;  /* default page bg */
-  --color-cream-soft:   #EDE8DA;  /* alt surface (sponsor row, secondary cards) */
+  --color-cream: #f5f1e6; /* default page bg */
+  --color-cream-soft: #ede8da; /* alt surface (sponsor row, secondary cards) */
 
   /* Ink (text + dark interludes) */
-  --color-ink:          #0A0A0A;  /* primary text + dark bg */
-  --color-ink-soft:     #1F1F1F;  /* layered dark surfaces */
-  --color-ink-muted:    #6B6B6B;  /* byline, dividers */
+  --color-ink: #0a0a0a; /* primary text + dark bg */
+  --color-ink-soft: #1f1f1f; /* layered dark surfaces */
+  --color-ink-muted: #6b6b6b; /* byline, dividers */
 
   /* Brand green (anchored to existing values) */
-  --color-jersey:       #4ACF52;  /* accent / tape / CTA — never body text on cream */
-  --color-jersey-deep:  #008755;  /* body-text-readable green on cream */
-  --color-jersey-bright:#22C55E;  /* green text on dark interludes */
+  --color-jersey: #4acf52; /* accent / tape / CTA — never body text on cream */
+  --color-jersey-deep: #008755; /* body-text-readable green on cream */
+  --color-jersey-bright: #22c55e; /* green text on dark interludes */
 
   /* Edges */
-  --color-paper-edge:   #D9D2BD;  /* card outline on cream */
+  --color-paper-edge: #d9d2bd; /* card outline on cream */
 }
 ```
 
-| Combination | Contrast | Verdict |
-| --- | --- | --- |
-| ink on cream | 17.4:1 | AAA all sizes |
-| ink-soft on cream | 13.6:1 | AAA all sizes |
-| ink-muted on cream | 4.7:1 | AA at ≥18pt only |
-| jersey on cream | 1.7:1 | Decorative only — never text |
-| jersey-deep on cream | 5.0:1 | AA body |
-| jersey-bright on ink | 6.1:1 | AAA large, AA small |
-| cream on ink | 17.4:1 | AAA all sizes |
+| Combination          | Contrast   | Verdict                                                                                                                                                                                     |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ink on cream         | 17.5:1     | AAA all sizes                                                                                                                                                                               |
+| ink-soft on cream    | 14.6:1     | AAA all sizes                                                                                                                                                                               |
+| ink-muted on cream   | 4.7:1      | AA at ≥18pt only                                                                                                                                                                            |
+| jersey on cream      | 1.8:1      | Decorative only — never text                                                                                                                                                                |
+| jersey-deep on cream | **4.05:1** | **AA large-text (≥18pt) only** — does NOT meet AA body (4.5:1). Use `--color-ink` or `--color-ink-soft` for body green-on-cream copy; reserve `jersey-deep` for headings, accents, and CTAs |
+| jersey-bright on ink | 8.7:1      | AAA all sizes                                                                                                                                                                               |
+| cream on ink         | 17.5:1     | AAA all sizes                                                                                                                                                                               |
 
 ### 3.3 Typography tokens
 
 #### Font roles after redesign
 
-| CSS variable | Family | Source | Role |
-| --- | --- | --- | --- |
-| `--font-display` | Freight Display Pro | Adobe Typekit (already added) | Headlines, italic emphasis, card titles |
-| `--font-display-big` | Freight Big Pro | Adobe Typekit (already added) | `text-display-2xl` only, footer wordmark |
-| `--font-body` | Quasimoda | Adobe Typekit (already loaded — role flips from title to body) | Paragraphs, UI text |
-| `--font-mono` | IBM Plex Mono | `next/font/google` (already loaded) | Match scores, byline metadata, mono labels |
+| CSS variable         | Family              | Source                                                         | Role                                       |
+| -------------------- | ------------------- | -------------------------------------------------------------- | ------------------------------------------ |
+| `--font-display`     | Freight Display Pro | Adobe Typekit (already added)                                  | Headlines, italic emphasis, card titles    |
+| `--font-display-big` | Freight Big Pro     | Adobe Typekit (already added)                                  | `text-display-2xl` only, footer wordmark   |
+| `--font-body`        | Quasimoda           | Adobe Typekit (already loaded — role flips from title to body) | Paragraphs, UI text                        |
+| `--font-mono`        | IBM Plex Mono       | `next/font/google` (already loaded)                            | Match scores, byline metadata, mono labels |
 
 **Retired:** Stenciletta (off-limits per owner preference), Montserrat (replaced by Quasimoda as body). Cleanup PR removes their `next/font` import and Typekit weights.
 
@@ -163,39 +163,40 @@ All tokens live in `apps/web/src/app/globals.css` inside `@theme {}`. Tailwind v
 ```css
 @theme {
   /* Display (serif) */
-  --text-display-2xl:        clamp(3.5rem, 1.5rem + 8vw, 6rem);    /* 56 → 96 */
-  --text-display-2xl--lh:    1.0;
-  --text-display-xl:         clamp(2.75rem, 1.5rem + 5vw, 4.5rem); /* 44 → 72 */
-  --text-display-xl--lh:     1.05;
-  --text-display-lg:         clamp(2rem, 1.25rem + 3vw, 3rem);     /* 32 → 48 */
-  --text-display-lg--lh:     1.1;
-  --text-display-md:         clamp(1.5rem, 1rem + 1.5vw, 2rem);    /* 24 → 32 */
-  --text-display-md--lh:     1.2;
-  --text-display-sm:         clamp(1.25rem, 1rem + 1vw, 1.5rem);   /* 20 → 24 */
-  --text-display-sm--lh:     1.3;
+  --text-display-2xl: clamp(3.5rem, 1.5rem + 8vw, 6rem); /* 56 → 96 */
+  --text-display-2xl--lh: 1;
+  --text-display-xl: clamp(2.75rem, 1.5rem + 5vw, 4.5rem); /* 44 → 72 */
+  --text-display-xl--lh: 1.05;
+  --text-display-lg: clamp(2rem, 1.25rem + 3vw, 3rem); /* 32 → 48 */
+  --text-display-lg--lh: 1.1;
+  --text-display-md: clamp(1.5rem, 1rem + 1.5vw, 2rem); /* 24 → 32 */
+  --text-display-md--lh: 1.2;
+  --text-display-sm: clamp(1.25rem, 1rem + 1vw, 1.5rem); /* 20 → 24 */
+  --text-display-sm--lh: 1.3;
 
   /* Body (sans) */
-  --text-body-lg:            1.125rem;  /* 18 (mobile 17) */
-  --text-body-lg--lh:        1.55;
-  --text-body-md:            1rem;      /* 16 */
-  --text-body-md--lh:        1.6;
-  --text-body-sm:            0.875rem;  /* 14 */
-  --text-body-sm--lh:        1.55;
+  --text-body-lg: 1.125rem; /* 18 (mobile 17) */
+  --text-body-lg--lh: 1.55;
+  --text-body-md: 1rem; /* 16 */
+  --text-body-md--lh: 1.6;
+  --text-body-sm: 0.875rem; /* 14 */
+  --text-body-sm--lh: 1.55;
 
   /* Mono */
-  --text-mono-md:            0.875rem;  /* 14 (mobile 13) */
-  --text-mono-md--lh:        1.4;
-  --text-mono-sm:            0.75rem;   /* 12 (mobile 11) */
-  --text-mono-sm--lh:        1.4;
-  --text-label:              0.6875rem; /* 11 — uppercase tracked labels */
-  --text-label--lh:          1;
-  --text-label--tracking:    0.08em;
+  --text-mono-md: 0.875rem; /* 14 (mobile 13) */
+  --text-mono-md--lh: 1.4;
+  --text-mono-sm: 0.75rem; /* 12 (mobile 11) */
+  --text-mono-sm--lh: 1.4;
+  --text-label: 0.6875rem; /* 11 — uppercase tracked labels */
+  --text-label--lh: 1;
+  --text-label--tracking: 0.08em;
 }
 ```
 
 #### Italic + emphasis behaviour
 
 Freight Display italic is the design's signature. Use it on inline `<em>` inside display text:
+
 - `<h2>Laatste <em>nieuws.</em></h2>` — italic word + period.
 - Optional `<HighlighterStroke>` underneath the italic word.
 
@@ -207,15 +208,15 @@ Keep the existing 4/8 spacing scale. Add layout containers and the rotation pool
 
 ```css
 @theme {
-  --container-prose:    680px;   /* article / interview body width */
-  --container-default:  1200px;  /* standard page max-width */
+  --container-prose: 680px; /* article / interview body width */
+  --container-default: 1200px; /* standard page max-width */
   /* --max-width-outer (1440px) already exists — reuse for full-bleed */
 
   /* Rotation pool — TapedCardGrid cycles through these via nth-child(4n+1..4) */
-  --rotate-tape-a:     -2.5deg;
-  --rotate-tape-b:     -1.5deg;
-  --rotate-tape-c:      1deg;
-  --rotate-tape-d:      2deg;
+  --rotate-tape-a: -2.5deg;
+  --rotate-tape-b: -1.5deg;
+  --rotate-tape-c: 1deg;
+  --rotate-tape-d: 2deg;
 }
 ```
 
@@ -225,10 +226,10 @@ A four-value rotation pool (instead of two) gives 8-card lists pleasant variety 
 
 ```css
 @theme {
-  --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
-  --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
-  --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);  /* hover state */
-  --shadow-soft:       0 2px 8px rgba(0, 0, 0, 0.08); /* modals/dropdowns only */
+  --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+  --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+  --shadow-paper-lift: 8px 8px 0 0 var(--color-ink); /* hover state */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08); /* modals/dropdowns only */
 }
 ```
 
@@ -238,9 +239,9 @@ Hard offset shadows simulate paper-on-paper. Avoid blurred shadows except on UI 
 
 ```css
 @theme {
-  --motion-fast:  150ms ease-out;
-  --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --motion-tape:  300ms ease-out;  /* card hover tilts upright + shadow lifts */
+  --motion-fast: 150ms ease-out;
+  --motion-base: 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tape: 300ms ease-out; /* card hover tilts upright + shadow lifts */
 }
 ```
 
@@ -300,55 +301,55 @@ Primitives are listed in dependency order so the build order falls out for free.
 
 ### 4.1 Tier A — pure decorative (zero React deps, ship first)
 
-| Primitive | Purpose | Key props |
-| --- | --- | --- |
-| `<TapeStrip>` | Diagonal washi-tape graphic on card corners | `color: 'jersey' \| 'ink' \| 'cream'`, `position: 'tl' \| 'tr' \| 'bl' \| 'br'`, `length: 'sm' \| 'md' \| 'lg'`, `rotation?: number` |
-| `<StripedSeam>` | Diagonal barber-pole horizontal section divider — SVG-backed (clean caps), never negative-margin | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'` |
-| `<DottedDivider>` / `<DashedDivider>` / `<SolidDivider>` | Thin row dividers (interview Q&A, table rows) | `style: 'dotted' \| 'dashed' \| 'solid'`, `color: 'ink' \| 'paper-edge'`, `inset?: boolean` |
-| `<QuoteMark>` | Two stacked italic open-quote glyphs (~20px) | `color: 'jersey' \| 'ink' \| 'cream'` |
-| `<TicketStub>` | Perforated-edge ephemera (`STAMNR. 55`, `SINDS 1909`) | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` |
-| `<HighlighterStroke>` | SVG hand-drawn underline beneath italic emphasis. Multi-line aware (per-line spans). Three hand-drawn variants for a non-mechanical feel | `variant: 'a' \| 'b' \| 'c'`, `color: 'jersey'` |
-| `<MonoLabel>` | Tracked uppercase pill or plain label | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'` |
+| Primitive                                                | Purpose                                                                                                                                  | Key props                                                                                                                            |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `<TapeStrip>`                                            | Diagonal washi-tape graphic on card corners                                                                                              | `color: 'jersey' \| 'ink' \| 'cream'`, `position: 'tl' \| 'tr' \| 'bl' \| 'br'`, `length: 'sm' \| 'md' \| 'lg'`, `rotation?: number` |
+| `<StripedSeam>`                                          | Diagonal barber-pole horizontal section divider — SVG-backed (clean caps), never negative-margin                                         | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'`                  |
+| `<DottedDivider>` / `<DashedDivider>` / `<SolidDivider>` | Thin row dividers (interview Q&A, table rows)                                                                                            | `style: 'dotted' \| 'dashed' \| 'solid'`, `color: 'ink' \| 'paper-edge'`, `inset?: boolean`                                          |
+| `<QuoteMark>`                                            | Two stacked italic open-quote glyphs (~20px)                                                                                             | `color: 'jersey' \| 'ink' \| 'cream'`                                                                                                |
+| `<TicketStub>`                                           | Perforated-edge ephemera (`STAMNR. 55`, `SINDS 1909`)                                                                                    | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'`                          |
+| `<HighlighterStroke>`                                    | SVG hand-drawn underline beneath italic emphasis. Multi-line aware (per-line spans). Three hand-drawn variants for a non-mechanical feel | `variant: 'a' \| 'b' \| 'c'`, `color: 'jersey'`                                                                                      |
+| `<MonoLabel>`                                            | Tracked uppercase pill or plain label                                                                                                    | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'`                                              |
 
 ### 4.2 Tier B — composition (depend on Tier A)
 
-| Primitive | Purpose | Key props |
-| --- | --- | --- |
-| `<TapedCard>` | Wrapper that gives any child the rotated-paper treatment | `rotation: 'a' \| 'b' \| 'c' \| 'd' \| 'none' \| 'auto' \| <deg>`, `tape?: TapeStripProps \| TapeStripProps[]`, `shadow: 'sm' \| 'md' \| 'lift'`, `bg: 'cream' \| 'cream-soft' \| 'ink' \| 'jersey'`, `padding: 'sm' \| 'md' \| 'lg' \| 'none'` |
-| `<TapedCardGrid>` | Grid wrapper that auto-cycles the 4-rotation pool via `nth-child(4n+1..4)`. Children rendered with `rotation="auto"` get the slot's rotation | `columns: 1 \| 2 \| 3 \| 4`, `gap: 'sm' \| 'md' \| 'lg'`, `as: 'div' \| 'ol' \| 'ul'` |
-| `<MonoLabelRow>` | Inline row of `<MonoLabel>` separated by `·` | `divider: '·' \| '\|'`, `as: 'div' \| 'ol' \| 'ul'` |
-| `<EditorialHeading>` | Period-terminated heading with optional italic emphasis word + optional highlighter underline | `level: 1..6`, `size: 'display-2xl' \| 'display-xl' \| 'display-lg' \| 'display-md' \| 'display-sm'`, `emphasis?: { text: string; position: 'before' \| 'after' \| 'inline' }`, `highlight?: boolean` |
-| `<PullQuote>` | Quote block — QuoteMark + italic display body + attribution row | `attribution: { name: string; role?: string; source?: string }`, `tone: 'cream' \| 'ink' \| 'jersey'` |
-| `<NumberDisplay>` | Big serif number as graphic monumentation (`#8`, `28`, `2374`) | `value: string \| number`, `size: 'display-2xl' \| 'display-xl' \| 'display-lg'`, `tone: 'jersey' \| 'jersey-deep' \| 'ink' \| 'cream'`, `prefix?: '#' \| 'nr.'`, `suffix?: string` |
-| `<DropCapParagraph>` | Lead paragraph with oversized first letter (display-2xl 900, jersey-tinted) | `as: 'p' \| 'div'`, `tone: 'jersey' \| 'ink'`, children |
-| `<TapedFigure>` | Editorial photo + optional caption / credit row. Composes `<TapedCard>` + `<img>` + `<figcaption>`. **Default aspect is 16:9** — the dominant aspect in the article/event content library — but accepts square and portrait via `aspect` prop. Used for article body images, event thumbnails, match detail hero photo, inline editorial photography | `src: string`, `alt: string`, `aspect: 'landscape-16-9' \| 'square' \| 'portrait-3-4' \| 'auto'`, `caption?: string`, `credit?: string`, `rotation?: TapedCardProps['rotation']`, `tape?: TapedCardProps['tape']` |
+| Primitive            | Purpose                                                                                                                                                                                                                                                                                                                                              | Key props                                                                                                                                                                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<TapedCard>`        | Wrapper that gives any child the rotated-paper treatment                                                                                                                                                                                                                                                                                             | `rotation: 'a' \| 'b' \| 'c' \| 'd' \| 'none' \| 'auto' \| <deg>`, `tape?: TapeStripProps \| TapeStripProps[]`, `shadow: 'sm' \| 'md' \| 'lift'`, `bg: 'cream' \| 'cream-soft' \| 'ink' \| 'jersey'`, `padding: 'sm' \| 'md' \| 'lg' \| 'none'` |
+| `<TapedCardGrid>`    | Grid wrapper that auto-cycles the 4-rotation pool via `nth-child(4n+1..4)`. Children rendered with `rotation="auto"` get the slot's rotation                                                                                                                                                                                                         | `columns: 1 \| 2 \| 3 \| 4`, `gap: 'sm' \| 'md' \| 'lg'`, `as: 'div' \| 'ol' \| 'ul'`                                                                                                                                                           |
+| `<MonoLabelRow>`     | Inline row of `<MonoLabel>` separated by `·`                                                                                                                                                                                                                                                                                                         | `divider: '·' \| '\|'`, `as: 'div' \| 'ol' \| 'ul'`                                                                                                                                                                                             |
+| `<EditorialHeading>` | Period-terminated heading with optional italic emphasis word + optional highlighter underline                                                                                                                                                                                                                                                        | `level: 1..6`, `size: 'display-2xl' \| 'display-xl' \| 'display-lg' \| 'display-md' \| 'display-sm'`, `emphasis?: { text: string; position: 'before' \| 'after' \| 'inline' }`, `highlight?: boolean`                                           |
+| `<PullQuote>`        | Quote block — QuoteMark + italic display body + attribution row                                                                                                                                                                                                                                                                                      | `attribution: { name: string; role?: string; source?: string }`, `tone: 'cream' \| 'ink' \| 'jersey'`                                                                                                                                           |
+| `<NumberDisplay>`    | Big serif number as graphic monumentation (`#8`, `28`, `2374`)                                                                                                                                                                                                                                                                                       | `value: string \| number`, `size: 'display-2xl' \| 'display-xl' \| 'display-lg'`, `tone: 'jersey' \| 'jersey-deep' \| 'ink' \| 'cream'`, `prefix?: '#' \| 'nr.'`, `suffix?: string`                                                             |
+| `<DropCapParagraph>` | Lead paragraph with oversized first letter (display-2xl 900, jersey-tinted)                                                                                                                                                                                                                                                                          | `as: 'p' \| 'div'`, `tone: 'jersey' \| 'ink'`, children                                                                                                                                                                                         |
+| `<TapedFigure>`      | Editorial photo + optional caption / credit row. Composes `<TapedCard>` + `<img>` + `<figcaption>`. **Default aspect is 16:9** — the dominant aspect in the article/event content library — but accepts square and portrait via `aspect` prop. Used for article body images, event thumbnails, match detail hero photo, inline editorial photography | `src: string`, `alt: string`, `aspect: 'landscape-16-9' \| 'square' \| 'portrait-3-4' \| 'auto'`, `caption?: string`, `credit?: string`, `rotation?: TapedCardProps['rotation']`, `tape?: TapedCardProps['tape']`                               |
 
 ### 4.3 Tier C — domain figures (illustration assets)
 
-| Primitive | Purpose | Key props |
-| --- | --- | --- |
-| `<PlayerFigure>` | Illustrated striped jersey + arms with circular face slot. Photo-first (`imageSrc` from `player.psdImage` is the face); generic cartoon face when no photo | `imageSrc?: string`, `imageAlt?: string`, `jerseyVariant: 'home' \| 'away' \| 'retro-94'`, `numberOverlay?: string`, `size: 'sm' \| 'md' \| 'lg' \| 'xl'`, `pose: 'standing' \| 'cropped-shoulders'` |
-| `<JerseyShirt>` | Stylized jersey thumbnail (no body) — webshop monogram grid, retro shirt thumbnails | `variant: 'home-stripes' \| 'away-black' \| 'kcvv-band' \| 'retro-94-white'`, `letterOverlay?: string`, `size: 'sm' \| 'md' \| 'lg'` |
-| `<EndMark>` | Closing flourish for long-form articles (`* Einde gesprek *`) | `flourish: 'star' \| 'em-dash'`, `text?: string` |
-| `<QASectionDivider>` | Centered italic title with em-dash flourish — marks acts inside an interview | `title: string`, `flourish: 'em-dash' \| 'star'` |
+| Primitive            | Purpose                                                                                                                                                    | Key props                                                                                                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<PlayerFigure>`     | Illustrated striped jersey + arms with circular face slot. Photo-first (`imageSrc` from `player.psdImage` is the face); generic cartoon face when no photo | `imageSrc?: string`, `imageAlt?: string`, `jerseyVariant: 'home' \| 'away' \| 'retro-94'`, `numberOverlay?: string`, `size: 'sm' \| 'md' \| 'lg' \| 'xl'`, `pose: 'standing' \| 'cropped-shoulders'` |
+| `<JerseyShirt>`      | Stylized jersey thumbnail (no body) — webshop monogram grid, retro shirt thumbnails                                                                        | `variant: 'home-stripes' \| 'away-black' \| 'kcvv-band' \| 'retro-94-white'`, `letterOverlay?: string`, `size: 'sm' \| 'md' \| 'lg'`                                                                 |
+| `<EndMark>`          | Closing flourish for long-form articles (`* Einde gesprek *`)                                                                                              | `flourish: 'star' \| 'em-dash'`, `text?: string`                                                                                                                                                     |
+| `<QASectionDivider>` | Centered italic title with em-dash flourish — marks acts inside an interview                                                                               | `title: string`, `flourish: 'em-dash' \| 'star'`                                                                                                                                                     |
 
 ### 4.4 Existing components that need rework
 
-| Existing | What changes | Phase |
-| --- | --- | --- |
-| `<Button>` | New variants: `primary` (jersey on cream), `inverted` (cream on ink), `ghost` (ink outline on cream). Drops the bright-green-pill aesthetic. | Phase 2 |
-| `<Badge>` | **Retire.** `<MonoLabel>` supersedes it. Migration is per-consumer. | Phase 1 cleanup |
-| `<BrandedTabs>` | Rework borders + active state to match mono-label aesthetic. | Phase 2 |
-| `<PageHero>` | Major rework. Probably becomes `<EditorialHero>` with discriminated `variant` prop (`transfer \| match-preview \| interview \| event \| announcement \| generic \| player`). | Phase 3 |
-| `<SectionHeader>` | Becomes a thin wrapper over `<EditorialHeading>` + `<MonoLabelRow>`. | Phase 1 |
-| `<Alert>` / `<Spinner>` / `<Input>` / `<Select>` / `<Textarea>` / `<Label>` | Update tokens (cream surface, ink text, jersey accents) but keep structure. | Phase 2 |
-| `<HorizontalSlider>` / `<ScrollHint>` / `<FilterTabs>` | Update tokens; preserve interaction behaviour. | Phase 2 |
-| `<PageHeader>` (`Layout/`) | Rework nav typography (mono caps), add `<MatchStrip>` integration, swap colour scheme. | Phase 3 |
-| `<PageFooter>` (`Layout/`) | Rework with `<PosterWordmark>` + dark column layout. | Phase 3 |
+| Existing                                                                    | What changes                                                                                                                                                                 | Phase           |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `<Button>`                                                                  | New variants: `primary` (jersey on cream), `inverted` (cream on ink), `ghost` (ink outline on cream). Drops the bright-green-pill aesthetic.                                 | Phase 2         |
+| `<Badge>`                                                                   | **Retire.** `<MonoLabel>` supersedes it. Migration is per-consumer.                                                                                                          | Phase 1 cleanup |
+| `<BrandedTabs>`                                                             | Rework borders + active state to match mono-label aesthetic.                                                                                                                 | Phase 2         |
+| `<PageHero>`                                                                | Major rework. Probably becomes `<EditorialHero>` with discriminated `variant` prop (`transfer \| match-preview \| interview \| event \| announcement \| generic \| player`). | Phase 3         |
+| `<SectionHeader>`                                                           | Becomes a thin wrapper over `<EditorialHeading>` + `<MonoLabelRow>`.                                                                                                         | Phase 1         |
+| `<Alert>` / `<Spinner>` / `<Input>` / `<Select>` / `<Textarea>` / `<Label>` | Update tokens (cream surface, ink text, jersey accents) but keep structure.                                                                                                  | Phase 2         |
+| `<HorizontalSlider>` / `<ScrollHint>` / `<FilterTabs>`                      | Update tokens; preserve interaction behaviour.                                                                                                                               | Phase 2         |
+| `<PageHeader>` (`Layout/`)                                                  | Rework nav typography (mono caps), add `<MatchStrip>` integration, swap colour scheme.                                                                                       | Phase 3         |
+| `<PageFooter>` (`Layout/`)                                                  | Rework with `<PosterWordmark>` + dark column layout.                                                                                                                         | Phase 3         |
 
-### 4.5 Deliberately *not* in v1
+### 4.5 Deliberately _not_ in v1
 
-- A `<TapedCard variant="polaroid" \| "news" \| "profile">` mega-prop. Variants of cards are different *compositions*, not different props on one wrapper.
+- A `<TapedCard variant="polaroid" \| "news" \| "profile">` mega-prop. Variants of cards are different _compositions_, not different props on one wrapper.
 - Per-illustration character variants (smiling, serious, raising-arms). `<PlayerFigure>` has one pose vocabulary at launch.
 - Animation primitives. Tilt-on-hover lives inside `<TapedCard>`'s built-in motion; nothing else animates by default.
 - A separate `<Card>` neutral wrapper. The catalogue ships `<TapedCard>` (paper feel, the dominant card primitive). Whether non-editorial UI surfaces (forms, modals, dropdowns) also adopt the paper feel for consistency, or use a softer chrome treatment, is decided per surface during the relevant phase's design checkpoint — not by introducing a third card abstraction up front.
@@ -485,7 +486,7 @@ All sponsor logos site-wide render greyscale by default and reveal full colour o
 
 ### 6.9 Jeugd landing (`/jeugd`)
 
-Mockups already preview this aesthetic via the homepage `<YouthBlock>`. Full page: `<EditorialHero variant="announcement">` `De toekomst van Elewijt.` with jersey-illustration artefact. Body sections: filosofie, divisions (Bovenbouw / Middenbouw / Onderbouw — per saved memory; *not* scholieren/duiveltjes), trainers grid, "schrijf je in" CTA, supporting sponsors. Existing `docs/prd/jeugd-landing-page.md` is superseded — restate in Phase 7.
+Mockups already preview this aesthetic via the homepage `<YouthBlock>`. Full page: `<EditorialHero variant="announcement">` `De toekomst van Elewijt.` with jersey-illustration artefact. Body sections: filosofie, divisions (Bovenbouw / Middenbouw / Onderbouw — per saved memory; _not_ scholieren/duiveltjes), trainers grid, "schrijf je in" CTA, supporting sponsors. Existing `docs/prd/jeugd-landing-page.md` is superseded — restate in Phase 7.
 
 ### 6.10 Club pages (`/club/organigram`, `/club/geschiedenis`)
 
@@ -519,22 +520,22 @@ The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a
 **Visual approval gating** is hybrid by deliberate design (see §8 for the full workflow):
 
 - **Phases 0–2 and 9** ship behind Storybook iteration alone. Tokens and small primitives are abstract enough that a Storybook story is a sufficient visual contract; mockups would not add information.
-- **Phases 3–8** require a *Design checkpoint* before any implementation work begins. The checkpoint runs `/design-an-interface` to produce 2–3 directional mockup options for the new surfaces, the owner picks one, and only then does PRD-writing → plan-writing → execution proceed for that phase.
+- **Phases 3–8** require a _Design checkpoint_ before any implementation work begins. The checkpoint runs `/design-an-interface` to produce 2–3 directional mockup options for the new surfaces, the owner picks one, and only then does PRD-writing → plan-writing → execution proceed for that phase.
 
 ### Phase summary
 
-| Phase | Focus | Design gate | Primitives delivered | Components touched | Effort |
-| --- | --- | --- | --- | --- | --- |
-| **0** | Foundations: tokens + Tier A decorative | Storybook only | `<TapeStrip>`, `<StripedSeam>`, dividers, `<QuoteMark>`, `<TicketStub>`, `<HighlighterStroke>`, `<MonoLabel>` | None refactored | 1–2 weeks |
-| **1** | Tier B composition primitives | Storybook only | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>`, `<TapedFigure>` | `<SectionHeader>` reworked; `<Badge>` retired | 2 weeks |
-| **2** | Atom rework | Storybook only | (no new primitives) | `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Label>`, `<Alert>`, `<Spinner>`, `<BrandedTabs>`, `<FilterTabs>` token swaps | 1–2 weeks |
-| **3** | Tier C domain figures + EditorialHero variants | **Mockups via `/design-an-interface`** — 6+ EditorialHero variants need approving (transfer / match-preview / interview / event / announcement / generic / player); PlayerFigure photo+illustration handling needs design decisions | `<PlayerFigure>`, `<JerseyShirt>`, `<EndMark>`, `<QASectionDivider>`; new `<EditorialHero>` | Existing `<PageHero>` retired; `<SiteHeader>` + `<MatchStrip>` + `<SiteFooter>` reworked | 2–3 weeks design + 2–3 weeks build |
-| **4** | Homepage rebuild | **Mockups per section** — even though one homepage exemplar exists, NewsGrid, ScheduleStandings, YouthBlock, WebshopStrip, SponsorsBlock, PosterWordmark each need detailed mockups | (no new primitives) | `<NewsGrid>`, `<NewsCard>`, `<ScheduleStandingsBlock>`, `<YouthBlock>`, `<WebshopStrip>`, `<SponsorsBlock>`, `<PosterWordmark>` | 1–2 weeks design + 2–3 weeks build |
-| **5** | Article detail (interviews first) | **Mockup per variant** — duo interview is mocked; matchverslag, column, transfer, jeugd, evenement, generic each need a mockup | `<InterviewHero>`, `<QARow>`, `<QASection>`, `<InterviewCredits>` | All article variants. `docs/prd/article-detail-redesign.md` superseded | 2–3 weeks design + 3–4 weeks build |
-| **6** | Player profile + match detail + team detail + calendar + events | **Mockup per page type** — player profile is mocked; match detail (3 states), team detail, kalender, events list + detail each need a mockup | `<PlayerHero>`, `<StatsStrip>`, `<BioBlock>`, `<CareerLogTable>`, `<RecentMatchesGrid>`, `<QuotesBlock>`, `<MatchPreviewBody>`, `<TeamHero>`, `<SquadGrid>`, `<EventCard>` | Player profile, match detail, team detail, kalender, events | 3–4 weeks design + 4–5 weeks build |
-| **7** | Club + jeugd + teams + sponsors landings | **Mockup per page** — none mocked. Sponsors tier rendering needs particular attention (logos vs names; monochrome vs colour) | (no new primitives) | Sponsors page, jeugd landing, teams landing, club organigram + geschiedenis. Existing `docs/prd/{sponsors,jeugd-landing-page,teams-landing-page,club-landing-page}-redesign.md` superseded | 2 weeks design + 2–3 weeks build |
-| **8** | Hulp + search + privacy + error pages | **Mockup per page** — none mocked | (no new primitives) | All remaining surfaces | 1 week design + 1–2 weeks build |
-| **9** | Cleanup | None | (no new primitives) | Retire legacy tokens, retire Stenciletta + Montserrat, retire `<Badge>` consumers, retire `<PageHero>` | 1–2 weeks |
+| Phase | Focus                                                           | Design gate                                                                                                                                                                                                                         | Primitives delivered                                                                                                                                                       | Components touched                                                                                                                                                                         | Effort                             |
+| ----- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| **0** | Foundations: tokens + Tier A decorative                         | Storybook only                                                                                                                                                                                                                      | `<TapeStrip>`, `<StripedSeam>`, dividers, `<QuoteMark>`, `<TicketStub>`, `<HighlighterStroke>`, `<MonoLabel>`                                                              | None refactored                                                                                                                                                                            | 1–2 weeks                          |
+| **1** | Tier B composition primitives                                   | Storybook only                                                                                                                                                                                                                      | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>`, `<TapedFigure>`                          | `<SectionHeader>` reworked; `<Badge>` retired                                                                                                                                              | 2 weeks                            |
+| **2** | Atom rework                                                     | Storybook only                                                                                                                                                                                                                      | (no new primitives)                                                                                                                                                        | `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Label>`, `<Alert>`, `<Spinner>`, `<BrandedTabs>`, `<FilterTabs>` token swaps                                                            | 1–2 weeks                          |
+| **3** | Tier C domain figures + EditorialHero variants                  | **Mockups via `/design-an-interface`** — 6+ EditorialHero variants need approving (transfer / match-preview / interview / event / announcement / generic / player); PlayerFigure photo+illustration handling needs design decisions | `<PlayerFigure>`, `<JerseyShirt>`, `<EndMark>`, `<QASectionDivider>`; new `<EditorialHero>`                                                                                | Existing `<PageHero>` retired; `<SiteHeader>` + `<MatchStrip>` + `<SiteFooter>` reworked                                                                                                   | 2–3 weeks design + 2–3 weeks build |
+| **4** | Homepage rebuild                                                | **Mockups per section** — even though one homepage exemplar exists, NewsGrid, ScheduleStandings, YouthBlock, WebshopStrip, SponsorsBlock, PosterWordmark each need detailed mockups                                                 | (no new primitives)                                                                                                                                                        | `<NewsGrid>`, `<NewsCard>`, `<ScheduleStandingsBlock>`, `<YouthBlock>`, `<WebshopStrip>`, `<SponsorsBlock>`, `<PosterWordmark>`                                                            | 1–2 weeks design + 2–3 weeks build |
+| **5** | Article detail (interviews first)                               | **Mockup per variant** — duo interview is mocked; matchverslag, column, transfer, jeugd, evenement, generic each need a mockup                                                                                                      | `<InterviewHero>`, `<QARow>`, `<QASection>`, `<InterviewCredits>`                                                                                                          | All article variants. `docs/prd/article-detail-redesign.md` superseded                                                                                                                     | 2–3 weeks design + 3–4 weeks build |
+| **6** | Player profile + match detail + team detail + calendar + events | **Mockup per page type** — player profile is mocked; match detail (3 states), team detail, kalender, events list + detail each need a mockup                                                                                        | `<PlayerHero>`, `<StatsStrip>`, `<BioBlock>`, `<CareerLogTable>`, `<RecentMatchesGrid>`, `<QuotesBlock>`, `<MatchPreviewBody>`, `<TeamHero>`, `<SquadGrid>`, `<EventCard>` | Player profile, match detail, team detail, kalender, events                                                                                                                                | 3–4 weeks design + 4–5 weeks build |
+| **7** | Club + jeugd + teams + sponsors landings                        | **Mockup per page** — none mocked. Sponsors tier rendering needs particular attention (logos vs names; monochrome vs colour)                                                                                                        | (no new primitives)                                                                                                                                                        | Sponsors page, jeugd landing, teams landing, club organigram + geschiedenis. Existing `docs/prd/{sponsors,jeugd-landing-page,teams-landing-page,club-landing-page}-redesign.md` superseded | 2 weeks design + 2–3 weeks build   |
+| **8** | Hulp + search + privacy + error pages                           | **Mockup per page** — none mocked                                                                                                                                                                                                   | (no new primitives)                                                                                                                                                        | All remaining surfaces                                                                                                                                                                     | 1 week design + 1–2 weeks build    |
+| **9** | Cleanup                                                         | None                                                                                                                                                                                                                                | (no new primitives)                                                                                                                                                        | Retire legacy tokens, retire Stenciletta + Montserrat, retire `<Badge>` consumers, retire `<PageHero>`                                                                                     | 1–2 weeks                          |
 
 **Total elapsed effort estimate:** ~25–40 weeks of focused work, depending on how many design rounds each gated phase needs. The wider range than before reflects design-checkpoint time, which can iterate (the owner may push back on mockup options once or twice before approval). Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
 
@@ -567,7 +568,7 @@ The redesign runs in parallel with ongoing match-day, news, and operations work.
 
 ## 8. Workflow per phase
 
-Each phase moves from idea to merged code through a fixed sequence. Phases 0–2 and 9 skip the *Design checkpoint* step; phases 3–8 must run it. The rest of the steps are the same for every phase.
+Each phase moves from idea to merged code through a fixed sequence. Phases 0–2 and 9 skip the _Design checkpoint_ step; phases 3–8 must run it. The rest of the steps are the same for every phase.
 
 ### 8.1 Sequence
 
@@ -598,16 +599,19 @@ Each phase moves from idea to merged code through a fixed sequence. Phases 0–2
 Run inside the redesign worktree. Invoke `/design-an-interface` with a brief framing the surface(s) the phase covers. The skill produces 2–3 directional mockup options per surface, typically as standalone HTML or PNG files.
 
 **Inputs the skill needs to do good work:**
+
 - The `docs/plans/2026-04-27-redesign-master-design.md` audit (§2) and primitive catalogue (§4).
 - The shape note for the surface from §6 (or the template spec from §5 if mocked).
 - Sample data shapes — current Sanity schema shapes, sample article / event / match payloads — so mockups render against real text lengths, not lorem ipsum.
 - Owner-stated must-haves and must-avoids per surface (e.g. "this is for parents, not players" or "no commercial sponsor placement on jeugd page").
 
 **Outputs:**
+
 - 2–3 mockup options committed to `docs/design/mockups/phase-<N>-<surface>/option-<a|b|c>.html` (or `.png` if image-only).
 - A short markdown comparison file `docs/design/mockups/phase-<N>-<surface>/compare.md` summarising trade-offs of each option.
 
 **Owner decision flow:**
+
 1. Owner reviews options visually (open the HTML files; view PNGs).
 2. Owner picks one, or asks for a revision round (the skill iterates inside the same `phase-<N>-<surface>/` directory).
 3. Once an option is chosen, the chosen file is renamed `option-final.html`. The other options stay committed for history.
@@ -621,7 +625,7 @@ Per-phase PRD lives at `docs/prd/redesign-phase-<N>.md`. Mirrors the structure o
 
 - Cite the master design doc + the chosen mockup file from §8.2.
 - Enumerate every component / page touched, mapped to the primitives from §4.
-- Specify the *new* tokens (if any) added to `globals.css` in this phase. Most non-foundation phases add zero new tokens.
+- Specify the _new_ tokens (if any) added to `globals.css` in this phase. Most non-foundation phases add zero new tokens.
 - Include a "VR baselines" section listing which `Features/<Domain>/` story files acquire baselines in this phase, and which existing baselines update.
 - Include an Analytics section per `apps/web/CLAUDE.md` rule (events, GTM mappings, GA4 dimensions for new user interactions).
 
@@ -668,7 +672,7 @@ After merge, the next phase's design checkpoint can begin (or run in parallel wi
 
 ### 8.9 What if a mockup approval fails late?
 
-If during execution a built component reveals the chosen mockup was wrong (e.g. a layout that worked in mockup HTML breaks at real responsive breakpoints, or real Sanity content has lengths the mockup didn't anticipate), halt the phase and re-enter §8.2. Document the failure mode in the phase issue close-out so subsequent phases factor it in. This is rare but explicitly allowed — design checkpoints buy *most* of the visual certainty, not all of it.
+If during execution a built component reveals the chosen mockup was wrong (e.g. a layout that worked in mockup HTML breaks at real responsive breakpoints, or real Sanity content has lengths the mockup didn't anticipate), halt the phase and re-enter §8.2. Document the failure mode in the phase issue close-out so subsequent phases factor it in. This is rare but explicitly allowed — design checkpoints buy _most_ of the visual certainty, not all of it.
 
 ---
 
@@ -690,7 +694,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 12. **Aspect-ratio agnostic primitives.** The taped paper frame is dimension-agnostic — 16:9 landscape (the dominant aspect of existing article and event imagery), square, portrait, and text-only all fit inside the same `<TapedCard>` without modification. Phase 1 ships `<TapedFigure>` as a dedicated landscape-by-default editorial photo + caption primitive for inline article body imagery, event thumbnails, and match-detail hero photos. `<NewsCard>` (Phase 4) takes an `aspectRatio` prop so mixed-aspect grids stay coherent: tape, rotation, and shadow stay constant; only the inner image aspect varies. (from owner correction 2026-04-28: existing content library is overwhelmingly 16:9; design must absorb that without forcing a re-crop.)
 13. **Stamnummer is `55`** (not `55⋅24`, not `55-24`). The `-24` suffix in mockup ticket-stub artwork is a decorative season/year tag, not part of the stamnummer. All ticket-stub examples in this doc use the canonical value. (from owner correction 2026-04-28.)
 14. **The football club in Elewijt has existed since 1909.** Mockup artwork showing `ANNO 1924` / `SINDS 1924` is a typo. Earlier saved-memory entries that said `1964` were also wrong. All "since X" branding in this doc and any subsequent design uses `1909`. (from owner correction 2026-04-28.)
-15. **Design checkpoint gating, hybrid by phase.** Phases 0–2 and 9 (tokens, primitives, atoms, cleanup) ship behind Storybook iteration alone — abstract pieces don't earn their keep with mockups. Phases 3–8 (composite components, full pages, landings) require a `/design-an-interface` checkpoint with 2–3 mockup options, owner approval, and committed mockups in `docs/design/mockups/phase-<N>-<surface>/` *before* PRD writing begins. This was made explicit because the owner cannot sign off on the entire redesign from the three exemplar mockups (homepage / duo interview / player profile) — most surfaces still need designing. See §8 for the full workflow. (from owner concern 2026-04-28.)
+15. **Design checkpoint gating, hybrid by phase.** Phases 0–2 and 9 (tokens, primitives, atoms, cleanup) ship behind Storybook iteration alone — abstract pieces don't earn their keep with mockups. Phases 3–8 (composite components, full pages, landings) require a `/design-an-interface` checkpoint with 2–3 mockup options, owner approval, and committed mockups in `docs/design/mockups/phase-<N>-<surface>/` _before_ PRD writing begins. This was made explicit because the owner cannot sign off on the entire redesign from the three exemplar mockups (homepage / duo interview / player profile) — most surfaces still need designing. See §8 for the full workflow. (from owner concern 2026-04-28.)
 16. **Sponsor logos render greyscale by default, full colour on hover.** Resolves the sponsor-treatment open question. CSS implementation:
 
     ```css
@@ -703,7 +707,9 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
       filter: grayscale(0%);
     }
     @media (prefers-reduced-motion: reduce) {
-      .sponsor-logo { transition: none; }
+      .sponsor-logo {
+        transition: none;
+      }
     }
     ```
 
@@ -733,4 +739,4 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 
 ---
 
-*End of master design.*
+_End of master design._

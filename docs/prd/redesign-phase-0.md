@@ -48,35 +48,35 @@ All tokens land additively inside the existing `@theme {}` block in `apps/web/sr
 ```css
 @theme {
   /* Surface */
-  --color-cream:        #F5F1E6;
-  --color-cream-soft:   #EDE8DA;
+  --color-cream: #f5f1e6;
+  --color-cream-soft: #ede8da;
 
   /* Ink */
-  --color-ink:          #0A0A0A;
-  --color-ink-soft:     #1F1F1F;
-  --color-ink-muted:    #6B6B6B;
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #1f1f1f;
+  --color-ink-muted: #6b6b6b;
 
   /* Brand green (anchored to existing #4ACF52 / #008755 — no speculative hexes) */
-  --color-jersey:       #4ACF52;
-  --color-jersey-deep:  #008755;
-  --color-jersey-bright:#22C55E;
+  --color-jersey: #4acf52;
+  --color-jersey-deep: #008755;
+  --color-jersey-bright: #22c55e;
 
   /* Edges */
-  --color-paper-edge:   #D9D2BD;
+  --color-paper-edge: #d9d2bd;
 }
 ```
 
 Contrast ratios (verified against WCAG AA):
 
-| Combination | Ratio | Verdict |
-| --- | --- | --- |
-| ink on cream | 17.4:1 | AAA all sizes |
-| ink-soft on cream | 13.6:1 | AAA all sizes |
-| ink-muted on cream | 4.7:1 | AA at ≥18pt only |
-| jersey on cream | 1.7:1 | Decorative only — never text |
-| jersey-deep on cream | 5.0:1 | AA body |
-| jersey-bright on ink | 6.1:1 | AAA large, AA small |
-| cream on ink | 17.4:1 | AAA all sizes |
+| Combination          | Ratio      | Verdict                                                                                                                                                                                      |
+| -------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ink on cream         | 17.5:1     | AAA all sizes                                                                                                                                                                                |
+| ink-soft on cream    | 14.6:1     | AAA all sizes                                                                                                                                                                                |
+| ink-muted on cream   | 4.7:1      | AA at ≥18pt only                                                                                                                                                                             |
+| jersey on cream      | 1.8:1      | Decorative only — never text                                                                                                                                                                 |
+| jersey-deep on cream | **4.05:1** | **AA large-text (≥18pt) only** — does NOT meet AA body (4.5:1). Body green-on-cream copy must use `--color-ink` or `--color-ink-soft`; `jersey-deep` is reserved for headings, accents, CTAs |
+| jersey-bright on ink | 8.7:1      | AAA all sizes                                                                                                                                                                                |
+| cream on ink         | 17.5:1     | AAA all sizes                                                                                                                                                                                |
 
 ### 1.2 Typography
 
@@ -84,11 +84,13 @@ Font roles after redesign — new CSS variables added; existing `--font-family-t
 
 ```css
 @theme {
-  --font-display:     "freight-display-pro", Georgia, "Times New Roman", serif;
+  --font-display: "freight-display-pro", Georgia, "Times New Roman", serif;
   --font-display-big: "freight-big-pro", Georgia, "Times New Roman", serif;
   /* --font-body and --font-mono are existing; redesign reuses them with role swap */
-  --font-body:        quasimoda, -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
-  --font-mono:        var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", monospace;
+  --font-body:
+    quasimoda, -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+  --font-mono:
+    var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", monospace;
 }
 ```
 
@@ -96,29 +98,29 @@ Type scale (fluid via `clamp()`):
 
 ```css
 @theme {
-  --text-display-2xl:        clamp(3.5rem, 1.5rem + 8vw, 6rem);
-  --text-display-2xl--lh:    1.0;
-  --text-display-xl:         clamp(2.75rem, 1.5rem + 5vw, 4.5rem);
-  --text-display-xl--lh:     1.05;
-  --text-display-lg:         clamp(2rem, 1.25rem + 3vw, 3rem);
-  --text-display-lg--lh:     1.1;
-  --text-display-md:         clamp(1.5rem, 1rem + 1.5vw, 2rem);
-  --text-display-md--lh:     1.2;
-  --text-display-sm:         clamp(1.25rem, 1rem + 1vw, 1.5rem);
-  --text-display-sm--lh:     1.3;
-  --text-body-lg:            1.125rem;
-  --text-body-lg--lh:        1.55;
-  --text-body-md:            1rem;
-  --text-body-md--lh:        1.6;
-  --text-body-sm:            0.875rem;
-  --text-body-sm--lh:        1.55;
-  --text-mono-md:            0.875rem;
-  --text-mono-md--lh:        1.4;
-  --text-mono-sm:            0.75rem;
-  --text-mono-sm--lh:        1.4;
-  --text-label:              0.6875rem;
-  --text-label--lh:          1;
-  --text-label--tracking:    0.08em;
+  --text-display-2xl: clamp(3.5rem, 1.5rem + 8vw, 6rem);
+  --text-display-2xl--lh: 1;
+  --text-display-xl: clamp(2.75rem, 1.5rem + 5vw, 4.5rem);
+  --text-display-xl--lh: 1.05;
+  --text-display-lg: clamp(2rem, 1.25rem + 3vw, 3rem);
+  --text-display-lg--lh: 1.1;
+  --text-display-md: clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  --text-display-md--lh: 1.2;
+  --text-display-sm: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --text-display-sm--lh: 1.3;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--lh: 1.55;
+  --text-body-md: 1rem;
+  --text-body-md--lh: 1.6;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--lh: 1.55;
+  --text-mono-md: 0.875rem;
+  --text-mono-md--lh: 1.4;
+  --text-mono-sm: 0.75rem;
+  --text-mono-sm--lh: 1.4;
+  --text-label: 0.6875rem;
+  --text-label--lh: 1;
+  --text-label--tracking: 0.08em;
 }
 ```
 
@@ -126,13 +128,13 @@ Type scale (fluid via `clamp()`):
 
 ```css
 @theme {
-  --container-prose:    680px;
-  --container-default:  1200px;
+  --container-prose: 680px;
+  --container-default: 1200px;
 
-  --rotate-tape-a:     -2.5deg;
-  --rotate-tape-b:     -1.5deg;
-  --rotate-tape-c:      1deg;
-  --rotate-tape-d:      2deg;
+  --rotate-tape-a: -2.5deg;
+  --rotate-tape-b: -1.5deg;
+  --rotate-tape-c: 1deg;
+  --rotate-tape-d: 2deg;
 }
 ```
 
@@ -142,10 +144,10 @@ The 4-value rotation pool (vs. PRD's 2-value `-1.5° / 2°`) gives long card gri
 
 ```css
 @theme {
-  --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
-  --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
+  --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+  --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
   --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
-  --shadow-soft:       0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 ```
 
@@ -153,9 +155,9 @@ The 4-value rotation pool (vs. PRD's 2-value `-1.5° / 2°`) gives long card gri
 
 ```css
 @theme {
-  --motion-fast:  150ms ease-out;
-  --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --motion-tape:  300ms ease-out;
+  --motion-fast: 150ms ease-out;
+  --motion-base: 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tape: 300ms ease-out;
 }
 ```
 
@@ -191,15 +193,15 @@ Each primitive lives at `apps/web/src/components/design-system/<Name>/` with the
 
 **Convention correction vs. external PRD:** the external PRD proposed `apps/web/src/components/foundations/` as the new home. We use `apps/web/src/components/design-system/` to match `apps/web/CLAUDE.md` rules. The `Foundation/` Storybook group is reserved for token MDX docs only — primitive stories live under `UI/<Name>`.
 
-| Primitive | Props | Notes |
-| --- | --- | --- |
-| `<TapeStrip>` | `color: 'jersey' \| 'ink' \| 'cream'`, `position: 'tl' \| 'tr' \| 'bl' \| 'br'`, `length: 'sm' \| 'md' \| 'lg'`, `rotation?: number` | Inline SVG with subtle texture; `transform: rotate()`. Default `color="jersey"`, default `position="tl"`. |
-| `<StripedSeam>` | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'` | SVG element so caps render cleanly. Renders the `--pattern-seam` (or `--pattern-jersey-stripes` rotated -45°) inside the SVG path. **Never use negative margins** to fix seam alignment (saved owner preference). |
-| `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` | `color: 'ink' \| 'paper-edge'`, `inset?: boolean` | Single component file `Divider.tsx` with three named exports for ergonomics. |
-| `<QuoteMark>` | `color: 'jersey' \| 'ink' \| 'cream'` | Pure SVG, ~20px square. Two stacked italic open-quote glyphs. |
-| `<TicketStub>` | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` | Mono content inside a perforated-edge SVG frame. `position="overlay-*"` uses `position: absolute`; `position="inline"` is a flow element. |
-| `<HighlighterStroke>` | `variant: 'a' \| 'b' \| 'c'` (three hand-drawn SVGs), `color: 'jersey'` | Wraps children with span-per-line and absolute-positions an SVG underneath. Multi-line aware. SVG paths live in `apps/web/src/components/design-system/HighlighterStroke/strokes/` as inline modules. |
-| `<MonoLabel>` | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'` | Renders `--text-label` token. Pill variants: 4-6px padding, 2px radius. Children wrapped in `<span>` with uppercase + tracking. |
+| Primitive                                              | Props                                                                                                                                | Notes                                                                                                                                                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<TapeStrip>`                                          | `color: 'jersey' \| 'ink' \| 'cream'`, `position: 'tl' \| 'tr' \| 'bl' \| 'br'`, `length: 'sm' \| 'md' \| 'lg'`, `rotation?: number` | Inline SVG with subtle texture; `transform: rotate()`. Default `color="jersey"`, default `position="tl"`.                                                                                                         |
+| `<StripedSeam>`                                        | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'`                  | SVG element so caps render cleanly. Renders the `--pattern-seam` (or `--pattern-jersey-stripes` rotated -45°) inside the SVG path. **Never use negative margins** to fix seam alignment (saved owner preference). |
+| `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` | `color: 'ink' \| 'paper-edge'`, `inset?: boolean`                                                                                    | Single component file `Divider.tsx` with three named exports for ergonomics.                                                                                                                                      |
+| `<QuoteMark>`                                          | `color: 'jersey' \| 'ink' \| 'cream'`                                                                                                | Pure SVG, ~20px square. Two stacked italic open-quote glyphs.                                                                                                                                                     |
+| `<TicketStub>`                                         | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'`                          | Mono content inside a perforated-edge SVG frame. `position="overlay-*"` uses `position: absolute`; `position="inline"` is a flow element.                                                                         |
+| `<HighlighterStroke>`                                  | `variant: 'a' \| 'b' \| 'c'` (three hand-drawn SVGs), `color: 'jersey'`                                                              | Wraps children with span-per-line and absolute-positions an SVG underneath. Multi-line aware. SVG paths live in `apps/web/src/components/design-system/HighlighterStroke/strokes/` as inline modules.             |
+| `<MonoLabel>`                                          | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'`                                              | Renders `--text-label` token. Pill variants: 4-6px padding, 2px radius. Children wrapped in `<span>` with uppercase + tracking.                                                                                   |
 
 ### Implementation notes
 
@@ -218,7 +220,7 @@ Update or create:
 - **`src/stories/foundation/Colors.mdx`** — add the 9 new colour tokens with swatches, hex values, and contrast notes against cream and ink. Sibling `Colors.stories.tsx` wraps the MDX with `tags: ["vr"]` (per existing pattern in `apps/web/CLAUDE.md`).
 - **`src/stories/foundation/Typography.mdx`** — add the 7 new display/body/mono tokens, render Dutch sample text including diacritics (`ë`, `é`, `ï`) and italics. Show Freight Display italic + Quasimoda body together so the pairing is visible.
 - **`src/stories/foundation/SpacingAndIcons.mdx`** — add the new container widths, rotation pool, and shadow tokens.
-- **`src/stories/foundation/Patterns.mdx`** — *new file*. Render the three pattern tokens (`--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, `--pattern-seam`) as full-width swatches with usage notes. Sibling `Patterns.stories.tsx` wraps it.
+- **`src/stories/foundation/Patterns.mdx`** — _new file_. Render the three pattern tokens (`--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, `--pattern-seam`) as full-width swatches with usage notes. Sibling `Patterns.stories.tsx` wraps it.
 
 ### 3.2 Primitive stories
 
@@ -262,7 +264,7 @@ What stays unchanged:
 - [ ] All token combinations used in mockups have documented contrast ratios in `Foundation/Colors.mdx`. Failing combos (e.g. `jersey on cream` for body text) flagged with usage warning.
 - [ ] Existing components still build and render with no regressions. Concretely:
   - `pnpm --filter @kcvv/web check-all` passes.
-  - `pnpm --filter @kcvv/web run vr:check` shows no diffs against committed baselines for any *existing* story (only **new** baselines are added in this PR).
+  - `pnpm --filter @kcvv/web run vr:check` shows no diffs against committed baselines for any _existing_ story (only **new** baselines are added in this PR).
 - [ ] PR body includes a `## VR baselines` section enumerating all new baselines as first-time captures (acceptable per the VR contract).
 - [ ] `apps/web/CLAUDE.md` updated:
   - Note that `Foundation/Patterns` MDX exists.
@@ -301,4 +303,4 @@ What stays unchanged:
 
 ---
 
-*End of Phase 0 PRD.*
+_End of Phase 0 PRD._
