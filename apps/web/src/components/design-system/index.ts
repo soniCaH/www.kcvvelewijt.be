@@ -100,3 +100,12 @@ export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
 // FooterSafeArea
 export { FooterSafeArea } from "./FooterSafeArea";
 export type { FooterSafeAreaProps } from "./FooterSafeArea";
+
+// TapeStrip
+export { TapeStrip } from "./TapeStrip";
+export type {
+  TapeStripProps,
+  TapeStripColor,
+  TapeStripPosition,
+  TapeStripLength,
+} from "./TapeStrip";
