@@ -1,0 +1,21 @@
+# Patterns
+
+Background patterns used by the redesign as first-class CSS variable tokens. Compose primitives reference these directly via `background: var(--pattern-...)` rather than redefining gradients inline.
+
+## `--pattern-jersey-stripes`
+
+Wide green/cream horizontal stripes (32 px / 32 px). Used on hero illustrations, dark interlude backgrounds, and the jersey shirt thumbnail in the homepage webshop strip.
+
+<div style={{ height: '120px', background: 'var(--pattern-jersey-stripes)', border: '1px solid var(--color-paper-edge)' }} />
+
+## `--pattern-jersey-stripes-tight`
+
+Tight green/cream horizontal stripes (14 px / 14 px). Used on small player figures, retro shirt thumbnails, and background fills where the wide stripes feel coarse.
+
+<div style={{ height: '120px', background: 'var(--pattern-jersey-stripes-tight)', border: '1px solid var(--color-paper-edge)' }} />
+
+## `--pattern-seam`
+
+Diagonal black/cream barber-pole stripe at -45° (8 px / 8 px). Used by `<StripedSeam>` for horizontal section dividers. Never apply with negative margins; `<StripedSeam>` is SVG-backed for clean caps.
+
+<div style={{ height: '24px', background: 'var(--pattern-seam)' }} />
