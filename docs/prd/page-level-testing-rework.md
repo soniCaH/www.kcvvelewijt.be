@@ -71,7 +71,7 @@ Move page-level testing off Storybook + test-runner and onto Playwright running 
 
 ## Acceptance criteria
 
-- [ ] `apps/web/test/e2e/` directory exists with a Playwright config (`playwright.config.ts`) targeting `localhost:3000` for local runs and a `BASE_URL` env var for CI.
+- [ ] `apps/web/test/e2e/` directory exists with a **dedicated** Playwright config at `apps/web/test/e2e/playwright.config.ts` (separate from any root or VR config) — defaults `baseURL` to `http://localhost:3000` for local runs and accepts a `BASE_URL` env var for CI. All test-suite invocations (local and CI) pass `-c apps/web/test/e2e/playwright.config.ts` so the e2e suite never reuses the existing VR / Storybook test-runner config.
 - [ ] At least 16 route smoke tests as enumerated in §3, each asserting the per-route checks in §4.
 - [ ] CI workflow `.github/workflows/e2e.yml` runs the suite against `next start` on a Linux runner. Path-trigger matches existing VR pattern. Job name `e2e`. Required for merge on PRs that touch `apps/web/src/**`.
 - [ ] All five `vr-skip`-tagged page stories remain skipped by `vr:check`; no test-runner crashes locally or in CI.
@@ -100,14 +100,23 @@ Move page-level testing off Storybook + test-runner and onto Playwright running 
 
 ## Implementation phases
 
-This PRD lands as a single PR (Phase 0.5 in the redesign series), broken into:
+This PRD will be delivered across two PRs (Phase 0.5 in the redesign series):
 
-1. Tag the 5 known-flaky stories `vr-skip` (in the same PR as this PRD — already done in the companion commit).
-2. Set up `apps/web/test/e2e/` with Playwright config + 1 route smoke test as a tracer-bullet.
-3. Add the remaining 15 route smoke tests.
-4. Add CI workflow.
-5. Update `docs/prd/visual-regression-testing.md` and `apps/web/CLAUDE.md`.
-6. Close / rescope GitHub issues #1375 and #1376.
+**PR 1 — this PR (#1520):** lands the PRD itself and the immediate-value piece.
+
+1. Commit this PRD at `docs/prd/page-level-testing-rework.md`.
+2. Tag the 5 known-flaky `Pages/*` stories with `vr-skip` (companion commit) so `vr:check` stops generating crashing test files locally and in CI.
+3. Cross-link the PRD ↔ tracking issue (#1522) ↔ legacy VR issues (#1375, #1376) for review-time visibility.
+
+**PR 2 — Playwright suite implementation (follow-up):** opens after PR 1 merges and the PRD direction is locked in.
+
+1. Set up `apps/web/test/e2e/` with the dedicated Playwright config at `apps/web/test/e2e/playwright.config.ts` (separate from any root config) plus 1 route smoke test as a tracer-bullet.
+2. Add the remaining 15 route smoke tests enumerated in §Decisions item 3.
+3. Add the CI workflow at `.github/workflows/e2e.yml` invoking `playwright test -c apps/web/test/e2e/playwright.config.ts` against `next start` on a Linux runner.
+4. Update `docs/prd/visual-regression-testing.md` (§12 Phase 3 Include list narrowed; Phase 4 + Phase 5 sections marked SUPERSEDED with link back to this PRD) and `apps/web/CLAUDE.md` (layered testing model documented).
+5. Close / rescope GitHub issues #1375 and #1376 per §Decisions item 6.
+
+Tracking issue #1522 closes only when **both** PRs merge.
 
 ---
 
