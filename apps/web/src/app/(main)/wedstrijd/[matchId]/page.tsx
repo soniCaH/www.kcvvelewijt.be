@@ -147,6 +147,7 @@ export default async function MatchPage({
 
   return (
     <>
+      <h1 className="sr-only">{matchLabel}</h1>
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
