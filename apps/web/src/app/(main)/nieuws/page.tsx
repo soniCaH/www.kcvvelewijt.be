@@ -71,6 +71,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
 
   return (
     <>
+      <h1 className="sr-only">Nieuwsarchief</h1>
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },

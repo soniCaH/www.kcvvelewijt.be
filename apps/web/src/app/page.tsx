@@ -326,6 +326,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <h1 className="sr-only">KCVV Elewijt</h1>
       <JsonLd data={buildSportsClubJsonLd()} />
       <JsonLd
         data={buildBreadcrumbJsonLd([

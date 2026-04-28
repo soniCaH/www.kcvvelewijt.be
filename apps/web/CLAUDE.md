@@ -139,6 +139,117 @@ Structured data builders live in `src/lib/seo/jsonld.ts` and use `schema-dts` ty
 - **Analytics test assertions must encode the privacy policy, not the wire format.** Write `expect(...).toHaveBeenCalledWith("event", { member_id: hashMemberId(id), query_text: sanitizeQuery(q) })` — not the raw input values. A test that passes against a privacy-violating implementation is not a privacy test.
 - **Bug fix commits need a regression test.** If a fix adds a guard condition, add a test case that exercises the unguarded path.
 
+## Layered testing model
+
+Three independent test layers, each owning a specific concern. Don't blur them — each layer's value comes from the bounded thing it asserts about.
+
+| Layer                           | Tool                                                   | What it catches                                                                               | Lives at                                                                            |
+| ------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Unit / component logic          | Vitest (`pnpm test`)                                   | Component behaviour, hooks, utility correctness                                               | `**/*.test.tsx`, `**/*.test.ts`                                                     |
+| Component visual regression     | Storybook + `@storybook/test-runner` (`pnpm vr:check`) | Pixel-level regressions on `UI/*`, `Features/*`, `Layout/*` stories                           | `apps/web/src/**/*.stories.tsx` + baselines under `apps/web/test/vr/__snapshots__/` |
+| **Page-level functional smoke** | **Playwright e2e (`pnpm test:e2e`)**                   | **Page renders 200/404, `<h1>` + nav + footer present, no broken images, no `console.error`** | **`apps/web/test/e2e/`**                                                            |
+
+`Pages/*` Storybook stories exist as design references but are **not** VR-tested — page composition correctness is the e2e suite's job. See `docs/prd/page-level-testing-rework.md` for the rationale.
+
+## Page-Level E2E Testing (Playwright)
+
+Functional smoke checks against `next start` (or a Vercel preview URL), one
+test per route. PRD: `docs/prd/page-level-testing-rework.md`.
+
+### Local workflow
+
+```bash
+# 0. First-run only: install Chromium for Playwright (one-time).
+pnpm --filter @kcvv/web run test:e2e:install
+
+# 1. Build the app — webServer in playwright.config.ts launches `next start`.
+pnpm --filter @kcvv/web run build
+
+# 2. Make sure the BFF is reachable. Either start it locally:
+#       pnpm --filter @kcvv/api dev
+#    OR point KCVV_API_URL at the staging worker in `apps/web/.env.local`.
+
+# 3. Run the suite. Auto-starts a server on :3000 if one isn't already up.
+pnpm --filter @kcvv/web run test:e2e
+
+# 4. Interactive UI mode (re-run on save, screenshots, trace viewer).
+pnpm --filter @kcvv/web run test:e2e:ui
+```
+
+To target a deployed environment instead of local `next start`:
+
+```bash
+BASE_URL=https://www.kcvvelewijt.be pnpm --filter @kcvv/web run test:e2e
+```
+
+When `BASE_URL` is set, the config's `webServer` block stays inactive and the
+suite hits the supplied URL directly.
+
+### What each test asserts
+
+The shared `smokeTest()` helper (`apps/web/test/e2e/helpers/smoke.ts`) enforces
+the same contract on every route:
+
+- HTTP status matches the expected status (200 for content routes, 404 for the
+  unknown-slug test).
+- `<h1>` is rendered and visible. Page-shells without a visible heading carry a
+  `sr-only` h1 — see `apps/web/src/app/page.tsx` and
+  `apps/web/src/app/(main)/nieuws/page.tsx`.
+- Primary `<nav>` and `<footer>` are visible.
+- No visible `<img>` is broken (`naturalWidth > 0`).
+- No `console.error` was emitted during page load (modulo a small known-noise
+  ignore-list in the helper).
+
+Per-route deep assertions are deliberately **out of scope** for this layer —
+the goal is broad coverage of "did the page render at all", not "did this
+specific value render correctly". Deep assertions belong in component-level
+unit tests or, for cross-component contracts, dedicated integration tests
+under the same `apps/web/test/e2e/` umbrella.
+
+### Dynamic-route fixtures
+
+Slugs for `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen/[slug]`,
+`/wedstrijd/[matchId]`, and `/events/[slug]` are discovered at suite startup
+by parsing `${BASE_URL}/sitemap.xml`. articleType variants are detected by
+fetching candidate article pages and matching the type-specific
+`data-testid="<type>-hero"` markers. If a route family has zero entries in
+the sitemap, that test is skipped (visible in runner output) rather than
+failing.
+
+### CI
+
+`.github/workflows/e2e.yml` runs the suite against `next start` on a Linux
+runner using the pinned `mcr.microsoft.com/playwright:v1.59.1-noble` image
+(same version as `@playwright/test` in `apps/web/package.json`).
+
+Path triggers are deliberately **distinct from the VR job's**:
+
+- Included: `apps/web/src/**`, `apps/web/public/**`,
+  `apps/web/package.json`, `apps/web/test/e2e/**`, `.github/workflows/e2e.yml`.
+- Excluded: `apps/web/.storybook/**`, `apps/web/test/vr/**` (Storybook-only
+  paths that don't affect a Playwright-against-`next start` run).
+
+Failure uploads `playwright-report/` and `test-results/` (traces,
+screenshots, video) as artifacts with 14-day retention.
+
+### When to add a new e2e test
+
+Add a route smoke test when you ship a **new top-level route** under
+`apps/web/src/app/`. Don't add e2e tests for sub-page interactions or
+component variants — those are component-level concerns.
+
+The `smokeTest()` helper already covers the structural contract. New tests
+are typically two lines:
+
+```typescript
+test("/new-route", async ({ page }) => {
+  await smokeTest(page, { path: "/new-route" });
+});
+```
+
+If the new route doesn't have a visible `<h1>` (page-shell pattern), add a
+`sr-only` h1 to the page rather than weakening the smoke contract.
+
 ## Visual Regression Testing
 
 Self-hosted Playwright + `@storybook/test-runner`. Baselines live under

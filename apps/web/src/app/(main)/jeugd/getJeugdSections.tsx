@@ -18,7 +18,7 @@ export function getJeugdSections(
       bg: "kcvv-black",
       content: (
         <PageHero
-          image="/images/hero-jeugd.jpg"
+          image="/images/youth-trainers.jpg"
           label="Jeugdopleiding"
           headline={
             <>

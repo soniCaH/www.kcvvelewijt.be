@@ -1,0 +1,104 @@
+name: E2E
+
+# Page-level Playwright smoke suite. PRD: docs/prd/page-level-testing-rework.md
+#
+# Path filtering deliberately differs from `visual-regression` in ci.yml:
+#   - Storybook-only paths (apps/web/.storybook/**, apps/web/test/vr/**) are
+#     EXCLUDED — they don't affect a Playwright-against-`next start` run.
+#   - apps/web/test/e2e/** is INCLUDED so PRs that only touch the suite still
+#     run it.
+#   - packages/api-contract/** is INCLUDED beyond the PRD's enumerated paths
+#     because @kcvv/api-contract is a runtime dep of @kcvv/web — schema
+#     changes there can break SSR rendering without touching apps/web/src.
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/web/src/**"
+      - "apps/web/public/**"
+      - "apps/web/package.json"
+      - "apps/web/test/e2e/**"
+      - "packages/api-contract/**"
+      - ".github/workflows/e2e.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "apps/web/src/**"
+      - "apps/web/public/**"
+      - "apps/web/package.json"
+      - "apps/web/test/e2e/**"
+      - "packages/api-contract/**"
+      - ".github/workflows/e2e.yml"
+
+jobs:
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
+    # Pinned to match @playwright/test in apps/web/package.json (1.59.1) and the
+    # local Docker image used by the visual-regression suite. Bump all of these
+    # together — drift between the version that runs the suite and the
+    # @playwright/test API can produce silent skips or false-positive failures.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      options: --user 0:0
+    env:
+      # The container ships browsers under /ms-playwright. Suppress
+      # @playwright/test's postinstall re-download to save ~150 MB and ~1 min.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build api-contract
+        run: npx turbo build --filter=@kcvv/api-contract
+
+      - name: Build Next.js
+        run: npx turbo build --filter=@kcvv/web
+        env:
+          KCVV_API_URL: ${{ vars.KCVV_API_URL }}
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
+
+      - name: Run Playwright e2e suite
+        run: pnpm --filter @kcvv/web run test:e2e
+        env:
+          # Same env required at runtime by `next start` for SSR data fetching.
+          KCVV_API_URL: ${{ vars.KCVV_API_URL }}
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload trace + screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-test-results
+          path: apps/web/test-results/
+          if-no-files-found: ignore
+          retention-days: 14

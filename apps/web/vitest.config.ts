@@ -11,6 +11,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.next/**",
+      "**/test/e2e/**",
       "**/tests/e2e/**",
       "**/tests/visual/**",
       "**/playwright-report/**",
@@ -21,6 +22,7 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
       exclude: [
         "node_modules/",
+        "test/e2e/",
         "tests/e2e/",
         "tests/visual/",
         "*.config.ts",
