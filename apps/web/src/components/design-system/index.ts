@@ -112,6 +112,14 @@ export type {
   HighlighterStrokeVariant,
 } from "./HighlighterStroke";
 
+// MonoLabel
+export { MonoLabel } from "./MonoLabel";
+export type {
+  MonoLabelProps,
+  MonoLabelVariant,
+  MonoLabelSize,
+} from "./MonoLabel";
+
 // QuoteMark
 export { QuoteMark } from "./QuoteMark";
 export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
