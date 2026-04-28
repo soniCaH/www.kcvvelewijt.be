@@ -516,22 +516,27 @@ Long-form legal text. `<EditorialHero variant="generic">` `Privacyverklaring.` +
 
 The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a **per-component PR series** — old and new tokens coexist in `globals.css` until cleanup. Each phase that touches `Features/*` carries the Visual Regression baseline contract from `docs/prd/visual-regression-testing.md` §12.
 
+**Visual approval gating** is hybrid by deliberate design (see §8 for the full workflow):
+
+- **Phases 0–2 and 9** ship behind Storybook iteration alone. Tokens and small primitives are abstract enough that a Storybook story is a sufficient visual contract; mockups would not add information.
+- **Phases 3–8** require a *Design checkpoint* before any implementation work begins. The checkpoint runs `/design-an-interface` to produce 2–3 directional mockup options for the new surfaces, the owner picks one, and only then does PRD-writing → plan-writing → execution proceed for that phase.
+
 ### Phase summary
 
-| Phase | Focus | Primitives delivered | Components touched | VR baselines | Effort |
+| Phase | Focus | Design gate | Primitives delivered | Components touched | Effort |
 | --- | --- | --- | --- | --- | --- |
-| **0** | Foundations: tokens + Tier A decorative | `<TapeStrip>`, `<StripedSeam>`, dividers, `<QuoteMark>`, `<TicketStub>`, `<HighlighterStroke>`, `<MonoLabel>` | None refactored | New baselines per primitive story | 1–2 weeks |
-| **1** | Tier B composition primitives | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>`, `<TapedFigure>` | `<SectionHeader>` reworked to compose new primitives; `<Badge>` retired | Per primitive | 2 weeks |
-| **2** | Atom rework | (no new primitives) | `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Label>`, `<Alert>`, `<Spinner>`, `<BrandedTabs>`, `<FilterTabs>` token swaps | Per atom | 1–2 weeks |
-| **3** | Tier C domain figures + EditorialHero | `<PlayerFigure>`, `<JerseyShirt>`, `<EndMark>`, `<QASectionDivider>`; new `<EditorialHero>` | Existing `<PageHero>` retired; `<SiteHeader>` + `<MatchStrip>` + `<SiteFooter>` reworked | Per layout component | 2–3 weeks |
-| **4** | Homepage rebuild | (no new primitives) | `<NewsGrid>`, `<NewsCard>`, `<ScheduleStandingsBlock>`, `<YouthBlock>`, `<WebshopStrip>`, `<SponsorsBlock>`, `<PosterWordmark>` | Per section + `Pages/Homepage` story | 2–3 weeks |
-| **5** | Article detail (interviews first) | `<InterviewHero>`, `<QARow>`, `<QASection>`, `<InterviewCredits>` | All article variants (interview, matchverslag, column, transfer, jeugd, evenement, generic). Existing `docs/prd/article-detail-redesign.md` superseded | Per article variant + `Pages/ArticleDetail` story | 3–4 weeks |
-| **6** | Player profile + match detail + team detail + calendar + events | `<PlayerHero>`, `<StatsStrip>`, `<BioBlock>`, `<CareerLogTable>`, `<RecentMatchesGrid>`, `<QuotesBlock>`, `<MatchPreviewBody>`, `<TeamHero>`, `<SquadGrid>`, `<EventCard>` | Player profile, match detail, team detail, kalender, events list + detail | Per page + `Pages/<Name>` stories | 4–5 weeks |
-| **7** | Club + jeugd + teams + sponsors landings | (no new primitives) | Sponsors page, jeugd landing, teams landing, club organigram + geschiedenis. Existing PRDs in `docs/prd/{sponsors,jeugd-landing-page,teams-landing-page,club-landing-page}-redesign.md` superseded | Per page | 2–3 weeks |
-| **8** | Hulp + search + privacy + error pages | (no new primitives) | All remaining surfaces | Per page | 1–2 weeks |
-| **9** | Cleanup | (no new primitives) | Retire legacy tokens (`--color-kcvv-*`, `--color-green--*`), retire Stenciletta + Montserrat from Typekit / next-font, drop legacy `tailwind.config.ts` references in plans, retire `<Badge>` consumers, retire `<PageHero>` | Comprehensive sweep | Per consumer | 1–2 weeks |
+| **0** | Foundations: tokens + Tier A decorative | Storybook only | `<TapeStrip>`, `<StripedSeam>`, dividers, `<QuoteMark>`, `<TicketStub>`, `<HighlighterStroke>`, `<MonoLabel>` | None refactored | 1–2 weeks |
+| **1** | Tier B composition primitives | Storybook only | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>`, `<TapedFigure>` | `<SectionHeader>` reworked; `<Badge>` retired | 2 weeks |
+| **2** | Atom rework | Storybook only | (no new primitives) | `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Label>`, `<Alert>`, `<Spinner>`, `<BrandedTabs>`, `<FilterTabs>` token swaps | 1–2 weeks |
+| **3** | Tier C domain figures + EditorialHero variants | **Mockups via `/design-an-interface`** — 6+ EditorialHero variants need approving (transfer / match-preview / interview / event / announcement / generic / player); PlayerFigure photo+illustration handling needs design decisions | `<PlayerFigure>`, `<JerseyShirt>`, `<EndMark>`, `<QASectionDivider>`; new `<EditorialHero>` | Existing `<PageHero>` retired; `<SiteHeader>` + `<MatchStrip>` + `<SiteFooter>` reworked | 2–3 weeks design + 2–3 weeks build |
+| **4** | Homepage rebuild | **Mockups per section** — even though one homepage exemplar exists, NewsGrid, ScheduleStandings, YouthBlock, WebshopStrip, SponsorsBlock, PosterWordmark each need detailed mockups | (no new primitives) | `<NewsGrid>`, `<NewsCard>`, `<ScheduleStandingsBlock>`, `<YouthBlock>`, `<WebshopStrip>`, `<SponsorsBlock>`, `<PosterWordmark>` | 1–2 weeks design + 2–3 weeks build |
+| **5** | Article detail (interviews first) | **Mockup per variant** — duo interview is mocked; matchverslag, column, transfer, jeugd, evenement, generic each need a mockup | `<InterviewHero>`, `<QARow>`, `<QASection>`, `<InterviewCredits>` | All article variants. `docs/prd/article-detail-redesign.md` superseded | 2–3 weeks design + 3–4 weeks build |
+| **6** | Player profile + match detail + team detail + calendar + events | **Mockup per page type** — player profile is mocked; match detail (3 states), team detail, kalender, events list + detail each need a mockup | `<PlayerHero>`, `<StatsStrip>`, `<BioBlock>`, `<CareerLogTable>`, `<RecentMatchesGrid>`, `<QuotesBlock>`, `<MatchPreviewBody>`, `<TeamHero>`, `<SquadGrid>`, `<EventCard>` | Player profile, match detail, team detail, kalender, events | 3–4 weeks design + 4–5 weeks build |
+| **7** | Club + jeugd + teams + sponsors landings | **Mockup per page** — none mocked. Sponsors tier rendering needs particular attention (logos vs names; monochrome vs colour) | (no new primitives) | Sponsors page, jeugd landing, teams landing, club organigram + geschiedenis. Existing `docs/prd/{sponsors,jeugd-landing-page,teams-landing-page,club-landing-page}-redesign.md` superseded | 2 weeks design + 2–3 weeks build |
+| **8** | Hulp + search + privacy + error pages | **Mockup per page** — none mocked | (no new primitives) | All remaining surfaces | 1 week design + 1–2 weeks build |
+| **9** | Cleanup | None | (no new primitives) | Retire legacy tokens, retire Stenciletta + Montserrat, retire `<Badge>` consumers, retire `<PageHero>` | 1–2 weeks |
 
-**Total elapsed effort estimate:** 18–28 weeks of focused work. Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
+**Total elapsed effort estimate:** ~25–40 weeks of focused work, depending on how many design rounds each gated phase needs. The wider range than before reflects design-checkpoint time, which can iterate (the owner may push back on mockup options once or twice before approval). Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
 
 ### VR baseline contract per phase
 
@@ -546,8 +551,9 @@ Stories that genuinely cannot be made deterministic carry `parameters.vr.disable
 
 ### Phase entry / exit criteria
 
-- **Entry:** previous phase is fully merged; per-phase PRD has been written, reviewed, and locked; corresponding GitHub issue exists.
-- **Exit:** all per-phase PRs merged; CI green; per-phase Storybook page reviewable; design owner sign-off recorded in the issue close-out comment.
+- **Entry (gated phases 3–8):** previous phase is fully merged; design checkpoint completed, mockup option chosen, mockups committed to `docs/design/mockups/<phase-N>/`; per-phase PRD written and references the chosen mockup; corresponding GitHub issue exists.
+- **Entry (un-gated phases 0–2 and 9):** previous phase is fully merged; per-phase PRD has been written, reviewed, and locked; corresponding GitHub issue exists.
+- **Exit (all phases):** all per-phase PRs merged; CI green; per-phase Storybook page reviewable; design owner sign-off recorded in the issue close-out comment.
 
 ### Merging redesign with concurrent feature work
 
@@ -559,7 +565,114 @@ The redesign runs in parallel with ongoing match-day, news, and operations work.
 
 ---
 
-## 8. Decision log
+## 8. Workflow per phase
+
+Each phase moves from idea to merged code through a fixed sequence. Phases 0–2 and 9 skip the *Design checkpoint* step; phases 3–8 must run it. The rest of the steps are the same for every phase.
+
+### 8.1 Sequence
+
+```text
+[ Design checkpoint ]   ← skipped for Phases 0-2, 9
+        |
+        v
+[ PRD writing ]
+        |
+        v
+[ Implementation plan writing ]
+        |
+        v
+[ Worktree + GitHub issue creation ]
+        |
+        v
+[ Execution (subagent-driven OR parallel session) ]
+        |
+        v
+[ VR baselines + check-all green ]
+        |
+        v
+[ PR open → owner review → merge ]
+```
+
+### 8.2 Step 1 — Design checkpoint (Phases 3–8 only)
+
+Run inside the redesign worktree. Invoke `/design-an-interface` with a brief framing the surface(s) the phase covers. The skill produces 2–3 directional mockup options per surface, typically as standalone HTML or PNG files.
+
+**Inputs the skill needs to do good work:**
+- The `docs/plans/2026-04-27-redesign-master-design.md` audit (§2) and primitive catalogue (§4).
+- The shape note for the surface from §6 (or the template spec from §5 if mocked).
+- Sample data shapes — current Sanity schema shapes, sample article / event / match payloads — so mockups render against real text lengths, not lorem ipsum.
+- Owner-stated must-haves and must-avoids per surface (e.g. "this is for parents, not players" or "no commercial sponsor placement on jeugd page").
+
+**Outputs:**
+- 2–3 mockup options committed to `docs/design/mockups/phase-<N>-<surface>/option-<a|b|c>.html` (or `.png` if image-only).
+- A short markdown comparison file `docs/design/mockups/phase-<N>-<surface>/compare.md` summarising trade-offs of each option.
+
+**Owner decision flow:**
+1. Owner reviews options visually (open the HTML files; view PNGs).
+2. Owner picks one, or asks for a revision round (the skill iterates inside the same `phase-<N>-<surface>/` directory).
+3. Once an option is chosen, the chosen file is renamed `option-final.html`. The other options stay committed for history.
+4. Master design doc §5 (templates) or §6 (shape notes) is updated to reflect any composition decisions visible in the chosen mockup but not yet documented (e.g. concrete responsive breakpoints, exact mono-label positions, illustration sizes).
+
+**Time budget per checkpoint:** typically 2–5 days including 1–2 revision rounds. Allocate more for phase 6 (5+ surfaces) and phase 7 (4 landings).
+
+### 8.3 Step 2 — PRD writing
+
+Per-phase PRD lives at `docs/prd/redesign-phase-<N>.md`. Mirrors the structure of `docs/prd/redesign-phase-0.md` (the working example). PRD must:
+
+- Cite the master design doc + the chosen mockup file from §8.2.
+- Enumerate every component / page touched, mapped to the primitives from §4.
+- Specify the *new* tokens (if any) added to `globals.css` in this phase. Most non-foundation phases add zero new tokens.
+- Include a "VR baselines" section listing which `Features/<Domain>/` story files acquire baselines in this phase, and which existing baselines update.
+- Include an Analytics section per `apps/web/CLAUDE.md` rule (events, GTM mappings, GA4 dimensions for new user interactions).
+
+PRDs that supersede an earlier per-feature PRD (e.g. Phase 5 supersedes `docs/prd/article-detail-redesign.md`) say so explicitly and link the superseded file. Old PRDs are not deleted — kept for git-blame context.
+
+### 8.4 Step 3 — Implementation plan writing
+
+Run `superpowers:writing-plans` with the per-phase PRD as input. Plan lives at `docs/plans/YYYY-MM-DD-redesign-phase-<N>-plan.md` and follows the bite-sized TDD task structure (see `docs/plans/2026-04-28-redesign-phase-0-plan.md` as the template).
+
+### 8.5 Step 4 — Worktree + issue
+
+Open a GitHub issue per phase: `Phase <N>: <surface(s)>`. Body links to the PRD, plan, and chosen mockup files.
+
+Create a worktree for execution:
+
+```bash
+git -C /path/to/repo worktree add ../kcvv-issue-<N> -b feat/issue-<N> origin/main
+```
+
+Per-phase worktrees keep the `feat/redesign-master` branch (which holds the master doc) free for ongoing language refinement.
+
+### 8.6 Step 5 — Execution
+
+Either:
+
+- **Subagent-driven** in the active session — fresh subagent per task, owner reviews between tasks. Best for early phases (0–2) where pace matters.
+- **Parallel session** — open a new Claude Code session inside the per-phase worktree and run `superpowers:executing-plans`. Best for long phases (4–6) where the active session continues design work for the next phase in parallel.
+
+Either way, each task in the plan is bite-sized (2–5 minutes per step), commits frequently, and ends with the per-phase plan's "Definition of Done" gates green.
+
+### 8.7 Step 6 — VR + check-all
+
+Per the rules already documented in `apps/web/CLAUDE.md` and the VR contract (`docs/prd/visual-regression-testing.md`):
+
+- All new `UI/<Name>` and `Pages/<Name>` stories tagged `["autodocs", "vr"]`, baselines committed in the same PR.
+- Updated baselines for existing `Features/<Domain>/` and `Layout/<Component>` stories justified in the PR body's `## VR baselines` section.
+- `pnpm --filter @kcvv/web run check-all` green before requesting review.
+
+### 8.8 Step 7 — PR open + review + merge
+
+PR uses the body template from the per-phase plan's "Open the PR" task. Owner approves; CodeRabbit feedback addressed; merge.
+
+After merge, the next phase's design checkpoint can begin (or run in parallel with the previous phase's PR if they are independent).
+
+### 8.9 What if a mockup approval fails late?
+
+If during execution a built component reveals the chosen mockup was wrong (e.g. a layout that worked in mockup HTML breaks at real responsive breakpoints, or real Sanity content has lengths the mockup didn't anticipate), halt the phase and re-enter §8.2. Document the failure mode in the phase issue close-out so subsequent phases factor it in. This is rare but explicitly allowed — design checkpoints buy *most* of the visual certainty, not all of it.
+
+---
+
+## 9. Decision log
 
 Decisions made in the 2026-04-27 brainstorm, with rationale.
 
@@ -577,6 +690,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 12. **Aspect-ratio agnostic primitives.** The taped paper frame is dimension-agnostic — 16:9 landscape (the dominant aspect of existing article and event imagery), square, portrait, and text-only all fit inside the same `<TapedCard>` without modification. Phase 1 ships `<TapedFigure>` as a dedicated landscape-by-default editorial photo + caption primitive for inline article body imagery, event thumbnails, and match-detail hero photos. `<NewsCard>` (Phase 4) takes an `aspectRatio` prop so mixed-aspect grids stay coherent: tape, rotation, and shadow stay constant; only the inner image aspect varies. (from owner correction 2026-04-28: existing content library is overwhelmingly 16:9; design must absorb that without forcing a re-crop.)
 13. **Stamnummer is `55`** (not `55⋅24`, not `55-24`). The `-24` suffix in mockup ticket-stub artwork is a decorative season/year tag, not part of the stamnummer. All ticket-stub examples in this doc use the canonical value. (from owner correction 2026-04-28.)
 14. **The football club in Elewijt has existed since 1909.** Mockup artwork showing `ANNO 1924` / `SINDS 1924` is a typo. Earlier saved-memory entries that said `1964` were also wrong. All "since X" branding in this doc and any subsequent design uses `1909`. (from owner correction 2026-04-28.)
+15. **Design checkpoint gating, hybrid by phase.** Phases 0–2 and 9 (tokens, primitives, atoms, cleanup) ship behind Storybook iteration alone — abstract pieces don't earn their keep with mockups. Phases 3–8 (composite components, full pages, landings) require a `/design-an-interface` checkpoint with 2–3 mockup options, owner approval, and committed mockups in `docs/design/mockups/phase-<N>-<surface>/` *before* PRD writing begins. This was made explicit because the owner cannot sign off on the entire redesign from the three exemplar mockups (homepage / duo interview / player profile) — most surfaces still need designing. See §8 for the full workflow. (from owner concern 2026-04-28.)
 
 ### Open questions deferred to per-phase PRDs
 
@@ -590,7 +704,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 
 ---
 
-## 9. References
+## 10. References
 
 - Source PRD (Claude Web, no codebase access — superseded): originally proposed at `docs/prd/redesign-phase-0.md` upstream context. The refined replacement lives at `docs/prd/redesign-phase-0.md`.
 - Editorial direction notes: `docs/design/directions/01-editorial-magazine.md`.
