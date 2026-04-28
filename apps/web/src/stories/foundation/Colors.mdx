@@ -129,7 +129,10 @@ restyled.
 
 Each row below renders the live token via `var(--color-...)` so the swatch and
 the contrast notes always reflect what `globals.css` ships today. Contrast
-ratios are measured against `--color-cream` (`#f5f1e6`).
+ratios are measured against `--color-cream` (`#f5f1e6`) by default; the
+`--color-jersey-bright` row is the exception and notes its `--color-ink`
+backdrop explicitly because the token is intended for green text on dark
+interludes, not on the cream surface.
 
 <table>
   <thead>
@@ -138,7 +141,7 @@ ratios are measured against `--color-cream` (`#f5f1e6`).
       <th>Hex</th>
       <th>Sample</th>
       <th>Role</th>
-      <th>Contrast on cream</th>
+      <th>Contrast &amp; verdict</th>
     </tr>
   </thead>
   <tbody>
@@ -175,7 +178,7 @@ ratios are measured against `--color-cream` (`#f5f1e6`).
       <td><code>#6b6b6b</code></td>
       <td><div style={{ background: 'var(--color-ink-muted)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
       <td>Byline, metadata, dividers</td>
-      <td>4.7:1 — AA at ≥18pt only</td>
+      <td>4.7:1 — AA normal text (just above the 4.5:1 threshold; AAA at ≥18pt)</td>
     </tr>
     <tr>
       <td><code>--color-jersey</code></td>

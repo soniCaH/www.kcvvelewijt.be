@@ -234,8 +234,8 @@
   /* ===== Redesign / Typography (Phase 0) ===== */
 
   /* Font families — Freight already loaded via existing Adobe Typekit kit */
-  --font-display:     "freight-display-pro", Georgia, "Times New Roman", serif;
-  --font-display-big: "freight-big-pro", Georgia, "Times New Roman", serif;
+  --font-display:     "freight-display-pro", georgia, "Times New Roman", serif;
+  --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
   /* --font-body and --font-mono are existing — Quasimoda flips title→body in Phase 9 cleanup */
 
   /* Type scale (fluid via clamp) */

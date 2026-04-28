@@ -83,10 +83,20 @@ export const AllVariants: Story = {
 // span wraps onto multiple lines, the background scales to one line-height
 // of the bounding box and does NOT repeat per visual line — so multi-line
 // highlights are visually broken. Multi-line support is deferred to
-// Phase 1+. This story is tagged `vr-skip` so the VR baselines do not
-// freeze an unsupported case.
+// Phase 1+. The story renders fine (no crash); it's just a known-broken
+// visual that we don't want VR to baseline. `parameters.vr.disable = true`
+// suppresses screenshot capture without excluding the story at discovery
+// (per apps/web/CLAUDE.md: `vr-skip` is reserved for stories that crash).
 export const MultiLineUnsupported: Story = {
-  tags: ["autodocs", "vr-skip"],
+  parameters: {
+    // vr.disable: known-broken visual (multi-line wrapping unsupported in
+    // Phase 0); the story renders without crashing, so vr-skip doesn't apply.
+    // Repro: render <HighlighterStroke> over wrapped text; stroke fails to
+    // repeat per visual line.
+    // Approved by: PR #1519 code review (CodeRabbit) 2026-04-28
+    // Re-evaluate: when multi-line support ships in Phase 1+
+    vr: { disable: true },
+  },
   args: { children: "x" },
   render: () => (
     <div className="font-display text-display-lg max-w-md italic">

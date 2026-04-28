@@ -12,7 +12,10 @@ export interface TicketStubProps {
 const POSITION_CLASS: Record<TicketStubPosition, string> = {
   "overlay-tr": "absolute top-2 right-2",
   "overlay-bl": "absolute bottom-2 left-2",
-  inline: "",
+  // `relative` is needed only for inline placement so the perforation pseudos
+  // anchor against the stub itself; absolute-positioned overlays rely on a
+  // positioned ancestor (the consumer's card frame) instead.
+  inline: "relative",
 };
 
 export function TicketStub({
@@ -26,7 +29,7 @@ export function TicketStub({
     <span
       data-position={position}
       style={style}
-      className={`${POSITION_CLASS[position]} bg-ink text-cream shadow-paper-sm relative inline-flex flex-col items-start px-3 py-1 font-mono text-[11px] leading-none tracking-[0.08em] uppercase`}
+      className={`${POSITION_CLASS[position]} bg-ink text-cream shadow-paper-sm inline-flex flex-col items-start px-3 py-1 font-mono text-[11px] leading-none tracking-[0.08em] uppercase`}
     >
       {/* Perforated edges — small cream circles punched into the left/right */}
       <span

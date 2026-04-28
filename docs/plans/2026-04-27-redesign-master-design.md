@@ -284,7 +284,7 @@ The Claude Web PRD listed four open questions. All are resolved here:
 
 1. **Jersey green hex.** Locked at `#4ACF52` (existing brand bright). No need to verify against external brand guide — this is the value already in `globals.css` today.
 2. **Mono choice.** IBM Plex Mono (already loaded via `next/font/google`). Numeric clarity is excellent.
-3. **Highlighter implementation.** SVG path, not `text-decoration`. Reason: text-decoration breaks awkwardly across line wraps and renders as a mechanical stroke. The mockups show clearly hand-drawn underlines, irregular by design. `<HighlighterStroke>` wraps children in spans-per-line and absolutely-positions an SVG underneath each.
+3. **Highlighter implementation.** SVG path delivered via CSS `background-image` (data URL), not `text-decoration`. Reason: text-decoration breaks awkwardly across line wraps and renders as a mechanical stroke. The mockups show clearly hand-drawn underlines, irregular by design. Phase 0 ships the **single-line** form of `<HighlighterStroke>` only — the CSS `background-image` approach lays one horizontal stroke across the highlighted span's bounding box and does NOT repeat per visual line when the span wraps. **Multi-line wrapping is a known limitation deferred to Phase 1+** (where a per-line span-wrapping helper would emit one stroke per visual line). The Phase 0 story file documents this explicitly via a `MultiLineUnsupported` story flagged with `parameters: { vr: { disable: true } }`.
 4. **Cream tone exact value.** `#F5F1E6` locked. Re-validate by eyedropper once the actual mockup PNGs are committed to the repo (today they live as HTML in `docs/design/mockups/`); cheap to adjust at any phase.
 
 ---

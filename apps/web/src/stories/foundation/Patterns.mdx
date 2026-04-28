@@ -1,6 +1,6 @@
 # Patterns
 
-Background patterns used by the redesign as first-class CSS variable tokens. Compose primitives reference these directly via `background: var(--pattern-...)` rather than redefining gradients inline.
+Background patterns used by the redesign. The `--pattern-jersey-stripes` and `--pattern-jersey-stripes-tight` tokens are first-class CSS variables — primitives that fill a flat background reference them directly via `background: var(--pattern-...)` rather than redefining gradients inline. The `--pattern-seam` token exists in `globals.css` as a quick-reference for the same pattern, but `<StripedSeam>` itself renders an inline SVG `<pattern>` definition (see `apps/web/src/components/design-system/StripedSeam/StripedSeam.tsx`) rather than consuming the CSS variable, because SVG gives clean start/end caps that a CSS gradient cannot match. New primitives should prefer the CSS-token route when a flat background fill is sufficient and reach for an SVG-backed implementation only when geometry beyond a repeating gradient is needed.
 
 ## `--pattern-jersey-stripes`
 

@@ -19,7 +19,11 @@ const VARIANT_CLASS: Record<MonoLabelVariant, string> = {
 };
 
 const SIZE_CLASS: Record<MonoLabelSize, string> = {
-  sm: "text-[11px] tracking-[0.08em]",
+  // sm consumes the canonical `--text-label` token (11px / 0.08em) so any
+  // future tweak to the label size lands here automatically.
+  sm: "text-[length:var(--text-label)] tracking-[var(--text-label--tracking)]",
+  // md keeps explicit values — no design token represents 13px/0.06em yet;
+  // promote to a token when a second consumer needs the same size.
   md: "text-[13px] tracking-[0.06em]",
 };
 
