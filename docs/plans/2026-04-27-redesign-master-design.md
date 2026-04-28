@@ -74,7 +74,7 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 7. **Mono-label pill rows.** Every editorial item starts with a row of small uppercase tracked labels: `INTERVIEW`, `SNELTREIN`, `8 MIN`, `MATCHVERSLAG`, `JEUGD ⋅ U15`. Title-case tags retire; mono caps come in.
 8. **Italic emphasis as house style.** Period-terminated headings (`Het rooster.`, `Clubkledij '26.`, `Vier wedstrijden.`) with one italic word. Strong, recognisable voice.
 9. **Striped jersey graphic device.** Horizontal green/white stripes recur on illustrated figures, retro thumbnails (`Retro '94`), webshop monogram grid (`H-U-K-V-V-R`). Becomes a brand pattern, reusable as bg fill.
-10. **Ticket-stub ephemera.** `STAMNR. 55`, `SINDS 1924`, perforated edges, taped overlap. Small graphic anchors that read as printed memorabilia.
+10. **Ticket-stub ephemera.** `STAMNR. 55`, `SINDS 1909`, perforated edges, taped overlap. Small graphic anchors that read as printed memorabilia.
 11. **Dark interlude blocks.** Youth section, retro shirt, pull-quotes flip to ink background with cream/jersey-bright text. Punctuates rhythm, isn't the default surface.
 12. **Newspaper sponsor table.** Sponsors render as a tabular grid (5×3) with thin black borders and italic Freight Display names. Replaces the current logo-strip.
 13. **Poster-scale wordmark footer.** Page closes with `KCVV ELEWIJT` set massive in Freight Big Pro 900. Closing flourish.
@@ -306,7 +306,7 @@ Primitives are listed in dependency order so the build order falls out for free.
 | `<StripedSeam>` | Diagonal barber-pole horizontal section divider — SVG-backed (clean caps), never negative-margin | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'` |
 | `<DottedDivider>` / `<DashedDivider>` / `<SolidDivider>` | Thin row dividers (interview Q&A, table rows) | `style: 'dotted' \| 'dashed' \| 'solid'`, `color: 'ink' \| 'paper-edge'`, `inset?: boolean` |
 | `<QuoteMark>` | Two stacked italic open-quote glyphs (~20px) | `color: 'jersey' \| 'ink' \| 'cream'` |
-| `<TicketStub>` | Perforated-edge ephemera (`STAMNR. 55`, `SINDS 1924`) | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` |
+| `<TicketStub>` | Perforated-edge ephemera (`STAMNR. 55`, `SINDS 1909`) | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` |
 | `<HighlighterStroke>` | SVG hand-drawn underline beneath italic emphasis. Multi-line aware (per-line spans). Three hand-drawn variants for a non-mechanical feel | `variant: 'a' \| 'b' \| 'c'`, `color: 'jersey'` |
 | `<MonoLabel>` | Tracked uppercase pill or plain label | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'` |
 
@@ -490,7 +490,7 @@ Mockups already preview this aesthetic via the homepage `<YouthBlock>`. Full pag
 ### 6.10 Club pages (`/club/organigram`, `/club/geschiedenis`)
 
 - **Organigram:** existing schema work (responsibility-finder, organigram-node-schema) is in flight. The redesign treats each board member / committee as a `<TapedCard>` polaroid with `<PlayerFigure>` photo + role tag. Hierarchy renders via `<DashedDivider>` group separators rather than connecting lines (paper aesthetic).
-- **Geschiedenis:** long-form editorial article using the article-detail primitives. Open with a `<DropCapParagraph>` of the founding story; punctuate with year-anchor `<TicketStub>` graphics (`SINDS 1924`, `KAMPIOEN 1937`, `STAMNR. 55`); embed historical photos as `<TapedCard>` polaroid figures; close with `<EndMark>`.
+- **Geschiedenis:** long-form editorial article using the article-detail primitives. Open with a `<DropCapParagraph>` of the founding story; punctuate with year-anchor `<TicketStub>` graphics (`SINDS 1909`, `STAMNR. 55`, plus historical milestones authored editorially as the article is written); embed historical photos as `<TapedCard>` polaroid figures; close with `<EndMark>`.
 
 Existing `docs/prd/club-landing-page.md` is superseded for the landing-page level — restate in Phase 7.
 
@@ -576,6 +576,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 11. **Tailwind v4, tokens in `globals.css`.** No `tailwind.config.ts` — the Claude Web PRD's snippet doesn't apply.
 12. **Aspect-ratio agnostic primitives.** The taped paper frame is dimension-agnostic — 16:9 landscape (the dominant aspect of existing article and event imagery), square, portrait, and text-only all fit inside the same `<TapedCard>` without modification. Phase 1 ships `<TapedFigure>` as a dedicated landscape-by-default editorial photo + caption primitive for inline article body imagery, event thumbnails, and match-detail hero photos. `<NewsCard>` (Phase 4) takes an `aspectRatio` prop so mixed-aspect grids stay coherent: tape, rotation, and shadow stay constant; only the inner image aspect varies. (from owner correction 2026-04-28: existing content library is overwhelmingly 16:9; design must absorb that without forcing a re-crop.)
 13. **Stamnummer is `55`** (not `55⋅24`, not `55-24`). The `-24` suffix in mockup ticket-stub artwork is a decorative season/year tag, not part of the stamnummer. All ticket-stub examples in this doc use the canonical value. (from owner correction 2026-04-28.)
+14. **The football club in Elewijt has existed since 1909.** Mockup artwork showing `ANNO 1924` / `SINDS 1924` is a typo. Earlier saved-memory entries that said `1964` were also wrong. All "since X" branding in this doc and any subsequent design uses `1909`. (from owner correction 2026-04-28.)
 
 ### Open questions deferred to per-phase PRDs
 
