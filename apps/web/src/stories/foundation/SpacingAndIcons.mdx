@@ -254,3 +254,114 @@ import { Trophy, MapPin } from "@/lib/icons";
 import { Icon } from "@/components/design-system/Icon";
 <Icon name="trophy" size="md" color="primary" />
 ```
+
+---
+
+## Redesign / Phase 0 — Layout, Rotation, Shadow, Motion
+
+The redesign introduces four new groups of layout primitives: container widths
+for prose vs. default content, a four-step rotation pool for taped-card looks,
+hard-edged paper shadows for the cream surface, and motion durations for
+typical interactions. All values are defined in `src/app/globals.css`.
+
+### Container widths
+
+`--container-prose` (680px) caps long-form article text at a comfortable
+measure; `--container-default` (1200px) is the standard page-content width
+between the cream surface gutters. `--max-width-outer` (1440px) — already
+present from earlier work — remains the full-bleed cap.
+
+<div style={{ marginBottom: '24px' }}>
+  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-prose · 680px (article body cap)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-default)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>--container-default · 1200px (standard page content)</div>
+</div>
+
+### Rotation pool
+
+Four small angles compose the taped-card aesthetic. Pick one per card to keep
+the layout from feeling regimented; never apply uniform rotation across a
+grid. The pool is intentionally narrow so the page never tips into chaos.
+
+<div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px', padding: '32px 16px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-2.5°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-a</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-1.5°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-b</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>1°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-c</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>2°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-d</div>
+  </div>
+</div>
+
+### Paper shadows
+
+The redesign uses hard-edged offset shadows ("paper shadows") for cards on the
+cream surface — they read like risograph print rather than soft web glows. The
+soft shadow stays available for chrome that should sit subtly above content
+(dropdowns, sticky bars).
+
+<div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '24px', padding: '32px 24px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-sm)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-paper-sm</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>4px offset</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-md)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-paper-md</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>6px offset</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-lift)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-paper-lift</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>8px offset (hover lift)</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-soft)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-soft</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>diffuse, for chrome</div>
+  </div>
+</div>
+
+### Motion
+
+Three motion tokens cover the redesign's interaction palette. Interactive
+motion previews live in `<TapedCard>` Storybook later in Phase 1 — this page
+documents the tokens only.
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--motion-fast</code></td>
+      <td><code>150ms ease-out</code></td>
+      <td>Hover state changes — colour, opacity, underline</td>
+    </tr>
+    <tr>
+      <td><code>--motion-base</code></td>
+      <td><code>240ms cubic-bezier(0.2, 0.8, 0.2, 1)</code></td>
+      <td>Default UI motion — drawer/menu open, focus ring</td>
+    </tr>
+    <tr>
+      <td><code>--motion-tape</code></td>
+      <td><code>300ms ease-out</code></td>
+      <td>TapedCard rotation snap + lift animation</td>
+    </tr>
+  </tbody>
+</table>
