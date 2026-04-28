@@ -87,7 +87,15 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  // vr-skip: this story is observed to generate a test file and crash
+  // Chromium's `page.goto` during the test-runner's setupPage hook under
+  // Docker's 8GB memory cap. The `--includeTags vr` filter does not fully
+  // exclude untagged stories at file-generation time (docs suggest it should,
+  // but empirical evidence on this codebase contradicts that), so
+  // `--excludeTags vr-skip` is the filter that actually keeps the test file
+  // from being generated. Page-level visual coverage moves to Playwright e2e
+  // per docs/prd/page-level-testing-rework.md.
+  tags: ["autodocs", "vr-skip"],
   args: {
     header: {
       name: "Bestuur",
