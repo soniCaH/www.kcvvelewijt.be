@@ -87,7 +87,11 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  // vr-skip: full-page Storybook composition exhausts the browser memory
+  // budget in the pinned Playwright Docker image (page.goto crashes during
+  // setupPage). Page-level visual coverage moves to Playwright e2e per
+  // docs/prd/page-level-testing-rework.md.
+  tags: ["autodocs", "vr-skip"],
   args: {
     header: {
       name: "Bestuur",
