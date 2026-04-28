@@ -67,14 +67,14 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 
 1. **Cream newsprint surface.** Default page background `#F5F1E6`. Ink-on-cream is the primary contrast pair (~17:1). Dark blocks become *interludes*, not the default — the inverse of the current site.
 2. **Editorial typography spine.** Display in Freight Display Pro (serif), with italics carrying signature emphasis (`Laatste *nieuws.*`, `In zijn eigen *woorden.*`). Body shifts to Quasimoda. Mono stays IBM Plex.
-3. **Taped polaroid pattern.** Content lives in slightly-rotated paper cards (-2.5° / -1.5° / +1° / +2°), green washi tape at corner, hard *offset* shadow (4/6/8px, no blur). Cards layer onto cream like a season programme.
+3. **Taped paper card pattern.** Content lives in slightly-rotated paper cards (-2.5° / -1.5° / +1° / +2°), green washi tape at corner, hard *offset* shadow (4/6/8px, no blur). Cards layer onto cream like a season programme. **The frame is aspect-agnostic** — the same taped frame holds 16:9 landscape (article/event hero images, the dominant aspect in the Sanity library), square (cropped news thumbs), portrait (player figures, transfer passes, tickets), and text-only (jersey-bg variant from homepage mockup card 2). The mockups skew portrait because the artefacts shown were illustrative; production content is mostly landscape and the frame absorbs both without modification.
 4. **Diagonal barber-pole seams.** Between major sections, a striped black/cream band breaks the page. Geometric, not photographic. SVG geometry, never negative margins.
 5. **Hero collage.** Every hero is two-column: serif headline + intro + CTA on the left; a taped-paper artefact on the right (transfer pass, match ticket, interview portrait, jersey illustration).
 6. **Numerical drama.** Big serif numbers as graphic monumentation: `#8`, `28 wedstrijden`, `2374 minuten`, `320 jongens en meisjes`, `4 ⋅ 0`. Numbers carry the page weight where photos used to.
 7. **Mono-label pill rows.** Every editorial item starts with a row of small uppercase tracked labels: `INTERVIEW`, `SNELTREIN`, `8 MIN`, `MATCHVERSLAG`, `JEUGD ⋅ U15`. Title-case tags retire; mono caps come in.
 8. **Italic emphasis as house style.** Period-terminated headings (`Het rooster.`, `Clubkledij '26.`, `Vier wedstrijden.`) with one italic word. Strong, recognisable voice.
 9. **Striped jersey graphic device.** Horizontal green/white stripes recur on illustrated figures, retro thumbnails (`Retro '94`), webshop monogram grid (`H-U-K-V-V-R`). Becomes a brand pattern, reusable as bg fill.
-10. **Ticket-stub ephemera.** `STAMNR. 55⋅24`, `SINDS 1924`, perforated edges, taped overlap. Small graphic anchors that read as printed memorabilia.
+10. **Ticket-stub ephemera.** `STAMNR. 55`, `SINDS 1924`, perforated edges, taped overlap. Small graphic anchors that read as printed memorabilia.
 11. **Dark interlude blocks.** Youth section, retro shirt, pull-quotes flip to ink background with cream/jersey-bright text. Punctuates rhythm, isn't the default surface.
 12. **Newspaper sponsor table.** Sponsors render as a tabular grid (5×3) with thin black borders and italic Freight Display names. Replaces the current logo-strip.
 13. **Poster-scale wordmark footer.** Page closes with `KCVV ELEWIJT` set massive in Freight Big Pro 900. Closing flourish.
@@ -306,7 +306,7 @@ Primitives are listed in dependency order so the build order falls out for free.
 | `<StripedSeam>` | Diagonal barber-pole horizontal section divider — SVG-backed (clean caps), never negative-margin | `direction: 'horizontal' \| 'vertical'`, `height: 'sm' \| 'md' \| 'lg'`, `colorPair: 'ink-cream' \| 'jersey-cream'` |
 | `<DottedDivider>` / `<DashedDivider>` / `<SolidDivider>` | Thin row dividers (interview Q&A, table rows) | `style: 'dotted' \| 'dashed' \| 'solid'`, `color: 'ink' \| 'paper-edge'`, `inset?: boolean` |
 | `<QuoteMark>` | Two stacked italic open-quote glyphs (~20px) | `color: 'jersey' \| 'ink' \| 'cream'` |
-| `<TicketStub>` | Perforated-edge ephemera (`STAMNR. 55⋅24`, `SINDS 1924`) | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` |
+| `<TicketStub>` | Perforated-edge ephemera (`STAMNR. 55`, `SINDS 1924`) | `label: string`, `value: string`, `rotation?: number`, `position: 'overlay-tr' \| 'overlay-bl' \| 'inline'` |
 | `<HighlighterStroke>` | SVG hand-drawn underline beneath italic emphasis. Multi-line aware (per-line spans). Three hand-drawn variants for a non-mechanical feel | `variant: 'a' \| 'b' \| 'c'`, `color: 'jersey'` |
 | `<MonoLabel>` | Tracked uppercase pill or plain label | `variant: 'plain' \| 'pill-jersey' \| 'pill-ink' \| 'pill-cream'`, `size: 'sm' \| 'md'` |
 
@@ -321,6 +321,7 @@ Primitives are listed in dependency order so the build order falls out for free.
 | `<PullQuote>` | Quote block — QuoteMark + italic display body + attribution row | `attribution: { name: string; role?: string; source?: string }`, `tone: 'cream' \| 'ink' \| 'jersey'` |
 | `<NumberDisplay>` | Big serif number as graphic monumentation (`#8`, `28`, `2374`) | `value: string \| number`, `size: 'display-2xl' \| 'display-xl' \| 'display-lg'`, `tone: 'jersey' \| 'jersey-deep' \| 'ink' \| 'cream'`, `prefix?: '#' \| 'nr.'`, `suffix?: string` |
 | `<DropCapParagraph>` | Lead paragraph with oversized first letter (display-2xl 900, jersey-tinted) | `as: 'p' \| 'div'`, `tone: 'jersey' \| 'ink'`, children |
+| `<TapedFigure>` | Editorial photo + optional caption / credit row. Composes `<TapedCard>` + `<img>` + `<figcaption>`. **Default aspect is 16:9** — the dominant aspect in the article/event content library — but accepts square and portrait via `aspect` prop. Used for article body images, event thumbnails, match detail hero photo, inline editorial photography | `src: string`, `alt: string`, `aspect: 'landscape-16-9' \| 'square' \| 'portrait-3-4' \| 'auto'`, `caption?: string`, `credit?: string`, `rotation?: TapedCardProps['rotation']`, `tape?: TapedCardProps['tape']` |
 
 ### 4.3 Tier C — domain figures (illustration assets)
 
@@ -365,11 +366,11 @@ Stack, top-down:
 1. `<SiteHeader>` — KCVV wordmark + nav links + search icon + `<Button variant="primary">WORD LID</Button>`. Sticky.
 2. `<MatchStrip>` — persistent sub-header band with next-match shield + tickets CTA. Lives in `apps/web/src/components/layout/MatchStrip/`. Renders only when an upcoming match exists.
 3. `<EditorialHero>` — single component, six variants (`transfer | match-preview | interview | event | announcement | generic`). Variant only changes the right-column artefact + kicker labels; headline + intro + CTA structure is shared.
-4. `<NewsGrid>` — header row: edition label + `<EditorialHeading size="display-lg" emphasis={{text:"nieuws", highlight:true}}>Laatste nieuws.</EditorialHeading>` + "ALLE ARTIKELS →" right-aligned. Body: `<TapedCardGrid columns={3}>` with mixed-bg `<NewsCard>` children. NewsCard composes `<TapedCard bg={"cream" | "jersey" | "ink"}>` + image OR placeholder OR text-only + `<MonoLabelRow>` + heading + dek + read-more.
+4. `<NewsGrid>` — header row: edition label + `<EditorialHeading size="display-lg" emphasis={{text:"nieuws", highlight:true}}>Laatste nieuws.</EditorialHeading>` + "ALLE ARTIKELS →" right-aligned. Body: `<TapedCardGrid columns={3}>` with mixed-bg `<NewsCard>` children. NewsCard composes `<TapedCard bg={"cream" | "jersey" | "ink"}>` + image (`<TapedFigure>` or inline `<img>`) OR placeholder OR text-only + `<MonoLabelRow>` + heading + dek + read-more. NewsCard accepts `aspectRatio: 'landscape-16-9' | 'square' | 'portrait-3-4' | 'text-only'` — most articles arrive with 16:9 hero images and render that aspect inside the polaroid frame; mockup-style square crops are reserved for thumbnails and visual rhythm where editorial taste calls for it. The polaroid frame, tape, rotation, and shadow stay constant across all aspect variants — only the inner image aspect varies.
 5. `<StripedSeam>` — section divider.
 6. `<ScheduleStandingsBlock>` — `<EditorialHeading>Het rooster.</EditorialHeading>` + two `<TapedCard bg="ink">` panels: `<MatchScheduleTable>` (4 rows × `date · time · opponent · comp · result`), `<StandingsTable>` (5 rows × `pos · team · diff · pts`). Tab row above (A-PLOEG / B-PLOEG / JEUGD-PLOEG) reskins existing `<BrandedTabs>`.
 7. `<StripedSeam>`.
-8. `<YouthBlock>` — full-bleed jersey-bg interlude. `<MonoLabelRow>JEUGD · U6 · U21</MonoLabelRow>` + `<EditorialHeading size="display-xl" emphasis={{text:"toekomst"}}>De toekomst van Elewijt trapt vandaag haar eerste bal.</EditorialHeading>` + lead paragraph + 2 CTAs + `<TapedCard rotation="b">` containing `<JerseyShirt variant="home-stripes" letterOverlay="U11">` + `<TicketStub label="STAMNR." value="55⋅24">`.
+8. `<YouthBlock>` — full-bleed jersey-bg interlude. `<MonoLabelRow>JEUGD · U6 · U21</MonoLabelRow>` + `<EditorialHeading size="display-xl" emphasis={{text:"toekomst"}}>De toekomst van Elewijt trapt vandaag haar eerste bal.</EditorialHeading>` + lead paragraph + 2 CTAs + `<TapedCard rotation="b">` containing `<JerseyShirt variant="home-stripes" letterOverlay="U11">` + `<TicketStub label="STAMNR." value="55">`.
 9. `<WebshopStrip>` — cream bg. `<EditorialHeading>Clubkledij '26.</EditorialHeading>` + 4-column `<JerseyShirt>` row with prices.
 10. `<SponsorsBlock>` — newspaper-style 5×3 table replacing today's logo strip. `<EditorialHeading>Merci aan onze sponsors.</EditorialHeading>` + thin-bordered table with sponsor names in italic Freight Display + "WORD SPONSOR +" CTA.
 11. `<PosterWordmark>` — green-bg full-bleed band: `<MonoLabel>ER IS MAAR ÉÉN PLEZANTE</MonoLabel>` + `text-display-2xl` `KCVV ELEWIJT` in Freight Big Pro 900 + small mono metadata row.
@@ -436,6 +437,7 @@ Existing types likely include matchverslag, column, transfer, jeugd-update, even
 
 - `<DropCapParagraph>` for the lead.
 - `<EditorialHeading size="display-md">` subheads.
+- Inline `<TapedFigure>` images at native 16:9 aspect — the article body image primitive. Renders at full prose-column width with a small caption row underneath.
 - Optional inline `<PullQuote>`, `<TapedCard>` callout, `<TicketStub>` for stat ephemera.
 - Body text in `--container-prose` width.
 - End closer: `<EndMark flourish="em-dash">`.
@@ -449,7 +451,7 @@ Three hero states: upcoming (preview), live (in progress), finished (verslag).
 
 - **Upcoming:** `<EditorialHero variant="match-preview">` — taped match-ticket artefact with date/venue, two club shields stacked, "VOORBESCHOUWING" mono kicker. Body: `<MatchPreviewBody>` composing tactical notes + recent form using `<TapedCardGrid>`.
 - **Live:** big mono score in the hero card, period clock in mono, possession/shots stats in `<NumberDisplay>` row, `<StatsStrip>` minute-by-minute event log with `<DashedDivider>` rows.
-- **Finished:** "MATCHVERSLAG" hero + score + key moments + `<PullQuote>` from coach reaction + `<RecentMatchesGrid>` of head-to-head history.
+- **Finished:** "MATCHVERSLAG" hero with 16:9 match photo (via `<TapedFigure aspect="landscape-16-9">`) paired with the score and final-whistle ephemera + key moments + `<PullQuote>` from coach reaction + `<RecentMatchesGrid>` of head-to-head history.
 
 Standings widget reuses the homepage's `<StandingsTable>` primitive.
 
@@ -469,7 +471,7 @@ Hero: `<EditorialHero variant="generic">` `Kalender.` Body: cream paper page wit
 
 ### 6.7 Events list + detail (`/events`, `/events/[slug]`)
 
-List: `<TapedCardGrid columns={3}>` of `<EventCard>` (composes `<TapedCard>` + date `<TicketStub>` + title + location + `<MonoLabel>` tag). Detail: `<EditorialHero variant="event">` with date ticket-stub artefact + body in `--container-prose` + RSVP CTA + sponsor/credit footer.
+List: `<TapedCardGrid columns={3}>` of `<EventCard>` (composes `<TapedCard>` + landscape `<TapedFigure aspect="landscape-16-9">` cover image + date `<TicketStub>` overlay + title + location + `<MonoLabel>` tag). Detail: `<EditorialHero variant="event">` with date ticket-stub artefact paired with the event hero image at 16:9; body in `--container-prose` + inline `<TapedFigure>` photos for any in-line imagery + RSVP CTA + sponsor/credit footer. Event imagery is overwhelmingly 16:9 today and renders at native aspect inside the polaroid frame.
 
 ### 6.8 Sponsors (`/sponsors`)
 
@@ -519,7 +521,7 @@ The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a
 | Phase | Focus | Primitives delivered | Components touched | VR baselines | Effort |
 | --- | --- | --- | --- | --- | --- |
 | **0** | Foundations: tokens + Tier A decorative | `<TapeStrip>`, `<StripedSeam>`, dividers, `<QuoteMark>`, `<TicketStub>`, `<HighlighterStroke>`, `<MonoLabel>` | None refactored | New baselines per primitive story | 1–2 weeks |
-| **1** | Tier B composition primitives | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>` | `<SectionHeader>` reworked to compose new primitives; `<Badge>` retired | Per primitive | 2 weeks |
+| **1** | Tier B composition primitives | `<TapedCard>`, `<TapedCardGrid>`, `<MonoLabelRow>`, `<EditorialHeading>`, `<PullQuote>`, `<NumberDisplay>`, `<DropCapParagraph>`, `<TapedFigure>` | `<SectionHeader>` reworked to compose new primitives; `<Badge>` retired | Per primitive | 2 weeks |
 | **2** | Atom rework | (no new primitives) | `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Label>`, `<Alert>`, `<Spinner>`, `<BrandedTabs>`, `<FilterTabs>` token swaps | Per atom | 1–2 weeks |
 | **3** | Tier C domain figures + EditorialHero | `<PlayerFigure>`, `<JerseyShirt>`, `<EndMark>`, `<QASectionDivider>`; new `<EditorialHero>` | Existing `<PageHero>` retired; `<SiteHeader>` + `<MatchStrip>` + `<SiteFooter>` reworked | Per layout component | 2–3 weeks |
 | **4** | Homepage rebuild | (no new primitives) | `<NewsGrid>`, `<NewsCard>`, `<ScheduleStandingsBlock>`, `<YouthBlock>`, `<WebshopStrip>`, `<SponsorsBlock>`, `<PosterWordmark>` | Per section + `Pages/Homepage` story | 2–3 weeks |
@@ -572,6 +574,8 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 9. **Highlighter underline = SVG, not `text-decoration`.** Hand-drawn irregularity, multi-line aware.
 10. **Storybook structure follows existing convention.** Primitives under `UI/<Name>`, NOT under `Foundation/`. Tokens in `Foundation/` MDX.
 11. **Tailwind v4, tokens in `globals.css`.** No `tailwind.config.ts` — the Claude Web PRD's snippet doesn't apply.
+12. **Aspect-ratio agnostic primitives.** The taped paper frame is dimension-agnostic — 16:9 landscape (the dominant aspect of existing article and event imagery), square, portrait, and text-only all fit inside the same `<TapedCard>` without modification. Phase 1 ships `<TapedFigure>` as a dedicated landscape-by-default editorial photo + caption primitive for inline article body imagery, event thumbnails, and match-detail hero photos. `<NewsCard>` (Phase 4) takes an `aspectRatio` prop so mixed-aspect grids stay coherent: tape, rotation, and shadow stay constant; only the inner image aspect varies. (from owner correction 2026-04-28: existing content library is overwhelmingly 16:9; design must absorb that without forcing a re-crop.)
+13. **Stamnummer is `55`** (not `55⋅24`, not `55-24`). The `-24` suffix in mockup ticket-stub artwork is a decorative season/year tag, not part of the stamnummer. All ticket-stub examples in this doc use the canonical value. (from owner correction 2026-04-28.)
 
 ### Open questions deferred to per-phase PRDs
 
