@@ -115,3 +115,102 @@ Status and feedback colors.
 // CSS custom property (when Tailwind class not available)
 <div style={{ color: 'var(--color-kcvv-gray-dark)' }}>…</div>
 ```
+
+---
+
+## Redesign / Phase 0 — Cream Surface
+
+The redesign introduces a cream-on-ink surface palette alongside the existing
+brand greens. Both vocabularies coexist — legacy `--color-kcvv-*` tokens remain
+valid until the Phase 9 cleanup, so feature work landing during Phases 1–8 may
+read either set without aliasing. Pick the cream surface for new redesign
+primitives; keep `--color-kcvv-*` for components that have not yet been
+restyled.
+
+Each row below renders the live token via `var(--color-...)` so the swatch and
+the contrast notes always reflect what `globals.css` ships today. Contrast
+ratios are measured against `--color-cream` (`#f5f1e6`) by default; the
+`--color-jersey-bright` row is the exception and notes its `--color-ink`
+backdrop explicitly because the token is intended for green text on dark
+interludes, not on the cream surface.
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Hex</th>
+      <th>Sample</th>
+      <th>Role</th>
+      <th>Contrast &amp; verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--color-cream</code></td>
+      <td><code>#f5f1e6</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Default page background</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>--color-cream-soft</code></td>
+      <td><code>#ede8da</code></td>
+      <td><div style={{ background: 'var(--color-cream-soft)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Alt surface — layered cards on cream</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>--color-ink</code></td>
+      <td><code>#0a0a0a</code></td>
+      <td><div style={{ background: 'var(--color-ink)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Primary text + dark interludes</td>
+      <td>17.5:1 — AAA all sizes</td>
+    </tr>
+    <tr>
+      <td><code>--color-ink-soft</code></td>
+      <td><code>#1f1f1f</code></td>
+      <td><div style={{ background: 'var(--color-ink-soft)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Layered dark surfaces</td>
+      <td>14.6:1 — AAA all sizes</td>
+    </tr>
+    <tr>
+      <td><code>--color-ink-muted</code></td>
+      <td><code>#6b6b6b</code></td>
+      <td><div style={{ background: 'var(--color-ink-muted)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Byline, metadata, dividers</td>
+      <td>4.7:1 — AA normal text (just above the 4.5:1 threshold; AAA at ≥18pt)</td>
+    </tr>
+    <tr>
+      <td><code>--color-jersey</code></td>
+      <td><code>#4acf52</code></td>
+      <td><div style={{ background: 'var(--color-jersey)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Brand bright — accents, decorative fills, CTAs</td>
+      <td>1.8:1 — decorative only, never text</td>
+    </tr>
+    <tr>
+      <td><code>--color-jersey-deep</code></td>
+      <td><code>#008755</code></td>
+      <td><div style={{ background: 'var(--color-jersey-deep)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Brand dark — large headings, primary CTAs</td>
+      <td><strong>4.05:1 — AA large-text (≥18pt) only, NOT body</strong></td>
+    </tr>
+    <tr>
+      <td><code>--color-jersey-bright</code></td>
+      <td><code>#22c55e</code></td>
+      <td><div style={{ background: 'var(--color-jersey-bright)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Green text on dark interludes</td>
+      <td>8.7:1 on <code>--color-ink</code> — AAA all sizes</td>
+    </tr>
+    <tr>
+      <td><code>--color-paper-edge</code></td>
+      <td><code>#d9d2bd</code></td>
+      <td><div style={{ background: 'var(--color-paper-edge)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
+      <td>Card outline / divider on cream</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+> `--color-jersey-deep` is **AA large-text only** against cream. Use it for
+> headings ≥18pt regular / ≥14pt bold and large CTAs — never body copy. Body
+> text on cream must use `--color-ink` or `--color-ink-soft`.

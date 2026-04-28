@@ -100,3 +100,48 @@ export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
 // FooterSafeArea
 export { FooterSafeArea } from "./FooterSafeArea";
 export type { FooterSafeAreaProps } from "./FooterSafeArea";
+
+// Divider
+export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
+export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
+
+// HighlighterStroke
+export { HighlighterStroke } from "./HighlighterStroke";
+export type {
+  HighlighterStrokeProps,
+  HighlighterStrokeVariant,
+} from "./HighlighterStroke";
+
+// MonoLabel
+export { MonoLabel } from "./MonoLabel";
+export type {
+  MonoLabelProps,
+  MonoLabelVariant,
+  MonoLabelSize,
+} from "./MonoLabel";
+
+// QuoteMark
+export { QuoteMark } from "./QuoteMark";
+export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
+
+// StripedSeam
+export { StripedSeam } from "./StripedSeam";
+export type {
+  StripedSeamProps,
+  StripedSeamDirection,
+  StripedSeamHeight,
+  StripedSeamColorPair,
+} from "./StripedSeam";
+
+// TapeStrip
+export { TapeStrip } from "./TapeStrip";
+export type {
+  TapeStripProps,
+  TapeStripColor,
+  TapeStripPosition,
+  TapeStripLength,
+} from "./TapeStrip";
+
+// TicketStub
+export { TicketStub } from "./TicketStub";
+export type { TicketStubProps, TicketStubPosition } from "./TicketStub";

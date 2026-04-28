@@ -211,6 +211,97 @@
   --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.15);   /* soft elevated card hover */
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-input-focus: 0 0 5px #cacaca;
+
+  /* ===== Redesign / Cream Surface (Phase 0) ===== */
+
+  /* Surface */
+  --color-cream:        #f5f1e6;
+  --color-cream-soft:   #ede8da;
+
+  /* Ink */
+  --color-ink:          #0a0a0a;
+  --color-ink-soft:     #1f1f1f;
+  --color-ink-muted:    #6b6b6b;
+
+  /* Brand green (anchored to existing #4acf52 / #008755) */
+  --color-jersey:       #4acf52;
+  --color-jersey-deep:  #008755;
+  --color-jersey-bright: #22c55e;
+
+  /* Edges */
+  --color-paper-edge:   #d9d2bd;
+
+  /* ===== Redesign / Typography (Phase 0) ===== */
+
+  /* Font families — Freight already loaded via existing Adobe Typekit kit */
+  --font-display:     "freight-display-pro", georgia, "Times New Roman", serif;
+  --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
+  /* --font-body and --font-mono are existing — Quasimoda flips title→body in Phase 9 cleanup */
+
+  /* Type scale (fluid via clamp) */
+  --text-display-2xl:        clamp(3.5rem, 1.5rem + 8vw, 6rem);
+  --text-display-2xl--lh:    1.0;
+  --text-display-xl:         clamp(2.75rem, 1.5rem + 5vw, 4.5rem);
+  --text-display-xl--lh:     1.05;
+  --text-display-lg:         clamp(2rem, 1.25rem + 3vw, 3rem);
+  --text-display-lg--lh:     1.1;
+  --text-display-md:         clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  --text-display-md--lh:     1.2;
+  --text-display-sm:         clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --text-display-sm--lh:     1.3;
+  --text-body-lg:            1.125rem;
+  --text-body-lg--lh:        1.55;
+  --text-body-md:            1rem;
+  --text-body-md--lh:        1.6;
+  --text-body-sm:            0.875rem;
+  --text-body-sm--lh:        1.55;
+  --text-mono-md:            0.875rem;
+  --text-mono-md--lh:        1.4;
+  --text-mono-sm:            0.75rem;
+  --text-mono-sm--lh:        1.4;
+  --text-label:              0.6875rem;
+  --text-label--lh:          1;
+  --text-label--tracking:    0.08em;
+
+  /* ===== Redesign / Layout & Motion (Phase 0) ===== */
+
+  --container-prose:    680px;
+  --container-default:  1200px;
+  /* --max-width-outer (1440px) already exists — reuse for full-bleed */
+
+  --rotate-tape-a:     -2.5deg;
+  --rotate-tape-b:     -1.5deg;
+  --rotate-tape-c:      1deg;
+  --rotate-tape-d:      2deg;
+
+  --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
+  --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
+  --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+  --shadow-soft:       0 2px 8px rgba(0, 0, 0, 0.08);
+
+  --motion-fast:  150ms ease-out;
+  --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tape:  300ms ease-out;
+
+  /* ===== Redesign / Pattern Tokens (Phase 0) ===== */
+
+  --pattern-jersey-stripes: repeating-linear-gradient(
+    90deg,
+    var(--color-jersey) 0 32px,
+    var(--color-cream) 32px 64px
+  );
+
+  --pattern-jersey-stripes-tight: repeating-linear-gradient(
+    90deg,
+    var(--color-jersey) 0 14px,
+    var(--color-cream) 14px 28px
+  );
+
+  --pattern-seam: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink) 0 8px,
+    var(--color-cream) 8px 16px
+  );
 }
 
 /* ===== Global Styles ===== */
