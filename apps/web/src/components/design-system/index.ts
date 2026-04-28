@@ -105,6 +105,10 @@ export type { FooterSafeAreaProps } from "./FooterSafeArea";
 export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 
+// QuoteMark
+export { QuoteMark } from "./QuoteMark";
+export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
+
 // StripedSeam
 export { StripedSeam } from "./StripedSeam";
 export type {
