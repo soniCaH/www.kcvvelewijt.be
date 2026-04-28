@@ -105,6 +105,13 @@ export type { FooterSafeAreaProps } from "./FooterSafeArea";
 export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 
+// HighlighterStroke
+export { HighlighterStroke } from "./HighlighterStroke";
+export type {
+  HighlighterStrokeProps,
+  HighlighterStrokeVariant,
+} from "./HighlighterStroke";
+
 // QuoteMark
 export { QuoteMark } from "./QuoteMark";
 export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
