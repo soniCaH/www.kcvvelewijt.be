@@ -30,7 +30,7 @@ export function Divider({
       data-style={style}
       data-color={color}
       data-inset={inset || undefined}
-      className={`${STYLE_CLASS[style]} ${COLOR_CLASS[color]} ${inset ? "ml-12" : ""} w-full`}
+      className={`${STYLE_CLASS[style]} ${COLOR_CLASS[color]} ${inset ? "ml-12 w-[calc(100%-3rem)]" : "w-full"}`}
     />
   );
 }
