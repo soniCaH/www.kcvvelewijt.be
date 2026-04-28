@@ -56,6 +56,20 @@ Use these top-level groups — enforced by `storySort` in `.storybook/preview.ts
 
 MDX 2 (Storybook 10) does **not** parse GFM pipe-table syntax (`| col |`) without `remark-gfm`. Always use native HTML `<table>` elements in `.mdx` files.
 
+### Redesign primitives (Phase 0+)
+
+Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the following design-system primitives. They live alongside legacy components per the dual-coexistence policy. See `docs/plans/2026-04-27-redesign-master-design.md` for the design language audit and `docs/prd/redesign-phase-0.md` for token + primitive specs.
+
+- `<TapeStrip>` — diagonal washi-tape graphic for card corners.
+- `<StripedSeam>` — SVG-backed diagonal barber-pole horizontal section divider.
+- `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` — thin row dividers (interview Q&A, table rows).
+- `<QuoteMark>` — two stacked italic open-quote glyphs.
+- `<TicketStub>` — perforated-edge mono-content ephemera.
+- `<HighlighterStroke>` — green hand-drawn underline beneath italic emphasis (single-line CSS-bg SVG; multi-line is a deferred Phase 1+ enhancement).
+- `<MonoLabel>` — tracked uppercase pill or plain label.
+
+A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, and `--pattern-seam`. The cream/ink/jersey colour, fluid display/body/mono typography, layout container, rotation pool, paper-shadow, and motion tokens added in Phase 0 are visible in `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` MDX.
+
 ## Design Conventions
 
 **Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.
