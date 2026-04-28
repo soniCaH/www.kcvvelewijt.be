@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Icon library comparison — Phase 2 exploration</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: Georgia, "Times New Roman", serif;
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        line-height: 1.5;
+      }
+
+      h1 {
+        font-weight: 900;
+        font-size: 3rem;
+        line-height: 1.05;
+        margin: 0 0 0.5rem;
+      }
+
+      h1 em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+      }
+
+      h2 {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 3rem 0 1rem;
+        border-top: 1px solid var(--color-paper-edge);
+        padding-top: 1.5rem;
+      }
+
+      .label {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      p,
+      .links {
+        color: var(--color-ink-muted);
+        font-size: 14px;
+      }
+
+      a {
+        color: var(--color-jersey-deep);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        background: var(--color-cream);
+      }
+
+      th,
+      td {
+        border: 1px solid var(--color-paper-edge);
+        padding: 0.75rem;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      th {
+        background: var(--color-cream-soft);
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      th .lib-name {
+        display: block;
+        font-size: 13px;
+      }
+
+      th small {
+        display: block;
+        font-family: Georgia, serif;
+        font-size: 11px;
+        color: var(--color-ink-muted);
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: normal;
+        margin-top: 0.4rem;
+      }
+
+      .concept {
+        text-align: left;
+        font-family: Georgia, serif;
+        font-weight: 700;
+        font-size: 16px;
+      }
+
+      .icon-cell {
+        width: 96px;
+        height: 64px;
+      }
+
+      .icon-cell img {
+        width: 32px;
+        height: 32px;
+        display: inline-block;
+      }
+
+      /* Game Icons SVGs ship with white fill on transparent — invert for cream bg */
+      .icon-cell.gi img {
+        filter: invert(1);
+      }
+
+      .glyph {
+        font-size: 28px;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--color-ink);
+        line-height: 1;
+      }
+
+      .glyph.mono {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-weight: 500;
+        font-size: 22px;
+      }
+
+      .key {
+        margin: 2.5rem 0;
+        padding: 1.5rem;
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      .key h3 {
+        margin: 0 0 0.5rem;
+        font-weight: 700;
+      }
+
+      .key ul {
+        margin: 0.5rem 0 0 1.25rem;
+        padding: 0;
+        font-size: 14px;
+      }
+
+      .key li {
+        margin-bottom: 0.25rem;
+      }
+
+      .footer {
+        margin-top: 4rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-paper-edge);
+        font-size: 13px;
+        color: var(--color-ink-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Icon library <em>comparison.</em></h1>
+    <p>
+      Phase 2 design checkpoint — visual A/B for the icon strategy. See
+      <code>docs/plans/2026-04-27-redesign-master-design.md</code> §9 open
+      question 8 for context. Lucide is what the site uses today; the redesign
+      direction (retro-terrace fanzine) wants something that sits with cream
+      paper, taped polaroids, and Freight Display italics rather than fighting
+      them.
+    </p>
+    <p>
+      Open this file in a browser. Icons load from public CDNs (jsdelivr); some
+      may take a moment on first paint. If a square stays blank, the CDN
+      doesn't have that variant — note it and move on; absence in a CDN doesn't
+      necessarily mean the library lacks the icon.
+    </p>
+
+    <div class="key">
+      <h3>How to read this</h3>
+      <ul>
+        <li>
+          <strong>Lucide</strong> column: the current site icons. Reference
+          baseline. Geometric, modern, 2px stroke, perfectly aligned.
+        </li>
+        <li>
+          <strong>Phosphor (Fill)</strong> column: same shape language as
+          Lucide but solid ink-stamp weight. Cheapest swap from Lucide — the
+          import path is the only change.
+        </li>
+        <li>
+          <strong>Game Icons</strong> column: hand-drawn engraving feel. Free,
+          CC BY 3.0, ~4000 icons. Skews toward sport / fantasy / medieval but
+          covers most UI primitives too. Best fit for the printed-fanzine vibe.
+          (SVGs ship white-on-transparent so they're CSS-inverted here for
+          visibility on cream — in production they'd be authored or recoloured
+          to ink.)
+        </li>
+        <li>
+          <strong>Typographic Glyph</strong> column: a Unicode character typed
+          in body or mono font. Zero icon-library payload. Saved owner
+          preference (<code>feedback_visual_preferences.md</code>) already
+          favours this approach where the glyph reads.
+        </li>
+      </ul>
+    </div>
+
+    <h2>Common UI icons</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="concept">Concept</th>
+          <th>
+            <span class="lib-name">Lucide</span>
+            <small
+              >current<br /><a href="https://lucide.dev">lucide.dev</a> ·
+              ISC</small
+            >
+          </th>
+          <th>
+            <span class="lib-name">Phosphor (Fill)</span>
+            <small
+              >ink-stamp solid<br /><a href="https://phosphoricons.com"
+                >phosphoricons.com</a
+              >
+              · MIT</small
+            >
+          </th>
+          <th>
+            <span class="lib-name">Game Icons</span>
+            <small
+              >engraving feel<br /><a href="https://game-icons.net"
+                >game-icons.net</a
+              >
+              · CC BY 3.0</small
+            >
+          </th>
+          <th>
+            <span class="lib-name">Typographic glyph</span>
+            <small>Unicode, no library</small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="concept">Search</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/search.svg"
+              alt="lucide search"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/magnifying-glass-fill.svg"
+              alt="phosphor magnifying-glass fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/magnifying-glass.svg"
+              alt="game-icons magnifying-glass"
+            />
+          </td>
+          <td class="glyph mono">⌕</td>
+        </tr>
+        <tr>
+          <td class="concept">Calendar / agenda</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar.svg"
+              alt="lucide calendar"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/calendar-fill.svg"
+              alt="phosphor calendar fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/scroll-unfurled.svg"
+              alt="game-icons scroll"
+            />
+          </td>
+          <td class="glyph mono">▤</td>
+        </tr>
+        <tr>
+          <td class="concept">Location pin</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/map-pin.svg"
+              alt="lucide map-pin"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/map-pin-fill.svg"
+              alt="phosphor map-pin fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/position-marker.svg"
+              alt="game-icons position-marker"
+            />
+          </td>
+          <td class="glyph">⊕</td>
+        </tr>
+        <tr>
+          <td class="concept">Share</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/share-2.svg"
+              alt="lucide share-2"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/share-network-fill.svg"
+              alt="phosphor share-network fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/megaphone.svg"
+              alt="game-icons megaphone"
+            />
+          </td>
+          <td class="glyph">↗</td>
+        </tr>
+        <tr>
+          <td class="concept">Arrow right</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/arrow-right.svg"
+              alt="lucide arrow-right"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/arrow-right-fill.svg"
+              alt="phosphor arrow-right fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/right-arrow.svg"
+              alt="game-icons right-arrow"
+            />
+          </td>
+          <td class="glyph">→</td>
+        </tr>
+        <tr>
+          <td class="concept">Email / mail</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/mail.svg"
+              alt="lucide mail"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/envelope-fill.svg"
+              alt="phosphor envelope fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/envelope.svg"
+              alt="game-icons envelope"
+            />
+          </td>
+          <td class="glyph">✉</td>
+        </tr>
+        <tr>
+          <td class="concept">Menu / hamburger</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/menu.svg"
+              alt="lucide menu"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/list-fill.svg"
+              alt="phosphor list fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/scroll-quill.svg"
+              alt="game-icons scroll-quill"
+            />
+          </td>
+          <td class="glyph mono">≡</td>
+        </tr>
+        <tr>
+          <td class="concept">Close / dismiss</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/x.svg"
+              alt="lucide x"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/x-fill.svg"
+              alt="phosphor x fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/cross-mark.svg"
+              alt="game-icons cross-mark"
+            />
+          </td>
+          <td class="glyph">×</td>
+        </tr>
+        <tr>
+          <td class="concept">Clock / time</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg"
+              alt="lucide clock"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/clock-fill.svg"
+              alt="phosphor clock fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/wall-clock.svg"
+              alt="game-icons wall-clock"
+            />
+          </td>
+          <td class="glyph">⏱</td>
+        </tr>
+        <tr>
+          <td class="concept">Heart / favourite</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/heart.svg"
+              alt="lucide heart"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/heart-fill.svg"
+              alt="phosphor heart fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/heart-plus.svg"
+              alt="game-icons heart"
+            />
+          </td>
+          <td class="glyph">♥</td>
+        </tr>
+        <tr>
+          <td class="concept">Star / decorative kicker</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/star.svg"
+              alt="lucide star"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/star-fill.svg"
+              alt="phosphor star fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/star-formation.svg"
+              alt="game-icons star-formation"
+            />
+          </td>
+          <td class="glyph">★</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Sport-specific icons (where the redesign earns its keep)</h2>
+    <p>
+      These are the ones where Game Icons or a custom-commissioned set
+      genuinely outperform Lucide. Lucide doesn't ship a real football, whistle,
+      or trophy that fits the editorial vibe; Game Icons does.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th class="concept">Concept</th>
+          <th>
+            <span class="lib-name">Lucide</span>
+            <small>often missing</small>
+          </th>
+          <th>
+            <span class="lib-name">Phosphor (Fill)</span>
+            <small>has some</small>
+          </th>
+          <th>
+            <span class="lib-name">Game Icons</span>
+            <small>strongest match</small>
+          </th>
+          <th>
+            <span class="lib-name">Typographic glyph</span>
+            <small>where Unicode covers</small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="concept">Football / soccer ball</td>
+          <td class="icon-cell">— (no good fit)</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/soccer-ball-fill.svg"
+              alt="phosphor soccer-ball fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/soccer-ball.svg"
+              alt="game-icons soccer-ball"
+            />
+          </td>
+          <td class="glyph">⚽</td>
+        </tr>
+        <tr>
+          <td class="concept">Whistle</td>
+          <td class="icon-cell">— (not in Lucide)</td>
+          <td class="icon-cell">— (not in Phosphor)</td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/police-officer-head.svg"
+              alt="game-icons placeholder for whistle"
+            />
+          </td>
+          <td class="glyph">—</td>
+        </tr>
+        <tr>
+          <td class="concept">Trophy</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/trophy.svg"
+              alt="lucide trophy"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/trophy-fill.svg"
+              alt="phosphor trophy fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/trophy-cup.svg"
+              alt="game-icons trophy-cup"
+            />
+          </td>
+          <td class="glyph">🏆</td>
+        </tr>
+        <tr>
+          <td class="concept">Stadium</td>
+          <td class="icon-cell">— (no good fit)</td>
+          <td class="icon-cell">— (no good fit)</td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/colosseum.svg"
+              alt="game-icons colosseum"
+            />
+          </td>
+          <td class="glyph">—</td>
+        </tr>
+        <tr>
+          <td class="concept">Megaphone / announce</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/megaphone.svg"
+              alt="lucide megaphone"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/megaphone-fill.svg"
+              alt="phosphor megaphone fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/delapouite/megaphone.svg"
+              alt="game-icons megaphone"
+            />
+          </td>
+          <td class="glyph">📢</td>
+        </tr>
+        <tr>
+          <td class="concept">Ticket</td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/ticket.svg"
+              alt="lucide ticket"
+            />
+          </td>
+          <td class="icon-cell">
+            <img
+              src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/fill/ticket-fill.svg"
+              alt="phosphor ticket fill"
+            />
+          </td>
+          <td class="icon-cell gi">
+            <img
+              src="https://cdn.jsdelivr.net/gh/game-icons/icons@master/lorc/papers.svg"
+              alt="game-icons papers"
+            />
+          </td>
+          <td class="glyph">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <p>
+        <strong>Reading the comparison:</strong> for the editorial-magazine
+        direction, Phosphor-fill is the safest near-term swap (drop-in
+        compatible API, ink-stamp weight reads as printed). Game Icons wins
+        the brand-character cases (football, trophy, stadium, megaphone, scarf,
+        ticket-stub) where Lucide and Phosphor offer only generic
+        approximations. Typographic glyphs handle the universal quick wins
+        (arrows, stars, checks, asterisks) at zero cost.
+      </p>
+      <p>
+        Final decision lands at the Phase 2 atom-rework design checkpoint. This
+        comparison is exploratory only.
+      </p>
+    </div>
+  </body>
+</html>
