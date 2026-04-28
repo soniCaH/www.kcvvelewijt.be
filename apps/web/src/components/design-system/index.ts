@@ -101,6 +101,10 @@ export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
 export { FooterSafeArea } from "./FooterSafeArea";
 export type { FooterSafeAreaProps } from "./FooterSafeArea";
 
+// Divider
+export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
+export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
+
 // StripedSeam
 export { StripedSeam } from "./StripedSeam";
 export type {
