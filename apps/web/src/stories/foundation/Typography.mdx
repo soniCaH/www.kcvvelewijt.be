@@ -146,3 +146,133 @@ Headings are set globally in CSS — no per-component overrides needed.
 <span className="font-alt text-4xl">KCVV</span>        {/* stenciletta accent */}
 <span className="font-mono font-bold text-3xl">2 — 1</span>  {/* scores, times, countdowns */}
 ```
+
+---
+
+## Redesign / Phase 0 — Editorial Type Scale
+
+The redesign introduces a fluid editorial type scale built on Freight Display
+Pro for headlines, Quasimoda for running text, and IBM Plex Mono for labels
+and timing data. Display sizes use `clamp()` so they breathe between mobile
+and desktop without manual breakpoints.
+
+Quasimoda's role flips from title to body in the Phase 9 cleanup; today both
+`--font-family-title` (legacy) and `--font-body` (new) reference Quasimoda.
+Treat the new `--font-display` / `--font-body` / `--font-mono` tokens as the
+target vocabulary for redesign primitives.
+
+### Visual samples
+
+The four samples below mix Freight Display, Quasimoda, and IBM Plex Mono so
+the contrast between editorial display, running text, and label voice is
+visible at a glance. Dutch diacritics (`é`, `ï`) and italic emphasis are
+exercised on the display rows.
+
+<div style={{ background: 'var(--color-cream)', padding: '2rem', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-display-xl)', lineHeight: 'var(--text-display-xl--lh)', fontWeight: 900, color: 'var(--color-ink)', marginBottom: '0.5rem' }}>Laatste <em style={{ fontStyle: 'italic', fontWeight: 700 }}>nieuws.</em></div>
+  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-display · --text-display-xl · weight 900 + italic 700</div>
+</div>
+
+<div style={{ background: 'var(--color-cream)', padding: '2rem', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-display-lg)', lineHeight: 'var(--text-display-lg--lh)', fontWeight: 700, color: 'var(--color-ink)', marginBottom: '0.5rem' }}>Het rooster.</div>
+  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-display · --text-display-lg · weight 700</div>
+</div>
+
+<div style={{ background: 'var(--color-cream)', padding: '2rem', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-body-md)', lineHeight: 'var(--text-body-md--lh)', color: 'var(--color-ink)', marginBottom: '0.5rem' }}>Drie afdelingen, 320 kinderen, één idee: plezier eerst.</div>
+  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-body · --text-body-md</div>
+</div>
+
+<div style={{ background: 'var(--color-cream)', padding: '2rem', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-label)', letterSpacing: 'var(--text-label--tracking)', textTransform: 'uppercase', lineHeight: 1, color: 'var(--color-ink)', marginBottom: '0.5rem' }}>INTERVIEW · SNELTREIN · 8 MIN</div>
+  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-mono · --text-label · uppercase + 0.08em tracking</div>
+</div>
+
+### Token reference
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--font-display</code></td>
+      <td><code>"freight-display-pro", Georgia, serif</code></td>
+      <td>Editorial headlines, hero display lines</td>
+    </tr>
+    <tr>
+      <td><code>--font-display-big</code></td>
+      <td><code>"freight-big-pro", Georgia, serif</code></td>
+      <td>Oversized magazine-style display (occasional)</td>
+    </tr>
+    <tr>
+      <td><code>--text-display-2xl</code></td>
+      <td><code>clamp(3.5rem, 1.5rem + 8vw, 6rem)</code> · lh <code>1.0</code></td>
+      <td>Page hero — largest editorial display</td>
+    </tr>
+    <tr>
+      <td><code>--text-display-xl</code></td>
+      <td><code>clamp(2.75rem, 1.5rem + 5vw, 4.5rem)</code> · lh <code>1.05</code></td>
+      <td>Section hero, big section headlines</td>
+    </tr>
+    <tr>
+      <td><code>--text-display-lg</code></td>
+      <td><code>clamp(2rem, 1.25rem + 3vw, 3rem)</code> · lh <code>1.1</code></td>
+      <td>Section heading (e.g. "Het rooster.")</td>
+    </tr>
+    <tr>
+      <td><code>--text-display-md</code></td>
+      <td><code>clamp(1.5rem, 1rem + 1.5vw, 2rem)</code> · lh <code>1.2</code></td>
+      <td>Sub-section heading</td>
+    </tr>
+    <tr>
+      <td><code>--text-display-sm</code></td>
+      <td><code>clamp(1.25rem, 1rem + 1vw, 1.5rem)</code> · lh <code>1.3</code></td>
+      <td>Card title, small editorial heading</td>
+    </tr>
+    <tr>
+      <td><code>--text-body-lg</code></td>
+      <td><code>1.125rem</code> · lh <code>1.55</code></td>
+      <td>Lead paragraph, intro copy</td>
+    </tr>
+    <tr>
+      <td><code>--text-body-md</code></td>
+      <td><code>1rem</code> · lh <code>1.6</code></td>
+      <td>Default running text</td>
+    </tr>
+    <tr>
+      <td><code>--text-body-sm</code></td>
+      <td><code>0.875rem</code> · lh <code>1.55</code></td>
+      <td>Captions, secondary text</td>
+    </tr>
+    <tr>
+      <td><code>--text-mono-md</code></td>
+      <td><code>0.875rem</code> · lh <code>1.4</code></td>
+      <td>Mono medium — match times, timestamps in body</td>
+    </tr>
+    <tr>
+      <td><code>--text-mono-sm</code></td>
+      <td><code>0.75rem</code> · lh <code>1.4</code></td>
+      <td>Mono small — inline timing data, table cells</td>
+    </tr>
+    <tr>
+      <td><code>--text-label</code></td>
+      <td><code>0.6875rem</code> · lh <code>1</code></td>
+      <td>Uppercase label / kicker — use with <code>--text-label--tracking</code></td>
+    </tr>
+    <tr>
+      <td><code>--text-label--lh</code></td>
+      <td><code>1</code></td>
+      <td>Line-height companion for <code>--text-label</code></td>
+    </tr>
+    <tr>
+      <td><code>--text-label--tracking</code></td>
+      <td><code>0.08em</code></td>
+      <td>Letter-spacing companion for <code>--text-label</code></td>
+    </tr>
+  </tbody>
+</table>
