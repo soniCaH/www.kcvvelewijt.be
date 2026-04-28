@@ -76,7 +76,7 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 9. **Striped jersey graphic device.** Horizontal green/white stripes recur on illustrated figures, retro thumbnails (`Retro '94`), webshop monogram grid (`H-U-K-V-V-R`). Becomes a brand pattern, reusable as bg fill.
 10. **Ticket-stub ephemera.** `STAMNR. 55`, `SINDS 1909`, perforated edges, taped overlap. Small graphic anchors that read as printed memorabilia.
 11. **Dark interlude blocks.** Youth section, retro shirt, pull-quotes flip to ink background with cream/jersey-bright text. Punctuates rhythm, isn't the default surface.
-12. **Newspaper sponsor table.** Sponsors render as a tabular grid (5×3) with thin black borders and italic Freight Display names. Replaces the current logo-strip.
+12. **Newspaper sponsor grid.** Sponsors render as a tabular grid with thin black borders, evoking a programme back-page. **Cells contain real sponsor logos** as primary content — the mockups show italic Freight Display names only because Claude design had no logo files; production data has logos and they are the recognizable asset that sponsors paid for. Names render as a small caption beneath each logo (accessibility + recognition fallback) or as the cell content only when no logo is available. The italic Freight Display treatment from the mockups stays in the headline (`Merci aan onze sponsors.`) and the partner-tier kicker labels.
 13. **Poster-scale wordmark footer.** Page closes with `KCVV ELEWIJT` set massive in Freight Big Pro 900. Closing flourish.
 14. **Sticky match strip.** Top header carries a persistent next-match shield + tickets CTA across all pages.
 15. **Highlighter underline.** Italic emphasis words optionally carry a hand-drawn green highlighter stroke beneath them — fine, irregular, deliberately not mechanical.
@@ -372,7 +372,7 @@ Stack, top-down:
 7. `<StripedSeam>`.
 8. `<YouthBlock>` — full-bleed jersey-bg interlude. `<MonoLabelRow>JEUGD · U6 · U21</MonoLabelRow>` + `<EditorialHeading size="display-xl" emphasis={{text:"toekomst"}}>De toekomst van Elewijt trapt vandaag haar eerste bal.</EditorialHeading>` + lead paragraph + 2 CTAs + `<TapedCard rotation="b">` containing `<JerseyShirt variant="home-stripes" letterOverlay="U11">` + `<TicketStub label="STAMNR." value="55">`.
 9. `<WebshopStrip>` — cream bg. `<EditorialHeading>Clubkledij '26.</EditorialHeading>` + 4-column `<JerseyShirt>` row with prices.
-10. `<SponsorsBlock>` — newspaper-style 5×3 table replacing today's logo strip. `<EditorialHeading>Merci aan onze sponsors.</EditorialHeading>` + thin-bordered table with sponsor names in italic Freight Display + "WORD SPONSOR +" CTA.
+10. `<SponsorsBlock>` — newspaper-style sponsor grid replacing today's logo strip. `<EditorialHeading>Merci aan onze sponsors.</EditorialHeading>` + thin-bordered grid of real sponsor logos + "WORD SPONSOR +" CTA. Per the existing tier model (saved-memory `reference_sponsor_tiers.md`): only `main` and `second` tier sponsors render on the homepage; `regular` sponsors are page-only. Main tier renders in larger cells than second tier so visual hierarchy reflects sponsorship value. Each cell carries the logo as primary content + a small mono-caption sponsor name underneath for accessibility / recognition. Cells with no available logo fall back to the italic Freight Display name treatment from the mockup.
 11. `<PosterWordmark>` — green-bg full-bleed band: `<MonoLabel>ER IS MAAR ÉÉN PLEZANTE</MonoLabel>` + `text-display-2xl` `KCVV ELEWIJT` in Freight Big Pro 900 + small mono metadata row.
 12. `<SiteFooter>` — ink bg, club logo + 3 columns (CLUB / CONTACT / VOLG ONS) + bottom strip.
 
@@ -477,11 +477,11 @@ List: `<TapedCardGrid columns={3}>` of `<EventCard>` (composes `<TapedCard>` + l
 
 Hero: `<EditorialHero variant="generic">` `Onze sponsors.` Body: tier sections. Per saved memory ("sponsor tiers: main / second / regular"):
 
-- Main sponsors: `<TapedCardGrid columns={2}>` with large logos + sponsor name in italic Freight Display + short blurb + outbound link.
+- Main sponsors: `<TapedCardGrid columns={2}>` with large real logos as primary content + sponsor name in italic Freight Display underneath + short blurb + outbound link.
 - Second sponsors: `<TapedCardGrid columns={3}>` with medium logos + name + link.
-- Regular sponsors: newspaper-table layout (same primitive as homepage `<SponsorsBlock>`) with a denser grid.
+- Regular sponsors: denser newspaper-grid layout (same primitive as homepage `<SponsorsBlock>` but tighter), each cell a small logo + mono name caption.
 
-Existing `docs/prd/sponsors-redesign.md` is superseded — restate in Phase 7.
+Logos are the primary asset throughout — the italic Freight Display name treatment is reserved for headlines, captions, and missing-logo fallbacks. Existing `docs/prd/sponsors-redesign.md` is superseded — restate in Phase 7.
 
 ### 6.9 Jeugd landing (`/jeugd`)
 
@@ -586,6 +586,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 4. **TapedCardGrid empty / single-card states.** Should a 1-card grid still rotate? Should an empty grid render a placeholder? Decide in Phase 1.
 5. **Adobe Typekit kit max payload.** With Stenciletta removed and Freight added (7 files), confirm total kit payload is acceptable on mobile — measure in Phase 0.
 6. **Player figure photo crop.** Where the headshot lands inside the cartoon body ring — vertical centre, slightly above centre? Test against a sample of real `psdImage` faces in Phase 3.
+7. **Sponsor logo treatment — monochrome or full colour?** Editorial / newsprint aesthetics typically favour 1-bit ink-only logos so the partner grid reads as a single coherent typographic surface. Full-colour logos pop visually but fight the cream-and-ink page palette and turn the sponsors block into the loudest section of the homepage — the opposite of newspaper feel. Resolve in Phase 4 (homepage rebuild) and Phase 7 (sponsors page rebuild). Likely answer: monochrome by default with full-colour reserved for the per-sponsor `<TapedCard>` on the sponsors page (where the sponsor IS the content). Requires sourcing or generating ink-only versions of every sponsor logo — track as a content-ops task ahead of Phase 4.
 
 ---
 
