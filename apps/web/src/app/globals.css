@@ -282,6 +282,26 @@
   --motion-fast:  150ms ease-out;
   --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-tape:  300ms ease-out;
+
+  /* ===== Redesign / Pattern Tokens (Phase 0) ===== */
+
+  --pattern-jersey-stripes: repeating-linear-gradient(
+    90deg,
+    var(--color-jersey) 0 32px,
+    var(--color-cream) 32px 64px
+  );
+
+  --pattern-jersey-stripes-tight: repeating-linear-gradient(
+    90deg,
+    var(--color-jersey) 0 14px,
+    var(--color-cream) 14px 28px
+  );
+
+  --pattern-seam: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink) 0 8px,
+    var(--color-cream) 8px 16px
+  );
 }
 
 /* ===== Global Styles ===== */
