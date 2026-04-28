@@ -1,7 +1,7 @@
 # Redesign — Phase 0: Foundations
 
 > **Master design reference:** `docs/plans/2026-04-27-redesign-master-design.md`
-> **Epic:** KCVV Elewijt redesign — editorial sports magazine aesthetic
+> **Epic:** KCVV Elewijt redesign — retro-terrace fanzine aesthetic
 > **Blocks:** all subsequent component issues (Phase 1–9)
 > **Owner:** _you_
 > **Estimate:** 1–2 weeks
@@ -295,7 +295,7 @@ What stays unchanged:
 ## 8. References
 
 - `docs/plans/2026-04-27-redesign-master-design.md` — master design doc (sections 2 and 3 are the source for the audit and tokens defined here).
-- `docs/design/directions/01-editorial-magazine.md` — direction notes.
+- Visual source: owner-uploaded screenshots from a Claude Design "retro-terrace fanzine" exploration (in owner's local Downloads at session time; commit to `docs/design/mockups/retro-terrace-fanzine/` during Phase 0 if desired). The pre-existing `docs/design/directions/01-editorial-magazine.md` is **not** related to this redesign — it's leftover from an earlier article-detail-only brainstorm and uses a different visual vocabulary.
 - `docs/prd/visual-regression-testing.md` — VR contract; see §12 Phase 3 for which `Features/*` files require baselines (none in this phase).
 - `apps/web/CLAUDE.md` — Storybook navigation and design-system folder rules.
 

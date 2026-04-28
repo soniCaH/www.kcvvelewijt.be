@@ -5,9 +5,9 @@
 > **Companion:** `docs/prd/redesign-phase-0.md` (the Phase 0 PRD that derives from this doc).
 > **Source material:**
 >
-> - Mockups in `docs/design/mockups/01-editorial-magazine.html` (and direction notes in `docs/design/directions/01-editorial-magazine.md`).
+> - Mockup screenshots committed at `docs/design/mockups/retro-terrace-fanzine/` (7 PNGs: homepage 3-variant, duo interview desktop+mobile, player profile desktop+mobile). The owner-named direction is **"retro-terrace fanzine"** and these screenshots are the canonical visual source for §2 (audit) and §5 (template applications).
+> - This brainstorm session itself (2026-04-27 / 2026-04-28) — first written artifact for the direction.
 > - Externally drafted Phase 0 PRD (Claude Web, no codebase access — superseded by `docs/prd/redesign-phase-0.md`).
-> - Direct image references shared by the owner: homepage 3-variant, duo interview, player profile.
 > - Brainstorming session 2026-04-27 (this doc captures the outcome).
 
 ---
@@ -16,7 +16,7 @@
 
 ### What this doc is
 
-The canonical design reference for the entire KCVV Elewijt site redesign. It defines the **design language** (audit), the **token system** (CSS variables), the **primitive catalogue** (reusable React components), how those primitives **compose into templates**, and the **phased rollout** that gets us from today's site to the editorial-magazine target without breaking production.
+The canonical design reference for the entire KCVV Elewijt site redesign. It defines the **design language** (audit), the **token system** (CSS variables), the **primitive catalogue** (reusable React components), how those primitives **compose into templates**, and the **phased rollout** that gets us from today's site to the **retro-terrace fanzine** target without breaking production.
 
 Per-phase PRDs (starting with `docs/prd/redesign-phase-0.md`) are derived from this doc. When the design language evolves, this doc is the source of truth and per-phase PRDs are revised to match.
 
@@ -30,7 +30,7 @@ Per-phase PRDs (starting with `docs/prd/redesign-phase-0.md`) are derived from t
 
 1. The visual regression testing infrastructure (commits `feat(ui): vr phase 1..3`, merged 2026-04) is the safety net that makes a wholesale redesign feasible. Every redesigned `Features/*` component PR commits its baselines in the same change, so unintended regressions on adjacent components surface as VR diffs at PR time.
 2. The current visual identity ("modern SaaS dashboard": geometric sans, dark surfaces, glassy cards) does not reflect KCVV Elewijt's culture ("Er is maar één plezante compagnie" — printed programmes, supporters' scarves, terrace banter, season magazines). The editorial direction does.
-3. Three design directions were explored (`docs/design/directions/{01-editorial-magazine,02-stadium-graphic,03-broadcast-dramatic}.md`); the owner has converged on **01-editorial-magazine** as the target.
+3. The owner explored multiple directions externally in Claude Design and converged on **"retro-terrace fanzine"** — a printed-programme / supporters-zine aesthetic anchored in cream paper, taped polaroids, striped jersey motifs, italic emphasis, and ticket-stub ephemera. The screenshots from that exploration are the canonical visual source for §2 of this doc.
 
 ### What changes vs. today
 
@@ -95,7 +95,7 @@ The kit of parts decoded from the four mockups (homepage 3-variant, duo intervie
 
 - Not "modern SaaS dashboard". No glassmorphism. No radial gradients. No Lucide icon walls (typographic glyphs preferred).
 - Not photographic full-bleed hero with overlaid text — that's the current site's signature and it goes away.
-- Not "every component gets the polaroid treatment" — the polaroid is a deliberate device used at moments of editorial weight (hero artefacts, news cards, jersey grid, retro thumbnails). UI chrome (forms, modals, dropdowns) stays unrotated and uses `--shadow-soft`.
+- Open question: how broadly does the taped paper card aesthetic apply to UI chrome (forms, modals, dropdowns, toasts, popovers)? Two sensible defaults are in tension: (a) paper everywhere for visual consistency, (b) paper only at moments of editorial weight (hero artefacts, news cards, jersey grid, retro thumbnails) with chrome staying unrotated and using `--shadow-soft`. Either is defensible. Resolve at design time during the Phase 2 atom rework checkpoint when forms / inputs / modals get redesigned — not before. The owner has flagged a preference for consistency over rigid editorial-only restraint.
 
 ---
 
@@ -351,7 +351,7 @@ Primitives are listed in dependency order so the build order falls out for free.
 - A `<TapedCard variant="polaroid" \| "news" \| "profile">` mega-prop. Variants of cards are different *compositions*, not different props on one wrapper.
 - Per-illustration character variants (smiling, serious, raising-arms). `<PlayerFigure>` has one pose vocabulary at launch.
 - Animation primitives. Tilt-on-hover lives inside `<TapedCard>`'s built-in motion; nothing else animates by default.
-- A separate `<Card>` neutral wrapper. If a surface needs to be a card, it's either a `<TapedCard>` (paper feel) or a `<section className="rounded-xl shadow-soft">` (UI chrome). No middle layer.
+- A separate `<Card>` neutral wrapper. The catalogue ships `<TapedCard>` (paper feel, the dominant card primitive). Whether non-editorial UI surfaces (forms, modals, dropdowns) also adopt the paper feel for consistency, or use a softer chrome treatment, is decided per surface during the relevant phase's design checkpoint — not by introducing a third card abstraction up front.
 
 ---
 
@@ -372,7 +372,7 @@ Stack, top-down:
 7. `<StripedSeam>`.
 8. `<YouthBlock>` — full-bleed jersey-bg interlude. `<MonoLabelRow>JEUGD · U6 · U21</MonoLabelRow>` + `<EditorialHeading size="display-xl" emphasis={{text:"toekomst"}}>De toekomst van Elewijt trapt vandaag haar eerste bal.</EditorialHeading>` + lead paragraph + 2 CTAs + `<TapedCard rotation="b">` containing `<JerseyShirt variant="home-stripes" letterOverlay="U11">` + `<TicketStub label="STAMNR." value="55">`.
 9. `<WebshopStrip>` — cream bg. `<EditorialHeading>Clubkledij '26.</EditorialHeading>` + 4-column `<JerseyShirt>` row with prices.
-10. `<SponsorsBlock>` — newspaper-style sponsor grid replacing today's logo strip. `<EditorialHeading>Merci aan onze sponsors.</EditorialHeading>` + thin-bordered grid of real sponsor logos + "WORD SPONSOR +" CTA. Per the existing tier model (saved-memory `reference_sponsor_tiers.md`): only `main` and `second` tier sponsors render on the homepage; `regular` sponsors are page-only. Main tier renders in larger cells than second tier so visual hierarchy reflects sponsorship value. Each cell carries the logo as primary content + a small mono-caption sponsor name underneath for accessibility / recognition. Cells with no available logo fall back to the italic Freight Display name treatment from the mockup.
+10. `<SponsorsBlock>` — newspaper-style sponsor grid replacing today's logo strip. `<EditorialHeading>Merci aan onze sponsors.</EditorialHeading>` + thin-bordered grid of real sponsor logos + "WORD SPONSOR +" CTA. Per the existing tier model (saved-memory `reference_sponsor_tiers.md`): only `main` and `second` tier sponsors render on the homepage; `regular` sponsors are page-only. Main tier renders in larger cells than second tier so visual hierarchy reflects sponsorship value. Each cell carries the logo as primary content + a small mono-caption sponsor name underneath for accessibility / recognition. **Logos render in greyscale by default and reveal full colour on hover / focus** via `filter: grayscale(100%)` with a `--motion-base` transition (decision 16 in §9). Cells with no available logo fall back to the italic Freight Display name treatment from the mockup.
 11. `<PosterWordmark>` — green-bg full-bleed band: `<MonoLabel>ER IS MAAR ÉÉN PLEZANTE</MonoLabel>` + `text-display-2xl` `KCVV ELEWIJT` in Freight Big Pro 900 + small mono metadata row.
 12. `<SiteFooter>` — ink bg, club logo + 3 columns (CLUB / CONTACT / VOLG ONS) + bottom strip.
 
@@ -481,7 +481,7 @@ Hero: `<EditorialHero variant="generic">` `Onze sponsors.` Body: tier sections. 
 - Second sponsors: `<TapedCardGrid columns={3}>` with medium logos + name + link.
 - Regular sponsors: denser newspaper-grid layout (same primitive as homepage `<SponsorsBlock>` but tighter), each cell a small logo + mono name caption.
 
-Logos are the primary asset throughout — the italic Freight Display name treatment is reserved for headlines, captions, and missing-logo fallbacks. Existing `docs/prd/sponsors-redesign.md` is superseded — restate in Phase 7.
+All sponsor logos site-wide render greyscale by default and reveal full colour on hover / focus (decision 16 in §9). Logos are the primary asset throughout — the italic Freight Display name treatment is reserved for headlines, captions, and missing-logo fallbacks. Existing `docs/prd/sponsors-redesign.md` is superseded — restate in Phase 7.
 
 ### 6.9 Jeugd landing (`/jeugd`)
 
@@ -676,7 +676,7 @@ If during execution a built component reveals the chosen mockup was wrong (e.g. 
 
 Decisions made in the 2026-04-27 brainstorm, with rationale.
 
-1. **Editorial-magazine direction over stadium-graphic / broadcast-dramatic.** The other two directions (`docs/design/directions/02-stadium-graphic.md`, `03-broadcast-dramatic.md`) were considered and rejected by the design owner. Editorial reflects KCVV culture better than spectacle.
+1. **Retro-terrace fanzine direction.** The owner explored several directions externally in Claude Design and chose this one — a printed-programme / supporters-zine aesthetic anchored in cream paper, taped polaroids, striped jersey motifs, italic emphasis, and ticket-stub ephemera. The screenshots from that exploration are committed at `docs/design/mockups/retro-terrace-fanzine/`.
 2. **Photo-first, illustration-fallback.** ~90% of player photos are rectangular (psdImage). Building primitives around illustration would require commissioning per-player art; building around photos uses what we already have. Illustrations stay in the system as fallback + marketing-context graphic.
 3. **Per-component PR rollout, dual-token coexistence.** Big-bang requires too much engineering for a club site; feature flags add infrastructure cost without a real audience-testing benefit. VR baselines make per-component safe.
 4. **Pattern catalogue + applied templates** as the master-doc shape (this doc). Mocked surfaces get full specs; un-mocked surfaces get shape notes. No speculative full design for unmocked routes.
@@ -691,6 +691,23 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 13. **Stamnummer is `55`** (not `55⋅24`, not `55-24`). The `-24` suffix in mockup ticket-stub artwork is a decorative season/year tag, not part of the stamnummer. All ticket-stub examples in this doc use the canonical value. (from owner correction 2026-04-28.)
 14. **The football club in Elewijt has existed since 1909.** Mockup artwork showing `ANNO 1924` / `SINDS 1924` is a typo. Earlier saved-memory entries that said `1964` were also wrong. All "since X" branding in this doc and any subsequent design uses `1909`. (from owner correction 2026-04-28.)
 15. **Design checkpoint gating, hybrid by phase.** Phases 0–2 and 9 (tokens, primitives, atoms, cleanup) ship behind Storybook iteration alone — abstract pieces don't earn their keep with mockups. Phases 3–8 (composite components, full pages, landings) require a `/design-an-interface` checkpoint with 2–3 mockup options, owner approval, and committed mockups in `docs/design/mockups/phase-<N>-<surface>/` *before* PRD writing begins. This was made explicit because the owner cannot sign off on the entire redesign from the three exemplar mockups (homepage / duo interview / player profile) — most surfaces still need designing. See §8 for the full workflow. (from owner concern 2026-04-28.)
+16. **Sponsor logos render greyscale by default, full colour on hover.** Resolves the sponsor-treatment open question. CSS implementation:
+
+    ```css
+    .sponsor-logo {
+      filter: grayscale(100%);
+      transition: filter var(--motion-base);
+    }
+    .sponsor-logo:hover,
+    .sponsor-logo:focus-visible {
+      filter: grayscale(0%);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sponsor-logo { transition: none; }
+    }
+    ```
+
+    `filter: grayscale()` works on any source — JPG, PNG, SVG — so no per-sponsor monochrome asset is required, and sponsors continue uploading their normal colour logos. The hover-to-colour reveal preserves the newspaper feel by default while letting visitors confirm the actual brand on interaction. Applies to both the homepage `<SponsorsBlock>` and the `/sponsors` page tier sections. (from owner decision 2026-04-28.)
 
 ### Open questions deferred to per-phase PRDs
 
@@ -700,15 +717,14 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 4. **TapedCardGrid empty / single-card states.** Should a 1-card grid still rotate? Should an empty grid render a placeholder? Decide in Phase 1.
 5. **Adobe Typekit kit max payload.** With Stenciletta removed and Freight added (7 files), confirm total kit payload is acceptable on mobile — measure in Phase 0.
 6. **Player figure photo crop.** Where the headshot lands inside the cartoon body ring — vertical centre, slightly above centre? Test against a sample of real `psdImage` faces in Phase 3.
-7. **Sponsor logo treatment — monochrome or full colour?** Editorial / newsprint aesthetics typically favour 1-bit ink-only logos so the partner grid reads as a single coherent typographic surface. Full-colour logos pop visually but fight the cream-and-ink page palette and turn the sponsors block into the loudest section of the homepage — the opposite of newspaper feel. Resolve in Phase 4 (homepage rebuild) and Phase 7 (sponsors page rebuild). Likely answer: monochrome by default with full-colour reserved for the per-sponsor `<TapedCard>` on the sponsors page (where the sponsor IS the content). Requires sourcing or generating ink-only versions of every sponsor logo — track as a content-ops task ahead of Phase 4.
+7. **How broadly does the paper-card aesthetic apply to UI chrome?** Forms, modals, dropdowns, popovers, toasts: do they adopt the cream/tape/rotation/hard-shadow language for visual consistency with the editorial surfaces, or stay as un-rotated chrome with `--shadow-soft` so they read as functional UI rather than printed memorabilia? The owner has flagged a preference for consistency over rigid editorial-only restraint, but reserves judgement until forms/modals are actually mocked. Phase 2 atom rework only swaps tokens on individual elements (`<Button>`, `<Input>`, etc.) — the container-level question (is a modal a `<TapedCard>` or a chrome surface?) gets answered at the first phase that introduces a real modal in a mockup. Likely Phase 6 (search modals, RSVP modals) or Phase 8 (hulp form). Until then, default to chrome treatment with `--shadow-soft` for any modal/dropdown/popover that ships.
 
 ---
 
 ## 10. References
 
 - Source PRD (Claude Web, no codebase access — superseded): originally proposed at `docs/prd/redesign-phase-0.md` upstream context. The refined replacement lives at `docs/prd/redesign-phase-0.md`.
-- Editorial direction notes: `docs/design/directions/01-editorial-magazine.md`.
-- Direction mockups (HTML): `docs/design/mockups/01-editorial-magazine.html`.
+- Visual source: `docs/design/mockups/retro-terrace-fanzine/` — 7 owner-curated screenshots from a Claude Design exploration (homepage 3-variant, duo interview desktop+mobile, player profile desktop+mobile) plus a `README.md` describing each.
 - Visual Regression contract: `docs/prd/visual-regression-testing.md`.
 - Multi-subject interview precedent: `docs/design/interview-multi-subject-review.md`.
 - Ubiquitous language (domain glossary): `docs/ubiquitous-language.md`.

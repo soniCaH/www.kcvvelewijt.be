@@ -272,7 +272,7 @@ The MDX file uses native HTML `<table>` elements (MDX 2 caveat from `apps/web/CL
 ```mdx
 ## Redesign / Phase 0 — Cream Surface
 
-These tokens land in Phase 0 of the editorial-magazine redesign. Legacy
+These tokens land in Phase 0 of the retro-terrace fanzine redesign. Legacy
 `--color-kcvv-*` tokens remain valid until Phase 9 cleanup; both
 vocabularies coexist.
 
@@ -1376,7 +1376,7 @@ Expected: zero output (additive changes only). If any legacy token line was dele
 ```markdown
 ### Redesign primitives (Phase 0+)
 
-Phase 0 of the editorial-magazine redesign added the following design-system primitives. They live alongside legacy components per the dual-coexistence policy. See `docs/plans/2026-04-27-redesign-master-design.md` for the design language audit and `docs/prd/redesign-phase-0.md` for token + primitive specs.
+Phase 0 of the retro-terrace fanzine redesign added the following design-system primitives. They live alongside legacy components per the dual-coexistence policy. See `docs/plans/2026-04-27-redesign-master-design.md` for the design language audit and `docs/prd/redesign-phase-0.md` for token + primitive specs.
 
 - `<TapeStrip>` — diagonal washi-tape graphic for card corners.
 - `<StripedSeam>` — SVG-backed diagonal barber-pole horizontal section divider.
@@ -1424,7 +1424,7 @@ gh pr create --title "redesign phase 0 — design tokens + Tier A primitives + f
 - Documents the new tokens in `Foundation/Colors`, `Foundation/Typography`, `Foundation/SpacingAndIcons`, and a new `Foundation/Patterns`.
 - Records the Stenciletta retirement from the Adobe Typekit kit.
 
-This is the first PR in the editorial-magazine redesign series. Master design reference: `docs/plans/2026-04-27-redesign-master-design.md`. Phase 0 PRD: `docs/prd/redesign-phase-0.md`.
+This is the first PR in the retro-terrace fanzine redesign series. Master design reference: `docs/plans/2026-04-27-redesign-master-design.md`. Phase 0 PRD: `docs/prd/redesign-phase-0.md`.
 
 ## VR baselines
 
