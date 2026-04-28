@@ -1,6 +1,9 @@
 # Redesign — Phase 0: Foundations
 
 > **Master design reference:** `docs/plans/2026-04-27-redesign-master-design.md`
+> **Tracking issue:** [#1521](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1521)
+> **Implementation PR:** [#1519](https://github.com/soniCaH/www.kcvvelewijt.be/pull/1519)
+> **Milestone:** `redesign-retro-terrace-fanzine`
 > **Epic:** KCVV Elewijt redesign — retro-terrace fanzine aesthetic
 > **Blocks:** all subsequent component issues (Phase 1–9)
 > **Owner:** _you_
