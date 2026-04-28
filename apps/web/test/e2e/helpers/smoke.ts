@@ -1,4 +1,10 @@
-import { expect, type Page } from "@playwright/test";
+import {
+  expect,
+  type ConsoleMessage,
+  type Page,
+  type Request,
+  type Response,
+} from "@playwright/test";
 
 export interface SmokeOptions {
   path: string;
@@ -69,23 +75,26 @@ export async function smokeTest(
   const consoleErrors: string[] = [];
   const failedRequests: string[] = [];
 
-  page.on("console", (msg) => {
+  // Named handlers so we can detach them after the run — keeps listeners
+  // from accumulating if the same Page is ever reused (Playwright retries,
+  // future helper re-use, etc.).
+  const consoleHandler = (msg: ConsoleMessage) => {
     if (msg.type() !== "error") return;
     const text = msg.text();
     if (expectedResourceErrorPattern?.test(text)) return;
     if (ignoreConsoleErrors.some((m) => matches(text, m))) return;
     consoleErrors.push(text);
-  });
+  };
 
   // The browser logs only "Failed to load resource: status of <code>" without
   // the URL. Capture failed-request URLs separately so the diff message tells
   // the engineer which sub-resource is the actual culprit.
-  page.on("requestfailed", (req) => {
+  const requestFailedHandler = (req: Request) => {
     failedRequests.push(
       `${req.method()} ${req.url()} (${req.failure()?.errorText ?? "unknown"})`,
     );
-  });
-  page.on("response", (response) => {
+  };
+  const responseHandler = (response: Response) => {
     const status = response.status();
     if (status < 400) return;
     // Don't flag the main page navigation as a sub-resource failure when the
@@ -96,42 +105,52 @@ export async function smokeTest(
     failedRequests.push(
       `${response.request().method()} ${response.url()} → ${status}`,
     );
-  });
+  };
 
-  const response = await page.goto(path);
-  expect(response, `goto(${path}) returned no response`).not.toBeNull();
-  expect(response!.status(), `${path} status`).toBe(expectedStatus);
+  page.on("console", consoleHandler);
+  page.on("requestfailed", requestFailedHandler);
+  page.on("response", responseHandler);
 
-  await expect(page.locator("h1").first(), `${path} <h1>`).toBeVisible();
-  await expect(page.locator("nav").first(), `${path} <nav>`).toBeVisible();
-  await expect(
-    page.locator("footer").first(),
-    `${path} <footer>`,
-  ).toBeVisible();
+  try {
+    const response = await page.goto(path);
+    expect(response, `goto(${path}) returned no response`).not.toBeNull();
+    expect(response!.status(), `${path} status`).toBe(expectedStatus);
 
-  // Wait for the load event before sampling images — `complete` is only
-  // meaningful after the browser has finished its initial loading pass.
-  await page.waitForLoadState("load");
+    await expect(page.locator("h1").first(), `${path} <h1>`).toBeVisible();
+    await expect(page.locator("nav").first(), `${path} <nav>`).toBeVisible();
+    await expect(
+      page.locator("footer").first(),
+      `${path} <footer>`,
+    ).toBeVisible();
 
-  const brokenImages = await page.evaluate(() => {
-    const imgs = Array.from(document.querySelectorAll("img"));
-    return imgs
-      .filter((img) => {
-        const rect = img.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      })
-      .filter((img) => img.complete && img.naturalWidth === 0)
-      .map((img) => img.currentSrc || img.src);
-  });
-  expect(brokenImages, `${path} broken images`).toEqual([]);
+    // Wait for the load event before sampling images — `complete` is only
+    // meaningful after the browser has finished its initial loading pass.
+    await page.waitForLoadState("load");
 
-  // Fold failed sub-resource URLs into the console-error diff so the message
-  // includes the offending URL(s), not just "Failed to load resource: 4xx".
-  const consoleErrorsWithContext =
-    consoleErrors.length > 0 && failedRequests.length > 0
-      ? [...consoleErrors, "", "Failed sub-resources:", ...failedRequests]
-      : consoleErrors;
-  expect(consoleErrorsWithContext, `${path} console.error`).toEqual([]);
+    const brokenImages = await page.evaluate(() => {
+      const imgs = Array.from(document.querySelectorAll("img"));
+      return imgs
+        .filter((img) => {
+          const rect = img.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        })
+        .filter((img) => img.complete && img.naturalWidth === 0)
+        .map((img) => img.currentSrc || img.src);
+    });
+    expect(brokenImages, `${path} broken images`).toEqual([]);
+
+    // Fold failed sub-resource URLs into the console-error diff so the message
+    // includes the offending URL(s), not just "Failed to load resource: 4xx".
+    const consoleErrorsWithContext =
+      consoleErrors.length > 0 && failedRequests.length > 0
+        ? [...consoleErrors, "", "Failed sub-resources:", ...failedRequests]
+        : consoleErrors;
+    expect(consoleErrorsWithContext, `${path} console.error`).toEqual([]);
+  } finally {
+    page.off("console", consoleHandler);
+    page.off("requestfailed", requestFailedHandler);
+    page.off("response", responseHandler);
+  }
 }
 
 function matches(text: string, m: string | RegExp): boolean {

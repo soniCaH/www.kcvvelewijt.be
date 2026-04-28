@@ -20,6 +20,9 @@ on:
       - "apps/web/package.json"
       - "apps/web/test/e2e/**"
       - "packages/api-contract/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main, develop]
@@ -29,6 +32,9 @@ on:
       - "apps/web/package.json"
       - "apps/web/test/e2e/**"
       - "packages/api-contract/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/e2e.yml"
 
 jobs:

@@ -225,7 +225,9 @@ runner using the pinned `mcr.microsoft.com/playwright:v1.59.1-noble` image
 Path triggers are deliberately **distinct from the VR job's**:
 
 - Included: `apps/web/src/**`, `apps/web/public/**`,
-  `apps/web/package.json`, `apps/web/test/e2e/**`, `.github/workflows/e2e.yml`.
+  `apps/web/package.json`, `apps/web/test/e2e/**`,
+  `packages/api-contract/**`, root `package.json`, `pnpm-lock.yaml`,
+  `pnpm-workspace.yaml`, `.github/workflows/e2e.yml`.
 - Excluded: `apps/web/.storybook/**`, `apps/web/test/vr/**` (Storybook-only
   paths that don't affect a Playwright-against-`next start` run).
 

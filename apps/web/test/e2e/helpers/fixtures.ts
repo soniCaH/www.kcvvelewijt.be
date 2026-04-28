@@ -66,13 +66,20 @@ export async function discoverRouteFixtures(
 
     const articleSlugs = slugsUnder(entries, PATH_PREFIXES.article);
     const probeCount = Math.min(articleSlugs.length, ARTICLE_PROBE_BUDGET);
-    const probeResults = await Promise.all(
+    // Tolerate per-slug failures: a single article that 5xxs (or whose
+    // request rejects on a transient network error) must not poison the
+    // whole probe — a missing articleType variant is recoverable (the
+    // affected test will skip), but a thrown promise here would fail
+    // every test in the file via the beforeAll hook.
+    const probeOutcomes = await Promise.allSettled(
       articleSlugs.slice(0, probeCount).map(async (slug) => ({
         slug,
         type: await probeArticleType(api, baseURL, slug),
       })),
     );
-    for (const { slug, type } of probeResults) {
+    for (const outcome of probeOutcomes) {
+      if (outcome.status !== "fulfilled") continue;
+      const { slug, type } = outcome.value;
       if (!type) continue;
       if (articleSlugByType[type] !== null) continue;
       articleSlugByType[type] = slug;
