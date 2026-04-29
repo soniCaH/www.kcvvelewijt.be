@@ -106,13 +106,10 @@ export const WithTape: Story = {
       </TapedCard>
       <TapedCard
         rotation="c"
-        tape={[
-          { position: "tl", color: "jersey", length: "md" },
-          { position: "tr", color: "ink", length: "sm" },
-        ]}
+        tape={[{ position: "tl", color: "jersey", length: "lg" }]}
       >
         <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
-          both top corners
+          single large jersey tape
         </p>
       </TapedCard>
     </div>

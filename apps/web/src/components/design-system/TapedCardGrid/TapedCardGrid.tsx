@@ -34,6 +34,11 @@ const ROTATION_POOL = [
   "var(--rotate-tape-d)",
 ] as const;
 
+// Per-slot tape rotation — narrower range than card rotation so tapes feel
+// hand-placed without dominating the layout. Capped at -6° (owner: -7° too
+// much). Cycles 4-wide so tapes vary across each grid row.
+const TAPE_ROTATION_POOL = ["-3deg", "-4deg", "-5deg", "-6deg"] as const;
+
 type StyleWithVars = CSSProperties & Record<`--${string}`, string | number>;
 
 export function TapedCardGrid({
@@ -62,6 +67,8 @@ export function TapedCardGrid({
       {items.map((child, index) => {
         const slotStyle: StyleWithVars = {
           "--taped-card-rotation": ROTATION_POOL[index % ROTATION_POOL.length]!,
+          "--tape-rotation":
+            TAPE_ROTATION_POOL[index % TAPE_ROTATION_POOL.length]!,
         };
         return (
           <SlotTag

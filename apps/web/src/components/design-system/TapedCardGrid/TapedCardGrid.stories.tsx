@@ -125,20 +125,19 @@ export const WithLargeTapesOnCorners: Story = {
     children: [],
   },
   render: () => {
-    // Tape only attaches at top edges — bottom tapes overlap the offset
-    // shadow region, which reads as un-physical.
-    const corners = ["tl", "tr", "tl", "tr", "tl", "tr"] as const;
+    // Tapes are tl-only. The grid sets a per-slot --tape-rotation CSS
+    // variable so each tape's angle varies subtly across the row.
     return (
       <TapedCardGrid columns={3}>
-        {corners.map((corner, i) => (
+        {Array.from({ length: 6 }).map((_, i) => (
           <TapedCard
             key={i}
             rotation="auto"
             padding="md"
-            tape={{ position: corner, color: "jersey", length: "lg" }}
+            tape={{ position: "tl", color: "jersey", length: "lg" }}
           >
             <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
-              tape · {corner}
+              slot · {i + 1}
             </p>
             <h3 className="text-display-sm mt-1">Het rooster.</h3>
             <p className="text-body-sm mt-2 leading-relaxed">

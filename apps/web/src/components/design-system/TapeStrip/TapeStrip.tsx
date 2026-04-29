@@ -1,12 +1,9 @@
 import type { CSSProperties } from "react";
 
 export type TapeStripColor = "jersey" | "ink" | "cream";
-// Only top-edge positions. Bottom/right tapes overlap the card's offset
-// shadow (bottom-right), which reads as un-physical: tape can't be visible
-// over a shadow it should be hiding. Real scrapbook/poster tape attaches
-// from the top — gravity does the rest. Master-design mockups exclusively
-// place tape at top corners.
-export type TapeStripPosition = "tl" | "tr";
+// Single canonical position. The card's offset shadow (bottom-right) means
+// only the top edge can host a tape without shadow conflict.
+export type TapeStripPosition = "tl";
 export type TapeStripLength = "sm" | "md" | "lg";
 
 export interface TapeStripProps {
@@ -33,26 +30,19 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
 // balanced.
 const POSITION_CLASS: Record<TapeStripPosition, string> = {
   tl: "absolute top-0 left-[12%] origin-center",
-  tr: "absolute top-0 right-[12%] origin-center",
 };
 
-// Per-position rotation lean. Custom rotation is intentionally not exposed
-// on the API: arbitrary degrees produced nonsensical results (tape barely
-// overlapping the card edge).
-const POSITION_ROTATION: Record<TapeStripPosition, number> = {
-  tl: -5,
-  tr: 5,
-};
+// Tape rotation reads from a CSS custom property so <TapedCardGrid> can
+// auto-vary the angle per slot (range -3deg → -6deg). Standalone tapes
+// fall back to -5deg.
+const TAPE_TRANSFORM = "translateY(-50%) rotate(var(--tape-rotation, -5deg))";
 
 export function TapeStrip({
   color = "jersey",
   position = "tl",
   length = "md",
 }: TapeStripProps) {
-  const rot = POSITION_ROTATION[position];
-  const style: CSSProperties = {
-    transform: `translateY(-50%) rotate(${rot}deg)`,
-  };
+  const style: CSSProperties = { transform: TAPE_TRANSFORM };
   return (
     <span
       data-color={color}

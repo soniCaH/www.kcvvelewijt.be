@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { CSSProperties } from "react";
 import { TapeStrip } from "./TapeStrip";
 
 const meta = {
@@ -22,12 +23,27 @@ export const Playground: Story = {
   args: { color: "jersey", position: "tl", length: "md" },
 };
 
-export const AllPositions: Story = {
+const slotStyle = (rot: string) =>
+  ({ "--tape-rotation": rot }) as CSSProperties;
+
+export const AutoVaryViaGridVariable: Story = {
+  // The grid pool TapedCardGrid uses: -3deg, -4deg, -5deg, -6deg.
+  // Standalone tapes default to -5deg.
   render: () => (
-    <>
-      <TapeStrip position="tl" />
-      <TapeStrip position="tr" />
-    </>
+    <div className="flex flex-col gap-4">
+      {(["-3deg", "-4deg", "-5deg", "-6deg"] as const).map((rot) => (
+        <div
+          key={rot}
+          style={slotStyle(rot)}
+          className="bg-cream-soft border-paper-edge relative h-20 w-64 border"
+        >
+          <TapeStrip />
+          <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
+            --tape-rotation: {rot}
+          </span>
+        </div>
+      ))}
+    </div>
   ),
 };
 
