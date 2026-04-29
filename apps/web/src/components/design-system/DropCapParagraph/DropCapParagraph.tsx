@@ -32,19 +32,27 @@ export function DropCapParagraph({
   const first = children.charAt(0);
   const rest = children.slice(1);
 
-  // Body line-height locked to text-body-md's --lh token so the dropcap
-  // height calculation below stays accurate even if the parent's class
-  // changes between leading-relaxed (1.6) and another preset.
+  // Body and drop-cap dimensions derived from the SAME source values so the
+  // float's height is guaranteed to equal exactly N body line-heights —
+  // independent of any class-resolution surprises (token vs preset, leading
+  // class specificity, parent overrides). The parent paragraph and the cap
+  // span both get inline-style font-size + line-height so nothing else can
+  // win the cascade.
+  const BODY_FONT_SIZE_REM = 1;
   const BODY_LINE_HEIGHT = 1.6;
-  const BODY_FONT_SIZE_REM = 1; // text-body-md = 1rem
   const DROP_CAP_LINES = 3;
-  const dropCapFontSize = `${BODY_FONT_SIZE_REM * BODY_LINE_HEIGHT * DROP_CAP_LINES}rem`;
+  const dropCapFontSizeRem =
+    BODY_FONT_SIZE_REM * BODY_LINE_HEIGHT * DROP_CAP_LINES;
 
   return createElement(
     as,
     {
       "data-tone": tone,
-      className: cn("text-body-md leading-[1.6]", className),
+      className: cn(className),
+      style: {
+        fontSize: `${BODY_FONT_SIZE_REM}rem`,
+        lineHeight: BODY_LINE_HEIGHT,
+      },
     },
     <>
       <span
@@ -55,10 +63,7 @@ export function DropCapParagraph({
           TONE_CLASS[tone],
         )}
         style={{
-          // Float height must equal exactly DROP_CAP_LINES × body line-height
-          // so the float clears flush with the bottom of line N. Any non-zero
-          // top/bottom margin or line-height ≠ 1 breaks the alignment.
-          fontSize: dropCapFontSize,
+          fontSize: `${dropCapFontSizeRem}rem`,
           lineHeight: 1,
         }}
       >
