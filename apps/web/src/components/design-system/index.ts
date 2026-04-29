@@ -145,3 +145,14 @@ export type {
 // TicketStub
 export { TicketStub } from "./TicketStub";
 export type { TicketStubProps, TicketStubPosition } from "./TicketStub";
+
+// TapedCard
+export { TapedCard } from "./TapedCard";
+export type {
+  TapedCardProps,
+  TapedCardRotation,
+  TapedCardShadow,
+  TapedCardBg,
+  TapedCardPadding,
+  TapedCardAs,
+} from "./TapedCard";
