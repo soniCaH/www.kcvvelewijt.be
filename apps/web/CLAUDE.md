@@ -260,9 +260,15 @@ committed to the repo. Background and rationale: `docs/prd/visual-regression-tes
 
 ### Local workflow (Docker required)
 
-Prerequisite: Docker Desktop running. Local runs use the pinned
-`mcr.microsoft.com/playwright:v1.59.1-noble` image so font rendering matches CI
-exactly.
+Prerequisite: Docker Desktop running with **at least 8 GB of memory allocated**
+to the Docker VM. Local runs use the pinned `mcr.microsoft.com/playwright:v1.59.1-noble`
+image so font rendering matches CI exactly.
+
+**Minimum Docker Desktop memory:** 8 GB (measured against the full Phase 2+3
+story surface). Below this floor, Chromium runs out of memory mid-story and
+produces `page.goto: Page crashed` failures on `Features/*` and `Pages/*` stories.
+If your machine allocates less than 8 GB, use the `vr:update:single` script
+(see "Single-worker fallback" below).
 
 ```bash
 # Compare against committed baselines.
@@ -278,6 +284,24 @@ pnpm --filter @kcvv/web run vr:diff layout-pagefooter--standalone
 `vr:check` and `vr:update` rebuild Storybook first, then run the test-runner
 inside Docker. First run pulls the Playwright image (~1.3 GB). Steady-state run
 time on a warm cache is ~30 s for the Phase 1 tracer-bullet set.
+
+### Single-worker fallback
+
+If `vr:update` crashes mid-run with `page.goto: Page crashed` (Chromium OOM
+inside the Docker container), use the single-worker variants:
+
+```bash
+# Compare — single worker, lower peak memory.
+pnpm --filter @kcvv/web run vr:run:single
+
+# Update baselines — single worker, lower peak memory.
+pnpm --filter @kcvv/web run vr:update:single
+```
+
+These scripts pass `--maxWorkers=1` to `test-storybook`, serialising story
+visits instead of parallelising them. Run time roughly doubles, but peak RSS
+drops significantly, allowing the full suite to complete on hosts below the
+8 GB memory floor.
 
 ### Path-based triggering
 
@@ -547,3 +571,6 @@ explicitly. A GitHub App is the cleaner long-term replacement.
 - **No baselines committed from macOS or Windows hosts.** Only Docker-local
   (Linux-matched) or the CI bot.
 - **No `visual` label.** Triggering is path-based; never introduce a label gate.
+- **Do not run multi-worker `vr:update` on hosts under the 8 GB memory floor.**
+  Chromium will crash mid-story inside the Docker container and produce phantom
+  `page.goto: Page crashed` failures. Use `vr:update:single` instead.
