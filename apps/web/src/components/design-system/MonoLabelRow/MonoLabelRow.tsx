@@ -29,7 +29,6 @@ export function MonoLabelRow({
   if (items.length === 0) return null;
 
   const isList = Tag === "ol" || Tag === "ul";
-  const ItemTag = isList ? "li" : "span";
 
   return (
     <Tag
@@ -41,42 +40,45 @@ export function MonoLabelRow({
         className,
       )}
     >
-      {items.map((item, index) => (
-        <Fragment key={index}>
-          {/* Item wrapper inherits browser-default line-height by default,
-              which makes the wrapper's box taller than its MonoLabel content
-              and pushes flex `items-center` to centre against an empty box
-              centre rather than the label's actual visual centre. Forcing
-              leading-none collapses the wrapper to the label's height so
-              dots line up with cap-height middle. */}
-          <ItemTag className={cn("leading-none", isList && "list-none")}>
-            <MonoLabel
-              variant={item.variant ?? "plain"}
-              size={item.size ?? "sm"}
-            >
-              {item.label}
-            </MonoLabel>
-          </ItemTag>
-          {index < items.length - 1 &&
-            (divider === "·" ? (
-              <span
-                data-divider="true"
-                data-divider-glyph={divider}
-                aria-hidden="true"
-                className="bg-ink-muted/60 inline-block h-[3px] w-[3px] rounded-full"
-              />
+      {items.map((item, index) => {
+        const label = (
+          <MonoLabel variant={item.variant ?? "plain"} size={item.size ?? "sm"}>
+            {item.label}
+          </MonoLabel>
+        );
+        return (
+          <Fragment key={index}>
+            {isList ? (
+              // <ol>/<ul> requires <li> children. inline-flex on the <li>
+              // bypasses the inline strut so the list item sizes to the
+              // MonoLabel's actual height.
+              <li className="inline-flex list-none items-center">{label}</li>
             ) : (
-              <span
-                data-divider="true"
-                data-divider-glyph={divider}
-                aria-hidden="true"
-                className="text-ink-muted font-mono text-[length:var(--text-label)] leading-none"
-              >
-                {divider}
-              </span>
-            ))}
-        </Fragment>
-      ))}
+              // No wrapper — MonoLabel is a direct flex child. Its
+              // inline-block leading-none box is already 11px.
+              label
+            )}
+            {index < items.length - 1 &&
+              (divider === "·" ? (
+                <span
+                  data-divider="true"
+                  data-divider-glyph={divider}
+                  aria-hidden="true"
+                  className="bg-ink-muted/60 inline-block h-[3px] w-[3px] rounded-full"
+                />
+              ) : (
+                <span
+                  data-divider="true"
+                  data-divider-glyph={divider}
+                  aria-hidden="true"
+                  className="text-ink-muted font-mono text-[length:var(--text-label)] leading-none"
+                >
+                  {divider}
+                </span>
+              ))}
+          </Fragment>
+        );
+      })}
     </Tag>
   );
 }
