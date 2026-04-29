@@ -172,3 +172,12 @@ export type {
   TapedFigureAspect,
   TapedFigureBg,
 } from "./TapedFigure";
+
+// MonoLabelRow
+export { MonoLabelRow } from "./MonoLabelRow";
+export type {
+  MonoLabelRowProps,
+  MonoLabelRowItem,
+  MonoLabelRowDivider,
+  MonoLabelRowAs,
+} from "./MonoLabelRow";
