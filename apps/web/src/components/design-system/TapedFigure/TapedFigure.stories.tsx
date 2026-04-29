@@ -28,8 +28,10 @@ const photoPlaceholder = (
   <div
     className="bg-ink flex h-full w-full items-center justify-center"
     style={{
-      backgroundImage:
-        "repeating-linear-gradient(135deg, rgba(74, 207, 82, 0.18) 0 14px, transparent 14px 28px)",
+      // Use the design-system jersey-stripes pattern token so the placeholder
+      // reads as a brand-consistent "photo would render here" surface.
+      backgroundImage: "var(--pattern-jersey-stripes-tight)",
+      backgroundBlendMode: "soft-light",
     }}
     aria-label="Sample editorial photo"
   >

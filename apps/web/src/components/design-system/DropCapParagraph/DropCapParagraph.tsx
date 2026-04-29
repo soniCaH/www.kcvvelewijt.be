@@ -33,9 +33,11 @@ export function DropCapParagraph({
   tone = "jersey",
   className,
 }: DropCapParagraphProps) {
-  if (!children) {
+  if (!children || children.trim().length === 0) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("[DropCapParagraph] received empty children");
+      console.warn(
+        "[DropCapParagraph] received empty or whitespace-only children",
+      );
     }
     return null;
   }

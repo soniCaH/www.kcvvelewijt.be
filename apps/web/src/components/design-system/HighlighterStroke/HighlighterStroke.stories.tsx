@@ -76,7 +76,7 @@ export const MultiLineUnsupported: Story = {
     // Repro: render <HighlighterStroke> over wrapped text; stroke fails to
     // repeat per visual line.
     // Approved by: PR #1519 code review 2026-04-28
-    // Re-evaluate: when multi-line support ships in a later phase
+    // Re-evaluate: 2026-10-01 (or earlier when #1543 multi-line support ships)
     vr: { disable: true },
   },
   args: { children: "x" },

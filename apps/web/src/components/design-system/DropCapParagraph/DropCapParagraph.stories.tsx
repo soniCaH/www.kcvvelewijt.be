@@ -18,6 +18,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  args: {
+    tone: "jersey",
+    children:
+      "Acht keer Elewijt — niet omdat hij telkens iets nieuws moest leren, maar omdat hij er telkens weer naartoe gewild heeft.",
+  },
+};
+
 export const Default: Story = {
   args: {
     children:

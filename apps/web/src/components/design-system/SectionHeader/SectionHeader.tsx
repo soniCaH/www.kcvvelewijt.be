@@ -7,10 +7,17 @@ import {
 } from "../EditorialHeading";
 import { MonoLabelRow, type MonoLabelRowItem } from "../MonoLabelRow";
 
-// Same path geometry as <HighlighterStroke> variant 'a' (clean slab) but
-// emitted as a mask shape with no fill colour. The element using this mask
-// fills with `background-color: currentColor`, so the highlighter inherits
-// the link's text colour rather than always rendering jersey green.
+// Mask-image shape for the CTA hover highlighter underline. Same conceptual
+// geometry as <HighlighterStroke>'s STROKE_PATH (4-point clean slab) but
+// emitted as a mask with no fill colour so the consuming element can fill
+// with `background-color` (here: bg-jersey/65) without rendering the
+// hard-coded jersey green that the primitive carries.
+//
+// TODO(phase-4): consolidate with <HighlighterStroke> once it gains a
+// `currentColor` / mask-mode option per PRD §11.7 / issue #1488 §b. At that
+// point this inline shape can drop in favour of `<HighlighterStroke
+// color="currentColor" />` (or similar) and SectionHeader can delete the
+// duplicated SVG path string below.
 const HIGHLIGHTER_MASK_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 5.4 L 99 5.0 L 99 10.4 L 1 10.6 Z' fill='black'/></svg>`,
 )}`;

@@ -18,6 +18,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  args: {
+    value: 8,
+    prefix: "#",
+    size: "display-xl",
+    tone: "ink",
+    label: "WEDSTRIJDEN",
+    as: "div",
+  },
+};
+
 export const JerseyNumber: Story = {
   args: { value: 8, prefix: "#", size: "display-2xl", tone: "jersey" },
 };

@@ -18,6 +18,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  args: {
+    items: [
+      { label: "MATCHVERSLAG" },
+      { label: "A-PLOEG" },
+      { label: "8 MIN" },
+    ],
+  },
+};
+
 export const Default: Story = {
   args: {
     items: [

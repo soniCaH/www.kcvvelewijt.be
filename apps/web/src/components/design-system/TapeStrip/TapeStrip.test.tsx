@@ -10,11 +10,13 @@ describe("TapeStrip", () => {
     expect(el).toHaveAttribute("data-length", "lg");
   });
 
-  it("respects color and length", () => {
-    const { container } = render(<TapeStrip color="ink" length="lg" />);
+  it("respects color and length (non-default values)", () => {
+    // Use length="sm" — non-default — so the test catches a regression that
+    // would silently fall back to the default lg.
+    const { container } = render(<TapeStrip color="ink" length="sm" />);
     const el = container.firstChild as HTMLElement;
     expect(el).toHaveAttribute("data-color", "ink");
-    expect(el).toHaveAttribute("data-length", "lg");
+    expect(el).toHaveAttribute("data-length", "sm");
   });
 
   it("left position reads var(--tape-left,12%) via Tailwind arbitrary class", () => {
