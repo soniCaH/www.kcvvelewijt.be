@@ -590,11 +590,9 @@ Master design decision 9 stated: _"Phase 0 ships single-line only; multi-line wr
 **Trip-wires** (so this can't get lost):
 
 1. **This PRD's §7 Out of scope** explicitly names the deferral.
-2. **`apps/web/CLAUDE.md` §"Redesign primitives (Phase 0+)"** continues to flag `<HighlighterStroke>` with `multi-line wrapping is the deferred follow-up tracked in docs/prd/redesign-phase-1.md §11.1`.
-3. **Phase 1 PR body** mentions the deferral so reviewers see it.
-4. **Phase 5 (article detail) PRD** — when authored, must reference this section and decide whether multi-line landing inside Phase 5 is required for body-copy emphasis spans, or whether the primitive can ship as-is. The first phase to need multi-line is the phase that builds the helper.
-
-A separate tracking GitHub issue is **not** opened — the four trip-wires above are sufficient and `blockedBy` doesn't apply (multi-line isn't a hard blocker for any specific future phase). Adding another issue would just create backlog noise that duplicates the PRD record.
+2. **GitHub issue [#1543](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1543)** opened with `nice to have` label tracking the multi-line helper, and Phase 5 ([#1527](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1527)) marked `blockedBy` #1543 via the GraphQL `addBlockedBy` mutation. Phase 5 won't be picked up by Ralph until #1543 is closed.
+3. **`apps/web/CLAUDE.md` §"Redesign primitives (Phase 0+)"** continues to flag `<HighlighterStroke>` with `multi-line wrapping is the deferred follow-up tracked in docs/prd/redesign-phase-1.md §11.1`.
+4. **Phase 1 PR body** mentions the deferral so reviewers see it.
 
 ### 11.2 `<TapedCard interactive>` rotate-on-hover delta
 
