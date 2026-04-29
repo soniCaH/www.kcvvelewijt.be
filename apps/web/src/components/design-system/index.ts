@@ -156,3 +156,12 @@ export type {
   TapedCardPadding,
   TapedCardAs,
 } from "./TapedCard";
+
+// TapedCardGrid
+export { TapedCardGrid } from "./TapedCardGrid";
+export type {
+  TapedCardGridProps,
+  TapedCardGridColumns,
+  TapedCardGridGap,
+  TapedCardGridAs,
+} from "./TapedCardGrid";
