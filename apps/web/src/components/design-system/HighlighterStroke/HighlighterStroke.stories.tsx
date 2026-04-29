@@ -42,7 +42,9 @@ export const InAHeading: Story = {
 };
 
 export const ColorVariants: Story = {
-  args: { children: "x" },
+  // children is required by the Story type but the render() composes its own
+  // gallery instead of consuming args; an empty value satisfies the contract.
+  args: { children: "" },
   render: () => (
     <div className="flex flex-col gap-6">
       <h2 className="font-display text-display-lg italic">
@@ -79,7 +81,8 @@ export const MultiLineUnsupported: Story = {
     // Re-evaluate: 2026-10-01 (or earlier when #1543 multi-line support ships)
     vr: { disable: true },
   },
-  args: { children: "x" },
+  // children is required by the Story type but the render() supplies its own.
+  args: { children: "" },
   render: () => (
     <div className="font-display text-display-lg max-w-md italic">
       <h2>

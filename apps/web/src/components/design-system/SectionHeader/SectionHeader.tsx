@@ -41,8 +41,24 @@ export interface SectionHeaderProps {
   className?: string;
 }
 
-const headingLevelFor = (as: SectionHeaderProps["as"]): 1 | 2 | 3 =>
-  as === "h1" ? 1 : as === "h3" ? 3 : 2;
+function headingLevelFor(as: SectionHeaderProps["as"]): 1 | 2 | 3 {
+  switch (as) {
+    case "h1":
+      return 1;
+    case "h3":
+      return 3;
+    case "h2":
+    case undefined:
+      return 2;
+    default: {
+      // Exhaustiveness check — TypeScript narrows `as` to `never` here, so
+      // adding a new tag variant to SectionHeaderProps['as'] without a case
+      // becomes a compile-time error.
+      const _exhaustive: never = as;
+      throw new Error(`headingLevelFor: unhandled value ${_exhaustive}`);
+    }
+  }
+}
 
 /**
  * Section header reworked in Phase 1 to compose <EditorialHeading> +

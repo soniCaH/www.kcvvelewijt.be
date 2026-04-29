@@ -18,24 +18,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const SAMPLE_ITEMS = [
+  { label: "MATCHVERSLAG" },
+  { label: "A-PLOEG" },
+  { label: "8 MIN" },
+];
+
 export const Playground: Story = {
-  args: {
-    items: [
-      { label: "MATCHVERSLAG" },
-      { label: "A-PLOEG" },
-      { label: "8 MIN" },
-    ],
-  },
+  args: { items: SAMPLE_ITEMS },
 };
 
 export const Default: Story = {
-  args: {
-    items: [
-      { label: "MATCHVERSLAG" },
-      { label: "A-PLOEG" },
-      { label: "8 MIN" },
-    ],
-  },
+  args: { items: SAMPLE_ITEMS },
 };
 
 export const MixedVariants: Story = {
