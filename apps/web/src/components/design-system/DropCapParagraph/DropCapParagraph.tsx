@@ -11,11 +11,22 @@ export interface DropCapParagraphProps {
   className?: string;
 }
 
-const TONE_CLASS: Record<DropCapParagraphTone, string> = {
-  jersey: "text-jersey-deep",
-  ink: "text-ink",
+const FIRST_LETTER_TONE_CLASS: Record<DropCapParagraphTone, string> = {
+  jersey: "first-letter:text-jersey-deep",
+  ink: "first-letter:text-ink",
 };
 
+// Drop-cap rendered via the W3C `initial-letter` CSS property — purpose-built
+// for drop caps and handles geometry against the actual rendered glyph
+// metrics (cap-height, ascender, descender) so the cap sits flush with N
+// body-line heights and the cap-line aligns with the body's first-line
+// cap-line. Browser support: Chrome 110+, Safari (incl. -webkit- prefix for
+// older), Firefox 132+. Falls back to a regular oversized first letter on
+// older browsers — graceful degradation rather than wrong geometry.
+//
+// The first character stays in the DOM as normal text so screen readers
+// pronounce it correctly without the aria-hidden + sr-only duplicate that
+// the float-based approach required.
 export function DropCapParagraph({
   children,
   as = "p",
@@ -29,57 +40,22 @@ export function DropCapParagraph({
     return null;
   }
 
-  const first = children.charAt(0);
-  const rest = children.slice(1);
-
-  // Body and drop-cap dimensions derived from the SAME source values so the
-  // float's height is guaranteed to equal exactly N body line-heights —
-  // independent of any class-resolution surprises (token vs preset, leading
-  // class specificity, parent overrides). The parent paragraph and the cap
-  // span both get inline-style font-size + line-height so nothing else can
-  // win the cascade.
-  const BODY_FONT_SIZE_REM = 1;
-  const BODY_LINE_HEIGHT = 1.6;
-  const DROP_CAP_LINES = 3;
-  const dropCapFontSizeRem =
-    BODY_FONT_SIZE_REM * BODY_LINE_HEIGHT * DROP_CAP_LINES;
-
   return createElement(
     as,
     {
       "data-tone": tone,
-      className: cn(className),
-      style: {
-        fontSize: `${BODY_FONT_SIZE_REM}rem`,
-        lineHeight: BODY_LINE_HEIGHT,
-      },
+      className: cn(
+        "text-body-md leading-[1.6]",
+        // initial-letter: <number-of-lines>. Both prefixed (older Safari)
+        // and unprefixed declarations via Tailwind arbitrary properties.
+        "first-letter:[initial-letter:3]",
+        "first-letter:[-webkit-initial-letter:3]",
+        "first-letter:font-display-big first-letter:font-black",
+        "first-letter:mr-3",
+        FIRST_LETTER_TONE_CLASS[tone],
+        className,
+      ),
     },
-    <>
-      <span
-        data-drop-cap="true"
-        aria-hidden="true"
-        className={cn(
-          "font-display-big float-left mt-0 mr-3 mb-0 font-black",
-          TONE_CLASS[tone],
-        )}
-        style={{
-          // Explicit height = N × body line-height. Without this, Freight Big
-          // Pro's natural ascender + descender extend past 1em even when
-          // line-height: 1 is set, which makes the float taller than the
-          // visible glyph and pushes line N+1 down by the overflow amount.
-          // display: block + fixed height + overflow: hidden clip the float
-          // box to exactly N body lines so the wrap clears flush.
-          display: "block",
-          height: `${dropCapFontSizeRem}rem`,
-          fontSize: `${dropCapFontSizeRem}rem`,
-          lineHeight: 1,
-          overflow: "visible",
-        }}
-      >
-        {first}
-      </span>
-      <span className="sr-only">{first}</span>
-      {rest}
-    </>,
+    children,
   );
 }

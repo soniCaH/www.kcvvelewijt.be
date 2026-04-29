@@ -21,30 +21,23 @@ describe("DropCapParagraph", () => {
     expect((container.firstChild as HTMLElement).tagName).toBe("DIV");
   });
 
-  it("renders the first character inside an aria-hidden visual cap span", () => {
+  it("renders the full paragraph text (drop-cap is a CSS first-letter pseudo)", () => {
     const { container } = render(
       <DropCapParagraph>Acht keer Elewijt.</DropCapParagraph>,
     );
-    const cap = container.querySelector('[data-drop-cap="true"]');
-    expect(cap).not.toBeNull();
-    expect(cap).toHaveAttribute("aria-hidden", "true");
-    expect(cap!.textContent).toBe("A");
+    // The native ::first-letter + initial-letter CSS styles the first
+    // character; the DOM text is unmodified so screen readers pronounce
+    // the full word correctly without aria-hidden + sr-only duplication.
+    expect(container.textContent).toBe("Acht keer Elewijt.");
   });
 
-  it("renders an sr-only duplicate of the first character for screen readers", () => {
+  it("applies the initial-letter Tailwind modifier classes", () => {
     const { container } = render(
       <DropCapParagraph>Acht keer Elewijt.</DropCapParagraph>,
     );
-    const srOnly = container.querySelector(".sr-only");
-    expect(srOnly).not.toBeNull();
-    expect(srOnly!.textContent).toBe("A");
-  });
-
-  it("renders the remainder of the paragraph after the cap", () => {
-    const { container } = render(
-      <DropCapParagraph>Acht keer Elewijt.</DropCapParagraph>,
-    );
-    expect(container.textContent).toContain("cht keer Elewijt.");
+    const root = container.firstChild as HTMLElement;
+    expect(root.className).toContain("first-letter:[initial-letter:3]");
+    expect(root.className).toContain("first-letter:[-webkit-initial-letter:3]");
   });
 
   it("default tone is jersey", () => {
@@ -60,18 +53,11 @@ describe("DropCapParagraph", () => {
   });
 
   it("warns in dev when children is empty", () => {
-    const original = process.env.NODE_ENV;
-    Object.defineProperty(process.env, "NODE_ENV", {
-      value: "development",
-      configurable: true,
-    });
+    vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     render(<DropCapParagraph>{""}</DropCapParagraph>);
     expect(warn).toHaveBeenCalled();
-    Object.defineProperty(process.env, "NODE_ENV", {
-      value: original,
-      configurable: true,
-    });
+    vi.unstubAllEnvs();
   });
 
   it("merges className", () => {

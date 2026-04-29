@@ -92,11 +92,7 @@ describe("EditorialHeading", () => {
   });
 
   it("warns in dev when emphasis text is not found", () => {
-    const original = process.env.NODE_ENV;
-    Object.defineProperty(process.env, "NODE_ENV", {
-      value: "development",
-      configurable: true,
-    });
+    vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     render(
       <EditorialHeading level={2} emphasis={{ text: "missing" }}>
@@ -104,10 +100,7 @@ describe("EditorialHeading", () => {
       </EditorialHeading>,
     );
     expect(warn).toHaveBeenCalled();
-    Object.defineProperty(process.env, "NODE_ENV", {
-      value: original,
-      configurable: true,
-    });
+    vi.unstubAllEnvs();
   });
 
   it("merges className", () => {
