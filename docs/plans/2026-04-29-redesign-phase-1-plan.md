@@ -734,7 +734,13 @@ The exact PNG list is pasted into the PR body's `## VR baselines` section in Tas
 
 ---
 
-## Task 13: Open follow-up issue for multi-line `<HighlighterStroke>`
+## Task 13: ~~Open follow-up issue for multi-line `<HighlighterStroke>`~~ — dropped
+
+Dropped during execution. The PRD §11.1 trip-wires (out-of-scope section, CLAUDE.md note, PR body, Phase 5 PRD obligation) are the tracking mechanism; a separate GitHub issue duplicates that record without unblocking anything (`blockedBy` doesn't apply because multi-line isn't a hard blocker for any specific future phase).
+
+---
+
+## Task 13 (skipped) — original step kept below for reference
 
 **Files:** none (creates a GitHub issue via `gh`).
 
