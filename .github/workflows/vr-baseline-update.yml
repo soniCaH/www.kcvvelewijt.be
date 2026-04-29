@@ -136,10 +136,14 @@ jobs:
         run: pnpm --filter @kcvv/web run vr:ci:update
 
       - name: Commit and push baselines
+        working-directory: ${{ github.workspace }}
         env:
           BOT_USER: kcvv-vr-bot
           BOT_EMAIL: kcvv-vr-bot@users.noreply.github.com
         run: |
+          # actions/checkout writes safe.directory under a temp HOME that is
+          # discarded after the step — re-register so git accepts the workspace.
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           git config user.name "$BOT_USER"
           git config user.email "$BOT_EMAIL"
           git add apps/web/test/vr/__snapshots__
