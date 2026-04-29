@@ -165,3 +165,11 @@ export type {
   TapedCardGridGap,
   TapedCardGridAs,
 } from "./TapedCardGrid";
+
+// TapedFigure
+export { TapedFigure } from "./TapedFigure";
+export type {
+  TapedFigureProps,
+  TapedFigureAspect,
+  TapedFigureBg,
+} from "./TapedFigure";
