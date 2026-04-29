@@ -602,6 +602,18 @@ The hover increment (`+0.5deg` opposite to resting rotation) is a starting point
 
 `children.charAt(0)` returns the base character for typical Dutch diacritics (`É`, `Ë`, `Ï`). Combining-mark cases (e.g. precomposed `é` vs decomposed `é`) are handled by the same `charAt(0)` returning the base, but rendering depends on font support inside Freight Big Pro 900. The dev-mode warning + a `WithDiacritic` story documents the contract; if Phase 5 articles produce a real-world failure, fix at that time.
 
+### 11.4 Inset dashed border for ticket-style cards (deferred to Phase 4)
+
+The retro-terrace-fanzine mockups include a NewsCard variant where the photo half of the card carries a dashed inset border, evoking a perforated event ticket (visible on the "Eetfestijn" card in the homepage news grid). This is **not** a Tier B primitive concern — it is a NewsCard composition decoration applied per article type. Tracked here so it lands in Phase 4 (homepage rebuild) when `<NewsCard>` is built; not needed in Phase 1.
+
+### 11.5 `<TapedCardGrid>` rotation tuning (re-evaluate at Phase 4)
+
+The 4-rotation pool (`-2.5°`, `-1.5°`, `1°`, `2°`) inherited from the master design tokens is applied to every slot in `<TapedCardGrid>`. The retro-terrace-fanzine homepage mockups show news cards mostly upright with only occasional slight rotation — suggesting the auto-rotation default may be too aggressive for a real news grid. Phase 1 ships the master-design pool as-is. **Phase 4 (homepage rebuild) PRD must decide:** keep auto-rotation at current intensity, dial it down (smaller pool), or flip the default to no-rotation with rotation as opt-in per card. Decision driven by visual checkpoint with real article content, not in advance.
+
+### 11.6 `<TapeStrip>` realism (parked)
+
+Owner feedback during Phase 1 implementation: the Phase 0 flat-block `<TapeStrip>` reads more authentically than CSS-gradient overlays or feTurbulence-driven SVG grain when composed onto a `<TapedCard>`. Two iteration attempts (gradient overlay + SVG grain) were reverted. If a future phase still wants a more washi-tape feel, the next experiment to try is **hand-drawn SVG variants** (`variant: 'a' | 'b' | 'c'` with three pre-drawn tape strokes — same pattern as `<HighlighterStroke>`) rather than procedural noise. Procedural realism produced an "uncanny" feel; hand-drawn assets do not.
+
 ---
 
 ## 12. References
