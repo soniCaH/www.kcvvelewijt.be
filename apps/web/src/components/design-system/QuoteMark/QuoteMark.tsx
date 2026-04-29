@@ -5,23 +5,22 @@ export interface QuoteMarkProps {
 }
 
 const COLOR_CLASS: Record<QuoteMarkColor, string> = {
-  jersey: "text-jersey",
+  jersey: "text-jersey-deep",
   ink: "text-ink",
   cream: "text-cream",
 };
 
-// Typographic open-quote glyph rendered in Freight Display italic at display
-// size. The visual matches the redesign's editorial-italic vocabulary far
-// better than a custom geometric SVG (owner: previous teardrop SVG was
-// rejected). Negative top margin pulls the glyph up so the natural baseline
-// alignment of the apostrophe sits flush with the upper edge of the quote
-// content area.
+// Oversized Freight Big Pro italic open-quote glyph rendered as a graphic
+// device — sized large enough to read as a magazine-pull-quote anchor rather
+// than a literal punctuation mark. Slight negative top margin tucks the
+// glyph above the body so its tail brushes the top of the quote text.
 export function QuoteMark({ color = "jersey" }: QuoteMarkProps) {
   return (
     <span
       data-color={color}
       aria-hidden="true"
-      className={`font-display block text-[length:var(--text-display-2xl)] leading-[0.6] italic select-none ${COLOR_CLASS[color]}`}
+      className={`font-display-big block text-[5rem] leading-[0.55] italic select-none ${COLOR_CLASS[color]}`}
+      style={{ marginBottom: "-0.45em" }}
     >
       &ldquo;
     </span>

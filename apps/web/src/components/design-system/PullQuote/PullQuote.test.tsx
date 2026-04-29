@@ -62,27 +62,27 @@ describe("PullQuote", () => {
     ).not.toBeNull();
   });
 
-  it("emphasis wraps the matched substring in <em>", () => {
+  it("emphasis wraps the matched substring in <HighlighterStroke> (no font change)", () => {
     const { container } = render(
       <PullQuote attribution={{ name: "x" }} emphasis={{ text: "tribune" }}>
         Een tribune die zingt is meer waard
       </PullQuote>,
     );
-    const em = container.querySelector("em");
-    expect(em).not.toBeNull();
-    expect(em!.textContent).toBe("tribune");
+    expect(container.querySelector("[data-variant]")).not.toBeNull();
+    // No <em> — the emphasis is the highlighter alone; font stays italic body.
+    expect(container.querySelector("em")).toBeNull();
   });
 
-  it("emphasis with highlight wraps the <em> inside <HighlighterStroke>", () => {
+  it("emphasis variant prop selects highlighter variant", () => {
     const { container } = render(
       <PullQuote
         attribution={{ name: "x" }}
-        emphasis={{ text: "tribune", highlight: true }}
+        emphasis={{ text: "tribune", variant: "c" }}
       >
-        Een tribune die zingt is meer waard
+        Een tribune die zingt
       </PullQuote>,
     );
-    expect(container.querySelector("[data-variant]")).not.toBeNull();
-    expect(container.querySelector("em")).not.toBeNull();
+    const stroke = container.querySelector("[data-variant]");
+    expect(stroke).toHaveAttribute("data-variant", "c");
   });
 });
