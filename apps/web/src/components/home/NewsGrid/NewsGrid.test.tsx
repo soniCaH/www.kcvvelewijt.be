@@ -46,12 +46,13 @@ describe("NewsGrid", () => {
 
     it("renders default title", () => {
       render(<NewsGrid articles={mockArticles} />);
-      expect(screen.getByText("Laatste nieuws")).toBeInTheDocument();
+      // SectionHeader composes EditorialHeading which auto-appends a period.
+      expect(screen.getByText("Laatste nieuws.")).toBeInTheDocument();
     });
 
     it("renders custom title", () => {
       render(<NewsGrid articles={mockArticles} title="Nieuwsoverzicht" />);
-      expect(screen.getByText("Nieuwsoverzicht")).toBeInTheDocument();
+      expect(screen.getByText("Nieuwsoverzicht.")).toBeInTheDocument();
     });
 
     it("accepts custom className", () => {

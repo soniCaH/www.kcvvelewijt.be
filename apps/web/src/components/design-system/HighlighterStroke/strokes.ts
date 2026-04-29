@@ -1,8 +1,23 @@
-// Three hand-drawn-ish horizontal stroke paths. The colour is hard-coded into
-// the SVG (urlencoded #4acf52) because it goes through a CSS data URL.
-// preserveAspectRatio="none" lets the stroke stretch to any underlying word width.
-export const STROKES = {
-  a: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M2 4 Q 20 2, 50 4 T 98 4' stroke='%234acf52' stroke-width='5' fill='none' stroke-linecap='round'/></svg>`,
-  b: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M3 5 Q 30 1, 60 5 T 97 4' stroke='%234acf52' stroke-width='6' fill='none' stroke-linecap='round'/></svg>`,
-  c: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M2 5 Q 25 6, 50 4 T 97 5' stroke='%234acf52' stroke-width='4' fill='none' stroke-linecap='round'/></svg>`,
-} as const;
+// Path for the highlighter slab — confident pass with hand-pulled asymmetry.
+// The path's fill colour is parameterised so consumers can render the marker
+// in any of the brand colours by composing a data URL at call time.
+//
+// preserveAspectRatio="none" lets the stroke stretch across any underlying
+// word; with no large curves the stretch doesn't visibly distort.
+export const STROKE_PATH =
+  "M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z";
+
+export type HighlighterStrokeColor = "jersey" | "jersey-deep" | "ink" | "cream";
+
+// urlencoded hex (#) prefix for inlining inside an SVG data URL.
+const COLOR_FILL: Record<HighlighterStrokeColor, string> = {
+  jersey: "%234acf52",
+  "jersey-deep": "%23008755",
+  ink: "%230a0a0a",
+  cream: "%23f5f1e6",
+};
+
+export function buildStrokeDataUrl(color: HighlighterStrokeColor): string {
+  const fill = COLOR_FILL[color];
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='${STROKE_PATH}' fill='${fill}' opacity='0.85'/></svg>`;
+}

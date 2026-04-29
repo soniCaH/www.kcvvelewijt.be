@@ -44,10 +44,6 @@ export type { TextareaProps, TextareaResize } from "./Textarea";
 export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
-// Badge
-export { Badge } from "./Badge";
-export type { BadgeProps, BadgeVariant, BadgeSize } from "./Badge";
-
 // Alert
 export { Alert } from "./Alert";
 export type { AlertProps, AlertVariant } from "./Alert";
@@ -109,7 +105,7 @@ export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 export { HighlighterStroke } from "./HighlighterStroke";
 export type {
   HighlighterStrokeProps,
-  HighlighterStrokeVariant,
+  HighlighterStrokeColor,
 } from "./HighlighterStroke";
 
 // MonoLabel
@@ -138,10 +134,82 @@ export { TapeStrip } from "./TapeStrip";
 export type {
   TapeStripProps,
   TapeStripColor,
-  TapeStripPosition,
   TapeStripLength,
 } from "./TapeStrip";
 
 // TicketStub
 export { TicketStub } from "./TicketStub";
 export type { TicketStubProps, TicketStubPosition } from "./TicketStub";
+
+// TapedCard
+export { TapedCard } from "./TapedCard";
+export type {
+  TapedCardProps,
+  TapedCardRotation,
+  TapedCardShadow,
+  TapedCardBg,
+  TapedCardPadding,
+  TapedCardAs,
+} from "./TapedCard";
+
+// TapedCardGrid
+export { TapedCardGrid } from "./TapedCardGrid";
+export type {
+  TapedCardGridProps,
+  TapedCardGridColumns,
+  TapedCardGridGap,
+  TapedCardGridAs,
+} from "./TapedCardGrid";
+
+// TapedFigure
+export { TapedFigure } from "./TapedFigure";
+export type {
+  TapedFigureProps,
+  TapedFigureAspect,
+  TapedFigureBg,
+} from "./TapedFigure";
+
+// MonoLabelRow
+export { MonoLabelRow } from "./MonoLabelRow";
+export type {
+  MonoLabelRowProps,
+  MonoLabelRowItem,
+  MonoLabelRowDivider,
+  MonoLabelRowAs,
+} from "./MonoLabelRow";
+
+// EditorialHeading
+export { EditorialHeading } from "./EditorialHeading";
+export type {
+  EditorialHeadingProps,
+  EditorialHeadingSize,
+  EditorialHeadingTone,
+  EditorialHeadingLevel,
+  EditorialHeadingEmphasis,
+} from "./EditorialHeading";
+
+// PullQuote
+export { PullQuote } from "./PullQuote";
+export type {
+  PullQuoteProps,
+  PullQuoteAttribution,
+  PullQuoteTone,
+  PullQuoteEmphasis,
+} from "./PullQuote";
+
+// NumberDisplay
+export { NumberDisplay } from "./NumberDisplay";
+export type {
+  NumberDisplayProps,
+  NumberDisplaySize,
+  NumberDisplayTone,
+  NumberDisplayAs,
+} from "./NumberDisplay";
+
+// DropCapParagraph
+export { DropCapParagraph } from "./DropCapParagraph";
+export type {
+  DropCapParagraphProps,
+  DropCapParagraphTone,
+  DropCapParagraphAs,
+} from "./DropCapParagraph";

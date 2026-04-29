@@ -65,10 +65,25 @@ Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the fol
 - `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` — thin row dividers (interview Q&A, table rows).
 - `<QuoteMark>` — two stacked italic open-quote glyphs.
 - `<TicketStub>` — perforated-edge mono-content ephemera.
-- `<HighlighterStroke>` — green hand-drawn underline beneath italic emphasis (single-line CSS-bg SVG; multi-line is a deferred Phase 1+ enhancement).
-- `<MonoLabel>` — tracked uppercase pill or plain label.
+- `<HighlighterStroke>` — hand-drawn marker underline beneath italic emphasis. Phase 1 added a `color: 'jersey' | 'jersey-deep' | 'ink' | 'cream'` prop (default `jersey`); previously fixed jersey green. Single-line CSS-bg SVG; multi-line wrapping is the deferred follow-up tracked in `docs/prd/redesign-phase-1.md` §11.1.
+- `<MonoLabel>` — tracked uppercase pill or plain label. Pill variants gained vertical padding in Phase 1 to read as proper badges.
 
-A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, and `--pattern-seam`. The cream/ink/jersey colour, fluid display/body/mono typography, layout container, rotation pool, paper-shadow, and motion tokens added in Phase 0 are visible in `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` MDX.
+A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, and `--pattern-seam`. The cream/ink/jersey colour, fluid display/body/mono typography, layout container, rotation pool, paper-shadow, and motion tokens added in Phase 0 are visible in `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` MDX. The `--rotate-tape-*` pool was retuned in Phase 1 from the original master-design values to a sub-degree range (`-0.5°` / `-0.25°` / `0.25°` / `0.5°`) after `<TapedCardGrid>` rendered "seasick" on real card grids — see `docs/prd/redesign-phase-1.md` §11.5.
+
+**Phase 1 additions (Tier B composition primitives):**
+
+- `<TapedCard>` — paper-card wrapper with rotation/tape/shadow/bg/padding props plus opt-in `interactive` hover tilt. Always renders a `border-2 border-ink` outline alongside the offset shadow.
+- `<TapedCardGrid>` — auto-rotation grid that distributes the 4-rotation pool across slots via per-slot `--taped-card-rotation` and `--tape-left` / `--tape-rotation` CSS custom properties. Accepts an `emptyState` fallback prop.
+- `<TapedFigure>` — editorial photo + caption primitive. Caller supplies the image element via `children` (works with `next/image`, plain `<img>`, `<SanityImage>`, etc.); aspect-ratio is enforced by the frame.
+- `<MonoLabelRow>` — inline row of `<MonoLabel>` items with a configurable divider glyph. The default `·` divider is rendered as a CSS circle so it centres optically against uppercase labels.
+- `<EditorialHeading>` — period-terminated heading with two mutually-exclusive emphasis modes: **accent** (italic + jersey-deep colour, default) or **marker** (italic + `<HighlighterStroke>`, opt-in via `emphasis.highlight=true`).
+- `<PullQuote>` — taped quote block (`<TapedCard>` + heavy Quasimoda `"` glyph + italic display body + attribution row). Three tones (cream / ink / jersey). Emphasis applies a `<HighlighterStroke>` only — body font stays italic.
+- `<NumberDisplay>` — big serif number with optional prefix (`#` rendered in mono; other prefixes in italic Freight Display) / suffix / mono label.
+- `<DropCapParagraph>` — lead paragraph with oversized first letter rendered via the W3C `initial-letter` CSS property (Chrome 110+ / Safari / Firefox 132+; graceful fallback on older browsers).
+
+`<SectionHeader>` was reworked in Phase 1 to compose `<EditorialHeading>` + `<MonoLabelRow>`. The legacy `font-body!` / `font-black!` / `mb-0!` / green-left-border pattern is gone. CTA link no longer swaps colour on hover; instead a brand-jersey marker animates left-to-right under the link text.
+
+`<Badge>` was retired in favour of `<MonoLabel variant="pill-…">`. The single consumer (`<MatchStatusBadge>`) was migrated to use MonoLabel pill variants directly.
 
 ## Design Conventions
 

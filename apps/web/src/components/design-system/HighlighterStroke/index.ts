@@ -1,5 +1,5 @@
 export {
   HighlighterStroke,
   type HighlighterStrokeProps,
-  type HighlighterStrokeVariant,
+  type HighlighterStrokeColor,
 } from "./HighlighterStroke";

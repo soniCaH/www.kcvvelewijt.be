@@ -56,11 +56,15 @@ export const NewsGrid = ({
   return (
     <section className={className}>
       <div className="mx-auto max-w-7xl px-4 md:px-8">
-        <SectionHeader
-          title={title}
-          linkText={showViewAll ? "Alle berichten" : undefined}
-          linkHref={showViewAll ? viewAllHref : undefined}
-        />
+        {showViewAll ? (
+          <SectionHeader
+            title={title}
+            linkText="Alle berichten"
+            linkHref={viewAllHref}
+          />
+        ) : (
+          <SectionHeader title={title} />
+        )}
 
         {/* 1 featured + 2 standard grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">

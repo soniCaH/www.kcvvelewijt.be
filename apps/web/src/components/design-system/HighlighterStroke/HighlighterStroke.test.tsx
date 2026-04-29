@@ -8,15 +8,23 @@ describe("HighlighterStroke", () => {
     expect(screen.getByText("nieuws")).toBeInTheDocument();
   });
 
-  it("default variant is 'a'", () => {
+  it("default color is jersey", () => {
     const { container } = render(<HighlighterStroke>x</HighlighterStroke>);
-    expect(container.firstChild).toHaveAttribute("data-variant", "a");
+    expect(container.firstChild).toHaveAttribute("data-color", "jersey");
   });
 
-  it("variant prop selects different stroke", () => {
+  it("respects color prop", () => {
     const { container } = render(
-      <HighlighterStroke variant="b">x</HighlighterStroke>,
+      <HighlighterStroke color="ink">x</HighlighterStroke>,
     );
-    expect(container.firstChild).toHaveAttribute("data-variant", "b");
+    expect(container.firstChild).toHaveAttribute("data-color", "ink");
+  });
+
+  it("renders with the stroke marker attribute", () => {
+    const { container } = render(<HighlighterStroke>x</HighlighterStroke>);
+    expect(container.firstChild).toHaveAttribute(
+      "data-highlighter-stroke",
+      "true",
+    );
   });
 });

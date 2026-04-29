@@ -4,26 +4,27 @@ export interface QuoteMarkProps {
   color?: QuoteMarkColor;
 }
 
-const COLOR: Record<QuoteMarkColor, string> = {
-  jersey: "var(--color-jersey)",
-  ink: "var(--color-ink)",
-  cream: "var(--color-cream)",
+const COLOR_CLASS: Record<QuoteMarkColor, string> = {
+  jersey: "text-jersey-deep",
+  ink: "text-ink",
+  cream: "text-cream",
 };
 
+// Heavy sans-serif right-double-quotation-mark glyph (U+201D) rendered as a
+// single typographic mark — the font renders it as the bulb-and-tail double
+// shape per the owner's reference. Quasimoda (font-body) at black weight
+// gives the solid stroke. Tight letter-spacing pulls the two parts of the
+// double-mark glyph closer together. Negative bottom margin tucks the mark
+// up so its tail sits above the quote body.
 export function QuoteMark({ color = "jersey" }: QuoteMarkProps) {
   return (
-    <svg
+    <span
       data-color={color}
-      role="presentation"
       aria-hidden="true"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill={COLOR[color]}
+      className={`font-body block text-[4.5rem] leading-[0.5] font-black tracking-[-0.05em] select-none ${COLOR_CLASS[color]}`}
+      style={{ marginBottom: "-0.3em" }}
     >
-      {/* Two slanted open-quote teardrops, stacked side-by-side */}
-      <path d="M4 6 C4 4 6 3 8 3 L8 9 C6 9 5 10 5 12 L4 12 Z" />
-      <path d="M14 6 C14 4 16 3 18 3 L18 9 C16 9 15 10 15 12 L14 12 Z" />
-    </svg>
+      &rdquo;
+    </span>
   );
 }

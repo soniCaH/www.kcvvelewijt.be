@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { CSSProperties } from "react";
 import { TapeStrip } from "./TapeStrip";
 
 const meta = {
@@ -19,22 +20,47 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  args: { color: "jersey", position: "tl", length: "md" },
+  args: { color: "jersey", length: "md" },
 };
 
-export const AllPositions: Story = {
-  render: () => (
-    <>
-      <TapeStrip position="tl" />
-      <TapeStrip position="tr" />
-      <TapeStrip position="bl" />
-      <TapeStrip position="br" />
-    </>
-  ),
+const slotStyle = (left: string, rot: string) =>
+  ({
+    "--tape-left": left,
+    "--tape-rotation": rot,
+  }) as CSSProperties;
+
+export const AutoVaryViaGridVariables: Story = {
+  // The grid pools <TapedCardGrid> uses:
+  //   --tape-rotation: -3deg / -4deg / -5deg / -6deg
+  //   --tape-left:     4%    / 7%    / 10%   / 12%
+  // Standalone tapes default to -5deg / 12%.
+  render: () => {
+    const slots = [
+      { left: "4%", rot: "-3deg" },
+      { left: "7%", rot: "-4deg" },
+      { left: "10%", rot: "-5deg" },
+      { left: "12%", rot: "-6deg" },
+    ];
+    return (
+      <div className="flex flex-col gap-4">
+        {slots.map(({ left, rot }) => (
+          <div
+            key={`${left}-${rot}`}
+            style={slotStyle(left, rot)}
+            className="bg-cream-soft border-paper-edge relative h-20 w-64 border"
+          >
+            <TapeStrip />
+            <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
+              left {left} · rot {rot}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  },
 };
 
 export const InkColor: Story = { args: { color: "ink" } };
 export const CreamColor: Story = { args: { color: "cream" } };
 export const LongLength: Story = { args: { length: "lg" } };
 export const ShortLength: Story = { args: { length: "sm" } };
-export const CustomRotation: Story = { args: { rotation: -25 } };
