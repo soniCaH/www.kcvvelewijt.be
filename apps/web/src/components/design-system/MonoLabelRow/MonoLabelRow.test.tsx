@@ -21,7 +21,9 @@ describe("MonoLabelRow", () => {
     const dividers = container.querySelectorAll('[data-divider="true"]');
     // n items → n-1 dividers
     expect(dividers).toHaveLength(2);
-    dividers.forEach((d) => expect(d.textContent).toBe("·"));
+    dividers.forEach((d) =>
+      expect(d.getAttribute("data-divider-glyph")).toBe("·"),
+    );
   });
 
   it("respects a custom divider glyph", () => {
@@ -30,6 +32,7 @@ describe("MonoLabelRow", () => {
     );
     const dividers = container.querySelectorAll('[data-divider="true"]');
     expect(dividers).toHaveLength(1);
+    expect(dividers[0]!.getAttribute("data-divider-glyph")).toBe("★");
     expect(dividers[0]!.textContent).toBe("★");
   });
 

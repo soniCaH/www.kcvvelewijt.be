@@ -51,18 +51,28 @@ export function MonoLabelRow({
               {item.label}
             </MonoLabel>
           </ItemTag>
-          {index < items.length - 1 && (
-            <span
-              data-divider="true"
-              aria-hidden="true"
-              // Match MonoLabel's font sizing + leading-none so the glyph
-              // centers vertically with the label text rather than floating
-              // above it (default browser baseline alignment for "·").
-              className="text-ink-muted font-mono text-[length:var(--text-label)] leading-none"
-            >
-              {divider}
-            </span>
-          )}
+          {index < items.length - 1 &&
+            (divider === "·" ? (
+              // The "·" glyph (U+00B7) sits at the font's x-height middle,
+              // which floats above the visual centre of uppercase MonoLabel
+              // text. Render a CSS circle instead so flex `items-center`
+              // produces a true vertical centre regardless of font.
+              <span
+                data-divider="true"
+                data-divider-glyph={divider}
+                aria-hidden="true"
+                className="bg-ink-muted/60 inline-block h-[3px] w-[3px] rounded-full"
+              />
+            ) : (
+              <span
+                data-divider="true"
+                data-divider-glyph={divider}
+                aria-hidden="true"
+                className="text-ink-muted font-mono text-[length:var(--text-label)] leading-none"
+              >
+                {divider}
+              </span>
+            ))}
         </Fragment>
       ))}
     </Tag>
