@@ -9,7 +9,18 @@ const meta = {
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (
-      <div className="bg-cream-soft border-paper-edge relative h-40 w-64 border">
+      // Pin --tape-rotation and --tape-left so client-side navigation between
+      // stories (e.g. from AutoVaryViaGridVariables which sets these inline)
+      // cannot leak a stale value into subsequent story screenshots.
+      <div
+        style={
+          {
+            "--tape-rotation": "var(--rotate-tape-a)",
+            "--tape-left": "12%",
+          } as CSSProperties
+        }
+        className="bg-cream-soft border-paper-edge relative h-40 w-64 border"
+      >
         <Story />
       </div>
     ),
