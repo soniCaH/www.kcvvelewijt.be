@@ -37,18 +37,26 @@ describe("MatchStatusBadge", () => {
     expect(container.innerHTML).toBe("");
   });
 
-  it("uses getStatusColor to determine badge variant", () => {
-    // postponed → orange → warning variant
+  it("postponed maps to a pill-jersey MonoLabel variant", () => {
+    // postponed → orange → pill-jersey (Phase 1 migration; was BadgeVariant 'warning')
     const { container } = render(<MatchStatusBadge status="postponed" />);
-    const badge = container.querySelector("span");
-    expect(badge?.className).toContain("warning");
+    expect(
+      container.querySelector('[data-variant="pill-jersey"]'),
+    ).not.toBeNull();
   });
 
-  it("applies custom className", () => {
+  it("forfeited maps to a pill-cream MonoLabel variant", () => {
+    // forfeited → gray → pill-cream
+    const { container } = render(<MatchStatusBadge status="forfeited" />);
+    expect(
+      container.querySelector('[data-variant="pill-cream"]'),
+    ).not.toBeNull();
+  });
+
+  it("applies custom className to the wrapping span", () => {
     const { container } = render(
       <MatchStatusBadge status="postponed" className="custom-class" />,
     );
-    const badge = container.querySelector("span");
-    expect(badge?.className).toContain("custom-class");
+    expect(container.firstChild).toHaveClass("custom-class");
   });
 });

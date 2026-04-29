@@ -44,10 +44,6 @@ export type { TextareaProps, TextareaResize } from "./Textarea";
 export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
-// Badge
-export { Badge } from "./Badge";
-export type { BadgeProps, BadgeVariant, BadgeSize } from "./Badge";
-
 // Alert
 export { Alert } from "./Alert";
 export type { AlertProps, AlertVariant } from "./Alert";
