@@ -37,4 +37,3 @@ export const InkColor: Story = { args: { color: "ink" } };
 export const CreamColor: Story = { args: { color: "cream" } };
 export const LongLength: Story = { args: { length: "lg" } };
 export const ShortLength: Story = { args: { length: "sm" } };
-export const CustomRotation: Story = { args: { rotation: -25 } };

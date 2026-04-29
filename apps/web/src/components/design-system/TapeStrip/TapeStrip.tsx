@@ -8,7 +8,6 @@ export interface TapeStripProps {
   color?: TapeStripColor;
   position?: TapeStripPosition;
   length?: TapeStripLength;
-  rotation?: number;
 }
 
 const LENGTH_CLASS: Record<TapeStripLength, string> = {
@@ -23,28 +22,38 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
   cream: "bg-cream",
 };
 
+// Position the tape so its center sits on the card's edge — the tape spans
+// the edge, ~half above (anchored to surrounding surface) and ~half below
+// (anchored to the card). transform-origin: center keeps rotation balanced.
 const POSITION_CLASS: Record<TapeStripPosition, string> = {
-  tl: "absolute -top-2 -left-2 origin-top-left",
-  tr: "absolute -top-2 -right-2 origin-top-right",
-  bl: "absolute -bottom-2 -left-2 origin-bottom-left",
-  br: "absolute -bottom-2 -right-2 origin-bottom-right",
+  tl: "absolute top-0 left-[12%] origin-center",
+  tr: "absolute top-0 right-[12%] origin-center",
+  bl: "absolute bottom-0 left-[12%] origin-center",
+  br: "absolute bottom-0 right-[12%] origin-center",
 };
 
-const DEFAULT_ROTATION: Record<TapeStripPosition, number> = {
-  tl: -8,
-  tr: 8,
-  bl: 8,
-  br: -8,
+// Per-position rotation lean — symmetric around the corner so the tape reads
+// as anchoring outward toward the surrounding surface. Custom rotation is
+// intentionally not exposed on the API: arbitrary degrees produce
+// nonsensical results (tape barely overlapping the card edge).
+const POSITION_ROTATION: Record<TapeStripPosition, number> = {
+  tl: -10,
+  tr: 10,
+  bl: 10,
+  br: -10,
 };
 
 export function TapeStrip({
   color = "jersey",
   position = "tl",
   length = "md",
-  rotation,
 }: TapeStripProps) {
-  const rot = rotation ?? DEFAULT_ROTATION[position];
-  const style: CSSProperties = { transform: `rotate(${rot}deg)` };
+  const rot = POSITION_ROTATION[position];
+  const isTop = position === "tl" || position === "tr";
+  const transY = isTop ? "-50%" : "50%";
+  const style: CSSProperties = {
+    transform: `translateY(${transY}) rotate(${rot}deg)`,
+  };
   return (
     <span
       data-color={color}
