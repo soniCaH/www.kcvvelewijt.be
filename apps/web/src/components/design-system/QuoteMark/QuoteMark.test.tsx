@@ -3,15 +3,23 @@ import { describe, expect, it } from "vitest";
 import { QuoteMark } from "./QuoteMark";
 
 describe("QuoteMark", () => {
-  it("renders the typographic open-quote glyph with default jersey colour", () => {
+  it("renders an SVG with default jersey colour", () => {
     const { container } = render(<QuoteMark />);
-    const el = container.firstChild as HTMLElement;
-    expect(el).toHaveAttribute("data-color", "jersey");
-    expect(el.textContent).toBe("“");
+    const svg = container.querySelector("svg");
+    expect(svg).not.toBeNull();
+    expect(svg).toHaveAttribute("data-color", "jersey");
   });
 
   it("respects color prop", () => {
     const { container } = render(<QuoteMark color="cream" />);
-    expect(container.firstChild).toHaveAttribute("data-color", "cream");
+    expect(container.querySelector("svg")).toHaveAttribute(
+      "data-color",
+      "cream",
+    );
+  });
+
+  it("renders two glyphs (left + right)", () => {
+    const { container } = render(<QuoteMark />);
+    expect(container.querySelectorAll("path")).toHaveLength(2);
   });
 });
