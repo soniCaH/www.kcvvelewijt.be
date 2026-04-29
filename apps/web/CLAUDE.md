@@ -285,6 +285,11 @@ produces `page.goto: Page crashed` failures on `Features/*` and `Pages/*` storie
 If your machine allocates less than 8 GB, use the `vr:update:single` script
 (see "Single-worker fallback" below).
 
+**Node.js heap:** `docker-compose.vr.yml` sets `NODE_OPTIONS=--max-old-space-size=4096`
+to raise the Node.js heap limit to 4 GB. Without this, the test runner OOMs
+after ~80 story visits regardless of Docker memory allocation (Node.js defaults
+to ~1.4 GB heap on 64-bit systems).
+
 ```bash
 # Compare against committed baselines.
 pnpm --filter @kcvv/web run vr:check
@@ -503,17 +508,12 @@ the determinism guarantees.
 
 ### Threshold note
 
-`toMatchImageSnapshot` uses `failureThreshold: 0.7` (percent). This is loose
-enough to absorb the ~0.5% ARM ↔ x86 anti-aliasing drift between
-Apple-Silicon Docker baselines and CI's native x86 runner. Rosetta-for-linux
-on Apple Silicon does not actually re-render through x86 fontconfig — it
-translates x86 binaries to ARM instructions at the silicon level, so font
-math stays ARM-native. Real visual regressions at the size we care about
-(diagonal seam hairlines, layout reflows, gradient breaks) still produce
-
-> 5% diffs and trip the gate. Tighten back to `0.001` once the `kcvv-vr-bot`
-> PAT (`KCVV_VR_BOT_TOKEN` secret) is configured and CI can canonicalise
-> baselines via `@kcvv-bot update-vr-baselines`.
+`toMatchImageSnapshot` uses `failureThreshold: 0.05` (percent). This absorbs
+sub-pixel anti-aliasing noise while catching real visual regressions. ARM ↔ x86
+drift no longer needs a wide threshold — `kcvv-vr-bot` canonicalises baselines
+on CI (`KCVV_VR_BOT_TOKEN` is configured), so contributors never commit
+Apple-Silicon baselines directly. Real regressions (diagonal seam hairlines,
+layout reflows, gradient breaks) produce >5% diffs and trip the gate reliably.
 
 ### Per-story escape hatch
 
@@ -597,3 +597,6 @@ explicitly. A GitHub App is the cleaner long-term replacement.
 - **Do not run multi-worker `vr:update` on hosts under the 8 GB memory floor.**
   Chromium will crash mid-story inside the Docker container and produce phantom
   `page.goto: Page crashed` failures. Use `vr:update:single` instead.
+- **Do not remove `NODE_OPTIONS=--max-old-space-size=4096` from `docker-compose.vr.yml`.**
+  Node.js defaults to ~1.4 GB heap — the test runner OOMs after ~80 story visits
+  regardless of Docker memory allocation.
