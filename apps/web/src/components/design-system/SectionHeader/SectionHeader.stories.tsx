@@ -1,9 +1,15 @@
+import type { ComponentType } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { SectionHeaderBase } from "./SectionHeader";
 import { SectionHeader } from "./SectionHeader";
+
+// Storybook can't resolve a discriminated-union component type — flatten to
+// optional pair for the story args and cast component accordingly.
+type StoryArgs = SectionHeaderBase & { linkText?: string; linkHref?: string };
 
 const meta = {
   title: "UI/SectionHeader",
-  component: SectionHeader,
+  component: SectionHeader as ComponentType<StoryArgs>,
   tags: ["autodocs", "vr"],
   parameters: {
     layout: "padded",
@@ -36,7 +42,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof SectionHeader>;
+} satisfies Meta<StoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

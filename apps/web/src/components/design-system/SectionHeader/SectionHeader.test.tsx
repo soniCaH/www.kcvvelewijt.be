@@ -69,13 +69,8 @@ describe("SectionHeader", () => {
       expect(link).toHaveAttribute("href", "/nieuws");
     });
 
-    it("does not render link when linkText is omitted", () => {
-      render(<SectionHeader title="Nieuws" linkHref="/nieuws" />);
-      expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    });
-
-    it("does not render link when linkHref is omitted", () => {
-      render(<SectionHeader title="Nieuws" linkText="Alle berichten" />);
+    it("does not render link when neither linkText nor linkHref are provided", () => {
+      render(<SectionHeader title="Nieuws" />);
       expect(screen.queryByRole("link")).not.toBeInTheDocument();
     });
   });

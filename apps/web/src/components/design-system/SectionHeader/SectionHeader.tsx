@@ -22,7 +22,9 @@ const HIGHLIGHTER_MASK_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 5.4 L 99 5.0 L 99 10.4 L 1 10.6 Z' fill='black'/></svg>`,
 )}`;
 
-export interface SectionHeaderProps {
+type SectionHeaderCta = { linkText: string; linkHref: string };
+
+export type SectionHeaderBase = {
   title: string;
   /** Optional uppercase mono kicker rendered above the heading via <MonoLabelRow> */
   kicker?: MonoLabelRowItem[];
@@ -30,16 +32,15 @@ export interface SectionHeaderProps {
   emphasis?: EditorialHeadingEmphasis;
   /** Size of the underlying <EditorialHeading>. Default: 'display-lg' */
   size?: EditorialHeadingSize;
-  /** Optional CTA link label */
-  linkText?: string;
-  /** Required when linkText is set */
-  linkHref?: string;
   /** "light" = ink on cream (default); "dark" = cream on ink */
   variant?: "light" | "dark";
   /** Override the rendered heading level. Default: h2 */
   as?: "h1" | "h2" | "h3";
   className?: string;
-}
+};
+
+export type SectionHeaderProps = SectionHeaderBase &
+  ({ linkText?: never; linkHref?: never } | SectionHeaderCta);
 
 function headingLevelFor(as: SectionHeaderProps["as"]): 1 | 2 | 3 {
   switch (as) {
@@ -111,11 +112,8 @@ export const SectionHeader = ({
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute right-0 -bottom-1 left-0 h-[0.45em] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none",
-                  // Brand accent — jersey green at ~65% so the underline reads
-                  // as a marker pass against the link's text colour rather
-                  // than a flat solid stripe.
-                  "bg-jersey/65",
+                  "absolute right-0 -bottom-1 left-0 h-[0.45em] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 group-focus-visible:scale-x-100 motion-reduce:transition-none",
+                  isDark ? "bg-jersey/65" : "bg-jersey-deep",
                 )}
                 style={{
                   WebkitMaskImage: `url("${HIGHLIGHTER_MASK_DATA_URL}")`,
@@ -129,7 +127,7 @@ export const SectionHeader = ({
             </span>
             <span
               aria-hidden="true"
-              className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
+              className="inline-block transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transition-none"
             >
               →
             </span>
