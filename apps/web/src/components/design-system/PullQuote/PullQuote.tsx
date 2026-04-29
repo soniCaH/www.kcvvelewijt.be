@@ -1,8 +1,5 @@
 import { cn } from "@/lib/utils/cn";
-import {
-  HighlighterStroke,
-  type HighlighterStrokeVariant,
-} from "../HighlighterStroke";
+import { HighlighterStroke } from "../HighlighterStroke";
 import { QuoteMark, type QuoteMarkColor } from "../QuoteMark";
 import { TapedCard, type TapedCardProps } from "../TapedCard";
 
@@ -17,8 +14,6 @@ export interface PullQuoteAttribution {
 export interface PullQuoteEmphasis {
   /** substring of the body to accentuate via <HighlighterStroke> — no font change */
   text: string;
-  /** which hand-drawn highlighter variant to apply */
-  variant?: HighlighterStrokeVariant;
 }
 
 export interface PullQuoteProps {
@@ -89,9 +84,7 @@ function renderBodyWithEmphasis(
   return (
     <>
       {before}
-      <HighlighterStroke variant={emphasis.variant ?? "a"}>
-        {match}
-      </HighlighterStroke>
+      <HighlighterStroke>{match}</HighlighterStroke>
       {after}
     </>
   );

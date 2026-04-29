@@ -1,20 +1,26 @@
-import { STROKES } from "./strokes";
+import { buildStrokeDataUrl, type HighlighterStrokeColor } from "./strokes";
 
-export type HighlighterStrokeVariant = "a" | "b" | "c";
+export type { HighlighterStrokeColor } from "./strokes";
 
 export interface HighlighterStrokeProps {
-  variant?: HighlighterStrokeVariant;
+  /**
+   * Stroke colour. Defaults to brand jersey green. Other brand colours
+   * (jersey-deep / ink / cream) ship for consumers that need a contrast
+   * accent against a non-default surface.
+   */
+  color?: HighlighterStrokeColor;
   children: React.ReactNode;
 }
 
 export function HighlighterStroke({
-  variant = "a",
+  color = "jersey",
   children,
 }: HighlighterStrokeProps) {
-  const dataUrl = `data:image/svg+xml;utf8,${STROKES[variant]}`;
+  const dataUrl = buildStrokeDataUrl(color);
   return (
     <span
-      data-variant={variant}
+      data-highlighter-stroke="true"
+      data-color={color}
       style={{
         backgroundImage: `url("${dataUrl}")`,
         backgroundRepeat: "no-repeat",

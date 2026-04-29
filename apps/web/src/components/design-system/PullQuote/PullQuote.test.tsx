@@ -68,21 +68,8 @@ describe("PullQuote", () => {
         Een tribune die zingt is meer waard
       </PullQuote>,
     );
-    expect(container.querySelector("[data-variant]")).not.toBeNull();
+    expect(container.querySelector("[data-highlighter-stroke]")).not.toBeNull();
     // No <em> — the emphasis is the highlighter alone; font stays italic body.
     expect(container.querySelector("em")).toBeNull();
-  });
-
-  it("emphasis variant prop selects highlighter variant", () => {
-    const { container } = render(
-      <PullQuote
-        attribution={{ name: "x" }}
-        emphasis={{ text: "tribune", variant: "c" }}
-      >
-        Een tribune die zingt
-      </PullQuote>,
-    );
-    const stroke = container.querySelector("[data-variant]");
-    expect(stroke).toHaveAttribute("data-variant", "c");
   });
 });

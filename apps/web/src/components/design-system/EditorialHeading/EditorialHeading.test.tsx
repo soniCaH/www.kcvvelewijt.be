@@ -87,7 +87,7 @@ describe("EditorialHeading", () => {
         Het laatste nieuws
       </EditorialHeading>,
     );
-    expect(container.querySelector("[data-variant]")).not.toBeNull();
+    expect(container.querySelector("[data-highlighter-stroke]")).not.toBeNull();
     expect(container.querySelector("em")).not.toBeNull();
   });
 

@@ -1,19 +1,23 @@
-// Three highlighter passes. Real marker strokes are much closer to a clean
-// rectangular slab than to a wavy organic shape — the wobble that reads as
-// "fake hand-drawn" comes from over-curving the top and bottom edges. These
-// variants ship as nearly-straight slabs with subtle slants and tapered ends
-// so they look like a deliberate marker pass, not a designed sticker.
+// Path for the highlighter slab — confident pass with hand-pulled asymmetry.
+// The path's fill colour is parameterised so consumers can render the marker
+// in any of the brand colours by composing a data URL at call time.
 //
-// Colour is hard-coded urlencoded #4acf52 because the SVG ships via a CSS
-// data URL. preserveAspectRatio="none" lets the stroke stretch across any
-// underlying word; with no large curves the stretch doesn't visibly distort.
-export const STROKES = {
-  // Variant a — clean horizontal pass, both ends slightly tapered.
-  a: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 5.4 L 99 5.0 L 99 10.4 L 1 10.6 Z' fill='%234acf52' opacity='0.78'/></svg>`,
+// preserveAspectRatio="none" lets the stroke stretch across any underlying
+// word; with no large curves the stretch doesn't visibly distort.
+export const STROKE_PATH =
+  "M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z";
 
-  // Variant b — thicker, slight angle as if the marker tip was held off-axis.
-  b: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.4 L 99 5.0 L 99 11.0 L 1 10.6 Z' fill='%234acf52' opacity='0.85'/></svg>`,
+export type HighlighterStrokeColor = "jersey" | "jersey-deep" | "ink" | "cream";
 
-  // Variant c — two thin overlapping passes, chiselled-tip feel.
-  c: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.6 L 99 4.4 L 99 8.4 L 1 8.6 Z' fill='%234acf52' opacity='0.55'/><path d='M 1 6.8 L 99 7.0 L 99 10.8 L 1 10.6 Z' fill='%234acf52' opacity='0.55'/></svg>`,
-} as const;
+// urlencoded hex (#) prefix for inlining inside an SVG data URL.
+const COLOR_FILL: Record<HighlighterStrokeColor, string> = {
+  jersey: "%234acf52",
+  "jersey-deep": "%23008755",
+  ink: "%230a0a0a",
+  cream: "%23f5f1e6",
+};
+
+export function buildStrokeDataUrl(color: HighlighterStrokeColor): string {
+  const fill = COLOR_FILL[color];
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='${STROKE_PATH}' fill='${fill}' opacity='0.85'/></svg>`;
+}

@@ -109,7 +109,7 @@ export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 export { HighlighterStroke } from "./HighlighterStroke";
 export type {
   HighlighterStrokeProps,
-  HighlighterStrokeVariant,
+  HighlighterStrokeColor,
 } from "./HighlighterStroke";
 
 // MonoLabel

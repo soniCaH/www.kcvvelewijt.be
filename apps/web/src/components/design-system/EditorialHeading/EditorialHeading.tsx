@@ -1,9 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
-import {
-  HighlighterStroke,
-  type HighlighterStrokeVariant,
-} from "../HighlighterStroke";
+import { HighlighterStroke } from "../HighlighterStroke";
 
 export type EditorialHeadingSize =
   | "display-2xl"
@@ -18,8 +15,12 @@ export type EditorialHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface EditorialHeadingEmphasis {
   text: string;
+  /**
+   * `true`  → italic + green HighlighterStroke (marker variant).
+   * `false` (default) → italic + jersey-deep accent colour (accent variant).
+   * The two variants are mutually exclusive — see PRD §4.1 / §11.
+   */
   highlight?: boolean;
-  highlightVariant?: HighlighterStrokeVariant;
 }
 
 export interface EditorialHeadingProps {
@@ -87,11 +88,24 @@ export function EditorialHeading({
         );
       }
     } else {
-      const emEl = <em className="font-display italic">{split.match}</em>;
-      const wrapped = emphasis.highlight ? (
-        <HighlighterStroke variant={emphasis.highlightVariant ?? "a"}>
-          {emEl}
-        </HighlighterStroke>
+      // Two mutually-exclusive emphasis variants:
+      // - highlight=true: italic + body tone, wrapped in <HighlighterStroke>
+      //   (the "marker pass" treatment).
+      // - highlight=false: italic + jersey-deep accent colour, no underline
+      //   (the "colour accent" treatment from the design source).
+      const isHighlight = !!emphasis.highlight;
+      const emEl = (
+        <em
+          className={cn(
+            "font-display italic",
+            !isHighlight && "text-jersey-deep",
+          )}
+        >
+          {split.match}
+        </em>
+      );
+      const wrapped = isHighlight ? (
+        <HighlighterStroke>{emEl}</HighlighterStroke>
       ) : (
         emEl
       );
