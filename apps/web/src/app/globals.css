@@ -269,10 +269,17 @@
   --container-default:  1200px;
   /* --max-width-outer (1440px) already exists — reuse for full-bleed */
 
-  --rotate-tape-a:     -2.5deg;
-  --rotate-tape-b:     -1.5deg;
-  --rotate-tape-c:      1deg;
-  --rotate-tape-d:      2deg;
+  /* Pool tuned twice on 2026-04-29 per owner feedback. Original master
+     design pool (-2.5/-1.5/1/2) produced "seasick" rendering when applied
+     to 6+ cards in <TapedCardGrid>; first iteration (-1/-0.5/0.5/1) still
+     too steep in single-column stacks. Final pool is sub-degree —
+     individual rotation is barely perceptible but breaks the perfect-grid
+     feel. If a phase wants more dramatic tilt for emphasis cards, set
+     <TapedCard rotation> explicitly per card. */
+  --rotate-tape-a:     -0.5deg;
+  --rotate-tape-b:     -0.25deg;
+  --rotate-tape-c:      0.25deg;
+  --rotate-tape-d:      0.5deg;
 
   --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
   --shadow-paper-md:   6px 6px 0 0 var(--color-ink);

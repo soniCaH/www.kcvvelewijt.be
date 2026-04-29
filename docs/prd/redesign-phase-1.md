@@ -81,10 +81,10 @@ The dominant card primitive of the redesign. Wraps any child in a rotated paper 
 
 ```typescript
 type TapedCardRotation =
-  | "a" // -2.5deg (--rotate-tape-a)
-  | "b" // -1.5deg (--rotate-tape-b)
-  | "c" //  1deg   (--rotate-tape-c)
-  | "d" //  2deg   (--rotate-tape-d)
+  | "a" // -0.5deg (--rotate-tape-a, tuned 2026-04-29)
+  | "b" // -0.25deg (--rotate-tape-b)
+  | "c" //  0.25deg (--rotate-tape-c)
+  | "d" //  0.5deg  (--rotate-tape-d)
   | "none" // no rotation
   | "auto" // consume rotation from <TapedCardGrid> via CSS custom property
   | number; // explicit deg override
@@ -145,7 +145,7 @@ interface TapedCardGridProps {
 
 **Behaviour (decision: edge cases)**
 
-- **1-card grid:** still rotates. Slot 0 always gets `--rotate-tape-a` (`-2.5deg`). No special-case for `Children.count === 1`.
+- **1-card grid:** still rotates. Slot 0 always gets `--rotate-tape-a` (`-0.5deg` after Phase 1 tuning). No special-case for `Children.count === 1`.
 - **Empty grid:** if `emptyState` prop is provided, render it. Otherwise render `null`. The primitive ships zero opinionated copy — calling pages own the empty-state text and tone (Dutch, brand voice).
 - **Non-card children:** the grid does not enforce that children are `<TapedCard>` instances; consumers may render any element per slot. The CSS variable is set unconditionally so any descendant `<TapedCard rotation="auto">` picks it up.
 
@@ -606,9 +606,14 @@ The hover increment (`+0.5deg` opposite to resting rotation) is a starting point
 
 The retro-terrace-fanzine mockups include a NewsCard variant where the photo half of the card carries a dashed inset border, evoking a perforated event ticket (visible on the "Eetfestijn" card in the homepage news grid). This is **not** a Tier B primitive concern — it is a NewsCard composition decoration applied per article type. Tracked here so it lands in Phase 4 (homepage rebuild) when `<NewsCard>` is built; not needed in Phase 1.
 
-### 11.5 `<TapedCardGrid>` rotation tuning (re-evaluate at Phase 4)
+### 11.5 `<TapedCardGrid>` rotation tuning (resolved in Phase 1)
 
-The 4-rotation pool (`-2.5°`, `-1.5°`, `1°`, `2°`) inherited from the master design tokens is applied to every slot in `<TapedCardGrid>`. The retro-terrace-fanzine homepage mockups show news cards mostly upright with only occasional slight rotation — suggesting the auto-rotation default may be too aggressive for a real news grid. Phase 1 ships the master-design pool as-is. **Phase 4 (homepage rebuild) PRD must decide:** keep auto-rotation at current intensity, dial it down (smaller pool), or flip the default to no-rotation with rotation as opt-in per card. Decision driven by visual checkpoint with real article content, not in advance.
+The original 4-rotation pool from the master design tokens (`-2.5°`/`-1.5°`/`1°`/`2°`) was applied to every slot in `<TapedCardGrid>`. Owner feedback during Phase 1 implementation was that this rendered "seasick" when applied to 6+ cards or in single-column stacks. Two tuning iterations followed:
+
+1. **First tighten** to `-1°`/`-0.5°`/`0.5°`/`1°` — still too steep in 1-column stacks per follow-up feedback.
+2. **Final pool** locked at `-0.5°`/`-0.25°`/`0.25°`/`0.5°` — sub-degree rotations are barely perceptible per card but still break the perfect-grid feel across a row. If a future phase wants more dramatic tilt for emphasis cards, the answer is `<TapedCard rotation>` explicitly per card, not a wider auto-pool.
+
+If Phase 4 (homepage rebuild) determines that auto-rotation still feels off when exercised against real Sanity article content, the next escalation is **removing auto-rotation from `<TapedCardGrid>` entirely** and making rotation opt-in per card via the explicit `rotation` prop. Tracked here so that decision is informed.
 
 ### 11.6 `<TapeStrip>` realism (parked)
 
