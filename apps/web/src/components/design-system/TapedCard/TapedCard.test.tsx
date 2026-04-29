@@ -105,6 +105,20 @@ describe("TapedCard", () => {
     expect(container.querySelector('[data-position="br"]')).not.toBeNull();
   });
 
+  it("renders a 2px ink border by default (signature paper-card look)", () => {
+    const { container } = render(<TapedCard>X</TapedCard>);
+    const el = container.firstChild as HTMLElement;
+    expect(el.className).toMatch(/border-2/);
+    expect(el.className).toMatch(/border-ink/);
+  });
+
+  it("ink border applies regardless of bg variant", () => {
+    const { container } = render(<TapedCard bg="ink">X</TapedCard>);
+    expect((container.firstChild as HTMLElement).className).toMatch(
+      /border-ink/,
+    );
+  });
+
   it("interactive=true sets data-interactive and adds hover/transition classes", () => {
     const { container } = render(<TapedCard interactive>X</TapedCard>);
     const el = container.firstChild as HTMLElement;

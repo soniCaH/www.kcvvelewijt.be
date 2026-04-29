@@ -96,6 +96,10 @@ export function TapedCard({
       style={style}
       className={cn(
         "relative",
+        // Solid ink border + hard offset shadow is the signature paper-card
+        // look in the retro-terrace-fanzine direction. Border merges visually
+        // into bg=ink cards but the shadow still defines the silhouette.
+        "border-ink border-2",
         SHADOW_CLASS[shadow],
         BG_CLASS[bg],
         PADDING_CLASS[padding],
