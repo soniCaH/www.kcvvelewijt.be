@@ -4,6 +4,7 @@ import { DropCapParagraph } from "./DropCapParagraph";
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 describe("DropCapParagraph", () => {
@@ -57,7 +58,6 @@ describe("DropCapParagraph", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     render(<DropCapParagraph>{""}</DropCapParagraph>);
     expect(warn).toHaveBeenCalled();
-    vi.unstubAllEnvs();
   });
 
   it("merges className", () => {

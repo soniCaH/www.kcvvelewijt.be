@@ -289,9 +289,15 @@ const TONE_CLASS = {
 } as const;
 ```
 
-Period auto-append: a one-liner `const display = children.endsWith(".") ? children : `${children}.`;`. Emphasis substring matching: `String.prototype.indexOf` (case-sensitive); split into `[before, emphasis, after]` and render each segment. Wrap the emphasis segment in `<HighlighterStroke>` when `emphasis.highlight === true`. Default `highlightVariant="a"`.
+Period auto-append:
 
-Render the heading via `React.createElement(`h${level}`, …)` — see `apps/web/src/components/design-system/SectionHeader/SectionHeader.tsx` for the existing pattern.
+```typescript
+const display = children.endsWith(".") ? children : `${children}.`;
+```
+
+Emphasis substring matching uses `String.prototype.indexOf` (case-sensitive); split into `[before, emphasis, after]` and render each segment, wrapping the emphasis in `<HighlighterStroke>` when `emphasis.highlight === true` and defaulting `highlightVariant='a'`.
+
+Render the heading via `React.createElement('h' + level, …)` — see `apps/web/src/components/design-system/SectionHeader/SectionHeader.tsx` for the existing pattern.
 
 **Step 3: Stories**
 

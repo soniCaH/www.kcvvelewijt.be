@@ -25,7 +25,8 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
 // custom properties so <TapedCardGrid> can auto-vary them per slot —
 // tapes in the same grid row don't perfectly align horizontally or
 // rotationally. Fallbacks are the standalone defaults.
-const TAPE_TRANSFORM = "translateY(-50%) rotate(var(--tape-rotation, -5deg))";
+const TAPE_TRANSFORM =
+  "translateY(-50%) rotate(var(--tape-rotation, var(--rotate-tape-a)))";
 
 export function TapeStrip({ color = "jersey", length = "lg" }: TapeStripProps) {
   const style: CSSProperties = { transform: TAPE_TRANSFORM };

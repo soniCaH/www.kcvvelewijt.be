@@ -4,6 +4,7 @@ import { EditorialHeading } from "./EditorialHeading";
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 describe("EditorialHeading", () => {
@@ -100,7 +101,6 @@ describe("EditorialHeading", () => {
       </EditorialHeading>,
     );
     expect(warn).toHaveBeenCalled();
-    vi.unstubAllEnvs();
   });
 
   it("merges className", () => {

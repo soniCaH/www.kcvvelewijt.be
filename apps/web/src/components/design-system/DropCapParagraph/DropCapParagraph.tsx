@@ -47,7 +47,7 @@ export function DropCapParagraph({
     {
       "data-tone": tone,
       className: cn(
-        "text-body-md leading-[1.6]",
+        "text-body-md leading-[var(--text-body-md--lh)]",
         // initial-letter: <number-of-lines>. Both prefixed (older Safari)
         // and unprefixed declarations via Tailwind arbitrary properties.
         "first-letter:[initial-letter:3]",

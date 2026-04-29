@@ -156,13 +156,13 @@ export const OrderedList: Story = {
     as: "ol",
     columns: 2,
     children: [
-      <TapedCard key="a" rotation="auto" padding="md" as="div">
+      <TapedCard key="a" rotation="auto" padding="md" as="li">
         <p className="font-mono text-[11px]">Stap 1</p>
       </TapedCard>,
-      <TapedCard key="b" rotation="auto" padding="md" as="div">
+      <TapedCard key="b" rotation="auto" padding="md" as="li">
         <p className="font-mono text-[11px]">Stap 2</p>
       </TapedCard>,
-      <TapedCard key="c" rotation="auto" padding="md" as="div">
+      <TapedCard key="c" rotation="auto" padding="md" as="li">
         <p className="font-mono text-[11px]">Stap 3</p>
       </TapedCard>,
     ],

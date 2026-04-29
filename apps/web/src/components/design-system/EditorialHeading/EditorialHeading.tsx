@@ -59,6 +59,7 @@ function splitOnEmphasis(
   text: string,
   emphasisText: string,
 ): { before: string; match: string; after: string } | null {
+  if (!emphasisText) return null;
   const idx = text.indexOf(emphasisText);
   if (idx < 0) return null;
   return {
