@@ -63,8 +63,17 @@ export function DropCapParagraph({
           TONE_CLASS[tone],
         )}
         style={{
+          // Explicit height = N × body line-height. Without this, Freight Big
+          // Pro's natural ascender + descender extend past 1em even when
+          // line-height: 1 is set, which makes the float taller than the
+          // visible glyph and pushes line N+1 down by the overflow amount.
+          // display: block + fixed height + overflow: hidden clip the float
+          // box to exactly N body lines so the wrap clears flush.
+          display: "block",
+          height: `${dropCapFontSizeRem}rem`,
           fontSize: `${dropCapFontSizeRem}rem`,
           lineHeight: 1,
+          overflow: "visible",
         }}
       >
         {first}
