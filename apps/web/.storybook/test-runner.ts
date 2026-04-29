@@ -241,8 +241,8 @@ const config: TestRunnerConfig = {
         // sub-pixel anti-aliasing noise. ARM ↔ x86 drift no longer needs
         // absorbing locally because the kcvv-vr-bot canonicalises baselines on
         // CI (KCVV_VR_BOT_TOKEN is configured). Real regressions (diagonal seam
-        // hairlines, layout reflows, gradient breaks) produce >5% diffs.
-        failureThreshold: 0.05,
+        // hairlines, layout reflows, gradient breaks) produce >0.05% diffs.
+        failureThreshold: 0.0005,
         failureThresholdType: "percent",
       });
     }

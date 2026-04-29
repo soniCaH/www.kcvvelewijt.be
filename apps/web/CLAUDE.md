@@ -508,12 +508,12 @@ the determinism guarantees.
 
 ### Threshold note
 
-`toMatchImageSnapshot` uses `failureThreshold: 0.05` (percent). This absorbs
+`toMatchImageSnapshot` uses `failureThreshold: 0.0005` (percent = 0.05%). This absorbs
 sub-pixel anti-aliasing noise while catching real visual regressions. ARM ↔ x86
 drift no longer needs a wide threshold — `kcvv-vr-bot` canonicalises baselines
 on CI (`KCVV_VR_BOT_TOKEN` is configured), so contributors never commit
 Apple-Silicon baselines directly. Real regressions (diagonal seam hairlines,
-layout reflows, gradient breaks) produce >5% diffs and trip the gate reliably.
+layout reflows, gradient breaks) produce >0.05% diffs and trip the gate reliably.
 
 ### Per-story escape hatch
 
