@@ -189,7 +189,7 @@ jobs:
     name: VR — Post diff comment
     runs-on: ubuntu-latest
     needs: [visual-regression]
-    if: failure() && needs.visual-regression.result == 'failure' && github.event_name == 'pull_request'
+    if: failure() && needs.visual-regression.result == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
     permissions:
       contents: write
       pull-requests: write
@@ -202,6 +202,7 @@ jobs:
 
       - name: Download diff artifacts
         uses: actions/download-artifact@v8
+        continue-on-error: true
         with:
           name: vr-diff-output
           path: /tmp/vr-diff-output
@@ -213,6 +214,14 @@ jobs:
           TOKEN: ${{ secrets.KCVV_VR_BOT_TOKEN }}
         run: |
           BRANCH="vr-diffs/pr-${PR_NUMBER}"
+
+          # Abort gracefully if no diff PNGs were produced (artifact absent or empty)
+          shopt -s nullglob
+          diff_pngs=(/tmp/vr-diff-output/__diff_output__/*.png /tmp/vr-diff-output/__received_output__/*.png)
+          if [ ${#diff_pngs[@]} -eq 0 ]; then
+            echo "No diff PNGs found — skipping orphan branch push. Original VR failure remains visible."
+            exit 0
+          fi
 
           git config user.email "kcvv-vr-bot@users.noreply.github.com"
           git config user.name "kcvv-vr-bot"
@@ -252,9 +261,9 @@ jobs:
             BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/vr-diffs"
 
             COMMENT+="### ${story_name}\n\n"
-            COMMENT+="| Baseline | Actual | Diff |\n"
-            COMMENT+="|----------|--------|------|\n"
-            COMMENT+="| _(see baseline commit)_ | ![actual](${BASE_URL}/actual-${filename}) | ![diff](${BASE_URL}/diff-${filename}) |\n\n"
+            COMMENT+="| Actual | Diff |\n"
+            COMMENT+="|--------|------|\n"
+            COMMENT+="| ![actual](${BASE_URL}/actual-${filename}) | ![diff](${BASE_URL}/diff-${filename}) |\n\n"
           done
 
           # Write to file to avoid shell escaping issues
