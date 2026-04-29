@@ -74,7 +74,8 @@ const divisions: YouthDivisionGroup[] = [
 describe("YouthTeamsDirectory", () => {
   it("renders section header", () => {
     render(<YouthTeamsDirectory divisions={divisions} />);
-    expect(screen.getByText("Jeugdploegen")).toBeInTheDocument();
+    // SectionHeader composes EditorialHeading which auto-appends a period.
+    expect(screen.getByText("Jeugdploegen.")).toBeInTheDocument();
   });
 
   it("renders all division group labels", () => {
