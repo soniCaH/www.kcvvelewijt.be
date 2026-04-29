@@ -23,6 +23,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
+      - ".nvmrc"
       - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main, develop]
@@ -35,6 +36,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
+      - ".nvmrc"
       - ".github/workflows/e2e.yml"
 
 jobs:

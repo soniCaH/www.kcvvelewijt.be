@@ -77,12 +77,31 @@ export async function discoverRouteFixtures(
         type: await probeArticleType(api, baseURL, slug),
       })),
     );
+    let typesFound = 0;
     for (const outcome of probeOutcomes) {
       if (outcome.status !== "fulfilled") continue;
       const { slug, type } = outcome.value;
       if (!type) continue;
       if (articleSlugByType[type] !== null) continue;
       articleSlugByType[type] = slug;
+      typesFound++;
+    }
+
+    // Hard fail if we attempted to probe candidates and not a single one
+    // resolved to a known articleType. The "no articles in sitemap" case is
+    // legitimate (probeCount === 0) and degrades to skipping the four
+    // articleType tests; the "everything failed" case means upstream
+    // rendering is broken or the data-testid="<type>-hero" markers were
+    // renamed, and must surface loudly rather than silently skipping every
+    // /nieuws/[slug] test.
+    if (probeCount > 0 && typesFound === 0) {
+      throw new Error(
+        `discoverRouteFixtures: probed ${probeCount} article slug(s) from ` +
+          `sitemap.xml but found zero matching articleType. Either upstream ` +
+          `article rendering is failing, or the data-testid="<type>-hero" ` +
+          `markers (interview/announcement/transfer/event) were renamed in ` +
+          `apps/web/src/components/article/.`,
+      );
     }
 
     return {
