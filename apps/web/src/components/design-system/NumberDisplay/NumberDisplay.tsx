@@ -42,22 +42,31 @@ export function NumberDisplay({
   as = "span",
   className,
 }: NumberDisplayProps) {
+  // The "#" glyph reads awkwardly in italic Freight; render it in mono
+  // (hashtag-style) at a smaller size for that case. Other prefixes (e.g.
+  // "nr.") stay in italic Freight Display.
+  const isHashPrefix = prefix === "#";
   const numberSection = (
     <span
       className={cn(
-        "font-display-big inline-flex items-baseline gap-1 font-black",
+        "font-display-big inline-flex items-baseline gap-1.5 font-black",
         SIZE_CLASS[size],
         TONE_CLASS[tone],
       )}
     >
-      {prefix && (
-        <span className="font-display text-[0.6em] font-semibold italic">
-          {prefix}
-        </span>
-      )}
+      {prefix &&
+        (isHashPrefix ? (
+          <span className="font-mono text-[0.4em] font-medium tracking-[0.04em]">
+            {prefix}
+          </span>
+        ) : (
+          <span className="font-display text-[0.55em] font-semibold italic">
+            {prefix}
+          </span>
+        ))}
       <span>{value}</span>
       {suffix && (
-        <span className="font-display text-[0.6em] font-semibold italic">
+        <span className="font-display text-[0.55em] font-semibold italic">
           {suffix}
         </span>
       )}
