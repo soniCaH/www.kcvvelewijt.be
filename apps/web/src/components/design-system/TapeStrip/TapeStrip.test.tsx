@@ -28,7 +28,9 @@ describe("TapeStrip", () => {
   it("rotation reads var(--tape-rotation,-5deg) so grid slots can auto-vary", () => {
     const { container } = render(<TapeStrip />);
     const el = container.firstChild as HTMLElement;
-    expect(el.style.transform).toContain("var(--tape-rotation, -5deg)");
+    expect(el.style.transform).toContain(
+      "var(--tape-rotation, var(--rotate-tape-a))",
+    );
     expect(el.style.transform).toContain("translateY(-50%)");
   });
 });
