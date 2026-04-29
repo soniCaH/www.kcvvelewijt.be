@@ -20,5 +20,6 @@ services:
       - ./storybook-static:/work/apps/web/storybook-static:ro
       # Read-write mount for baselines and diff artifacts.
       - ./test:/work/apps/web/test
+    mem_limit: 8g
     environment:
       - CI=true
