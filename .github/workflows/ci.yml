@@ -254,8 +254,9 @@ jobs:
           COMMENT="## Visual Regression Diffs\n\n"
           COMMENT+="One or more stories changed. Review before triggering \`@kcvv-bot update-vr-baselines\`.\n\n"
 
+          HAS_DIFFS=false
+          shopt -s nullglob
           for diff_file in /tmp/vr-diff-output/__diff_output__/*.png; do
-            [ -f "$diff_file" ] || continue
             filename=$(basename "$diff_file")
             story_name="${filename%.png}"
             BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/vr-diffs"
@@ -264,13 +265,18 @@ jobs:
             COMMENT+="| Actual | Diff |\n"
             COMMENT+="|--------|------|\n"
             COMMENT+="| ![actual](${BASE_URL}/actual-${filename}) | ![diff](${BASE_URL}/diff-${filename}) |\n\n"
+            HAS_DIFFS=true
           done
 
-          # Write to file to avoid shell escaping issues
-          printf "%b" "$COMMENT" > /tmp/vr-comment.md
-          echo "comment_file=/tmp/vr-comment.md" >> "$GITHUB_OUTPUT"
+          echo "has_diffs=${HAS_DIFFS}" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_DIFFS" = "true" ]; then
+            # Write to file to avoid shell escaping issues
+            printf "%b" "$COMMENT" > /tmp/vr-comment.md
+            echo "comment_file=/tmp/vr-comment.md" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Post sticky PR comment
+        if: steps.build-comment.outputs.has_diffs == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: vr-diff-comment
