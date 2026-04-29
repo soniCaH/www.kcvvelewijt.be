@@ -27,8 +27,6 @@ export const AllPositions: Story = {
     <>
       <TapeStrip position="tl" />
       <TapeStrip position="tr" />
-      <TapeStrip position="bl" />
-      <TapeStrip position="br" />
     </>
   ),
 };

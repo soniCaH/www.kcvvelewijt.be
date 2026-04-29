@@ -109,12 +109,10 @@ export const WithTape: Story = {
         tape={[
           { position: "tl", color: "jersey", length: "md" },
           { position: "tr", color: "ink", length: "sm" },
-          { position: "bl", color: "cream", length: "sm" },
-          { position: "br", color: "jersey", length: "lg" },
         ]}
       >
         <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
-          all four corners
+          both top corners
         </p>
       </TapedCard>
     </div>

@@ -125,7 +125,9 @@ export const WithLargeTapesOnCorners: Story = {
     children: [],
   },
   render: () => {
-    const corners = ["tl", "tr", "bl", "br", "tl", "tr"] as const;
+    // Tape only attaches at top edges — bottom tapes overlap the offset
+    // shadow region, which reads as un-physical.
+    const corners = ["tl", "tr", "tl", "tr", "tl", "tr"] as const;
     return (
       <TapedCardGrid columns={3}>
         {corners.map((corner, i) => (

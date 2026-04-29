@@ -95,14 +95,14 @@ describe("TapedCard", () => {
       <TapedCard
         tape={[
           { position: "tl", color: "jersey" },
-          { position: "br", color: "ink" },
+          { position: "tr", color: "ink" },
         ]}
       >
         X
       </TapedCard>,
     );
     expect(container.querySelector('[data-position="tl"]')).not.toBeNull();
-    expect(container.querySelector('[data-position="br"]')).not.toBeNull();
+    expect(container.querySelector('[data-position="tr"]')).not.toBeNull();
   });
 
   it("renders a 2px ink border by default (signature paper-card look)", () => {

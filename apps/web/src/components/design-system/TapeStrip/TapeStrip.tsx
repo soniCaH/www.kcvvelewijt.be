@@ -1,7 +1,12 @@
 import type { CSSProperties } from "react";
 
 export type TapeStripColor = "jersey" | "ink" | "cream";
-export type TapeStripPosition = "tl" | "tr" | "bl" | "br";
+// Only top-edge positions. Bottom/right tapes overlap the card's offset
+// shadow (bottom-right), which reads as un-physical: tape can't be visible
+// over a shadow it should be hiding. Real scrapbook/poster tape attaches
+// from the top — gravity does the rest. Master-design mockups exclusively
+// place tape at top corners.
+export type TapeStripPosition = "tl" | "tr";
 export type TapeStripLength = "sm" | "md" | "lg";
 
 export interface TapeStripProps {
@@ -22,25 +27,21 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
   cream: "bg-cream",
 };
 
-// Position the tape so its center sits on the card's edge — the tape spans
-// the edge, ~half above (anchored to surrounding surface) and ~half below
-// (anchored to the card). transform-origin: center keeps rotation balanced.
+// Position the tape so its center sits on the card's top edge — the tape
+// spans the edge, ~half above (anchored to surrounding surface) and ~half
+// below (anchored to the card). transform-origin: center keeps rotation
+// balanced.
 const POSITION_CLASS: Record<TapeStripPosition, string> = {
   tl: "absolute top-0 left-[12%] origin-center",
   tr: "absolute top-0 right-[12%] origin-center",
-  bl: "absolute bottom-0 left-[12%] origin-center",
-  br: "absolute bottom-0 right-[12%] origin-center",
 };
 
-// Per-position rotation lean — symmetric around the corner so the tape reads
-// as anchoring outward toward the surrounding surface. Custom rotation is
-// intentionally not exposed on the API: arbitrary degrees produce
-// nonsensical results (tape barely overlapping the card edge).
+// Per-position rotation lean. Custom rotation is intentionally not exposed
+// on the API: arbitrary degrees produced nonsensical results (tape barely
+// overlapping the card edge).
 const POSITION_ROTATION: Record<TapeStripPosition, number> = {
   tl: -5,
   tr: 5,
-  bl: 5,
-  br: -5,
 };
 
 export function TapeStrip({
@@ -49,10 +50,8 @@ export function TapeStrip({
   length = "md",
 }: TapeStripProps) {
   const rot = POSITION_ROTATION[position];
-  const isTop = position === "tl" || position === "tr";
-  const transY = isTop ? "-50%" : "50%";
   const style: CSSProperties = {
-    transform: `translateY(${transY}) rotate(${rot}deg)`,
+    transform: `translateY(-50%) rotate(${rot}deg)`,
   };
   return (
     <span
