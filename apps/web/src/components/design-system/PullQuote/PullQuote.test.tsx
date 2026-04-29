@@ -15,7 +15,8 @@ describe("PullQuote", () => {
 
   it("renders the attribution name", () => {
     render(<PullQuote attribution={{ name: "Maxim" }}>x</PullQuote>);
-    expect(screen.getByText("MAXIM")).toBeInTheDocument();
+    // MonoLabel applies CSS uppercase — the DOM text retains original case.
+    expect(screen.getByText("Maxim")).toBeInTheDocument();
   });
 
   it("renders role and source when provided", () => {
@@ -61,10 +62,27 @@ describe("PullQuote", () => {
     ).not.toBeNull();
   });
 
-  it("renders a QuoteMark glyph", () => {
+  it("emphasis wraps the matched substring in <em>", () => {
     const { container } = render(
-      <PullQuote attribution={{ name: "x" }}>x</PullQuote>,
+      <PullQuote attribution={{ name: "x" }} emphasis={{ text: "tribune" }}>
+        Een tribune die zingt is meer waard
+      </PullQuote>,
     );
-    expect(container.querySelector("svg")).not.toBeNull();
+    const em = container.querySelector("em");
+    expect(em).not.toBeNull();
+    expect(em!.textContent).toBe("tribune");
+  });
+
+  it("emphasis with highlight wraps the <em> inside <HighlighterStroke>", () => {
+    const { container } = render(
+      <PullQuote
+        attribution={{ name: "x" }}
+        emphasis={{ text: "tribune", highlight: true }}
+      >
+        Een tribune die zingt is meer waard
+      </PullQuote>,
+    );
+    expect(container.querySelector("[data-variant]")).not.toBeNull();
+    expect(container.querySelector("em")).not.toBeNull();
   });
 });

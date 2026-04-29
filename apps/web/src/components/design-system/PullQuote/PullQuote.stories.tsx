@@ -65,7 +65,16 @@ export const Rotated: Story = {
 export const LongQuote: Story = {
   args: {
     attribution: { name: "Voorzitter", role: "BESTUUR" },
+    emphasis: { text: "generatie na generatie", highlight: true },
     children:
       "Het clubgevoel zit in de kleinste dingen — een kop koffie na de match, een gedeeld pintje, een ouder die zijn kind langs de zijlijn ziet groeien. Dat verkoop je niet, dat bouw je generatie na generatie.",
+  },
+};
+
+export const WithEmphasis: Story = {
+  args: {
+    attribution: { name: "Maxim", role: "A-PLOEG" },
+    emphasis: { text: "tribune die zingt", highlight: true },
+    children: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
   },
 };
