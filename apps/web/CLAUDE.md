@@ -338,7 +338,10 @@ VR. There is no `visual` label and none should be introduced.
 When `pnpm vr:check` (or the CI `visual-regression` job) reports a diff:
 
 1. **Read each diff PNG** via the `Read` tool (vision-enabled — Claude sees the
-   actual visual difference). For CI, download the `vr-diff-output` artifact.
+   actual visual difference). For CI, check the sticky PR comment — diff images
+   are posted inline automatically by the `vr-diff-comment` job (no artifact
+   download required). The comment embeds baseline / actual / diff side-by-side
+   for each changed story.
 2. **Cross-reference with the issue's acceptance criteria.**
 3. **If the diff aligns with the issue's stated goal** (e.g. the issue says
    "redesign card shadow" and the diff shows a changed shadow):
@@ -556,11 +559,16 @@ component or library. Document the reason inline (one comment line).
 
 ### Inspecting diffs
 
-Failed CI runs upload `vr-diff-output` artifacts containing the diff PNG and
-the captured "actual" PNG. Both are vision-readable by Claude's `Read` tool —
-just point it at the file path. Locally, `pnpm --filter @kcvv/web run vr:diff
-<story-id>` prints the on-disk path(s) under
-`apps/web/test/vr/__diff_output__/`.
+When the CI `visual-regression` job fails on a PR, the `vr-diff-comment` job
+automatically pushes the diff PNGs to the orphan branch `vr-diffs/pr-<N>` and
+posts a sticky comment on the PR. The comment embeds baseline / actual / diff
+images inline via `raw.githubusercontent.com` links — no artifact download
+needed. The orphan branch (and the sticky comment) are cleaned up automatically
+when the PR closes via `vr-diff-cleanup.yml`.
+
+Locally, `pnpm --filter @kcvv/web run vr:diff <story-id>` prints the on-disk
+path(s) under `apps/web/test/vr/__diff_output__/`. The `vr-diff-output`
+artifact is still uploaded as a fallback for programmatic access.
 
 ### Baseline-update bot flow
 
