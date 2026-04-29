@@ -85,23 +85,24 @@ describe("TapedCard", () => {
 
   it("renders one TapeStrip when tape is a single object", () => {
     const { container } = render(
-      <TapedCard tape={{ position: "tl", color: "jersey" }}>X</TapedCard>,
+      <TapedCard tape={{ color: "jersey" }}>X</TapedCard>,
     );
-    expect(container.querySelectorAll('[data-position="tl"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-color="jersey"]')).toHaveLength(1);
   });
 
   it("renders multiple TapeStrips when tape is an array", () => {
     const { container } = render(
       <TapedCard
         tape={[
-          { position: "tl", color: "jersey", length: "md" },
-          { position: "tl", color: "ink", length: "sm" },
+          { color: "jersey", length: "md" },
+          { color: "ink", length: "sm" },
         ]}
       >
         X
       </TapedCard>,
     );
-    expect(container.querySelectorAll('[data-position="tl"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-color="jersey"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-color="ink"]')).toHaveLength(1);
   });
 
   it("renders a 2px ink border by default (signature paper-card look)", () => {

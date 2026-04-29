@@ -96,18 +96,12 @@ export const WithTape: Story = {
   args: { children: sample },
   render: () => (
     <div className="grid grid-cols-2 items-start gap-10">
-      <TapedCard
-        rotation="a"
-        tape={{ position: "tl", color: "jersey", length: "md" }}
-      >
+      <TapedCard rotation="a" tape={{ color: "jersey", length: "md" }}>
         <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
-          single tl tape
+          single jersey tape
         </p>
       </TapedCard>
-      <TapedCard
-        rotation="c"
-        tape={[{ position: "tl", color: "jersey", length: "lg" }]}
-      >
+      <TapedCard rotation="c" tape={[{ color: "jersey", length: "lg" }]}>
         <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
           single large jersey tape
         </p>

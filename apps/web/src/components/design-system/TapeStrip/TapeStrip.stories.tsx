@@ -20,31 +20,44 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  args: { color: "jersey", position: "tl", length: "md" },
+  args: { color: "jersey", length: "md" },
 };
 
-const slotStyle = (rot: string) =>
-  ({ "--tape-rotation": rot }) as CSSProperties;
+const slotStyle = (left: string, rot: string) =>
+  ({
+    "--tape-left": left,
+    "--tape-rotation": rot,
+  }) as CSSProperties;
 
-export const AutoVaryViaGridVariable: Story = {
-  // The grid pool TapedCardGrid uses: -3deg, -4deg, -5deg, -6deg.
-  // Standalone tapes default to -5deg.
-  render: () => (
-    <div className="flex flex-col gap-4">
-      {(["-3deg", "-4deg", "-5deg", "-6deg"] as const).map((rot) => (
-        <div
-          key={rot}
-          style={slotStyle(rot)}
-          className="bg-cream-soft border-paper-edge relative h-20 w-64 border"
-        >
-          <TapeStrip />
-          <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
-            --tape-rotation: {rot}
-          </span>
-        </div>
-      ))}
-    </div>
-  ),
+export const AutoVaryViaGridVariables: Story = {
+  // The grid pools <TapedCardGrid> uses:
+  //   --tape-rotation: -3deg / -4deg / -5deg / -6deg
+  //   --tape-left:     4%    / 7%    / 10%   / 12%
+  // Standalone tapes default to -5deg / 12%.
+  render: () => {
+    const slots = [
+      { left: "4%", rot: "-3deg" },
+      { left: "7%", rot: "-4deg" },
+      { left: "10%", rot: "-5deg" },
+      { left: "12%", rot: "-6deg" },
+    ];
+    return (
+      <div className="flex flex-col gap-4">
+        {slots.map(({ left, rot }) => (
+          <div
+            key={`${left}-${rot}`}
+            style={slotStyle(left, rot)}
+            className="bg-cream-soft border-paper-edge relative h-20 w-64 border"
+          >
+            <TapeStrip />
+            <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
+              left {left} · rot {rot}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  },
 };
 
 export const InkColor: Story = { args: { color: "ink" } };

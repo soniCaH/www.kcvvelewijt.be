@@ -90,7 +90,7 @@ export const Auto: Story = {
 export const RotatedAndTaped: Story = {
   args: {
     rotation: "b",
-    tape: [{ position: "tl", color: "jersey", length: "md" }],
+    tape: [{ color: "jersey" }],
     caption: "Met tape en rotatie.",
     children: photoPlaceholder,
   },

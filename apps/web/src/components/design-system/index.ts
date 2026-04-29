@@ -138,7 +138,6 @@ export { TapeStrip } from "./TapeStrip";
 export type {
   TapeStripProps,
   TapeStripColor,
-  TapeStripPosition,
   TapeStripLength,
 } from "./TapeStrip";
 

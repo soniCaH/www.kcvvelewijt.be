@@ -134,7 +134,7 @@ export const WithLargeTapesOnCorners: Story = {
             key={i}
             rotation="auto"
             padding="md"
-            tape={{ position: "tl", color: "jersey", length: "lg" }}
+            tape={{ color: "jersey", length: "lg" }}
           >
             <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
               slot · {i + 1}
