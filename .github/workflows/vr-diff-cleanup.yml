@@ -1,0 +1,32 @@
+name: VR Diff Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    name: Delete vr-diffs orphan branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete orphan branch
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.KCVV_VR_BOT_TOKEN }}
+        run: |
+          BRANCH="vr-diffs/pr-${PR_NUMBER}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X DELETE \
+            -H "Authorization: token ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/git/refs/heads/${BRANCH}")
+          # 204 = deleted; 422 = ref not found (PR had no VR failures) — both are fine
+          if [ "$HTTP_STATUS" = "204" ] || [ "$HTTP_STATUS" = "422" ]; then
+            echo "Branch cleanup result: HTTP ${HTTP_STATUS} (OK)"
+          else
+            echo "::error::Unexpected HTTP ${HTTP_STATUS} while deleting ${BRANCH}"
+            exit 1
+          fi

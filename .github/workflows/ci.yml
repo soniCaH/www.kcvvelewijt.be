@@ -185,6 +185,104 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  vr-diff-comment:
+    name: VR — Post diff comment
+    runs-on: ubuntu-latest
+    needs: [visual-regression]
+    if: failure() && needs.visual-regression.result == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.KCVV_VR_BOT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Download diff artifacts
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: vr-diff-output
+          path: /tmp/vr-diff-output
+
+      - name: Push diffs to orphan branch
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.KCVV_VR_BOT_TOKEN }}
+        run: |
+          BRANCH="vr-diffs/pr-${PR_NUMBER}"
+
+          # Abort gracefully if no diff PNGs were produced (artifact absent or empty)
+          shopt -s nullglob
+          diff_pngs=(/tmp/vr-diff-output/__diff_output__/*.png /tmp/vr-diff-output/__received_output__/*.png)
+          if [ ${#diff_pngs[@]} -eq 0 ]; then
+            echo "No diff PNGs found — skipping orphan branch push. Original VR failure remains visible."
+            exit 0
+          fi
+
+          git config user.email "kcvv-vr-bot@users.noreply.github.com"
+          git config user.name "kcvv-vr-bot"
+
+          # Create a detached orphan branch with no history
+          git checkout --orphan "$BRANCH"
+          git rm -rf . --quiet
+
+          # Copy diff PNGs with prefixes to avoid filename collisions
+          mkdir -p vr-diffs
+          for f in /tmp/vr-diff-output/__diff_output__/*.png; do
+            [ -f "$f" ] && cp "$f" "vr-diffs/diff-$(basename "$f")"
+          done
+          for f in /tmp/vr-diff-output/__received_output__/*.png; do
+            [ -f "$f" ] && cp "$f" "vr-diffs/actual-$(basename "$f")"
+          done
+
+          git add vr-diffs/
+          git commit -m "vr: diff snapshots for PR #${PR_NUMBER} [skip ci]"
+          git push "https://x-access-token:${TOKEN}@github.com/${REPO}.git" \
+            "HEAD:refs/heads/${BRANCH}" --force
+
+      - name: Build comment body
+        id: build-comment
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          BRANCH="vr-diffs/pr-${PR_NUMBER}"
+          COMMENT="## Visual Regression Diffs\n\n"
+          COMMENT+="One or more stories changed. Review before triggering \`@kcvv-bot update-vr-baselines\`.\n\n"
+
+          HAS_DIFFS=false
+          shopt -s nullglob
+          for diff_file in /tmp/vr-diff-output/__diff_output__/*.png; do
+            filename=$(basename "$diff_file")
+            story_name="${filename%.png}"
+            BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/vr-diffs"
+
+            COMMENT+="### ${story_name}\n\n"
+            COMMENT+="| Actual | Diff |\n"
+            COMMENT+="|--------|------|\n"
+            COMMENT+="| ![actual](${BASE_URL}/actual-${filename}) | ![diff](${BASE_URL}/diff-${filename}) |\n\n"
+            HAS_DIFFS=true
+          done
+
+          echo "has_diffs=${HAS_DIFFS}" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_DIFFS" = "true" ]; then
+            # Write to file to avoid shell escaping issues
+            printf "%b" "$COMMENT" > /tmp/vr-comment.md
+            echo "comment_file=/tmp/vr-comment.md" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post sticky PR comment
+        if: steps.build-comment.outputs.has_diffs == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: vr-diff-comment
+          path: ${{ steps.build-comment.outputs.comment_file }}
+          GITHUB_TOKEN: ${{ secrets.KCVV_VR_BOT_TOKEN }}
+
   migration-status:
     name: Update Migration Status
     runs-on: ubuntu-latest
