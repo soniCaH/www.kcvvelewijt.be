@@ -37,10 +37,10 @@ const POSITION_CLASS: Record<TapeStripPosition, string> = {
 // intentionally not exposed on the API: arbitrary degrees produce
 // nonsensical results (tape barely overlapping the card edge).
 const POSITION_ROTATION: Record<TapeStripPosition, number> = {
-  tl: -10,
-  tr: 10,
-  bl: 10,
-  br: -10,
+  tl: -5,
+  tr: 5,
+  bl: 5,
+  br: -5,
 };
 
 export function TapeStrip({

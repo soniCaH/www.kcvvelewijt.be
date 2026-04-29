@@ -20,23 +20,23 @@ describe("TapeStrip", () => {
     expect(el).toHaveAttribute("data-length", "lg");
   });
 
-  it("default rotation is position-driven (tl=-10deg, tape straddles top edge)", () => {
+  it("default rotation is position-driven (tl=-5deg, tape straddles top edge)", () => {
     const { container } = render(<TapeStrip position="tl" />);
     const el = container.firstChild as HTMLElement;
-    expect(el.style.transform).toContain("rotate(-10deg)");
+    expect(el.style.transform).toContain("rotate(-5deg)");
     expect(el.style.transform).toContain("translateY(-50%)");
   });
 
   it("bottom-position tapes straddle the bottom edge with translateY(50%)", () => {
     const { container } = render(<TapeStrip position="bl" />);
     const el = container.firstChild as HTMLElement;
-    expect(el.style.transform).toContain("rotate(10deg)");
+    expect(el.style.transform).toContain("rotate(5deg)");
     expect(el.style.transform).toContain("translateY(50%)");
   });
 
   it("each position has its own rotation lean (br is mirror of bl)", () => {
     const { container } = render(<TapeStrip position="br" />);
     const el = container.firstChild as HTMLElement;
-    expect(el.style.transform).toContain("rotate(-10deg)");
+    expect(el.style.transform).toContain("rotate(-5deg)");
   });
 });
