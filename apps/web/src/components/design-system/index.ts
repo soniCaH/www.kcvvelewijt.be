@@ -181,3 +181,21 @@ export type {
   MonoLabelRowDivider,
   MonoLabelRowAs,
 } from "./MonoLabelRow";
+
+// EditorialHeading
+export { EditorialHeading } from "./EditorialHeading";
+export type {
+  EditorialHeadingProps,
+  EditorialHeadingSize,
+  EditorialHeadingTone,
+  EditorialHeadingLevel,
+  EditorialHeadingEmphasis,
+} from "./EditorialHeading";
+
+// PullQuote
+export { PullQuote } from "./PullQuote";
+export type {
+  PullQuoteProps,
+  PullQuoteAttribution,
+  PullQuoteTone,
+} from "./PullQuote";
