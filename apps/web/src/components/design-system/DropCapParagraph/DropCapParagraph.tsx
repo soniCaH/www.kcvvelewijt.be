@@ -43,17 +43,19 @@ export function DropCapParagraph({
         data-drop-cap="true"
         aria-hidden="true"
         className={cn(
-          // Drop-cap sized to span ~3 body lines. text-[4.5rem] / leading 1
-          // gives a 72-px tall cap that fits cleanly inside 3 × 1.6 lines of
-          // body-md text. The negative top adjustment realigns the cap's
-          // glyph top with the body's first-line cap-top so the wraparound
-          // sits flush.
-          "font-display-big float-left mr-3 text-[4.5rem] leading-[0.78] font-black",
-          // -mt-1 pulls the optical top of the cap up so the body's first
-          // line cap-line meets the drop-cap's cap-line.
-          "-mt-1",
+          // Drop-cap pattern: float:left + font-size sized to span 3 body
+          // lines + line-height:1 + tight right margin. line-height: 1 keeps
+          // the cap glyph inside its bounding box so surrounding body lines
+          // wrap at their natural body line-height instead of being pushed
+          // apart by a tall line-strut on the cap span.
+          "font-display-big float-left mr-2 mb-1 text-[4rem] leading-none font-black",
           TONE_CLASS[tone],
         )}
+        style={{
+          // Pull the cap's optical top up by the body's natural cap-to-top
+          // gap so the H aligns with the body's first-line cap line.
+          marginTop: "-0.1em",
+        }}
       >
         {first}
       </span>
