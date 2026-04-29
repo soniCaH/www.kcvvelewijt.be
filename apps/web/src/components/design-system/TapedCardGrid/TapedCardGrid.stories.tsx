@@ -119,6 +119,37 @@ export const EmptyWithoutFallback: Story = {
   args: { columns: 3, children: [] },
 };
 
+export const WithLargeTapesOnCorners: Story = {
+  args: {
+    columns: 3,
+    children: [],
+  },
+  render: () => {
+    const corners = ["tl", "tr", "bl", "br", "tl", "tr"] as const;
+    return (
+      <TapedCardGrid columns={3}>
+        {corners.map((corner, i) => (
+          <TapedCard
+            key={i}
+            rotation="auto"
+            padding="md"
+            tape={{ position: corner, color: "jersey", length: "lg" }}
+          >
+            <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
+              tape · {corner}
+            </p>
+            <h3 className="text-display-sm mt-1">Het rooster.</h3>
+            <p className="text-body-sm mt-2 leading-relaxed">
+              Een korte samenvatting van wat eraan komt — speeldata, locaties en
+              wie er thuis speelt.
+            </p>
+          </TapedCard>
+        ))}
+      </TapedCardGrid>
+    );
+  },
+};
+
 export const OrderedList: Story = {
   args: {
     as: "ol",
