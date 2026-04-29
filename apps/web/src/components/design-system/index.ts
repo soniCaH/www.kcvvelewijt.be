@@ -209,3 +209,11 @@ export type {
   NumberDisplayTone,
   NumberDisplayAs,
 } from "./NumberDisplay";
+
+// DropCapParagraph
+export { DropCapParagraph } from "./DropCapParagraph";
+export type {
+  DropCapParagraphProps,
+  DropCapParagraphTone,
+  DropCapParagraphAs,
+} from "./DropCapParagraph";
