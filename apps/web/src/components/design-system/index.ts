@@ -198,4 +198,14 @@ export type {
   PullQuoteProps,
   PullQuoteAttribution,
   PullQuoteTone,
+  PullQuoteEmphasis,
 } from "./PullQuote";
+
+// NumberDisplay
+export { NumberDisplay } from "./NumberDisplay";
+export type {
+  NumberDisplayProps,
+  NumberDisplaySize,
+  NumberDisplayTone,
+  NumberDisplayAs,
+} from "./NumberDisplay";
