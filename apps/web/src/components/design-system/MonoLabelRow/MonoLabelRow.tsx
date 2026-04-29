@@ -43,7 +43,13 @@ export function MonoLabelRow({
     >
       {items.map((item, index) => (
         <Fragment key={index}>
-          <ItemTag className={isList ? "list-none" : undefined}>
+          {/* Item wrapper inherits browser-default line-height by default,
+              which makes the wrapper's box taller than its MonoLabel content
+              and pushes flex `items-center` to centre against an empty box
+              centre rather than the label's actual visual centre. Forcing
+              leading-none collapses the wrapper to the label's height so
+              dots line up with cap-height middle. */}
+          <ItemTag className={cn("leading-none", isList && "list-none")}>
             <MonoLabel
               variant={item.variant ?? "plain"}
               size={item.size ?? "sm"}
@@ -53,10 +59,6 @@ export function MonoLabelRow({
           </ItemTag>
           {index < items.length - 1 &&
             (divider === "·" ? (
-              // The "·" glyph (U+00B7) sits at the font's x-height middle,
-              // which floats above the visual centre of uppercase MonoLabel
-              // text. Render a CSS circle instead so flex `items-center`
-              // produces a true vertical centre regardless of font.
               <span
                 data-divider="true"
                 data-divider-glyph={divider}
