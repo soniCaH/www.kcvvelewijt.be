@@ -49,7 +49,7 @@ export default async function TeamsPage() {
         sections={getPloegenSections({
           hero: aTeam ? (
             <PageHero
-              image={aTeam.teamImageUrl ?? "/images/hero-club.jpg"}
+              image={aTeam.teamImageUrl ?? undefined}
               imageAlt={`Team foto ${aTeam.name}`}
               label="Eerste ploeg"
               headline={(() => {

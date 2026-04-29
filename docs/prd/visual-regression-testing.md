@@ -211,6 +211,9 @@ No changes to root `CLAUDE.md` — VR is `apps/web`-scoped.
 
 Each phase is a separate GitHub issue. Phases ship sequentially; later phases assume earlier phases are live.
 
+> **Phase 4 + 5 page-coverage scope superseded — see [`page-level-testing-rework.md`](./page-level-testing-rework.md).**
+> Page-level visual coverage moved off Storybook + `@storybook/test-runner` and onto a dedicated Playwright e2e suite running against `next start`. Phase 3 narrows to `UI/*` + `Features/*` + `Layout/*` only (no `Pages/*`); Phase 4 is closed; Phase 5 is rescoped component-only.
+
 ### Phase 1 — Tracer bullet
 
 Scope: 5 stories × 3 viewports = 15 baselines. Stories: `Layout/PageFooter`, two `UI/SectionTransition` variants, two `UI/SectionStack` compositions.
@@ -219,7 +222,7 @@ Work:
 
 - Install `@playwright/test` + `@storybook/test-runner` dev dependencies.
 - Uninstall `@chromatic-com/storybook`.
-- Scaffold `apps/web/playwright.config.ts` and `apps/web/test/vr/` setup.
+- Scaffold `apps/web/test/vr/` baseline tree (the Storybook test-runner config lives at `apps/web/.storybook/test-runner.ts`; no separate Playwright config is required for VR).
 - Scaffold `apps/web/Dockerfile.vr` (or `apps/web/docker-compose.vr.yml`) pinning Playwright's official image.
 - Add `pnpm vr:check`, `pnpm vr:update`, `pnpm vr:diff` scripts.
 - Add `visual-regression` CI job to `.github/workflows/ci.yml`.
@@ -260,7 +263,16 @@ Determinism work happens once in this phase for the whole repo:
 
 ### Phase 3 — Selective `Features/*`
 
-Not every `Features/*` story. Criterion: **include if the story's failure mode is visual-structural (layout, composition, spacing) rather than data-presentational.**
+Scope: `UI/*`, `Features/*`, `Layout/*` only. **`Pages/*` are explicitly out of
+scope** — page-level composition coverage moved to the Playwright e2e suite at
+`apps/web/test/e2e/` per
+[`page-level-testing-rework.md`](./page-level-testing-rework.md). New
+`Pages/*` stories must not adopt `tags: ["vr"]`; their composition is verified
+by the e2e route smoke tests.
+
+Within the in-scope groups, not every story participates. Criterion:
+**include if the story's failure mode is visual-structural (layout,
+composition, spacing) rather than data-presentational.**
 
 Examples that qualify (titles below match story-file metas in the repo):
 
@@ -506,23 +518,29 @@ Subsequent visual changes to the same component follow the standard §10
 decision loop — `pnpm vr:check` produces diffs; intentional changes
 re-update baselines; unexpected diffs halt and report.
 
-### Phase 4 — Real-page compositions
+### Phase 4 — Real-page compositions — **SUPERSEDED**
 
-Full-page Playwright snapshots for ~10 critical routes, captured against a Next.js dev server seeded with deterministic mock data (mock Sanity client returning pinned fixtures, mock PSD response fixtures).
+> **Superseded by [`page-level-testing-rework.md`](./page-level-testing-rework.md) (2026-04-28).** Page-level coverage moved off Storybook + `@storybook/test-runner` and onto a dedicated Playwright e2e suite at `apps/web/test/e2e/` running against `next start`. The supersession trades pixel-diff snapshots for functional smoke checks (HTTP 200, `<h1>`, nav, footer, no broken images, no `console.error`) which avoid the data-fixture drift that made `Pages/*` Storybook stories fragile in practice.
 
-Routes: `/`, `/nieuws`, `/nieuws/[slug]`, `/kalender`, `/wedstrijd/[matchId]`, `/ploegen`, `/sponsors`, `/club/organigram`, `/jeugd`, one dynamic player page.
+Original (no longer applicable) scope below for historical reference:
 
-Catches cross-component regressions that story-level VR cannot see — e.g., a primitive change that looks fine in isolation but breaks composition on the home page.
+> ~~Full-page Playwright snapshots for ~10 critical routes, captured against a Next.js dev server seeded with deterministic mock data (mock Sanity client returning pinned fixtures, mock PSD response fixtures).~~
+>
+> ~~Routes: `/`, `/nieuws`, `/nieuws/[slug]`, `/kalender`, `/wedstrijd/[matchId]`, `/ploegen`, `/sponsors`, `/club/organigram`, `/jeugd`, one dynamic player page.~~
+>
+> ~~Catches cross-component regressions that story-level VR cannot see — e.g., a primitive change that looks fine in isolation but breaks composition on the home page.~~
+>
+> ~~Runs in a separate CI job because it's slower and has different dependencies (Next.js dev server, mock infrastructure).~~
 
-Runs in a separate CI job because it's slower and has different dependencies (Next.js dev server, mock infrastructure).
+### Phase 5 — Full Storybook coverage — narrowed to component-only
 
-### Phase 5 — Full Storybook coverage
+> **Narrowed by [`page-level-testing-rework.md`](./page-level-testing-rework.md) (2026-04-28).** The phrase "full Storybook coverage" originally extended to `Pages/*`. Pages no longer participate in Storybook VR — their composition is covered by the Playwright e2e suite. This phase is now scoped to **component-only** fixture pinning + VR coverage of every remaining `UI/*` and `Features/*` story.
 
-Every remaining `Features/*` story gets VR coverage.
+Every remaining `UI/*` and `Features/*` story (excluding `Pages/*`) gets VR coverage.
 
 **Prerequisite work:** convert all data-variance stories to pinned JSON fixtures. A story currently reading from `faker.seed()`, live data, or random inputs is swapped to a fixed fixture file so its baseline does not churn on unrelated changes.
 
-This prerequisite is the bulk of the phase — the VR setup itself is already proven by earlier phases. Endpoint: zero Storybook stories without a VR baseline.
+This prerequisite is the bulk of the phase — the VR setup itself is already proven by earlier phases. Endpoint: zero `UI/*` or `Features/*` Storybook stories without a VR baseline. `Pages/*` stories remain in Storybook as design references but are not VR-tested.
 
 ## 13. Anti-goals / non-goals
 

@@ -15,7 +15,6 @@ export function getClubSections(content: ClubSectionsContent): SectionConfig[] {
       bg: "kcvv-black",
       content: (
         <PageHero
-          image="/images/hero-club.jpg"
           label="Onze club"
           headline={
             <>
