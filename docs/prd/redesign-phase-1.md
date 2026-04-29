@@ -619,6 +619,12 @@ If Phase 4 (homepage rebuild) determines that auto-rotation still feels off when
 
 Owner feedback during Phase 1 implementation: the Phase 0 flat-block `<TapeStrip>` reads more authentically than CSS-gradient overlays or feTurbulence-driven SVG grain when composed onto a `<TapedCard>`. Two iteration attempts (gradient overlay + SVG grain) were reverted. If a future phase still wants a more washi-tape feel, the next experiment to try is **hand-drawn SVG variants** (`variant: 'a' | 'b' | 'c'` with three pre-drawn tape strokes — same pattern as `<HighlighterStroke>`) rather than procedural noise. Procedural realism produced an "uncanny" feel; hand-drawn assets do not.
 
+### 11.7 `<HighlighterStroke>` colour prop (deferred to Phase 4)
+
+The Phase 0 `<HighlighterStroke>` primitive ships with a hard-coded jersey-green fill in the SVG data URL. Phase 1 introduces two consumers that need a coloured marker: `<EmphasisText variant="marker">` (always jersey) and the `<SectionHeader>` CTA hover (the link's text colour or a brand accent). The hover case is currently solved with an inline mask-image trick that re-implements the SVG path with `currentColor` fill via `mask-image` + `background-color: currentColor`.
+
+**Phase 4 cleanup:** extend `<HighlighterStroke>` with a `color: 'jersey' | 'currentColor' | 'jersey-deep' | …` prop so SectionHeader (and any future hover/accent consumer) can drop the inline mask-image hack and consume the primitive directly. Mask-image with a swappable colour is the canonical implementation; the current Phase 1 inline trick is the placeholder.
+
 ---
 
 ## 12. References
