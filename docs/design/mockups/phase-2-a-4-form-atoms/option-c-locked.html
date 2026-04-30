@@ -402,9 +402,12 @@
         letter-spacing: 0.08em;
         color: var(--color-ink-muted);
       }
+      /* <Button variant="secondary"> — documented Phase 2 §6.1 variant.
+         Cream-soft body + ink border + ink paper shadow + press idiom.
+         No green on the button; single green moment in the form is the stamp. */
       .submit-btn {
-        background: var(--color-ink);
-        color: var(--color-cream);
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
         border: 2px solid var(--color-ink);
         padding: 12px 22px;
         font-family: var(--font-mono);
@@ -413,13 +416,14 @@
         letter-spacing: 0.1em;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 4px 4px 0 0 var(--color-jersey);
+        box-shadow: var(--shadow-paper-sm);
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        transition: box-shadow 120ms ease, transform 80ms ease;
       }
-      .submit-btn:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 0 var(--color-jersey); }
-      .submit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--color-jersey); }
+      .submit-btn:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 0 var(--color-ink); }
+      .submit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--color-ink); }
 
       /* ============================================================
          STATE-MACHINE REFERENCE CARD
@@ -775,7 +779,7 @@
            =========================================== -->
       <section class="section">
         <div class="section-title"><h2>Consolidated form <em>· composition preview</em></h2></div>
-        <p class="section-meta">All atoms uniformly styled in the locked C language, wrapped in a TapedCard with corner clip, kicker meta row, Freight headline, jersey-deep tape stamp, dashed footer divider, and ink submit button with jersey-deep paper offset (the only place jersey returns — content CTA, not chrome).</p>
+        <p class="section-meta">All atoms uniformly styled in the locked C language, composed inside a bordered card (no offset shadow — distinct mood from TapedCard) with corner-clip accents at TL+BR, kicker meta row, Freight headline, jersey-deep tape stamp, dashed footer divider, and a documented <code>&lt;Button variant="secondary"&gt;</code> submit (cream-soft body + ink border + ink paper shadow + press idiom). Single green moment in the form is the stamp.</p>
 
         <div class="form-stage">
           <div class="form-card form-card-corners">
