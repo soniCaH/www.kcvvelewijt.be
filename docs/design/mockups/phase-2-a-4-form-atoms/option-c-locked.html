@@ -309,7 +309,9 @@
       .field--lg { height: 48px; padding: 0 15px; font-size: 17px; }
 
       /* ============================================================
-         CONSOLIDATED FORM — TapedCard composition
+         CONSOLIDATED FORM — ClippedCard composition
+         (bordered card + internal corner-clips, no offset shadow —
+         distinct mood from TapedCard)
          ============================================================ */
       .form-stage {
         max-width: 760px;
@@ -402,9 +404,12 @@
         letter-spacing: 0.08em;
         color: var(--color-ink-muted);
       }
+      /* <Button variant="secondary"> — documented Phase 2 §6.1 variant.
+         Cream-soft body + ink border + ink paper shadow + press idiom.
+         No green on the button; single green moment in the form is the stamp. */
       .submit-btn {
-        background: var(--color-ink);
-        color: var(--color-cream);
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
         border: 2px solid var(--color-ink);
         padding: 12px 22px;
         font-family: var(--font-mono);
@@ -413,13 +418,14 @@
         letter-spacing: 0.1em;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 4px 4px 0 0 var(--color-jersey);
+        box-shadow: var(--shadow-paper-sm);
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        transition: box-shadow 120ms ease, transform 80ms ease;
       }
-      .submit-btn:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 0 var(--color-jersey); }
-      .submit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--color-jersey); }
+      .submit-btn:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 0 var(--color-ink); }
+      .submit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--color-ink); }
 
       /* ============================================================
          STATE-MACHINE REFERENCE CARD
@@ -775,7 +781,7 @@
            =========================================== -->
       <section class="section">
         <div class="section-title"><h2>Consolidated form <em>· composition preview</em></h2></div>
-        <p class="section-meta">All atoms uniformly styled in the locked C language, wrapped in a TapedCard with corner clip, kicker meta row, Freight headline, jersey-deep tape stamp, dashed footer divider, and ink submit button with jersey-deep paper offset (the only place jersey returns — content CTA, not chrome).</p>
+        <p class="section-meta">All atoms uniformly styled in the locked C language, composed inside a <code>&lt;ClippedCard&gt;</code> (bordered card with TL+BR corner-clip accents, no offset shadow — distinct mood from <code>&lt;TapedCard&gt;</code>) with kicker meta row, Freight headline, jersey-deep <code>&lt;StampBadge&gt;</code>, dashed footer divider, and a documented <code>&lt;Button variant="secondary"&gt;</code> submit (cream-soft body + ink border + ink paper shadow + press idiom). Single green moment in the form is the stamp.</p>
 
         <div class="form-stage">
           <div class="form-card form-card-corners">
@@ -847,7 +853,7 @@
         </div>
 
         <div class="note" style="max-width: 760px; margin: 28px auto 0;">
-          <strong>What's shown above:</strong> all five field states co-existing in one composition — <code>filled</code> (Voornaam, Geboortejaar, Ploeg, Vertel iets), <code>default</code> (Achternaam), <code>focus</code> (E-mail), <code>error</code> (Telefoon), and <code>optional-pill labels</code> (Geboortejaar, Vertel iets). The TapedCard wrapper, tape stamp, dashed footer divider, ink-with-jersey-shadow submit button, and Freight Display headline are the editorial frame. Chrome inside (form fields) stays uniform paper-card.
+          <strong>What's shown above:</strong> all five field states co-existing in one composition — <code>filled</code> (Voornaam, Geboortejaar, Ploeg, Vertel iets), <code>default</code> (Achternaam), <code>focus</code> (E-mail), <code>error</code> (Telefoon), and <code>optional-pill labels</code> (Geboortejaar, Vertel iets). The <code>&lt;ClippedCard&gt;</code> wrapper, jersey-deep <code>&lt;StampBadge&gt;</code>, dashed footer divider, secondary submit button, and Freight Display headline are the editorial frame. Chrome inside (form fields) stays uniform paper-card.
         </div>
       </section>
     </main>
