@@ -1,18 +1,22 @@
 "use client";
 
 /**
- * BrandedTabs — Pure presentational tab bar
+ * BrandedTabs — Pure presentational tab bar.
  *
- * Renders a horizontal row of tab buttons with the KCVV branded look:
- * uppercase, tracked, with a 4px green bottom border on the active tab
- * and a hover state on the inactive ones.
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
  *
- * When tabs overflow on narrow screens, navigation arrows appear at the
- * edges (shared scroll-hint pattern via `useScrollHint`).
+ * Each tab renders the paper-card vocabulary at tab scale: `border-2 ink`,
+ * `--shadow-paper-sm`, `bg-cream`, mono caps, sharp corners — no rotation,
+ * no tape. The active tab inverts to `bg-ink text-cream` with the soft
+ * `--shadow-paper-sm-soft` so the ink body and shadow remain distinguishable.
+ * Hover (active and inactive) shifts to a 3 × 3 offset shadow + a 1 × 1
+ * translate — the canonical paper-press idiom.
  *
- * State management is left to the parent — pass `activeTabId` and
- * `onTabChange`. Use this with `useState`, `useUrlTab`, or any other
- * mechanism that suits the consumer.
+ * State is owned by the parent. When tabs overflow on narrow screens,
+ * navigation arrows appear at the edges via the shared `useScrollHint`
+ * hook.
  */
 
 import { useRef, type KeyboardEvent } from "react";
@@ -35,6 +39,28 @@ export interface BrandedTabsProps {
   ariaLabel?: string;
   className?: string;
 }
+
+const TAB_BASE_CLASSES = [
+  "flex-shrink-0",
+  "rounded-none border-2 border-ink",
+  "px-[18px] py-3",
+  "font-mono text-xs font-semibold uppercase tracking-[0.08em]",
+  "transition-[transform,box-shadow] duration-150 ease-out",
+  "hover:translate-x-px hover:translate-y-px",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
+] as const;
+
+const TAB_INACTIVE_CLASSES = [
+  "bg-cream text-ink",
+  "shadow-[var(--shadow-paper-sm)]",
+  "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
+] as const;
+
+const TAB_ACTIVE_CLASSES = [
+  "bg-ink text-cream",
+  "shadow-[var(--shadow-paper-sm-soft)]",
+  "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+] as const;
 
 export function BrandedTabs({
   tabs,
@@ -77,8 +103,13 @@ export function BrandedTabs({
         aria-label={ariaLabel}
         data-scroll-container
         className={cn(
-          "scrollbar-hide flex gap-8 overflow-x-auto border-b border-gray-200",
-          /* scrollbar-hide: @utility in globals.css — hides native scrollbar across all browsers */
+          // scrollbar-hide: @utility in globals.css — hides native scrollbar
+          // across all browsers. Tab gap matches Direction D mockup (12 px).
+          // pb-1.5 (6 px) gives the 4 × 4 paper shadow room to render —
+          // mixing `overflow-x: auto` with `overflow-y: visible` is silently
+          // normalised to both-axes scroll, which would otherwise clip the
+          // shadow's bottom edge.
+          "scrollbar-hide flex gap-3 overflow-x-auto pb-1.5",
           canScrollLeft ? "pl-12" : "pl-0",
           canScrollRight ? "pr-12" : "pr-0",
         )}
@@ -99,13 +130,8 @@ export function BrandedTabs({
               onClick={() => handleSelect(tab.id)}
               onKeyDown={handleKeyDown}
               className={cn(
-                "flex-shrink-0 border-b-4 px-1 py-4 text-sm font-bold tracking-[0.05em] whitespace-nowrap uppercase",
-                "transition-all duration-200",
-                "active:scale-[0.98]",
-                "focus-visible:ring-kcvv-green-bright focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-                isActive
-                  ? "border-kcvv-green-bright text-kcvv-green-dark"
-                  : "text-kcvv-gray-blue hover:text-kcvv-black active:bg-kcvv-green-dark/10 border-transparent",
+                ...TAB_BASE_CLASSES,
+                ...(isActive ? TAB_ACTIVE_CLASSES : TAB_INACTIVE_CLASSES),
               )}
             >
               {tab.label}
