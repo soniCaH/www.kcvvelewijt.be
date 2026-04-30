@@ -220,6 +220,15 @@ const config: TestRunnerConfig = {
           new Promise((resolve) => setTimeout(resolve, timeoutMs)),
         ]);
       }, IMAGE_LOAD_TIMEOUT_MS);
+      // Wait for two animation frames so that ResizeObserver callbacks
+      // (e.g. useScrollHint in FilterTabs) and the React re-renders they
+      // trigger have been painted before the screenshot is taken.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          }),
+      );
       // `fullPage: true` would extend horizontally past `vp.width` whenever
       // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
       // that overflow can be a few px wider on Apple Silicon than on x86,
@@ -237,15 +246,12 @@ const config: TestRunnerConfig = {
         customSnapshotIdentifier: `${context.id}--${name}`,
         customSnapshotsDir: "test/vr/__snapshots__",
         customDiffDir: "test/vr/__diff_output__",
-        // 0.7% absorbs the residual ARM ↔ x86 anti-aliasing drift between
-        // Apple-Silicon Docker baselines and CI's native x86 Linux runner
-        // (~0.5% observed on `UI/PageHero`). Tighten back to 0.001% once the
-        // `kcvv-vr-bot` token is configured and CI itself can canonicalise
-        // baselines (see follow-up ticket and PRD §15). For reference, real
-        // visual regressions at the size we care about — diagonal seam
-        // hairlines, layout reflows, gradient breaks — produce >5% diffs and
-        // still trip this threshold easily.
-        failureThreshold: 0.7,
+        // 0.05% — tight enough to catch real visual regressions while absorbing
+        // sub-pixel anti-aliasing noise. ARM ↔ x86 drift no longer needs
+        // absorbing locally because the kcvv-vr-bot canonicalises baselines on
+        // CI (KCVV_VR_BOT_TOKEN is configured). Real regressions (diagonal seam
+        // hairlines, layout reflows, gradient breaks) produce >0.05% diffs.
+        failureThreshold: 0.0005,
         failureThresholdType: "percent",
       });
     }
