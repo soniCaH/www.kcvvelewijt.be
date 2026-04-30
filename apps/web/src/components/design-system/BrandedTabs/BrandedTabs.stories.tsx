@@ -1,3 +1,13 @@
+/**
+ * BrandedTabs Component Stories
+ *
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Each tab is a cream paper card with an
+ * ink border + offset shadow; active inverts to ink + cream + soft shadow.
+ * Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
+ */
+
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
