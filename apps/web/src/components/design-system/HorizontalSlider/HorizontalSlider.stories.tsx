@@ -47,25 +47,22 @@ const manyItems = (
 // Match-card showcase — the locked Direction D layout per compare.md
 // ---------------------------------------------------------------------------
 
-type MatchKickerStatus =
-  | { type: "scheduled"; date: string }
-  | {
-      type: "live";
-      minute: string;
-    };
-
 interface MockMatch {
   id: string;
   competition: string;
-  status: MatchKickerStatus;
+  /** Match date, mono caps (`ZA 02 MEI`) */
+  date: string;
   homeTeam: { id: string; abbr: string; name: string };
   awayTeam: { id: string; abbr: string; name: string };
-  /** Either a played score `2 — 1` or upcoming time `20:00` */
-  score: string;
-  scoreUpcoming: boolean;
+  /** Kick-off time, italic Freight Display ink-muted (`20:00`) */
+  time: string;
   venue: string;
   cta: string;
 }
+
+// The slider only ever renders upcoming fixtures — finished/live results
+// surface elsewhere (recap cards, live-match component) once PSD has synced.
+// Mock data here is upcoming-only by design.
 
 const ROTATION_POOL = [
   "var(--rotate-tape-a)",
@@ -80,45 +77,41 @@ const mockMatches: MockMatch[] = [
   {
     id: "m1",
     competition: "1STE PROV.",
-    status: { type: "live", minute: "67'" },
-    homeTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
-    awayTeam: { id: "tv", abbr: "TV", name: "Tervuren" },
-    score: "2 — 1",
-    scoreUpcoming: false,
-    venue: "DRIESSTRAAT",
-    cta: "VOLG LIVE →",
-  },
-  {
-    id: "m2",
-    competition: "1STE PROV.",
-    status: { type: "scheduled", date: "ZA 02 MEI" },
+    date: "ZA 02 MEI",
     homeTeam: { id: "wb", abbr: "WB", name: "Wezembeek" },
     awayTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
-    score: "20:00",
-    scoreUpcoming: true,
+    time: "20:00",
     venue: "WEZEMBEEK-OPPEM",
     cta: "TICKETS →",
   },
   {
-    id: "m3",
+    id: "m2",
     competition: "BEKER · 1/8",
-    status: { type: "scheduled", date: "WO 06 MEI" },
+    date: "WO 06 MEI",
     homeTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
     awayTeam: { id: "lb", abbr: "LB", name: "Lebbeke" },
-    score: "19:30",
-    scoreUpcoming: true,
+    time: "19:30",
+    venue: "DRIESSTRAAT",
+    cta: "TICKETS →",
+  },
+  {
+    id: "m3",
+    competition: "1STE PROV.",
+    date: "ZA 09 MEI",
+    homeTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
+    awayTeam: { id: "vv", abbr: "VV", name: "Vilvoorde" },
+    time: "15:00",
     venue: "DRIESSTRAAT",
     cta: "TICKETS →",
   },
   {
     id: "m4",
     competition: "1STE PROV.",
-    status: { type: "scheduled", date: "ZA 09 MEI" },
-    homeTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
-    awayTeam: { id: "vv", abbr: "VV", name: "Vilvoorde" },
-    score: "15:00",
-    scoreUpcoming: true,
-    venue: "DRIESSTRAAT",
+    date: "ZA 16 MEI",
+    homeTeam: { id: "ku", abbr: "KU", name: "Kampenhout" },
+    awayTeam: { id: KCVV_TEAM_ID, abbr: "KC", name: "Elewijt" },
+    time: "15:00",
+    venue: "KAMPENHOUT",
     cta: "TICKETS →",
   },
 ];
@@ -172,13 +165,7 @@ function MatchCard({
     >
       <div className="text-ink-muted mb-3 flex items-baseline gap-2 font-mono text-[10px] tracking-[0.08em] uppercase">
         <span>{match.competition}</span>
-        {match.status.type === "live" ? (
-          <span className="text-alert font-bold">
-            ★ LIVE · {match.status.minute}
-          </span>
-        ) : (
-          <span>{match.status.date}</span>
-        )}
+        <span>{match.date}</span>
       </div>
 
       <div className="mb-2 flex items-center gap-2">
@@ -189,14 +176,8 @@ function MatchCard({
         <MatchCardTeam team={match.awayTeam} alignEnd />
       </div>
 
-      <div
-        className={
-          match.scoreUpcoming
-            ? "font-display text-ink-muted my-2 text-center text-[22px] font-normal italic"
-            : "text-ink my-2 text-center font-mono text-[28px] font-bold tracking-tight"
-        }
-      >
-        {match.score}
+      <div className="font-display text-ink-muted my-2 text-center text-[22px] font-normal italic">
+        {match.time}
       </div>
 
       <div className="border-paper-edge flex items-center justify-between border-t border-dashed pt-2 font-mono text-[10px] tracking-[0.08em] uppercase">
