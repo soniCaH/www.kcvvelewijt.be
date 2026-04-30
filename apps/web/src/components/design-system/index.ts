@@ -137,9 +137,6 @@ export type {
   TapeStripLength,
 } from "./TapeStrip";
 
-// TicketStub
-export { TicketStub } from "./TicketStub";
-export type { TicketStubProps, TicketStubPosition } from "./TicketStub";
 
 // TapedCard
 export { TapedCard } from "./TapedCard";

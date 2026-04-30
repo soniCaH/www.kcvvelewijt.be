@@ -64,7 +64,6 @@ Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the fol
 - `<StripedSeam>` — SVG-backed diagonal barber-pole horizontal section divider.
 - `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` — thin row dividers (interview Q&A, table rows).
 - `<QuoteMark>` — two stacked italic open-quote glyphs.
-- `<TicketStub>` — perforated-edge mono-content ephemera.
 - `<HighlighterStroke>` — hand-drawn marker underline beneath italic emphasis. Phase 1 added a `color: 'jersey' | 'jersey-deep' | 'ink' | 'cream'` prop (default `jersey`); previously fixed jersey green. Single-line CSS-bg SVG; multi-line wrapping is the deferred follow-up tracked in `docs/prd/redesign-phase-1.md` §11.1.
 - `<MonoLabel>` — tracked uppercase pill or plain label. Pill variants gained vertical padding in Phase 1 to read as proper badges.
 
