@@ -54,26 +54,120 @@
   --footer-diagonal: clamp(2rem, 6vw, 5rem);
 }
 
-/* KCVV Logo Spinner Animation (matches Gatsby site) */
-@keyframes kcvv-logo-spin {
-  0% {
-    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
-    transform: rotateY(0deg);
-  }
+/* ===== Spinner — scarf barber-pole + compact dot pulse (Phase 2.B.1) =====
 
-  50% {
-    transform: rotateY(1800deg);
-    animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
-  }
+   Visual contract locked at the Track B design checkpoint (2026-04-30).
+   Source-of-record:
+   docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
 
-  100% {
-    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
-    transform: rotateY(3600deg);
-  }
+   Diagonal scarf stripes scroll inside a paper bar via a 90° gradient on a
+   ::before pseudo-element rotated -45deg statically; background-position
+   animates by clean-integer 80 px per cycle to avoid sub-pixel rasterisation
+   seams. The pulse variant is a sequence of three jersey-deep dots for
+   inline use where a 96 px barber-pole bar is too heavy. */
+
+@keyframes kcvv-scarf-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 0; }
 }
 
-.animate-kcvv-logo-spin {
-  animation: kcvv-logo-spin 6s linear infinite;
+@keyframes kcvv-spinner-dot-pulse {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.kcvv-spinner-scarf {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  border: 2px solid var(--color-ink);
+  background: var(--color-cream);
+  box-shadow: var(--shadow-paper-sm);
+}
+
+.kcvv-spinner-scarf::before {
+  content: "";
+  position: absolute;
+  inset: -200px;
+  animation: kcvv-scarf-scroll 1.5s linear infinite;
+  transform: rotate(-45deg);
+}
+
+.kcvv-spinner-scarf--primary::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-jersey) 0px,
+    var(--color-jersey) 20px,
+    var(--color-cream) 20px,
+    var(--color-cream) 40px,
+    var(--color-ink) 40px,
+    var(--color-ink) 60px,
+    var(--color-cream) 60px,
+    var(--color-cream) 80px
+  );
+}
+
+.kcvv-spinner-scarf--secondary::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink) 0px,
+    var(--color-ink) 20px,
+    var(--color-cream) 20px,
+    var(--color-cream) 40px,
+    var(--color-ink-muted) 40px,
+    var(--color-ink-muted) 60px,
+    var(--color-cream) 60px,
+    var(--color-cream) 80px
+  );
+}
+
+.kcvv-spinner-scarf--white {
+  background: var(--color-ink-soft);
+  border-color: var(--color-paper-edge);
+  box-shadow: var(--shadow-paper-sm-soft);
+}
+
+.kcvv-spinner-scarf--white::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-cream) 0px,
+    var(--color-cream) 20px,
+    var(--color-ink) 20px,
+    var(--color-ink) 40px,
+    var(--color-jersey-bright) 40px,
+    var(--color-jersey-bright) 60px,
+    var(--color-ink) 60px,
+    var(--color-ink) 80px
+  );
+}
+
+.kcvv-spinner-scarf--sm { width: 96px; height: 16px; }
+.kcvv-spinner-scarf--md { width: 180px; height: 28px; }
+.kcvv-spinner-scarf--lg { width: 240px; height: 36px; }
+.kcvv-spinner-scarf--xl { width: 360px; height: 56px; }
+
+.kcvv-spinner-pulse {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.kcvv-spinner-pulse > span {
+  width: 6px;
+  height: 6px;
+  background: var(--color-jersey-deep);
+  border-radius: 50%;
+  animation: kcvv-spinner-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.kcvv-spinner-pulse > span:nth-child(2) { animation-delay: 0.15s; }
+.kcvv-spinner-pulse > span:nth-child(3) { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kcvv-spinner-scarf::before,
+  .kcvv-spinner-pulse > span {
+    animation: none;
+  }
 }
 
 /* Fade In Animation (for result cards, modals, etc.) */
@@ -319,6 +413,13 @@
   --color-alert-soft:   #e8d5cf;
   --color-warning:      #c68b2c;
   --color-warning-soft: #ecddb8;
+
+  /* Soft offset-shadow sibling — used wherever the standard --shadow-paper-sm
+     (ink) would vanish: ink-bg active states (BrandedTab + FilterTab) and any
+     chrome surface on a dark / ink panel (arrows, match cards, white-variant
+     scarf spinner). Ink-muted (#6b6b6b) gives the offset visible depth without
+     adding a third primary shadow weight. */
+  --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
 }
 
 /* ===== Global Styles ===== */

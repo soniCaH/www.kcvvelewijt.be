@@ -1,49 +1,50 @@
 /**
- * Spinner Component
- * Loading indicator with KCVV branding
+ * Spinner — scarf barber-pole + compact dot pulse.
+ *
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
+ *
+ * Variants:
+ *  - primary   — jersey · cream · ink · cream stripes (default on cream)
+ *  - secondary — ink · cream · ink-muted · cream stripes (non-brand)
+ *  - white     — cream · ink · jersey-bright · ink stripes (dark interlude)
+ *  - compact   — three jersey-deep dots pulsing in sequence (inline)
+ *
+ * Sizes (sm/md/lg/xl) apply only to scarf variants and resolve to fixed pixel
+ * dimensions per the design contract. Compact has a single canonical inline
+ * form. Animations honour `prefers-reduced-motion` via the global CSS rule.
  */
 
 import { forwardRef, type HTMLAttributes } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
 export type SpinnerSize = "sm" | "md" | "lg" | "xl";
-export type SpinnerVariant = "primary" | "secondary" | "white" | "logo";
+export type SpinnerVariant = "primary" | "secondary" | "white" | "compact";
 
 export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   /**
-   * Size of the spinner
+   * Size of the spinner. Applies only to scarf variants
+   * (primary / secondary / white). Ignored for compact.
    * @default 'md'
    */
   size?: SpinnerSize;
   /**
-   * Visual variant
+   * Visual variant.
    * @default 'primary'
    */
   variant?: SpinnerVariant;
   /**
-   * Accessible label for screen readers
+   * Accessible label for screen readers.
    * @default 'Loading...'
    */
   label?: string;
   /**
-   * Additional CSS classes
+   * Additional CSS classes applied to the wrapper.
    */
   className?: string;
 }
 
-/**
- * Spinner component for loading states
- *
- * @example
- * ```tsx
- * <Spinner size="lg" variant="primary" />
- *
- * <Spinner label="Loading articles..." />
- *
- * <Spinner variant="logo" /> // KCVV logo spinner
- * ```
- */
 export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
   (
     {
@@ -55,38 +56,25 @@ export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
     },
     ref,
   ) => {
-    // Logo variant with 3D Y-axis rotation (matches Gatsby site)
-    if (variant === "logo") {
+    if (variant === "compact") {
       return (
         <div
           ref={ref}
           role="status"
           aria-label={label}
-          className={cn("inline-flex items-center justify-center", className)}
+          className={cn("inline-flex items-center", className)}
           {...props}
         >
-          <Image
-            src="/images/logo-flat.png"
-            alt="KCVV Logo"
-            width={
-              size === "sm" ? 48 : size === "md" ? 56 : size === "lg" ? 80 : 96
-            }
-            height={
-              size === "sm" ? 48 : size === "md" ? 56 : size === "lg" ? 80 : 96
-            }
-            className={cn("animate-kcvv-logo-spin", {
-              "h-12 w-12": size === "sm",
-              "h-14 w-14": size === "md", // 3.5rem to match Gatsby
-              "h-20 w-20": size === "lg",
-              "h-24 w-24": size === "xl",
-            })}
-          />
+          <span className="kcvv-spinner-pulse" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
           <span className="sr-only">{label}</span>
         </div>
       );
     }
 
-    // SVG spinner for other variants
     return (
       <div
         ref={ref}
@@ -95,41 +83,14 @@ export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
         className={cn("inline-flex items-center justify-center", className)}
         {...props}
       >
-        <svg
+        <span
+          aria-hidden="true"
           className={cn(
-            "animate-spin",
-            // Size classes
-            {
-              "h-4 w-4": size === "sm",
-              "h-8 w-8": size === "md",
-              "h-12 w-12": size === "lg",
-              "h-16 w-16": size === "xl",
-            },
-            // Color classes
-            {
-              "text-kcvv-green-bright": variant === "primary",
-              "text-gray-600": variant === "secondary",
-              "text-white": variant === "white",
-            },
+            "kcvv-spinner-scarf",
+            `kcvv-spinner-scarf--${variant}`,
+            `kcvv-spinner-scarf--${size}`,
           )}
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
+        />
         <span className="sr-only">{label}</span>
       </div>
     );
@@ -138,17 +99,14 @@ export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
 
 Spinner.displayName = "Spinner";
 
-/**
- * FullPageSpinner for page-level loading states
- */
 export interface FullPageSpinnerProps {
   /**
-   * Accessible label for screen readers
+   * Accessible label for screen readers.
    * @default 'Loading page...'
    */
   label?: string;
   /**
-   * Size of the spinner
+   * Size of the spinner.
    * @default 'xl'
    */
   size?: SpinnerSize;
@@ -159,7 +117,7 @@ export const FullPageSpinner = ({
   size = "xl",
 }: FullPageSpinnerProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+    <div className="bg-cream/85 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
       <Spinner size={size} label={label} />
     </div>
   );
