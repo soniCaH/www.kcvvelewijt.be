@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Banner Strip · Phase 2 · Track A · Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         ALERT — banner-strip: solid ink-filled header band over
+         tinted soft body. Sharp corners. No rotation. No gradients.
+         The alert IS still a paper card — the band lives INSIDE it.
+         ============================================================ */
+
+      .alert {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        border-radius: 0; /* sharp corners — confirmed */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header band — solid colour, INVERSE mono caps title. Carries
+         icon (left), title (mono caps), optional dismiss (right).
+         No gradient, no fade — must read as a hard inked strip. */
+      .alert__band {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: var(--color-ink); /* default — overridden per variant */
+        color: var(--color-cream);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .alert__icon {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        line-height: 1;
+        color: var(--color-cream);
+      }
+      .alert__title {
+        flex: 1;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        line-height: 1.2;
+      }
+      .alert__dismiss {
+        flex-shrink: 0;
+        background: transparent;
+        border: 1px solid var(--color-cream);
+        color: var(--color-cream);
+        width: 22px;
+        height: 22px;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 0;
+        transition: background 120ms ease, color 120ms ease;
+      }
+      .alert__dismiss:hover {
+        background: var(--color-cream);
+        color: var(--color-ink);
+      }
+
+      /* Body — tinted soft bg, --color-ink text, generous padding.
+         Sits below the band, no border between (the band has its own
+         bottom border to terminate cleanly into the body fill). */
+      .alert__body {
+        padding: 14px 18px;
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--color-ink);
+      }
+      .alert__body p { margin: 0; }
+      .alert__body p + p { margin-top: 8px; }
+
+      /* Variant — SUCCESS · jersey-deep band · jersey/10 body */
+      .alert--success .alert__band {
+        background: var(--color-jersey-deep);
+        border-bottom-color: var(--color-ink);
+      }
+      .alert--success .alert__body {
+        background: rgba(74, 207, 82, 0.12); /* var(--color-jersey)/10ish */
+      }
+
+      /* Variant — WARNING · warning band · warning-soft body */
+      .alert--warning .alert__band {
+        background: var(--color-warning);
+        border-bottom-color: var(--color-ink);
+      }
+      .alert--warning .alert__body {
+        background: var(--color-warning-soft);
+      }
+
+      /* Variant — ERROR · alert band · alert-soft body */
+      .alert--error .alert__band {
+        background: var(--color-alert);
+        border-bottom-color: var(--color-ink);
+      }
+      .alert--error .alert__body {
+        background: var(--color-alert-soft);
+      }
+
+      /* Inline-with-form scale — same vocab, tighter padding,
+         slightly smaller type. Used directly under input fields. */
+      .alert--inline {
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      .alert--inline .alert__band { padding: 7px 12px; gap: 10px; }
+      .alert--inline .alert__icon { width: 18px; height: 18px; font-size: 13px; }
+      .alert--inline .alert__title { font-size: 11px; letter-spacing: 0.1em; }
+      .alert--inline .alert__dismiss { width: 18px; height: 18px; font-size: 12px; }
+      .alert--inline .alert__body { padding: 10px 14px; font-size: 13.5px; line-height: 1.5; }
+
+      /* ============================================================
+         FORM atoms — minimal mock for the in-context section. Mirrors
+         Direction D's paper-card vocabulary (border-2 ink, sharp
+         corners). Just enough to host the alert below an input.
+         ============================================================ */
+
+      .form-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 480px;
+      }
+      .form-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .form-input {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        font-family: var(--font-body);
+        font-size: 15px;
+        color: var(--color-ink);
+        padding: 11px 14px;
+        border-radius: 0;
+        outline: none;
+      }
+      .form-input--error {
+        border-color: var(--color-alert);
+      }
+      .form-input::placeholder { color: var(--color-ink-muted); }
+      .form-help {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK A · DIRECTION C</span>
+          <span class="mono mono--muted">★ ALERT · BANNER STRIP</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Banner <span class="display"><em>strip.</em></span></h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          A bold ink-filled header band sits at the top of the alert carrying
+          INVERSE mono caps title — the icon and the variant label live in the
+          band, the body content sits below in a tinted soft fill. Sharp corners,
+          no rotation, no gradients. The alert <em>is</em> still a paper card
+          (border-2 ink + shadow-paper-sm) — the band lives INSIDE that card.
+          Feel: <em>fanzine breaking-news strip — loud, ink-emphasized, demands
+          attention.</em> This direction is the most opinionated about urgency.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           STANDALONE VARIANTS
+           =========================================================== -->
+      <section class="section" id="standalone">
+        <div class="section-meta">
+          <span class="mono">★ 01 · STANDALONE VARIANTS</span>
+          <span class="mono mono--muted">— success · warning · error · stacked at full width</span>
+        </div>
+        <h2>Drie <em>strips,</em> drie urgenties.</h2>
+        <p class="lead">
+          Three semantic variants share one chassis. The band colour does the
+          talking — jersey-deep for emphatic-friendly, mustard ochre for "look
+          here", dusty brick for "now". Body fills follow as the soft-tinted
+          sibling of each band. Title is mono caps, INVERSE cream-on-band.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">SUCCESS · jersey-deep band · jersey/12% body — confirmation, default friendly-emphatic state</div>
+          <div class="alert alert--success">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">✓</span>
+              <span class="alert__title">VERZONDEN!</span>
+            </div>
+            <div class="alert__body">
+              <p>Je bericht is succesvol verzonden.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">WARNING · warning band · warning-soft body — "let op", non-blocking heads-up</div>
+          <div class="alert alert--warning">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">▲</span>
+              <span class="alert__title">LET OP</span>
+            </div>
+            <div class="alert__body">
+              <p>De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">ERROR · alert band · alert-soft body — failure, demands attention now</div>
+          <div class="alert alert--error">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">⊗</span>
+              <span class="alert__title">FOUT</span>
+            </div>
+            <div class="alert__body">
+              <p>Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0">
+          Note: title text in the band is mono caps with letter-spacing 0.12em
+          for the tightest possible "headline strip" feel. Body text drops to
+          Inter regular / 15px / line-height 1.55 — readable, not shouty.
+        </p>
+      </section>
+
+      <!-- ===========================================================
+           WITH TITLE + DISMISSIBLE
+           =========================================================== -->
+      <section class="section" id="dismissible">
+        <div class="section-meta">
+          <span class="mono">★ 02 · WITH TITLE + DISMISSIBLE</span>
+          <span class="mono mono--muted">— inline close button on the band's right edge</span>
+        </div>
+        <h2>Sluitbaar <em>op de strip.</em></h2>
+        <p class="lead">
+          The dismiss control lives on the band, not in the body — a 22×22 cream
+          outline button with a hairline cream border, hovering to inverted
+          (cream fill / ink mark). It belongs to the band's chrome, not the
+          content. Title is always present in this scale; the strip is loud
+          enough that an unlabelled icon-only mode would feel dishonest.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">SUCCESS</span>
+            <span class="mono mono--muted">— with dismiss</span>
+          </div>
+          <div class="alert alert--success">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">✓</span>
+              <span class="alert__title">VERZONDEN!</span>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+            <div class="alert__body">
+              <p>Je bericht is succesvol verzonden.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">WARNING</span>
+            <span class="mono mono--muted">— with dismiss</span>
+          </div>
+          <div class="alert alert--warning">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">▲</span>
+              <span class="alert__title">LET OP</span>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+            <div class="alert__body">
+              <p>De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">ERROR</span>
+            <span class="mono mono--muted">— with dismiss</span>
+          </div>
+          <div class="alert alert--error">
+            <div class="alert__band">
+              <span class="alert__icon" aria-hidden="true">⊗</span>
+              <span class="alert__title">FOUT</span>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+            <div class="alert__body">
+              <p>Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0">
+          Hover the dismiss button — fill flips to cream, mark to ink. Hairline
+          border keeps the affordance visible inside the band without competing
+          with the title. Same idiom across all three variants.
+        </p>
+      </section>
+
+      <!-- ===========================================================
+           IN-CONTEXT (form) — error variant inline below an input
+           =========================================================== -->
+      <section class="section" id="in-context">
+        <div class="section-meta">
+          <span class="mono">★ 03 · IN-CONTEXT (form)</span>
+          <span class="mono mono--muted">— error alert wired below a mock input · inline scale</span>
+        </div>
+        <h2>Onder het <em>invoerveld.</em></h2>
+        <p class="lead">
+          The error alert renders inline below a failing form input. This should
+          look LOUD — that's the point. The alert-red strip terminates the input
+          field's error state visually: the input border itself flips to alert,
+          the band picks the same red and shouts "FOUT", the body's soft fill
+          carries the explanation. The user cannot miss this.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">FORM · email input failed validation · alert at inline scale</div>
+          <div class="form-stack">
+            <label class="form-label" for="email-input">E-MAILADRES</label>
+            <input
+              id="email-input"
+              class="form-input form-input--error"
+              type="email"
+              value="kevin@elewijt"
+              aria-invalid="true"
+              aria-describedby="email-alert"
+            />
+            <div class="alert alert--error alert--inline" id="email-alert" role="alert">
+              <div class="alert__band">
+                <span class="alert__icon" aria-hidden="true">⊗</span>
+                <span class="alert__title">FOUT</span>
+                <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+              </div>
+              <div class="alert__body">
+                <p>Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+            </div>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 20px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            At inline scale the band tightens (7×12 padding, 11px title) and the
+            shadow softens to 3×3 ink — still clearly a paper card, but
+            proportional to a single form row. The alert-red strip and the
+            input's red border read as one continuous error event.
+          </p>
+        </div>
+
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">SUCCESS · same form, after fix · inline scale on cream-soft surface</div>
+          <div class="form-stack">
+            <label class="form-label" for="email-input-ok">E-MAILADRES</label>
+            <input
+              id="email-input-ok"
+              class="form-input"
+              type="email"
+              value="kevin@elewijt.be"
+              aria-describedby="email-ok"
+            />
+            <div class="alert alert--success alert--inline" id="email-ok" role="status">
+              <div class="alert__band">
+                <span class="alert__icon" aria-hidden="true">✓</span>
+                <span class="alert__title">VERZONDEN!</span>
+                <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+              </div>
+              <div class="alert__body">
+                <p>Je bericht is succesvol verzonden.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">WARNING · same form, fixture-update advisory · inline scale</div>
+          <div class="form-stack">
+            <label class="form-label" for="match-rsvp">AANWEZIGHEID</label>
+            <input
+              id="match-rsvp"
+              class="form-input"
+              type="text"
+              value="Ja, ik kom kijken"
+              aria-describedby="match-warning"
+            />
+            <div class="alert alert--warning alert--inline" id="match-warning" role="status">
+              <div class="alert__band">
+                <span class="alert__icon" aria-hidden="true">▲</span>
+                <span class="alert__title">LET OP</span>
+                <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+              </div>
+              <div class="alert__body">
+                <p>De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           TRADEOFFS
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · TRADEOFFS</span>
+          <span class="mono mono--muted">— why this direction wins · what it sacrifices</span>
+        </div>
+        <h2>Waarom <em>strip,</em> en wanneer niet.</h2>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Most opinionated about urgency of the three Track A directions —
+              alerts read as proper urgent communications, not generic notices.
+              The ink-filled header strip is the loudest "LOOK HERE" signal in
+              the system without resorting to gradients or animation. INVERSE
+              mono caps title carries fanzine breaking-news energy and ties
+              directly into BrandedTabs / FilterTabs / Spinner active-state
+              vocabulary (cream-on-ink). Three semantic colours (jersey-deep /
+              warning / alert) read at a glance even from across the page.
+              Sharp corners + paper-card chassis keep it native to Direction D.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              <strong>Risks feeling loud at low information density.</strong> A
+              short success message ("Verzonden!") gets the same theatrical
+              banner treatment as a critical failure — the strip can feel
+              over-committed for routine confirmations. Stacked vertically
+              (e.g. multiple form errors) the repeated dark bands carry visual
+              weight that competes with the surrounding editorial. The
+              two-row vertical structure (band + body) also takes more height
+              than a single-row inline alert, which may feel heavy in dense
+              dashboards or admin tables. Mitigation: the inline scale is
+              materially shorter, and the variant restraint (only 3 colours)
+              prevents the strip from becoming visual noise across a page.
+            </p>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION C — BANNER STRIP · KCVV ELEWIJT · 2026-04-30
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

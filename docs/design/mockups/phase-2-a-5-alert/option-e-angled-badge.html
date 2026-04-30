@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction E — Angled badge · Phase 2 · Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-badge: 3px 3px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: -0.25deg;
+        --rotate-tape-c: 0.25deg;
+        --rotate-tape-d: 0.5deg;
+        --rotate-badge: -2deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 24px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      /* ============================================================
+         ALERT — angled ink badge + italic display message
+         ============================================================ */
+
+      /* The alert is layout-only: a flex row with gap. No surrounding
+         paper-card body, no soft tinted bg. The page colour shows
+         through. The badge IS the variant accent strongest read; the
+         italic display message echoes that accent for emphasis. */
+
+      .alert-e {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 8px 4px 8px 0;
+        max-width: 640px;
+      }
+
+      /* Multi-line message: every wrapped line aligns to the same left
+         edge as line 1 (badge-right + gap). This is automatic flex
+         behaviour — message is a flex item, text wraps within its bounds.
+         The badge stays aligned with the first line via the
+         translate-y nudge below so it reads as "marking" line 1. */
+      .alert-e__badge {
+        /* Align the badge's vertical centre to the first line's
+           cap-height by translating down ~1 line-height/2. */
+        margin-top: 2px;
+      }
+
+      .alert-e__badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-badge);
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        transform: rotate(var(--rotate-badge));
+        transform-origin: center;
+        border-radius: 0;
+        white-space: nowrap;
+        line-height: 1;
+      }
+
+      .alert-e__glyph {
+        font-size: 12px;
+        line-height: 1;
+        display: inline-block;
+        transform: translateY(0);
+      }
+
+      /* Variant — error: alert-red badge, alert-red italic message
+         (matches owner sketch). */
+      .alert-e--error .alert-e__badge {
+        background: var(--color-alert);
+        color: var(--color-cream);
+      }
+
+      /* Variant — warning: warning-amber badge with cream text. The
+         ink-bordered amber reads as a hand-stamped caution flag.
+         (Owner may iterate to bg-ink if amber-on-cream feels soft.) */
+      .alert-e--warning .alert-e__badge {
+        background: var(--color-warning);
+        color: var(--color-cream);
+      }
+
+      /* Variant — success: jersey-deep badge with cream text. */
+      .alert-e--success .alert-e__badge {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+      }
+
+      .alert-e__message {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        line-height: 1.25;
+        color: var(--color-ink);
+      }
+
+      .alert-e--error .alert-e__message { color: var(--color-alert); }
+      .alert-e--warning .alert-e__message { color: var(--color-warning); }
+      .alert-e--success .alert-e__message { color: var(--color-jersey-deep); }
+
+      /* Optional dismiss — a small × glyph after the message in
+         ink-muted. Acknowledged in tradeoffs as an awkward fit for
+         this metaphor; left out of the canonical standalone variants. */
+      .alert-e__dismiss {
+        margin-left: 4px;
+        font-family: var(--font-body);
+        font-size: 18px;
+        line-height: 1;
+        color: var(--color-ink-muted);
+        background: transparent;
+        border: 0;
+        padding: 4px 6px;
+        cursor: pointer;
+        align-self: flex-start;
+      }
+      .alert-e__dismiss:hover { color: var(--color-ink); }
+
+      /* ============================================================
+         FORM — mock context for the in-context demonstration
+         ============================================================ */
+
+      .form-field { display: flex; flex-direction: column; gap: 8px; max-width: 480px; }
+      .form-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .form-input {
+        font-family: var(--font-body);
+        font-size: 16px;
+        padding: 12px 14px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        border-radius: 0;
+        outline: none;
+      }
+      .form-input--error { border-color: var(--color-alert); }
+      .form-input:focus { box-shadow: var(--shadow-paper-sm); transform: translate(-1px, -1px); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK A · DIRECTION E</span>
+          <span class="mono mono--muted">★ ANGLED BADGE</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Een <span class="display"><em>schuin</em></span> stempeltje.</h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          A fifth direction sketched by the owner that breaks the A–D
+          paper-card lineage. The alert is no longer a card — it's a
+          <em>kicker tag</em> next to an editorial italic line. A
+          slight-angle ink-bordered badge on the left holds the icon +
+          mono caps label; the message lives to the right in
+          <em>Freight Display</em> italic, tinted to the variant accent.
+          No surrounding card body. No soft tinted bg. The page colour
+          shows through. Compact, personality-driven, fanzine-coded.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           STANDALONE VARIANTS
+           =========================================================== -->
+      <section class="section" id="standalone">
+        <div class="section-meta">
+          <span class="mono">★ 01 · STANDALONE VARIANTS</span>
+          <span class="mono mono--muted">— success · warning · error, each at natural width on the page bg</span>
+        </div>
+        <h2>Drie <em>varianten</em>, één gebaar.</h2>
+        <p class="lead">
+          All three variants stacked on the page bg. Each alert occupies
+          only the width of its content — never full-width. The badge
+          rotation is fixed at <code>-2deg</code>; the italic message is
+          upright (italic is the slant, rotation would be too much).
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">SUCCESS</span>
+            <span class="mono mono--muted">— jersey-deep badge · jersey-deep italic</span>
+          </div>
+          <div class="alert-e alert-e--success" role="status">
+            <span class="alert-e__badge">
+              <span class="alert-e__glyph" aria-hidden="true">✓</span>
+              <span>MELDING</span>
+            </span>
+            <span class="alert-e__message">Bericht verzonden.</span>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">WARNING</span>
+            <span class="mono mono--muted">— warning-amber badge · warning-amber italic</span>
+          </div>
+          <div class="alert-e alert-e--warning" role="status" aria-live="polite">
+            <span class="alert-e__badge">
+              <span class="alert-e__glyph" aria-hidden="true">▲</span>
+              <span>WAARSCHUWING</span>
+            </span>
+            <span class="alert-e__message">Wedstrijd kan uitgesteld worden.</span>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">ERROR</span>
+            <span class="mono mono--muted">— alert-red badge · alert-red italic (canonical owner sketch)</span>
+          </div>
+          <div class="alert-e alert-e--error" role="alert">
+            <span class="alert-e__badge">
+              <span class="alert-e__glyph" aria-hidden="true">!</span>
+              <span>FOUT</span>
+            </span>
+            <span class="alert-e__message">Geen geldig telefoonnummer.</span>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            This is the rendering the owner sketched: small dark-red
+            badge, cream interior glyph + mono caps, slightly angled, with
+            the italic Freight Display message in matching dark-red beside
+            it. Treat as the canonical for this direction.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           LONGER MESSAGE
+           =========================================================== -->
+      <section class="section" id="longer">
+        <div class="section-meta">
+          <span class="mono">★ 02 · LONGER MESSAGE</span>
+          <span class="mono mono--muted">— what happens when the italic line wraps</span>
+        </div>
+        <h2>Wanneer het <em>uitloopt.</em></h2>
+        <p class="lead">
+          The design BIAS is a short headline-style message. When that
+          guarantee can't be honoured, the italic wraps to a second line
+          beside the badge. The badge stays vertically centred on the
+          full message block. It works — but worth surfacing because
+          this is where the personality starts to fight the readability,
+          and is one of the honest tradeoffs of the direction.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">2-LINE</span>
+            <span class="mono mono--muted">— success variant, deliberately uncomfortable case</span>
+          </div>
+          <div class="alert-e alert-e--success" role="status" style="max-width: 560px">
+            <span class="alert-e__badge">
+              <span class="alert-e__glyph" aria-hidden="true">✓</span>
+              <span>MELDING</span>
+            </span>
+            <span class="alert-e__message">
+              Je bericht is verzonden — we nemen binnen 2 werkdagen
+              contact met je op.
+            </span>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Two lines is the practical ceiling. Beyond that the badge
+            metaphor breaks down — the kicker tag stops feeling like a
+            stamp and starts feeling like a column header for a
+            paragraph it can't structure. Copy guidance for this
+            direction must enforce headline-length messages.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           IN-CONTEXT (form)
+           =========================================================== -->
+      <section class="section" id="in-context">
+        <div class="section-meta">
+          <span class="mono">★ 03 · IN-CONTEXT (FORM)</span>
+          <span class="mono mono--muted">— error variant under a form input, the natural fit</span>
+        </div>
+        <h2>Waar deze <em>schittert.</em></h2>
+        <p class="lead">
+          The compact form factor and headline-italic message fit
+          inline-validation perfectly. Under a single field, beside a
+          short error reason, the alert reads like a magazine pull-quote
+          rather than a chrome notification. This is the home turf of
+          Direction E.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">CONTACT</span>
+            <span class="mono mono--muted">— phone field with invalid input</span>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="phone-input">TELEFOONNUMMER</label>
+            <input
+              id="phone-input"
+              class="form-input form-input--error"
+              type="tel"
+              value="+32 abc"
+              aria-invalid="true"
+              aria-describedby="phone-error"
+            />
+            <div id="phone-error" class="alert-e alert-e--error" role="alert" style="margin-top: 4px">
+              <span class="alert-e__badge">
+                <span class="alert-e__glyph" aria-hidden="true">!</span>
+                <span>FOUT</span>
+              </span>
+              <span class="alert-e__message">Geen geldig telefoonnummer.</span>
+            </div>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 24px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            The badge anchors the eye exactly where validation matters
+            (left edge, just under the field), while the italic carries
+            the human-readable reason. No card body; the field's own
+            border + the alert's red ink badge are the visual frame.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           TRADEOFFS
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · TRADEOFFS</span>
+          <span class="mono mono--muted">— honest accounting of what this direction wins and sacrifices</span>
+        </div>
+        <h2>Wat het <em>kost.</em></h2>
+        <p class="lead">
+          Direction E is the most personality-driven option of the five
+          but pays for it with reduced information capacity, an awkward
+          dismiss slot, and a different shape than typical alerts —
+          which means anywhere the alert grid currently assumes
+          full-width chrome will need rethinking.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Strongest editorial voice of any of the five directions —
+              reads as a fanzine kicker + pull-quote rather than chrome.
+              Compact: occupies only the width it needs, never demands a
+              full row. Pairs naturally with form-field validation where
+              short, specific messages are the norm. Badge metaphor
+              makes the variant unmistakable at a glance — accent colour
+              flips badge bg AND italic tint, so the alert reads from
+              across the page without needing to parse text. Reuses
+              existing tokens (alert / warning / jersey-deep) and
+              vocabulary (border-2 ink, mono caps, italic display, hard
+              offset shadow) — nothing new in the foundation, only a
+              new composition of approved primitives.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Limited information capacity — can't hold multi-paragraph
+              error explanations. Copy guidance must enforce
+              headline-length messages, which existing alert content may
+              violate. No obvious dismiss slot — adding a small
+              <code>×</code> glyph after the message reads as an
+              afterthought; the badge metaphor doesn't naturally hold a
+              close affordance. Different shape from typical
+              full-width alert chrome, so any layout that currently
+              reserves a full row for an alert needs to be re-evaluated
+              (the alert is now intrinsically content-width, not
+              layout-width). Two-line wrap is the practical ceiling —
+              beyond that the badge stops feeling like a stamp and
+              starts feeling like a misaligned column header. Variant
+              tint (alert-red on cream, warning-amber on cream) reduces
+              non-text contrast vs a paper-card body; the message
+              colour is the first thing to scrutinise on accessibility
+              audits.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map, design constraints, decisions remaining</span>
+        </div>
+
+        <h3>Decisions captured</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Badge rotation locked at <code>-2deg</code>. Italic message stays upright (italic is the slant)</li>
+          <li>Badge corners are <code>border-radius: 0</code> — sharp, hand-stamped feel</li>
+          <li>Badge shadow is <code>3×3 ink</code> (slightly softer than the standard 4×4 paper-shadow because the badge is smaller)</li>
+          <li>Alert is layout-only — flex row with gap, no surrounding paper-card body, no soft tinted bg</li>
+          <li>Variant accent flips BOTH the badge bg AND the italic message colour — single source of variant truth</li>
+          <li>Mono caps badge label uses <code>var(--font-mono)</code>; italic message uses <code>var(--font-display)</code> italic (Playfair stand-in for Freight Display)</li>
+          <li>Phosphor Fill icon mapping in production: <code>CheckCircle</code> (success), <code>Warning</code> (warning), <code>WarningCircle</code> (error). This mockup uses Unicode stand-ins: <code>✓</code>, <code>▲</code>, <code>!</code> — distinct per variant per owner feedback (the earlier draft mistakenly used <code>▲</code> for both warning and error)</li>
+        </ul>
+
+        <h3>Open</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Warning variant: keep <code>bg-warning</code> (amber) or flip to <code>bg-ink</code> if amber-on-cream feels too soft? Owner to confirm in cohesion check</li>
+          <li>Dismiss affordance: leave out entirely (current default), or add a small <code>×</code> in <code>--color-ink-muted</code> after the message? Acknowledged as an awkward fit for the badge metaphor either way</li>
+          <li>Maximum message length: enforce in copy guidance, or allow 2-line wrap as the ceiling? 3+ lines breaks the metaphor</li>
+        </ul>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>BADGE / TYPOGRAPHY</h4>
+            <ul>
+              <li>Badge bg (success): <code>--color-jersey-deep</code></li>
+              <li>Badge bg (warning): <code>--color-warning</code></li>
+              <li>Badge bg (error): <code>--color-alert</code></li>
+              <li>Badge text + glyph: <code>--color-cream</code></li>
+              <li>Badge border: <code>2px solid var(--color-ink)</code></li>
+              <li>Badge label: <code>var(--font-mono)</code> · 11px · 700 · 0.12em tracking · uppercase</li>
+              <li>Message: <code>var(--font-display)</code> italic · 22px · 400</li>
+              <li>Message colour echoes badge accent — jersey-deep / warning / alert</li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / GEOMETRY</h4>
+            <ul>
+              <li>Badge rotation: <code>-2deg</code> via <code>--rotate-badge</code></li>
+              <li>Badge shadow: <code>3px 3px 0 0 var(--color-ink)</code> (softer than the 4×4 paper-shadow because the badge is smaller)</li>
+              <li>Badge corners: <code>border-radius: 0</code></li>
+              <li>Layout: <code>display: inline-flex</code> · <code>gap: 18px</code> · <code>align-items: center</code></li>
+              <li>No card body, no tinted bg — page bg shows through</li>
+              <li>Max-width: 640px standalone; wraps gracefully to 2 lines under tighter constraints</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION E — ANGLED BADGE · KCVV ELEWIJT · 2026-04-30
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

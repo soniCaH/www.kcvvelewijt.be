@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction D — Mono Stamp · Phase 2 · Track A · Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-stamp-a: -2deg;
+        --rotate-stamp-b: -1.5deg;
+        --rotate-stamp-c: 1.5deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 20px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         ALERT — Mono Stamp · Direction D
+         ============================================================
+         Light-touch retro: tinted soft bg per variant, NO paper-card body
+         (no border-2 ink, no shadow-paper-sm). The retro signal is carried
+         by a strong ink-bordered "stamp" mark on the left containing the
+         Phosphor Fill icon + a TWO-LINE mono caps label. Alert itself stays
+         flat — at most a 1px paper-edge border. Sharp corners. Title in
+         ink, body in ink. Optional thin dashed paper-edge underline between
+         title and body.
+         ============================================================ */
+
+      .alert {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        gap: 18px;
+        padding: 18px 20px 18px 18px;
+        border: 1px solid var(--color-paper-edge);
+        border-radius: 0;
+        font-family: var(--font-body);
+        color: var(--color-ink);
+      }
+
+      /* Per-variant tinted bg — alert body is the tint, not a card.
+         Success uses a 10%-blend of jersey on cream (computed manually). */
+      .alert--success { background: #e6f4e2; }
+      .alert--warning { background: var(--color-warning-soft); }
+      .alert--error   { background: var(--color-alert-soft); }
+
+      /* The stamp mark — only heavy ink in the entire alert.
+         Rectangle, ~64px square, border-2 ink, sharp corners, slight rotate
+         like a manually applied rubber stamp. Inside: Phosphor Fill icon
+         glyph at top + two-line mono caps label. */
+      .alert__stamp {
+        position: relative;
+        flex: 0 0 64px;
+        align-self: flex-start;
+        width: 64px;
+        height: 64px;
+        margin-top: 2px;
+        border: 2px solid var(--color-ink);
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 6px 4px;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transform: rotate(var(--rotate-stamp-a));
+        /* Subtle "stamp ink" texture — low-opacity radial dots over the
+           stamp face. Easy on the eye; doesn't read as noise. */
+        background-image:
+          radial-gradient(circle at 22% 28%, rgba(10, 10, 10, 0.05) 0 0.9px, transparent 1px),
+          radial-gradient(circle at 70% 38%, rgba(10, 10, 10, 0.04) 0 0.8px, transparent 1px),
+          radial-gradient(circle at 38% 72%, rgba(10, 10, 10, 0.05) 0 0.9px, transparent 1px),
+          radial-gradient(circle at 80% 80%, rgba(10, 10, 10, 0.035) 0 0.7px, transparent 1px);
+        background-size: 18px 18px, 22px 22px, 16px 16px, 24px 24px;
+      }
+
+      .alert__stamp-icon {
+        font-family: var(--font-body); /* glyph is unicode; mono not required */
+        font-size: 22px;
+        line-height: 1;
+        font-weight: 700;
+      }
+      .alert__stamp-label {
+        display: block;
+        white-space: nowrap;
+      }
+
+      /* Per-variant stamp accent — ink border stays, text + icon flip to
+         the variant accent. */
+      .alert--success .alert__stamp { color: var(--color-jersey-deep); }
+      .alert--warning .alert__stamp { color: var(--color-warning); }
+      .alert--error   .alert__stamp { color: var(--color-alert); }
+
+      /* Cycle stamp rotation across the row of alerts so they don't read as
+         a perfectly mechanical column. Same nth-child pattern as TapedCardGrid. */
+      .alert:nth-child(3n+1) .alert__stamp { transform: rotate(var(--rotate-stamp-a)); }
+      .alert:nth-child(3n+2) .alert__stamp { transform: rotate(var(--rotate-stamp-b)); }
+      .alert:nth-child(3n+3) .alert__stamp { transform: rotate(var(--rotate-stamp-c)); }
+
+      .alert__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .alert__title {
+        font-family: var(--font-body);
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.3;
+        color: var(--color-ink);
+        margin: 0;
+        letter-spacing: -0.005em;
+      }
+
+      .alert__rule {
+        height: 0;
+        margin: 6px 0 6px;
+        border: 0;
+        border-top: 1px dashed var(--color-paper-edge);
+      }
+
+      .alert__message {
+        font-family: var(--font-body);
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--color-ink);
+        margin: 0;
+      }
+
+      /* Untitled variant — body sits a touch lower so it visually centres
+         next to the stamp. */
+      .alert--untitled .alert__body { justify-content: center; }
+
+      /* Dismiss button — low-key X in the upper-right. Mono ink glyph,
+         no chrome, hover deepens. */
+      .alert__dismiss {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1;
+        color: var(--color-ink-muted);
+        border-radius: 0;
+        transition: color 150ms ease;
+      }
+      .alert__dismiss:hover { color: var(--color-ink); }
+
+      /* Inline-with-form size — slightly tighter padding, smaller stamp. */
+      .alert--inline {
+        padding: 14px 16px 14px 14px;
+        gap: 14px;
+      }
+      .alert--inline .alert__stamp {
+        flex: 0 0 56px;
+        width: 56px;
+        height: 56px;
+        font-size: 8px;
+      }
+      .alert--inline .alert__stamp-icon { font-size: 18px; }
+      .alert--inline .alert__title { font-size: 14px; }
+      .alert--inline .alert__message { font-size: 13px; }
+
+      /* ============================================================
+         FORM MOCK — for the in-context section
+         ============================================================ */
+
+      .form-stack { display: flex; flex-direction: column; gap: 12px; max-width: 480px; }
+      .form-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        font-weight: 600;
+      }
+      .form-input {
+        font-family: var(--font-body);
+        font-size: 15px;
+        color: var(--color-ink);
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 12px 14px;
+        border-radius: 0;
+        outline: none;
+        width: 100%;
+      }
+      .form-input--error {
+        border-color: var(--color-alert);
+        background: #fff8f6;
+      }
+
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK A · ALERT</span>
+          <span class="mono mono--muted">★ DIRECTION D · MONO STAMP</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Mono <span class="display"><em>stamp.</em></span></h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          Light-touch retro. Per-variant tinted soft bg carries the semantic colour;
+          an ink-bordered <em>stamp</em> on the left — Phosphor Fill icon over a
+          two-line mono caps label — is the only heavy chrome. No paper-card body,
+          no <code>border-2 ink</code> on the alert itself, no <code>shadow-paper-sm</code>.
+          Title and body in ink. Optional dashed <code>paper-edge</code> underline. Sharp
+          corners throughout. Reads as <em>printed notice</em>, not chromed banner.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           STANDALONE VARIANTS
+           =========================================================== -->
+      <section class="section" id="standalone">
+        <div class="section-meta">
+          <span class="mono">★ 01 · STANDALONE VARIANTS</span>
+          <span class="mono mono--muted">— success · warning · error, full width, untitled</span>
+        </div>
+        <h2>Drie <em>meldingen.</em></h2>
+        <p class="lead">
+          One row per variant. Tint comes from the variant's <code>-soft</code> token
+          (success uses a 10%-blend of jersey on cream). Each stamp leans a degree or
+          two off-axis as if hand-applied — the alert body itself stays straight.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">DEFAULT — body only, no title, no dismiss</div>
+          <div class="stack">
+
+            <!-- Success -->
+            <div class="alert alert--success alert--untitled" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">✓</span>
+                <span class="alert__stamp-label">MELDING</span>
+                <span class="alert__stamp-label">SUCCES</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">Je bericht is succesvol verzonden.</p>
+              </div>
+            </div>
+
+            <!-- Warning -->
+            <div class="alert alert--warning alert--untitled" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">▲</span>
+                <span class="alert__stamp-label">WAAR-</span>
+                <span class="alert__stamp-label">SCHUWING</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+              </div>
+            </div>
+
+            <!-- Error -->
+            <div class="alert alert--error alert--untitled" role="alert">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">⊗</span>
+                <span class="alert__stamp-label">FOUT</span>
+                <span class="alert__stamp-label">04</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Lightest of the four directions. The stamp is the entire retro anchor — typography carries the brand, not chrome. Tint per variant is unmistakable but never loud. Sharp corners + mono caps stamp = "printed notice".</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Without a paper-card body, the alert can blur into surrounding cream content if the parent layout is also untextured. The stamp must do all the lifting — one minor visual element away from feeling like a generic flash banner.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           WITH TITLE + DISMISSIBLE
+           =========================================================== -->
+      <section class="section" id="titled">
+        <div class="section-meta">
+          <span class="mono">★ 02 · WITH TITLE + DISMISSIBLE</span>
+          <span class="mono mono--muted">— bold title, dashed paper-edge rule, low-key dismiss X</span>
+        </div>
+        <h2>Met <em>kop</em> en sluit-knop.</h2>
+        <p class="lead">
+          Bold Inter title in ink, optional dashed <code>paper-edge</code> underline,
+          body below. Dismiss <code>×</code> sits in the upper-right — mono glyph,
+          ink-muted by default, deepens to ink on hover. No chrome around it.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">FULL — stamp · title · dashed rule · body · dismiss</div>
+          <div class="stack">
+
+            <!-- Success -->
+            <div class="alert alert--success" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">✓</span>
+                <span class="alert__stamp-label">MELDING</span>
+                <span class="alert__stamp-label">SUCCES</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__title">Verzonden!</p>
+                <hr class="alert__rule" />
+                <p class="alert__message">Je bericht is succesvol verzonden.</p>
+              </div>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+
+            <!-- Warning -->
+            <div class="alert alert--warning" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">▲</span>
+                <span class="alert__stamp-label">WAAR-</span>
+                <span class="alert__stamp-label">SCHUWING</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__title">Let op</p>
+                <hr class="alert__rule" />
+                <p class="alert__message">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+              </div>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+
+            <!-- Error -->
+            <div class="alert alert--error" role="alert">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">⊗</span>
+                <span class="alert__stamp-label">FOUT</span>
+                <span class="alert__stamp-label">04</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__title">Fout</p>
+                <hr class="alert__rule" />
+                <p class="alert__message">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+              <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Title hierarchy is clean — bold Inter against body Inter, separated by a hairline dashed rule that nods to <code>match-card__footer</code>. Dismiss X is unobtrusive but reachable; no chrome around it competes with the stamp.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>The dashed rule is the only structural element inside the body — without it, the title can bleed into the message. Skip it and the alert reads even flatter, which may be too much restraint for the error variant where urgency matters.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           IN-CONTEXT (form)
+           =========================================================== -->
+      <section class="section" id="in-context">
+        <div class="section-meta">
+          <span class="mono">★ 03 · IN-CONTEXT (form)</span>
+          <span class="mono mono--muted">— error variant rendered below a mock form input, inline scale</span>
+        </div>
+        <h2>Onder een <em>veld.</em></h2>
+        <p class="lead">
+          The inline scale uses a slightly smaller stamp (56px) and tighter padding,
+          but the same vocabulary — title, dashed rule, body, dismiss. Reads as
+          form-validation copy, not a marketing banner.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">FORM — input with error state, inline alert below</div>
+
+          <div class="form-stack">
+            <label class="form-label" for="email-d">EMAIL</label>
+            <input
+              id="email-d"
+              class="form-input form-input--error"
+              type="email"
+              value="kevin@kcvv"
+              aria-invalid="true"
+              aria-describedby="email-d-error"
+            />
+
+            <div
+              id="email-d-error"
+              class="alert alert--error alert--inline"
+              role="alert"
+            >
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">⊗</span>
+                <span class="alert__stamp-label">FOUT</span>
+                <span class="alert__stamp-label">04</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__title">Fout</p>
+                <hr class="alert__rule" />
+                <p class="alert__message">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">SUCCESS · WARNING · ERROR — inline scale, untitled, side-by-side</div>
+          <div class="stack" style="max-width: 560px">
+
+            <div class="alert alert--success alert--inline alert--untitled" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">✓</span>
+                <span class="alert__stamp-label">MELDING</span>
+                <span class="alert__stamp-label">SUCCES</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">Je bericht is succesvol verzonden.</p>
+              </div>
+            </div>
+
+            <div class="alert alert--warning alert--inline alert--untitled" role="status">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">▲</span>
+                <span class="alert__stamp-label">WAAR-</span>
+                <span class="alert__stamp-label">SCHUWING</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+              </div>
+            </div>
+
+            <div class="alert alert--error alert--inline alert--untitled" role="alert">
+              <div class="alert__stamp" aria-hidden="true">
+                <span class="alert__stamp-icon">⊗</span>
+                <span class="alert__stamp-label">FOUT</span>
+                <span class="alert__stamp-label">04</span>
+              </div>
+              <div class="alert__body">
+                <p class="alert__message">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           TRADEOFFS — Direction-level
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · TRADEOFFS</span>
+          <span class="mono mono--muted">— why this direction wins · what it sacrifices</span>
+        </div>
+        <h2>Wegen en <em>weegschalen.</em></h2>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Most restrained of the four candidates. Leans on
+              <strong>typography</strong> (mono caps stamp) rather than chrome
+              (paper-card body) to carry the retro signal — the "less is more"
+              reading of Direction D. Composes with FilterTabs / BrandedTabs
+              vocabulary because it shares the <em>fonts</em> and <em>token
+              palette</em>, not because it copies their <code>border-2 ink</code>
+              shell. The hand-rotated stamp is unmistakably ours; readers spot
+              the typographic glyph + mono caps before they read the message.
+              Sharp corners, ink + cream + retro-pigment palette, no neon, no
+              radial glow. Per-variant tint is loud enough to scan but never
+              feels like a Material toast.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              <strong>Chrome lives in one place</strong> — if the stamp is ever
+              suppressed (e.g. an extra-tight inline context where 56px is still
+              too wide), the alert collapses to a tinted strip with a body and
+              no retro signal at all. There is no visual fallback. Compared to
+              the paper-card directions, the alert sits flatter on the page —
+              fine in a section panel, possibly too quiet on a busy editorial
+              homepage where every other module has <code>shadow-paper-sm</code>
+              chrome. The dashed paper-edge rule helps the title/body split,
+              but it remains optional — without it, hierarchy depends purely on
+              font weight, which is the thinnest of safety nets.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map for the alert atom</span>
+        </div>
+
+        <h3>Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TINT</h4>
+            <ul>
+              <li>Success bg: 10% jersey on cream (<code>#e6f4e2</code>)</li>
+              <li>Warning bg: <code>--color-warning-soft</code></li>
+              <li>Error bg: <code>--color-alert-soft</code></li>
+              <li>Alert outer border: <code>1px solid var(--color-paper-edge)</code> (subtle)</li>
+              <li>Title + body: <code>--color-ink</code></li>
+              <li>Dashed rule: <code>1px dashed var(--color-paper-edge)</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4>STAMP</h4>
+            <ul>
+              <li>Stamp border: <code>2px solid var(--color-ink)</code> — the only heavy ink</li>
+              <li>Stamp accent (icon + label): <code>jersey-deep</code> / <code>warning</code> / <code>alert</code></li>
+              <li>Stamp size: 64px square (default), 56px (inline)</li>
+              <li>Stamp rotation: <code>--rotate-stamp-a..c</code> cycle via <code>nth-child(3n+1..3)</code></li>
+              <li>Stamp label: <code>--font-mono</code> 9px (default) / 8px (inline), 700 weight, uppercase, two lines</li>
+              <li>Stamp ink texture: low-opacity radial dots, easy on the eye</li>
+              <li>Sharp corners: no <code>border-radius</code> anywhere</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION D — MONO STAMP · KCVV ELEWIJT · 2026-04-30
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

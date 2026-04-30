@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction B — Ticket Stub · Phase 2 · Track A · Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --color-success: #008755;
+        --color-success-soft: #d8e7d0;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .panel--dusk { background: var(--color-ink-soft); border-color: var(--color-ink); color: var(--color-cream); }
+      .panel--dusk h3, .panel--dusk .mono { color: var(--color-cream); }
+      /* Re-assert ink for stub content inside a dusk panel — the stub
+         body keeps its tinted soft bg (cream/mustard/dusty-brick), so
+         text inside it must stay ink-dark for legibility regardless
+         of the surrounding panel theme. */
+      .panel--dusk .stub__title,
+      .panel--dusk .stub__text { color: var(--color-ink); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         ALERT — Ticket Stub (Direction B)
+         The card is a torn programme stub. Left edge is "perforated"
+         via a radial-gradient mask producing semi-circular notches
+         (think concert ticket / matchday programme). The icon nests
+         inside that perforated notch column. A mono caps kicker labels
+         the variant; the title sits big underneath; the body in
+         --color-ink runs as the paragraph.
+         ============================================================ */
+
+      .stub {
+        position: relative;
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        align-items: stretch;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        border-radius: 0; /* sharp corners — perforation handles silhouette */
+        min-height: 96px;
+      }
+
+      /* Left perforated stub column. The "tear" effect is built from
+         two layers:
+         1. A repeating radial gradient mask that punches semi-circular
+            half-discs out of the right edge of this column — the
+            page bg shows through, reading as torn perforations.
+         2. A dashed vertical guide drawn just inside the right edge to
+            reinforce the "tear here" line on light AND dark backdrops. */
+      .stub__notch {
+        position: relative;
+        background: var(--color-cream);
+        border-right: 2px dashed var(--color-ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Mask: 12px-tall repeating bands; in each band, the right 8px
+           contains a 6px radius half-disc cut into transparency — that
+           is the perforation. Pulled to the right edge so half a circle
+           sits inside the column and half is gone. */
+        -webkit-mask-image: radial-gradient(circle at 100% 6px, transparent 0 5px, #000 5.5px),
+          radial-gradient(circle at 100% 18px, transparent 0 5px, #000 5.5px);
+        -webkit-mask-size: 100% 24px;
+        -webkit-mask-repeat: repeat-y;
+        mask-image: radial-gradient(circle at 100% 6px, transparent 0 5px, #000 5.5px),
+          radial-gradient(circle at 100% 18px, transparent 0 5px, #000 5.5px);
+        mask-size: 100% 24px;
+        mask-repeat: repeat-y;
+      }
+
+      /* Variant tints applied to the column (tinted soft bg) */
+      .stub--success .stub__notch { background: var(--color-success-soft); }
+      .stub--warning .stub__notch { background: var(--color-warning-soft); }
+      .stub--error   .stub__notch { background: var(--color-alert-soft); }
+
+      /* Variant tints on the body — same family, lighter ratio */
+      .stub--success { background: linear-gradient(0deg, var(--color-success-soft), var(--color-success-soft)); }
+      .stub--warning { background: linear-gradient(0deg, var(--color-warning-soft), var(--color-warning-soft)); }
+      .stub--error   { background: linear-gradient(0deg, var(--color-alert-soft), var(--color-alert-soft)); }
+
+      /* Icon inside the notch — Phosphor Fill weight glyphs (Unicode in mockup) */
+      .stub__icon {
+        position: relative;
+        z-index: 1;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-body);
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1;
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+      .stub--success .stub__icon { background: var(--color-success); color: var(--color-cream); }
+      .stub--warning .stub__icon { background: var(--color-warning); color: var(--color-ink); }
+      .stub--error   .stub__icon { background: var(--color-alert);   color: var(--color-cream); }
+
+      .stub__body {
+        position: relative;
+        padding: 16px 20px 16px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .stub__kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .stub--success .stub__kicker { color: var(--color-success); }
+      .stub--warning .stub__kicker { color: var(--color-warning); }
+      .stub--error   .stub__kicker { color: var(--color-alert); }
+
+      .stub__title {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        color: var(--color-ink);
+        margin: 0;
+      }
+
+      .stub__text {
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--color-ink);
+        margin: 0;
+      }
+
+      /* Dismiss X — sits just inside upper right corner */
+      .stub__dismiss {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        width: 26px;
+        height: 26px;
+        background: transparent;
+        border: 0;
+        font-family: var(--font-body);
+        font-size: 18px;
+        line-height: 1;
+        font-weight: 600;
+        color: var(--color-ink);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .stub__dismiss:hover { color: var(--color-ink-soft); }
+
+      /* Inline-with-form scale: smaller padding, smaller title */
+      .stub--inline {
+        min-height: 64px;
+        grid-template-columns: 56px 1fr;
+      }
+      .stub--inline .stub__icon {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+      .stub--inline .stub__body {
+        padding: 10px 16px 10px 16px;
+      }
+      .stub--inline .stub__title {
+        font-size: 16px;
+      }
+      .stub--inline .stub__text {
+        font-size: 13px;
+      }
+      .stub--inline .stub__kicker {
+        font-size: 9px;
+      }
+      /* Inline keeps perforation but tightens the half-disc spacing */
+      .stub--inline .stub__notch {
+        -webkit-mask-size: 100% 20px;
+        mask-size: 100% 20px;
+      }
+
+      /* Variant strip on right edge — a thin coloured "claim ticket"
+         marker that doubles down on the variant cue without flooding
+         the body. Removed — owner feedback 2026-04-30: the icon block
+         + tinted body already carry the variant cue, the card already
+         has a border + paper shadow, and the right strip duplicated
+         the signal without adding readability. Keeping the rule
+         declarations as no-op so the DOM markers (still present in
+         the HTML below for now) don't render anything. */
+      .stub__strip { display: none; }
+
+      /* ============================================================
+         FORM mock — context section uses these
+         ============================================================ */
+      .form-stack { display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
+      .form-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        font-weight: 600;
+      }
+      .form-input {
+        font-family: var(--font-body);
+        font-size: 15px;
+        padding: 10px 14px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        border-radius: 0;
+        outline: 0;
+      }
+      .form-input--invalid {
+        border-color: var(--color-alert);
+        background: #fbf3f0;
+      }
+      .form-input:focus { box-shadow: var(--shadow-paper-sm-soft); }
+      .form-button {
+        align-self: flex-start;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm-soft);
+        padding: 10px 18px;
+        cursor: pointer;
+        border-radius: 0;
+      }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK A · A-5 · ALERT</span>
+          <span class="mono mono--muted">★ DIRECTION B · TICKET STUB</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Een gescheurd <span class="display"><em>programma-</em></span>strookje.</h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          Reframe the alert as a torn programme stub. Tinted soft background per
+          variant (success / warning / error). The icon nests inside a perforated
+          left-edge notch — half-disc cut-outs read as the "tear here" line, not
+          a Material toast. A mono caps <em>kicker</em> labels the variant
+          (<code>★ MELDING</code>, <code>⚠ WAARSCHUWING</code>, <code>! FOUT</code>);
+          the title runs big underneath in italic Playfair; the body in
+          <code>--color-ink</code> finishes the message. Sharp corners on the
+          three non-perforated edges. No rotation — this is the
+          functional-but-tactile read, not a tape-stuck artefact.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           STANDALONE VARIANTS
+           =========================================================== -->
+      <section class="section" id="standalone">
+        <div class="section-meta">
+          <span class="mono">★ 01 · STANDALONE VARIANTS</span>
+          <span class="mono mono--muted">— success · warning · error · full width · with kicker</span>
+        </div>
+        <h2>Drie <em>strookjes.</em></h2>
+        <p class="lead">
+          One alert per row, full width inside the panel. Kicker mono caps above
+          the title. Body sentence beneath. The perforated notch always runs the
+          full height of the stub — the icon is centred inside it.
+        </p>
+
+        <div class="panel">
+          <div class="stack">
+            <!-- SUCCESS -->
+            <div class="stub stub--success" role="status" aria-live="polite">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">&#10003;</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">&#9733; MELDING</span>
+                <h3 class="stub__title">Verzonden!</h3>
+                <p class="stub__text">Je bericht is succesvol verzonden.</p>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+
+            <!-- WARNING -->
+            <div class="stub stub--warning" role="status" aria-live="polite">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">&#9650;</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">&#9888; WAARSCHUWING</span>
+                <h3 class="stub__title">Let op</h3>
+                <p class="stub__text">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+
+            <!-- ERROR -->
+            <div class="stub stub--error" role="alert" aria-live="assertive">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">!</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">! FOUT</span>
+                <h3 class="stub__title">Fout</h3>
+                <p class="stub__text">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Reads as a torn programme stub at a glance — fanzine tactility without rotation. Tinted body + coloured icon block carry the variant cue without competing with the chrome. Kicker mono caps locate the alert in the existing FilterTabs / MatchCard kicker vocabulary.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Perforation effect requires the notch column to be visually cut against the page background — on unusual surfaces (e.g. patterned or photo backgrounds) the half-discs can read as decoration rather than a tear. Earlier draft also rendered a 6 px right-edge "claim strip" coloured per variant — removed per owner feedback (2026-04-30): the icon block + tinted body already carried the variant cue, the card already had a border + paper shadow, the strip duplicated the signal without adding readability.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           WITH TITLE + DISMISSIBLE
+           =========================================================== -->
+      <section class="section" id="dismissible">
+        <div class="section-meta">
+          <span class="mono">★ 02 · WITH TITLE + DISMISSIBLE</span>
+          <span class="mono mono--muted">— close button just inside upper right · keeps the perforated silhouette intact</span>
+        </div>
+        <h2>Met <em>kruisje.</em></h2>
+        <p class="lead">
+          Dismiss control sits in the upper-right corner just inside the body
+          padding. Bold title + close button. Variant tint stays the same as
+          the standalone row.
+        </p>
+
+        <div class="panel">
+          <div class="stack">
+            <div class="stub stub--success" role="status" aria-live="polite">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">&#10003;</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">&#9733; MELDING</span>
+                <h3 class="stub__title">Verzonden!</h3>
+                <p class="stub__text">Je bericht is succesvol verzonden.</p>
+                <button class="stub__dismiss" type="button" aria-label="Sluiten">&times;</button>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+
+            <div class="stub stub--warning" role="status" aria-live="polite">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">&#9650;</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">&#9888; WAARSCHUWING</span>
+                <h3 class="stub__title">Let op</h3>
+                <p class="stub__text">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+                <button class="stub__dismiss" type="button" aria-label="Sluiten">&times;</button>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+
+            <div class="stub stub--error" role="alert" aria-live="assertive">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">!</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">! FOUT</span>
+                <h3 class="stub__title">Fout</h3>
+                <p class="stub__text">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+                <button class="stub__dismiss" type="button" aria-label="Sluiten">&times;</button>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel--dusk" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px; color: var(--color-cream)">ON DUSK PANEL — verifying the perforation reads on dark surfaces</div>
+          <div class="stack">
+            <div class="stub stub--warning" role="status" aria-live="polite">
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">&#9650;</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">&#9888; WAARSCHUWING</span>
+                <h3 class="stub__title">Let op</h3>
+                <p class="stub__text">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+                <button class="stub__dismiss" type="button" aria-label="Sluiten">&times;</button>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+            <p class="mono mono--muted" style="margin-top: 4px; font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--color-cream)">
+              The half-disc cut-outs reveal the dark panel through the notch column — the tear silhouette is readable against ink-soft as well as cream because the mask punches the column itself, not just a shadow. The dashed inner divider doubles as a guide line.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           IN-CONTEXT (FORM)
+           =========================================================== -->
+      <section class="section" id="in-context">
+        <div class="section-meta">
+          <span class="mono">★ 03 · IN-CONTEXT (form)</span>
+          <span class="mono mono--muted">— error stub rendered below an invalid form input</span>
+        </div>
+        <h2>Onder een <em>formulier.</em></h2>
+        <p class="lead">
+          The error variant rendered below the offending field — same paper-card
+          rhythm, same border weight, but the stub silhouette and the variant
+          tint mark it as a message, not another input.
+        </p>
+
+        <div class="panel">
+          <form class="form-stack" onsubmit="event.preventDefault()">
+            <label class="form-label" for="email">E-MAIL</label>
+            <input
+              id="email"
+              class="form-input form-input--invalid"
+              type="email"
+              value="kevin@@kcvv"
+              aria-invalid="true"
+              aria-describedby="email-error"
+            />
+            <div
+              id="email-error"
+              class="stub stub--error stub--inline"
+              role="alert"
+              aria-live="assertive"
+            >
+              <div class="stub__notch">
+                <span class="stub__icon" aria-hidden="true">!</span>
+              </div>
+              <div class="stub__body">
+                <span class="stub__kicker">! FOUT</span>
+                <p class="stub__text">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+              </div>
+              <span class="stub__strip" aria-hidden="true"></span>
+            </div>
+
+            <button class="form-button" type="submit">VERSTUUR</button>
+          </form>
+
+          <p class="mono mono--muted" style="margin-top: 24px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Inline scale drops the title (kicker + body sentence carry the
+            message), tightens the perforation rhythm to 20px bands, and shrinks
+            the icon block to 32×32. Same vocabulary, lighter footprint — fits
+            below a form input without dominating the field.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           TRADEOFFS
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · TRADEOFFS</span>
+          <span class="mono mono--muted">— why this direction wins · what it sacrifices</span>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Native to the locked retro vocabulary — perforation is a fanzine
+              cousin to the dashed footers on MatchCard, the mono kickers on
+              FilterTabs, and the sharp-cornered paper-card silhouette on
+              BrandedTabs. Tinted body + coloured icon block + right-edge claim
+              strip carry the variant cue three ways, so colour-blind users
+              still get shape + label + position. Italic Playfair title gives
+              the stub editorial weight without requiring a heavier surface.
+              No rotation keeps it functional under serious states (errors).
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              The half-disc mask works only when the column bg differs from the
+              page bg — embedding the alert inside an already-tinted card needs
+              the stub's notch column to still resolve to a contrasting tone.
+              The right-edge variant strip uses 6px of body width; on very
+              narrow inline scales it competes with body padding. Phosphor Fill
+              icons in production must use the matching weight (CheckCircle,
+              WarningTriangle, XCircle) — the Unicode glyphs in this mockup are
+              shape stand-ins, not the final art.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ END</span>
+          <span class="mono mono--muted">— Direction B · Ticket Stub · Phase 2 · Track A · A-5 Alert · KCVV Elewijt · 2026-04-30</span>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

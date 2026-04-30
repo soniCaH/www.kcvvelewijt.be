@@ -1,41 +1,58 @@
 "use client";
 
 /**
- * Alert Component
- * Contextual feedback messages with KCVV design system styling
+ * Alert — long-form ticket-stub alert.
+ *
+ * Direction B ("Ticket Stub — torn from a programme") locked at the
+ * Phase 2.A.5 design checkpoint (2026-04-30). Source-of-record:
+ * `docs/design/mockups/phase-2-a-5-alert/option-b-ticket-stub.html` and
+ * `docs/prd/redesign-phase-2.md` §6.4.B.
+ *
+ * Two-form Alert API: this is the long-form companion. Use `<Alert>` for
+ * page-level / dashboard-level alerts that need a title, multi-paragraph
+ * body, and/or a dismiss button. Use `<AlertBadge>` (sibling file) for
+ * inline form-field validation, short single-headline confirmations, and
+ * one-badge-per-form-summary multi-line messages.
+ *
+ * Visual: a paper-card outer (`border-2 border-ink` + `--shadow-paper-sm`)
+ * with a perforated left "stub" column. The stub holds a coloured icon
+ * block; the body holds a mono caps kicker label, italic Freight Display
+ * title, and an ink Inter body. Sharp corners; `<Alert>` overrides text
+ * colour explicitly inside `panel--dusk` contexts so the tinted body
+ * stays legible regardless of the surrounding theme.
  */
 
 import { forwardRef, type ReactNode } from "react";
-import { X, CheckCircle, AlertTriangle, Info, XCircle } from "@/lib/icons";
+import { CheckCircle, Warning, WarningCircle, X } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
-export type AlertVariant = "info" | "success" | "warning" | "error";
+export type AlertVariant = "success" | "warning" | "error";
 
 export interface AlertProps {
   /**
-   * Visual variant controlling colour and icon
-   * @default 'info'
+   * Visual variant — controls icon block colour, body tint, and kicker.
+   * @default 'success'
    */
   variant?: AlertVariant;
   /**
-   * Optional bold title displayed above the description
+   * Optional bold italic title displayed above the body.
    */
   title?: string;
   /**
-   * Alert body content
+   * Alert body content.
    */
   children: ReactNode;
   /**
-   * Show a close button (caller is responsible for hiding the alert)
+   * Show a close button (caller is responsible for hiding the alert).
    * @default false
    */
   dismissible?: boolean;
   /**
-   * Callback fired when the close button is clicked
+   * Callback fired when the close button is clicked.
    */
   onDismiss?: () => void;
   /**
-   * Additional CSS classes
+   * Additional CSS classes applied to the outer card.
    */
   className?: string;
 }
@@ -44,44 +61,47 @@ const variantConfig: Record<
   AlertVariant,
   {
     bg: string;
-    border: string;
-    icon: ReactNode;
-    titleColor: string;
-    textColor: string;
+    iconBlock: string;
+    kicker: string;
+    kickerLabel: string;
+    Icon: typeof CheckCircle;
+    /** WAI-ARIA role + live-region politeness. Errors are assertive; */
+    /** success/warning are polite (status), avoiding interruption. */
+    role: "alert" | "status";
+    ariaLive: "assertive" | "polite";
   }
 > = {
-  info: {
-    bg: "bg-kcvv-green-bright/8",
-    border: "border-l-4 border-kcvv-green-bright",
-    icon: <Info size={18} aria-hidden="true" />,
-    titleColor: "text-kcvv-green-dark",
-    textColor: "text-kcvv-gray-blue",
-  },
   success: {
-    bg: "bg-kcvv-success/10",
-    border: "border-l-4 border-kcvv-success",
-    icon: <CheckCircle size={18} aria-hidden="true" />,
-    titleColor: "text-kcvv-green-dark",
-    textColor: "text-kcvv-gray-blue",
+    bg: "bg-success-soft",
+    iconBlock: "bg-jersey-deep text-cream",
+    kicker: "text-jersey-deep",
+    kickerLabel: "★ MELDING",
+    Icon: CheckCircle,
+    role: "status",
+    ariaLive: "polite",
   },
   warning: {
-    bg: "bg-kcvv-warning/10",
-    border: "border-l-4 border-kcvv-warning",
-    icon: <AlertTriangle size={18} aria-hidden="true" />,
-    titleColor: "text-amber-800",
-    textColor: "text-amber-900",
+    bg: "bg-warning-soft",
+    iconBlock: "bg-warning text-cream",
+    kicker: "text-warning",
+    kickerLabel: "⚠ WAARSCHUWING",
+    Icon: Warning,
+    role: "status",
+    ariaLive: "polite",
   },
   error: {
-    bg: "bg-kcvv-alert/8",
-    border: "border-l-4 border-kcvv-alert",
-    icon: <XCircle size={18} aria-hidden="true" />,
-    titleColor: "text-kcvv-alert",
-    textColor: "text-kcvv-gray-blue",
+    bg: "bg-alert-soft",
+    iconBlock: "bg-alert text-cream",
+    kicker: "text-alert",
+    kickerLabel: "! FOUT",
+    Icon: WarningCircle,
+    role: "alert",
+    ariaLive: "assertive",
   },
 };
 
 /**
- * Alert component for contextual feedback messages.
+ * Alert — long-form ticket-stub alert.
  *
  * @example
  * ```tsx
@@ -89,14 +109,14 @@ const variantConfig: Record<
  *   Je bericht is succesvol verstuurd.
  * </Alert>
  *
- * <Alert variant="error" dismissible onDismiss={() => setVisible(false)}>
- *   Er ging iets mis. Probeer opnieuw.
+ * <Alert variant="error" title="Fout" dismissible onDismiss={() => setOpen(false)}>
+ *   Er ging iets mis. Controleer je gegevens en probeer opnieuw.
  * </Alert>
  * ```
  */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   {
-    variant = "info",
+    variant = "success",
     title,
     children,
     dismissible = false,
@@ -106,48 +126,78 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   ref,
 ) {
   const config = variantConfig[variant];
+  const { Icon } = config;
 
   return (
     <div
       ref={ref}
-      role="alert"
+      role={config.role}
+      aria-live={config.ariaLive}
       className={cn(
-        "relative flex gap-3 rounded-[0.25em] px-4 py-3",
+        "relative grid grid-cols-[72px_1fr] items-stretch overflow-hidden",
+        "border-ink rounded-none border-2",
+        "shadow-[var(--shadow-paper-sm)]",
         config.bg,
-        config.border,
         className,
       )}
     >
-      {/* Icon */}
-      <div className={cn("mt-0.5 shrink-0", config.titleColor)}>
-        {config.icon}
-      </div>
-
-      {/* Body */}
-      <div className="min-w-0 flex-1">
-        {title && (
-          <p className={cn("mb-0.5 text-sm font-semibold", config.titleColor)}>
-            {title}
-          </p>
+      <div
+        aria-hidden="true"
+        className={cn(
+          // pt-4 matches the body's py-4 so the icon top aligns with the
+          // kicker text top, not the geometric centre of the card. This
+          // keeps the icon anchored to "top text" on multi-paragraph
+          // bodies — owner feedback 2026-04-30.
+          "kcvv-stub-notch flex items-start justify-center pt-4",
+          config.bg,
         )}
-        <div className={cn("text-sm", config.textColor)}>{children}</div>
-      </div>
-
-      {/* Dismiss button */}
-      {dismissible && (
-        <button
-          type="button"
-          onClick={() => onDismiss?.()}
-          aria-label="Sluit melding"
+      >
+        <span
           className={cn(
-            "-mt-0.5 -mr-1 shrink-0 rounded p-1 transition-colors",
-            "focus:ring-kcvv-green-bright hover:bg-black/10 focus:ring-2 focus:ring-offset-1 focus:outline-none",
-            config.titleColor,
+            "relative z-10 inline-flex h-10 w-10 items-center justify-center",
+            config.iconBlock,
           )}
         >
-          <X size={14} aria-hidden="true" />
-        </button>
-      )}
+          <Icon size={22} aria-hidden="true" />
+        </span>
+      </div>
+
+      <div className="relative px-5 py-4">
+        {dismissible && (
+          <button
+            type="button"
+            onClick={() => onDismiss?.()}
+            aria-label="Sluit melding"
+            className={cn(
+              "absolute top-2 right-2 inline-flex h-6 w-6 items-center justify-center",
+              "rounded p-0.5 transition-colors",
+              "text-ink/60 hover:text-ink hover:bg-ink/5",
+              "focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+            )}
+          >
+            <X size={14} aria-hidden="true" />
+          </button>
+        )}
+
+        <span
+          className={cn(
+            "block font-mono text-[10px] font-semibold tracking-[0.12em] uppercase",
+            config.kicker,
+          )}
+        >
+          {config.kickerLabel}
+        </span>
+
+        {title && (
+          <h3 className="font-display text-ink mt-0.5 text-[22px] leading-[1.15] font-bold italic">
+            {title}
+          </h3>
+        )}
+
+        <div className="text-ink mt-1 text-[15px] leading-[1.55]">
+          {children}
+        </div>
+      </div>
     </div>
   );
 });

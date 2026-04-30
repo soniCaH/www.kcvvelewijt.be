@@ -1,9 +1,15 @@
 /**
  * Alert Component Stories
+ *
+ * Direction B ("Ticket Stub — torn from a programme") locked at the
+ * Phase 2.A.5 design checkpoint (2026-04-30). Source-of-record:
+ * docs/design/mockups/phase-2-a-5-alert/option-b-ticket-stub.html
+ * and PRD §6.4.B.
  */
 
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { Alert } from "./Alert";
 
 const meta = {
@@ -14,35 +20,34 @@ const meta = {
     docs: {
       description: {
         component:
-          "Contextual feedback messages for form validation, confirmations, and system notifications. Four variants: info (green), success, warning, error. Optionally dismissible.",
+          "Long-form ticket-stub alert with perforated left edge, mono caps kicker, italic Freight Display title, and ink Inter body. Used for page-level / dashboard-level alerts that need a title, multi-paragraph body, and/or a dismiss button. For inline form-field validation or short single-headline confirmations, use the sibling `<AlertBadge>` component.",
       },
     },
   },
   tags: ["autodocs", "vr"],
+  args: {
+    // Meta-level defaults so `StoryObj<typeof meta>` doesn't force every
+    // `render`-only story to re-state `children`. Stories override.
+    children: "Standaard meldingsinhoud.",
+    onDismiss: fn(),
+  },
   argTypes: {
     variant: {
       control: "select",
-      options: ["info", "success", "warning", "error"],
+      options: ["success", "warning", "error"],
     },
     title: { control: "text" },
     dismissible: { control: "boolean" },
-    onDismiss: { action: "onDismiss" },
   },
 } satisfies Meta<typeof Alert>;
 
 export default meta;
-type Story = StoryObj<typeof Alert>;
-
-export const Info: Story = {
-  args: {
-    variant: "info",
-    children: "Inschrijvingen voor het nieuwe seizoen zijn open.",
-  },
-};
+type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {
   args: {
     variant: "success",
+    title: "Verzonden!",
     children: "Je bericht is succesvol verzonden.",
   },
 };
@@ -50,51 +55,24 @@ export const Success: Story = {
 export const Warning: Story = {
   args: {
     variant: "warning",
-    children:
-      "De wedstrijd van zaterdag kan uitgesteld worden wegens weersomstandigheden.",
+    title: "Let op",
+    children: "De wedstrijd kan uitgesteld worden wegens weersomstandigheden.",
   },
 };
 
 export const Error: Story = {
   args: {
     variant: "error",
+    title: "Fout",
     children: "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
   },
 };
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex w-125 flex-col gap-3">
-      <Alert variant="info">
-        Inschrijvingen voor het nieuwe seizoen zijn open.
-      </Alert>
-      <Alert variant="success">Je bericht is succesvol verzonden.</Alert>
-      <Alert variant="warning">
-        De wedstrijd kan uitgesteld worden wegens weersomstandigheden.
-      </Alert>
-      <Alert variant="error">
-        Er ging iets mis. Controleer je gegevens en probeer opnieuw.
-      </Alert>
-    </div>
-  ),
-};
-
-export const WithTitle: Story = {
-  args: {
-    variant: "success",
-    title: "Verzonden!",
-    children: "We nemen binnen 2 werkdagen contact met je op.",
-  },
-};
-
-export const WithTitleAllVariants: Story = {
-  render: () => (
-    <div className="flex w-125 flex-col gap-3">
-      <Alert variant="info" title="Info">
-        Inschrijvingen voor het nieuwe seizoen zijn open.
-      </Alert>
+    <div className="flex max-w-2xl flex-col gap-4">
       <Alert variant="success" title="Verzonden!">
-        We nemen binnen 2 werkdagen contact met je op.
+        Je bericht is succesvol verzonden.
       </Alert>
       <Alert variant="warning" title="Let op">
         De wedstrijd kan uitgesteld worden wegens weersomstandigheden.
@@ -106,14 +84,21 @@ export const WithTitleAllVariants: Story = {
   ),
 };
 
+export const WithoutTitle: Story = {
+  args: {
+    variant: "success",
+    children: "Je bericht is succesvol verzonden.",
+  },
+};
+
 export const Dismissible: Story = {
   render: () => {
     const [visible, setVisible] = useState(true);
     return (
-      <div className="w-125">
+      <div className="max-w-2xl">
         {visible ? (
           <Alert
-            variant="info"
+            variant="success"
             title="Nieuw seizoen"
             dismissible
             onDismiss={() => setVisible(false)}
@@ -121,7 +106,7 @@ export const Dismissible: Story = {
             Inschrijvingen voor het nieuwe seizoen zijn open.
           </Alert>
         ) : (
-          <p className="text-foundation-gray-dark text-sm">Alert gesloten.</p>
+          <p className="text-ink-muted text-sm">Alert gesloten.</p>
         )}
       </div>
     );
@@ -137,34 +122,13 @@ export const Dismissible: Story = {
 };
 
 /**
- * Form validation feedback — error alert below a form
- */
-export const FormValidationError: Story = {
-  render: () => (
-    <div className="w-125">
-      <Alert variant="error" title="Formulier onvolledig">
-        Vul alle verplichte velden in voor je het formulier verstuurt.
-      </Alert>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Typical form-level validation error shown above or below the submit button.",
-      },
-    },
-  },
-};
-
-/**
- * Form success feedback — after contact form submission
+ * Form-success — alert renders after a contact form is submitted.
  */
 export const FormSuccess: Story = {
   render: () => {
     const [visible, setVisible] = useState(true);
     return (
-      <div className="w-125">
+      <div className="max-w-2xl">
         {visible ? (
           <Alert
             variant="success"
@@ -176,18 +140,37 @@ export const FormSuccess: Story = {
             op.
           </Alert>
         ) : (
-          <p className="text-foundation-gray-dark text-sm">
-            Bevestiging gesloten.
-          </p>
+          <p className="text-ink-muted text-sm">Bevestiging gesloten.</p>
         )}
       </div>
     );
   },
 };
 
+/**
+ * Multi-paragraph body — typical page-level guidance.
+ */
+export const MultiParagraph: Story = {
+  args: {
+    variant: "warning",
+    title: "Onderhoud gepland",
+    children: (
+      <>
+        <p>
+          De website is op zaterdag 3 mei tussen 22:00 en 02:00 niet beschikbaar
+          wegens gepland onderhoud.
+        </p>
+        <p className="mt-2">
+          Inschrijvingen die je voor 22:00 indient worden normaal verwerkt.
+        </p>
+      </>
+    ),
+  },
+};
+
 export const Playground: Story = {
   args: {
-    variant: "info",
+    variant: "success",
     title: "Titel",
     children: "Dit is de inhoud van de melding.",
     dismissible: false,
