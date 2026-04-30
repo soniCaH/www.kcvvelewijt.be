@@ -220,6 +220,15 @@ const config: TestRunnerConfig = {
           new Promise((resolve) => setTimeout(resolve, timeoutMs)),
         ]);
       }, IMAGE_LOAD_TIMEOUT_MS);
+      // Wait for two animation frames so that ResizeObserver callbacks
+      // (e.g. useScrollHint in FilterTabs) and the React re-renders they
+      // trigger have been painted before the screenshot is taken.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          }),
+      );
       // `fullPage: true` would extend horizontally past `vp.width` whenever
       // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
       // that overflow can be a few px wider on Apple Silicon than on x86,

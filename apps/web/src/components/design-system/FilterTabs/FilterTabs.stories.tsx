@@ -178,13 +178,7 @@ export const WithoutCounts: Story = {
  * Demonstrates mobile scrolling arrows on overflow.
  */
 export const NewsCategoryFilter: Story = {
-  // Fixed 280px wrapper guarantees the 8 tabs always overflow, making
-  // canScrollRight deterministic across VR runs regardless of font metrics.
-  render: (args) => (
-    <div className="w-[280px]">
-      <InteractiveFilterTabs {...args} />
-    </div>
-  ),
+  render: (args) => <InteractiveFilterTabs {...args} />,
   args: {
     tabs: categoryTabs,
     activeTab: "all",
@@ -199,13 +193,7 @@ export const NewsCategoryFilter: Story = {
  * Used on the sponsors page to filter by tier.
  */
 export const SponsorTierFilter: Story = {
-  // Fixed 700px wrapper ensures the 5 sponsor tabs always fit without
-  // overflowing, keeping canScrollRight=false deterministic across VR runs.
-  render: (args) => (
-    <div className="w-[700px]">
-      <InteractiveFilterTabs {...args} />
-    </div>
-  ),
+  render: (args) => <InteractiveFilterTabs {...args} />,
   args: {
     tabs: sponsorTabs,
     activeTab: "all",
