@@ -28,7 +28,7 @@ export type RedesignIconProps = Omit<IconProps, "weight">;
 
 const fillWrapper = (PhIcon: ComponentType<IconProps>) => {
   const Wrapped = (props: RedesignIconProps) =>
-    createElement(PhIcon, { weight: "fill", ...props });
+    createElement(PhIcon, { ...props, weight: "fill" });
   Wrapped.displayName = `Fill(${PhIcon.displayName ?? PhIcon.name ?? "Icon"})`;
   return Wrapped;
 };

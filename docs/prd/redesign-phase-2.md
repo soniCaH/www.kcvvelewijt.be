@@ -84,13 +84,13 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 
 ### 5.0 Tracer bullet (Phase 2.0)
 
-- [ ] `apps/web/package.json` contains `vr:update:story` script invoking `test-storybook -u --testNamePattern=$1`
+- [ ] `apps/web/package.json` contains `vr:update:story` script that invokes `test-storybook -u` and forwards a positional argument to the test-runner. The argument falls through to Jest as a `testPathPattern` (test-storybook does not expose `--testNamePattern`; pass `--testNamePattern <regex>` after the positional path pattern only if a finer name-level filter is intentionally required).
 - [ ] `apps/web/src/styles/globals.css` `@theme` block contains `--color-alert: #B84A3A`, `--color-warning: #C68B2C`, `--color-alert-soft: #E8D5CF`, `--color-warning-soft: #ECDDB8`
 - [ ] `@phosphor-icons/react` installed in `apps/web/package.json`
 - [ ] `apps/web/src/lib/icons.redesign.ts` exists and exports at least `ArrowRight` as a `weight="fill"` wrapper component
 - [ ] `<Button variant="primary">` renders `bg-jersey text-cream` with the documented hover/focus treatment
 - [ ] `Button.stories.tsx` `PrimaryRedesigned` story exists with `tags: ["autodocs", "vr"]` and a captured VR baseline
-- [ ] `pnpm vr:update:story "Button"` updates only Button-story baselines (verified by counting changed PNG files)
+- [ ] `pnpm vr:update:story design-system/Button/Button` (or any `testPathPattern` anchored to the Button atom) updates only Button-story baselines (verified by counting changed PNG files)
 - [ ] `pnpm --filter @kcvv/web check-all` passes
 
 ### 5.A Track A acceptance (per child issue, summarised here)
@@ -292,7 +292,7 @@ Invocation: `pnpm vr:update:story design-system/Button/Button` — only updates 
 
 VR baselines are committed in the same PR as the atom that invalidates them. For each atom PR:
 
-1. Run `pnpm vr:update:story "<AtomName>"` locally to capture only the changed atom + first-degree consumer story baselines.
+1. Run `pnpm vr:update:story <atom-path-pattern>` locally (e.g. `pnpm vr:update:story design-system/Button/Button`) to capture only the changed atom's baselines. The argument is a Jest-compatible `testPathPattern` regex; anchor it tightly to the atom file path. First-degree consumer stories whose visuals change because they import the redesigned atom should be opted out via `parameters.vr.disable: true` per `apps/web/CLAUDE.md` → _Atom reskin PRs_, with the consumer's redesign issue as the re-evaluate date — not auto-baselined here.
 2. Inspect the produced baselines manually — the atom should look correct in light + dark, sm + md + lg, default + hover/focus/disabled per its story matrix.
 3. Stage and commit the new/updated baseline PNGs in the same commit as the component change.
 4. PR description includes a "## VR baselines" section listing every story file whose baseline changed (justifies the update per the VR contract).
