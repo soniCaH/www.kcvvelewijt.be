@@ -277,7 +277,7 @@ jobs:
 
       - name: Post sticky PR comment
         if: steps.build-comment.outputs.has_diffs == 'true'
-        uses: marocchino/sticky-pull-request-comment@v2.9.4
+        uses: marocchino/sticky-pull-request-comment@v3.0.4
         with:
           header: vr-diff-comment
           path: ${{ steps.build-comment.outputs.comment_file }}
