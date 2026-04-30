@@ -301,11 +301,14 @@ pnpm --filter @kcvv/web run vr:check
 # Accept the current rendering as the new baseline (commit the resulting PNGs).
 pnpm --filter @kcvv/web run vr:update
 
-# Surgical baseline update — only stories whose .stories.tsx path matches.
-# The argument is forwarded as a positional pattern to Jest (testPathPattern),
-# so it matches against the story file path on disk. Use a tight anchor like
-# `design-system/Button/Button` to scope to a single component file.
-pnpm --filter @kcvv/web run vr:update:story design-system/Button/Button
+# Surgical baseline update — only stories matching the path pattern.
+# The `--` separator hands the rest to test-storybook, which forwards
+# `--testPathPatterns=<regex>` to Jest. The regex matches the synthetic
+# test file paths the runner generates from story IDs (e.g. `ui-button`,
+# `layout-pagefooter`), NOT the source `.stories.tsx` paths. Use a tight
+# anchor like `ui-button` to scope to one atom (without dragging in
+# `ui-linkbutton`/`ui-downloadbutton`/etc.).
+pnpm --filter @kcvv/web run vr:update:story -- --testPathPatterns=ui-button
 
 # Print the diff PNG path(s) for a failed story so the Read tool can inspect them.
 pnpm --filter @kcvv/web run vr:diff layout-pagefooter--standalone
@@ -386,8 +389,10 @@ Phase 2+ atom reskins (Button, Input, Alert, …) intentionally change the visua
 of every story that consumes them. The contract for these PRs:
 
 1. **Update the atom's own baselines surgically.** Run `vr:update:story` with a
-   tight `--testPathPattern` regex matched against the atom's story file path
-   (e.g. `pnpm vr:update:story design-system/Button/Button`). The PR's
+   tight `--testPathPatterns` regex anchored to the atom's story-ID prefix —
+   e.g. `pnpm vr:update:story -- --testPathPatterns=ui-button`. The pattern
+   matches the synthetic test file paths derived from story IDs (e.g.
+   `ui-button.test.js`), not the source `.stories.tsx` paths. The PR's
    `## VR baselines` section enumerates every changed baseline file with a
    one-line rationale.
 2. **Defer consumer baselines via `parameters.vr.disable: true`, not `vr-skip`.**
