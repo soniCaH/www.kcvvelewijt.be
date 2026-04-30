@@ -181,7 +181,7 @@ jobs:
           name: vr-diff-output
           path: |
             apps/web/test/vr/__diff_output__/
-            apps/web/test/vr/__received_output__/
+            apps/web/test/vr/__snapshots__/__received_output__/
           if-no-files-found: ignore
           retention-days: 14
 
@@ -217,7 +217,7 @@ jobs:
 
           # Abort gracefully if no diff PNGs were produced (artifact absent or empty)
           shopt -s nullglob
-          diff_pngs=(/tmp/vr-diff-output/__diff_output__/*.png /tmp/vr-diff-output/__received_output__/*.png)
+          diff_pngs=(/tmp/vr-diff-output/__diff_output__/*.png /tmp/vr-diff-output/__snapshots__/__received_output__/*.png)
           if [ ${#diff_pngs[@]} -eq 0 ]; then
             echo "No diff PNGs found — skipping orphan branch push. Original VR failure remains visible."
             exit 0
@@ -235,7 +235,7 @@ jobs:
           for f in /tmp/vr-diff-output/__diff_output__/*.png; do
             [ -f "$f" ] && cp "$f" "vr-diffs/diff-$(basename "$f")"
           done
-          for f in /tmp/vr-diff-output/__received_output__/*.png; do
+          for f in /tmp/vr-diff-output/__snapshots__/__received_output__/*.png; do
             [ -f "$f" ] && cp "$f" "vr-diffs/actual-$(basename "$f")"
           done
 
