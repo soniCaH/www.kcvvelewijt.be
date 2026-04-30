@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Unified filter component for consistent filtering UI across the application. Features mobile scrolling, count badges, and multiple size variants.",
+          "Unified filter component for consistent filtering UI across the application. Direction D paper-chip vocabulary: ink-bordered cream-soft chips with mono caps labels, ink-invert active state, and inline counts using a 1 px hairline pipe divider (no pill, no badge). Mobile scrolling and three size variants (sm/md/lg) preserved.",
       },
     },
   },
@@ -35,11 +35,12 @@ const meta = {
     size: {
       control: "select",
       options: ["sm", "md", "lg"],
-      description: "Size variant",
+      description: "Size variant — controls chip padding + font-size only",
     },
     showCounts: {
       control: "boolean",
-      description: "Show count badges",
+      description:
+        "Toggle the inline paper-chip count rendered after the hairline pipe divider",
     },
     renderAsLinks: {
       control: "boolean",
@@ -97,9 +98,17 @@ function InteractiveFilterTabs(args: FilterTabsProps) {
     args.activeTab || args.tabs[0].value,
   );
 
+  // Update local state AND forward to args.onChange so the Storybook
+  // Actions panel still receives the event (fn() mock declared in meta).
+  // Mirrors the BrandedTabs.stories `Interactive` pattern.
+  const handleChange = (value: string) => {
+    setActiveTab(value);
+    args.onChange?.(value);
+  };
+
   return (
     <div className="space-y-6">
-      <FilterTabs {...args} activeTab={activeTab} onChange={setActiveTab} />
+      <FilterTabs {...args} activeTab={activeTab} onChange={handleChange} />
       <div className="border-paper-edge bg-cream-soft border p-4">
         <p className="text-ink-muted font-mono text-xs tracking-wider uppercase">
           Selected: <span className="text-jersey-deep">{activeTab}</span>
