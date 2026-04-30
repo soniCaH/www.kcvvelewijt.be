@@ -4,20 +4,16 @@ import { fn } from "storybook/test";
 import { FilterTabs, type FilterTab, type FilterTabsProps } from "./FilterTabs";
 
 /**
- * FilterTabs - Unified filter/tab component
+ * FilterTabs Component Stories
  *
- * A consistent, reusable filter component used across the application for:
- * - News category filtering
- * - Organigram department filtering
- * - Sponsor tier filtering
- * - Responsibility finder role filtering
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Each chip is a paper-card body in
+ * cream-soft + ink border + offset shadow; active inverts to ink + cream
+ * + soft shadow. Counts render inline after a 1 px hairline pipe — no pill,
+ * no badge. Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
  *
- * Features:
- * - Mobile-responsive with horizontal scrolling
- * - Optional count badges
- * - Multiple size variants (sm, md, lg)
- * - Accessible and keyboard navigable
- * - Consistent KCVV green styling
+ * Used in: Organigram, News Categories, Sponsors, Responsibility Finder.
  */
 const meta = {
   title: "UI/FilterTabs",
@@ -27,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Unified filter component for consistent filtering UI across the application. Features mobile scrolling, count badges, and multiple size variants.",
+          "Unified filter component for consistent filtering UI across the application. Direction D paper-chip vocabulary: ink-bordered cream-soft chips with mono caps labels, ink-invert active state, and inline counts using a 1 px hairline pipe divider (no pill, no badge). Mobile scrolling and three size variants (sm/md/lg) preserved.",
       },
     },
   },
@@ -39,11 +35,12 @@ const meta = {
     size: {
       control: "select",
       options: ["sm", "md", "lg"],
-      description: "Size variant",
+      description: "Size variant — controls chip padding + font-size only",
     },
     showCounts: {
       control: "boolean",
-      description: "Show count badges",
+      description:
+        "Toggle the inline paper-chip count rendered after the hairline pipe divider",
     },
     renderAsLinks: {
       control: "boolean",
@@ -96,17 +93,37 @@ const roleTabs: FilterTab[] = [
  * @param args - Props forwarded to FilterTabs; when `args.activeTab` is not provided the first tab's `value` is used as the initial selection.
  * @returns A JSX element containing the FilterTabs bound to internal state and a panel displaying the currently selected tab value.
  */
+// Re-mount the stateful inner whenever the Storybook controls change
+// `activeTab` or the `tabs` array, so the preview + readout track the
+// controls. Using a `key` to reset state is React's recommended pattern
+// over a state-syncing useEffect (see react.dev "you might not need an
+// effect"). Forwarding args.onChange in handleChange keeps the Actions
+// panel populated.
 function InteractiveFilterTabs(args: FilterTabsProps) {
+  // Stable signature of tab identity — joining `value`s catches edits,
+  // reorders, and same-length swaps that `tabs.length` alone would miss.
+  const stateKey = `${args.activeTab ?? ""}-${args.tabs
+    .map((t) => t.value)
+    .join(",")}`;
+  return <InteractiveFilterTabsInner key={stateKey} {...args} />;
+}
+
+function InteractiveFilterTabsInner(args: FilterTabsProps) {
   const [activeTab, setActiveTab] = useState(
     args.activeTab || args.tabs[0].value,
   );
 
+  const handleChange = (value: string) => {
+    setActiveTab(value);
+    args.onChange?.(value);
+  };
+
   return (
     <div className="space-y-6">
-      <FilterTabs {...args} activeTab={activeTab} onChange={setActiveTab} />
-      <div className="rounded-lg bg-gray-50 p-4">
-        <p className="text-kcvv-gray-blue text-sm font-medium">
-          Selected: <span className="text-kcvv-green-bright">{activeTab}</span>
+      <FilterTabs {...args} activeTab={activeTab} onChange={handleChange} />
+      <div className="border-paper-edge bg-cream-soft border p-4">
+        <p className="text-ink-muted font-mono text-xs tracking-wider uppercase">
+          Selected: <span className="text-jersey-deep">{activeTab}</span>
         </p>
       </div>
     </div>
@@ -361,7 +378,7 @@ export const SizeComparison: Story = {
   render: () => (
     <div className="space-y-8">
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Small
         </h3>
         <FilterTabs
@@ -373,7 +390,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Medium (Default)
         </h3>
         <FilterTabs
@@ -385,7 +402,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Large
         </h3>
         <FilterTabs

@@ -23,7 +23,6 @@
 
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LayoutGrid, Network, CircleHelp } from "@/lib/icons";
 import { CardHierarchy } from "./card-hierarchy/CardHierarchy";
 import { MemberDetailsModal } from "./MemberDetailsModal";
 import { FilterTabs } from "../design-system/FilterTabs";
@@ -319,23 +318,12 @@ export function UnifiedOrganigramClient({
     setSelectedResponsibilityId(null); // Clear ID when using path object
   };
 
-  // View tabs configuration
+  // View tabs configuration. Track B Direction D retired the leading-glyph
+  // slot on FilterTabs (closes #1573); the tab labels carry the affordance.
   const viewTabs: FilterTab[] = [
-    {
-      value: "cards",
-      label: "Overzicht",
-      icon: LayoutGrid,
-    },
-    {
-      value: "chart",
-      label: "Diagram",
-      icon: Network,
-    },
-    {
-      value: "responsibilities",
-      label: "Hulp",
-      icon: CircleHelp,
-    },
+    { value: "cards", label: "Overzicht" },
+    { value: "chart", label: "Diagram" },
+    { value: "responsibilities", label: "Hulp" },
   ];
 
   // Swipe gesture handlers for mobile view switching (Phase 4)

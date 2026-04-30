@@ -1,42 +1,46 @@
 "use client";
 
 /**
- * FilterTabs Component
+ * FilterTabs — Pure presentational filter chip row.
  *
- * Unified filter/tab component for consistent filtering UI across the app.
- * Used in: Organigram, News Categories, Sponsors, Responsibility Finder, etc.
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html
+ * (`.f-chip` rules, ink-invert active variant chosen — see compare.md
+ * lines 60–70).
  *
- * Features:
- * - Horizontal scrolling on mobile with navigation arrows
- * - Optional count badges
- * - Multiple size variants (sm, md, lg)
- * - Active state with green background (no side borders)
- * - Inactive state with green text and border
- * - Fully accessible and keyboard navigable
- * - Consistent with KCVV design system
+ * Each chip is a paper-chip body: `border-2 ink` + `--shadow-paper-sm` +
+ * `bg-cream-soft`, mono caps label, sharp corners. Active inverts to
+ * `bg-ink text-cream` with the soft `--shadow-paper-sm-soft`. Hover
+ * shifts to a 3 × 3 offset shadow + a 1 × 1 translate (paper press idiom),
+ * with the active state swapping shadow colour to ink-muted. Counts
+ * render inline after a 1 px hairline pipe — no pill, no badge.
  *
- * Design:
- * - Active: bg-kcvv-green-bright text-white (clean, no side borders)
- * - Inactive: bg-transparent text-kcvv-green-bright border-kcvv-green-bright
- * - Hover: bg-kcvv-green-bright text-white
+ * Used in: Organigram, News Categories, Sponsors, Responsibility Finder.
+ * State management is left to the parent (`activeTab` + `onChange?`); when
+ * `renderAsLinks` is true, tabs with `href` render as `<a>` instead of
+ * `<button>` for full-page Next.js navigation.
+ *
+ * Direction D retired the leading-glyph slot — `FilterTab.icon` is no
+ * longer part of the prop surface (closes #1573).
  */
 
+import { cn } from "@/lib/utils/cn";
 import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
 import { ScrollArrowButton } from "@/components/design-system/ScrollHint/ScrollArrowButton";
-import { type LucideIcon } from "@/lib/icons";
 
 export interface FilterTab {
   /** Unique identifier */
   value: string;
   /** Display label */
   label: string;
-  /** Optional count badge */
+  /** Optional count rendered inline after a 1 px hairline pipe divider */
   count?: number;
-  /** Optional custom href (for Link-based tabs) */
+  /** Optional href — only consumed when `renderAsLinks` is true */
   href?: string;
-  /** Optional Lucide icon component */
-  icon?: LucideIcon;
 }
+
+export type FilterTabsSize = "sm" | "md" | "lg";
 
 export interface FilterTabsProps {
   /** Array of filter options */
@@ -45,31 +49,67 @@ export interface FilterTabsProps {
   activeTab: string;
   /** Change handler (for controlled tabs) */
   onChange?: (value: string) => void;
-  /** Size variant */
-  size?: "sm" | "md" | "lg";
-  /** Show count badges */
+  /** Size variant — controls padding + font-size only */
+  size?: FilterTabsSize;
+  /** Show count after a hairline pipe divider when present */
   showCounts?: boolean;
-  /** Additional CSS classes */
+  /** Additional CSS classes applied to the outer container */
   className?: string;
-  /** Optional aria-label for accessibility */
+  /** Optional aria-label for the tablist */
   ariaLabel?: string;
-  /** Render as links instead of buttons (for Next.js Link) */
+  /** Render as links instead of buttons (for Next.js Link / SSR routing) */
   renderAsLinks?: boolean;
 }
 
-/**
- * Render a horizontally scrollable set of filter tabs with optional count badges, size variants, and arrow navigation.
- *
- * @param tabs - Array of tab options; each item should include `value`, `label`, and optional `count` and `href`
- * @param activeTab - The `value` of the currently active tab
- * @param onChange - Callback invoked with a tab's `value` when a non-link tab is activated
- * @param size - Visual size variant: `"sm" | "md" | "lg"` (default: `"md"`)
- * @param showCounts - Whether to display per-tab numeric badges (default: `true`)
- * @param className - Additional CSS classes applied to the root container
- * @param ariaLabel - Accessible label for the tablist (default: `"Filter tabs"`)
- * @param renderAsLinks - If `true`, tabs with `href` are rendered as anchor elements instead of buttons
- * @returns The rendered filter tabs React element
- */
+const CHIP_BASE_CLASSES = [
+  // gap-2 (8 px) is the *internal* gap between the chip label and the
+  // count `<span>` — matches the mockup's `.f-chip { gap: 8px }`. Don't
+  // confuse with the row-level `gap-3` (12 px) below, which is the
+  // BrandedTabs-aligned breathing space *between* chips.
+  "inline-flex flex-shrink-0 items-center gap-2",
+  "rounded-none border-2 border-ink",
+  "font-mono font-semibold uppercase tracking-[0.08em]",
+  "transition-[transform,box-shadow] duration-150 ease-out",
+  "hover:translate-x-px hover:translate-y-px",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
+] as const;
+
+const CHIP_INACTIVE_CLASSES = [
+  "bg-cream-soft text-ink",
+  "shadow-[var(--shadow-paper-sm)]",
+  "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
+] as const;
+
+const CHIP_ACTIVE_CLASSES = [
+  "bg-ink text-cream",
+  "shadow-[var(--shadow-paper-sm-soft)]",
+  "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+] as const;
+
+const SIZE_CLASSES: Record<FilterTabsSize, string> = {
+  sm: "px-[9px] py-[5px] text-[10px]",
+  md: "px-3 py-2 text-[11px]",
+  lg: "px-4 py-[11px] text-xs",
+};
+
+const ARROW_SIZE_CLASSES: Record<FilterTabsSize, string> = {
+  sm: "w-8 h-8",
+  md: "w-10 h-10",
+  lg: "w-12 h-12",
+};
+
+const SCROLL_PADDING_LEFT: Record<FilterTabsSize, string> = {
+  sm: "pl-10",
+  md: "pl-12",
+  lg: "pl-14",
+};
+
+const SCROLL_PADDING_RIGHT: Record<FilterTabsSize, string> = {
+  sm: "pr-10",
+  md: "pr-12",
+  lg: "pr-14",
+};
+
 export function FilterTabs({
   tabs,
   activeTab,
@@ -83,72 +123,25 @@ export function FilterTabs({
   const { scrollRef, canScrollLeft, canScrollRight, scrollLeft, scrollRight } =
     useScrollHint<HTMLDivElement>();
 
-  // Size-based styles
-  const sizeClasses = {
-    sm: {
-      tab: "px-4 py-2 text-xs",
-      badge: "ml-1.5 px-1.5 py-0.5 text-xs",
-      arrow: "w-8 h-8",
-    },
-    md: {
-      tab: "px-6 py-3 text-sm",
-      badge: "ml-2 px-2 py-0.5 text-xs",
-      arrow: "w-10 h-10",
-    },
-    lg: {
-      tab: "px-8 py-4 text-base",
-      badge: "ml-2.5 px-2.5 py-1 text-sm",
-      arrow: "w-12 h-12",
-    },
-  };
-
-  const currentSize = sizeClasses[size];
-
-  // Active/Inactive styles - transparent border for active to prevent width shift
-  const activeClasses =
-    "bg-kcvv-green-bright text-white border-2 border-transparent";
-  const inactiveClasses =
-    "bg-transparent text-kcvv-green-bright hover:bg-kcvv-green-bright hover:text-white hover:border-transparent border-2 border-kcvv-green-bright";
-
-  // Render individual tab
   const renderTab = (tab: FilterTab) => {
     const isActive = activeTab === tab.value;
-    const baseClasses = `
-      group
-      ${currentSize.tab}
-      ${isActive ? activeClasses : inactiveClasses}
-      font-medium
-      transition-all
-      duration-200
-      whitespace-nowrap
-      flex-shrink-0
-      rounded
-      flex
-      items-center
-      focus:outline-none
-    `;
-
-    const IconComponent = tab.icon;
-    const iconSize = size === "sm" ? 16 : size === "lg" ? 20 : 18;
+    const chipClasses = cn(
+      ...CHIP_BASE_CLASSES,
+      SIZE_CLASSES[size],
+      ...(isActive ? CHIP_ACTIVE_CLASSES : CHIP_INACTIVE_CLASSES),
+    );
 
     const content = (
       <>
-        {IconComponent && (
-          <IconComponent
-            size={iconSize}
-            className="flex-shrink-0"
-            aria-hidden="true"
-          />
-        )}
-        <span className={IconComponent ? "ml-2" : ""}>{tab.label}</span>
+        <span>{tab.label}</span>
         {showCounts && typeof tab.count !== "undefined" && (
           <span
-            className={` ${currentSize.badge} rounded-full font-semibold ${
+            className={cn(
+              "border-l pl-2 text-[10px] font-semibold",
               isActive
-                ? "bg-white/20 text-white"
-                : "bg-kcvv-green-bright/10 text-kcvv-green-bright group-hover:bg-white/20 group-hover:text-white"
-            } `}
-            style={{ fontFamily: "var(--font-family-mono)" }}
+                ? "border-cream text-cream"
+                : "border-ink-muted text-ink-muted",
+            )}
           >
             {tab.count}
           </span>
@@ -161,7 +154,7 @@ export function FilterTabs({
         <a
           key={tab.value}
           href={tab.href}
-          className={baseClasses}
+          className={chipClasses}
           role="tab"
           aria-selected={isActive ? "true" : "false"}
           aria-current={isActive ? "page" : undefined}
@@ -176,7 +169,7 @@ export function FilterTabs({
       <button
         key={tab.value}
         onClick={() => onChange?.(tab.value)}
-        className={baseClasses}
+        className={chipClasses}
         role="tab"
         aria-selected={isActive ? "true" : "false"}
         type="button"
@@ -188,12 +181,12 @@ export function FilterTabs({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn("relative", className)}>
       {canScrollLeft && (
         <ScrollArrowButton
           direction="left"
           onClick={scrollLeft}
-          className={currentSize.arrow}
+          className={ARROW_SIZE_CLASSES[size]}
         />
       )}
 
@@ -201,7 +194,18 @@ export function FilterTabs({
         ref={scrollRef}
         role="tablist"
         aria-label={ariaLabel}
-        className={`flex gap-2 overflow-x-auto scroll-smooth ${canScrollLeft ? (size === "sm" ? "pl-10" : size === "lg" ? "pl-14" : "pl-12") : "pl-0"} ${canScrollRight ? (size === "sm" ? "pr-10" : size === "lg" ? "pr-14" : "pr-12") : "pr-0"} scrollbar-hide`}
+        className={cn(
+          // scrollbar-hide @utility lives in globals.css. pb-1.5 (6 px)
+          // gives the 4 × 4 paper shadow room to render — `overflow-x: auto`
+          // is silently normalised by browsers to clip on both axes when
+          // the other axis would be `visible`, otherwise cropping the
+          // shadow's bottom edge (same fix as BrandedTabs #1576). Tab gap
+          // matches BrandedTabs (`gap-3` = 12 px) — overrides the mockup's
+          // 8 px to keep the two atoms visually consistent at the row level.
+          "scrollbar-hide flex gap-3 overflow-x-auto scroll-smooth pb-1.5",
+          canScrollLeft ? SCROLL_PADDING_LEFT[size] : "pl-0",
+          canScrollRight ? SCROLL_PADDING_RIGHT[size] : "pr-0",
+        )}
       >
         {tabs.map(renderTab)}
       </div>
@@ -210,7 +214,7 @@ export function FilterTabs({
         <ScrollArrowButton
           direction="right"
           onClick={scrollRight}
-          className={currentSize.arrow}
+          className={ARROW_SIZE_CLASSES[size]}
         />
       )}
     </div>
