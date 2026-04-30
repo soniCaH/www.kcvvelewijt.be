@@ -23,6 +23,13 @@ const meta = {
     },
   },
   tags: ["autodocs", "vr"],
+  args: {
+    // Meta-level defaults so `StoryObj<typeof meta>` doesn't force every
+    // `render`-only story to re-state `variant` + `children`. Stories
+    // override via their own `args` block.
+    variant: "success",
+    children: "Bericht verzonden.",
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -32,7 +39,7 @@ const meta = {
 } satisfies Meta<typeof AlertBadge>;
 
 export default meta;
-type Story = StoryObj<typeof AlertBadge>;
+type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {
   args: {

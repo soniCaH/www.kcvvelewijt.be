@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { Alert } from "./Alert";
 
 const meta = {
@@ -24,6 +25,12 @@ const meta = {
     },
   },
   tags: ["autodocs", "vr"],
+  args: {
+    // Meta-level defaults so `StoryObj<typeof meta>` doesn't force every
+    // `render`-only story to re-state `children`. Stories override.
+    children: "Standaard meldingsinhoud.",
+    onDismiss: fn(),
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -31,12 +38,11 @@ const meta = {
     },
     title: { control: "text" },
     dismissible: { control: "boolean" },
-    onDismiss: { action: "onDismiss" },
   },
 } satisfies Meta<typeof Alert>;
 
 export default meta;
-type Story = StoryObj<typeof Alert>;
+type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {
   args: {

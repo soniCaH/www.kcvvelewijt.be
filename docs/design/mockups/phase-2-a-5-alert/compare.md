@@ -68,33 +68,33 @@ Each direction is a self-contained HTML mockup at `docs/design/mockups/phase-2-a
 - **Mono Stamp (D)** — calm informational notices, log-line confirmations, anywhere typography should carry the retro signal without chrome weight.
 - **Angled Badge (E)** — inline form-validation messaging, single-headline confirmations ("Bericht verzonden."), error explanations under a specific input. Strongest personality, smallest footprint.
 
-## Recommendation
+## Locked outcome — two-form Alert API
 
-**E (Angled Badge) is the right primary direction**, with **A (Paper Notice) as the long-form fallback** — a two-form Alert API rather than five-direction-one-shape.
+Two distinct components ship; one shape per message-length tier:
 
-Reasoning:
+- **`<AlertBadge>` (Direction E — Angled Badge)** — primary inline form. Solid-coloured angled badge on the left + italic Freight Display message to the right. No card body, no soft tinted bg — the page colour shows through. Non-dismissible by design. Used for inline form-field validation (`Geen geldig telefoonnummer.`), short single-headline confirmations (`Bericht verzonden.`), and form summaries (one badge under the form with a multi-line message).
+- **`<Alert>` (Direction B — Ticket Stub)** — long-form companion. Paper-card outer with perforated left notch, mono caps kicker → italic Freight Display title → ink Inter body, optional Phosphor `X` dismiss. Used for page-level / dashboard-level alerts that need a title + multi-paragraph body and/or a dismiss button.
 
-1. **E carries the strongest retro-fanzine signal** of any option. It's the most distinctive thing the design system would own. Owner reached for E unprompted from a sketch — that's the strongest possible product-design signal that we're on a real lead.
-2. **E genuinely doesn't fit multi-line errors.** Don't try to force it. Form-validation messages are short ("Geen geldig telefoonnummer.", "Verplicht veld.", "Bericht verzonden.") — that's E's home. Long-form server errors and dashboard banners need a different shape.
-3. **A is the lowest-risk long-form fallback** because it composes with Track B chrome. Keeping the API surface as `<Alert variant="error" mode="badge|notice">` (or two separate components — `<AlertBadge>` and `<AlertNotice>`) lets callers pick the right shape per use case.
-4. **B / C / D don't pull weight as a third direction.** B's perforation idiom should be reserved for `<TicketStub>` so it stays special. C is loud enough that it's only correct once a quarter, and a quarter isn't enough volume to justify the surface area. D is fine but doesn't add anything A doesn't.
+Both share the same variant set (`success` / `warning` / `error` — `info` retired) and the same icon mapping (`CheckCircle` / `Warning` / `WarningCircle`).
 
-If we have to pick ONE direction with no fallback, **A** is the right safe answer: it's the spec-compliant interpretation that respects the locked Direction D vocabulary. But A on its own feels like one more chrome atom — it doesn't add personality the way E does.
+### Why two components, not one with a `mode` prop
 
-## Open questions for the owner
+A single `<Alert>` with a `mode="badge" | "notice"` prop would collapse the API surface, but the two visual contracts have **zero shared markup** — no shared border, no shared body, no shared layout grid. A `mode` prop would force every prop (title, dismissible, multi-paragraph body) to gain a "valid in this mode only" footnote. Two components communicate the constraint at the type level: `<AlertBadge>` simply doesn't accept `title` or `dismissible`; `<Alert>` accepts both naturally.
 
-1. **Two-form API or single-form?** Is the team OK with `<AlertBadge>` (E) for short messages and `<Alert>` (A) for long ones, or does the simplicity of one component matter more?
-2. **Warning variant in E** — owner sketch covered error. Should the warning badge use `--color-warning` bg (mustard ochre on cream) or `--color-ink` bg (matches the strongest read but loses the warning chroma)? The mockup tries warning bg.
-3. **Dismiss in E** — accept that E is non-dismissible by design (the user reads, types correctly, the alert disappears on revalidation), or wedge in an `×` glyph somewhere?
-4. **Multi-instance stacking** — in a form with three failed fields, three E badges read as a strong list of three pull-quotes. Acceptable, or do we collapse to one A-style summary banner?
-5. **PRD §6.4 revision** — once a direction is locked, that section needs a rewrite. Pre-implementation update or post-VR-baseline?
+### Why E primary
 
-## What to do next
+1. **E carries the strongest retro-fanzine signal** of any option. It's the most distinctive thing the design system owns. Owner reached for E unprompted from a sketch — that's the strongest possible product-design signal we landed on a real lead.
+2. **E genuinely doesn't fit multi-paragraph errors.** Form-validation messages are short (`Geen geldig telefoonnummer.`, `Verplicht veld.`, `Bericht verzonden.`) — that's E's home. Long-form server errors and dashboard banners need the long-form shape.
+3. **The form atoms (#1571) consume `<AlertBadge variant="error">`** for the helper-row error slot — the originally-proposed `<FieldError>` primitive is superseded. Two teams converging on the same retro-pill-plus-italic-message vocabulary (Phase 2.A.5 Alert checkpoint and Phase 2.A.4 form atoms checkpoint) is a strong design signal there's no behavioural daylight between the two.
 
-1. **Review** the five HTML mockups in a browser. Each is `~600 lines` and scrollable as a single page with all variants + tradeoffs inline.
-2. **Decide direction(s).** Recommended: E primary + A long-form fallback.
-3. **Settle the open questions above** (especially Q1 — single-form vs two-form API determines the PR shape).
-4. **PRD §6.4 revision** authored alongside the implementation PR.
-5. **VR baselines re-captured** with the chosen direction.
+### Why B over A / C / D as the long-form companion
+
+- **B (Ticket Stub) wins on vocabulary cohesion with E.** Both lean _editorial_ — italic Freight Display titles in B, italic Freight Display messages in E. The "italic editorial" thread runs through both. C and D have a different language entirely.
+- **B's visual weight pairs cleanly with E.** When both end up on screen at once, B doesn't compete with E.
+- **A (Paper Notice)** would have been the "lowest-risk" pick — sibling of Track B chrome — but on its own felt like one more chrome atom rather than adding personality.
+- **C (Banner Strip)** is too loud for routine long-form alerts.
+- **D (Mono Stamp)** doesn't add anything A doesn't.
+
+A / C / D mockups stay in this directory for historical reference; they will not ship.
 
 Once a direction is locked, this document moves from `⏳ Awaiting owner direction` to `✅ LOCKED — Direction <X>` and the implementation PR proceeds.
