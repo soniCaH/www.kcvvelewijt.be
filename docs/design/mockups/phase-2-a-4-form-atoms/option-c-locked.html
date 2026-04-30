@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Paper-card emphasis (locked) · Phase 2.A.4 form atoms</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-ink-15: rgba(10, 10, 10, 0.15);
+        --color-ink-20: rgba(10, 10, 10, 0.2);
+        --color-ink-30: rgba(10, 10, 10, 0.3);
+        --color-ink-40: rgba(10, 10, 10, 0.4);
+        --color-ink-60: rgba(10, 10, 10, 0.6);
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 48px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 5vw, 60px); line-height: 1.05; margin: 12px 0 12px; }
+      h1 em { color: var(--color-jersey-deep); font-style: italic; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: 28px; line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      .lead { max-width: 820px; font-size: 16px; color: var(--color-ink-soft); margin: 0 0 32px; }
+
+      .section { margin: 64px 0; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .section-title { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+      .section-title h2 { margin: 0; }
+      .section-meta { color: var(--color-ink-muted); margin-bottom: 24px; font-size: 14px; max-width: 820px; }
+
+      /* ============================================================
+         SHOWCASE HEADER (matches owner mockups: bold name + jersey dot + state list)
+         ============================================================ */
+      .showcase-header {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .showcase-header .title {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 32px;
+        line-height: 1;
+      }
+      .showcase-header .title .dot { color: var(--color-jersey-deep); }
+      .showcase-header .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         FIELD — locked Direction C state machine (uniform across atoms)
+         ============================================================ */
+      .field {
+        display: block;
+        width: 100%;
+        height: 40px;
+        padding: 0 13px; /* 13px to compensate for the 2px border keeping inner 11px */
+        font-family: var(--font-body);
+        font-size: 15px;
+        color: var(--color-ink);
+        background: #fff;
+        border-radius: 0;
+        outline: none;
+        border: 2px solid var(--color-ink-30);
+        box-shadow: var(--shadow-paper-sm-soft);
+        transition: border-color 120ms ease, box-shadow 120ms ease, transform 80ms ease;
+      }
+      .field::placeholder { color: var(--color-ink-40); }
+
+      .field-textarea {
+        height: 96px;
+        padding: 12px 13px;
+        resize: vertical;
+        font-family: var(--font-body);
+        line-height: 1.5;
+      }
+
+      .field-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%230a0a0a' d='M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32Z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 38px;
+        cursor: pointer;
+      }
+
+      /* Real :hover on inputs (also class-simulatable for showcase) */
+      .field:hover,
+      .field.is-hover {
+        border-color: var(--color-ink-40);
+        box-shadow: 3px 3px 0 0 var(--color-ink-muted);
+        transform: translate(1px, 1px);
+      }
+      .field:focus,
+      .field.is-focus {
+        border-color: var(--color-ink); /* full ink — no jersey */
+        box-shadow: 0 0 0 0 var(--color-ink-muted);
+        transform: translate(2px, 2px);
+      }
+      .field.is-filled {
+        border-color: var(--color-ink-60);
+        box-shadow: var(--shadow-paper-sm-soft);
+        transform: none;
+      }
+      .field.is-filled.is-focus {
+        border-color: var(--color-ink);
+        box-shadow: 0 0 0 0 var(--color-ink-muted);
+        transform: translate(2px, 2px);
+      }
+      .field.is-error {
+        border-color: var(--color-alert);
+        box-shadow: var(--shadow-paper-sm-alert);
+        transform: none;
+      }
+      .field.is-error.is-focus {
+        border-color: var(--color-alert);
+        box-shadow: 0 0 0 0 var(--color-alert-soft);
+        transform: translate(2px, 2px);
+      }
+      .field.is-disabled {
+        background: var(--color-cream-soft);
+        border-color: var(--color-ink-15);
+        box-shadow: none;
+        transform: none;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* ============================================================
+         FIELD CONTAINER — wrapper that owns the press translate so
+         absolutely-positioned siblings (chevron, counter) stay locked
+         to the field through hover/focus.
+         ============================================================ */
+      .field-wrap { position: relative; }
+
+      /* Move the visual layers together by translating the wrapper instead.
+         Using class-driven simulation here for the showcase; in React this
+         is :focus-within on the wrap. */
+      .field-wrap.is-hover { /* hover translates handled on field directly */ }
+
+      /* ============================================================
+         LABEL ATOM
+         ============================================================ */
+      .field-label {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--color-ink);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .field-label .req { color: var(--color-alert); font-weight: 700; }
+      .field-label .pill-optional {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        padding: 2px 6px;
+        border: 1.5px solid var(--color-ink-30);
+        color: var(--color-ink-muted);
+        line-height: 1;
+      }
+      .field-label--sm { font-size: 13px; }
+      .field-label--lg { font-size: 17px; }
+
+      /* Hint between label and field */
+      .field-hint {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        color: var(--color-ink-60);
+        margin-bottom: 6px;
+      }
+
+      /* Mono kicker below field */
+      .field-kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-ink-muted);
+        margin-top: 8px;
+      }
+
+      .state-row {
+        margin-bottom: 24px;
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px dashed var(--color-paper-edge);
+      }
+      .state-row .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-ink-muted);
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .state-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 720px) { .state-grid { grid-template-columns: 1fr; } }
+
+      /* ============================================================
+         FOUT badge — paper pill, alert body, ink shadow
+         ============================================================ */
+      .error-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .fout-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--color-alert);
+        color: #fff;
+        padding: 4px 9px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        border: 1.5px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        line-height: 1;
+      }
+      .fout-pill svg { width: 12px; height: 12px; fill: #fff; }
+      .error-msg {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 15px;
+        color: var(--color-alert);
+      }
+
+      /* ============================================================
+         TEXTAREA COUNTER
+         ============================================================ */
+      .textarea-counter {
+        position: absolute;
+        bottom: 8px;
+        right: 14px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-ink-60);
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 1px 4px;
+      }
+      .textarea-counter.over { color: var(--color-alert); }
+
+      /* ============================================================
+         SIZES SHOWCASE
+         ============================================================ */
+      .sizes-stack { display: flex; flex-direction: column; gap: 12px; }
+      .field--sm { height: 32px; padding: 0 11px; font-size: 14px; }
+      .field--lg { height: 48px; padding: 0 15px; font-size: 17px; }
+
+      /* ============================================================
+         CONSOLIDATED FORM — TapedCard composition
+         ============================================================ */
+      .form-stage {
+        max-width: 760px;
+        margin: 0 auto;
+        position: relative;
+        padding: 24px 16px 40px;
+      }
+
+      .form-card {
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        padding: 36px 40px 28px;
+        position: relative;
+        /* No offset shadow — corner clips carry the visual identity.
+           Distinct mood from TapedCard (which is shadow + tape, casual). */
+      }
+      .form-card-corners::before,
+      .form-card-corners::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--color-ink);
+      }
+      .form-card-corners::before { top: -2px; left: -2px; border-right: none; border-bottom: none; transform: translate(-6px, -6px); }
+      .form-card-corners::after { bottom: -2px; right: -2px; border-left: none; border-top: none; transform: translate(6px, 6px); }
+
+      .form-tape-stamp {
+        position: absolute;
+        top: -14px;
+        right: 36px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 6px 14px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 700;
+        transform: rotate(2deg);
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+        border: 1.5px solid var(--color-ink);
+        z-index: 2;
+      }
+      .form-tape-stamp::before { content: "★ "; color: var(--color-cream); }
+
+      .form-meta-row {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-ink-muted);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        margin-bottom: 18px;
+      }
+      .form-headline {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: normal;
+        font-size: 40px;
+        line-height: 1.05;
+        margin: 0 0 24px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 20px;
+        margin-bottom: 20px;
+      }
+      .form-grid > .span-2 { grid-column: 1 / -1; }
+      .form-divider {
+        border: none;
+        border-top: 1.5px dashed var(--color-ink-40);
+        margin: 16px 0 14px;
+      }
+      .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .form-progress {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-ink-muted);
+      }
+      .submit-btn {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 12px 22px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 0 var(--color-jersey);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .submit-btn:hover { transform: translate(1px, 1px); box-shadow: 3px 3px 0 0 var(--color-jersey); }
+      .submit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--color-jersey); }
+
+      /* ============================================================
+         STATE-MACHINE REFERENCE CARD
+         ============================================================ */
+      .matrix {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.5);
+        margin-top: 12px;
+      }
+      .matrix th, .matrix td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .matrix th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .matrix code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 1px 5px;
+      }
+
+      /* Helper note callout */
+      .note {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px dashed var(--color-paper-edge);
+        padding: 16px 20px;
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--color-ink-soft);
+      }
+      .note strong { color: var(--color-ink); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- Header -->
+      <header>
+        <div class="mono mono--muted">Phase 2.A.4 · Form atoms · Direction C — Locked</div>
+        <h1>Paper-card <em>chrome,</em> uniform.</h1>
+        <p class="lead">
+          Input · Select · Textarea · Label all share one state machine. Three ink weights signal fill progression
+          (<em>idle → filled → focused</em>). Paper press idiom carries focus. Jersey-deep stays out of the field —
+          it's reserved for content elsewhere on Track B. Alert color + alert-soft shadow uniquely mark errors.
+        </p>
+      </header>
+
+      <!-- ===========================================
+           STATE MACHINE REFERENCE CARD
+           =========================================== -->
+      <section class="section" style="margin-top: 32px;">
+        <div class="section-title"><h2>Field state machine <em>· uniform across atoms</em></h2></div>
+        <p class="section-meta">All four atoms (Input, Select, Textarea, and the field used inside form composition) implement this exact set of rules.</p>
+
+        <table class="matrix">
+          <thead>
+            <tr><th>State</th><th>Border</th><th>Shadow</th><th>Transform</th><th>Surface</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Default</td><td><code>2px ink/30</code></td><td><code>4×4 ink-muted</code></td><td>—</td><td><code>bg-white</code></td></tr>
+            <tr><td>Hover</td><td><code>2px ink/40</code></td><td><code>3×3 ink-muted</code></td><td><code>translate(1px, 1px)</code></td><td><code>bg-white</code></td></tr>
+            <tr><td><strong>Focus</strong></td><td><code>2px ink</code> (full)</td><td><code>0 0 0 0</code></td><td><code>translate(2px, 2px)</code></td><td><code>bg-white</code></td></tr>
+            <tr><td><strong>Filled</strong></td><td><code>2px ink/60</code></td><td><code>4×4 ink-muted</code></td><td>—</td><td><code>bg-white</code></td></tr>
+            <tr><td>Filled + focus</td><td><code>2px ink</code></td><td><code>0 0 0 0</code></td><td><code>translate(2px, 2px)</code></td><td><code>bg-white</code></td></tr>
+            <tr><td>Error</td><td><code>2px alert</code></td><td><code>4×4 alert-soft</code></td><td>—</td><td><code>bg-white</code></td></tr>
+            <tr><td>Error + focus</td><td><code>2px alert</code></td><td><code>0 0 0 0</code></td><td><code>translate(2px, 2px)</code></td><td><code>bg-white</code></td></tr>
+            <tr><td>Disabled</td><td><code>2px ink/15</code></td><td><code>none</code></td><td>—</td><td><code>bg-cream-soft</code></td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          <strong>No jersey-deep on the field anywhere.</strong> Track B reserves jersey for content (live match strip, KCVV name, scoring) — never chrome. Focus signals via ink-darken + paper press idiom; this also avoids reading as false-positive validation. <strong>New token:</strong> <code>--shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft)</code> appended to the existing <code>@theme</code> block.
+        </div>
+      </section>
+
+      <!-- ===========================================
+           INPUT
+           =========================================== -->
+      <section class="section">
+        <div class="showcase-header">
+          <span class="title">Input<span class="dot">.</span></span>
+          <span class="meta">Default · Hover · Focus · Filled · Error · Error + Focus · Disabled</span>
+        </div>
+
+        <div class="state-grid">
+          <div class="state-row">
+            <div class="state-label">Default</div>
+            <div class="field-label">Voornaam <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field" type="text" placeholder="Bijv. Jonas" /></div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Hover</div>
+            <div class="field-label">Achternaam <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field is-hover" type="text" placeholder="hover-staat" /></div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Focus</div>
+            <div class="field-label">E-mail <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field is-focus" type="email" placeholder="naam@kcvvelewijt.be" /></div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Filled</div>
+            <div class="field-label">Rugnummer</div>
+            <div class="field-wrap"><input class="field is-filled" type="text" value="9" /></div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Error</div>
+            <div class="field-label">Telefoon <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field is-error" type="text" value="0470 12 34" /></div>
+            <div class="error-row">
+              <span class="fout-pill">
+                <svg viewBox="0 0 256 256"><path d="M128 24a104 104 0 1 0 104 104A104.13 104.13 0 0 0 128 24Zm-8 56a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm8 116a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+                FOUT
+              </span>
+              <span class="error-msg">Geen geldig telefoonnummer.</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Error + focus</div>
+            <div class="field-label">Postcode <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field is-error is-focus" type="text" value="123" /></div>
+            <div class="error-row">
+              <span class="fout-pill">
+                <svg viewBox="0 0 256 256"><path d="M128 24a104 104 0 1 0 104 104A104.13 104.13 0 0 0 128 24Zm-8 56a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm8 116a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+                FOUT
+              </span>
+              <span class="error-msg">Vul minstens 4 cijfers in.</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Disabled</div>
+            <div class="field-label">Lidnummer</div>
+            <div class="field-wrap"><input class="field is-disabled" type="text" value="KCVV-2019-077" disabled /></div>
+            <div class="field-kicker">Van bestuur ontvangen</div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">With leading icon</div>
+            <div class="field-label">Met icoon</div>
+            <div class="field-hint">Zoek door 142 spelers.</div>
+            <div class="field-wrap">
+              <input class="field" style="padding-left: 36px;" type="text" placeholder="Zoek speler…" />
+              <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-ink-muted);">
+                <svg width="16" height="16" viewBox="0 0 256 256"><path fill="currentColor" d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           SELECT
+           =========================================== -->
+      <section class="section">
+        <div class="showcase-header">
+          <span class="title">Select<span class="dot">.</span></span>
+          <span class="meta">Phosphor caret · Default · Focus · Filled · Error · Disabled</span>
+        </div>
+
+        <div class="state-grid">
+          <div class="state-row">
+            <div class="state-label">Default</div>
+            <div class="field-label">Ploeg <span class="req">*</span></div>
+            <div class="field-wrap">
+              <select class="field field-select"><option value="" disabled selected>Maak een keuze…</option><option>U21</option></select>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Filled</div>
+            <div class="field-label">Ploeg (geselecteerd)</div>
+            <div class="field-wrap">
+              <select class="field field-select is-filled"><option>U15</option></select>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Focus</div>
+            <div class="field-label">Ploeg (focus)</div>
+            <div class="field-wrap">
+              <select class="field field-select is-focus"><option value="" disabled selected>Maak een keuze…</option><option>U21</option></select>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Filled + focus</div>
+            <div class="field-label">Ploeg (filled + focus)</div>
+            <div class="field-wrap">
+              <select class="field field-select is-filled is-focus"><option>U21</option></select>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Error</div>
+            <div class="field-label">Positie <span class="req">*</span></div>
+            <div class="field-wrap">
+              <select class="field field-select is-error"><option value="" disabled selected>Kies positie…</option></select>
+            </div>
+            <div class="error-row">
+              <span class="fout-pill">
+                <svg viewBox="0 0 256 256"><path d="M128 24a104 104 0 1 0 104 104A104.13 104.13 0 0 0 128 24Zm-8 56a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm8 116a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+                FOUT
+              </span>
+              <span class="error-msg">Selecteer een positie.</span>
+            </div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Disabled</div>
+            <div class="field-label">Categorie</div>
+            <div class="field-wrap">
+              <select class="field field-select is-disabled" disabled><option>—</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Open-menu state</strong> (image 2 mockup, inverted active option <code>bg-ink text-cream</code> + jersey-deep dot) is <strong>not implementable</strong> on a native <code>&lt;select&gt;</code>. Deferred to a future combobox issue (Phase 5 forms-tier work).
+        </div>
+      </section>
+
+      <!-- ===========================================
+           TEXTAREA
+           =========================================== -->
+      <section class="section">
+        <div class="showcase-header">
+          <span class="title">Textarea<span class="dot">.</span></span>
+          <span class="meta">Resize-vertical · Counter · Focus · Filled · Error · Disabled</span>
+        </div>
+
+        <div class="state-grid">
+          <div class="state-row">
+            <div class="state-label">Filled · with counter</div>
+            <div class="field-label">Korte intro</div>
+            <div class="field-hint">Maximaal 240 tekens.</div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-filled">Spits, geboren in Mechelen — debuteerde voor KCVV in 2019.</textarea>
+              <span class="textarea-counter">58/240</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Focus (empty)</div>
+            <div class="field-label">Notities</div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-focus" placeholder="Schrijf je notitie…"></textarea>
+              <span class="textarea-counter">0/240</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Error (empty required)</div>
+            <div class="field-label">Notities <span class="req">*</span></div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-error" placeholder="Schrijf je notitie…"></textarea>
+              <span class="textarea-counter">0/240</span>
+            </div>
+            <div class="error-row">
+              <span class="fout-pill">
+                <svg viewBox="0 0 256 256"><path d="M128 24a104 104 0 1 0 104 104A104.13 104.13 0 0 0 128 24Zm-8 56a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm8 116a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+                FOUT
+              </span>
+              <span class="error-msg">Notitie is verplicht.</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Filled + focus</div>
+            <div class="field-label">Reactie</div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-filled is-focus">Schrijf je reactie…</textarea>
+              <span class="textarea-counter">19/500</span>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Disabled</div>
+            <div class="field-label">Wedstrijdverslag</div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-disabled" disabled>Eindstand 3-1. Doelpunten: Geldhof (12'), Maes (44'), De Smet (78'). Mooie wedstrijd voor de thuisploeg.</textarea>
+            </div>
+            <div class="field-kicker">Gepubliceerd · 12 apr 2026</div>
+          </div>
+
+          <div class="state-row">
+            <div class="state-label">Over limit (counter alerts)</div>
+            <div class="field-label">Bio</div>
+            <div class="field-wrap">
+              <textarea class="field field-textarea is-filled">Lorem ipsum dolor sit amet consectetur, adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua minim veniam quis nostrud.</textarea>
+              <span class="textarea-counter over">156/120</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           LABEL
+           =========================================== -->
+      <section class="section">
+        <div class="showcase-header">
+          <span class="title">Label<span class="dot">.</span></span>
+          <span class="meta">Required · Optional · Sizes · Hint</span>
+        </div>
+
+        <div class="state-grid">
+          <div class="state-row">
+            <div class="state-label">Required</div>
+            <div class="field-label">Standaard label (md) <span class="req">*</span></div>
+            <div class="field-wrap"><input class="field" type="text" placeholder="…" /></div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Optional pill</div>
+            <div class="field-label">Optioneel veld <span class="pill-optional">Optioneel</span></div>
+            <div class="field-wrap"><input class="field" type="text" placeholder="…" /></div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">With hint</div>
+            <div class="field-label">E-mail <span class="req">*</span></div>
+            <div class="field-hint">Voor wedstrijdupdates en lidkaart.</div>
+            <div class="field-wrap"><input class="field" type="email" placeholder="naam@kcvvelewijt.be" /></div>
+          </div>
+          <div class="state-row">
+            <div class="state-label">Size sm (32px)</div>
+            <div class="field-label field-label--sm">Klein label (sm)</div>
+            <div class="field-wrap"><input class="field field--sm" type="text" placeholder="Klein (sm) — 32px" /></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <div class="showcase-header" style="margin-bottom: 12px;">
+            <span class="title" style="font-size: 26px;">Sizes<span class="dot">.</span></span>
+            <span class="meta">Sm 32 · Md 40 · Lg 48</span>
+          </div>
+          <div class="sizes-stack">
+            <div class="field-wrap"><input class="field field--sm" type="text" placeholder="Klein (sm) — 32px" /></div>
+            <div class="field-wrap"><input class="field" type="text" placeholder="Standaard (md) — 40px" /></div>
+            <div class="field-wrap"><input class="field field--lg" type="text" placeholder="Groot (lg) — 48px" /></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           CONSOLIDATED FORM EXAMPLE
+           =========================================== -->
+      <section class="section">
+        <div class="section-title"><h2>Consolidated form <em>· composition preview</em></h2></div>
+        <p class="section-meta">All atoms uniformly styled in the locked C language, wrapped in a TapedCard with corner clip, kicker meta row, Freight headline, jersey-deep tape stamp, dashed footer divider, and ink submit button with jersey-deep paper offset (the only place jersey returns — content CTA, not chrome).</p>
+
+        <div class="form-stage">
+          <div class="form-card form-card-corners">
+            <div class="form-tape-stamp">Inschrijving</div>
+            <div class="form-meta-row">
+              <span>Formulier · Nieuw lid</span>
+              <span>FORM-2026/04</span>
+            </div>
+            <h2 class="form-headline">Welkom op de tribune.</h2>
+
+            <div class="form-grid">
+              <!-- Voornaam — filled -->
+              <div>
+                <div class="field-label">Voornaam <span class="req">*</span></div>
+                <div class="field-wrap"><input class="field is-filled" type="text" value="Wim Breugelmans" /></div>
+              </div>
+              <!-- Achternaam — empty default -->
+              <div>
+                <div class="field-label">Achternaam <span class="req">*</span></div>
+                <div class="field-wrap"><input class="field" type="text" placeholder="Bijv. Verschueren" /></div>
+              </div>
+              <!-- E-mail — focus -->
+              <div class="span-2">
+                <div class="field-label">E-mail <span class="req">*</span></div>
+                <div class="field-hint">Voor wedstrijdupdates en lidkaart.</div>
+                <div class="field-wrap"><input class="field is-focus" type="email" placeholder="naam@kcvvelewijt.be" /></div>
+              </div>
+              <!-- Ploeg — filled select -->
+              <div>
+                <div class="field-label">Ploeg <span class="req">*</span></div>
+                <div class="field-wrap">
+                  <select class="field field-select is-filled"><option>U15</option></select>
+                </div>
+              </div>
+              <!-- Geboortejaar — filled optional -->
+              <div>
+                <div class="field-label">Geboortejaar <span class="pill-optional">Optioneel</span></div>
+                <div class="field-wrap"><input class="field is-filled" type="text" value="1998" /></div>
+              </div>
+              <!-- Telefoon — error inline -->
+              <div class="span-2">
+                <div class="field-label">Telefoon <span class="req">*</span></div>
+                <div class="field-wrap"><input class="field is-error" type="tel" value="0470 12 34" /></div>
+                <div class="error-row">
+                  <span class="fout-pill">
+                    <svg viewBox="0 0 256 256"><path d="M128 24a104 104 0 1 0 104 104A104.13 104.13 0 0 0 128 24Zm-8 56a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm8 116a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+                    FOUT
+                  </span>
+                  <span class="error-msg">Geen geldig telefoonnummer.</span>
+                </div>
+              </div>
+              <!-- Vertel iets — filled textarea + counter, optional -->
+              <div class="span-2">
+                <div class="field-label">Vertel iets over jezelf <span class="pill-optional">Optioneel</span></div>
+                <div class="field-hint">Optioneel — verschijnt op je spelerspagina.</div>
+                <div class="field-wrap">
+                  <textarea class="field field-textarea is-filled">Spits, geboren in Mechelen — debuteerde voor KCVV in 2019.</textarea>
+                  <span class="textarea-counter">58/240</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="form-divider" />
+            <div class="form-footer">
+              <span class="form-progress">5 van 7 ingevuld</span>
+              <button class="submit-btn">Versturen →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="max-width: 760px; margin: 28px auto 0;">
+          <strong>What's shown above:</strong> all five field states co-existing in one composition — <code>filled</code> (Voornaam, Geboortejaar, Ploeg, Vertel iets), <code>default</code> (Achternaam), <code>focus</code> (E-mail), <code>error</code> (Telefoon), and <code>optional-pill labels</code> (Geboortejaar, Vertel iets). The TapedCard wrapper, tape stamp, dashed footer divider, ink-with-jersey-shadow submit button, and Freight Display headline are the editorial frame. Chrome inside (form fields) stays uniform paper-card.
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

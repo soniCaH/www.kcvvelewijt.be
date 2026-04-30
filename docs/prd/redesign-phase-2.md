@@ -98,7 +98,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] **2.A.1 EditorialLink:** `apps/web/src/components/design-system/EditorialLink/` exists with `EditorialLink.tsx`, `EditorialLink.stories.tsx`, `EditorialLink.test.tsx`, `index.ts`. `SectionHeader.tsx` no longer holds bespoke highlighter-mask JSX; it renders `<EditorialLink variant="cta">`. The `TODO(phase-4): consolidate with <HighlighterStroke>` comment is removed.
 - [ ] **2.A.2 Phosphor migration:** Every Phase 2 atom that previously imported from `@/lib/icons` now imports from `@/lib/icons.redesign`. Wrapper components default `weight="fill"` and accept `size`, `className`, `aria-hidden` pass-through.
 - [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
-- [ ] **2.A.4 Form atoms:** All four atoms render `bg-white` with `border border-ink/20`, focus state uses `border-jersey-deep` + `ring-jersey-deep/20`. Error state on Input/Select/Textarea uses `--color-alert`. Label required asterisk uses `--color-alert`. `kcvv-alert` no longer referenced from these four files.
+- [ ] **2.A.4 Form atoms:** Input / Select / Textarea uniformly implement the locked Direction C state machine (`bg-white` + 2px ink-weighted border + `--shadow-paper-sm-soft` resting shadow + paper-press idiom on hover/focus + `--shadow-paper-sm-alert` on error). No jersey-deep on the field anywhere — focus signals via `border-ink` + shadow snap + `translate(2px, 2px)`. Filled state anchors at `border-ink/60`. Sharp corners (`rounded-[0.25em]` removed — see AC override note in §6.3). New `<FieldError>` and `<TextareaCounter>` primitives extracted. Phosphor `CaretDown` replaces Lucide on Select. `kcvv-alert` no longer referenced from these four files. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md` (locked spec) and `option-c-locked.html` (canonical visual).
 - [ ] **2.A.5 Alert:** `AlertVariant` type is `"success" | "warning" | "error"` (no `info`). Each variant matches the colour map in §6.5. Dismiss button renders Phosphor Fill `X`.
 - [ ] **2.A.6 FilterTab.icon removal:** `FilterTab.icon` field removed from the `FilterTab` interface; the `<FilterTabs>` rendering path no longer accepts or renders any leading icon. Locked at the Track B design checkpoint (2026-04-30) — supersedes the original Lucide → Phosphor type-swap plan. Acceptance: zero non-test references to `FilterTab.icon` after the PR; consumers that previously passed an `icon` stop doing so; type-check passes.
 
@@ -179,21 +179,87 @@ interface EditorialLinkProps {
 
 ### 6.3 Form atoms — `<Input>`, `<Select>`, `<Textarea>`, `<Label>`
 
-Master design Open Q7 (paper aesthetic on chrome) defers to Phase 6/8. Phase 2 keeps form atoms as functional chrome — no rotation, no tape, no hard paper shadow.
+The Phase 2.A.4 form-atom design checkpoint completed 2026-04-30. Owner picked **Direction C — "Paper-card emphasis"**, with two revisions on top of the original three-way exploration: (a) no jersey-deep on the field anywhere (Track B reserves jersey for content, not chrome; jersey-on-focus also reads as false-positive validation), (b) filled-state anchor locked at `border-ink/60`.
 
-**Token swaps:**
+**Source-of-record:**
 
-- Background: stays `bg-white`.
-- Border (default): `border border-ink/20` (was `border-foundation-gray`).
-- Border (focus): `focus:border-jersey-deep`.
-- Ring (focus): `focus:ring-jersey-deep/20`.
-- Border (error): `border-alert`.
-- Ring (error): `focus:ring-alert/20`.
-- Disabled: `disabled:bg-cream-soft disabled:opacity-50` (cream-soft unifies with page surface).
-- Placeholder text: `text-ink/40`.
-- `Label`: `text-ink font-semibold`. Required asterisk `text-alert`.
+- Canonical visual: `docs/design/mockups/phase-2-a-4-form-atoms/option-c-locked.html`.
+- Locked specification, resolved sign-off questions, and historical exploration: `docs/design/mockups/phase-2-a-4-form-atoms/compare.md`.
+- Three-way historical exploration: `docs/design/mockups/phase-2-a-4-form-atoms/compare.html`.
 
-Border radius (`rounded-[0.25em]`) unchanged. Sizes (sm/md/lg) unchanged.
+**AC override — sharp corners.** Issue [#1571](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1571) AC text says "Border radius `rounded-[0.25em]` unchanged". This PRD **overrides that AC** — form atoms ship with no border-radius, aligning with the Track B chrome lockdown ("Sharp corners everywhere — no `border-radius`" — `phase-2-track-b/compare.md` §Decision). Implementation PR description must call this out explicitly under "AC overrides".
+
+**Master-design Open Q7** (paper aesthetic on chrome) is now resolved for Phase 2: paper-card vocabulary applies. Q7 deferral to Phase 6/8 stands only for non-form chrome surfaces.
+
+#### Field state machine — uniform across `<Input>`, `<Select>`, `<Textarea>`
+
+| State          | Border             | Shadow                                     | Transform             | Surface                                              |
+| -------------- | ------------------ | ------------------------------------------ | --------------------- | ---------------------------------------------------- |
+| Default        | `2px ink/30`       | `--shadow-paper-sm-soft` (4×4 ink-muted)   | —                     | `bg-white`                                           |
+| Hover          | `2px ink/40`       | `3×3 ink-muted`                            | `translate(1px, 1px)` | `bg-white`                                           |
+| Focus          | `2px ink` _(full)_ | `0 0 0 0`                                  | `translate(2px, 2px)` | `bg-white`                                           |
+| Filled         | `2px ink/60`       | `--shadow-paper-sm-soft`                   | —                     | `bg-white`                                           |
+| Filled + focus | `2px ink`          | `0 0 0 0`                                  | `translate(2px, 2px)` | `bg-white`                                           |
+| Error          | `2px alert`        | `--shadow-paper-sm-alert` (4×4 alert-soft) | —                     | `bg-white`                                           |
+| Error + focus  | `2px alert`        | `0 0 0 0`                                  | `translate(2px, 2px)` | `bg-white`                                           |
+| Disabled       | `2px ink/15`       | `none`                                     | —                     | `bg-cream-soft` (`opacity-50`, `cursor-not-allowed`) |
+
+**Where jersey-deep no longer appears:** the field itself. Jersey returns only on the `<EditorialHeading>` period dot (decoration), the submit-button paper-shadow offset (content CTA), and tape stamps (content moment).
+
+#### New token
+
+```css
+/* Append to the existing @theme block in apps/web/src/styles/globals.css */
+--shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft);
+```
+
+Mirrors the `--shadow-paper-sm-soft` pattern locked in Track B. Used exclusively where `--color-alert` border is present. Add a swatch + token reference in `Foundation/Colors` MDX.
+
+#### Token swaps (per atom)
+
+```text
+text-kcvv-gray-dark                                            → text-ink
+placeholder:text-foundation-gray-dark                          → placeholder:text-ink/40
+border-foundation-gray                                         → border-ink/30 (1px → 2px)
+focus:border-kcvv-green-bright focus:ring-kcvv-green-bright/20 → state machine above (no ring, no jersey)
+border-kcvv-alert                                              → border-alert (+ shadow-paper-sm-alert)
+disabled:bg-foundation-gray-light                              → disabled:bg-cream-soft
+rounded-[0.25em]                                               → (removed — sharp corners; AC override)
+```
+
+#### `<Label>`
+
+- `text-ink font-semibold`.
+- Required asterisk: `text-alert`.
+- Optional pill: mono caps "OPTIONEEL", `border border-ink/30 px-1.5 py-0.5 text-[10px] tracking-wide` (no `border-radius`).
+- Sizes sm/md/lg unchanged.
+
+#### `<Select>` — Phosphor caret
+
+Import `CaretDown` from `@/lib/icons.redesign` (Phosphor Fill); drop the Lucide `ChevronDown`. Chevron stays absolutely positioned inside the same `relative` wrapper so it follows the field through hover/focus translates.
+
+**Open-menu state** (image 2 mockup — inverted active option `bg-ink text-cream` + jersey-deep dot) is **not implementable on a native `<select>`**. Deferred to a future combobox issue (Phase 5 forms-tier work). Native `<select>` keeps the OS-rendered dropdown.
+
+#### New primitives — `<FieldError>` and `<TextareaCounter>`
+
+Both extracted into `apps/web/src/components/design-system/` with their own stories (`tags: ["autodocs", "vr"]`).
+
+- **`<FieldError>`** — paper-pill error indicator + italic alert message. Renders `<span class="paper-pill paper-pill--alert"><WarningCircle weight="fill" /> FOUT</span>` followed by an inline italic Freight Display alert message. Single source of truth across Input / Select / Textarea, consumed via each atom's existing `error?: string` prop. Pill body: `bg-alert text-white border-[1.5px] border-ink shadow-[3px_3px_0_0_var(--color-ink)]` (ink shadow — never jersey on chrome).
+- **`<TextareaCounter>`** — `current/max` mono digits in the bottom-right corner of `<Textarea>`. Color shifts to `text-alert` when `current > max`. Wired into `<Textarea>` via the existing `maxLength` prop (no new public surface).
+
+#### Sizes
+
+Heights locked at sm 32 / md 40 / lg 48 (px). Padding scales with the existing `sm/md/lg` ladder. Sizes ladder unchanged from current implementation; only borders, shadows, and transforms change.
+
+#### Implementation order (per the standard Phase 2 atom-reskin workflow)
+
+1. Append `--shadow-paper-sm-alert` to the `@theme` block in `apps/web/src/styles/globals.css`. Add MDX entry in `Foundation/Colors`.
+2. Reskin `Input.tsx`, `Select.tsx`, `Textarea.tsx`, `Label.tsx` per the spec above.
+3. Create `<FieldError>` and `<TextareaCounter>` primitives with their own stories + tests.
+4. Update Storybook stories for all four atoms covering every state in the table above (default, hover, focus, filled, filled+focus, error, error+focus, disabled), plus sm/md/lg, optional-pill, hint, kicker.
+5. `pnpm vr:update:story "Input|Select|Textarea|Label|FieldError|TextareaCounter"` captures baselines.
+6. PR description lists every story whose baseline was updated, plus an explicit **AC overrides** section calling out the sharp-corners override.
+7. `pnpm --filter @kcvv/web check-all` passes.
 
 ### 6.4 `<Alert>` — 3 variants (info dropped)
 
@@ -282,6 +348,13 @@ Append to the existing `@theme` block alongside other redesign tokens (cream/ink
    scarf spinner). Ink-muted (#6b6b6b) gives the offset visible depth without
    adding a third primary shadow weight. */
 --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+
+/* Alert offset-shadow sibling — used exclusively on form fields in the
+   error state (Input / Select / Textarea), where the resting --shadow-paper-sm-soft
+   would lose semantic distinction. Pairs with a 2px alert border. Alert-soft
+   (#e8d5cf) keeps the offset visible without competing with the alert border
+   itself. See §6.3. */
+--shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft);
 ```
 
 `--color-success` is not added — `--color-jersey-deep` covers success semantics.
@@ -327,6 +400,12 @@ These are NOT blockers for writing the PRD. Each one is genuinely unknown right 
 - [x] **Arrow button shape.** ✅ Resolved 2026-04-30 — single canonical 48 × 48 paper button, italic Freight Display `←` / `→`. See compare.md.
 - [ ] **`<Alert variant="info">` migration.** Are there existing consumers? If yes, do they all map cleanly to `success`, or do some need a different variant? → resolved by grep at PR time for #2.A.5
 - [x] **Phosphor `Spinner` compatibility.** ✅ Resolved 2026-04-30 — not used. The barber-pole motif replaces the SVG spinner entirely. Phosphor `Spinner` icon was never adopted.
+- [x] **Form-atom direction.** ✅ Resolved 2026-04-30 — Direction C (paper-card emphasis) with two revisions: no jersey-deep on the field, filled anchor at `border-ink/60`. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md`.
+- [x] **Form-atom sharp corners override.** ✅ Resolved 2026-04-30 — owner confirmed dropping `rounded-[0.25em]` from issue #1571 AC. PR description must call out the AC override.
+- [x] **Form-atom filled-state anchor.** ✅ Resolved 2026-04-30 — `border-ink/60` (three ink weights signal fill progression: ink/30 idle → ink/60 filled → ink full focused).
+- [x] **Form-atom textarea counter.** ✅ Resolved 2026-04-30 — in scope for #1571 as new `<TextareaCounter>` primitive.
+- [x] **Open-`<select>` active-option styling.** ✅ Resolved 2026-04-30 — deferred to a future combobox issue (Phase 5 forms-tier work). Native `<select>` cannot render `bg-ink text-cream + jersey-deep dot` on the active option.
+- [x] **`<FieldError>` extraction.** ✅ Resolved 2026-04-30 — extracted as a primitive (single source of truth across Input / Select / Textarea).
 - [ ] **`disabled` cream-soft on Form atoms.** Master design has no explicit guidance for disabled form chrome; cream-soft is a guess that unifies with surrounding page. May need to be lighter (`cream-soft/50`) if it reads as too prominent. → resolved during implementation of #2.A.4
 - [ ] **EditorialLink `inline` arrow opt-in.** Is there a use case for inline links that _do_ want a trailing arrow? Default is `false` for `inline` but `withArrow` accepts override. May discover none and remove the prop. → resolved during implementation of #2.A.1
 - [ ] **VR baselines for legacy consumers.** When an atom changes, its appearance inside legacy consumer stories also changes. Should those baselines be updated too (consumer is unchanged but renders the new atom), or marked `vr-skip` until the consumer's own phase? → resolved during tracer bullet (#2.0); set the precedent there.
