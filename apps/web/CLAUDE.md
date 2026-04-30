@@ -404,6 +404,17 @@ of every story that consumes them. The contract for these PRs:
    below); using it for deferred-redesign opt-outs would prevent the test
    runner from even visiting the story, masking unrelated crashes from the
    moment the tag lands.
+
+   **Carve-out for structural twins** — atoms that share the same
+   source-of-truth style file as the reskinned atom (e.g. `<LinkButton>`
+   imports `getButtonClasses` directly from `Button/button-styles.ts` and
+   cannot visually drift from `<Button>` without editing that same file)
+   update _alongside_ the atom, not deferred. Their baselines belong in the
+   atom's PR. This carve-out is narrow and structural: it requires a literal
+   shared style module, not a shared design language. Composed consumers that
+   render the atom (feature components, page sections) always defer via
+   `vr.disable`.
+
 3. **PR `## VR baselines` section** lists the atom's updated baselines, plus
    any consumer stories transitioned to `vr.disable` and the issue/phase they
    re-acquire VR coverage in. Example:
