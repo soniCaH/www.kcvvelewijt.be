@@ -207,16 +207,25 @@ Border radius (`rounded-[0.25em]`) unchanged. Sizes (sm/md/lg) unchanged.
 - `info` variant removed entirely. Any consumer using it migrates to `success` (the closest visual semantic).
 - Verify zero `<Alert variant="info">` consumers at PR time; if any exist, migrate them in the same PR.
 
-### 6.5 Track B atoms (designs to be produced)
+### 6.5 Track B atoms — locked design contract
 
-The following atoms have **no specified visual contract in this PRD** — design checkpoints via `/design-an-interface` produce that contract before implementation begins.
+The Track B design checkpoint completed 2026-04-30. Owner picked **Direction D — "Paper chrome, ink emphasis"**, a synthesis derived from feedback on three exploratory directions (A — Paper &amp; Tape, B — Mono &amp; Ink, C — Matchday Programme).
 
-- **`<Spinner>`** — circular SVG default is the digital-loader trope. Explore retro-fanzine alternatives: spinning football glyph, halftone dot cycle, barber-pole stripe, animated mono-cycling dots. Constraint: still works at every Spinner size (sm/md/lg/xl) and renders correctly inline + standalone. Logo variant (`/images/logo-flat.png` rotation) likely retained as-is — it's already brand-character.
-- **`<BrandedTabs>`** — bottom-border tab pattern. Token swap is trivial; the open question is whether the bottom-border _pattern itself_ survives in the retro vocabulary or gets reinterpreted (e.g., taped corner accent, mono-stamp underline, ink ribbon).
-- **`<FilterTabs>`** — pill toggle group. Open question: pills survive (with new fills), or replaced with a stamped-card grid, button-row, or other retro-coherent toggle pattern.
-- **`<HorizontalSlider>` + `<ScrollHint>` arrow buttons** — arrow button shape, fill, hover treatment. Should match whatever toggle/button vocabulary settles in BrandedTabs/FilterTabs for visual cohesion.
+**Source-of-record:**
 
-**Design exploration brief for Track B:** produce _cohesive directional options_ (e.g., direction A = "stamped paper buttons", direction B = "ink ribbon underlines") so the four atoms read as one family, AND _per-atom variations_ within each direction so each atom can be evaluated on its own merits. Owner picks direction → per-atom mockups → implementation.
+- Canonical visual: `docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html`.
+- Per-atom locked specifications, historical exploration trail, and provisional caveats: `docs/design/mockups/phase-2-track-b/compare.md`.
+
+**Locked atom contracts (summary; see compare.md for full detail):**
+
+- **`<Spinner>`** — primary motif: scarf barber-pole (diagonal jersey/cream/ink stripes scrolling at 90° via a rotated `::before` for seam-free integer-pixel translation). Variants: `primary` (full brand stripes), `secondary` (no jersey, ink/cream/ink-muted only), `white` (palette flip on dark interlude bg, with `paper-edge` border + `--shadow-paper-sm-soft`), `compact` (three jersey-deep dots pulsing in sequence, inline). Sizes sm/md/lg/xl: 96 × 16 / 180 × 28 / 240 × 36 / 360 × 56. **`variant="logo"` retired** — `SpinnerVariant` becomes `"primary" | "secondary" | "white" | "compact"`.
+- **`<BrandedTabs>`** — paper-card vocabulary at tab scale: `border-2 ink` + `shadow-paper-sm` + `bg-cream`, mono caps, sharp corners, no rotation, no tape. Active: `bg-ink text-cream` + `--shadow-paper-sm-soft` (so the ink tab body and shadow remain distinguishable). Hover: shadow → 3 × 3 + `translate(1px, 1px)`. Prop surface unchanged.
+- **`<FilterTabs>`** — paper-chip vocabulary: `border-2 ink` + `shadow-paper-sm` + `bg-cream-soft`, mono caps, sharp corners. Active: `bg-ink text-cream` + `--shadow-paper-sm-soft` (matches BrandedTabs). Count rendered inline after a 1 px ink-muted hairline pipe — no pill, no badge. Sizes sm/md/lg differ in padding + font-size only. **`FilterTab.icon` prop dropped entirely** — closes #1573 with no UI work (the type swap becomes a removal). `renderAsLinks?`, `showCounts?`, `size`, `tabs`, `activeTab`, `onChange?`, `ariaLabel?`, `className?` retained.
+- **`<HorizontalSlider>` + `<ScrollHint>` arrows.** Arrow: single canonical 48 × 48 paper button (`border-2 ink` + `shadow-paper-sm` + `bg-cream` + italic Freight Display `←` / `→` glyph). On `panel--dusk`, shadow swaps to `--shadow-paper-sm-soft` via descendant rule. **`ScrollArrowButtonProps.variant` dropped** — `{ direction, onClick, className? }` is the full surface. Slider match-card structure (top-to-bottom): mono kicker · teams (KCVV always italic Freight Display + jersey-deep, opponent in body sans) · big mono score · venue + CTA. Sub-degree rotation per `nth-child(4n+1..4)` matching `<TapedCardGrid>`. **No live-card surface variant** — all cards equally treated; live status signalled only via kicker text (`★ LIVE` in alert-red) and score field. `theme: "light" | "dark"` retained (homepage `MatchesSliderSection` consumes dark); dark theme keeps the same paper cards on an ink panel + soft shadow via descendant rule. No green borders, no green shadows.
+
+**Provisional caveats** (from compare.md):
+
+- Owner sign-off was conditional ("not 200% convinced, but let's go with it for now"). The dark-shadow `--shadow-paper-sm-soft` decision and the slider's "all cards equally treated" rule are the two areas most likely to need refinement during implementation. If issues #1575–#1578 surface real-use friction, the per-issue PRDs may revise — this checkpoint is the source-of-record, not a hard freeze.
 
 ### 6.6 Phosphor migration — `apps/web/src/lib/icons.redesign.ts`
 
@@ -266,6 +275,13 @@ Append to the existing `@theme` block alongside other redesign tokens (cream/ink
 --color-alert-soft: #e8d5cf;
 --color-warning: #c68b2c;
 --color-warning-soft: #ecddb8;
+
+/* Soft offset-shadow sibling — used wherever the standard --shadow-paper-sm
+   (ink) would vanish: ink-bg active states (BrandedTab + FilterTab) and any
+   chrome surface on a dark / ink panel (arrows, match cards, white-variant
+   scarf spinner). Ink-muted (#6b6b6b) gives the offset visible depth without
+   adding a third primary shadow weight. */
+--shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
 ```
 
 `--color-success` is not added — `--color-jersey-deep` covers success semantics.
@@ -305,12 +321,12 @@ Full `pnpm vr:update` (~25–41 minutes) runs only when a token file change demo
 
 These are NOT blockers for writing the PRD. Each one is genuinely unknown right now and will be resolved at the indicated point:
 
-- [ ] **Spinner direction.** Retro alternatives explored — which one wins? → resolved by `/design-an-interface` for #2.B.1
-- [ ] **BrandedTabs pattern survival.** Bottom-border underline preserved or reinterpreted (taped accent, mono-stamp, ink ribbon)? → resolved by `/design-an-interface` for #2.B.2
-- [ ] **FilterTabs pattern survival.** Pill toggle preserved (new fills) or replaced with a stamped-card grid? → resolved by `/design-an-interface` for #2.B.3
-- [ ] **Arrow button shape.** Should follow whatever toggle vocabulary settles in BrandedTabs/FilterTabs. → resolved by `/design-an-interface` for #2.B.4
+- [x] **Spinner direction.** ✅ Resolved 2026-04-30 — scarf barber-pole + compact three-dot pulse. See `docs/design/mockups/phase-2-track-b/compare.md`.
+- [x] **BrandedTabs pattern survival.** ✅ Resolved 2026-04-30 — paper-card body, ink-invert active, no tape, no rotation. See compare.md.
+- [x] **FilterTabs pattern survival.** ✅ Resolved 2026-04-30 — paper-chip body, ink-invert active, hairline pipe count. See compare.md.
+- [x] **Arrow button shape.** ✅ Resolved 2026-04-30 — single canonical 48 × 48 paper button, italic Freight Display `←` / `→`. See compare.md.
 - [ ] **`<Alert variant="info">` migration.** Are there existing consumers? If yes, do they all map cleanly to `success`, or do some need a different variant? → resolved by grep at PR time for #2.A.5
-- [ ] **Phosphor `Spinner` compatibility.** Phosphor Fill ships a `Spinner` icon — does it work as a CSS-spun loading indicator, or does the design checkpoint settle on something else? → resolved by `/design-an-interface` for #2.B.1
+- [x] **Phosphor `Spinner` compatibility.** ✅ Resolved 2026-04-30 — not used. The barber-pole motif replaces the SVG spinner entirely. Phosphor `Spinner` icon was never adopted.
 - [ ] **`disabled` cream-soft on Form atoms.** Master design has no explicit guidance for disabled form chrome; cream-soft is a guess that unifies with surrounding page. May need to be lighter (`cream-soft/50`) if it reads as too prominent. → resolved during implementation of #2.A.4
 - [ ] **EditorialLink `inline` arrow opt-in.** Is there a use case for inline links that _do_ want a trailing arrow? Default is `false` for `inline` but `withArrow` accepts override. May discover none and remove the prop. → resolved during implementation of #2.A.1
 - [ ] **VR baselines for legacy consumers.** When an atom changes, its appearance inside legacy consumer stories also changes. Should those baselines be updated too (consumer is unchanged but renders the new atom), or marked `vr-skip` until the consumer's own phase? → resolved during tracer bullet (#2.0); set the precedent there.

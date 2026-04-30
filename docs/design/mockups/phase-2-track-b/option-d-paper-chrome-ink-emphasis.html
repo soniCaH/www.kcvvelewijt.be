@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction D — Paper chrome, ink emphasis · Phase 2 · Track B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: -0.25deg;
+        --rotate-tape-c: 0.25deg;
+        --rotate-tape-d: 0.5deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .panel--dusk { background: var(--color-ink-soft); border-color: var(--color-ink); color: var(--color-cream); }
+      .panel--dusk h3, .panel--dusk .mono { color: var(--color-cream); }
+      /* Chrome inside dusk panels: ink offset shadow disappears against ink-soft bg.
+         Lift to the soft (ink-muted) shadow so the offset depth stays readable. */
+      .panel--dusk .arrow-btn,
+      .panel--dusk .match-card {
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .panel--dusk .arrow-btn:hover { box-shadow: 3px 3px 0 0 var(--color-ink-muted); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .recommend-pick {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--color-jersey);
+        color: var(--color-ink);
+        padding: 4px 10px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+      }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         SPINNER — scarf barber-pole (primary/secondary/white) + compact pulse
+         ============================================================ */
+
+      @keyframes scarf-scroll {
+        0% { background-position: 0 0; }
+        100% { background-position: 80px 0; }
+      }
+
+      .scarf {
+        position: relative;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        background: var(--color-cream);
+        overflow: hidden;
+        display: inline-block;
+      }
+      .scarf::before {
+        content: "";
+        position: absolute;
+        inset: -200px;
+        animation: scarf-scroll 1.5s linear infinite;
+      }
+
+      .scarf--primary::before {
+        background: repeating-linear-gradient(90deg,
+          var(--color-jersey) 0px, var(--color-jersey) 20px,
+          var(--color-cream) 20px, var(--color-cream) 40px,
+          var(--color-ink) 40px, var(--color-ink) 60px,
+          var(--color-cream) 60px, var(--color-cream) 80px);
+        transform: rotate(-45deg);
+      }
+      .scarf--secondary::before {
+        background: repeating-linear-gradient(90deg,
+          var(--color-ink) 0px, var(--color-ink) 20px,
+          var(--color-cream) 20px, var(--color-cream) 40px,
+          var(--color-ink-muted) 40px, var(--color-ink-muted) 60px,
+          var(--color-cream) 60px, var(--color-cream) 80px);
+        transform: rotate(-45deg);
+      }
+      .scarf--white {
+        background: var(--color-ink-soft);
+        border-color: var(--color-paper-edge);
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .scarf--white::before {
+        background: repeating-linear-gradient(90deg,
+          var(--color-cream) 0px, var(--color-cream) 20px,
+          var(--color-ink) 20px, var(--color-ink) 40px,
+          var(--color-jersey-bright) 40px, var(--color-jersey-bright) 60px,
+          var(--color-ink) 60px, var(--color-ink) 80px);
+        transform: rotate(-45deg);
+      }
+
+      .scarf--sm { width: 96px; height: 16px; }
+      .scarf--md { width: 180px; height: 28px; }
+      .scarf--lg { width: 240px; height: 36px; }
+      .scarf--xl { width: 360px; height: 56px; }
+
+      .scarf-cell {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .scarf-cell .scarf-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .scarf-cell--white .scarf-label { color: var(--color-cream); }
+
+      /* Compact three-dot pulse */
+      @keyframes dot-pulse {
+        0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+        40% { opacity: 1; transform: scale(1); }
+      }
+      .dot-pulse {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .dot-pulse__dots { display: inline-flex; gap: 4px; align-items: center; }
+      .dot-pulse__dots span {
+        width: 6px;
+        height: 6px;
+        background: var(--color-jersey-deep);
+        border-radius: 50%;
+        animation: dot-pulse 1.2s ease-in-out infinite;
+      }
+      .dot-pulse__dots span:nth-child(2) { animation-delay: 0.15s; }
+      .dot-pulse__dots span:nth-child(3) { animation-delay: 0.3s; }
+
+      .spinner-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        margin-top: 24px;
+      }
+      .spinner-cell {
+        background: var(--color-cream);
+        border: 1px solid var(--color-paper-edge);
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        min-height: 140px;
+        justify-content: center;
+      }
+      .spinner-cell .size-tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); }
+
+      /* ============================================================
+         BRANDED TABS — paper-card, ink-invert active, NO TAPE
+         ============================================================ */
+
+      .b-tab-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+
+      .b-tab {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        padding: 12px 18px;
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+        border-radius: 0; /* sharp corners — confirmed */
+      }
+      .b-tab:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      .b-tab--active {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .b-tab--active:hover { box-shadow: 3px 3px 0 0 var(--color-ink-muted); }
+
+      /* ============================================================
+         FILTER TABS — paper-chip body, THREE active states for comparison
+         ============================================================ */
+
+      .f-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+      .f-chip {
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+        border-radius: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .f-chip:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      .f-chip__count {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+        padding-left: 8px;
+        border-left: 1px solid var(--color-ink-muted);
+      }
+
+      /* Variant 1 — jersey fill (from Direction A) */
+      .f-chip--jersey-fill.f-chip--active {
+        background: var(--color-jersey);
+        color: var(--color-ink);
+      }
+      .f-chip--jersey-fill.f-chip--active .f-chip__count {
+        color: var(--color-ink);
+        border-left-color: var(--color-ink);
+      }
+
+      /* Variant 2 — ink invert (synthesis proposal) */
+      .f-chip--ink-invert.f-chip--active {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .f-chip--ink-invert.f-chip--active .f-chip__count {
+        color: var(--color-cream);
+        border-left-color: var(--color-cream);
+      }
+
+      /* Variant 3 — green-border outline (from C reference image) */
+      .f-chip--green-outline.f-chip--active {
+        background: var(--color-cream-soft);
+        border-color: var(--color-jersey-deep);
+        color: var(--color-ink);
+      }
+      .f-chip--green-outline.f-chip--active .f-chip__count {
+        color: var(--color-jersey-deep);
+        border-left-color: var(--color-jersey-deep);
+      }
+
+      /* Sizes */
+      .f-chip--sm { font-size: 10px; padding: 5px 9px; }
+      .f-chip--lg { font-size: 12px; padding: 11px 16px; }
+
+      /* ============================================================
+         SCROLL ARROW BUTTONS — paper card, no tape
+         ============================================================ */
+
+      .arrow-btn {
+        width: 48px;
+        height: 48px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        color: var(--color-ink);
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+        border-radius: 0;
+      }
+      .arrow-btn:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      /* No `arrow-btn--dark` variant — a single canonical cream-on-ink arrow
+         renders correctly on both light and dark panel bgs. The shadow vanishes
+         into an ink panel; cream contrast against ink already shows elevation. */
+
+      /* ============================================================
+         HORIZONTAL SLIDER — match cards, KCVV-prominent typography
+         ============================================================ */
+
+      .slider-wrap { position: relative; padding: 0 32px; }
+      .slider-track { display: flex; gap: 20px; overflow: hidden; padding: 12px 0; }
+
+      .match-card {
+        flex: 0 0 280px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 16px 18px;
+      }
+      .match-card:nth-child(4n+1) { transform: rotate(var(--rotate-tape-a)); }
+      .match-card:nth-child(4n+2) { transform: rotate(var(--rotate-tape-c)); }
+      .match-card:nth-child(4n+3) { transform: rotate(var(--rotate-tape-b)); }
+      .match-card:nth-child(4n+4) { transform: rotate(var(--rotate-tape-d)); }
+
+      .match-card__kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-ink-muted);
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        align-items: baseline;
+      }
+      .match-card__kicker .live {
+        color: var(--color-alert);
+        font-weight: 700;
+      }
+
+      .match-card__teams {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .match-card__team {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+      }
+      .match-card__crest {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        border: 1.5px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 11px;
+        color: var(--color-ink);
+      }
+      .match-card__name {
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--color-ink);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .match-card__name--kcvv {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 17px;
+        color: var(--color-jersey-deep);
+      }
+      .match-card__vs {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .match-card__score {
+        font-family: var(--font-mono);
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-ink);
+        margin: 8px 0 12px;
+        text-align: center;
+        letter-spacing: -0.01em;
+      }
+      .match-card__score--upcoming {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--color-ink-muted);
+      }
+
+      .match-card__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding-top: 8px;
+        border-top: 1px dashed var(--color-paper-edge);
+      }
+      .match-card__venue { color: var(--color-ink-muted); }
+      .match-card__cta {
+        color: var(--color-jersey-deep);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      /* All slider cards are equally treated — no live "active" variant.
+         A live match is signalled only through its kicker text (`★ LIVE · 67'`
+         in alert red) and through the score showing real numbers instead of a
+         time. The card surface itself stays identical to upcoming matches.
+
+         Dusk dark theme: the panel bg flips to ink, but the cards do not change.
+         Cream paper cards on ink panel pop via contrast alone; the ink offset
+         shadow becomes invisible against the ink bg, which is fine — the cream
+         surface carries the depth read on its own. No green borders, no green
+         shadows, no neon. */
+
+      /* ============================================================
+         COHESION mock
+         ============================================================ */
+
+      .cohesion { background: var(--color-cream); padding: 40px; border: 1px solid var(--color-paper-edge); }
+      .cohesion-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK B · DIRECTION D</span>
+          <span class="mono mono--muted">★ SYNTHESIS</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Paper chrome, <span class="display"><em>ink</em></span> emphasis.</h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          One coherent direction synthesised from your A / B / C feedback. Paper-card
+          foundation everywhere (border-2 ink + shadow-paper-sm + cream bg). Active
+          states invert to ink + cream — never jersey-fill, except on the live match
+          card where jersey is the <em>content</em> moment, not chrome. No tape on
+          chrome. No leading glyphs on filter tabs. Sharp corners. Typographic
+          arrows over Lucide. One canonical form per atom.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           SPINNER
+           =========================================================== -->
+      <section class="section" id="spinner">
+        <div class="section-meta">
+          <span class="mono">★ 01 · SPINNER</span>
+          <span class="mono mono--muted">— scarf barber-pole (primary / secondary / white) + compact pulse</span>
+        </div>
+        <h2>Sjaal-strepen <em>oneindig.</em></h2>
+        <p class="lead">
+          Diagonal scarf stripes scrolling infinitely — strongest KCVV cultural
+          signal of the three directions. Three palette variants cover all spinner
+          contexts; compact pulse handles inline use.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">PRIMARY · jersey · cream · ink — default loading on cream surfaces</div>
+          <div class="spinner-grid">
+            <div class="spinner-cell"><div class="scarf scarf--primary scarf--sm"></div><span class="size-tag">SM · 96×16</span></div>
+            <div class="spinner-cell"><div class="scarf scarf--primary scarf--md"></div><span class="size-tag">MD · 180×28</span></div>
+            <div class="spinner-cell"><div class="scarf scarf--primary scarf--lg"></div><span class="size-tag">LG · 240×36</span></div>
+            <div class="spinner-cell"><div class="scarf scarf--primary scarf--xl"></div><span class="size-tag">XL · 360×56</span></div>
+          </div>
+        </div>
+
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">SECONDARY · ink · cream · ink-muted (no jersey) — non-brand loading</div>
+          <div class="row">
+            <div class="scarf-cell">
+              <div class="scarf scarf--secondary scarf--lg"></div>
+              <span class="scarf-label">Bezig met opslaan…</span>
+            </div>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Used when the brand colour shouldn't pull attention — e.g. form
+            validation, admin-panel saves, background sync. Stripe palette swaps
+            jersey for ink-muted; everything else identical.
+          </p>
+        </div>
+
+        <div class="panel panel--dusk" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px; color: var(--color-cream)">WHITE · cream · ink · jersey-bright (palette flip) — on dark interlude bg</div>
+          <div class="row">
+            <div class="scarf-cell scarf-cell--white">
+              <div class="scarf scarf--white scarf--lg"></div>
+              <span class="scarf-label">Wedstrijden laden…</span>
+            </div>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 16px; font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--color-cream)">
+            Surface flips to ink-soft, stripes invert to cream-led. Border lifts
+            to <code style="color: var(--color-cream); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15)">paper-edge</code> (warm tan)
+            so it's visible against the ink panel; box-shadow lifts to
+            <code style="color: var(--color-cream); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15)">--shadow-paper-sm-soft</code>
+            (gray, ink-muted) so the offset depth stays readable. Jersey-bright
+            kept only because the cream stripes carry the contrast.
+          </p>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px">COMPACT · three jersey-deep dots — inline next to text</div>
+          <div class="dot-pulse">
+            <span>BIJWERKEN</span>
+            <span class="dot-pulse__dots"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Most KCVV-coded chrome of any direction. Three palette variants cover every loading context (default / non-brand / dark interlude). Compact pulse is the inline workhorse.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Barber-pole bar requires a minimum width (~96px sm). For very-tight inline contexts (button-internal loading state), only `compact` works.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           BRANDED TABS
+           =========================================================== -->
+      <section class="section" id="branded-tabs">
+        <div class="section-meta">
+          <span class="mono">★ 02 · BRANDED TABS</span>
+          <span class="mono mono--muted">— paper-card, ink-invert active, no tape, no rotation</span>
+        </div>
+        <h2>Geplakte <em>tabbladen.</em></h2>
+        <p class="lead">
+          Paper-card vocabulary at tab scale — same border + shadow as TapedCard.
+          Active inverts to ink + cream. Tape removed per your A feedback.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">DEFAULT — five ploeg tabs, B-PLOEG active</div>
+          <div class="b-tab-row" role="tablist" aria-label="Ploeg selectie">
+            <button class="b-tab" type="button" role="tab" aria-selected="false">A-PLOEG</button>
+            <button class="b-tab b-tab--active" type="button" role="tab" aria-selected="true">B-PLOEG</button>
+            <button class="b-tab" type="button" role="tab" aria-selected="false">U21</button>
+            <button class="b-tab" type="button" role="tab" aria-selected="false">U17</button>
+            <button class="b-tab" type="button" role="tab" aria-selected="false">DAMES</button>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Tabs read as physical paper sections. Clear active signal (full inversion). Hover idiom (shadow shift + translate) unifies with all other paper-card press states.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Five paper shadows in a row carry visible weight — fine on a section header, possibly heavy in dense layouts.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FILTER TABS — three active state variants
+           =========================================================== -->
+      <section class="section" id="filter-tabs">
+        <div class="section-meta">
+          <span class="mono">★ 03 · FILTER TABS</span>
+          <span class="mono mono--muted">— paper-chip body fixed, three active-state options to compare</span>
+        </div>
+        <h2>Drie <em>actieve</em> opties.</h2>
+        <p class="lead">
+          Chip body locked: paper-card vocabulary with `border-2 ink` + `shadow-paper-sm`,
+          mono caps label, count after a hairline pipe (`LIVE | 1`). Three options
+          for the active state below — pick one.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">VARIANT 1</span>
+            <span class="mono">JERSEY FILL — from Direction A</span>
+          </div>
+          <div class="f-row">
+            <button class="f-chip f-chip--jersey-fill" type="button">LIVE<span class="f-chip__count">1</span></button>
+            <button class="f-chip f-chip--jersey-fill f-chip--active" type="button">AANKOMEND<span class="f-chip__count">6</span></button>
+            <button class="f-chip f-chip--jersey-fill" type="button">UITSLAGEN<span class="f-chip__count">24</span></button>
+            <button class="f-chip f-chip--jersey-fill" type="button">THUIS<span class="f-chip__count">12</span></button>
+            <button class="f-chip f-chip--jersey-fill" type="button">UIT<span class="f-chip__count">13</span></button>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 12px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Active chip flips to <code>bg-jersey text-ink</code>. Loud but unmistakable.
+            Owner concern: green active may pull attention away from editorial.
+          </p>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">VARIANT 2</span>
+            <span class="mono">INK INVERT — synthesis proposal</span>
+            <span class="recommend-pick">★ GEKOZEN</span>
+          </div>
+          <div class="f-row">
+            <button class="f-chip f-chip--ink-invert" type="button">LIVE<span class="f-chip__count">1</span></button>
+            <button class="f-chip f-chip--ink-invert f-chip--active" type="button">AANKOMEND<span class="f-chip__count">6</span></button>
+            <button class="f-chip f-chip--ink-invert" type="button">UITSLAGEN<span class="f-chip__count">24</span></button>
+            <button class="f-chip f-chip--ink-invert" type="button">THUIS<span class="f-chip__count">12</span></button>
+            <button class="f-chip f-chip--ink-invert" type="button">UIT<span class="f-chip__count">13</span></button>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 12px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Active flips to <code>bg-ink text-cream</code> (matches BrandedTabs).
+            Strongest readable contrast, doesn't compete with editorial jersey moments.
+            Multi-active works (each active chip independently inverted).
+          </p>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">VARIANT 3</span>
+            <span class="mono">GREEN OUTLINE — from your reference image</span>
+          </div>
+          <div class="f-row">
+            <button class="f-chip f-chip--green-outline" type="button">LIVE<span class="f-chip__count">1</span></button>
+            <button class="f-chip f-chip--green-outline f-chip--active" type="button">AANKOMEND<span class="f-chip__count">6</span></button>
+            <button class="f-chip f-chip--green-outline" type="button">UITSLAGEN<span class="f-chip__count">24</span></button>
+            <button class="f-chip f-chip--green-outline f-chip--active" type="button">THUIS<span class="f-chip__count">12</span></button>
+            <button class="f-chip f-chip--green-outline" type="button">UIT<span class="f-chip__count">13</span></button>
+          </div>
+          <p class="mono mono--muted" style="margin-top: 12px; font-size: 12px; text-transform: none; letter-spacing: 0">
+            Border + count digit flip to jersey-deep, body stays cream. Most restrained.
+            Multi-active reads cleanly. Risk: subtler than other two — at quick glance
+            the active state may not pop on a busy page. Test in cohesion mock to verify.
+          </p>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR (across all three)</h4>
+            <p>Paper-card chip body reads as filters at a glance — addresses your B concern. Hairline pipe count divider keeps things readable without a pill stamp. No leading glyphs.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ RESOLVED</h4>
+            <p>Variant 2 (ink-invert) chosen. Chrome states are uniformly ink-coded across BrandedTabs + FilterTabs; jersey stays reserved for content moments only. Variants 1 + 3 retained above as historical reference, will not ship.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SCROLL ARROW BUTTONS
+           =========================================================== -->
+      <section class="section" id="scroll-arrows">
+        <div class="section-meta">
+          <span class="mono">★ 04 · SCROLL ARROW BUTTON</span>
+          <span class="mono mono--muted">— paper card, no tape, typographic glyph</span>
+        </div>
+        <h2>Pijlen <em>op papier.</em></h2>
+
+        <p class="lead">
+          One canonical arrow — cream paper button with ink border and offset
+          shadow. Same rendering on both light and dark panel bgs. The hard-offset
+          shadow vanishes when the panel itself is ink (visible only at very close
+          inspection where the shadow's bottom-right edge clips the ink panel),
+          and the cream button still reads as obviously elevated thanks to the
+          cream-on-ink contrast.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">ON CREAM PANEL — default light context</div>
+          <div class="row">
+            <button class="arrow-btn" type="button" aria-label="Vorige">←</button>
+            <button class="arrow-btn" type="button" aria-label="Volgende">→</button>
+            <span class="mono mono--muted" style="margin-left: 16px">Hover any arrow — shadow shifts to 3×3, translate +1/+1.</span>
+          </div>
+        </div>
+
+        <div class="panel panel--dusk" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px; color: var(--color-cream)">ON INK PANEL — dusk dark context</div>
+          <div class="row">
+            <button class="arrow-btn" type="button" aria-label="Vorige">←</button>
+            <button class="arrow-btn" type="button" aria-label="Volgende">→</button>
+            <span class="mono mono--muted" style="margin-left: 16px; color: var(--color-cream)">Same button, different bg. No green styling — cream-on-ink contrast does the elevation work.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           HORIZONTAL SLIDER
+           =========================================================== -->
+      <section class="section" id="slider">
+        <div class="section-meta">
+          <span class="mono">★ 05 · HORIZONTAL SLIDER</span>
+          <span class="mono mono--muted">— match cards with KCVV-prominent typography, dusk dark theme</span>
+        </div>
+        <h2>De <em>kalender.</em></h2>
+        <p class="lead">
+          Match card structure: mono kicker · teams (KCVV always rendered as italic
+          Freight Display in jersey-deep, opponent in body sans) · big mono score ·
+          venue + CTA. Sub-degree rotation per <code>nth-child(4n+1..4)</code>, same as
+          <code>&lt;TapedCardGrid&gt;</code>. <strong>All cards are equally treated</strong> —
+          no live "active" variant; live status comes from the kicker text only
+          (<code>★ LIVE · 67'</code> in alert-red). Dark theme keeps the same paper
+          cards on an ink panel — no green borders, no green shadows.
+        </p>
+
+        <div class="panel">
+          <div class="mono mono--muted" style="margin-bottom: 16px">LIGHT THEME · cream bg · paper match cards</div>
+          <div class="slider-wrap">
+            <button class="arrow-btn" type="button" aria-label="Vorige" style="position: absolute; left: -8px; top: 50%; transform: translateY(-50%); z-index: 2">←</button>
+            <div class="slider-track">
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span class="live">★ LIVE · 67'</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">KC</span>
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name">Tervuren</span>
+                    <span class="match-card__crest">TV</span>
+                  </div>
+                </div>
+                <div class="match-card__score">2 — 1</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">VOLG LIVE →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span>ZA 02 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">WB</span>
+                    <span class="match-card__name">Wezembeek</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                    <span class="match-card__crest">KC</span>
+                  </div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">20:00</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">WEZEMBEEK-OPPEM</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>BEKER · 1/8</span><span>WO 06 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">KC</span>
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name">Lebbeke</span>
+                    <span class="match-card__crest">LB</span>
+                  </div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">19:30</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span>ZA 09 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">KC</span>
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name">Vilvoorde</span>
+                    <span class="match-card__crest">VV</span>
+                  </div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">15:00</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+            </div>
+            <button class="arrow-btn" type="button" aria-label="Volgende" style="position: absolute; right: -8px; top: 50%; transform: translateY(-50%); z-index: 2">→</button>
+          </div>
+        </div>
+
+        <div class="panel panel--dusk" style="margin-top: 16px">
+          <div class="mono mono--muted" style="margin-bottom: 16px; color: var(--color-cream)">DARK THEME · ink panel · cream paper cards (identical to light) · cream-on-ink contrast carries elevation</div>
+          <div class="slider-wrap">
+            <button class="arrow-btn" type="button" aria-label="Vorige" style="position: absolute; left: -8px; top: 50%; transform: translateY(-50%); z-index: 2">←</button>
+            <div class="slider-track">
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span class="live">★ LIVE · 67'</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">KC</span>
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name">Tervuren</span>
+                    <span class="match-card__crest">TV</span>
+                  </div>
+                </div>
+                <div class="match-card__score">2 — 1</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">VOLG LIVE →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span>ZA 02 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">WB</span>
+                    <span class="match-card__name">Wezembeek</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                    <span class="match-card__crest">KC</span>
+                  </div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">20:00</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">WEZEMBEEK-OPPEM</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>BEKER · 1/8</span><span>WO 06 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team">
+                    <span class="match-card__crest">KC</span>
+                    <span class="match-card__name match-card__name--kcvv">Elewijt</span>
+                  </div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end">
+                    <span class="match-card__name">Lebbeke</span>
+                    <span class="match-card__crest">LB</span>
+                  </div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">19:30</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+            </div>
+            <button class="arrow-btn" type="button" aria-label="Volgende" style="position: absolute; right: -8px; top: 50%; transform: translateY(-50%); z-index: 2">→</button>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>KCVV (always rendered as <em>Elewijt</em> in italic Freight Display jersey-deep) is unambiguously the visual centre of every card. All cards equally treated — no special-casing. Dark theme is just "cream paper on ink", no green chrome.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Match card width (~280px) means ~3–4 cards visible per viewport on desktop — fewer than a dense slider. Sub-degree rotation through 4 cards is satisfying; on uneven counts the rhythm interrupts. Live status reads only via kicker text — fine for at-a-glance, but a viewer scrolling fast may not register "this one's playing now" without scanning the kicker.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           COHESION mock
+           =========================================================== -->
+      <section class="section" id="cohesion">
+        <div class="section-meta">
+          <span class="mono">★ 06 · COHESION CHECK</span>
+          <span class="mono mono--muted">— matches page fragment, all four atoms together</span>
+        </div>
+
+        <div class="cohesion">
+          <div class="cohesion-head">
+            <div>
+              <div class="mono mono--muted" style="margin-bottom: 6px">★ MATCHDAG</div>
+              <h2 class="display"><em>Wedstrijden.</em></h2>
+            </div>
+            <div class="dot-pulse">
+              <span>BIJWERKEN</span>
+              <span class="dot-pulse__dots"><span></span><span></span><span></span></span>
+            </div>
+          </div>
+
+          <div class="b-tab-row" style="margin-bottom: 16px">
+            <button class="b-tab b-tab--active" type="button">A-PLOEG</button>
+            <button class="b-tab" type="button">B-PLOEG</button>
+            <button class="b-tab" type="button">U21</button>
+            <button class="b-tab" type="button">DAMES</button>
+          </div>
+
+          <div class="f-row" style="margin-bottom: 24px">
+            <button class="f-chip f-chip--ink-invert" type="button">LIVE<span class="f-chip__count">1</span></button>
+            <button class="f-chip f-chip--ink-invert f-chip--active" type="button">AANKOMEND<span class="f-chip__count">6</span></button>
+            <button class="f-chip f-chip--ink-invert" type="button">UITSLAGEN<span class="f-chip__count">24</span></button>
+            <button class="f-chip f-chip--ink-invert" type="button">THUIS<span class="f-chip__count">12</span></button>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-track">
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span class="live">★ LIVE · 67'</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team"><span class="match-card__crest">KC</span><span class="match-card__name match-card__name--kcvv">Elewijt</span></div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end"><span class="match-card__name">Tervuren</span><span class="match-card__crest">TV</span></div>
+                </div>
+                <div class="match-card__score">2 — 1</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">VOLG LIVE →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>1STE PROV.</span><span>ZA 02 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team"><span class="match-card__crest">WB</span><span class="match-card__name">Wezembeek</span></div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end"><span class="match-card__name match-card__name--kcvv">Elewijt</span><span class="match-card__crest">KC</span></div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">20:00</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">WEZEMBEEK-OPPEM</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+              <div class="match-card">
+                <div class="match-card__kicker"><span>BEKER · 1/8</span><span>WO 06 MEI</span></div>
+                <div class="match-card__teams">
+                  <div class="match-card__team"><span class="match-card__crest">KC</span><span class="match-card__name match-card__name--kcvv">Elewijt</span></div>
+                  <span class="match-card__vs">VS</span>
+                  <div class="match-card__team" style="justify-content: flex-end"><span class="match-card__name">Lebbeke</span><span class="match-card__crest">LB</span></div>
+                </div>
+                <div class="match-card__score match-card__score--upcoming">19:30</div>
+                <div class="match-card__footer">
+                  <span class="match-card__venue">DRIESSTRAAT</span>
+                  <a href="#" class="match-card__cta">TICKETS →</a>
+                </div>
+              </div>
+            </div>
+            <button class="arrow-btn" type="button" aria-label="Volgende" style="position: absolute; right: -8px; top: 50%; transform: translateY(-50%); z-index: 2">→</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map, decisions resolved, decisions remaining</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Spinner: barber-pole primary / secondary / white + compact three-dot pulse. <code>variant="logo"</code> retired</li>
+          <li>BrandedTabs: paper-card, no tape, no rotation, ink-invert active</li>
+          <li>FilterTabs: paper-chip body + hairline pipe count divider. <strong>Active state: variant 2 (ink invert)</strong> — cohesive with BrandedTabs, jersey reserved for content</li>
+          <li><code>FilterTab.icon</code> prop retired entirely (no leading glyphs anywhere → closes #1573 with no UI work)</li>
+          <li>ScrollArrowButton: single canonical cream-on-ink-bordered paper button with italic Freight Display glyph + <code>shadow-paper-sm</code>. <strong>No <code>variant: "light" | "dark"</code></strong> — same arrow on both panel bgs</li>
+          <li>HorizontalSlider: match card layout (kicker / teams / score / venue+CTA), KCVV always italic Freight Display jersey-deep, sub-degree rotation per <code>nth-child(4n+1..4)</code></li>
+          <li><strong>All slider cards equally treated</strong> — no live "active" variant. Live status signalled only via the kicker text (<code>★ LIVE · 67'</code> in alert-red)</li>
+          <li>Slider <code>theme: "light" | "dark"</code> stays (homepage MatchesSliderSection consumes dark). Dark theme is "cream paper cards on ink panel" — no green borders, no green shadows, no neon</li>
+          <li><strong>New token <code>--shadow-paper-sm-soft: 4px 4px 0 var(--color-ink-muted)</code></strong> — the gray-shadow sibling of <code>--shadow-paper-sm</code>, used wherever ink would vanish: ink-bg active states (BrandedTab + FilterTab) and any chrome on a dark panel (arrows, cards, white-variant spinner). White-variant spinner border also lifts to <code>paper-edge</code> for visibility on ink panels</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          None. The synthesis is locked pending owner sign-off.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TEXT</h4>
+            <ul>
+              <li>Chrome surfaces: <code>--color-cream</code> default, <code>--color-cream-soft</code> for chips</li>
+              <li>Active chrome: <code>--color-ink</code> bg + <code>--color-cream</code> text</li>
+              <li>Live match card: <code>--color-jersey</code> bg + <code>--color-ink</code> text</li>
+              <li>KCVV name typography: italic Freight Display + <code>--color-jersey-deep</code></li>
+              <li>Dusk dark theme: <code>--color-ink-soft</code> bg + <code>--color-cream-soft</code> cards + <code>--color-jersey-deep</code> accents</li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / DEPTH</h4>
+            <ul>
+              <li>Chrome border: <code>2px solid var(--color-ink)</code> (default), <code>paper-edge</code> on white-variant spinner (visibility on ink panel)</li>
+              <li>Chrome shadow: <code>--shadow-paper-sm</code> (4×4 ink) — default</li>
+              <li>Soft shadow sibling: <code>--shadow-paper-sm-soft</code> (4×4 ink-muted gray) — for ink-bg active states + any chrome on dark panel where ink would vanish</li>
+              <li>Press: shadow → 3×3 + <code>translate(1px, 1px)</code></li>
+              <li>Match card rotation: <code>--rotate-tape-a..d</code> via nth-child cycle</li>
+              <li>Sharp corners: no <code>border-radius</code> anywhere</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION D — PAPER CHROME, INK EMPHASIS · KCVV ELEWIJT · 2026-04-30
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

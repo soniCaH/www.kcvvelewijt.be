@@ -1,0 +1,2121 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1280, initial-scale=1" />
+    <title>KCVV Elewijt — Phase 2 · Track B · Direction B — Mono &amp; Ink</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ------------------------------------------------------------------
+         TOKENS — Direction B explicitly does NOT consume --shadow-paper-*
+         ------------------------------------------------------------------ */
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-warning: #c68b2c;
+
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        --font-display: "Playfair Display", "Georgia", serif;
+        --font-body: "Inter", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", "Menlo", monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      ::selection {
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 64px 56px 96px;
+      }
+
+      /* ------------------------------------------------------------------
+         HELPERS
+         ------------------------------------------------------------------ */
+      .kicker {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .kicker .dot {
+        width: 4px;
+        height: 4px;
+        background: var(--color-ink);
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .kicker--ink {
+        color: var(--color-ink);
+      }
+
+      .hairline {
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.18;
+        width: 100%;
+      }
+
+      h1.display,
+      h2.display,
+      h3.display {
+        font-family: var(--font-display);
+        font-weight: 900;
+        line-height: 0.95;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      h1.display {
+        font-size: 88px;
+        font-style: italic;
+        font-weight: 400;
+      }
+
+      h1.display .period {
+        color: var(--color-jersey-deep);
+        font-style: normal;
+      }
+
+      h2.display {
+        font-size: 52px;
+      }
+
+      h3.display {
+        font-size: 36px;
+        font-weight: 700;
+      }
+
+      .lede {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-ink-soft);
+        line-height: 1.35;
+        max-width: 60ch;
+        margin: 18px 0 0;
+      }
+
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        background: rgba(10, 10, 10, 0.06);
+        padding: 1px 5px;
+        color: var(--color-ink);
+      }
+
+      /* ------------------------------------------------------------------
+         HEADER
+         ------------------------------------------------------------------ */
+      .doc-header {
+        padding-bottom: 48px;
+        margin-bottom: 56px;
+        border-bottom: 1px solid var(--color-ink);
+        position: relative;
+      }
+
+      .doc-header .kicker-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+
+      .doc-header h1 {
+        max-width: 14ch;
+      }
+
+      .doc-header .meta {
+        margin-top: 36px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-ink);
+      }
+
+      .meta dt {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-bottom: 6px;
+      }
+
+      .meta dd {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: var(--color-ink);
+      }
+
+      /* ------------------------------------------------------------------
+         SECTION
+         ------------------------------------------------------------------ */
+      section.atom {
+        padding: 56px 0 64px;
+        border-bottom: 1px solid rgba(10, 10, 10, 0.18);
+      }
+
+      section.atom:last-of-type {
+        border-bottom: none;
+      }
+
+      .atom-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: end;
+        gap: 32px;
+        margin-bottom: 36px;
+      }
+
+      .atom-head .copy {
+        max-width: 60ch;
+      }
+
+      .atom-head h2 {
+        margin: 14px 0 0;
+      }
+
+      .atom-head p {
+        margin: 14px 0 0;
+        color: var(--color-ink-soft);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .atom-head .index {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 96px;
+        line-height: 0.85;
+        color: var(--color-ink);
+        opacity: 0.12;
+      }
+
+      .demo-card {
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        padding: 36px 32px 32px;
+        position: relative;
+      }
+
+      .demo-card .demo-label {
+        position: absolute;
+        top: 0;
+        left: 24px;
+        transform: translateY(-50%);
+        background: var(--color-cream);
+        padding: 0 10px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+
+      .demo-card--soft {
+        background: var(--color-cream-soft);
+      }
+
+      .demo-card--soft .demo-label {
+        background: var(--color-cream-soft);
+      }
+
+      .demo-card--ink {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border-color: var(--color-ink);
+      }
+
+      .demo-card--ink .demo-label {
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+
+      /* ------------------------------------------------------------------
+         SPINNER — variant B.1: mono ellipsis + 2px arc
+         ------------------------------------------------------------------ */
+      .spinner-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .spinner-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 18px;
+        padding: 36px 12px 18px;
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        background: var(--color-cream);
+        min-height: 240px;
+      }
+
+      .spinner-tile__caption {
+        font-family: var(--font-mono);
+        font-weight: 500;
+        font-size: 10px;
+        line-height: 1.4;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+      }
+
+      .spinner-tile__caption strong {
+        display: block;
+        color: var(--color-ink);
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .spinner-b1 {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .spinner-b1__arc {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: var(--color-ink);
+        border-right-color: var(--color-ink);
+        border-radius: 50%;
+        animation: spin-quiet 1.6s linear infinite;
+      }
+
+      .spinner-b1__label {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        white-space: nowrap;
+        text-align: center;
+        position: relative;
+      }
+
+      .spinner-b1__label::after {
+        content: ".";
+        display: inline-block;
+        animation: ellipsis 1.6s steps(4, end) infinite;
+        margin-left: 1px;
+        position: relative;
+      }
+
+      .spinner-b1--sm {
+        width: 64px;
+        height: 64px;
+      }
+      .spinner-b1--sm .spinner-b1__label {
+        font-size: 8px;
+        letter-spacing: 0.14em;
+      }
+
+      .spinner-b1--md {
+        width: 96px;
+        height: 96px;
+      }
+      .spinner-b1--md .spinner-b1__label {
+        font-size: 10px;
+      }
+
+      .spinner-b1--lg {
+        width: 128px;
+        height: 128px;
+      }
+      .spinner-b1--lg .spinner-b1__label {
+        font-size: 12px;
+      }
+
+      .spinner-b1--xl {
+        width: 168px;
+        height: 168px;
+      }
+      .spinner-b1--xl .spinner-b1__arc {
+        border-width: 2.5px;
+      }
+      .spinner-b1--xl .spinner-b1__label {
+        font-size: 14px;
+      }
+
+      @keyframes spin-quiet {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes ellipsis {
+        0% {
+          content: ".";
+        }
+        25% {
+          content: "..";
+        }
+        50% {
+          content: "...";
+        }
+        75% {
+          content: "..";
+        }
+        100% {
+          content: ".";
+        }
+      }
+
+      /* B.2 — three-dot inline pulse */
+      .spinner-b2 {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 4px;
+      }
+
+      .spinner-b2 .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-ink);
+        opacity: 0.25;
+        animation: dot-pulse 1.2s ease-in-out infinite;
+      }
+
+      .spinner-b2 .pulse-dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .spinner-b2 .pulse-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .spinner-b2 .pulse-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      .spinner-b2__label {
+        font-family: var(--font-mono);
+        font-weight: 500;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-left: 12px;
+      }
+
+      @keyframes dot-pulse {
+        0%,
+        100% {
+          opacity: 0.18;
+          transform: translateY(0) scale(0.92);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-1px) scale(1);
+        }
+      }
+
+      .spinner-inline-row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 18px 22px;
+        border: 1px solid rgba(10, 10, 10, 0.2);
+        background: var(--color-cream);
+      }
+
+      .spinner-inline-row + .spinner-inline-row {
+        margin-top: 12px;
+      }
+
+      .spinner-inline-row__copy {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .spinner-inline-row__copy strong {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+      }
+
+      .spinner-inline-row__copy span {
+        font-size: 13px;
+        color: var(--color-ink-muted);
+      }
+
+      /* logo variant placeholder */
+      .spinner-logo {
+        width: 96px;
+        height: 96px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .spinner-logo svg {
+        width: 100%;
+        height: 100%;
+        animation: logo-pulse 2.4s ease-in-out infinite;
+      }
+
+      @keyframes logo-pulse {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* ------------------------------------------------------------------
+         BRANDED TABS
+         ------------------------------------------------------------------ */
+      .branded-tabs {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        gap: 48px;
+        padding: 6px 0 0;
+      }
+
+      .branded-tabs__hairline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.22;
+      }
+
+      .branded-tab {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 0 18px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        transition: color 160ms ease;
+      }
+
+      .branded-tab:hover {
+        color: var(--color-ink);
+      }
+
+      .branded-tab[aria-selected="true"] {
+        color: var(--color-ink);
+      }
+
+      .branded-tab[aria-selected="true"]::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 3px;
+        background: var(--color-jersey-deep);
+      }
+
+      .branded-tab:focus-visible {
+        outline: 1px dashed var(--color-ink);
+        outline-offset: 4px;
+      }
+
+      .branded-tabs--ink .branded-tab {
+        color: rgba(245, 241, 230, 0.55);
+      }
+      .branded-tabs--ink .branded-tab:hover,
+      .branded-tabs--ink .branded-tab[aria-selected="true"] {
+        color: var(--color-cream);
+      }
+      .branded-tabs--ink .branded-tabs__hairline {
+        background: var(--color-cream);
+        opacity: 0.25;
+      }
+      .branded-tabs--ink .branded-tab[aria-selected="true"]::after {
+        background: var(--color-jersey);
+      }
+
+      /* state preview row */
+      .state-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .state-card {
+        padding: 22px 22px 24px;
+        border: 1px solid rgba(10, 10, 10, 0.2);
+        background: var(--color-cream);
+      }
+
+      .state-card__caption {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-bottom: 14px;
+      }
+
+      .state-card .branded-tabs {
+        gap: 28px;
+      }
+
+      .state-card .branded-tab {
+        font-size: 11px;
+      }
+
+      /* ------------------------------------------------------------------
+         FILTER TABS
+         ------------------------------------------------------------------ */
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .filter-row + .filter-row {
+        margin-top: 16px;
+      }
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        transition:
+          background-color 140ms ease,
+          color 140ms ease;
+        white-space: nowrap;
+      }
+
+      .filter-chip__count {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--color-ink-muted);
+        font-weight: 500;
+      }
+
+      .filter-chip__count::before {
+        content: "";
+        display: inline-block;
+        width: 1px;
+        height: 10px;
+        background: currentColor;
+        opacity: 0.55;
+      }
+
+      .filter-chip[aria-pressed="true"] {
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+
+      .filter-chip[aria-pressed="true"] .filter-chip__count {
+        color: var(--color-cream);
+        opacity: 0.75;
+      }
+
+      .filter-chip:hover:not([aria-pressed="true"]) {
+        color: var(--color-ink-soft);
+        background: rgba(10, 10, 10, 0.05);
+      }
+
+      .filter-chip:focus-visible {
+        outline: 1px dashed var(--color-ink);
+        outline-offset: 3px;
+      }
+
+      .filter-chip__icon {
+        display: inline-flex;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .filter-chip--sm {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      .filter-chip--md {
+        font-size: 12px;
+        padding: 9px 14px;
+      }
+
+      .filter-chip--lg {
+        font-size: 13px;
+        padding: 12px 18px;
+      }
+
+      .filter-row__label {
+        width: 64px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-alert);
+        display: inline-block;
+        animation: live-pulse 1.4s ease-in-out infinite;
+      }
+
+      .filter-chip[aria-pressed="true"] .live-dot {
+        background: var(--color-jersey);
+      }
+
+      @keyframes live-pulse {
+        0%,
+        100% {
+          opacity: 0.55;
+          transform: scale(0.85);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+
+      /* ------------------------------------------------------------------
+         HORIZONTAL SLIDER
+         ------------------------------------------------------------------ */
+      .slider {
+        position: relative;
+        padding: 28px 0 4px;
+        background: var(--color-cream);
+      }
+
+      .slider--ink {
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+
+      .slider__head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        margin-bottom: 22px;
+      }
+
+      .slider__title {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+      }
+
+      .slider__title .period {
+        color: var(--color-jersey-deep);
+      }
+
+      .slider--ink .slider__title .period {
+        color: var(--color-jersey);
+      }
+
+      .slider__controls {
+        display: inline-flex;
+        gap: 8px;
+      }
+
+      .scroll-arrow {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid var(--color-ink);
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--color-ink);
+        transition:
+          background-color 160ms ease,
+          color 160ms ease;
+        padding: 0;
+      }
+
+      .scroll-arrow:hover {
+        background: var(--color-ink);
+        color: var(--color-cream);
+      }
+
+      .scroll-arrow:focus-visible {
+        outline: 1px dashed var(--color-ink);
+        outline-offset: 3px;
+      }
+
+      .scroll-arrow[disabled] {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .slider--ink .scroll-arrow {
+        border-color: var(--color-cream);
+        color: var(--color-cream);
+      }
+
+      .slider--ink .scroll-arrow:hover {
+        background: var(--color-cream);
+        color: var(--color-ink);
+      }
+
+      .slider__track {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(260px, 1fr);
+        gap: 16px;
+        overflow-x: hidden;
+        padding-bottom: 4px;
+      }
+
+      .match-card {
+        border: 1px solid var(--color-ink);
+        padding: 18px;
+        background: var(--color-cream);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 168px;
+      }
+
+      .slider--ink .match-card {
+        background: var(--color-ink);
+        border-color: rgba(245, 241, 230, 0.4);
+        color: var(--color-cream);
+      }
+
+      .match-card__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      .slider--ink .match-card__meta {
+        color: rgba(245, 241, 230, 0.65);
+      }
+
+      .match-card__teams {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .match-card__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 15px;
+      }
+
+      .match-card__row .team {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .match-card__crest {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        display: inline-block;
+        flex-shrink: 0;
+      }
+
+      .slider--ink .match-card__crest {
+        background: var(--color-ink-soft);
+        border-color: rgba(245, 241, 230, 0.5);
+      }
+
+      .match-card__crest--away {
+        background: var(--color-jersey);
+        border-color: var(--color-jersey-deep);
+      }
+
+      .match-card__score {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+      }
+
+      .match-card__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        padding-top: 10px;
+        border-top: 1px solid rgba(10, 10, 10, 0.18);
+      }
+
+      .slider--ink .match-card__footer {
+        color: rgba(245, 241, 230, 0.55);
+        border-top-color: rgba(245, 241, 230, 0.18);
+      }
+
+      .match-card .badge-final {
+        color: var(--color-ink);
+        font-weight: 700;
+      }
+
+      .slider--ink .match-card .badge-final {
+        color: var(--color-cream);
+      }
+
+      .slider__track--drift {
+        animation: drift 18s ease-in-out infinite alternate;
+      }
+
+      @keyframes drift {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-32px);
+        }
+      }
+
+      /* ------------------------------------------------------------------
+         COHESION
+         ------------------------------------------------------------------ */
+      .cohesion {
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        padding: 40px 36px 44px;
+      }
+
+      .cohesion__head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+
+      .cohesion__title {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 64px;
+        letter-spacing: -0.01em;
+        line-height: 0.95;
+      }
+
+      .cohesion__title .period {
+        color: var(--color-jersey-deep);
+      }
+
+      .cohesion__sub {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 18px;
+        color: var(--color-ink-soft);
+        margin-top: 8px;
+        max-width: 38ch;
+      }
+
+      .cohesion__loading-slot {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 22px;
+        margin-top: 24px;
+        border: 1px dashed rgba(10, 10, 10, 0.4);
+        background: var(--color-cream-soft);
+      }
+
+      .cohesion__loading-slot__copy {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .cohesion__loading-slot__copy strong {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .cohesion__loading-slot span {
+        font-size: 13px;
+        color: var(--color-ink-muted);
+      }
+
+      .cohesion__filters {
+        margin: 18px 0 24px;
+      }
+
+      /* ------------------------------------------------------------------
+         TRADE-OFFS / NOTES
+         ------------------------------------------------------------------ */
+      .tradeoffs {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      .tradeoff {
+        border-left: 2px solid var(--color-ink);
+        padding: 4px 0 4px 16px;
+      }
+
+      .tradeoff--for {
+        border-left-color: var(--color-jersey-deep);
+      }
+
+      .tradeoff--against {
+        border-left-color: var(--color-alert);
+      }
+
+      .tradeoff__label {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .tradeoff--for .tradeoff__label {
+        color: var(--color-jersey-deep);
+      }
+
+      .tradeoff--against .tradeoff__label {
+        color: var(--color-alert);
+      }
+
+      .tradeoff p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--color-ink-soft);
+      }
+
+      /* token map */
+      .token-map {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 28px;
+      }
+
+      .token-card {
+        padding: 12px 14px;
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.4;
+        background: var(--color-cream);
+      }
+
+      .token-card .swatch {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+        border: 1px solid rgba(10, 10, 10, 0.25);
+      }
+
+      .token-card .swatch--cream {
+        background: var(--color-cream);
+      }
+      .token-card .swatch--cream-soft {
+        background: var(--color-cream-soft);
+      }
+      .token-card .swatch--ink {
+        background: var(--color-ink);
+        border-color: var(--color-ink);
+      }
+      .token-card .swatch--ink-muted {
+        background: var(--color-ink-muted);
+      }
+      .token-card .swatch--jersey-deep {
+        background: var(--color-jersey-deep);
+      }
+      .token-card .swatch--jersey {
+        background: var(--color-jersey);
+      }
+      .token-card .swatch--alert {
+        background: var(--color-alert);
+      }
+      .token-card .swatch--paper-edge {
+        background: var(--color-paper-edge);
+      }
+
+      .token-card strong {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--color-ink);
+      }
+
+      .token-card span {
+        color: var(--color-ink-muted);
+      }
+
+      .not-consumed {
+        margin-top: 20px;
+        padding: 16px 18px;
+        border: 1px dashed var(--color-ink-muted);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--color-ink-muted);
+      }
+
+      .not-consumed strong {
+        color: var(--color-ink);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      footer.doc-footer {
+        margin-top: 64px;
+        padding-top: 32px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-ink-muted);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      footer.doc-footer strong {
+        color: var(--color-ink);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <!-- ============================================================
+           HEADER
+           ============================================================ -->
+      <header class="doc-header">
+        <div class="kicker-row">
+          <span class="kicker">
+            <span class="dot"></span>
+            PHASE 2 · TRACK B · DIRECTION B
+          </span>
+          <span class="kicker">
+            KCVV ELEWIJT · UI CHROME EXPLORATION · 2026
+          </span>
+        </div>
+
+        <h1 class="display">Mono <em>&amp;</em> Ink<span class="period">.</span></h1>
+
+        <p class="lede">
+          Functional restraint. Chrome stays flat — no rotation, no tape, no offset shadow.
+          The editorial primitives carry the weight; the atoms quietly hand the page back to
+          the writing.
+        </p>
+
+        <dl class="meta">
+          <div>
+            <dt>Direction</dt>
+            <dd>B — Mono &amp; Ink</dd>
+          </div>
+          <div>
+            <dt>Atoms covered</dt>
+            <dd>Spinner · BrandedTabs · FilterTabs · HorizontalSlider</dd>
+          </div>
+          <div>
+            <dt>Token posture</dt>
+            <dd>cream + ink + jersey-deep accent</dd>
+          </div>
+          <div>
+            <dt>Paper shadows</dt>
+            <dd>not consumed</dd>
+          </div>
+        </dl>
+      </header>
+
+      <!-- ============================================================
+           1 — SPINNER
+           ============================================================ -->
+      <section class="atom" id="spinner">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>01 · ATOM · SPINNER</span>
+            <h2 class="display">Een rustige laad&shy;indicator<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              Two sub-variants share one identity. <strong>B.1</strong> is the canonical loading
+              state: a quietly rotating 2&nbsp;px ink arc behind a mono-caps <code>LADEN.</code>
+              ellipsis. <strong>B.2</strong> is a three-dot inline pulse for compact contexts —
+              row meta, list footers, micro-loading. No paper texture, no stripes, no rotation
+              of the label itself.
+            </p>
+          </div>
+          <div class="index">01.</div>
+        </div>
+
+        <div class="demo-card">
+          <span class="demo-label">B.1 — sm · md · lg · xl</span>
+          <div class="spinner-row">
+            <div class="spinner-tile">
+              <div class="spinner-b1 spinner-b1--sm" role="status" aria-label="Laden">
+                <div class="spinner-b1__arc"></div>
+                <span class="spinner-b1__label">LADEN</span>
+              </div>
+              <div class="spinner-tile__caption"><strong>SM · 64</strong>list rows · inline blocks</div>
+            </div>
+            <div class="spinner-tile">
+              <div class="spinner-b1 spinner-b1--md" role="status" aria-label="Laden">
+                <div class="spinner-b1__arc"></div>
+                <span class="spinner-b1__label">LADEN</span>
+              </div>
+              <div class="spinner-tile__caption"><strong>MD · 96</strong>panels · cards</div>
+            </div>
+            <div class="spinner-tile">
+              <div class="spinner-b1 spinner-b1--lg" role="status" aria-label="Laden">
+                <div class="spinner-b1__arc"></div>
+                <span class="spinner-b1__label">LADEN</span>
+              </div>
+              <div class="spinner-tile__caption"><strong>LG · 128</strong>page sections</div>
+            </div>
+            <div class="spinner-tile">
+              <div class="spinner-b1 spinner-b1--xl" role="status" aria-label="Laden">
+                <div class="spinner-b1__arc"></div>
+                <span class="spinner-b1__label">LADEN</span>
+              </div>
+              <div class="spinner-tile__caption"><strong>XL · 168</strong>full-page boundary</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 24px;">
+          <div class="demo-card">
+            <span class="demo-label">B.2 — three-dot inline pulse</span>
+            <div class="spinner-inline-row">
+              <span class="spinner-b2" role="status" aria-label="Laden">
+                <span class="pulse-dot"></span>
+                <span class="pulse-dot"></span>
+                <span class="pulse-dot"></span>
+                <span class="spinner-b2__label">UITSLAGEN LADEN</span>
+              </span>
+            </div>
+            <div class="spinner-inline-row">
+              <span class="spinner-b2" role="status" aria-label="Laden" aria-hidden="false">
+                <span class="pulse-dot"></span>
+                <span class="pulse-dot"></span>
+                <span class="pulse-dot"></span>
+              </span>
+              <div class="spinner-inline-row__copy">
+                <strong>OPSTELLINGEN</strong>
+                <span>Aanvragen bij PSD…</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <span class="demo-label">Variant: logo (placeholder)</span>
+            <div style="display: flex; align-items: center; gap: 28px; padding: 12px 0;">
+              <div class="spinner-logo" role="status" aria-label="Laden">
+                <svg viewBox="0 0 96 96" aria-hidden="true">
+                  <circle cx="48" cy="48" r="44" fill="none" stroke="#0A0A0A" stroke-width="1" />
+                  <text
+                    x="48"
+                    y="42"
+                    text-anchor="middle"
+                    font-family="Playfair Display, Georgia, serif"
+                    font-style="italic"
+                    font-weight="900"
+                    font-size="22"
+                    fill="#0A0A0A"
+                  >
+                    KCVV
+                  </text>
+                  <text
+                    x="48"
+                    y="62"
+                    text-anchor="middle"
+                    font-family="IBM Plex Mono, monospace"
+                    font-weight="600"
+                    font-size="8"
+                    letter-spacing="2"
+                    fill="#0A0A0A"
+                  >
+                    ELEWIJT
+                  </text>
+                  <line x1="20" y1="74" x2="76" y2="74" stroke="#008755" stroke-width="3" />
+                </svg>
+              </div>
+              <div>
+                <p style="margin: 0 0 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+                  variant=&quot;logo&quot;
+                </p>
+                <p style="margin: 0; font-size: 13px; color: var(--color-ink-muted);">
+                  Reserved for the route loading boundary; opacity pulse only — no rotation,
+                  no tilt.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div class="tradeoff tradeoff--for">
+            <div class="tradeoff__label">FOR</div>
+            <p>
+              Reads as quiet system feedback. The mono-caps label doubles as a status string,
+              accessible without relying on shape language. The inline sub-variant avoids the
+              awkward &quot;tiny spinning logo in a list row&quot; mismatch of monolithic
+              spinner systems.
+            </p>
+          </div>
+          <div class="tradeoff tradeoff--against">
+            <div class="tradeoff__label">AGAINST</div>
+            <p>
+              At a glance, almost identical to the React Suspense default. Loses the chance to
+              make &quot;waiting for KCVV data&quot; feel like a club moment.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           2 — BRANDED TABS
+           ============================================================ -->
+      <section class="atom" id="branded-tabs">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>02 · ATOM · BRANDED TABS</span>
+            <h2 class="display">Eén lijn, één onderstreping<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              Mono caps labels, generous gap, a single 1&nbsp;px ink-muted hairline under the row.
+              The active tab is signalled by a 3&nbsp;px <strong>jersey-deep</strong> underline that
+              overlaps the hairline by one pixel — no badges, no shadows, no surrounding borders.
+              Hover lifts the muted label into full ink.
+            </p>
+          </div>
+          <div class="index">02.</div>
+        </div>
+
+        <div class="demo-card">
+          <span class="demo-label">on cream — default surface</span>
+          <div class="branded-tabs" role="tablist" aria-label="Ploegen">
+            <button class="branded-tab" role="tab" aria-selected="false">A-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="true">B-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U21</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U17</button>
+            <button class="branded-tab" role="tab" aria-selected="false">Dames</button>
+            <span class="branded-tabs__hairline"></span>
+          </div>
+        </div>
+
+        <div class="demo-card demo-card--soft" style="margin-top: 24px;">
+          <span class="demo-label">on cream-soft — section surface</span>
+          <div class="branded-tabs" role="tablist" aria-label="Ploegen">
+            <button class="branded-tab" role="tab" aria-selected="false">A-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="true">B-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U21</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U17</button>
+            <button class="branded-tab" role="tab" aria-selected="false">Dames</button>
+            <span class="branded-tabs__hairline"></span>
+          </div>
+        </div>
+
+        <div class="state-row">
+          <div class="state-card">
+            <div class="state-card__caption">DEFAULT</div>
+            <div class="branded-tabs" role="tablist">
+              <button class="branded-tab" role="tab" aria-selected="true">A-ploeg</button>
+              <button class="branded-tab" role="tab" aria-selected="false">B-ploeg</button>
+              <button class="branded-tab" role="tab" aria-selected="false">U21</button>
+              <span class="branded-tabs__hairline"></span>
+            </div>
+          </div>
+          <div class="state-card">
+            <div class="state-card__caption">HOVER (B-ploeg)</div>
+            <div class="branded-tabs" role="tablist">
+              <button class="branded-tab" role="tab" aria-selected="true">A-ploeg</button>
+              <button class="branded-tab" role="tab" aria-selected="false" style="color: var(--color-ink);">
+                B-ploeg
+              </button>
+              <button class="branded-tab" role="tab" aria-selected="false">U21</button>
+              <span class="branded-tabs__hairline"></span>
+            </div>
+          </div>
+          <div class="state-card">
+            <div class="state-card__caption">FOCUS-VISIBLE (U21)</div>
+            <div class="branded-tabs" role="tablist">
+              <button class="branded-tab" role="tab" aria-selected="true">A-ploeg</button>
+              <button class="branded-tab" role="tab" aria-selected="false">B-ploeg</button>
+              <button
+                class="branded-tab"
+                role="tab"
+                aria-selected="false"
+                style="outline: 1px dashed var(--color-ink); outline-offset: 4px;"
+              >
+                U21
+              </button>
+              <span class="branded-tabs__hairline"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div class="tradeoff tradeoff--for">
+            <div class="tradeoff__label">FOR</div>
+            <p>
+              The 3&nbsp;px jersey-deep stripe is the only club-coded mark on the row. It overlaps
+              the hairline so the underline reads as a continuous member of the same axis — not as
+              an applied decoration. Quiet, but unmistakable.
+            </p>
+          </div>
+          <div class="tradeoff tradeoff--against">
+            <div class="tradeoff__label">AGAINST</div>
+            <p>
+              Without a brand mark or kit motif, the row could live on any modern site. Compared
+              to Direction A&apos;s tape and Direction C&apos;s heavy underscore, B feels generic
+              at first glance.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           3 — FILTER TABS
+           ============================================================ -->
+      <section class="atom" id="filter-tabs">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>03 · ATOM · FILTER TABS</span>
+            <h2 class="display">Sharp chips, no curves<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              Inactive chips render as transparent text-only — no border, no fill. Active chips
+              flip to <code>bg-ink text-cream</code> in a sharp rectangle (no rounded corners).
+              Counts sit inline behind a 1&nbsp;px hairline divider — never as pills or badges.
+            </p>
+          </div>
+          <div class="index">03.</div>
+        </div>
+
+        <div class="demo-card">
+          <span class="demo-label">size variants — sm · md · lg</span>
+
+          <div class="filter-row">
+            <span class="filter-row__label">SM</span>
+            <button class="filter-chip filter-chip--sm" aria-pressed="false">
+              <span class="live-dot"></span>
+              Live
+              <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip filter-chip--sm" aria-pressed="true">
+              Aankomend
+              <span class="filter-chip__count">6</span>
+            </button>
+            <button class="filter-chip filter-chip--sm" aria-pressed="false">
+              Uitslagen
+              <span class="filter-chip__count">24</span>
+            </button>
+            <button class="filter-chip filter-chip--sm" aria-pressed="false">
+              Thuis
+              <span class="filter-chip__count">12</span>
+            </button>
+            <button class="filter-chip filter-chip--sm" aria-pressed="false">
+              Uit
+              <span class="filter-chip__count">13</span>
+            </button>
+          </div>
+
+          <div class="filter-row">
+            <span class="filter-row__label">MD</span>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              <span class="live-dot"></span>
+              Live
+              <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              Aankomend
+              <span class="filter-chip__count">6</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="true">
+              Uitslagen
+              <span class="filter-chip__count">24</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              Thuis
+              <span class="filter-chip__count">12</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              Uit
+              <span class="filter-chip__count">13</span>
+            </button>
+          </div>
+
+          <div class="filter-row">
+            <span class="filter-row__label">LG</span>
+            <button class="filter-chip filter-chip--lg" aria-pressed="false">
+              <span class="live-dot"></span>
+              Live
+              <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip filter-chip--lg" aria-pressed="false">
+              Aankomend
+              <span class="filter-chip__count">6</span>
+            </button>
+            <button class="filter-chip filter-chip--lg" aria-pressed="false">
+              Uitslagen
+              <span class="filter-chip__count">24</span>
+            </button>
+            <button class="filter-chip filter-chip--lg" aria-pressed="true">
+              Thuis
+              <span class="filter-chip__count">12</span>
+            </button>
+            <button class="filter-chip filter-chip--lg" aria-pressed="false">
+              Uit
+              <span class="filter-chip__count">13</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="demo-card" style="margin-top: 24px;">
+          <span class="demo-label">leading typographic glyph variant</span>
+          <div class="filter-row">
+            <span class="filter-row__label">MD</span>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              <span class="filter-chip__icon">●</span>
+              Live
+              <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="true">
+              <span class="filter-chip__icon">»</span>
+              Aankomend
+              <span class="filter-chip__count">6</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              <span class="filter-chip__icon">§</span>
+              Uitslagen
+              <span class="filter-chip__count">24</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              <span class="filter-chip__icon">⌂</span>
+              Thuis
+              <span class="filter-chip__count">12</span>
+            </button>
+            <button class="filter-chip filter-chip--md" aria-pressed="false">
+              <span class="filter-chip__icon">↗</span>
+              Uit
+              <span class="filter-chip__count">13</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div class="tradeoff tradeoff--for">
+            <div class="tradeoff__label">FOR</div>
+            <p>
+              The hairline-divided count is unique enough to feel typeset rather than UI-kit.
+              Sharp corners reinforce the broadsheet/fanzine surface. Active state needs zero
+              animation to read.
+            </p>
+          </div>
+          <div class="tradeoff tradeoff--against">
+            <div class="tradeoff__label">AGAINST</div>
+            <p>
+              Inactive chips have no resting border, so the row reads as a list of links until
+              you click. Density is high; we&apos;ll need to verify hit-target spacing at SM
+              still clears the 44&nbsp;px tap area on touch.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           4 — HORIZONTAL SLIDER
+           ============================================================ -->
+      <section class="atom" id="slider">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>04 · ATOM · HORIZONTAL SLIDER</span>
+            <h2 class="display">Pijlen die niet schreeuwen<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              Two scroll arrows: 40&nbsp;×&nbsp;40&nbsp;px squares with a 1&nbsp;px ink border, a
+              typographic chevron (<code>‹</code>&nbsp;/&nbsp;<code>›</code>) in IBM Plex Mono,
+              no fill. Hover inverts to ink-fill / cream-glyph. Track gap matches body grid
+              (16&nbsp;px).
+            </p>
+          </div>
+          <div class="index">04.</div>
+        </div>
+
+        <div class="demo-card" style="padding: 24px; border: 1px solid var(--color-ink); background: var(--color-cream);">
+          <span class="demo-label" style="background: var(--color-cream);">theme · light</span>
+          <div class="slider">
+            <div class="slider__head">
+              <div>
+                <span class="kicker kicker--ink"><span class="dot"></span>BLOK · AANKOMEND</span>
+                <div class="slider__title" style="margin-top: 6px;">Aankomende wedstrijden<span class="period">.</span></div>
+              </div>
+              <div class="slider__controls">
+                <button class="scroll-arrow" aria-label="Vorige" disabled>‹</button>
+                <button class="scroll-arrow" aria-label="Volgende">›</button>
+              </div>
+            </div>
+            <div class="slider__track slider__track--drift">
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 03 MEI · 15:00</span>
+                  <span>EERSTE PROV.</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>SK Halle</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span>THUIS</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZO · 04 MEI · 14:30</span>
+                  <span>U21</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>FC Vossem</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt U21</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>VOSSEM</span>
+                  <span>UIT</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 10 MEI · 19:30</span>
+                  <span>BEKER</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>RC Mechelen</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span>THUIS</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZO · 11 MEI · 11:00</span>
+                  <span>U17</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt U17</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>KFC Boortmeerbeek</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span>THUIS</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-card demo-card--ink" style="margin-top: 24px;">
+          <span class="demo-label">theme · dark</span>
+          <div class="slider slider--ink">
+            <div class="slider__head">
+              <div>
+                <span class="kicker" style="color: rgba(245, 241, 230, 0.6);">
+                  <span class="dot" style="background: var(--color-cream);"></span>BLOK · UITSLAGEN
+                </span>
+                <div class="slider__title" style="margin-top: 6px;">Recente uitslagen<span class="period">.</span></div>
+              </div>
+              <div class="slider__controls">
+                <button class="scroll-arrow" aria-label="Vorige">‹</button>
+                <button class="scroll-arrow" aria-label="Volgende">›</button>
+              </div>
+            </div>
+            <div class="slider__track slider__track--drift">
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 26 APR · 15:00</span>
+                  <span>EERSTE PROV.</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt</span>
+                    <span class="match-card__score">3</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>VC Eppegem</span>
+                    <span class="match-card__score">1</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span class="badge-final">FINAAL</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZO · 20 APR · 14:30</span>
+                  <span>B-PLOEG</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>SK Lubbeek</span>
+                    <span class="match-card__score">0</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt B</span>
+                    <span class="match-card__score">2</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>LUBBEEK</span>
+                  <span class="badge-final">FINAAL</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 19 APR · 18:00</span>
+                  <span>DAMES</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt Dames</span>
+                    <span class="match-card__score">2</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>KFC Heist</span>
+                    <span class="match-card__score">2</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span><span class="live-dot"></span>LIVE 78&apos;</span>
+                  <span class="badge-final">LIVE</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZO · 13 APR · 11:00</span>
+                  <span>U21</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt U21</span>
+                    <span class="match-card__score">4</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>FC Wespelaar</span>
+                    <span class="match-card__score">0</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span class="badge-final">FINAAL</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div class="tradeoff tradeoff--for">
+            <div class="tradeoff__label">FOR</div>
+            <p>
+              The arrows are pure typographic primitives — they scale with the font and don&apos;t
+              fight the broadsheet rhythm. Disabled state is just opacity; no extra colour token
+              required.
+            </p>
+          </div>
+          <div class="tradeoff tradeoff--against">
+            <div class="tradeoff__label">AGAINST</div>
+            <p>
+              Mono chevrons are smaller in optical weight than ChevronLeft/Right SVGs at the same
+              box. We may need 44&nbsp;px boxes for touch, or a 700 glyph weight on dark theme so
+              the contrast holds at distance.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           5 — COHESION
+           ============================================================ -->
+      <section class="atom" id="cohesion">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>05 · COHESION · WEDSTRIJDEN PAGE</span>
+            <h2 class="display">Restraint, in context<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              All four atoms in their natural habitat: a fragment of <code>/wedstrijden</code>.
+              The display heading carries the page; the chrome stays out of its way. A loading
+              slot at the bottom holds B.2 in case any panel suspends.
+            </p>
+          </div>
+          <div class="index">05.</div>
+        </div>
+
+        <div class="cohesion">
+          <div class="cohesion__head">
+            <div>
+              <span class="kicker"><span class="dot"></span>SECTIE · WEDSTRIJDEN</span>
+              <div class="cohesion__title" style="margin-top: 8px;">Wedstrijden<span class="period">.</span></div>
+              <p class="cohesion__sub">
+                <em>De volgende afspraken aan de Tervuursesteenweg, en wat we daarvoor hebben
+                gedaan.</em>
+              </p>
+            </div>
+            <div class="slider__controls">
+              <button class="scroll-arrow" aria-label="Vorige" disabled>‹</button>
+              <button class="scroll-arrow" aria-label="Volgende">›</button>
+            </div>
+          </div>
+
+          <div class="branded-tabs" role="tablist" aria-label="Ploegen">
+            <button class="branded-tab" role="tab" aria-selected="true">A-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="false">B-ploeg</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U21</button>
+            <button class="branded-tab" role="tab" aria-selected="false">U17</button>
+            <button class="branded-tab" role="tab" aria-selected="false">Dames</button>
+            <span class="branded-tabs__hairline"></span>
+          </div>
+
+          <div class="cohesion__filters">
+            <div class="filter-row" style="margin-top: 18px;">
+              <button class="filter-chip filter-chip--md" aria-pressed="false">
+                <span class="live-dot"></span>
+                Live
+                <span class="filter-chip__count">1</span>
+              </button>
+              <button class="filter-chip filter-chip--md" aria-pressed="true">
+                Aankomend
+                <span class="filter-chip__count">6</span>
+              </button>
+              <button class="filter-chip filter-chip--md" aria-pressed="false">
+                Uitslagen
+                <span class="filter-chip__count">24</span>
+              </button>
+              <button class="filter-chip filter-chip--md" aria-pressed="false">
+                Thuis
+                <span class="filter-chip__count">12</span>
+              </button>
+              <button class="filter-chip filter-chip--md" aria-pressed="false">
+                Uit
+                <span class="filter-chip__count">13</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="slider" style="padding: 0;">
+            <div class="slider__track">
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 03 MEI · 15:00</span>
+                  <span>EERSTE PROV.</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>SK Halle</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span>THUIS</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZO · 04 MEI · 14:30</span>
+                  <span>RES. A</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>FC Vossem</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt B</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>VOSSEM</span>
+                  <span>UIT</span>
+                </div>
+              </article>
+              <article class="match-card">
+                <div class="match-card__meta">
+                  <span>ZA · 10 MEI · 19:30</span>
+                  <span>BEKER</span>
+                </div>
+                <div class="match-card__teams">
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest"></span>KCVV Elewijt</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                  <div class="match-card__row">
+                    <span class="team"><span class="match-card__crest match-card__crest--away"></span>RC Mechelen</span>
+                    <span class="match-card__score">—</span>
+                  </div>
+                </div>
+                <div class="match-card__footer">
+                  <span>SPORTPARK ELEWIJT</span>
+                  <span>THUIS</span>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="cohesion__loading-slot" role="status" aria-live="polite">
+            <span class="spinner-b2" aria-hidden="true">
+              <span class="pulse-dot"></span>
+              <span class="pulse-dot"></span>
+              <span class="pulse-dot"></span>
+            </span>
+            <div class="cohesion__loading-slot__copy">
+              <strong>VERWANTE WEDSTRIJDEN</strong>
+              <span>Opstellingen en uitslagen worden uit PSD gehaald…</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           6 — TOKEN MAP & FOOTER NOTES
+           ============================================================ -->
+      <section class="atom" id="tokens">
+        <div class="atom-head">
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>06 · TOKEN MAP</span>
+            <h2 class="display">Wat we wel en niet gebruiken<span class="period" style="color: var(--color-jersey-deep);">.</span></h2>
+            <p>
+              The full Phase&nbsp;2 token surface is available, but Direction&nbsp;B is deliberately
+              narrow: cream surfaces, ink type, ink-muted secondaries, jersey-deep accent. Paper
+              shadow tokens are not consumed.
+            </p>
+          </div>
+          <div class="index">06.</div>
+        </div>
+
+        <div class="token-map">
+          <div class="token-card">
+            <strong><span class="swatch swatch--cream"></span>--color-cream</strong>
+            <span>#F5F1E6 · default surface</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--cream-soft"></span>--color-cream-soft</strong>
+            <span>#EDE8DA · section surface</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--ink"></span>--color-ink</strong>
+            <span>#0A0A0A · type, hairline, active filter fill</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--ink-muted"></span>--color-ink-muted</strong>
+            <span>#6B6B6B · inactive labels, count meta</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--jersey-deep"></span>--color-jersey-deep</strong>
+            <span>#008755 · active tab underline (light)</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--jersey"></span>--color-jersey</strong>
+            <span>#4ACF52 · live dot, dark-theme accent</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--alert"></span>--color-alert</strong>
+            <span>#B84A3A · live status dot only</span>
+          </div>
+          <div class="token-card">
+            <strong><span class="swatch swatch--paper-edge"></span>--color-paper-edge</strong>
+            <span>#D9D2BD · reserved (unused here)</span>
+          </div>
+        </div>
+
+        <div class="not-consumed">
+          <strong>Tokens explicitly NOT consumed in Direction B</strong>
+          <code>--shadow-paper-sm</code> · <code>--shadow-paper-md</code> ·
+          <code>--shadow-paper-lg</code> · <code>--shadow-paper-tape</code> · all rotation
+          transforms · the sticker/tape decorative layer.<br />
+          Direction B&apos;s argument: chrome that doesn&apos;t cast a shadow lets editorial
+          primitives (TapedCard, EditorialHeading, PullQuote) keep ownership of the paper
+          metaphor. Atoms stay on the page surface.
+        </div>
+
+        <div class="tradeoffs">
+          <div class="tradeoff tradeoff--for">
+            <div class="tradeoff__label">FOR — overall direction</div>
+            <p>
+              Cleanest typographic hierarchy of the three options. Editorial primitives have
+              maximum room to breathe. Accessibility passes trivially: every state is
+              colour-and-text, never shape-only.
+            </p>
+          </div>
+          <div class="tradeoff tradeoff--against">
+            <div class="tradeoff__label">AGAINST — overall direction</div>
+            <p>
+              Visually under-articulated. Without paper shadow, tape, or rotation, the atoms
+              don&apos;t telegraph &quot;KCVV fanzine&quot; on their own — they rely on neighbouring
+              editorial primitives to do that work. Risk: at small viewports, the page reads as
+              minimalist-default rather than club-coded.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="doc-footer">
+        <span><strong>KCVV ELEWIJT</strong> · Phase 2 · Track B · Direction B — Mono &amp; Ink</span>
+        <span>Er is maar één plezante compagnie.</span>
+      </footer>
+    </main>
+  </body>
+</html>
