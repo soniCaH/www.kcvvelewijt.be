@@ -285,6 +285,11 @@ produces `page.goto: Page crashed` failures on `Features/*` and `Pages/*` storie
 If your machine allocates less than 8 GB, use the `vr:update:single` script
 (see "Single-worker fallback" below).
 
+**CI / local parity contract:** GitHub-hosted `ubuntu-latest` runners provide
+16 GB RAM — 2× the 8 GB local floor, satisfying the ≥ 25 % headroom requirement.
+If either the runner spec or the local floor changes, re-verify the other before
+merging.
+
 **Node.js heap:** `docker-compose.vr.yml` sets `NODE_OPTIONS=--max-old-space-size=4096`
 to raise the Node.js heap limit to 4 GB. Without this, the test runner OOMs
 after ~80 story visits regardless of Docker memory allocation (Node.js defaults
@@ -596,7 +601,10 @@ explicitly. A GitHub App is the cleaner long-term replacement.
 - **No `visual` label.** Triggering is path-based; never introduce a label gate.
 - **Do not run multi-worker `vr:update` on hosts under the 8 GB memory floor.**
   Chromium will crash mid-story inside the Docker container and produce phantom
-  `page.goto: Page crashed` failures. Use `vr:update:single` instead.
+  `page.goto: Page crashed` failures. Use `vr:run:single` / `vr:update:single`
+  instead (see "Single-worker fallback" above). CI runners have 16 GB and are
+  not affected, but contributor machines under the floor must use the single-worker
+  variants.
 - **Do not remove `NODE_OPTIONS=--max-old-space-size=4096` from `docker-compose.vr.yml`.**
   Node.js defaults to ~1.4 GB heap — the test runner OOMs after ~80 story visits
   regardless of Docker memory allocation.
