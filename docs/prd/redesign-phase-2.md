@@ -67,7 +67,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
    │       2.A.3  Button rework completion (inverted, secondary, ghost; retire link)       → #1570
    │       2.A.4  Form atoms reskin (Input, Select, Textarea, Label)                       → #1571
    │       2.A.5  Alert reskin (drop info; success/warning/error)                          → #1572
-   │       2.A.6  FilterTabs icon prop type swap (Lucide → Phosphor Icon)                  → #1573
+   │       2.A.6  Remove FilterTab.icon prop entirely (no leading glyphs)                 → #1573
    │
    └──── Track B — design checkpoint via /design-an-interface (cohesive across atoms, per-atom variation)
            2.B.1  Spinner — design + reskin                                                → #1575
@@ -100,7 +100,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
 - [ ] **2.A.4 Form atoms:** All four atoms render `bg-white` with `border border-ink/20`, focus state uses `border-jersey-deep` + `ring-jersey-deep/20`. Error state on Input/Select/Textarea uses `--color-alert`. Label required asterisk uses `--color-alert`. `kcvv-alert` no longer referenced from these four files.
 - [ ] **2.A.5 Alert:** `AlertVariant` type is `"success" | "warning" | "error"` (no `info`). Each variant matches the colour map in §6.5. Dismiss button renders Phosphor Fill `X`.
-- [ ] **2.A.6 FilterTabs prop type:** `FilterTab.icon` typed as Phosphor `Icon` from `@phosphor-icons/react`. Type-check passes (no current consumers verified to break).
+- [ ] **2.A.6 FilterTab.icon removal:** `FilterTab.icon` field removed from the `FilterTab` interface; the `<FilterTabs>` rendering path no longer accepts or renders any leading icon. Locked at the Track B design checkpoint (2026-04-30) — supersedes the original Lucide → Phosphor type-swap plan. Acceptance: zero non-test references to `FilterTab.icon` after the PR; consumers that previously passed an `icon` stop doing so; type-check passes.
 
 ### 5.B Track B acceptance (per child issue)
 
@@ -111,10 +111,10 @@ Each Track B child issue has two phases internally:
 
 Per atom:
 
-- [ ] **2.B.1 Spinner:** Approved design (likely _not_ the circular SVG default). Reskinned. `SpinnerVariant` updated if needed (e.g., `white` → `cream` rename). Story + baseline.
+- [ ] **2.B.1 Spinner:** Approved design (scarf barber-pole + compact three-dot pulse, per locked design checkpoint). Reskinned. `SpinnerVariant` becomes `"primary" | "secondary" | "white" | "compact"` — the `"white"` member is **retained** (it's the dark-interlude palette flip; no rename). `"logo"` is **removed**. Story + baseline.
 - [ ] **2.B.2 BrandedTabs:** Approved design. Bottom-border tabs reinterpreted in retro vocabulary. Token swap (`kcvv-green-bright` → `jersey-deep`, etc.). Story + baseline.
 - [ ] **2.B.3 FilterTabs:** Approved design. Pill toggle group reinterpreted. Story + baseline.
-- [ ] **2.B.4 HorizontalSlider + ScrollHint arrows:** Approved design. Arrow buttons reskinned. Phosphor Fill `CaretLeft` / `CaretRight` consumed via `icons.redesign.ts`. Story + baseline.
+- [ ] **2.B.4 HorizontalSlider + ScrollHint arrows:** Approved design (per locked design checkpoint). Arrow buttons reskinned as a single canonical 48 × 48 paper button with typographic `←` / `→` in Freight Display italic — **no Phosphor `CaretLeft` / `CaretRight` consumed; the typographic glyph is hardcoded** per the "typographic glyphs over Lucide where the glyph reads" preference. `ScrollArrowButtonProps.variant` removed. HorizontalSlider match-card layout shipped per `docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html`. Story + baseline.
 
 ### Cross-cutting acceptance
 

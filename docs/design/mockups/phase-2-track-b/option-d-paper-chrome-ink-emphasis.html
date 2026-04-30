@@ -359,8 +359,11 @@
         box-shadow: 3px 3px 0 0 var(--color-ink);
       }
       /* No `arrow-btn--dark` variant — a single canonical cream-on-ink arrow
-         renders correctly on both light and dark panel bgs. The shadow vanishes
-         into an ink panel; cream contrast against ink already shows elevation. */
+         renders correctly on both light and dark panel bgs. On a dusk panel the
+         standard ink offset shadow would lose contrast, so the `.panel--dusk`
+         descendant rule above swaps the arrow's box-shadow to
+         --shadow-paper-sm-soft (4×4 ink-muted). The cream button keeps a
+         visible, softened gray offset against the ink panel. */
 
       /* ============================================================
          HORIZONTAL SLIDER — match cards, KCVV-prominent typography
@@ -490,11 +493,12 @@
          in alert red) and through the score showing real numbers instead of a
          time. The card surface itself stays identical to upcoming matches.
 
-         Dusk dark theme: the panel bg flips to ink, but the cards do not change.
-         Cream paper cards on ink panel pop via contrast alone; the ink offset
-         shadow becomes invisible against the ink bg, which is fine — the cream
-         surface carries the depth read on its own. No green borders, no green
-         shadows, no neon. */
+         Dusk dark theme: the panel bg flips to ink, but the cards themselves
+         keep their light-theme paper-card vocabulary. The chrome shadow is
+         swapped to --shadow-paper-sm-soft (4×4 ink-muted) via the
+         `.panel--dusk .match-card` descendant rule above, so the cream paper
+         card retains a visible softened gray offset against the ink bg —
+         depth without green borders, green shadows, or neon. */
 
       /* ============================================================
          COHESION mock
@@ -742,12 +746,13 @@
         <h2>Pijlen <em>op papier.</em></h2>
 
         <p class="lead">
-          One canonical arrow — cream paper button with ink border and offset
-          shadow. Same rendering on both light and dark panel bgs. The hard-offset
-          shadow vanishes when the panel itself is ink (visible only at very close
-          inspection where the shadow's bottom-right edge clips the ink panel),
-          and the cream button still reads as obviously elevated thanks to the
-          cream-on-ink contrast.
+          One canonical arrow — cream paper button with ink border and a hard
+          offset shadow. On cream panels the shadow is the standard
+          <code>--shadow-paper-sm</code> (4×4 ink). On dusk panels a
+          <code>.panel--dusk</code> descendant rule swaps the shadow to
+          <code>--shadow-paper-sm-soft</code> (4×4 ink-muted gray) so the offset
+          depth remains visible against the ink bg. Same button across both
+          contexts; only the shadow colour adapts.
         </p>
 
         <div class="panel">
