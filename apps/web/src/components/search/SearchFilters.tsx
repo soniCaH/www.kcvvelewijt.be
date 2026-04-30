@@ -11,7 +11,6 @@ import {
   FilterTabs,
   type FilterTab,
 } from "@/components/design-system/FilterTabs";
-import { Search, Newspaper, User, UserCog, Users } from "lucide-react";
 
 export interface SearchFiltersProps {
   /**
@@ -42,38 +41,14 @@ export const SearchFilters = ({
   onFilterChange,
   resultCounts,
 }: SearchFiltersProps) => {
+  // FilterTab.icon retired with Track B Direction D (closes #1573).
   const tabs: FilterTab[] = useMemo(
     () => [
-      {
-        value: "all",
-        label: "Alles",
-        icon: Search,
-        count: resultCounts.all,
-      },
-      {
-        value: "article",
-        label: "Nieuws",
-        icon: Newspaper,
-        count: resultCounts.article,
-      },
-      {
-        value: "player",
-        label: "Spelers",
-        icon: User,
-        count: resultCounts.player,
-      },
-      {
-        value: "staff",
-        label: "Staf",
-        icon: UserCog,
-        count: resultCounts.staff,
-      },
-      {
-        value: "team",
-        label: "Teams",
-        icon: Users,
-        count: resultCounts.team,
-      },
+      { value: "all", label: "Alles", count: resultCounts.all },
+      { value: "article", label: "Nieuws", count: resultCounts.article },
+      { value: "player", label: "Spelers", count: resultCounts.player },
+      { value: "staff", label: "Staf", count: resultCounts.staff },
+      { value: "team", label: "Teams", count: resultCounts.team },
     ],
     [resultCounts],
   );

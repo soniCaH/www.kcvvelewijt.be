@@ -4,20 +4,16 @@ import { fn } from "storybook/test";
 import { FilterTabs, type FilterTab, type FilterTabsProps } from "./FilterTabs";
 
 /**
- * FilterTabs - Unified filter/tab component
+ * FilterTabs Component Stories
  *
- * A consistent, reusable filter component used across the application for:
- * - News category filtering
- * - Organigram department filtering
- * - Sponsor tier filtering
- * - Responsibility finder role filtering
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Each chip is a paper-card body in
+ * cream-soft + ink border + offset shadow; active inverts to ink + cream
+ * + soft shadow. Counts render inline after a 1 px hairline pipe — no pill,
+ * no badge. Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html.
  *
- * Features:
- * - Mobile-responsive with horizontal scrolling
- * - Optional count badges
- * - Multiple size variants (sm, md, lg)
- * - Accessible and keyboard navigable
- * - Consistent KCVV green styling
+ * Used in: Organigram, News Categories, Sponsors, Responsibility Finder.
  */
 const meta = {
   title: "UI/FilterTabs",
@@ -104,9 +100,9 @@ function InteractiveFilterTabs(args: FilterTabsProps) {
   return (
     <div className="space-y-6">
       <FilterTabs {...args} activeTab={activeTab} onChange={setActiveTab} />
-      <div className="rounded-lg bg-gray-50 p-4">
-        <p className="text-kcvv-gray-blue text-sm font-medium">
-          Selected: <span className="text-kcvv-green-bright">{activeTab}</span>
+      <div className="border-paper-edge bg-cream-soft border p-4">
+        <p className="text-ink-muted font-mono text-xs tracking-wider uppercase">
+          Selected: <span className="text-jersey-deep">{activeTab}</span>
         </p>
       </div>
     </div>
@@ -361,7 +357,7 @@ export const SizeComparison: Story = {
   render: () => (
     <div className="space-y-8">
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Small
         </h3>
         <FilterTabs
@@ -373,7 +369,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Medium (Default)
         </h3>
         <FilterTabs
@@ -385,7 +381,7 @@ export const SizeComparison: Story = {
         />
       </div>
       <div>
-        <h3 className="text-kcvv-gray-blue mb-3 text-sm font-semibold">
+        <h3 className="text-ink-muted mb-3 font-mono text-xs font-semibold tracking-wider uppercase">
           Large
         </h3>
         <FilterTabs

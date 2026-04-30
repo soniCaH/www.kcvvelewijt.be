@@ -186,25 +186,35 @@ describe("CategoryFilters", () => {
   });
 
   describe("Size Variants", () => {
+    // Size tokens align with the FilterTabs Direction-D contract:
+    // sm `px-[9px] py-[5px] text-[10px]`, md `px-3 py-2 text-[11px]`,
+    // lg `px-4 py-[11px] text-xs`. See packages/.../FilterTabs.tsx
+    // SIZE_CLASSES for the canonical mapping.
     it("should render small size by default", () => {
       render(<CategoryFilters categories={mockCategories} />);
 
       const tab = screen.getByRole("tab", { name: /alles/i });
-      expect(tab).toHaveClass("px-4", "py-2", "text-xs");
+      expect(tab.className).toContain("px-[9px]");
+      expect(tab.className).toContain("py-[5px]");
+      expect(tab.className).toContain("text-[10px]");
     });
 
     it("should render medium size", () => {
       render(<CategoryFilters categories={mockCategories} size="md" />);
 
       const tab = screen.getByRole("tab", { name: /alles/i });
-      expect(tab).toHaveClass("px-6", "py-3", "text-sm");
+      expect(tab).toHaveClass("px-3");
+      expect(tab).toHaveClass("py-2");
+      expect(tab.className).toContain("text-[11px]");
     });
 
     it("should render large size", () => {
       render(<CategoryFilters categories={mockCategories} size="lg" />);
 
       const tab = screen.getByRole("tab", { name: /alles/i });
-      expect(tab).toHaveClass("px-8", "py-4", "text-base");
+      expect(tab).toHaveClass("px-4");
+      expect(tab.className).toContain("py-[11px]");
+      expect(tab).toHaveClass("text-xs");
     });
   });
 

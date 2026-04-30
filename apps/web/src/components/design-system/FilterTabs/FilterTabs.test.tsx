@@ -1,5 +1,12 @@
 /**
- * FilterTabs Component Tests
+ * FilterTabs tests
+ *
+ * Visual contract: paper-chip body + ink-invert active + 1px hairline pipe
+ * count divider, per the Track B design checkpoint locked 2026-04-30
+ * (Direction D — Paper chrome, ink emphasis). Source-of-record:
+ * docs/design/mockups/phase-2-track-b/compare.md and
+ * option-d-paper-chrome-ink-emphasis.html (`.f-chip` rules, ink-invert
+ * active variant).
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -50,21 +57,108 @@ describe("FilterTabs", () => {
     });
   });
 
+  describe("Visual contract — Direction D paper-chip vocabulary", () => {
+    it("renders inactive chips with paper-chip body (cream-soft bg, ink border, ink text)", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+
+      const inactive = screen.getByRole("tab", { name: "All 10" });
+      expect(inactive).toHaveClass("bg-cream-soft");
+      expect(inactive).toHaveClass("border-2");
+      expect(inactive).toHaveClass("border-ink");
+      expect(inactive).toHaveClass("text-ink");
+    });
+
+    it("renders the active chip inverted (ink bg, cream text) with the soft shadow", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+
+      const active = screen.getByRole("tab", { name: "Active 5" });
+      expect(active).toHaveClass("bg-ink");
+      expect(active).toHaveClass("text-cream");
+      expect(active.className).toContain(
+        "shadow-[var(--shadow-paper-sm-soft)]",
+      );
+    });
+
+    it("uses mono caps + tracking on every chip", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+
+      const tab = screen.getByRole("tab", { name: "All 10" });
+      expect(tab).toHaveClass("font-mono");
+      expect(tab).toHaveClass("uppercase");
+      expect(tab.className).toContain("tracking-[0.08em]");
+    });
+
+    it("uses sharp corners (rounded-none)", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+
+      const tab = screen.getByRole("tab", { name: "All 10" });
+      expect(tab).toHaveClass("rounded-none");
+    });
+
+    it("inactive chips carry the ink offset shadow at rest", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+
+      const inactive = screen.getByRole("tab", { name: "All 10" });
+      expect(inactive.className).toContain("shadow-[var(--shadow-paper-sm)]");
+    });
+
+    it("the tablist row reserves room below for the 4px paper shadow", () => {
+      // overflow-x: auto silently forces overflow-y to behave like a scroll
+      // container, which would otherwise clip --shadow-paper-sm. pb-1.5 keeps
+      // the 4 × 4 ink shadow visible (same fix as BrandedTabs #1576).
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+
+      const tablist = screen.getByRole("tablist");
+      expect(tablist).toHaveClass("pb-1.5");
+    });
+
+    it("the tablist row uses gap-3 (12px) for chip breathing room", () => {
+      // Matches BrandedTabs (#1576) row gap; overrides the option-d mockup's
+      // 8 px to keep the two Track B tab atoms visually consistent.
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+
+      const tablist = screen.getByRole("tablist");
+      expect(tablist).toHaveClass("gap-3");
+    });
+  });
+
+  describe("Press idiom (paper-card press)", () => {
+    it("applies the hover translate(1, 1) press utility classes", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+      const tab = screen.getByRole("tab", { name: "Active 5" });
+      expect(tab).toHaveClass("hover:translate-x-px");
+      expect(tab).toHaveClass("hover:translate-y-px");
+    });
+
+    it("inactive hover collapses shadow to 3 × 3 ink", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+      const inactive = screen.getByRole("tab", { name: "Active 5" });
+      expect(inactive.className).toContain(
+        "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
+      );
+    });
+
+    it("active hover collapses shadow to 3 × 3 ink-muted", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+      const active = screen.getByRole("tab", { name: "Active 5" });
+      expect(active.className).toContain(
+        "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+      );
+    });
+
+    it("applies transition classes for smooth state changes", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
+      const tab = screen.getByRole("tab", { name: "All 10" });
+      expect(tab.className).toContain("transition-");
+    });
+  });
+
   describe("Active Tab", () => {
-    it("should highlight the active tab", () => {
+    it("should mark the active tab via aria-selected", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="active" />);
 
       const activeTab = screen.getByRole("tab", { name: "Active 5" });
       expect(activeTab).toHaveAttribute("aria-selected", "true");
-      expect(activeTab).toHaveClass("bg-kcvv-green-bright", "text-white");
-    });
-
-    it("should not highlight inactive tabs", () => {
-      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
-
-      const inactiveTab = screen.getByRole("tab", { name: "All 10" });
-      expect(inactiveTab).toHaveAttribute("aria-selected", "false");
-      expect(inactiveTab).toHaveClass("text-kcvv-green-bright");
     });
 
     it("should set correct tabIndex for active and inactive tabs", () => {
@@ -78,24 +172,39 @@ describe("FilterTabs", () => {
     });
   });
 
-  describe("Count Badges", () => {
-    it("should show count badges by default", () => {
+  describe("Count divider (hairline pipe)", () => {
+    it("should show count after a 1 px hairline pipe by default", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
-      expect(screen.getByText("10")).toBeInTheDocument();
-      expect(screen.getByText("5")).toBeInTheDocument();
-      expect(screen.getByText("3")).toBeInTheDocument();
-      expect(screen.getByText("2")).toBeInTheDocument();
+      const count = screen.getByText("10");
+      expect(count).toHaveClass("border-l");
+      expect(count).toHaveClass("pl-2");
     });
 
-    it("should hide count badges when showCounts is false", () => {
+    it("inactive count uses ink-muted text + ink-muted pipe", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+
+      const count = screen.getByText("10"); // inactive 'All 10'
+      expect(count).toHaveClass("text-ink-muted");
+      expect(count).toHaveClass("border-ink-muted");
+    });
+
+    it("active count flips to cream text + cream pipe", () => {
+      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
+
+      const count = screen.getByText("5"); // active 'Active 5'
+      expect(count).toHaveClass("text-cream");
+      expect(count).toHaveClass("border-cream");
+    });
+
+    it("hides count when showCounts is false", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" showCounts={false} />);
 
       expect(screen.queryByText("10")).not.toBeInTheDocument();
       expect(screen.queryByText("5")).not.toBeInTheDocument();
     });
 
-    it("should not render count badge when count is undefined", () => {
+    it("does not render count when count is undefined", () => {
       const tabsWithoutCounts: FilterTab[] = [
         { value: "all", label: "All" },
         { value: "active", label: "Active" },
@@ -103,32 +212,37 @@ describe("FilterTabs", () => {
 
       render(<FilterTabs tabs={tabsWithoutCounts} activeTab="all" />);
 
-      // Should render tabs but no count badges
       expect(screen.getByRole("tab", { name: "All" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Active" })).toBeInTheDocument();
     });
   });
 
-  describe("Size Variants", () => {
+  describe("Size Variants — padding + font-size only", () => {
     it("should render small size", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" size="sm" />);
 
       const tab = screen.getByRole("tab", { name: /all/i });
-      expect(tab).toHaveClass("px-4", "py-2", "text-xs");
+      expect(tab.className).toContain("px-[9px]");
+      expect(tab.className).toContain("py-[5px]");
+      expect(tab.className).toContain("text-[10px]");
     });
 
     it("should render medium size by default", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
       const tab = screen.getByRole("tab", { name: /all/i });
-      expect(tab).toHaveClass("px-6", "py-3", "text-sm");
+      expect(tab).toHaveClass("px-3");
+      expect(tab).toHaveClass("py-2");
+      expect(tab.className).toContain("text-[11px]");
     });
 
     it("should render large size", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" size="lg" />);
 
       const tab = screen.getByRole("tab", { name: /all/i });
-      expect(tab).toHaveClass("px-8", "py-4", "text-base");
+      expect(tab).toHaveClass("px-4");
+      expect(tab.className).toContain("py-[11px]");
+      expect(tab).toHaveClass("text-xs");
     });
   });
 
@@ -169,7 +283,6 @@ describe("FilterTabs", () => {
       const activeTab = screen.getByRole("tab", { name: "Active 5" });
       await user.click(activeTab);
 
-      // onChange should not be called for links
       expect(handleChange).not.toHaveBeenCalled();
     });
   });
@@ -247,10 +360,8 @@ describe("FilterTabs", () => {
         <FilterTabs tabs={mockTabs} activeTab="all" />,
       );
 
-      // Unmount should trigger cleanup of scroll and resize listeners
       unmount();
 
-      // If listeners weren't cleaned up, this would cause issues
       expect(true).toBe(true);
     });
   });
@@ -261,7 +372,6 @@ describe("FilterTabs", () => {
     let originalScrollTo: PropertyDescriptor | undefined;
 
     beforeEach(() => {
-      // Store original descriptors
       originalScrollWidth = Object.getOwnPropertyDescriptor(
         HTMLElement.prototype,
         "scrollWidth",
@@ -275,7 +385,6 @@ describe("FilterTabs", () => {
         "scrollTo",
       );
 
-      // Mock scrollWidth to trigger arrow visibility
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
         value: 1000,
@@ -291,47 +400,23 @@ describe("FilterTabs", () => {
     });
 
     afterEach(() => {
-      // Restore original descriptors
-      if (originalScrollWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "scrollWidth",
-          originalScrollWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).scrollWidth;
-      }
-
-      if (originalClientWidth) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "clientWidth",
-          originalClientWidth,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).clientWidth;
-      }
-
-      if (originalScrollTo) {
-        Object.defineProperty(
-          HTMLElement.prototype,
-          "scrollTo",
-          originalScrollTo,
-        );
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (HTMLElement.prototype as any).scrollTo;
-      }
-
+      const restore = (prop: string, desc: PropertyDescriptor | undefined) => {
+        if (desc) {
+          Object.defineProperty(HTMLElement.prototype, prop, desc);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          delete (HTMLElement.prototype as any)[prop];
+        }
+      };
+      restore("scrollWidth", originalScrollWidth);
+      restore("clientWidth", originalClientWidth);
+      restore("scrollTo", originalScrollTo);
       vi.restoreAllMocks();
     });
 
     it("should show right arrow when content overflows", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
-      // Right arrow should be visible when there's overflow
       const rightArrow = screen.getByLabelText("Scroll right");
       expect(rightArrow).toBeInTheDocument();
     });
@@ -356,17 +441,14 @@ describe("FilterTabs", () => {
         '[role="tablist"]',
       ) as HTMLElement;
 
-      // Simulate scrolling to the end
       Object.defineProperty(scrollContainer, "scrollLeft", { value: 100 });
       Object.defineProperty(scrollContainer, "scrollWidth", { value: 200 });
       Object.defineProperty(scrollContainer, "clientWidth", { value: 100 });
 
-      // Trigger scroll event to update arrows
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
       });
 
-      // Right arrow should not be visible when scrolled to end
       expect(screen.queryByLabelText("Scroll right")).not.toBeInTheDocument();
     });
   });
@@ -404,17 +486,17 @@ describe("FilterTabs", () => {
       const user = userEvent.setup();
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
-      // Tab to first button (active one should have tabIndex 0)
       await user.tab();
       const activeTab = screen.getByRole("tab", { name: /all/i });
       expect(activeTab).toHaveFocus();
     });
 
-    it("should have focus styles", () => {
+    it("focus-visible ring uses jersey-deep for keyboard users", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
       const tab = screen.getByRole("tab", { name: /all/i });
-      expect(tab).toHaveClass("focus:outline-none");
+      expect(tab.className).toContain("focus-visible:ring-2");
+      expect(tab.className).toContain("focus-visible:ring-jersey-deep");
     });
   });
 });
