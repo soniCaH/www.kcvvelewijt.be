@@ -170,6 +170,34 @@
   }
 }
 
+/* ===== Alert ticket-stub perforation (Phase 2.A.5) =====
+
+   The "tear" effect on the left notch column of <Alert> (Direction B —
+   Ticket Stub, locked at the design checkpoint 2026-04-30). Two-layer
+   mask: half-disc cut-outs at 6 px and 18 px within a 24 px repeating
+   band, anchored to the right edge so half a circle sits inside the
+   column and half is cut into transparency. The page bg shows through
+   the perforations, reading as torn paper on light AND dark surrounding
+   panels. Reinforced by a `border-right: 2px dashed var(--color-ink)`
+   on the same column to draw a "tear here" guide.
+
+   Source-of-record: docs/design/mockups/phase-2-a-5-alert/option-b-ticket-stub.html. */
+
+.kcvv-stub-notch {
+  position: relative;
+  border-right: 2px dashed var(--color-ink);
+  -webkit-mask-image:
+    radial-gradient(circle at 100% 6px, transparent 0 5px, #000 5.5px),
+    radial-gradient(circle at 100% 18px, transparent 0 5px, #000 5.5px);
+  -webkit-mask-size: 100% 24px;
+  -webkit-mask-repeat: repeat-y;
+  mask-image:
+    radial-gradient(circle at 100% 6px, transparent 0 5px, #000 5.5px),
+    radial-gradient(circle at 100% 18px, transparent 0 5px, #000 5.5px);
+  mask-size: 100% 24px;
+  mask-repeat: repeat-y;
+}
+
 /* Fade In Animation (for result cards, modals, etc.) */
 @keyframes fadeIn {
   from {
@@ -413,6 +441,11 @@
   --color-alert-soft:   #e8d5cf;
   --color-warning:      #c68b2c;
   --color-warning-soft: #ecddb8;
+  /* Success body tint — desaturated sage. Pairs with the existing
+     `--color-warning-soft` (mustard) and `--color-alert-soft` (dusty
+     brick) to give the three Alert variants visually-balanced soft
+     bodies. Introduced for the Phase 2.A.5 Alert ticket-stub. */
+  --color-success-soft: #d8e7d0;
 
   /* Soft offset-shadow sibling — used wherever the standard --shadow-paper-sm
      (ink) would vanish: ink-bg active states (BrandedTab + FilterTab) and any

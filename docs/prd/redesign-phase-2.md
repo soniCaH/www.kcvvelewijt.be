@@ -99,7 +99,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] **2.A.2 Phosphor migration:** Every Phase 2 atom that previously imported from `@/lib/icons` now imports from `@/lib/icons.redesign`. Wrapper components default `weight="fill"` and accept `size`, `className`, `aria-hidden` pass-through.
 - [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
 - [ ] **2.A.4 Form atoms:** Input / Select / Textarea uniformly implement the locked Direction C state machine (`bg-white` + 2px ink-weighted border + `--shadow-paper-sm-soft` resting shadow + paper-press idiom on hover/focus + `--shadow-paper-sm-alert` on error). No jersey-deep on the field anywhere — focus signals via `border-ink` + shadow snap + `translate(2px, 2px)`. Filled state anchors at `border-ink/60`. Sharp corners (`rounded-[0.25em]` removed — see AC override note in §6.3). New `<FieldError>` and `<TextareaCounter>` primitives extracted. Phosphor `CaretDown` replaces Lucide on Select. `kcvv-alert` no longer referenced from these four files. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md` (locked spec) and `option-c-locked.html` (canonical visual).
-- [ ] **2.A.5 Alert:** `AlertVariant` type is `"success" | "warning" | "error"` (no `info`). Each variant matches the colour map in §6.5. Dismiss button renders Phosphor Fill `X`.
+- [ ] **2.A.5 Alert:** Two-form retro vocabulary per the locked design checkpoint (2026-04-30) — primary `<AlertBadge>` (Direction E — angled badge + italic Freight Display message, non-dismissible) and long-form `<Alert>` (Direction B — perforated ticket-stub with mono kicker + italic title + ink body + optional dismiss). Both share `variant: "success" | "warning" | "error"` (no `info`). Each variant uses distinct icons: `CheckCircle` (success) / `Warning` (warning) / `WarningCircle` (error). Dismiss on `<Alert>` renders Phosphor Fill `X`. WAI-ARIA: `success` and `warning` use `role="status"` + `aria-live="polite"`; `error` uses `role="alert"` + `aria-live="assertive"`. See `docs/design/mockups/phase-2-a-5-alert/compare.md` (locked spec) and `option-e-angled-badge.html` + `option-b-ticket-stub.html` (canonical visuals). Original token-swap PRD §6.4 was rejected and has been rewritten — see updated §6.4 in this PRD. Form-atoms (§6.3 / #1571) consume `<AlertBadge variant="error">` for the helper-row error slot — the originally-proposed `<FieldError>` primitive is superseded.
 - [ ] **2.A.6 FilterTab.icon removal:** `FilterTab.icon` field removed from the `FilterTab` interface; the `<FilterTabs>` rendering path no longer accepts or renders any leading icon. Locked at the Track B design checkpoint (2026-04-30) — supersedes the original Lucide → Phosphor type-swap plan. Acceptance: zero non-test references to `FilterTab.icon` after the PR; consumers that previously passed an `icon` stop doing so; type-check passes.
 
 ### 5.B Track B acceptance (per child issue)
@@ -191,6 +191,12 @@ The Phase 2.A.4 form-atom design checkpoint completed 2026-04-30. Owner picked *
 
 **Master-design Open Q7** (paper aesthetic on chrome) is now resolved for Phase 2: paper-card vocabulary applies. Q7 deferral to Phase 6/8 stands only for non-form chrome surfaces.
 
+**Field-error rendering — use `<AlertBadge>`, not a separate `<FieldError>` primitive.** The form-atoms checkpoint compare.md sketched a `<FieldError>` extraction (a "paper pill `FOUT` + italic alert message" wrapper). The Phase 2.A.5 design checkpoint independently arrived at the identical idiom and shipped it as `<AlertBadge variant="error">` (PRD §6.4.A). Two teams converging on the same retro-pill-plus-italic-message vocabulary is a strong design signal — there is no behavioural daylight between the two. The form atoms therefore use `<AlertBadge variant="error">` directly:
+
+- `<Input>`, `<Select>`, `<Textarea>` accept an `error?: string` prop. When set, the atom renders `<AlertBadge variant="error">{error}</AlertBadge>` inside the helper-row slot. No separate `<FieldError>` primitive is created.
+- The form-atoms compare.md `<FieldError>` extraction (lines 112–129) is **superseded by this PRD section**. The historical mockup remains for reference.
+- One source of truth, one component file, one set of stories + VR baselines.
+
 #### Field state machine — uniform across `<Input>`, `<Select>`, `<Textarea>`
 
 | State          | Border             | Shadow                                     | Transform             | Surface                                              |
@@ -240,12 +246,13 @@ Import `CaretDown` from `@/lib/icons.redesign` (Phosphor Fill); drop the Lucide 
 
 **Open-menu state** (image 2 mockup — inverted active option `bg-ink text-cream` + jersey-deep dot) is **not implementable on a native `<select>`**. Deferred to a future combobox issue (Phase 5 forms-tier work). Native `<select>` keeps the OS-rendered dropdown.
 
-#### New primitives — `<FieldError>` and `<TextareaCounter>`
+#### New primitive — `<TextareaCounter>`
 
-Both extracted into `apps/web/src/components/design-system/` with their own stories (`tags: ["autodocs", "vr"]`).
+Extracted into `apps/web/src/components/design-system/` with its own story (`tags: ["autodocs", "vr"]`).
 
-- **`<FieldError>`** — paper-pill error indicator + italic alert message. Renders `<span class="paper-pill paper-pill--alert"><WarningCircle weight="fill" /> FOUT</span>` followed by an inline italic Freight Display alert message. Single source of truth across Input / Select / Textarea, consumed via each atom's existing `error?: string` prop. Pill body: `bg-alert text-white border-[1.5px] border-ink shadow-[3px_3px_0_0_var(--color-ink)]` (ink shadow — never jersey on chrome).
 - **`<TextareaCounter>`** — `current/max` mono digits in the bottom-right corner of `<Textarea>`. Color shifts to `text-alert` when `current > max`. Wired into `<Textarea>` via the existing `maxLength` prop (no new public surface).
+
+> **Field-error rendering uses `<AlertBadge>` (§6.4.A)**, not a separate `<FieldError>` primitive. The form-atoms compare.md sketched a `<FieldError>` extraction, but the Phase 2.A.5 design checkpoint independently arrived at the identical retro-pill-plus-italic-message vocabulary as `<AlertBadge variant="error">`. There is no behavioural daylight between the two — `<Input>`, `<Select>`, `<Textarea>` render `<AlertBadge variant="error">{error}</AlertBadge>` in the helper-row slot when `error?: string` is set. Single component file, one set of stories + VR baselines, no vocabulary drift between teams.
 
 #### Sizes
 
@@ -255,23 +262,95 @@ Heights locked at sm 32 / md 40 / lg 48 (px). Padding scales with the existing `
 
 1. Append `--shadow-paper-sm-alert` to the `@theme` block in `apps/web/src/styles/globals.css`. Add MDX entry in `Foundation/Colors`.
 2. Reskin `Input.tsx`, `Select.tsx`, `Textarea.tsx`, `Label.tsx` per the spec above.
-3. Create `<FieldError>` and `<TextareaCounter>` primitives with their own stories + tests.
+3. Create `<TextareaCounter>` primitive with its own story + tests. (Field-error rendering uses `<AlertBadge variant="error">` from §6.4.A — no separate `<FieldError>` primitive.)
 4. Update Storybook stories for all four atoms covering every state in the table above (default, hover, focus, filled, filled+focus, error, error+focus, disabled), plus sm/md/lg, optional-pill, hint, kicker.
-5. `pnpm vr:update:story "Input|Select|Textarea|Label|FieldError|TextareaCounter"` captures baselines.
+5. `pnpm vr:update:story "Input|Select|Textarea|Label|TextareaCounter"` captures baselines.
 6. PR description lists every story whose baseline was updated, plus an explicit **AC overrides** section calling out the sharp-corners override.
 7. `pnpm --filter @kcvv/web check-all` passes.
 
-### 6.4 `<Alert>` — 3 variants (info dropped)
+### 6.4 Alert — two-form retro vocabulary (`<AlertBadge>` + `<Alert>`)
 
-| Variant   | Surface           | Left accent                     | Icon                                                       | Text       |
-| --------- | ----------------- | ------------------------------- | ---------------------------------------------------------- | ---------- |
-| `success` | `bg-jersey/10`    | `border-l-4 border-jersey-deep` | `CheckCircle` (Phosphor Fill, `text-jersey-deep`)          | `text-ink` |
-| `warning` | `bg-warning-soft` | `border-l-4 border-warning`     | `Warning` (Phosphor Fill, `text-warning`)                  | `text-ink` |
-| `error`   | `bg-alert-soft`   | `border-l-4 border-alert`       | `WarningCircle` or `XCircle` (Phosphor Fill, `text-alert`) | `text-ink` |
+Originally specced as a single token-swap atom in this PRD. Owner reviewed the token-swap implementation (left-accent border + tinted soft bg + Phosphor icon) and rejected — it produced visuals indistinguishable from generic Material/shadcn alerts. Promoted to a real design checkpoint; **see [`docs/design/mockups/phase-2-a-5-alert/compare.md`](../design/mockups/phase-2-a-5-alert/compare.md) for the full direction comparison and locked decisions.**
 
-- Dismiss button: Phosphor Fill `X` icon, `text-ink/60 hover:text-ink`.
-- `info` variant removed entirely. Any consumer using it migrates to `success` (the closest visual semantic).
-- Verify zero `<Alert variant="info">` consumers at PR time; if any exist, migrate them in the same PR.
+The locked outcome is a **two-form Alert API**: a primary inline form (`<AlertBadge>`, Direction E) and a long-form companion (`<Alert>`, Direction B). Different shapes for different message lengths instead of one shape forced on every use case.
+
+`info` stays retired across both forms; consumers migrate to `success`. Verify zero `<Alert variant="info">` consumers at PR time; if any exist, migrate them in the same PR.
+
+#### 6.4.A `<AlertBadge>` — primary inline form (Direction E)
+
+Angled solid-colored badge on the left + italic Freight Display message to the right. No card body, no soft-tinted bg, no chrome — the page colour shows through. Used for inline form-field validation, short single-headline confirmations, and one-badge-per-form-summary multi-line messages.
+
+```typescript
+type AlertBadgeVariant = "success" | "warning" | "error";
+
+interface AlertBadgeProps {
+  variant: AlertBadgeVariant;
+  /** Message text — single line typical, multi-line allowed. */
+  children: ReactNode;
+  className?: string;
+}
+```
+
+**Visual contract** (canonical reference: [`option-e-angled-badge.html`](../design/mockups/phase-2-a-5-alert/option-e-angled-badge.html)):
+
+| Layer                | Spec                                                                                                                                                                                                                                                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Container            | `inline-flex items-start gap-[18px]`. No border, no shadow, no bg.                                                                                                                                                                                                                                               |
+| Badge                | `inline-flex items-center gap-2`, `border-2 border-ink`, `shadow-[3px_3px_0_0_var(--color-ink)]`, `transform: rotate(-2deg)`, `rounded-none`, `font-mono text-[11px] font-bold uppercase tracking-[0.12em]`, `px-3 py-[6px]`, `whitespace-nowrap`, `mt-[2px]` (cap-height alignment with line 1 of the message). |
+| Badge bg per variant | success → `bg-jersey-deep text-cream`; warning → `bg-warning text-cream`; error → `bg-alert text-cream`.                                                                                                                                                                                                         |
+| Badge label          | Mono caps Dutch — `MELDING` / `WAARSCHUWING` / `FOUT`.                                                                                                                                                                                                                                                           |
+| Badge glyph          | `✓` (success — Phosphor `CheckCircle`); `▲` (warning — Phosphor `Warning`); `!` (error — Phosphor `WarningCircle`). Distinct per variant; the earlier draft mistakenly used `▲` for both warning and error.                                                                                                      |
+| Message              | `font-display italic font-normal text-[22px] leading-[1.25]`. Variant accent colour: `text-jersey-deep` / `text-warning` / `text-alert`.                                                                                                                                                                         |
+| Multi-line behaviour | Wrapped lines align to the same x-edge as line 1 (badge-right + 18 px gap). The badge stays at line 1 via `align-items: flex-start`; do **not** vertically centre the badge against multi-line messages.                                                                                                         |
+| Dismiss              | **Not supported.** AlertBadge is non-dismissible by design — form validation resolves on revalidation; confirmations fade with the next interaction; no `×` slot.                                                                                                                                                |
+
+**Production icon imports:** `CheckCircle`, `Warning`, `WarningCircle` from `@/lib/icons.redesign`.
+
+**Form-atoms integration (cross-references §6.3):** `<AlertBadge variant="error">` is the canonical renderer for form-field errors. When `<Input>`, `<Select>`, `<Textarea>` (Phase 2.A.4) accept an `error?: string` prop, they internally render `<AlertBadge variant="error">{error}</AlertBadge>` in the helper-row slot. The originally-proposed `<FieldError>` primitive in the form-atoms checkpoint compare.md is superseded — there is no behavioural daylight between it and `<AlertBadge>`, and converging on a single component avoids vocabulary drift between two teams shipping the same idiom.
+
+#### 6.4.B `<Alert>` — long-form companion (Direction B — Ticket Stub)
+
+Perforated-edge "torn from a programme" card with mono caps kicker label, italic Freight Display title, and an ink-text body. Used for page-level / dashboard-level alerts that need a title, multi-paragraph body, and/or a dismiss button. Replaces the legacy `<Alert>`.
+
+```typescript
+type AlertVariant = "success" | "warning" | "error";
+
+interface AlertProps {
+  variant?: AlertVariant; // default: "success"
+  title?: string;
+  children: ReactNode;
+  dismissible?: boolean; // default: false
+  onDismiss?: () => void;
+  className?: string;
+}
+```
+
+**Visual contract** (canonical reference: [`option-b-ticket-stub.html`](../design/mockups/phase-2-a-5-alert/option-b-ticket-stub.html)):
+
+| Layer                         | Spec                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Outer card                    | `relative grid grid-cols-[72px_1fr] border-2 border-ink shadow-[var(--shadow-paper-sm)] rounded-none overflow-hidden`. Tinted soft bg per variant: `bg-success-soft` (introduced for this atom — see §6.7) / `bg-warning-soft` / `bg-alert-soft`.                                                                                                                                                                                                                            |
+| Notch column                  | Left grid track (72 px wide). Perforated tear via paired `radial-gradient` masks producing half-disc cut-outs at a 12 px rhythm; reinforced by `border-right: 2px dashed var(--color-ink)`. The mask punches the notch column itself, so the page bg shows through the half-discs (works on both light and dark surrounding panels). Implemented as the `kcvv-stub-notch` utility class in `globals.css`.                                                                    |
+| Icon block                    | 40 × 40 (h-10 w-10), centred horizontally in the notch column and anchored to the top via `flex items-start justify-center pt-4`, so the icon top aligns with the kicker text top instead of the geometric centre — keeps the icon "on top text" in multi-paragraph bodies. Solid bg per variant (`bg-jersey-deep` / `bg-warning` / `bg-alert`). Cream glyph; same icon mapping as `<AlertBadge>` (`CheckCircle` / `Warning` / `WarningCircle` from `@/lib/icons.redesign`). |
+| Body                          | `px-5 py-4` (20 × 16 px). Mono caps kicker (`★ MELDING` / `⚠ WAARSCHUWING` / `! FOUT`) above an italic Freight Display title (`font-display italic font-bold text-[22px]`). Body text in `text-ink` Inter 15 px / 1.55.                                                                                                                                                                                                                                                      |
+| Dismiss                       | Optional `×` button in the upper-right corner just inside the body padding. `text-ink/60 hover:text-ink`, `focus-visible:ring-jersey-deep`.                                                                                                                                                                                                                                                                                                                                  |
+| **No** right-edge claim strip | An earlier draft rendered a 6 px coloured strip on the right edge as a redundant variant cue — removed per owner feedback (2026-04-30). The icon block + tinted body already carry the variant cue, the card already has a border + paper shadow.                                                                                                                                                                                                                            |
+| Dusk-panel legibility         | Stub body keeps its tinted soft bg regardless of surrounding panel theme — title and body MUST stay `text-ink` even when nested inside `panel--dusk` (CSS-level override required, since `.panel--dusk h3` cascades cream to `<h3>` titles by default).                                                                                                                                                                                                                      |
+
+**Production icon imports:** same as `<AlertBadge>` plus `X` for dismiss, all from `@/lib/icons.redesign`.
+
+#### 6.4.C Choosing between the two forms
+
+| Use case                                                               | Form                                           |
+| ---------------------------------------------------------------------- | ---------------------------------------------- |
+| Inline form-field error ("invalid phone number")                       | `<AlertBadge>`                                 |
+| Short single-headline confirmation ("message sent")                    | `<AlertBadge>`                                 |
+| Form-summary alert under the form (multi-line, listing several issues) | `<AlertBadge>` (one badge, multi-line message) |
+| Page-level system error / dashboard banner with title + body           | `<Alert>`                                      |
+| Multi-paragraph guidance / informational notice with optional dismiss  | `<Alert>`                                      |
+| Anything that needs a `dismissible` close button                       | `<Alert>`                                      |
+
+If a use case feels ambiguous, default to `<AlertBadge>` — it carries the strongest retro signal and works for ~80 % of alerts in the product.
 
 ### 6.5 Track B atoms — locked design contract
 
@@ -355,9 +434,15 @@ Append to the existing `@theme` block alongside other redesign tokens (cream/ink
    (#e8d5cf) keeps the offset visible without competing with the alert border
    itself. See §6.3. */
 --shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft);
+
+/* Success body tint — desaturated sage. Pairs with the existing
+   warning-soft (mustard) and alert-soft (dusty brick) so the three Alert
+   variants share a balanced soft-body palette. Introduced for the Phase
+   2.A.5 Alert ticket-stub (§6.4.B). */
+--color-success-soft: #d8e7d0;
 ```
 
-`--color-success` is not added — `--color-jersey-deep` covers success semantics.
+`--color-success` itself is **not added** — `--color-jersey-deep` covers solid-fill success semantics (icon blocks, badge fills). Only the `-soft` body tint is unique enough to warrant its own token.
 
 Legacy `--color-kcvv-warning` and `--color-kcvv-alert` stay defined; legacy components keep using them until their own phase.
 

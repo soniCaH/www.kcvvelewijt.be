@@ -1,5 +1,8 @@
 /**
  * Alert Component Tests
+ *
+ * Direction B ("Ticket Stub — torn from a programme") locked at the
+ * Phase 2.A.5 design checkpoint (2026-04-30). PRD §6.4.B.
  */
 
 import { createRef } from "react";
@@ -8,6 +11,15 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Alert } from "./Alert";
 
+/**
+ * Per WAI-ARIA, success/warning use `role="status"` (polite) and error
+ * uses `role="alert"` (assertive). Tests that don't care about role —
+ * they just want the alert root to assert visual classes — use this
+ * helper to dodge the role split.
+ */
+const getAlertRoot = (container: HTMLElement) =>
+  container.querySelector('[role="alert"], [role="status"]') as HTMLElement;
+
 describe("Alert", () => {
   describe("Rendering", () => {
     it("should render children content", () => {
@@ -15,55 +27,109 @@ describe("Alert", () => {
       expect(screen.getByText("Inschrijvingen zijn open.")).toBeInTheDocument();
     });
 
-    it("should have role='alert'", () => {
+    it("should have role='status' with aria-live=polite for success (default)", () => {
       render(<Alert>Melding</Alert>);
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      const alert = screen.getByRole("status");
+      expect(alert).toBeInTheDocument();
+      expect(alert).toHaveAttribute("aria-live", "polite");
+    });
+
+    it("should have role='status' with aria-live=polite for warning", () => {
+      render(<Alert variant="warning">Melding</Alert>);
+      const alert = screen.getByRole("status");
+      expect(alert).toHaveAttribute("aria-live", "polite");
+    });
+
+    it("should have role='alert' with aria-live=assertive for error", () => {
+      render(<Alert variant="error">Melding</Alert>);
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveAttribute("aria-live", "assertive");
     });
 
     it("should render title when provided", () => {
-      render(<Alert title="Info">Inhoud</Alert>);
-      expect(screen.getByText("Info")).toBeInTheDocument();
+      render(<Alert title="Verzonden!">Inhoud</Alert>);
+      expect(
+        screen.getByRole("heading", { name: "Verzonden!" }),
+      ).toBeInTheDocument();
       expect(screen.getByText("Inhoud")).toBeInTheDocument();
     });
 
     it("should not render title element when not provided", () => {
       render(<Alert>Geen titel</Alert>);
-      expect(
-        screen.queryByText("Geen titel", { selector: "p" }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     });
 
     it("should forward ref to root div", () => {
       const ref = createRef<HTMLDivElement>();
-      render(<Alert ref={ref}>Melding</Alert>);
-      expect(ref.current).toBe(screen.getByRole("alert"));
+      const { container } = render(<Alert ref={ref}>Melding</Alert>);
+      expect(ref.current).toBe(getAlertRoot(container));
     });
   });
 
-  describe("Variants", () => {
-    it("should render info variant with green border", () => {
-      render(<Alert variant="info">Info</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("border-kcvv-green-bright");
+  describe("Visual contract — Direction B ticket-stub", () => {
+    it("renders the outer paper card (border-2 ink + shadow-paper-sm + rounded-none)", () => {
+      const { container } = render(<Alert>x</Alert>);
+      const alert = getAlertRoot(container);
+      expect(alert).toHaveClass("border-2");
+      expect(alert).toHaveClass("border-ink");
+      expect(alert).toHaveClass("rounded-none");
+      expect(alert.className).toContain("shadow-[var(--shadow-paper-sm)]");
     });
 
-    it("should render success variant", () => {
-      render(<Alert variant="success">Succes</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("border-kcvv-success");
+    it("renders the perforated notch column via kcvv-stub-notch utility", () => {
+      const { container } = render(<Alert>x</Alert>);
+      const notch = container.querySelector(".kcvv-stub-notch");
+      expect(notch).toBeInTheDocument();
     });
 
-    it("should render warning variant", () => {
-      render(<Alert variant="warning">Waarschuwing</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("border-kcvv-warning");
+    it("default variant is success — jersey-deep icon block on success-soft body", () => {
+      const { container } = render(<Alert>x</Alert>);
+      const alert = getAlertRoot(container);
+      expect(alert).toHaveClass("bg-success-soft");
+      const iconBlock = container.querySelector(
+        ".kcvv-stub-notch > span",
+      ) as HTMLElement;
+      expect(iconBlock).toHaveClass("bg-jersey-deep");
+      expect(iconBlock).toHaveClass("text-cream");
     });
 
-    it("should render error variant", () => {
-      render(<Alert variant="error">Fout</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("border-kcvv-alert");
+    it("warning variant uses warning-soft body and warning icon block", () => {
+      const { container } = render(<Alert variant="warning">x</Alert>);
+      const alert = getAlertRoot(container);
+      expect(alert).toHaveClass("bg-warning-soft");
+      const iconBlock = container.querySelector(
+        ".kcvv-stub-notch > span",
+      ) as HTMLElement;
+      expect(iconBlock).toHaveClass("bg-warning");
     });
 
-    it("should default to info variant", () => {
-      render(<Alert>Default</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("border-kcvv-green-bright");
+    it("error variant uses alert-soft body and alert icon block", () => {
+      const { container } = render(<Alert variant="error">x</Alert>);
+      const alert = getAlertRoot(container);
+      expect(alert).toHaveClass("bg-alert-soft");
+      const iconBlock = container.querySelector(
+        ".kcvv-stub-notch > span",
+      ) as HTMLElement;
+      expect(iconBlock).toHaveClass("bg-alert");
+    });
+
+    it("renders mono caps kicker label per variant", () => {
+      const { rerender } = render(<Alert variant="success">x</Alert>);
+      expect(screen.getByText(/MELDING/)).toBeInTheDocument();
+
+      rerender(<Alert variant="warning">x</Alert>);
+      expect(screen.getByText(/WAARSCHUWING/)).toBeInTheDocument();
+
+      rerender(<Alert variant="error">x</Alert>);
+      expect(screen.getByText(/FOUT/)).toBeInTheDocument();
+    });
+
+    it("renders title in italic Freight Display when provided", () => {
+      render(<Alert title="Verzonden!">x</Alert>);
+      const heading = screen.getByRole("heading", { name: "Verzonden!" });
+      expect(heading).toHaveClass("font-display");
+      expect(heading).toHaveClass("italic");
+      expect(heading).toHaveClass("text-ink");
     });
   });
 
@@ -82,10 +148,22 @@ describe("Alert", () => {
       ).toBeInTheDocument();
     });
 
+    it("dismiss button uses ink-on-ink-hover for the Phosphor X glyph", () => {
+      render(<Alert dismissible>Melding</Alert>);
+      const button = screen.getByRole("button", { name: /sluit melding/i });
+      expect(button.className).toContain("text-ink/60");
+      expect(button.className).toContain("hover:text-ink");
+    });
+
+    it("dismiss button focus-visible ring uses jersey-deep", () => {
+      render(<Alert dismissible>Melding</Alert>);
+      const button = screen.getByRole("button", { name: /sluit melding/i });
+      expect(button.className).toContain("focus-visible:ring-jersey-deep");
+    });
+
     it("should call onDismiss when close button is clicked", async () => {
       const user = userEvent.setup();
       const handleDismiss = vi.fn();
-
       render(
         <Alert dismissible onDismiss={handleDismiss}>
           Melding
@@ -105,23 +183,26 @@ describe("Alert", () => {
     });
   });
 
-  describe("Icon", () => {
-    it("should render an SVG icon", () => {
-      const { container } = render(<Alert>Melding</Alert>);
-      expect(container.querySelector("svg")).toBeInTheDocument();
+  describe("Accessibility", () => {
+    it("notch column is hidden from accessibility tree", () => {
+      const { container } = render(<Alert>x</Alert>);
+      const notch = container.querySelector(".kcvv-stub-notch");
+      expect(notch).toHaveAttribute("aria-hidden", "true");
     });
 
-    it("should mark icon as aria-hidden", () => {
-      const { container } = render(<Alert>Melding</Alert>);
-      const icon = container.querySelector("svg");
+    it("renders the icon with aria-hidden", () => {
+      const { container } = render(<Alert>x</Alert>);
+      const icon = container.querySelector(".kcvv-stub-notch svg");
       expect(icon).toHaveAttribute("aria-hidden", "true");
     });
   });
 
   describe("Custom props", () => {
     it("should accept custom className", () => {
-      render(<Alert className="custom-alert">Melding</Alert>);
-      expect(screen.getByRole("alert")).toHaveClass("custom-alert");
+      const { container } = render(
+        <Alert className="custom-alert">Melding</Alert>,
+      );
+      expect(getAlertRoot(container)).toHaveClass("custom-alert");
     });
   });
 });

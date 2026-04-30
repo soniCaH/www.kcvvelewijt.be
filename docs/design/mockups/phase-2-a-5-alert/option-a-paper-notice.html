@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction A — Paper Notice · Phase 2 · Track A · Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         ALERT — paper notice (border-2 ink + shadow + tinted soft bg
+         + Phosphor Fill stamp upper-left + mono caps title)
+         ============================================================ */
+
+      .alert {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 18px 20px 18px 76px;
+        display: block;
+        border-radius: 0; /* sharp corners — no rotation, no tape */
+      }
+
+      /* Variant tints — soft tinted bg per semantic per-token alert/warning,
+         plus a brand-green tint for success that does not duplicate jersey
+         chrome. Stays inside the cream/ink paper vocabulary. */
+      .alert--success { background: #dceedc; }              /* jersey-deep tint @ ~20% on cream */
+      .alert--warning { background: var(--color-warning-soft); }
+      .alert--error   { background: var(--color-alert-soft); }
+
+      /* Stamp — upper-left ink-bordered box reading as a postmark.
+         Sized as a square so glyph sits centred. */
+      .alert__stamp {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        width: 44px;
+        height: 44px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 22px;
+        line-height: 1;
+        color: var(--color-ink);
+        font-weight: 700;
+      }
+      .alert--success .alert__stamp { color: var(--color-jersey-deep); }
+      .alert--warning .alert__stamp { color: var(--color-warning); }
+      .alert--error .alert__stamp { color: var(--color-alert); }
+
+      .alert__title {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        margin: 0 0 4px;
+      }
+
+      .alert__body {
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+
+      /* Dismiss — paper-card mini button, top-right of notice */
+      .alert__dismiss {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 28px;
+        height: 28px;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 16px;
+        line-height: 1;
+        color: var(--color-ink);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+        border-radius: 0;
+        padding: 0;
+      }
+      .alert__dismiss:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+      }
+
+      /* Inline / form-scale variant — slightly tighter padding,
+         smaller stamp, smaller body. Same vocabulary, scaled. */
+      .alert--inline {
+        padding: 12px 16px 12px 60px;
+      }
+      .alert--inline .alert__stamp {
+        top: 10px;
+        left: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+      .alert--inline .alert__title {
+        font-size: 11px;
+        margin: 0 0 2px;
+      }
+      .alert--inline .alert__body {
+        font-size: 14px;
+      }
+
+      /* ============================================================
+         FORM mock — for in-context demo
+         ============================================================ */
+
+      .form-mock {
+        max-width: 480px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .form-mock label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .form-mock input {
+        font-family: var(--font-body);
+        font-size: 15px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 10px 12px;
+        color: var(--color-ink);
+        border-radius: 0;
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .form-mock input:focus {
+        outline: none;
+        box-shadow: var(--shadow-paper-sm), 0 0 0 3px var(--color-cream-soft);
+      }
+      .form-mock input.is-invalid {
+        border-color: var(--color-alert);
+      }
+      .form-mock button {
+        align-self: flex-start;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 12px 18px;
+        cursor: pointer;
+        box-shadow: var(--shadow-paper-sm-soft);
+        border-radius: 0;
+      }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 2 · TRACK A · ALERT · DIRECTION A</span>
+          <span class="mono mono--muted">★ PAPER NOTICE</span>
+          <span class="mono mono--muted">2026-04-30</span>
+        </div>
+        <h1>Een <span class="display"><em>officieel</em></span> bericht.</h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          Alerts as official printed notices. Same paper-card chrome the rest of
+          the redesign already speaks — <code>border-2 ink</code> + <code>shadow-paper-sm</code>
+          + tinted soft bg per semantic + sharp corners. The Phosphor Fill icon
+          sits upper-left in an ink-bordered "stamp" box like a postmark, so the
+          variant reads at a glance without polluting the title row. Mono caps
+          title in pure ink, body in Inter. <strong>No tape, no rotation</strong>
+          — alerts read as a flat sibling of BrandedTabs / FilterTabs / arrows,
+          not as a tilted scrap on top of them.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           STANDALONE VARIANTS
+           =========================================================== -->
+      <section class="section" id="standalone">
+        <div class="section-meta">
+          <span class="mono">★ 01 · STANDALONE VARIANTS</span>
+          <span class="mono mono--muted">— success · warning · error, full-width, no title omitted yet</span>
+        </div>
+        <h2>Drie <em>varianten.</em></h2>
+        <p class="lead">
+          Each variant inherits the same paper-notice chrome. Only three things
+          change per variant: the <strong>tinted soft bg</strong> (alert-soft /
+          warning-soft / a jersey-deep tint at ~20% on cream for success), the
+          <strong>stamp glyph</strong>, and the <strong>stamp ink colour</strong>.
+          Border, shadow, title typography, and body typography are constant.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">SUCCESS</span>
+            <span class="mono">jersey-deep stamp · success-tinted bg</span>
+          </div>
+          <div class="alert alert--success" role="status">
+            <span class="alert__stamp" aria-hidden="true">✓</span>
+            <p class="alert__title">Verzonden!</p>
+            <p class="alert__body">Je bericht is succesvol verzonden.</p>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">WARNING</span>
+            <span class="mono">warning ochre stamp · warning-soft bg</span>
+          </div>
+          <div class="alert alert--warning" role="status">
+            <span class="alert__stamp" aria-hidden="true">▲</span>
+            <p class="alert__title">Let op</p>
+            <p class="alert__body">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">ERROR</span>
+            <span class="mono">alert red stamp · alert-soft bg</span>
+          </div>
+          <div class="alert alert--error" role="alert">
+            <span class="alert__stamp" aria-hidden="true">⊗</span>
+            <p class="alert__title">Fout</p>
+            <p class="alert__body">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Reads as a sibling of the redesigned chrome — same border, same shadow, same sharp corners. Tinted bg signals semantic without fighting the cream-paper foundation. Stamp box gives the icon real estate without needing to inline-align with the title baseline.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Three distinct soft bg tints add three colours to the global token map. Stamp box doubles the visible borders (alert outer + stamp inner) — at small sizes this can read as busy. Mitigated by the inline scale (section 03) which trims the stamp.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           WITH TITLE + DISMISSIBLE
+           =========================================================== -->
+      <section class="section" id="dismissible">
+        <div class="section-meta">
+          <span class="mono">★ 02 · WITH TITLE + DISMISSIBLE</span>
+          <span class="mono mono--muted">— close button is a paper-card mini, top-right</span>
+        </div>
+        <h2>Met een <em>kruisje.</em></h2>
+        <p class="lead">
+          The dismiss control is its own miniature paper card — same ink border,
+          smaller. It lives top-right and never touches the body text. Same
+          press idiom as <code>BrandedTabs</code> hover (translate + shadow).
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">SUCCESS</span>
+            <span class="mono">dismissible variant — toast-style, transient confirmation</span>
+          </div>
+          <div class="alert alert--success" role="status">
+            <span class="alert__stamp" aria-hidden="true">✓</span>
+            <p class="alert__title">Verzonden!</p>
+            <p class="alert__body">Je bericht is succesvol verzonden.</p>
+            <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">WARNING</span>
+            <span class="mono">dismissible variant — soft advisory, user can ignore</span>
+          </div>
+          <div class="alert alert--warning" role="status">
+            <span class="alert__stamp" aria-hidden="true">▲</span>
+            <p class="alert__title">Let op</p>
+            <p class="alert__body">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+            <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">ERROR</span>
+            <span class="mono">dismissible variant — page-level error banner</span>
+          </div>
+          <div class="alert alert--error" role="alert">
+            <span class="alert__stamp" aria-hidden="true">⊗</span>
+            <p class="alert__title">Fout</p>
+            <p class="alert__body">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+            <button class="alert__dismiss" type="button" aria-label="Sluiten">×</button>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Dismiss button is a paper-card mini — same press idiom as every other chrome atom. No new shape introduced for the dismiss affordance. Position upper-right keeps it visually balanced against the upper-left stamp.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Stamp + dismiss = two ink-bordered boxes inside one notice. Visually heavy at very small widths (&lt;320px). For inline form errors, prefer the non-dismissible inline scale below.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           IN-CONTEXT (FORM)
+           =========================================================== -->
+      <section class="section" id="in-context">
+        <div class="section-meta">
+          <span class="mono">★ 03 · IN-CONTEXT (FORM)</span>
+          <span class="mono mono--muted">— inline scale, sits below an invalid input, no dismiss</span>
+        </div>
+        <h2>In een <em>formulier.</em></h2>
+        <p class="lead">
+          Inline alerts sit immediately below the offending input. Stamp shrinks
+          to <code>36×36</code>, padding tightens, body type drops to 14px.
+          The input itself flips its border to <code>--color-alert</code>; the
+          alert tells the user <em>what</em> went wrong. No dismiss button —
+          the user fixes the input to clear it.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">FORM</span>
+            <span class="mono">contact form, e-mail field invalid</span>
+          </div>
+
+          <form class="form-mock" onsubmit="event.preventDefault()">
+            <label for="email-bad">E-mailadres</label>
+            <input id="email-bad" class="is-invalid" type="email" value="kevin@elewijt" aria-invalid="true" aria-describedby="email-bad-error" />
+            <div class="alert alert--error alert--inline" id="email-bad-error" role="alert">
+              <span class="alert__stamp" aria-hidden="true">⊗</span>
+              <p class="alert__title">Fout</p>
+              <p class="alert__body">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+            </div>
+
+            <label for="name-ok" style="margin-top: 8px">Naam</label>
+            <input id="name-ok" type="text" value="Kevin Van Ransbeeck" />
+
+            <button type="submit">VERZENDEN</button>
+          </form>
+        </div>
+
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SCALE</span>
+            <span class="mono">inline-scale notices, all three variants, no parent form</span>
+          </div>
+
+          <div class="stack">
+            <div class="alert alert--success alert--inline" role="status">
+              <span class="alert__stamp" aria-hidden="true">✓</span>
+              <p class="alert__title">Verzonden!</p>
+              <p class="alert__body">Je bericht is succesvol verzonden.</p>
+            </div>
+
+            <div class="alert alert--warning alert--inline" role="status">
+              <span class="alert__stamp" aria-hidden="true">▲</span>
+              <p class="alert__title">Let op</p>
+              <p class="alert__body">De wedstrijd kan uitgesteld worden wegens weersomstandigheden.</p>
+            </div>
+
+            <div class="alert alert--error alert--inline" role="alert">
+              <span class="alert__stamp" aria-hidden="true">⊗</span>
+              <p class="alert__title">Fout</p>
+              <p class="alert__body">Er ging iets mis. Controleer je gegevens en probeer opnieuw.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Same chrome scales cleanly to form-row width — only padding, stamp, and body size change. The notice never overpowers a 480px-wide form. Below-input placement is the canonical accessibility pattern (<code>aria-describedby</code>) and matches the visual weight expected in a form.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Inline scale still carries a 36×36 stamp + 2px ink border + paper shadow — heavier than a stripped one-line helper text. If a project uses many alerts per form, density adds up. Counter-pattern: keep field-level guidance as plain helper text; reserve <code>&lt;Alert&gt;</code> for actionable state changes (validation failed, submit succeeded).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           TRADEOFFS — direction-level summary
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · TRADEOFFS</span>
+          <span class="mono mono--muted">— direction-level summary across all variants</span>
+        </div>
+        <h2>Waarom <em>deze</em> richting.</h2>
+        <p class="lead">
+          Direction A maximises reuse of the locked chrome vocabulary. The alert
+          is structurally indistinguishable from a tab, an arrow button, or a
+          match card — only the tinted bg + stamp glyph + mono title carry the
+          "this is a notice" reading. Lowest-risk direction; closest neighbour
+          of the existing system.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Maximum chrome reuse — every primitive is already on main:
+              <code>border-2 ink</code>, <code>--shadow-paper-sm</code>,
+              <code>cream</code> + <code>cream-soft</code> bgs, mono caps title,
+              sharp corners, the press idiom. Adds three new tokens
+              (<code>--color-alert-soft</code>, <code>--color-warning-soft</code>,
+              and a jersey-deep success tint) and one new structural element
+              (the stamp box). Reads as a flat sibling of BrandedTabs and
+              FilterTabs — exactly what the rejection brief asked for. Scales
+              cleanly from page-level banner down to inline form error.
+              Phosphor Fill icon stays in production code (mockup uses Unicode
+              glyphs as stand-ins). No tape, no rotation, no editorial drama —
+              alerts behave like reliable, official notices.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Visually quiet by design — does not stand out the way a torn-tape
+              or rotated alert would. The stamp + dismiss combination shows
+              two ink-bordered boxes in one notice; on very narrow widths this
+              can read busy. Three new soft-bg tints expand the colour token
+              map (mitigation: they are semantic-only, never used as chrome
+              fill). For pages with heavy chrome already on screen — many
+              tabs + filter chips — adding multiple alerts compounds the
+              "field of paper rectangles" effect; advisory placement should
+              prefer one alert per view. Trades editorial novelty for system
+              cohesion.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map, structure decisions, production handoff</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Alert chrome inherits paper-card vocabulary verbatim — <code>border-2 ink</code> + <code>--shadow-paper-sm</code> + sharp corners + cream paper foundation</li>
+          <li>Variant differentiation is bg tint + stamp glyph colour only — body and title typography are invariant</li>
+          <li>Stamp lives upper-left in a 44×44 ink-bordered cream box (inline scale: 36×36) — the icon never inlines with the title baseline</li>
+          <li>Title uses <code>var(--font-mono)</code> uppercase, 12px, 700 weight, in pure <code>--color-ink</code> — never tinted to match the variant</li>
+          <li>Body uses <code>var(--font-body)</code> in <code>--color-ink-soft</code>, 15px (12px inline)</li>
+          <li><code>var(--font-display)</code> is reserved for editorial moments — the Alert never reaches for Playfair</li>
+          <li>Dismiss button is a paper-card mini (28×28, ink-bordered) at top-right — same press idiom as <code>BrandedTabs</code> hover</li>
+          <li>Inline scale: padding <code>12px 16px 12px 60px</code>, stamp 36×36, body 14px — same component, scaled prop</li>
+          <li><strong>No tape, no rotation, no border-radius</strong> — alerts are flat siblings of the chrome atoms, never editorial scraps</li>
+          <li>Phosphor Fill icons in production: <code>CheckCircleFill</code> (success), <code>WarningFill</code> (warning), <code>XCircleFill</code> (error). Mockup uses Unicode glyphs (<code>✓ ▲ ⊗</code>) as stand-ins</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction A (this) and any sibling directions
+          authored alongside. Once a direction is locked we ship the new
+          <code>&lt;Alert&gt;</code> component, retire the old shadcn-style alert
+          from <code>apps/web/src/components/ui/alert.tsx</code>, and add a
+          Storybook story per variant + scale.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TINT</h4>
+            <ul>
+              <li>Stamp box surface: <code>--color-cream</code></li>
+              <li>Notice surface (success): jersey-deep tint at ~20% on cream (proposed token: <code>--color-success-soft</code>)</li>
+              <li>Notice surface (warning): <code>--color-warning-soft</code></li>
+              <li>Notice surface (error): <code>--color-alert-soft</code></li>
+              <li>Title colour (all variants): <code>--color-ink</code></li>
+              <li>Body colour (all variants): <code>--color-ink-soft</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / DEPTH</h4>
+            <ul>
+              <li>Notice border: <code>2px solid var(--color-ink)</code></li>
+              <li>Notice shadow: <code>--shadow-paper-sm</code> (4×4 ink)</li>
+              <li>Stamp border: <code>2px solid var(--color-ink)</code> (1.5px on the dismiss mini)</li>
+              <li>Dismiss press: shadow → 2×2 + <code>translate(1px, 1px)</code></li>
+              <li>Stamp glyph colour: matches semantic — <code>jersey-deep</code> / <code>warning</code> / <code>alert</code></li>
+              <li>Sharp corners: no <code>border-radius</code> anywhere</li>
+              <li>No rotation: <code>transform: none</code> — explicit deviation from <code>TapedCardGrid</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION A — PAPER NOTICE · KCVV ELEWIJT · 2026-04-30
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
