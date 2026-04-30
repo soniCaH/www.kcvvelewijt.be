@@ -93,14 +93,22 @@ const roleTabs: FilterTab[] = [
  * @param args - Props forwarded to FilterTabs; when `args.activeTab` is not provided the first tab's `value` is used as the initial selection.
  * @returns A JSX element containing the FilterTabs bound to internal state and a panel displaying the currently selected tab value.
  */
+// Re-mount the stateful inner whenever the Storybook controls change
+// `activeTab` or the `tabs` array, so the preview + readout track the
+// controls. Using a `key` to reset state is React's recommended pattern
+// over a state-syncing useEffect (see react.dev "you might not need an
+// effect"). Forwarding args.onChange in handleChange keeps the Actions
+// panel populated.
 function InteractiveFilterTabs(args: FilterTabsProps) {
+  const stateKey = `${args.activeTab ?? ""}-${args.tabs.length}`;
+  return <InteractiveFilterTabsInner key={stateKey} {...args} />;
+}
+
+function InteractiveFilterTabsInner(args: FilterTabsProps) {
   const [activeTab, setActiveTab] = useState(
     args.activeTab || args.tabs[0].value,
   );
 
-  // Update local state AND forward to args.onChange so the Storybook
-  // Actions panel still receives the event (fn() mock declared in meta).
-  // Mirrors the BrandedTabs.stories `Interactive` pattern.
   const handleChange = (value: string) => {
     setActiveTab(value);
     args.onChange?.(value);

@@ -66,6 +66,12 @@ export const ThreeTabs: Story = {
 
 /**
  * Interactive playground — switches the active tab on click using local state.
+ *
+ * The `key` on `<Playground>` resets the local state whenever Storybook
+ * controls change `activeTabId` or the `tabs` array, so the preview tracks
+ * the controls panel. Using `key`-driven remount over a state-syncing
+ * useEffect is React's recommended pattern (see react.dev "you might not
+ * need an effect").
  */
 export const Interactive: Story = {
   render: (args) => {
@@ -83,7 +89,7 @@ export const Interactive: Story = {
         />
       );
     }
-    return <Playground />;
+    return <Playground key={`${args.activeTabId}-${args.tabs.length}`} />;
   },
 };
 
@@ -113,7 +119,7 @@ export const ManyTabs: Story = {
         </div>
       );
     }
-    return <Playground />;
+    return <Playground key={`${args.activeTabId}-${args.tabs.length}`} />;
   },
 };
 
