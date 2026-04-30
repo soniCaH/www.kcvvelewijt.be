@@ -309,6 +309,16 @@
     var(--color-ink) 0 8px,
     var(--color-cream) 8px 16px
   );
+
+  /* ===== Redesign / Retro semantic palette (Phase 2) =====
+     Replaces digital --color-kcvv-warning / --color-kcvv-alert on redesign
+     surfaces. Tones tuned for fanzine print feel: alert = dusty brick red,
+     warning = aged mustard ochre. Legacy kcvv-* equivalents stay defined
+     for components still on the legacy vocabulary. */
+  --color-alert:        #b84a3a;
+  --color-alert-soft:   #e8d5cf;
+  --color-warning:      #c68b2c;
+  --color-warning-soft: #ecddb8;
 }
 
 /* ===== Global Styles ===== */

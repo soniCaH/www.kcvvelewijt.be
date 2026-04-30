@@ -84,13 +84,13 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 
 ### 5.0 Tracer bullet (Phase 2.0)
 
-- [ ] `apps/web/package.json` contains `vr:update:story` script invoking `test-storybook -u --testNamePattern=$1`
+- [ ] `apps/web/package.json` contains `vr:update:story` script that invokes `test-storybook -u` and forwards trailing arguments to the test-runner. Invoke as `pnpm vr:update:story -- --testPathPatterns=<regex>` so the explicit Jest flag (plural — `--testPathPattern` was deprecated) reaches Jest via test-storybook's pass-through. The regex matches synthetic test file paths derived from story IDs (e.g. `ui-button`), not source `.stories.tsx` paths.
 - [ ] `apps/web/src/styles/globals.css` `@theme` block contains `--color-alert: #B84A3A`, `--color-warning: #C68B2C`, `--color-alert-soft: #E8D5CF`, `--color-warning-soft: #ECDDB8`
 - [ ] `@phosphor-icons/react` installed in `apps/web/package.json`
 - [ ] `apps/web/src/lib/icons.redesign.ts` exists and exports at least `ArrowRight` as a `weight="fill"` wrapper component
 - [ ] `<Button variant="primary">` renders `bg-jersey text-cream` with the documented hover/focus treatment
 - [ ] `Button.stories.tsx` `PrimaryRedesigned` story exists with `tags: ["autodocs", "vr"]` and a captured VR baseline
-- [ ] `pnpm vr:update:story "Button"` updates only Button-story baselines (verified by counting changed PNG files)
+- [ ] `pnpm vr:update:story -- --testPathPatterns=ui-button` (or any `testPathPatterns` regex anchored to the Button atom's story-ID prefix) updates only Button-story baselines (verified by counting changed PNG files)
 - [ ] `pnpm --filter @kcvv/web check-all` passes
 
 ### 5.A Track A acceptance (per child issue, summarised here)
@@ -275,10 +275,10 @@ Legacy `--color-kcvv-warning` and `--color-kcvv-alert` stay defined; legacy comp
 ### 6.8 New script — `apps/web/package.json`
 
 ```json
-"vr:update:story": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u --testNamePattern"
+"vr:update:story": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u"
 ```
 
-Invocation: `pnpm vr:update:story "Button"` — only updates baselines for stories whose name matches `Button`. Pattern is a Jest-compatible regex string passed to `test-storybook --testNamePattern`.
+Invocation: `pnpm vr:update:story -- --testPathPatterns=ui-button` — only updates baselines for stories whose synthetic test path matches the regex. The `--` separator hands the trailing arguments to test-storybook, which forwards `--testPathPatterns=<regex>` to Jest (the flag is plural in current Jest; the singular `--testPathPattern` is deprecated). The regex matches the synthetic test file paths derived from story IDs (e.g. `ui-button`, `layout-pagefooter`), not the source `.stories.tsx` file paths. Use a tight anchor like `ui-button` to scope to a single atom without dragging in `ui-linkbutton`/`ui-downloadbutton`/etc. Pattern is a Jest-compatible regex string.
 
 ---
 
@@ -292,7 +292,7 @@ Invocation: `pnpm vr:update:story "Button"` — only updates baselines for stori
 
 VR baselines are committed in the same PR as the atom that invalidates them. For each atom PR:
 
-1. Run `pnpm vr:update:story "<AtomName>"` locally to capture only the changed atom + first-degree consumer story baselines.
+1. Run `pnpm vr:update:story -- --testPathPatterns=<regex>` locally (e.g. `pnpm vr:update:story -- --testPathPatterns=ui-button`) to capture only the changed atom's baselines. The regex is a Jest-compatible `testPathPatterns` value; anchor it tightly to the atom's story-ID prefix (which is what the synthetic test paths use, not source paths). First-degree consumer stories whose visuals change because they import the redesigned atom should be opted out via `parameters.vr.disable: true` per `apps/web/CLAUDE.md` → _Atom reskin PRs_, with the consumer's redesign issue as the re-evaluate date — not auto-baselined here.
 2. Inspect the produced baselines manually — the atom should look correct in light + dark, sm + md + lg, default + hover/focus/disabled per its story matrix.
 3. Stage and commit the new/updated baseline PNGs in the same commit as the component change.
 4. PR description includes a "## VR baselines" section listing every story file whose baseline changed (justifies the update per the VR contract).

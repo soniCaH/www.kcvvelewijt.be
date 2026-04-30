@@ -56,7 +56,7 @@ describe("SectionCta", () => {
       render(<SectionCta {...defaultProps} />);
       const link = screen.getByRole("link", { name: /meer info/i });
       // LinkButton primary variant class
-      expect(link).toHaveClass("bg-kcvv-green-bright");
+      expect(link).toHaveClass("bg-jersey");
       // Arrow icon should be present
       const icon = link.querySelector("svg");
       expect(icon).toBeInTheDocument();

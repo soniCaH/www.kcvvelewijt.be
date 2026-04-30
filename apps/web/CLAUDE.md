@@ -301,6 +301,15 @@ pnpm --filter @kcvv/web run vr:check
 # Accept the current rendering as the new baseline (commit the resulting PNGs).
 pnpm --filter @kcvv/web run vr:update
 
+# Surgical baseline update — only stories matching the path pattern.
+# The `--` separator hands the rest to test-storybook, which forwards
+# `--testPathPatterns=<regex>` to Jest. The regex matches the synthetic
+# test file paths the runner generates from story IDs (e.g. `ui-button`,
+# `layout-pagefooter`), NOT the source `.stories.tsx` paths. Use a tight
+# anchor like `ui-button` to scope to one atom (without dragging in
+# `ui-linkbutton`/`ui-downloadbutton`/etc.).
+pnpm --filter @kcvv/web run vr:update:story -- --testPathPatterns=ui-button
+
 # Print the diff PNG path(s) for a failed story so the Read tool can inspect them.
 pnpm --filter @kcvv/web run vr:diff layout-pagefooter--standalone
 ```
@@ -373,6 +382,59 @@ per AC#3`).
 
 This loop is canonical for any Claude session — Ralph, `/spec`, ad-hoc — not
 Ralph-specific.
+
+### Atom reskin PRs — surgical baselines, defer consumers via `vr.disable`
+
+Phase 2+ atom reskins (Button, Input, Alert, …) intentionally change the visual
+of every story that consumes them. The contract for these PRs:
+
+1. **Update the atom's own baselines surgically.** Run `vr:update:story` with a
+   tight `--testPathPatterns` regex anchored to the atom's story-ID prefix —
+   e.g. `pnpm vr:update:story -- --testPathPatterns=ui-button`. The pattern
+   matches the synthetic test file paths derived from story IDs (e.g.
+   `ui-button.test.js`), not the source `.stories.tsx` paths. The PR's
+   `## VR baselines` section enumerates every changed baseline file with a
+   one-line rationale.
+2. **Defer consumer baselines via `parameters.vr.disable: true`, not `vr-skip`.**
+   A consumer story that has the `vr` tag and visually changes because it
+   imports the redesigned atom should NOT have its baseline auto-updated in the
+   atom's PR — that bleeds half-redesigned state into the consumer's committed
+   baseline before the consumer itself is redesigned. The right opt-out is the
+   per-story escape hatch documented under "Per-story escape hatch" below
+   (`parameters: { vr: { disable: true } }` on the affected story export). Use
+   the same annotation template that section requires (reason, repro, approver,
+   re-evaluate date) — pointing the re-evaluate date at the consumer's redesign
+   issue. **Do not use `tags: ["vr-skip"]` for this.** `vr-skip` is reserved
+   for stories that crash during render or `play()` (see `vr-skip` section
+   below); using it for deferred-redesign opt-outs would prevent the test
+   runner from even visiting the story, masking unrelated crashes from the
+   moment the tag lands.
+
+   **Carve-out for structural twins** — atoms that share the same
+   source-of-truth style file as the reskinned atom (e.g. `<LinkButton>`
+   imports `getButtonClasses` directly from `Button/button-styles.ts` and
+   cannot visually drift from `<Button>` without editing that same file)
+   update _alongside_ the atom, not deferred. Their baselines belong in the
+   atom's PR. This carve-out is narrow and structural: it requires a literal
+   shared style module, not a shared design language. Composed consumers that
+   render the atom (feature components, page sections) always defer via
+   `vr.disable`.
+
+3. **PR `## VR baselines` section** lists the atom's updated baselines, plus
+   any consumer stories transitioned to `vr.disable` and the issue/phase they
+   re-acquire VR coverage in. Example:
+
+   ```markdown
+   ## VR baselines
+
+   - Updated `ui-button--*` (16 baselines × 3 viewports) — primary variant
+     reskinned to jersey-on-cream (PRD §6.1).
+   - First-degree consumers opted out via `vr.disable` until their phase:
+     - `features-homepage-matchesslideremptystate--*` → re-baselined in #<NN>
+     - `features-homepage-webshopsection--*` → re-baselined in #<NN>
+   ```
+
+This precedent was established in the Phase 2 tracer-bullet PR (#1568).
 
 ### Opt-in via the `vr` tag
 

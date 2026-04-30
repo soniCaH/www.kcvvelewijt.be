@@ -21,12 +21,18 @@ export function getButtonClasses({
     "group inline-flex items-center justify-center gap-2",
     "font-medium transition-all duration-300",
     "cursor-pointer",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kcvv-green focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+
+    // Focus ring per variant. Primary moved to jersey-deep on the redesign
+    // surface (PRD §6.1); other variants stay on legacy ring until 2.A.3.
+    {
+      "focus-visible:ring-jersey-deep": variant === "primary",
+      "focus-visible:ring-kcvv-green": variant !== "primary",
+    },
 
     // Variant styles
     {
-      "bg-kcvv-green-bright text-white hover:bg-kcvv-green-bright/50":
-        variant === "primary",
+      "bg-jersey text-cream hover:brightness-110": variant === "primary",
       "bg-kcvv-gray text-white hover:bg-kcvv-gray-dark":
         variant === "secondary",
       "border-2 border-kcvv-green-bright text-kcvv-green-bright hover:bg-kcvv-green-bright hover:text-white":
@@ -38,7 +44,7 @@ export function getButtonClasses({
     // Disabled styles (only for actual disabled elements)
     disabled && "opacity-50 cursor-not-allowed",
     disabled && {
-      "hover:bg-kcvv-green-bright": variant === "primary",
+      "hover:brightness-100": variant === "primary",
       "hover:bg-kcvv-gray": variant === "secondary",
       "hover:bg-transparent hover:text-kcvv-green-bright": variant === "ghost",
       "hover:no-underline": variant === "link",
