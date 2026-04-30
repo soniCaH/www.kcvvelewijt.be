@@ -100,7 +100,11 @@ const roleTabs: FilterTab[] = [
 // effect"). Forwarding args.onChange in handleChange keeps the Actions
 // panel populated.
 function InteractiveFilterTabs(args: FilterTabsProps) {
-  const stateKey = `${args.activeTab ?? ""}-${args.tabs.length}`;
+  // Stable signature of tab identity — joining `value`s catches edits,
+  // reorders, and same-length swaps that `tabs.length` alone would miss.
+  const stateKey = `${args.activeTab ?? ""}-${args.tabs
+    .map((t) => t.value)
+    .join(",")}`;
   return <InteractiveFilterTabsInner key={stateKey} {...args} />;
 }
 

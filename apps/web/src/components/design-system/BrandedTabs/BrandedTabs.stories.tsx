@@ -89,7 +89,11 @@ export const Interactive: Story = {
         />
       );
     }
-    return <Playground key={`${args.activeTabId}-${args.tabs.length}`} />;
+    return (
+      <Playground
+        key={`${args.activeTabId}-${args.tabs.map((t) => t.id).join(",")}`}
+      />
+    );
   },
 };
 
@@ -119,7 +123,11 @@ export const ManyTabs: Story = {
         </div>
       );
     }
-    return <Playground key={`${args.activeTabId}-${args.tabs.length}`} />;
+    return (
+      <Playground
+        key={`${args.activeTabId}-${args.tabs.map((t) => t.id).join(",")}`}
+      />
+    );
   },
 };
 
