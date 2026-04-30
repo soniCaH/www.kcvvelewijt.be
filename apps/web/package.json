@@ -32,6 +32,7 @@
     "vr:check": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr",
     "vr:update": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u",
     "vr:update:single": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u --maxWorkers=1",
+    "vr:update:story": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u",
     "vr:ci": "pnpm run vr:run",
     "vr:ci:update": "pnpm run vr:run:update",
     "vr:diff": "node scripts/vr-diff.mjs"
@@ -39,6 +40,7 @@
   "dependencies": {
     "@effect/platform": "0.96.1",
     "@kcvv/api-contract": "workspace:*",
+    "@phosphor-icons/react": "2.1.10",
     "@portabletext/react": "6.0.3",
     "@radix-ui/react-tabs": "1.1.13",
     "@sanity/client": "7.22.0",

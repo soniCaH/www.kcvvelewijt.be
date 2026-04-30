@@ -5,6 +5,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "./Button";
+import { ArrowRight as ArrowRightFill } from "@/lib/icons.redesign";
 
 const meta = {
   title: "UI/Button",
@@ -43,7 +44,28 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Primary button with KCVV bright green
+ * Primary button — reskinned to the redesign vocabulary (jersey-on-cream).
+ *
+ * Tracer-bullet story for Phase 2 (#1568): proves the Phosphor Fill icon
+ * wrapper from `@/lib/icons.redesign` integrates with `<Button variant="primary">`
+ * on the new visual treatment. The companion `Primary` story uses the same
+ * variant — they share a baseline cluster until 2.A.3 retires the legacy
+ * variants entirely.
+ */
+export const PrimaryRedesigned: Story = {
+  args: {
+    variant: "primary",
+    children: "Continue",
+  },
+  render: ({ children, ...args }) => (
+    <Button {...args}>
+      {children} <ArrowRightFill size={16} aria-hidden="true" />
+    </Button>
+  ),
+};
+
+/**
+ * Primary button — default (no trailing icon)
  */
 export const Primary: Story = {
   args: {

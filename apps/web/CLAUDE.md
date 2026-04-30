@@ -301,6 +301,12 @@ pnpm --filter @kcvv/web run vr:check
 # Accept the current rendering as the new baseline (commit the resulting PNGs).
 pnpm --filter @kcvv/web run vr:update
 
+# Surgical baseline update — only stories whose .stories.tsx path matches.
+# The argument is forwarded as a positional pattern to Jest (testPathPattern),
+# so it matches against the story file path on disk. Use a tight anchor like
+# `design-system/Button/Button` to scope to a single component file.
+pnpm --filter @kcvv/web run vr:update:story design-system/Button/Button
+
 # Print the diff PNG path(s) for a failed story so the Read tool can inspect them.
 pnpm --filter @kcvv/web run vr:diff layout-pagefooter--standalone
 ```
@@ -373,6 +379,43 @@ per AC#3`).
 
 This loop is canonical for any Claude session — Ralph, `/spec`, ad-hoc — not
 Ralph-specific.
+
+### Atom reskin PRs — surgical baselines, `vr-skip` legacy consumers
+
+Phase 2+ atom reskins (Button, Input, Alert, …) intentionally change the visual
+of every story that consumes them. The contract for these PRs:
+
+1. **Update the atom's own baselines surgically.** Run `vr:update:story` with a
+   tight `--testPathPattern` regex matched against the atom's story file path
+   (e.g. `pnpm vr:update:story design-system/Button/Button`). The PR's
+   `## VR baselines` section enumerates every changed baseline file with a
+   one-line rationale.
+2. **Mark first-degree consumer stories `vr-skip` until their own redesign
+   phase.** A consumer story that has the `vr` tag and visually changes because
+   it imports the redesigned atom should NOT have its baseline auto-updated in
+   the atom's PR — that bleeds half-redesigned state into the consumer's
+   committed baseline before the consumer itself is redesigned. Instead,
+   add `tags: ["vr-skip"]` on the affected story exports with an inline comment
+   pointing to the consumer's own redesign issue. The consumer re-acquires the
+   `vr` tag and a fresh baseline as part of its redesign PR. Reserve full
+   `vr.disable` for genuinely non-deterministic stories (see "Per-story escape
+   hatch" above) — `vr-skip` is the right tool for "deferred until consumer's
+   own phase".
+3. **PR `## VR baselines` section** lists the atom's updated baselines, plus
+   any consumer stories transitioned to `vr-skip` and the issue/phase they'll
+   re-acquire VR coverage in. Example:
+
+   ```markdown
+   ## VR baselines
+
+   - Updated `ui-button--*` (16 baselines × 3 viewports) — primary variant
+     reskinned to jersey-on-cream (PRD §6.1).
+   - First-degree consumers transitioned to `vr-skip` until their phase:
+     - `features-homepage-matchesslideremptystate--*` → re-baselined in #<NN>
+     - `features-homepage-webshopsection--*` → re-baselined in #<NN>
+   ```
+
+This precedent was established in the Phase 2 tracer-bullet PR (#1568).
 
 ### Opt-in via the `vr` tag
 

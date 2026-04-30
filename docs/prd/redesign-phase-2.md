@@ -275,10 +275,10 @@ Legacy `--color-kcvv-warning` and `--color-kcvv-alert` stay defined; legacy comp
 ### 6.8 New script — `apps/web/package.json`
 
 ```json
-"vr:update:story": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u --testNamePattern"
+"vr:update:story": "pnpm run vr:build-storybook && docker compose -f docker-compose.vr.yml run --rm vr -u"
 ```
 
-Invocation: `pnpm vr:update:story "Button"` — only updates baselines for stories whose name matches `Button`. Pattern is a Jest-compatible regex string passed to `test-storybook --testNamePattern`.
+Invocation: `pnpm vr:update:story design-system/Button/Button` — only updates baselines for stories whose `.stories.tsx` file path matches the given pattern. The positional argument falls through to Jest's runner as `testPathPattern` per Jest CLI convention (test-storybook does not expose `--testNamePattern` directly; it spawns Jest with leftover argv). Use a tight anchor like `design-system/Button/Button` to scope to a single component file. Pattern is a Jest-compatible regex string.
 
 ---
 

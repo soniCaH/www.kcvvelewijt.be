@@ -16,7 +16,7 @@ describe("LinkButton", () => {
     it("should render primary variant by default", () => {
       render(<LinkButton href="/test">Primary</LinkButton>);
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-kcvv-green-bright");
+      expect(link).toHaveClass("bg-jersey", "text-cream");
     });
 
     it("should render secondary variant", () => {
