@@ -1,5 +1,39 @@
 "use client";
 
+/**
+ * HorizontalSlider — generic horizontal scroll container with
+ * paper-card prev/next arrows.
+ *
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Source-of-record:
+ * docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html
+ * (slider section + `.arrow-btn` rules — note the canonical layout puts
+ * arrows at `left: -8px / right: -8px`, overhanging outside the cards).
+ *
+ * Arrows render via the shared `<ScrollArrowButton>` so the slider primitive
+ * and overflow scrollers (BrandedTabs / FilterTabs) share one canonical
+ * 48 × 48 paper button. Two slider-specific layout choices:
+ *
+ *   - **Overhang**: arrows sit at `left: -20px / right: -20px` (the
+ *     mockup spec is `-8px`; bumped per owner feedback to clear the
+ *     card outline + offset shadow). Keeps the cream paper button from
+ *     sitting directly on top of the cream paper cards — the cream-on-
+ *     cream blend made the button visually unclear when overlapping
+ *     content. Implemented via explicit `left-[…]/right-[…]` classes
+ *     (not negative margin) so `tailwind-merge` resolves the override
+ *     unambiguously against the base `left-0/right-0`.
+ *   - **Edge fade**: a `mask-image` linear-gradient softens the scroll
+ *     track's cut-off where content overflows, so cards fade out instead
+ *     of being abruptly clipped. The mask is conditional on
+ *     `canScrollLeft / canScrollRight` so it never fades a non-scrollable
+ *     edge.
+ *
+ * On `theme="dark"`, the arrow's shadow swaps to `--shadow-paper-sm-soft`
+ * so the offset depth stays readable against an ink panel — same idiom as
+ * `.panel--dusk` in the canonical mockup CSS, applied here through a
+ * className override.
+ */
+
 import {
   useRef,
   useState,
@@ -8,17 +42,42 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils/cn";
-import { ChevronLeft, ChevronRight } from "@/lib/icons";
+import { ScrollArrowButton } from "@/components/design-system/ScrollHint/ScrollArrowButton";
 
 export interface HorizontalSliderProps {
   /** Content to scroll horizontally */
   children: ReactNode;
   /** Optional section heading */
   title?: string;
-  /** Theme variant — "dark" for dark background sections */
+  /** Theme variant — "dark" for ink-bg sections (e.g. homepage MatchesSliderSection) */
   theme?: "light" | "dark";
   /** Additional CSS classes */
   className?: string;
+}
+
+const DARK_ARROW_OVERRIDE =
+  "shadow-[var(--shadow-paper-sm-soft)] hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]";
+
+// Overhang the arrows outside the relative parent so the cream paper button
+// doesn't sit directly on top of the cream paper cards inside the slider.
+// Matches the mockup's `left: -8px / right: -8px` rule. We override the
+// base `left-0 / right-0` from `ScrollArrowButton` directly (vs negative
+// margin) so the position override is unambiguous through `tailwind-merge`.
+const LEFT_ARROW_OVERHANG = "left-[-20px]";
+const RIGHT_ARROW_OVERHANG = "right-[-20px]";
+
+const FADE_BOTH =
+  "[mask-image:linear-gradient(to_right,transparent_0,black_24px,black_calc(100%-24px),transparent_100%)]";
+const FADE_RIGHT =
+  "[mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent_100%)]";
+const FADE_LEFT =
+  "[mask-image:linear-gradient(to_right,transparent_0,black_24px)]";
+
+function pickFadeMask(canScrollLeft: boolean, canScrollRight: boolean) {
+  if (canScrollLeft && canScrollRight) return FADE_BOTH;
+  if (canScrollRight) return FADE_RIGHT;
+  if (canScrollLeft) return FADE_LEFT;
+  return undefined;
 }
 
 export const HorizontalSlider = ({
@@ -58,13 +117,19 @@ export const HorizontalSlider = ({
     });
   };
 
+  const themeOverride = theme === "dark" ? DARK_ARROW_OVERRIDE : undefined;
+  const fadeMask = pickFadeMask(canScrollLeft, canScrollRight);
+
   return (
-    <div className={cn("", className)}>
+    <div
+      className={cn("", className)}
+      data-slider-theme={theme === "dark" ? "dark" : "light"}
+    >
       {title && (
         <h3
           className={cn(
             "mb-3 text-lg font-bold",
-            theme === "dark" ? "text-kcvv-white" : "text-kcvv-black",
+            theme === "dark" ? "text-cream" : "text-ink",
           )}
         >
           {title}
@@ -73,61 +138,29 @@ export const HorizontalSlider = ({
 
       <div className="relative">
         {canScrollLeft && (
-          <button
-            type="button"
+          <ScrollArrowButton
+            direction="left"
             onClick={() => scroll("left")}
-            className={cn(
-              "absolute top-1/2 left-0 z-10 flex -translate-x-5 -translate-y-1/2",
-              "h-10 w-10 items-center justify-center transition-colors",
-              theme === "dark"
-                ? "bg-kcvv-black border-kcvv-green-bright/50 hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright rounded-sm border"
-                : "rounded-full bg-white shadow-md hover:bg-gray-50",
-            )}
-            aria-label="Scroll naar links"
-          >
-            <ChevronLeft
-              className={cn(
-                "h-5 w-5",
-                theme === "dark"
-                  ? "text-kcvv-green-bright"
-                  : "text-kcvv-green-dark",
-              )}
-            />
-          </button>
+            className={cn(LEFT_ARROW_OVERHANG, themeOverride)}
+          />
         )}
 
         <div
           ref={scrollRef}
           onScroll={checkScroll}
           data-slot="scroll-track"
-          className="overflow-x-auto scroll-smooth pb-2"
+          className={cn("overflow-x-auto scroll-smooth pb-2", fadeMask)}
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           <div className="flex min-w-max gap-3">{children}</div>
         </div>
 
         {canScrollRight && (
-          <button
-            type="button"
+          <ScrollArrowButton
+            direction="right"
             onClick={() => scroll("right")}
-            className={cn(
-              "absolute top-1/2 right-0 z-10 flex translate-x-5 -translate-y-1/2",
-              "h-10 w-10 items-center justify-center transition-colors",
-              theme === "dark"
-                ? "bg-kcvv-black border-kcvv-green-bright/50 hover:bg-kcvv-green-bright/10 hover:border-kcvv-green-bright rounded-sm border"
-                : "rounded-full bg-white shadow-md hover:bg-gray-50",
-            )}
-            aria-label="Scroll naar rechts"
-          >
-            <ChevronRight
-              className={cn(
-                "h-5 w-5",
-                theme === "dark"
-                  ? "text-kcvv-green-bright"
-                  : "text-kcvv-green-dark",
-              )}
-            />
-          </button>
+            className={cn(RIGHT_ARROW_OVERHANG, themeOverride)}
+          />
         )}
       </div>
     </div>

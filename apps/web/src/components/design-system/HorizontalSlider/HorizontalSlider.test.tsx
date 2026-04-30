@@ -1,5 +1,10 @@
 /**
  * HorizontalSlider Component Tests
+ *
+ * Direction D ("Paper chrome, ink emphasis") locked at the Phase 2 Track B
+ * design checkpoint (2026-04-30). Arrows are now `<ScrollArrowButton>`
+ * paper buttons; tests assert the new contract — incl. the `theme="dark"`
+ * shadow override.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -111,6 +116,29 @@ describe("HorizontalSlider", () => {
       ) as HTMLElement;
       expect(scrollContainer.style.scrollbarWidth).toBe("none");
     });
+
+    it('annotates the wrapper with data-slider-theme="dark" for the dark theme', () => {
+      const { container } = render(
+        <HorizontalSlider theme="dark">
+          <div>Item</div>
+        </HorizontalSlider>,
+      );
+
+      expect(container.firstChild).toHaveAttribute("data-slider-theme", "dark");
+    });
+
+    it('annotates the wrapper with data-slider-theme="light" by default', () => {
+      const { container } = render(
+        <HorizontalSlider>
+          <div>Item</div>
+        </HorizontalSlider>,
+      );
+
+      expect(container.firstChild).toHaveAttribute(
+        "data-slider-theme",
+        "light",
+      );
+    });
   });
 
   describe("Scroll Arrows", () => {
@@ -132,7 +160,7 @@ describe("HorizontalSlider", () => {
         </HorizontalSlider>,
       );
 
-      expect(screen.getByLabelText("Scroll naar rechts")).toBeInTheDocument();
+      expect(screen.getByLabelText("Scroll right")).toBeInTheDocument();
     });
 
     it("should not show left arrow at initial position", () => {
@@ -143,9 +171,7 @@ describe("HorizontalSlider", () => {
         </HorizontalSlider>,
       );
 
-      expect(
-        screen.queryByLabelText("Scroll naar links"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Scroll left")).not.toBeInTheDocument();
     });
 
     it("should show left arrow after scrolling right", () => {
@@ -166,7 +192,7 @@ describe("HorizontalSlider", () => {
         scrollContainer.dispatchEvent(new Event("scroll"));
       });
 
-      expect(screen.getByLabelText("Scroll naar links")).toBeInTheDocument();
+      expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();
     });
 
     it("should hide right arrow when scrolled to end", () => {
@@ -189,9 +215,7 @@ describe("HorizontalSlider", () => {
         scrollContainer.dispatchEvent(new Event("scroll"));
       });
 
-      expect(
-        screen.queryByLabelText("Scroll naar rechts"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Scroll right")).not.toBeInTheDocument();
     });
 
     it("should scroll left when left arrow is clicked", async () => {
@@ -214,7 +238,7 @@ describe("HorizontalSlider", () => {
         scrollContainer.dispatchEvent(new Event("scroll"));
       });
 
-      await user.click(screen.getByLabelText("Scroll naar links"));
+      await user.click(screen.getByLabelText("Scroll left"));
       expect(scrollBySpy).toHaveBeenCalledWith(
         expect.objectContaining({
           left: expect.any(Number),
@@ -239,7 +263,7 @@ describe("HorizontalSlider", () => {
       const scrollBySpy = vi.fn();
       scrollContainer.scrollBy = scrollBySpy;
 
-      await user.click(screen.getByLabelText("Scroll naar rechts"));
+      await user.click(screen.getByLabelText("Scroll right"));
       expect(scrollBySpy).toHaveBeenCalledWith(
         expect.objectContaining({
           left: expect.any(Number),
@@ -250,7 +274,7 @@ describe("HorizontalSlider", () => {
     });
   });
 
-  describe("Theme", () => {
+  describe("Theme — paper-card arrows on both light and dark surfaces", () => {
     let restoreScrollDimensions: () => void;
 
     beforeEach(() => {
@@ -261,26 +285,54 @@ describe("HorizontalSlider", () => {
       restoreScrollDimensions();
     });
 
-    it("should apply light theme styles to arrows by default", () => {
+    it("light theme uses the standard ink offset shadow on arrows", () => {
       render(
         <HorizontalSlider>
           <div>Item 1</div>
         </HorizontalSlider>,
       );
 
-      const rightArrow = screen.getByLabelText("Scroll naar rechts");
-      expect(rightArrow).toHaveClass("bg-white");
+      const rightArrow = screen.getByLabelText("Scroll right");
+      expect(rightArrow.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      expect(rightArrow.className).not.toContain("--shadow-paper-sm-soft");
     });
 
-    it("should apply dark theme styles to arrows", () => {
+    it("dark theme overrides the arrow shadow to the soft (ink-muted) sibling", () => {
       render(
         <HorizontalSlider theme="dark">
           <div>Item 1</div>
         </HorizontalSlider>,
       );
 
-      const rightArrow = screen.getByLabelText("Scroll naar rechts");
-      expect(rightArrow).toHaveClass("bg-kcvv-black");
+      const rightArrow = screen.getByLabelText("Scroll right");
+      expect(rightArrow.className).toContain(
+        "shadow-[var(--shadow-paper-sm-soft)]",
+      );
+      expect(rightArrow.className).toContain(
+        "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+      );
+    });
+
+    it("uses retro typography colours for the title (cream on dark, ink on light)", () => {
+      const { rerender } = render(
+        <HorizontalSlider title="Light Title">
+          <div>Item 1</div>
+        </HorizontalSlider>,
+      );
+
+      expect(screen.getByRole("heading", { name: "Light Title" })).toHaveClass(
+        "text-ink",
+      );
+
+      rerender(
+        <HorizontalSlider theme="dark" title="Dark Title">
+          <div>Item 1</div>
+        </HorizontalSlider>,
+      );
+
+      expect(screen.getByRole("heading", { name: "Dark Title" })).toHaveClass(
+        "text-cream",
+      );
     });
   });
 
