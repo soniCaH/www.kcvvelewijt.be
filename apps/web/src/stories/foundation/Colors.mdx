@@ -214,3 +214,71 @@ interludes, not on the cream surface.
 > `--color-jersey-deep` is **AA large-text only** against cream. Use it for
 > headings ≥18pt regular / ≥14pt bold and large CTAs — never body copy. Body
 > text on cream must use `--color-ink` or `--color-ink-soft`.
+
+---
+
+## Redesign / Semantic — Alert / Warning / Success
+
+Print-tuned semantic tones replacing the digital `--color-kcvv-warning` /
+`--color-kcvv-alert` on redesign surfaces. Each tone is paired with a `-soft`
+body tint used as the alert/warning/success body fill (and as the offset
+shadow on form-field error states).
+
+<SwatchRow items={[
+  { name: 'alert (dusty brick)', variable: '--color-alert', hex: '#b84a3a' },
+  { name: 'alert-soft (body / shadow tint)', variable: '--color-alert-soft', hex: '#e8d5cf' },
+  { name: 'warning (aged mustard)', variable: '--color-warning', hex: '#c68b2c' },
+  { name: 'warning-soft (body tint)', variable: '--color-warning-soft', hex: '#ecddb8' },
+  { name: 'success-soft (sage body tint)', variable: '--color-success-soft', hex: '#d8e7d0' },
+]} />
+
+---
+
+## Redesign / Paper Shadows
+
+Sharp 0-blur offset shadows used by Track B chrome to hint at a paper-card
+sitting above the surface. Every paper-pressed component uses the same token
+trio so hover/focus presses stay in lockstep — never inline these values.
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Sample</th>
+      <th>Used by</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--shadow-paper-sm</code></td>
+      <td><code>4px 4px 0 0 ink</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '5rem', border: '2px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-sm)' }} /></td>
+      <td>Default paper-card chrome (TapedCard, Alert outer, BrandedTab inactive).</td>
+    </tr>
+    <tr>
+      <td><code>--shadow-paper-sm-soft</code></td>
+      <td><code>4px 4px 0 0 ink-muted</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '5rem', border: '2px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-sm-soft)' }} /></td>
+      <td>Resting state on dark panels and form fields where ink would vanish (Input/Select/Textarea idle, ScrollArrow, slider arrows).</td>
+    </tr>
+    <tr>
+      <td><code>--shadow-paper-sm-soft-hover</code></td>
+      <td><code>3px 3px 0 0 ink-muted</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '5rem', border: '2px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-sm-soft-hover)', transform: 'translate(1px, 1px)' }} /></td>
+      <td>Hover on paper-pressed chrome — shadow compresses by 1px while surface translates `1px, 1px`. Pair with the token, never inline.</td>
+    </tr>
+    <tr>
+      <td><code>--shadow-paper-sm-alert</code></td>
+      <td><code>4px 4px 0 0 alert-soft</code></td>
+      <td><div style={{ background: '#fff', height: '2.5rem', width: '5rem', border: '2px solid var(--color-alert)', boxShadow: 'var(--shadow-paper-sm-alert)' }} /></td>
+      <td>Form-field error rest state — exclusive to fields with a `--color-alert` border.</td>
+    </tr>
+    <tr>
+      <td><code>--shadow-paper-sm-alert-hover</code></td>
+      <td><code>3px 3px 0 0 alert-soft</code></td>
+      <td><div style={{ background: '#fff', height: '2.5rem', width: '5rem', border: '2px solid var(--color-alert)', boxShadow: 'var(--shadow-paper-sm-alert-hover)', transform: 'translate(1px, 1px)' }} /></td>
+      <td>Form-field error hover — same press idiom, alert-soft tint.</td>
+    </tr>
+  </tbody>
+</table>

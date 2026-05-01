@@ -1,5 +1,5 @@
 /**
- * Label Component Tests
+ * Label Component Tests — Phase 2.A.4 Direction C.
  */
 
 import { describe, it, expect } from "vitest";
@@ -8,17 +8,17 @@ import { Label } from "./Label";
 
 describe("Label", () => {
   describe("Rendering", () => {
-    it("should render as a label element", () => {
+    it("renders as a label element", () => {
       const { container } = render(<Label>Naam</Label>);
       expect(container.querySelector("label")).toBeInTheDocument();
     });
 
-    it("should render children text", () => {
+    it("renders children text", () => {
       render(<Label>E-mailadres</Label>);
       expect(screen.getByText("E-mailadres")).toBeInTheDocument();
     });
 
-    it("should forward ref", () => {
+    it("forwards ref", () => {
       const ref = { current: null };
       render(<Label ref={ref}>Test</Label>);
       expect(ref.current).toBeInstanceOf(HTMLLabelElement);
@@ -26,65 +26,85 @@ describe("Label", () => {
   });
 
   describe("Styles", () => {
-    it("should have base label styles", () => {
+    it("applies bold ink semibold + bottom margin", () => {
       const { container } = render(<Label>Label</Label>);
       const label = container.querySelector("label") as HTMLElement;
-      expect(label).toHaveClass(
-        "text-sm",
-        "font-semibold",
-        "text-kcvv-gray-blue",
-      );
+      expect(label).toHaveClass("text-ink", "font-semibold", "text-sm", "mb-2");
     });
 
-    it("should have bottom margin", () => {
-      const { container } = render(<Label>Label</Label>);
-      const label = container.querySelector("label") as HTMLElement;
-      expect(label).toHaveClass("mb-1.5");
+    it("does not reference legacy kcvv- tokens", () => {
+      const { container } = render(
+        <Label required optional>
+          Label
+        </Label>,
+      );
+      const html = container.innerHTML;
+      expect(html).not.toContain("text-kcvv-alert");
+      expect(html).not.toContain("text-kcvv-gray-blue");
     });
   });
 
   describe("Required", () => {
-    it("should not show asterisk by default", () => {
+    it("does not show asterisk by default", () => {
       render(<Label>Naam</Label>);
       expect(screen.queryByText("*")).not.toBeInTheDocument();
     });
 
-    it("should show asterisk when required is true", () => {
+    it("shows asterisk when required is true", () => {
       render(<Label required>Naam</Label>);
       expect(screen.getByText("*")).toBeInTheDocument();
     });
 
-    it("should mark asterisk as aria-hidden", () => {
-      const { container } = render(<Label required>Naam</Label>);
-      const asterisk = container.querySelector("[aria-hidden='true']");
-      expect(asterisk).toBeInTheDocument();
-      expect(asterisk).toHaveTextContent("*");
-    });
-
-    it("should apply alert colour to asterisk", () => {
+    it("marks asterisk as aria-hidden + applies text-alert", () => {
       const { container } = render(<Label required>Naam</Label>);
       const asterisk = container.querySelector(
         "[aria-hidden='true']",
       ) as HTMLElement;
-      expect(asterisk).toHaveClass("text-kcvv-alert");
+      expect(asterisk).toHaveTextContent("*");
+      expect(asterisk).toHaveClass("text-alert");
+    });
+  });
+
+  describe("Optional pill", () => {
+    it("does not render pill by default", () => {
+      render(<Label>Naam</Label>);
+      expect(screen.queryByText("Optioneel")).not.toBeInTheDocument();
+    });
+
+    it("renders mono caps OPTIONEEL pill when optional is true", () => {
+      const { container } = render(<Label optional>Naam</Label>);
+      const pill = screen.getByText("Optioneel");
+      expect(pill).toBeInTheDocument();
+      expect(pill).toHaveClass(
+        "font-mono",
+        "uppercase",
+        "border",
+        "border-ink/30",
+      );
+      // Sharp corners — never rounded.
+      expect(pill.className).not.toMatch(/\brounded-/);
+      // Aria-hidden so screen readers don't read "Optioneel" as content.
+      expect(container.querySelector("[aria-hidden='true']")).toBe(pill);
+    });
+
+    it("required wins over optional when both are passed", () => {
+      render(
+        <Label required optional>
+          Naam
+        </Label>,
+      );
+      expect(screen.getByText("*")).toBeInTheDocument();
+      expect(screen.queryByText("Optioneel")).not.toBeInTheDocument();
     });
   });
 
   describe("Custom props", () => {
-    it("should accept custom className", () => {
+    it("accepts custom className", () => {
       const { container } = render(<Label className="custom">Label</Label>);
       expect(container.querySelector("label")).toHaveClass("custom");
     });
 
-    it("should accept htmlFor attribute", () => {
-      const { container } = render(<Label htmlFor="my-input">Label</Label>);
-      expect(container.querySelector("label")).toHaveAttribute(
-        "for",
-        "my-input",
-      );
-    });
-
-    it("should associate with input via htmlFor", () => {
+    it("accepts htmlFor + associates with input via id", () => {
       render(
         <>
           <Label htmlFor="email">E-mailadres</Label>

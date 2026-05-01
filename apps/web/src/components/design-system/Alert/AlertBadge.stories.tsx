@@ -126,6 +126,38 @@ export const FormSummary: Story = {
   ),
 };
 
+export const SmallInlineFormRow: Story = {
+  render: () => (
+    <AlertBadge variant="error" size="sm">
+      Geen geldig telefoonnummer.
+    </AlertBadge>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`size="sm"` — used inline under Input/Select/Textarea on their helper row. Smaller pill (1.5px border, no rotation, 11px label) and 15px italic message keep the alert moment proportional to a single field rather than a full form summary.',
+      },
+    },
+  },
+};
+
+export const SmallSizeAllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <AlertBadge variant="error" size="sm">
+        Geen geldig telefoonnummer.
+      </AlertBadge>
+      <AlertBadge variant="warning" size="sm">
+        Deze keuze is niet meer aanpasbaar na verzenden.
+      </AlertBadge>
+      <AlertBadge variant="success" size="sm">
+        Bevestigingsmail verstuurd.
+      </AlertBadge>
+    </div>
+  ),
+};
+
 export const Playground: Story = {
   args: {
     variant: "success",

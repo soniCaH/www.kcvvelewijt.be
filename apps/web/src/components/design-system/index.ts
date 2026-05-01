@@ -40,13 +40,23 @@ export type { LabelProps } from "./Label";
 export { Textarea } from "./Textarea";
 export type { TextareaProps, TextareaResize } from "./Textarea";
 
+// TextareaCounter
+export { TextareaCounter } from "./TextareaCounter";
+export type { TextareaCounterProps } from "./TextareaCounter";
+
 // Select
 export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
 // Alert
-export { Alert } from "./Alert";
-export type { AlertProps, AlertVariant } from "./Alert";
+export { Alert, AlertBadge } from "./Alert";
+export type {
+  AlertProps,
+  AlertVariant,
+  AlertBadgeProps,
+  AlertBadgeVariant,
+  AlertBadgeSize,
+} from "./Alert";
 
 // SectionTransition
 export { SectionTransition } from "./SectionTransition";
