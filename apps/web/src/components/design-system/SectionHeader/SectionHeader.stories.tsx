@@ -74,6 +74,15 @@ export const WithEmphasisHighlighted: Story = {
   },
 };
 
+export const WithEmphasisAccent: Story = {
+  args: {
+    title: "Het laatste nieuws",
+    emphasis: { text: "nieuws" },
+    linkText: "Alle artikels",
+    linkHref: "/nieuws",
+  },
+};
+
 export const WithoutLink: Story = {
   args: { title: "Laatste nieuws" },
 };

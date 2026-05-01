@@ -1,23 +1,11 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import {
   EditorialHeading,
   type EditorialHeadingEmphasis,
   type EditorialHeadingSize,
 } from "../EditorialHeading";
+import { EditorialLink } from "../EditorialLink";
 import { MonoLabelRow, type MonoLabelRowItem } from "../MonoLabelRow";
-import { STROKE_PATH } from "../HighlighterStroke/strokes";
-
-// Mask-image for the CTA hover highlighter underline. Uses the shared
-// STROKE_PATH from HighlighterStroke/strokes.ts so both components share the
-// same geometry. Emitted as a mask (fill='black') so the consuming element
-// can fill with `background-color` without rendering a hard-coded colour.
-//
-// TODO(phase-4): consolidate with <HighlighterStroke> once it gains a
-// `currentColor` / mask-mode option per PRD §11.7 / issue #1488 §b.
-const HIGHLIGHTER_MASK_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
-  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='${STROKE_PATH}' fill='black'/></svg>`,
-)}`;
 
 type SectionHeaderCta = { linkText: string; linkHref: string };
 
@@ -92,43 +80,13 @@ export const SectionHeader = ({
           {title}
         </EditorialHeading>
         {linkText && linkHref && (
-          <Link
+          <EditorialLink
             href={linkHref}
-            className={cn(
-              "group inline-flex items-center gap-2 font-mono text-[length:var(--text-label)] leading-none font-medium tracking-[var(--text-label--tracking)] uppercase",
-              // Static text colour — no hover colour swap. Highlighter underline
-              // (animated below) carries the hover affordance instead.
-              isDark ? "text-cream/85" : "text-jersey-deep",
-            )}
+            variant="cta"
+            tone={isDark ? "dark" : "light"}
           >
-            <span className="relative inline-block">
-              {linkText}
-              {/* Highlighter underline accent — jersey bright at moderate
-                  opacity to read as a deliberate brand accent (not the link
-                  text colour). Animates left-to-right on hover via scale-x. */}
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "absolute right-0 -bottom-1 left-0 h-[0.45em] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 group-focus-visible:scale-x-100 motion-reduce:transition-none",
-                  isDark ? "bg-jersey/65" : "bg-jersey-deep",
-                )}
-                style={{
-                  WebkitMaskImage: `url("${HIGHLIGHTER_MASK_DATA_URL}")`,
-                  maskImage: `url("${HIGHLIGHTER_MASK_DATA_URL}")`,
-                  WebkitMaskRepeat: "no-repeat",
-                  maskRepeat: "no-repeat",
-                  WebkitMaskSize: "100% 100%",
-                  maskSize: "100% 100%",
-                }}
-              />
-            </span>
-            <span
-              aria-hidden="true"
-              className="inline-block transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transition-none"
-            >
-              →
-            </span>
-          </Link>
+            {linkText}
+          </EditorialLink>
         )}
       </div>
     </header>
