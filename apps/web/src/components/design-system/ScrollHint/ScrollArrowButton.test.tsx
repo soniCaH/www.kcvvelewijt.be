@@ -45,7 +45,7 @@ describe("ScrollArrowButton", () => {
       expect(button).toHaveClass("bg-cream");
       expect(button).toHaveClass("border-2");
       expect(button).toHaveClass("border-ink");
-      expect(button.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      expect(button).toHaveClass("shadow-paper-sm");
     });
 
     it("uses sharp corners (rounded-none)", () => {
@@ -76,26 +76,24 @@ describe("ScrollArrowButton", () => {
     });
   });
 
-  describe("Press idiom (paper-card press)", () => {
+  describe("Press idiom (canonical press-down hover)", () => {
     it("applies hover translate(1, 1) press utility classes", () => {
       render(<ScrollArrowButton direction="left" onClick={vi.fn()} />);
       const button = screen.getByLabelText("Scroll left");
-      expect(button).toHaveClass("hover:translate-x-px");
-      expect(button).toHaveClass("hover:translate-y-px");
+      expect(button).toHaveClass("hover:translate-x-1");
+      expect(button).toHaveClass("hover:translate-y-1");
     });
 
-    it("hover collapses shadow to 3 × 3 ink", () => {
+    it("hover collapses the shadow fully to none (canonical press-down)", () => {
       render(<ScrollArrowButton direction="left" onClick={vi.fn()} />);
       const button = screen.getByLabelText("Scroll left");
-      expect(button.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
-      );
+      expect(button).toHaveClass("hover:shadow-none");
     });
 
-    it("applies transition classes for smooth state changes", () => {
+    it("uses the canonical 300ms duration for hover transitions", () => {
       render(<ScrollArrowButton direction="left" onClick={vi.fn()} />);
       const button = screen.getByLabelText("Scroll left");
-      expect(button.className).toContain("transition-");
+      expect(button).toHaveClass("transition-all", "duration-300");
     });
 
     it("preserves focus-visible ring for keyboard navigation", () => {

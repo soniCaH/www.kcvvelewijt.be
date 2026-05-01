@@ -16,7 +16,23 @@ describe("LinkButton", () => {
     it("should render primary variant by default", () => {
       render(<LinkButton href="/test">Primary</LinkButton>);
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-jersey", "text-cream");
+      expect(link).toHaveClass(
+        "bg-jersey-deep",
+        "text-cream",
+        "border-2",
+        "border-ink",
+        "shadow-paper-sm",
+      );
+    });
+
+    it("should render inverted variant", () => {
+      render(
+        <LinkButton href="/test" variant="inverted">
+          Inverted
+        </LinkButton>,
+      );
+      const link = screen.getByRole("link");
+      expect(link).toHaveClass("bg-cream", "text-ink");
     });
 
     it("should render secondary variant", () => {
@@ -26,7 +42,13 @@ describe("LinkButton", () => {
         </LinkButton>,
       );
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-kcvv-gray");
+      expect(link).toHaveClass(
+        "bg-cream-soft",
+        "text-ink",
+        "border-2",
+        "border-ink",
+        "shadow-paper-sm",
+      );
     });
 
     it("should render ghost variant", () => {
@@ -36,17 +58,12 @@ describe("LinkButton", () => {
         </LinkButton>,
       );
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("border-2", "border-kcvv-green-bright");
-    });
-
-    it("should render link variant", () => {
-      render(
-        <LinkButton href="/test" variant="link">
-          Link
-        </LinkButton>,
+      expect(link).toHaveClass(
+        "border-2",
+        "border-ink",
+        "text-ink",
+        "shadow-paper-sm",
       );
-      const link = screen.getByRole("link");
-      expect(link).toHaveClass("text-kcvv-green-bright", "underline-offset-4");
     });
   });
 
@@ -82,19 +99,23 @@ describe("LinkButton", () => {
     it("should not show arrow by default", () => {
       render(<LinkButton href="/test">No Arrow</LinkButton>);
       const link = screen.getByRole("link");
-      expect(link.querySelector("svg")).not.toBeInTheDocument();
+      expect(
+        link.querySelector('[aria-hidden="true"]'),
+      ).not.toBeInTheDocument();
     });
 
-    it("should show arrow when withArrow is true", () => {
+    it("should show typographic arrow glyph when withArrow is true", () => {
       render(
         <LinkButton href="/test" withArrow>
           With Arrow
         </LinkButton>,
       );
       const link = screen.getByRole("link");
-      const icon = link.querySelector("svg");
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute("aria-hidden", "true");
+      const arrow = link.querySelector('[aria-hidden="true"]');
+      expect(arrow).toBeInTheDocument();
+      expect(arrow?.tagName).toBe("SPAN");
+      expect(arrow?.textContent).toBe("→");
+      expect(link.querySelector("svg")).not.toBeInTheDocument();
     });
   });
 
@@ -147,9 +168,9 @@ describe("LinkButton", () => {
       );
 
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-kcvv-gray");
+      expect(link).toHaveClass("bg-cream-soft");
       expect(link).toHaveClass("text-lg");
-      expect(link.querySelector("svg")).toBeInTheDocument();
+      expect(link.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
     });
   });
 });

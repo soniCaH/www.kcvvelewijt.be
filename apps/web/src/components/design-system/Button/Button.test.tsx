@@ -27,27 +27,41 @@ describe("Button", () => {
     it("should render primary variant by default", () => {
       render(<Button>Primary</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-jersey", "text-cream");
+      expect(button).toHaveClass(
+        "bg-jersey-deep",
+        "text-cream",
+        "border-2",
+        "border-ink",
+        "shadow-paper-sm",
+      );
+    });
+
+    it("should render inverted variant", () => {
+      render(<Button variant="inverted">Inverted</Button>);
+      const button = screen.getByRole("button");
+      expect(button).toHaveClass("bg-cream", "text-ink");
     });
 
     it("should render secondary variant", () => {
       render(<Button variant="secondary">Secondary</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-kcvv-gray");
+      expect(button).toHaveClass(
+        "bg-cream-soft",
+        "text-ink",
+        "border-2",
+        "border-ink",
+        "shadow-paper-sm",
+      );
     });
 
     it("should render ghost variant", () => {
       render(<Button variant="ghost">Ghost</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("border-2", "border-kcvv-green-bright");
-    });
-
-    it("should render link variant", () => {
-      render(<Button variant="link">Link</Button>);
-      const button = screen.getByRole("button");
       expect(button).toHaveClass(
-        "text-kcvv-green-bright",
-        "underline-offset-4",
+        "border-2",
+        "border-ink",
+        "text-ink",
+        "shadow-paper-sm",
       );
     });
   });
@@ -76,15 +90,19 @@ describe("Button", () => {
     it("should not show arrow by default", () => {
       render(<Button>No Arrow</Button>);
       const button = screen.getByRole("button");
-      expect(button.querySelector("svg")).not.toBeInTheDocument();
+      expect(
+        button.querySelector('[aria-hidden="true"]'),
+      ).not.toBeInTheDocument();
     });
 
-    it("should show arrow when withArrow is true", () => {
+    it("should show typographic arrow glyph when withArrow is true", () => {
       render(<Button withArrow>With Arrow</Button>);
       const button = screen.getByRole("button");
-      const icon = button.querySelector("svg");
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute("aria-hidden", "true");
+      const arrow = button.querySelector('[aria-hidden="true"]');
+      expect(arrow).toBeInTheDocument();
+      expect(arrow?.tagName).toBe("SPAN");
+      expect(arrow?.textContent).toBe("→");
+      expect(button.querySelector("svg")).not.toBeInTheDocument();
     });
   });
 
@@ -232,9 +250,9 @@ describe("Button", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-kcvv-gray"); // secondary
+      expect(button).toHaveClass("bg-cream-soft"); // secondary
       expect(button).toHaveClass("text-lg"); // large
-      expect(button.querySelector("svg")).toBeInTheDocument(); // arrow
+      expect(button.querySelector('[aria-hidden="true"]')).toBeInTheDocument(); // arrow
     });
 
     it("should combine all props", () => {
@@ -252,12 +270,12 @@ describe("Button", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("border-kcvv-green-bright"); // ghost
+      expect(button).toHaveClass("border-ink"); // ghost
       expect(button).toHaveClass("text-sm"); // small
       expect(button).toHaveClass("w-full"); // fullWidth
       expect(button).toHaveClass("custom"); // custom className
       expect(button).toBeDisabled(); // disabled
-      expect(button.querySelector("svg")).toBeInTheDocument(); // arrow
+      expect(button.querySelector('[aria-hidden="true"]')).toBeInTheDocument(); // arrow
     });
   });
 });

@@ -293,8 +293,8 @@ describe("HorizontalSlider", () => {
       );
 
       const rightArrow = screen.getByLabelText("Scroll right");
-      expect(rightArrow.className).toContain("shadow-[var(--shadow-paper-sm)]");
-      expect(rightArrow.className).not.toContain("--shadow-paper-sm-soft");
+      expect(rightArrow).toHaveClass("shadow-paper-sm");
+      expect(rightArrow.className).not.toContain("shadow-paper-sm-soft");
     });
 
     it("dark theme overrides the arrow shadow to the soft (ink-muted) sibling", () => {
@@ -305,12 +305,10 @@ describe("HorizontalSlider", () => {
       );
 
       const rightArrow = screen.getByLabelText("Scroll right");
-      expect(rightArrow.className).toContain(
-        "shadow-[var(--shadow-paper-sm-soft)]",
-      );
-      expect(rightArrow.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
-      );
+      expect(rightArrow).toHaveClass("shadow-paper-sm-soft");
+      expect(rightArrow).toHaveClass("hover:shadow-none");
+      // Dark-theme override must replace, not stack on top of, the light token.
+      expect(rightArrow).not.toHaveClass("shadow-paper-sm");
     });
 
     it("uses retro typography colours for the title (cream on dark, ink on light)", () => {

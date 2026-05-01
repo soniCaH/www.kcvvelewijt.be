@@ -74,9 +74,7 @@ describe("FilterTabs", () => {
       const active = screen.getByRole("tab", { name: "Active 5" });
       expect(active).toHaveClass("bg-ink");
       expect(active).toHaveClass("text-cream");
-      expect(active.className).toContain(
-        "shadow-[var(--shadow-paper-sm-soft)]",
-      );
+      expect(active).toHaveClass("shadow-paper-sm-soft");
     });
 
     it("uses mono caps + tracking on every chip", () => {
@@ -99,7 +97,7 @@ describe("FilterTabs", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="active" />);
 
       const inactive = screen.getByRole("tab", { name: "All 10" });
-      expect(inactive.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      expect(inactive).toHaveClass("shadow-paper-sm");
     });
 
     it("the tablist row reserves room below for the 4px paper shadow", () => {
@@ -122,34 +120,24 @@ describe("FilterTabs", () => {
     });
   });
 
-  describe("Press idiom (paper-card press)", () => {
+  describe("Press idiom (canonical press-down hover)", () => {
     it("applies the hover translate(1, 1) press utility classes", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
       const tab = screen.getByRole("tab", { name: "Active 5" });
-      expect(tab).toHaveClass("hover:translate-x-px");
-      expect(tab).toHaveClass("hover:translate-y-px");
+      expect(tab).toHaveClass("hover:translate-x-1");
+      expect(tab).toHaveClass("hover:translate-y-1");
     });
 
-    it("inactive hover collapses shadow to 3 × 3 ink", () => {
+    it("hover collapses the shadow fully to none (canonical press-down)", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
       const inactive = screen.getByRole("tab", { name: "Active 5" });
-      expect(inactive.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
-      );
+      expect(inactive).toHaveClass("hover:shadow-none");
     });
 
-    it("active hover collapses shadow to 3 × 3 ink-muted", () => {
-      render(<FilterTabs tabs={mockTabs} activeTab="active" />);
-      const active = screen.getByRole("tab", { name: "Active 5" });
-      expect(active.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
-      );
-    });
-
-    it("applies transition classes for smooth state changes", () => {
+    it("uses the canonical 300ms duration for hover transitions", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
       const tab = screen.getByRole("tab", { name: "All 10" });
-      expect(tab.className).toContain("transition-");
+      expect(tab).toHaveClass("transition-all", "duration-300");
     });
   });
 

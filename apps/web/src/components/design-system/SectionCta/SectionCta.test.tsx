@@ -56,11 +56,15 @@ describe("SectionCta", () => {
       render(<SectionCta {...defaultProps} />);
       const link = screen.getByRole("link", { name: /meer info/i });
       // LinkButton primary variant class
-      expect(link).toHaveClass("bg-jersey");
-      // Arrow icon should be present
-      const icon = link.querySelector("svg");
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute("aria-hidden", "true");
+      expect(link).toHaveClass("bg-jersey-deep");
+      // Arrow glyph should be present (typographic →, not an SVG)
+      const arrow = link.querySelector('[aria-hidden="true"]');
+      expect(arrow).toBeInTheDocument();
+      expect(arrow?.tagName).toBe("SPAN");
+      expect(arrow?.textContent).toBe("→");
+      // Guard against the legacy Lucide/Phosphor SVG sneaking back in
+      // alongside the new <span> if a future change reverts the migration.
+      expect(link.querySelector("svg")).toBeNull();
     });
   });
 

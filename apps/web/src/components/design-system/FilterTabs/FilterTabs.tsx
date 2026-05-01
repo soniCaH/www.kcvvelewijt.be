@@ -12,9 +12,12 @@
  * Each chip is a paper-chip body: `border-2 ink` + `--shadow-paper-sm` +
  * `bg-cream-soft`, mono caps label, sharp corners. Active inverts to
  * `bg-ink text-cream` with the soft `--shadow-paper-sm-soft`. Hover
- * shifts to a 3 × 3 offset shadow + a 1 × 1 translate (paper press idiom),
- * with the active state swapping shadow colour to ink-muted. Counts
- * render inline after a 1 px hairline pipe — no pill, no badge.
+ * collapses the shadow fully (`hover:shadow-none`) and translates by 4 px
+ * on both axes (`hover:translate-x-1 hover:translate-y-1`) over
+ * `transition-all duration-300` — the canonical press-down hover shared
+ * with `<Button>`, `<BrandedTabs>`, `<ScrollArrowButton>`, and the slider
+ * arrows. Counts render inline after a 1 px hairline pipe — no pill, no
+ * badge.
  *
  * Used in: Organigram, News Categories, Sponsors, Responsibility Finder.
  * State management is left to the parent (`activeTab` + `onChange?`); when
@@ -69,21 +72,19 @@ const CHIP_BASE_CLASSES = [
   "inline-flex flex-shrink-0 items-center gap-2",
   "rounded-none border-2 border-ink",
   "font-mono font-semibold uppercase tracking-[0.08em]",
-  "transition-[transform,box-shadow] duration-150 ease-out",
-  "hover:translate-x-px hover:translate-y-px",
+  "transition-all duration-300",
+  "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
 ] as const;
 
 const CHIP_INACTIVE_CLASSES = [
   "bg-cream-soft text-ink",
-  "shadow-[var(--shadow-paper-sm)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
+  "shadow-paper-sm",
 ] as const;
 
 const CHIP_ACTIVE_CLASSES = [
   "bg-ink text-cream",
-  "shadow-[var(--shadow-paper-sm-soft)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+  "shadow-paper-sm-soft",
 ] as const;
 
 const SIZE_CLASSES: Record<FilterTabsSize, string> = {

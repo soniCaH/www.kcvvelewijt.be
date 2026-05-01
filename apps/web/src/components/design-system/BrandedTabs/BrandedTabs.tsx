@@ -11,8 +11,10 @@
  * `--shadow-paper-sm`, `bg-cream`, mono caps, sharp corners — no rotation,
  * no tape. The active tab inverts to `bg-ink text-cream` with the soft
  * `--shadow-paper-sm-soft` so the ink body and shadow remain distinguishable.
- * Hover (active and inactive) shifts to a 3 × 3 offset shadow + a 1 × 1
- * translate — the canonical paper-press idiom.
+ * Hover (active and inactive) collapses the shadow fully (`hover:shadow-none`)
+ * and translates by 4 px on both axes (`hover:translate-x-1 hover:translate-y-1`)
+ * over `transition-all duration-300` — the canonical press-down hover shared
+ * with `<Button>`, `<FilterTabs>`, `<ScrollArrowButton>`, and the slider arrows.
  *
  * State is owned by the parent. When tabs overflow on narrow screens,
  * navigation arrows appear at the edges via the shared `useScrollHint`
@@ -45,21 +47,16 @@ const TAB_BASE_CLASSES = [
   "rounded-none border-2 border-ink",
   "px-[18px] py-3",
   "font-mono text-xs font-semibold uppercase tracking-[0.08em]",
-  "transition-[transform,box-shadow] duration-150 ease-out",
-  "hover:translate-x-px hover:translate-y-px",
+  "transition-all duration-300",
+  "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
 ] as const;
 
-const TAB_INACTIVE_CLASSES = [
-  "bg-cream text-ink",
-  "shadow-[var(--shadow-paper-sm)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
-] as const;
+const TAB_INACTIVE_CLASSES = ["bg-cream text-ink", "shadow-paper-sm"] as const;
 
 const TAB_ACTIVE_CLASSES = [
   "bg-ink text-cream",
-  "shadow-[var(--shadow-paper-sm-soft)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+  "shadow-paper-sm-soft",
 ] as const;
 
 export function BrandedTabs({
