@@ -108,6 +108,14 @@ export type {
   HighlighterStrokeColor,
 } from "./HighlighterStroke";
 
+// EditorialLink
+export { EditorialLink } from "./EditorialLink";
+export type {
+  EditorialLinkProps,
+  EditorialLinkVariant,
+  EditorialLinkTone,
+} from "./EditorialLink";
+
 // MonoLabel
 export { MonoLabel } from "./MonoLabel";
 export type {
@@ -136,7 +144,6 @@ export type {
   TapeStripColor,
   TapeStripLength,
 } from "./TapeStrip";
-
 
 // TapedCard
 export { TapedCard } from "./TapedCard";
