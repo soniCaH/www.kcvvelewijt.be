@@ -88,7 +88,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] `apps/web/src/styles/globals.css` `@theme` block contains `--color-alert: #B84A3A`, `--color-warning: #C68B2C`, `--color-alert-soft: #E8D5CF`, `--color-warning-soft: #ECDDB8`
 - [ ] `@phosphor-icons/react` installed in `apps/web/package.json`
 - [ ] `apps/web/src/lib/icons.redesign.ts` exists and exports at least `ArrowRight` as a `weight="fill"` wrapper component
-- [ ] `<Button variant="primary">` renders `bg-jersey text-cream` with the documented hover/focus treatment
+- [ ] `<Button variant="primary">` renders `bg-jersey-deep text-cream` with the documented hover/focus treatment
 - [ ] `Button.stories.tsx` `PrimaryRedesigned` story exists with `tags: ["autodocs", "vr"]` and a captured VR baseline
 - [ ] `pnpm vr:update:story -- --testPathPatterns=ui-button` (or any `testPathPatterns` regex anchored to the Button atom's story-ID prefix) updates only Button-story baselines (verified by counting changed PNG files)
 - [ ] `pnpm --filter @kcvv/web check-all` passes

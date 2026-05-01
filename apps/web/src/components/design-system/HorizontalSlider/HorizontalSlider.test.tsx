@@ -307,6 +307,8 @@ describe("HorizontalSlider", () => {
       const rightArrow = screen.getByLabelText("Scroll right");
       expect(rightArrow).toHaveClass("shadow-paper-sm-soft");
       expect(rightArrow).toHaveClass("hover:shadow-none");
+      // Dark-theme override must replace, not stack on top of, the light token.
+      expect(rightArrow).not.toHaveClass("shadow-paper-sm");
     });
 
     it("uses retro typography colours for the title (cream on dark, ink on light)", () => {

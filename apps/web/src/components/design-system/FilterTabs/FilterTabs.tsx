@@ -12,9 +12,12 @@
  * Each chip is a paper-chip body: `border-2 ink` + `--shadow-paper-sm` +
  * `bg-cream-soft`, mono caps label, sharp corners. Active inverts to
  * `bg-ink text-cream` with the soft `--shadow-paper-sm-soft`. Hover
- * shifts to a 3 × 3 offset shadow + a 1 × 1 translate (paper press idiom),
- * with the active state swapping shadow colour to ink-muted. Counts
- * render inline after a 1 px hairline pipe — no pill, no badge.
+ * collapses the shadow fully (`hover:shadow-none`) and translates by 4 px
+ * on both axes (`hover:translate-x-1 hover:translate-y-1`) over
+ * `transition-all duration-300` — the canonical press-down hover shared
+ * with `<Button>`, `<BrandedTabs>`, `<ScrollArrowButton>`, and the slider
+ * arrows. Counts render inline after a 1 px hairline pipe — no pill, no
+ * badge.
  *
  * Used in: Organigram, News Categories, Sponsors, Responsibility Finder.
  * State management is left to the parent (`activeTab` + `onChange?`); when

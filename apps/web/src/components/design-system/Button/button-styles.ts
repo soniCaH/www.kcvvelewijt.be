@@ -46,9 +46,14 @@ export function getButtonClasses({
         ? "hover:shadow-paper-sm-soft"
         : "hover:shadow-paper-sm",
     ],
+    // On disabled, neutralise each variant's hover-fill back to its own base
+    // colour so the cursor-not-allowed button never appears to react. The base
+    // surfaces are: primary `bg-jersey-deep`, inverted `bg-cream`, secondary
+    // `bg-cream-soft`, ghost `bg-transparent`.
     disabled && {
       "hover:brightness-100": variant === "primary",
-      "hover:bg-cream": variant === "inverted" || variant === "secondary",
+      "hover:bg-cream": variant === "inverted",
+      "hover:bg-cream-soft": variant === "secondary",
       "hover:bg-transparent": variant === "ghost",
     },
 

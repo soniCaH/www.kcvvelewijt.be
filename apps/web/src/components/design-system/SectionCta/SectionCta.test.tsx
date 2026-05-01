@@ -62,6 +62,9 @@ describe("SectionCta", () => {
       expect(arrow).toBeInTheDocument();
       expect(arrow?.tagName).toBe("SPAN");
       expect(arrow?.textContent).toBe("→");
+      // Guard against the legacy Lucide/Phosphor SVG sneaking back in
+      // alongside the new <span> if a future change reverts the migration.
+      expect(link.querySelector("svg")).toBeNull();
     });
   });
 

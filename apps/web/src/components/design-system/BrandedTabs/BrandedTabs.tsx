@@ -11,8 +11,10 @@
  * `--shadow-paper-sm`, `bg-cream`, mono caps, sharp corners — no rotation,
  * no tape. The active tab inverts to `bg-ink text-cream` with the soft
  * `--shadow-paper-sm-soft` so the ink body and shadow remain distinguishable.
- * Hover (active and inactive) shifts to a 3 × 3 offset shadow + a 1 × 1
- * translate — the canonical paper-press idiom.
+ * Hover (active and inactive) collapses the shadow fully (`hover:shadow-none`)
+ * and translates by 4 px on both axes (`hover:translate-x-1 hover:translate-y-1`)
+ * over `transition-all duration-300` — the canonical press-down hover shared
+ * with `<Button>`, `<FilterTabs>`, `<ScrollArrowButton>`, and the slider arrows.
  *
  * State is owned by the parent. When tabs overflow on narrow screens,
  * navigation arrows appear at the edges via the shared `useScrollHint`
