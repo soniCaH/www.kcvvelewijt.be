@@ -1,5 +1,5 @@
 /**
- * Label Component Stories
+ * Label Component Stories — Phase 2.A.4 Direction C.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -14,13 +14,14 @@ const meta = {
     docs: {
       description: {
         component:
-          "Form label with KCVV design system styling. Pairs with Input, Textarea, and Select. Supports a required asterisk indicator.",
+          "Phase 2.A.4 form-atom label. Bold ink semibold above the field; required appends `*` in `text-alert`; optional appends a mono-caps `OPTIONEEL` pill (sharp corners, `border-ink/30`).",
       },
     },
   },
   tags: ["autodocs", "vr"],
   argTypes: {
     required: { control: "boolean" },
+    optional: { control: "boolean" },
     htmlFor: { control: "text" },
   },
 } satisfies Meta<typeof Label>;
@@ -29,21 +30,17 @@ export default meta;
 type Story = StoryObj<typeof Label>;
 
 export const Default: Story = {
-  args: {
-    children: "E-mailadres",
-  },
+  args: { children: "E-mailadres" },
 };
 
 export const Required: Story = {
-  args: {
-    children: "Naam",
-    required: true,
-  },
+  args: { children: "Naam", required: true },
 };
 
-/**
- * Label paired with Input — the typical usage
- */
+export const Optional: Story = {
+  args: { children: "Telefoonnummer", optional: true },
+};
+
 export const WithInput: Story = {
   render: () => (
     <div className="w-80">
@@ -55,9 +52,22 @@ export const WithInput: Story = {
   ),
 };
 
-/**
- * Full form field group showing Label + Input + error message
- */
+export const OptionalWithInput: Story = {
+  render: () => (
+    <div className="w-80">
+      <Label htmlFor="demo-phone" optional>
+        Telefoonnummer
+      </Label>
+      <Input
+        id="demo-phone"
+        type="tel"
+        placeholder="+32 4XX XX XX XX"
+        hint="Enkel voor dringende vragen — wordt nooit gedeeld."
+      />
+    </div>
+  ),
+};
+
 export const WithInputAndError: Story = {
   render: () => (
     <div className="w-80">
@@ -73,23 +83,6 @@ export const WithInputAndError: Story = {
   ),
 };
 
-export const WithInputAndHint: Story = {
-  render: () => (
-    <div className="w-80">
-      <Label htmlFor="demo-phone">Telefoonnummer</Label>
-      <Input
-        id="demo-phone"
-        type="tel"
-        placeholder="+32 4XX XX XX XX"
-        hint="Optioneel — enkel voor dringende vragen."
-      />
-    </div>
-  ),
-};
-
-/**
- * Labels in a realistic contact form layout
- */
 export const ContactForm: Story = {
   render: () => (
     <div className="flex w-96 flex-col gap-5">
@@ -106,22 +99,16 @@ export const ContactForm: Story = {
         <Input id="cf-email" type="email" placeholder="je@email.be" />
       </div>
       <div>
-        <Label htmlFor="cf-phone">Telefoonnummer</Label>
+        <Label htmlFor="cf-phone" optional>
+          Telefoonnummer
+        </Label>
         <Input
           id="cf-phone"
           type="tel"
           placeholder="+32 4XX XX XX XX"
-          hint="Optioneel"
+          hint="Enkel voor dringende vragen — wordt nooit gedeeld."
         />
       </div>
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Typical contact form field group with required and optional labels.",
-      },
-    },
-  },
 };

@@ -23,6 +23,15 @@
  * emphasis. Multi-line messages keep all wrapped lines aligned to the
  * same x-edge as line 1 (badge-right + gap); the badge stays anchored
  * to line 1 via `items-start`.
+ *
+ * Size variants:
+ * - `md` (default): standalone alert moments — form summaries, page
+ *   confirmations. 22px italic message, `border-2`, `-rotate-2`,
+ *   `tracking-[0.12em]`. Phase 2.A.5 source idiom.
+ * - `sm`: inline form-row helper text under Input/Select/Textarea. 15px
+ *   italic message, `border-[1.5px]`, no rotation, `tracking-[0.08em]`.
+ *   Phase 2.A.4 form-atom idiom — the FOUT pill that follows a single
+ *   field instead of a whole form summary.
  */
 
 import { forwardRef, type ReactNode } from "react";
@@ -30,6 +39,7 @@ import { CheckCircle, Warning, WarningCircle } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
 export type AlertBadgeVariant = "success" | "warning" | "error";
+export type AlertBadgeSize = "sm" | "md";
 
 export interface AlertBadgeProps {
   /**
@@ -37,6 +47,18 @@ export interface AlertBadgeProps {
    * Required (no default) so callers think about which one applies.
    */
   variant: AlertBadgeVariant;
+  /**
+   * Visual scale.
+   * - `md` (default) for standalone moments / form summaries.
+   * - `sm` for inline form-row helper text under a single field.
+   * @default "md"
+   */
+  size?: AlertBadgeSize;
+  /**
+   * Optional id for `aria-describedby` association — used by form
+   * fields that point at the alert with their `aria-describedby`.
+   */
+  id?: string;
   /**
    * Message text. Single-line typical; multi-line allowed for form
    * summaries.
@@ -87,6 +109,41 @@ const variantConfig: Record<
   },
 };
 
+const sizeConfig: Record<
+  AlertBadgeSize,
+  {
+    container: string;
+    badge: string;
+    iconPx: number;
+    message: string;
+  }
+> = {
+  md: {
+    container: "gap-[18px] py-2 pr-1",
+    badge: cn(
+      "border-2 px-3 py-[6px]",
+      "shadow-[3px_3px_0_0_var(--color-ink)]",
+      "text-[11px] tracking-[0.12em]",
+      "-rotate-2",
+    ),
+    iconPx: 12,
+    message: "text-[22px] leading-[1.25]",
+  },
+  sm: {
+    container: "gap-3 py-1",
+    badge: cn(
+      "border-[1.5px] px-2 py-[3px]",
+      "shadow-[3px_3px_0_0_var(--color-ink)]",
+      "text-[11px] tracking-[0.08em]",
+      // Subtler tilt than md's -rotate-2 — keeps the hand-stamped vocabulary
+      // visible in tight form-row context without dominating the field.
+      "-rotate-1",
+    ),
+    iconPx: 12,
+    message: "text-[15px] leading-snug",
+  },
+};
+
 /**
  * AlertBadge — angled badge + italic message.
  *
@@ -97,41 +154,49 @@ const variantConfig: Record<
  * <AlertBadge variant="success">
  *   Je bericht is verzonden — we nemen binnen 2 werkdagen contact met je op.
  * </AlertBadge>
+ *
+ * // Inline under a form field
+ * <AlertBadge variant="error" size="sm" id={helperId}>
+ *   Vul een geldig e-mailadres in.
+ * </AlertBadge>
  * ```
  */
 export const AlertBadge = forwardRef<HTMLDivElement, AlertBadgeProps>(
-  function AlertBadge({ variant, children, className }, ref) {
+  function AlertBadge({ variant, size = "md", id, children, className }, ref) {
     const config = variantConfig[variant];
+    const sz = sizeConfig[size];
     const { Icon } = config;
 
     return (
       <div
         ref={ref}
+        id={id}
         role={config.role}
         aria-live={config.ariaLive}
+        data-size={size}
         className={cn(
-          "inline-flex max-w-[640px] items-start gap-[18px] py-2 pr-1",
+          "inline-flex max-w-[640px] items-start",
+          sz.container,
           className,
         )}
       >
         <span
           className={cn(
             "mt-[2px] inline-flex flex-shrink-0 items-center gap-2",
-            "border-ink rounded-none border-2",
-            "shadow-[3px_3px_0_0_var(--color-ink)]",
-            "px-3 py-[6px]",
-            "font-mono text-[11px] font-bold tracking-[0.12em] uppercase",
+            "border-ink rounded-none",
+            "font-mono font-bold uppercase",
             "leading-none whitespace-nowrap",
-            "-rotate-2",
+            sz.badge,
             config.badge,
           )}
         >
-          <Icon size={12} aria-hidden="true" />
+          <Icon size={sz.iconPx} aria-hidden="true" />
           <span>{config.label}</span>
         </span>
         <span
           className={cn(
-            "font-display text-[22px] leading-[1.25] font-normal italic",
+            "font-display font-normal italic",
+            sz.message,
             config.message,
           )}
         >

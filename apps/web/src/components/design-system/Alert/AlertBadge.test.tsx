@@ -198,5 +198,43 @@ describe("AlertBadge", () => {
       );
       expect(getBadgeRoot(container)).toHaveClass("custom-badge");
     });
+
+    it("should forward id onto the outer container for aria-describedby", () => {
+      const { container } = render(
+        <AlertBadge variant="error" id="email-error">
+          x
+        </AlertBadge>,
+      );
+      expect(getBadgeRoot(container)).toHaveAttribute("id", "email-error");
+    });
+  });
+
+  describe("Size — sm (form-row inline)", () => {
+    it("uses subtler rotation (-rotate-1), 1.5px border, and 15px message", () => {
+      const { container } = render(
+        <AlertBadge variant="error" size="sm">
+          x
+        </AlertBadge>,
+      );
+      const root = getBadgeRoot(container);
+      const [badge, message] = Array.from(root.children) as HTMLElement[];
+      expect(root).toHaveAttribute("data-size", "sm");
+      expect(badge.className).toContain("-rotate-1");
+      expect(badge.className).not.toContain("-rotate-2");
+      expect(badge.className).toContain("border-[1.5px]");
+      expect(message.className).toContain("text-[15px]");
+    });
+
+    it("retains the same FOUT label and italic Freight Display message", () => {
+      const { container } = render(
+        <AlertBadge variant="error" size="sm">
+          x
+        </AlertBadge>,
+      );
+      expect(screen.getByText("FOUT")).toBeInTheDocument();
+      const message = getBadgeRoot(container).children[1] as HTMLElement;
+      expect(message).toHaveClass("font-display");
+      expect(message).toHaveClass("italic");
+    });
   });
 });

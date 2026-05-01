@@ -1,8 +1,12 @@
 "use client";
 
 /**
- * Input Component
- * Text input field with KCVV design system styling
+ * Input — Phase 2.A.4 form atom (Direction C — paper-card emphasis).
+ *
+ * Implements the eight-state field machine documented in
+ * `apps/web/src/components/design-system/_internal/fieldChrome.ts` and
+ * PRD §6.3. Sharp corners, 2px borders with three ink weights, paper-soft
+ * resting shadow, ink-press focus.
  */
 
 import {
@@ -11,35 +15,37 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from "react";
+import { AlertBadge } from "@/components/design-system/Alert";
 import { cn } from "@/lib/utils/cn";
+import { fieldChrome } from "../_internal/fieldChrome";
 
 export type InputSize = "sm" | "md" | "lg";
 
 const sizeClasses: Record<InputSize, string> = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2.5 text-base",
-  lg: "px-5 py-3 text-lg",
+  sm: "h-8 px-3 text-sm",
+  md: "h-10 px-4 text-base",
+  lg: "h-12 px-5 text-lg",
 };
 
 const leadingPadding: Record<InputSize, string> = {
-  sm: "pl-8",
-  md: "pl-10",
-  lg: "pl-12",
+  sm: "pl-9",
+  md: "pl-11",
+  lg: "pl-13",
 };
 
 const trailingPadding: Record<InputSize, string> = {
-  sm: "pr-8",
-  md: "pr-10",
-  lg: "pr-12",
+  sm: "pr-9",
+  md: "pr-11",
+  lg: "pr-13",
 };
 
-const iconSize: Record<InputSize, string> = {
+const iconWrap: Record<InputSize, string> = {
   sm: "left-2.5 [&>*]:w-3.5 [&>*]:h-3.5",
   md: "left-3 [&>*]:w-4 [&>*]:h-4",
   lg: "left-4 [&>*]:w-5 [&>*]:h-5",
 };
 
-const trailingIconSize: Record<InputSize, string> = {
+const trailingIconWrap: Record<InputSize, string> = {
   sm: "right-2.5 [&>*]:w-3.5 [&>*]:h-3.5",
   md: "right-3 [&>*]:w-4 [&>*]:h-4",
   lg: "right-4 [&>*]:w-5 [&>*]:h-5",
@@ -49,134 +55,94 @@ export interface InputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "size"
 > {
-  /**
-   * Size variant of the input
-   * @default 'md'
-   */
+  /** @default 'md' */
   size?: InputSize;
-  /**
-   * Show error styling and message
-   */
+  /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
   error?: string;
-  /**
-   * Hint text displayed below the input
-   */
+  /** Hint text rendered below when no error. */
   hint?: string;
-  /**
-   * Icon or element displayed on the left inside the input
-   */
+  /** Optional leading icon (left side, vertically centered). */
   leadingIcon?: ReactNode;
-  /**
-   * Icon or element displayed on the right inside the input
-   */
+  /** Optional trailing icon (right side, vertically centered). */
   trailingIcon?: ReactNode;
-  /**
-   * Additional CSS classes
-   */
   className?: string;
 }
 
-/**
- * Input component with KCVV design system styling.
- *
- * @example
- * ```tsx
- * <Input placeholder="Zoek op naam..." />
- * <Input size="lg" error="Dit veld is verplicht" />
- * <Input leadingIcon={<Search size={16} />} placeholder="Zoeken..." />
- * ```
- */
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      size = "md",
-      error,
-      hint,
-      leadingIcon,
-      trailingIcon,
-      className,
-      disabled,
-      ...props
-    },
-    ref,
-  ) => {
-    const helperId = useId();
-    const hasHelper = !!(error || hint);
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    size = "md",
+    error,
+    hint,
+    leadingIcon,
+    trailingIcon,
+    className,
+    disabled,
+    placeholder,
+    ...props
+  },
+  ref,
+) {
+  const helperId = useId();
+  const hasHelper = !!(error || hint);
 
-    return (
-      <div className="w-full">
-        <div className="relative">
-          {leadingIcon && (
-            <div
-              className={cn(
-                "text-foundation-gray-dark pointer-events-none absolute top-1/2 -translate-y-1/2",
-                iconSize[size],
-              )}
-            >
-              {leadingIcon}
-            </div>
-          )}
+  // The field-chrome state machine relies on `:placeholder-shown` to
+  // detect "filled". A non-empty placeholder is therefore required for
+  // the filled-anchor border to engage; default to a single space when
+  // the consumer omits one. (Visible placeholder still wins when set.)
+  const effectivePlaceholder = placeholder ?? " ";
 
-          <input
-            ref={ref}
-            {...props}
-            disabled={disabled}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={hasHelper ? helperId : undefined}
+  return (
+    <div className="w-full">
+      <div className="relative">
+        {leadingIcon && (
+          <div
             className={cn(
-              // Base
-              "font-body w-full rounded-[0.25em] border bg-white",
-              "text-kcvv-gray-dark placeholder:text-foundation-gray-dark",
-              "transition-all duration-200",
-              "focus:ring-2 focus:ring-offset-0 focus:outline-hidden",
-
-              // Default border + focus
-              !error &&
-                "border-foundation-gray focus:border-kcvv-green-bright focus:ring-kcvv-green-bright/20",
-
-              // Error state
-              error &&
-                "border-kcvv-alert focus:border-kcvv-alert focus:ring-kcvv-alert/20",
-
-              // Disabled
-              "disabled:bg-foundation-gray-light disabled:cursor-not-allowed disabled:opacity-50",
-
-              // Size
-              sizeClasses[size],
-
-              // Icon padding
-              leadingIcon && leadingPadding[size],
-              trailingIcon && trailingPadding[size],
-
-              className,
+              "text-ink/60 pointer-events-none absolute top-1/2 z-10 -translate-y-1/2",
+              iconWrap[size],
             )}
-          />
-
-          {trailingIcon && (
-            <div
-              className={cn(
-                "text-foundation-gray-dark pointer-events-none absolute top-1/2 -translate-y-1/2",
-                trailingIconSize[size],
-              )}
-            >
-              {trailingIcon}
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <p id={helperId} className="text-kcvv-alert mt-1.5 text-sm">
-            {error}
-          </p>
+          >
+            {leadingIcon}
+          </div>
         )}
-        {!error && hint && (
-          <p id={helperId} className="text-foundation-gray-dark mt-1.5 text-sm">
-            {hint}
-          </p>
+
+        <input
+          ref={ref}
+          {...props}
+          placeholder={effectivePlaceholder}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={hasHelper ? helperId : undefined}
+          className={cn(
+            fieldChrome(!!error),
+            sizeClasses[size],
+            leadingIcon && leadingPadding[size],
+            trailingIcon && trailingPadding[size],
+            className,
+          )}
+        />
+
+        {trailingIcon && (
+          <div
+            className={cn(
+              "text-ink/60 pointer-events-none absolute top-1/2 z-10 -translate-y-1/2",
+              trailingIconWrap[size],
+            )}
+          >
+            {trailingIcon}
+          </div>
         )}
       </div>
-    );
-  },
-);
 
-Input.displayName = "Input";
+      {error && (
+        <AlertBadge variant="error" size="sm" id={helperId} className="mt-2">
+          {error}
+        </AlertBadge>
+      )}
+      {!error && hint && (
+        <p id={helperId} className="font-body text-ink/60 mt-2 text-sm italic">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+});

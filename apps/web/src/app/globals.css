@@ -453,6 +453,20 @@
      scarf spinner). Ink-muted (#6b6b6b) gives the offset visible depth without
      adding a third primary shadow weight. */
   --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+
+  /* Hover companion to --shadow-paper-sm-soft — used by paper-pressed chrome
+     (form fields, scroll arrows, horizontal slider arrows) on hover where the
+     shadow compresses by 1px while the surface translates by `1px, 1px`. The
+     visual delta is the press idiom; tokenising it keeps every paper-pressed
+     surface in lockstep. */
+  --shadow-paper-sm-soft-hover: 3px 3px 0 0 var(--color-ink-muted);
+
+  /* Alert variant of --shadow-paper-sm-soft — exclusive to form-field error
+     state. `--color-alert-soft` matches the alert border so the offset reads
+     as part of the same alert moment instead of a generic gray drop. Mirrors
+     the soft/soft-hover pair for state-machine symmetry. */
+  --shadow-paper-sm-alert:        4px 4px 0 0 var(--color-alert-soft);
+  --shadow-paper-sm-alert-hover:  3px 3px 0 0 var(--color-alert-soft);
 }
 
 /* ===== Global Styles ===== */
