@@ -45,21 +45,16 @@ const TAB_BASE_CLASSES = [
   "rounded-none border-2 border-ink",
   "px-[18px] py-3",
   "font-mono text-xs font-semibold uppercase tracking-[0.08em]",
-  "transition-[transform,box-shadow] duration-150 ease-out",
-  "hover:translate-x-px hover:translate-y-px",
+  "transition-all duration-300",
+  "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
 ] as const;
 
-const TAB_INACTIVE_CLASSES = [
-  "bg-cream text-ink",
-  "shadow-[var(--shadow-paper-sm)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
-] as const;
+const TAB_INACTIVE_CLASSES = ["bg-cream text-ink", "shadow-paper-sm"] as const;
 
 const TAB_ACTIVE_CLASSES = [
   "bg-ink text-cream",
-  "shadow-[var(--shadow-paper-sm-soft)]",
-  "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
+  "shadow-paper-sm-soft",
 ] as const;
 
 export function BrandedTabs({

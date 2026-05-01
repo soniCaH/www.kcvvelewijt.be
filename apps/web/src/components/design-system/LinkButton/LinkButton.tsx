@@ -2,8 +2,6 @@
 
 import { forwardRef, type ReactNode } from "react";
 import Link, { type LinkProps } from "next/link";
-import { cn } from "@/lib/utils/cn";
-import { ArrowRight } from "@/lib/icons";
 import {
   getButtonClasses,
   type ButtonStyleProps,
@@ -38,14 +36,12 @@ export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(
         {children}
 
         {withArrow && (
-          <ArrowRight
-            size={16}
-            className={cn(
-              "transition-transform duration-300",
-              "group-hover:translate-x-1",
-            )}
+          <span
             aria-hidden="true"
-          />
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          >
+            →
+          </span>
         )}
       </Link>
     );

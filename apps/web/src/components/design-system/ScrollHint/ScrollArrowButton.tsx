@@ -40,15 +40,14 @@ export function ScrollArrowButton({
         // hover and the button to leap to the top of its parent.
         "absolute inset-y-0 z-10 my-auto",
         "border-ink bg-cream h-12 w-12 rounded-none border-2",
-        "shadow-[var(--shadow-paper-sm)]",
+        "shadow-paper-sm",
         "inline-flex items-center justify-center",
         // 22px matches the canonical mockup `.arrow-btn` font-size; pb-px
         // compensates for the italic Freight Display arrow glyph riding
         // slightly above the typographic baseline.
         "font-display text-ink pb-px text-[22px] leading-none italic",
-        "transition-[transform,box-shadow] duration-150 ease-out",
-        "hover:translate-x-px hover:translate-y-px",
-        "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
+        "transition-all duration-300",
+        "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
         "focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         positionClass,
         className,

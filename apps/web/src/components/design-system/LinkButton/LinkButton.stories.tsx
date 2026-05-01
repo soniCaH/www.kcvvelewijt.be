@@ -6,6 +6,13 @@ const meta = {
   component: LinkButton,
   parameters: {
     layout: "centered",
+    backgrounds: {
+      default: "cream",
+      values: [
+        { name: "cream", value: "#f5f1e6" },
+        { name: "ink", value: "#0a0a0a" },
+      ],
+    },
   },
   tags: ["autodocs", "vr"],
   args: {
@@ -14,7 +21,7 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary", "ghost", "link"],
+      options: ["primary", "inverted", "secondary", "ghost"],
       description: "Visual variant",
     },
     size: {
@@ -24,7 +31,7 @@ const meta = {
     },
     withArrow: {
       control: "boolean",
-      description: "Show animated arrow icon on the right",
+      description: "Render the typographic → glyph after the label",
     },
     fullWidth: {
       control: "boolean",
@@ -47,6 +54,16 @@ export const Primary: Story = {
   },
 };
 
+export const Inverted: Story = {
+  args: {
+    children: "Inverted Link",
+    variant: "inverted",
+  },
+  parameters: {
+    backgrounds: { default: "ink" },
+  },
+};
+
 export const Secondary: Story = {
   args: {
     children: "Secondary Link",
@@ -58,13 +75,6 @@ export const Ghost: Story = {
   args: {
     children: "Ghost Link",
     variant: "ghost",
-  },
-};
-
-export const Link: Story = {
-  args: {
-    children: "Link Style",
-    variant: "link",
   },
 };
 
@@ -80,7 +90,7 @@ export const AllVariants: Story = {
     children: "Link",
   },
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <div className="bg-cream flex flex-col items-start gap-4 p-6">
       <LinkButton href="/example" variant="primary">
         Primary
       </LinkButton>
@@ -90,9 +100,11 @@ export const AllVariants: Story = {
       <LinkButton href="/example" variant="ghost">
         Ghost
       </LinkButton>
-      <LinkButton href="/example" variant="link">
-        Link
-      </LinkButton>
+      <div className="bg-ink p-4">
+        <LinkButton href="/example" variant="inverted">
+          Inverted
+        </LinkButton>
+      </div>
     </div>
   ),
 };
@@ -121,7 +133,7 @@ export const WithArrowVariants: Story = {
     children: "Link",
   },
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <div className="bg-cream flex flex-col items-start gap-4 p-6">
       <LinkButton href="/example" variant="primary" withArrow>
         Primary with Arrow
       </LinkButton>
@@ -131,6 +143,11 @@ export const WithArrowVariants: Story = {
       <LinkButton href="/example" variant="ghost" withArrow>
         Ghost with Arrow
       </LinkButton>
+      <div className="bg-ink p-4">
+        <LinkButton href="/example" variant="inverted" withArrow>
+          Inverted with Arrow
+        </LinkButton>
+      </div>
     </div>
   ),
 };

@@ -53,7 +53,7 @@ describe("WebshopSection", () => {
   it("renders the CTA with design system button classes", () => {
     render(<WebshopSection />);
     const link = screen.getByRole("link", { name: /naar de webshop/i });
-    // Design system primary button uses bg-jersey on the redesign vocabulary
-    expect(link.className).toContain("bg-jersey");
+    // Design system primary button uses bg-jersey-deep on the redesign vocabulary
+    expect(link.className).toContain("bg-jersey-deep");
   });
 });

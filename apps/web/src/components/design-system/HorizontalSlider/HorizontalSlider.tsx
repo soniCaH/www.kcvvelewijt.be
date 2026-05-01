@@ -55,8 +55,7 @@ export interface HorizontalSliderProps {
   className?: string;
 }
 
-const DARK_ARROW_OVERRIDE =
-  "shadow-[var(--shadow-paper-sm-soft)] hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]";
+const DARK_ARROW_OVERRIDE = "shadow-paper-sm-soft";
 
 // Overhang the arrows outside the relative parent so the cream paper button
 // doesn't sit directly on top of the cream paper cards inside the slider.

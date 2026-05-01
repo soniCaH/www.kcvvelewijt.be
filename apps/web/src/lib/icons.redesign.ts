@@ -16,6 +16,7 @@ import {
   CaretLeft as PhCaretLeft,
   CaretRight as PhCaretRight,
   CheckCircle as PhCheckCircle,
+  Heart as PhHeart,
   Warning as PhWarning,
   WarningCircle as PhWarningCircle,
   X as PhX,
@@ -38,6 +39,7 @@ export const CaretDown = fillWrapper(PhCaretDown);
 export const CaretLeft = fillWrapper(PhCaretLeft);
 export const CaretRight = fillWrapper(PhCaretRight);
 export const CheckCircle = fillWrapper(PhCheckCircle);
+export const Heart = fillWrapper(PhHeart);
 export const Warning = fillWrapper(PhWarning);
 export const WarningCircle = fillWrapper(PhWarningCircle);
 export const X = fillWrapper(PhX);

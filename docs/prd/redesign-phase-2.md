@@ -97,7 +97,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 
 - [ ] **2.A.1 EditorialLink:** `apps/web/src/components/design-system/EditorialLink/` exists with `EditorialLink.tsx`, `EditorialLink.stories.tsx`, `EditorialLink.test.tsx`, `index.ts`. `SectionHeader.tsx` no longer holds bespoke highlighter-mask JSX; it renders `<EditorialLink variant="cta">`. The `TODO(phase-4): consolidate with <HighlighterStroke>` comment is removed.
 - [ ] **2.A.2 Phosphor migration:** Every Phase 2 atom that previously imported from `@/lib/icons` now imports from `@/lib/icons.redesign`. Wrapper components default `weight="fill"` and accept `size`, `className`, `aria-hidden` pass-through.
-- [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
+- [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Corners are square (`rounded-none`). `secondary` uses the shared `shadow-paper-sm` token (not an arbitrary `[4px_4px_0_0_…]` value). Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
 - [ ] **2.A.4 Form atoms:** Input / Select / Textarea uniformly implement the locked Direction C state machine (`bg-white` + 2px ink-weighted border + `--shadow-paper-sm-soft` resting shadow + paper-press idiom on hover/focus + `--shadow-paper-sm-alert` on error). No jersey-deep on the field anywhere — focus signals via `border-ink` + shadow snap + `translate(2px, 2px)`. Filled state anchors at `border-ink/60`. Sharp corners (`rounded-[0.25em]` removed — see AC override note in §6.3). New `<FieldError>` and `<TextareaCounter>` primitives extracted. Phosphor `CaretDown` replaces Lucide on Select. `kcvv-alert` no longer referenced from these four files. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md` (locked spec) and `option-c-locked.html` (canonical visual).
 - [ ] **2.A.5 Alert:** Two-form retro vocabulary per the locked design checkpoint (2026-04-30) — primary `<AlertBadge>` (Direction E — angled badge + italic Freight Display message, non-dismissible) and long-form `<Alert>` (Direction B — perforated ticket-stub with mono kicker + italic title + ink body + optional dismiss). Both share `variant: "success" | "warning" | "error"` (no `info`). Each variant uses distinct icons: `CheckCircle` (success) / `Warning` (warning) / `WarningCircle` (error). Dismiss on `<Alert>` renders Phosphor Fill `X`. WAI-ARIA: `success` and `warning` use `role="status"` + `aria-live="polite"`; `error` uses `role="alert"` + `aria-live="assertive"`. See `docs/design/mockups/phase-2-a-5-alert/compare.md` (locked spec) and `option-e-angled-badge.html` + `option-b-ticket-stub.html` (canonical visuals). Original token-swap PRD §6.4 was rejected and has been rewritten — see updated §6.4 in this PRD. Form-atoms (§6.3 / #1571) consume `<AlertBadge variant="error">` for the helper-row error slot — the originally-proposed `<FieldError>` primitive is superseded.
 - [ ] **2.A.6 FilterTab.icon removal:** `FilterTab.icon` field removed from the `FilterTab` interface; the `<FilterTabs>` rendering path no longer accepts or renders any leading icon. Locked at the Track B design checkpoint (2026-04-30) — supersedes the original Lucide → Phosphor type-swap plan. Acceptance: zero non-test references to `FilterTab.icon` after the PR; consumers that previously passed an `icon` stop doing so; type-check passes.
@@ -132,12 +132,16 @@ Per atom:
 
 ### 6.1 `<Button>` — 4 variants
 
-| Variant     | Surface         | Border                | Text         | Shadow                                  | Hover                                                              |
-| ----------- | --------------- | --------------------- | ------------ | --------------------------------------- | ------------------------------------------------------------------ |
-| `primary`   | `bg-jersey`     | none                  | `text-cream` | —                                       | brightens / depth subtle                                           |
-| `inverted`  | `bg-cream`      | none                  | `text-ink`   | —                                       | subtle ink shift                                                   |
-| `secondary` | `bg-cream-soft` | `border-2 border-ink` | `text-ink`   | `shadow-[4px_4px_0_0_var(--color-ink)]` | shadow collapses + `translate-x-1 translate-y-1` (TapedCard press) |
-| `ghost`     | transparent     | `border-2 border-ink` | `text-ink`   | —                                       | `bg-ink/5` fill                                                    |
+All four variants share the canonical retro press-down hover: `hover:shadow-none hover:translate-x-1 hover:translate-y-1` (the shadow is "absorbed" as the button presses down by exactly its 4 px offset). Inverted swaps `shadow-paper-sm` for the muted sibling `shadow-paper-sm-soft` so the shadow stays visible against the dark surface the variant is designed for. Every variant carries `border-2 border-ink` for the stamped paper-card silhouette.
+
+| Variant     | Surface          | Text         | Shadow                 | Hover-fill change      |
+| ----------- | ---------------- | ------------ | ---------------------- | ---------------------- |
+| `primary`   | `bg-jersey-deep` | `text-cream` | `shadow-paper-sm`      | `hover:brightness-110` |
+| `inverted`  | `bg-cream`       | `text-ink`   | `shadow-paper-sm-soft` | `hover:bg-cream-soft`  |
+| `secondary` | `bg-cream-soft`  | `text-ink`   | `shadow-paper-sm`      | `hover:bg-cream`       |
+| `ghost`     | transparent      | `text-ink`   | `shadow-paper-sm`      | `hover:bg-ink/5`       |
+
+**Cross-component rule:** the press-down hover defined here is the **canonical interactive hover** for the redesign. Every paper-stamped interactive primitive (`Button`, `LinkButton`, `FilterTabs` chips, `BrandedTabs` tabs, `ScrollArrowButton`, `HorizontalSlider` arrows) uses `hover:shadow-none hover:translate-x-1 hover:translate-y-1` — no exceptions, no per-component soft-press variants.
 
 **Removed:** `variant="link"` (zero non-test consumers; the link visual lives in `<EditorialLink>` instead).
 
@@ -147,6 +151,7 @@ Per atom:
 - Focus ring: `focus-visible:ring-jersey-deep focus-visible:ring-offset-2`.
 - Disabled: `opacity-50 cursor-not-allowed` (unchanged).
 - Sizes (sm/md/lg) and `fullWidth` prop preserved.
+- **Corners are square** (`rounded-none`). The retro-terrace fanzine vocabulary drops border-radius across the redesign — buttons inherit that rule.
 
 ### 6.2 `<EditorialLink>` (new primitive)
 

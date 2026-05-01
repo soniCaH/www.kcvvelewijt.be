@@ -1,23 +1,25 @@
-/**
- * Button Component Stories
- * Showcases all Button variants and use cases
- */
-
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "./Button";
-import { ArrowRight as ArrowRightFill } from "@/lib/icons.redesign";
+import { Heart } from "@/lib/icons.redesign";
 
 const meta = {
   title: "UI/Button",
   component: Button,
   parameters: {
     layout: "centered",
+    backgrounds: {
+      default: "cream",
+      values: [
+        { name: "cream", value: "#f5f1e6" },
+        { name: "ink", value: "#0a0a0a" },
+      ],
+    },
   },
   tags: ["autodocs", "vr"],
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary", "ghost", "link"],
+      options: ["primary", "inverted", "secondary", "ghost"],
       description: "Visual variant of the button",
     },
     size: {
@@ -27,7 +29,7 @@ const meta = {
     },
     withArrow: {
       control: "boolean",
-      description: "Show arrow icon on the right",
+      description: "Render the typographic → glyph after the label",
     },
     fullWidth: {
       control: "boolean",
@@ -43,30 +45,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Primary button — reskinned to the redesign vocabulary (jersey-on-cream).
- *
- * Tracer-bullet story for Phase 2 (#1568): proves the Phosphor Fill icon
- * wrapper from `@/lib/icons.redesign` integrates with `<Button variant="primary">`
- * on the new visual treatment. The companion `Primary` story uses the same
- * variant — they share a baseline cluster until 2.A.3 retires the legacy
- * variants entirely.
- */
-export const PrimaryRedesigned: Story = {
-  args: {
-    variant: "primary",
-    children: "Continue",
-  },
-  render: ({ children, ...args }) => (
-    <Button {...args}>
-      {children} <ArrowRightFill size={16} aria-hidden="true" />
-    </Button>
-  ),
-};
-
-/**
- * Primary button — default (no trailing icon)
- */
 export const Primary: Story = {
   args: {
     children: "Primary Button",
@@ -75,8 +53,20 @@ export const Primary: Story = {
 };
 
 /**
- * Secondary button with gray background
+ * `inverted` is the dark-surface counterpart of `primary` — `bg-cream` on
+ * `text-ink`. Rendered against an ink backdrop in this story to expose the
+ * contrast the variant is designed for.
  */
+export const Inverted: Story = {
+  args: {
+    children: "Inverted Button",
+    variant: "inverted",
+  },
+  parameters: {
+    backgrounds: { default: "ink" },
+  },
+};
+
 export const Secondary: Story = {
   args: {
     children: "Secondary Button",
@@ -84,9 +74,6 @@ export const Secondary: Story = {
   },
 };
 
-/**
- * Ghost button with transparent background and border
- */
 export const Ghost: Story = {
   args: {
     children: "Ghost Button",
@@ -94,19 +81,6 @@ export const Ghost: Story = {
   },
 };
 
-/**
- * Link-styled button
- */
-export const Link: Story = {
-  args: {
-    children: "Link Button",
-    variant: "link",
-  },
-};
-
-/**
- * Small button size
- */
 export const Small: Story = {
   args: {
     children: "Small Button",
@@ -114,9 +88,6 @@ export const Small: Story = {
   },
 };
 
-/**
- * Medium button size (default)
- */
 export const Medium: Story = {
   args: {
     children: "Medium Button",
@@ -124,9 +95,6 @@ export const Medium: Story = {
   },
 };
 
-/**
- * Large button size
- */
 export const Large: Story = {
   args: {
     children: "Large Button",
@@ -135,7 +103,8 @@ export const Large: Story = {
 };
 
 /**
- * Button with animated arrow icon
+ * `withArrow` renders the locked typographic `→` glyph (not a Phosphor icon)
+ * with a hover translate-x-1 animation.
  */
 export const WithArrow: Story = {
   args: {
@@ -145,8 +114,23 @@ export const WithArrow: Story = {
 };
 
 /**
- * Full width button (mobile-friendly)
+ * Composing an arbitrary leading icon with `<Button>` — proves icon glyphs
+ * sit alongside the label without colliding with the `withArrow` typographic
+ * `→`. Uses Phosphor Fill `Heart` from `@/lib/icons.redesign`.
  */
+export const WithLeadingIcon: Story = {
+  args: {
+    variant: "primary",
+    children: "Support the club",
+  },
+  render: ({ children, ...args }) => (
+    <Button {...args}>
+      <Heart size={16} aria-hidden="true" />
+      {children}
+    </Button>
+  ),
+};
+
 export const FullWidth: Story = {
   args: {
     children: "Full Width Button",
@@ -164,9 +148,6 @@ export const FullWidth: Story = {
   ],
 };
 
-/**
- * Disabled button state
- */
 export const Disabled: Story = {
   args: {
     children: "Disabled Button",
@@ -174,26 +155,22 @@ export const Disabled: Story = {
   },
 };
 
-/**
- * All variants side by side
- */
 export const AllVariants: Story = {
   args: {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <div className="bg-cream flex flex-col items-start gap-4 p-6">
       <Button variant="primary">Primary</Button>
       <Button variant="secondary">Secondary</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="link">Link</Button>
+      <div className="bg-ink p-4">
+        <Button variant="inverted">Inverted</Button>
+      </div>
     </div>
   ),
 };
 
-/**
- * All sizes comparison
- */
 export const AllSizes: Story = {
   args: {
     children: "Button",
@@ -207,15 +184,12 @@ export const AllSizes: Story = {
   ),
 };
 
-/**
- * Button with arrow in all variants
- */
 export const WithArrowVariants: Story = {
   args: {
     children: "Button",
   },
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <div className="bg-cream flex flex-col items-start gap-4 p-6">
       <Button variant="primary" withArrow>
         Primary with Arrow
       </Button>
@@ -225,13 +199,15 @@ export const WithArrowVariants: Story = {
       <Button variant="ghost" withArrow>
         Ghost with Arrow
       </Button>
+      <div className="bg-ink p-4">
+        <Button variant="inverted" withArrow>
+          Inverted with Arrow
+        </Button>
+      </div>
     </div>
   ),
 };
 
-/**
- * Real-world usage examples
- */
 export const Examples: Story = {
   args: {
     children: "Button",
@@ -239,14 +215,14 @@ export const Examples: Story = {
   render: () => (
     <div className="flex max-w-md flex-col gap-6">
       <div>
-        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Call to Action</h3>
+        <h3 className="text-ink mb-2 font-bold">Call to Action</h3>
         <Button variant="primary" size="lg" withArrow fullWidth>
           Join KCVV Elewijt
         </Button>
       </div>
 
       <div>
-        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Article Actions</h3>
+        <h3 className="text-ink mb-2 font-bold">Article Actions</h3>
         <div className="flex gap-2">
           <Button variant="primary" size="sm">
             Read Article
@@ -258,7 +234,7 @@ export const Examples: Story = {
       </div>
 
       <div>
-        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Form Buttons</h3>
+        <h3 className="text-ink mb-2 font-bold">Form Buttons</h3>
         <div className="flex gap-2">
           <Button type="submit" variant="primary">
             Submit
@@ -268,13 +244,6 @@ export const Examples: Story = {
           </Button>
         </div>
       </div>
-
-      <div>
-        <h3 className="text-kcvv-gray-blue mb-2 font-bold">Navigation</h3>
-        <Button variant="link" withArrow>
-          View All News
-        </Button>
-      </div>
     </div>
   ),
   parameters: {
@@ -282,9 +251,6 @@ export const Examples: Story = {
   },
 };
 
-/**
- * Interactive playground
- */
 export const Playground: Story = {
   args: {
     children: "Customize me!",

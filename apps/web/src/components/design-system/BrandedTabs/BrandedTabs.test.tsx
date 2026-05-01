@@ -90,9 +90,7 @@ describe("BrandedTabs", () => {
       const active = screen.getByRole("tab", { name: "Spelers" });
       expect(active).toHaveClass("bg-ink");
       expect(active).toHaveClass("text-cream");
-      expect(active.className).toContain(
-        "shadow-[var(--shadow-paper-sm-soft)]",
-      );
+      expect(active).toHaveClass("shadow-paper-sm-soft");
     });
 
     it("uses mono font, uppercase, tracking on every tab", () => {
@@ -118,7 +116,7 @@ describe("BrandedTabs", () => {
         <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={() => {}} />,
       );
       const inactive = screen.getByRole("tab", { name: "Spelers" });
-      expect(inactive.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      expect(inactive).toHaveClass("shadow-paper-sm");
     });
 
     it("the tablist container drops the legacy bottom border", () => {
@@ -142,46 +140,30 @@ describe("BrandedTabs", () => {
     });
   });
 
-  describe("Press idiom (paper-card press)", () => {
+  describe("Press idiom (canonical press-down hover)", () => {
     it("applies the hover translate(1, 1) press utility classes", () => {
       render(
         <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={() => {}} />,
       );
       const tab = screen.getByRole("tab", { name: "Spelers" });
-      expect(tab).toHaveClass("hover:translate-x-px");
-      expect(tab).toHaveClass("hover:translate-y-px");
+      expect(tab).toHaveClass("hover:translate-x-1");
+      expect(tab).toHaveClass("hover:translate-y-1");
     });
 
-    it("inactive hover collapses shadow to 3 × 3 ink", () => {
+    it("hover collapses the shadow fully to none (canonical press-down)", () => {
       render(
         <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={() => {}} />,
       );
       const inactive = screen.getByRole("tab", { name: "Spelers" });
-      expect(inactive.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink)]",
-      );
+      expect(inactive).toHaveClass("hover:shadow-none");
     });
 
-    it("active hover collapses shadow to 3 × 3 ink-muted", () => {
-      render(
-        <BrandedTabs
-          tabs={tabs}
-          activeTabId="spelers"
-          onTabChange={() => {}}
-        />,
-      );
-      const active = screen.getByRole("tab", { name: "Spelers" });
-      expect(active.className).toContain(
-        "hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]",
-      );
-    });
-
-    it("applies transition classes for smooth state changes", () => {
+    it("uses the canonical 300ms duration for hover transitions", () => {
       render(
         <BrandedTabs tabs={tabs} activeTabId="info" onTabChange={() => {}} />,
       );
       const tab = screen.getByRole("tab", { name: "Info" });
-      expect(tab.className).toContain("transition-");
+      expect(tab).toHaveClass("transition-all", "duration-300");
     });
 
     it("preserves focus-visible ring for keyboard navigation", () => {
