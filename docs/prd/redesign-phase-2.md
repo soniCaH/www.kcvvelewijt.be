@@ -98,7 +98,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] **2.A.1 EditorialLink:** `apps/web/src/components/design-system/EditorialLink/` exists with `EditorialLink.tsx`, `EditorialLink.stories.tsx`, `EditorialLink.test.tsx`, `index.ts`. `SectionHeader.tsx` no longer holds bespoke highlighter-mask JSX; it renders `<EditorialLink variant="cta">`. The `TODO(phase-4): consolidate with <HighlighterStroke>` comment is removed.
 - [ ] **2.A.2 Phosphor migration:** Every Phase 2 atom that previously imported from `@/lib/icons` now imports from `@/lib/icons.redesign`. Wrapper components default `weight="fill"` and accept `size`, `className`, `aria-hidden` pass-through.
 - [ ] **2.A.3 Button:** `ButtonVariant` type is `"primary" | "inverted" | "secondary" | "ghost"` (no `link`). `withArrow` renders typographic `→` glyph (`<span aria-hidden>→</span>`), not a Phosphor icon. Focus ring uses `ring-jersey-deep`. Corners are square (`rounded-none`). `secondary` uses the shared `shadow-paper-sm` token (not an arbitrary `[4px_4px_0_0_…]` value). Disabled stays `opacity-50 cursor-not-allowed`. Zero non-test consumers of the removed `link` variant (verified by grep at PR time).
-- [ ] **2.A.4 Form atoms:** Input / Select / Textarea uniformly implement the locked Direction C state machine (`bg-white` + 2px ink-weighted border + `--shadow-paper-sm-soft` resting shadow + paper-press idiom on hover/focus + `--shadow-paper-sm-alert` on error). No jersey-deep on the field anywhere — focus signals via `border-ink` + shadow snap + `translate(2px, 2px)`. Filled state anchors at `border-ink/60`. Sharp corners (`rounded-[0.25em]` removed — see AC override note in §6.3). New `<FieldError>` and `<TextareaCounter>` primitives extracted. Phosphor `CaretDown` replaces Lucide on Select. `kcvv-alert` no longer referenced from these four files. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md` (locked spec) and `option-c-locked.html` (canonical visual).
+- [ ] **2.A.4 Form atoms:** Input / Select / Textarea uniformly implement the locked Direction C state machine (`bg-white` + 2px ink-weighted border + `--shadow-paper-sm-soft` resting shadow + paper-press idiom on hover/focus + `--shadow-paper-sm-alert` on error). No jersey-deep on the field anywhere — focus signals via `border-ink` + shadow snap + `translate(2px, 2px)`. Filled state anchors at `border-ink/60`. Sharp corners (`rounded-[0.25em]` removed — see AC override note in §6.3). Form atoms render `<AlertBadge variant="error">` directly in the helper-row slot when `error?: string` is set (no separate `<FieldError>` primitive — superseded by §6.4.A). New `<TextareaCounter>` primitive extracted. Phosphor `CaretDown` replaces Lucide on Select. `kcvv-alert` no longer referenced from these four files. See `docs/design/mockups/phase-2-a-4-form-atoms/compare.md` (locked spec) and `option-c-locked.html` (canonical visual).
 - [ ] **2.A.5 Alert:** Two-form retro vocabulary per the locked design checkpoint (2026-04-30) — primary `<AlertBadge>` (Direction E — angled badge + italic Freight Display message, non-dismissible) and long-form `<Alert>` (Direction B — perforated ticket-stub with mono kicker + italic title + ink body + optional dismiss). Both share `variant: "success" | "warning" | "error"` (no `info`). Each variant uses distinct icons: `CheckCircle` (success) / `Warning` (warning) / `WarningCircle` (error). Dismiss on `<Alert>` renders Phosphor Fill `X`. WAI-ARIA: `success` and `warning` use `role="status"` + `aria-live="polite"`; `error` uses `role="alert"` + `aria-live="assertive"`. See `docs/design/mockups/phase-2-a-5-alert/compare.md` (locked spec) and `option-e-angled-badge.html` + `option-b-ticket-stub.html` (canonical visuals). Original token-swap PRD §6.4 was rejected and has been rewritten — see updated §6.4 in this PRD. Form-atoms (§6.3 / #1571) consume `<AlertBadge variant="error">` for the helper-row error slot — the originally-proposed `<FieldError>` primitive is superseded.
 - [ ] **2.A.6 FilterTab.icon removal:** `FilterTab.icon` field removed from the `FilterTab` interface; the `<FilterTabs>` rendering path no longer accepts or renders any leading icon. Locked at the Track B design checkpoint (2026-04-30) — supersedes the original Lucide → Phosphor type-swap plan. Acceptance: zero non-test references to `FilterTab.icon` after the PR; consumers that previously passed an `icon` stop doing so; type-check passes.
 
@@ -459,6 +459,64 @@ Legacy `--color-kcvv-warning` and `--color-kcvv-alert` stay defined; legacy comp
 
 Invocation: `pnpm vr:update:story -- --testPathPatterns=ui-button` — only updates baselines for stories whose synthetic test path matches the regex. The `--` separator hands the trailing arguments to test-storybook, which forwards `--testPathPatterns=<regex>` to Jest (the flag is plural in current Jest; the singular `--testPathPattern` is deprecated). The regex matches the synthetic test file paths derived from story IDs (e.g. `ui-button`, `layout-pagefooter`), not the source `.stories.tsx` file paths. Use a tight anchor like `ui-button` to scope to a single atom without dragging in `ui-linkbutton`/`ui-downloadbutton`/etc. Pattern is a Jest-compatible regex string.
 
+### 6.9 Composition primitives — `<ClippedCard>` + `<StampBadge>`
+
+Two Tier B composition primitives that frame **document / form** surfaces in the retro-terrace-fanzine direction. Implemented in #1591 alongside Phase 2. Visual reference: the consolidated form composition in `docs/design/mockups/phase-2-a-4-form-atoms/option-c-locked.html`.
+
+#### `<ClippedCard>`
+
+Bordered "archival document" paper card — `border-2 ink` + white (`bg-white`) surface + opinionated `36px 40px 28px` padding default, **no offset shadow, no rotation**. The white surface matches the locked option-c mockup — a sheet of paper sitting on the cream page backdrop. Renders TL + BR L-shaped corner-clip accents internally as a private `<CornerClipDecoration>` subcomponent (not exported from the design-system barrel). L-marks: `18px × 18px`, `2px solid ink`, drawn on the relevant two sides per corner, translated 6px outward so they sit _outside_ the parent's border edge. Sharp corners. Decorations carry `aria-hidden="true"`.
+
+Prop surface is intentionally narrow: `{ children, className?, as? }`. No `rotation`, no `shadow`, no `tape`, no surface-tone override. A consumer reaching for any of those should use `<TapedCard>` instead — see the mood split below.
+
+#### `<StampBadge>`
+
+Content-bearing rotated badge with paper offset shadow, designed to pin to a `position: relative` parent (`<ClippedCard>` already is). Default surface: `bg-jersey-deep text-cream` + `1.5px ink` border + `4px 4px 0 0 var(--color-ink)` shadow. Mono caps typography (`text-[11px] tracking-[0.1em] font-bold`, `px-3.5 py-1.5`). Default rotation `2°`; accepts negative values for opposite tilt.
+
+Props: `{ children, rotation?, position?, tone?, className? }`. Tones: `jersey` (default), `ink` (`bg-ink text-cream`), `alert` (`bg-alert text-white` — for stamps like "VOLZET" or "GEANNULEERD"). Positions: `top-right` (default) and `top-left`. Border + shadow stay ink across all tones — chrome rule, mirrors the `<AlertBadge variant="error">` FOUT badge convention from §6.4.A (the canonical retro-pill-plus-italic-message renderer that the form atoms in §6.3 consume for the helper-row error slot).
+
+Distinct from `<TapeStrip>` (graphical washi-tape strip) — `<StampBadge>` is a _content-bearing rotated label_ with an offset shadow.
+
+#### Mood split — keep `<ClippedCard>` and `<TapedCard>` distinct
+
+The two card primitives express different moods and **must not be combined**. Their prop surfaces are deliberately non-overlapping so the visual conflict is unrepresentable:
+
+| Mood                        | Primitive       | Visual identity                                                                         |
+| --------------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| Loose paper / casual notice | `<TapedCard>`   | `border-2 ink` + `--shadow-paper-sm` offset + optional washi tape + sub-degree rotation |
+| Document / archival form    | `<ClippedCard>` | `border-2 ink` + L-marks at TL/BR (internal) + **no offset shadow** + **no rotation**   |
+
+`<ClippedCard>` is for things that feel like _clipped paper_ — pinned to a clipboard, archival, official. `<TapedCard>` is for things that feel like loose paper on a desk (notices, taped-up artefacts, editorial figures). The "don't" Storybook story `UI/ClippedCard › DontMixWithTapedCard` illustrates the conflict.
+
+#### Composition pattern — registration form shell
+
+The locked Phase 2.A.4 form composition is documented as a Storybook story at `Features/Forms/RegistrationCardPattern` — **not** promoted to a `<FormCard>` wrapper component. `<ClippedCard>` carries the visual contract; the form-specific composition (stamp content, header, footer divider, button) is feature-level. If ≥ 2 form pages duplicate that exact shell, promote to `<FormCard>` then — not pre-emptively.
+
+Submit button uses `<Button variant="secondary">` (cream-soft body + ink border + ink paper shadow + press idiom; PRD §6.1) — the single green moment in the form is the jersey-deep stamp. Two greens (button body + stamp body) become a visual conversation; cohesion of paper-card chrome wins.
+
+```tsx
+<ClippedCard>
+  <StampBadge rotation={2}>★ INSCHRIJVING</StampBadge>
+  <MonoLabelRow>…</MonoLabelRow>
+  <EditorialHeading>Welkom op de tribune.</EditorialHeading>
+  <FormGrid>…</FormGrid>
+  <DashedDivider />
+  <FormFooter>
+    <span className="font-mono text-ink-muted">5 van 7 ingevuld</span>
+    <Button variant="secondary" withArrow>
+      Versturen
+    </Button>
+  </FormFooter>
+</ClippedCard>
+```
+
+#### Deferred follow-ups
+
+- `<ClippedCard size?: "sm" | "md">` — corner-clip size scaling for smaller surfaces (e.g. event tile in a grid). Defer until a real consumer hits the limit.
+- `<ClippedCard tone?: "dark">` — dark-mood archival variant on `panel--dusk`. Defer until needed.
+- `<StampBadge glyph?: "★" | "✱" | "♦">` — promote leading-glyph variant when ≥ 2 consumers request it. Currently inlined via `children`.
+- `<StampBadge>` `tone="ink"` shadow on `panel--dusk` — adopt `--shadow-paper-sm-soft` per Track B precedent if a non-form consumer puts the stamp on dark.
+
 ---
 
 ## 7. Effect Schema / api-contract changes
@@ -495,7 +553,7 @@ These are NOT blockers for writing the PRD. Each one is genuinely unknown right 
 - [x] **Form-atom filled-state anchor.** ✅ Resolved 2026-04-30 — `border-ink/60` (three ink weights signal fill progression: ink/30 idle → ink/60 filled → ink full focused).
 - [x] **Form-atom textarea counter.** ✅ Resolved 2026-04-30 — in scope for #1571 as new `<TextareaCounter>` primitive.
 - [x] **Open-`<select>` active-option styling.** ✅ Resolved 2026-04-30 — deferred to a future combobox issue (Phase 5 forms-tier work). Native `<select>` cannot render `bg-ink text-cream + jersey-deep dot` on the active option.
-- [x] **`<FieldError>` extraction.** ✅ Resolved 2026-04-30 — extracted as a primitive (single source of truth across Input / Select / Textarea).
+- [x] **`<FieldError>` extraction.** ✅ Resolved 2026-04-30 — superseded by `<AlertBadge variant="error">` from §6.4.A. The form atoms (`<Input>`, `<Select>`, `<Textarea>`) render `<AlertBadge variant="error">{error}</AlertBadge>` directly in the helper-row slot when `error?: string` is set; no separate `<FieldError>` primitive exists. See §6.3 and §6.4.A for details.
 - [ ] **`disabled` cream-soft on Form atoms.** Master design has no explicit guidance for disabled form chrome; cream-soft is a guess that unifies with surrounding page. May need to be lighter (`cream-soft/50`) if it reads as too prominent. → resolved during implementation of #2.A.4
 - [ ] **EditorialLink `inline` arrow opt-in.** Is there a use case for inline links that _do_ want a trailing arrow? Default is `false` for `inline` but `withArrow` accepts override. May discover none and remove the prop. → resolved during implementation of #2.A.1
 - [ ] **VR baselines for legacy consumers.** When an atom changes, its appearance inside legacy consumer stories also changes. Should those baselines be updated too (consumer is unchanged but renders the new atom), or marked `vr-skip` until the consumer's own phase? → resolved during tracer bullet (#2.0); set the precedent there.
