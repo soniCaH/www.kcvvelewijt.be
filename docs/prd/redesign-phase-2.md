@@ -473,7 +473,7 @@ Prop surface is intentionally narrow: `{ children, className?, as? }`. No `rotat
 
 Content-bearing rotated badge with paper offset shadow, designed to pin to a `position: relative` parent (`<ClippedCard>` already is). Default surface: `bg-jersey-deep text-cream` + `1.5px ink` border + `4px 4px 0 0 var(--color-ink)` shadow. Mono caps typography (`text-[11px] tracking-[0.1em] font-bold`, `px-3.5 py-1.5`). Default rotation `2°`; accepts negative values for opposite tilt.
 
-Props: `{ children, rotation?, position?, tone?, className? }`. Tones: `jersey` (default), `ink` (`bg-ink text-cream`), `alert` (`bg-alert text-white` — for stamps like "VOLZET" or "GEANNULEERD"). Positions: `top-right` (default) and `top-left`. Border + shadow stay ink across all tones — chrome rule, mirrors the `<FieldError>` FOUT badge convention from #1571.
+Props: `{ children, rotation?, position?, tone?, className? }`. Tones: `jersey` (default), `ink` (`bg-ink text-cream`), `alert` (`bg-alert text-white` — for stamps like "VOLZET" or "GEANNULEERD"). Positions: `top-right` (default) and `top-left`. Border + shadow stay ink across all tones — chrome rule, mirrors the `<AlertBadge variant="error">` FOUT badge convention from §6.4.A (the canonical retro-pill-plus-italic-message renderer that the form atoms in §6.3 consume for the helper-row error slot).
 
 Distinct from `<TapeStrip>` (graphical washi-tape strip) — `<StampBadge>` is a _content-bearing rotated label_ with an offset shadow.
 
@@ -553,7 +553,7 @@ These are NOT blockers for writing the PRD. Each one is genuinely unknown right 
 - [x] **Form-atom filled-state anchor.** ✅ Resolved 2026-04-30 — `border-ink/60` (three ink weights signal fill progression: ink/30 idle → ink/60 filled → ink full focused).
 - [x] **Form-atom textarea counter.** ✅ Resolved 2026-04-30 — in scope for #1571 as new `<TextareaCounter>` primitive.
 - [x] **Open-`<select>` active-option styling.** ✅ Resolved 2026-04-30 — deferred to a future combobox issue (Phase 5 forms-tier work). Native `<select>` cannot render `bg-ink text-cream + jersey-deep dot` on the active option.
-- [x] **`<FieldError>` extraction.** ✅ Resolved 2026-04-30 — extracted as a primitive (single source of truth across Input / Select / Textarea).
+- [x] **`<FieldError>` extraction.** ✅ Resolved 2026-04-30 — superseded by `<AlertBadge variant="error">` from §6.4.A. The form atoms (`<Input>`, `<Select>`, `<Textarea>`) render `<AlertBadge variant="error">{error}</AlertBadge>` directly in the helper-row slot when `error?: string` is set; no separate `<FieldError>` primitive exists. See §6.3 and §6.4.A for details.
 - [ ] **`disabled` cream-soft on Form atoms.** Master design has no explicit guidance for disabled form chrome; cream-soft is a guess that unifies with surrounding page. May need to be lighter (`cream-soft/50`) if it reads as too prominent. → resolved during implementation of #2.A.4
 - [ ] **EditorialLink `inline` arrow opt-in.** Is there a use case for inline links that _do_ want a trailing arrow? Default is `false` for `inline` but `withArrow` accepts override. May discover none and remove the prop. → resolved during implementation of #2.A.1
 - [ ] **VR baselines for legacy consumers.** When an atom changes, its appearance inside legacy consumer stories also changes. Should those baselines be updated too (consumer is unchanged but renders the new atom), or marked `vr-skip` until the consumer's own phase? → resolved during tracer bullet (#2.0); set the precedent there.

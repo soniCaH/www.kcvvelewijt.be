@@ -24,7 +24,11 @@ import {
  * native HTML attribute pass-through) — feature-level concerns like
  * `onSubmit` belong on the form element inside.
  */
-const meta = {
+type StoryArgs = {
+  onSubmit: (e: React.FormEvent) => void;
+};
+
+const meta: Meta<StoryArgs> = {
   title: "Features/Forms/RegistrationCardPattern",
   tags: ["autodocs", "vr"],
   parameters: { layout: "centered" },
@@ -38,16 +42,12 @@ const meta = {
   args: {
     onSubmit: fn(),
   },
-} satisfies Meta;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<StoryArgs>;
 
-interface Args {
-  onSubmit: (e: React.FormEvent) => void;
-}
-
-function RegistrationForm({ onSubmit }: Args) {
+function RegistrationForm({ onSubmit }: StoryArgs) {
   return (
     <ClippedCard>
       <StampBadge tone="jersey" rotation={2} position="top-right">
@@ -155,6 +155,10 @@ function RegistrationForm({ onSubmit }: Args) {
   );
 }
 
+function renderRegistrationCardPattern(args: StoryArgs) {
+  return <RegistrationForm onSubmit={args.onSubmit} />;
+}
+
 export const Default: Story = {
-  render: (args) => <RegistrationForm onSubmit={(args as Args).onSubmit} />,
+  render: renderRegistrationCardPattern,
 };
