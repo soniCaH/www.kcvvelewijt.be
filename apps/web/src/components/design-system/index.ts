@@ -227,3 +227,15 @@ export type {
   DropCapParagraphTone,
   DropCapParagraphAs,
 } from "./DropCapParagraph";
+
+// ClippedCard
+export { ClippedCard } from "./ClippedCard";
+export type { ClippedCardProps, ClippedCardAs } from "./ClippedCard";
+
+// StampBadge
+export { StampBadge } from "./StampBadge";
+export type {
+  StampBadgeProps,
+  StampBadgeTone,
+  StampBadgePosition,
+} from "./StampBadge";

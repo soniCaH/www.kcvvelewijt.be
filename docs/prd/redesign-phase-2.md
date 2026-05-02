@@ -459,6 +459,64 @@ Legacy `--color-kcvv-warning` and `--color-kcvv-alert` stay defined; legacy comp
 
 Invocation: `pnpm vr:update:story -- --testPathPatterns=ui-button` — only updates baselines for stories whose synthetic test path matches the regex. The `--` separator hands the trailing arguments to test-storybook, which forwards `--testPathPatterns=<regex>` to Jest (the flag is plural in current Jest; the singular `--testPathPattern` is deprecated). The regex matches the synthetic test file paths derived from story IDs (e.g. `ui-button`, `layout-pagefooter`), not the source `.stories.tsx` file paths. Use a tight anchor like `ui-button` to scope to a single atom without dragging in `ui-linkbutton`/`ui-downloadbutton`/etc. Pattern is a Jest-compatible regex string.
 
+### 6.9 Composition primitives — `<ClippedCard>` + `<StampBadge>`
+
+Two Tier B composition primitives that frame **document / form** surfaces in the retro-terrace-fanzine direction. Implemented in #1591 alongside Phase 2. Visual reference: the consolidated form composition in `docs/design/mockups/phase-2-a-4-form-atoms/option-c-locked.html`.
+
+#### `<ClippedCard>`
+
+Bordered "archival document" paper card — `border-2 ink` + cream-soft surface + opinionated `36px 40px 28px` padding default, **no offset shadow, no rotation**. Renders TL + BR L-shaped corner-clip accents internally as a private `<CornerClipDecoration>` subcomponent (not exported from the design-system barrel). L-marks: `18px × 18px`, `2px solid ink`, drawn on the relevant two sides per corner, translated 6px outward so they sit _outside_ the parent's border edge. Sharp corners. Decorations carry `aria-hidden="true"`.
+
+Prop surface is intentionally narrow: `{ children, className?, as? }`. No `rotation`, no `shadow`, no `tape`, no surface-tone override. A consumer reaching for any of those should use `<TapedCard>` instead — see the mood split below.
+
+#### `<StampBadge>`
+
+Content-bearing rotated badge with paper offset shadow, designed to pin to a `position: relative` parent (`<ClippedCard>` already is). Default surface: `bg-jersey-deep text-cream` + `1.5px ink` border + `4px 4px 0 0 var(--color-ink)` shadow. Mono caps typography (`text-[11px] tracking-[0.1em] font-bold`, `px-3.5 py-1.5`). Default rotation `2°`; accepts negative values for opposite tilt.
+
+Props: `{ children, rotation?, position?, tone?, className? }`. Tones: `jersey` (default), `ink` (`bg-ink text-cream`), `alert` (`bg-alert text-white` — for stamps like "VOLZET" or "GEANNULEERD"). Positions: `top-right` (default) and `top-left`. Border + shadow stay ink across all tones — chrome rule, mirrors the `<FieldError>` FOUT badge convention from #1571.
+
+Distinct from `<TapeStrip>` (graphical washi-tape strip) — `<StampBadge>` is a _content-bearing rotated label_ with an offset shadow.
+
+#### Mood split — keep `<ClippedCard>` and `<TapedCard>` distinct
+
+The two card primitives express different moods and **must not be combined**. Their prop surfaces are deliberately non-overlapping so the visual conflict is unrepresentable:
+
+| Mood                        | Primitive       | Visual identity                                                                         |
+| --------------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| Loose paper / casual notice | `<TapedCard>`   | `border-2 ink` + `--shadow-paper-sm` offset + optional washi tape + sub-degree rotation |
+| Document / archival form    | `<ClippedCard>` | `border-2 ink` + L-marks at TL/BR (internal) + **no offset shadow** + **no rotation**   |
+
+`<ClippedCard>` is for things that feel like _clipped paper_ — pinned to a clipboard, archival, official. `<TapedCard>` is for things that feel like loose paper on a desk (notices, taped-up artefacts, editorial figures). The "don't" Storybook story `UI/ClippedCard › DontMixWithTapedCard` illustrates the conflict.
+
+#### Composition pattern — registration form shell
+
+The locked Phase 2.A.4 form composition is documented as a Storybook story at `Features/Forms/RegistrationCardPattern` — **not** promoted to a `<FormCard>` wrapper component. `<ClippedCard>` carries the visual contract; the form-specific composition (stamp content, header, footer divider, button) is feature-level. If ≥ 2 form pages duplicate that exact shell, promote to `<FormCard>` then — not pre-emptively.
+
+Submit button uses `<Button variant="secondary">` (cream-soft body + ink border + ink paper shadow + press idiom; PRD §6.1) — the single green moment in the form is the jersey-deep stamp. Two greens (button body + stamp body) become a visual conversation; cohesion of paper-card chrome wins.
+
+```tsx
+<ClippedCard>
+  <StampBadge rotation={2}>★ INSCHRIJVING</StampBadge>
+  <MonoLabelRow>…</MonoLabelRow>
+  <EditorialHeading>Welkom op de tribune.</EditorialHeading>
+  <FormGrid>…</FormGrid>
+  <DashedDivider />
+  <FormFooter>
+    <span className="font-mono text-ink-muted">5 van 7 ingevuld</span>
+    <Button variant="secondary" withArrow>
+      Versturen
+    </Button>
+  </FormFooter>
+</ClippedCard>
+```
+
+#### Deferred follow-ups
+
+- `<ClippedCard size?: "sm" | "md">` — corner-clip size scaling for smaller surfaces (e.g. event tile in a grid). Defer until a real consumer hits the limit.
+- `<ClippedCard tone?: "dark">` — dark-mood archival variant on `panel--dusk`. Defer until needed.
+- `<StampBadge glyph?: "★" | "✱" | "♦">` — promote leading-glyph variant when ≥ 2 consumers request it. Currently inlined via `children`.
+- `<StampBadge>` `tone="ink"` shadow on `panel--dusk` — adopt `--shadow-paper-sm-soft` per Track B precedent if a non-form consumer puts the stamp on dark.
+
 ---
 
 ## 7. Effect Schema / api-contract changes
