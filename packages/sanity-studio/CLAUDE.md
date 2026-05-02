@@ -24,6 +24,9 @@ src/
 ├── migrations/       ← One-off data migration scripts (run manually via CLI)
 ├── preview/          ← previewSelect + prepare helpers shared with sanity-schemas
 ├── structure/        ← Structure builder fragments (desk sidebar ordering)
+├── templates/        ← LauncherTemplate manifests grouped per schema type
+├── tools/            ← Studio Tools (top-nav tabs); one folder per Tool
+│   └── launcher/     ← LauncherTool — `✨ Create` card grid (#1499)
 ├── validation/       ← Custom Rule.custom() validators
 ├── schema-types.ts   ← Re-exports schemaTypes from @kcvv/sanity-schemas
 └── index.ts          ← Barrel: everything exported by name
@@ -35,6 +38,31 @@ src/
 - Extract pure logic (mutation builders, queries) into a sibling `build-<action>-mutations.ts` — keeps the React component thin and the logic unit-testable
 - Actions are registered in the studio `defineConfig` in `apps/studio/` and `apps/studio-staging/` — this package exports the component, the studio app wires it in
 - Gate visibility with early-return null checks: `if (type !== 'staffMember') return null`
+
+## Tools (top-nav tabs)
+
+Custom Studio Tools live under `src/tools/<name>/`. Each Tool exports:
+
+- A factory function (`<name>Tool()`) returning a Sanity `Tool` object — wired in both `apps/studio/sanity.config.ts` and `apps/studio-staging/sanity.config.ts` via `tools: (prev) => [...prev, <name>Tool()]`.
+- A root React component (`<Name>Tool`) referenced by the factory's `component` field.
+- Sub-components (cards, grids, etc.) kept pure where possible — receive data via props, dispatch intent via `useRouter()` from `sanity/router` only at the root.
+
+### LauncherTool — `tools/launcher/`
+
+The `✨ Create` card grid in the top nav. Reads launcher-eligible templates from the workspace via `useTemplates()` and dispatches `router.navigateIntent('create', { type, template })` when an editor picks a card. Sanity routes the intent to a new draft seeded by the template's `value`.
+
+**Adding a launcher card** for an existing schema type:
+
+1. Create or edit `src/templates/<schemaType>-templates.ts` and export a `<schemaType>Templates: LauncherTemplate[]` constant. Each entry needs `id`, `title`, `schemaType`, `value` (zero-prefill `{}` unless seeding form-shape fields like `articleType`), and a `ui` block (`icon`, Dutch ≤100-char `description`, `group`).
+2. Re-export the manifest from `src/templates/index.ts` and from the package barrel.
+3. Wire it into both studios' `sanity.config.ts` via `schema.templates: (prev) => [...prev, ...<schemaType>Templates]`.
+
+**Filtering rules** (enforced by `filterLauncherTemplates`):
+
+- Templates without a `ui` block are ignored — Sanity's auto-generated and third-party templates still work via the default `+ Create` button. Coexistence is the design contract.
+- Templates whose `schemaType` is not registered in the workspace schema are ignored and a single console warning is logged per unknown type per render.
+
+The pure filter (`filterLauncherTemplates`) lives in its own file separate from the React hook so vitest can import it without dragging Sanity's runtime CSS bundle into the module graph. Keep new pure helpers in their own files for the same reason.
 
 ## Custom Inputs
 

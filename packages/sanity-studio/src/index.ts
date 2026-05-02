@@ -27,3 +27,10 @@ export {validateSubjectsCount} from './validation/subjects-count'
 export type {SubjectsCountContext} from './validation/subjects-count'
 export {validateRespondentKey} from './validation/respondent-key'
 export type {RespondentKeyContext} from './validation/respondent-key'
+// Public LauncherTool surface. `useTemplates` and `filterLauncherTemplates`
+// are intentionally NOT re-exported — they would shadow Sanity's own
+// `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.
+// Internal callers reach them via the `./tools/launcher` subpath instead.
+export {launcherTool} from './tools/launcher'
+export {responsibilityTemplates} from './templates'
+export type {LauncherTemplate, LauncherTemplateUi} from './templates'
