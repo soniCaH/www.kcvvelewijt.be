@@ -314,9 +314,13 @@ export const responsibility = defineType({
         'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een dynamische teamrol, of handmatige contactgegevens.',
       fields: contactFields,
       validation: (Rule) =>
-        Rule.required().custom((contact: Record<string, unknown> | undefined) =>
-          validateContactFields(contact, true),
-        ),
+        Rule.required()
+          .error(
+            'Verplicht. Zonder hoofdcontactpersoon weet de gebruiker niet bij wie hij terecht kan en blijft de detailpagina onvolledig.',
+          )
+          .custom((contact: Record<string, unknown> | undefined) =>
+            validateContactFields(contact, true),
+          ),
     }),
     defineField({
       name: 'active',
@@ -332,7 +336,8 @@ export const responsibility = defineType({
       title: 'Icon',
       type: 'string',
       group: 'meta',
-      description: 'Lucide icon name (e.g. "heart", "file-text", "shield"). Optioneel; valt anders terug op het categorie-icoon.',
+      description:
+        'Lucide-icoonnaam (bijv. "heart", "file-text", "shield"). Optioneel; valt anders terug op het categorie-icoon.',
     }),
     defineField({
       name: 'relatedPaths',
