@@ -39,6 +39,7 @@ export function LauncherCard({template, onSelect}: LauncherCardProps): JSX.Eleme
       }}
       role="button"
       tabIndex={0}
+      aria-label={`Maak nieuw "${template.title}" document aan`}
       style={{cursor: 'pointer'}}
     >
       <Stack space={3}>

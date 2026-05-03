@@ -4,6 +4,36 @@ import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './previ
 const hasContent = (value: unknown): boolean =>
   typeof value === 'string' && value.trim().length > 0
 
+/**
+ * Shared validation for both `primaryContact` and `solutionStep.contact`
+ * — single source of truth for the contact-type discriminator branches
+ * and their teaching messages. The two validators differ only in
+ * whether `contactType` is required: primary contact is mandatory on
+ * the parent document; per-step contact is optional and short-circuits
+ * to `true` when no `contactType` was picked.
+ */
+function validateContactFields(
+  contact: Record<string, unknown> | undefined,
+  required: boolean,
+): true | string {
+  if (!contact?.contactType) return required ? 'Kies een type contact' : true
+  switch (contact.contactType) {
+    case 'position':
+      return contact.organigramNode ? true : 'Kies een organigram-positie'
+    case 'team-role':
+      return contact.teamRole ? true : 'Kies een teamrol'
+    case 'manual':
+      return hasContent(contact.email) ||
+        hasContent(contact.phone) ||
+        hasContent(contact.role) ||
+        hasContent(contact.department)
+        ? true
+        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
+    default:
+      return 'Ongeldig type contact'
+  }
+}
+
 const contactFields = [
   defineField({
     name: 'contactType',
@@ -250,21 +280,9 @@ export const responsibility = defineType({
                 'Optioneel: contactpersoon specifiek voor déze stap (bijv. "stuur het ingevulde formulier naar [secretaris]"). Overschrijft de primaire contact alleen voor deze stap.',
               fields: contactFields,
               validation: (Rule) =>
-                Rule.custom((contact: Record<string, unknown> | undefined) => {
-                  if (!contact?.contactType) return true // step contacts are optional
-                  switch (contact.contactType) {
-                    case 'position':
-                      return contact.organigramNode ? true : 'Kies een organigram-positie'
-                    case 'team-role':
-                      return contact.teamRole ? true : 'Kies een teamrol'
-                    case 'manual':
-                      return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role) || hasContent(contact.department)
-                        ? true
-                        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
-                    default:
-                      return 'Ongeldig type contact'
-                  }
-                }),
+                Rule.custom((contact: Record<string, unknown> | undefined) =>
+                  validateContactFields(contact, false),
+                ),
             }),
           ],
           preview: {
@@ -286,21 +304,9 @@ export const responsibility = defineType({
         'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een dynamische teamrol, of handmatige contactgegevens.',
       fields: contactFields,
       validation: (Rule) =>
-        Rule.required().custom((contact: Record<string, unknown> | undefined) => {
-          if (!contact?.contactType) return 'Kies een type contact'
-          switch (contact.contactType) {
-            case 'position':
-              return contact.organigramNode ? true : 'Kies een organigram-positie'
-            case 'team-role':
-              return contact.teamRole ? true : 'Kies een teamrol'
-            case 'manual':
-              return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role) || hasContent(contact.department)
-                ? true
-                : 'Vul minstens één van: rol, email, telefoon, afdeling in'
-            default:
-              return 'Ongeldig type contact'
-          }
-        }),
+        Rule.required().custom((contact: Record<string, unknown> | undefined) =>
+          validateContactFields(contact, true),
+        ),
     }),
     defineField({
       name: 'active',

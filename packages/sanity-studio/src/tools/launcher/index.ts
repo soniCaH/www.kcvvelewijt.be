@@ -1,5 +1,6 @@
 export {LauncherTool, launcherTool} from './launcher-tool'
 export {LauncherCard, type LauncherCardProps} from './launcher-card'
-export {LauncherGrid, type LauncherGridProps, groupByUiGroup, searchTemplates} from './launcher-grid'
+export {LauncherGrid, type LauncherGridProps} from './launcher-grid'
+export {groupByUiGroup, searchTemplates} from './launcher-grid-helpers'
 export {useTemplates} from './use-templates'
 export {filterLauncherTemplates} from './filter-launcher-templates'
