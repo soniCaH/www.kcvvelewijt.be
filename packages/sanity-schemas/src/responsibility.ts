@@ -229,7 +229,12 @@ export const responsibility = defineType({
       of: [{type: 'string'}],
       description:
         'Zoeksynoniemen en gerelateerde termen — wees genereus. Voorbeelden voor "blessure": "letsel", "geblesseerd", "kreukel", "ongeval". Zorgt dat gebruikers dit info-pad vinden ook al gebruiken ze niet de exacte woorden uit de vraag.',
-      validation: (Rule) => Rule.required().min(1),
+      validation: (Rule) =>
+        Rule.required()
+          .min(1)
+          .error(
+            'Verplicht — voeg minstens één keyword toe. Zonder keywords mist de zoekfunctie synoniemen waardoor gebruikers dit info-pad alleen vinden met de exacte woorden uit de vraag.',
+          ),
     }),
     defineField({
       name: 'summary',
@@ -293,7 +298,12 @@ export const responsibility = defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.required().min(1),
+      validation: (Rule) =>
+        Rule.required()
+          .min(1)
+          .error(
+            'Verplicht — voeg minstens één stap toe. Een stap is een concrete actie die de gebruiker kan uitvoeren (bijv. "Verwittig de afgevaardigde via WhatsApp"); zonder stappen lijkt het antwoord op de site onvolledig.',
+          ),
     }),
     defineField({
       name: 'primaryContact',
