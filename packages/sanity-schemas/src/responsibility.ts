@@ -4,6 +4,36 @@ import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './previ
 const hasContent = (value: unknown): boolean =>
   typeof value === 'string' && value.trim().length > 0
 
+/**
+ * Shared validation for both `primaryContact` and `solutionStep.contact`
+ * — single source of truth for the contact-type discriminator branches
+ * and their teaching messages. The two validators differ only in
+ * whether `contactType` is required: primary contact is mandatory on
+ * the parent document; per-step contact is optional and short-circuits
+ * to `true` when no `contactType` was picked.
+ */
+function validateContactFields(
+  contact: Record<string, unknown> | undefined,
+  required: boolean,
+): true | string {
+  if (!contact?.contactType) return required ? 'Kies een type contact' : true
+  switch (contact.contactType) {
+    case 'position':
+      return contact.organigramNode ? true : 'Kies een organigram-positie'
+    case 'team-role':
+      return contact.teamRole ? true : 'Kies een teamrol'
+    case 'manual':
+      return hasContent(contact.email) ||
+        hasContent(contact.phone) ||
+        hasContent(contact.role) ||
+        hasContent(contact.department)
+        ? true
+        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
+    default:
+      return 'Ongeldig type contact'
+  }
+}
+
 const contactFields = [
   defineField({
     name: 'contactType',
@@ -18,14 +48,18 @@ const contactFields = [
       layout: 'radio',
     },
     initialValue: 'position',
-    validation: (Rule) => Rule.required(),
+    validation: (Rule) =>
+      Rule.required().error(
+        'Verplicht. Bepaalt welke velden hieronder verschijnen — kies "Organigram positie" voor vaste functies (bijv. Secretaris), "Teamrol" voor trainer/afgevaardigde van een ploeg, of "Handmatig" voor ad-hoc contacten.',
+      ),
   }),
   defineField({
     name: 'organigramNode',
     title: 'Positie',
     type: 'reference',
     to: [{type: 'organigramNode'}],
-    description: 'Kies de organigram-positie (bijv. Secretaris, TVJO, API)',
+    description:
+      'Kies de organigram-positie (bijv. Secretaris, TVJO, API). De naam en gegevens van de huidige titularis worden automatisch overgenomen op de site — zo blijft de info up-to-date als iemand wisselt van rol.',
     hidden: ({parent}) => parent?.contactType !== 'position',
   }),
   defineField({
@@ -38,7 +72,8 @@ const contactFields = [
         {title: 'Afgevaardigde', value: 'afgevaardigde'},
       ],
     },
-    description: 'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest',
+    description:
+      'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest. Bijvoorbeeld: een speler van het A-team die "trainer" selecteert krijgt zijn eigen trainer als contactpersoon te zien.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
@@ -51,14 +86,16 @@ const contactFields = [
         {title: 'Afgevaardigde', value: 'afgevaardigde'},
       ],
     },
-    description: 'Optioneel: als de primaire teamrol niet beschikbaar is, wordt deze rol geprobeerd',
+    description:
+      'Optioneel: als de primaire teamrol niet beschikbaar is voor de gekozen ploeg, wordt deze rol geprobeerd. Voorkomt dat gebruikers met een lege contactkaart eindigen.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
     name: 'role',
     title: 'Rol',
     type: 'string',
-    description: 'Weergavenaam (bijv. "Kantine")',
+    description:
+      'Weergavenaam (bijv. "Kantine"). Wordt op de site getoond als de naam van de contactpersoon — kies iets dat een buitenstaander herkent.',
     hidden: ({parent}) => parent?.contactType !== 'manual',
   }),
   defineField({
@@ -92,34 +129,57 @@ export const responsibility = defineType({
   name: 'responsibility',
   title: 'Responsibility',
   type: 'document',
+  groups: [
+    {name: 'vraag', title: 'Vraag', default: true},
+    {name: 'antwoord', title: 'Antwoord'},
+    {name: 'contact', title: 'Contact'},
+    {name: 'meta', title: 'Meta'},
+  ],
   fields: [
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
-      description: 'Short display title for Studio (e.g. "Blessure – herstel")',
-      validation: (Rule) => Rule.required(),
+      group: 'vraag',
+      description:
+        'Korte interne titel die je in Studio terugziet (bijv. "Blessure – herstel"). Niet zichtbaar op de site — alleen bedoeld om dit info-pad terug te vinden in zoekresultaten en lijsten in Studio.',
+      validation: (Rule) =>
+        Rule.required().error(
+          'Verplicht. Zonder titel is dit info-pad niet terug te vinden in Studio en kan je het niet later bewerken.',
+        ),
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      description: 'Unique identifier used in the web app (kebab-case, stable across environments)',
+      group: 'vraag',
+      description:
+        'Unieke identifier voor de URL (`/info/{slug}`). Eens gepubliceerd: niet meer wijzigen — externe links breken anders. Gebruik kebab-case (kleine letters, koppeltekens).',
       options: {source: 'title', maxLength: 96},
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().error(
+          'Verplicht. De slug bepaalt de URL waar gebruikers dit info-pad bereiken — zonder slug verschijnt het niet op de site.',
+        ),
     }),
     defineField({
-      name: 'active',
-      title: 'Active',
-      type: 'boolean',
-      description: 'Unpublish without deleting. Inactive paths are hidden from the web app.',
-      initialValue: true,
+      name: 'question',
+      title: 'Question',
+      type: 'string',
+      group: 'vraag',
+      description:
+        'De vraag in spreektaal, zoals een gebruiker hem zou typen (bijv. "heb een ongeval op training"). Lowercase, geen punt op het einde. Dit is de tekst die getoond wordt in zoekresultaten op de site.',
+      validation: (Rule) =>
+        Rule.required().error(
+          'Verplicht. Zonder vraag verschijnt dit info-pad niet in zoekresultaten — gebruikers kunnen het dan niet vinden.',
+        ),
     }),
     defineField({
       name: 'audience',
       title: 'Audience',
       type: 'array',
-      description: 'Who can ask this question?',
+      group: 'vraag',
+      description:
+        'Wie kan deze vraag stellen? Selecteer alle relevante doelgroepen — gebruikers krijgen alleen info-paden te zien die op hen van toepassing zijn na de eerste filterklik op de site.',
       of: [
         {
           type: 'string',
@@ -135,35 +195,20 @@ export const responsibility = defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.required().min(1),
-    }),
-    defineField({
-      name: 'question',
-      title: 'Question',
-      type: 'string',
-      description: 'Lowercase, conversational (e.g. "heb een ongeval op training")',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'keywords',
-      title: 'Keywords',
-      type: 'array',
-      of: [{type: 'string'}],
-      description: 'Search synonyms and related terms. Be generous.',
-      validation: (Rule) => Rule.required().min(1),
-    }),
-    defineField({
-      name: 'summary',
-      title: 'Summary',
-      type: 'text',
-      rows: 2,
-      description: '1-2 sentences shown immediately after the user selects this path',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required()
+          .min(1)
+          .error(
+            'Verplicht — kies minstens één doelgroep. Zonder doelgroep blijft dit info-pad voor alle bezoekers verborgen.',
+          ),
     }),
     defineField({
       name: 'category',
       title: 'Category',
       type: 'string',
+      group: 'vraag',
+      description:
+        'Bovenliggende categorie waar dit info-pad onder valt. Bepaalt het icoon-thema en de groepering op de site (bijv. medische vragen worden samen gepresenteerd).',
       options: {
         list: [
           {title: 'Medisch', value: 'medisch'},
@@ -174,42 +219,41 @@ export const responsibility = defineType({
           {title: 'Commercieel', value: 'commercieel'},
         ],
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().error('Verplicht — kies een categorie zodat dit info-pad correct gegroepeerd wordt op de site.'),
     }),
     defineField({
-      name: 'icon',
-      title: 'Icon',
-      type: 'string',
-      description: 'Lucide icon name (e.g. "heart", "file-text", "shield")',
-    }),
-    defineField({
-      name: 'primaryContact',
-      title: 'Primary contact',
-      type: 'object',
-      description: 'Main contact person for this path',
-      fields: contactFields,
+      name: 'keywords',
+      title: 'Keywords',
+      type: 'array',
+      group: 'vraag',
+      of: [{type: 'string'}],
+      description:
+        'Zoeksynoniemen en gerelateerde termen — wees genereus. Voorbeelden voor "blessure": "letsel", "geblesseerd", "kreukel", "ongeval". Zorgt dat gebruikers dit info-pad vinden ook al gebruiken ze niet de exacte woorden uit de vraag.',
       validation: (Rule) =>
-        Rule.required().custom((contact: Record<string, unknown> | undefined) => {
-          if (!contact?.contactType) return 'Kies een type contact'
-          switch (contact.contactType) {
-            case 'position':
-              return contact.organigramNode ? true : 'Kies een organigram-positie'
-            case 'team-role':
-              return contact.teamRole ? true : 'Kies een teamrol'
-            case 'manual':
-              return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role) || hasContent(contact.department)
-                ? true
-                : 'Vul minstens één van: rol, email, telefoon, afdeling in'
-            default:
-              return 'Ongeldig type contact'
-          }
-        }),
+        Rule.required()
+          .min(1)
+          .error(
+            'Verplicht — voeg minstens één keyword toe. Zonder keywords mist de zoekfunctie synoniemen waardoor gebruikers dit info-pad alleen vinden met de exacte woorden uit de vraag.',
+          ),
+    }),
+    defineField({
+      name: 'summary',
+      title: 'Summary',
+      type: 'text',
+      rows: 2,
+      group: 'antwoord',
+      description:
+        '1-2 zinnen die direct getoond worden zodra de gebruiker dit info-pad opent. De kern van het antwoord — alle details horen in de stappen hieronder.',
+      validation: (Rule) =>
+        Rule.required().error('Verplicht. De summary is het eerste wat gebruikers zien na het openen — zonder dit veld lijkt de pagina leeg.'),
     }),
     defineField({
       name: 'steps',
       title: 'Steps',
       type: 'array',
-      description: 'Ordered solution steps. Array order is the display order.',
+      group: 'antwoord',
+      description:
+        'Geordende oplossingsstappen. De volgorde in de lijst = de volgorde op de site. Splits het antwoord in concrete acties die de gebruiker één voor één kan doorlopen.',
       of: [
         {
           type: 'object',
@@ -219,13 +263,17 @@ export const responsibility = defineType({
               name: 'description',
               title: 'Description',
               type: 'string',
-              validation: (Rule) => Rule.required(),
+              validation: (Rule) =>
+                Rule.required().error(
+                  'Verplicht. Een stap zonder beschrijving wordt op de site weergegeven als een leeg item.',
+                ),
             }),
             defineField({
               name: 'link',
               title: 'Link',
               type: 'string',
-              description: 'Optional relative or absolute URL',
+              description:
+                'Optioneel: relatieve of absolute URL (bijv. `/contact` of `https://...`). Als ingevuld, wordt de beschrijving een klikbare actie op de site.',
               // @ts-expect-error .uri() exists at runtime but is missing from StringRule types
               validation: (Rule) => Rule.uri({allowRelative: true}),
             }),
@@ -233,24 +281,13 @@ export const responsibility = defineType({
               name: 'contact',
               title: 'Contact (this step)',
               type: 'object',
-              description: 'Optional contact specific to this step',
+              description:
+                'Optioneel: contactpersoon specifiek voor déze stap (bijv. "stuur het ingevulde formulier naar [secretaris]"). Overschrijft de primaire contact alleen voor deze stap.',
               fields: contactFields,
               validation: (Rule) =>
-                Rule.custom((contact: Record<string, unknown> | undefined) => {
-                  if (!contact?.contactType) return true // step contacts are optional
-                  switch (contact.contactType) {
-                    case 'position':
-                      return contact.organigramNode ? true : 'Kies een organigram-positie'
-                    case 'team-role':
-                      return contact.teamRole ? true : 'Kies een teamrol'
-                    case 'manual':
-                      return hasContent(contact.email) || hasContent(contact.phone) || hasContent(contact.role) || hasContent(contact.department)
-                        ? true
-                        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
-                    default:
-                      return 'Ongeldig type contact'
-                  }
-                }),
+                Rule.custom((contact: Record<string, unknown> | undefined) =>
+                  validateContactFields(contact, false),
+                ),
             }),
           ],
           preview: {
@@ -261,14 +298,54 @@ export const responsibility = defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.required().min(1),
+      validation: (Rule) =>
+        Rule.required()
+          .min(1)
+          .error(
+            'Verplicht — voeg minstens één stap toe. Een stap is een concrete actie die de gebruiker kan uitvoeren (bijv. "Verwittig de afgevaardigde via WhatsApp"); zonder stappen lijkt het antwoord op de site onvolledig.',
+          ),
+    }),
+    defineField({
+      name: 'primaryContact',
+      title: 'Primary contact',
+      type: 'object',
+      group: 'contact',
+      description:
+        'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een dynamische teamrol, of handmatige contactgegevens.',
+      fields: contactFields,
+      validation: (Rule) =>
+        Rule.required()
+          .error(
+            'Verplicht. Zonder hoofdcontactpersoon weet de gebruiker niet bij wie hij terecht kan en blijft de detailpagina onvolledig.',
+          )
+          .custom((contact: Record<string, unknown> | undefined) =>
+            validateContactFields(contact, true),
+          ),
+    }),
+    defineField({
+      name: 'active',
+      title: 'Active',
+      type: 'boolean',
+      group: 'meta',
+      description:
+        'Laat staan op `true` voor zichtbaar op de site. Zet op `false` om dit info-pad tijdelijk te verbergen zonder het te verwijderen — handig tijdens herwerking of als de info even niet klopt.',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'icon',
+      title: 'Icon',
+      type: 'string',
+      group: 'meta',
+      description:
+        'Lucide-icoonnaam (bijv. "heart", "file-text", "shield"). Optioneel; valt anders terug op het categorie-icoon.',
     }),
     defineField({
       name: 'relatedPaths',
       title: 'Related paths',
       type: 'array',
+      group: 'meta',
       of: [{type: 'reference', to: [{type: 'responsibility'}]}],
-      description: '"See also" links shown at the bottom of the result card',
+      description: '"Zie ook"-links onderaan de detailpagina. Verwijs naar verwante info-paden zodat gebruikers hun vraag kunnen verfijnen of gerelateerde acties terugvinden.',
     }),
   ],
   preview: {
