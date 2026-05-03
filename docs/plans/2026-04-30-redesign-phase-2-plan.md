@@ -106,7 +106,7 @@ All ACs from #1524 are now met:
 
 - [x] **PRD authored** — `docs/prd/redesign-phase-2.md`
 - [x] **Plan authored** — this document
-- [x] **Phosphor Fill installed and exported via `src/lib/icons.ts`** — split into `src/lib/icons.ts` (Lucide, legacy) + `src/lib/icons.redesign.ts` (Phosphor Fill, redesign surfaces) per the dual-coexistence rule. Done in #1568 / #1569.
+- [x] **Phosphor Fill installed and exported via a redesign-only shim** — the icon library is split per the dual-coexistence rule: `src/lib/icons.ts` keeps Lucide for legacy components, while `src/lib/icons.redesign.ts` exports Phosphor Fill (`weight="fill"`) wrappers for redesign-surface consumers. Redesign atoms import from `src/lib/icons.redesign.ts`; do not import Phosphor from `src/lib/icons.ts` (it does not re-export them). Done in #1568 / #1569.
 - [x] **Lucide retired from redesign-surface consumers** — every Phase 2 atom imports from `icons.redesign.ts`. Legacy components keep Lucide.
 - [x] **All affected atoms reskinned** — Button, Input, Select, Textarea, Label, Alert, Spinner, BrandedTabs, FilterTabs, HorizontalSlider, ScrollHint. Plus EditorialLink (new) and TextareaCounter (new) extracted along the way; ClippedCard + StampBadge (new) composition primitives added.
 - [x] **VR baselines updated for affected stories** — every sub-PR's `## VR baselines` section enumerates the changed baselines with rationale per the §6.8 surgical-baseline workflow.
