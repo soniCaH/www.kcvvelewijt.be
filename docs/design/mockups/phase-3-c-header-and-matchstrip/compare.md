@@ -6,48 +6,51 @@
 
 ## Options
 
-| Option | File | Direction |
-|---|---|---|
-| A | `option-a-classic-newsstand.html` | Cream paper masthead with hairline rules. Reads like a daily newspaper masthead. |
-| B | `option-b-ink-band.html` | Ink top band with cream wordmark + cream mono nav. Stadium-concourse contrast. |
-| C | `option-c-taped-flyer.html` | TapedCard-wrapped header with TapeStrip flourish; MatchStrip uses TicketStub aesthetic. Most fanzine-leaning. |
+| Option | File                              | Direction                                                                                                     |
+| ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| A      | `option-a-classic-newsstand.html` | Cream paper masthead with hairline rules. Reads like a daily newspaper masthead.                              |
+| B      | `option-b-ink-band.html`          | Ink top band with cream wordmark + cream mono nav. Stadium-concourse contrast.                                |
+| C      | `option-c-taped-flyer.html`       | TapedCard-wrapped header with TapeStrip flourish; MatchStrip uses TicketStub aesthetic. Most fanzine-leaning. |
 
 ## MatchStrip state matrix coverage
 
-Every option renders the four required data states:
+> **Scope correction 2026-05-05:** Owner clarified that KCVV has no live
+> data feed (and no plans for one) and does not sell tickets. The
+> matchstrip surfaces **upcoming matches only**. Live and concluded
+> states are out of scope. State matrix simplifies from 4 → 2.
 
-| State | A | B | C |
-|---|---|---|---|
-| **No upcoming** (strip hidden) | placeholder note + outline | placeholder note + outline | placeholder note + outline |
-| **Upcoming** | shield + competition + date/time + venue + TICKETS CTA | cream bg + 2px jersey-green left rail + tickets CTA | TicketStub: shield + dashed rule between segments + tickets stub |
-| **Live / in-progress** | LIVE pill + current score + minute marker | jersey-green pulse rail + score + minute | TicketStub variant: LIVE stamp + score |
-| **Concluded with result** | final score + MATCH REPORT CTA | final score + match-report CTA | final score + match-report stub |
+| State                          | A                                                                 | B                                                              | C                                                                           |
+| ------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **No upcoming** (strip hidden) | component returns `null` (placeholder is doc-only)                | component returns `null`                                       | component returns `null`                                                    |
+| **Upcoming**                   | shield + competition + date/time + venue + `Wedstrijddetails` CTA | cream bg + 2px jersey-green left rail + `Wedstrijddetails` CTA | TicketStub: shield + dashed rule between segments + `Wedstrijddetails` stub |
+| ~~**Live / in-progress**~~     | _out of scope (no live feed)_                                     | _out of scope_                                                 | _out of scope_                                                              |
+| ~~**Concluded with result**~~  | _out of scope (matchstrip is forward-looking only)_               | _out of scope_                                                 | _out of scope_                                                              |
 
 ## Trade-off summary
 
-| Criterion | A — Newsstand | B — Ink Band | C — Taped Flyer |
-|---|---|---|---|
-| **Brand recognition vs current site** | Medium (familiar paper feel) | High (sharp departure) | Highest (most distinctive) |
-| **Nav legibility** | Highest (cream bg + ink type, IBM Plex caps) | High (cream-on-ink reverses; relies on weight) | Medium (paper card competes with content rhythm) |
-| **WORD LID button prominence** | Medium (ink-on-cream button on cream bg) | Highest (jersey-green button against ink) | Medium (ink button on tape-flecked card) |
-| **MatchStrip readability** | Highest (hairline rules pure tabular) | High (jersey rail anchors eye) | Medium (perforations + dashes can compete with content) |
-| **Sticky behaviour at scroll** | Strongest (paper sits flat against content) | Strong (ink band lifts off cream content cleanly) | Risk — tape strips' rotation can feel busy when sticky |
-| **Mobile collapse simplicity** | Highest (already a single-row strip) | High (band collapses cleanly) | Medium (TapedCard wrap needs careful corner handling at narrow widths) |
-| **Implementation complexity** | Lowest (rules + flexbox) | Low (background swap + jersey rail) | Highest (rotated tape, perforation borders, dashed rules) |
-| **Primitive reuse density** | Low — header is mostly chrome, MatchStrip cells are bespoke | Medium — borrows MonoLabel + StampBadge patterns | Highest — TapedCard + TapeStrip + TicketStub all in chrome |
-| **Risk if MatchStrip is not present** | Low (header reads complete alone) | Low (header still anchors) | Low (header reads as a complete card on its own) |
+| Criterion                             | A — Newsstand                                               | B — Ink Band                                      | C — Taped Flyer                                                        |
+| ------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Brand recognition vs current site** | Medium (familiar paper feel)                                | High (sharp departure)                            | Highest (most distinctive)                                             |
+| **Nav legibility**                    | Highest (cream bg + ink type, IBM Plex caps)                | High (cream-on-ink reverses; relies on weight)    | Medium (paper card competes with content rhythm)                       |
+| **WORD LID button prominence**        | Medium (ink-on-cream button on cream bg)                    | Highest (jersey-green button against ink)         | Medium (ink button on tape-flecked card)                               |
+| **MatchStrip readability**            | Highest (hairline rules pure tabular)                       | High (jersey rail anchors eye)                    | Medium (perforations + dashes can compete with content)                |
+| **Sticky behaviour at scroll**        | Strongest (paper sits flat against content)                 | Strong (ink band lifts off cream content cleanly) | Risk — tape strips' rotation can feel busy when sticky                 |
+| **Mobile collapse simplicity**        | Highest (already a single-row strip)                        | High (band collapses cleanly)                     | Medium (TapedCard wrap needs careful corner handling at narrow widths) |
+| **Implementation complexity**         | Lowest (rules + flexbox)                                    | Low (background swap + jersey rail)               | Highest (rotated tape, perforation borders, dashed rules)              |
+| **Primitive reuse density**           | Low — header is mostly chrome, MatchStrip cells are bespoke | Medium — borrows MonoLabel + StampBadge patterns  | Highest — TapedCard + TapeStrip + TicketStub all in chrome             |
+| **Risk if MatchStrip is not present** | Low (header reads complete alone)                           | Low (header still anchors)                        | Low (header reads as a complete card on its own)                       |
 
 ## Visual decision map (selected)
 
-| Decision | A | B | C |
-|---|---|---|---|
-| Background top band | cream | ink | cream paper TapedCard |
-| Wordmark colour | ink Freight Display | cream Freight Display | ink Freight Display |
-| Nav typography | IBM Plex Mono caps | IBM Plex Mono caps, cream | IBM Plex Mono inline contents-list (`§ X · Y · Z`) |
-| Search affordance | `⌕` glyph | `⌕` glyph cream | `⌕` glyph + tape corner |
-| WORD LID button | ink fill, cream text | jersey-green fill, ink text | ink fill, cream text, on TapedCard |
-| MatchStrip border | hairline ink top + bottom | 2px jersey-green left rail | TicketStub perforated edge + dashed dividers |
-| MatchStrip background | cream | cream | cream with subtle paper-edge gradient |
+| Decision              | A                         | B                           | C                                                  |
+| --------------------- | ------------------------- | --------------------------- | -------------------------------------------------- |
+| Background top band   | cream                     | ink                         | cream paper TapedCard                              |
+| Wordmark colour       | ink Freight Display       | cream Freight Display       | ink Freight Display                                |
+| Nav typography        | IBM Plex Mono caps        | IBM Plex Mono caps, cream   | IBM Plex Mono inline contents-list (`§ X · Y · Z`) |
+| Search affordance     | `⌕` glyph                 | `⌕` glyph cream             | `⌕` glyph + tape corner                            |
+| WORD LID button       | ink fill, cream text      | jersey-green fill, ink text | ink fill, cream text, on TapedCard                 |
+| MatchStrip border     | hairline ink top + bottom | 2px jersey-green left rail  | TicketStub perforated edge + dashed dividers       |
+| MatchStrip background | cream                     | cream                       | cream with subtle paper-edge gradient              |
 
 ## Owner choice
 
@@ -62,6 +65,7 @@ Every option renders the four required data states:
 ## Next step
 
 Once an option is chosen:
+
 1. PRD `docs/prd/redesign-phase-3.md` §5 (Layout chrome) cites the chosen mockup file.
 2. Sub-issues 3.C.1 (`SiteHeader`) and 3.C.2 (`MatchStrip` — including all 4 states) reference it.
 3. PageHeader legacy retirement is in 3.B.3 / 3.C.1's call-site migration.

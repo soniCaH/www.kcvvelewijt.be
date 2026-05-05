@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · Checkpoint C · SiteHeader — locked composition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1240px; margin: 0 auto; padding: 56px 32px 96px; }
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 5vw, 60px); line-height: 1.05; margin: 16px 0 12px; }
+      h1 em { font-style: italic; color: var(--color-jersey-deep); }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(24px, 2.4vw, 32px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      h4 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 18px; margin: 0 0 8px; }
+      .lead { max-width: 800px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 36px 44px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+      .section { margin: 64px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+      .panel { background: var(--color-cream); padding: 28px; border: 1px solid var(--color-paper-edge); margin-top: 20px; }
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; min-height: 28px; flex-wrap: wrap; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+      .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: hidden; }
+      .frame__chrome { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; }
+      .frame__viewport--mobile { max-width: 420px; margin: 0 auto; border-left: 1px dashed var(--color-paper-edge); border-right: 1px dashed var(--color-paper-edge); }
+
+      /* SiteHeader */
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); }
+      .site-header__inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 16px 24px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 26px; line-height: 1; letter-spacing: -0.01em; color: var(--color-ink); white-space: nowrap; text-decoration: none; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .wordmark__sup { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-left: 8px; vertical-align: super; }
+      .site-nav { display: flex; justify-content: center; gap: 22px; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 6px 2px; position: relative; display: inline-flex; align-items: center; gap: 4px; transition: color 150ms ease; }
+      .site-nav__link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--color-ink); transform: scaleX(0); transform-origin: left center; transition: transform 200ms ease; }
+      .site-nav__link:hover::after, .site-nav__link.is-active::after { transform: scaleX(1); }
+      .site-nav__link.is-active { color: var(--color-jersey-deep); }
+      .site-nav__link.is-active::after { background: var(--color-jersey-deep); }
+      .site-nav__caret { font-family: var(--font-mono); font-size: 9px; line-height: 1; opacity: 0.6; }
+      .site-actions { display: flex; align-items: center; gap: 12px; }
+      .site-search { width: 30px; height: 30px; background: transparent; border: 1.5px solid var(--color-ink); font-family: var(--font-mono); font-size: 15px; line-height: 1; color: var(--color-ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border-radius: 0; padding: 0; transition: transform 150ms ease, box-shadow 150ms ease; }
+      .site-search:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 0 var(--color-ink); }
+      .btn-wordlid { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--color-ink); color: var(--color-cream); border: 2px solid var(--color-ink); padding: 9px 16px; cursor: pointer; box-shadow: var(--shadow-paper-sm); border-radius: 0; text-decoration: none; display: inline-block; transition: transform 200ms ease, box-shadow 200ms ease; }
+      .btn-wordlid:hover { transform: translate(4px, 4px); box-shadow: none; }
+
+      /* Mobile */
+      .site-header--mobile .site-header__inner { grid-template-columns: auto 1fr auto; padding: 14px 16px; gap: 10px; }
+      .site-header--mobile .wordmark { font-size: 20px; }
+      .site-header--mobile .wordmark__sup { display: none; }
+      .site-header--mobile .site-nav { display: none; }
+      .hamburger { width: 32px; height: 32px; background: transparent; border: 1.5px solid var(--color-ink); cursor: pointer; border-radius: 0; padding: 8px 6px; display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 4px; }
+      .hamburger span { display: block; height: 2px; background: var(--color-ink); }
+      .mobile-actions { display: flex; gap: 8px; align-items: center; }
+
+      /* Annotation pattern */
+      .anno {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 20px;
+        margin-top: 12px;
+      }
+      .anno__notes {
+        font-size: 13.5px;
+        color: var(--color-ink-soft);
+        line-height: 1.5;
+        padding: 6px 0 0;
+      }
+      .anno__notes h5 {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 6px;
+      }
+      .anno__notes ul { margin: 0 0 14px; padding-left: 16px; }
+      .anno__notes li { margin-bottom: 4px; }
+      .anno__notes code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      /* Reuse table */
+      .reuse-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 12px; }
+      .reuse-table th, .reuse-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .reuse-table th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-muted); background: var(--color-cream-soft); border-bottom: 1.5px solid var(--color-ink); font-weight: 600; }
+      .reuse-table code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- HERO -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT C · SITEHEADER LOCK</span>
+          <span class="mono mono--muted">★ CANONICAL DETAIL</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>De <em>masthead</em>, vergrendeld.</h1>
+        <p class="lead">
+          Single-mockup composition of the locked SiteHeader: Direction A
+          (Classic Newsstand) shell · sticky scroll behaviour · icon-only
+          search · WORD LID hidden on mobile · full-screen takeover
+          drawer with Playfair-italic nav and submenu-arrow-only right
+          slot. Companion: <code>option-a-matchstrip-detail.html</code>.
+          Spec: <code>header-locked.md</code>.
+        </p>
+      </header>
+
+      <!-- DESKTOP -->
+      <section class="section" id="desktop">
+        <div class="section-meta">
+          <span class="mono">★ 01 · DESKTOP — DEFAULT</span>
+          <span class="mono mono--muted">— ≥ 1024px · NIEUWS active · sticky at top:0</span>
+        </div>
+        <h2><em>Desktop</em> chrome.</h2>
+        <p class="lead">
+          Three-column grid. Wordmark left, nav centre (8 items, 3 with
+          submenu chevrons), search icon + WORD LID right. Sticky at
+          <code>top:0</code> on every page. ~64px tall.
+        </p>
+
+        <div class="anno">
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be / nieuws · sticky</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a href="#" class="wordmark">KCVV <em>Elewijt</em><span class="wordmark__sup">SINDS 1948</span></a>
+                  <nav class="site-nav" aria-label="Hoofdnavigatie">
+                    <a class="site-nav__link" href="#">Home</a>
+                    <a class="site-nav__link is-active" href="#">Nieuws</a>
+                    <a class="site-nav__link" href="#">Evenementen</a>
+                    <a class="site-nav__link" href="#">Teams<span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link" href="#">Jeugd<span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link" href="#">Sponsors</a>
+                    <a class="site-nav__link" href="#">Hulp</a>
+                    <a class="site-nav__link" href="#">De club<span class="site-nav__caret">▾</span></a>
+                  </nav>
+                  <div class="site-actions">
+                    <button class="site-search" type="button" aria-label="Zoeken">⌕</button>
+                    <a href="#" class="btn-wordlid">Word lid</a>
+                  </div>
+                </div>
+              </header>
+            </div>
+          </div>
+
+          <div class="anno__notes">
+            <h5>★ Wordmark</h5>
+            <ul>
+              <li>Playfair Display italic 900, 26px, jersey-deep on <code>Elewijt</code></li>
+              <li><code>SINDS 1948</code> mono caps superscript, 9px, ink-muted</li>
+            </ul>
+            <h5>★ Nav (8 items)</h5>
+            <ul>
+              <li>IBM Plex Mono caps, 11.5px, weight 600, tracking 0.04em</li>
+              <li><code>▾</code> caret on submenu items only (Teams · Jeugd · De club)</li>
+              <li>Active = jersey-deep + 2px jersey-deep underline (<code>::after</code>)</li>
+            </ul>
+            <h5>★ Actions</h5>
+            <ul>
+              <li>Search: 30×30 outlined-icon, click → <code>/zoeken</code></li>
+              <li>WORD LID: ink fill, cream text, paper shadow, press-down hover</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOBILE — closed -->
+      <section class="section" id="mobile-closed">
+        <div class="section-meta">
+          <span class="mono">★ 02 · MOBILE — CLOSED (DEFAULT)</span>
+          <span class="mono mono--muted">— ≤ 768px · hamburger · wordmark · search · no inline CTA</span>
+        </div>
+        <h2><em>Mobile</em> chrome.</h2>
+        <p class="lead">
+          Three children: hamburger left, full <code>KCVV Elewijt</code>
+          wordmark centre (jersey-deep accent on <code>Elewijt</code>
+          intact), search icon right. WORD LID is <em>not</em> rendered
+          inline on mobile (Q3 D3 lock) — it lives prominently inside
+          the open drawer.
+        </p>
+
+        <div class="anno">
+          <div class="frame" style="max-width: 420px;">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be · ≤ 420px</span>
+            </div>
+            <div class="frame__viewport frame__viewport--mobile">
+              <header class="site-header site-header--mobile">
+                <div class="site-header__inner">
+                  <button class="hamburger" type="button" aria-label="Menu openen"><span></span><span></span><span></span></button>
+                  <a href="#" class="wordmark">KCVV <em>Elewijt</em></a>
+                  <div class="mobile-actions">
+                    <button class="site-search" type="button" aria-label="Zoeken">⌕</button>
+                  </div>
+                </div>
+              </header>
+            </div>
+          </div>
+
+          <div class="anno__notes">
+            <h5>★ Why no WORD LID button</h5>
+            <ul>
+              <li>Brand integrity — full wordmark stays</li>
+              <li>jersey-deep <code>Elewijt</code> accent intact on the device where users spend most time</li>
+              <li>Membership CTA accessible via the drawer (one tap)</li>
+            </ul>
+            <h5>★ Wordmark scaling</h5>
+            <ul>
+              <li>Font 20px (vs 26px desktop)</li>
+              <li><code>SINDS 1948</code> superscript dropped</li>
+              <li>jersey-deep accent preserved</li>
+            </ul>
+            <h5>★ Both icons (hamburger + search)</h5>
+            <ul>
+              <li>Same outline pattern as desktop search: 1.5px ink stroke, sharp corners</li>
+              <li>32×32px tap target</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOBILE — open drawer -->
+      <section class="section" id="mobile-open">
+        <div class="section-meta">
+          <span class="mono">★ 03 · MOBILE — DRAWER OPEN</span>
+          <span class="mono mono--muted">— full-screen takeover · Playfair italic 22px · ▾ submenu only · Word lid hero</span>
+        </div>
+        <h2>Het <em>menu</em>.</h2>
+        <p class="lead">
+          Hamburger tap → drawer fills the viewport. No backdrop (drawer
+          IS the surface). Wordmark stays at top in the same slot; ✕
+          replaces the hamburger. Nav rendered as Playfair italic 22px
+          display lines with bottom rules between each. Right slot is
+          functional only — <code>▾</code> on submenu items, nothing on
+          leaf items. Active item signal is colour alone (jersey-deep).
+          Word lid is a hero block (full-width primary button, paper
+          shadow) below the nav list.
+        </p>
+
+        <div class="anno">
+          <div class="frame" style="max-width: 420px;">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">drawer open · ✕ to close</span>
+            </div>
+            <div class="frame__viewport frame__viewport--mobile" style="position: relative; height: 580px; overflow: hidden; background: var(--color-cream);">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--color-ink); background: var(--color-cream); position: relative; z-index: 5;">
+                <a href="#" class="wordmark" style="font-size: 18px;">KCVV <em>Elewijt</em></a>
+                <button type="button" aria-label="Menu sluiten" style="width: 32px; height: 32px; background: var(--color-ink); border: 2px solid var(--color-ink); color: var(--color-cream); font-family: var(--font-mono); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;">✕</button>
+              </div>
+              <div style="padding: 22px 20px 16px; display: flex; flex-direction: column; gap: 0;">
+                <a href="#" style="display: flex; align-items: baseline; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Home</a>
+                <a href="#" style="display: flex; align-items: baseline; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-jersey-deep); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Nieuws</a>
+                <a href="#" style="display: flex; align-items: baseline; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Evenementen</a>
+                <a href="#" style="display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Teams<span style="font-family: var(--font-mono); font-style: normal; font-weight: 600; color: var(--color-ink-muted); font-size: 14px;">▾</span></a>
+                <a href="#" style="display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Jeugd<span style="font-family: var(--font-mono); font-style: normal; font-weight: 600; color: var(--color-ink-muted); font-size: 14px;">▾</span></a>
+                <a href="#" style="display: flex; align-items: baseline; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Sponsors</a>
+                <a href="#" style="display: flex; align-items: baseline; padding: 10px 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-paper-edge);">Hulp</a>
+                <a href="#" style="display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0 14px; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 22px; line-height: 1.05; color: var(--color-ink); text-decoration: none;">De club<span style="font-family: var(--font-mono); font-style: normal; font-weight: 600; color: var(--color-ink-muted); font-size: 14px;">▾</span></a>
+                <a href="#" style="display: block; padding: 18px 20px; background: var(--color-ink); color: var(--color-cream); font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; text-decoration: none; border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); margin-top: 18px;">Word lid</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="anno__notes">
+            <h5>★ Right-slot rule</h5>
+            <ul>
+              <li><code>▾</code> only on submenu items: Teams · Jeugd · De club</li>
+              <li>Leaf items (Home · Nieuws · Evenementen · Sponsors · Hulp): nothing</li>
+              <li>No 01-08 numbering, no ★ suffix, no decorative dots</li>
+              <li>Active signal = colour alone (jersey-deep)</li>
+            </ul>
+            <h5>★ Sub-item expansion</h5>
+            <ul>
+              <li>Tap on submenu item → expands inline below the row</li>
+              <li>Sub-items render as compact mono-caps rows (cream-soft bg, indented)</li>
+              <li>Lazy reveal — closed list stays short by default</li>
+            </ul>
+            <h5>★ Word lid hero block</h5>
+            <ul>
+              <li>Full-width ink-fill primary button</li>
+              <li>4px paper-shadow + press-down hover (canonical)</li>
+              <li>Strongest possible mobile CTA — only mobile placement</li>
+            </ul>
+            <h5>★ Close paths</h5>
+            <ul>
+              <li>✕ button (top-right)</li>
+              <li>Escape key</li>
+              <li>Tap on a nav item that navigates</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- REUSE MAP -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 04 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— each chrome part traced to its source primitive</span>
+        </div>
+        <h2>Wat hergebruikt <em>wat</em>.</h2>
+        <p class="lead">
+          Every visible part composes onto an existing locked primitive
+          or extracts into a new shared sub-component (Storybook coverage
+          required per the reuse mandate).
+        </p>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Header part</th>
+                <th style="width: 26%;">Composed primitive(s)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Wordmark <code>KCVV Elewijt</code></td>
+                <td><code>EditorialHeading</code> (display italic 900) + jersey-deep accent</td>
+                <td>Same Playfair italic + jersey-deep emphasis treatment used by every editorial display heading. The wordmark is just a constrained instance.</td>
+              </tr>
+              <tr>
+                <td>Nav links</td>
+                <td><code>MonoLabel</code> (size sm, weight 600)</td>
+                <td>Mono caps with 0.04em tracking (slightly tighter than default 0.08em to fit 8 items at 1024px). Active state adds 2px ink underline + jersey-deep.</td>
+              </tr>
+              <tr>
+                <td>Submenu caret <code>▾</code></td>
+                <td>Inline mono glyph (no primitive)</td>
+                <td>9px IBM Plex Mono next to the label, opacity 0.6. Functional only — leaf items get no glyph (per <code>feedback_no_decorative_nav_ornaments</code>).</td>
+              </tr>
+              <tr>
+                <td>Search icon button</td>
+                <td>New <code>IconButton</code> primitive (1.5px ink outline, sharp corners)</td>
+                <td>Press-down hover (canonical). Currently typographic glyph <code>⌕</code>; production swaps in Phosphor <code>MagnifyingGlass</code>. Same affordance shape as the hamburger.</td>
+              </tr>
+              <tr>
+                <td>WORD LID button</td>
+                <td><code>Button</code> variant=<code>"primary"</code></td>
+                <td>Locked ink-fill primary button: <code>shadow-paper-sm</code> default + <code>hover:translate(4px,4px)</code> + <code>shadow-none</code> (canonical press-down).</td>
+              </tr>
+              <tr>
+                <td>Hamburger toggle</td>
+                <td><code>IconButton</code> + 3 ink bars</td>
+                <td>Inherits the same outline-and-press idiom as the search button. Active (drawer-open) state inverts: ink fill, cream bars.</td>
+              </tr>
+              <tr>
+                <td>Mobile drawer surface</td>
+                <td>New <code>NavTakeover</code> sub-component (Storybook required)</td>
+                <td>Full-viewport overlay, cream paper, no backdrop. Composes <code>EditorialHeading</code> nav-row sub-component + <code>Button</code> hero block.</td>
+              </tr>
+              <tr>
+                <td>Drawer nav row</td>
+                <td>New <code>NavTakeover.Item</code> sub-component</td>
+                <td>Playfair italic 700 22px line + bottom paper-edge rule + optional <code>▾</code> right glyph for submenu items. No active underline (just colour).</td>
+              </tr>
+              <tr>
+                <td>Drawer Word lid hero block</td>
+                <td><code>Button</code> variant=<code>"primary"</code> at full-width</td>
+                <td>Same primary button at <code>w-full</code>; paper shadow + press-down hover preserved.</td>
+              </tr>
+              <tr>
+                <td>Drawer ✕ close button</td>
+                <td>Inverted <code>IconButton</code> (ink fill, cream glyph)</td>
+                <td>Replaces the hamburger in-place — same slot, ink/cream inverted to signal "open" state.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— locked decisions cross-referenced</span>
+        </div>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0 0">
+          <li>Q1 lock — header is <code>position: sticky; top: 0</code> at all viewports; MatchStrip flows separately (see <code>option-a-matchstrip-detail.html</code>)</li>
+          <li>Q2 lock — search is icon-only on every viewport; click navigates to <code>/zoeken</code></li>
+          <li>Q3 lock — WORD LID hidden on mobile; full <code>KCVV Elewijt</code> wordmark preserved</li>
+          <li>Q4 lock — full-screen takeover drawer with Playfair italic 22px nav, <code>▾</code> only on submenu items, Word lid as hero block</li>
+          <li>Q5 lock — MatchStrip rendered on landing surfaces only; no impact on header rendering</li>
+          <li>Reuse mandate — every shared sub-component (NavTakeover, NavTakeover.Item, IconButton) ships with a Storybook story (<code>UI/&lt;Name&gt;</code>, vr-tagged)</li>
+          <li>Field availability — nav items hard-coded in <code>apps/web/src/components/layout/menuItems.ts</code>; senior/youth team sub-items dynamic via <code>TeamRepository.findAll()</code></li>
+        </ul>
+        <p style="margin-top: 32px" class="mono mono--muted">★ END · SITEHEADER LOCK · KCVV ELEWIJT · 2026-05-05</p>
+      </footer>
+    </main>
+  </body>
+</html>

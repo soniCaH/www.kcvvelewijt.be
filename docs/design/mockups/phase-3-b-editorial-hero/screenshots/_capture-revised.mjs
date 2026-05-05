@@ -3,14 +3,28 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dir = path.resolve(__dirname, "..");
+const mockupsRoot = path.resolve(__dirname, "..", "..");
 
 const variant = process.argv[2];
 const placement = process.argv[3] ?? "detail";
 if (!variant) {
-  console.error("usage: node _capture-revised.mjs <variant> [detail|homepage]");
+  console.error("usage: node _capture-revised.mjs <variant> [detail|homepage|compare]");
   process.exit(1);
 }
+
+// Per-variant checkpoint mapping — each checkpoint has its own mockup
+// directory and (when needed) its own screenshots/ subdirectory.
+const checkpointDir = {
+  announcement: "phase-3-b-editorial-hero",
+  transfer: "phase-3-b-editorial-hero",
+  event: "phase-3-b-editorial-hero",
+  interview: "phase-3-b-editorial-hero",
+  header: "phase-3-c-header-and-matchstrip",
+  matchstrip: "phase-3-c-header-and-matchstrip",
+};
+
+const dir = path.join(mockupsRoot, checkpointDir[variant] ?? "phase-3-b-editorial-hero");
+const outDir = path.join(dir, "screenshots");
 
 const variantSections = {
   announcement: [
@@ -47,6 +61,28 @@ const variantSections = {
         { id: "duo-subjects", suffix: "n2" },
         { id: "rare-counts-mobile", suffix: "rare-mobile" },
       ],
+  header: placement === "compare"
+    ? [
+        { id: "q0-data-audit", suffix: "q0-audit" },
+        { id: "q1-scroll", suffix: "q1-locked" },
+        { id: "q2-search", suffix: "q2-locked" },
+        { id: "q3-cta-breakpoint", suffix: "q3-locked" },
+        { id: "q4-drawer", suffix: "q4-locked" },
+        { id: "q5-stacking", suffix: "q5-locked" },
+        { id: "q6-state-matrix", suffix: "q6-locked" },
+      ]
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile-closed", suffix: "mobile-closed" },
+        { id: "mobile-open", suffix: "mobile-open" },
+      ],
+  matchstrip: placement === "compare"
+    ? []
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile", suffix: "mobile" },
+        { id: "render-matrix", suffix: "render-matrix" },
+      ],
 };
 const sections = variantSections[variant] ?? [];
 
@@ -74,7 +110,7 @@ await page.waitForTimeout(500);
 // Full page
 const prefix = placement === "detail" ? `detail-${variant}` : placement === "compare" ? `compare-${variant}` : `revised-${variant}`;
 await page.screenshot({
-  path: path.join(__dirname, `${prefix}-full.png`),
+  path: path.join(outDir, `${prefix}-full.png`),
   fullPage: true,
 });
 console.log(`✓ ${prefix}-full.png`);
@@ -96,7 +132,7 @@ for (const { id, suffix } of sections) {
     continue;
   }
   await page.screenshot({
-    path: path.join(__dirname, `${prefix}-${suffix}.png`),
+    path: path.join(outDir, `${prefix}-${suffix}.png`),
     fullPage: true,
     clip: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
   });
