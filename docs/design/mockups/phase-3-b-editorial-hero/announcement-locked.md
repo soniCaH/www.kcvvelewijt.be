@@ -151,3 +151,16 @@ Implementation rules:
 - [x] No fabricated fields.
 - [x] All 5 blocking schema migrations captured for the issue split.
 - [x] Reuse mandate captured (existing primitives + new shared sub-components).
+
+## Homepage placement (`placement="homepage"`)
+
+Locked 2026-05-05 — see `option-a-homepage-placement-comparisons.html` (P3 picked from P1/P2/P3 drill).
+
+When the EditorialHero renders as a featured-article teaser at the top of the homepage's news section, the shell + slots above stay **identical to the detail-page composition**. One extension: **whole-card click**.
+
+- The entire hero is wrapped as a link to `/nieuws/{article.slug}`.
+- **At rest**: identical to the detail-page hero — kicker, heading, lead, byline, right-column artefact unchanged. No CTA text, no extra band, no inline read-more affordance.
+- **On hover**: card press-ups (`transform: translate(-2px, -2px)` + box-shadow grown by ~4px) — the natural inverse of the canonical press-down hover used on paper-stamped primitives. A small `★ Lees verder →` hint fades in at the bottom-right.
+- **Body content does not render in homepage placement.** Anything below the hero in the detail spec (article body, factStrips, Q&A divider, EndMark) is article-detail-only.
+- **Touch-device note**: no hover means the press-up + hint never trigger. The whole card is clickable; native touch tap navigates. Acceptable starting point; revisit with a persistent foot-line hint if analytics show click-through underperforms.
+- **`<EditorialHero>` discriminated union**: `placement?: "detail" | "homepage"` (default `"detail"`). `"homepage"` triggers the `<a>` wrap + press-up styling + body content suppression in the Server Component.
