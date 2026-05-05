@@ -12,8 +12,11 @@ Tier C figures + composition + layout chrome rework. Per master design §4.4 / �
 - `<JerseyShirt>` — stylised jersey thumbnail.
 - `<EndMark>` — closing flourish.
 - `<QASectionDivider>` — interview act-divider.
-- `<EditorialHero>` — single component, 6+ variants (`transfer | match-preview | interview | event | announcement | generic | player`); discriminated union artefact prop.
-- `<PageHero>` retired; call-sites migrated to `<EditorialHero>`.
+- `<EditorialHero>` — single component, scoped to **article-type** variants only.
+  - **In Phase 3 (today's articleTypes):** `interview | announcement | transfer | event` (4 variants matching `packages/sanity-schemas/src/article.ts` enum).
+  - **Deferred to #1470:** `matchPreview | matchRecap` — articleType doesn't exist yet; design coordinates with #1470 implementation.
+  - **Out of Phase 3:** ~~`player`~~ (Phase 6 — own `<PlayerHero>` + supporting blocks per master design line 539; see scope correction 2026-05-05). ~~`generic`~~ (redundant — every article has a typed articleType; no call-site).
+- `<PageHero>` retired; **non-article page heroes are out of Phase 3 scope** (no EditorialHero `generic` variant). Page-document hero treatment is a separate phase.
 - `<SiteHeader>`, `<MatchStrip>`, `<SiteFooter>` reworked.
 
 **Footer divergence flag (owner, 2026-04-29):** the footer mockups must be fresh, not refinements of the retro-terrace-fanzine screenshot.
@@ -33,9 +36,10 @@ Each checkpoint produces standalone HTML option files + a `compare.md` in `docs/
 ### B — EditorialHero
 
 **Slug:** `phase-3-b-editorial-hero`
-**Surfaces:** `<EditorialHero>` with all 6+ variants (`transfer | match-preview | interview | event | announcement | generic | player`).
-**Options:** 3, each rendering the full variant set on one canvas to judge cohesion.
-**Gap fix — per-variant artefact composition pass:** before 3.B.2 implementation begins, the chosen option is expanded into a per-variant composition sheet pinning down each artefact column (which `TapedCard` rotation, which slots, photo treatment, kicker labels). This pass produces a follow-up artefact in the same checkpoint dir (`compose.md`) — no second `/design-an-interface` run required.
+**Surfaces:** `<EditorialHero>` with article-type variants — `interview | announcement | transfer | event` (4 today). `matchPreview | matchRecap` defer to #1470.
+**Options:** 3 directions originally produced (Asymmetric Broadsheet · Stacked Poster · Cover Frame). **Direction locked 2026-05-05:** Option A — Asymmetric Broadsheet. Options B and C are historical record only.
+**Scope correction 2026-05-05:** dropped `player` variant (Phase 6, separate `<PlayerHero>`) and `generic` variant (redundant — every article has an articleType).
+**Gap fix — per-variant artefact composition pass:** the locked Option A shell is drilled per variant. Each variant gets a focused revised mockup + screenshot, then a `<variant>-locked.md` once approved. Final `compose.md` consolidates the four locked variants for 3.B.2 implementation.
 
 ### C — SiteHeader + MatchStrip
 
@@ -93,11 +97,11 @@ Mirrors phase 2 PRD's 567-line structure, scaled up:
 
 Three gaps in the original 4-checkpoint scoping, all closed with checkpoint-internal expansions (option **a**):
 
-| Sub-issue | Gap | Fix |
-|---|---|---|
-| 3.A.1 PlayerFigure | photo+illustration mechanics under-specified inside 4-figure bundle | dedicated mechanics sheet per option in checkpoint A (photo-present/missing/cropped-tight) |
+| Sub-issue                    | Gap                                                                   | Fix                                                                                                  |
+| ---------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 3.A.1 PlayerFigure           | photo+illustration mechanics under-specified inside 4-figure bundle   | dedicated mechanics sheet per option in checkpoint A (photo-present/missing/cropped-tight)           |
 | 3.B.2 EditorialHero variants | per-variant artefact column under-specified by single-canvas overview | follow-up `compose.md` pass on chosen option, per-variant artefact pinned down before implementation |
-| 3.C.2 MatchStrip | state matrix missing | every checkpoint C option renders all 4 data states |
+| 3.C.2 MatchStrip             | state matrix missing                                                  | every checkpoint C option renders all 4 data states                                                  |
 
 3.B.3 (PageHero retirement) and 3.B.1 (EditorialHero shell) intentionally need no design — migration / structural-types only.
 
@@ -105,14 +109,15 @@ Three gaps in the original 4-checkpoint scoping, all closed with checkpoint-inte
 
 Checkpoint A drilled down piece by piece (2026-05-04). Each figure has a dedicated locked spec next to its mockups in `docs/design/mockups/phase-3-a-tier-c-figures/`:
 
-| Sub-issue | Figure | Locked spec | Direction |
-|---|---|---|---|
-| 3.A.1 | `<PlayerFigure>` | `playerfigure-locked.md` | Option A polaroid for photo state; canonical option-b block-print torso (no face-circle) for illustration state. Side meta column rendered identically in both states. |
-| 3.A.2 | `<JerseyShirt>` | `jerseyshirt-locked.md` | Single decorative tile for YouthBlock only. Same SVG paths as the PlayerFigure illustration; **palette inverted** (ink underprint + jersey-deep overprint). No webshop variants ship. |
-| 3.A.3 | `<EndMark>` | `endmark-locked.md` | Option C — `[1px ink rule] ★ EINDE GESPREK ★ [1px ink rule]`. Glyphs are flex children, not pseudo-elements. Three-centerline alignment contract. |
-| 3.A.4 | `<QASectionDivider>` | `qasectiondivider-locked.md` | Option C with `✦` (different glyph than EndMark's `★`). Sanity schema is constrained Portable Text with an "Accent" decorator — editors apply emphasis by selecting + clicking, not typing substrings. Optional kicker beneath the rule. |
+| Sub-issue | Figure               | Locked spec                  | Direction                                                                                                                                                                                                                                |
+| --------- | -------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.A.1     | `<PlayerFigure>`     | `playerfigure-locked.md`     | Option A polaroid for photo state; canonical option-b block-print torso (no face-circle) for illustration state. Side meta column rendered identically in both states.                                                                   |
+| 3.A.2     | `<JerseyShirt>`      | `jerseyshirt-locked.md`      | Single decorative tile for YouthBlock only. Same SVG paths as the PlayerFigure illustration; **palette inverted** (ink underprint + jersey-deep overprint). No webshop variants ship.                                                    |
+| 3.A.3     | `<EndMark>`          | `endmark-locked.md`          | Option C — `[1px ink rule] ★ EINDE GESPREK ★ [1px ink rule]`. Glyphs are flex children, not pseudo-elements. Three-centerline alignment contract.                                                                                        |
+| 3.A.4     | `<QASectionDivider>` | `qasectiondivider-locked.md` | Option C with `✦` (different glyph than EndMark's `★`). Sanity schema is constrained Portable Text with an "Accent" decorator — editors apply emphasis by selecting + clicking, not typing substrings. Optional kicker beneath the rule. |
 
 Memory notes captured (`~/.claude-personal/projects/.../memory/`):
+
 - `feedback_playerfigure_no_hybrid.md` — never combine photo face + drawn body.
 - `project_playerfigure_illustration_canonical.md` — single canonical illustration, ellipse head only, no face-circle.
 - `project_playerfigure_photo_state.md` — Option A polaroid; no TicketStub inside PlayerFigure.
@@ -128,7 +133,7 @@ The Checkpoint A sign-offs revise four sections of `docs/plans/2026-04-27-redesi
 2. **§4.4 catalogue — `<JerseyShirt>` spec.** Replace "stylised jersey thumbnail" with: "single decorative jersey illustration sharing PlayerFigure's two-pass vocabulary (palette inverted — ink underprint + jersey-deep overprint). YouthBlock only."
 3. **§5.1 step 9 (WebshopStrip).** Drop `<JerseyShirt>` as the primitive. Webshop conversion needs real product photography — `<JerseyShirt>` no longer renders there. Use `<TapedCard>` + `<img>` + price + CTA composition instead.
 4. **§5.2 interview template.** Drop `flourish: "em-dash" | "star"` from `<EndMark>` and `<QASectionDivider>` props. Each component has a single fixed glyph: `★` for EndMark, `✦` for QASectionDivider.
-5. **§5.3 player profile.** `<PlayerFigure>` no longer contains `<TicketStub>` internally. The hero composition can place `<TicketStub>` as a *sibling* next to `<PlayerFigure>` if the page wants it.
+5. **§5.3 player profile.** `<PlayerFigure>` no longer contains `<TicketStub>` internally. The hero composition can place `<TicketStub>` as a _sibling_ next to `<PlayerFigure>` if the page wants it.
 
 These deltas are descriptive, not destructive — the master design stays as the historical record of phase-0 thinking; the phase 3 PRD overrides the relevant sections.
 
@@ -142,14 +147,37 @@ No other schema changes from Checkpoint A. Checkpoints B / C / D will surface ad
 
 ## 9. Remaining work
 
-| Phase | Status |
-|---|---|
-| Checkpoint A — Tier C figures | ✅ locked (2026-05-04) |
-| Checkpoint B — EditorialHero | mockups produced; **not yet drilled down**. Once direction picked, runs the `compose.md` per-variant pass before implementation (see §5 gap audit). |
-| Checkpoint C — SiteHeader + MatchStrip | mockups produced; **not yet drilled down**. State-matrix gap is satisfied by the existing mockups; no extra design pass required. |
-| Checkpoint D — SiteFooter | mockups produced; **not yet drilled down**. Owner-flagged divergent territory — pick fresh, do not refine the screenshot. |
-| `docs/prd/redesign-phase-3.md` | pending — write after B / C / D drill-downs land. |
-| `docs/plans/2026-05-03-redesign-phase-3-plan.md` | pending — `superpowers:writing-plans` after PRD. |
-| GitHub sub-issues × 11 | pending — `addBlockedBy` 3.B.2 → {3.A.1, 3.A.2, 3.B.1}; 3.B.3 → {3.B.2}. |
+| Phase                                            | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Checkpoint A — Tier C figures                    | ✅ locked (2026-05-04) — see four `*-locked.md` in `docs/design/mockups/phase-3-a-tier-c-figures/`                                                                                                                                                                                                                                                                                                                                                        |
+| Checkpoint B — EditorialHero                     | ✅ **locked (2026-05-05)** — Option A shell + 4 article-type variants drilled per-piece. Four `*-locked.md` files in `docs/design/mockups/phase-3-b-editorial-hero/`: `announcement-locked.md` · `transfer-locked.md` · `event-locked.md` · `interview-locked.md`. Variant scope correction (no player, no generic) captured. matchPreview/matchRecap deferred to #1470 (commented on the issue 2026-05-05). Schema migrations enumerated in `fields.md`. |
+| Checkpoint C — SiteHeader + MatchStrip           | mockups produced; **not yet drilled down**. State-matrix gap is satisfied by the existing mockups; no extra design pass required. **Next session starts here** — see `docs/design/mockups/phase-3-c-header-and-matchstrip/compare.md`.                                                                                                                                                                                                                    |
+| Checkpoint D — SiteFooter                        | mockups produced; **not yet drilled down**. Owner-flagged divergent territory — pick fresh, do not refine the retro-terrace-fanzine screenshot footer (see memory `project_phase_3_footer_divergence`).                                                                                                                                                                                                                                                   |
+| Homepage placement layer on EditorialHero        | pending — adds `placement="homepage"` extension to the locked detail-page variants (CTA row + adjusted byline). Can land alongside or before Phase 4 homepage rebuild.                                                                                                                                                                                                                                                                                    |
+| `docs/prd/redesign-phase-3.md`                   | pending — write after C / D drill-downs land.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `docs/plans/2026-05-03-redesign-phase-3-plan.md` | pending — `superpowers:writing-plans` after PRD.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| GitHub sub-issues × 11                           | pending — `addBlockedBy` 3.B.2 → {3.A.1, 3.A.2, 3.B.1}; 3.B.3 → {3.B.2}.                                                                                                                                                                                                                                                                                                                                                                                  |
 
-When picking up next session: open this file first, then the four `*-locked.md` specs in `docs/design/mockups/phase-3-a-tier-c-figures/`, then the existing `compare.md` for Checkpoints B / C / D in their respective mockup dirs.
+### Schema migrations BLOCKING 3.B.2 (EditorialHero variants) implementation
+
+Captured in `docs/design/mockups/phase-3-b-editorial-hero/fields.md`:
+
+1. `article.lead` field added (Ask 1).
+2. `articleType=event` body validator: ≥1 `eventFact` required (Ask 6).
+3. `articleType=transfer` body validator: ≥1 `transferFact` required (Ask 6).
+4. `article.coverImage` becomes required — `r.required()` on `article` schema. **Pre-deploy dataset audit + backfill needed** (Ask 8).
+5. `article.title` → constrained Portable Text + `accent` decorator (single block, no other marks/styles). One-shot data migration string→PT for every article. Every consumer (cards, hero, OG meta, JSON-LD, sitemap, search, RSS) updates to PT-aware rendering or `serializeTitle()` helper (Ask 9).
+
+Plus non-blocking follow-up: optional `article.author` field (Ask 2) — default rendered byline stays `"Door redactie"` until that field ships.
+
+### Drill pattern (locked workflow)
+
+The Checkpoint B drill-down established a workflow that worked well — captured in memory `feedback_editorial_hero_drill_pattern`. Use the same pattern for C and D:
+
+1. Open variant- or surface-comparison file (`option-a-<surface>-comparisons.html`).
+2. Drill **one question at a time** with visual side-by-side options (2–4 sub-options per question).
+3. After each owner pick: lock the answer in-file (collapse the comparison to a "LOCKED" summary), then layer the next question's comparison **on top of all previous locks** so subsequent renderings show the cumulative state.
+4. After all questions answered: write the canonical `option-a-<surface>-detail.html` mockup + a `<surface>-locked.md` capturing composition, field-source map, schema dependencies, and reuse mandate.
+5. Capture screenshots per section using the playwright script at `screenshots/_capture-revised.mjs` (already wired for `compare` and `detail` placements).
+
+When picking up next session: open `docs/plans/2026-05-03-redesign-phase-3-design.md` first, then this §9 table to see what's left, then the entry brief for the specific checkpoint you're picking up.
