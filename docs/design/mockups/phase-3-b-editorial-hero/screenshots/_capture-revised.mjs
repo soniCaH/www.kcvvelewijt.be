@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
+import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const mockupsRoot = path.resolve(__dirname, "..", "..");
@@ -33,6 +34,10 @@ const filePrefix = {
 
 const dir = path.join(mockupsRoot, checkpointDir[variant] ?? "phase-3-b-editorial-hero");
 const outDir = path.join(dir, "screenshots");
+// Per-checkpoint screenshots/ directories aren't always pre-created
+// (Checkpoint D was added later). Ensure the output dir exists before
+// any screenshot write — `recursive: true` is a no-op when it already does.
+fs.mkdirSync(outDir, { recursive: true });
 
 const variantSections = {
   announcement: [
@@ -45,11 +50,18 @@ const variantSections = {
     { id: "direction-matrix", suffix: "matrix" },
     { id: "mobile-preview", suffix: "mobile" },
   ],
+  // Compare entries below capture the LOCKED summary blocks in each
+  // comparison HTML (background: cream-soft, dashed border). Pre-lock
+  // q-option IDs (e.g. q4-cover, q1-strip, q2-sessions,
+  // q1-subjects-placement, q2-subject-counts) are still in the DOM
+  // but `display:none` per the drill pattern, so capturing them yields
+  // 0×0 rects and gets skipped — IDs updated to the visible
+  // post-lock equivalents.
   event: placement === "compare"
     ? [
-        { id: "q4-cover", suffix: "q4" },
-        { id: "q1-strip", suffix: "q1" },
-        { id: "q2-sessions", suffix: "q2" },
+        { id: "q4-locked", suffix: "q4" },
+        { id: "q1-locked", suffix: "q1" },
+        { id: "q2-locked", suffix: "q2" },
         { id: "q3-event-doc", suffix: "q3" },
       ]
     : [
@@ -60,8 +72,8 @@ const variantSections = {
       ],
   interview: placement === "compare"
     ? [
-        { id: "q1-subjects-placement", suffix: "q1" },
-        { id: "q2-subject-counts", suffix: "q2" },
+        { id: "q1-locked", suffix: "q1" },
+        { id: "q2-locked", suffix: "q2" },
         { id: "q2b-mobile-counts", suffix: "q2b" },
       ]
     : [
@@ -119,7 +131,7 @@ const fileName = placement === "detail"
   : placement === "compare"
     ? `${prefixForVariant}-${variant}-comparisons.html`
     : `${prefixForVariant}-${variant}-revised.html`;
-const url = "file://" + path.join(dir, fileName);
+const url = pathToFileURL(path.join(dir, fileName)).href;
 await page.goto(url, { waitUntil: "networkidle" });
 await page.evaluate(async () => {
   await Promise.all(

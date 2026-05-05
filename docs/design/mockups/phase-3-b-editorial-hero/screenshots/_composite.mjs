@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import path from "node:path";
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const variants = ["transfer", "match-preview", "interview", "event", "announcement"];
@@ -31,7 +31,7 @@ for (const v of variants) {
 </body></html>`;
   const tmp = path.join(__dirname, `_tmp-${v}.html`);
   fs.writeFileSync(tmp, html);
-  await page.goto("file://" + tmp, { waitUntil: "networkidle" });
+  await page.goto(pathToFileURL(tmp).href, { waitUntil: "networkidle" });
   await page.screenshot({
     path: path.join(__dirname, `compare-${v}.png`),
     fullPage: true,

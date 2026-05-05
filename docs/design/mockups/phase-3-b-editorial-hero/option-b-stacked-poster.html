@@ -794,6 +794,10 @@
           it), then dek + CTA. Variant only changes what lives inside the band — the
           hero shell, the kicker, the headline, the dek, and the CTA row are invariant.
         </p>
+        <div style="margin-top: 24px; padding: 16px 20px; border: 1.5px solid #b84a3a; background: rgba(184, 74, 58, 0.06); font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: #1f1f1f;">
+          <strong style="display: block; margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; color: #b84a3a;">★ ARCHIVED — historical record</strong>
+          Direction A (Asymmetric Broadsheet) was locked 2026-05-05; Directions B and C are kept as historical record only. <strong>Variant scope correction (2026-05-05):</strong> the originally specced <code>generic</code> and <code>player</code> variants were removed from Phase 3 B (player → Phase 6 with its own <code>&lt;PlayerHero&gt;</code>; generic → redundant since every article has a typed articleType). Phase 3 B ships <strong>four locked variants only</strong>: <code>announcement</code>, <code>transfer</code>, <code>event</code>, <code>interview</code>. <code>matchPreview</code> / <code>matchRecap</code> deferred to issue #1470. Mentions of <code>generic</code> / <code>player</code> + counts of "7 variants" below are pre-correction artefacts; the reuse map rows for those variants are marked struck-through.
+        </div>
       </header>
 
       <!-- =====================================================
@@ -1235,7 +1239,7 @@
           </div>
           <div>
             <h4 class="against">↓ AGAINST</h4>
-            <p>Variants whose artefact band relies on horizontal grouping (transfer's two shields + arrow, interview's 2-up portraits, player's 4-item cluster) still have to reflow internally to vertical. That's still a mobile-specific spec per variant — the "stacked-poster" idiom doesn't kill it, just simplifies the parent shell.</p>
+            <p>Variants whose artefact band relies on horizontal grouping (transfer's two shields + arrow, interview's 2-up portraits) still have to reflow internally to vertical. That's still a mobile-specific spec per variant — the "stacked-poster" idiom doesn't kill it, just simplifies the parent shell.</p>
           </div>
         </div>
       </section>
@@ -1291,13 +1295,13 @@
                 <td><code>StampBadge</code> (rotated, lg), <code>MonoLabel</code> ×3 (variants jersey / ink / cream)</td>
                 <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
               </tr>
-              <tr>
-                <td><code>generic</code></td>
+              <tr style="opacity: 0.45; text-decoration: line-through;">
+                <td><code>generic</code> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — redundant; every article has a typed articleType]</span></td>
                 <td>display-italic drop-mark glyph, dashed rule (existing pattern), <code>TapeStrip</code></td>
                 <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
               </tr>
-              <tr>
-                <td><code>player</code></td>
+              <tr style="opacity: 0.45; text-decoration: line-through;">
+                <td><code>player</code> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — deferred to Phase 6 with its own &lt;PlayerHero&gt;]</span></td>
                 <td><code>NumberDisplay</code>, <code>TapedCard</code> rot-B, <code>PlayerFigure</code> lg, <code>TicketStub</code>, <code>MonoLabel</code> ×3, <code>TapeStrip</code></td>
                 <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
               </tr>
@@ -1308,11 +1312,11 @@
         <div class="tradeoffs">
           <div>
             <h4 class="for">↑ FOR</h4>
-            <p>One discriminated <code>variant</code> prop on a single component. Shell (kicker, headline, dek, CTA row) is invariant across all 7 variants — only the band slot differs. Storybook ships one story per variant + autodocs + VR per variant; ~7 stories total.</p>
+            <p>One discriminated <code>variant</code> prop on a single component. Shell (kicker, headline, dek, CTA row) is invariant across all 4 locked variants (announcement, transfer, event, interview) — only the band slot differs. Storybook ships one story per variant + autodocs + VR per variant; ~4 stories total.</p>
           </div>
           <div>
             <h4 class="against">↓ AGAINST</h4>
-            <p>Putting all 7 variants behind one <code>EditorialHero</code> means the component file has 7 internal artefact-band sub-renderers. Risks growing into a 600-line component. Mitigation: extract each band as its own sibling component in <code>EditorialHero/bands/&lt;Variant&gt;Band.tsx</code>, keep <code>EditorialHero/index.tsx</code> as a thin switch.</p>
+            <p>Putting all 4 locked variants behind one <code>EditorialHero</code> means the component file has 4 internal artefact-band sub-renderers. Risks growing into a multi-hundred-line component. Mitigation: extract each band as its own sibling component in <code>EditorialHero/bands/&lt;Variant&gt;Band.tsx</code>, keep <code>EditorialHero/index.tsx</code> as a thin switch.</p>
         </div>
         </div>
       </section>
@@ -1376,7 +1380,7 @@
 
         <h3>Resolved</h3>
         <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
-          <li>Single component <code>&lt;EditorialHero variant=...&gt;</code> with 7 discriminated variants — invariant shell, swappable artefact band</li>
+          <li>Single component <code>&lt;EditorialHero variant=...&gt;</code> with 4 locked discriminated variants (announcement, transfer, event, interview) — invariant shell, swappable artefact band</li>
           <li>Shell primitives: <code>MonoLabelRow</code> kicker, <code>EditorialHeading size="display-2xl"</code>, dek paragraph, CTA row with <code>Button</code> primary + ghost</li>
           <li>Artefact band sits <strong>below the headline</strong>, full poster width, bordered top + bottom 2px ink with dashed rule overlay</li>
           <li>Press idiom on every interactive primitive: <code>hover:shadow-none</code> + <code>translate(4px, 4px)</code> + <code>transition-all 300ms ease</code></li>
@@ -1385,16 +1389,17 @@
           <li>Glyph language uses Playfair italic numerals / arrows / ampersands; Lucide icons only when no typographic alternative exists</li>
           <li>Mobile collapse is single-axis — only padding, type scale, and band internal grid change; the parent shell never reflows</li>
           <li>Each band sub-renderer extracted to <code>EditorialHero/bands/&lt;Variant&gt;Band.tsx</code> to keep <code>index.tsx</code> a thin switch</li>
-          <li>Storybook: one story per variant (<code>tags: ["autodocs", "vr"]</code>) — VR catches regressions across all 7</li>
+          <li>Storybook: one story per variant (<code>tags: ["autodocs", "vr"]</code>) — VR catches regressions across all 4 locked variants</li>
         </ul>
 
         <h3>Open</h3>
         <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
-          Owner pick between Direction B (this), Direction A (side-by-side
-          two-column), and any sibling directions. If B is locked: write
-          <code>EditorialHero</code> in <code>apps/web/src/components/design-system/EditorialHero/</code>,
-          retire the existing <code>PageHero</code>, migrate the homepage,
-          interview detail, event detail, and player profile templates.
+          <em>Direction A locked 2026-05-05 — this section is historical.</em>
+          The originally-proposed <code>player profile</code> template
+          migration is now out of Phase 3 B scope (player → Phase 6
+          with its own <code>&lt;PlayerHero&gt;</code>). Phase 3 B's
+          implementation hits the homepage, news section index,
+          announcement / transfer / event / interview detail templates.
         </p>
 
         <h3 style="margin-top: 32px">Token map</h3>

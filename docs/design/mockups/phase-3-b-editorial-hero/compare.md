@@ -45,20 +45,16 @@
 
 All three options work with rectangular `psdImage` portraits in `interview` and `player` variants. Option C's frame-break is the most photo-flattering (object-like presentation), but also the strictest about photo crop quality. Option B's wide band is the most forgiving for low-quality crops because the band can absorb mismatched aspect ratios.
 
-## Owner choice
+## Decision recorded
 
-> _Pick one option below. After picking, run a follow-up "compose pass" — `compose.md` in this directory — that pins down each variant's artefact column composition (which TapedCard rotation, which approved primitives, what slots, photo treatment, kicker label set). The compose pass is checkpoint-internal; no new `/design-an-interface` run required._
+> **Option A — Asymmetric Broadsheet** locked 2026-05-05. Options B and C are kept as historical record only. Any reopen of this decision requires a fresh `/design-an-interface` round.
 
-- [ ] Option A — Asymmetric Broadsheet
-- [ ] Option B — Stacked Poster
-- [ ] Option C — Cover Frame
+The drill produced canonical detail mockups and per-variant locked specs directly — there is no consolidated `compose.md` (it was originally proposed as a checkpoint-internal follow-up, but the four per-variant `*-locked.md` files cover the same ground at higher fidelity). A `compose.md` is only required if the variant set itself changes (e.g. when issue #1470 lands `matchPreview` / `matchRecap` and they need a unified composition pass alongside the existing four).
 
-**Rationale (after pick):** _to be filled in by owner._
+## Post-decision references
 
-## Next step
+The lock cascades through these existing artefacts:
 
-Once an option is chosen and `compose.md` is written:
-
-1. PRD `docs/prd/redesign-phase-3.md` §4 (EditorialHero) cites the chosen mockup file path and the compose.md.
-2. Sub-issues 3.B.1 (shell + types) and 3.B.2 (variants) reference both artefacts.
-3. 3.B.3 (PageHero retirement + call-site migration) follows once 3.B.2 is shipped.
+1. **Per-variant locked specs** in this directory — `announcement-locked.md`, `transfer-locked.md`, `event-locked.md`, `interview-locked.md`. Each pins shell composition, slots, field-source map, schema dependencies, mobile collapse, reuse mandate, and approval checklist for its variant. These are the canonical implementation contracts.
+2. **PRD `docs/prd/redesign-phase-3.md` §4** — synthesises the EditorialHero spec across all four variants (discriminated union prop shape, shared sub-components, schema-migration list, exit criteria).
+3. **Sub-issues 3.B.1, 3.B.2, 3.B.3** — Ralph-eligible work items (created post-PRD-merge via `/prd-to-issues`); 3.B.1 = shell + types, 3.B.2 = variants + 5 blocking schema migrations (depends on 3.A.1 + 3.A.2 + 3.B.1), 3.B.3 = `<PageHero>` retirement + call-site migration (depends on 3.B.2).

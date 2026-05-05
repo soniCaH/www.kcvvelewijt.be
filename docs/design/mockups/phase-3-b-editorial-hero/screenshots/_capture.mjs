@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dir = path.resolve(__dirname, "..");
@@ -21,7 +21,7 @@ const context = await browser.newContext({
 
 for (const opt of options) {
   const page = await context.newPage();
-  const url = "file://" + path.join(dir, opt.file);
+  const url = pathToFileURL(path.join(dir, opt.file)).href;
   await page.goto(url, { waitUntil: "networkidle" });
   // Full page
   await page.screenshot({
