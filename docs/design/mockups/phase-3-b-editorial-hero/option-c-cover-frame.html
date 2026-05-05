@@ -839,9 +839,13 @@
           on the right that <strong>deliberately overlaps the frame edge</strong>
           to give the page a tactile object-on-paper read. Variant differs only
           in artefact + kicker — heading, dek, and CTA structure are invariant.
-          One component, seven variants. No glows, no rim-lights, sharp corners,
-          press-down hover throughout.
+          One component, four locked variants (originally specced as seven).
+          No glows, no rim-lights, sharp corners, press-down hover throughout.
         </p>
+        <div style="margin-top: 24px; padding: 16px 20px; border: 1.5px solid #b84a3a; background: rgba(184, 74, 58, 0.06); font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: #1f1f1f;">
+          <strong style="display: block; margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; color: #b84a3a;">★ ARCHIVED — historical record</strong>
+          Direction A (Asymmetric Broadsheet) was locked 2026-05-05; Directions B and C are kept as historical record only. <strong>Variant scope correction (2026-05-05):</strong> the originally specced <code>generic</code> and <code>player</code> variants were removed from Phase 3 B (player → Phase 6 with its own <code>&lt;PlayerHero&gt;</code>; generic → redundant since every article has a typed articleType). Phase 3 B ships <strong>four variants only</strong>: <code>announcement</code>, <code>transfer</code>, <code>event</code>, <code>interview</code>. <code>matchPreview</code> / <code>matchRecap</code> deferred to issue #1470. Mentions of <code>generic</code> / <code>player</code> + counts of "seven" below are pre-correction artefacts; the reuse map rows for those variants are marked struck-through.
+        </div>
       </header>
 
       <!-- ===========================================================
@@ -1336,13 +1340,13 @@
                 <td><code>StampBadge</code> + <code>MonoLabelRow</code> + <code>EditorialHeading</code></td>
                 <td>None</td>
               </tr>
-              <tr>
-                <td><strong>generic</strong></td>
+              <tr style="opacity: 0.45; text-decoration: line-through;">
+                <td><strong>generic</strong> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — redundant; every article has a typed articleType]</span></td>
                 <td><code>EditorialHeading</code> + dek + <code>MonoLabelRow</code> + typographic ornament (low-opacity Playfair glyph)</td>
                 <td>Typographic ornament treatment (low-opacity display glyph as background) — composes existing tokens, not a new primitive</td>
               </tr>
-              <tr>
-                <td><strong>player</strong></td>
+              <tr style="opacity: 0.45; text-decoration: line-through;">
+                <td><strong>player</strong> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — deferred to Phase 6 with its own &lt;PlayerHero&gt;]</span></td>
                 <td><code>TapedCard</code> (rot-b) + <code>PlayerFigure</code> + <code>TicketStub</code> + <code>MonoLabel</code> + <code>MonoLabelRow</code></td>
                 <td>None</td>
               </tr>
@@ -1363,7 +1367,7 @@
         <div class="tradeoffs">
           <div>
             <h4 class="for">↑ FOR</h4>
-            <p>Zero new primitives introduced for six of seven variants. The frame structure is one new layout pattern that re-uses every chrome token verbatim. Total token additions: zero. Total primitive additions: zero. Lowest-risk delivery.</p>
+            <p>Zero new primitives introduced across all four locked variants. The frame structure is one new layout pattern that re-uses every chrome token verbatim. Total token additions: zero. Total primitive additions: zero. Lowest-risk delivery.</p>
           </div>
           <div>
             <h4 class="against">↓ AGAINST</h4>
@@ -1378,13 +1382,13 @@
       <section class="section" id="tradeoffs">
         <div class="section-meta">
           <span class="mono">★ 10 · DIRECTION-LEVEL TRADEOFFS</span>
-          <span class="mono mono--muted">— summary across all seven variants</span>
+          <span class="mono mono--muted">— summary across all four locked variants</span>
         </div>
         <h2>Waarom <em>kaft</em>.</h2>
         <p class="lead">
           Direction C reads the EditorialHero as a contained editorial object,
           not a broadsheet. Concentrated, framed, more "magazine cover" than
-          "front page". One frame, seven variants, every artefact composed from
+          "front page". One frame, four locked variants, every artefact composed from
           existing primitives.
         </p>
 
@@ -1410,9 +1414,11 @@
               and the variant collapses to a stacked panel. Frame + artefact
               creates a 2-layer paper stack which on a stacked feed (NewsGrid)
               risks reading as "more chrome on top of chrome". Direction asks
-              the cover to do most of the editorial work, so generic and
-              announcement variants lean heavier on typography than imagery —
-              risk of editors defaulting to generic when richer variants exist.
+              the cover to do most of the editorial work, so the
+              announcement variant leans heavier on typography than imagery —
+              the kind of risk that originally motivated a separate
+              <code>generic</code> variant (now removed — see scope correction
+              admonition above).
             </p>
           </div>
         </div>
@@ -1430,10 +1436,10 @@
         <h3>Resolved</h3>
         <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
           <li>Cover frame = <code>2px solid var(--color-ink)</code> + <code>--shadow-paper-md</code> (6×6 ink) + sharp corners + cream / cream-soft / ink / jersey-deep surface</li>
-          <li>Variant differentiation is artefact + kicker only — heading / dek / CTA structure is constant across all seven variants</li>
-          <li>Artefact area sits in the right grid column and may overflow the frame's right or bottom edge by up to 56px (transfer / match-preview / event / player) — the parent <code>cover-stage</code> reserves margin for that overflow</li>
-          <li>Six variants compose existing primitives only (TapedCard, TicketStub, MonoLabel, EditorialHeading, ClippedCard, StampBadge, PlayerFigure)</li>
-          <li>Generic variant introduces a low-opacity <code>--font-display</code> ornament treatment — composed from existing tokens, not a new primitive</li>
+          <li>Variant differentiation is artefact + kicker only — heading / dek / CTA structure is constant across all four locked variants</li>
+          <li>Artefact area sits in the right grid column and may overflow the frame's right or bottom edge by up to 56px (transfer / event) — the parent <code>cover-stage</code> reserves margin for that overflow. <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted);">(originally also listed match-preview / player; both removed from Phase 3 B scope per the admonition above — match-preview defers to issue #1470, player to Phase 6)</span></li>
+          <li>All four locked variants compose existing primitives only (TapedCard, TicketStub, MonoLabel, EditorialHeading, ClippedCard, StampBadge)</li>
+          <li><s style="opacity: 0.55;">Generic variant introduces a low-opacity <code>--font-display</code> ornament treatment — composed from existing tokens, not a new primitive</s> <span style="font-family: var(--font-mono); font-size: 11px; color: #b84a3a;">[REMOVED — generic variant out of Phase 3 B scope, see admonition above]</span></li>
           <li>Press-down hover canon: <code>hover:translate(4px, 4px)</code> + <code>hover:shadow: none</code> + <code>transition-all 300ms</code> on every TapedCard, ticket-stub-bearing primitive, and CTA</li>
           <li>No <code>border-radius</code> anywhere, no radial glows, no rim-lights — paper-flat shadows only</li>
           <li>Subject photos rectangular default per the photo-fallback rule (PlayerFigure renders <code>player.psdImage</code> as <code>3:4</code> bounded box)</li>

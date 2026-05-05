@@ -1,6 +1,6 @@
 # Phase 3 — Checkpoint C — SiteHeader + MatchStrip · Compare
 
-**Surfaces:** `<SiteHeader>` (sticky top) + `<MatchStrip>` (persistent sub-header band; renders only when an upcoming/live/concluded match exists).
+**Surfaces:** `<SiteHeader>` (sticky top) + `<MatchStrip>` (renders only when an upcoming match exists; live and concluded states are out of scope — see "MatchStrip state matrix coverage" below).
 **Issue:** #1525 · master design `docs/plans/2026-04-27-redesign-master-design.md` §5.1
 **Brief:** see `docs/plans/2026-05-03-redesign-phase-3-design.md` §2 — Checkpoint C.
 
@@ -67,5 +67,5 @@
 Once an option is chosen:
 
 1. PRD `docs/prd/redesign-phase-3.md` §5 (Layout chrome) cites the chosen mockup file.
-2. Sub-issues 3.C.1 (`SiteHeader`) and 3.C.2 (`MatchStrip` — including all 4 states) reference it.
+2. Sub-issues 3.C.1 (`SiteHeader`) and 3.C.2 (`MatchStrip` — both locked states: hidden / upcoming) reference it.
 3. PageHeader legacy retirement is in 3.B.3 / 3.C.1's call-site migration.

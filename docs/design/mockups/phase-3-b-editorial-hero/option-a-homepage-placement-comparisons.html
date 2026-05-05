@@ -232,11 +232,21 @@
         cursor: pointer;
         transition: transform 200ms ease, box-shadow 200ms ease;
       }
-      .eh-clickable:hover {
+      /* Keyboard parity (a11y):
+         the <div class="eh-clickable"> is wrapped by the focusable <a>,
+         so `.eh-clickable` itself isn't focusable and `:focus-visible` /
+         `:focus-within` on the div alone won't fire. Pair every `:hover`
+         rule below with `a:focus-visible .eh-clickable` so Tab focus
+         mirrors the press-up + accent + hint affordances. */
+      .eh-clickable:hover,
+      a:focus-visible .eh-clickable {
         transform: translate(-2px, -2px);
         box-shadow: 8px 8px 0 0 var(--color-ink);
       }
-      .eh-clickable:hover .eh-heading em { color: var(--color-jersey-deep); }
+      .eh-clickable:hover .eh-heading em,
+      a:focus-visible .eh-clickable .eh-heading em {
+        color: var(--color-jersey-deep);
+      }
       .eh-clickable .eh-hover-hint {
         position: absolute;
         bottom: 12px;
@@ -250,7 +260,17 @@
         transition: opacity 200ms ease;
         pointer-events: none;
       }
-      .eh-clickable:hover .eh-hover-hint { opacity: 1; }
+      .eh-clickable:hover .eh-hover-hint,
+      a:focus-visible .eh-clickable .eh-hover-hint {
+        opacity: 1;
+      }
+      /* Suppress default browser outline on the wrapping anchor — the
+         card lift + jersey-deep accent + visible hint together form
+         a strong, deliberate focus indicator that's already higher
+         contrast than the default outline. */
+      a:has(> .eh-clickable):focus-visible {
+        outline: none;
+      }
 
       footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
       footer .next-step { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 24px 28px; margin-bottom: 24px; }

@@ -5,7 +5,7 @@
 **Mockup:** `option-a-header-detail.html`.
 **Companion:** `matchstrip-locked.md` + `option-a-matchstrip-detail.html` (separate component, separate sub-issue 3.C.2).
 
-> **★ Reuse audit correction (2026-05-05):** the `<IconButton>` primitive originally proposed in this spec is **not** built. Audit against the design-system barrel found that `<Button variant="ghost" size="sm">` already provides the 1.5px ink stroke + sharp corners + canonical press-down hover that the search · hamburger · drawer ✕ affordances need. Search uses `<Button variant="ghost" size="sm">` with a Phosphor `MagnifyingGlass` icon child; hamburger uses the same with a custom 3-bar SVG (or Phosphor `List`); drawer ✕ uses Phosphor `X`. The reuse map and approval checklist below still mention `<IconButton>` for historical accuracy of the drilling; **the canonical source of truth is the Phase 3 PRD §8b**.
+> **★ Reuse audit correction (2026-05-05):** the `<IconButton>` primitive originally proposed in this spec is **not** built. Audit against the design-system barrel found that `<Button variant="ghost" size="sm">` already provides the 1.5px ink stroke + sharp corners + canonical press-down hover that the search · hamburger · drawer ✕ affordances need. Search uses `<Button variant="ghost" size="sm">` with a Phosphor `MagnifyingGlass` icon child; hamburger uses the same with a custom 3-bar SVG (or Phosphor `List`); drawer ✕ uses Phosphor `X`. The reuse map, reuse mandate, and approval checklist below have been updated to reflect this; **canonical source of truth: Phase 3 PRD §8b**.
 
 ## Scope
 
@@ -19,7 +19,7 @@ Three-column CSS grid (`auto · 1fr · auto`). Sticky at `top: 0`, ~64px tall.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│  KCVV Elewijt[SINDS 1948]   Home Nieuws Even Teams▾ Jeugd▾ … De club▾   ⌕ Word lid  │
+│  KCVV Elewijt[SINDS 1909]   Home Nieuws Even Teams▾ Jeugd▾ … De club▾   ⌕ Word lid  │
 │  └─ wordmark (left)         └─ nav (centred, 8 items)                  └─ actions (right)  │
 ├──────────────────────────────────────────────────────────────────────────────┤
                           ↓  1px ink seam
@@ -75,7 +75,7 @@ Per `feedback_no_decorative_nav_ornaments`: only functional indicators belong in
 
 | Slot             | Content                                | Source                                                                                                      |
 | ---------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Wordmark         | `KCVV Elewijt` + `SINDS 1948` (sup)    | Static; jersey-deep accent on `Elewijt`                                                                     |
+| Wordmark         | `KCVV Elewijt` + `SINDS 1909` (sup)    | Static; jersey-deep accent on `Elewijt`                                                                     |
 | Nav              | 8 items, 3 with submenu carets         | Hard-coded in `apps/web/src/components/layout/menuItems.ts` + dynamic teams from `TeamRepository.findAll()` |
 | Search           | `⌕` icon button                        | Click → `/zoeken`                                                                                           |
 | WORD LID         | ink-fill primary button (desktop only) | → `/club/inschrijven`                                                                                       |
@@ -86,32 +86,32 @@ Per `feedback_no_decorative_nav_ornaments`: only functional indicators belong in
 
 **Existing primitives used verbatim:**
 
-| Primitive            | Source                                                    | Use                                                |
-| -------------------- | --------------------------------------------------------- | -------------------------------------------------- |
-| `<EditorialHeading>` | `apps/web/src/components/design-system/EditorialHeading/` | Wordmark (display italic 900 + jersey-deep accent) |
-| `<MonoLabel>`        | `apps/web/src/components/design-system/MonoLabel/`        | Nav links (size `sm`, weight 600, tracking 0.04em) |
-| `<Button>`           | `apps/web/src/components/design-system/Button/`           | WORD LID (variant `primary`); drawer Word lid hero |
+| Primitive            | Source                                                    | Use                                                                                                         |
+| -------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `<EditorialHeading>` | `apps/web/src/components/design-system/EditorialHeading/` | Wordmark (display italic 900 + jersey-deep accent)                                                          |
+| `<MonoLabel>`        | `apps/web/src/components/design-system/MonoLabel/`        | Nav links (size `sm`, weight 600, tracking 0.04em)                                                          |
+| `<Button>` `primary` | `apps/web/src/components/design-system/Button/`           | WORD LID (desktop) + drawer Word lid hero (mobile)                                                          |
+| `<Button>` `ghost`   | `apps/web/src/components/design-system/Button/`           | Icon-only affordances at `size="sm"` with Phosphor icon child — search · hamburger · drawer ✕ (per PRD §8b) |
 
 **New shared sub-components (built once, used by SiteHeader + reusable elsewhere):**
 
-| New component        | Purpose                                                  | Composition                                                            |
-| -------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `<IconButton>`       | Outlined icon affordance — search + hamburger + drawer ✕ | 1.5px ink stroke, sharp corners, press-down hover (canonical)          |
-| `<NavTakeover>`      | Full-viewport mobile drawer surface                      | Cream paper, no backdrop, top bar (wordmark + ✕), nav list + hero CTA  |
-| `<NavTakeover.Item>` | Drawer nav row                                           | Playfair italic 700 22px + bottom paper-edge rule + optional `▾` glyph |
+| New component        | Purpose                             | Composition                                                            |
+| -------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| `<NavTakeover>`      | Full-viewport mobile drawer surface | Cream paper, no backdrop, top bar (wordmark + ✕), nav list + hero CTA  |
+| `<NavTakeover.Item>` | Drawer nav row                      | Playfair italic 700 22px + bottom paper-edge rule + optional `▾` glyph |
 
 **Storybook coverage required (per reuse mandate):**
 
-- `<IconButton>` — `UI/IconButton`, vr-tagged, stories for default + hover-press states
 - `<NavTakeover>` — `UI/NavTakeover`, vr-tagged, stories for closed (no DOM), open default, open with one submenu expanded
 - `<NavTakeover.Item>` — `UI/NavTakeover/Item`, vr-tagged, stories for leaf, submenu, active states
+- _(no separate `<IconButton>` story — search · hamburger · drawer ✕ all reuse the existing `<Button>` ghost variant + Phosphor icon child; covered by `<Button>`'s existing baseline.)_
 
 ## Field-source map
 
 | UI element       | Source                                                   | Notes                                                                       |
 | ---------------- | -------------------------------------------------------- | --------------------------------------------------------------------------- |
 | Wordmark text    | Static literal `"KCVV Elewijt"`                          | Not from Sanity                                                             |
-| `SINDS 1948`     | Static literal                                           | Mono caps superscript, ink-muted                                            |
+| `SINDS 1909`     | Static literal                                           | Mono caps superscript, ink-muted                                            |
 | Static nav items | `apps/web/src/components/layout/menuItems.ts`            | Home · Nieuws · Evenementen · Sponsors · Hulp · De club (+ sub-items)       |
 | Senior teams     | `TeamRepository.findAll()` filtered by no-`age` prefix   | Dynamic; rendered inside Teams submenu                                      |
 | Youth teams      | `TeamRepository.findAll()` filtered by `age` prefix `U…` | Dynamic; rendered inside Jeugd submenu                                      |
@@ -122,15 +122,18 @@ Per `feedback_no_decorative_nav_ornaments`: only functional indicators belong in
 ## Mobile collapse
 
 - **Closed default** at `≤ 768px`: hamburger · wordmark · search (no inline WORD LID).
-- **Wordmark scales**: 26px desktop → 20px mobile; `SINDS 1948` superscript dropped.
+- **Wordmark scales**: 26px desktop → 20px mobile; `SINDS 1909` superscript dropped.
 - **Drawer open** triggers a full-viewport takeover (`<NavTakeover>`); body scroll locks while open. Close paths: ✕ button, Escape key, click on a nav item that navigates.
 
 ## API (target shape)
 
 ```typescript
+// `<SiteHeader>` is a Client Component (top of file: `"use client"`) so it can
+// call `usePathname()` for active-item detection — same approach as the
+// existing `PageHeader.tsx` it replaces. Senior + youth team nav items are
+// server-fetched in the root layout (Server Component, calls
+// `TeamRepository.findAll()`) and passed in as props.
 type SiteHeaderProps = {
-  // Reads current route via Next.js navigation hooks; no caller props needed for that.
-  // Senior + youth team nav items are server-fetched in the root layout and passed as props:
   seniorTeams: TeamNavVM[]; // existing shape from PageHeader
   youthTeams: TeamNavVM[];
 };
@@ -156,10 +159,10 @@ type NavTakeoverItemProps = {
 
 ## Reuse mandate
 
-1. **Audit before building.** Before writing `<IconButton>`, grep `apps/web/src/components/design-system/` for an existing primitive that fits. (Audit confirmed none — `IconButton` does not exist today; landing it as a primitive serves search, hamburger, drawer ✕, and any future outlined-icon affordance.)
-2. **Extract before duplicating.** `<NavTakeover>` + `<NavTakeover.Item>` are two new primitives, but each is used 1× today. They earn their primitive status because (a) their behaviour is non-trivial (focus management, body-scroll lock, escape handler) and (b) they'll be reused by future drawer-style surfaces (filter sheets, command palettes, etc).
-3. **Storybook coverage on every new primitive.** Each new component ships with `<Name>.stories.tsx` (title `UI/<Name>`), VR-tagged, `vr` tag in meta.
-4. **No hidden state.** `<SiteHeader>` is a Server Component fed by the root layout's data fetch; client-side interactivity (drawer open/close) lives in `<NavTakeover>` only.
+1. **Audit before building.** Icon-only affordances (search, hamburger, drawer ✕) reuse `<Button variant="ghost" size="sm">` with a Phosphor icon child — the ghost variant already provides the 1.5px ink stroke, sharp corners, and canonical press-down hover (per Phase 3 PRD §8b — canonical source of truth). No new `<IconButton>` primitive.
+2. **Extract before duplicating.** `<NavTakeover>` + `<NavTakeover.Item>` are two new primitives, each used 1× today. They earn their primitive status because (a) their behaviour is non-trivial (focus management, body-scroll lock, escape handler) and (b) they'll be reused by future drawer-style surfaces (filter sheets, command palettes, etc).
+3. **Storybook coverage on every new primitive.** `<NavTakeover>` and `<NavTakeover.Item>` each ship with `<Name>.stories.tsx` (title `UI/<Name>`), VR-tagged, `vr` tag in meta. The reused `<Button>` variants are already covered by the existing `<Button>` baseline.
+4. **Server / Client split.** `<SiteHeader>` is a **Client Component** (uses `usePathname()` for active-item detection — same as the existing `PageHeader.tsx` it replaces). Senior/youth team data is server-fetched in the root layout (`TeamRepository.findAll()`) and passed in as props; nothing else is fetched inside `<SiteHeader>`. Drawer state (open/close, focus management, body-scroll lock) lives in `<NavTakeover>`, also a Client Component. No `useRouter()` is needed — navigation happens via standard `<Link>` / `<a>` clicks.
 
 ## Open follow-ups (non-blocking)
 
@@ -178,5 +181,5 @@ type NavTakeoverItemProps = {
 - [x] No 01-08 numbering on drawer items (per `feedback_no_decorative_nav_ornaments`).
 - [x] No fabricated nav items — all 8 trace to `menuItems.ts` + dynamic team data.
 - [x] No fabricated CTA destinations — `/zoeken` and `/club/inschrijven` are real routes.
-- [x] Reuse mandate captured — existing primitives + new `<IconButton>`, `<NavTakeover>`, `<NavTakeover.Item>` shared sub-components, all Storybook-covered.
+- [x] Reuse mandate captured — existing primitives (`<EditorialHeading>` · `<MonoLabel>` · `<Button>` primary + ghost) + new `<NavTakeover>` and `<NavTakeover.Item>` shared sub-components, Storybook-covered. Icon-only affordances reuse `<Button variant="ghost" size="sm">` with Phosphor icon child per Phase 3 PRD §8b — no new `<IconButton>` primitive.
 - [x] No schema migrations required for Checkpoint C.
