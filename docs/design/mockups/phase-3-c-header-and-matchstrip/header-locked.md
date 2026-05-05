@@ -5,6 +5,8 @@
 **Mockup:** `option-a-header-detail.html`.
 **Companion:** `matchstrip-locked.md` + `option-a-matchstrip-detail.html` (separate component, separate sub-issue 3.C.2).
 
+> **★ Reuse audit correction (2026-05-05):** the `<IconButton>` primitive originally proposed in this spec is **not** built. Audit against the design-system barrel found that `<Button variant="ghost" size="sm">` already provides the 1.5px ink stroke + sharp corners + canonical press-down hover that the search · hamburger · drawer ✕ affordances need. Search uses `<Button variant="ghost" size="sm">` with a Phosphor `MagnifyingGlass` icon child; hamburger uses the same with a custom 3-bar SVG (or Phosphor `List`); drawer ✕ uses Phosphor `X`. The reuse map and approval checklist below still mention `<IconButton>` for historical accuracy of the drilling; **the canonical source of truth is the Phase 3 PRD §8b**.
+
 ## Scope
 
 Site-wide masthead rendered in the root layout. Sticky at `top: 0` on every page. Three states across viewports: desktop default, mobile closed, mobile drawer-open. Direction A vocabulary (Classic Newsstand) — cream paper, 1px ink rules, IBM Plex Mono caps nav, Playfair italic 900 wordmark with jersey-deep accent on `Elewijt`.

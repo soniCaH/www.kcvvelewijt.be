@@ -171,12 +171,13 @@ Each task has its own sub-issue. After 3.0 lands, all four can run in parallel; 
 - `apps/web/src/components/article/EditorialHero/EditorialHero.tsx` (Server Component, discriminated union dispatch)
 - `apps/web/src/components/article/EditorialHero/EditorialHero.types.ts` (TS union)
 - `apps/web/src/components/article/EditorialHero/EditorialHeroShell.tsx` (60/40 grid + ink rule)
-- `apps/web/src/components/article/EditorialHero/EditorialKicker.tsx`
+- `apps/web/src/components/article/EditorialHero/EditorialKicker.tsx` (thin wrapper around `<MonoLabelRow divider="★">` + leading/trailing ★ glyphs)
 - `apps/web/src/components/article/EditorialHero/EditorialLead.tsx`
 - `apps/web/src/components/article/EditorialHero/EditorialByline.tsx`
-- `apps/web/src/components/article/EditorialHero/HeroCoverImage.tsx`
 - All paired `*.stories.tsx` and `index.ts` files
 - `apps/web/src/components/design-system/index.ts` — barrel exports for the shared sub-components
+
+**No `<HeroCoverImage>` wrapper.** Per the reuse audit (PRD §8b), the cover-image artefact is composed inline in each variant component as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` — `<TapedFigure>` already accepts that aspect, so no wrapper primitive is needed.
 
 **Implementation per `announcement-locked.md` §"Component composition":**
 
@@ -305,8 +306,9 @@ Each migration ships with:
 - `apps/web/src/components/layout/SiteHeader/SiteHeader.tsx` (Server Component, fetches senior/youth teams via `TeamRepository`)
 - `apps/web/src/components/layout/SiteHeader/NavTakeover.tsx` (Client Component, drawer state)
 - `apps/web/src/components/layout/SiteHeader/NavTakeover.Item.tsx`
-- `apps/web/src/components/design-system/IconButton/IconButton.tsx` (+ stories)
-- All paired `*.stories.tsx` files (UI/SiteHeader, UI/NavTakeover, UI/NavTakeover/Item, UI/IconButton)
+- All paired `*.stories.tsx` files (UI/SiteHeader, UI/NavTakeover, UI/NavTakeover/Item)
+
+**No `<IconButton>` primitive.** Per the reuse audit (PRD §8b), search · hamburger · drawer ✕ all reuse `<Button variant="ghost" size="sm">` with a Phosphor icon child — the ghost variant already provides 1.5px ink stroke + sharp corners + canonical press-down hover.
 
 **Files to modify:**
 
@@ -317,7 +319,7 @@ Each migration ships with:
 **Implementation per `header-locked.md`:**
 
 1. **Sticky at `top: 0`** on every page (Q1 B1 lock). Pure CSS — no JS scroll listener.
-2. **Icon-only search** (Q2 C1) — click → `/zoeken`. Use `<IconButton>` + Phosphor `MagnifyingGlass` (production swap; mockup uses `⌕` glyph).
+2. **Icon-only search** (Q2 C1) — click → `/zoeken`. Use `<Button variant="ghost" size="sm">` with Phosphor `MagnifyingGlass` icon child (production swap; mockup uses `⌕` glyph).
 3. **WORD LID hidden on mobile** (Q3 D3) — `<button class="...hidden md:flex">` pattern. Full `KCVV Elewijt` wordmark with jersey-deep on `Elewijt` preserved at every viewport.
 4. **Mobile drawer** = `<NavTakeover>` full-viewport takeover (Q4 E2 refined):
    - Top bar: wordmark + ✕ close button (replaces hamburger in same slot, ink/cream inverted).
@@ -333,7 +335,8 @@ Each migration ships with:
 **Acceptance:**
 
 - `<SiteHeader>` ships at `apps/web/src/components/layout/SiteHeader/`.
-- `<IconButton>`, `<NavTakeover>`, `<NavTakeover.Item>` all in Storybook with VR baselines.
+- `<NavTakeover>`, `<NavTakeover.Item>` in Storybook with VR baselines.
+- Header icon buttons (search, hamburger, drawer ✕) all rendered via `<Button variant="ghost" size="sm">` with Phosphor icon children — verified to match the locked visual treatment.
 - Drawer closed/open/submenu-expanded all VR-captured.
 - Legacy `<PageHeader>` deleted.
 - Root layout swap done.
@@ -394,7 +397,7 @@ Each migration ships with:
 - `apps/web/src/components/layout/SiteFooter/SiteFooter.tsx`
 - `apps/web/src/components/layout/SiteFooter/SiteFooter.stories.tsx`
 - `apps/web/src/components/layout/SiteFooter/footerLinks.ts` (locked link list)
-- `apps/web/src/components/design-system/FooterLink/FooterLink.tsx` (+ stories)
+  **No new primitive for footer links.** Per the reuse audit (PRD §8b), footer directory links reuse `<EditorialLink variant="inline" tone="light">` — the existing inline + light combo provides ink-soft default + jersey-deep hover (with `<HighlighterStroke>` sweep) at the right density for footer columns.
 
 **Files to modify:**
 
@@ -412,7 +415,7 @@ Each migration ships with:
    - Bij de club — Geschiedenis · Bestuur · Contact · Praktische info
 3. **Ink bottom bar:** `© 1909–{currentYear} KCVV Elewijt` · `Driesstraat 32 · 1982 Elewijt` · Privacy · Cookies · social glyphs (Facebook + Instagram).
 4. **Mobile collapse** (≤ 768px): 3 cols → 1 col stack, wordmark 44 → 32px, tagline 21 → 18px, ink bar wraps to 2 rows.
-5. **`<FooterLink>` primitive:** body font 14/500, ink-soft default, jersey-deep with bottom rule on hover. Distinct from `<EditorialLink>` (different sizing).
+5. **Directory links** use `<EditorialLink variant="inline" tone="light">`. Body font sizing handled by the variant; ink-soft default; jersey-deep hover with `<HighlighterStroke>` sweep. **No new primitive** (reuses existing `<EditorialLink>` from Phase 2).
 6. **Reuses verbatim:** `<EditorialHeading>`, `<MonoLabel>`, `<SocialLinks>`, `<CookiePreferencesButton>`.
 7. **Founding year fixes** — three one-line edits in passing (`MissionBanner` · `jsonld.ts` · `PageHeader` wordmark already handled by 3.C.1).
 8. **No newsletter** — never include a newsletter signup column or CTA. Permanent constraint.
@@ -421,7 +424,7 @@ Each migration ships with:
 **Acceptance:**
 
 - `<SiteFooter>` ships at `apps/web/src/components/layout/SiteFooter/`.
-- `<FooterLink>` Storybook + VR baseline.
+- `<EditorialLink variant="inline" tone="light">` consumed throughout the directory; no new VR baseline (existing primitive's baselines apply).
 - `<SiteFooter>` Storybook stories for desktop + mobile.
 - Legacy `<PageFooter>` deleted.
 - All 3 founding-year locations corrected.

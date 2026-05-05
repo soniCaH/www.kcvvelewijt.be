@@ -6,6 +6,8 @@
 **Drill-down record:** `option-x-footer-comparisons.html` (Q0 audit + Q1 + Q2 + Q2.5 + Q3 with all archived options preserved `display:none` for diff history).
 **Companions:** `header-locked.md` + `matchstrip-locked.md` (other Checkpoint C/D locks).
 
+> **★ Reuse audit correction (2026-05-05):** the `<FooterLink>` primitive originally proposed in this spec is **not** built. Audit against the design-system barrel found that `<EditorialLink variant="inline" tone="light">` already provides the ink-soft default + jersey-deep hover (with `<HighlighterStroke>` sweep) at the right density for footer columns. Footer directory links use `<EditorialLink variant="inline" tone="light">` directly — no new primitive, no new Storybook story (existing primitive's baselines apply). The reuse map and approval checklist below still mention `<FooterLink>` for historical accuracy of the drilling; **the canonical source of truth is the Phase 3 PRD §8b**.
+
 ## Scope
 
 Site-wide footer rendered in the root layout — colofon anchor on **every page** (homepage, section indexes, article detail, single-team / single-player / single-match detail, hero-less utility pages, error pages). Three-band composition: top zone with modest wordmark + 2-colour motto · 3-column task-oriented directory · ink bottom bar. **Founding year `1909`** (correcting three existing buggy locations — see open follow-ups).

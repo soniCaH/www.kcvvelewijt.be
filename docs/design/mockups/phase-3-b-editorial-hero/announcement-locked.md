@@ -5,6 +5,8 @@
 **Mockup:** `option-a-announcement-detail.html` + screenshots `screenshots/detail-announcement-{full,no-cover,with-cover}.png`.
 **Field availability sheet:** `fields.md` (gates the rendered fields).
 
+> **★ Reuse audit correction (2026-05-05):** the `<HeroCoverImage>` shared sub-component originally proposed in this spec (and inherited by transfer/event/interview-locked.md) is **not** built. Audit against the design-system barrel found that `<TapedFigure>` already accepts `aspect="landscape-16-9"`, so the cover-image artefact composes inline in each variant component as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` — no wrapper primitive needed, no new Storybook story. The composition diagram + reuse map below still mention `<HeroCoverImage>` for historical accuracy of the drilling; **the canonical source of truth is the Phase 3 PRD §8b**. Same correction applies verbatim to `transfer-locked.md`, `event-locked.md`, `interview-locked.md`.
+
 ## Scope
 
 Detail-page hero for `/nieuws/[slug]` when `articleType === "announcement"`. Renders at the top of the article; body flows directly below. **No click-through CTAs** — the reader is already on the article. Homepage placement (with CTA row) layers on top of this spec via the `placement="homepage"` extension (Phase 3 B follow-up, not blocking).

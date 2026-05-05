@@ -139,7 +139,7 @@ Each sub-issue ships:
   - `<EditorialKicker>` — star sandwich + dot-separated MonoLabel row.
   - `<EditorialLead>` — italic display paragraph, max-width 52ch + truncate-to-280 helper.
   - `<EditorialByline>` — author row with leading star.
-  - `<HeroCoverImage>` — TapedCard rotation A + TapedFigure aspect="landscape-16-9".
+  - **Cover image artefact** — direct composition `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` inline in each variant component. **No new wrapper primitive** (existing `<TapedFigure>` already accepts the 16:9 aspect).
 - 0 variant rendering — variants land in 3.B.2.
 
 #### 5.B.2 Variants (depends on 3.A.1 + 3.A.2 + 3.B.1)
@@ -175,7 +175,7 @@ Plus the homepage placement extension folded into all 4 specs:
 - Icon-only search → `/zoeken` (Q2 C1).
 - WORD LID hidden on mobile; full `KCVV Elewijt` wordmark with jersey-deep accent on `Elewijt` preserved (Q3 D3).
 - Mobile drawer: full-screen takeover, Playfair italic 22px nav, `▾` only on submenu items, Word lid as hero block (Q4 E2 refined).
-- New shared sub-components: `<IconButton>`, `<NavTakeover>`, `<NavTakeover.Item>`. Each Storybook-covered.
+- New shared sub-components: `<NavTakeover>`, `<NavTakeover.Item>`. Each Storybook-covered. Icon-only buttons (search, hamburger, drawer ✕) reuse `<Button variant="ghost" size="sm">` with Phosphor icon children — no new `<IconButton>` primitive.
 - Replaces legacy `<PageHeader>` site-wide (root layout swap).
 - **Founding year `SINDS 1948` in wordmark superscript → `SINDS 1909`** in passing.
 
@@ -192,7 +192,7 @@ Plus the homepage placement extension folded into all 4 specs:
 - I2 task-oriented columns: Ontdek · Aansluiten · Bij de club.
 - J1 refined middle column: role-based items (Als speler · Als vrijwilliger · Als sponsor).
 - Founding year `1909` in `© 1909–2026 KCVV Elewijt` colofon. **Three buggy code locations corrected in passing**: `MissionBanner` (was 1948) · `PageHeader` wordmark superscript (handled by 3.C.1) · `jsonld.ts` (was 1924).
-- New shared sub-component: `<FooterLink>` (footer-density link with ink-soft → jersey-deep + bottom rule on hover).
+- Footer directory links reuse `<EditorialLink variant="inline" tone="light">` — no new `<FooterLink>` primitive. The existing inline + light combo provides ink-soft default + jersey-deep hover (with `<HighlighterStroke>` sweep) at the right density for footer columns.
 - Reuses existing `<EditorialHeading>`, `<MonoLabel>`, `<SocialLinks>`, `<CookiePreferencesButton>` verbatim.
 - Replaces legacy `<PageFooter>` site-wide (root layout swap).
 
@@ -248,25 +248,39 @@ Plus one non-blocking Checkpoint B follow-up:
 
 Every new shared sub-component shipped in Phase 3 carries a Storybook story (`<Name>.stories.tsx`, title `UI/<Name>`, `vr` tag) and a VR baseline. Per the redesign mandate.
 
-| Sub-issue | Component              | Notes                                                                                  |
-| --------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| 3.A.1     | `<PlayerFigure>`       | Primitive — photo state (polaroid TapedCard) + illustration state (block-print figure) |
-| 3.A.2     | `<JerseyShirt>`        | Primitive — single decorative jersey illustration (inverted palette)                   |
-| 3.A.3     | `<EndMark>`            | Primitive — `[rule] ★ EINDE GESPREK ★ [rule]`                                          |
-| 3.A.4     | `<QASectionDivider>`   | Primitive — single block PT title + ✦ glyph                                            |
-| 3.B.1     | `<EditorialHeroShell>` | Shared — 60/40 grid + ink rule                                                         |
-| 3.B.1     | `<EditorialKicker>`    | Shared — star sandwich + MonoLabelRow                                                  |
-| 3.B.1     | `<EditorialLead>`      | Shared — italic display paragraph                                                      |
-| 3.B.1     | `<EditorialByline>`    | Shared — author row with leading star                                                  |
-| 3.B.1     | `<HeroCoverImage>`     | Shared — TapedCard rotation A + 16:9 TapedFigure                                       |
-| 3.B.2     | `<TransferFactStrip>`  | Variant artefact — 3 paper cards + jersey-deep arrows for incoming                     |
-| 3.B.2     | `<EventFactStrip>`     | Variant artefact — ticket-stub banner with jersey-deep date block                      |
-| 3.B.2     | `<SubjectsStrip>`      | Variant artefact — N=1/2/3/4 polaroid layouts + mobile compact list                    |
-| 3.C.1     | `<IconButton>`         | New primitive — outlined icon affordance (search, hamburger, drawer ✕)                 |
-| 3.C.1     | `<NavTakeover>`        | New primitive — full-viewport mobile drawer surface                                    |
-| 3.C.1     | `<NavTakeover.Item>`   | New primitive — drawer nav row (Playfair italic 22px + paper-edge rule)                |
-| 3.C.2     | `<ShieldFigure>`       | New primitive — heraldic clip-path shield with `kcvv` / `opponent` variants            |
-| 3.C.3     | `<FooterLink>`         | New primitive — footer-density link (ink-soft → jersey-deep on hover)                  |
+**Reuse audit (2026-05-05):** the claims below survived a check against the existing design-system barrel. Three earlier candidates (`<IconButton>`, `<FooterLink>`, `<HeroCoverImage>`) were dropped — existing primitives cover those use-cases (see §8b below).
+
+| Sub-issue | Component              | Notes                                                                                                                                                                                                                                      |
+| --------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3.A.1     | `<PlayerFigure>`       | Primitive — photo state (polaroid TapedCard) + illustration state (block-print figure)                                                                                                                                                     |
+| 3.A.2     | `<JerseyShirt>`        | Primitive — single decorative jersey illustration (inverted palette)                                                                                                                                                                       |
+| 3.A.3     | `<EndMark>`            | Primitive — `[rule] ★ EINDE GESPREK ★ [rule]`                                                                                                                                                                                              |
+| 3.A.4     | `<QASectionDivider>`   | Primitive — single block PT title + ✦ glyph                                                                                                                                                                                                |
+| 3.B.1     | `<EditorialHeroShell>` | Shared — 60/40 grid + ink rule                                                                                                                                                                                                             |
+| 3.B.1     | `<EditorialKicker>`    | Shared — thin wrapper around `<MonoLabelRow divider="★">` + leading/trailing ★ glyphs                                                                                                                                                      |
+| 3.B.1     | `<EditorialLead>`      | Shared — italic display paragraph + truncate-to-280 helper                                                                                                                                                                                 |
+| 3.B.1     | `<EditorialByline>`    | Shared — author row with leading star                                                                                                                                                                                                      |
+| 3.B.2     | `<TransferFactStrip>`  | Variant artefact — 3 paper cards + jersey-deep arrows for incoming                                                                                                                                                                         |
+| 3.B.2     | `<EventFactStrip>`     | Variant artefact — ticket-stub banner with jersey-deep date block                                                                                                                                                                          |
+| 3.B.2     | `<SubjectsStrip>`      | Variant artefact — N=1/2/3/4 polaroid layouts + mobile compact list                                                                                                                                                                        |
+| 3.C.1     | `<NavTakeover>`        | New primitive — full-viewport mobile drawer surface                                                                                                                                                                                        |
+| 3.C.1     | `<NavTakeover.Item>`   | New primitive — drawer nav row (Playfair italic 22px + paper-edge rule)                                                                                                                                                                    |
+| 3.C.2     | `<ShieldFigure>`       | New primitive — heraldic clip-path shield with `kcvv` / `opponent` variants. **Caveat:** partial geometry overlap with `<StampBadge>` — flag for post-Phase-3 unification (clip-path swap could potentially fold both into one primitive). |
+
+### 8b · Existing primitives reused (no new component)
+
+| Use-case                                             | Existing primitive                                                                   | How                                                                                                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header search · hamburger · drawer ✕ icon affordance | `<Button variant="ghost" size="sm">` + Phosphor icon child                           | Ghost variant already provides 1.5px ink stroke + sharp corners + canonical press-down hover. **No new `<IconButton>` needed.**                   |
+| Footer directory link                                | `<EditorialLink variant="inline" tone="light">`                                      | Existing inline + light combo serves the ink-soft default + jersey-deep hover with `<HighlighterStroke>` sweep. **No new `<FooterLink>` needed.** |
+| EditorialHero cover image artefact                   | Direct composition: `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` | `<TapedFigure>` already accepts `aspect="landscape-16-9"`. Inline composition in the variant components — **no `<HeroCoverImage>` wrapper.**      |
+| MatchStrip CTA                                       | `<Button variant="primary" size="sm">`                                               | Existing primary variant + small size                                                                                                             |
+| Footer wordmark                                      | `<EditorialHeading>`                                                                 | At 44px (vs header's 26px); jersey-deep accent on `Elewijt`                                                                                       |
+| Footer column headings                               | `<MonoLabel>` size `sm` weight 700                                                   | With custom 1.5px jersey-deep underline (one-off footer styling, not new primitive)                                                               |
+| EditorialKicker MonoLabel row                        | `<MonoLabelRow divider="★">`                                                         | Existing component already accepts `divider` prop with `"★"` option                                                                               |
+| Match shield team name                               | `<EditorialHeading>`                                                                 | At 16px display italic 700; same primitive as wordmark, scaled down                                                                               |
+| Footer social glyphs                                 | `<SocialLinks>`                                                                      | Reuses existing component; ink-bar styling override (1px cream outline)                                                                           |
+| Footer cookie consent                                | `<CookiePreferencesButton>`                                                          | Reused as-is; no API change                                                                                                                       |
 
 ---
 
