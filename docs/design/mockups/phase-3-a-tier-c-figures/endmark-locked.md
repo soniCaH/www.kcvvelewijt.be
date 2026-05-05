@@ -75,6 +75,6 @@ Common labels (page-/article-supplied): `EINDE GESPREK`, `EINDE INTERVIEW`, `EIN
 - [ ] Stars rendered as separate flex children (`<span class="endmark__star">★</span>`), not pseudo-elements.
 - [ ] Three centerlines (rule, star optical centre, label cap-height midpoint) align to within 1px — verified with a VR baseline overlaid on a guide.
 - [ ] Label is editor-supplied with default `EINDE GESPREK`; no other props.
-- [ ] Stars are `aria-hidden`; component is `role="presentation"`.
+- [ ] Stars are `aria-hidden="true"`; wrapper is a plain `<aside>` (or `<div>`) — **NOT** `aria-hidden` and **NOT** `role="presentation"`, because the label text is meaningful (see "A11y" section).
 
 Reply "approved" and the next figure goes under the same drill-down.
