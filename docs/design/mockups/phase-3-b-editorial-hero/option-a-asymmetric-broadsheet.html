@@ -1,0 +1,1522 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction A — Asymmetric Broadsheet · Phase 3 · Checkpoint B · EditorialHero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-lg: 10px 10px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         EDITORIAL HERO — asymmetric broadsheet (60/40 grid)
+         ============================================================ */
+
+      .ed-hero {
+        display: grid;
+        grid-template-columns: 60% 40%;
+        gap: 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 56px 56px 56px 56px;
+        position: relative;
+      }
+      .ed-hero::before {
+        content: "";
+        position: absolute;
+        top: 56px;
+        bottom: 56px;
+        left: calc(60% + 8px);
+        width: 1px;
+        background: var(--color-ink);
+        opacity: 0.55;
+      }
+      .ed-hero__left { padding-right: 56px; display: flex; flex-direction: column; justify-content: center; }
+      .ed-hero__right { padding-left: 56px; display: flex; align-items: center; justify-content: center; min-height: 380px; }
+
+      .mono-label-row {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+      }
+      .mono-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .mono-label--muted { color: var(--color-ink-muted); }
+      .mono-label--pill {
+        display: inline-block;
+        padding: 4px 10px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .mono-label--ink-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .star-kicker {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+      }
+
+      .editorial-heading {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: clamp(56px, 6.4vw, 96px);
+        line-height: 1.02;
+        letter-spacing: -0.01em;
+        margin: 0 0 24px;
+        color: var(--color-ink);
+      }
+      .editorial-heading em {
+        font-style: italic;
+        font-weight: 900;
+        color: var(--color-jersey-deep);
+      }
+
+      .ed-hero__dek {
+        font-family: var(--font-body);
+        font-size: 18px;
+        line-height: 1.55;
+        color: var(--color-ink-soft);
+        max-width: 56ch;
+        margin: 0 0 32px;
+      }
+
+      .ed-hero__cta-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 14px 22px;
+        border: 2px solid var(--color-ink);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 300ms ease;
+        border-radius: 0;
+      }
+      .btn--primary {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .btn--ghost {
+        background: var(--color-cream);
+        color: var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .btn--inverted {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .btn:hover {
+        transform: translate(4px, 4px);
+        box-shadow: none;
+      }
+
+      .byline {
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-paper-edge);
+        display: flex;
+        gap: 24px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        flex-wrap: wrap;
+      }
+
+      /* ============================================================
+         TAPED CARD — paper artefact wrapper
+         ============================================================ */
+
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lg);
+        padding: 24px;
+        transition: all 300ms ease;
+        max-width: 380px;
+        width: 100%;
+      }
+      .taped-card--rot-a { transform: rotate(-2.4deg); }
+      .taped-card--rot-b { transform: rotate(2.1deg); }
+      .taped-card--rot-c { transform: rotate(-1.4deg); }
+      .taped-card:hover {
+        transform: rotate(0deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      .taped-card__tape {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-3deg);
+        width: 96px;
+        height: 26px;
+        background: rgba(74, 207, 82, 0.45);
+        border: 1px solid rgba(10, 10, 10, 0.2);
+      }
+      .taped-card__tape--alt {
+        background: rgba(10, 10, 10, 0.18);
+        transform: translateX(-50%) rotate(4deg);
+        left: 30%;
+      }
+
+      /* ============================================================
+         ARTEFACT 1 — TRANSFER (before/after shields)
+         ============================================================ */
+
+      .transfer-artefact {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .club-shield {
+        width: 96px;
+        height: 110px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 38px;
+        color: var(--color-ink);
+        clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+        position: relative;
+      }
+      .club-shield--prev {
+        background: var(--color-cream-soft);
+        color: var(--color-ink-muted);
+        opacity: 0.7;
+      }
+      .club-shield--next {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+      }
+      .transfer-arrow {
+        font-family: var(--font-display);
+        font-size: 56px;
+        font-weight: 900;
+        color: var(--color-ink);
+        line-height: 1;
+      }
+      .transfer-meta {
+        margin-top: 18px;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        border-top: 1px dashed var(--color-paper-edge);
+        padding-top: 12px;
+      }
+
+      /* ============================================================
+         ARTEFACT 2 — MATCH PREVIEW
+         ============================================================ */
+
+      .match-artefact { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+      .match-artefact__shield {
+        width: 120px;
+        height: 140px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 48px;
+        clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+      }
+      .match-artefact__date {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 28px;
+        line-height: 1;
+        text-align: center;
+      }
+      .match-artefact__date em { font-style: italic; color: var(--color-jersey-deep); }
+      .match-artefact__meta {
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .match-artefact__rule {
+        width: 60%;
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.4;
+      }
+
+      /* ============================================================
+         ARTEFACT 3 — INTERVIEW (player figure stubs)
+         ============================================================ */
+
+      .interview-artefact {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        align-items: flex-end;
+      }
+      .player-figure-stub {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .player-figure-stub__circle {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        background-image: linear-gradient(180deg, #d9d2bd 0%, #b8b0a0 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .player-figure-stub__circle::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 56px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(10, 10, 10, 0.45);
+      }
+      .player-figure-stub__jersey {
+        width: 70px;
+        height: 56px;
+        background: var(--color-jersey-deep);
+        border: 2px solid var(--color-ink);
+        position: relative;
+      }
+      .player-figure-stub__jersey::before,
+      .player-figure-stub__jersey::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--color-cream);
+      }
+      .player-figure-stub__jersey::before { left: 22px; }
+      .player-figure-stub__jersey::after { right: 22px; }
+      .player-figure-stub__name {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      /* ============================================================
+         ARTEFACT 4 — EVENT POSTER
+         ============================================================ */
+
+      .poster-artefact {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 24px 18px;
+        text-align: center;
+        border: 2px solid var(--color-ink);
+        position: relative;
+      }
+      .poster-artefact__kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-jersey);
+        margin-bottom: 8px;
+      }
+      .poster-artefact__title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        margin: 0 0 6px;
+      }
+      .poster-artefact__date {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 0.9;
+        color: var(--color-jersey);
+        margin: 14px 0 8px;
+      }
+      .poster-artefact__rule {
+        width: 40%;
+        margin: 12px auto;
+        height: 1px;
+        background: var(--color-cream);
+        opacity: 0.4;
+      }
+      .poster-artefact__foot {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+
+      /* ============================================================
+         ARTEFACT 5 — STAMP BADGE
+         ============================================================ */
+
+      .stamp-badge {
+        width: 200px;
+        height: 200px;
+        margin: 12px auto;
+        border: 3px double var(--color-ink);
+        border-radius: 50%;
+        background: var(--color-cream);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transform: rotate(-9deg);
+        position: relative;
+        color: var(--color-ink);
+        padding: 12px;
+      }
+      .stamp-badge::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 1px solid var(--color-ink);
+        border-radius: 50%;
+        opacity: 0.4;
+      }
+      .stamp-badge__top {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .stamp-badge__title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 28px;
+        line-height: 1;
+        margin: 6px 0;
+        color: var(--color-jersey-deep);
+      }
+      .stamp-badge__bottom {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .stamp-badge__star { font-size: 14px; color: var(--color-jersey-deep); }
+
+      /* ============================================================
+         ARTEFACT 6 — TYPOGRAPHIC MARK / DROP CAP
+         ============================================================ */
+
+      .typo-mark {
+        text-align: center;
+      }
+      .typo-mark__cap {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 220px;
+        line-height: 0.85;
+        color: var(--color-jersey-deep);
+        text-shadow: 4px 4px 0 var(--color-ink);
+        margin: 0;
+      }
+      .typo-mark__rule {
+        width: 70%;
+        margin: 14px auto;
+        height: 2px;
+        background: var(--color-ink);
+      }
+      .typo-mark__foot {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         ARTEFACT 7 — PLAYER FIGURE (rect crop + jersey + ticket stub)
+         ============================================================ */
+
+      .player-artefact { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+      .player-artefact__photo {
+        width: 100%;
+        height: 220px;
+        border: 2px solid var(--color-ink);
+        background-size: cover;
+        background-position: center top;
+        background-image: url("https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=400&fit=crop");
+        position: relative;
+        filter: contrast(1.05) saturate(0.92);
+      }
+      .player-artefact__photo .mono-label--pill {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+      .player-artefact__row {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+      }
+      .player-artefact__jersey {
+        flex: 0 0 64px;
+        height: 70px;
+        background: var(--color-jersey-deep);
+        border: 2px solid var(--color-ink);
+        position: relative;
+      }
+      .player-artefact__jersey::before,
+      .player-artefact__jersey::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--color-cream);
+      }
+      .player-artefact__jersey::before { left: 18px; }
+      .player-artefact__jersey::after { right: 18px; }
+      .player-artefact__jersey-num {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 32px;
+        color: var(--color-cream);
+      }
+      .ticket-stub {
+        flex: 1;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        padding: 8px 10px;
+        position: relative;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+      }
+      .ticket-stub::before,
+      .ticket-stub::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        transform: translateY(-50%);
+      }
+      .ticket-stub::before { left: -7px; }
+      .ticket-stub::after { right: -7px; }
+      .ticket-stub__label { font-size: 9px; color: var(--color-ink-muted); }
+      .ticket-stub__value { font-size: 13px; font-weight: 700; }
+
+      /* ============================================================
+         CLIPPED CARD — used in mobile collapse demo
+         ============================================================ */
+
+      .clipped-card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 18px 22px;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+      }
+
+      /* ============================================================
+         MOBILE COLLAPSE DEMO
+         ============================================================ */
+
+      .mobile-frame {
+        max-width: 380px;
+        margin: 0 auto;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-md);
+        padding: 24px;
+      }
+      .mobile-frame .ed-hero {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+      }
+      .mobile-frame .ed-hero::before { display: none; }
+      .mobile-frame .ed-hero__right {
+        order: -1;
+        padding: 0 0 24px;
+        min-height: 0;
+        border-bottom: 1px solid var(--color-paper-edge);
+        margin-bottom: 24px;
+      }
+      .mobile-frame .ed-hero__left { padding: 0; }
+      .mobile-frame .editorial-heading { font-size: 40px; }
+      .mobile-frame .ed-hero__dek { font-size: 15px; }
+
+      /* ============================================================
+         PRIMITIVE MAP TABLE
+         ============================================================ */
+
+      .primitive-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .primitive-table th,
+      .primitive-table td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        font-size: 13px;
+        vertical-align: top;
+      }
+      .primitive-table th {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .primitive-table td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 5px;
+        border: 1px solid var(--color-paper-edge);
+      }
+      .primitive-table tr:last-child td { border-bottom: none; }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+
+      @media (max-width: 900px) {
+        .ed-hero { grid-template-columns: 1fr; padding: 32px; }
+        .ed-hero::before { display: none; }
+        .ed-hero__left { padding-right: 0; }
+        .ed-hero__right { padding-left: 0; padding-top: 32px; min-height: 0; }
+        .editorial-heading { font-size: 48px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIALHERO · DIRECTION A</span>
+          <span class="mono mono--muted">★ ASYMMETRIC BROADSHEET</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Een <span class="display"><em>broadsheet</em></span> hero.</h1>
+        <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
+          One <code>&lt;EditorialHero&gt;</code> with seven variants. The
+          headline / dek / CTA structure is invariant — only the right-column
+          artefact and the kicker label set switch per <code>variant</code>.
+          Layout is a <strong>60 / 40 left-right split</strong> with a thin
+          ink rule between columns and generous editorial white space. Heavy
+          Playfair display type on the left, paper-shadow <code>TapedCard</code>
+          artefact on the right with a slight rotation. No radial glows, no
+          rim-lights — paper-flat shadows only. Press-down hover canon
+          (<code>translate(4px, 4px) · shadow → none · 300ms</code>) on every
+          interactive primitive.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           VARIANT 1 — TRANSFER
+           =========================================================== -->
+      <section class="section" id="variant-transfer">
+        <div class="section-meta">
+          <span class="mono">★ 01 · VARIANT — TRANSFER</span>
+          <span class="mono mono--muted">— before/after club shields with arrow</span>
+        </div>
+        <h2>Een <em>nieuwe</em> shirt.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="b"</code> containing
+          two club shields side-by-side connected by a Playfair display arrow
+          glyph. Kicker reads as a postmark — <code>* TRANSFER * 2026 *</code>.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">* TRANSFER * 2026 *</span>
+              <span class="mono-label--pill">A-PLOEG</span>
+              <span class="mono-label mono-label--muted">12 MIN LEZEN</span>
+            </div>
+            <h2 class="editorial-heading">Maxim wisselt van <em>kleur.</em></h2>
+            <p class="ed-hero__dek">
+              Onze rechterflank wordt komend seizoen versterkt. Maxim Breugelmans
+              tekende een tweejarig contract en ruilt het oranje voor het
+              jersey-groen. Een transfer die we al weken stilletjes hoopten te
+              kunnen aankondigen.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">LEES HET VERHAAL <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">ALLE TRANSFERS</a>
+            </div>
+            <div class="byline">
+              <span>★ DOOR REDACTIE</span>
+              <span>03 MEI 2026</span>
+              <span>FOTO · KCVV</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-b">
+              <span class="taped-card__tape" aria-hidden="true"></span>
+              <div class="transfer-artefact">
+                <div class="club-shield club-shield--prev" aria-label="Vorige club">O</div>
+                <span class="transfer-arrow" aria-hidden="true">→</span>
+                <div class="club-shield club-shield--next" aria-label="Nieuwe club">K</div>
+              </div>
+              <p class="transfer-meta">FROM ORANJE FC · TO KCVV ELEWIJT · 2J</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Two-shield comparison reads instantly — no domain knowledge needed. Reuses the same shield clip-path as MatchScheduleTable. Postmark-style kicker (<code>* … *</code>) sets the editorial tone before the eye hits the headline.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Requires a "previous club" data point on the article schema or a manual override. For mid-season transfers without a clean previous club (e.g. promotion from youth) the artefact has to fall back to a single shield + arrow + "JEUGD" tag — the variant logic gets a sub-branch.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 2 — MATCH PREVIEW
+           =========================================================== -->
+      <section class="section" id="variant-match-preview">
+        <div class="section-meta">
+          <span class="mono">★ 02 · VARIANT — MATCH PREVIEW</span>
+          <span class="mono mono--muted">— opponent shield + date + venue + competition</span>
+        </div>
+        <h2>De <em>match</em> van zondag.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="a"</code> with the
+          opponent's club shield, the kickoff date in display serif, venue and
+          competition in mono caps. Kicker locks the matchday context.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">MATCHDAY · ZONDAG 12 OKT · 15:00</span>
+              <span class="mono-label--pill">PROVINCIAAL</span>
+              <span class="mono-label mono-label--muted">SPEELDAG 7</span>
+            </div>
+            <h2 class="editorial-heading">Een <em>topper</em> in eigen huis.</h2>
+            <p class="ed-hero__dek">
+              Vooraan in het klassement, met een ploeg die geen wedstrijd uit
+              handen geeft. Zondag komt VK Tildonk naar de Mertensstraat. We
+              halen de stoelen onder het afdak vandaan — dit wordt er één om
+              rechtop te zien.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">TICKETS RESERVEREN <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">SPEEL­SCHEMA</a>
+            </div>
+            <div class="byline">
+              <span>★ KCVV ELEWIJT vs VK TILDONK</span>
+              <span>HOOFDPLEIN</span>
+              <span>SCHEIDS · J. DEROO</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-a">
+              <span class="taped-card__tape taped-card__tape--alt" aria-hidden="true"></span>
+              <div class="match-artefact">
+                <div class="match-artefact__shield">T</div>
+                <p class="match-artefact__date">ZO 12 <em>okt</em></p>
+                <div class="match-artefact__rule" aria-hidden="true"></div>
+                <p class="match-artefact__meta">15:00 · MERTENSSTRAAT</p>
+                <p class="match-artefact__meta">PROVINCIAAL · SPEELDAG 7</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Compact match info card without rebuilding MatchStrip — same shield clip-path, same mono / display split. Maps cleanly to <code>match.homeTeam</code> + <code>match.awayTeam</code> + <code>match.startsAt</code>.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Visually adjacent to the persistent <code>&lt;MatchStrip&gt;</code> band when both render on a homepage. Risk of "two match cards" reading. Mitigation: reserve match-preview hero for the dedicated match-preview article; never on /matches index.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 3 — INTERVIEW
+           =========================================================== -->
+      <section class="section" id="variant-interview">
+        <div class="section-meta">
+          <span class="mono">★ 03 · VARIANT — INTERVIEW</span>
+          <span class="mono mono--muted">— two PlayerFigure stubs, duo format</span>
+        </div>
+        <h2>Een <em>dubbel-</em>gesprek.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="c"</code> wrapping
+          two <code>PlayerFigure</code> stubs side by side — each a circular
+          headshot placeholder + jersey block + name tag. Multi-subject
+          interviews add a third figure inline.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">INTERVIEW · DUO · 12 MIN</span>
+              <span class="mono-label--pill">A-PLOEG</span>
+              <span class="mono-label mono-label--muted">★ AFSCHEID DUBBEL</span>
+            </div>
+            <h2 class="editorial-heading">Acht <em>seizoenen</em> samen.</h2>
+            <p class="ed-hero__dek">
+              Julien en Niels haakten dezelfde zomer aan. Acht seizoenen later
+              hangen ze samen de schoenen aan de haak. We zetten ze één laatste
+              keer aan tafel — over de eerste training, het kampioenenjaar, en
+              wat ze écht gaan missen.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">LEES HET INTERVIEW <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">MEER GESPREKKEN</a>
+            </div>
+            <div class="byline">
+              <span>★ DOOR L. PEETERS</span>
+              <span>FOTO · M. CLAES</span>
+              <span>03 MEI 2026</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-c">
+              <span class="taped-card__tape" aria-hidden="true"></span>
+              <div class="interview-artefact">
+                <div class="player-figure-stub">
+                  <div class="player-figure-stub__circle" aria-hidden="true"></div>
+                  <div class="player-figure-stub__jersey" aria-hidden="true"></div>
+                  <span class="player-figure-stub__name">JULIEN</span>
+                </div>
+                <div class="player-figure-stub">
+                  <div class="player-figure-stub__circle" aria-hidden="true"></div>
+                  <div class="player-figure-stub__jersey" aria-hidden="true"></div>
+                  <span class="player-figure-stub__name">NIELS</span>
+                </div>
+              </div>
+              <p class="transfer-meta" style="margin-top: 14px">★ DUO · 2018 — 2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Multi-subject interviews are visually distinct from single-subject articles at-a-glance — the count of figures inside the TapedCard signals format before you read the kicker. Composes from the same PlayerFigure used in /spelers.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>3+ subject interviews stretch the right-column horizontally — at narrow viewports the figures get small. Cap at 3 subjects in the hero (rest go in body) and keep the figure-stub width responsive.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 4 — EVENT
+           =========================================================== -->
+      <section class="section" id="variant-event">
+        <div class="section-meta">
+          <span class="mono">★ 04 · VARIANT — EVENT</span>
+          <span class="mono mono--muted">— event poster crop</span>
+        </div>
+        <h2>Een <em>poster</em> in het klein.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="b"</code> wrapping
+          a miniature event poster. Ink-bg, jersey-green accent, oversized date
+          numeral. The poster crop is editorially distinct from the rest of the
+          paper-cream system — it asks for attention.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">EVENT · CLUBHUIS · 14 NOV</span>
+              <span class="mono-label--ink-pill">SUPPORTERSAVOND</span>
+              <span class="mono-label mono-label--muted">VRIJ TOEGANG</span>
+            </div>
+            <h2 class="editorial-heading">Eén <em>kantine,</em> alle clubs.</h2>
+            <p class="ed-hero__dek">
+              Op vrijdag 14 november draait de kantine één avond lang om een
+              ding: samenzijn. Geen wedstrijd, geen bestuursvergadering — wel
+              vlees op de grill, tappers achter de toog en een quiz voor wie
+              zijn KCVV-trivia tot in de jaren '70 kent.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">RESERVEER PLAATS <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">AGENDA</a>
+            </div>
+            <div class="byline">
+              <span>★ KCVV CLUBHUIS</span>
+              <span>VR 14 NOV · 19:00</span>
+              <span>GRATIS · INSCHRIJVING NODIG</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-b">
+              <span class="taped-card__tape" aria-hidden="true"></span>
+              <div class="poster-artefact">
+                <p class="poster-artefact__kicker">★ KCVV PRESENTS</p>
+                <p class="poster-artefact__title">Supporters­avond</p>
+                <p class="poster-artefact__date">14·11</p>
+                <div class="poster-artefact__rule" aria-hidden="true"></div>
+                <p class="poster-artefact__foot">VR · 19:00 · CLUBHUIS</p>
+                <p class="poster-artefact__foot" style="margin-top: 4px">EÉN PLEZANTE COMPAGNIE</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>The ink-bg poster crop is the loudest variant — appropriate for events where conversion (RSVP) matters. Borrows the Phase 2 PosterWordmark vocabulary so the event hero feels like a continuation of the club's poster language.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Two strong colour zones (ink poster + jersey-deep CTA) on the same hero compete for the eye. If the page underneath also uses ink panels (e.g. ScheduleStandingsBlock) the rhythm flattens. Mitigation: reserve event hero for /agenda detail pages, not homepage.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 5 — ANNOUNCEMENT
+           =========================================================== -->
+      <section class="section" id="variant-announcement">
+        <div class="section-meta">
+          <span class="mono">★ 05 · VARIANT — ANNOUNCEMENT</span>
+          <span class="mono mono--muted">— StampBadge, rotated, front-and-centre</span>
+        </div>
+        <h2>Een <em>officiële</em> mededeling.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="a"</code> wrapping
+          a <code>StampBadge</code> rotated counter-clockwise. The stamp is the
+          announcement — circular, double-rule, jersey-deep title. Used for
+          board communications, schedule changes, statements.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">MEDEDELING · BESTUUR</span>
+              <span class="mono-label--ink-pill">OFFICIEEL</span>
+              <span class="mono-label mono-label--muted">03 MEI 2026</span>
+            </div>
+            <h2 class="editorial-heading">De <em>kantine</em> blijft open.</h2>
+            <p class="ed-hero__dek">
+              Het bestuur bevestigt dat de kantine ook tijdens de winterstop
+              dagelijks open blijft. Eén plezante compagnie laat haar tappers
+              niet droogvallen. We rekenen op jullie.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">LEES MEDEDELING <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">ARCHIEF</a>
+            </div>
+            <div class="byline">
+              <span>★ BESTUUR KCVV</span>
+              <span>VOORZITTER · M. JANSSENS</span>
+              <span>OFFICIEEL</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-a">
+              <span class="taped-card__tape taped-card__tape--alt" aria-hidden="true"></span>
+              <div class="stamp-badge">
+                <span class="stamp-badge__top"><span class="stamp-badge__star">★</span> KCVV BESTUUR <span class="stamp-badge__star">★</span></span>
+                <span class="stamp-badge__title">Officieel</span>
+                <span class="stamp-badge__bottom">MEDEDELING · 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>StampBadge composes from primitives already shipped in #1591. Rotated + circular gives announcements an unambiguous "official" reading without colour-shifting the whole hero. Works without a photo asset — board comms rarely have visuals.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>One-trick variant — the StampBadge is dense, hard to vary copy length on. Long titles (3+ words) overflow the inner double-rule. Editorial guidance: announcement titles must be ≤ 2 words for stamp-fit.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 6 — GENERIC
+           =========================================================== -->
+      <section class="section" id="variant-generic">
+        <div class="section-meta">
+          <span class="mono">★ 06 · VARIANT — GENERIC</span>
+          <span class="mono mono--muted">— typographic mark / oversized drop cap</span>
+        </div>
+        <h2>Het <em>fallback-</em>gezicht.</h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="c"</code> wrapping
+          an oversized italic drop cap derived from the article slug's first
+          letter. Used when no transfer / match / interview / event / player
+          context applies — generic news.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">NIEUWS · CLUB</span>
+              <span class="mono-label--pill">UPDATE</span>
+              <span class="mono-label mono-label--muted">5 MIN LEZEN</span>
+            </div>
+            <h2 class="editorial-heading">Het terrein krijgt <em>nieuwe</em> doelen.</h2>
+            <p class="ed-hero__dek">
+              De aluminium doelen op terrein twee gaan na vijftien seizoenen
+              met pensioen. In juni komen er fonkelnieuwe — diepere netten,
+              veiliger frame, en een witte coating die langer wit blijft. Met
+              dank aan de werkploeg.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">LEES MEER <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">ALLE NIEUWS</a>
+            </div>
+            <div class="byline">
+              <span>★ DOOR REDACTIE</span>
+              <span>03 MEI 2026</span>
+              <span>FOTO · WERKPLOEG</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-c">
+              <span class="taped-card__tape" aria-hidden="true"></span>
+              <div class="typo-mark">
+                <p class="typo-mark__cap">H</p>
+                <div class="typo-mark__rule" aria-hidden="true"></div>
+                <p class="typo-mark__foot">§ NIEUWS · ELEWIJT</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>No external asset needed — the artefact derives from the headline text. Cheap to ship, never empty. Reinforces the typographic identity of the redesign in a place where photos would feel forced.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>The least visually arresting variant. On a homepage where every other hero has a photo or stamp, generic articles can feel "second class". Mitigation: encourage editorial team to assign a more specific variant whenever possible; reserve generic for true catch-all.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           VARIANT 7 — PLAYER
+           =========================================================== -->
+      <section class="section" id="variant-player">
+        <div class="section-meta">
+          <span class="mono">★ 07 · VARIANT — PLAYER</span>
+          <span class="mono mono--muted">— PlayerFigure (rectangular crop) + jersey + TicketStub + "NIEUW"</span>
+        </div>
+        <h2>Een <em>spelers­profiel.</em></h2>
+        <p class="lead">
+          Right-column artefact: <code>TapedCard rotation="b"</code> wrapping
+          a <code>PlayerFigure</code> — rectangular psdImage crop with a
+          <code>MonoLabel</code> "NIEUW" pill overlay, jersey block + number,
+          and a <code>TicketStub</code> reading the team / season tag.
+        </p>
+
+        <div class="ed-hero">
+          <div class="ed-hero__left">
+            <div class="mono-label-row">
+              <span class="star-kicker">SPELERSPROFIEL · A-PLOEG</span>
+              <span class="mono-label--pill">#8</span>
+              <span class="mono-label mono-label--muted">MIDDENVELD</span>
+            </div>
+            <h2 class="editorial-heading">Maxim <em>Breugelmans.</em></h2>
+            <p class="ed-hero__dek">
+              23 jaar, rechtsbenig, één meter tachtig. Komt over van Oranje FC
+              en moet de creatieve as op middenveld bemannen. Voorkeur voor
+              loopacties tussen de linies — exact het type dat we vorig
+              seizoen misten.
+            </p>
+            <div class="ed-hero__cta-row">
+              <a class="btn btn--primary" href="#">VOLLEDIG PROFIEL <span aria-hidden="true">→</span></a>
+              <a class="btn btn--ghost" href="#">A-PLOEG SELECTIE</a>
+            </div>
+            <div class="byline">
+              <span>★ A-PLOEG · 26/27</span>
+              <span>RUGNUMMER 8</span>
+              <span>STAMNR. 1102</span>
+            </div>
+          </div>
+          <div class="ed-hero__right">
+            <div class="taped-card taped-card--rot-b">
+              <span class="taped-card__tape" aria-hidden="true"></span>
+              <div class="player-artefact">
+                <div class="player-artefact__photo" role="img" aria-label="Maxim Breugelmans">
+                  <span class="mono-label--pill">NIEUW</span>
+                </div>
+                <div class="player-artefact__row">
+                  <div class="player-artefact__jersey" aria-hidden="true">
+                    <span class="player-artefact__jersey-num">8</span>
+                  </div>
+                  <div class="ticket-stub">
+                    <span class="ticket-stub__label">A-PLOEG</span>
+                    <span class="ticket-stub__value">26 / 27</span>
+                    <span class="ticket-stub__label">STAMNR. 1102</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Fully composes the existing PlayerFigure + TicketStub + MonoLabel vocabulary — same chrome the /spelers/[slug] PlayerHero will use. Editorial-team consistency: a player-profile hero on a news article and the player-detail page hero look like siblings.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Only works when a <code>player.psdImage</code> exists. Roughly 90% of A-team players have one (per saved-memory baseline) but youth + reserves often don't — fallback to a circular illustrated portrait, which weakens the variant's "real photo" reading.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           MOBILE COLLAPSE
+           =========================================================== -->
+      <section class="section" id="mobile-collapse">
+        <div class="section-meta">
+          <span class="mono">★ 08 · MOBILE COLLAPSE</span>
+          <span class="mono mono--muted">— &lt; 768px: artefact stacks above text, single column</span>
+        </div>
+        <h2>Op een <em>kleinere</em> ruit.</h2>
+        <p class="lead">
+          The 60/40 split collapses to a single column under 768px. The
+          right-column <code>TapedCard</code> moves <strong>above</strong> the
+          headline (matching the cross-template observation in the master
+          plan: "the artefact moves above the headline by default"). Vertical
+          ink rule disappears; the mono-label row, headline, dek, and CTAs
+          flow as a single editorial column. Headline size shrinks from
+          <code>96px</code> to <code>40px</code> and the dek from
+          <code>18px</code> to <code>15px</code> for legibility.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">MOBILE</span>
+            <span class="mono">match-preview variant @ 380px viewport — artefact-on-top stacking</span>
+          </div>
+          <div class="mobile-frame">
+            <div class="ed-hero">
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a" style="margin: 0 auto">
+                  <span class="taped-card__tape taped-card__tape--alt" aria-hidden="true"></span>
+                  <div class="match-artefact">
+                    <div class="match-artefact__shield">T</div>
+                    <p class="match-artefact__date">ZO 12 <em>okt</em></p>
+                    <div class="match-artefact__rule" aria-hidden="true"></div>
+                    <p class="match-artefact__meta">15:00 · MERTENSSTRAAT</p>
+                    <p class="match-artefact__meta">PROVINCIAAL · SPEELDAG 7</p>
+                  </div>
+                </div>
+              </div>
+              <div class="ed-hero__left">
+                <div class="mono-label-row">
+                  <span class="star-kicker">MATCHDAY · ZO 12 OKT</span>
+                  <span class="mono-label--pill">PROV.</span>
+                </div>
+                <h2 class="editorial-heading">Een <em>topper</em> in eigen huis.</h2>
+                <p class="ed-hero__dek">
+                  Zondag komt VK Tildonk naar de Mertensstraat. Eén om rechtop
+                  te zien.
+                </p>
+                <div class="ed-hero__cta-row">
+                  <a class="btn btn--primary" href="#">TICKETS <span aria-hidden="true">→</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Artefact-on-top respects the cross-template default and gives mobile readers the visual anchor first. CTA stays above-the-fold on a typical 380px viewport because the headline is constrained.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Two viewports below 768px (320px–480px and 481px–767px) need slightly different paddings; one breakpoint is a compromise. If the artefact dominates a 320px screen it can push the CTA below the fold. Mitigation: a second media-query at <code>≤ 480px</code> tightens the artefact max-height.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="primitive-map">
+        <div class="section-meta">
+          <span class="mono">★ 09 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— variant → artefact composition primitives</span>
+        </div>
+        <h2>Wat <em>elk</em> variant erfde.</h2>
+        <p class="lead">
+          Every variant composes from the same primitive vocabulary shipped in
+          Phase 1 (#1591) and Phase 2. No new shapes are introduced by
+          <code>EditorialHero</code>; only the right-column composition
+          changes. The left column — <code>MonoLabelRow</code> +
+          <code>EditorialHeading</code> + dek + button row — is invariant.
+        </p>
+
+        <table class="primitive-table">
+          <thead>
+            <tr>
+              <th style="width: 14%">VARIANT</th>
+              <th style="width: 28%">KICKER LABELS</th>
+              <th style="width: 36%">RIGHT-COLUMN COMPOSITION</th>
+              <th style="width: 22%">TAPED-CARD ROTATION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>transfer</code></td>
+              <td><code>* TRANSFER * 2026 *</code> + team pill + read-time</td>
+              <td><code>TapedCard</code> + 2× shield clip-path + display-arrow glyph + dashed rule + mono meta</td>
+              <td><code>rotation="b"</code> (+2.1°)</td>
+            </tr>
+            <tr>
+              <td><code>match-preview</code></td>
+              <td><code>MATCHDAY · ZONDAG 12 OKT · 15:00</code> + comp pill + matchday#</td>
+              <td><code>TapedCard</code> + 1× opponent shield + display date (italic em) + ink rule + 2× mono meta lines</td>
+              <td><code>rotation="a"</code> (-2.4°)</td>
+            </tr>
+            <tr>
+              <td><code>interview</code></td>
+              <td><code>INTERVIEW · DUO · 12 MIN</code> + team pill + format kicker</td>
+              <td><code>TapedCard</code> + 2× <code>PlayerFigure</code> stub (circle + jersey + name tag) + dashed rule + mono caption</td>
+              <td><code>rotation="c"</code> (-1.4°)</td>
+            </tr>
+            <tr>
+              <td><code>event</code></td>
+              <td><code>EVENT · CLUBHUIS · 14 NOV</code> + ink-pill format + access tag</td>
+              <td><code>TapedCard</code> + ink-bg poster crop (jersey kicker + display title + oversized date numeral + cream rule + mono foot ×2)</td>
+              <td><code>rotation="b"</code> (+2.1°)</td>
+            </tr>
+            <tr>
+              <td><code>announcement</code></td>
+              <td><code>MEDEDELING · BESTUUR</code> + ink-pill <code>OFFICIEEL</code> + date</td>
+              <td><code>TapedCard</code> + <code>StampBadge</code> (double-rule circle + mono top + display title + mono bottom, rotated -9°)</td>
+              <td><code>rotation="a"</code> (-2.4°)</td>
+            </tr>
+            <tr>
+              <td><code>generic</code></td>
+              <td><code>NIEUWS · CLUB</code> + update pill + read-time</td>
+              <td><code>TapedCard</code> + oversized italic display drop-cap (jersey-deep + ink shadow) + ink rule + mono section glyph (§)</td>
+              <td><code>rotation="c"</code> (-1.4°)</td>
+            </tr>
+            <tr>
+              <td><code>player</code></td>
+              <td><code>SPELERSPROFIEL · A-PLOEG</code> + #number pill + position tag</td>
+              <td><code>TapedCard</code> + rectangular psdImage crop + <code>MonoLabel</code> "NIEUW" overlay + jersey block w/ number + <code>TicketStub</code> (label + value + label)</td>
+              <td><code>rotation="b"</code> (+2.1°)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===========================================================
+           DIRECTION-LEVEL TRADEOFFS
+           =========================================================== -->
+      <section class="section" id="tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 10 · DIRECTION TRADEOFFS</span>
+          <span class="mono mono--muted">— summary across all seven variants</span>
+        </div>
+        <h2>Waarom een <em>broadsheet.</em></h2>
+        <p class="lead">
+          Direction A reads as a Saturday paper front-page: a heavy headline
+          on the left, a tilted artefact on the right, a thin rule between
+          them. The 60/40 split is the most common newspaper hero ratio —
+          enough room for a 5–6 word italic headline without the artefact
+          shrinking into a thumbnail. Lowest typographic risk; tightest
+          editorial reading.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Maximises the editorial language the redesign was hired to
+              speak — Playfair display in italic, mono-caps kickers, paper
+              shadows, jersey-deep accent. Every artefact composes from
+              already-shipped primitives (<code>TapedCard</code>,
+              <code>StampBadge</code>, <code>PlayerFigure</code>,
+              <code>TicketStub</code>, <code>MonoLabel</code>,
+              <code>EditorialHeading</code>) — no new shapes shipped by this
+              component. The 60/40 split scales cleanly to one column on
+              mobile by stacking artefact-above-text, which matches the
+              cross-template default. Press-down hover canon applies
+              uniformly to buttons + cards. Single component, seven
+              variants, one type-discriminated prop — cheaper to ship,
+              cheaper to maintain.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Heavy on the headline — variants where the article title is
+              short (announcement: "De kantine blijft open.") leave a lot of
+              empty cream in the left column, while variants where the
+              headline runs long (interview: 5+ words) wrap to three lines
+              and pressure the CTA placement. Two-column tension is
+              universally specified across hero / interlude / quote — risk
+              of "every section looks like a hero" if the rest of the page
+              chrome doesn't deliberately break the rhythm. The poster
+              variant's ink-bg artefact and the announcement's StampBadge
+              circular shape introduce more variance inside the right column
+              than the other five variants combined — the discriminated
+              union has internal tension between "geometric primitive
+              variants" and "editorial poster variants".
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— production handoff for EditorialHero</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Layout grid: <code>grid-template-columns: 60% 40%</code> with a 1px ink rule via <code>::before</code>; collapses to single column at <code>≤ 900px</code></li>
+          <li>Left column is invariant: <code>MonoLabelRow</code> + <code>EditorialHeading size="display-xl"</code> + dek paragraph + button row + byline</li>
+          <li>Right column varies by <code>variant</code> prop only; every artefact wraps in <code>TapedCard</code> with rotation modifier (-2.4° / +2.1° / -1.4°)</li>
+          <li>Headline italic-emphasis span uses <code>--color-jersey-deep</code> — same convention as <code>EditorialHeading emphasis</code></li>
+          <li>Press-down hover canon uniform across buttons + TapedCard: <code>transition: all 300ms; on hover { transform: translate(4px, 4px); box-shadow: none; }</code></li>
+          <li>Player variant uses rectangular <code>psdImage</code> crop (saved-memory: subject photos default to rectangular)</li>
+          <li>StampBadge announcement variant requires headline copy ≤ 2 words for inner double-rule fit</li>
+          <li>No tape on the announcement variant (TapedCard tape collides with rotated StampBadge); use <code>tape="alt"</code> position offset</li>
+          <li>Mobile stacking: artefact moves <strong>above</strong> the headline (cross-template default); vertical ink rule hidden; padding tightens to 32px</li>
+        </ul>
+
+        <h3>Token map</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px">
+          <div>
+            <h4 style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px">SURFACE / TINT</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft)">
+              <li>Hero surface: <code>--color-cream</code></li>
+              <li>Hero border: <code>2px solid var(--color-ink)</code></li>
+              <li>Hero shadow: <code>--shadow-paper-md</code> (6×6 ink)</li>
+              <li>Vertical rule: <code>1px solid var(--color-ink)</code> at <code>opacity: 0.55</code></li>
+              <li>TapedCard surface: <code>--color-cream</code></li>
+              <li>TapedCard shadow: <code>--shadow-paper-lg</code> (10×10 ink)</li>
+              <li>Headline emphasis: <code>--color-jersey-deep</code></li>
+              <li>Poster artefact bg: <code>--color-ink</code> w/ <code>--color-jersey</code> accent</li>
+              <li>Player photo source: rectangular <code>player.psdImage</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px">STRUCTURE / DEPTH</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft)">
+              <li>Grid columns: <code>60% 40%</code> desktop</li>
+              <li>Grid columns: <code>1fr</code> at <code>≤ 900px</code> (artefact stacks above)</li>
+              <li>Headline scale: <code>clamp(56px, 6.4vw, 96px)</code></li>
+              <li>Dek scale: <code>18px</code> desktop / <code>15px</code> mobile</li>
+              <li>Press-down hover: <code>transform: translate(4px, 4px); box-shadow: none;</code></li>
+              <li>Transition: <code>all 300ms ease</code></li>
+              <li>TapedCard rotations: <code>-2.4° / +2.1° / -1.4°</code></li>
+              <li>StampBadge rotation: <code>-9°</code> (counter-clockwise)</li>
+              <li>Sharp corners: no <code>border-radius</code> on hero, buttons, taped-card, ticket-stub</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 32px">Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction A (this · asymmetric broadsheet) and
+          any sibling directions authored alongside. Once locked we ship
+          <code>apps/web/src/components/design-system/EditorialHero/</code>
+          with one Storybook story per variant + the mobile-collapse story,
+          all tagged <code>tags: ["autodocs", "vr"]</code>. Phase 3 issue
+          #1525.
+        </p>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION A — ASYMMETRIC BROADSHEET · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

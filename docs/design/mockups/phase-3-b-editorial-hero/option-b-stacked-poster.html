@@ -1,0 +1,1565 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction B — Stacked Poster · Phase 3 · Checkpoint B · EditorialHero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-lg: 10px 10px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1240px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .mono--jersey { color: var(--color-jersey-deep); }
+
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.02; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; flex-wrap: wrap; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         EDITORIAL HERO — STACKED POSTER (Direction B)
+         Single column. Kicker → display headline (full width) →
+         artefact band (full-width horizontal) → dek + CTA row.
+         ============================================================ */
+
+      .hero-poster {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 56px 48px 48px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-poster + .hero-poster { margin-top: 32px; }
+
+      /* MonoLabelRow — kicker */
+      .mono-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        padding: 6px 12px;
+        border: 1.5px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        margin-bottom: 28px;
+      }
+      .mono-row .dot { width: 4px; height: 4px; background: var(--color-ink); border-radius: 50%; flex-shrink: 0; }
+      .mono-row .star { color: var(--color-jersey-deep); font-weight: 700; }
+
+      /* EditorialHeading — display-2xl, full poster width */
+      .poster-head {
+        font-family: var(--font-display);
+        font-weight: 900;
+        line-height: 0.98;
+        margin: 0 0 36px;
+        font-size: clamp(56px, 9vw, 128px);
+        letter-spacing: -0.02em;
+      }
+      .poster-head em { font-style: italic; color: var(--color-jersey-deep); }
+      .poster-head .underline { position: relative; display: inline-block; }
+      .poster-head .underline::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: 0.04em;
+        height: 0.18em;
+        background: var(--color-jersey);
+        z-index: -1;
+        opacity: 0.55;
+      }
+
+      /* Artefact band — wide horizontal row below headline */
+      .artefact-band {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 24px;
+        align-items: center;
+        padding: 28px 0 36px;
+        border-top: 2px solid var(--color-ink);
+        border-bottom: 2px solid var(--color-ink);
+        margin-bottom: 32px;
+        position: relative;
+      }
+      .artefact-band::before,
+      .artefact-band::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0;
+        height: 6px;
+        background-image: repeating-linear-gradient(
+          90deg,
+          var(--color-ink) 0 8px,
+          transparent 8px 16px
+        );
+      }
+      .artefact-band::before { top: -8px; }
+      .artefact-band::after { bottom: -8px; }
+
+      /* Dek + CTA row */
+      .poster-foot {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 32px;
+        align-items: end;
+      }
+      .poster-dek {
+        font-family: var(--font-body);
+        font-size: 18px;
+        line-height: 1.5;
+        color: var(--color-ink-soft);
+        margin: 0;
+        max-width: 56ch;
+      }
+      .poster-cta-row {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+
+      /* Buttons — paper-card press idiom */
+      .btn {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 14px 20px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        cursor: pointer;
+        box-shadow: var(--shadow-paper-sm);
+        transition: all 300ms ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 0;
+      }
+      .btn:hover { box-shadow: none; transform: translate(4px, 4px); }
+      .btn--primary { background: var(--color-jersey-deep); color: var(--color-cream); }
+      .btn--ink { background: var(--color-ink); color: var(--color-cream); }
+      .btn--ghost { box-shadow: none; }
+
+      /* TapedCard — paper-feel card primitive */
+      .taped-card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 18px;
+        position: relative;
+        transition: all 300ms ease;
+      }
+      .taped-card--rot-a { transform: rotate(-1.4deg); }
+      .taped-card--rot-b { transform: rotate(1.6deg); }
+      .taped-card:hover { box-shadow: none; transform: translate(4px, 4px) rotate(0); }
+      .taped-card--rot-a:hover,
+      .taped-card--rot-b:hover { transform: translate(4px, 4px) rotate(0); }
+
+      /* TapeStrip — visual ornament */
+      .tape-strip {
+        position: absolute;
+        width: 86px;
+        height: 22px;
+        background: rgba(74, 207, 82, 0.45);
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-3deg);
+      }
+      .tape-strip--right { left: auto; right: -14px; top: 18px; transform: rotate(28deg); }
+      .tape-strip--ochre { background: rgba(198, 139, 44, 0.45); }
+      .tape-strip--ink { background: rgba(10, 10, 10, 0.6); }
+
+      /* TicketStub — perforated edge stub */
+      .ticket-stub {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 14px 18px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        position: relative;
+        display: inline-block;
+      }
+      .ticket-stub::before,
+      .ticket-stub::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .ticket-stub::before { left: -8px; }
+      .ticket-stub::after { right: -8px; }
+      .ticket-stub strong {
+        display: block;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 28px;
+        font-style: italic;
+        color: var(--color-jersey-deep);
+        letter-spacing: 0;
+        text-transform: none;
+        line-height: 1;
+        margin-top: 4px;
+      }
+
+      /* MonoLabel — pill */
+      .mono-label {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border: 1.5px solid var(--color-ink);
+        background: var(--color-cream);
+        color: var(--color-ink);
+      }
+      .mono-label--jersey { background: var(--color-jersey); color: var(--color-ink); border-color: var(--color-ink); }
+      .mono-label--ink { background: var(--color-ink); color: var(--color-cream); }
+      .mono-label--alert { background: var(--color-alert); color: var(--color-cream); border-color: var(--color-ink); }
+
+      /* StampBadge — circular rotated stamp */
+      .stamp-badge {
+        width: 152px;
+        height: 152px;
+        border: 3px solid var(--color-ink);
+        border-radius: 50%;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream);
+        text-align: center;
+        line-height: 1.2;
+        transform: rotate(-8deg);
+        position: relative;
+        flex-shrink: 0;
+        padding: 12px;
+      }
+      .stamp-badge::before {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border: 1.5px dashed var(--color-ink);
+        border-radius: 50%;
+      }
+      .stamp-badge .glyph {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+        margin: 6px 0 4px;
+      }
+      .stamp-badge--lg { width: 200px; height: 200px; font-size: 12px; }
+      .stamp-badge--lg .glyph { font-size: 48px; }
+
+      /* ClippedCard — angular clipped corner card (decorative) */
+      .clipped-card {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 18px 22px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+        display: inline-block;
+      }
+
+      /* PlayerFigure — circular cropped portrait */
+      .player-figure {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--color-ink);
+        background: var(--color-jersey);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .player-figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .player-figure--lg { width: 220px; height: 220px; }
+      .player-figure--placeholder {
+        background: linear-gradient(180deg, var(--color-jersey) 0%, var(--color-jersey-deep) 100%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 64px;
+        color: var(--color-cream);
+        padding-bottom: 18px;
+      }
+
+      /* Shield — club crest stand-in */
+      .shield {
+        width: 120px;
+        height: 140px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 48px;
+        flex-shrink: 0;
+      }
+      .shield--alt { background: #1f3a8a; }
+      .shield--alt2 { background: #8a1f1f; }
+      .shield--ink { background: var(--color-ink); }
+
+      /* Transfer band */
+      .transfer-band {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        padding: 12px 0;
+      }
+      .transfer-arrow {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 96px;
+        color: var(--color-jersey-deep);
+        line-height: 0.8;
+      }
+      .transfer-card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 24px 28px;
+        text-align: center;
+        position: relative;
+        min-width: 200px;
+      }
+      .transfer-card--in { background: rgba(74, 207, 82, 0.18); }
+      .transfer-card--out { background: var(--color-cream-soft); }
+      .transfer-card .role {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-bottom: 12px;
+      }
+      .transfer-card .club-name {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 18px;
+        margin-top: 12px;
+      }
+
+      /* Match-preview band */
+      .match-band {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 32px;
+        align-items: center;
+      }
+      .match-details {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        border-left: 1px solid var(--color-ink);
+        border-right: 1px solid var(--color-ink);
+      }
+      .match-details > div {
+        padding: 12px 16px;
+        border-right: 1px dashed var(--color-paper-edge);
+      }
+      .match-details > div:last-child { border-right: none; }
+      .match-details .key {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-bottom: 6px;
+      }
+      .match-details .val {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      /* Interview band */
+      .interview-band {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 48px;
+      }
+      .interview-name-tag {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        text-align: center;
+        margin-top: 14px;
+      }
+      .interview-name-tag .role {
+        display: block;
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 4px;
+      }
+      .interview-amp {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 96px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+
+      /* Event band */
+      .event-band {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 32px;
+        align-items: center;
+      }
+      .event-poster {
+        background: var(--color-ink);
+        height: 220px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .event-poster img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+      .event-poster .overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(0deg, rgba(10, 10, 10, 0.55), rgba(10, 10, 10, 0.1));
+        display: flex;
+        align-items: flex-end;
+        padding: 24px;
+        color: var(--color-cream);
+      }
+      .event-poster .overlay-title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        text-shadow: 2px 2px 0 rgba(10, 10, 10, 0.5);
+      }
+      .date-marker {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 18px 24px;
+        text-align: center;
+        position: relative;
+        display: inline-block;
+      }
+      .date-marker::before,
+      .date-marker::after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        border-radius: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .date-marker::before { top: -10px; }
+      .date-marker::after { bottom: -10px; }
+      .date-marker .month {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+      }
+      .date-marker .day {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 64px;
+        line-height: 0.9;
+        margin: 4px 0;
+      }
+      .date-marker .year {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+
+      /* Announcement band */
+      .announcement-band {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 24px;
+        padding: 24px 0;
+      }
+      .announcement-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      /* Generic band — drop cap mark + tape ornament */
+      .generic-band {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 40px;
+        align-items: center;
+        padding: 16px 24px;
+      }
+      .drop-mark {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 220px;
+        line-height: 0.78;
+        color: var(--color-jersey-deep);
+        letter-spacing: -0.04em;
+      }
+      .generic-rule {
+        height: 8px;
+        background-image: repeating-linear-gradient(
+          90deg,
+          var(--color-ink) 0 12px,
+          transparent 12px 22px
+        );
+      }
+      .tape-ornament {
+        position: relative;
+        width: 140px;
+        height: 32px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(10, 10, 10, 0.2);
+        transform: rotate(-4deg);
+      }
+
+      /* Player band */
+      .player-band {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 24px;
+        align-items: center;
+        padding: 12px 24px;
+      }
+      .player-band-spacer { /* deliberate negative space left of artefact */ }
+      .player-band .label-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+      }
+      .number-display {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 96px;
+        line-height: 0.85;
+        color: var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         MOBILE COLLAPSE
+         ============================================================ */
+      .mobile-frame {
+        max-width: 380px;
+        margin: 0 auto;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 28px 20px 24px;
+      }
+      .mobile-frame .mono-row { font-size: 10px; padding: 4px 8px; gap: 8px; margin-bottom: 18px; }
+      .mobile-frame .poster-head { font-size: 44px; margin-bottom: 22px; }
+      .mobile-frame .artefact-band {
+        grid-template-columns: 1fr;
+        padding: 18px 0 22px;
+        gap: 14px;
+      }
+      .mobile-frame .match-band,
+      .mobile-frame .transfer-band,
+      .mobile-frame .interview-band,
+      .mobile-frame .event-band,
+      .mobile-frame .player-band,
+      .mobile-frame .generic-band,
+      .mobile-frame .announcement-band {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .mobile-frame .poster-foot {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .mobile-frame .poster-cta-row { justify-content: flex-start; }
+      .mobile-frame .poster-dek { font-size: 15px; }
+      .mobile-frame .transfer-arrow,
+      .mobile-frame .interview-amp { font-size: 56px; transform: rotate(90deg); }
+      .mobile-frame .drop-mark { font-size: 140px; }
+
+      /* Reuse map */
+      .reuse-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+      .reuse-table th, .reuse-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream-soft);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .reuse-table td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      @media (max-width: 720px) {
+        main { padding: 32px 16px 64px; }
+        .hero-poster { padding: 40px 24px 32px; }
+        .poster-foot { grid-template-columns: 1fr; }
+        .poster-cta-row { justify-content: flex-start; }
+        .artefact-band { grid-template-columns: 1fr; }
+        .transfer-band, .match-band, .interview-band, .event-band, .player-band, .generic-band {
+          display: flex; flex-direction: column;
+        }
+        .tradeoffs { grid-template-columns: 1fr; }
+        .map-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- =====================================================
+           HEADER
+           ===================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIAL HERO · DIRECTION B</span>
+          <span class="mono mono--muted">★ STACKED POSTER</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Een <span class="display"><em>fly-poster</em></span> aan de muur.</h1>
+        <p class="lead">
+          Direction B reads the EditorialHero as a <strong>stacked poster</strong>: kicker
+          on top, then a single full-bleed display headline that fills the whole poster
+          width, then a <em>horizontal artefact band</em> below the headline (not beside
+          it), then dek + CTA. Variant only changes what lives inside the band — the
+          hero shell, the kicker, the headline, the dek, and the CTA row are invariant.
+        </p>
+      </header>
+
+      <!-- =====================================================
+           VARIANT 1 — TRANSFER
+           ===================================================== -->
+      <section class="section" id="transfer">
+        <div class="section-meta">
+          <span class="mono">★ 01 · TRANSFER</span>
+          <span class="mono mono--muted">— before/after shields, jersey-deep tint, signing announcement</span>
+        </div>
+        <h2>Variant <em>transfer.</em></h2>
+        <p class="lead">
+          Player signs from another club. Band shows two side-by-side shields with the
+          arrow between, the <em>from</em> club tinted muted and the <em>to</em> club
+          tinted jersey-soft. Reads as a transfer market notice, not a news article.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-transfer">
+          <span class="mono-row">
+            <span class="star">★</span>
+            <span>TRANSFER</span>
+            <span class="dot"></span>
+            <span>2026</span>
+            <span class="dot"></span>
+            <span class="star">★</span>
+          </span>
+          <h2 id="head-transfer" class="poster-head">
+            Welkom, <em>Maxim</em><br />
+            <span class="underline">Breugelmans.</span>
+          </h2>
+
+          <div class="artefact-band" aria-label="Transfer detail band">
+            <div class="transfer-band">
+              <div class="transfer-card transfer-card--out">
+                <div class="role">VAN</div>
+                <div class="shield shield--alt" aria-hidden="true">L</div>
+                <div class="club-name">KFC Lubbeek</div>
+              </div>
+              <div class="transfer-arrow" aria-hidden="true">→</div>
+              <div class="transfer-card transfer-card--in">
+                <div class="role">NAAR</div>
+                <div class="shield" aria-hidden="true">K</div>
+                <div class="club-name">KCVV Elewijt</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Centrale middenvelder Maxim Breugelmans tekent voor twee seizoenen.
+              Acht jaar Elewijt-jeugd, één jaar Lubbeek, en nu terug thuis.
+              "Een spelersprofiel waar we al lang naar zochten," aldus T1.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">SPELERSPROFIEL →</a>
+              <a class="btn btn--primary" href="#">LEES VOLLEDIG ARTIKEL →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Stacked poster gives the headline maximum room — "Welkom, Maxim Breugelmans" reads like a tannoy announcement, not a card title. Transfer band is unambiguously a transfer (two shields + arrow) so the variant reads at a glance even on small screens. Jersey-deep tint on the inbound side carries the brand colour without painting the whole hero green.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Display-2xl headline pushes the artefact band well below the fold on short viewports. Two shields + arrow is a wide composition; below ~480px wide the band has to reflow vertically and the arrow becomes a chevron-down — that reflow rule must ship as a tested case in Storybook.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 2 — MATCH-PREVIEW
+           ===================================================== -->
+      <section class="section" id="match-preview">
+        <div class="section-meta">
+          <span class="mono">★ 02 · MATCH-PREVIEW</span>
+          <span class="mono mono--muted">— opponent shield + match details list + ticket CTA</span>
+        </div>
+        <h2>Variant <em>match-preview.</em></h2>
+        <p class="lead">
+          Used on matchday-eve articles and the homepage upcoming-fixture hero. Band
+          shows the opponent shield (left) + a flat key/value details list (centre) +
+          the ticket-stub CTA (right). Headline names the opponent in italic display.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-match">
+          <span class="mono-row">
+            <span>MATCHDAY</span>
+            <span class="dot"></span>
+            <span>ZONDAG 12 OKT</span>
+            <span class="dot"></span>
+            <span>SPEELDAG 9</span>
+          </span>
+          <h2 id="head-match" class="poster-head">
+            Thuis tegen <br />
+            <em>Tervuren-Duisburg.</em>
+          </h2>
+
+          <div class="artefact-band" aria-label="Match preview band">
+            <div class="match-band">
+              <div class="taped-card taped-card--rot-a" style="padding: 14px;">
+                <span class="tape-strip" aria-hidden="true"></span>
+                <div class="shield shield--alt2" aria-hidden="true">T</div>
+              </div>
+              <div class="match-details" role="list">
+                <div role="listitem">
+                  <div class="key">Datum</div>
+                  <div class="val">12 OKT</div>
+                </div>
+                <div role="listitem">
+                  <div class="key">Aftrap</div>
+                  <div class="val">15:00</div>
+                </div>
+                <div role="listitem">
+                  <div class="key">Veld</div>
+                  <div class="val">Sport- en Speelplein</div>
+                </div>
+                <div role="listitem">
+                  <div class="key">Reeks</div>
+                  <div class="val">2e Prov B</div>
+                </div>
+              </div>
+              <div>
+                <div class="ticket-stub">
+                  TICKETS
+                  <strong>€ 8</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Vierde thuiswedstrijd, drie keer de drie punten gepakt. Tervuren-Duisburg
+              komt naar Elewijt na een 2-2 vorige speeldag. T1 verwacht "een gesloten
+              partij waarin het lopen het verschil maakt".
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">VOORBESCHOUWING →</a>
+              <a class="btn btn--primary" href="#">KOOP TICKETS →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Flat key/value strip is the most data-dense way to fit four match facts inline — kickoff, venue, competition, date — without drowning the headline. Ticket-stub CTA on the right reads as the primary affordance for matchday traffic. Opponent shield in a TapedCard frames the visual identity even when the badge file itself is plain.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Four-column details strip needs at least ~640px of horizontal real estate to read cleanly; below that it stacks into four rows and the band height grows. Two CTAs in the foot row + one CTA on the ticket stub is three CTAs total — risk of split decision-making. Could be mitigated by treating the ticket stub as decorative and routing all clicks to the foot row.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 3 — INTERVIEW (DUO)
+           ===================================================== -->
+      <section class="section" id="interview">
+        <div class="section-meta">
+          <span class="mono">★ 03 · INTERVIEW</span>
+          <span class="mono mono--muted">— 2-up TapedCard PlayerFigure thumbnails, jersey colour blocks</span>
+        </div>
+        <h2>Variant <em>interview.</em></h2>
+        <p class="lead">
+          Duo (or trio) interview. Band centres a 2-up TapedCard set with circular
+          PlayerFigure portraits, an italic ampersand between, and a small role tag
+          underneath each. Drives the duo-interview homepage hero and article detail.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-interview">
+          <span class="mono-row">
+            <span>INTERVIEW</span>
+            <span class="dot"></span>
+            <span>DUO</span>
+            <span class="dot"></span>
+            <span>12 MIN</span>
+          </span>
+          <h2 id="head-interview" class="poster-head">
+            <em>Twee</em> stoelen,<br />
+            één <span class="underline">kleedkamer.</span>
+          </h2>
+
+          <div class="artefact-band" aria-label="Interview subjects band">
+            <div class="interview-band">
+              <div>
+                <div class="taped-card taped-card--rot-a" style="padding: 12px; border-radius: 0;">
+                  <span class="tape-strip tape-strip--ochre" aria-hidden="true"></span>
+                  <div class="player-figure player-figure--placeholder" aria-hidden="true">J</div>
+                </div>
+                <div class="interview-name-tag">
+                  Julien
+                  <span class="role">KAPITEIN A · 33</span>
+                </div>
+              </div>
+              <div class="interview-amp" aria-hidden="true">&amp;</div>
+              <div>
+                <div class="taped-card taped-card--rot-b" style="padding: 12px; border-radius: 0;">
+                  <span class="tape-strip" aria-hidden="true"></span>
+                  <div class="player-figure player-figure--placeholder" aria-hidden="true" style="background: linear-gradient(180deg, #1f3a8a 0%, #0f1d4a 100%);">N</div>
+                </div>
+                <div class="interview-name-tag">
+                  Niels
+                  <span class="role">DEBUTANT A · 19</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Veertien jaar verschil, één scheldebroek-tof verleden, en een
+              afscheidsseizoen voor één van hen. Julien en Niels over erfenis,
+              spelersbus-zang en hoe je een kleedkamer leest.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">DEEL DIT GESPREK</a>
+              <a class="btn btn--primary" href="#">LEES INTERVIEW →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Subject-pair as the artefact reads instantly as "this is a conversation". The italic ampersand is a typographic moment, not an icon — earns its keep at display scale. Each portrait sits in its own rotated TapedCard so the same primitive used in NewsCard / TapedCardGrid is reused verbatim.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Two PlayerFigure thumbnails at this size leave very little room for any third or fourth subject (trio interviews exist). Three subjects need a different band layout (3-up at smaller scale) — that's a second sub-variant of the interview band, not free reuse. Below ~480px the ampersand has to rotate 90° (becomes a vertical separator), which feels less editorial than the desktop composition.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 4 — EVENT
+           ===================================================== -->
+      <section class="section" id="event">
+        <div class="section-meta">
+          <span class="mono">★ 04 · EVENT</span>
+          <span class="mono mono--muted">— full-width event poster crop + ticket-stub date marker</span>
+        </div>
+        <h2>Variant <em>event.</em></h2>
+        <p class="lead">
+          Used for clubhuis events, eetfestijnen, jubilees, pop-up nights. Band gives
+          the event poster image priority — full-width 16:9 crop on a TapedCard — with
+          a perforated date marker to its right naming the day in display italic.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-event">
+          <span class="mono-row">
+            <span>EVENT</span>
+            <span class="dot"></span>
+            <span>CLUBHUIS</span>
+            <span class="dot"></span>
+            <span>14 NOV</span>
+          </span>
+          <h2 id="head-event" class="poster-head">
+            <em>Mosselsouper</em><br />
+            <span class="underline">'26.</span>
+          </h2>
+
+          <div class="artefact-band" aria-label="Event poster band">
+            <div class="event-band">
+              <div class="event-poster" aria-hidden="true">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&h=300&fit=crop" alt="" />
+                <div class="overlay">
+                  <div class="overlay-title">Eet je rond. Drink je dichter.</div>
+                </div>
+              </div>
+              <div class="date-marker">
+                <div class="month">November</div>
+                <div class="day">14</div>
+                <div class="year">2026 · 19u00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Vrijdagavond, één lange tafel, mosselen tot we niet meer kunnen.
+              Inschrijven via de kantine of online — vorig jaar uitverkocht in
+              twee dagen.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">PROGRAMMA</a>
+              <a class="btn btn--primary" href="#">RESERVEER →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Photo-forward band gives event hosts the surface they want — a poster crop where their key image actually breathes. Date marker in mono + display italic mirrors the matchday clock and reuses the perforated stub language from TicketStub.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Event photos are the lowest-quality assets in the system (phone snaps, scanned flyers). The full-bleed crop ruthlessly exposes weak source material. Ships with a fallback rule: if no usable image, replace event-poster with a typographic poster card (heavy display headline + date marker only) rather than a placeholder.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 5 — ANNOUNCEMENT
+           ===================================================== -->
+      <section class="section" id="announcement">
+        <div class="section-meta">
+          <span class="mono">★ 05 · ANNOUNCEMENT</span>
+          <span class="mono mono--muted">— centred StampBadge + supporting MonoLabelRow</span>
+        </div>
+        <h2>Variant <em>announcement.</em></h2>
+        <p class="lead">
+          Bestuur / club-wide statement: "we steunen X", "kleedkamers gerenoveerd",
+          "kapitein verlengt". Band centres a large rotated StampBadge — reads as
+          a wax-seal endorsement — flanked by a small supporting MonoLabelRow.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-ann">
+          <span class="mono-row">
+            <span>MEDEDELING</span>
+            <span class="dot"></span>
+            <span>BESTUUR</span>
+            <span class="dot"></span>
+            <span class="star">★</span>
+          </span>
+          <h2 id="head-ann" class="poster-head">
+            Het bestuur <em>verlengt</em><br />
+            de samenwerking.
+          </h2>
+
+          <div class="artefact-band" aria-label="Announcement stamp band">
+            <div class="announcement-band">
+              <div class="stamp-badge stamp-badge--lg" aria-hidden="true">
+                OFFICIEEL
+                <span class="glyph">✦</span>
+                BEKRACHTIGD
+              </div>
+              <div class="announcement-row">
+                <span class="mono-label">DATUM · 03 MEI 2026</span>
+                <span class="mono-label mono-label--jersey">EFFECTIEF · ONMIDDELLIJK</span>
+                <span class="mono-label mono-label--ink">RAAD VAN BESTUUR</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Na intense gesprekken bevestigt het bestuur dat hoofdcoach
+              Wim Vandersteen ook in seizoen 26/27 aan het roer staat.
+              Een unaniem signaal van vertrouwen, sportieve continuïteit, en rust.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">PERSCOMMUNIQUÉ (PDF)</a>
+              <a class="btn btn--primary" href="#">VOLLEDIGE TEKST →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>StampBadge is already in the catalogue — reuse, not reinvention. A rotated stamp gives the announcement weight without resorting to a colour banner or photographic device. The supporting MonoLabelRow communicates the meta (date, effective scope, signatory) flatly.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>One central stamp + a row of mono labels can read sparse for a hero band — there's a lot of cream paper around the stamp. Risk of feeling under-engineered next to the photo-forward variants on the same homepage. Mitigation: ship a "with portrait" sub-variant where the stamp pairs with a TapedCard PlayerFigure (e.g. for personal endorsements).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 6 — GENERIC
+           ===================================================== -->
+      <section class="section" id="generic">
+        <div class="section-meta">
+          <span class="mono">★ 06 · GENERIC</span>
+          <span class="mono mono--muted">— typographic drop-cap mark + tape ornament fallback</span>
+        </div>
+        <h2>Variant <em>generic.</em></h2>
+        <p class="lead">
+          The catch-all. Used when the article doesn't fit any other variant — a
+          summary, an opinion piece, a "wist je dat". Band is purely typographic:
+          an oversized italic drop-cap mark, a dashed rule, a tape ornament. No
+          imagery is required.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-generic">
+          <span class="mono-row">
+            <span>NIEUWS</span>
+            <span class="dot"></span>
+            <span>CLUB</span>
+            <span class="dot"></span>
+            <span>04 MIN</span>
+          </span>
+          <h2 id="head-generic" class="poster-head">
+            <em>Vijf</em> dingen die we<br />
+            <span class="underline">leerden</span> in oktober.
+          </h2>
+
+          <div class="artefact-band" aria-label="Generic typographic band">
+            <div class="generic-band">
+              <div class="drop-mark" aria-hidden="true">5.</div>
+              <div class="generic-rule" aria-hidden="true"></div>
+              <div class="tape-ornament" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Een seizoenshelft op kruissnelheid. Wat de B-ploeg ons vertelde over
+              het opleidingsmodel, waarom de jeugdwerking ineens dieper graaft,
+              en het ene detail in de kantine dat alles veranderde.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">DEEL ARTIKEL</a>
+              <a class="btn btn--primary" href="#">LEES VOLLEDIG →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Zero imagery dependency — generic articles often arrive without art direction. The drop-mark + dashed rule + tape composition is dense enough to feel intentional, light enough to ship in five minutes from text alone. Reuses TapeStrip vocabulary as decoration without compromising the poster shell.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Without imagery the variant leans 100% on typographic charisma — needs the display headline to actually pop. A bland headline ("clubnieuws") + this band lands flat. Recommend pairing this variant with editorial copy guidelines (verb-led headlines, short numerals or pronouns up top).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           VARIANT 7 — PLAYER
+           ===================================================== -->
+      <section class="section" id="player">
+        <div class="section-meta">
+          <span class="mono">★ 07 · PLAYER</span>
+          <span class="mono mono--muted">— large PlayerFigure on TapedCard rot-B + TicketStub + NIEUW label</span>
+        </div>
+        <h2>Variant <em>player.</em></h2>
+        <p class="lead">
+          Player profile hero (<code>/spelers/[slug]</code>). Band sits asymmetric —
+          a number display anchored left, then the rotated TapedCard portrait,
+          a TicketStub naming the team-season, and a "NIEUW" MonoLabel. Negative
+          space sits left of the artefact cluster.
+        </p>
+
+        <article class="hero-poster" aria-labelledby="head-player">
+          <span class="mono-row">
+            <span>SPELERSPROFIEL</span>
+            <span class="dot"></span>
+            <span>A-PLOEG</span>
+            <span class="dot"></span>
+            <span>MIDDENVELDER</span>
+          </span>
+          <h2 id="head-player" class="poster-head">
+            <em>Maxim</em><br />
+            <span class="underline">Breugelmans.</span>
+          </h2>
+
+          <div class="artefact-band" aria-label="Player figure band">
+            <div class="player-band">
+              <div class="number-display" aria-hidden="true">#8</div>
+              <div class="taped-card taped-card--rot-b" style="padding: 14px;">
+                <span class="tape-strip tape-strip--right" aria-hidden="true"></span>
+                <div class="player-figure player-figure--lg player-figure--placeholder" aria-hidden="true" style="background: linear-gradient(180deg, var(--color-jersey) 0%, var(--color-jersey-deep) 100%);">M</div>
+              </div>
+              <div class="ticket-stub">
+                A-PLOEG
+                <strong>26 / 27</strong>
+              </div>
+              <div class="label-stack">
+                <span class="mono-label mono-label--jersey">NIEUW</span>
+                <span class="mono-label">23 J · 1.82M</span>
+                <span class="mono-label">RECHTS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <p class="poster-dek">
+              Box-to-box achtien wiens loopstijl al even bij Elewijt past als zijn
+              eigen voornaam. Acht jeugdjaren, één uitstapje naar Lubbeek, en een
+              hervatting onder rugnummer 8. Lees waarom hij koos voor terugkeer.
+            </p>
+            <div class="poster-cta-row">
+              <a class="btn btn--ghost" href="#">VOLLEDIG PROFIEL</a>
+              <a class="btn btn--primary" href="#">RECENTE WEDSTRIJDEN →</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Asymmetric band (number-display anchored left, portrait cluster right-of-centre) keeps the negative space the player profile loves — air around the headline, weight on the right. Reuses PlayerFigure + TapedCard rotation-B + TicketStub + MonoLabel verbatim, no new primitives. Number-display uses existing NumberDisplay scale.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Four artefacts in one band (number, portrait, stub, labels) is the busiest variant. On medium widths the cluster wraps awkwardly; below ~720px the number-display has to drop to inline-with-name treatment, breaking the "anchored-left" composition. Ships with explicit breakpoint specs (≥1024 / ≥720 / &lt;720).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           MOBILE COLLAPSE
+           ===================================================== -->
+      <section class="section" id="mobile">
+        <div class="section-meta">
+          <span class="mono">★ 08 · MOBILE COLLAPSE</span>
+          <span class="mono mono--muted">— stacked column already, padding tightens, headline drops to display-lg</span>
+        </div>
+        <h2>Op <em>mobiel.</em></h2>
+        <p class="lead">
+          The whole point of stacked-poster is that the desktop layout is already
+          a single column — the kicker, headline, band, dek, CTAs are stacked top to
+          bottom by default. Mobile only tightens spacing, drops the display-2xl
+          headline to ~44px, and reflows the artefact band into a vertical mini-stack.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">VARIANT</span>
+            <span class="mono">match-preview · 380px frame · band reflows to vertical 3-row stack</span>
+          </div>
+          <div class="mobile-frame">
+            <article class="hero-poster" aria-labelledby="head-mobile" style="padding: 28px 18px 22px;">
+              <span class="mono-row">
+                <span>MATCHDAY</span>
+                <span class="dot"></span>
+                <span>ZON 12 OKT</span>
+              </span>
+              <h2 id="head-mobile" class="poster-head">
+                Thuis <em>tegen</em><br />
+                Tervuren-D.
+              </h2>
+              <div class="artefact-band" style="padding: 18px 0 22px;">
+                <div class="match-band" style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+                  <div class="taped-card taped-card--rot-a" style="padding: 10px;">
+                    <div class="shield shield--alt2" aria-hidden="true" style="width: 80px; height: 96px; font-size: 32px;">T</div>
+                  </div>
+                  <div class="match-details" style="grid-template-columns: 1fr 1fr; border: 1px solid var(--color-ink); width: 100%;">
+                    <div><div class="key">Datum</div><div class="val">12 OKT</div></div>
+                    <div><div class="key">Aftrap</div><div class="val">15:00</div></div>
+                    <div><div class="key">Veld</div><div class="val">Sport-Speel</div></div>
+                    <div><div class="key">Reeks</div><div class="val">2e Prov B</div></div>
+                  </div>
+                  <div class="ticket-stub">TICKETS<strong>€ 8</strong></div>
+                </div>
+              </div>
+              <div class="poster-foot">
+                <p class="poster-dek">Vierde thuiswedstrijd, drie keer drie punten gepakt.</p>
+                <div class="poster-cta-row">
+                  <a class="btn btn--primary" href="#">KOOP TICKETS →</a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>No layout reflow drama — the desktop stack <em>is</em> the mobile stack. Only spacing, type scale, and the artefact band's internal grid change. Headline reflows naturally because it never had a side-by-side column to compete with.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Variants whose artefact band relies on horizontal grouping (transfer's two shields + arrow, interview's 2-up portraits, player's 4-item cluster) still have to reflow internally to vertical. That's still a mobile-specific spec per variant — the "stacked-poster" idiom doesn't kill it, just simplifies the parent shell.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           PRIMITIVE REUSE MAP
+           ===================================================== -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 09 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— every artefact mapped back to a catalogue primitive</span>
+        </div>
+        <h2>Reuse <em>contract.</em></h2>
+        <p class="lead">
+          Every visual choice in every variant traces back to a primitive that's
+          already in the catalogue or already shipping. EditorialHero introduces
+          <strong>zero new primitives</strong> — only new compositions of existing
+          ones inside the artefact band.
+        </p>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th>Variant</th>
+                <th>Artefact band primitives</th>
+                <th>Shell primitives</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>transfer</code></td>
+                <td><code>TapedCard</code> ×2, <code>Shield</code> ×2 (existing), display-italic arrow glyph</td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading size="display-2xl"</code>, <code>Button</code></td>
+              </tr>
+              <tr>
+                <td><code>match-preview</code></td>
+                <td><code>TapedCard</code>, <code>Shield</code>, key/value strip, <code>TicketStub</code></td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+              <tr>
+                <td><code>interview</code></td>
+                <td><code>TapedCard</code> ×2 (rot-A / rot-B), <code>PlayerFigure</code> ×2, <code>TapeStrip</code> ×2, italic display ampersand</td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+              <tr>
+                <td><code>event</code></td>
+                <td><code>TapedCard</code> (full-bleed image variant), date-marker (TicketStub vocabulary)</td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+              <tr>
+                <td><code>announcement</code></td>
+                <td><code>StampBadge</code> (rotated, lg), <code>MonoLabel</code> ×3 (variants jersey / ink / cream)</td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+              <tr>
+                <td><code>generic</code></td>
+                <td>display-italic drop-mark glyph, dashed rule (existing pattern), <code>TapeStrip</code></td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+              <tr>
+                <td><code>player</code></td>
+                <td><code>NumberDisplay</code>, <code>TapedCard</code> rot-B, <code>PlayerFigure</code> lg, <code>TicketStub</code>, <code>MonoLabel</code> ×3, <code>TapeStrip</code></td>
+                <td><code>MonoLabelRow</code>, <code>EditorialHeading</code>, <code>Button</code> ×2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>One discriminated <code>variant</code> prop on a single component. Shell (kicker, headline, dek, CTA row) is invariant across all 7 variants — only the band slot differs. Storybook ships one story per variant + autodocs + VR per variant; ~7 stories total.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Putting all 7 variants behind one <code>EditorialHero</code> means the component file has 7 internal artefact-band sub-renderers. Risks growing into a 600-line component. Mitigation: extract each band as its own sibling component in <code>EditorialHero/bands/&lt;Variant&gt;Band.tsx</code>, keep <code>EditorialHero/index.tsx</code> as a thin switch.</p>
+        </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           DIRECTION TRADEOFFS
+           ===================================================== -->
+      <section class="section" id="direction-tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 10 · DIRECTION TRADEOFFS</span>
+          <span class="mono mono--muted">— summary across all variants and viewports</span>
+        </div>
+        <h2>Waarom <em>deze</em> richting.</h2>
+        <p class="lead">
+          Direction B treats the hero as a single fly-poster pasted on a wall —
+          headline lives at the top, big and unchallenged. The artefact band is a
+          horizontal stripe under the title rather than a sidebar — gives every
+          variant the same vertical rhythm and removes the "left column / right
+          column" tension entirely.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Headline gets full poster width — display-2xl reads enormous at any
+              breakpoint and the variant prop never steals room from it. Mobile
+              is essentially "just tighter" — no two-column-to-one reflow rules
+              to debug per variant. Every variant has the same vertical signature
+              (kicker → head → band → foot) so the homepage rhythm is predictable
+              even when six variants stack one after the other. Reuses the entire
+              primitive catalogue (TapedCard, TicketStub, MonoLabel, StampBadge,
+              ClippedCard, PlayerFigure, TapeStrip) verbatim — no new chrome.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Pushes the artefact below the fold on shorter viewports. The
+              two-column "left-words / right-artefact" tension that the master
+              redesign doc calls "universal" (§5.4) is deliberately abandoned
+              here — that tension is what carries the duo-interview hero in the
+              source mockups, and it doesn't survive the stack. Variant
+              differentiation now relies entirely on the band slot — if a viewer
+              skims the kicker and headline alone, they have no other variant
+              cue. Risk of a homepage that reads as "seven near-identical poster
+              shells with different stripes underneath".
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           FOOTER
+           ===================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— production handoff for the EditorialHero stacked-poster direction</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Single component <code>&lt;EditorialHero variant=...&gt;</code> with 7 discriminated variants — invariant shell, swappable artefact band</li>
+          <li>Shell primitives: <code>MonoLabelRow</code> kicker, <code>EditorialHeading size="display-2xl"</code>, dek paragraph, CTA row with <code>Button</code> primary + ghost</li>
+          <li>Artefact band sits <strong>below the headline</strong>, full poster width, bordered top + bottom 2px ink with dashed rule overlay</li>
+          <li>Press idiom on every interactive primitive: <code>hover:shadow-none</code> + <code>translate(4px, 4px)</code> + <code>transition-all 300ms ease</code></li>
+          <li>Subject photos default rectangular (event poster, transfer-card branding); circular crops only inside <code>PlayerFigure</code></li>
+          <li>No radial glows, no rim-lights — paper shadows only</li>
+          <li>Glyph language uses Playfair italic numerals / arrows / ampersands; Lucide icons only when no typographic alternative exists</li>
+          <li>Mobile collapse is single-axis — only padding, type scale, and band internal grid change; the parent shell never reflows</li>
+          <li>Each band sub-renderer extracted to <code>EditorialHero/bands/&lt;Variant&gt;Band.tsx</code> to keep <code>index.tsx</code> a thin switch</li>
+          <li>Storybook: one story per variant (<code>tags: ["autodocs", "vr"]</code>) — VR catches regressions across all 7</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction B (this), Direction A (side-by-side
+          two-column), and any sibling directions. If B is locked: write
+          <code>EditorialHero</code> in <code>apps/web/src/components/design-system/EditorialHero/</code>,
+          retire the existing <code>PageHero</code>, migrate the homepage,
+          interview detail, event detail, and player profile templates.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SHELL / SURFACE</h4>
+            <ul>
+              <li>Hero surface: <code>--color-cream</code></li>
+              <li>Hero border: <code>2px solid var(--color-ink)</code></li>
+              <li>Hero shadow: <code>--shadow-paper-md</code> (6×6 ink)</li>
+              <li>Headline colour: <code>--color-ink</code> with italic emphasis in <code>--color-jersey-deep</code></li>
+              <li>Underline-highlight: <code>--color-jersey</code> at ~55% alpha behind word</li>
+              <li>Dek colour: <code>--color-ink-soft</code></li>
+              <li>Kicker bg: <code>--color-cream-soft</code> with 1.5px ink border</li>
+            </ul>
+          </div>
+          <div>
+            <h4>BAND / ARTEFACT</h4>
+            <ul>
+              <li>Band borders: 2px ink top + bottom + dashed 6px overlay rule</li>
+              <li>TapedCard rotation-A: <code>rotate(-1.4deg)</code>; rotation-B: <code>rotate(1.6deg)</code></li>
+              <li>TapeStrip tints: jersey @ 45%, ochre @ 45%, ink @ 60%</li>
+              <li>StampBadge sizes: <code>md=152px</code>, <code>lg=200px</code>, default rotation <code>-8deg</code></li>
+              <li>TicketStub: 12px perforation circles at edge midpoints</li>
+              <li>PlayerFigure sizes: <code>md=160px</code>, <code>lg=220px</code>, 3px ink border</li>
+              <li>Press idiom across all primitives: <code>translate(4px, 4px)</code> + shadow-none on hover</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION B — STACKED POSTER · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

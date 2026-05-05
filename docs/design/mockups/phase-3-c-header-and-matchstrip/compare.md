@@ -1,0 +1,67 @@
+# Phase 3 — Checkpoint C — SiteHeader + MatchStrip · Compare
+
+**Surfaces:** `<SiteHeader>` (sticky top) + `<MatchStrip>` (persistent sub-header band; renders only when an upcoming/live/concluded match exists).
+**Issue:** #1525 · master design `docs/plans/2026-04-27-redesign-master-design.md` §5.1
+**Brief:** see `docs/plans/2026-05-03-redesign-phase-3-design.md` §2 — Checkpoint C.
+
+## Options
+
+| Option | File | Direction |
+|---|---|---|
+| A | `option-a-classic-newsstand.html` | Cream paper masthead with hairline rules. Reads like a daily newspaper masthead. |
+| B | `option-b-ink-band.html` | Ink top band with cream wordmark + cream mono nav. Stadium-concourse contrast. |
+| C | `option-c-taped-flyer.html` | TapedCard-wrapped header with TapeStrip flourish; MatchStrip uses TicketStub aesthetic. Most fanzine-leaning. |
+
+## MatchStrip state matrix coverage
+
+Every option renders the four required data states:
+
+| State | A | B | C |
+|---|---|---|---|
+| **No upcoming** (strip hidden) | placeholder note + outline | placeholder note + outline | placeholder note + outline |
+| **Upcoming** | shield + competition + date/time + venue + TICKETS CTA | cream bg + 2px jersey-green left rail + tickets CTA | TicketStub: shield + dashed rule between segments + tickets stub |
+| **Live / in-progress** | LIVE pill + current score + minute marker | jersey-green pulse rail + score + minute | TicketStub variant: LIVE stamp + score |
+| **Concluded with result** | final score + MATCH REPORT CTA | final score + match-report CTA | final score + match-report stub |
+
+## Trade-off summary
+
+| Criterion | A — Newsstand | B — Ink Band | C — Taped Flyer |
+|---|---|---|---|
+| **Brand recognition vs current site** | Medium (familiar paper feel) | High (sharp departure) | Highest (most distinctive) |
+| **Nav legibility** | Highest (cream bg + ink type, IBM Plex caps) | High (cream-on-ink reverses; relies on weight) | Medium (paper card competes with content rhythm) |
+| **WORD LID button prominence** | Medium (ink-on-cream button on cream bg) | Highest (jersey-green button against ink) | Medium (ink button on tape-flecked card) |
+| **MatchStrip readability** | Highest (hairline rules pure tabular) | High (jersey rail anchors eye) | Medium (perforations + dashes can compete with content) |
+| **Sticky behaviour at scroll** | Strongest (paper sits flat against content) | Strong (ink band lifts off cream content cleanly) | Risk — tape strips' rotation can feel busy when sticky |
+| **Mobile collapse simplicity** | Highest (already a single-row strip) | High (band collapses cleanly) | Medium (TapedCard wrap needs careful corner handling at narrow widths) |
+| **Implementation complexity** | Lowest (rules + flexbox) | Low (background swap + jersey rail) | Highest (rotated tape, perforation borders, dashed rules) |
+| **Primitive reuse density** | Low — header is mostly chrome, MatchStrip cells are bespoke | Medium — borrows MonoLabel + StampBadge patterns | Highest — TapedCard + TapeStrip + TicketStub all in chrome |
+| **Risk if MatchStrip is not present** | Low (header reads complete alone) | Low (header still anchors) | Low (header reads as a complete card on its own) |
+
+## Visual decision map (selected)
+
+| Decision | A | B | C |
+|---|---|---|---|
+| Background top band | cream | ink | cream paper TapedCard |
+| Wordmark colour | ink Freight Display | cream Freight Display | ink Freight Display |
+| Nav typography | IBM Plex Mono caps | IBM Plex Mono caps, cream | IBM Plex Mono inline contents-list (`§ X · Y · Z`) |
+| Search affordance | `⌕` glyph | `⌕` glyph cream | `⌕` glyph + tape corner |
+| WORD LID button | ink fill, cream text | jersey-green fill, ink text | ink fill, cream text, on TapedCard |
+| MatchStrip border | hairline ink top + bottom | 2px jersey-green left rail | TicketStub perforated edge + dashed dividers |
+| MatchStrip background | cream | cream | cream with subtle paper-edge gradient |
+
+## Owner choice
+
+> _Pick one. The chosen option's data states freeze the MatchStrip state matrix for sub-issue 3.C.2._
+
+- [ ] Option A — Classic Newsstand
+- [ ] Option B — Ink Band
+- [ ] Option C — Taped Flyer
+
+**Rationale (after pick):** _to be filled in by owner._
+
+## Next step
+
+Once an option is chosen:
+1. PRD `docs/prd/redesign-phase-3.md` §5 (Layout chrome) cites the chosen mockup file.
+2. Sub-issues 3.C.1 (`SiteHeader`) and 3.C.2 (`MatchStrip` — including all 4 states) reference it.
+3. PageHeader legacy retirement is in 3.B.3 / 3.C.1's call-site migration.

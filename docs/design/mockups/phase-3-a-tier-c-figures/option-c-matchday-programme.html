@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Matchday Programme · Phase 3 · Checkpoint A · Tier C Figures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         REUSED PRIMITIVES — TapedCard, TicketStub, MonoLabel,
+         ClippedCard, StampBadge — referenced by class so the reuse
+         contract is legible at a glance. Kept light; faithful to the
+         already-shipped vocabulary in apps/web/src/components/design-system.
+         ============================================================ */
+
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 28px 28px 32px;
+      }
+      .taped-card--rot-a { transform: rotate(-1.2deg); }
+      .taped-card--rot-b { transform: rotate(0.9deg); }
+      .taped-card .tape-strip {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 96px;
+        height: 22px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(10, 10, 10, 0.35);
+        box-shadow: 1px 1px 0 0 rgba(10, 10, 10, 0.15);
+      }
+      .taped-card .tape-strip--right {
+        left: auto;
+        right: -10px;
+        top: 18px;
+        transform: rotate(20deg);
+        width: 72px;
+      }
+
+      .ticket-stub {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        padding: 6px 10px;
+        position: relative;
+      }
+      .ticket-stub::before,
+      .ticket-stub::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        background: var(--color-cream-soft);
+        border: 1.5px solid var(--color-ink);
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+      .ticket-stub::before { left: -6px; }
+      .ticket-stub::after { right: -6px; }
+      .ticket-stub b { color: var(--color-jersey-deep); font-weight: 700; }
+
+      .mono-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .mono-label--pill {
+        background: var(--color-jersey);
+        color: var(--color-ink);
+        padding: 4px 10px;
+        border: 1.5px solid var(--color-ink);
+      }
+      .mono-label--row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+      .clipped-card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 24px;
+        clip-path: polygon(
+          0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%,
+          18px 100%, 0 calc(100% - 18px)
+        );
+      }
+
+      .stamp-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        text-align: center;
+        line-height: 1.1;
+        transform: rotate(-6deg);
+      }
+
+      /* ============================================================
+         GRAPH-PAPER BACKGROUND
+         Faint 8px grid via repeating-linear-gradient at ~5% opacity.
+         Used behind JerseyShirt thumbnails per Direction C brief.
+         ============================================================ */
+      .graph-paper {
+        background-color: var(--color-cream);
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            rgba(10, 10, 10, 0.05) 0 1px,
+            transparent 1px 8px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(10, 10, 10, 0.05) 0 1px,
+            transparent 1px 8px
+          );
+      }
+
+      /* ============================================================
+         PLAYER FIGURE — Direction C "matchday programme"
+         Rule-bordered photo (1px ink rule), line-art jersey
+         illustration below, sans-mono name plate at the bottom.
+         No fills inside the illustration — contour only.
+         ============================================================ */
+
+      .player-figure {
+        --pf-width: 260px;
+        width: var(--pf-width);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        font-family: var(--font-body);
+      }
+
+      .player-figure__photo {
+        position: relative;
+        aspect-ratio: 4 / 5;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        overflow: hidden;
+      }
+      .player-figure__photo-inner {
+        position: absolute;
+        inset: 14px;
+        border: 1px solid var(--color-ink-muted);
+        background:
+          radial-gradient(circle at 50% 38%, #c2b9a0 0 60px, transparent 60px),
+          linear-gradient(180deg, #d8d0b5 0%, #b8ad8a 100%);
+        clip-path: inset(0 0 0 0);
+      }
+      /* Circular face crop — a CSS clip-path circle out of the
+         rectangular placeholder. Mirrors the data note in §5.3 of
+         the master design doc: PlayerFigure crops a circle out of
+         a rectangular source. */
+      .player-figure__face {
+        position: absolute;
+        top: 18%;
+        left: 50%;
+        width: 56%;
+        aspect-ratio: 1 / 1;
+        transform: translateX(-50%);
+        background:
+          radial-gradient(circle at 50% 38%, #e8d9b8 0 42%, #c2a875 42% 60%, transparent 60%),
+          radial-gradient(circle at 50% 70%, #2c2820 0 24%, transparent 25%);
+        clip-path: circle(50% at 50% 50%);
+        border: 1px solid rgba(10, 10, 10, 0.3);
+        border-radius: 50%;
+      }
+      .player-figure__photo-corner {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        padding: 2px 6px;
+      }
+
+      /* Jersey illustration — 1px contour only, no fills. */
+      .player-figure__jersey {
+        border-left: 1px solid var(--color-ink);
+        border-right: 1px solid var(--color-ink);
+        background: var(--color-cream);
+        padding: 14px 12px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .player-figure__jersey svg {
+        width: 100%;
+        max-width: 160px;
+        height: auto;
+        display: block;
+      }
+      .player-figure__jersey svg * {
+        fill: none;
+        stroke: var(--color-ink);
+        stroke-width: 1px;
+        vector-effect: non-scaling-stroke;
+      }
+
+      /* Name plate — sans-mono, bottom of figure, ink-bordered. */
+      .player-figure__plate {
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+        padding: 8px 10px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .player-figure__plate b {
+        color: var(--color-jersey-deep);
+        font-weight: 700;
+        margin-right: 4px;
+      }
+      .player-figure__plate .pf-divider {
+        color: var(--color-ink-muted);
+        margin: 0 4px;
+        font-weight: 400;
+      }
+      .player-figure__plate .pf-role {
+        color: var(--color-ink-muted);
+      }
+
+      /* Photo-missing state — illustrated face inside the photo
+         frame (still a 1px line-art portrait, no photographic data). */
+      .player-figure__photo--empty .player-figure__photo-inner,
+      .player-figure__photo--empty .player-figure__face { display: none; }
+      .player-figure__photo--empty {
+        background: var(--color-cream);
+      }
+      .player-figure__photo--empty svg {
+        position: absolute;
+        inset: 18px;
+        width: calc(100% - 36px);
+        height: calc(100% - 36px);
+      }
+      .player-figure__photo--empty svg * {
+        fill: none;
+        stroke: var(--color-ink);
+        stroke-width: 1px;
+        vector-effect: non-scaling-stroke;
+      }
+
+      /* Tight crop variant — face takes up more of the frame */
+      .player-figure__photo--tight .player-figure__face {
+        top: 6%;
+        width: 86%;
+      }
+      .player-figure__photo--tight .player-figure__photo-inner {
+        background:
+          radial-gradient(circle at 50% 28%, #c2b9a0 0 80px, transparent 80px),
+          linear-gradient(180deg, #d8d0b5 0%, #b8ad8a 100%);
+      }
+
+      /* ============================================================
+         JERSEY SHIRT — 4-up variants on graph-paper background.
+         Line-art only, 1px stroke.
+         ============================================================ */
+
+      .jersey-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      .jersey-cell {
+        position: relative;
+        padding: 24px 16px 18px;
+        border: 1px solid var(--color-paper-edge);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .jersey-cell svg {
+        width: 100%;
+        max-width: 140px;
+        height: auto;
+        display: block;
+      }
+      .jersey-cell svg * {
+        fill: none;
+        stroke: var(--color-ink);
+        stroke-width: 1px;
+        vector-effect: non-scaling-stroke;
+      }
+      .jersey-cell__caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+      }
+      .jersey-cell__caption b { color: var(--color-ink); font-weight: 700; }
+
+      /* Letter overlay — large Playfair italic glyph centered behind
+         the jersey contour (still no fills on the jersey itself). */
+      .jersey-cell__letter {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -58%);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 84px;
+        color: var(--color-jersey-deep);
+        opacity: 0.18;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 0;
+      }
+      .jersey-cell svg { position: relative; z-index: 1; }
+      .jersey-cell__caption { position: relative; z-index: 2; }
+
+      /* ============================================================
+         END MARK — thin horizontal rule with mono "EINDE GESPREK"
+         tag floating in the centre. The rule visually passes
+         through the tag (rule on each side, tag in the middle).
+         ============================================================ */
+
+      .end-mark {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 20px;
+        margin: 32px auto;
+        max-width: 560px;
+      }
+      .end-mark__rule {
+        height: 1px;
+        background: var(--color-ink);
+      }
+      .end-mark__tag {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream);
+        padding: 0 12px;
+        font-weight: 600;
+      }
+      .end-mark__tag::before { content: "★ "; color: var(--color-jersey-deep); }
+      .end-mark__tag::after { content: " ★"; color: var(--color-jersey-deep); }
+
+      /* ============================================================
+         QA SECTION DIVIDER — full-width thin double-rule with italic
+         Freight Display act-title centered between the rules. Small
+         jersey-green stars at left and right.
+         ============================================================ */
+
+      .qa-divider {
+        margin: 40px 0;
+        position: relative;
+      }
+      .qa-divider__rule {
+        height: 1px;
+        background: var(--color-ink);
+      }
+      .qa-divider__inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        padding: 14px 0;
+        gap: 24px;
+      }
+      .qa-divider__star {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 22px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      .qa-divider__title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 28px;
+        text-align: center;
+        color: var(--color-ink);
+        line-height: 1.1;
+      }
+
+      /* ============================================================
+         MECHANICS SHEET — 3-column grid for state coverage
+         ============================================================ */
+
+      .mechanics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 8px;
+      }
+      .mechanics-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .mechanics-cell .player-figure { --pf-width: 100%; max-width: 240px; }
+      .mechanics-cell__caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        line-height: 1.4;
+      }
+      .mechanics-cell__caption b { color: var(--color-ink); font-weight: 700; display: block; margin-bottom: 2px; }
+
+      /* ============================================================
+         REUSE MAP TABLE
+         ============================================================ */
+
+      .reuse-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 16px;
+      }
+      .reuse-table th, .reuse-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        font-weight: 600;
+        border-bottom: 1.5px solid var(--color-ink);
+      }
+      .reuse-table td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      /* ============================================================
+         CANONICAL PRESS-DOWN HOVER — paper-stamped interactives
+         hover:shadow-none hover:translate-x-1 hover:translate-y-1
+         + transition-all duration-300
+         ============================================================ */
+      .press-canon {
+        transition: transform 300ms ease, box-shadow 300ms ease;
+      }
+      .press-canon:hover {
+        transform: translate(4px, 4px);
+        box-shadow: none !important;
+      }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer p.foot {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HERO
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT A · TIER C FIGURES · DIRECTION C</span>
+          <span class="mono mono--muted">★ MATCHDAY PROGRAMME</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Het <span class="display"><em>programmaboekje.</em></span></h1>
+        <p class="lead">
+          Direction C reads PlayerFigure, JerseyShirt, EndMark and
+          QASectionDivider as pages torn from a matchday programme — rule-bordered
+          photos, sans-mono name plates, line-art jersey contours on graph paper,
+          and a thin double-rule with italic act-titles between Q&amp;A clusters.
+          Editorial sidebar treatment: quiet, paper-thin, deferential to the
+          journalism it frames.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           01 · PLAYERFIGURE — main rendering
+           =========================================================== -->
+      <section class="section" id="player-figure">
+        <div class="section-meta">
+          <span class="mono">★ 01 · &lt;PlayerFigure&gt;</span>
+          <span class="mono mono--muted">— rule-bordered photo · line-art jersey · sans-mono name plate · on TapedCard</span>
+        </div>
+        <h2>De <em>matchkaart.</em></h2>
+        <p class="lead">
+          A single column: photo at the top inside a 1px ink rule, line-art
+          jersey contour beneath in the same column width, name plate at the
+          bottom reading <code>#8 · MAXIM BREUGELMANS · MIDFIELDER</code>. The
+          whole stack sits on a <code>.taped-card</code> with a tape strip — the
+          card carries the paper feel; the figure stays disciplined.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">DEFAULT</span>
+            <span class="mono">on .taped-card with .tape-strip — rotation -1.2deg</span>
+          </div>
+
+          <div style="display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; padding: 32px 16px">
+            <div class="taped-card taped-card--rot-a press-canon" style="width: 320px">
+              <span class="tape-strip"></span>
+              <div class="player-figure">
+                <div class="player-figure__photo">
+                  <span class="player-figure__photo-corner">PSD-2026</span>
+                  <div class="player-figure__photo-inner"></div>
+                  <div class="player-figure__face"></div>
+                </div>
+                <div class="player-figure__jersey">
+                  <!-- Jersey contour: shoulders, neckline, sleeves, body, hem.
+                       Pure 1px stroke, no fills, no shading. -->
+                  <svg viewBox="0 0 160 180" aria-hidden="true">
+                    <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                    <path d="M60 18 Q80 38 100 18" />
+                    <path d="M55 80 L55 160" />
+                    <path d="M105 80 L105 160" />
+                    <text x="80" y="125" text-anchor="middle" font-family="IBM Plex Mono" font-size="36" font-weight="700" style="fill: none; stroke: #0a0a0a; stroke-width: 1">8</text>
+                  </svg>
+                </div>
+                <div class="player-figure__plate">
+                  <b>#8</b><span class="pf-divider">·</span>MAXIM BREUGELMANS<span class="pf-divider">·</span><span class="pf-role">MIDFIELDER</span>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: center; margin-top: 14px">
+                <span class="ticket-stub"><b>A-PLOEG</b> 26/27</span>
+              </div>
+            </div>
+
+            <div style="flex: 1 1 280px; min-width: 260px">
+              <div class="mono-label mono-label--row" style="margin-bottom: 12px">
+                <span class="mono-label">★ COMPOSITION</span>
+                <span class="mono-label--pill mono-label">PLAYERFIGURE</span>
+              </div>
+              <h3 style="font-style: italic">Drie regels, één kolom.</h3>
+              <p style="font-size: 14.5px; color: var(--color-ink-soft); margin: 8px 0 14px">
+                The photo, the jersey, and the plate are stacked rectangles of
+                identical width — a single ink rule traces the column edge from
+                top to bottom. The name plate's <code>#8</code> renders in
+                <code>--color-jersey-deep</code> so the number is the only
+                colour spike in an otherwise monochrome card.
+              </p>
+              <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 0">
+                <li>Photo: 4:5 aspect, 1px ink rule, optional <code>PSD-2026</code> mono corner stamp</li>
+                <li>Face: circular CSS clip out of the rectangular source (<code>clip-path: circle()</code>)</li>
+                <li>Jersey: 1px contour only — no fills, no shading, just outline</li>
+                <li>Plate: mono caps, <code>#NN</code> in jersey-deep, name in ink, role in ink-muted</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Reads instantly as a programme-booklet entry — readers recognise the matchday-list typography. The single-column rule unifies photo + jersey + plate into one composed object; the figure cannot drift apart on smaller widths. Letting the jersey live as a 1px contour means a player figure with no photo still has a recognisable artefact below.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Quieter than tier-A or tier-B figures — the figure won't carry a hero on its own without a TapedCard rotation + tape strip around it. Three stacked rectangles with similar borders can flatten if the photo, jersey, and plate end up at the same visual weight — mitigated by the jersey-deep <code>#NN</code> spike in the plate.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           02 · MECHANICS SHEET
+           =========================================================== -->
+      <section class="section" id="mechanics">
+        <div class="section-meta">
+          <span class="mono">★ 02 · MECHANICS SHEET</span>
+          <span class="mono mono--muted">— photo-present · photo-missing (line-art only) · photo-cropped-tight</span>
+        </div>
+        <h2>Drie <em>states.</em></h2>
+        <p class="lead">
+          PlayerFigure must survive three real states: a clean PSD photo, no
+          photo at all, and a tight crop where the face fills most of the frame.
+          The plate stays identical across states. Only the photo cell changes.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">STATES</span>
+            <span class="mono">photo-present (default) · photo-missing · photo-cropped-tight</span>
+          </div>
+
+          <div class="mechanics-grid">
+            <!-- State 1: photo present -->
+            <div class="mechanics-cell">
+              <div class="player-figure">
+                <div class="player-figure__photo">
+                  <span class="player-figure__photo-corner">PSD-2026</span>
+                  <div class="player-figure__photo-inner"></div>
+                  <div class="player-figure__face"></div>
+                </div>
+                <div class="player-figure__jersey">
+                  <svg viewBox="0 0 160 180" aria-hidden="true">
+                    <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                    <path d="M60 18 Q80 38 100 18" />
+                    <text x="80" y="125" text-anchor="middle" font-family="IBM Plex Mono" font-size="36" font-weight="700" style="fill: none; stroke: #0a0a0a; stroke-width: 1">8</text>
+                  </svg>
+                </div>
+                <div class="player-figure__plate">
+                  <b>#8</b><span class="pf-divider">·</span>BREUGELMANS<span class="pf-divider">·</span><span class="pf-role">MID</span>
+                </div>
+              </div>
+              <p class="mechanics-cell__caption">
+                <b>STATE — PHOTO PRESENT</b>
+                Default · 4:5 source · circular face crop
+              </p>
+            </div>
+
+            <!-- State 2: photo missing — line-art-only portrait -->
+            <div class="mechanics-cell">
+              <div class="player-figure">
+                <div class="player-figure__photo player-figure__photo--empty">
+                  <span class="player-figure__photo-corner">NO IMG</span>
+                  <svg viewBox="0 0 200 250" aria-hidden="true">
+                    <!-- Line-art portrait: head, neck, shoulders, hairline,
+                         eyes, nose. 1px contour only. -->
+                    <ellipse cx="100" cy="100" rx="58" ry="66" />
+                    <path d="M55 90 Q100 30 145 90" />
+                    <path d="M70 110 Q78 102 86 110" />
+                    <path d="M114 110 Q122 102 130 110" />
+                    <path d="M96 130 L100 150 L104 130" />
+                    <path d="M85 168 Q100 178 115 168" />
+                    <path d="M55 165 L40 230 L160 230 L145 165" />
+                    <path d="M70 165 Q100 195 130 165" />
+                  </svg>
+                </div>
+                <div class="player-figure__jersey">
+                  <svg viewBox="0 0 160 180" aria-hidden="true">
+                    <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                    <path d="M60 18 Q80 38 100 18" />
+                  </svg>
+                </div>
+                <div class="player-figure__plate">
+                  <b>#22</b><span class="pf-divider">·</span>VAN INGELGEM<span class="pf-divider">·</span><span class="pf-role">DEF</span>
+                </div>
+              </div>
+              <p class="mechanics-cell__caption">
+                <b>STATE — PHOTO MISSING</b>
+                Line-art-only portrait · 1px stroke · contour only
+              </p>
+            </div>
+
+            <!-- State 3: photo cropped tight -->
+            <div class="mechanics-cell">
+              <div class="player-figure">
+                <div class="player-figure__photo player-figure__photo--tight">
+                  <span class="player-figure__photo-corner">PSD-2026 · CROP</span>
+                  <div class="player-figure__photo-inner"></div>
+                  <div class="player-figure__face"></div>
+                </div>
+                <div class="player-figure__jersey">
+                  <svg viewBox="0 0 160 180" aria-hidden="true">
+                    <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                    <path d="M60 18 Q80 38 100 18" />
+                    <text x="80" y="125" text-anchor="middle" font-family="IBM Plex Mono" font-size="36" font-weight="700" style="fill: none; stroke: #0a0a0a; stroke-width: 1">11</text>
+                  </svg>
+                </div>
+                <div class="player-figure__plate">
+                  <b>#11</b><span class="pf-divider">·</span>SAEYS<span class="pf-divider">·</span><span class="pf-role">FWD</span>
+                </div>
+              </div>
+              <p class="mechanics-cell__caption">
+                <b>STATE — CROPPED TIGHT</b>
+                Face fills the frame · used for hero spreads
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Photo-missing state degrades to a recognisable line-art portrait — never to a generic placeholder. The plate carries the same metadata across all three states, so a roster grid mixing photo'd and un-photo'd players still reads as a single editorial artefact. Tight-crop variant gives art-direction headroom on hero spreads without forking the component.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>The line-art portrait fallback ships a small SVG library of poses — grows over time as we add youth/staff variants. Tight-crop variant requires deliberate art direction (an editor must opt-in per article); auto-cropping a wide-angle PSD photo to a tight square will produce ugly edges. Tracked as a Sanity-side art-direction concern, not a component concern.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03 · JERSEYSHIRT — 4-up on graph paper
+           =========================================================== -->
+      <section class="section" id="jersey-shirt">
+        <div class="section-meta">
+          <span class="mono">★ 03 · &lt;JerseyShirt&gt;</span>
+          <span class="mono mono--muted">— 4-up variants · graph-paper bg · letter-overlay support</span>
+        </div>
+        <h2>Het <em>shirtblad.</em></h2>
+        <p class="lead">
+          A 4-cell row inside a single graph-paper panel (faint 8px grid via
+          <code>repeating-linear-gradient</code> at ~5% opacity). Each cell is
+          a 1px line-art jersey with optional letter overlay rendered in
+          Playfair italic at 18% opacity behind the contour. Captions read
+          <code>HOME · UIT · KEEPER · U11</code> in mono caps below.
+        </p>
+
+        <div class="panel graph-paper">
+          <div class="label-row">
+            <span class="row-label">VARIANTS</span>
+            <span class="mono">home-stripes · away-plain · keeper · youth (letter overlay)</span>
+          </div>
+
+          <div class="jersey-grid">
+            <!-- Home stripes -->
+            <div class="jersey-cell">
+              <svg viewBox="0 0 160 180" aria-hidden="true">
+                <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                <path d="M60 18 Q80 38 100 18" />
+                <line x1="55" y1="40" x2="55" y2="170" />
+                <line x1="75" y1="40" x2="75" y2="170" />
+                <line x1="95" y1="40" x2="95" y2="170" />
+                <line x1="115" y1="40" x2="115" y2="170" />
+              </svg>
+              <p class="jersey-cell__caption"><b>HOME</b><br/>STRIPES · GROEN/WIT</p>
+            </div>
+
+            <!-- Away plain -->
+            <div class="jersey-cell">
+              <svg viewBox="0 0 160 180" aria-hidden="true">
+                <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                <path d="M60 18 Q80 38 100 18" />
+                <path d="M30 60 L130 60" />
+              </svg>
+              <p class="jersey-cell__caption"><b>UIT</b><br/>EFFEN · CRÈME</p>
+            </div>
+
+            <!-- Keeper -->
+            <div class="jersey-cell">
+              <svg viewBox="0 0 160 180" aria-hidden="true">
+                <path d="M20 32 L55 18 Q80 30 105 18 L140 32 L160 70 L140 80 L140 170 L20 170 L20 80 L0 70 Z" />
+                <path d="M55 18 Q80 40 105 18" />
+                <!-- long sleeves indicator -->
+                <path d="M20 80 L8 130" />
+                <path d="M140 80 L152 130" />
+                <text x="80" y="125" text-anchor="middle" font-family="IBM Plex Mono" font-size="32" font-weight="700" style="fill: none; stroke: #0a0a0a; stroke-width: 1">1</text>
+              </svg>
+              <p class="jersey-cell__caption"><b>KEEPER</b><br/>LANGE MOUW · #1</p>
+            </div>
+
+            <!-- Youth — letter overlay -->
+            <div class="jersey-cell">
+              <span class="jersey-cell__letter">U</span>
+              <svg viewBox="0 0 160 180" aria-hidden="true">
+                <path d="M30 30 L60 18 Q80 28 100 18 L130 30 L150 60 L130 70 L130 170 L30 170 L30 70 L10 60 Z" />
+                <path d="M60 18 Q80 38 100 18" />
+                <text x="80" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="22" font-weight="700" style="fill: none; stroke: #0a0a0a; stroke-width: 1">U11</text>
+              </svg>
+              <p class="jersey-cell__caption"><b>U11</b><br/>LETTER-OVERLAY</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Graph-paper backdrop is generated entirely from <code>repeating-linear-gradient</code> — no asset, no SVG, costs zero kilobytes. The 1px contour scales cleanly from a 32×32 navigation thumbnail to a 320×320 hero artefact without changing component code. Letter-overlay slot lets youth/transfer/keeper variants carry their own glyph (U11, GK, ★) without forking the SVG.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Pure line-art means no shirt colour signal — a "home" jersey is indistinguishable from an "away" jersey at small sizes unless the caption reads it. We could tint the contour stroke (jersey-deep for home, ink for away) without breaking the no-fills rule; tracked as a follow-up. The graph-paper backdrop reads slightly fussy when stacked next to a TapedCard with its own paper texture.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           04 · ENDMARK
+           =========================================================== -->
+      <section class="section" id="end-mark">
+        <div class="section-meta">
+          <span class="mono">★ 04 · &lt;EndMark&gt;</span>
+          <span class="mono mono--muted">— thin horizontal rule · mono "EINDE GESPREK" tag floating in the centre</span>
+        </div>
+        <h2>Een <em>laatste</em> regel.</h2>
+        <p class="lead">
+          A 1px ink rule, broken in the middle by a mono caps tag in cream
+          paper. The rule reads as a continuous line passing through the tag —
+          flanked by jersey-green typographic stars. No emoji, no Lucide; just
+          glyphs the typeface already carries.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">DEFAULT</span>
+            <span class="mono">end-of-interview closer · centered · ~560px max-width</span>
+          </div>
+
+          <div class="end-mark">
+            <span class="end-mark__rule"></span>
+            <span class="end-mark__tag">EINDE GESPREK</span>
+            <span class="end-mark__rule"></span>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">VARIANTS</span>
+            <span class="mono">EINDE INTERVIEW · EINDE LOGBOEK · EINDE</span>
+          </div>
+
+          <div class="end-mark">
+            <span class="end-mark__rule"></span>
+            <span class="end-mark__tag">EINDE INTERVIEW</span>
+            <span class="end-mark__rule"></span>
+          </div>
+          <div class="end-mark">
+            <span class="end-mark__rule"></span>
+            <span class="end-mark__tag">EINDE LOGBOEK</span>
+            <span class="end-mark__rule"></span>
+          </div>
+          <div class="end-mark">
+            <span class="end-mark__rule"></span>
+            <span class="end-mark__tag">EINDE</span>
+            <span class="end-mark__rule"></span>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Quietest possible closer — a single 1px rule and a mono tag. The label is editor-authored so each long-form piece can sign off in its own voice (EINDE GESPREK / EINDE LOGBOEK / EINDE). Two typographic stars in jersey-deep are the only colour — same green spike used by the PlayerFigure plate and the QASectionDivider.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>So quiet that on long-scroll articles a reader can miss it — there's no large display flourish announcing "this is the end". Acceptable: the InterviewCredits block immediately below is the actual sign-off; EndMark is the pause, not the curtain.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           05 · QASectionDivider
+           =========================================================== -->
+      <section class="section" id="qa-divider">
+        <div class="section-meta">
+          <span class="mono">★ 05 · &lt;QASectionDivider&gt;</span>
+          <span class="mono mono--muted">— double-rule · italic Freight Display act-title · jersey-green stars at edges</span>
+        </div>
+        <h2>Tussen <em>twee</em> aktes.</h2>
+        <p class="lead">
+          Two thin 1px ink rules — one above, one below — with an italic
+          Playfair display act-title centered between them. Small jersey-green
+          star glyphs flank the title at left and right. Used between Q&amp;A
+          clusters in the duo-interview template.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">DEFAULT</span>
+            <span class="mono">act-title between two rules — duo-interview clusters</span>
+          </div>
+
+          <div class="qa-divider">
+            <span class="qa-divider__rule"></span>
+            <div class="qa-divider__inner">
+              <span class="qa-divider__star">✦</span>
+              <span class="qa-divider__title">Over <em style="color: var(--color-jersey-deep)">verloren</em> finales.</span>
+              <span class="qa-divider__star">✦</span>
+            </div>
+            <span class="qa-divider__rule"></span>
+          </div>
+
+          <div class="qa-divider">
+            <span class="qa-divider__rule"></span>
+            <div class="qa-divider__inner">
+              <span class="qa-divider__star">✦</span>
+              <span class="qa-divider__title">De <em style="color: var(--color-jersey-deep)">eerste</em> bal.</span>
+              <span class="qa-divider__star">✦</span>
+            </div>
+            <span class="qa-divider__rule"></span>
+          </div>
+
+          <div class="qa-divider">
+            <span class="qa-divider__rule"></span>
+            <div class="qa-divider__inner">
+              <span class="qa-divider__star">✦</span>
+              <span class="qa-divider__title">Een <em style="color: var(--color-jersey-deep)">stille</em> kleedkamer.</span>
+              <span class="qa-divider__star">✦</span>
+            </div>
+            <span class="qa-divider__rule"></span>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">IN-CONTEXT</span>
+            <span class="mono">two QA rows around a divider — preview of duo-interview body</span>
+          </div>
+
+          <div style="max-width: 680px; margin: 0 auto">
+            <p style="font-family: var(--font-display); font-style: italic; font-size: 22px; margin: 0 0 6px"><span style="color: var(--color-jersey-deep); font-weight: 900">07.</span> En toen?</p>
+            <p style="font-size: 15.5px; color: var(--color-ink-soft); margin: 0 0 12px">JULIEN — Toen liep ik naar de cornervlag, en ik dacht: dit is het laatste moment dat ik dit zal doen in deze tenue.</p>
+
+            <div class="qa-divider">
+              <span class="qa-divider__rule"></span>
+              <div class="qa-divider__inner">
+                <span class="qa-divider__star">✦</span>
+                <span class="qa-divider__title">Over <em style="color: var(--color-jersey-deep)">afscheid</em> nemen.</span>
+                <span class="qa-divider__star">✦</span>
+              </div>
+              <span class="qa-divider__rule"></span>
+            </div>
+
+            <p style="font-family: var(--font-display); font-style: italic; font-size: 22px; margin: 0 0 6px"><span style="color: var(--color-jersey-deep); font-weight: 900">08.</span> Hoe vertel je zoiets aan je medespelers?</p>
+            <p style="font-size: 15.5px; color: var(--color-ink-soft); margin: 0">NIELS — Je vertelt het niet. Ze weten het al voor je het zegt. Dat is het mooie aan een kleedkamer.</p>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>The double-rule + centered italic act-title is unmistakably a programme-booklet act break — readers slow down without being told to. Jersey-green stars at the edges add the brand colour without flooding the divider, and use a typographic glyph (✦) instead of a Lucide icon, per the visual-preferences memo.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Two rules close together can read as a single thick band on retina-density displays at small zoom; the 14px gap between rules holds the breathing room but is sensitive to font-size adjustments. The italic act-title is editor-authored — needs editorial guidance ("keep it under 6 words") in the Sanity field.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           06 · PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse-map">
+        <div class="section-meta">
+          <span class="mono">★ 06 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— each Tier C figure → composed primitives already on main</span>
+        </div>
+        <h2>Wat <em>hergebruikt</em> elke figuur?</h2>
+        <p class="lead">
+          Every figure in this direction composes from the already-shipped
+          primitive vocabulary. No new chrome atom is introduced — the
+          matchday-programme reading comes from arrangement, not invention.
+        </p>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th>FIGURE</th>
+                <th>COMPOSED PRIMITIVES</th>
+                <th>NEW MATERIAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>&lt;PlayerFigure&gt;</code></td>
+                <td><code>.taped-card</code> + <code>.tape-strip</code> + <code>.ticket-stub</code> + <code>.mono-label</code></td>
+                <td>Three rule-bordered cells (photo / jersey / plate) stacked in one column. 1px ink rule and mono name plate. No new tokens.</td>
+              </tr>
+              <tr>
+                <td><code>&lt;PlayerFigure&gt;</code> mechanics</td>
+                <td><code>.taped-card</code> (omitted in grid for clarity) + <code>.mono-label</code></td>
+                <td>Photo-missing fallback uses a 1px line-art portrait SVG. Plate metadata invariant across states.</td>
+              </tr>
+              <tr>
+                <td><code>&lt;JerseyShirt&gt;</code></td>
+                <td><code>.graph-paper</code> background + <code>.mono-label</code> captions</td>
+                <td>Letter-overlay slot for youth/keeper/transfer glyphs. 1px contour SVG variants (home / away / keeper / youth).</td>
+              </tr>
+              <tr>
+                <td><code>&lt;EndMark&gt;</code></td>
+                <td><code>.mono-label</code> typography (10px caps, 0.18em tracking)</td>
+                <td>1px ink rule split by a cream-paper tag. Two jersey-deep typographic stars (★) at the tag edges.</td>
+              </tr>
+              <tr>
+                <td><code>&lt;QASectionDivider&gt;</code></td>
+                <td><code>--font-display</code> italic + <code>--color-jersey-deep</code></td>
+                <td>Two stacked 1px ink rules with an italic Playfair act-title between, flanked by jersey-deep ✦ glyphs.</td>
+              </tr>
+              <tr>
+                <td>(global)</td>
+                <td><code>.press-canon</code> hover (hover:translate-x-1 + hover:translate-y-1 + hover:shadow-none)</td>
+                <td>None — canonical press-down hover applied to <code>.taped-card</code> instances that are interactive (e.g. linked PlayerFigure on roster grid).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Direction C ships zero new chrome atoms. Every figure is a re-arrangement of <code>.taped-card</code>, <code>.ticket-stub</code>, <code>.mono-label</code>, plus <code>.graph-paper</code> (a 5-line CSS gradient, not a component) and a small library of 1px-stroke SVGs. Migration risk is the lowest of the three Tier C directions.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Quiet by construction — none of the figures will carry a homepage hero on their own. They depend on their host (<code>InterviewHero</code>, <code>PlayerHero</code>, <code>YouthBlock</code>) to bring the editorial weight. Acceptable for body / sidebar use; if the homepage needs a louder PlayerFigure variant we add it in tier-A or tier-B, not here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— direction-level summary · structure decisions · production handoff</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>PlayerFigure is a single-column stack: photo · jersey · plate. One ink rule traces the column edge top-to-bottom.</li>
+          <li>Jersey illustration is 1px contour only — no fills, no shading. Same rule applies to JerseyShirt variants.</li>
+          <li>Photo-missing state degrades to a 1px line-art portrait — never to a generic placeholder rectangle.</li>
+          <li>Graph-paper background is a <code>repeating-linear-gradient</code> at ~5% opacity, 8px grid. No asset, no SVG.</li>
+          <li>EndMark uses a single 1px rule split by a mono caps tag. Two jersey-deep ★ glyphs flank the tag.</li>
+          <li>QASectionDivider uses two parallel 1px rules with an italic Playfair act-title between, flanked by ✦ glyphs in jersey-deep.</li>
+          <li>Press-down hover canon applied per memo: <code>hover:translate-x-1 hover:translate-y-1 hover:shadow-none</code> + <code>transition-all duration-300</code>.</li>
+          <li>No emoji in chrome — typographic glyphs only (★ ✦). Stenciletta off-limits per visual-preferences memo.</li>
+          <li>No radial glows, no rim-lights — chrome stays paper-thin throughout.</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction C (this), Direction A, and Direction B
+          for Phase 3 Checkpoint A · Tier C Figures. Once locked we ship the
+          <code>&lt;PlayerFigure&gt;</code> + <code>&lt;JerseyShirt&gt;</code>
+          + <code>&lt;EndMark&gt;</code> + <code>&lt;QASectionDivider&gt;</code>
+          components into <code>apps/web/src/components/design-system</code>
+          with Storybook stories + VR baselines per primitive.
+        </p>
+
+        <p class="foot">
+          ★ END · DIRECTION C — MATCHDAY PROGRAMME · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

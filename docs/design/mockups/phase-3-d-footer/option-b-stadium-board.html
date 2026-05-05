@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction B — Stadium Board · Phase 3 · Checkpoint D · SiteFooter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         FOOTER — STADIUM BOARD
+         Ink slab, jersey-green + cream FG, IBM Plex Mono throughout.
+         Reads as a dot-matrix scoreboard / departures board.
+         ============================================================ */
+
+      .stadium-footer {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        margin-top: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Hairline gridlines on the slab — subtle scoreboard feel.
+         Pure CSS, no glow — just thin cream lines at low opacity. */
+      .stadium-footer::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(to right, rgba(245, 241, 230, 0.04) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(245, 241, 230, 0.04) 1px, transparent 1px);
+        background-size: 32px 32px;
+        z-index: 0;
+      }
+      .stadium-footer > * { position: relative; z-index: 1; }
+
+      /* ----- Ticker band — top of footer.
+         Looped club motto in mono caps, jersey-green type on ink.
+         ----- */
+      .stadium-ticker {
+        border-bottom: 1px solid rgba(245, 241, 230, 0.18);
+        padding: 14px 0;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .stadium-ticker__track {
+        display: inline-flex;
+        gap: 48px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        color: var(--color-jersey);
+        animation: ticker-scroll 40s linear infinite;
+        padding-left: 100%;
+      }
+      .stadium-ticker__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 48px;
+      }
+      .stadium-ticker__item::after {
+        content: "★";
+        color: var(--color-cream);
+        font-size: 11px;
+      }
+      @keyframes ticker-scroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+      }
+
+      /* ----- Wordmark band — Freight Display club name only.
+         Everything around it stays mono. ----- */
+      .stadium-wordmark {
+        padding: 40px 48px 28px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 32px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid rgba(245, 241, 230, 0.18);
+      }
+      .stadium-wordmark__name {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: clamp(40px, 5vw, 64px);
+        line-height: 0.95;
+        color: var(--color-cream);
+        margin: 0;
+      }
+      .stadium-wordmark__name em {
+        font-style: italic;
+        color: var(--color-jersey);
+      }
+      .stadium-wordmark__meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        opacity: 0.7;
+        text-align: right;
+        line-height: 1.6;
+      }
+      .stadium-wordmark__meta span { display: block; }
+      .stadium-wordmark__meta .live-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--color-jersey-bright);
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      /* ----- 4 column board — STAMNUMMER · CONTACT · TEAMS · SOCIAL ----- */
+      .stadium-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding: 0;
+      }
+      .stadium-col {
+        padding: 36px 32px 36px;
+        border-right: 1px solid rgba(245, 241, 230, 0.14);
+      }
+      .stadium-col:last-child { border-right: none; }
+      .stadium-col__head {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        margin: 0 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-jersey-deep);
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .stadium-col__head-num {
+        font-size: 10px;
+        color: var(--color-jersey);
+        opacity: 0.8;
+      }
+      .stadium-col__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .stadium-col__list li {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--color-cream);
+        opacity: 0.86;
+      }
+      .stadium-col__list a {
+        color: var(--color-cream);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        transition: all 300ms ease;
+      }
+      .stadium-col__list a:hover {
+        color: var(--color-jersey);
+      }
+      .stadium-col__list a::before {
+        content: "›";
+        color: var(--color-jersey);
+        margin-right: 8px;
+        opacity: 0.6;
+      }
+
+      /* Stamnummer column — emphasised number block */
+      .stadium-stamnr {
+        font-family: var(--font-mono);
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--color-jersey);
+        line-height: 1;
+        margin: 4px 0 12px;
+      }
+      .stadium-stamnr__caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        opacity: 0.6;
+        margin-bottom: 16px;
+      }
+      .stadium-affil {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--color-cream);
+        opacity: 0.8;
+      }
+      .stadium-affil strong {
+        color: var(--color-jersey);
+        font-weight: 700;
+      }
+
+      /* Contact column — k:v pairs */
+      .stadium-kv {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .stadium-kv__row {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .stadium-kv__k {
+        display: block;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-jersey);
+        opacity: 0.85;
+        margin-bottom: 2px;
+      }
+      .stadium-kv__v {
+        color: var(--color-cream);
+        opacity: 0.92;
+      }
+      .stadium-kv__v a {
+        color: var(--color-cream);
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(245, 241, 230, 0.4);
+      }
+      .stadium-kv__v a:hover {
+        color: var(--color-jersey);
+        border-bottom-color: var(--color-jersey);
+      }
+
+      /* Social column — paper-stamped mini-cards inverted on ink.
+         Press-down hover canon: hover translates +1/+1 and shadow goes 0. */
+      .stadium-social {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .stadium-social__btn {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 1.5px solid var(--color-cream);
+        box-shadow: 4px 4px 0 0 var(--color-jersey-deep);
+        padding: 10px 12px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 300ms ease;
+      }
+      .stadium-social__btn:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+        color: var(--color-jersey);
+        border-color: var(--color-jersey);
+      }
+      .stadium-social__glyph {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-jersey);
+        width: 16px;
+        text-align: center;
+      }
+
+      /* ----- Matchday ticker — bottom strip, next 3 fixtures ----- */
+      .stadium-fixtures {
+        border-top: 1px solid rgba(245, 241, 230, 0.18);
+        background: rgba(0, 135, 85, 0.08); /* faint jersey-deep wash */
+        display: grid;
+        grid-template-columns: 200px repeat(3, 1fr);
+        align-items: stretch;
+      }
+      .stadium-fixtures__label {
+        padding: 18px 24px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-jersey);
+        border-right: 1px solid rgba(245, 241, 230, 0.18);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .stadium-fixtures__label::before {
+        content: "▸";
+        color: var(--color-jersey-bright);
+      }
+      .stadium-fixture {
+        padding: 14px 20px;
+        border-right: 1px solid rgba(245, 241, 230, 0.14);
+        font-family: var(--font-mono);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .stadium-fixture:last-child { border-right: none; }
+      .stadium-fixture__date {
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-jersey);
+        opacity: 0.85;
+      }
+      .stadium-fixture__match {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-cream);
+      }
+      .stadium-fixture__match em {
+        font-style: normal;
+        color: var(--color-jersey);
+        font-weight: 700;
+      }
+      .stadium-fixture__meta {
+        font-size: 10px;
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        opacity: 0.6;
+      }
+
+      /* ----- Bottom slab — copyright + minor links, all mono ----- */
+      .stadium-base {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 32px;
+        border-top: 1px solid rgba(245, 241, 230, 0.18);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        opacity: 0.7;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .stadium-base a {
+        color: var(--color-cream);
+        text-decoration: none;
+        margin-left: 18px;
+      }
+      .stadium-base a:hover { color: var(--color-jersey); }
+
+      /* ----- Map / breakdown table ----- */
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code, p code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      .reuse-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+      .reuse-table th, .reuse-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .reuse-table th { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); font-weight: 600; }
+      .reuse-table td { color: var(--color-ink-soft); }
+      .reuse-table td code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+      .reuse-table tbody tr:last-child td { border-bottom: none; }
+
+      .doc-footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+
+      @media (max-width: 900px) {
+        .stadium-board { grid-template-columns: 1fr 1fr; }
+        .stadium-col { border-right: none; border-bottom: 1px solid rgba(245, 241, 230, 0.14); }
+        .stadium-fixtures { grid-template-columns: 1fr; }
+        .stadium-fixtures__label { border-right: none; border-bottom: 1px solid rgba(245, 241, 230, 0.18); }
+        .stadium-fixture { border-right: none; border-bottom: 1px solid rgba(245, 241, 230, 0.14); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT D · SITEFOOTER · DIRECTION B</span>
+          <span class="mono mono--muted">★ STADIUM BOARD</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Het <span class="display"><em>scorebord</em></span> spreekt.</h1>
+        <p class="lead">
+          Footer reads like a dot-matrix stadium scoreboard. Ink slab, jersey-green
+          + cream foreground type, IBM Plex Mono everywhere except the club name.
+          Hairline gridlines, motto ticker, four-column board, and a bottom
+          fixtures strip. Austere, technical, almost industrial — a deliberate
+          divergence from the retro-terrace-fanzine screenshot.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           FOOTER — RENDERED AT INTENDED SCALE
+           =========================================================== -->
+      <section class="section" id="footer-render">
+        <div class="section-meta">
+          <span class="mono">★ 01 · FOOTER — INTENDED SCALE</span>
+          <span class="mono mono--muted">— ink slab, jersey-green + cream foreground, mono throughout</span>
+        </div>
+        <h2>Het <em>volledige</em> scorebord.</h2>
+        <p class="lead">
+          Five horizontal bands stacked: motto ticker, wordmark, four-column
+          board, fixtures strip, base meta. Each band reads as a row on a
+          stadium scoreboard — type and spacing carry the dot-matrix language,
+          no pixel-glow effects.
+        </p>
+
+        <footer class="stadium-footer" role="contentinfo" aria-label="Site footer">
+          <!-- BAND 01 — motto ticker -->
+          <div class="stadium-ticker" aria-hidden="true">
+            <div class="stadium-ticker__track">
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+              <span class="stadium-ticker__item">ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</span>
+            </div>
+          </div>
+
+          <!-- BAND 02 — wordmark -->
+          <div class="stadium-wordmark">
+            <h2 class="stadium-wordmark__name">KCVV <em>Elewijt</em></h2>
+            <div class="stadium-wordmark__meta">
+              <span><span class="live-dot" aria-hidden="true"></span>BOARD ONLINE · 2026/27</span>
+              <span>SPORTPARK DE WAUWER · ELEWIJT</span>
+              <span>OPGERICHT 1944</span>
+            </div>
+          </div>
+
+          <!-- BAND 03 — 4 column board -->
+          <div class="stadium-board">
+            <!-- Col 01 — STAMNUMMER -->
+            <div class="stadium-col">
+              <h3 class="stadium-col__head">
+                <span>Stamnummer</span>
+                <span class="stadium-col__head-num">01 / 04</span>
+              </h3>
+              <div class="stadium-stamnr">№ 5587</div>
+              <div class="stadium-stamnr__caption">VOETBAL VLAANDEREN · KBVB</div>
+              <div class="stadium-affil">
+                <strong>KCVV ELEWIJT VZW</strong><br />
+                Tervuursesteenweg 187<br />
+                1982 Elewijt<br />
+                BTW BE 0419.123.456<br />
+                IBAN BE12 3456 7890 1234
+              </div>
+            </div>
+
+            <!-- Col 02 — CONTACT -->
+            <div class="stadium-col">
+              <h3 class="stadium-col__head">
+                <span>Contact</span>
+                <span class="stadium-col__head-num">02 / 04</span>
+              </h3>
+              <div class="stadium-kv">
+                <div class="stadium-kv__row">
+                  <span class="stadium-kv__k">Secretariaat</span>
+                  <span class="stadium-kv__v"><a href="mailto:secretariaat@kcvvelewijt.be">secretariaat@kcvvelewijt.be</a></span>
+                </div>
+                <div class="stadium-kv__row">
+                  <span class="stadium-kv__k">Jeugd</span>
+                  <span class="stadium-kv__v"><a href="mailto:jeugd@kcvvelewijt.be">jeugd@kcvvelewijt.be</a></span>
+                </div>
+                <div class="stadium-kv__row">
+                  <span class="stadium-kv__k">Sponsoring</span>
+                  <span class="stadium-kv__v"><a href="mailto:sponsors@kcvvelewijt.be">sponsors@kcvvelewijt.be</a></span>
+                </div>
+                <div class="stadium-kv__row">
+                  <span class="stadium-kv__k">Telefoon</span>
+                  <span class="stadium-kv__v"><a href="tel:+3215612345">+32 15 61 23 45</a></span>
+                </div>
+                <div class="stadium-kv__row">
+                  <span class="stadium-kv__k">Kantine</span>
+                  <span class="stadium-kv__v">Wo 18–22 · Za 14–01 · Zo 09–22</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 03 — TEAMS -->
+            <div class="stadium-col">
+              <h3 class="stadium-col__head">
+                <span>Teams</span>
+                <span class="stadium-col__head-num">03 / 04</span>
+              </h3>
+              <ul class="stadium-col__list">
+                <li><a href="/teams/eerste">Eerste elftal</a></li>
+                <li><a href="/teams/reserven">Reserven</a></li>
+                <li><a href="/teams/veteranen">Veteranen</a></li>
+                <li><a href="/teams/dames">Dames</a></li>
+                <li><a href="/jeugd/bovenbouw">Bovenbouw</a></li>
+                <li><a href="/jeugd/middenbouw">Middenbouw</a></li>
+                <li><a href="/jeugd/onderbouw">Onderbouw</a></li>
+              </ul>
+            </div>
+
+            <!-- Col 04 — SOCIAL -->
+            <div class="stadium-col">
+              <h3 class="stadium-col__head">
+                <span>Social</span>
+                <span class="stadium-col__head-num">04 / 04</span>
+              </h3>
+              <div class="stadium-social">
+                <a class="stadium-social__btn" href="https://facebook.com/kcvvelewijt">
+                  <span class="stadium-social__glyph" aria-hidden="true">f</span>
+                  <span>Facebook</span>
+                </a>
+                <a class="stadium-social__btn" href="https://instagram.com/kcvvelewijt">
+                  <span class="stadium-social__glyph" aria-hidden="true">◉</span>
+                  <span>Instagram</span>
+                </a>
+                <a class="stadium-social__btn" href="https://x.com/kcvvelewijt">
+                  <span class="stadium-social__glyph" aria-hidden="true">✕</span>
+                  <span>X</span>
+                </a>
+                <a class="stadium-social__btn" href="https://youtube.com/@kcvvelewijt">
+                  <span class="stadium-social__glyph" aria-hidden="true">▶</span>
+                  <span>YouTube</span>
+                </a>
+                <a class="stadium-social__btn" href="/feed.xml">
+                  <span class="stadium-social__glyph" aria-hidden="true">»</span>
+                  <span>RSS</span>
+                </a>
+                <a class="stadium-social__btn" href="/nieuwsbrief">
+                  <span class="stadium-social__glyph" aria-hidden="true">✉</span>
+                  <span>Nieuws</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- BAND 04 — fixtures ticker (next 3) -->
+          <div class="stadium-fixtures" aria-label="Komende wedstrijden">
+            <div class="stadium-fixtures__label">Volgende drie</div>
+            <div class="stadium-fixture">
+              <span class="stadium-fixture__date">ZAT · 09 MEI · 15:00</span>
+              <span class="stadium-fixture__match"><em>KCVV Elewijt</em> — Hever-Sint-Job</span>
+              <span class="stadium-fixture__meta">Thuis · Sportpark De Wauwer</span>
+            </div>
+            <div class="stadium-fixture">
+              <span class="stadium-fixture__date">ZON · 17 MEI · 14:30</span>
+              <span class="stadium-fixture__match">Tervuren — <em>KCVV Elewijt</em></span>
+              <span class="stadium-fixture__meta">Uit · Stade Tervuren</span>
+            </div>
+            <div class="stadium-fixture">
+              <span class="stadium-fixture__date">ZAT · 23 MEI · 19:30</span>
+              <span class="stadium-fixture__match"><em>KCVV Elewijt</em> — Diegem Sport</span>
+              <span class="stadium-fixture__meta">Thuis · Sportpark De Wauwer</span>
+            </div>
+          </div>
+
+          <!-- BAND 05 — base meta -->
+          <div class="stadium-base">
+            <span>© 2026 KCVV ELEWIJT VZW · ALL RIGHTS RESERVED</span>
+            <span>
+              <a href="/privacy">Privacy</a>
+              <a href="/cookies">Cookies</a>
+              <a href="/disclaimer">Disclaimer</a>
+              <a href="/colofon">Colofon</a>
+            </span>
+          </div>
+        </footer>
+      </section>
+
+      <!-- ===========================================================
+           02 · SECTIONS BREAKDOWN
+           =========================================================== -->
+      <section class="section" id="breakdown">
+        <div class="section-meta">
+          <span class="mono">★ 02 · SECTIONS BREAKDOWN</span>
+          <span class="mono mono--muted">— five horizontal bands, top to bottom, with per-band tradeoffs</span>
+        </div>
+        <h2>Vijf <em>banden,</em> elk een eigen rij.</h2>
+        <p class="lead">
+          The footer is composed of five horizontal bands stacked vertically. Each
+          band carries a distinct rhetorical job; together they read as the
+          rolling rows of a stadium scoreboard.
+        </p>
+
+        <!-- BAND 01 -->
+        <div class="panel panel--soft">
+          <div class="label-row">
+            <span class="row-label">BAND 01</span>
+            <span class="mono">MOTTO TICKER · jersey-green type on ink, looped infinite</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0">
+            Horizontal scrolling band running the club motto verbatim:
+            <code>ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</code>. Repeats with star
+            separators, scrolls left at 40s/cycle. Letter-spacing 0.18em, weight
+            600, jersey-green on ink. <strong>No glow</strong> — readability
+            comes from contrast and tracking, not bloom.
+          </p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Carries the club voice without claiming a hero position. Sets the dot-matrix register the rest of the footer inherits. Looping animation is the only motion in the slab — gives the board a heartbeat without distracting upward.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Animation in the footer can pull the eye when scrolling past on long pages. Mitigation: <code>prefers-reduced-motion</code> halts the loop. On low-content pages the motto ticker can read as the most active element on screen.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 02 -->
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">BAND 02</span>
+            <span class="mono">WORDMARK · Freight Display club name + mono meta column</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0">
+            The single editorial moment: <code>KCVV Elewijt</code> in Freight
+            Display 900 with italic <em>Elewijt</em> in jersey-green. To the
+            right, three mono caps lines — live dot + season, address, founding
+            year. Hairline divider underneath.
+          </p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Reserves Freight Display for one moment only — the club name. Reinforces that the typeface is editorial, not utility. Live-dot + season label echoes a real scoreboard's "ON AIR" indicator without inventing new chrome.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>The Freight Display call-out tonally clashes with the rest of the slab on first read — it's the only non-mono surface in the entire footer. If the user wants the footer to read as <em>purely</em> technical, drop the wordmark and lead with the column board.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 03 -->
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">BAND 03</span>
+            <span class="mono">FOUR-COLUMN BOARD · STAMNUMMER · CONTACT · TEAMS · SOCIAL</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0">
+            The information core. Four equal columns, each headed by a mono caps
+            label with a hairline jersey-deep underline and a "01 / 04"-style
+            counter on the right. Columns separated by hairline cream
+            dividers at 14% opacity. STAMNUMMER showcases the club's KBVB
+            registration number in a 32px jersey-green block. SOCIAL uses
+            paper-stamped mini-cards inverted on ink (cream border, jersey-deep
+            shadow) and follows the canonical press-down hover.
+          </p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Four equal columns mirror a scoreboard's symmetric column layout. Counter glyph ("01 / 04") nods at the dot-matrix register without asking for a new icon set. Stamnummer column gives the footer a unique signal — clubs in Belgium recognise <code>№ 5587</code> immediately. Social column reuses the press-down hover canon, so even on the inverted ink slab the interaction language is unchanged.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Four equal columns under 900px collapse to 2×2 — works, but the visual rhythm of the scoreboard suffers when wrapped. On very dense pages with long sponsor or team lists, columns can become uneven; a future variant may want a fifth "PARTNERS" column or a row-flow.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 04 -->
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">BAND 04</span>
+            <span class="mono">FIXTURES STRIP · next 3 fixtures, mono date · time · opponent</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0">
+            A label cell ("VOLGENDE DRIE") followed by three fixture cells.
+            Each fixture is three lines: date in mono caps + jersey-green,
+            match line with KCVV in jersey-green emphasis and opponent in cream,
+            venue meta in cream-muted. Faint jersey-deep wash on the band
+            distinguishes it from the columns above. Reads as the live
+            scoreline strip on a real board.
+          </p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Gives the footer a job beyond navigation — every page surfaces the next three fixtures. Tightens the loop between the editorial body of the site and the matchday rhythm. Mono date format is unambiguous and reads at a glance.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Adds a data dependency to the footer — every page now requires the next-fixtures BFF query (already cached, but a coupling). When fixtures are absent (off-season, fixture not yet announced), the band needs a graceful empty state. Three fixed slots may feel sparse during weeks with two scheduled matches.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 05 -->
+        <div class="panel panel--soft" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">BAND 05</span>
+            <span class="mono">BASE STRIP · copyright + legal links, all mono caps</span>
+          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0">
+            Single-line strip: copyright + legal links (Privacy, Cookies,
+            Disclaimer, Colofon). 10px mono caps, cream at 70% opacity, links
+            shift to jersey-green on hover. Closes the slab in a single tight
+            line.
+          </p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Kept deliberately small and quiet — the legal links never compete with the columns above. Cream-at-70% fades into the slab without disappearing.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>10px mono can fail WCAG AA contrast at the 70% opacity setting on the ink slab — needs a contrast pass before production. If GDPR demands a more prominent cookies link, this band becomes the wrong home for it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03 · PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse-map">
+        <div class="section-meta">
+          <span class="mono">★ 03 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— how each band maps back to existing redesign primitives</span>
+        </div>
+        <h2>Welke <em>primitieven</em> dragen het scorebord.</h2>
+        <p class="lead">
+          Every visual choice in this footer maps back to a primitive already
+          approved earlier in the redesign series. The slab is not a new
+          aesthetic — it inverts the cream/ink polarity and switches the body
+          face to mono, but every interaction and structural rule is borrowed
+          intact from the existing vocabulary.
+        </p>
+
+        <table class="reuse-table">
+          <thead>
+            <tr>
+              <th>Footer band / atom</th>
+              <th>Reused primitive</th>
+              <th>Notes / divergence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Motto ticker (Band 01)</td>
+              <td><code>MonoLabel</code> · letter-spacing + uppercase mono caps language</td>
+              <td>Inverted polarity (jersey-green on ink). Adds a horizontal scroll-loop animation; respects <code>prefers-reduced-motion</code>.</td>
+            </tr>
+            <tr>
+              <td>Wordmark (Band 02)</td>
+              <td><code>EditorialHeading</code> · Freight Display 900 with italic jersey-green emphasis</td>
+              <td>Single editorial moment in the entire slab. Same italic-coloured-em pattern used in <code>display em</code> tokens.</td>
+            </tr>
+            <tr>
+              <td>Live-dot meta row (Band 02)</td>
+              <td><code>MonoLabelRow</code> · stacked mono caps lines</td>
+              <td>Live dot is a 8×8 jersey-bright square — reuses the matchday "live" indicator from <code>MatchStrip</code>.</td>
+            </tr>
+            <tr>
+              <td>Column header + counter (Band 03)</td>
+              <td><code>MonoLabel</code> + <code>MonoLabelRow</code> with hairline rule</td>
+              <td>Counter glyph ("01 / 04") borrowed from <code>QARow</code> number convention; rendered in jersey-green at lower opacity.</td>
+            </tr>
+            <tr>
+              <td>Stamnummer block (Band 03 / Col 01)</td>
+              <td>Numeric emphasis from <code>QARow</code> Freight Display 900 number</td>
+              <td>Divergence: rendered in mono (32px IBM Plex Mono 700) instead of Freight Display, to preserve the technical register of the slab.</td>
+            </tr>
+            <tr>
+              <td>Contact k:v rows (Band 03 / Col 02)</td>
+              <td><code>InterviewCredits</code> · 4-column credits grid label/value pattern</td>
+              <td>Rotated to vertical k/v stack inside a single column. Same caps-label + value cadence.</td>
+            </tr>
+            <tr>
+              <td>Teams link list (Band 03 / Col 03)</td>
+              <td><code>SiteHeader</code> nav link list · arrow-prefixed mono links</td>
+              <td>Prefix glyph "›" instead of an arrow primitive, so the list reads as a board listing rather than navigation.</td>
+            </tr>
+            <tr>
+              <td>Social mini-cards (Band 03 / Col 04)</td>
+              <td><code>BrandedTabs</code> + canonical press-down hover</td>
+              <td>Inverted polarity (cream border + jersey-deep shadow on ink). Hover canon: <code>hover:shadow-none hover:translate-x-1 hover:translate-y-1</code> + <code>transition-all duration-300</code>.</td>
+            </tr>
+            <tr>
+              <td>Fixtures strip (Band 04)</td>
+              <td><code>MatchStrip</code> · next-fixture data + mono date format</td>
+              <td>Compressed to three mono cells side-by-side. KCVV name in jersey-green emphasis, opponent in cream — same colour roles as <code>MatchStrip</code>.</td>
+            </tr>
+            <tr>
+              <td>Base strip legal links (Band 05)</td>
+              <td><code>MonoLabel</code> · 10px caps</td>
+              <td>Cream at 70% opacity; hover lifts to jersey-green. Same hover colour as the column links — interaction parity across the slab.</td>
+            </tr>
+            <tr>
+              <td>Hairline gridlines on slab</td>
+              <td>Paper-edge token language, inverted</td>
+              <td>32×32px CSS gradient grid at <code>rgba(245, 241, 230, 0.04)</code> — reads as a faint scoreboard substrate, no glow.</td>
+            </tr>
+            <tr>
+              <td>Slab border + shadow envelope</td>
+              <td><code>--shadow-paper-md</code> · 6×6 ink, sharp corners</td>
+              <td>Same 2px ink border + paper shadow as every chrome atom. The footer slab is a paper card the same way an Alert is — only inverted.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Every band borrows from a primitive already approved earlier in the redesign series — no new atoms invented. The polarity inversion (cream/ink → ink/cream) is the only structural divergence; every interaction rule and typographic token survives intact.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>The inversion + heavy reliance on mono moves the footer further from the editorial register of the homepage. Users reading the page top-to-bottom shift from Freight-Display-and-cream into mono-and-ink at the bottom — a sharp tonal pivot. Direction A keeps a paper-warm footer; Direction B owns the technical register.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           DOC FOOTER — token map + handoff notes
+           =========================================================== -->
+      <footer class="doc-footer">
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map, structure decisions, production handoff</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Footer slab inherits paper-card vocabulary inverted — <code>border-2 ink</code> + <code>--shadow-paper-md</code> + sharp corners + ink slab foundation</li>
+          <li>Foreground type is jersey-green + cream only — no new colour tokens introduced</li>
+          <li>Body is IBM Plex Mono everywhere; Freight Display reserved for the wordmark line only</li>
+          <li>Five bands stacked top-to-bottom: motto ticker · wordmark · 4-column board · fixtures strip · base meta</li>
+          <li>Column headers use mono caps + hairline jersey-deep underline + counter glyph (01 / 04)</li>
+          <li>Social mini-cards use inverted paper-card chrome (cream border + jersey-deep shadow on ink) and the canonical press-down hover</li>
+          <li>Fixtures strip surfaces the next 3 fixtures with mono date · KCVV-in-jersey · opponent-in-cream</li>
+          <li>Hairline gridlines on the slab (32×32 CSS grid at 4% cream opacity) carry the scoreboard register without pixel-glow effects</li>
+          <li>Club motto verbatim: <code>ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</code> — looped infinite in the top ticker</li>
+          <li><strong>No glows, no rim-lights, no Stenciletta</strong> — the dot-matrix vibe is type + spacing only</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction B (this) and any sibling directions
+          authored alongside. Confirm whether the wordmark band keeps Freight
+          Display (current) or drops to mono only (more austere variant).
+          Confirm fixtures-strip empty-state behaviour for off-season weeks.
+          Confirm WCAG AA contrast on the 10px base-strip type.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TINT</h4>
+            <ul>
+              <li>Slab surface: <code>--color-ink</code></li>
+              <li>Slab gridlines: <code>rgba(245, 241, 230, 0.04)</code> (cream at 4%)</li>
+              <li>Hairline dividers: <code>rgba(245, 241, 230, 0.18)</code></li>
+              <li>Fixtures wash: <code>rgba(0, 135, 85, 0.08)</code> (jersey-deep at 8%)</li>
+              <li>Foreground primary: <code>--color-cream</code></li>
+              <li>Foreground accent: <code>--color-jersey</code> · <code>--color-jersey-deep</code></li>
+              <li>Live-dot pulse: <code>--color-jersey-bright</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / DEPTH</h4>
+            <ul>
+              <li>Slab border: <code>2px solid var(--color-ink)</code></li>
+              <li>Slab shadow: <code>--shadow-paper-md</code> (6×6 ink)</li>
+              <li>Social card border: <code>1.5px solid var(--color-cream)</code></li>
+              <li>Social card shadow: <code>4×4 var(--color-jersey-deep)</code></li>
+              <li>Social press hover: <code>shadow-none + translate(1px, 1px)</code> · 300ms ease</li>
+              <li>Column dividers: <code>1px solid rgba(245, 241, 230, 0.14)</code></li>
+              <li>Sharp corners: no <code>border-radius</code> anywhere</li>
+              <li>Body face: <code>var(--font-mono)</code> · IBM Plex Mono</li>
+              <li>Display face: <code>var(--font-display)</code> · wordmark only</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION B — STADIUM BOARD · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

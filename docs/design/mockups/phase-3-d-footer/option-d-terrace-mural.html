@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction D — Terrace Mural · Phase 3 · Checkpoint D · SiteFooter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e6dfca;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-lg: 10px 10px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         FOOTER — Terrace Mural
+         ============================================================ */
+
+      .footer-stage {
+        position: relative;
+        padding: 64px 0 0;
+        background: var(--color-cream-deep);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        overflow: hidden;
+      }
+
+      /* Torn-paper top edge — the mural begins by tearing away from the page */
+      .footer-stage::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        height: 28px;
+        background: var(--color-cream);
+        border-bottom: 2px solid var(--color-ink);
+        clip-path: polygon(
+          0 0, 100% 0, 100% 60%,
+          96% 100%, 92% 70%, 88% 95%, 83% 65%, 78% 100%,
+          72% 72%, 67% 96%, 61% 68%, 55% 100%, 49% 74%,
+          43% 98%, 37% 70%, 31% 100%, 25% 72%, 19% 96%,
+          13% 68%, 7% 100%, 2% 70%, 0 92%
+        );
+      }
+
+      /* Jersey-deep wash on a partial column — left third of mural */
+      .footer-stage::after {
+        content: "";
+        position: absolute;
+        top: 28px;
+        bottom: 88px;
+        left: 0;
+        width: 36%;
+        background: var(--color-jersey-deep);
+        clip-path: polygon(
+          0 0, 100% 4%, 96% 100%, 0 96%
+        );
+        z-index: 0;
+        opacity: 0.92;
+      }
+
+      .mural {
+        position: relative;
+        z-index: 1;
+        padding: 32px 56px 64px;
+        min-height: 720px;
+      }
+
+      /* ----- TapedCard primitive (mural variant) ----- */
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 24px 24px 22px;
+        transition: transform 300ms ease, box-shadow 300ms ease;
+      }
+      .taped-card .tape {
+        position: absolute;
+        top: -14px;
+        width: 64px;
+        height: 22px;
+        background: rgba(247, 230, 130, 0.78); /* warm masking-tape ochre */
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        transform: rotate(-4deg);
+      }
+      .taped-card .tape--left { left: 18px; transform: rotate(-5deg); }
+      .taped-card .tape--right { right: 18px; transform: rotate(4deg); }
+      .taped-card .tape--center { left: 50%; margin-left: -32px; transform: rotate(-2deg); }
+
+      /* ----- TicketStub primitive ----- */
+      .ticket-stub {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 14px 22px 14px 22px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .ticket-stub::before, .ticket-stub::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        background: var(--color-cream-deep);
+        border: 2px solid var(--color-ink);
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+      .ticket-stub::before { left: -8px; }
+      .ticket-stub::after { right: -8px; }
+
+      /* ----- StampBadge primitive ----- */
+      .stamp-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-cream);
+        border: 2.5px solid var(--color-ink);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        line-height: 0.9;
+        color: var(--color-ink);
+        text-align: center;
+        box-shadow: var(--shadow-paper-sm);
+      }
+
+      /* ----- Mural grid — overlapping placement ----- */
+      .mural-grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-template-rows: auto;
+        gap: 0;
+        min-height: 560px;
+      }
+
+      /* The big "1932" hand-painted stamp anchors the left jersey-wash column */
+      .mural-stamp {
+        position: absolute;
+        top: 8px;
+        left: -16px;
+        width: 280px;
+        height: 220px;
+        z-index: 3;
+        background: var(--color-cream);
+        border: 3px solid var(--color-ink);
+        box-shadow: 8px 8px 0 0 var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-3deg);
+        clip-path: polygon(
+          2% 4%, 14% 1%, 28% 5%, 42% 0, 58% 6%, 74% 1%, 88% 4%, 100% 8%,
+          99% 22%, 100% 38%, 96% 54%, 100% 72%, 98% 88%, 99% 100%,
+          84% 97%, 68% 100%, 52% 96%, 36% 100%, 18% 96%, 4% 100%,
+          0 84%, 3% 68%, 0 50%, 4% 32%, 0 16%
+        );
+      }
+      .mural-stamp__kicker {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        margin: 0 0 6px;
+      }
+      .mural-stamp__year {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 132px;
+        line-height: 0.85;
+        color: var(--color-ink);
+        letter-spacing: -0.03em;
+      }
+      .mural-stamp__caption {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 8px;
+      }
+
+      /* Crest panel — sits on the jersey-wash column, slightly lower */
+      .mural-crest {
+        grid-column: 1 / span 4;
+        grid-row: 1;
+        position: relative;
+        z-index: 2;
+        margin: 248px 0 0 24px;
+        align-self: start;
+      }
+      .crest-card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 22px 24px 20px;
+        transform: rotate(2deg);
+        max-width: 280px;
+      }
+      .crest-card .crest-mark {
+        width: 64px;
+        height: 64px;
+        border: 2.5px solid var(--color-ink);
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+      .crest-card h4 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 26px;
+        line-height: 1.05;
+        margin: 0 0 4px;
+      }
+      .crest-card p {
+        font-size: 13px;
+        color: var(--color-ink-soft);
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      /* NAV TapedCard — middle-top, tilted left */
+      .mural-nav {
+        grid-column: 5 / span 5;
+        grid-row: 1;
+        margin: 32px 0 0 -32px;
+        z-index: 4;
+      }
+      .nav-card {
+        transform: rotate(-2deg);
+        max-width: 460px;
+      }
+      .nav-card:hover {
+        transform: rotate(-2deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      .nav-card h5 {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 14px;
+      }
+      .nav-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 24px;
+      }
+      .nav-card ul li {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 22px;
+        line-height: 1.2;
+      }
+      .nav-card ul li a {
+        color: var(--color-ink);
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        transition: border-color 200ms ease, color 200ms ease;
+      }
+      .nav-card ul li a:hover {
+        color: var(--color-jersey-deep);
+        border-bottom-color: var(--color-jersey-deep);
+      }
+
+      /* CONTACT TapedCard — right column, tilted right, slightly lower */
+      .mural-contact {
+        grid-column: 9 / span 4;
+        grid-row: 1;
+        margin: 88px 16px 0 0;
+        z-index: 3;
+      }
+      .contact-card {
+        transform: rotate(3deg);
+        max-width: 320px;
+      }
+      .contact-card:hover {
+        transform: rotate(3deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      .contact-card h5 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 0 0 12px;
+        color: var(--color-ink);
+      }
+      .contact-card dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 6px 12px;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .contact-card dt {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        padding-top: 3px;
+      }
+      .contact-card dd {
+        margin: 0;
+        color: var(--color-ink-soft);
+      }
+      .contact-card dd a {
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 3px;
+      }
+
+      /* Photo scrap — torn-edge rectangular polaroid pinned center-low */
+      .mural-photo {
+        grid-column: 4 / span 4;
+        grid-row: 1;
+        margin: 360px 0 0 -8px;
+        z-index: 2;
+        position: relative;
+      }
+      .photo-scrap {
+        position: relative;
+        width: 240px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 8px 8px 30px;
+        transform: rotate(-4deg);
+        clip-path: polygon(
+          0 2%, 8% 0, 22% 3%, 38% 0, 56% 4%, 72% 1%, 88% 3%, 100% 0,
+          100% 98%, 84% 100%, 62% 97%, 42% 100%, 22% 97%, 6% 100%, 0 96%
+        );
+      }
+      .photo-scrap__img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background:
+          linear-gradient(135deg, #2a4d2a 0%, #4a7a3a 40%, #6b9a4a 100%);
+        border: 1px solid var(--color-ink);
+        position: relative;
+        overflow: hidden;
+      }
+      .photo-scrap__img::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 14px),
+          radial-gradient(ellipse at 50% 110%, rgba(0,0,0,0.45), transparent 60%);
+      }
+      .photo-scrap__caption {
+        position: absolute;
+        bottom: 6px;
+        left: 12px;
+        right: 12px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .photo-scrap .tape {
+        top: -14px;
+        left: 50%;
+        margin-left: -32px;
+        transform: rotate(-3deg);
+        background: rgba(247, 230, 130, 0.78);
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        position: absolute;
+        width: 64px;
+        height: 22px;
+      }
+
+      /* SOCIAL TicketStub — bottom-right, tilted */
+      .mural-social {
+        grid-column: 8 / span 5;
+        grid-row: 1;
+        margin: 380px 24px 0 0;
+        z-index: 4;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 14px;
+      }
+      .social-stub {
+        transform: rotate(-2deg);
+        padding: 16px 28px;
+        gap: 10px;
+        transition: transform 300ms ease, box-shadow 300ms ease;
+      }
+      .social-stub:hover {
+        transform: rotate(-2deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      .social-stub__head {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .social-stub__row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .social-glyph {
+        width: 36px;
+        height: 36px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        color: var(--color-ink);
+        text-decoration: none;
+        transition: transform 300ms ease, box-shadow 300ms ease, background 200ms ease;
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      .social-glyph:hover {
+        transform: translate(3px, 3px);
+        box-shadow: none;
+        background: var(--color-jersey);
+      }
+
+      /* MOTTO BANNER — sits across mural, just below the cards */
+      .motto-banner {
+        position: relative;
+        z-index: 5;
+        margin: 28px -24px 0;
+        padding: 20px 32px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        transform: rotate(-0.6deg);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: clamp(28px, 3.4vw, 44px);
+        line-height: 1.05;
+        letter-spacing: 0.01em;
+        text-align: center;
+        text-transform: uppercase;
+        clip-path: polygon(
+          0 6%, 8% 0, 22% 4%, 36% 0, 50% 5%, 64% 0, 78% 4%, 92% 0, 100% 6%,
+          100% 96%, 92% 100%, 76% 96%, 60% 100%, 44% 96%, 28% 100%, 12% 96%, 0 100%
+        );
+      }
+      .motto-banner em {
+        font-style: italic;
+        color: var(--color-jersey-bright);
+      }
+
+      /* BOTTOM STRIP — legal + colophon, sits flat */
+      .footer-strip {
+        position: relative;
+        z-index: 6;
+        margin-top: 32px;
+        padding: 16px 32px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .footer-strip a {
+        color: var(--color-cream);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 150ms ease;
+      }
+      .footer-strip a:hover { border-bottom-color: var(--color-jersey-bright); }
+      .footer-strip .strip-links { display: flex; gap: 18px; flex-wrap: wrap; }
+
+      /* ============================================================
+         BREAKDOWN + REUSE TABLE
+         ============================================================ */
+
+      .breakdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 24px; }
+      .breakdown article {
+        background: var(--color-cream);
+        border: 1px solid var(--color-paper-edge);
+        padding: 20px;
+      }
+      .breakdown h4 {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        margin: 0 0 6px;
+      }
+      .breakdown h5 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        margin: 0 0 10px;
+      }
+      .breakdown p { font-size: 14px; color: var(--color-ink-soft); margin: 0 0 12px; }
+
+      table.reuse {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 24px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      table.reuse th, table.reuse td {
+        text-align: left;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        font-size: 14px;
+        vertical-align: top;
+      }
+      table.reuse th {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--color-cream-soft);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      table.reuse td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+      table.reuse tr:last-child td { border-bottom: none; }
+      .reuse-pull { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border: 1.5px solid var(--color-ink); display: inline-block; letter-spacing: 0.08em; text-transform: uppercase; }
+      .reuse-pull--high { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .reuse-pull--med { background: var(--color-warning-soft); }
+      .reuse-pull--low { background: var(--color-cream-soft); color: var(--color-ink-muted); }
+
+      /* ============================================================
+         PAGE-LEVEL FOOTER (chrome notes)
+         ============================================================ */
+
+      footer.notes { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer.notes code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+
+      @media (max-width: 900px) {
+        .mural { padding: 24px 24px 56px; }
+        .mural-grid { display: block; min-height: auto; }
+        .mural-stamp { position: relative; top: auto; left: auto; transform: rotate(-2deg); margin: 0 auto 24px; }
+        .mural-crest, .mural-nav, .mural-contact, .mural-photo, .mural-social {
+          grid-column: auto;
+          margin: 0 0 24px;
+          display: block;
+        }
+        .footer-stage::after { display: none; }
+        .breakdown { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT D · SITEFOOTER · DIRECTION D</span>
+          <span class="mono mono--muted">★ TERRACE MURAL</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Een <span class="display"><em>terras</em></span>-muurschildering.</h1>
+        <p class="lead">
+          Direction D pushes the footer the furthest from the retro-terrace-fanzine
+          screenshot. The footer is reframed as a <strong>layered scrapbook
+          mural</strong> — torn-paper edges, overlapping TapedCards at small
+          rotations, a partial jersey-deep wash, a hand-painted-style "1932"
+          stamp, and information distributed across the collage rather than
+          ranked into columns. <strong>This is the highest-risk option of the
+          four</strong>: more compositional density, more room for visual
+          mistakes, and the largest departure from Phase 1/2 chrome density.
+          Worth it if the owner wants the footer to feel like a stadium-tunnel
+          mural rather than a sitemap.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           THE FOOTER ITSELF
+           =========================================================== -->
+      <section class="section" id="footer-render">
+        <div class="section-meta">
+          <span class="mono">★ 01 · FOOTER AT INTENDED SCALE</span>
+          <span class="mono mono--muted">— full mural composition, desktop ≥ 1024px</span>
+        </div>
+        <h2>De <em>volledige</em> muur.</h2>
+        <p class="lead">
+          Rendered at the breakpoint where the mural composition reads — every
+          rotation, every overlap, every torn edge sits where the production
+          component will place it. The motto banner and bottom strip remain
+          stable elements; everything above them is composition.
+        </p>
+
+        <div class="footer-stage" role="contentinfo" aria-label="Site footer mural">
+          <div class="mural">
+            <div class="mural-grid">
+
+              <!-- Hand-painted "1932" stamp — anchors the jersey-wash column -->
+              <div class="mural-stamp" aria-hidden="true">
+                <p class="mural-stamp__kicker">Sinds</p>
+                <p class="mural-stamp__year">1932</p>
+                <p class="mural-stamp__caption">★ Eén plezante compagnie ★</p>
+              </div>
+
+              <!-- Crest card — sits below the stamp on the jersey wash -->
+              <div class="mural-crest">
+                <div class="crest-card">
+                  <span class="crest-mark" aria-hidden="true">K</span>
+                  <h4>KCVV<br />Elewijt</h4>
+                  <p>Sportcomplex 't Trompet · Tervuursesteenweg 247 · 1982 Elewijt</p>
+                </div>
+              </div>
+
+              <!-- NAV TapedCard — middle, tilted left -->
+              <nav class="mural-nav" aria-label="Footer navigatie">
+                <div class="taped-card nav-card">
+                  <span class="tape tape--left" aria-hidden="true"></span>
+                  <span class="tape tape--right" aria-hidden="true"></span>
+                  <h5>★ Ontdek de club</h5>
+                  <ul>
+                    <li><a href="#">Nieuws</a></li>
+                    <li><a href="#">Kalender</a></li>
+                    <li><a href="#">Wedstrijden</a></li>
+                    <li><a href="#">Klassement</a></li>
+                    <li><a href="#">Eerste ploeg</a></li>
+                    <li><a href="#">Jeugd</a></li>
+                    <li><a href="#">Sponsors</a></li>
+                    <li><a href="#">Webshop</a></li>
+                    <li><a href="#">Word lid</a></li>
+                    <li><a href="#">Contact</a></li>
+                  </ul>
+                </div>
+              </nav>
+
+              <!-- CONTACT TapedCard — right, tilted right -->
+              <address class="mural-contact" style="font-style: normal">
+                <div class="taped-card contact-card">
+                  <span class="tape tape--center" aria-hidden="true"></span>
+                  <h5><em>Schrijf ons</em></h5>
+                  <dl>
+                    <dt>Adres</dt>
+                    <dd>Tervuursesteenweg 247<br />1982 Elewijt</dd>
+                    <dt>Mail</dt>
+                    <dd><a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a></dd>
+                    <dt>Tel</dt>
+                    <dd><a href="tel:+3215613347">015 61 33 47</a></dd>
+                    <dt>Kantine</dt>
+                    <dd>Wo–Zo · 14u00–23u00</dd>
+                  </dl>
+                </div>
+              </address>
+
+              <!-- Photo scrap — torn polaroid at center-low -->
+              <figure class="mural-photo">
+                <div class="photo-scrap">
+                  <span class="tape" aria-hidden="true"></span>
+                  <div class="photo-scrap__img" role="img" aria-label="Tribune 't Trompet, zaterdagmatch"></div>
+                  <figcaption class="photo-scrap__caption">★ TRIBUNE · ZA 14U30 ★</figcaption>
+                </div>
+              </figure>
+
+              <!-- SOCIAL TicketStub — bottom-right -->
+              <div class="mural-social">
+                <div class="ticket-stub social-stub">
+                  <p class="social-stub__head">Volg de ploeg.</p>
+                  <div class="social-stub__row" role="list">
+                    <a class="social-glyph" href="#" role="listitem" aria-label="Facebook">f</a>
+                    <a class="social-glyph" href="#" role="listitem" aria-label="Instagram">◉</a>
+                    <a class="social-glyph" href="#" role="listitem" aria-label="X (voorheen Twitter)">×</a>
+                    <a class="social-glyph" href="#" role="listitem" aria-label="YouTube">▶</a>
+                    <a class="social-glyph" href="#" role="listitem" aria-label="WhatsApp">✆</a>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /.mural-grid -->
+
+            <!-- Motto banner — runs across the mural -->
+            <div class="motto-banner" role="presentation">
+              ER IS MAAR <em>ÉÉN</em> PLEZANTE COMPAGNIE
+            </div>
+          </div><!-- /.mural -->
+
+          <!-- Bottom strip — legal + colophon -->
+          <div class="footer-strip">
+            <span>© 1932–2026 · KCVV ELEWIJT VZW · BE0414.832.117</span>
+            <div class="strip-links">
+              <a href="#">Privacy</a>
+              <a href="#">Cookies</a>
+              <a href="#">Disclaimer</a>
+              <a href="#">Colofon</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTIONS BREAKDOWN
+           =========================================================== -->
+      <section class="section" id="breakdown">
+        <div class="section-meta">
+          <span class="mono">★ 02 · SECTIONS BREAKDOWN</span>
+          <span class="mono mono--muted">— per-panel role + risk/distinctiveness tradeoff</span>
+        </div>
+        <h2>Wat <em>elk</em> stuk doet.</h2>
+        <p class="lead">
+          The mural is not a grid — it is a deliberately staged collage. Each
+          panel earns its rotation and overlap by carrying a specific role.
+          Below: what each piece is, and the honest cost of placing it that way.
+        </p>
+
+        <div class="breakdown">
+          <article>
+            <h4>★ JERSEY WASH + 1932 STAMP</h4>
+            <h5>De ankerkleur.</h5>
+            <p>
+              A partial jersey-deep wash on the left third gives the mural its
+              terrace-tunnel feel — a single saturated brand colour against the
+              rest of the cream paper. The "1932" stamp anchors that column with
+              a hand-cut polygon edge and a Playfair italic year set at 132px.
+              Founding year as identity, not as small-print legal.
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>The single brand-saturated zone reads instantly; no other footer in the design system uses jersey-deep at this scale. The 1932 stamp is the most ownable element in the entire mural.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>A partial colour wash is harder to maintain than full-bleed ink — torn-edge polygons need careful per-breakpoint tuning. Risks "decorative" reading if not tied to real content (the crest card on top of it is the bridge).</p>
+              </div>
+            </div>
+          </article>
+
+          <article>
+            <h4>★ NAV TAPEDCARD</h4>
+            <h5>De sitemap als briefje.</h5>
+            <p>
+              Ten primary links live inside one TapedCard tilted -2°, two columns
+              of italic Playfair links, masking-tape strips top-left and
+              top-right. The card sits over the boundary between the jersey wash
+              and the cream — the most prominent panel in the mural by surface
+              area.
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Putting the entire nav inside one tilted card is the clearest single-element distinctiveness move available — no competitor footer treats nav as collage paper. Reuses TapedCard verbatim, no new primitive.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>A tilted nav card is a screen-reader / focus-ring liability if rotation isn't disabled at <code>prefers-reduced-motion</code> + small viewports. Two-column layout inside a rotated container can drift visually under long localisation strings.</p>
+              </div>
+            </div>
+          </article>
+
+          <article>
+            <h4>★ CONTACT TAPEDCARD</h4>
+            <h5>Het adresboekje.</h5>
+            <p>
+              Address, mail, telefoon, kantine-uren rendered as a definition
+              list inside a TapedCard tilted +3°. Center-tape strip. Sits in the
+              right-third of the mural, slightly lower than the nav card so the
+              two never overlap — they read as two pinned notes.
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Definition-list semantics are correct (<code>&lt;dl&gt;/&lt;dt&gt;/&lt;dd&gt;</code>) and the rotated card is tasteful — only +3°. Keeps contact info easy to scan despite the playful framing.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Two rotated cards in close proximity (-2° + +3°) is the maximum the rotation budget should ever spend. If a third card is added later it must stay flat (0°) or the mural starts to read as a hot mess.</p>
+              </div>
+            </div>
+          </article>
+
+          <article>
+            <h4>★ TORN-EDGE PHOTO SCRAP</h4>
+            <h5>De terras-foto.</h5>
+            <p>
+              A 4:3 rectangular bounded-box photo, masking-tape pinned, with an
+              irregular <code>clip-path</code> simulating a torn edge. Default
+              caption is a tribune snapshot — easy to swap to any approved photo
+              from the asset library. Tilted -4° (the rotation maximum).
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Rectangular photo respects the saved-memory default (~90% of player photos arrive as rectangular psdImage). Torn-edge clip-path is geometric, not blurred — stays inside the flat paper-tone constraint.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Editorial photos must be hand-picked per page — a wrong photo (eg. a generic stock terrace shot) collapses the mural's authenticity. Likely needs a curated rotating set of 4–8 approved photos per season, owned by the marketing lead.</p>
+              </div>
+            </div>
+          </article>
+
+          <article>
+            <h4>★ SOCIAL TICKETSTUB</h4>
+            <h5>De volg-strookje.</h5>
+            <p>
+              Five social platforms inside a TicketStub at -2°. Each glyph is a
+              36×36 ink-bordered cream square that uses the canonical press-down
+              hover (<code>translate(3px, 3px)</code> + <code>shadow-none</code>
+              + jersey-bright fill on hover). Typographic glyphs only — never
+              the platform logo lockups.
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>TicketStub for "ticket to follow the team" reads as an obvious metaphor without needing a label. Glyphs over icons matches the saved-memory feedback (<em>typographic glyphs over Lucide equivalents</em>). Hover canon respected.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Typographic glyphs for social platforms (especially X and Instagram) are recognisable but not platform-trademark-safe. Some users may not parse "◉" as Instagram immediately. Counter: every glyph carries an <code>aria-label</code>; recognition reads on hover via the press idiom.</p>
+              </div>
+            </div>
+          </article>
+
+          <article>
+            <h4>★ MOTTO BANNER + BOTTOM STRIP</h4>
+            <h5>De gestabiliseerde bodem.</h5>
+            <p>
+              Two flat elements anchor the mural — the ink motto banner (with
+              the verbatim "ER IS MAAR ÉÉN PLEZANTE COMPAGNIE" claim, jersey-bright
+              ÉÉN), and the legal/colophon strip beneath it. These never rotate,
+              never tear. They are the line that stops the collage drifting off
+              the page.
+            </p>
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Every collage needs a steadying baseline. Two flat ink elements give the mural a clear "gallery wall" termination. Legal links remain accessible at full mono-caps clarity, no rotation, no overlap.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Putting the motto on ink + the strip on ink stacks two dark bands at the bottom — visually heavy at narrow widths. The torn polygon clip on the motto banner is the only thing keeping them visually distinct. If the polygon is dropped for performance or accessibility reasons, the two bands fuse into a wall.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 03 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— this option pulls heavily on existing primitives</span>
+        </div>
+        <h2>Wat <em>al</em> bestaat.</h2>
+        <p class="lead">
+          The Terrace Mural looks the most novel of the four directions, but it
+          is built almost entirely from primitives already approved in Phases 1
+          and 2 — <code>TapedCard</code>, <code>TapeStrip</code>,
+          <code>TicketStub</code>, <code>StampBadge</code>,
+          <code>MonoLabel</code>, <code>EditorialHeading</code>. The novelty is
+          in <em>composition density</em>, not in new tokens. That's the bet.
+        </p>
+
+        <table class="reuse">
+          <thead>
+            <tr>
+              <th>Mural panel</th>
+              <th>Primitive(s)</th>
+              <th>Pull intensity</th>
+              <th>New surface required?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>NAV card</td>
+              <td><code>TapedCard</code> + <code>TapeStrip</code> ×2</td>
+              <td><span class="reuse-pull reuse-pull--high">HIGH</span></td>
+              <td>None — rotation prop already supported.</td>
+            </tr>
+            <tr>
+              <td>CONTACT card</td>
+              <td><code>TapedCard</code> + <code>TapeStrip</code> (center)</td>
+              <td><span class="reuse-pull reuse-pull--high">HIGH</span></td>
+              <td>None.</td>
+            </tr>
+            <tr>
+              <td>SOCIAL stub</td>
+              <td><code>TicketStub</code> + 5× ink-bordered glyph buttons</td>
+              <td><span class="reuse-pull reuse-pull--high">HIGH</span></td>
+              <td>One new atom — <code>SocialGlyphButton</code> 36×36, but it's just a press-down paper-card mini already on main.</td>
+            </tr>
+            <tr>
+              <td>1932 stamp</td>
+              <td><code>StampBadge</code> + <code>clip-path</code> torn polygon</td>
+              <td><span class="reuse-pull reuse-pull--med">MEDIUM</span></td>
+              <td>Stamp size (280×220) is bigger than today's StampBadge default — needs a <code>size="founding"</code> variant. Polygon clip-path is data, not a new primitive.</td>
+            </tr>
+            <tr>
+              <td>Crest card</td>
+              <td><code>TapedCard</code> (rotated, no tape) + <code>EditorialHeading</code></td>
+              <td><span class="reuse-pull reuse-pull--high">HIGH</span></td>
+              <td>None.</td>
+            </tr>
+            <tr>
+              <td>Photo scrap</td>
+              <td><code>TapedFigure</code> + torn <code>clip-path</code></td>
+              <td><span class="reuse-pull reuse-pull--med">MEDIUM</span></td>
+              <td>TapedFigure already exists; this adds an optional <code>edge="torn"</code> prop carrying the polygon. One prop, no new component.</td>
+            </tr>
+            <tr>
+              <td>Motto banner</td>
+              <td>Custom — ink bg + Playfair italic + torn edges</td>
+              <td><span class="reuse-pull reuse-pull--low">LOW</span></td>
+              <td>New element <code>&lt;FooterMottoBanner&gt;</code>, footer-scoped only. Reuses the same italic display + torn-polygon technique as the stamp, so no new visual language.</td>
+            </tr>
+            <tr>
+              <td>Jersey wash + torn top edge</td>
+              <td>Background + <code>clip-path</code></td>
+              <td><span class="reuse-pull reuse-pull--low">LOW</span></td>
+              <td>Footer-internal only. Implemented with two pseudo-elements on <code>.footer-stage</code> — no exported primitive.</td>
+            </tr>
+            <tr>
+              <td>Bottom strip</td>
+              <td>Plain ink bar + mono caps</td>
+              <td><span class="reuse-pull reuse-pull--high">HIGH</span></td>
+              <td>None — same chrome as <code>SiteHeader</code> dark variant.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="lead" style="margin-top: 24px">
+          Pull-intensity summary: <strong>5 of 9 panels</strong> are pure
+          existing-primitive composition; <strong>2 panels</strong> add a single
+          variant prop to an existing primitive; <strong>2 panels</strong>
+          (motto banner, jersey wash) are footer-internal CSS — they never
+          leave the footer file. No new tokens. No new fonts. No new colours
+          beyond what Phase 1/2 already shipped.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              The mural is the highest-distinctiveness footer in the four-option
+              set, but its <em>token cost is zero</em> — every effect is
+              composition, not new primitives. If the owner picks Direction D,
+              the design system grows by one variant prop on <code>StampBadge</code>
+              and one on <code>TapedFigure</code>. No new colours, no new fonts,
+              no new shadows.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Composition density is itself a maintenance cost. The mural needs
+              an explicit "do not add a fourth tilted card" rule in the footer
+              README, otherwise future contributors will tilt every new panel
+              and the collage degrades into chaos. <strong>Highest design
+              risk in the set</strong> — if the rotations / overlaps drift even
+              1–2px off intent, the whole footer reads as broken rather than
+              playful.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           DIRECTION-LEVEL TRADEOFFS
+           =========================================================== -->
+      <section class="section" id="direction-tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 04 · DIRECTION-LEVEL TRADEOFFS</span>
+          <span class="mono mono--muted">— honest cost/value of picking the most experimental option</span>
+        </div>
+        <h2>Waarom <em>(of niet)</em> deze richting.</h2>
+        <p class="lead">
+          Direction D is the swing-for-the-fences choice. If picked, the footer
+          becomes a signature element of the redesigned site — the place where
+          the "retro-terrace fanzine" thesis is loudest. If a more conservative
+          footer is preferred, A / B / C all carry the same content with less
+          visual risk.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Maximum distinctiveness in the four-option set. Communicates club
+              identity (1932, motto, address, terras) before communicating
+              sitemap. No competitor club site in the inspiration set
+              (Sporting Hasselt, Real Madrid, Inter Miami CF) treats the footer
+              as a mural — Direction D is the only option that makes the footer
+              a destination rather than a wayfinding utility. Token cost is
+              zero. Press-down hover canon respected. Motto verbatim. Stenciletta
+              avoided. Jersey-deep used as content colour, not chrome glow.
+              Photo defaults rectangular per saved-memory. Glyphs over Lucide
+              icons.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Highest visual risk of the set. Three rotated panels close
+              together (stamp -3°, nav -2°, contact +3°, photo -4°, social -2°)
+              is at the absolute ceiling of the rotation budget — one more
+              rotated element and the mural collapses. Mobile rendering must
+              fall back to a stacked, flat layout (handled in the media query
+              above) and that fallback is much closer to a conventional footer
+              — meaning Direction D's distinctiveness <strong>only exists at
+              ≥900px viewports</strong>. Collage maintenance demands curated
+              photo rotation and a "no fourth tilt" guard in the footer README.
+              Accessibility requires <code>prefers-reduced-motion</code> +
+              focus-ring testing on every rotated card. Highest QA cost of the
+              four options.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           NOTES
+           =========================================================== -->
+      <footer class="notes">
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— constraints respected, decisions to ratify, mobile fallback</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Motto verbatim: <code>ER IS MAAR ÉÉN PLEZANTE COMPAGNIE</code> with <code>ÉÉN</code> in jersey-bright italic Playfair</li>
+          <li>Founding year framed as identity (1932 stamp), not legal small-print</li>
+          <li>Rotations capped at ±4° everywhere — stamp -3°, nav -2°, contact +3°, photo -4°, social -2°, motto -0.6°</li>
+          <li>Press-down hover canon used on every interactive paper element: <code>translate(3–4px, 3–4px)</code> + <code>shadow-none</code> + <code>transition-all 300ms</code></li>
+          <li>No glows, no rim-lights — torn edges via <code>clip-path: polygon(...)</code>, never blur or filter effects</li>
+          <li>Photos default to rectangular bounded box (4:3) — tracks saved-memory feedback that ~90% of subject photos arrive as psdImage rectangles</li>
+          <li>Social affordances are typographic glyphs in 36×36 paper-card minis — never Lucide nor platform-logo lockups</li>
+          <li>Stenciletta deliberately avoided — display work is Playfair italic 900, body is Inter, mono is IBM Plex Mono</li>
+          <li>Token map reused 1:1 from Phase 2 alert — zero new colours, zero new shadows, zero new fonts</li>
+          <li>Mobile fallback (<code>≤ 900px</code>) flattens the mural into a stacked column; jersey-wash pseudo and torn-top pseudo are dropped — distinctiveness reads on desktop only, mobile reads as a clean conventional footer</li>
+          <li>All rotated panels expose the rotation under a <code>prefers-reduced-motion: reduce</code> media query that resets to 0° (production-only — mockup retains rotation for visual review)</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction A (the closest-to-screenshot footer),
+          Direction B, Direction C, and Direction D (this — terrace mural). If
+          D is selected, the implementation plan must include: (1) curated
+          photo rotation for the photo scrap (4–8 approved per season), (2) a
+          "no fourth tilt" guard in the footer README, (3) a Storybook story
+          per breakpoint (≥1024 / 768–1023 / ≤767), and (4) a focus-ring audit
+          on every rotated card.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map (re-used from Phase 1/2)</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TINT</h4>
+            <ul>
+              <li>Mural surface: <code>--color-cream-deep</code></li>
+              <li>Wash column: <code>--color-jersey-deep</code> @ 92% opacity</li>
+              <li>Card surfaces: <code>--color-cream</code></li>
+              <li>Motto banner: <code>--color-ink</code> with <code>--color-jersey-bright</code> accent</li>
+              <li>Bottom strip: <code>--color-ink</code></li>
+              <li>Tape colour: warm ochre <code>rgba(247, 230, 130, 0.78)</code> with hairline ink edge — same value used in TapeStrip on main</li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / DEPTH</h4>
+            <ul>
+              <li>Stage border: <code>2px solid var(--color-ink)</code> + <code>--shadow-paper-md</code></li>
+              <li>TapedCards: <code>2px solid ink</code> + <code>--shadow-paper-sm</code> (press → <code>shadow-none</code> + <code>translate(4px, 4px)</code>)</li>
+              <li>1932 stamp: <code>3px solid ink</code> + <code>8×8 ink shadow</code> + torn polygon clip-path</li>
+              <li>Photo scrap: <code>2px solid ink</code> + <code>--shadow-paper-md</code> + torn polygon clip-path</li>
+              <li>Social glyph buttons: <code>2px solid ink</code> + <code>3×3 ink shadow</code> (press → <code>shadow-none</code> + <code>translate(3px, 3px)</code>)</li>
+              <li>Sharp corners everywhere — no <code>border-radius</code> except the round ticket-stub punch-holes</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION D — TERRACE MURAL · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
