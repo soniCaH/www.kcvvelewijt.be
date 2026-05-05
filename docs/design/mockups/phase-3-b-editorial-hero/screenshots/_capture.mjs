@@ -1,4 +1,4 @@
-import { chromium } from "/Users/kevinvanransbeeck/Sites/KCVV/kcvv-issue-1525/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/index.mjs";
+import { chromium } from "playwright";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
