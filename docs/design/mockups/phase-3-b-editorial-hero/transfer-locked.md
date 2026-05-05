@@ -5,6 +5,8 @@
 **Mockup:** `option-a-transfer-detail.html` + screenshots `screenshots/detail-transfer-{full,option-a,option-b,matrix,mobile}.png`.
 **Field availability sheet:** `fields.md`.
 
+> **★ Reuse audit correction (2026-05-05):** mentions of `<HeroCoverImage>` below (composition diagram + reuse map) are **superseded** — `<TapedFigure>` already accepts `aspect="landscape-16-9"`, so the cover-image artefact composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">`. No wrapper primitive, no new Storybook story. **Canonical source of truth: Phase 3 PRD §8b.** Same correction applies to `announcement-locked.md`, `event-locked.md`, `interview-locked.md`.
+
 ## Scope
 
 Detail-page hero for `/nieuws/[slug]` when `articleType === "transfer"`. Reuses the locked Asymmetric Broadsheet shell + the same five slots locked on announcement (kicker / heading / lead / byline / cover image). Variant-specific narrative — the transferFact's van → naar story — sits as a separate `<TransferFactStrip>` BELOW the hero. The optional pull-quote uses the existing `<PullQuote tone="jersey">` primitive between strip and body.

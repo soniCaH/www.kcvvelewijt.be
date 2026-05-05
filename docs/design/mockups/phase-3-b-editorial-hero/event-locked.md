@@ -6,6 +6,8 @@
 **Iterative comparison file** (historical): `option-a-event-comparisons.html`.
 **Field availability sheet:** `fields.md`.
 
+> **★ Reuse audit correction (2026-05-05):** mentions of `<HeroCoverImage>` below (composition diagram + reuse map) are **superseded** — `<TapedFigure>` already accepts `aspect="landscape-16-9"`, so the cover-image artefact composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">`. No wrapper primitive, no new Storybook story. **Canonical source of truth: Phase 3 PRD §8b.** Same correction applies to `announcement-locked.md`, `transfer-locked.md`, `interview-locked.md`.
+
 ## Scope
 
 Detail-page hero for `/nieuws/[slug]` when `articleType === "event"`. Reuses the locked Asymmetric Broadsheet shell + the same five slots locked on announcement and transfer. Variant-specific narrative (date / location / sessions / tickets) lives in a sibling `<EventFactStrip>` BELOW the hero — same architectural pattern as `<TransferFactStrip>`, but with event-specific content shape.

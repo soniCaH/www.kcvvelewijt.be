@@ -6,6 +6,8 @@
 **Iterative comparison file** (historical): `option-a-interview-comparisons.html`.
 **Field availability sheet:** `fields.md`.
 
+> **★ Reuse audit correction (2026-05-05):** mentions of `<HeroCoverImage>` below (composition diagram + reuse map) are **superseded** — `<TapedFigure>` already accepts `aspect="landscape-16-9"`, so the cover-image artefact composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">`. No wrapper primitive, no new Storybook story. **Canonical source of truth: Phase 3 PRD §8b.** Same correction applies to `announcement-locked.md`, `transfer-locked.md`, `event-locked.md`.
+
 ## Scope
 
 Detail-page hero for `/nieuws/[slug]` when `articleType === "interview"`. Reuses the locked Asymmetric Broadsheet shell + the same five slots locked on announcement / transfer / event. Variant-specific composition is a sibling `<SubjectsStrip>` BELOW the hero — same architectural pattern as `<TransferFactStrip>` and `<EventFactStrip>`, but with subject portraits + (for N=1) an inline pull-quote.
