@@ -67,12 +67,13 @@ Locked direction A — Asymmetric Broadsheet (60/40 grid, ink rule between text 
 | `<EditorialKicker>`    | Kicker row with star sandwich and dot-separated MonoLabels                                                | `<MonoLabelRow divider="·">` wrapped in leading + trailing `★` glyphs aligned via flex+line-height-1 |
 | `<EditorialLead>`      | Italic display paragraph, max-width ~52ch                                                                 | `<p>` with design tokens; ships truncate-to-280 helper for body-fallback case                        |
 | `<EditorialByline>`    | Author row at hero foot — leading star + author string                                                    | Mono caps + leading ★ glyph; future: secondary action slot for share/copy-link                       |
-| `<HeroCoverImage>`     | Cover image artefact for variants where coverImage is the right-column piece                              | `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">`                                     |
+
+> **Cover image artefact:** the previously-listed `<HeroCoverImage>` wrapper is **not built** (per the supersession note at the top of this file + Phase 3 PRD §8b). The cover-image artefact composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` — `<TapedFigure>` already accepts `aspect="landscape-16-9"`, so no wrapper primitive is needed.
 
 **Why these specific sub-components and not just inline JSX:**
 
 - Every variant uses Kicker + Heading + Lead + Byline. Identical markup, identical styling. Extract once, reuse 4×.
-- HeroCoverImage is shared between announcement (image only), event (image + ticketstub overlay), and possibly transfer/interview when their primary artefact incorporates the cover.
+- The cover image artefact composes inline (existing `<TapedCard>` + `<TapedFigure>`) — no extraction needed.
 - The shell stays variant-agnostic so adding a 5th variant (matchPreview/matchRecap from #1470) doesn't fork it.
 
 ## Field-source map
@@ -101,6 +102,7 @@ type EditorialHeroAnnouncementProps = {
   placement?: "detail" | "homepage"; // default "detail"
   article: {
     title: PortableTextBlock[]; // single block, accent decorator only
+    slug: string; // required — used by placement="homepage" to build /nieuws/{slug}
     lead?: string; // optional, falls back to body[0]
     body: PortableTextBlock[]; // for fallback + reading time
     publishedAt: string; // datetime

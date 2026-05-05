@@ -12,6 +12,7 @@
 ```
 
 Stacked over one another:
+
 - **Top row** — single horizontal closer line: 1px ink rule, jersey-deep `✦`, italic Freight Display title (mixed-case Dutch), jersey-deep `✦`, 1px ink rule.
 - **Bottom row** — small mono caps kicker (e.g. `AKTE 02 · DE OVERSTAP`), centered, sits ~8px under the rule. Optional — when omitted, the divider is just the top row.
 
@@ -21,18 +22,19 @@ Container: `max-width: 580px`, centered in the article column, `margin: 40px aut
 
 Both primitives intentionally share vocabulary (1px rule + jersey-deep glyph + label). The split that prevents reader confusion:
 
-| | `<EndMark>` | `<QASectionDivider>` |
-|---|---|---|
-| Glyph | **★** (five-pointed) | **✦** (four-pointed) — distinct silhouette |
-| Title font | mono caps, 10px | italic Freight Display, 22px, mixed-case |
-| Kicker beneath | none | optional mono caps act label |
-| Role | article closer (appears once) | section break (appears 1–N times) |
+|                | `<EndMark>`                   | `<QASectionDivider>`                       |
+| -------------- | ----------------------------- | ------------------------------------------ |
+| Glyph          | **★** (five-pointed)          | **✦** (four-pointed) — distinct silhouette |
+| Title font     | mono caps, 10px               | italic Freight Display, 22px, mixed-case   |
+| Kicker beneath | none                          | optional mono caps act label               |
+| Role           | article closer (appears once) | section break (appears 1–N times)          |
 
 `★` is reserved for "this is the end"; `✦` is reserved for "the next section starts." Designers must not mix them.
 
 ## Alignment contract (same rules as `<EndMark>`)
 
 The top row's three centerlines must share one vertical line, accurate to 1px:
+
 1. 1px rules.
 2. Optical centre of the `✦` glyphs.
 3. Cap-height midpoint of the italic Freight Display title.
@@ -80,16 +82,16 @@ defineType({
         defineArrayMember({
           type: "block",
           styles: [{ title: "Normal", value: "normal" }], // no headings
-          lists: [],                                       // no lists
+          lists: [], // no lists
           marks: {
             decorators: [
-              { title: "Accent", value: "accent" },        // ← inline toolbar button
+              { title: "Accent", value: "accent" }, // ← inline toolbar button
             ],
-            annotations: [],                               // no links / refs
+            annotations: [], // no links / refs
           },
         }),
       ],
-      validation: r => r.required(),
+      validation: (r) => r.required(),
     }),
     defineField({
       name: "kicker",
@@ -104,8 +106,9 @@ defineType({
 Add to the article body's block schema as a new block-of object so editors insert it from the body editor's "+" menu.
 
 **Editor flow** (familiar Sanity rich-text pattern):
+
 1. Insert "Q&A section divider" from the body editor's `+` menu.
-2. Type the title in the inline editor. (e.g. *De jaren tussen de lijnen.*)
+2. Type the title in the inline editor. (e.g. _De jaren tussen de lijnen._)
 3. Optional — select a word, click the **Accent** button in the toolbar. That word renders jersey-deep italic.
 4. Optional — fill in the kicker.
 
@@ -114,6 +117,7 @@ If no accent is applied, the title renders plain ink italic — same end result 
 ## Renderer rule
 
 Walk the `title` Portable Text block's children. For each child span:
+
 - No marks → render in `<span>` with default ink italic styling.
 - `accent` in `marks` → render in `<em class="qa-divider__accent">` with jersey-deep italic + `font-weight: 900` styling.
 
@@ -121,7 +125,7 @@ No string matching, no substring search — Sanity stores the marked range struc
 
 ## A11y
 
-- Wrap in `<aside role="separator" aria-label={title}>` so assistive tech reads the divider as a section break with its title as context.
+- Wrap in `<aside role="separator" aria-label={portableTextToPlainText(title)}>` so assistive tech reads the divider as a section break with its title as context. **`aria-label` requires a `string`, not the raw `PortableTextBlock[]`** — the component must serialize the title via the existing `portableTextToPlainText()` helper (or an equivalent — the same helper used to derive the cover-image `alt` attribute on `<EditorialHero>`). Strips spans + accent decorator marks; preserves the readable text only.
 - `✦` glyphs are decorative — `aria-hidden="true"`.
 - Kicker is meaningful but secondary — leave readable.
 
@@ -143,6 +147,6 @@ No string matching, no substring search — Sanity stores the marked range struc
 - [ ] Kicker is optional; when present, mono caps under the rule.
 - [ ] Accent is inline-applied in the Sanity Portable Text editor via an "Accent" decorator (like bold/italic). No substring typing.
 - [ ] Sanity schema (`packages/sanity-schemas/src/blocks/qaSectionDivider.ts`) ships with `title` (Portable Text, single block, `accent` decorator only — no styles/lists/links) + optional `kicker`. Article body schema gains it as a block-of object.
-- [ ] `aria-label={title}` on the wrapper; glyphs `aria-hidden`.
+- [ ] `aria-label={portableTextToPlainText(title)}` on the wrapper (serialised plain string, NOT the raw `PortableTextBlock[]`); glyphs `aria-hidden`.
 
 Reply "approved" and the next figure goes (JerseyShirt — last one in Checkpoint A).

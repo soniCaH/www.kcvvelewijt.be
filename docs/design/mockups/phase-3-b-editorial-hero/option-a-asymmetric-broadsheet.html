@@ -767,7 +767,11 @@
         </div>
         <h1>Een <span class="display"><em>broadsheet</em></span> hero.</h1>
         <p class="lead" style="font-size: 17px; color: var(--color-ink-soft); margin: 16px 0 0">
-          One <code>&lt;EditorialHero&gt;</code> with seven variants. The
+          One <code>&lt;EditorialHero&gt;</code> with four locked variants
+          (announcement, transfer, event, interview) — originally specced as
+          seven; <code>generic</code> and <code>player</code> were removed
+          per the 2026-05-05 scope correction (see the comment further down
+          this file or Phase 3 PRD §2 / §8). The
           headline / dek / CTA structure is invariant — only the right-column
           artefact and the kicker label set switch per <code>variant</code>.
           Layout is a <strong>60 / 40 left-right split</strong> with a thin
@@ -1241,14 +1245,14 @@
               <td><code>TapedCard</code> + <code>StampBadge</code> (double-rule circle + mono top + display title + mono bottom, rotated -9°)</td>
               <td><code>rotation="a"</code> (-2.4°)</td>
             </tr>
-            <tr>
-              <td><code>generic</code></td>
+            <tr style="opacity: 0.45; text-decoration: line-through;">
+              <td><code>generic</code> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — redundant; every article has a typed articleType]</span></td>
               <td><code>NIEUWS · CLUB</code> + update pill + read-time</td>
               <td><code>TapedCard</code> + oversized italic display drop-cap (jersey-deep + ink shadow) + ink rule + mono section glyph (§)</td>
               <td><code>rotation="c"</code> (-1.4°)</td>
             </tr>
-            <tr>
-              <td><code>player</code></td>
+            <tr style="opacity: 0.45; text-decoration: line-through;">
+              <td><code>player</code> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[REMOVED 2026-05-05 — deferred to Phase 6 with its own &lt;PlayerHero&gt;]</span></td>
               <td><code>SPELERSPROFIEL · A-PLOEG</code> + #number pill + position tag</td>
               <td><code>TapedCard</code> + rectangular psdImage crop + <code>MonoLabel</code> "NIEUW" overlay + jersey block w/ number + <code>TicketStub</code> (label + value + label)</td>
               <td><code>rotation="b"</code> (+2.1°)</td>
@@ -1263,7 +1267,7 @@
       <section class="section" id="tradeoffs">
         <div class="section-meta">
           <span class="mono">★ 10 · DIRECTION TRADEOFFS</span>
-          <span class="mono mono--muted">— summary across all seven variants</span>
+          <span class="mono mono--muted">— summary across all four locked variants</span>
         </div>
         <h2>Waarom een <em>broadsheet.</em></h2>
         <p class="lead">

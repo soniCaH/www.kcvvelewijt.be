@@ -6,11 +6,12 @@
 
 ## Composition
 
-```
+```text
 [ 1px ink rule ]  ★  EINDE GESPREK  ★  [ 1px ink rule ]
 ```
 
 A single horizontal closer composed of:
+
 - left ink rule (1px solid `--color-ink`, flexible width)
 - jersey-deep `★` glyph (typographic, no SVG / no Lucide)
 - mono caps label (Sanity-/article-supplied — defaults `EINDE GESPREK`)
@@ -55,9 +56,9 @@ Common labels (page-/article-supplied): `EINDE GESPREK`, `EINDE INTERVIEW`, `EIN
 
 ## A11y
 
-- The whole component is decorative and scoped to article close. Wrap in `<aside role="presentation">` or `<div aria-hidden="true">` if the surrounding article uses an explicit `<footer>` for credits.
-- The `★` glyphs are decorative — `aria-hidden="true"`.
-- The label is meaningful text — leave it readable to assistive tech.
+- The label text (`EINDE GESPREK`, `EINDE INTERVIEW`, etc.) is meaningful — it announces the structural close of the article. **Do NOT wrap the component in `aria-hidden="true"`** (that would cascade and hide the label). Use a plain `<aside>` (or `<div>`) container so the label remains readable to assistive tech.
+- Only the decorative `★` glyphs carry `aria-hidden="true"`; the label span stays unhidden.
+- If a surrounding article already provides a more authoritative section close (e.g. an explicit `<footer>` with the same credit), the consumer can suppress this `<EndMark>` instance entirely rather than hiding the label — picking one or the other, never both.
 
 ## Reference render
 

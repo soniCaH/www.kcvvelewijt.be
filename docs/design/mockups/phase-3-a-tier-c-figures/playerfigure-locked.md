@@ -8,10 +8,10 @@
 
 PlayerFigure renders one of two **mutually-exclusive** compositions, never combined:
 
-| State | When | Composition |
-|---|---|---|
-| **Photo** | `psdImage` is set on the player | Polaroid TapedCard wrapping the rectangular `psdImage`, surrounded by editorial chrome. |
-| **Illustration** | `psdImage` is missing | A single canonical drawn figure (jersey-deep block silhouette + ink overprint outline + V-collar + vertical stripes) on a desaturated grey panel inside a polaroid TapedCard. **Identical across all options** — there is no per-direction illustration variant. |
+| State            | When                            | Composition                                                                                                                                                                                                                                                      |
+| ---------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Photo**        | `psdImage` is set on the player | Polaroid TapedCard wrapping the rectangular `psdImage`, surrounded by editorial chrome.                                                                                                                                                                          |
+| **Illustration** | `psdImage` is missing           | A single canonical drawn figure (jersey-deep block silhouette + ink overprint outline + V-collar + vertical stripes) on a desaturated grey panel inside a polaroid TapedCard. **Identical across all options** — there is no per-direction illustration variant. |
 
 The illustration state never embeds a photo well; the photo state never wraps a drawn jersey/arm illustration. Hybrid combinations are explicitly rejected ("Mickey Mouse" — `feedback_playerfigure_no_hybrid`).
 
@@ -19,7 +19,7 @@ The illustration state never embeds a photo well; the photo state never wraps a 
 
 Direction: **Option A — Photobooth Strip** (`option-a-photobooth-strip.html`, photo-state section).
 
-```
+```text
 TapedCard (polaroid)
   ├─ <img src={psdImage} />               ← rectangular, no surrounding illustration
   └─ caption strip: "★ KCVV ELEWIJT · SEIZOEN 25–26"   ← static club chrome
@@ -34,10 +34,12 @@ Side meta column:
 ```
 
 **Not in PlayerFigure:**
+
 - ❌ TicketStub ("STAMNR. 55") — moved out; lives separately on hero compositions if needed (see master design delta below).
 - ❌ Pull-quote — quotes belong to `<PullQuote>` (Phase 1 primitive) as a sibling. Never inside PlayerFigure.
 
 Reference renders:
+
 - `screenshots/compare-playerfigure-revised-photo.png` (column A)
 - `screenshots/compare-playerfigure-revised-photo-tight.png` (column A)
 
@@ -45,7 +47,7 @@ Reference renders:
 
 The illustration replaces the **photo well only**. The surrounding meta column (position, name, jerseyNumber, bio, tag, teamLabel) renders identically to the photo state — players without a `psdImage` are not second-class.
 
-```
+```text
 TapedCard (polaroid, slight rotation, two cream tape strips at top corners)
   ├─ Inner panel — desaturated grey rectangle (option-b's .figure__photo gradient, no real photo)
   ├─ jersey-deep block silhouette (head ellipse + curved torso + shoulder stripe blocks)
@@ -64,6 +66,7 @@ Side meta column (SAME as photo state):
 **Head:** the body's own ellipse-head reads through. **No** face-circle accent (grey-gradient, dark-green, or any other overlay) — owner-confirmed 2026-05-04.
 
 Reference render:
+
 - `screenshots/compare-playerfigure-revised-illustration.png` (any column — all three are identical).
 
 Source SVG/CSS lives in `option-b-stamped-block-print.html` `#player-figure` (lines 720-756, photo + face-circle layers omitted in the canonical illustration). When `<PlayerFigure>` is implemented, the illustration is shipped as a fixed SVG asset / component — not parameterised.
@@ -72,7 +75,16 @@ Source SVG/CSS lives in `option-b-stamped-block-print.html` `#player-figure` (li
 
 ```typescript
 type PlayerFigureProps = {
-  player: Pick<Player, "firstName" | "lastName" | "position" | "positionPsd" | "jerseyNumber" | "psdImage" | "bio">;
+  player: Pick<
+    Player,
+    | "firstName"
+    | "lastName"
+    | "position"
+    | "positionPsd"
+    | "jerseyNumber"
+    | "psdImage"
+    | "bio"
+  >;
   /** Optional context tag (e.g. "SPELER VAN DE WEEK", "NIEUW"). Renders as a MonoLabel. */
   tag?: string | { text: string; tone: "default" | "jersey" | "ink" };
   /** Optional team label (e.g. "A-PLOEG"). Calling page derives it from team references. */
@@ -86,16 +98,16 @@ The component picks photo vs illustration internally based on `player.psdImage`.
 
 ## Field source mapping (verified against `packages/sanity-schemas/src/player.ts`)
 
-| UI element | Source |
-|---|---|
-| `psdImage` | PSD-synced image field |
-| firstName, lastName | PSD-synced |
-| position | editorial `position` field (sentence-case, uppercased via CSS) — fallback `positionPsd` |
-| jerseyNumber | editorial number field |
-| short bio line | first paragraph of `bio` (block content); empty → drop |
-| caption "★ KCVV ELEWIJT · SEIZOEN 25–26" | static club chrome |
-| `tag` | page prop |
-| `teamLabel` | page prop (derived by caller from team references) |
+| UI element                               | Source                                                                                  |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- |
+| `psdImage`                               | PSD-synced image field                                                                  |
+| firstName, lastName                      | PSD-synced                                                                              |
+| position                                 | editorial `position` field (sentence-case, uppercased via CSS) — fallback `positionPsd` |
+| jerseyNumber                             | editorial number field                                                                  |
+| short bio line                           | first paragraph of `bio` (block content); empty → drop                                  |
+| caption "★ KCVV ELEWIJT · SEIZOEN 25–26" | static club chrome                                                                      |
+| `tag`                                    | page prop                                                                               |
+| `teamLabel`                              | page prop (derived by caller from team references)                                      |
 
 ## Master design deltas (to fold into the phase 3 PRD)
 

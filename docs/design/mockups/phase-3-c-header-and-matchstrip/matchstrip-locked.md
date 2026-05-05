@@ -26,6 +26,10 @@ Three-column CSS grid (`auto · 1fr · auto`). Cream paper + 1px ink top & botto
                        [page content / hero]
 ```
 
+### Tablet (769–1023px)
+
+Same composition as desktop — the 3-column grid scales down with the viewport but doesn't restructure. Padding tightens slightly via `clamp()`. The strip stays single-row through the entire tablet range; the column collapse only fires below the mobile breakpoint.
+
 ### Mobile (≤ 768px)
 
 Single-column stack: fixture row → meta row (Aftrap value only) → CTA. Total height ~80–90px.

@@ -297,7 +297,11 @@
       .transfer-strip__extension-stamp .stamp-value { font-size: 14px; letter-spacing: 0.12em; }
 
       /* ====================================================================
-         MOBILE — cards stack vertically, swap horizontal → for vertical ↓
+         MOBILE (≤ 720px) — cards stack vertically; horizontal `→` glyph
+         swaps for the inline SVG vertical arrow (no character swap, no
+         rotation hack). See `.transfer-strip__arrow--horizontal` /
+         `.transfer-strip__arrow--vertical` and the inline <svg> path
+         in the markup below.
          ==================================================================== */
       @media (max-width: 720px) {
         .transfer-strip {
@@ -663,14 +667,16 @@
       <section class="section" id="mobile-preview">
         <div class="section-meta">
           <span class="mono">★ 03b · MOBILE PREVIEW</span>
-          <span class="mono mono--muted">— cards stack vertically, arrows swap → for clean ↓ glyph</span>
+          <span class="mono mono--muted">— cards stack vertically (≤ 720px); horizontal → swaps for inline SVG vertical arrow</span>
         </div>
         <h2>Op <em>kleinere ruit.</em></h2>
         <p class="lead">
           Below 720px the strip flips from horizontal to vertical. Cards stack top-to-bottom, and the arrow
-          span swaps its inner glyph from italic <code>→</code> to a normal-weight <code>↓</code> — no
-          rotation hack, the down-arrow is its own character. Extension stays a single centered card (no
-          journey, no arrows). Outgoing keeps its alert-red colour.
+          span swaps from its horizontal italic <code>→</code> glyph to an inline SVG path drawn as a
+          vertical down-arrow (24-line, currentColor stroke) — no rotation hack and no character glyph
+          swap; the SVG is its own variant element (<code>.transfer-strip__arrow--vertical</code>) toggled
+          via CSS. Extension stays a single centered card (no journey, no arrows). Outgoing keeps its
+          alert-red colour.
         </p>
 
         <div class="panel" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
@@ -879,7 +885,7 @@
             <li><strong>TransferFactStrip is a NEW shared sub-component</strong> for transfer + (later) used as inspiration for matchPreview/matchRecap (#1470). Naming: <code>&lt;TransferFactStrip&gt;</code>. Lives at <code>apps/web/src/components/article/blocks/TransferFactStrip/</code> (it's a body block, not design-system primitive).</li>
             <li><strong>Multiple transferFacts in one article</strong> — schema comment says first powers the hero/strip; the rest render as compact overview rows. Compact-row treatment is a body concern, not hero — design later in 3.B.2 implementation. Confirm.</li>
             <li><strong>Cover image fallback per direction?</strong> Per Ask 8 (a) coverImage is hard-required — editor uploads one for every article. Confirm: no per-direction default (e.g. no auto "shield-to-shield" placeholder for transfers without a player photo).</li>
-            <li><strong>Mobile collapse</strong> — TransferFactStrip reflows to vertical (3 stacked rows: from / player / to) under 640px. No special handling needed for extension's already-single column.</li>
+            <li><strong>Mobile collapse</strong> — TransferFactStrip reflows to vertical (3 stacked rows: from / player / to) under 720px (matches the `.transfer-strip` `@media (max-width: 720px)` rule earlier in the file). No special handling needed for extension's already-single column.</li>
           </ul>
         </div>
       </section>
