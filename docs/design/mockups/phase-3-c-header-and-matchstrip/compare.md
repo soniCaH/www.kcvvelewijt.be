@@ -52,15 +52,15 @@
 | MatchStrip border     | hairline ink top + bottom | 2px jersey-green left rail  | TicketStub perforated edge + dashed dividers       |
 | MatchStrip background | cream                     | cream                       | cream with subtle paper-edge gradient              |
 
-## Owner choice
+## Decision recorded
 
-> _Pick one. The chosen option's data states freeze the MatchStrip state matrix for sub-issue 3.C.2._
+> **Option A — Classic Newsstand** locked 2026-05-05. Options B and C are kept as historical record only.
 
-- [ ] Option A — Classic Newsstand
-- [ ] Option B — Ink Band
-- [ ] Option C — Taped Flyer
+- [x] **Option A — Classic Newsstand** (locked 2026-05-05)
+- [ ] ~~Option B — Ink Band~~ _(historical record only)_
+- [ ] ~~Option C — Taped Flyer~~ _(historical record only)_
 
-**Rationale (after pick):** _to be filled in by owner._
+**Rationale:** Option A's cream-paper masthead with hairline ink rules composes naturally with the locked Phase 3 B EditorialHero shell (Asymmetric Broadsheet — same cream/ink vocabulary), reads instantly as a club masthead, has the lowest implementation cost (rules + flexbox), and gives the cleanest sticky-scroll seam between header and content. The full per-question lock specs live in `header-locked.md` and `matchstrip-locked.md` — those files are the canonical sources of truth for the implementation contract; this `compare.md` is the historical drill-down record.
 
 ## Next step
 

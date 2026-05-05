@@ -4,7 +4,25 @@ import fs from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const variants = ["transfer", "match-preview", "interview", "event", "announcement"];
+// `match-preview` deferred to issue #1470 — see note in `_capture.mjs`.
+const variants = ["transfer", "interview", "event", "announcement"];
+
+// Fail fast if any expected source PNG is missing, so the composite
+// step doesn't silently produce a screenshot full of broken-image
+// placeholders that look "valid" until someone opens it.
+const missing = [];
+for (const v of variants) {
+  for (const slug of ["a", "b", "c"]) {
+    const file = path.join(__dirname, `option-${slug}-${v}.png`);
+    if (!fs.existsSync(file)) missing.push(`option-${slug}-${v}.png`);
+  }
+}
+if (missing.length > 0) {
+  console.error(
+    `\n✗ _composite.mjs aborting — missing source screenshot${missing.length === 1 ? "" : "s"}:\n  ${missing.join("\n  ")}\n\nRun \`node _capture.mjs\` first to (re)generate them.\n`
+  );
+  process.exit(1);
+}
 
 const browser = await chromium.launch();
 const context = await browser.newContext({

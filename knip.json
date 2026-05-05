@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
     ".": {
-      "ignoreDependencies": ["prettier-plugin-tailwindcss"]
+      "ignoreDependencies": ["prettier-plugin-tailwindcss", "playwright"]
     },
     "apps/api": {
       "ignoreBinaries": ["jq"]

@@ -6,12 +6,12 @@
 
 EditorialHero is one component used in two placements. Drill-down focuses on the **detail-page placement** first; homepage placement layers on top once detail is locked.
 
-|                                                  | Detail page (`/nieuws/[slug]`)                         | Homepage (lead-story slot)                         |
-| ------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------- |
-| **Phase 3 B drill order**                        | **first** — canonical anchor                           | second — additive `placement="homepage"` extension |
-| **Kicker / headline / lead / artefact / byline** | same                                                   | same                                               |
-| **CTA row**                                      | **none** — body flows below the hero                   | `LEES …` + `ALLE …` (click-through)                |
-| **Reasoning**                                    | reader is already committed; "READ" CTA is meaningless | reader needs an obvious entry point                |
+|                                                  | Detail page (`/nieuws/[slug]`)                         | Homepage (lead-story slot)                                                                                                             |
+| ------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 3 B drill order**                        | **first** — canonical anchor                           | second — additive `placement="homepage"` extension                                                                                     |
+| **Kicker / headline / lead / artefact / byline** | same                                                   | same                                                                                                                                   |
+| **CTA row**                                      | **none** — body flows below the hero                   | **none** — whole-card click; no CTA row/band at rest (locked 2026-05-05, P3 — see `option-a-homepage-placement-comparisons.html`)      |
+| **Reasoning**                                    | reader is already committed; "READ" CTA is meaningless | reader needs an obvious entry; the entire hero is the affordance (`<a>` wrap + press-up hover + "★ Lees verder →" hint on hover/focus) |
 
 The mockups in this dir from 2026-05-05 onwards are the **detail-page** variants. Homepage adaptations come once those are locked.
 

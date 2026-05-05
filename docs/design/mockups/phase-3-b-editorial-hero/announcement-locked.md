@@ -20,7 +20,7 @@ Locked direction A — Asymmetric Broadsheet (60/40 grid, ink rule between text 
 ```text
 ┌──────────────────────────────────────────────┬───────────────────────────┐
 │  EditorialKicker (60%)                       │                           │
-│  EditorialHeading (PT-aware, accent)         │   HeroCoverImage          │
+│  EditorialHeading (PT-aware, accent)         │   <TapedCard rotation>    │
 │  EditorialLead                               │   (TapedCard rotation A   │
 │  EditorialByline                             │    + 16:9 image)          │
 │                                              │                           │
@@ -133,7 +133,7 @@ Capture all 5 as hard prerequisites for sub-issue `3.B.2` in the GitHub issue sp
 Implementation rules:
 
 1. **Audit before building.** Before writing any new component for any of the four variants, grep `apps/web/src/components/design-system/` for an existing primitive that fits. Use it; don't reinvent.
-2. **Extract before duplicating.** Any markup or styling that appears in 2+ variants becomes a shared sub-component (Kicker / Lead / Byline / HeroCoverImage / Shell). Don't ship per-variant copy-paste.
+2. **Extract before duplicating.** Any markup or styling that appears in 2+ variants becomes a shared sub-component — locked extractions are Shell / Kicker / Lead / Byline. The cover image is _not_ extracted; it composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` per the supersession note above + Phase 3 PRD §8b.
 3. **Storybook coverage on every shared sub-component.** Each new sub-component ships with `<Name>.stories.tsx` (title `UI/<Name>`), VR-tagged, `vr` tag in meta. Per `apps/web/CLAUDE.md` §"Design System & Storybook (MANDATORY)".
 4. **No hidden state.** Sub-components are pure presentational — no fetching, no Effect, no hooks beyond what's needed. Article data flows in as props from the page-level Server Component.
 

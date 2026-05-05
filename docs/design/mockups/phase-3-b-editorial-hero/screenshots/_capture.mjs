@@ -11,7 +11,10 @@ const options = [
   { slug: "c", file: "option-c-cover-frame.html", variantSelectorTpl: '#v-{slug}' },
 ];
 
-const variants = ["transfer", "match-preview", "interview", "event", "announcement"];
+// `match-preview` deferred to issue #1470 — no longer a Phase 3 B variant.
+// Removed from the capture loop; Direction A's section was excised on
+// 2026-05-06 and Directions B/C have it banner-marked as deferred.
+const variants = ["transfer", "interview", "event", "announcement"];
 
 const browser = await chromium.launch();
 const context = await browser.newContext({
@@ -23,6 +26,22 @@ for (const opt of options) {
   const page = await context.newPage();
   const url = pathToFileURL(path.join(dir, opt.file)).href;
   await page.goto(url, { waitUntil: "networkidle" });
+  // Wait for fonts + images to settle so the screenshot captures
+  // final glyph metrics + remote artwork rather than fallback fonts
+  // or broken-image placeholders.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.all(
+      Array.from(document.images).map((img) =>
+        img.complete
+          ? null
+          : new Promise((resolve) => {
+              img.addEventListener("load", resolve, { once: true });
+              img.addEventListener("error", resolve, { once: true });
+            })
+      )
+    );
+  });
   // Full page
   await page.screenshot({
     path: path.join(__dirname, `option-${opt.slug}-full.png`),

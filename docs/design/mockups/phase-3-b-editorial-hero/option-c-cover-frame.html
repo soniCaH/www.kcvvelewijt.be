@@ -924,6 +924,10 @@
           <span class="mono">★ 02 · MATCH-PREVIEW</span>
           <span class="mono mono--muted">— opponent shield on TapedCard, ClippedCard date strip below frame</span>
         </div>
+        <div role="status" aria-label="Variant deferred — out of Phase 3 B scope" style="margin: 12px 0 18px; padding: 10px 14px; border: 1.5px solid #b84a3a; background: rgba(184, 74, 58, 0.08); display: inline-flex; gap: 8px; align-items: baseline; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #b84a3a;">
+          <span aria-hidden="true">⊘</span>
+          <span>Deferred · Out of Phase 3 B scope — matchPreview articleType doesn't exist yet (lands with #1470). Variant kept as historical reference only.</span>
+        </div>
         <h2>De <em>tegenstander</em> van zondag.</h2>
         <p class="lead">
           Match-preview cover features the opponent crest on a square TapedCard
@@ -1447,14 +1451,19 @@
           <li>Stenciletta is not used</li>
         </ul>
 
-        <h3>Open</h3>
+        <h3>Archived</h3>
         <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
-          Owner pick between Direction A (Broadsheet — separate file), Direction
-          B (Stacked Strip — separate file), and Direction C (this — Cover
-          Frame). Once locked we ship <code>&lt;EditorialHero variant="..."&gt;</code>
-          with a Storybook story per variant + the mobile collapse + a stacked-
-          feed VR test verifying multiple covers in sequence don't read as
-          monotonous.
+          <strong>Direction A (Asymmetric Broadsheet) was locked
+          2026-05-05.</strong> Direction C (this file) is kept as
+          historical record only — no Storybook stories or VR tests
+          ship from this mockup. The locked Storybook + VR coverage
+          lives in the per-variant files
+          (<code>option-a-announcement-detail.html</code> /
+          <code>option-a-transfer-detail.html</code> /
+          <code>option-a-event-detail.html</code> /
+          <code>option-a-interview-detail.html</code>) and their
+          paired <code>*-locked.md</code> specs. See the leading
+          archived banner at the top of this file.
         </p>
 
         <h3 style="margin-top: 32px">Token map</h3>

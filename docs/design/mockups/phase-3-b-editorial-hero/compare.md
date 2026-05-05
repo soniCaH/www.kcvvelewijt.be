@@ -30,20 +30,20 @@
 
 ## Trade-off summary
 
-| Criterion                                                   | A — Broadsheet                                                        | B — Poster                                           | C — Cover frame                                                |
-| ----------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------- |
-| **Headline weight**                                         | Medium (constrained to 60% column)                                    | Highest (full-width display-2xl)                     | Medium (constrained inside frame)                              |
-| **Artefact prominence**                                     | Balanced co-equal column                                              | Subordinate band below                               | Object-like; breaks frame for emphasis                         |
-| **Variant differentiation**                                 | High (artefact column changes shape per variant)                      | Medium (band shape constant; contents change)        | Highest (frame-break direction signals variant identity)       |
-| **Mobile collapse simplicity**                              | Medium (column reorder)                                               | Highest (already single-column)                      | Medium (frame stays, artefact slides under)                    |
-| **Implementation complexity**                               | Low (CSS grid 60/40 + responsive flip)                                | Lowest (single-column flow)                          | Medium (frame + overlapping absolute artefact = layering work) |
-| **Distinctiveness vs current site**                         | Medium                                                                | Medium-high                                          | Highest                                                        |
-| **Rhythm with other phase-3 figures**                       | High (artefact column is natural home for `PlayerFigure` and friends) | Medium (band can over-emphasise artefact thumbnails) | High (frame-break = playful, scrapbook-feel)                   |
-| **Risk for content-light variants (announcement, generic)** | Low (column gracefully hosts a single stamp/glyph)                    | Medium (band feels empty if artefact thin)           | Low (frame contains the weight regardless)                     |
+| Criterion                                          | A — Broadsheet                                                        | B — Poster                                           | C — Cover frame                                                |
+| -------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------- |
+| **Headline weight**                                | Medium (constrained to 60% column)                                    | Highest (full-width display-2xl)                     | Medium (constrained inside frame)                              |
+| **Artefact prominence**                            | Balanced co-equal column                                              | Subordinate band below                               | Object-like; breaks frame for emphasis                         |
+| **Variant differentiation**                        | High (artefact column changes shape per variant)                      | Medium (band shape constant; contents change)        | Highest (frame-break direction signals variant identity)       |
+| **Mobile collapse simplicity**                     | Medium (column reorder)                                               | Highest (already single-column)                      | Medium (frame stays, artefact slides under)                    |
+| **Implementation complexity**                      | Low (CSS grid 60/40 + responsive flip)                                | Lowest (single-column flow)                          | Medium (frame + overlapping absolute artefact = layering work) |
+| **Distinctiveness vs current site**                | Medium                                                                | Medium-high                                          | Highest                                                        |
+| **Rhythm with other phase-3 figures**              | High (artefact column is natural home for `PlayerFigure` and friends) | Medium (band can over-emphasise artefact thumbnails) | High (frame-break = playful, scrapbook-feel)                   |
+| **Risk for content-light variants (announcement)** | Low (column gracefully hosts a single stamp/glyph)                    | Medium (band feels empty if artefact thin)           | Low (frame contains the weight regardless)                     |
 
 ## Photo-first compatibility
 
-All three options work with rectangular `psdImage` portraits in `interview` and `player` variants. Option C's frame-break is the most photo-flattering (object-like presentation), but also the strictest about photo crop quality. Option B's wide band is the most forgiving for low-quality crops because the band can absorb mismatched aspect ratios.
+All three options work with rectangular `psdImage` portraits in the `interview` variant. (The `player` variant was originally part of this analysis but has been moved to Phase 6 with its own `<PlayerHero>` — out of Phase 3 scope.) Option C's frame-break is the most photo-flattering (object-like presentation), but also the strictest about photo crop quality. Option B's wide band is the most forgiving for low-quality crops because the band can absorb mismatched aspect ratios.
 
 ## Decision recorded
 

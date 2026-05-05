@@ -849,69 +849,18 @@
       </section>
 
       <!-- ===========================================================
-           VARIANT 2 — MATCH PREVIEW
+           VARIANT 2 — MATCH PREVIEW · DEFERRED
+           — Originally a first-class variant in this exploration; the
+             matchPreview articleType doesn't exist in the Sanity schema
+             yet (deferred to issue #1470). Removed from the Phase 3 B
+             canonical variant set on 2026-05-05; the locked variants
+             are: announcement / transfer / event / interview.
+             The locked Direction A shell still accepts matchPreview
+             once #1470 lands — composition pattern (opponent shield
+             on TapedCard rotation="a", display-serif date, mono caps
+             venue + competition) is captured in PRD §4 + #1470's
+             eventual design pass.
            =========================================================== -->
-      <section class="section" id="variant-match-preview">
-        <div class="section-meta">
-          <span class="mono">★ 02 · VARIANT — MATCH PREVIEW</span>
-          <span class="mono mono--muted">— opponent shield + date + venue + competition</span>
-        </div>
-        <h2>De <em>match</em> van zondag.</h2>
-        <p class="lead">
-          Right-column artefact: <code>TapedCard rotation="a"</code> with the
-          opponent's club shield, the kickoff date in display serif, venue and
-          competition in mono caps. Kicker locks the matchday context.
-        </p>
-
-        <div class="ed-hero">
-          <div class="ed-hero__left">
-            <div class="mono-label-row">
-              <span class="star-kicker">MATCHDAY · ZONDAG 12 OKT · 15:00</span>
-              <span class="mono-label--pill">PROVINCIAAL</span>
-              <span class="mono-label mono-label--muted">SPEELDAG 7</span>
-            </div>
-            <h2 class="editorial-heading">Een <em>topper</em> in eigen huis.</h2>
-            <p class="ed-hero__dek">
-              Vooraan in het klassement, met een ploeg die geen wedstrijd uit
-              handen geeft. Zondag komt VK Tildonk naar de Mertensstraat. We
-              halen de stoelen onder het afdak vandaan — dit wordt er één om
-              rechtop te zien.
-            </p>
-            <div class="ed-hero__cta-row">
-              <a class="btn btn--primary" href="#">TICKETS RESERVEREN <span aria-hidden="true">→</span></a>
-              <a class="btn btn--ghost" href="#">SPEEL­SCHEMA</a>
-            </div>
-            <div class="byline">
-              <span>★ KCVV ELEWIJT vs VK TILDONK</span>
-              <span>HOOFDPLEIN</span>
-              <span>SCHEIDS · J. DEROO</span>
-            </div>
-          </div>
-          <div class="ed-hero__right">
-            <div class="taped-card taped-card--rot-a">
-              <span class="taped-card__tape taped-card__tape--alt" aria-hidden="true"></span>
-              <div class="match-artefact">
-                <div class="match-artefact__shield">T</div>
-                <p class="match-artefact__date">ZO 12 <em>okt</em></p>
-                <div class="match-artefact__rule" aria-hidden="true"></div>
-                <p class="match-artefact__meta">15:00 · MERTENSSTRAAT</p>
-                <p class="match-artefact__meta">PROVINCIAAL · SPEELDAG 7</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tradeoffs">
-          <div>
-            <h4 class="for">↑ FOR</h4>
-            <p>Compact match info card without rebuilding MatchStrip — same shield clip-path, same mono / display split. Maps cleanly to <code>match.homeTeam</code> + <code>match.awayTeam</code> + <code>match.startsAt</code>.</p>
-          </div>
-          <div>
-            <h4 class="against">↓ AGAINST</h4>
-            <p>Visually adjacent to the persistent <code>&lt;MatchStrip&gt;</code> band when both render on a homepage. Risk of "two match cards" reading. Mitigation: reserve match-preview hero for the dedicated match-preview article; never on /matches index.</p>
-          </div>
-        </div>
-      </section>
 
       <!-- ===========================================================
            VARIANT 3 — INTERVIEW
@@ -1142,38 +1091,18 @@
         <div class="panel">
           <div class="label-row">
             <span class="row-label">MOBILE</span>
-            <span class="mono">match-preview variant @ 380px viewport — artefact-on-top stacking</span>
+            <span class="mono">— example panel removed: it used the deferred match-preview variant for illustration</span>
           </div>
-          <div class="mobile-frame">
-            <div class="ed-hero">
-              <div class="ed-hero__right">
-                <div class="taped-card taped-card--rot-a" style="margin: 0 auto">
-                  <span class="taped-card__tape taped-card__tape--alt" aria-hidden="true"></span>
-                  <div class="match-artefact">
-                    <div class="match-artefact__shield">T</div>
-                    <p class="match-artefact__date">ZO 12 <em>okt</em></p>
-                    <div class="match-artefact__rule" aria-hidden="true"></div>
-                    <p class="match-artefact__meta">15:00 · MERTENSSTRAAT</p>
-                    <p class="match-artefact__meta">PROVINCIAAL · SPEELDAG 7</p>
-                  </div>
-                </div>
-              </div>
-              <div class="ed-hero__left">
-                <div class="mono-label-row">
-                  <span class="star-kicker">MATCHDAY · ZO 12 OKT</span>
-                  <span class="mono-label--pill">PROV.</span>
-                </div>
-                <h2 class="editorial-heading">Een <em>topper</em> in eigen huis.</h2>
-                <p class="ed-hero__dek">
-                  Zondag komt VK Tildonk naar de Mertensstraat. Eén om rechtop
-                  te zien.
-                </p>
-                <div class="ed-hero__cta-row">
-                  <a class="btn btn--primary" href="#">TICKETS <span aria-hidden="true">→</span></a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0;">
+            Per-variant mobile previews now live in their canonical detail mockups:
+            <code>option-a-announcement-detail.html</code>,
+            <code>option-a-transfer-detail.html</code>,
+            <code>option-a-event-detail.html</code>,
+            <code>option-a-interview-detail.html</code>. The collapse
+            rule (artefact-above-headline, 60/40 → 1-col, headline 96 →
+            40px, dek 18 → 15px) is the same across all four; each
+            detail file shows it for that variant's specific artefact.
+          </p>
         </div>
 
         <div class="tradeoffs">
@@ -1221,9 +1150,9 @@
               <td><code>TapedCard</code> + 2× shield clip-path + display-arrow glyph + dashed rule + mono meta</td>
               <td><code>rotation="b"</code> (+2.1°)</td>
             </tr>
-            <tr>
-              <td><code>match-preview</code></td>
-              <td><code>MATCHDAY · ZONDAG 12 OKT · 15:00</code> + comp pill + matchday#</td>
+            <tr style="opacity: 0.45; text-decoration: line-through;">
+              <td><code>match-preview</code> <span style="font-family: var(--font-mono); font-size: 10px; color: #b84a3a; text-decoration: none;">[DEFERRED 2026-05-05 — articleType doesn't exist yet; lands with #1470, design pattern preserved here for reference]</span></td>
+              <td><code>MATCHDAY · …</code> + comp pill + matchday#</td>
               <td><code>TapedCard</code> + 1× opponent shield + display date (italic em) + ink rule + 2× mono meta lines</td>
               <td><code>rotation="a"</code> (-2.4°)</td>
             </tr>

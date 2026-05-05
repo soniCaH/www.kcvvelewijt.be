@@ -243,6 +243,14 @@
         transform: translate(-2px, -2px);
         box-shadow: 8px 8px 0 0 var(--color-ink);
       }
+      /* Default state — accented word reads as ink-soft; hover/focus
+         shifts it to jersey-deep so the colour change is visible
+         (previously the default already was jersey-deep, leaving the
+         "accent on hover" indistinguishable from the resting state). */
+      .eh-clickable .eh-heading em {
+        color: var(--color-ink-soft);
+        transition: color 200ms ease;
+      }
       .eh-clickable:hover .eh-heading em,
       a:focus-visible .eh-clickable .eh-heading em {
         color: var(--color-jersey-deep);
@@ -264,12 +272,14 @@
       a:focus-visible .eh-clickable .eh-hover-hint {
         opacity: 1;
       }
-      /* Suppress default browser outline on the wrapping anchor — the
-         card lift + jersey-deep accent + visible hint together form
-         a strong, deliberate focus indicator that's already higher
-         contrast than the default outline. */
+      /* Keyboard focus ring — explicit, high-contrast, sits OUTSIDE
+         the card's paper shadow. Replaces the previous `outline: none`
+         suppression which broke focus visibility for users whose
+         lift-on-focus animation isn't sufficient (reduced-motion,
+         high-contrast, or non-pointer input). */
       a:has(> .eh-clickable):focus-visible {
-        outline: none;
+        outline: 3px solid var(--color-jersey-deep);
+        outline-offset: 4px;
       }
 
       footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
