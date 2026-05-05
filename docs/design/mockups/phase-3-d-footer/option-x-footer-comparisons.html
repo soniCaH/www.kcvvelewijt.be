@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · Checkpoint D · SiteFooter — base direction comparisons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-warning: #c68b2c;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 56px 32px 96px; }
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 5vw, 60px); line-height: 1.05; margin: 16px 0 12px; }
+      h1 em { font-style: italic; color: var(--color-jersey-deep); }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(26px, 2.6vw, 36px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      h4 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 18px; margin: 0 0 8px; }
+      .lead { max-width: 800px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 36px 44px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 64px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 28px; border: 1px solid var(--color-paper-edge); margin-top: 20px; }
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; min-height: 28px; flex-wrap: wrap; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; padding: 18px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+      .tradeoffs code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      /* Audit block (data-source gaps) */
+      .audit { background: rgba(184, 74, 58, 0.06); border: 1.5px solid var(--color-alert); padding: 20px 24px; margin: 24px 0; }
+      .audit__head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 10px; }
+      .audit__title { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-alert); }
+      .audit ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; color: var(--color-ink-soft); }
+      .audit li { margin-bottom: 6px; }
+      .audit code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+      .audit__star { color: var(--color-alert); font-family: var(--font-display); font-style: italic; font-weight: 900; }
+
+      /* Locked block */
+      .locked { background: var(--color-cream-soft); border: 1.5px dashed var(--color-jersey-deep); padding: 20px 24px; margin: 24px 0; }
+      .locked__head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+      .locked__star { color: var(--color-jersey-deep); font-family: var(--font-display); font-style: italic; font-weight: 900; }
+      .locked__title { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-jersey-deep); }
+      .locked__date { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--color-ink-muted); }
+      .locked__recap { font-size: 14.5px; line-height: 1.55; color: var(--color-ink-soft); margin: 0; }
+      .locked code, .locked__recap code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      /* Iframe wrapper for embedded full-page mockups */
+      .iframe-wrap {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        overflow: hidden;
+      }
+      .iframe-wrap__chrome {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        background: var(--color-cream-soft);
+        border-bottom: 1px solid var(--color-paper-edge);
+      }
+      .iframe-wrap__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .iframe-wrap__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .iframe-wrap__url a { color: inherit; text-decoration: underline; }
+      .iframe-wrap iframe {
+        display: block;
+        width: 100%;
+        height: 1200px;
+        border: 0;
+        background: var(--color-cream);
+      }
+
+      /* 4-card summary */
+      .compare-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-top: 16px; }
+      .compare-cell { background: var(--color-cream); border: 1px solid var(--color-paper-edge); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+      .compare-cell__head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--color-paper-edge); }
+      .compare-cell__num { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; color: var(--color-jersey-deep); line-height: 1; }
+      .compare-cell__title { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink); }
+      .compare-cell__copy { font-size: 13px; color: var(--color-ink-soft); margin: 0; line-height: 1.5; }
+      .compare-cell__copy code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      /* Q2.5 — middle-column refinement variants */
+      .hf-cta-band {
+        background: var(--color-cream-soft);
+        padding: 22px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--color-paper-edge);
+      }
+      .hf-cta-band__lead {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 19px;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .hf-cta-band__lead em { color: var(--color-jersey-deep); font-style: italic; font-weight: 800; }
+      .hf-cta-band__links { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+      .hf-cta-band__link {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        text-decoration: none;
+        border: 2px solid var(--color-ink);
+        padding: 7px 12px;
+        background: var(--color-cream);
+        transition: transform 200ms ease, box-shadow 200ms ease;
+      }
+      .hf-cta-band__link--primary {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+      .hf-cta-band__link--primary:hover { transform: translate(3px, 3px); box-shadow: none; }
+      .hf-directory--2col { grid-template-columns: 1fr 1fr !important; }
+
+      footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
+      footer .next-step { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 24px 28px; margin-bottom: 24px; }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      /* ============================================================
+         HYBRID FOOTER MOCKUPS (Q1.v2)
+         Shared chrome: cream paper · 3-col directory · ink bottom bar.
+         Differences live in `.hf-top--*` modifier classes only.
+         ============================================================ */
+      .hybrid-footer-mock {
+        background: var(--color-cream);
+        border-top: 2px solid var(--color-ink);
+        margin: 12px 0 0;
+        overflow: hidden;
+        font-family: var(--font-body);
+      }
+      .hybrid-footer-mock .hf-tagline {
+        text-align: center;
+        margin: 0;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: 28px;
+        line-height: 1.1;
+        color: var(--color-ink);
+        letter-spacing: -0.005em;
+      }
+      .hybrid-footer-mock .hf-tagline em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+        font-weight: 800;
+      }
+
+      /* Top-zone modifiers */
+      .hf-top--tagline-only { padding: 36px 32px 28px; }
+      .hf-top--stamp-tagline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 32px 32px 28px;
+        flex-wrap: wrap;
+      }
+      .hf-top--stamp-tagline .hf-tagline { text-align: left; max-width: 460px; }
+      .hf-top--wordmark { padding: 28px 32px 24px; text-align: center; }
+      .hf-top--wordmark .hf-wordmark {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: var(--color-ink);
+        margin: 0 0 10px;
+      }
+      .hf-top--wordmark .hf-wordmark em { color: var(--color-jersey-deep); font-style: italic; }
+      .hf-top--wordmark .hf-tagline { font-size: 21px; padding-top: 4px; }
+
+      .hf-stamp {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 92px;
+        height: 92px;
+        border: 2.5px solid var(--color-jersey-deep);
+        color: var(--color-jersey-deep);
+        background: var(--color-cream);
+        transform: rotate(-3deg);
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .hf-stamp__star { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 12px; }
+      .hf-stamp__year { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; padding: 2px 0; }
+      .hf-stamp__label {
+        font-family: var(--font-mono);
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      /* 3-col directory (shared) */
+      .hf-directory {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 28px;
+        padding: 24px 40px 28px;
+        border-top: 1px solid var(--color-paper-edge);
+      }
+      .hf-col__heading {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        margin: 0 0 10px;
+        padding-bottom: 8px;
+        border-bottom: 1.5px solid var(--color-jersey-deep);
+      }
+      .hf-col__list { list-style: none; margin: 0; padding: 0; }
+      .hf-col__list li { margin: 0; padding: 3px 0; }
+      .hf-col__list a {
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-ink-soft);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: color 150ms ease, border-color 150ms ease;
+      }
+      .hf-col__list a:hover {
+        color: var(--color-jersey-deep);
+        border-bottom-color: var(--color-jersey-deep);
+      }
+
+      /* Ink bottom bar (shared) */
+      .hf-bottom {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 14px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .hf-bottom a {
+        color: var(--color-cream);
+        text-decoration: none;
+        opacity: 0.85;
+        transition: opacity 150ms ease;
+      }
+      .hf-bottom a:hover { opacity: 1; border-bottom: 1px solid var(--color-cream); }
+      .hf-bottom__group { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+      .hf-bottom__sep {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--color-cream);
+        opacity: 0.45;
+      }
+      .hf-social { display: inline-flex; gap: 8px; align-items: center; }
+      .hf-social a {
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT D · DRILL-DOWN</span>
+          <span class="mono mono--muted">★ SITEFOOTER</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Eén vraag <em>per keer.</em></h1>
+        <p class="lead">
+          Same drill pattern as Checkpoint C. Four fresh footer
+          directions — none refines the retro-terrace-fanzine screenshot
+          (per <code>project_phase_3_footer_divergence</code>). Q0 audit
+          + Q1 base direction below; further questions (information
+          architecture, sponsor strip relationship, render scope, mobile
+          collapse) build on the Q1 lock.
+        </p>
+      </header>
+
+      <!-- Q0 — DATA AUDIT -->
+      <section id="q0-data-audit">
+        <div class="audit">
+          <div class="audit__head">
+            <span class="audit__star">★</span>
+            <span class="audit__title">Q0 — DATA AUDIT (non-blocking for Q1)</span>
+          </div>
+          <p style="margin: 0 0 4px; font-size: 14.5px; color: var(--color-ink-soft);">
+            Audit of <code>apps/web/src/components/layout/PageFooter/</code>,
+            <code>apps/web/src/lib/constants.ts</code>, and
+            <code>packages/sanity-schemas/src/</code> surfaced four
+            constraints that bind every footer direction:
+          </p>
+          <ul>
+            <li>
+              <strong>Footer is 100% hard-coded.</strong> No Sanity
+              <code>siteSettings</code> document exists. Address
+              (<code>Driesstraat 32, 1982 Elewijt</code>), email
+              (<code>info@kcvvelewijt.be</code>), social URLs (Facebook
+              + Instagram), nav links (6 items: Nieuws · Kalender ·
+              Ploegen · Sponsors · Bestuur · Webshop), and KBVB
+              stamnummer (<code>55</code>) all live in code constants.
+              Same pattern as the locked SiteHeader nav.
+            </li>
+            <li>
+              <strong>Founding year = <code>1909</code></strong>
+              (owner-confirmed 2026-05-05). Three existing locations in
+              the codebase contradict this — captured in
+              <code>reference_club_founding_year.md</code>:
+              <code>MissionBanner</code> (renders 1948),
+              <code>PageHeader</code> wordmark superscript (renders 1948),
+              <code>jsonld.ts</code> <code>foundingDate</code> (renders 1924).
+              All three should be corrected when touched. The footer
+              renders <code>1909</code>.
+            </li>
+            <li>
+              <strong>Sponsor section</strong>
+              (<code>apps/web/src/components/home/SponsorsSection/</code>)
+              renders on <strong>homepage only</strong> currently —
+              tier-driven from Sanity (<code>hoofdsponsor</code> /
+              <code>sponsor</code> / <code>sympathisant</code>). Whether
+              the redesigned footer hosts sponsors / sits below them /
+              ignores them is Q2.
+            </li>
+            <li>
+              <strong>Two referenced primitives don't exist yet.</strong>
+              <code>compare.md</code> Option C/D mentions
+              <code>&lt;TicketStub&gt;</code> and <code>&lt;PosterWordmark&gt;</code>;
+              audit confirmed neither is in the design-system barrel
+              export. Also: no SVG crest exists — only PNG logo assets.
+              Any locked direction leaning on these earns Storybook
+              coverage as a new shared sub-component.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Q1 — BASE DIRECTION — LOCKED (H3) -->
+      <section class="section" id="q1-base-direction">
+        <div class="section-meta">
+          <span class="mono">★ Q1 · BASE DIRECTION — LOCKED</span>
+          <span class="mono mono--muted">— H3 (modest wordmark + tagline) · synthesis of A + C + D ingredients</span>
+        </div>
+
+        <div class="locked">
+          <div class="locked__head">
+            <span class="locked__star">★</span>
+            <span class="locked__title">Q1 — LOCKED · H3 (Modest wordmark + tagline)</span>
+            <span class="locked__date">2026-05-05</span>
+          </div>
+          <p class="locked__recap">
+            <strong>Cream paper footer with modest wordmark and two-colour motto on top, 3-column directory below, ink bottom bar at the bottom.</strong>
+            Top zone: <code>KCVV Elewijt</code> in Playfair italic 900 at
+            ~44px (jersey-deep on <code>Elewijt</code>) — same voice as
+            the locked SiteHeader wordmark, scaled to footer-prominence
+            rather than header-prominence (NOT A's poster scale). Below
+            it: <em>"Er is maar één <strong style="color: var(--color-jersey-deep)">plezante</strong> compagnie."</em> in display italic.
+            Middle: 3-col directory with mono-caps headings + body-font
+            (Inter) link list (NOT all-caps mono — A's link font
+            rejected). Bottom: ink bar with copyright + address +
+            privacy + cookies + small social glyphs (D's idea — ink
+            bottom bar kept). <strong>No newsletter</strong> (saved
+            permanent constraint), no inverted social cards, no
+            jersey-deep poster band, no collage. Q1.v1 panels (A/B/C/D
+            iframes) and Q1.v2 H1/H2 alternatives archived
+            <code>display:none</code> below.
+          </p>
+        </div>
+
+        <!-- archive opener (Q1.v1 + Q1.v2 H1/H2) — preserved for diff history -->
+        <div style="display: none" id="q1-archive" aria-hidden="true">
+
+        <!-- Q1.v2 reframing (archived) -->
+        <div class="audit" style="border-color: var(--color-warning); background: rgba(198, 139, 44, 0.08); margin-top: 8px;">
+          <div class="audit__head">
+            <span style="color: var(--color-warning); font-family: var(--font-display); font-style: italic; font-weight: 900;">★</span>
+            <span class="audit__title" style="color: var(--color-warning);">Q1.v1 → Q1.v2 SYNTHESIS — owner feedback 2026-05-05</span>
+          </div>
+          <p style="margin: 0 0 6px; font-size: 14.5px; color: var(--color-ink-soft);">
+            <strong>v1 framing was wrong — none of A/C/D wins straight up.</strong>
+            Owner audited each direction and surfaced concrete
+            like/dislike for chrome elements:
+          </p>
+          <ul style="margin: 6px 0 8px; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft);">
+            <li><strong>From A:</strong> ✓ 3-col directory + mono-caps headings · ✗ giant <code>KCVV ELEWIJT</code> wordmark band (way too much) · ✗ link font (all-caps mono) · ✗ social block (inverted cards)</li>
+            <li><strong>From B:</strong> eliminated entirely.</li>
+            <li><strong>From C:</strong> ✓ tagline / motto rendered in two colours ("er is maar één <em>plezante</em> compagnie") · ✗ overall too quiet</li>
+            <li><strong>From D:</strong> ✗ collage way too messy as a whole · ✓ concept (festival/terrace feel) · ✓ ink bottom bar</li>
+          </ul>
+          <p style="margin: 0 0 6px; font-size: 14.5px; color: var(--color-ink-soft);">
+            <strong>Constraints surfaced (also become permanent rules):</strong>
+          </p>
+          <ul style="margin: 6px 0 8px; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft);">
+            <li><strong>No newsletter</strong> (saved as <code>feedback_no_newsletter</code>) — all four mockups had a newsletter signup; permanently eliminated. Don't propose it again.</li>
+            <li><strong>No fabricated data in IA stage.</strong> Wrong founding year, fake stamnummer placement, mistyped address are mockup-scaffolding only — actual fields get audited in Q2 (information architecture, next drill). For the voice pick, ignore literal field correctness; judge chrome only.</li>
+          </ul>
+          <p style="margin: 0; font-size: 13.5px; color: var(--color-ink-muted);">
+            Q1.v1 panels (A iframes, C iframes, D iframes; B already
+            archived) hidden via <code>display:none</code> below.
+            Q1.v2 sub-options below all share the synthesis baseline:
+            <em>cream paper · 3-col directory with body-font links ·
+            two-colour motto · ink bottom bar · no newsletter</em>.
+            Variants differ on the <strong>top zone</strong> only.
+          </p>
+        </div>
+
+        <h2 style="margin-top: 28px">Drie <em>hybride</em> top-zones.</h2>
+        <p class="lead">
+          Same footer chrome below the seam in all three: 3-col
+          directory (Lees · Teams · De club) with mono-caps headings
+          and Inter-weight links · ink bottom bar with copyright +
+          privacy + cookies + small social glyphs · no newsletter. The
+          variable is what sits above the directory.
+        </p>
+
+        <div class="compare-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">H1</span>
+              <span class="compare-cell__title">Tagline-led</span>
+            </div>
+            <p class="compare-cell__copy">
+              <em>Quietest top.</em> Centred motto in display italic,
+              two-colour. No wordmark, no crest, no stamp. Lets the
+              tagline carry the brand voice on its own.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">H2</span>
+              <span class="compare-cell__title">Stamp + tagline</span>
+            </div>
+            <p class="compare-cell__copy">
+              <em>D's idea, contained.</em> Single
+              <code>StampBadge</code> (jersey-deep, slightly rotated,
+              "★ 1909 SINDS") beside the two-colour motto. Festival
+              feel without the collage chaos.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">H3</span>
+              <span class="compare-cell__title">Modest wordmark + tagline</span>
+            </div>
+            <p class="compare-cell__copy">
+              <em>A's wordmark, scaled to header voice.</em>
+              <code>KCVV Elewijt</code> at ~44px (vs A's ~188px) above
+              the two-colour motto. Direct cohesion with the locked
+              SiteHeader wordmark.
+            </p>
+          </div>
+        </div>
+
+        <!-- ============================================
+             H1 — TAGLINE-LED (most quiet)
+             ============================================ -->
+        <div class="panel" id="q1v2-h1">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION H1</span>
+            <span class="mono">tagline-led · no wordmark · no stamp · cream paper · ink bottom bar</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--tagline-only">
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Lees</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Nieuws</a></li>
+                  <li><a href="#">Kalender</a></li>
+                  <li><a href="#">Evenementen</a></li>
+                  <li><a href="#">Sponsors</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Teams</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">A-ploeg</a></li>
+                  <li><a href="#">Reserves</a></li>
+                  <li><a href="#">B-team</a></li>
+                  <li><a href="#">Jeugd</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">De club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Geschiedenis</a></li>
+                  <li><a href="#">Bestuur</a></li>
+                  <li><a href="#">Contact</a></li>
+                  <li><a href="#">Word vrijwilliger</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="#">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>The motto carries everything. Cleanest typography in the footer; nothing competes with the page content above. Lowest implementation cost (no extra primitives). The two-colour rendering of <code>plezante</code> is the brand signal — strong but quiet. Composes well with any hero above (no risk of the footer over-shouting an article).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Without a wordmark, crest, or stamp, the footer is pure typography + links. Some users may not register the footer as "the club's footer" until they read the motto. On hero-less utility pages (search, sitemap), the cream-on-cream top zone may not feel distinct enough from the body content above. Risks reading as "default" / "templated" rather than "designed".</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             H2 — STAMP + TAGLINE
+             ============================================ -->
+        <div class="panel" id="q1v2-h2" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION H2</span>
+            <span class="mono">StampBadge ★ 1909 SINDS · tagline beside · cream paper · ink bottom bar</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--stamp-tagline">
+              <span class="hf-stamp" aria-label="Sinds 1909">
+                <span class="hf-stamp__star">★</span>
+                <span class="hf-stamp__year">1909</span>
+                <span class="hf-stamp__label">Sinds</span>
+              </span>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Lees</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Nieuws</a></li>
+                  <li><a href="#">Kalender</a></li>
+                  <li><a href="#">Evenementen</a></li>
+                  <li><a href="#">Sponsors</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Teams</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">A-ploeg</a></li>
+                  <li><a href="#">Reserves</a></li>
+                  <li><a href="#">B-team</a></li>
+                  <li><a href="#">Jeugd</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">De club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Geschiedenis</a></li>
+                  <li><a href="#">Bestuur</a></li>
+                  <li><a href="#">Contact</a></li>
+                  <li><a href="#">Word vrijwilliger</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="#">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>D's festival-stamp idea, contained to a single anchor. The 1909 stamp is the visual gravity of the footer — small but distinctive, slightly rotated for printed-feel. Composes onto the existing <code>StampBadge</code> primitive (audit-confirmed). Tagline + stamp together carry both heritage (year) and personality (motto). More distinctive than H1 without committing to a collage.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Two visual elements compete for the top-zone attention — eye has to choose between stamp and tagline. Slightly more chrome than H1 on small viewports (stamp + tagline stacked vs centred). The "★ 1909 SINDS" stamp is still ornamental; if the IA drill shows the founding year doesn't earn that prominence, the stamp is a candidate to drop.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             H3 — MODEST WORDMARK + TAGLINE
+             ============================================ -->
+        <div class="panel" id="q1v2-h3" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION H3</span>
+            <span class="mono">KCVV Elewijt at header-voice scale (~44px) · tagline below · cream · ink bottom</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Lees</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Nieuws</a></li>
+                  <li><a href="#">Kalender</a></li>
+                  <li><a href="#">Evenementen</a></li>
+                  <li><a href="#">Sponsors</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Teams</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">A-ploeg</a></li>
+                  <li><a href="#">Reserves</a></li>
+                  <li><a href="#">B-team</a></li>
+                  <li><a href="#">Jeugd</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">De club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="#">Geschiedenis</a></li>
+                  <li><a href="#">Bestuur</a></li>
+                  <li><a href="#">Contact</a></li>
+                  <li><a href="#">Word vrijwilliger</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="#">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Direct cohesion with the locked Checkpoint C SiteHeader wordmark — same voice (Playfair italic 900, jersey-deep on <code>Elewijt</code>), scaled to footer-prominence rather than header-prominence. Reads as a "deliberate bookend" exactly like A wanted, but without A's poster-wordmark over-shout. Tagline beneath ties the brand to the motto in a single visual unit. Two visual signals in the top zone, both functional (wordmark = identity, tagline = personality).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Wordmark is technically redundant — it's already in the sticky header at the top of every page. Showing it again in the footer is decorative, not informational. On long pages, the user sees the wordmark twice (top + bottom) — that may feel repetitive on detail pages. Also: the wordmark + tagline stack adds vertical height vs H1's tagline-only top.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- v1 archive (display:none) — A/C/D iframe panels preserved for diff history -->
+        <div style="display: none" id="q1v1-archive" aria-hidden="true">
+
+        <h2>Welke <em>vocabulaire</em> draagt de footer? (v1 — archived)</h2>
+        <p class="lead">
+          Four fresh directions, all rendered inline below. Scroll
+          inside each frame to see the full footer mockup. After the
+          pick, this section collapses to a "★ LOCKED" recap and
+          subsequent questions (IA · sponsor relationship · render
+          scope · mobile collapse) inherit the chosen direction's
+          chrome verbatim.
+        </p>
+
+        <!-- B eliminated 2026-05-05 ("not my cup of tea"); panel below archived display:none -->
+        <div class="compare-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">A</span>
+              <span class="compare-cell__title">Poster Wordmark Block</span>
+            </div>
+            <p class="compare-cell__copy">
+              Full-bleed jersey-deep band + massive
+              <code>KCVV ELEWIJT</code> wordmark + 3-col cream directory
+              + ink bottom strip. Highest brand recall, low implementation
+              cost. Composes with locked SiteHeader vocabulary.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">C</span>
+              <span class="compare-cell__title">Paper-Fold Letterhead</span>
+            </div>
+            <p class="compare-cell__copy">
+              Single-column letterhead. Crest left + address right,
+              centred motto. Calmest. Lowest implementation cost.
+              Closest to a printed letter.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">D</span>
+              <span class="compare-cell__title">Terrace Mural</span>
+            </div>
+            <p class="compare-cell__copy">
+              Layered TapedCard collage with torn edges, founding-year
+              stamp, distributed information. Highest distinctiveness +
+              highest risk; mobile flattens the collage (acknowledged).
+            </p>
+          </div>
+        </div>
+
+        <!-- A -->
+        <div class="panel" id="q1-option-a" style="margin-top: 28px">
+          <div class="label-row">
+            <span class="row-label">OPTION A</span>
+            <span class="mono">poster wordmark block · jersey-deep band + cream 3-col + ink strip</span>
+          </div>
+
+          <div class="iframe-wrap">
+            <div class="iframe-wrap__chrome">
+              <span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span>
+              <span class="iframe-wrap__url"><a href="option-a-poster-wordmark-block.html" target="_blank">option-a-poster-wordmark-block.html</a> ↗ open in new tab</span>
+            </div>
+            <iframe src="option-a-poster-wordmark-block.html" title="Option A — Poster Wordmark Block" loading="lazy"></iframe>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Brand recall through sheer wordmark scale — the footer reads as a poster pasted at the bottom of every page. Composes with the locked Checkpoint C SiteHeader vocabulary (cream paper, ink rules, jersey-deep accent) so footer + header read as bookends. 3-col directory collapses cleanly to mobile stack. Lowest implementation cost of the four. Sponsor strip sits naturally above the poster band as a separate section (no integration needed).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>The jersey-deep band is the only large jersey-coloured surface in the redesign — it'll dominate "scroll-to-bottom" landings. If overused (e.g. shown on hero-less utility pages), the brand-shouting can feel one-note. Wordmark is repeated content (the same string lives in the header and JSON-LD) — semantically redundant; mitigated by treating the footer wordmark as decorative typography rather than a navigation anchor.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- B archive (display:none) — owner eliminated 2026-05-05 -->
+        <div style="display: none" id="q1-option-b-archive" aria-hidden="true">
+        <div class="panel" id="q1-option-b">
+          <div class="label-row">
+            <span class="row-label">OPTION B (eliminated 2026-05-05)</span>
+            <span class="mono">stadium board · ink slab + mono board grid · 4 cols + fixtures ticker</span>
+          </div>
+
+          <div class="iframe-wrap">
+            <div class="iframe-wrap__chrome">
+              <span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span>
+              <span class="iframe-wrap__url"><a href="option-b-stadium-board.html" target="_blank">option-b-stadium-board.html</a> ↗ open in new tab</span>
+            </div>
+            <iframe src="option-b-stadium-board.html" title="Option B — Stadium Board" loading="lazy"></iframe>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Sharpest functional departure from the editorial chrome above — the footer reads as utility, not editorial. 4-column grid carries more directory density than A's 3-col without feeling cramped. Ink slab is a strong full-bleed signal that "the page ends here". Mono board vocabulary ages well; doesn't fight content above.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Ink slab + mono caps reads as cold, technical, scoreboard-like — at odds with the warm fanzine voice the rest of the redesign commits to. The locked EditorialHero (Asymmetric Broadsheet) and the locked SiteHeader (Direction A Classic Newsstand) both speak "warm cream paper"; B introduces a cold counter-vocabulary at the page bottom that may feel disjointed. Fixtures ticker would need a real-data source the redesign doesn't currently propose.</p>
+            </div>
+          </div>
+        </div>
+        </div>
+        <!-- /B archive -->
+
+        <!-- C -->
+        <div class="panel" id="q1-option-c" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">OPTION C</span>
+            <span class="mono">paper-fold letterhead · crest left + address right + centred motto · single column</span>
+          </div>
+
+          <div class="iframe-wrap">
+            <div class="iframe-wrap__chrome">
+              <span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span>
+              <span class="iframe-wrap__url"><a href="option-c-paper-fold-letterhead.html" target="_blank">option-c-paper-fold-letterhead.html</a> ↗ open in new tab</span>
+            </div>
+            <iframe src="option-c-paper-fold-letterhead.html" title="Option C — Paper-Fold Letterhead" loading="lazy"></iframe>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Calmest footer of the four — single-column letterhead voice doesn't fight content above. Lowest implementation cost (no clip-paths, no rotation, no torn edges). Most editorial — reads like the colofon of a printed magazine. Already-linear so mobile collapse is identity. Crest-left + address-right is the universal "letterhead" pattern; zero learning curve.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Lowest distinctiveness — risks reading as "default" rather than "designed". Wordmark presence is low (the crest does the brand-recall work); on small screens with sparse content above (utility pages), the footer may not feel like a footer. <strong>Requires an SVG crest</strong> — audit found only PNG logos exist; either ship a new SVG asset or render the PNG (which loses the woodcut/print look the letterhead implies).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- D -->
+        <div class="panel" id="q1-option-d" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">OPTION D</span>
+            <span class="mono">terrace mural · TapedCard collage · torn edges · 1909 stamp · distributed info</span>
+          </div>
+
+          <div class="iframe-wrap">
+            <div class="iframe-wrap__chrome">
+              <span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span><span class="iframe-wrap__dot"></span>
+              <span class="iframe-wrap__url"><a href="option-d-terrace-mural.html" target="_blank">option-d-terrace-mural.html</a> ↗ open in new tab</span>
+            </div>
+            <iframe src="option-d-terrace-mural.html" title="Option D — Terrace Mural" loading="lazy"></iframe>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Highest distinctiveness — the only direction that fully extends the fanzine/terrace voice into the footer surface. Composes with the locked TapedCard / TapeStrip / StampBadge primitives; founding-year stamp anchors club identity (1909 — see Q0 audit) without redundant wordmark scaling. Highest primitive-reuse density.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Highest implementation cost — clip-paths, rotations, layered panels. Mobile collapse flattens the collage and loses much of the distinctiveness (compare.md acknowledges this). Sponsor strip integration is awkward — collage doesn't host an aligned logo row; the seam between sponsors-section and footer needs an explicit visual divider (StripedSeam or similar). Stamp shows <code>1909</code> per Q0 — confirm the existing mockup file's stamp value if it shows otherwise.</p>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- /Q1.v1 archive -->
+
+        </div>
+        <!-- /Q1 archive -->
+      </section>
+
+      <!-- ===========================================================
+           Q2 — INFORMATION ARCHITECTURE — LOCKED (I2)
+           =========================================================== -->
+      <section class="section" id="q2-ia">
+        <div class="section-meta">
+          <span class="mono">★ Q2 · INFORMATION ARCHITECTURE — LOCKED</span>
+          <span class="mono mono--muted">— I2 (task-oriented) · Ontdek · Doe mee · Bij de club</span>
+        </div>
+
+        <div class="locked">
+          <div class="locked__head">
+            <span class="locked__star">★</span>
+            <span class="locked__title">Q2 — LOCKED · I2 (Task-oriented columns) — links accepted</span>
+            <span class="locked__date">2026-05-05</span>
+          </div>
+          <p class="locked__recap">
+            <strong>3-col directory grouped by user intent:</strong>
+            <code>Ontdek</code> (read/browse) · <code>Doe mee</code>
+            (engage) · <code>Bij de club</code> (about/practical).
+            Headings carry voice-aware Dutch copy that matches the
+            motto register. Locked link list (per
+            <code>menuItems.ts</code>, <code>clubLinks</code>, header
+            dropdown sub-items):
+          </p>
+          <ul style="margin: 8px 0 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft); line-height: 1.55;">
+            <li><strong>Ontdek</strong> — <code>/nieuws</code> · <code>/kalender</code> · <code>/evenementen</code> · <code>/ploegen</code> (Onze ploegen) · <code>/jeugd</code> (Jeugdwerking)</li>
+            <li><strong>Doe mee</strong> — <code>/club/inschrijven</code> (Word lid) · <code>/club/word-vrijwilliger</code> · <code>/sponsors</code> (Word sponsor) · <code>/club/cashless</code> (Cashless clubkaart)</li>
+            <li><strong>Bij de club</strong> — <code>/club/geschiedenis</code> · <code>/club/bestuur</code> · <code>/club/contact</code> · <code>/club/praktische-info</code></li>
+          </ul>
+          <p class="locked__recap" style="margin-top: 8px;">
+            Bottom bar carries: <code>© 1909–2026 KCVV Elewijt</code> ·
+            address (<code>Driesstraat 32 · 1982 Elewijt</code>) ·
+            Privacy · Cookies · Facebook + Instagram glyphs. No
+            newsletter. I1 (mirror header) and I3 (lean + contact)
+            archived <code>display:none</code> below for diff history.
+          </p>
+        </div>
+
+        <!-- I2/I1/I3 archive opener (display:none) -->
+        <div style="display: none" id="q2-archive" aria-hidden="true">
+
+        <h2>Hoe groeperen we de <em>kolommen</em>? (archived)</h2>
+        <p class="lead">
+          Per locked H3, the footer has 3 directory columns. Q2 pins
+          their grouping logic + heading naming + which routes go where.
+          All routes below are <strong>real</strong> — sourced from
+          <code>menuItems.ts</code>, <code>EXTERNAL_LINKS</code>,
+          existing <code>clubLinks</code> in
+          <code>PageFooter.tsx</code>, and the 11 sub-items under
+          "De club" in the header dropdown. Three structural options
+          below; per-route final list (any add/drop/rename) drills as
+          Q3 if the owner wants to refine after the structural pick.
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">I1</span>
+              <span class="compare-cell__title">Mirror header</span>
+            </div>
+            <p class="compare-cell__copy">
+              Columns reflect header nav structure: <code>Lees</code> ·
+              <code>Teams</code> · <code>De club</code>. Predictable —
+              users see the same mental model in header + footer.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">I2</span>
+              <span class="compare-cell__title">Task-oriented</span>
+            </div>
+            <p class="compare-cell__copy">
+              Columns by user intent: <code>Ontdek</code> (read/browse) ·
+              <code>Doe mee</code> (join/volunteer/sponsor) ·
+              <code>Bij de club</code> (about/practical). Footer
+              becomes a conversion-aware secondary nav.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">I3</span>
+              <span class="compare-cell__title">Lean directory + Contact</span>
+            </div>
+            <p class="compare-cell__copy">
+              Columns: <code>Lees</code> · <code>De club</code> ·
+              <code>Contact</code> (contact-card style with address +
+              email + directions + social). Frees the bottom bar to
+              just © + privacy + cookies. Densest contact zone.
+            </p>
+          </div>
+        </div>
+
+        <!-- ============================================
+             I1 — MIRROR HEADER NAV
+             ============================================ -->
+        <div class="panel" id="q2-i1">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION I1</span>
+            <span class="mono">columns mirror header nav · Lees · Teams · De club</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Lees</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/sponsors">Sponsors</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Teams</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/ploegen">A-ploeg &amp; reserves</a></li>
+                  <li><a href="/jeugd">Jeugd</a></li>
+                  <li><a href="/club/word-vrijwilliger">Word vrijwilliger</a></li>
+                  <li><a href="/club/inschrijven">Word lid</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">De club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/cashless">Cashless clubkaart</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Predictable mental model — same "Lees / Teams / De club" grouping the user already learned in the header. Routes map 1:1 to existing pages, no new IA naming. Easy to maintain: when the header gets a new top-level item, the footer mirrors. Headings are short and concrete.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Footer is a near-clone of the header dropdown. Doesn't earn its placement — feels like a sitemap rather than a curated secondary nav. "Word lid" sits in the Teams column awkwardly (it's a CTA, not a team). Doesn't surface high-conversion items (volunteer, member-signup) in their own slot.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             I2 — TASK-ORIENTED
+             ============================================ -->
+        <div class="panel" id="q2-i2" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION I2</span>
+            <span class="mono">columns by user intent · Ontdek · Doe mee · Bij de club</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Ontdek</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/ploegen">Onze ploegen</a></li>
+                  <li><a href="/jeugd">Jeugdwerking</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Doe mee</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/inschrijven">Word lid</a></li>
+                  <li><a href="/club/word-vrijwilliger">Word vrijwilliger</a></li>
+                  <li><a href="/sponsors">Word sponsor</a></li>
+                  <li><a href="/club/cashless">Cashless clubkaart</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Bij de club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/contact">Contact</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Footer earns its placement — it's an intent-aware secondary nav, not a header sitemap clone. <code>Doe mee</code> column groups conversion routes (member signup, volunteer, sponsor) into a single high-visibility cluster — the strongest possible "second chance to engage" surface at the bottom of every page. Heading copy is voice-aware and warm (matches the motto register).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Headings are slightly more abstract than I1's literal mirroring — users have to infer "Ontdek = read content" and "Doe mee = engage". The "Doe mee" column conflates membership with sponsorship and volunteering — three different conversion paths sitting in the same heading. Some routes overlap headings (Sponsors as "Word sponsor" in Doe mee vs as a content destination in Ontdek).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             I3 — LEAN + CONTACT COLUMN
+             ============================================ -->
+        <div class="panel" id="q2-i3" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION I3</span>
+            <span class="mono">2 directory cols + 1 contact card · address moves out of bottom bar</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Lees</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/ploegen">Ploegen</a></li>
+                  <li><a href="/jeugd">Jeugd</a></li>
+                  <li><a href="/sponsors">Sponsors</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">De club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/inschrijven">Word lid</a></li>
+                  <li><a href="/club/word-vrijwilliger">Word vrijwilliger</a></li>
+                  <li><a href="/club/cashless">Cashless clubkaart</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Contact</h4>
+                <ul class="hf-col__list" style="margin-bottom: 12px;">
+                  <li style="padding: 0;">Driesstraat 32</li>
+                  <li style="padding: 0;">1982 Elewijt</li>
+                  <li style="padding: 6px 0 0;"><a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a></li>
+                  <li><a href="https://maps.google.com/?q=Driesstraat+32+Elewijt" target="_blank" rel="noreferrer">Routebeschrijving ↗</a></li>
+                </ul>
+                <span class="hf-social" style="margin-top: 8px;">
+                  <a href="#" aria-label="Facebook" style="border-color: var(--color-ink); color: var(--color-ink); background: var(--color-cream);">f</a>
+                  <a href="#" aria-label="Instagram" style="border-color: var(--color-ink); color: var(--color-ink); background: var(--color-cream);">○</a>
+                </span>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Address + contact details get prominence above the ink seam — usable not buried in fine-print. Social icons sit at directory-density (more visible than as small bottom-bar glyphs). Bottom bar reduces to pure colofon (© + legal links) — cleanest possible. Useful for users who arrive on a deep-linked page wanting to find the club's address quickly.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Asymmetric column behaviour — "Contact" isn't a directory; it's a contact card. The grid math gets uneven if the address text wraps differently from the link lists. "Lees" and "De club" become longer (6 items each vs 4 in I1/I2) to compensate for losing "Teams" as its own column. Mobile collapse of a contact-card column is messier than two more uniform link lists.</p>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- /Q2 archive -->
+      </section>
+
+      <!-- ===========================================================
+           Q2.5 — MIDDLE-COLUMN REFINEMENT — LOCKED (J1 + role-based items)
+           =========================================================== -->
+      <section class="section" id="q2-5-middle-refinement">
+        <div class="section-meta">
+          <span class="mono">★ Q2.5 · MIDDLE COLUMN — LOCKED</span>
+          <span class="mono mono--muted">— J1 with role-based items · "Aansluiten" · Als speler / Als vrijwilliger / Als sponsor</span>
+        </div>
+
+        <div class="locked">
+          <div class="locked__head">
+            <span class="locked__star">★</span>
+            <span class="locked__title">Q2.5 — LOCKED · J1 refined</span>
+            <span class="locked__date">2026-05-05</span>
+          </div>
+          <p class="locked__recap">
+            <strong>Middle column = "Aansluiten" with role-based items</strong>
+            (per <code>feedback_role_based_engagement_naming</code>):
+            heading carries the verb (<em>aansluiten</em>),
+            items name roles. Locked items:
+          </p>
+          <ul style="margin: 8px 0 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft); line-height: 1.55;">
+            <li><code>/club/inschrijven</code> → <strong>Als speler</strong></li>
+            <li><code>/club/word-vrijwilliger</code> → <strong>Als vrijwilliger</strong></li>
+            <li><code>/sponsors</code> → <strong>Als sponsor</strong></li>
+          </ul>
+          <p class="locked__recap" style="margin-top: 10px;">
+            Cashless clubkaart dropped from the footer entirely
+            ("useless anyway" — owner). J2 (Steun KCVV) and J3
+            (CTA band + 2-col directory) panels archived
+            <code>display:none</code> below.
+          </p>
+        </div>
+
+        <!-- archive opener (Q2.5 v1 reframing + J1/J2/J3 panels) — preserved for diff history -->
+        <div style="display: none" id="q2-5-archive" aria-hidden="true">
+
+        <div class="audit" style="border-color: var(--color-warning); background: rgba(198, 139, 44, 0.08); margin-top: 8px;">
+          <div class="audit__head">
+            <span style="color: var(--color-warning); font-family: var(--font-display); font-style: italic; font-weight: 900;">★</span>
+            <span class="audit__title" style="color: var(--color-warning);">Q2 LOCK — partial revision · 2026-05-05</span>
+          </div>
+          <p style="margin: 0 0 6px; font-size: 14.5px; color: var(--color-ink-soft);">
+            Owner: <em>"Cashless info is useless anyway. Ontdek is ok with the links. club links feel also ok, maybe its just the middle column I feel is a bit forced."</em>
+            Lock revisions:
+          </p>
+          <ul style="margin: 6px 0 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft);">
+            <li><strong>Cashless clubkaart removed</strong> from the footer entirely. (Q2 lock above is updated to reflect this; the Q2 LOCKED recap still says "Cashless clubkaart" as documentation of what the engagement cluster <em>was</em> before refinement, but the canonical lock is what comes out of Q2.5.)</li>
+            <li><strong>Ontdek</strong> and <strong>Bij de club</strong> columns confirmed as locked.</li>
+            <li><strong>Middle column</strong> drilled below. Three sub-options.</li>
+          </ul>
+        </div>
+
+        <h2 style="margin-top: 24px">Drie middens — <em>welke?</em></h2>
+        <p class="lead">
+          All three render with locked H3 (modest wordmark + tagline)
+          + locked Ontdek and Bij de club columns. Variable: the
+          middle slot.
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">J1</span>
+              <span class="compare-cell__title">Renamed cluster</span>
+            </div>
+            <p class="compare-cell__copy">
+              Same task-orientation, better heading.
+              <code>Aansluiten</code> instead of <code>Doe mee</code>.
+              Three items: <em>Word lid · Word vrijwilliger · Word sponsor</em>.
+              Smallest change.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">J2</span>
+              <span class="compare-cell__title">Renamed cluster v2</span>
+            </div>
+            <p class="compare-cell__copy">
+              Different framing — <code>Steun KCVV</code> centres
+              support over membership. Same 3 items.
+              Reads as warmer / less corporate than "Doe mee".
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">J3</span>
+              <span class="compare-cell__title">CTA band + 2-col directory</span>
+            </div>
+            <p class="compare-cell__copy">
+              <strong>Structural change.</strong> Middle column
+              eliminated. 2-col directory (Ontdek + Bij de club).
+              Engagement promoted to a dedicated CTA band ABOVE the
+              directory: tagline + 3 mini-buttons.
+            </p>
+          </div>
+        </div>
+
+        <!-- ============================================
+             J1 — RENAMED CLUSTER (Aansluiten)
+             ============================================ -->
+        <div class="panel" id="q2-5-j1">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION J1</span>
+            <span class="mono">heading rename · "Aansluiten" · 3 items · cashless dropped</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Ontdek</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/ploegen">Onze ploegen</a></li>
+                  <li><a href="/jeugd">Jeugdwerking</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Aansluiten</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/inschrijven">Word lid</a></li>
+                  <li><a href="/club/word-vrijwilliger">Word vrijwilliger</a></li>
+                  <li><a href="/sponsors">Word sponsor</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Bij de club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/contact">Contact</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Smallest possible revision — same structure, just a better heading. <code>Aansluiten</code> is concrete and singular: it answers the visitor's "how do I get involved?" question without conflating with sponsorship-as-content. Three items in the column also feel less crowded than four with cashless. Minimal disruption to the mental model the rest of the design has settled on.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Sponsor-signup still sits in the engagement cluster which is technically different from joining or volunteering. Three "Word X" items in a single column still echo the same template — not as forced as "Doe mee" but the underlying repetitiveness of the verb pattern remains.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             J2 — RENAMED CLUSTER v2 (Steun KCVV)
+             ============================================ -->
+        <div class="panel" id="q2-5-j2" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION J2</span>
+            <span class="mono">heading rename · "Steun KCVV" · 3 items · cashless dropped</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-directory">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Ontdek</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/ploegen">Onze ploegen</a></li>
+                  <li><a href="/jeugd">Jeugdwerking</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Steun KCVV</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/inschrijven">Word lid</a></li>
+                  <li><a href="/club/word-vrijwilliger">Word vrijwilliger</a></li>
+                  <li><a href="/sponsors">Word sponsor</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Bij de club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/contact">Contact</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Warmer framing — <code>Steun KCVV</code> reads as solidarity rather than corporate-onboarding. Naturally accommodates lid + vrijwilliger + sponsor under one umbrella ("they all support the club, in different ways"). Verb is implicit (everything in the column is a way to support); column items don't need to all be "Word X" patterns going forward — could add e.g. "Doneer aan de jeugd" later without feeling out of place.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>"Steun" leans charitable / supporter-club, which may undersell that <code>Word lid</code> is a primary membership action (financial + participation) and <code>Word vrijwilliger</code> is concrete time commitment — neither is just "support". On a club page the framing might miscalibrate expectations vs reality.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             J3 — CTA BAND + 2-COL DIRECTORY
+             ============================================ -->
+        <div class="panel" id="q2-5-j3" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION J3</span>
+            <span class="mono">structural · drop middle col · 2-col directory · CTA band above</span>
+          </div>
+
+          <div class="hybrid-footer-mock">
+            <div class="hf-top hf-top--wordmark">
+              <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+              <p class="hf-tagline">
+                Er is maar één <em>plezante</em> compagnie.
+              </p>
+            </div>
+            <div class="hf-cta-band">
+              <p class="hf-cta-band__lead">
+                Sluit je aan bij <em>onze compagnie</em>.
+              </p>
+              <span class="hf-cta-band__links">
+                <a href="/club/inschrijven" class="hf-cta-band__link hf-cta-band__link--primary">Word lid</a>
+                <a href="/club/word-vrijwilliger" class="hf-cta-band__link">Word vrijwilliger</a>
+                <a href="/sponsors" class="hf-cta-band__link">Word sponsor</a>
+              </span>
+            </div>
+            <div class="hf-directory hf-directory--2col">
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Ontdek</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/nieuws">Nieuws</a></li>
+                  <li><a href="/kalender">Kalender</a></li>
+                  <li><a href="/evenementen">Evenementen</a></li>
+                  <li><a href="/ploegen">Onze ploegen</a></li>
+                  <li><a href="/jeugd">Jeugdwerking</a></li>
+                </ul>
+              </div>
+              <div class="hf-col">
+                <h4 class="hf-col__heading">Bij de club</h4>
+                <ul class="hf-col__list">
+                  <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                  <li><a href="/club/bestuur">Bestuur</a></li>
+                  <li><a href="/club/contact">Contact</a></li>
+                  <li><a href="/club/praktische-info">Praktische info</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="hf-bottom">
+              <div class="hf-bottom__group">
+                <span>© 1909–2026 KCVV Elewijt</span>
+                <span class="hf-bottom__sep"></span>
+                <span>Driesstraat 32 · 1982 Elewijt</span>
+              </div>
+              <div class="hf-bottom__group">
+                <a href="/privacy">Privacy</a>
+                <span class="hf-bottom__sep"></span>
+                <a href="#">Cookies</a>
+                <span class="hf-bottom__sep"></span>
+                <span class="hf-social">
+                  <a href="#" aria-label="Facebook">f</a>
+                  <a href="#" aria-label="Instagram">○</a>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>The "feels forced" symptom is solved by elimination — the engagement column is gone; instead, the 3 conversion routes get their own dedicated CTA strip with a tagline lead, primary <code>Word lid</code> button, and secondary outline links. Tagline-led copy ("Sluit je aan bij <em>onze compagnie</em>") echoes the motto's voice without repeating it. Directory becomes 2 cleaner columns of roughly equal weight (Ontdek 5 items · Bij de club 4). Engagement is more visible than as a footer column. Pattern matches how lots of editorial sites surface mailing-list / membership CTAs (which we don't have, but the vocabulary fits).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Adds vertical height to the footer (CTA band is ~70–90px). Header already carries the <code>Word lid</code> CTA on desktop and inside the drawer on mobile — putting it in the footer too means three placements site-wide, which is either valuable redundancy or visual repetition depending on how charitable you are. Slightly more chrome to maintain (<code>.hf-cta-band</code> + 2-col directory variant). On hero-less utility pages the CTA band may feel pushy.</p>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- /Q2.5 archive -->
+
+        <!-- Locked refined mockup -->
+        <h4 style="margin-top: 24px">Locked composition (preview)</h4>
+        <div class="hybrid-footer-mock">
+          <div class="hf-top hf-top--wordmark">
+            <p class="hf-wordmark">KCVV <em>Elewijt</em></p>
+            <p class="hf-tagline">
+              Er is maar één <em>plezante</em> compagnie.
+            </p>
+          </div>
+          <div class="hf-directory">
+            <div class="hf-col">
+              <h4 class="hf-col__heading">Ontdek</h4>
+              <ul class="hf-col__list">
+                <li><a href="/nieuws">Nieuws</a></li>
+                <li><a href="/kalender">Kalender</a></li>
+                <li><a href="/evenementen">Evenementen</a></li>
+                <li><a href="/ploegen">Onze ploegen</a></li>
+                <li><a href="/jeugd">Jeugdwerking</a></li>
+              </ul>
+            </div>
+            <div class="hf-col">
+              <h4 class="hf-col__heading">Aansluiten</h4>
+              <ul class="hf-col__list">
+                <li><a href="/club/inschrijven">Als speler</a></li>
+                <li><a href="/club/word-vrijwilliger">Als vrijwilliger</a></li>
+                <li><a href="/sponsors">Als sponsor</a></li>
+              </ul>
+            </div>
+            <div class="hf-col">
+              <h4 class="hf-col__heading">Bij de club</h4>
+              <ul class="hf-col__list">
+                <li><a href="/club/geschiedenis">Geschiedenis</a></li>
+                <li><a href="/club/bestuur">Bestuur</a></li>
+                <li><a href="/club/contact">Contact</a></li>
+                <li><a href="/club/praktische-info">Praktische info</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="hf-bottom">
+            <div class="hf-bottom__group">
+              <span>© 1909–2026 KCVV Elewijt</span>
+              <span class="hf-bottom__sep"></span>
+              <span>Driesstraat 32 · 1982 Elewijt</span>
+            </div>
+            <div class="hf-bottom__group">
+              <a href="/privacy">Privacy</a>
+              <span class="hf-bottom__sep"></span>
+              <a href="#">Cookies</a>
+              <span class="hf-bottom__sep"></span>
+              <span class="hf-social">
+                <a href="#" aria-label="Facebook">f</a>
+                <a href="#" aria-label="Instagram">○</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q3 — REMAINING VERIFICATIONS (text-only, no drill)
+           =========================================================== -->
+      <section class="section" id="q3-verifications">
+        <div class="section-meta">
+          <span class="mono">★ Q3 · REMAINING VERIFICATIONS — pre-lock</span>
+          <span class="mono mono--muted">— sponsor strip · PosterWordmark band · render scope · mobile collapse</span>
+        </div>
+        <h2>Vier <em>verificaties</em> voor de lock.</h2>
+        <p class="lead">
+          Each of the four below has an obvious answer given the locks
+          already in place. Confirm them as a batch (or push back on any
+          single one to drill it visually) and we move to writing
+          <code>option-x-footer-detail.html</code> + <code>footer-locked.md</code>.
+        </p>
+
+        <div class="panel">
+          <h4>1 · Sponsor strip stays separate above the footer (homepage only)</h4>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 6px 0 14px;">
+            Existing <code>SponsorsSection</code> renders on the
+            homepage in document flow above the footer (per Q0 audit).
+            The locked footer (H3 + I2) doesn't host sponsor logos in
+            its directory — instead the <code>Doe mee</code> column
+            includes a <code>Word sponsor</code> link to
+            <code>/sponsors</code>. Recommendation: <strong>keep separate</strong>.
+            No structural change to <code>SponsorsSection</code>; no
+            integration; no overlap. Section indexes (<code>/nieuws</code>,
+            <code>/evenementen</code>, etc.) don't render the sponsor
+            strip — sponsors stay homepage-exclusive.
+          </p>
+
+          <h4 style="margin-top: 18px;">2 · <code>&lt;PosterWordmark&gt;</code> band — <strong>absorbed</strong> by H3's modest wordmark</h4>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 6px 0 14px;">
+            Master design §5.1 step 11 referenced a separate
+            <code>&lt;PosterWordmark&gt;</code> band before the footer
+            (a full-bleed hero-scale wordmark). Q1 audit confirmed this
+            primitive doesn't exist in the design-system barrel — it
+            was aspirational. With H3's modest wordmark living
+            <em>inside</em> the footer's top zone, the standalone band
+            becomes redundant. Recommendation: <strong>absorb / drop</strong>.
+            The footer's wordmark + tagline is the only wordmark band
+            on the page (besides the sticky header itself).
+          </p>
+
+          <h4 style="margin-top: 18px;">3 · Footer renders on every page (not landing-only like the MatchStrip)</h4>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 6px 0 14px;">
+            By analogy with the MatchStrip (Q5 of Checkpoint C locked
+            G3 — landing-only), one might ask whether the footer is
+            also landing-only. <strong>It's not.</strong> Footer carries
+            colofon (copyright, address, legal links, cookies) which
+            the site needs on <em>every</em> page including detail
+            pages, hero-less utility pages, and error pages. MatchStrip
+            is a forward-looking module; footer is a legal/wayfinding
+            anchor. Recommendation: <strong>render on every page</strong>
+            via the root layout slot.
+          </p>
+
+          <h4 style="margin-top: 18px;">4 · Mobile collapse — 3 columns stack vertically; ink bar wraps to 2 rows</h4>
+          <p style="font-size: 14px; color: var(--color-ink-soft); margin: 6px 0 14px;">
+            Below ~768px, the directory's
+            <code>grid-template-columns: 1fr 1fr 1fr</code> collapses to
+            <code>1fr</code> (single column, columns stack: Ontdek →
+            Doe mee → Bij de club). Each column keeps its mono-caps
+            heading + bottom-rule + body-font links. Wordmark scales
+            from 44px to 32px on mobile; tagline scales from 28px to
+            22px. Ink bottom bar wraps from one-row to two-rows
+            (group 1 = copyright + address; group 2 = privacy + cookies +
+            social glyphs). Total mobile footer height ~480–540px
+            depending on link wrap.
+          </p>
+        </div>
+
+        <p style="font-size: 13.5px; color: var(--color-ink-muted); margin: 18px 0 0; max-width: 760px;">
+          <strong>Sign-off pattern:</strong> say "confirm all 4" to
+          accept and move to lock files; or say
+          <em>"confirm 1, 2, 3 but drill 4"</em> (or any subset) and
+          I'll surface visual options for the items you want to drill.
+        </p>
+      </section>
+
+      <footer>
+        <div class="next-step">
+          <div class="section-meta">
+            <span class="mono">★ CHECKPOINT D — ALL QUESTIONS LOCKED</span>
+            <span class="mono mono--muted">— Q1 · Q2 · Q2.5 · Q3 · ready for canonical detail file + lock spec</span>
+          </div>
+          <h3>Locked picks summary</h3>
+          <ul style="font-size: 14.5px; color: var(--color-ink-soft); margin: 14px 0 0; padding-left: 18px;">
+            <li><strong>Q1 · base direction</strong> — <code>H3</code> (Modest wordmark + tagline) · synthesis of A/C/D ingredients</li>
+            <li><strong>Q2 · IA structure</strong> — <code>I2</code> (task-oriented columns) · <em>Ontdek · Aansluiten · Bij de club</em></li>
+            <li><strong>Q2.5 · middle column</strong> — <code>J1 refined</code> · <em>Aansluiten</em> heading + role-based items (Als speler · Als vrijwilliger · Als sponsor) · cashless dropped</li>
+            <li><strong>Q3 · verifications</strong> — sponsor strip separate · PosterWordmark absorbed · every-page render · 3-col → 1-col mobile stack</li>
+          </ul>
+          <p style="font-size: 13.5px; color: var(--color-ink-muted); margin: 18px 0 0">
+            <strong>Next:</strong> writing <code>option-x-footer-detail.html</code>
+            + <code>footer-locked.md</code> · running lock-point
+            screenshots · updating <code>docs/plans/2026-05-03-redesign-phase-3-design.md</code>
+            §9 · committing.
+          </p>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

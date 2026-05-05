@@ -21,6 +21,14 @@ const checkpointDir = {
   interview: "phase-3-b-editorial-hero",
   header: "phase-3-c-header-and-matchstrip",
   matchstrip: "phase-3-c-header-and-matchstrip",
+  footer: "phase-3-d-footer",
+};
+
+// Some Checkpoint D files use `option-x-` prefix instead of the
+// drill-down convention's `option-a-` prefix (the locked direction
+// is a synthesis, not a single picked option).
+const filePrefix = {
+  footer: "option-x",
 };
 
 const dir = path.join(mockupsRoot, checkpointDir[variant] ?? "phase-3-b-editorial-hero");
@@ -83,6 +91,19 @@ const variantSections = {
         { id: "mobile", suffix: "mobile" },
         { id: "render-matrix", suffix: "render-matrix" },
       ],
+  footer: placement === "compare"
+    ? [
+        { id: "q0-data-audit", suffix: "q0-audit" },
+        { id: "q1-base-direction", suffix: "q1-locked" },
+        { id: "q2-ia", suffix: "q2-locked" },
+        { id: "q2-5-middle-refinement", suffix: "q2-5-locked" },
+        { id: "q3-verifications", suffix: "q3-verifications" },
+      ]
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile", suffix: "mobile" },
+        { id: "render-rule", suffix: "render-rule" },
+      ],
 };
 const sections = variantSections[variant] ?? [];
 
@@ -92,11 +113,12 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
 });
 const page = await context.newPage();
+const prefixForVariant = filePrefix[variant] ?? "option-a";
 const fileName = placement === "detail"
-  ? `option-a-${variant}-detail.html`
+  ? `${prefixForVariant}-${variant}-detail.html`
   : placement === "compare"
-    ? `option-a-${variant}-comparisons.html`
-    : `option-a-${variant}-revised.html`;
+    ? `${prefixForVariant}-${variant}-comparisons.html`
+    : `${prefixForVariant}-${variant}-revised.html`;
 const url = "file://" + path.join(dir, fileName);
 await page.goto(url, { waitUntil: "networkidle" });
 await page.evaluate(async () => {
