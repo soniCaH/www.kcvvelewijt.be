@@ -16,9 +16,10 @@ Detail-page hero for `/nieuws/[slug]` when `articleType === "transfer"`. Reuses 
 ```text
 ┌──────────────────────────────────────────────┬───────────────────────────┐
 │  EditorialKicker                              │                           │
-│  EditorialHeading (PT-aware, accent)          │   HeroCoverImage          │
-│  EditorialLead                                │   (TapedCard rotation A   │
-│  EditorialByline                              │    + 16:9 image)          │
+│  EditorialHeading (PT-aware, accent)          │   <TapedCard rotation A>  │
+│  EditorialLead                                │     + <TapedFigure        │
+│  EditorialByline                              │       aspect="landscape-  │
+│                                               │       16-9">              │
 └──────────────────────────────────────────────┴───────────────────────────┘
                                             ↓
                              <TransferFactStrip transferFact={firstTransferFact} />

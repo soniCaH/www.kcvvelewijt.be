@@ -27,7 +27,7 @@ Three-column CSS grid (`auto · 1fr · auto`). Sticky at `top: 0`, ~64px tall.
                     [page content / hero]
 ```
 
-### Mobile — closed (≤ 768px)
+### Mobile — closed (< 1024px)
 
 Three children inline: hamburger (left), wordmark (centre, full `KCVV Elewijt` with jersey-deep accent intact), search icon (right). **No `Word lid` button** — that lives only inside the open drawer.
 
@@ -37,6 +37,10 @@ Three children inline: hamburger (left), wordmark (centre, full `KCVV Elewijt` w
 │  └─ hamburger  └─ wordmark  └─ search │
 └──────────────────────────────────────┘
 ```
+
+### Tablet (769–1023px)
+
+**Uses the Mobile variant** — hamburger · wordmark · search inline; drawer pattern on open. The desktop 8-item centred nav row is too cramped below 1024px (sub-items wrap), so the breakpoint between Mobile and Desktop is set at `1024px`. Tablet inherits Mobile's closed and drawer-open layouts verbatim; no dedicated tablet composition.
 
 ### Mobile — drawer open
 
@@ -121,7 +125,7 @@ Per `feedback_no_decorative_nav_ornaments`: only functional indicators belong in
 
 ## Mobile collapse
 
-- **Closed default** at `≤ 768px`: hamburger · wordmark · search (no inline WORD LID).
+- **Closed default** at `< 1024px` (covers mobile + tablet): hamburger · wordmark · search (no inline WORD LID).
 - **Wordmark scales**: 26px desktop → 20px mobile; `SINDS 1909` superscript dropped.
 - **Drawer open** triggers a full-viewport takeover (`<NavTakeover>`); body scroll locks while open. Close paths: ✕ button, Escape key, click on a nav item that navigates.
 

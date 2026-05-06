@@ -126,57 +126,62 @@ const variantSections = {
 const sections = variantSections[variant] ?? [];
 
 const browser = await chromium.launch();
-const context = await browser.newContext({
-  viewport: { width: 1440, height: 900 },
-  deviceScaleFactor: 2,
-});
-const page = await context.newPage();
-const prefixForVariant = filePrefix[variant] ?? "option-a";
-const fileName = placement === "detail"
-  ? `${prefixForVariant}-${variant}-detail.html`
-  : placement === "compare"
-    ? `${prefixForVariant}-${variant}-comparisons.html`
-    : `${prefixForVariant}-${variant}-revised.html`;
-const url = pathToFileURL(path.join(dir, fileName)).href;
-await page.goto(url, { waitUntil: "networkidle" });
-await page.evaluate(async () => {
-  await Promise.all(
-    Array.from(document.images).map((img) =>
-      img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r; })
-    )
-  );
-  if (document.fonts) await document.fonts.ready;
-});
-await page.waitForTimeout(500);
-// Full page
-const prefix = placement === "detail" ? `detail-${variant}` : placement === "compare" ? `compare-${variant}` : `revised-${variant}`;
-await page.screenshot({
-  path: path.join(outDir, `${prefix}-full.png`),
-  fullPage: true,
-});
-console.log(`✓ ${prefix}-full.png`);
-for (const { id, suffix } of sections) {
-  const el = await page.$(`#${id}`);
-  if (!el) {
-    console.warn(`  ! missing #${id}`);
-    continue;
-  }
-  // Compute element rect in document coords (not viewport), then clip the full page.
-  const rect = await el.evaluate((node) => {
-    const r = node.getBoundingClientRect();
-    const x = r.left + window.scrollX;
-    const y = r.top + window.scrollY;
-    return { x, y, width: r.width, height: r.height };
+let context;
+try {
+  context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    deviceScaleFactor: 2,
   });
-  if (!rect || rect.width === 0 || rect.height === 0) {
-    console.warn(`  ! could not measure #${id}`);
-    continue;
-  }
+  const page = await context.newPage();
+  const prefixForVariant = filePrefix[variant] ?? "option-a";
+  const fileName = placement === "detail"
+    ? `${prefixForVariant}-${variant}-detail.html`
+    : placement === "compare"
+      ? `${prefixForVariant}-${variant}-comparisons.html`
+      : `${prefixForVariant}-${variant}-revised.html`;
+  const url = pathToFileURL(path.join(dir, fileName)).href;
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(async () => {
+    await Promise.all(
+      Array.from(document.images).map((img) =>
+        img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r; })
+      )
+    );
+    if (document.fonts) await document.fonts.ready;
+  });
+  await page.waitForTimeout(500);
+  // Full page
+  const prefix = placement === "detail" ? `detail-${variant}` : placement === "compare" ? `compare-${variant}` : `revised-${variant}`;
   await page.screenshot({
-    path: path.join(outDir, `${prefix}-${suffix}.png`),
+    path: path.join(outDir, `${prefix}-full.png`),
     fullPage: true,
-    clip: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
   });
-  console.log(`  ✓ ${prefix}-${suffix}.png`);
+  console.log(`✓ ${prefix}-full.png`);
+  for (const { id, suffix } of sections) {
+    const el = await page.$(`#${id}`);
+    if (!el) {
+      console.warn(`  ! missing #${id}`);
+      continue;
+    }
+    // Compute element rect in document coords (not viewport), then clip the full page.
+    const rect = await el.evaluate((node) => {
+      const r = node.getBoundingClientRect();
+      const x = r.left + window.scrollX;
+      const y = r.top + window.scrollY;
+      return { x, y, width: r.width, height: r.height };
+    });
+    if (!rect || rect.width === 0 || rect.height === 0) {
+      console.warn(`  ! could not measure #${id}`);
+      continue;
+    }
+    await page.screenshot({
+      path: path.join(outDir, `${prefix}-${suffix}.png`),
+      fullPage: true,
+      clip: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    });
+    console.log(`  ✓ ${prefix}-${suffix}.png`);
+  }
+} finally {
+  if (context) await context.close();
+  if (browser) await browser.close();
 }
-await browser.close();
