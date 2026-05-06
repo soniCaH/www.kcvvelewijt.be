@@ -31,20 +31,20 @@ export function EndMark({ label = "EINDE GESPREK" }: EndMarkProps) {
       <span
         data-endmark="star"
         aria-hidden="true"
-        className="text-jersey-deep inline-flex items-center text-[14px] leading-none"
+        className="text-jersey-deep mx-3 inline-flex items-center text-[14px] leading-none"
       >
         ★
       </span>
       <span
         data-endmark="label"
-        className="text-ink px-3 font-mono text-[10px] leading-none font-semibold tracking-[0.18em] uppercase"
+        className="text-ink font-mono text-[10px] leading-none font-semibold tracking-[0.18em] whitespace-nowrap uppercase"
       >
         {label}
       </span>
       <span
         data-endmark="star"
         aria-hidden="true"
-        className="text-jersey-deep inline-flex items-center text-[14px] leading-none"
+        className="text-jersey-deep mx-3 inline-flex items-center text-[14px] leading-none"
       >
         ★
       </span>
