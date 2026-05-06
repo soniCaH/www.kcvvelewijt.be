@@ -3,12 +3,12 @@
  * Matches the date-grouped upcoming matches layout
  */
 
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 
 export default function ScheurkalenderLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageHero
+      <InteriorPageHero
         label="Kalender"
         headline="Scheurkalender"
         body=""

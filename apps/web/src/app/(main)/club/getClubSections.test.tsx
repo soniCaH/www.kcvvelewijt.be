@@ -11,7 +11,7 @@ describe("getClubSections", () => {
 
     expect(sections).toHaveLength(4);
 
-    // Hero — always static PageHero, kcvv-black bg, diagonal right overlap full
+    // Hero — always static InteriorPageHero, kcvv-black bg, diagonal right overlap full
     expect(sections[0].key).toBe("hero");
     expect(sections[0].bg).toBe("kcvv-black");
     expect(sections[0].paddingTop).toBe("pt-0");

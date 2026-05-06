@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { PageHero } from "./PageHero";
+import { InteriorPageHero } from "./InteriorPageHero";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, ...props }: Record<string, unknown>) => (
@@ -23,7 +23,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-describe("PageHero", () => {
+describe("InteriorPageHero", () => {
   const defaultProps = {
     image: "/images/hero-club.jpg",
     label: "Onze club",
@@ -38,7 +38,7 @@ describe("PageHero", () => {
   };
 
   it("renders label, headline, and body text", () => {
-    render(<PageHero {...defaultProps} />);
+    render(<InteriorPageHero {...defaultProps} />);
 
     expect(screen.getByText("Onze club")).toBeInTheDocument();
     expect(screen.getByText(/de plezantste/i)).toBeInTheDocument();
@@ -47,13 +47,13 @@ describe("PageHero", () => {
   });
 
   it("does not render a built-in SVG diagonal", () => {
-    const { container } = render(<PageHero {...defaultProps} />);
+    const { container } = render(<InteriorPageHero {...defaultProps} />);
     expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
 
   it("renders LinkButton with arrow when cta prop is provided", () => {
     render(
-      <PageHero
+      <InteriorPageHero
         {...defaultProps}
         cta={{ label: "Bekijk de ploeg", href: "/ploegen/a" }}
       />,
@@ -65,30 +65,32 @@ describe("PageHero", () => {
   });
 
   it("does not render a CTA when cta prop is omitted", () => {
-    render(<PageHero {...defaultProps} />);
+    render(<InteriorPageHero {...defaultProps} />);
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("renders background image with provided src and alt", () => {
-    render(<PageHero {...defaultProps} imageAlt="Club photo" />);
+    render(<InteriorPageHero {...defaultProps} imageAlt="Club photo" />);
     const img = screen.getByAltText("Club photo");
     expect(img).toHaveAttribute("src", "/images/hero-club.jpg");
   });
 
   it("uses green accent bar in label", () => {
-    const { container } = render(<PageHero {...defaultProps} />);
+    const { container } = render(<InteriorPageHero {...defaultProps} />);
     const accentBar = container.querySelector(".bg-kcvv-green");
     expect(accentBar).toBeInTheDocument();
   });
 
   it("renders with default min-h-[60vh] when no size prop", () => {
-    const { container } = render(<PageHero {...defaultProps} />);
+    const { container } = render(<InteriorPageHero {...defaultProps} />);
     const content = container.querySelector(".min-h-\\[60vh\\]");
     expect(content).toBeInTheDocument();
   });
 
   it("renders with min-h-[35vh] when size is compact", () => {
-    const { container } = render(<PageHero {...defaultProps} size="compact" />);
+    const { container } = render(
+      <InteriorPageHero {...defaultProps} size="compact" />,
+    );
     const content = container.querySelector(".min-h-\\[35vh\\]");
     expect(content).toBeInTheDocument();
     expect(
@@ -98,7 +100,7 @@ describe("PageHero", () => {
 
   it("renders gradient background when no image is provided", () => {
     const { container } = render(
-      <PageHero label="Club" headline="Test" body="" />,
+      <InteriorPageHero label="Club" headline="Test" body="" />,
     );
     const img = container.querySelector("img");
     expect(img).not.toBeInTheDocument();
@@ -109,7 +111,7 @@ describe("PageHero", () => {
   });
 
   it("renders image background when image is provided", () => {
-    const { container } = render(<PageHero {...defaultProps} />);
+    const { container } = render(<InteriorPageHero {...defaultProps} />);
     const img = container.querySelector("img");
     expect(img).toBeInTheDocument();
     expect(
@@ -118,7 +120,7 @@ describe("PageHero", () => {
   });
 
   it("uses dark gradient by default when no image", () => {
-    render(<PageHero label="Club" headline="Test" body="" />);
+    render(<InteriorPageHero label="Club" headline="Test" body="" />);
     const gradientDiv = screen.getByTestId("hero-gradient");
     expect(gradientDiv).toHaveStyle({
       background:
@@ -127,7 +129,14 @@ describe("PageHero", () => {
   });
 
   it("applies the selected gradient preset", () => {
-    render(<PageHero label="Club" headline="Test" body="" gradient="green" />);
+    render(
+      <InteriorPageHero
+        label="Club"
+        headline="Test"
+        body=""
+        gradient="green"
+      />,
+    );
     const gradientDiv = screen.getByTestId("hero-gradient");
     expect(gradientDiv).toHaveStyle({
       background:
@@ -137,7 +146,12 @@ describe("PageHero", () => {
 
   it("applies the neutral gradient preset", () => {
     render(
-      <PageHero label="Club" headline="Test" body="" gradient="neutral" />,
+      <InteriorPageHero
+        label="Club"
+        headline="Test"
+        body=""
+        gradient="neutral"
+      />,
     );
     const gradientDiv = screen.getByTestId("hero-gradient");
     expect(gradientDiv).toHaveStyle({

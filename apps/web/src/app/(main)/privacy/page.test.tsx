@@ -7,7 +7,7 @@ import { render, screen } from "@testing-library/react";
 import PrivacyPage from "./page";
 
 describe("PrivacyPage", () => {
-  it("renders the PageHero with the Juridisch label and headline", () => {
+  it("renders the InteriorPageHero with the Juridisch label and headline", () => {
     render(<PrivacyPage />);
     expect(screen.getByText("Juridisch")).toBeInTheDocument();
     expect(

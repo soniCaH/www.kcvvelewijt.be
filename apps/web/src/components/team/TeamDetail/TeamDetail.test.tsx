@@ -84,7 +84,7 @@ describe("TeamDetail", () => {
     mockSearchParams = new URLSearchParams();
   });
 
-  it("renders the PageHero with the team name as headline", () => {
+  it("renders the InteriorPageHero with the team name as headline", () => {
     render(<TeamDetail header={header} />);
     expect(
       screen.getByRole("heading", { name: /eerste ploeg/i }),

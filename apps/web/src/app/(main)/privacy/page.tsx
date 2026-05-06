@@ -2,7 +2,7 @@
  * Privacy Policy Page
  *
  * GDPR-compliant privacy policy for KCVV Elewijt. Wraps the legal copy in
- * the standard SectionStack + PageHero layout used across the redesigned
+ * the standard SectionStack + InteriorPageHero layout used across the redesigned
  * pages — compact dark hero followed by a single gray-100 prose section.
  */
 
@@ -13,7 +13,7 @@ import {
   SectionStack,
   type SectionConfig,
 } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 
 /**
  * Last updated date for the privacy policy.
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
       content: (
-        <PageHero
+        <InteriorPageHero
           size="compact"
           gradient="dark"
           label="Juridisch"

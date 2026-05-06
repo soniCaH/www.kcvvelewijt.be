@@ -3,7 +3,7 @@
  *
  * Page-level layout for team detail pages, composed as a `SectionStack`:
  *
- *   1. Compact `PageHero` with the team image as background
+ *   1. Compact `InteriorPageHero` with the team image as background
  *   2. Gray `BrandedTabs` content section showing the active panel
  *      (Info / Spelers / Wedstrijden / Klassement) — only tabs with
  *      data are exposed
@@ -19,7 +19,7 @@ import {
   SectionStack,
   type SectionConfig,
 } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 import { Spinner } from "@/components/design-system/Spinner";
 import { TeamRoster, type RosterPlayer, type StaffMember } from "../TeamRoster";
@@ -334,7 +334,7 @@ export function TeamDetail({
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
       content: (
-        <PageHero
+        <InteriorPageHero
           size="compact"
           image={header.imageUrl}
           imageAlt={`${header.name} teamfoto`}

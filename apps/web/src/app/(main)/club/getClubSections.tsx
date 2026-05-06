@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 
 interface ClubSectionsContent {
   editorial: ReactNode;
@@ -14,7 +14,7 @@ export function getClubSections(content: ClubSectionsContent): SectionConfig[] {
       key: "hero",
       bg: "kcvv-black",
       content: (
-        <PageHero
+        <InteriorPageHero
           label="Onze club"
           headline={
             <>
