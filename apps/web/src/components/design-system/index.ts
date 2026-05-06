@@ -122,6 +122,10 @@ export type {
   HighlighterStrokeColor,
 } from "./HighlighterStroke";
 
+// JerseyShirt
+export { JerseyShirt } from "./JerseyShirt";
+export type { JerseyShirtProps } from "./JerseyShirt";
+
 // EditorialLink
 export { EditorialLink } from "./EditorialLink";
 export type {
