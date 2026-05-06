@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Paper-Fold Letterhead · Phase 3 · Checkpoint D · SiteFooter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e6e0cc;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .panel--bare { padding: 0; border: 0; background: transparent; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         FOOTER — Direction C: Paper-Fold Letterhead
+         A folded printed-letter bottom. Cream paper foundation with
+         a 2px linear-gradient cream→cream-soft fold-shadow under a
+         1px ink top rule. Single-column letter-style: club crest left
+         + letterhead address block right. Beneath: 3-col directory
+         (CLUB / TEAMS / VOLG) with hairline ink rules. Centered
+         hand-set typographic motto, then bottom mono-caps strip.
+         The most paper-toned of the four — a printed bulletin, not
+         a footer band.
+         ============================================================ */
+
+      .footer-stage {
+        margin-top: 24px;
+        background: var(--color-cream);
+        border: 1px solid var(--color-paper-edge);
+        padding: 0;
+      }
+
+      .site-footer {
+        position: relative;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        padding: 0 56px 28px;
+        font-family: var(--font-body);
+      }
+
+      /* Top edge: 1px ink rule + 2px linear-gradient cream→cream-soft
+         fold hint immediately beneath. No blur, no drop shadow. */
+      .site-footer::before {
+        content: "";
+        display: block;
+        height: 1px;
+        background: var(--color-ink);
+      }
+      .site-footer::after {
+        content: "";
+        position: absolute;
+        top: 1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(to bottom, var(--color-cream) 0%, var(--color-cream-soft) 100%);
+        pointer-events: none;
+      }
+
+      /* Letterhead band — crest left, address-block right */
+      .letterhead {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 36px;
+        align-items: flex-start;
+        padding: 56px 0 40px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+
+      .letterhead__crest {
+        width: 96px;
+        height: 96px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 38px;
+        line-height: 1;
+        color: var(--color-jersey-deep);
+        letter-spacing: -0.02em;
+      }
+
+      .letterhead__body {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .letterhead__kicker {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+      }
+      .letterhead__kicker .glyph {
+        color: var(--color-jersey-deep);
+        margin: 0 6px;
+      }
+
+      .letterhead__name {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: clamp(36px, 4.4vw, 52px);
+        line-height: 1;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      .letterhead__name em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+      }
+
+      .letterhead__address {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        gap: 0;
+        margin-top: 12px;
+        border-top: 1px solid var(--color-paper-edge);
+        padding-top: 14px;
+      }
+      .letterhead__address dt {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 4px;
+      }
+      .letterhead__address dd {
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-ink);
+        margin: 0;
+        padding-right: 32px;
+        line-height: 1.45;
+      }
+      .letterhead__address .group {
+        display: flex;
+        flex-direction: column;
+      }
+      .letterhead__address .group + .group {
+        border-left: 1px solid var(--color-paper-edge);
+        padding-left: 24px;
+      }
+      .letterhead__address a {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px solid var(--color-paper-edge);
+        transition: border-color 200ms ease;
+      }
+      .letterhead__address a:hover { border-color: var(--color-ink); }
+
+      /* Directory band — 3 columns CLUB / TEAMS / VOLG with hairline
+         ink rules between, sitting on cream-deep tint to suggest the
+         second fold panel. Press-down hover canon on the link rows. */
+      .directory {
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr 1px 1fr;
+        gap: 0;
+        padding: 36px 0 32px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .directory__rule {
+        background: var(--color-paper-edge);
+        width: 1px;
+      }
+      .directory__col {
+        padding: 0 28px;
+      }
+      .directory__col:first-child { padding-left: 0; }
+      .directory__col:last-child { padding-right: 0; }
+
+      .directory__title {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        margin: 0 0 18px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .directory__title .glyph {
+        font-family: var(--font-mono);
+        color: var(--color-jersey-deep);
+        margin-right: 8px;
+      }
+
+      .directory__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .directory__list li + li {
+        border-top: 1px dotted var(--color-paper-edge);
+      }
+      .directory__list a {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 9px 4px 9px 0;
+        font-family: var(--font-body);
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--color-ink);
+        text-decoration: none;
+        transition: all 300ms ease;
+      }
+      .directory__list a .arrow {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        color: var(--color-ink-muted);
+        transition: color 300ms ease;
+      }
+      /* Press-down hover canon — translate on x+y by 1px, no shadow
+         change because this row has no shadow to begin with; the
+         dotted rule beneath shifts in sympathy and gives the haptic
+         tap reading without breaking the letterhead's quiet tone. */
+      .directory__list a:hover {
+        transform: translate(1px, 1px);
+        color: var(--color-jersey-deep);
+      }
+      .directory__list a:hover .arrow { color: var(--color-jersey-deep); }
+
+      /* Motto band — hand-set typographic centerline. Display italic
+         "Er is maar één", Freight-display 900 caps "PLEZANTE COMPAGNIE",
+         framed by single-em-rule glyphs. No background — it sits on
+         the same paper. The only ornament is the §·* stack. */
+      .motto {
+        text-align: center;
+        padding: 44px 0 36px;
+        border-bottom: 1px solid var(--color-paper-edge);
+      }
+      .motto__ornament {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        letter-spacing: 0.4em;
+        color: var(--color-jersey-deep);
+        margin: 0 0 14px;
+        line-height: 1;
+      }
+      .motto__ornament .ink { color: var(--color-ink); }
+      .motto__line-a {
+        display: block;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 700;
+        font-size: clamp(22px, 2.4vw, 30px);
+        color: var(--color-ink-soft);
+        line-height: 1.1;
+      }
+      .motto__line-b {
+        display: block;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: clamp(36px, 4.6vw, 56px);
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      .motto__line-b em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+      }
+      .motto__sig {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 18px;
+      }
+
+      /* Colofon — bottom mono-caps strip. Stamnummer left, copyright
+         center, legal links right. All mono, all caps. */
+      .colofon {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 22px 0 0;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .colofon__left { text-align: left; }
+      .colofon__center { text-align: center; }
+      .colofon__right {
+        text-align: right;
+        display: flex;
+        gap: 18px;
+        justify-content: flex-end;
+      }
+      .colofon a {
+        color: var(--color-ink-muted);
+        text-decoration: none;
+        transition: color 300ms ease, transform 300ms ease;
+      }
+      .colofon a:hover {
+        color: var(--color-ink);
+        transform: translate(1px, 1px);
+      }
+      .colofon__center strong {
+        color: var(--color-ink);
+        font-weight: 700;
+      }
+
+      /* ============================================================
+         BREAKDOWN + REUSE MAP shared utilities
+         ============================================================ */
+      .reuse-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      .reuse-table th, .reuse-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table th {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+        border-bottom: 1.5px solid var(--color-ink);
+      }
+      .reuse-table tr:last-child td { border-bottom: 0; }
+      .reuse-table code {
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      .band-card {
+        background: var(--color-cream);
+        border: 1px solid var(--color-paper-edge);
+        padding: 24px 28px;
+        margin-top: 16px;
+      }
+      .band-card h3 { margin-top: 0; }
+      .band-card p { margin: 6px 0 0; color: var(--color-ink-soft); font-size: 15px; }
+
+      /* Notes footer */
+      footer.page-footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer.page-footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT D · SITEFOOTER · DIRECTION C</span>
+          <span class="mono mono--muted">§ PAPER-FOLD LETTERHEAD</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Het <span class="display"><em>onderschrift</em></span> van een gevouwen brief.</h1>
+        <p class="lead">
+          Direction C reads the footer as the bottom panel of a folded printed
+          letter — cream paper, a 1px ink top rule with a 2px gradient hint
+          beneath standing in for the fold, a single-column letterhead with
+          crest + address block, a hairlined 3-column directory, and a
+          hand-set typographic motto centred above the colofon. The most
+          paper-toned of the four directions; closer to a printed bulletin
+          than a footer band.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           FOOTER — at intended scale
+           =========================================================== -->
+      <section class="section" id="footer">
+        <div class="section-meta">
+          <span class="mono">§ 01 · FULL FOOTER · INTENDED SCALE</span>
+          <span class="mono mono--muted">— letterhead · directory · motto · colofon</span>
+        </div>
+        <h2>De <em>brief</em> sluit.</h2>
+        <p class="lead">
+          Rendered at intended viewport scale. Top fold is a 1px ink rule with
+          a 2px <code style="font-family:var(--font-mono); background:var(--color-cream-soft); padding:1px 5px; border:1px solid var(--color-paper-edge); font-size:12.5px">linear-gradient(cream → cream-soft)</code>
+          immediately under it — no <code style="font-family:var(--font-mono); background:var(--color-cream-soft); padding:1px 5px; border:1px solid var(--color-paper-edge); font-size:12.5px">box-shadow blur</code>, no drop. Reads
+          as a sheet that has been folded once horizontally, then unfolded.
+        </p>
+
+        <div class="footer-stage">
+          <footer class="site-footer" role="contentinfo" aria-label="Site footer">
+
+            <!-- LETTERHEAD: crest + address block ============== -->
+            <div class="letterhead">
+              <div class="letterhead__crest" aria-hidden="true">K</div>
+              <div class="letterhead__body">
+                <p class="letterhead__kicker">
+                  K. F. C. V. V. ELEWIJT
+                  <span class="glyph">§</span>
+                  STAMNUMMER 5481
+                  <span class="glyph">*</span>
+                  OPGERICHT 1942
+                </p>
+                <h2 class="letterhead__name">Koninklijke Football Club <em>Voorwaarts</em> Elewijt.</h2>
+
+                <dl class="letterhead__address">
+                  <div class="group">
+                    <dt>Adres</dt>
+                    <dd>Tervuursesteenweg 738<br/>1982 Elewijt</dd>
+                  </div>
+                  <div class="group">
+                    <dt>Telefoon</dt>
+                    <dd><a href="tel:+3215611234">+32 15 61 12 34</a></dd>
+                  </div>
+                  <div class="group">
+                    <dt>Email</dt>
+                    <dd><a href="mailto:secretariaat@kcvvelewijt.be">secretariaat@kcvvelewijt.be</a></dd>
+                  </div>
+                  <div class="group">
+                    <dt>Kantine</dt>
+                    <dd>Wo · Vr · Za vanaf 18u<br/>Zo vanaf 13u</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <!-- DIRECTORY: 3 cols with hairline rules ============== -->
+            <nav class="directory" aria-label="Footer navigatie">
+              <div class="directory__col">
+                <h3 class="directory__title"><span class="glyph">§</span>Club</h3>
+                <ul class="directory__list">
+                  <li><a href="/over">Over KCVV<span class="arrow">→</span></a></li>
+                  <li><a href="/bestuur">Bestuur<span class="arrow">→</span></a></li>
+                  <li><a href="/sponsoring">Sponsoring<span class="arrow">→</span></a></li>
+                  <li><a href="/lid-worden">Lid worden<span class="arrow">→</span></a></li>
+                  <li><a href="/vacatures">Vacatures<span class="arrow">→</span></a></li>
+                  <li><a href="/contact">Contact<span class="arrow">→</span></a></li>
+                </ul>
+              </div>
+              <div class="directory__rule" aria-hidden="true"></div>
+              <div class="directory__col">
+                <h3 class="directory__title"><span class="glyph">*</span>Teams</h3>
+                <ul class="directory__list">
+                  <li><a href="/teams/a-ploeg">A-ploeg<span class="arrow">→</span></a></li>
+                  <li><a href="/teams/b-ploeg">B-ploeg<span class="arrow">→</span></a></li>
+                  <li><a href="/teams/jeugd/bovenbouw">Bovenbouw<span class="arrow">→</span></a></li>
+                  <li><a href="/teams/jeugd/middenbouw">Middenbouw<span class="arrow">→</span></a></li>
+                  <li><a href="/teams/jeugd/onderbouw">Onderbouw<span class="arrow">→</span></a></li>
+                  <li><a href="/kalender">Kalender<span class="arrow">→</span></a></li>
+                </ul>
+              </div>
+              <div class="directory__rule" aria-hidden="true"></div>
+              <div class="directory__col">
+                <h3 class="directory__title"><span class="glyph">+</span>Volg</h3>
+                <ul class="directory__list">
+                  <li><a href="https://facebook.com">Facebook<span class="arrow">↗</span></a></li>
+                  <li><a href="https://instagram.com">Instagram<span class="arrow">↗</span></a></li>
+                  <li><a href="https://x.com">X / Twitter<span class="arrow">↗</span></a></li>
+                  <li><a href="https://youtube.com">YouTube<span class="arrow">↗</span></a></li>
+                  <li><a href="/nieuwsbrief">Nieuwsbrief<span class="arrow">→</span></a></li>
+                  <li><a href="/rss.xml">RSS<span class="arrow">→</span></a></li>
+                </ul>
+              </div>
+            </nav>
+
+            <!-- MOTTO band — centred hand-set typography ============== -->
+            <div class="motto" aria-hidden="false">
+              <p class="motto__ornament"><span>§</span> <span class="ink">*</span> <span>+</span> <span class="ink">*</span> <span>§</span></p>
+              <span class="motto__line-a">Er is maar <em>één</em></span>
+              <span class="motto__line-b">PLEZANTE <em>COMPAGNIE</em></span>
+              <p class="motto__sig">— Sinds 1942 · Elewijt · België —</p>
+            </div>
+
+            <!-- COLOFON — bottom mono strip ============== -->
+            <div class="colofon">
+              <div class="colofon__left">STAMNR. 5481 · BTW BE 0410.123.456</div>
+              <div class="colofon__center">© 2026 <strong>KCVV ELEWIJT</strong> · ALLE RECHTEN VOORBEHOUDEN</div>
+              <div class="colofon__right">
+                <a href="/privacy">Privacy</a>
+                <a href="/cookies">Cookies</a>
+                <a href="/colofon">Colofon</a>
+              </div>
+            </div>
+          </footer>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>The most paper-native of the four directions — every band sits on the same cream sheet, separated only by hairline ink rules. The fold-shadow at the top is a literal 2px gradient, not a chrome trick. Reads as continuous with the body content above; the page does not "end with a band of black", it folds.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Quietest of the four. No ink-fill emphasis, no jersey-bg interlude — relies entirely on typography and rules to create hierarchy. Risk: at long scroll, the visual end-of-page signal is weaker than an ink-bg footer. Mitigation: the 2px fold-gradient + 1px ink top rule together provide a deliberate edge.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTIONS BREAKDOWN
+           =========================================================== -->
+      <section class="section" id="breakdown">
+        <div class="section-meta">
+          <span class="mono">§ 02 · SECTIONS BREAKDOWN</span>
+          <span class="mono mono--muted">— per-band rationale and tradeoffs</span>
+        </div>
+        <h2>Vier <em>vouwen</em>, vier banden.</h2>
+        <p class="lead">
+          The footer reads top-to-bottom as four logical bands: letterhead,
+          directory, motto, colofon. Each band has its own rationale and
+          its own per-band tradeoffs — listed below.
+        </p>
+
+        <!-- Band 1 -->
+        <div class="band-card">
+          <h3>Band 01 · Letterhead</h3>
+          <p>Crest left (96×96 ink-bordered cream square with display-italic K), address block right. Kicker mono row above headline ("K. F. C. V. V. ELEWIJT § STAMNUMMER 5481 * OPGERICHT 1942"). Headline reads "Koninklijke Football Club <em>Voorwaarts</em> Elewijt." in display-900 with the italic accent on the brand-defining word. Below: 4-column dl of address / phone / email / kantine, each cell separated by a 1px paper-edge rule. The headline is the editorial anchor — everything else in the footer subordinates to it.</p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Establishes the "this is a printed letter" reading immediately. The crest box is a known primitive (TicketStub geometry). Address dl is information-dense without feeling like a form.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>4-column dl can wrap awkwardly at narrow viewports. Mitigation: stack to 2×2 below 768px (production responsive rule, not shown in this mockup).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Band 2 -->
+        <div class="band-card">
+          <h3>Band 02 · Directory</h3>
+          <p>3 columns CLUB / TEAMS / VOLG separated by 1px paper-edge vertical rules. Each column heading is mono-caps with a coloured typographic glyph (§ * +) prefix, underlined by 1px ink rule. Link rows use 1px dotted paper-edge rules between items. Press-down hover canon: <code style="font-family:var(--font-mono); background:var(--color-cream-soft); padding:1px 5px; border:1px solid var(--color-paper-edge); font-size:12.5px">translate(1px,1px)</code> + jersey-deep recolour on hover. No shadow shift because the rows have no shadow — the haptic tap reading comes from the 1px translate alone.</p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Symmetric 3-column grid is conventional and parseable. Hairline rules keep the eye moving without ink weight. Glyph-prefixed headings reuse the typographic vocabulary established in motto + kicker — no new icon system introduced for the footer.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Press-down without a shadow change is a softer haptic than the canonical shadow→none press; the link still re-tints to jersey-deep, which carries the weight of the hover signal. Owner sign-off requested on whether this softer press is acceptable in the letterhead's quiet register.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Band 3 -->
+        <div class="band-card">
+          <h3>Band 03 · Motto</h3>
+          <p>Centered, no background, no border. Two typographic ornament rows of <code style="font-family:var(--font-mono); background:var(--color-cream-soft); padding:1px 5px; border:1px solid var(--color-paper-edge); font-size:12.5px">§ * + * §</code> alternating jersey-deep/ink. Display-italic 700 "Er is maar <em>één</em>" line, then display-900 caps "PLEZANTE <em>COMPAGNIE</em>" with the italic accent on COMPAGNIE for editorial rhythm. Mono-caps signature line "— Sinds 1942 · Elewijt · België —" beneath. Verbatim motto: "ER IS MAAR ÉÉN PLEZANTE COMPAGNIE".</p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Hand-set typography earns a moment in the page without bg or chrome. The italic-on-caps split echoes the EditorialHeading vocabulary. Ornaments use only the three approved typographic glyphs (§ * +) — no Lucide, no Stenciletta.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Display-900 caps at clamp(36px,4.6vw,56px) is the tallest type in the footer; on very narrow viewports the line can break awkwardly between PLEZANTE and COMPAGNIE. Acceptable break — both halves are scannable in isolation.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Band 4 -->
+        <div class="band-card">
+          <h3>Band 04 · Colofon</h3>
+          <p>Three-column mono-caps strip: stamnummer + BTW left, copyright center (with bolded ink-coloured KCVV ELEWIJT), legal links right (Privacy · Cookies · Colofon). All 10.5px IBM Plex Mono, 0.12em tracking. Sits flush below the motto's bottom rule with 22px top padding — quiet sign-off, no border, no fill.</p>
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Legal/admin info compressed into one mono-caps line — no second band of chrome. The bold KCVV ELEWIJT in copyright doubles as a quiet wordmark sign-off. Press-down hover canon on the legal links keeps the interactive vocabulary consistent.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Three-cell row at narrow widths needs to stack. At ≤640px production rule should be: stack center → left → right, all left-aligned, with 8px gap. Not shown in mockup.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">§ 03 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— every visual choice mapped back to an approved source primitive</span>
+        </div>
+        <h2>Niets <em>nieuws</em> onder de zon.</h2>
+        <p class="lead">
+          Per the redesign convention, every element in this footer maps to
+          an existing approved primitive or token. New chrome shapes are
+          forbidden — the table below shows which primitive each band borrows
+          from, and what (if anything) is genuinely new.
+        </p>
+
+        <table class="reuse-table">
+          <thead>
+            <tr>
+              <th style="width: 22%">Element</th>
+              <th style="width: 26%">Source primitive</th>
+              <th style="width: 22%">Token / vocabulary</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Top fold rule</td>
+              <td><code>StripedSeam</code> (degenerate · 1px ink)</td>
+              <td><code>--color-ink</code></td>
+              <td>1px solid ink top edge — same role as a section seam, scaled to a single line.</td>
+            </tr>
+            <tr>
+              <td>Fold-shadow gradient</td>
+              <td>New: 2px <code>linear-gradient</code></td>
+              <td><code>--color-cream</code> → <code>--color-cream-soft</code></td>
+              <td>Genuinely new structural element — paper-fold hint. No <code>box-shadow</code>, no blur.</td>
+            </tr>
+            <tr>
+              <td>Crest box</td>
+              <td><code>TicketStub</code> geometry · <code>EditorialHeading</code> italic</td>
+              <td><code>border-2 ink</code> · <code>--color-jersey-deep</code></td>
+              <td>96×96 ink-bordered cream square with a display-italic K — same vocabulary as the StampBadge / TicketStub shield slot.</td>
+            </tr>
+            <tr>
+              <td>Letterhead headline</td>
+              <td><code>EditorialHeading</code> (size: display-md)</td>
+              <td><code>--font-display</code> 900 + italic emphasis</td>
+              <td>Same italic-on-display rhythm used across hero + Q&A dividers — the &lt;em&gt;Voorwaarts&lt;/em&gt; emphasis.</td>
+            </tr>
+            <tr>
+              <td>Address dl</td>
+              <td><code>MonoLabelRow</code> + body Inter</td>
+              <td><code>--font-mono</code> 9.5px caps · <code>--font-body</code> 14px</td>
+              <td>4-column dl with 1px paper-edge vertical rules between cells — same quiet rule vocabulary as the InterviewCredits grid.</td>
+            </tr>
+            <tr>
+              <td>Directory column heading</td>
+              <td><code>MonoLabel</code></td>
+              <td><code>--font-mono</code> 11px 700 · 0.16em tracking</td>
+              <td>Mono-caps with a coloured glyph prefix (§ * +) and a 1px ink underline — reuses the MonoLabel + 1px-ink-rule pattern from BrandedTabs.</td>
+            </tr>
+            <tr>
+              <td>Directory link row</td>
+              <td><code>BrandedTabs</code> press-down idiom (softened)</td>
+              <td>press-down hover canon · <code>--color-jersey-deep</code></td>
+              <td>1px dotted paper-edge between rows. Hover uses translate(1px,1px) + jersey-deep recolour. No shadow shift (rows have no shadow).</td>
+            </tr>
+            <tr>
+              <td>Motto ornaments</td>
+              <td><code>EndMark</code> star/dash flourish</td>
+              <td>typographic glyphs § * + only</td>
+              <td>No Lucide, no Stenciletta. Three approved glyphs used in alternation.</td>
+            </tr>
+            <tr>
+              <td>Motto display lines</td>
+              <td><code>EditorialHeading</code> (display-lg + display-md italic)</td>
+              <td><code>--font-display</code> 900 caps + italic 700</td>
+              <td>Same italic-on-display rhythm as the letterhead headline. Italic accent moves to COMPAGNIE for editorial pacing.</td>
+            </tr>
+            <tr>
+              <td>Colofon strip</td>
+              <td><code>MonoLabelRow</code></td>
+              <td><code>--font-mono</code> 10.5px · 0.12em tracking</td>
+              <td>3-column mono caps. Bold KCVV ELEWIJT in <code>--color-ink</code> doubles as quiet wordmark sign-off.</td>
+            </tr>
+            <tr>
+              <td>Vertical rules (directory)</td>
+              <td>1px paper-edge divider</td>
+              <td><code>--color-paper-edge</code></td>
+              <td>Same hairline used in TapedCard internal dividers.</td>
+            </tr>
+            <tr>
+              <td>Horizontal band rules</td>
+              <td>1px ink rule</td>
+              <td><code>--color-ink</code></td>
+              <td>Three solid 1px ink rules separate letterhead / directory / motto. The motto-to-colofon rule drops to <code>--color-paper-edge</code> for sign-off softness.</td>
+            </tr>
+            <tr>
+              <td>Press-down hover</td>
+              <td>Canonical paper-stamp press</td>
+              <td><code>translate(1px, 1px)</code> + <code>transition-all 300ms</code></td>
+              <td>Applied to directory links + colofon legal links. Shadow shift omitted because rows are unshadowed; recolour to jersey-deep / ink carries the haptic signal.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===========================================================
+           NOTES / RESOLVED / OPEN
+           =========================================================== -->
+      <footer class="page-footer">
+        <div class="section-meta">
+          <span class="mono">§ NOTES</span>
+          <span class="mono mono--muted">— resolved decisions + open questions for owner</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Footer is paper-toned end-to-end — no ink-bg band, no jersey-bg band. Cream foundation throughout</li>
+          <li>Top edge is 1px solid <code>--color-ink</code> rule + 2px <code>linear-gradient(--color-cream → --color-cream-soft)</code> immediately beneath. No <code>box-shadow</code>, no blur</li>
+          <li>Letterhead is single-column letter-style: 96×96 ink-bordered crest left, display-italic 900 headline + 4-cell address dl right</li>
+          <li>Directory is 3 columns CLUB / TEAMS / VOLG with 1px paper-edge vertical rules and 1px dotted paper-edge horizontal rules between link rows</li>
+          <li>Motto is centred typography, no bg, no border. Verbatim line: <strong>"ER IS MAAR ÉÉN PLEZANTE COMPAGNIE"</strong></li>
+          <li>Colofon is a 3-column mono-caps strip — stamnummer + BTW · copyright · legal links</li>
+          <li>Press-down hover canon applies to directory link rows and colofon legal links — <code>translate(1px, 1px)</code> + jersey-deep / ink recolour</li>
+          <li>Typographic glyph vocabulary is § (CLUB), * (TEAMS), + (VOLG). No Lucide. No Stenciletta. No emoji</li>
+          <li>Italic emphasis on display headlines stays jersey-deep — same as EditorialHeading rhythm</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction C (this) and the three sibling
+          directions authored alongside (A · paper-bg classic, B · ink-bg
+          inverted, D · jersey-bg interlude — names placeholder). Once a
+          direction is locked we ship <code>&lt;SiteFooter&gt;</code> in
+          <code>apps/web/src/components/layout/SiteFooter/</code> with
+          Storybook coverage of the four bands plus a narrow-viewport
+          stack story.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <table class="reuse-table" style="margin-top: 12px">
+          <thead>
+            <tr>
+              <th style="width: 30%">Token</th>
+              <th style="width: 20%">Value</th>
+              <th>Used by</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--color-cream</code></td>
+              <td>#f5f1e6</td>
+              <td>Footer surface, crest box fill, address dl fill, all four bands</td>
+            </tr>
+            <tr>
+              <td><code>--color-cream-soft</code></td>
+              <td>#ede8da</td>
+              <td>Bottom stop of the 2px fold-shadow gradient under the top ink rule</td>
+            </tr>
+            <tr>
+              <td><code>--color-ink</code></td>
+              <td>#0a0a0a</td>
+              <td>Top fold rule, letterhead bottom rule, directory bottom rule, directory column-heading underline, crest border, headline body, copyright wordmark</td>
+            </tr>
+            <tr>
+              <td><code>--color-ink-soft</code></td>
+              <td>#1f1f1f</td>
+              <td>Motto display-italic line ("Er is maar één")</td>
+            </tr>
+            <tr>
+              <td><code>--color-ink-muted</code></td>
+              <td>#6b6b6b</td>
+              <td>Mono kicker, address dt labels, directory list arrows, colofon mono-caps body, motto signature line</td>
+            </tr>
+            <tr>
+              <td><code>--color-jersey-deep</code></td>
+              <td>#008755</td>
+              <td>Italic emphasis in headlines, glyph prefixes (§ * +) on directory headings, hover recolour for directory link rows, italic emphasis on motto display lines</td>
+            </tr>
+            <tr>
+              <td><code>--color-paper-edge</code></td>
+              <td>#d9d2bd</td>
+              <td>Address dl vertical separators, directory vertical separators, directory dotted row separators, motto-to-colofon hairline, address-link border-bottom underline</td>
+            </tr>
+            <tr>
+              <td><code>--font-display</code></td>
+              <td>Playfair Display</td>
+              <td>Letterhead headline (900), motto line A (italic 700) and line B (900 caps), crest letter (italic 900)</td>
+            </tr>
+            <tr>
+              <td><code>--font-body</code></td>
+              <td>Inter</td>
+              <td>Address dd values, directory link labels</td>
+            </tr>
+            <tr>
+              <td><code>--font-mono</code></td>
+              <td>IBM Plex Mono</td>
+              <td>Letterhead kicker, address dt labels, directory column titles, directory arrows, motto ornaments + signature line, colofon strip</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top: 32px">Press-down hover canon — applied surfaces</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0 0">
+          Two surface classes carry the canonical paper-stamp press idiom:
+          directory link rows and colofon legal links. Both apply
+          <code>transform: translate(1px, 1px)</code> with
+          <code>transition: all 300ms ease</code> and recolour to
+          jersey-deep (directory) or ink (colofon legal). The shadow
+          shift component of the canon is omitted on these surfaces
+          because the rows have no resting shadow — the recolour +
+          translate alone supply the haptic tap reading. Address links
+          (phone, email) carry only an underline-shift on hover —
+          they are inline within body copy, not interactive cards, and
+          the press-down idiom would over-signal at body-text scale.
+        </p>
+
+        <h3 style="margin-top: 32px">Responsive behaviour (production rules · not in mockup)</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li><strong>≥1024px</strong> — as rendered above. Letterhead 2-col, address dl 4-col, directory 3-col, colofon 3-col</li>
+          <li><strong>768–1023px</strong> — letterhead stays 2-col, address dl drops to 2×2, directory stays 3-col with reduced inner padding (16px), colofon stays 3-col</li>
+          <li><strong>640–767px</strong> — letterhead drops to single column (crest above headline), address dl stacks to 2×2 then 1-col, directory stacks to 1-col with full-width dotted rules between columns (the 1px ink vertical rules drop entirely), colofon stacks center → left → right, all left-aligned</li>
+          <li><strong>≤639px</strong> — outer padding drops to 24px, headline clamps to 28px, motto line B clamps to 32px. The 2px fold-shadow gradient and 1px ink top rule remain unchanged at every breakpoint — the fold metaphor scales with the page</li>
+        </ul>
+
+        <h3 style="margin-top: 32px">Accessibility</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Footer carries <code>role="contentinfo"</code> + <code>aria-label="Site footer"</code></li>
+          <li>Directory carries <code>aria-label="Footer navigatie"</code> on its <code>&lt;nav&gt;</code></li>
+          <li>External directory links (Facebook, Instagram, X, YouTube) use the <code>↗</code> arrow glyph as an aria-hidden visual cue; production wires <code>rel="noopener"</code> + screen-reader-only "(opens in new tab)" text</li>
+          <li>Crest letter is <code>aria-hidden="true"</code> — the wordmark in the headline below carries the accessible club name</li>
+          <li>Motto ornament rows are <code>aria-hidden="false"</code> by default but carry no semantic content; if owner prefers, flip to <code>aria-hidden="true"</code> to prevent SR announcement of "section section asterisk plus asterisk section"</li>
+          <li>Colour contrast: ink (#0a0a0a) on cream (#f5f1e6) ≈ 17.5:1 — well above AAA. ink-muted (#6b6b6b) on cream ≈ 4.9:1 — passes AA for body, fails AAA — acceptable for mono-caps labels and arrows but not for body copy (none used here)</li>
+          <li>Press-down hover canon is supplemented in production by a <code>:focus-visible</code> 2px ink outline — not shown in mockup</li>
+        </ul>
+
+        <h3 style="margin-top: 32px">Production handoff sketch</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0 0">
+          On lock, ship <code>&lt;SiteFooter&gt;</code> in
+          <code>apps/web/src/components/layout/SiteFooter/</code> with
+          subcomponents <code>&lt;FooterLetterhead&gt;</code>,
+          <code>&lt;FooterDirectory&gt;</code>,
+          <code>&lt;FooterMotto&gt;</code>, <code>&lt;FooterColofon&gt;</code>.
+          Directory link data accepted as a typed prop
+          (<code>columns: { title: string; glyph: '§' | '*' | '+'; items: { label: string; href: string; external?: boolean }[] }[]</code>).
+          Address block sourced from a Sanity <code>siteSettings</code>
+          singleton (existing). Storybook stories per band + a full-width
+          composed story + a narrow-viewport stacked story. Visual
+          regression baseline taken at 1280, 1024, 768, 640, 375.
+        </p>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          § END · DIRECTION C — PAPER-FOLD LETTERHEAD · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

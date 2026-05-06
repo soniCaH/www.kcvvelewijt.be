@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction A — Poster Wordmark Block · Phase 3 · Checkpoint D · SiteFooter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         FOOTER MOCK — full-bleed, three-band poster-pasted-on-page
+         Band 1: jersey-green wordmark band (the "poster")
+         Band 2: cream three-column directory block
+         Band 3: ink bottom strip — copyright + small links
+         ============================================================ */
+
+      .footer-mock {
+        /* Break out of the panel padding so the footer feels full-bleed */
+        margin: 0 -32px;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        background: var(--color-cream);
+        overflow: hidden;
+      }
+
+      /* ---------- BAND 1 — POSTER WORDMARK ---------- */
+
+      .footer-poster {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 40px 56px 56px;
+        position: relative;
+        border-bottom: 2px solid var(--color-ink);
+        /* Subtle paper-noise dots so the green band reads as printed, not flat */
+        background-image:
+          radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px),
+          radial-gradient(circle at 72% 80%, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px);
+        background-size: 200px 200px, 280px 280px;
+      }
+
+      .footer-poster__metarow {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--color-cream);
+        opacity: 0.9;
+        margin: 0 0 24px;
+      }
+      .footer-poster__metarow .dot {
+        width: 4px; height: 4px; border-radius: 50%;
+        background: var(--color-cream);
+        opacity: 0.7;
+      }
+      .footer-poster__motto { font-weight: 700; letter-spacing: 0.18em; }
+
+      .footer-poster__wordmark {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: normal;
+        line-height: 0.88;
+        letter-spacing: -0.02em;
+        font-size: clamp(72px, 13vw, 188px);
+        color: var(--color-cream);
+        margin: 0;
+        text-transform: uppercase;
+        /* Two lines: KCVV / ELEWIJT — stacked like a poster headline */
+        display: block;
+      }
+      .footer-poster__wordmark span.line {
+        display: block;
+      }
+      .footer-poster__wordmark span.line + span.line {
+        margin-top: -0.06em;
+      }
+      .footer-poster__wordmark em {
+        font-style: italic;
+        color: var(--color-cream);
+        /* a small chromatic accent so ELEWIJT reads as a sibling word, not a copy */
+        text-shadow: 4px 4px 0 rgba(10, 10, 10, 0.22);
+      }
+
+      .footer-poster__rule {
+        border: none;
+        height: 2px;
+        background: var(--color-cream);
+        opacity: 0.5;
+        margin: 28px 0 0;
+      }
+
+      .footer-poster__caption {
+        display: flex;
+        gap: 24px;
+        align-items: baseline;
+        margin-top: 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-cream);
+        opacity: 0.85;
+        flex-wrap: wrap;
+      }
+      .footer-poster__caption strong {
+        color: var(--color-cream);
+        font-weight: 700;
+        opacity: 1;
+      }
+
+      /* ---------- BAND 2 — DIRECTORY BLOCK (cream) ---------- */
+
+      .footer-directory {
+        background: var(--color-cream);
+        padding: 56px 56px 48px;
+        border-bottom: 2px solid var(--color-ink);
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1fr;
+        gap: 48px;
+      }
+
+      .footer-col__label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid var(--color-ink);
+      }
+
+      .footer-col__heading {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 28px;
+        line-height: 1.05;
+        color: var(--color-ink);
+        margin: 0 0 16px;
+      }
+      .footer-col__heading em { color: var(--color-jersey-deep); font-style: italic; }
+
+      .footer-col ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .footer-col li {
+        padding: 6px 0;
+        font-size: 15px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        border-bottom: 1px dotted var(--color-paper-edge);
+      }
+      .footer-col li:last-child { border-bottom: none; }
+      .footer-col a {
+        color: var(--color-ink);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        padding: 2px 0;
+        transition: all 300ms ease;
+        display: inline-block;
+      }
+      .footer-col a:hover {
+        color: var(--color-jersey-deep);
+        transform: translate(1px, 1px);
+      }
+
+      .footer-col p.address {
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--color-ink-soft);
+        margin: 0 0 14px;
+      }
+      .footer-col p.address strong {
+        color: var(--color-ink);
+        font-weight: 600;
+        display: block;
+      }
+
+      /* "Volg ons" — typographic glyph row, no Lucide */
+      .glyph-row {
+        display: flex;
+        gap: 0;
+        align-items: stretch;
+        margin-top: 8px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm);
+        max-width: 320px;
+      }
+      .glyph-row a {
+        flex: 1;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-align: center;
+        padding: 14px 8px;
+        color: var(--color-ink);
+        text-decoration: none;
+        border-right: 1.5px solid var(--color-ink);
+        transition: all 300ms ease;
+      }
+      .glyph-row a:last-child { border-right: none; }
+      .glyph-row a:hover {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+      }
+      .glyph-row a .star {
+        display: inline-block;
+        margin: 0 4px;
+        color: var(--color-jersey-deep);
+        font-weight: 400;
+      }
+      .glyph-row a:hover .star { color: var(--color-cream); }
+
+      /* Newsletter mini — paper-card aligned with form atoms */
+      .footer-newsletter {
+        margin-top: 22px;
+        padding: 16px;
+        background: var(--color-cream-soft);
+        border: 1.5px solid var(--color-ink);
+      }
+      .footer-newsletter__label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 8px;
+        display: block;
+      }
+      .footer-newsletter__row {
+        display: flex;
+        gap: 0;
+      }
+      .footer-newsletter__row input {
+        flex: 1;
+        font-family: var(--font-body);
+        font-size: 14px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        border-right: none;
+        padding: 10px 12px;
+        color: var(--color-ink);
+        border-radius: 0;
+      }
+      .footer-newsletter__row input:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px var(--color-cream-soft);
+      }
+      .footer-newsletter__row button {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 10px 18px;
+        cursor: pointer;
+        border-radius: 0;
+        box-shadow: var(--shadow-paper-sm-soft);
+        transition: all 300ms ease;
+      }
+      .footer-newsletter__row button:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+
+      /* ---------- BAND 3 — INK STRIP ---------- */
+
+      .footer-strip {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 18px 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .footer-strip__left {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-cream);
+        opacity: 0.85;
+      }
+      .footer-strip__left .star { color: var(--color-jersey); margin: 0 6px; }
+      .footer-strip__links {
+        display: flex;
+        gap: 0;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .footer-strip__links a {
+        color: var(--color-cream);
+        text-decoration: none;
+        padding: 4px 12px;
+        border-right: 1px solid rgba(245, 241, 230, 0.3);
+        transition: all 300ms ease;
+      }
+      .footer-strip__links a:last-child { border-right: none; }
+      .footer-strip__links a:hover {
+        color: var(--color-jersey);
+      }
+
+      /* ============================================================
+         BREAKDOWN — band-by-band callouts
+         ============================================================ */
+
+      .breakdown-band {
+        margin-top: 32px;
+        border: 1px solid var(--color-paper-edge);
+        background: var(--color-cream);
+      }
+      .breakdown-band__caption {
+        padding: 14px 24px;
+        background: var(--color-cream-soft);
+        border-bottom: 1px solid var(--color-paper-edge);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-ink-muted);
+      }
+      .breakdown-band__caption strong { color: var(--color-ink); font-weight: 700; }
+      .breakdown-band__body { padding: 24px; }
+
+      /* Mini reproductions of each band so reviewers see them in isolation */
+      .mini-poster {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 24px 28px 28px;
+        border: 1.5px solid var(--color-ink);
+      }
+      .mini-poster .meta {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.9;
+        margin: 0 0 14px;
+      }
+      .mini-poster .wm {
+        font-family: var(--font-display);
+        font-weight: 900;
+        line-height: 0.9;
+        font-size: clamp(48px, 6vw, 80px);
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+      .mini-poster .wm span { display: block; }
+      .mini-poster .cap {
+        margin-top: 14px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.85;
+      }
+
+      .mini-directory {
+        background: var(--color-cream);
+        padding: 24px;
+        border: 1.5px solid var(--color-ink);
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+      }
+      .mini-directory h5 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 8px;
+        padding-bottom: 6px;
+        border-bottom: 1.5px solid var(--color-ink);
+      }
+      .mini-directory p {
+        font-size: 13px;
+        color: var(--color-ink-soft);
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .mini-strip {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 14px 24px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        border: 1.5px solid var(--color-ink);
+      }
+      .mini-strip .star { color: var(--color-jersey); }
+
+      /* ============================================================
+         PRIMITIVE REUSE TABLE
+         ============================================================ */
+
+      .reuse-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 16px;
+      }
+      .reuse-table th, .reuse-table td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table thead th {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-ink-muted);
+        font-weight: 600;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .reuse-table td.atom {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-ink);
+        white-space: nowrap;
+      }
+      .reuse-table td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+      .reuse-table .source {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-jersey-deep);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* ============================================================
+         FOOTER (page-level — for this mockup file)
+         ============================================================ */
+
+      footer.notes { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer.notes code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      @media (max-width: 880px) {
+        .footer-directory { grid-template-columns: 1fr; gap: 32px; }
+        .mini-directory { grid-template-columns: 1fr; }
+        .footer-poster { padding: 32px 28px 40px; }
+        .footer-strip { padding: 18px 28px; }
+        .footer-mock { margin: 0 -16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HEADER
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT D · SITEFOOTER · DIRECTION A</span>
+          <span class="mono mono--muted">★ POSTER WORDMARK BLOCK</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Het <span class="display"><em>plakkaat</em></span> onderaan.</h1>
+        <p class="lead">
+          A divergent footer direction — <strong>not</strong> a refinement of
+          the retro-terrace-fanzine screenshot. The page closes with a
+          full-bleed jersey-green band carrying a poster-scale
+          <code>KCVV ELEWIJT</code> wordmark in Freight Display 900, like
+          a printed bill pasted over the bottom of the page. Beneath it:
+          a calm cream directory block (CLUB / CONTACT / VOLG ONS) and a
+          dense ink strip with copyright + small links. The hero element is
+          the wordmark itself — the footer reads as a sign-off, not a sitemap.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           FULL FOOTER — RENDERED AT INTENDED SCALE
+           =========================================================== -->
+      <section class="section" id="full">
+        <div class="section-meta">
+          <span class="mono">★ 01 · FULL FOOTER · INTENDED SCALE</span>
+          <span class="mono mono--muted">— rendered as it would sit at the bottom of <code>/</code> at desktop width</span>
+        </div>
+        <h2>Het <em>volledige</em> plakkaat.</h2>
+        <p class="lead">
+          Three bands stacked, sharp 2px ink seams, paper shadow on the outer
+          envelope. The green band breathes — generous top/bottom padding so
+          the wordmark feels stamped, not crammed. The directory block keeps
+          the cream paper foundation the rest of the redesign already speaks.
+          The ink strip is the quiet legal end-note.
+        </p>
+
+        <div class="footer-mock" role="contentinfo" aria-label="Site footer mock">
+          <!-- ───────── BAND 1 — POSTER WORDMARK ───────── -->
+          <div class="footer-poster">
+            <p class="footer-poster__metarow">
+              <span class="footer-poster__motto">★ ER IS MAAR ÉÉN PLEZANTE</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>SK ELEWIJT '26</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>STAMNUMMER 5503</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>OPGERICHT 1928</span>
+            </p>
+
+            <h2 class="footer-poster__wordmark" aria-label="KCVV Elewijt">
+              <span class="line">KCVV</span>
+              <span class="line"><em>Elewijt</em></span>
+            </h2>
+
+            <hr class="footer-poster__rule" aria-hidden="true" />
+
+            <p class="footer-poster__caption">
+              <strong>★ COMPAGNIE ★</strong>
+              <span>Voetbalstraat 1A · 1982 Elewijt</span>
+              <span>info@kcvvelewijt.be</span>
+              <span>+32 (0)15 61 12 34</span>
+            </p>
+          </div>
+
+          <!-- ───────── BAND 2 — DIRECTORY BLOCK ───────── -->
+          <div class="footer-directory">
+            <!-- COL 1 — CLUB -->
+            <section class="footer-col" aria-labelledby="footer-col-club">
+              <p class="footer-col__label" id="footer-col-club">★ 01 · CLUB</p>
+              <h3 class="footer-col__heading">De <em>club.</em></h3>
+              <ul>
+                <li><a href="#">Bestuur &amp; commissies</a></li>
+                <li><a href="#">A-ploeg</a></li>
+                <li><a href="#">B-ploeg</a></li>
+                <li><a href="#">Jeugdwerking</a></li>
+                <li><a href="#">Geschiedenis</a></li>
+                <li><a href="#">Word lid &amp; tarieven</a></li>
+                <li><a href="#">Word sponsor</a></li>
+              </ul>
+            </section>
+
+            <!-- COL 2 — CONTACT -->
+            <section class="footer-col" aria-labelledby="footer-col-contact">
+              <p class="footer-col__label" id="footer-col-contact">★ 02 · CONTACT</p>
+              <h3 class="footer-col__heading">Op <em>bezoek.</em></h3>
+              <p class="address">
+                <strong>KCVV Elewijt</strong>
+                Voetbalstraat 1A<br />
+                1982 Elewijt<br />
+                Zemst, België
+              </p>
+              <ul>
+                <li><a href="#">info@kcvvelewijt.be</a></li>
+                <li><a href="#">+32 (0)15 61 12 34</a></li>
+                <li><a href="#">Routebeschrijving</a></li>
+                <li><a href="#">Kantine-uren</a></li>
+              </ul>
+            </section>
+
+            <!-- COL 3 — VOLG ONS -->
+            <section class="footer-col" aria-labelledby="footer-col-volg">
+              <p class="footer-col__label" id="footer-col-volg">★ 03 · VOLG ONS</p>
+              <h3 class="footer-col__heading">Volg ons <em>mee.</em></h3>
+
+              <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0 0 8px">
+                Vier kanalen, één compagnie. Klik door naar de socials of
+                schrijf je in voor de nieuwsbrief — om de twee weken een
+                korte update over wedstrijden, jeugd en kantine.
+              </p>
+
+              <nav class="glyph-row" aria-label="Sociale netwerken">
+                <a href="#" aria-label="Facebook"><span class="star">*</span>FB<span class="star">*</span></a>
+                <a href="#" aria-label="Instagram"><span class="star">*</span>IG<span class="star">*</span></a>
+                <a href="#" aria-label="X (voorheen Twitter)"><span class="star">*</span>X<span class="star">*</span></a>
+                <a href="#" aria-label="YouTube"><span class="star">*</span>YT<span class="star">*</span></a>
+              </nav>
+
+              <div class="footer-newsletter">
+                <span class="footer-newsletter__label">★ Nieuwsbrief</span>
+                <form class="footer-newsletter__row" onsubmit="event.preventDefault()">
+                  <input type="email" placeholder="E-mailadres" aria-label="E-mailadres" />
+                  <button type="submit">IN ↗</button>
+                </form>
+              </div>
+            </section>
+          </div>
+
+          <!-- ───────── BAND 3 — INK STRIP ───────── -->
+          <div class="footer-strip">
+            <p class="footer-strip__left">
+              © 2026 KCVV ELEWIJT <span class="star">★</span> ALLE RECHTEN VOORBEHOUDEN <span class="star">★</span> STAMNR. 5503
+            </p>
+            <nav class="footer-strip__links" aria-label="Footer-links">
+              <a href="#">Privacy</a>
+              <a href="#">Cookies</a>
+              <a href="#">Colofon</a>
+              <a href="#">Pers</a>
+            </nav>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTIONS BREAKDOWN
+           =========================================================== -->
+      <section class="section" id="breakdown">
+        <div class="section-meta">
+          <span class="mono">★ 02 · SECTIONS BREAKDOWN</span>
+          <span class="mono mono--muted">— each band in isolation, with FOR / AGAINST tradeoffs</span>
+        </div>
+        <h2>Drie <em>banden.</em></h2>
+        <p class="lead">
+          Each band is a distinct surface with a distinct job. Reviewers
+          should be able to push back on one band without rejecting the
+          whole footer — so each appears here on its own with the questions
+          it raises.
+        </p>
+
+        <!-- BAND 1 — POSTER -->
+        <div class="breakdown-band">
+          <div class="breakdown-band__caption">
+            <strong>BAND 01 · POSTER WORDMARK</strong> · jersey-green full-bleed · Freight Display 900 · ER IS MAAR ÉÉN PLEZANTE meta-row
+          </div>
+          <div class="breakdown-band__body">
+            <div class="mini-poster">
+              <p class="meta">★ ER IS MAAR ÉÉN PLEZANTE · STAMNR. 5503 · OPGERICHT 1928</p>
+              <h4 class="wm">
+                <span>KCVV</span>
+                <span style="font-style: italic; text-shadow: 3px 3px 0 rgba(10,10,10,0.22)">Elewijt</span>
+              </h4>
+              <p class="cap">★ COMPAGNIE ★ &nbsp; Voetbalstraat 1A · 1982 Elewijt</p>
+            </div>
+
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Wordmark scale claims the page-end the way a stadium banner claims a wall. The mono motto row anchors the brand voice ("er is maar één plezante") in the canonical phrasing without burning a Playfair line on it. Jersey-deep + cream is the highest-contrast pair in the token map — readable, unambiguous, brand-locked.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>A 188px wordmark on every page is loud — at the bottom of a quiet article it can feel like a second hero. Italic Elewijt with a soft drop-shadow risks reading as "logo-on-logo" if the page above already shows the SiteHeader logo. Mitigation: keep the band height fixed and resist the temptation to add a crest sprite.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 2 — DIRECTORY -->
+        <div class="breakdown-band">
+          <div class="breakdown-band__caption">
+            <strong>BAND 02 · DIRECTORY BLOCK</strong> · cream paper · 3 columns (CLUB / CONTACT / VOLG ONS) · mono labels + italic display headings + dotted-rule list
+          </div>
+          <div class="breakdown-band__body">
+            <div class="mini-directory">
+              <div>
+                <h5>★ 01 · CLUB</h5>
+                <p>Bestuur, A-ploeg, B-ploeg, jeugdwerking, geschiedenis, lid worden, sponsor worden — primary site-map in italic display heading + plain-link list.</p>
+              </div>
+              <div>
+                <h5>★ 02 · CONTACT</h5>
+                <p>Adresblok in body text (rectangular photo-default doesn't apply — pure text) + clickable e-mail/telefoon/route/uren links. No map embed in this band.</p>
+              </div>
+              <div>
+                <h5>★ 03 · VOLG ONS</h5>
+                <p>Typographic glyph row (FB · IG · X · YT, no Lucide), short paragraph framing the channels, and a paper-card newsletter mini reusing form-atom chrome.</p>
+              </div>
+            </div>
+
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Cream block lands the user back into the same paper foundation the rest of the page used — no tonal whiplash between the green poster and the legal strip. Three columns is the conventional footer scan-pattern, which lowers cognitive load at end-of-page. The italic display per-column heading carries voice without pushing past CLAUDE.md's "no Stenciletta" rule.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Three columns at 1280px wrap to a single column ≤880px — the band gets tall fast on phones, which can push the ink strip below the fold on short viewports. The newsletter mini lives only in column 3, which makes its discoverability viewport-dependent. Counter-pattern would be hoisting the newsletter into its own dedicated band above the directory.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAND 3 — INK STRIP -->
+        <div class="breakdown-band">
+          <div class="breakdown-band__caption">
+            <strong>BAND 03 · INK STRIP</strong> · pure ink bg · cream mono caps · copyright left · small links right · jersey star separators
+          </div>
+          <div class="breakdown-band__body">
+            <div class="mini-strip">
+              <span>© 2026 KCVV ELEWIJT <span class="star">★</span> ALLE RECHTEN VOORBEHOUDEN <span class="star">★</span> STAMNR. 5503</span>
+              <span>PRIVACY · COOKIES · COLOFON · PERS</span>
+            </div>
+
+            <div class="tradeoffs">
+              <div>
+                <h4 class="for">↑ FOR</h4>
+                <p>Ink strip is the quietest possible legal end-note — no decoration, no display type, just IBM Plex Mono in cream on ink. Jersey-green star separators are the only chromatic accent and they reuse a glyph already in the meta-row above, so the band has zero new vocabulary. Reads like the colophon line at the bottom of a printed match-day programme.</p>
+              </div>
+              <div>
+                <h4 class="against">↓ AGAINST</h4>
+                <p>Pure ink fill is a third surface colour for the footer (after green and cream), which means the page closes on three distinct backgrounds in 600px of vertical space. If a future reviewer wants the strip to absorb into the directory block, this band can be removed and copyright/links can move into the bottom row of column 1 — at the cost of reduced legal-link legibility.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 03 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— every visual choice traced back to an approved primitive</span>
+        </div>
+        <h2>Niets <em>nieuws.</em></h2>
+        <p class="lead">
+          Per the project's "reuse approved primitives" rule (memory:
+          <code>feedback_reuse_approved_primitives.md</code>), every atom in
+          this footer maps back to a vocabulary the redesign already speaks.
+          Nothing here is invented — the footer composes existing atoms in a
+          new arrangement.
+        </p>
+
+        <table class="reuse-table" aria-label="Primitive reuse map">
+          <thead>
+            <tr>
+              <th>FOOTER ATOM</th>
+              <th>SOURCE PRIMITIVE</th>
+              <th>HOW IT'S REUSED</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="atom">Outer envelope</td>
+              <td class="source">TapedCard (untaped variant)</td>
+              <td><code>border: 2px solid var(--color-ink)</code> + <code>--shadow-paper-md</code> — the same paper-card body used by hero panels and match cards. No tape, no rotation: footers are flat.</td>
+            </tr>
+            <tr>
+              <td class="atom">Poster band bg</td>
+              <td class="source">YouthBlock jersey interlude</td>
+              <td>Full-bleed <code>--color-jersey-deep</code> with subtle paper-noise dots, identical pattern to the homepage <code>YouthBlock</code> band described in master-design §5.1 line 378.</td>
+            </tr>
+            <tr>
+              <td class="atom">Wordmark "KCVV / Elewijt"</td>
+              <td class="source">EditorialHeading size="display-2xl"</td>
+              <td>Same Playfair Display (production: Freight Display 900) + italic emphasis token used by every editorial hero — scaled up to the band-level extreme. Italic word reuses the <code>display em</code> emphasis pattern.</td>
+            </tr>
+            <tr>
+              <td class="atom">Meta motto row</td>
+              <td class="source">MonoLabelRow</td>
+              <td>Mono caps + ★ glyph + dot separators — identical to the homepage <code>MonoLabelRow</code> above the editorial hero. Verbatim "ER IS MAAR ÉÉN PLEZANTE" per <code>reference_club_identity.md</code>.</td>
+            </tr>
+            <tr>
+              <td class="atom">Directory column heading</td>
+              <td class="source">EditorialHeading size="md" + italic emphasis</td>
+              <td>"De <em>club.</em>" / "Op <em>bezoek.</em>" / "Volg ons <em>mee.</em>" — same italic-final-word emphasis as h2's elsewhere in the redesign. Jersey-deep tint on the emphasised word.</td>
+            </tr>
+            <tr>
+              <td class="atom">Mono column labels</td>
+              <td class="source">MonoLabel (pill variant flattened)</td>
+              <td>★ 01 · CLUB pattern — same numbering + star kicker as the QASection row numbers. 1.5px ink underline replaces the pill border so the label reads as a section header, not a chip.</td>
+            </tr>
+            <tr>
+              <td class="atom">Link list with dotted rule</td>
+              <td class="source">DottedDivider</td>
+              <td>Same 1px dotted edge already separating Q&amp;A rows — reused as a list-item separator at footer scale.</td>
+            </tr>
+            <tr>
+              <td class="atom">Social glyph row</td>
+              <td class="source">BrandedTabs + canonical press-down hover</td>
+              <td>Three-cell ink-bordered row, mono caps, identical to the BrandedTabs strip used for A-PLOEG / B-PLOEG / JEUGD-PLOEG. Hover flips fill to jersey-deep — the canonical-press-down idiom (<code>hover:translate(1px,1px)</code> via the surrounding <code>transition-all duration-300</code>).</td>
+            </tr>
+            <tr>
+              <td class="atom">Newsletter mini</td>
+              <td class="source">Phase 2 form atoms (input + ink button)</td>
+              <td>Verbatim copy of the form-atom input chrome (2px ink border, sharp corners, cream fill) + the ink submit button with <code>--shadow-paper-sm-soft</code>. Press idiom inherited unchanged.</td>
+            </tr>
+            <tr>
+              <td class="atom">Ink bottom strip</td>
+              <td class="source">SiteHeader top-strip (inverted)</td>
+              <td>Same band geometry as the inverse of <code>SiteHeader</code>'s top utility strip — ink fill, cream mono caps, jersey-green ★ separators, small flat links. Reads as a closing bookend to the header's opening strip.</td>
+            </tr>
+            <tr>
+              <td class="atom">Star glyph (★) accents</td>
+              <td class="source">EndMark / star kicker</td>
+              <td>Same Unicode ★ used by EndMark and the * AFSCHEID DUBBEL * kicker — never replaced with a Lucide icon, per <code>feedback_visual_preferences.md</code> and <code>feedback_icons_over_emojis.md</code> (typographic glyph wins for this use).</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===========================================================
+           NOTES (page-level footer for this mockup file)
+           =========================================================== -->
+      <footer class="notes">
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— divergence from screenshot, token map, open questions</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Footer is a <strong>fresh divergent design</strong> — not a refinement of the retro-terrace-fanzine screenshot footer (per <code>project_phase_3_footer_divergence.md</code>)</li>
+          <li>Hero element of the footer is the wordmark, not the directory — the band reads as a poster pasted over the page-end</li>
+          <li>Three bands, three surface colours, one envelope: <code>jersey-deep</code> → <code>cream</code> → <code>ink</code></li>
+          <li>Motto rendered verbatim as <strong>"ER IS MAAR ÉÉN PLEZANTE"</strong> — never "meer dan een club" (per <code>reference_club_identity.md</code>)</li>
+          <li>Social glyphs are typographic (<code>* FB *</code>, <code>* IG *</code>, <code>* X *</code>, <code>* YT *</code>), not Lucide icons (per <code>feedback_visual_preferences.md</code>)</li>
+          <li>Newsletter input + submit reuse Phase 2 Track A form-atom chrome verbatim</li>
+          <li>Press-down hover canon: <code>transform: translate(1px, 1px)</code> + <code>transition-all 300ms</code> on every interactive (per <code>feedback_canonical_press_down_hover.md</code>)</li>
+          <li>No tape, no rotation, no border-radius — footer is a flat sibling of header, alerts, and tabs</li>
+          <li>Stenciletta is <strong>not</strong> reached for — wordmark uses Freight Display 900 (production) / Playfair Display 900 (mockup) per <code>feedback_visual_preferences.md</code></li>
+          <li>Bottom strip reuses ink + jersey-star pattern from SiteHeader top-strip; the page opens and closes on the same chrome bookend</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between this Direction A and any sibling directions
+          authored alongside (B / C). On lock, ship as <code>&lt;SiteFooter&gt;</code>
+          composed of <code>&lt;PosterWordmark&gt;</code> (band 1, exists per
+          master-design §5.1 line 381), <code>&lt;FooterDirectory&gt;</code>
+          (band 2, new), <code>&lt;FooterStrip&gt;</code> (band 3, new). Storybook
+          stories per band + a full-footer composition story.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACE / TINT</h4>
+            <ul>
+              <li>Band 1 surface: <code>--color-jersey-deep</code></li>
+              <li>Band 1 type: <code>--color-cream</code></li>
+              <li>Band 2 surface: <code>--color-cream</code></li>
+              <li>Band 2 type: <code>--color-ink</code> / <code>--color-ink-soft</code></li>
+              <li>Band 2 emphasis: <code>--color-jersey-deep</code> on italic words</li>
+              <li>Band 3 surface: <code>--color-ink</code></li>
+              <li>Band 3 type: <code>--color-cream</code></li>
+              <li>Band 3 accent: <code>--color-jersey</code> for ★ separators</li>
+              <li>Newsletter mini bg: <code>--color-cream-soft</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / DEPTH</h4>
+            <ul>
+              <li>Outer envelope border: <code>2px solid var(--color-ink)</code></li>
+              <li>Outer envelope shadow: <code>--shadow-paper-md</code> (6×6 ink)</li>
+              <li>Inter-band seam: <code>2px solid var(--color-ink)</code></li>
+              <li>Mono label underline: <code>1.5px solid var(--color-ink)</code></li>
+              <li>Link separator: <code>1px dotted var(--color-paper-edge)</code></li>
+              <li>Glyph row border: <code>2px solid var(--color-ink)</code> + <code>--shadow-paper-sm</code></li>
+              <li>Newsletter input border: <code>2px solid var(--color-ink)</code> sharp</li>
+              <li>Press idiom: <code>translate(1px, 1px)</code> + <code>transition-all 300ms ease</code></li>
+              <li>No <code>border-radius</code> anywhere. No rotation, no tape.</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION A — POSTER WORDMARK BLOCK · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

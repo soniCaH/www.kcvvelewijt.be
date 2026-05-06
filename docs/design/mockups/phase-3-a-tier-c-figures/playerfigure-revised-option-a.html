@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction A — Photobooth Strip · PlayerFigure (revised) · Phase 3 · Checkpoint A</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         APPROVED PRIMITIVE: TapedCard
+         cream paper + 2px ink + hard offset shadow + optional rotation
+         ============================================================ */
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 18px;
+        transition: all 300ms ease;
+      }
+      .taped-card--tilt-l { transform: rotate(-1.6deg); }
+      .taped-card--tilt-r { transform: rotate(1.4deg); }
+      .taped-card--tilt-tight { transform: rotate(-2.4deg); }
+      .taped-card:hover {
+        box-shadow: none;
+        transform: translate(4px, 4px) rotate(0deg);
+      }
+      .taped-card--tilt-l:hover,
+      .taped-card--tilt-r:hover,
+      .taped-card--tilt-tight:hover {
+        transform: translate(4px, 4px) rotate(0deg);
+        box-shadow: none;
+      }
+
+      .tape-strip {
+        position: absolute;
+        top: -10px;
+        left: 24%;
+        width: 96px;
+        height: 22px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(10, 10, 10, 0.18);
+        transform: rotate(-3deg);
+        box-shadow: 1px 1px 0 0 rgba(10, 10, 10, 0.15);
+        z-index: 3;
+      }
+      .tape-strip--right { left: auto; right: 18%; transform: rotate(3deg); background: rgba(0, 135, 85, 0.45); }
+      .tape-strip--cream { background: rgba(217, 210, 189, 0.85); }
+
+      /* ============================================================
+         APPROVED PRIMITIVE: MonoLabel
+         ============================================================ */
+      .mono-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        padding: 4px 8px;
+      }
+      .mono-label--filled { background: var(--color-ink); color: var(--color-cream); }
+      .mono-label--jersey { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      /* ============================================================
+         APPROVED PRIMITIVE: TicketStub
+         ============================================================ */
+      .ticket-stub {
+        display: inline-flex;
+        align-items: stretch;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .ticket-stub__num {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 8px 14px;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.04em;
+        display: inline-flex;
+        align-items: center;
+      }
+      .ticket-stub__perf {
+        width: 0;
+        border-left: 2px dashed var(--color-ink);
+        margin: 6px 0;
+      }
+      .ticket-stub__body {
+        padding: 8px 14px;
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+      }
+      .ticket-stub__body strong { font-family: var(--font-body); font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+      .ticket-stub__body span { color: var(--color-ink-muted); }
+
+      /* ============================================================
+         APPROVED PRIMITIVE: EditorialHeading
+         ============================================================ */
+      .editorial-heading {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .editorial-heading em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+        font-weight: 900;
+      }
+      .editorial-heading--lg { font-size: 44px; }
+      .editorial-heading--sm { font-size: 28px; }
+
+      /* ============================================================
+         FIGURE — composition layout shared by both states
+         The figure stage holds the TapedCard (the figure itself) and a
+         right-hand metadata column with TicketStub + MonoLabel + name.
+         ============================================================ */
+      .figure-stage {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 56px;
+        align-items: center;
+        padding: 32px 8px 24px;
+      }
+      .figure-stage__media {
+        position: relative;
+        width: 320px;
+        justify-self: start;
+      }
+      .figure-stage__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        align-items: flex-start;
+      }
+      .figure-stage__name-line {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .figure-stage__name-line .first { font-family: var(--font-display); font-size: 28px; font-weight: 700; font-style: italic; color: var(--color-ink-soft); line-height: 1; }
+      .figure-stage__name-line .last { font-family: var(--font-display); font-size: 52px; font-weight: 900; line-height: 0.95; color: var(--color-ink); }
+      .figure-stage__name-line .last em { font-style: italic; color: var(--color-jersey-deep); }
+
+      .figure-stage__quote {
+        max-width: 360px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 16px;
+        color: var(--color-ink-muted);
+        border-left: 2px solid var(--color-jersey-deep);
+        padding-left: 14px;
+        margin: 4px 0 0;
+      }
+
+      /* ============================================================
+         STATE 1 — PHOTO STATE
+         Photo state: rectangular psdImage on a TapedCard with rotation
+         + tape strip + cream paper frame. NO drawn jersey, NO drawn
+         arms. Just photo + chrome.
+         ============================================================ */
+      .photo-card {
+        /* extends .taped-card, declared inline */
+        padding: 14px 14px 28px;
+      }
+      .photo-card__frame {
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        padding: 6px;
+        position: relative;
+      }
+      .photo-card__photo {
+        display: block;
+        width: 100%;
+        height: 360px;
+        object-fit: cover;
+        object-position: center 18%;
+        filter: contrast(1.04) saturate(0.9);
+        background: var(--color-cream-soft);
+      }
+      .photo-card__photo--tight {
+        height: 320px;
+        object-position: center 32%;
+      }
+      .photo-card__caption {
+        margin-top: 12px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+      }
+      .photo-card__caption strong {
+        color: var(--color-ink);
+        font-weight: 700;
+      }
+
+      /* ============================================================
+         STATE 2 — ILLUSTRATION STATE
+         Full drawn figure on cream. Block-color silhouette
+         (jersey-deep on cream): jersey body with stripe + number,
+         arms, stylised oval head (no facial features). The drawing
+         IS the figure. NO photo well anywhere.
+         ============================================================ */
+      .illus-card {
+        padding: 14px 14px 24px;
+      }
+      .illus-card__frame {
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .illus-card__svg {
+        display: block;
+        width: 100%;
+        height: 360px;
+        background: var(--color-cream-soft);
+      }
+      .illus-card__caption {
+        margin-top: 12px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+      }
+      .illus-card__caption strong { color: var(--color-ink); font-weight: 700; }
+
+      /* ============================================================
+         REUSE MAP TABLE (Section 04)
+         ============================================================ */
+      table.reuse-map {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      table.reuse-map th, table.reuse-map td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      table.reuse-map th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+        background: var(--color-cream-soft);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      table.reuse-map td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      /* ============================================================
+         CANONICAL ILLUSTRATION FALLBACK (shared across A · B · C)
+         Ported verbatim from option-b-stamped-block-print.html
+         #player-figure markup, photo + face-circle layers omitted.
+         ============================================================ */
+      .taped-card--rotation-b { transform: rotate(1.6deg); }
+      .illus-canonical { display: flex; justify-content: center; padding: 20px 0 8px; }
+      .illus-canonical .taped-card { padding: 18px 18px 22px; background: var(--color-cream); display: inline-block; }
+      .illus-canonical .figure {
+        position: relative;
+        width: 280px;
+        height: 360px;
+        margin: 0 auto;
+      }
+      .illus-canonical .figure__photo {
+        position: absolute;
+        inset: 14px 18px 38px 16px;
+        background: linear-gradient(180deg, #cfc6b0 0%, #a89e85 60%, #7d735c 100%);
+        background-blend-mode: multiply;
+        filter: grayscale(100%) contrast(1.05);
+        border: 1px solid rgba(10, 10, 10, 0.4);
+      }
+      .illus-canonical .figure__photo::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 26px;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: rgba(10, 10, 10, 0.18);
+        transform: translateX(-50%);
+      }
+      .illus-canonical .figure__photo::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 180px;
+        height: 170px;
+        background: rgba(10, 10, 10, 0.18);
+        transform: translateX(-50%);
+        clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+      }
+      .illus-canonical .figure__underprint {
+        position: absolute;
+        inset: 12px 22px 36px 12px;
+        mix-blend-mode: multiply;
+        opacity: 0.92;
+      }
+      .illus-canonical .figure__underprint svg { width: 100%; height: 100%; display: block; }
+      .illus-canonical .figure__overprint {
+        position: absolute;
+        inset: 14px 18px 38px 16px;
+      }
+      .illus-canonical .figure__overprint svg { width: 100%; height: 100%; display: block; }
+      .illus-canonical .figure__face-circle {
+        position: absolute;
+        top: 36px;
+        left: 50%;
+        width: 108px;
+        height: 108px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle at 45% 35%, #d6cdb3 0%, #b3a78b 65%, #7c7156 100%);
+        border: 2px solid var(--color-ink);
+        filter: grayscale(100%) contrast(1.08);
+        overflow: hidden;
+        box-shadow: 2px 3px 0 0 rgba(10, 10, 10, 0.45);
+      }
+      .illus-canonical .figure__face-circle::after {
+        content: "";
+        position: absolute;
+        inset: 18% 22% 28% 22%;
+        background: rgba(10, 10, 10, 0.28);
+        border-radius: 40% 40% 30% 30% / 50% 50% 30% 30%;
+      }
+      .illus-canonical .figure__caption {
+        position: absolute;
+        left: 16px;
+        right: 18px;
+        bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .illus-canonical .figure__caption b { color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HERO
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT A · DIRECTION A</span>
+          <span class="mono mono--muted">★ PHOTOBOOTH STRIP — REVISED</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Twee <span class="display"><em>aparte</em></span> staten.</h1>
+        <p class="lead">
+          The original <code>&lt;PlayerFigure&gt;</code> spec mixed a circular
+          photo face with a drawn jersey + arms — read as "Mickey Mouse" and
+          was rejected. This revision splits the component into two
+          <strong>mutually-exclusive runtime states</strong>: a
+          <em>photo state</em> (rectangular <code>psdImage</code> + editorial
+          chrome only — no drawn body parts) and an <em>illustration state</em>
+          (a complete flat silhouette with jersey, arms, and stylised head —
+          no embedded photo). One or the other, never both.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           SECTION 01 — PHOTO STATE
+           =========================================================== -->
+      <section class="section" id="photo-state">
+        <div class="section-meta">
+          <span class="mono">★ 01 · PHOTO STATE</span>
+          <span class="mono mono--muted">— rectangular psdImage on TapedCard with TapeStrip + cream frame</span>
+        </div>
+        <h2>Wanneer er een <em>foto</em> is.</h2>
+        <p class="lead">
+          <code>psdImage</code> exists for ~90% of squad players. The figure
+          renders as a polaroid-strip rectangular crop, mounted in a
+          cream-paper inner frame on a tilted <code>TapedCard</code>, with a
+          <code>TapeStrip</code> across the top. Outside the card, the
+          <code>TicketStub</code> stamnr, a <code>MonoLabel</code> for team +
+          position, and the editorial name composition do all the talking.
+          <strong>No drawn jersey. No drawn arms.</strong>
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">PHOTO</span>
+            <span class="mono">main rendering — TapedCard tilt-l + TapeStrip green + photo frame</span>
+          </div>
+
+          <div class="figure-stage">
+            <div class="figure-stage__media">
+              <div class="taped-card photo-card taped-card--tilt-l">
+                <span class="tape-strip" aria-hidden="true"></span>
+                <div class="photo-card__frame">
+                  <img
+                    class="photo-card__photo"
+                    src="https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=800&fit=crop"
+                    alt="Maxim Breugelmans"
+                  />
+                </div>
+                <p class="photo-card__caption">
+                  <strong>★ KCVV ELEWIJT</strong> · SEIZOEN 25–26
+                </p>
+              </div>
+            </div>
+
+            <div class="figure-stage__meta">
+              <span class="mono-label mono-label--filled" style="text-transform: uppercase">A-Ploeg · Middenvelder</span>
+
+              <div class="figure-stage__name-line">
+                <span class="first">Maxim</span>
+                <span class="last"><em>Breugelmans</em></span>
+              </div>
+
+              <p class="figure-stage__num" style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--color-jersey-deep); margin: 4px 0 0;">#8</p>
+              <p class="figure-stage__bio" style="font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--color-ink-soft); margin: 12px 0 0; max-width: 32ch;">
+                Linkse spits met een neus voor de tweede paal. Dertiende seizoen in groen-wit.
+              </p>
+              <p class="figure-stage__data-note" style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 16px 0 0; max-width: 32ch;">
+                Source: <code>firstName</code> · <code>lastName</code> · <code>position</code> · <code>jerseyNumber</code> · <code>psdImage</code> · <code>bio</code> (first paragraph). <code>teamLabel</code> = page prop.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Photo speaks for itself — rectangular crop respects the natural
+              shape of <code>psdImage</code> (90% of squad). Cream inner frame
+              + outer TapedCard + TapeStrip read editorial without dressing
+              the player up. No drawn body parts means the photo is never
+              competing with a graphic costume. Composition cleanly separates
+              identity (photo) from metadata (ticket + label + name).
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Players without a usable <code>psdImage</code> need a fully
+              different render path (Section 02) — the chrome is shared but
+              the centre swaps. Tilt + tape strip means the photo is never
+              perfectly upright, which reads "scrapbook" not "official
+              roster shot"; some clubs prefer the latter. Mitigation: keep
+              tilt under ~2° so it never feels rotational.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTION 02 — ILLUSTRATION STATE
+           =========================================================== -->
+      <section class="section" id="illustration-state">
+        <div class="section-meta">
+          <span class="mono">★ 02 · ILLUSTRATION STATE</span>
+          <span class="mono mono--muted">— full drawn silhouette, no photo well</span>
+        </div>
+        <h2>Wanneer er <em>geen</em> foto is.</h2>
+        <p class="lead">
+          The fallback is a complete drawn figure — block-color silhouette in
+          <code>--color-jersey-deep</code> on <code>--color-cream-soft</code>,
+          showing jersey body with a vertical stripe and squad number, both
+          arms, and an oval stylised head (no facial features — kept abstract
+          so the figure stands in for any player). The drawing IS the figure.
+          The same outer TapedCard chrome and same metadata column compose
+          around it — only the centre swaps.
+        </p>
+        <p class="lead"><strong>The illustration fallback is canonical — identical across all photo-state directions. Direction A/B/C governs only the photo state (above).</strong></p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">CANONICAL</span>
+            <span class="mono">illustration fallback — shared across directions A · B · C</span>
+          </div>
+
+          <div class="figure-stage" style="display: grid; grid-template-columns: minmax(280px, auto) 1fr; gap: 40px; align-items: start;">
+            <div class="illus-canonical" style="padding: 0;">
+              <div class="taped-card taped-card--rotation-b press-target">
+                <div class="figure">
+                  <div class="figure__photo" aria-hidden="true"></div>
+                  <div class="figure__underprint" aria-hidden="true">
+                    <svg viewBox="0 0 220 300" preserveAspectRatio="none">
+                      <g fill="#008755">
+                        <ellipse cx="110" cy="78" rx="44" ry="48" />
+                        <path d="M30 300 L40 168 Q60 138 110 130 Q160 138 180 168 L190 300 Z" />
+                        <path d="M52 168 L70 162 L72 196 L54 200 Z" />
+                        <path d="M168 168 L150 162 L148 196 L166 200 Z" />
+                      </g>
+                    </svg>
+                  </div>
+                  <div class="figure__overprint" aria-hidden="true">
+                    <svg viewBox="0 0 220 300" preserveAspectRatio="none">
+                      <g fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square">
+                        <ellipse cx="110" cy="78" rx="44" ry="48" />
+                        <path d="M30 300 L40 168 Q60 138 110 130 Q160 138 180 168 L190 300" />
+                        <path d="M92 132 L110 156 L128 132" />
+                        <path d="M88 158 L88 300" stroke-width="2" />
+                        <path d="M132 158 L132 300" stroke-width="2" />
+                        <path d="M70 168 L70 300" stroke-width="2" />
+                        <path d="M150 168 L150 300" stroke-width="2" />
+                      </g>
+                    </svg>
+                  </div>
+                  <div class="figure__caption">
+                    <b>#8</b>
+                    <span>Maxim Breugelmans · A-PLOEG</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="figure-stage__meta">
+              <span class="mono-label mono-label--filled" style="text-transform: uppercase">A-Ploeg · Middenvelder</span>
+
+              <div class="figure-stage__name-line">
+                <span class="first">Maxim</span>
+                <span class="last"><em>Breugelmans</em></span>
+              </div>
+
+              <p class="figure-stage__num" style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--color-jersey-deep); margin: 4px 0 0;">#8</p>
+              <p class="figure-stage__bio" style="font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--color-ink-soft); margin: 12px 0 0; max-width: 32ch;">
+                Linkse spits met een neus voor de tweede paal. Dertiende seizoen in groen-wit.
+              </p>
+              <p class="figure-stage__data-note" style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 16px 0 0; max-width: 32ch;">
+                Side meta column is identical to the photo state — players without <code>psdImage</code> still get full metadata.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              The drawing is internally consistent — jersey, arms, and head
+              all rendered as a single silhouette in one ink-line idiom. No
+              attempt to fake a face, so no uncanny mismatch with a missing
+              photo. Block-colour read holds at every size and prints flat.
+              Squad number is part of the drawing, not pasted-on chrome —
+              keeps the identity readable without a portrait.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              The figure is generic by design — every photo-missing player
+              shares the same silhouette. For coaches and staff this is fine;
+              for first-team starters with no photo it can read as a
+              placeholder rather than a portrait. Mitigation: editorial copy
+              confirms it is a fallback ("NO PHOTO ON FILE"), and PSD sync
+              is the long-term remedy.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTION 03 — CROPPED-TIGHT PHOTO VARIANT
+           =========================================================== -->
+      <section class="section" id="photo-tight">
+        <div class="section-meta">
+          <span class="mono">★ 03 · PHOTO STATE — TIGHT CROP</span>
+          <span class="mono mono--muted">— same photo, chest-up crop, sharper tilt for hero / featured spots</span>
+        </div>
+        <h2>Een <em>scherpere</em> uitsnede.</h2>
+        <p class="lead">
+          Same photo, tighter <code>object-position</code> — chest-up rather
+          than full upper body. Pairs with a sharper card tilt for hero
+          placements (player-of-the-match, profile page lead, sponsor
+          handshake spotlight). Same chrome, same composition, only the
+          framing changes.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">TIGHT</span>
+            <span class="mono">tilt-tight (-2.4°) · tape strip cream-right · chest-up crop</span>
+          </div>
+
+          <div class="figure-stage">
+            <div class="figure-stage__media">
+              <div class="taped-card photo-card taped-card--tilt-tight">
+                <span class="tape-strip tape-strip--right tape-strip--cream" aria-hidden="true"></span>
+                <div class="photo-card__frame">
+                  <img
+                    class="photo-card__photo photo-card__photo--tight"
+                    src="https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=800&fit=crop"
+                    alt="Maxim Breugelmans (chest-up)"
+                  />
+                </div>
+                <p class="photo-card__caption">
+                  <strong>★ SPELER VAN DE WEEK</strong> · MATCHDAG 28
+                </p>
+              </div>
+            </div>
+
+            <div class="figure-stage__meta">
+              <span class="mono-label mono-label--jersey">SPELER VAN DE WEEK</span>
+
+              <div class="figure-stage__name-line">
+                <span class="first">Maxim</span>
+                <span class="last"><em>Breugelmans</em></span>
+              </div>
+
+              <p class="figure-stage__num" style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--color-jersey-deep); margin: 4px 0 0;">#8</p>
+              <p class="figure-stage__bio" style="font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--color-ink-soft); margin: 12px 0 0; max-width: 32ch;">
+                Linkse spits met een neus voor de tweede paal. Dertiende seizoen in groen-wit.
+              </p>
+              <p class="figure-stage__data-note" style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 16px 0 0; max-width: 32ch;">
+                <code>tag</code> (here <code>SPELER VAN DE WEEK</code>) = page prop. Bio is first paragraph of <code>player.bio</code>; empty → drop slot.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Chest-up crop reads as a portrait, not a roster shot — earns
+              the editorial weight for hero / "player of the week" spots.
+              Sharper tilt (-2.4°) signals "featured" without changing the
+              chrome vocabulary. Same component, two crop tokens
+              (<code>--photo-crop-roster</code>, <code>--photo-crop-portrait</code>).
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Tight crop depends on the source <code>psdImage</code> framing.
+              PSD photos vary — some are torso, some full body. Tight crop
+              fails gracefully but inconsistently across the squad.
+              Mitigation: only apply tight variant on hero placements where
+              an editor has reviewed the source image.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           SECTION 04 — REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse-map">
+        <div class="section-meta">
+          <span class="mono">★ 04 · REUSE MAP</span>
+          <span class="mono mono--muted">— each chrome element traced to its approved primitive</span>
+        </div>
+        <h2>Welke <em>primitieven</em> worden hergebruikt.</h2>
+        <p class="lead">
+          Every chrome decision in both states maps back to a primitive
+          already approved on <code>main</code> or in flight via
+          <code>packages/design-system</code>. Nothing new is invented; the
+          two states differ only in their centre content.
+        </p>
+
+        <div class="panel">
+          <table class="reuse-map">
+            <thead>
+              <tr>
+                <th style="width: 22%">Element</th>
+                <th style="width: 26%">Photo state</th>
+                <th style="width: 26%">Illustration state</th>
+                <th>Source primitive</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Outer card</strong></td>
+                <td>cream + 2px ink + paper-md shadow + tilt-l</td>
+                <td>cream + 2px ink + paper-md shadow + tilt-r</td>
+                <td><code>TapedCard</code></td>
+              </tr>
+              <tr>
+                <td><strong>Tape across card</strong></td>
+                <td>jersey-tinted strip, top-left rotation</td>
+                <td>cream-tinted strip, top-right rotation</td>
+                <td><code>TapeStrip</code></td>
+              </tr>
+              <tr>
+                <td><strong>Inner frame</strong></td>
+                <td>cream-soft, 1px ink, 6px padding around photo</td>
+                <td>cream-soft, 1px ink, encloses SVG silhouette</td>
+                <td><code>ClippedCard</code> (rect variant)</td>
+              </tr>
+              <tr>
+                <td><strong>Centre content</strong></td>
+                <td>rectangular <code>psdImage</code>, object-cover</td>
+                <td>SVG block-colour silhouette (jersey + arms + head)</td>
+                <td>n/a — content slot</td>
+              </tr>
+              <tr>
+                <td><strong>Caption strip</strong></td>
+                <td>mono caps, ink-muted, bottom of card</td>
+                <td>mono caps, ink-muted, "NO PHOTO ON FILE"</td>
+                <td><code>MonoLabel</code> (caption variant)</td>
+              </tr>
+              <tr>
+                <td><strong>Squad number</strong></td>
+                <td>perforated stub, ink fill, mono 22px</td>
+                <td>perforated stub, ink fill, mono 22px</td>
+                <td><code>TicketStub</code></td>
+              </tr>
+              <tr>
+                <td><strong>Team + position tag</strong></td>
+                <td>filled ink mono caps</td>
+                <td>filled ink mono caps</td>
+                <td><code>MonoLabel</code> (filled)</td>
+              </tr>
+              <tr>
+                <td><strong>Name composition</strong></td>
+                <td>Playfair italic first + display last with em accent</td>
+                <td>Playfair italic first + display last with em accent</td>
+                <td><code>EditorialHeading</code> (name variant)</td>
+              </tr>
+              <tr>
+                <td><strong>Hero accent stamp</strong></td>
+                <td>optional — tight-crop variant adds <code>StampBadge</code></td>
+                <td>not used (silhouette already block-colour)</td>
+                <td><code>StampBadge</code></td>
+              </tr>
+              <tr>
+                <td><strong>Hover</strong></td>
+                <td>translate(4,4) + shadow:none + rotate→0</td>
+                <td>translate(4,4) + shadow:none + rotate→0</td>
+                <td>canonical press-down</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Both states share 9 of 10 chrome rows — only the centre slot
+              differs. That makes the runtime branch a single conditional in
+              the React component (<code>psdImage ? &lt;Photo /&gt; : &lt;Silhouette /&gt;</code>),
+              with all surrounding primitives composed identically. No new
+              tokens, no new shapes, no new shadows.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              The illustration state introduces one new asset: the SVG
+              silhouette. It must live in the design system as a single
+              source-of-truth (proposed: <code>PlayerSilhouette</code> in
+              <code>packages/design-system/PlayerFigure/</code>). One asset,
+              but it is bespoke — not a composition of existing primitives.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— correction summary, runtime split, handoff</span>
+        </div>
+
+        <h3>Correction</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0 16px">
+          The original master-design <code>PlayerFigure</code> (circular
+          photo face inside a drawn jersey + arms) was rejected for reading
+          as "Mickey Mouse". This revision replaces that hybrid with two
+          mutually-exclusive runtime states. <strong>Photo and drawn body
+          parts are never combined in the same composition.</strong>
+        </p>
+
+        <h3>Runtime branch</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0 16px">
+          Pseudocode: <code>player.psdImage ? &lt;PlayerFigurePhoto crop=&quot;roster|portrait&quot; /&gt; : &lt;PlayerFigureSilhouette /&gt;</code>.
+          Surrounding metadata (TicketStub, MonoLabel, EditorialHeading,
+          quote) is composed by the parent — independent of which state the
+          centre renders.
+        </p>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between this revised Direction A and any sibling
+          revised directions authored alongside. Once locked, ship the new
+          <code>&lt;PlayerFigure&gt;</code> component as two sub-components
+          (<code>PlayerFigurePhoto</code>, <code>PlayerFigureSilhouette</code>)
+          plus a thin selector wrapper. Storybook stories per state + crop
+          variant. Seed staging with at least one photo-missing player to
+          exercise the silhouette path end-to-end.
+        </p>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION A — PHOTOBOOTH STRIP (REVISED) · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

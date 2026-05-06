@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EditorialHero · transfer · DETAIL PAGE — Phase 3 · Checkpoint B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-alert: #b84a3a;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: 0.5deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 40px 48px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .change-list { background: rgba(10,10,10,0.04); border-left: 3px solid var(--color-jersey-deep); padding: 16px 20px; margin: 16px 0 28px; font-size: 14px; line-height: 1.55; }
+      .change-list h4 { margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-jersey-deep); }
+      .change-list ul { margin: 0; padding-left: 18px; }
+      .change-list li { margin: 4px 0; }
+      .change-list code { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; }
+
+      .page-frame { background: var(--color-cream); border: 1px dashed var(--color-paper-edge); padding: 28px; position: relative; }
+      .page-frame__label { position: absolute; top: -10px; left: 16px; background: var(--color-cream); padding: 0 8px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-muted); }
+
+      /* Hero shell (locked direction A — same as announcement) */
+      .ed-hero {
+        display: grid; grid-template-columns: 60% 40%;
+        background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md);
+        padding: 56px; position: relative;
+      }
+      .ed-hero::before {
+        content: ""; position: absolute; top: 56px; bottom: 56px; left: calc(60% + 8px);
+        width: 1px; background: var(--color-ink); opacity: 0.55;
+      }
+      .ed-hero__left { padding-right: 56px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+      .ed-hero__right { padding-left: 56px; display: flex; align-items: center; justify-content: center; min-height: 380px; }
+
+      /* EditorialKicker */
+      .kicker { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--color-ink); line-height: 1; }
+      .kicker > span { display: inline-flex; align-items: center; line-height: 1; }
+      .kicker__star { color: var(--color-jersey-deep); font-size: 14px; }
+      .kicker__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--color-ink); }
+      .kicker__muted { color: var(--color-ink-muted); }
+
+      /* EditorialHeading */
+      .editorial-heading {
+        font-family: var(--font-display); font-weight: 900;
+        font-size: clamp(40px, 5.2vw, 64px); line-height: 1.0;
+        margin: 0;
+      }
+      .editorial-heading em { font-style: italic; color: var(--color-jersey-deep); }
+      .editorial-heading::after { content: "."; color: var(--color-jersey-deep); }
+
+      /* EditorialLead */
+      .ed-hero__lead {
+        font-family: var(--font-display); font-style: italic; font-weight: 400;
+        font-size: 18px; line-height: 1.55;
+        color: var(--color-ink-soft);
+        margin: 6px 0 4px;
+        max-width: 52ch;
+      }
+
+      /* In-hero pull-quote (Option A under §02) */
+      .ed-hero__quote {
+        margin: 4px 0 0;
+        padding: 12px 0 0;
+        border-top: 1px dashed var(--color-paper-edge);
+        font-family: var(--font-display); font-style: italic; font-weight: 700;
+        font-size: 19px; line-height: 1.4;
+        color: var(--color-ink);
+        position: relative;
+        max-width: 52ch;
+      }
+      .ed-hero__quote::before {
+        content: "\201C";
+        font-family: var(--font-display); font-weight: 900; font-style: italic;
+        color: var(--color-jersey-deep);
+        position: absolute; left: -4px; top: 14px;
+        font-size: 36px; line-height: 0.6;
+      }
+      .ed-hero__quote-text { padding-left: 26px; display: block; }
+      .ed-hero__quote-attr {
+        display: block; padding-left: 26px; margin-top: 8px;
+        font-family: var(--font-mono); font-size: 10px; font-style: normal; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted);
+      }
+      .ed-hero__quote-attr::before { content: "— "; }
+
+      /* EditorialByline */
+      .byline {
+        margin-top: 14px; padding-top: 12px;
+        border-top: 1px solid var(--color-paper-edge);
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: flex; gap: 12px; flex-wrap: wrap; align-items: center; line-height: 1;
+      }
+      .byline > span { display: inline-flex; align-items: center; line-height: 1; }
+      .byline__star { color: var(--color-jersey-deep); font-size: 13px; }
+
+      /* TapedCard */
+      .taped-card { position: relative; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 28px; }
+      .taped-card--rot-a { transform: rotate(var(--rotate-tape-a)); }
+      .taped-card--rot-b { transform: rotate(var(--rotate-tape-b)); }
+      .taped-card__tape { position: absolute; top: -14px; left: 18%; transform: rotate(-4deg); width: 72px; height: 24px; background: rgba(74, 207, 82, 0.55); border: 1px solid rgba(0,0,0,0.18); }
+      .taped-card__tape--right { left: auto; right: 18%; transform: rotate(4deg); }
+
+      /* HeroCoverImage */
+      .cover-artefact { width: 100%; max-width: 460px; }
+      .cover-artefact__frame { aspect-ratio: 16 / 9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden; }
+      .cover-artefact__frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.02) saturate(0.95); }
+      .cover-artefact__caption { padding: 12px 4px 2px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; align-items: center; gap: 8px; line-height: 1; }
+      .cover-artefact__caption .star { color: var(--color-jersey-deep); font-size: 13px; }
+
+      /* ====================================================================
+         TransferFactStrip — three paper cards with directional arrows.
+         Each card composes <TapedCard> at a different rotation from the pool.
+         Center card is the player passport; side cards are the clubs.
+         Arrows between are decorative jersey-deep glyphs.
+         ==================================================================== */
+      .transfer-strip {
+        margin-top: 32px;
+        display: flex; align-items: center; justify-content: center;
+        gap: 0;
+        padding: 12px 0;
+      }
+
+      .transfer-strip__card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 26px 22px 20px;
+        flex: 1 1 0;
+        max-width: 320px;
+        min-width: 0;
+        text-align: center;
+        display: flex; flex-direction: column; align-items: center; gap: 10px;
+      }
+      .transfer-strip__card--rot-a { transform: rotate(-1.2deg); }
+      .transfer-strip__card--rot-b { transform: rotate(0.6deg); }
+      .transfer-strip__card--rot-c { transform: rotate(1.2deg); }
+
+      /* Tape strip — different position per card for editorial rhythm */
+      .transfer-strip__card::before {
+        content: ""; position: absolute; top: -10px;
+        width: 64px; height: 22px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(0, 0, 0, 0.18);
+      }
+      .transfer-strip__card--rot-a::before { left: 14%; transform: rotate(-3deg); }
+      .transfer-strip__card--rot-b::before { left: 50%; transform: translateX(-50%) rotate(2deg); background: rgba(245, 200, 80, 0.6); }
+      .transfer-strip__card--rot-c::before { right: 14%; transform: rotate(3deg); }
+
+      /* Shield — top of card, anchored visual */
+      .transfer-strip__shield {
+        width: 64px; height: 76px;
+        background: var(--color-jersey-deep);
+        clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
+        display: flex; align-items: flex-start; justify-content: center; padding-top: 12px;
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        color: var(--color-cream); font-size: 30px; line-height: 1;
+        flex-shrink: 0;
+        margin: 4px auto 6px;
+      }
+      .transfer-strip__shield--ink { background: var(--color-ink); }
+
+      /* Card content — three stacked rows: role / name / sub */
+      .transfer-strip__role {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+        color: var(--color-jersey-deep); font-weight: 700;
+        margin: 0;
+        line-height: 1;
+      }
+      .transfer-strip__name {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 21px; line-height: 1.05; color: var(--color-ink);
+        margin: 0;
+        word-break: break-word;
+      }
+      .transfer-strip__sub {
+        font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      /* Player center card — slightly different signature: star sandwich + perforation */
+      .transfer-strip__card--player {
+        background: var(--color-cream-soft);
+        max-width: 360px;
+      }
+      .transfer-strip__card--player .transfer-strip__role {
+        display: inline-flex; align-items: center; gap: 8px;
+      }
+      .transfer-strip__card--player .transfer-strip__role .star { font-size: 13px; }
+      .transfer-strip__card--player .transfer-strip__name {
+        font-size: 24px;
+      }
+      .transfer-strip__card--player::after {
+        content: ""; position: absolute; bottom: 12px; left: 22px; right: 22px;
+        border-bottom: 2px dashed rgba(10, 10, 10, 0.25);
+      }
+      .transfer-strip__player-spacer { height: 14px; }
+
+      /* Directional arrow between cards — colour signals direction semantics.
+         Two glyphs in the same span; CSS toggles which renders by viewport. */
+      .transfer-strip__arrow {
+        font-family: var(--font-display); font-weight: 900;
+        line-height: 1;
+        color: var(--color-jersey-deep);  /* default: incoming = jersey-deep */
+        flex-shrink: 0;
+        padding: 0 18px;
+        align-self: center;
+      }
+      .transfer-strip__arrow--horizontal {
+        display: inline-flex; align-items: center; line-height: 1;
+        font-style: italic; font-size: 64px;
+        transform: translateY(-4px);
+      }
+      .transfer-strip__arrow--vertical {
+        display: none;  /* hidden on desktop; flipped by media query */
+        align-items: center; justify-content: center; line-height: 0;
+        width: 28px; height: 38px;
+      }
+      .transfer-strip__arrow--vertical svg {
+        width: 100%; height: 100%;
+        stroke: currentColor; fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round; stroke-linejoin: round;
+      }
+      /* Outgoing — players leaving KCVV — render in alert red */
+      .transfer-strip--outgoing .transfer-strip__arrow { color: var(--color-alert); }
+
+      /* Extension — single centered card (player STAYS at KCVV, no journey, no arrows) */
+      .transfer-strip--extension { justify-content: center; }
+      .transfer-strip__card--extension {
+        max-width: 440px;
+        padding: 32px 28px 26px;
+      }
+      .transfer-strip__extension-stamp {
+        margin-top: 14px;
+        padding: 10px 18px;
+        border: 2px solid var(--color-jersey-deep);
+        color: var(--color-jersey-deep);
+        font-family: var(--font-mono); font-weight: 700;
+        font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+        display: inline-flex; flex-direction: column; gap: 3px; align-items: center;
+        background: var(--color-cream-soft);
+        transform: rotate(-1.8deg);
+        line-height: 1;
+        align-self: center;
+      }
+      .transfer-strip__extension-stamp .stamp-label { font-size: 8px; letter-spacing: 0.18em; opacity: 0.75; }
+      .transfer-strip__extension-stamp .stamp-value { font-size: 14px; letter-spacing: 0.12em; }
+
+      /* ====================================================================
+         MOBILE (≤ 720px) — cards stack vertically; horizontal `→` glyph
+         swaps for the inline SVG vertical arrow (no character swap, no
+         rotation hack). See `.transfer-strip__arrow--horizontal` /
+         `.transfer-strip__arrow--vertical` and the inline <svg> path
+         in the markup below.
+         ==================================================================== */
+      @media (max-width: 720px) {
+        .transfer-strip {
+          flex-direction: column;
+          gap: 8px;
+          padding: 20px 0;
+        }
+        .transfer-strip__card {
+          max-width: 320px; width: 100%;
+        }
+        .transfer-strip__card--rot-a { transform: rotate(-1deg); }
+        .transfer-strip__card--rot-b { transform: rotate(0.6deg); }
+        .transfer-strip__card--rot-c { transform: rotate(1deg); }
+        .transfer-strip__arrow { padding: 4px 0; }
+        .transfer-strip__arrow--horizontal { display: none; }
+        .transfer-strip__arrow--vertical { display: inline-flex; }
+      }
+
+      /* Body-pull-quote (Option B) — uses PullQuote primitive composed with TapedCard */
+      .pull-quote {
+        margin: 32px auto;
+        max-width: 720px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 32px 36px;
+        position: relative;
+        transform: rotate(-0.4deg);
+      }
+      .pull-quote--jersey { background: var(--color-jersey-deep); color: var(--color-cream); }
+      .pull-quote__mark {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        color: var(--color-jersey-deep);
+        font-size: 84px; line-height: 0.6; position: absolute; top: 28px; left: 24px;
+      }
+      .pull-quote--jersey .pull-quote__mark { color: var(--color-cream); }
+      .pull-quote__body {
+        font-family: var(--font-display); font-style: italic; font-weight: 700;
+        font-size: 26px; line-height: 1.35;
+        padding-left: 56px; margin: 0;
+      }
+      .pull-quote__attr {
+        margin-top: 18px; padding-left: 56px;
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--color-ink-muted); font-weight: 600;
+      }
+      .pull-quote--jersey .pull-quote__attr { color: rgba(245, 241, 230, 0.75); }
+
+      /* Body simulation */
+      .body-sim { margin-top: 40px; max-width: 720px; }
+      .body-sim p { font-size: 17px; line-height: 1.7; color: var(--color-ink-soft); margin: 0 0 18px; }
+      .body-sim p:first-of-type::first-letter {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 4em; line-height: 0.85;
+        color: var(--color-jersey-deep);
+        float: left; margin: 8px 8px 0 0;
+      }
+
+      /* Field-source map */
+      .map-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .map-table thead th { text-align: left; padding: 12px 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 2px solid var(--color-ink); }
+      .map-table tbody td { padding: 10px 8px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .map-table code { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; }
+      .map-table .col-static { color: var(--color-ink-muted); font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIAL HERO · DIRECTION A</span>
+          <span class="mono mono--muted">★ TRANSFER · DETAIL PAGE</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Variant <em>transfer</em> — drilled.</h1>
+        <p class="lead">
+          <code>articleType=transfer</code>. Hero reuses the locked Asymmetric Broadsheet shell + the same
+          slots locked on announcement (kicker / heading / lead / byline / cover image). The variant-specific
+          piece — the <code>transferFact</code>'s van → naar shields strip — sits as a separate
+          <strong>TransferFactStrip</strong> below the hero, per master design §5.
+        </p>
+        <p class="lead">
+          The pull-quote (<code>transferFact.note</code>) is the open question — owner asked for an A/B
+          comparison: <strong>inside the hero</strong> (between lead and byline) vs. <strong>below the
+          hero</strong> as the existing <code>&lt;PullQuote&gt;</code> primitive. Both rendered below.
+        </p>
+
+        <div class="change-list">
+          <h4>★ Composition decisions in this drill</h4>
+          <ul>
+            <li><strong>Cover image</strong> → editorial choice (per owner). Editor uploads any contextually relevant 16:9 photo (face shot of new signing if available, otherwise clubhouse / handshake / generic). <code>article.coverImage</code> required (Ask 8).</li>
+            <li><strong>Direction "extension"</strong> → single KCVV crest + <code>until</code> badge, no other-club shield, no arrow. Strip reflows to single column.</li>
+            <li><strong>Pull-quote</strong> = open A/B (see §03 + §04 below).</li>
+            <li><strong>Hero stays clean</strong> — reuses identical Kicker / Heading / Lead / Byline / HeroCoverImage from announcement-locked. Variant-specific narrative (shields) is a sibling block below the hero, not nested inside it.</li>
+          </ul>
+        </div>
+      </header>
+
+      <!-- ===========================================================
+           1. INCOMING — pull-quote IN-HERO (Option A)
+           =========================================================== -->
+      <section class="section" id="in-hero-quote">
+        <div class="section-meta">
+          <span class="mono">★ 01 · INCOMING TRANSFER · PULL-QUOTE IN-HERO (Option A)</span>
+          <span class="mono mono--muted">— quote sits between lead and byline, inside the hero card</span>
+        </div>
+        <h2>Optie <em>A</em> — quote in de hero.</h2>
+        <p class="lead">
+          The <code>transferFact.note</code> renders as a small italic quote between the lead and the byline,
+          inside the hero block. Cheap visual moment, no extra component below the hero.
+        </p>
+
+        <div class="page-frame">
+          <span class="page-frame__label">★ /NIEUWS/[SLUG] · TRANSFER · OPTION A</span>
+
+          <div class="ed-hero">
+            <div class="ed-hero__left">
+              <span class="kicker">
+                <span class="kicker__star">★</span>
+                <span>TRANSFER</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">05 MIN LEZEN</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">05 MEI 2026</span>
+                <span class="kicker__star">★</span>
+              </span>
+
+              <h2 class="editorial-heading">Welkom <em>thuis</em>, Maxim</h2>
+
+              <p class="ed-hero__lead">
+                Onze rechterflank wordt komend seizoen versterkt. Maxim Breugelmans tekent voor twee jaar en
+                ruilt het oranje in voor het jersey-groen.
+              </p>
+
+              <p class="ed-hero__quote">
+                <span class="ed-hero__quote-text">We hebben Maxim acht jaar gevolgd. Vandaag is hij thuis.</span>
+                <span class="ed-hero__quote-attr">T1 Wim Vandersteen</span>
+              </p>
+
+              <div class="byline">
+                <span class="byline__star">★</span>
+                <span>DOOR REDACTIE</span>
+              </div>
+            </div>
+
+            <div class="ed-hero__right">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape" aria-hidden="true"></span>
+                <div class="cover-artefact">
+                  <div class="cover-artefact__frame">
+                    <img src="https://picsum.photos/seed/transfer-maxim/1600/900" alt="Welkom thuis, Maxim" />
+                  </div>
+                  <p class="cover-artefact__caption">
+                    <span class="star">★</span><span>FOTO &middot; M. BREUGELMANS</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TransferFactStrip — INCOMING: 3 paper cards + arrows between -->
+          <div class="transfer-strip">
+            <div class="transfer-strip__card transfer-strip__card--rot-a">
+              <div class="transfer-strip__shield transfer-strip__shield--ink">L</div>
+              <p class="transfer-strip__role">Van</p>
+              <p class="transfer-strip__name">KFC Lubbeek</p>
+              <p class="transfer-strip__sub">Tweede Provinciale</p>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--player">
+              <p class="transfer-strip__role"><span class="star">★</span>Speler<span class="star">★</span></p>
+              <p class="transfer-strip__name">Maxim Breugelmans</p>
+              <p class="transfer-strip__sub">Middenvelder · 23&thinsp;j.</p>
+              <div class="transfer-strip__player-spacer" aria-hidden="true"></div>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-c">
+              <div class="transfer-strip__shield">K</div>
+              <p class="transfer-strip__role">Naar</p>
+              <p class="transfer-strip__name">KCVV Elewijt</p>
+              <p class="transfer-strip__sub">Derde Amateur · A-ploeg · #8</p>
+            </div>
+          </div>
+
+          <div class="body-sim">
+            <p>
+              Maxim Breugelmans (23) tekende een tweejarig contract bij KCVV Elewijt en wordt komend seizoen
+              de centrale schakel op het middenveld. De terugkeer is geen toeval: de speler doorliep zijn
+              volledige jeugdopleiding bij KCVV en speelde één seizoen voor KFC Lubbeek …
+            </p>
+            <p>
+              "Wij zochten al langer een box-to-box achtien," aldus T1 Wim Vandersteen. "Maxim hebben we acht
+              jaar zien groeien — wat hij vandaag in zijn benen heeft, hadden we niet meer in de A-ploeg." …
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           2. INCOMING — pull-quote IN-BODY (Option B)
+           =========================================================== -->
+      <section class="section" id="in-body-quote">
+        <div class="section-meta">
+          <span class="mono">★ 02 · INCOMING TRANSFER · PULL-QUOTE IN-BODY (Option B)</span>
+          <span class="mono mono--muted">— quote uses existing &lt;PullQuote&gt; primitive, sits between hero/strip and body</span>
+        </div>
+        <h2>Optie <em>B</em> — quote als losse PullQuote.</h2>
+        <p class="lead">
+          Hero stays clean (no quote between lead and byline). The <code>transferFact.note</code> renders as
+          the existing <code>&lt;PullQuote tone="jersey"&gt;</code> primitive at full prose width, between
+          the TransferFactStrip and the body's first paragraph.
+        </p>
+
+        <div class="page-frame">
+          <span class="page-frame__label">★ /NIEUWS/[SLUG] · TRANSFER · OPTION B</span>
+
+          <div class="ed-hero">
+            <div class="ed-hero__left">
+              <span class="kicker">
+                <span class="kicker__star">★</span>
+                <span>TRANSFER</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">05 MIN LEZEN</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">05 MEI 2026</span>
+                <span class="kicker__star">★</span>
+              </span>
+
+              <h2 class="editorial-heading">Welkom <em>thuis</em>, Maxim</h2>
+
+              <p class="ed-hero__lead">
+                Onze rechterflank wordt komend seizoen versterkt. Maxim Breugelmans tekent voor twee jaar en
+                ruilt het oranje in voor het jersey-groen. Acht jaar Elewijt-jeugd, één jaar Lubbeek, en nu
+                terug thuis.
+              </p>
+
+              <div class="byline">
+                <span class="byline__star">★</span>
+                <span>DOOR REDACTIE</span>
+              </div>
+            </div>
+
+            <div class="ed-hero__right">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape" aria-hidden="true"></span>
+                <div class="cover-artefact">
+                  <div class="cover-artefact__frame">
+                    <img src="https://picsum.photos/seed/transfer-maxim/1600/900" alt="Welkom thuis, Maxim" />
+                  </div>
+                  <p class="cover-artefact__caption">
+                    <span class="star">★</span><span>FOTO &middot; M. BREUGELMANS</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Same TransferFactStrip below hero. -->
+          <div class="transfer-strip">
+            <div class="transfer-strip__card transfer-strip__card--rot-a">
+              <div class="transfer-strip__shield transfer-strip__shield--ink">L</div>
+              <p class="transfer-strip__role">Van</p>
+              <p class="transfer-strip__name">KFC Lubbeek</p>
+              <p class="transfer-strip__sub">Tweede Provinciale</p>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--player">
+              <p class="transfer-strip__role"><span class="star">★</span>Speler<span class="star">★</span></p>
+              <p class="transfer-strip__name">Maxim Breugelmans</p>
+              <p class="transfer-strip__sub">Middenvelder · 23&thinsp;j.</p>
+              <div class="transfer-strip__player-spacer" aria-hidden="true"></div>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-c">
+              <div class="transfer-strip__shield">K</div>
+              <p class="transfer-strip__role">Naar</p>
+              <p class="transfer-strip__name">KCVV Elewijt</p>
+              <p class="transfer-strip__sub">Derde Amateur · A-ploeg · #8</p>
+            </div>
+          </div>
+
+          <!-- PullQuote primitive between strip and body -->
+          <blockquote class="pull-quote pull-quote--jersey">
+            <span class="pull-quote__mark" aria-hidden="true">&ldquo;</span>
+            <p class="pull-quote__body">We hebben Maxim acht jaar gevolgd. Vandaag is hij thuis.</p>
+            <p class="pull-quote__attr">★ T1 Wim Vandersteen</p>
+          </blockquote>
+
+          <div class="body-sim">
+            <p>
+              Maxim Breugelmans (23) tekende een tweejarig contract bij KCVV Elewijt en wordt komend seizoen
+              de centrale schakel op het middenveld. De terugkeer is geen toeval: de speler doorliep zijn
+              volledige jeugdopleiding bij KCVV en speelde één seizoen voor KFC Lubbeek …
+            </p>
+            <p>
+              Coach Wim Vandersteen had Breugelmans al weken in beeld …
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           3. DIRECTION MATRIX — extension + outgoing
+           =========================================================== -->
+      <section class="section" id="direction-matrix">
+        <div class="section-meta">
+          <span class="mono">★ 03 · DIRECTION MATRIX</span>
+          <span class="mono mono--muted">— extension + outgoing TransferFactStrip variations (compact)</span>
+        </div>
+        <h2>De <em>drie</em> richtingen.</h2>
+        <p class="lead">
+          The TransferFactStrip morphs per direction. <strong>Incoming</strong> shown above. Below:
+          <strong>extension</strong> (only KCVV — single shield + <code>until</code> badge, no arrow) and
+          <strong>outgoing</strong> (KCVV → other club).
+        </p>
+
+        <div class="panel">
+          <p class="mono mono--muted" style="margin: 0 0 12px;">★ EXTENSION — direction="extension" · single card · player stays at KCVV</p>
+          <div class="transfer-strip transfer-strip--extension">
+            <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--extension">
+              <div class="transfer-strip__shield">K</div>
+              <p class="transfer-strip__role"><span class="star">★</span>Verlengd<span class="star">★</span></p>
+              <p class="transfer-strip__name">Julien Verlinden</p>
+              <p class="transfer-strip__sub">Aanvaller · 33&thinsp;j. · A-ploeg #7</p>
+              <div class="transfer-strip__extension-stamp">
+                <span class="stamp-label">tot</span>
+                <span class="stamp-value">2027 — 28</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <p class="mono mono--muted" style="margin: 0 0 12px;">★ OUTGOING — direction="outgoing" · arrows in alert-red signal a departure</p>
+          <div class="transfer-strip transfer-strip--outgoing">
+            <div class="transfer-strip__card transfer-strip__card--rot-a">
+              <div class="transfer-strip__shield">K</div>
+              <p class="transfer-strip__role">Van</p>
+              <p class="transfer-strip__name">KCVV Elewijt</p>
+              <p class="transfer-strip__sub">Derde Amateur · B-ploeg</p>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--player">
+              <p class="transfer-strip__role"><span class="star">★</span>Speler<span class="star">★</span></p>
+              <p class="transfer-strip__name">Lukas Janssens</p>
+              <p class="transfer-strip__sub">Verdediger · 22&thinsp;j.</p>
+              <div class="transfer-strip__player-spacer" aria-hidden="true"></div>
+            </div>
+            <span class="transfer-strip__arrow" aria-hidden="true"><span class="transfer-strip__arrow--horizontal">→</span><span class="transfer-strip__arrow--vertical"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+            <div class="transfer-strip__card transfer-strip__card--rot-c">
+              <div class="transfer-strip__shield transfer-strip__shield--ink">T</div>
+              <p class="transfer-strip__role">Naar</p>
+              <p class="transfer-strip__name">VK Tildonk</p>
+              <p class="transfer-strip__sub">Tweede Provinciale</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           NEW — Mobile preview (360px viewport simulation)
+           =========================================================== -->
+      <section class="section" id="mobile-preview">
+        <div class="section-meta">
+          <span class="mono">★ 03b · MOBILE PREVIEW</span>
+          <span class="mono mono--muted">— cards stack vertically (≤ 720px); horizontal → swaps for inline SVG vertical arrow</span>
+        </div>
+        <h2>Op <em>kleinere ruit.</em></h2>
+        <p class="lead">
+          Below 720px the strip flips from horizontal to vertical. Cards stack top-to-bottom, and the arrow
+          span swaps from its horizontal italic <code>→</code> glyph to an inline SVG path drawn as a
+          vertical down-arrow (24-line, currentColor stroke) — no rotation hack and no character glyph
+          swap; the SVG is its own variant element (<code>.transfer-strip__arrow--vertical</code>) toggled
+          via CSS. Extension stays a single centered card (no journey, no arrows). Outgoing keeps its
+          alert-red colour.
+        </p>
+
+        <div class="panel" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+          <!-- INCOMING mobile -->
+          <div style="background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge); padding: 12px; max-width: 360px;">
+            <p class="mono mono--muted" style="margin: 0 0 8px;">★ INCOMING · 360px</p>
+            <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+              <div class="transfer-strip" style="flex-direction: column; gap: 12px; padding: 16px 0;">
+                <div class="transfer-strip__card transfer-strip__card--rot-a" style="max-width: 280px; width: 100%;">
+                  <div class="transfer-strip__shield transfer-strip__shield--ink">L</div>
+                  <p class="transfer-strip__role">Van</p>
+                  <p class="transfer-strip__name">KFC Lubbeek</p>
+                  <p class="transfer-strip__sub">Tweede Prov.</p>
+                </div>
+                <span class="transfer-strip__arrow" aria-hidden="true" style="padding: 4px 0;"><span class="transfer-strip__arrow--horizontal" style="display: none;">→</span><span class="transfer-strip__arrow--vertical" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 38px; line-height: 0;"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+                <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--player" style="max-width: 280px; width: 100%;">
+                  <p class="transfer-strip__role"><span class="star">★</span>Speler<span class="star">★</span></p>
+                  <p class="transfer-strip__name">Maxim Breugelmans</p>
+                  <p class="transfer-strip__sub">Mid · 23&thinsp;j.</p>
+                  <div class="transfer-strip__player-spacer" aria-hidden="true"></div>
+                </div>
+                <span class="transfer-strip__arrow" aria-hidden="true" style="padding: 4px 0;"><span class="transfer-strip__arrow--horizontal" style="display: none;">→</span><span class="transfer-strip__arrow--vertical" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 38px; line-height: 0;"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+                <div class="transfer-strip__card transfer-strip__card--rot-c" style="max-width: 280px; width: 100%;">
+                  <div class="transfer-strip__shield">K</div>
+                  <p class="transfer-strip__role">Naar</p>
+                  <p class="transfer-strip__name">KCVV Elewijt</p>
+                  <p class="transfer-strip__sub">Derde Am. · #8</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OUTGOING mobile -->
+          <div style="background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge); padding: 12px; max-width: 360px;">
+            <p class="mono mono--muted" style="margin: 0 0 8px;">★ OUTGOING · 360px · red arrows</p>
+            <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+              <div class="transfer-strip transfer-strip--outgoing" style="flex-direction: column; gap: 12px; padding: 16px 0;">
+                <div class="transfer-strip__card transfer-strip__card--rot-a" style="max-width: 280px; width: 100%;">
+                  <div class="transfer-strip__shield">K</div>
+                  <p class="transfer-strip__role">Van</p>
+                  <p class="transfer-strip__name">KCVV Elewijt</p>
+                  <p class="transfer-strip__sub">Derde Am. · B</p>
+                </div>
+                <span class="transfer-strip__arrow" aria-hidden="true" style="padding: 4px 0;"><span class="transfer-strip__arrow--horizontal" style="display: none;">→</span><span class="transfer-strip__arrow--vertical" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 38px; line-height: 0;"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+                <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--player" style="max-width: 280px; width: 100%;">
+                  <p class="transfer-strip__role"><span class="star">★</span>Speler<span class="star">★</span></p>
+                  <p class="transfer-strip__name">Lukas Janssens</p>
+                  <p class="transfer-strip__sub">Verd · 22&thinsp;j.</p>
+                  <div class="transfer-strip__player-spacer" aria-hidden="true"></div>
+                </div>
+                <span class="transfer-strip__arrow" aria-hidden="true" style="padding: 4px 0;"><span class="transfer-strip__arrow--horizontal" style="display: none;">→</span><span class="transfer-strip__arrow--vertical" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 38px; line-height: 0;"><svg viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;"><path d="M14 4 L14 32 M5 23 L14 33 L23 23"/></svg></span></span>
+                <div class="transfer-strip__card transfer-strip__card--rot-c" style="max-width: 280px; width: 100%;">
+                  <div class="transfer-strip__shield transfer-strip__shield--ink">T</div>
+                  <p class="transfer-strip__role">Naar</p>
+                  <p class="transfer-strip__name">VK Tildonk</p>
+                  <p class="transfer-strip__sub">Tweede Prov.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EXTENSION mobile -->
+          <div style="background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge); padding: 12px; max-width: 360px;">
+            <p class="mono mono--muted" style="margin: 0 0 8px;">★ EXTENSION · 360px · no arrows</p>
+            <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+              <div class="transfer-strip transfer-strip--extension" style="padding: 16px 0;">
+                <div class="transfer-strip__card transfer-strip__card--rot-b transfer-strip__card--extension" style="max-width: 280px; width: 100%; padding: 28px 22px 22px;">
+                  <div class="transfer-strip__shield">K</div>
+                  <p class="transfer-strip__role"><span class="star">★</span>Verlengd<span class="star">★</span></p>
+                  <p class="transfer-strip__name">Julien Verlinden</p>
+                  <p class="transfer-strip__sub">Aanvaller · 33&thinsp;j.</p>
+                  <div class="transfer-strip__extension-stamp">
+                    <span class="stamp-label">tot</span>
+                    <span class="stamp-value">2027 — 28</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           4. A/B TRADE-OFF
+           =========================================================== -->
+      <section class="section" id="ab-tradeoff">
+        <div class="section-meta">
+          <span class="mono">★ 04 · A/B PULL-QUOTE — TRADE-OFF</span>
+        </div>
+        <h2>Welke <em>quote-plaatsing</em>?</h2>
+
+        <div class="panel">
+          <table class="map-table">
+            <thead><tr><th>Criterion</th><th>A — In-hero</th><th>B — Below hero (PullQuote primitive)</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Visual weight of the quote</td>
+                <td>Smaller — sits flush with the lead, single column</td>
+                <td>Larger — full prose width, dedicated card, paper rotation, jersey-tone</td>
+              </tr>
+              <tr>
+                <td>Hero density</td>
+                <td>Heavier — kicker + heading + lead + quote + byline in one column</td>
+                <td>Lighter — kicker + heading + lead + byline (matches announcement)</td>
+              </tr>
+              <tr>
+                <td>Component reuse</td>
+                <td>Requires a small new sub-component (a quote line inside the hero)</td>
+                <td>Reuses existing <code>&lt;PullQuote tone="jersey"&gt;</code> primitive verbatim</td>
+              </tr>
+              <tr>
+                <td>Consistency across variants</td>
+                <td>Hero shape diverges from announcement (which has no quote slot)</td>
+                <td>Hero shape stays identical to announcement; quote is a sibling block</td>
+              </tr>
+              <tr>
+                <td>Quote prominence</td>
+                <td>Reader sees it before scrolling — high attention</td>
+                <td>Reader sees it after scrolling past the strip — medium attention</td>
+              </tr>
+              <tr>
+                <td>When the editor leaves the quote empty</td>
+                <td>Hero collapses cleanly (no row renders)</td>
+                <td>Section is just absent — body flows directly from strip to first paragraph</td>
+              </tr>
+              <tr>
+                <td>Risk: fight with cover image</td>
+                <td>None — quote is in the left column, image in the right</td>
+                <td>None — quote sits below both</td>
+              </tr>
+              <tr>
+                <td>Mobile collapse</td>
+                <td>Quote stays inline below the lead (one extra line in the stack)</td>
+                <td>Quote sits as a block between strip and body</td>
+              </tr>
+              <tr>
+                <td>Editorial voice</td>
+                <td>Quiet — feels like a footnote on the hero</td>
+                <td>Loud — reads as a signature moment, the way a magazine pull-quote does</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="mono mono--muted" style="margin: 16px 0 0;">
+            ★ My pick: <strong>B</strong>. The <code>&lt;PullQuote&gt;</code> primitive already exists,
+            already has the right typographic weight, already supports tone variants. Hero stays consistent
+            with announcement. The quote earns its keep as a paper-card moment instead of a hero footnote.
+            But A is a defensible "quieter" call — confirm or override.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           5. FIELD-SOURCE MAP
+           =========================================================== -->
+      <section class="section" id="field-map">
+        <div class="section-meta">
+          <span class="mono">★ 05 · FIELD-SOURCE MAP</span>
+          <span class="mono mono--muted">— transferFact + article fields traced</span>
+        </div>
+
+        <div class="panel">
+          <table class="map-table">
+            <thead><tr><th>UI element</th><th>Source</th><th>Treatment</th></tr></thead>
+            <tbody>
+              <tr><td>Kicker · "TRANSFER"</td><td><span class="col-static">Static · keyed off articleType</span></td><td>EditorialKicker</td></tr>
+              <tr><td>Kicker · reading time</td><td><code>computeReadingTime(article.body)</code></td><td>Mono muted</td></tr>
+              <tr><td>Kicker · date</td><td><code>article.publishedAt</code></td><td>Mono muted</td></tr>
+              <tr><td>Headline</td><td><code>article.title</code> (PT, post-Ask-9)</td><td>EditorialHeading</td></tr>
+              <tr><td>Lead</td><td><code>article.lead</code> (post-Ask-1) → fallback <code>body[0]</code></td><td>Italic display</td></tr>
+              <tr><td>Byline</td><td><code>article.author ?? "Door redactie"</code></td><td>Mono caps muted</td></tr>
+              <tr><td>Cover image</td><td><code>article.coverImage</code> @ 16:9 (required, Ask 8) · editorial choice (any contextual photo)</td><td>HeroCoverImage shared component</td></tr>
+              <tr><td>TransferFactStrip · KCVV side label</td><td><span class="col-static">Static · "Naar" / "Van" / "Verlengd" by direction</span></td><td>Mono jersey-deep small caps</td></tr>
+              <tr><td>TransferFactStrip · KCVV club name</td><td><span class="col-static">Static · "KCVV Elewijt"</span></td><td>Display italic 900</td></tr>
+              <tr><td>TransferFactStrip · KCVV sub</td><td><code>transferFact.kcvvContext</code></td><td>Mono caps muted</td></tr>
+              <tr><td>TransferFactStrip · other club logo</td><td><code>transferFact.otherClubLogo</code> (image — falls back to text shield)</td><td>Shield clip-path · ink fill when image absent</td></tr>
+              <tr><td>TransferFactStrip · other club name</td><td><code>transferFact.otherClubName</code></td><td>Display italic 900</td></tr>
+              <tr><td>TransferFactStrip · other club sub</td><td><code>transferFact.otherClubContext</code></td><td>Mono caps muted</td></tr>
+              <tr><td>TransferFactStrip · player line</td><td><code>transferFact.playerName</code> + <code>position</code> + <code>age</code></td><td>Mono kicker + Display italic name + Mono meta</td></tr>
+              <tr><td>TransferFactStrip · arrow / extension badge</td><td><span class="col-static">Static "→" or "tot " + <code>transferFact.until</code></span></td><td>Display italic for arrow; mono outline pill for extension</td></tr>
+              <tr><td>Pull-quote body</td><td><code>transferFact.note</code> (≤ 140 char)</td><td>PullQuote primitive (Option B) or in-hero quote (Option A)</td></tr>
+              <tr><td>Pull-quote attribution</td><td><code>transferFact.noteAttribution ?? transferFact.playerName</code></td><td>Mono caps muted</td></tr>
+              <tr style="background: rgba(184,74,58,0.06);">
+                <td style="color: #b84a3a;"><strong>(absent)</strong> "JEUGD: ELEWIJT (2014–22)" career history</td>
+                <td colspan="2">No career-log field on article or transferFact — drop from hero</td>
+              </tr>
+              <tr style="background: rgba(184,74,58,0.06);">
+                <td style="color: #b84a3a;"><strong>(absent)</strong> Fake author "DOOR REDACTIE / FOTO · KCVV"</td>
+                <td colspan="2">Photo credit dropped (Ask 4); author falls back to default stub (Ask 2)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           6. NOTES BEFORE LOCK
+           =========================================================== -->
+      <section class="section" id="lock-notes">
+        <div class="section-meta">
+          <span class="mono">★ 06 · OPEN QUESTIONS BEFORE LOCK</span>
+        </div>
+
+        <div class="panel panel--soft">
+          <ul style="margin: 0; padding-left: 20px; line-height: 1.7;">
+            <li><strong>Pull-quote placement</strong> — pick A (in-hero) or B (PullQuote primitive below hero/strip).</li>
+            <li><strong>TransferFactStrip is a NEW shared sub-component</strong> for transfer + (later) used as inspiration for matchPreview/matchRecap (#1470). Naming: <code>&lt;TransferFactStrip&gt;</code>. Lives at <code>apps/web/src/components/article/blocks/TransferFactStrip/</code> (it's a body block, not design-system primitive).</li>
+            <li><strong>Multiple transferFacts in one article</strong> — schema comment says first powers the hero/strip; the rest render as compact overview rows. Compact-row treatment is a body concern, not hero — design later in 3.B.2 implementation. Confirm.</li>
+            <li><strong>Cover image fallback per direction?</strong> Per Ask 8 (a) coverImage is hard-required — editor uploads one for every article. Confirm: no per-direction default (e.g. no auto "shield-to-shield" placeholder for transfers without a player photo).</li>
+            <li><strong>Mobile collapse</strong> — TransferFactStrip reflows to vertical (3 stacked rows: from / player / to) under 720px (matches the `.transfer-strip` `@media (max-width: 720px)` rule earlier in the file). No special handling needed for extension's already-single column.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

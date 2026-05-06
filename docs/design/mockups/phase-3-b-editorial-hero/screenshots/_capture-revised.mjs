@@ -1,0 +1,187 @@
+import { chromium } from "playwright";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const mockupsRoot = path.resolve(__dirname, "..", "..");
+
+const variant = process.argv[2];
+const placement = process.argv[3] ?? "detail";
+const allowedPlacements = ["detail", "homepage", "compare"];
+if (!variant || !/^[a-z0-9_-]+$/i.test(variant)) {
+  console.error("usage: node _capture-revised.mjs <variant> [detail|homepage|compare]");
+  console.error("  <variant> must be non-empty and match /^[a-z0-9_-]+$/i");
+  process.exit(1);
+}
+if (!allowedPlacements.includes(placement)) {
+  console.error(`invalid placement '${placement}'; expected one of: ${allowedPlacements.join(", ")}`);
+  process.exit(1);
+}
+
+// Per-variant checkpoint mapping — each checkpoint has its own mockup
+// directory and (when needed) its own screenshots/ subdirectory.
+const checkpointDir = {
+  announcement: "phase-3-b-editorial-hero",
+  transfer: "phase-3-b-editorial-hero",
+  event: "phase-3-b-editorial-hero",
+  interview: "phase-3-b-editorial-hero",
+  header: "phase-3-c-header-and-matchstrip",
+  matchstrip: "phase-3-c-header-and-matchstrip",
+  footer: "phase-3-d-footer",
+};
+
+// Some Checkpoint D files use `option-x-` prefix instead of the
+// drill-down convention's `option-a-` prefix (the locked direction
+// is a synthesis, not a single picked option).
+const filePrefix = {
+  footer: "option-x",
+};
+
+const dir = path.join(mockupsRoot, checkpointDir[variant] ?? "phase-3-b-editorial-hero");
+const outDir = path.join(dir, "screenshots");
+// Per-checkpoint screenshots/ directories aren't always pre-created
+// (Checkpoint D was added later). Ensure the output dir exists before
+// any screenshot write — `recursive: true` is a no-op when it already does.
+fs.mkdirSync(outDir, { recursive: true });
+
+const variantSections = {
+  announcement: [
+    { id: "detail-no-cover", suffix: "primary" },
+    { id: "detail-with-cover", suffix: "secondary" },
+  ],
+  transfer: [
+    { id: "in-hero-quote", suffix: "option-a" },
+    { id: "in-body-quote", suffix: "option-b" },
+    { id: "direction-matrix", suffix: "matrix" },
+    { id: "mobile-preview", suffix: "mobile" },
+  ],
+  // Compare entries below capture the LOCKED summary blocks in each
+  // comparison HTML (background: cream-soft, dashed border). Pre-lock
+  // q-option IDs (e.g. q4-cover, q1-strip, q2-sessions,
+  // q1-subjects-placement, q2-subject-counts) are still in the DOM
+  // but `display:none` per the drill pattern, so capturing them yields
+  // 0×0 rects and gets skipped — IDs updated to the visible
+  // post-lock equivalents.
+  event: placement === "compare"
+    ? [
+        { id: "q4-locked", suffix: "q4" },
+        { id: "q1-locked", suffix: "q1" },
+        { id: "q2-locked", suffix: "q2" },
+        { id: "q3-event-doc", suffix: "q3" },
+      ]
+    : [
+        { id: "single-day-full", suffix: "single-day" },
+        { id: "recurring-sessions", suffix: "recurring" },
+        { id: "no-ticket-url", suffix: "no-ticket" },
+        { id: "mobile-preview", suffix: "mobile" },
+      ],
+  interview: placement === "compare"
+    ? [
+        { id: "q1-locked", suffix: "q1" },
+        { id: "q2-locked", suffix: "q2" },
+        { id: "q2b-mobile-counts", suffix: "q2b" },
+      ]
+    : [
+        { id: "single-subject", suffix: "n1" },
+        { id: "duo-subjects", suffix: "n2" },
+        { id: "rare-counts-mobile", suffix: "rare-mobile" },
+      ],
+  header: placement === "compare"
+    ? [
+        { id: "q0-data-audit", suffix: "q0-audit" },
+        { id: "q1-scroll", suffix: "q1-locked" },
+        { id: "q2-search", suffix: "q2-locked" },
+        { id: "q3-cta-breakpoint", suffix: "q3-locked" },
+        { id: "q4-drawer", suffix: "q4-locked" },
+        { id: "q5-stacking", suffix: "q5-locked" },
+        { id: "q6-state-matrix", suffix: "q6-locked" },
+      ]
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile-closed", suffix: "mobile-closed" },
+        { id: "mobile-open", suffix: "mobile-open" },
+      ],
+  matchstrip: placement === "compare"
+    ? []
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile", suffix: "mobile" },
+        { id: "render-matrix", suffix: "render-matrix" },
+      ],
+  footer: placement === "compare"
+    ? [
+        { id: "q0-data-audit", suffix: "q0-audit" },
+        { id: "q1-base-direction", suffix: "q1-locked" },
+        { id: "q2-ia", suffix: "q2-locked" },
+        { id: "q2-5-middle-refinement", suffix: "q2-5-locked" },
+        { id: "q3-verifications", suffix: "q3-verifications" },
+      ]
+    : [
+        { id: "desktop", suffix: "desktop" },
+        { id: "mobile", suffix: "mobile" },
+        { id: "render-rule", suffix: "render-rule" },
+      ],
+};
+const sections = variantSections[variant] ?? [];
+
+const browser = await chromium.launch();
+let context;
+try {
+  context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+  const prefixForVariant = filePrefix[variant] ?? "option-a";
+  const fileName = placement === "detail"
+    ? `${prefixForVariant}-${variant}-detail.html`
+    : placement === "compare"
+      ? `${prefixForVariant}-${variant}-comparisons.html`
+      : `${prefixForVariant}-${variant}-revised.html`;
+  const url = pathToFileURL(path.join(dir, fileName)).href;
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(async () => {
+    await Promise.all(
+      Array.from(document.images).map((img) =>
+        img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r; })
+      )
+    );
+    if (document.fonts) await document.fonts.ready;
+  });
+  await page.waitForTimeout(500);
+  // Full page
+  const prefix = placement === "detail" ? `detail-${variant}` : placement === "compare" ? `compare-${variant}` : `revised-${variant}`;
+  await page.screenshot({
+    path: path.join(outDir, `${prefix}-full.png`),
+    fullPage: true,
+  });
+  console.log(`✓ ${prefix}-full.png`);
+  for (const { id, suffix } of sections) {
+    const el = await page.$(`#${id}`);
+    if (!el) {
+      console.warn(`  ! missing #${id}`);
+      continue;
+    }
+    // Compute element rect in document coords (not viewport), then clip the full page.
+    const rect = await el.evaluate((node) => {
+      const r = node.getBoundingClientRect();
+      const x = r.left + window.scrollX;
+      const y = r.top + window.scrollY;
+      return { x, y, width: r.width, height: r.height };
+    });
+    if (!rect || rect.width === 0 || rect.height === 0) {
+      console.warn(`  ! could not measure #${id}`);
+      continue;
+    }
+    await page.screenshot({
+      path: path.join(outDir, `${prefix}-${suffix}.png`),
+      fullPage: true,
+      clip: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    });
+    console.log(`  ✓ ${prefix}-${suffix}.png`);
+  }
+} finally {
+  if (context) await context.close();
+  if (browser) await browser.close();
+}

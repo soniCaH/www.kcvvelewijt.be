@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EditorialHero · interview · COMPARISONS — Phase 3 · Checkpoint B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: 0.5deg;
+        --rotate-tape-c: -0.25deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { font-family: var(--font-body); background: var(--color-cream); color: var(--color-ink); font-size: 16px; line-height: 1.6; background-image: radial-gradient(circle at 12% 20%, rgba(10,10,10,0.022) 0 1px, transparent 1px), radial-gradient(circle at 78% 65%, rgba(10,10,10,0.018) 0 1px, transparent 1px); background-size: 240px 240px, 180px 180px; }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 12px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .header-bar { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 32px 40px; margin-bottom: 40px; }
+      .header-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 12px; }
+
+      .question { margin: 60px 0; padding: 32px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); }
+      .question__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-jersey-deep); margin: 0 0 8px; font-weight: 700; }
+      .question__title { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 32px; line-height: 1.1; margin: 0 0 14px; }
+      .question__title em { color: var(--color-jersey-deep); }
+      .question__brief { font-size: 16px; color: var(--color-ink-soft); margin: 0 0 28px; max-width: 800px; }
+
+      .options { display: grid; gap: 32px; margin-top: 24px; grid-template-columns: 1fr; }
+      .option-card { background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge); padding: 16px; }
+      .option-card__label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ink); font-weight: 700; margin: 0 0 4px; }
+      .option-card__hint { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--color-ink-muted); margin: 0 0 14px; }
+
+      .tradeoff { margin-top: 16px; padding: 12px 16px; background: rgba(10,10,10,0.04); border-left: 3px solid var(--color-jersey-deep); font-size: 13px; line-height: 1.5; color: var(--color-ink-soft); }
+      .tradeoff strong { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); }
+
+      /* Hero shell */
+      .ed-hero { display: grid; grid-template-columns: 60% 40%; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 40px; position: relative; }
+      .ed-hero::before { content: ""; position: absolute; top: 40px; bottom: 40px; left: calc(60% + 8px); width: 1px; background: var(--color-ink); opacity: 0.55; }
+      .ed-hero__left { padding-right: 40px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+      .ed-hero__right { padding-left: 40px; display: flex; align-items: center; justify-content: center; min-height: 360px; gap: 18px; }
+
+      .kicker { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--color-ink); line-height: 1; }
+      .kicker > span { display: inline-flex; align-items: center; line-height: 1; }
+      .kicker__star { color: var(--color-jersey-deep); font-size: 12px; }
+      .kicker__dot { width: 3px; height: 3px; border-radius: 50%; background: var(--color-ink); }
+      .kicker__muted { color: var(--color-ink-muted); }
+
+      .editorial-heading { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.0; margin: 0; }
+      .editorial-heading em { font-style: italic; color: var(--color-jersey-deep); }
+      .editorial-heading::after { content: "."; color: var(--color-jersey-deep); }
+
+      .ed-hero__lead { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 14px; line-height: 1.55; color: var(--color-ink-soft); margin: 4px 0; max-width: 52ch; }
+      .byline { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--color-paper-edge); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; line-height: 1; }
+      .byline > span { display: inline-flex; align-items: center; line-height: 1; }
+      .byline__star { color: var(--color-jersey-deep); font-size: 11px; }
+
+      /* TapedCard / PlayerFigure (per Checkpoint A locked spec) */
+      .taped-card { position: relative; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 14px; }
+      .taped-card--rot-a { transform: rotate(-1.5deg); }
+      .taped-card--rot-b { transform: rotate(1.2deg); }
+      .taped-card--rot-c { transform: rotate(0.4deg); }
+      .taped-card__tape { position: absolute; top: -10px; width: 56px; height: 18px; border: 1px solid rgba(0,0,0,0.18); }
+      .taped-card__tape--green { background: rgba(74,207,82,0.55); }
+      .taped-card__tape--ochre { background: rgba(245,200,80,0.6); }
+      .taped-card__tape--left { left: 14%; transform: rotate(-3deg); }
+      .taped-card__tape--right { right: 14%; transform: rotate(3deg); }
+      .taped-card__tape--center { left: 50%; transform: translateX(-50%) rotate(2deg); }
+
+      /* PlayerFigure polaroid */
+      .player-figure { width: 180px; }
+      .player-figure__well { aspect-ratio: 3/4; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden; }
+      .player-figure__well img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.02) saturate(0.94); }
+      .player-figure__caption { padding: 10px 4px 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; color: var(--color-ink-soft); line-height: 1.3; }
+      .player-figure__caption .star { color: var(--color-jersey-deep); }
+      .player-figure__caption strong { display: block; font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; color: var(--color-ink); letter-spacing: 0; text-transform: none; margin-bottom: 2px; }
+
+      /* Cover image (16:9 in TapedCard) */
+      .cover-artefact { width: 100%; max-width: 360px; }
+      .cover-artefact__frame { aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden; }
+      .cover-artefact__frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.02) saturate(0.95); }
+      .cover-artefact__caption { padding: 8px 4px 0; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; align-items: center; gap: 6px; line-height: 1; }
+      .cover-artefact__caption .star { color: var(--color-jersey-deep); font-size: 11px; }
+
+      /* SubjectsStrip — paper-card row of PlayerFigures (variant of TransferFactStrip's pattern) */
+      .subjects-strip {
+        margin-top: 32px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 28px 32px;
+        display: flex; align-items: center; justify-content: center; gap: 24px;
+      }
+      .subjects-strip__amp {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 56px; color: var(--color-jersey-deep);
+        line-height: 1;
+        align-self: center;
+        flex-shrink: 0;
+      }
+
+      /* SubjectsStrip — N=1 pullquote variant */
+      .subjects-strip--n1 {
+        gap: 40px; padding: 36px 40px;
+        justify-content: flex-start;
+      }
+      .subjects-strip__quote {
+        flex: 1; min-width: 0;
+        display: flex; flex-direction: column; gap: 14px;
+        max-width: 56ch;
+      }
+      .subjects-strip__quote-mark {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 80px; line-height: 0.5;
+        color: var(--color-jersey-deep);
+        margin-top: 10px;
+      }
+      .subjects-strip__quote-body {
+        font-family: var(--font-display); font-style: italic; font-weight: 700;
+        font-size: 22px; line-height: 1.35;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .subjects-strip__quote-attr {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--color-ink-muted); font-weight: 600;
+        margin: 0;
+        display: inline-flex; align-items: center; gap: 6px;
+        line-height: 1;
+      }
+      .subjects-strip__quote-attr .star { color: var(--color-jersey-deep); font-size: 12px; }
+
+      /* Cover-image-as-strip (for option 1 — coverImage moves below hero as a 16:9 strip) */
+      .cover-strip {
+        margin-top: 32px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 14px;
+      }
+      .cover-strip__frame { aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden; max-width: 100%; }
+      .cover-strip__frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.02) saturate(0.95); }
+      .cover-strip__caption { padding: 10px 4px 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; align-items: center; gap: 8px; line-height: 1; }
+      .cover-strip__caption .star { color: var(--color-jersey-deep); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="header-bar">
+        <div class="header-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIAL HERO · DIRECTION A</span>
+          <span class="mono mono--muted">★ INTERVIEW · DRILL-DOWN COMPARISONS</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Interview variant — <em>compare each choice.</em></h1>
+        <p class="lead">
+          Four open questions. Picking one at a time, building the next on top of the previous answer.
+          Starting with Q1: where do the subject portraits live in the composition?
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           Q1 — LOCKED: Option 2 (coverImage in hero + SubjectsStrip below)
+           =========================================================== -->
+      <section class="question" id="q1-locked" style="background: var(--color-cream-soft); border-style: dashed;">
+        <p class="question__label" style="color: var(--color-jersey-deep);">★ Q1 · LOCKED — 2026-05-05</p>
+        <h2 class="question__title" style="font-size: 22px;">Option 2 — coverImage in hero, SubjectsStrip below. <em>Pattern-consistent.</em></h2>
+        <p class="question__brief" style="margin: 0;">
+          Hero stays the same shape as announcement / transfer / event (coverImage in right column).
+          Subject portraits live in a sibling block below — same architectural pattern as
+          <code>&lt;TransferFactStrip&gt;</code> and <code>&lt;EventFactStrip&gt;</code>.
+        </p>
+      </section>
+
+      <!-- (Old Q1 comparison hidden) -->
+      <section class="question" id="q1-subjects-placement" style="display: none;">
+        <p class="question__label">★ Q1 · Subject portraits — where do they live?</p>
+        <h2 class="question__title">Waar leven de <em>subjects[]</em> portretten?</h2>
+        <p class="question__brief">
+          The interview's visual signature is the subject portraits. <code>article.subjects[]</code> can hold
+          1–4 entries (player / staff / custom). The article ALSO has a <code>coverImage</code> (required per
+          Ask 8). Three placement strategies — each shows the same N=2 duo example data.
+        </p>
+
+        <div class="options">
+          <!-- Option 1 · Subjects in right-column slot, coverImage moves below hero -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option 1 · Subjects IN the hero (right column) · coverImage as strip below</p>
+            <p class="option-card__hint">Subjects replace coverImage in the right-column artefact slot — they ARE the variant signature. coverImage moves below the hero as a 16:9 context strip.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">DUO</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">12 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Acht <em>seizoenen</em> samen</h2>
+                <p class="ed-hero__lead">Julien en Niels haakten dezelfde zomer aan. Acht seizoenen later hangen ze samen de schoenen aan de haak. We zetten ze één laatste keer aan tafel.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="player-figure">
+                    <div class="player-figure__well"><img src="https://picsum.photos/seed/julien/450/600" alt="Julien" /></div>
+                    <p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7 · 33 J.</p>
+                  </div>
+                </div>
+                <div class="taped-card taped-card--rot-b">
+                  <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--right" aria-hidden="true"></span>
+                  <div class="player-figure">
+                    <div class="player-figure__well"><img src="https://picsum.photos/seed/niels/450/600" alt="Niels" /></div>
+                    <p class="player-figure__caption"><strong>Niels</strong>DEBUTANT A · #18 · 19 J.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <figure class="cover-strip">
+              <div class="cover-strip__frame">
+                <img src="https://picsum.photos/seed/interview-context-1/1600/900" alt="Acht seizoenen samen" />
+              </div>
+              <figcaption class="cover-strip__caption">
+                <span class="star">★</span><span>FOTO &middot; <code>article.coverImage</code> @ 16:9 — context strip below hero</span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- Option 2 · coverImage in right column, subjects strip below (TransferFactStrip pattern) -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option 2 · coverImage in right column · SubjectsStrip below hero</p>
+            <p class="option-card__hint">Cover image stays in the right column slot (consistent with announcement / transfer / event). Subject portraits live in a sibling block below — same architectural pattern as TransferFactStrip / EventFactStrip.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">DUO</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">12 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Acht <em>seizoenen</em> samen</h2>
+                <p class="ed-hero__lead">Julien en Niels haakten dezelfde zomer aan. Acht seizoenen later hangen ze samen de schoenen aan de haak. We zetten ze één laatste keer aan tafel.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/interview-cover-2/1600/900" alt="Julien & Niels" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; J &amp; N</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="subjects-strip">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/julien-2/450/600" alt="Julien" /></div>
+                  <p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7</p>
+                </div>
+              </div>
+              <span class="subjects-strip__amp" aria-hidden="true">&amp;</span>
+              <div class="taped-card taped-card--rot-b">
+                <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/niels-2/450/600" alt="Niels" /></div>
+                  <p class="player-figure__caption"><strong>Niels</strong>DEBUTANT A · #18</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option 3 · Compact — coverImage in right column with subject names IN THE CAPTION, no separate strip -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option 3 · Compact — coverImage with subject names in the caption · NO separate strip</p>
+            <p class="option-card__hint">Single artefact. The coverImage in the right column carries the duo photo (editor uploads a shot of the subjects together); the photo caption beneath it names the subjects. No SubjectsStrip below — saves a block. Subjects' individual data (jersey, role, age) flows into the body's QaBlock attribution rather than the hero.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">DUO</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">12 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Acht <em>seizoenen</em> samen</h2>
+                <p class="ed-hero__lead">Julien en Niels haakten dezelfde zomer aan. Acht seizoenen later hangen ze samen de schoenen aan de haak. We zetten ze één laatste keer aan tafel.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/interview-cover-3/1600/900" alt="Julien & Niels samen" />
+                    </div>
+                    <p class="cover-artefact__caption" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                      <span style="display: inline-flex; align-items: center; gap: 6px; line-height: 1;"><span class="star">★</span><span>SUBJECTS</span></span>
+                      <span style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 14px; color: var(--color-ink); letter-spacing: 0; text-transform: none; line-height: 1.2;">Julien Verlinden &amp; Niels Verlinden</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; padding: 16px 20px; background: rgba(10,10,10,0.04); border-left: 3px solid var(--color-ink-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted);">
+              ★ no separate SubjectsStrip below — body flows directly with QaBlock attribution carrying subject context
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>Option 1</strong> makes subjects the variant signature (they replace coverImage as the
+          right-column artefact); coverImage drops to a context strip below.
+          <strong>Option 2</strong> stays consistent with the rest of the variants (coverImage in right
+          column, sibling strip below — same pattern as TransferFactStrip / EventFactStrip); subjects get
+          their own paper-card moment.
+          <strong>Option 3</strong> is the compact variant — single artefact, no separate strip; subject
+          names live in the photo caption; individual subject data flows into the body's QaBlock
+          attribution rather than the hero. Saves vertical space; relies on the body to introduce subject
+          identity properly. My pick: 2.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q2 + Q2b — LOCKED
+           =========================================================== -->
+      <section class="question" id="q2-locked" style="background: var(--color-cream-soft); border-style: dashed;">
+        <p class="question__label" style="color: var(--color-jersey-deep);">★ Q2 + Q2b · LOCKED — 2026-05-05</p>
+        <h2 class="question__title" style="font-size: 22px;">SubjectsStrip — N counts + mobile.</h2>
+        <p class="question__brief" style="margin: 0;">
+          <strong>N=1</strong> (main use case): polaroid + pull-quote inside the strip container; quote
+          source = first <code>qaPair</code> with <code>tag in [key, quote]</code> + attribution.
+          <strong>N=2</strong>: duo with italic display "&amp;" between.
+          <strong>N=3</strong>: three polaroids inline, no separator (rare).
+          <strong>N=4</strong>: 2×2 grid (rare).
+          <strong>Mobile (N≥3)</strong>: SubjectsStrip flips to compact mono-caps list — display italic name +
+          role + jersey (or function title for staff, customRole for custom). Polaroids do NOT render
+          on mobile when N≥3.
+        </p>
+      </section>
+
+      <!-- (Old Q2 + Q2b comparison hidden) -->
+      <section class="question" id="q2-subject-counts" style="display: none;">
+        <p class="question__label">★ Q2 · SubjectsStrip — N = 1 / 2 / 3 / 4</p>
+        <h2 class="question__title">Hoe past de strip zich aan voor <em>1 tot 4</em> subjects?</h2>
+        <p class="question__brief">
+          The schema allows 1–4 subjects per interview (validated via <code>validateSubjectsCount</code>).
+          Each rendering below shows the same hero + SubjectsStrip with a different subject count.
+          Proposed layouts: <strong>N=1</strong> single centered polaroid · <strong>N=2</strong> duo
+          with italic display "&amp;" (locked from Q1) · <strong>N=3</strong> three polaroids inline,
+          no separator · <strong>N=4</strong> 2×2 grid (panel format).
+        </p>
+
+        <div class="options">
+
+          <!-- N=1 (main use case — polaroid + pull-quote inside the strip container) -->
+          <div class="option-card">
+            <p class="option-card__label">★ N=1 · Single subject — POLAROID + PULL-QUOTE inside the strip container</p>
+            <p class="option-card__hint">Main use case (3 and 4 are rare). Polaroid sits left; pull-quote text fills the right side of the strip. Quote source: first <code>qaPair</code> in body with <code>tag in [key, quote]</code>; attribution derives from <code>respondentKey</code> (or the only subject when N=1). Hides quote gracefully when no key/quote-tagged pair exists.</p>
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">AFSCHEID</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">9 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Vijftien <em>jaar</em> Elewijt</h2>
+                <p class="ed-hero__lead">Julien Verlinden hangt in juni de schoenen aan de haak. Vijftien jaar bij dezelfde club, een handvol kapiteinslintjes, en één jaar dat hij blijft uitleggen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame"><img src="https://picsum.photos/seed/julien-cover/1600/900" alt="Julien Verlinden" /></div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; J. VERLINDEN</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="subjects-strip subjects-strip--n1">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure" style="width: 200px;">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="Julien" /></div>
+                  <p class="player-figure__caption"><strong>Julien Verlinden</strong>KAPITEIN A · #7 · 33 J.</p>
+                </div>
+              </div>
+              <div class="subjects-strip__quote">
+                <span class="subjects-strip__quote-mark" aria-hidden="true">&ldquo;</span>
+                <p class="subjects-strip__quote-body">
+                  Vijftien jaar in dezelfde kleedkamer doe je niet voor het geld of de erekost. Je doet het
+                  omdat de vrijdagavondtraining ineens je ankerpunt wordt — en je dat pas voelt op het moment
+                  dat het bijna gedaan is.
+                </p>
+                <p class="subjects-strip__quote-attr">
+                  <span class="star">★</span>
+                  <span>JULIEN VERLINDEN · KAPITEIN A · #7</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- N=2 (locked from Q1, shown for reference) -->
+          <div class="option-card">
+            <p class="option-card__label">★ N=2 · Duo (locked from Q1) — for reference</p>
+            <p class="option-card__hint">Two polaroids with italic display "&amp;" between them. Already locked.</p>
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">DUO</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">12 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Acht <em>seizoenen</em> samen</h2>
+                <p class="ed-hero__lead">Julien en Niels haakten dezelfde zomer aan. Acht seizoenen later hangen ze samen de schoenen aan de haak.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame"><img src="https://picsum.photos/seed/duo-cover/1600/900" alt="Julien & Niels" /></div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; J &amp; N</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="subjects-strip">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="Julien" /></div>
+                  <p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7</p>
+                </div>
+              </div>
+              <span class="subjects-strip__amp" aria-hidden="true">&amp;</span>
+              <div class="taped-card taped-card--rot-b">
+                <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/niels-pf/450/600" alt="Niels" /></div>
+                  <p class="player-figure__caption"><strong>Niels</strong>DEBUTANT A · #18</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- N=3 -->
+          <div class="option-card">
+            <p class="option-card__label">★ N=3 · Trio (panel of three)</p>
+            <p class="option-card__hint">Three polaroids inline, no italic "&amp;" separator (it works for couples, not groups). Polaroids alternate rotations from the pool: a / b / a. Tape colour alternates green / ochre / green.</p>
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">TRIO</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Drie <em>captains</em>, één tafel</h2>
+                <p class="ed-hero__lead">De kapiteins van A, B en U21 zaten één avond aan dezelfde tafel. Over de bus, het bestuur, en wat er moet veranderen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame"><img src="https://picsum.photos/seed/trio-cover/1600/900" alt="Trio captains" /></div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="subjects-strip">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="Julien" /></div>
+                  <p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7</p>
+                </div>
+              </div>
+              <div class="taped-card taped-card--rot-b">
+                <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/tom-pf/450/600" alt="Tom" /></div>
+                  <p class="player-figure__caption"><strong>Tom</strong>KAPITEIN B · #4</p>
+                </div>
+              </div>
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/lukas-pf/450/600" alt="Lukas" /></div>
+                  <p class="player-figure__caption"><strong>Lukas</strong>KAPITEIN U21 · #11</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- N=4 -->
+          <div class="option-card">
+            <p class="option-card__label">★ N=4 · Panel (2×2 grid)</p>
+            <p class="option-card__hint">Four polaroids in a 2×2 grid — contact-sheet feel. Inline 4-up gets too narrow per polaroid. Grid keeps each polaroid at the same scale as N=1/2/3.</p>
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>INTERVIEW</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">PANEL</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">18 MIN LEZEN</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading">Vier <em>generaties</em>, één club</h2>
+                <p class="ed-hero__lead">Vier KCVV-spelers van vier verschillende generaties. Eén tafel, één avond, één gesprek over wat verandert en wat blijft.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape taped-card__tape--green taped-card__tape--left" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame"><img src="https://picsum.photos/seed/panel-cover/1600/900" alt="Panel" /></div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="subjects-strip" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; padding: 32px; justify-items: center;">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="Julien" /></div>
+                  <p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7</p>
+                </div>
+              </div>
+              <div class="taped-card taped-card--rot-b">
+                <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/niels-pf/450/600" alt="Niels" /></div>
+                  <p class="player-figure__caption"><strong>Niels</strong>DEBUTANT A · #18</p>
+                </div>
+              </div>
+              <div class="taped-card taped-card--rot-c">
+                <span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/tom-pf/450/600" alt="Tom" /></div>
+                  <p class="player-figure__caption"><strong>Tom</strong>KAPITEIN B · #4</p>
+                </div>
+              </div>
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span>
+                <div class="player-figure">
+                  <div class="player-figure__well"><img src="https://picsum.photos/seed/lukas-pf/450/600" alt="Lukas" /></div>
+                  <p class="player-figure__caption"><strong>Lukas</strong>KAPITEIN U21 · #11</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>N=1</strong> — single centered polaroid, slightly larger size, owns the strip space.
+          <strong>N=2</strong> — duo with italic "&amp;" between (locked from Q1; "&amp;" reads as "couple").
+          <strong>N=3</strong> — three inline polaroids, no separator (italic "&amp;" doesn't fit groups,
+          and "·" feels too utilitarian). <strong>N=4</strong> — 2×2 grid keeps each polaroid at the same
+          scale as the other counts. 4-up inline would shrink each one beyond legibility.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q2b — Mobile handling for N=3 / N=4
+           Owner concern: long vertical stack of polaroids before body starts
+           =========================================================== -->
+      <section class="question" id="q2b-mobile-counts">
+        <p class="question__label">★ Q2b · Mobile handling for N≥3 (rare counts)</p>
+        <h2 class="question__title">Wat doen we met N=3 en N=4 op <em>mobile</em>?</h2>
+        <p class="question__brief">
+          Owner concern: at 360px, three or four polaroids stacked vertically pushes the article body
+          way down the page. N=1 and N=2 work fine on mobile (polaroid + quote stack for N=1; two
+          polaroids stack for N=2). Three options below for the rare N≥3 cases. Each shows N=3 (trio)
+          and N=4 (panel) at a 360px viewport.
+        </p>
+
+        <div class="options">
+          <!-- Mobile A · Hide SubjectsStrip entirely for N≥3 -->
+          <div class="option-card">
+            <p class="option-card__label">★ Mobile A · Hide SubjectsStrip entirely for N≥3</p>
+            <p class="option-card__hint">Strip is desktop-only when N≥3. Mobile readers go from hero straight to article body. Subject identity comes through later via QaBlock attribution inline. Saves the most vertical space.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge);">
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=3 trio · 360px</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;">
+                      <span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span>
+                      <span class="kicker__dot"></span><span class="kicker__muted">TRIO</span>
+                      <span class="kicker__star" style="font-size: 11px;">★</span>
+                    </span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Drie <em>captains</em>, één tafel</h2>
+                    <p class="ed-hero__lead" style="font-size: 12px;">De kapiteins van A, B en U21 zaten één avond aan dezelfde tafel.</p>
+                    <div style="margin-top: 8px;">
+                      <div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/trio-mobile-a/1600/900" alt="Trio" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+                    </div>
+                    <div class="byline" style="font-size: 8px; margin-top: 8px; padding-top: 6px;"><span class="byline__star" style="font-size: 10px;">★</span><span>DOOR REDACTIE</span></div>
+                  </div>
+                  <div style="margin-top: 16px; padding: 12px; background: rgba(184,74,58,0.06); border: 1px dashed var(--color-alert); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-alert); text-align: center;">
+                    ★ subjectsStrip · hidden on mobile
+                  </div>
+                  <div style="margin-top: 16px; padding: 12px 14px; background: var(--color-cream); border-left: 3px solid var(--color-jersey-deep);">
+                    <p style="font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 14px; line-height: 1.4; margin: 0;">"Drie kapiteins, drie verhalen — en één bus naar elke uitwedstrijd …"</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=4 panel · 360px</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;">
+                      <span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span>
+                      <span class="kicker__dot"></span><span class="kicker__muted">PANEL</span>
+                      <span class="kicker__star" style="font-size: 11px;">★</span>
+                    </span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Vier <em>generaties</em>, één club</h2>
+                    <p class="ed-hero__lead" style="font-size: 12px;">Vier KCVV-spelers van vier verschillende generaties.</p>
+                    <div style="margin-top: 8px;">
+                      <div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/panel-mobile-a/1600/900" alt="Panel" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+                    </div>
+                    <div class="byline" style="font-size: 8px; margin-top: 8px; padding-top: 6px;"><span class="byline__star" style="font-size: 10px;">★</span><span>DOOR REDACTIE</span></div>
+                  </div>
+                  <div style="margin-top: 16px; padding: 12px; background: rgba(184,74,58,0.06); border: 1px dashed var(--color-alert); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-alert); text-align: center;">
+                    ★ subjectsStrip · hidden on mobile
+                  </div>
+                  <div style="margin-top: 16px; padding: 12px 14px; background: var(--color-cream); border-left: 3px solid var(--color-jersey-deep);">
+                    <p style="font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 14px; line-height: 1.4; margin: 0;">"Vier generaties klinken anders, maar lopen allemaal hetzelfde rondje …"</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile B · Compact text-only subjects list -->
+          <div class="option-card">
+            <p class="option-card__label">★ Mobile B · Compact mono-caps subjects list (no polaroids)</p>
+            <p class="option-card__hint">Strip becomes a compressed mono-caps list of subjects on mobile when N≥3. No photos. One row per subject with role + name. Tells the reader who the subjects are without paying for portrait pixels.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge);">
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=3 trio · 360px</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;">
+                      <span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span>
+                      <span class="kicker__dot"></span><span class="kicker__muted">TRIO</span>
+                      <span class="kicker__star" style="font-size: 11px;">★</span>
+                    </span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Drie <em>captains</em>, één tafel</h2>
+                    <p class="ed-hero__lead" style="font-size: 12px;">De kapiteins van A, B en U21 zaten één avond aan dezelfde tafel.</p>
+                    <div style="margin-top: 8px;">
+                      <div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/trio-mobile-b/1600/900" alt="Trio" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+                    </div>
+                    <div class="byline" style="font-size: 8px; margin-top: 8px; padding-top: 6px;"><span class="byline__star" style="font-size: 10px;">★</span><span>DOOR REDACTIE</span></div>
+                  </div>
+                  <div style="margin-top: 16px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 14px 16px;">
+                    <p class="mono" style="color: var(--color-jersey-deep); margin: 0 0 8px; font-size: 9px; font-weight: 700;">★ Subjects</p>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Julien</strong> · Kapitein A · #7</li>
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Tom</strong> · Kapitein B · #4</li>
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Lukas</strong> · Kapitein U21 · #11</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=4 panel · 360px</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;">
+                      <span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span>
+                      <span class="kicker__dot"></span><span class="kicker__muted">PANEL</span>
+                      <span class="kicker__star" style="font-size: 11px;">★</span>
+                    </span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Vier <em>generaties</em>, één club</h2>
+                    <p class="ed-hero__lead" style="font-size: 12px;">Vier KCVV-spelers van vier verschillende generaties.</p>
+                    <div style="margin-top: 8px;">
+                      <div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/panel-mobile-b/1600/900" alt="Panel" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+                    </div>
+                    <div class="byline" style="font-size: 8px; margin-top: 8px; padding-top: 6px;"><span class="byline__star" style="font-size: 10px;">★</span><span>DOOR REDACTIE</span></div>
+                  </div>
+                  <div style="margin-top: 16px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 14px 16px;">
+                    <p class="mono" style="color: var(--color-jersey-deep); margin: 0 0 8px; font-size: 9px; font-weight: 700;">★ Subjects</p>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Julien</strong> · Kapitein A · #7</li>
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Niels</strong> · Debutant A · #18</li>
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Tom</strong> · Kapitein B · #4</li>
+                      <li style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3;"><strong style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 13px; letter-spacing: 0; text-transform: none;">Lukas</strong> · Kapitein U21 · #11</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile C · Stack polaroids vertically (status quo) -->
+          <div class="option-card">
+            <p class="option-card__label">★ Mobile C · Stack polaroids vertically (status quo)</p>
+            <p class="option-card__hint">N=3 stacks 3 polaroids vertically; N=4 stacks 4. Reader scrolls past every portrait before reaching the body. Most consistent with desktop, longest scroll.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; background: var(--color-cream-soft); border: 1px dashed var(--color-paper-edge);">
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=3 trio · 360px (long)</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;"><span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span><span class="kicker__dot"></span><span class="kicker__muted">TRIO</span><span class="kicker__star" style="font-size: 11px;">★</span></span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Drie <em>captains</em>, één tafel</h2>
+                    <div style="margin-top: 8px;"><div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/trio-mobile-c/1600/900" alt="" style="width: 100%; height: 100%; object-fit: cover;" /></div></div>
+                  </div>
+                  <div class="subjects-strip" style="flex-direction: column; gap: 12px; padding: 20px; margin-top: 16px;">
+                    <div class="taped-card taped-card--rot-a"><span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="Julien" /></div><p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A · #7</p></div></div>
+                    <div class="taped-card taped-card--rot-b"><span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/tom-pf/450/600" alt="Tom" /></div><p class="player-figure__caption"><strong>Tom</strong>KAPITEIN B · #4</p></div></div>
+                    <div class="taped-card taped-card--rot-a"><span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/lukas-pf/450/600" alt="Lukas" /></div><p class="player-figure__caption"><strong>Lukas</strong>KAPITEIN U21 · #11</p></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p class="mono mono--muted" style="margin: 0 0 8px;">★ N=4 panel · 360px (very long)</p>
+                <div style="max-width: 320px; margin: 0 auto;">
+                  <div style="background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px;">
+                    <span class="kicker" style="font-size: 9px;"><span class="kicker__star" style="font-size: 11px;">★</span><span>INTERVIEW</span><span class="kicker__dot"></span><span class="kicker__muted">PANEL</span><span class="kicker__star" style="font-size: 11px;">★</span></span>
+                    <h2 class="editorial-heading" style="font-size: 24px; margin: 8px 0;">Vier <em>generaties</em>, één club</h2>
+                    <div style="margin-top: 8px;"><div style="aspect-ratio: 16/9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden;"><img src="https://picsum.photos/seed/panel-mobile-c/1600/900" alt="" style="width: 100%; height: 100%; object-fit: cover;" /></div></div>
+                  </div>
+                  <div class="subjects-strip" style="flex-direction: column; gap: 12px; padding: 20px; margin-top: 16px;">
+                    <div class="taped-card taped-card--rot-a"><span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/julien-pf/450/600" alt="" /></div><p class="player-figure__caption"><strong>Julien</strong>KAPITEIN A</p></div></div>
+                    <div class="taped-card taped-card--rot-b"><span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/niels-pf/450/600" alt="" /></div><p class="player-figure__caption"><strong>Niels</strong>DEBUTANT A</p></div></div>
+                    <div class="taped-card taped-card--rot-c"><span class="taped-card__tape taped-card__tape--green taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/tom-pf/450/600" alt="" /></div><p class="player-figure__caption"><strong>Tom</strong>KAPITEIN B</p></div></div>
+                    <div class="taped-card taped-card--rot-a"><span class="taped-card__tape taped-card__tape--ochre taped-card__tape--center" aria-hidden="true"></span><div class="player-figure" style="width: 200px;"><div class="player-figure__well"><img src="https://picsum.photos/seed/lukas-pf/450/600" alt="" /></div><p class="player-figure__caption"><strong>Lukas</strong>KAPITEIN U21</p></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>Mobile A</strong> — strip hidden on mobile when N≥3. Simplest, fastest scroll to body.
+          Subject identity recovered via QaBlock attribution inline. <strong>Mobile B</strong> — text-only
+          subjects list (mono caps with names + roles). Identifies subjects without portrait pixels;
+          cheap to render. <strong>Mobile C</strong> — vertical polaroid stack, longest scroll, most
+          consistent with desktop. N=1 / N=2 unchanged on mobile in all options. My pick: A — mobile is
+          for substance, the strip is desktop's bonus moment.
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Matchday Programme · PlayerFigure (revised) · Phase 3 · Checkpoint A</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         REUSED PRIMITIVES — TapedCard, TapeStrip, TicketStub, MonoLabel
+         (kept light; faithful to apps/web/src/components/design-system).
+         ============================================================ */
+
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 28px 28px 32px;
+      }
+      .taped-card .tape-strip {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 96px;
+        height: 22px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(10, 10, 10, 0.35);
+        box-shadow: 1px 1px 0 0 rgba(10, 10, 10, 0.15);
+      }
+
+      .ticket-stub {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        padding: 6px 10px;
+        position: relative;
+      }
+      .ticket-stub::before,
+      .ticket-stub::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        background: var(--color-cream-soft);
+        border: 1.5px solid var(--color-ink);
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+      .ticket-stub::before { left: -6px; }
+      .ticket-stub::after { right: -6px; }
+      .ticket-stub b { color: var(--color-jersey-deep); font-weight: 700; }
+
+      .mono-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .mono-label--pill {
+        background: var(--color-jersey);
+        color: var(--color-ink);
+        padding: 4px 10px;
+        border: 1.5px solid var(--color-ink);
+      }
+      .mono-label--row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+      /* ============================================================
+         PLAYERFIGURE (REVISED) — two mutually-exclusive states.
+         1. PHOTO STATE: rectangular psdImage, 1px ink rule frame,
+            8px paper shadow, sans-mono name plate beneath. NO drawn
+            jersey. NO drawn arms.
+         2. ILLUSTRATION STATE: full-figure 1px line-art (jersey,
+            arms, stylised oval head), same 1px ink rule frame, same
+            sans-mono name plate beneath. NO photo anywhere.
+         Photo and illustration NEVER appear in the same composition.
+         ============================================================ */
+
+      .player-figure {
+        --pf-width: 280px;
+        width: var(--pf-width);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        font-family: var(--font-body);
+      }
+
+      /* Frame — shared by both states. 1px ink rule + 8px paper shadow. */
+      .pf-frame {
+        position: relative;
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        box-shadow: 8px 8px 0 0 var(--color-ink);
+        overflow: hidden;
+      }
+
+      /* Photo state — rectangular psdImage, fills frame. */
+      .pf-frame--photo {
+        aspect-ratio: 3 / 4;
+      }
+      .pf-frame--photo img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        /* subtle editorial duotone — desaturate slightly to match cream paper */
+        filter: contrast(1.05) saturate(0.92);
+      }
+
+      /* Inner editorial inset rule — a second hairline 1px rule
+         floating 10px inside the frame. Pure programme-booklet
+         convention. No glow, no rim-light. */
+      .pf-frame--photo::after {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid rgba(245, 241, 230, 0.6);
+        pointer-events: none;
+      }
+
+      /* Tight crop variant — photo zooms to chest-up. Same frame,
+         same rule, same plate; only the object-position changes. */
+      .pf-frame--photo.is-tight img {
+        object-position: 50% 18%;
+        transform: scale(1.35);
+        transform-origin: 50% 25%;
+      }
+
+      /* Mono corner stamp — top-left of the photo frame, reads as
+         an archive sticker. NEVER placed inside the photo subject's
+         face zone. */
+      .pf-corner {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 2;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        padding: 2px 6px;
+      }
+
+      /* Illustration state — full-figure 1px line-art on cream paper. */
+      .pf-frame--illust {
+        aspect-ratio: 3 / 4;
+        background: var(--color-cream);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+      }
+      .pf-frame--illust svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .pf-frame--illust svg * {
+        fill: none;
+        stroke: var(--color-ink);
+        stroke-width: 1.25;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+      }
+      /* Faint inner rule for the illustration too — keeps state parity. */
+      .pf-frame--illust::after {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid rgba(10, 10, 10, 0.08);
+        pointer-events: none;
+      }
+
+      /* Name plate — sans-mono, bottom of figure, sits flush against
+         the frame with no gap. Identical across both states. */
+      .pf-plate {
+        margin-top: -1px; /* collapse the 1px ink edge into one shared rule */
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+        padding: 10px 12px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .pf-plate__num {
+        color: var(--color-jersey-deep);
+        font-weight: 700;
+      }
+      .pf-plate__div {
+        color: var(--color-ink-muted);
+        font-weight: 400;
+      }
+      .pf-plate__name {
+        color: var(--color-ink);
+        flex: 0 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pf-plate__role {
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         REUSE MAP TABLE
+         ============================================================ */
+
+      .reuse-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 16px;
+      }
+      .reuse-table th, .reuse-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        font-weight: 600;
+        border-bottom: 1.5px solid var(--color-ink);
+      }
+      .reuse-table td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      /* ============================================================
+         CANONICAL PRESS-DOWN HOVER
+         ============================================================ */
+      .press-canon {
+        transition: transform 300ms ease, box-shadow 300ms ease;
+      }
+      .press-canon:hover {
+        transform: translate(4px, 4px);
+        box-shadow: none !important;
+      }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer p.foot {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 32px;
+      }
+
+      .figure-row {
+        display: flex;
+        gap: 56px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 32px 16px 16px;
+      }
+      .figure-notes {
+        flex: 1 1 280px;
+        min-width: 260px;
+        max-width: 460px;
+      }
+      .figure-notes ul {
+        font-size: 14px;
+        color: var(--color-ink-soft);
+        padding-left: 18px;
+        margin: 0;
+      }
+      .figure-notes li { margin-bottom: 4px; }
+
+      .reject-callout {
+        margin-top: 16px;
+        padding: 14px 18px;
+        background: var(--color-alert-soft);
+        border: 1px solid var(--color-alert);
+        font-size: 14px;
+        color: var(--color-ink);
+      }
+      .reject-callout strong {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-alert);
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      /* ============================================================
+         CANONICAL ILLUSTRATION FALLBACK (shared across A · B · C)
+         Ported verbatim from option-b-stamped-block-print.html
+         #player-figure markup, photo + face-circle layers omitted.
+         ============================================================ */
+      .taped-card--rotation-b { transform: rotate(1.6deg); }
+      .illus-canonical { display: flex; justify-content: center; padding: 20px 0 8px; }
+      .illus-canonical .taped-card { padding: 18px 18px 22px; background: var(--color-cream); display: inline-block; }
+      .illus-canonical .figure {
+        position: relative;
+        width: 280px;
+        height: 360px;
+        margin: 0 auto;
+      }
+      .illus-canonical .figure__photo {
+        position: absolute;
+        inset: 14px 18px 38px 16px;
+        background: linear-gradient(180deg, #cfc6b0 0%, #a89e85 60%, #7d735c 100%);
+        background-blend-mode: multiply;
+        filter: grayscale(100%) contrast(1.05);
+        border: 1px solid rgba(10, 10, 10, 0.4);
+      }
+      .illus-canonical .figure__photo::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 26px;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: rgba(10, 10, 10, 0.18);
+        transform: translateX(-50%);
+      }
+      .illus-canonical .figure__photo::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 180px;
+        height: 170px;
+        background: rgba(10, 10, 10, 0.18);
+        transform: translateX(-50%);
+        clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+      }
+      .illus-canonical .figure__underprint {
+        position: absolute;
+        inset: 12px 22px 36px 12px;
+        mix-blend-mode: multiply;
+        opacity: 0.92;
+      }
+      .illus-canonical .figure__underprint svg { width: 100%; height: 100%; display: block; }
+      .illus-canonical .figure__overprint {
+        position: absolute;
+        inset: 14px 18px 38px 16px;
+      }
+      .illus-canonical .figure__overprint svg { width: 100%; height: 100%; display: block; }
+      .illus-canonical .figure__face-circle {
+        position: absolute;
+        top: 36px;
+        left: 50%;
+        width: 108px;
+        height: 108px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle at 45% 35%, #d6cdb3 0%, #b3a78b 65%, #7c7156 100%);
+        border: 2px solid var(--color-ink);
+        filter: grayscale(100%) contrast(1.08);
+        overflow: hidden;
+        box-shadow: 2px 3px 0 0 rgba(10, 10, 10, 0.45);
+      }
+      .illus-canonical .figure__face-circle::after {
+        content: "";
+        position: absolute;
+        inset: 18% 22% 28% 22%;
+        background: rgba(10, 10, 10, 0.28);
+        border-radius: 40% 40% 30% 30% / 50% 50% 30% 30%;
+      }
+      .illus-canonical .figure__caption {
+        position: absolute;
+        left: 16px;
+        right: 18px;
+        bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .illus-canonical .figure__caption b { color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HERO
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT A · DIRECTION C · PLAYERFIGURE (REVISED)</span>
+          <span class="mono mono--muted">★ MATCHDAY PROGRAMME</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Direction C — <span class="display"><em>Matchday</em></span> Programme · PlayerFigure (revised) · Phase 3 · Checkpoint A</h1>
+        <p class="lead">
+          Corrected after the master-design hybrid (photo face stitched into a
+          drawn jersey/arms) was rejected for reading as a Mickey-Mouse pastiche.
+          PlayerFigure now ships as <strong>two mutually-exclusive states</strong>:
+          a quiet rectangular photo inside a 1px ink rule frame, or a full-figure
+          1px line-art drawing on cream paper — never a mash-up of both. The
+          sans-mono name plate beneath is identical across states.
+        </p>
+
+        <div class="reject-callout">
+          <strong>★ Rejected direction</strong>
+          The original master-design PlayerFigure composited a photographic face
+          on top of a drawn jersey + drawn arms. That hybrid reads as a costume
+          (<em>"Mickey Mouse"</em>) and is no longer the spec. Photo and
+          illustration are now disjoint states of the same component.
+        </div>
+      </header>
+
+      <!-- ===========================================================
+           01 · PHOTO STATE
+           =========================================================== -->
+      <section class="section" id="photo-state">
+        <div class="section-meta">
+          <span class="mono">★ 01 · PHOTO STATE</span>
+          <span class="mono mono--muted">— rectangular psdImage · 1px ink rule frame · sans-mono name plate · NO drawn jersey, NO drawn arms</span>
+        </div>
+        <h2>De <em>foto.</em></h2>
+        <p class="lead">
+          A rectangular <code>psdImage</code> sits inside a 1px ink rule frame
+          with an 8px paper shadow. Editorial framing only — a faint hairline
+          inset rule 10px inside the frame, a mono archive corner stamp at
+          top-left, a slight desaturation to read as printed-paper. Beneath the
+          frame: a single sans-mono name plate row reading
+          <code>#8 · MAXIM BREUGELMANS · MIDDENVELD</code>. Surrounding chrome
+          (TapedCard, optional TapeStrip, optional TicketStub) is the host
+          context — not the figure itself.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">DEFAULT</span>
+            <span class="mono">on .taped-card · NO rotation · TapeStrip + TicketStub optional</span>
+          </div>
+
+          <div class="figure-row">
+            <div class="taped-card press-canon" style="width: 340px">
+              <span class="tape-strip"></span>
+              <div class="player-figure">
+                <div class="pf-frame pf-frame--photo">
+                  <span class="pf-corner">PSD-2026</span>
+                  <img
+                    src="https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=800&fit=crop"
+                    alt="Maxim Breugelmans"
+                  />
+                </div>
+                <div class="pf-plate">
+                  <span class="pf-plate__num">#8</span>
+                  <span class="pf-plate__div">·</span>
+                  <span class="pf-plate__name">MAXIM BREUGELMANS</span>
+                  <span class="pf-plate__div">·</span>
+                  <span class="pf-plate__role">MIDDENVELD</span>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: center; margin-top: 16px">
+                <span class="ticket-stub"><b>A-PLOEG</b> 26/27</span>
+              </div>
+            </div>
+
+            <div class="figure-notes">
+              <div class="mono-label mono-label--row" style="margin-bottom: 12px">
+                <span class="mono-label">★ STATE A</span>
+                <span class="mono-label--pill mono-label">PHOTO ONLY</span>
+              </div>
+              <h3>Eén beeld, één regel.</h3>
+              <p style="font-size: 14.5px; color: var(--color-ink-soft); margin: 8px 0 14px">
+                The photo carries the figure entirely on its own. No drawn
+                shapes overlap the image — no jersey contour, no arms, no
+                stylised head. The frame is a thin 1px ink rule with an 8px
+                ink paper shadow; the shadow gives the figure its weight, the
+                rule gives it its discipline.
+              </p>
+              <ul>
+                <li>Source: rectangular <code>psdImage</code> (3:4 aspect, full bleed inside frame)</li>
+                <li>Frame: <code>border: 1px solid ink</code> + <code>box-shadow: 8px 8px 0 0 ink</code></li>
+                <li>Inner inset: 10px hairline rule in cream-on-image — programme-booklet convention</li>
+                <li>Treatment: <code>filter: contrast(1.05) saturate(0.92)</code> — printed-paper feel, no rim light, no glow</li>
+                <li>Corner stamp: mono caps <code>PSD-2026</code> top-left, ink-bordered cream box</li>
+                <li>Plate: sans-mono caps, 11px, <code>#NN</code> in jersey-deep, name in ink, role in ink-muted</li>
+                <li>Surrounding TapedCard carries the paper feel; the figure stays disciplined inside</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Reads instantly as a matchday-programme entry — quiet, editorial, deferential to the photographer. The rectangular photo respects the actual <code>psdImage</code> aspect (~90% of players ship rectangular sources, per the <em>subject_photo_fallback</em> memo) so no re-cropping is needed at the data layer. The plate is the only colour spike (<code>#NN</code> in jersey-deep), keeping the figure monochrome-with-a-flash. No drawn shapes anywhere — eliminates the rejected costume reading.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Quieter than tier-A or tier-B figures — won't carry a hero on its own without a TapedCard rotation + tape strip surrounding it. The hairline inner inset rule is faint by design (cream at 60% opacity over the photo) and may disappear on very dark image regions; acceptable trade-off for keeping the figure paper-thin. Image filter is conservative — owners who want a stronger duotone treatment will need a follow-up token.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           02 · ILLUSTRATION STATE
+           =========================================================== -->
+      <section class="section" id="illustration-state">
+        <div class="section-meta">
+          <span class="mono">★ 02 · ILLUSTRATION STATE</span>
+          <span class="mono mono--muted">— full 1px line-art figure · jersey + arms + stylised head · NO photo anywhere</span>
+        </div>
+        <h2>De <em>tekening.</em></h2>
+        <p class="lead">
+          Used when there is no <code>psdImage</code>, or when the editorial
+          context calls for a drawn figure (youth scouting reports, a tribute
+          column, a transfer rumour). The drawing is a <strong>full figure</strong>
+          — jersey, both arms, stylised oval head — rendered in 1px stroke only.
+          No fills, no shading, no facial features. Same frame, same inner inset
+          rule, same name plate beneath as the photo state.
+        </p>
+        <p class="lead"><strong>The illustration fallback is canonical — identical across all photo-state directions. Direction A/B/C governs only the photo state (above).</strong></p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">CANONICAL</span>
+            <span class="mono">illustration fallback — shared across directions A · B · C</span>
+          </div>
+
+          <div class="illus-canonical">
+            <div class="taped-card taped-card--rotation-b press-canon">
+              <div class="figure">
+                <div class="figure__photo" aria-hidden="true"></div>
+                <div class="figure__underprint" aria-hidden="true">
+                  <svg viewBox="0 0 220 300" preserveAspectRatio="none">
+                    <g fill="#008755">
+                      <ellipse cx="110" cy="78" rx="44" ry="48" />
+                      <path d="M30 300 L40 168 Q60 138 110 130 Q160 138 180 168 L190 300 Z" />
+                      <path d="M52 168 L70 162 L72 196 L54 200 Z" />
+                      <path d="M168 168 L150 162 L148 196 L166 200 Z" />
+                    </g>
+                  </svg>
+                </div>
+                <div class="figure__overprint" aria-hidden="true">
+                  <svg viewBox="0 0 220 300" preserveAspectRatio="none">
+                    <g fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square">
+                      <ellipse cx="110" cy="78" rx="44" ry="48" />
+                      <path d="M30 300 L40 168 Q60 138 110 130 Q160 138 180 168 L190 300" />
+                      <path d="M92 132 L110 156 L128 132" />
+                      <path d="M88 158 L88 300" stroke-width="2" />
+                      <path d="M132 158 L132 300" stroke-width="2" />
+                      <path d="M70 168 L70 300" stroke-width="2" />
+                      <path d="M150 168 L150 300" stroke-width="2" />
+                    </g>
+                  </svg>
+                </div>
+                <div class="figure__caption">
+                  <b>#8</b>
+                  <span>Maxim Breugelmans · A-PLOEG</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Solves the photo-missing case without falling back to a generic placeholder rectangle. The drawing is recognisably a player figure (jersey, arms, head) but unmistakably a drawing — no chance of mistaking it for a real photo, no chance of reading as a costume since there is no photographic face. Same frame and same plate as the photo state means a roster grid mixing photo'd and un-photo'd players reads as a single editorial artefact.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Ships a small SVG library — over time the youth/staff/keeper variants will grow (different jersey cuts, different number sizes). Drawing one figure is fine; six is a quiet maintenance tax. The featureless oval head reads as deliberate-and-editorial inside a programme spread; outside that frame (e.g. on a roster grid alongside many photo'd players) it can read as a placeholder. Acceptable: the placement is always editorially chosen, never automatic.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03 · CROPPED-TIGHT VARIANT (PHOTO STATE)
+           =========================================================== -->
+      <section class="section" id="cropped-tight">
+        <div class="section-meta">
+          <span class="mono">★ 03 · CROPPED-TIGHT VARIANT</span>
+          <span class="mono mono--muted">— same photo state · chest-up crop · same frame · same plate</span>
+        </div>
+        <h2>Een <em>strakke</em> uitsnede.</h2>
+        <p class="lead">
+          A second prop on the photo state: <code>isTight</code> renders the
+          same rectangular <code>psdImage</code> at a chest-up crop, with the
+          face filling more of the frame. Same 1px ink rule frame, same paper
+          shadow, same name plate. Used for hero spreads and longer-form
+          interview leads where the photo carries the article.
+        </p>
+
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">TIGHT</span>
+            <span class="mono">prop: isTight=true · object-position: top, transform-scale 1.35</span>
+          </div>
+
+          <div class="figure-row">
+            <div class="taped-card press-canon" style="width: 340px">
+              <span class="tape-strip"></span>
+              <div class="player-figure">
+                <div class="pf-frame pf-frame--photo is-tight">
+                  <span class="pf-corner">PSD-2026 · CROP</span>
+                  <img
+                    src="https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=800&fit=crop"
+                    alt="Maxim Breugelmans, tight crop"
+                  />
+                </div>
+                <div class="pf-plate">
+                  <span class="pf-plate__num">#8</span>
+                  <span class="pf-plate__div">·</span>
+                  <span class="pf-plate__name">MAXIM BREUGELMANS</span>
+                  <span class="pf-plate__div">·</span>
+                  <span class="pf-plate__role">MIDDENVELD</span>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: center; margin-top: 16px">
+                <span class="ticket-stub"><b>HERO</b> 26/27</span>
+              </div>
+            </div>
+
+            <div class="figure-notes">
+              <div class="mono-label mono-label--row" style="margin-bottom: 12px">
+                <span class="mono-label">★ STATE A · TIGHT</span>
+                <span class="mono-label--pill mono-label">isTight=true</span>
+              </div>
+              <h3>Dezelfde foto, dichterbij.</h3>
+              <p style="font-size: 14.5px; color: var(--color-ink-soft); margin: 8px 0 14px">
+                A scaled-up CSS crop of the same source — no second image, no
+                separate variant. The face zone fills roughly two-thirds of the
+                frame, leaving the corner stamp and the inset rule untouched.
+                This is an art-direction switch, not a different component.
+              </p>
+              <ul>
+                <li>Source: same rectangular <code>psdImage</code> as the default photo state</li>
+                <li>Crop: <code>object-position: 50% 18%</code> + <code>transform: scale(1.35)</code> + <code>transform-origin: 50% 25%</code></li>
+                <li>Frame: identical 1px ink rule + 8px paper shadow</li>
+                <li>Plate: identical sans-mono row — chest-up crop never changes the metadata</li>
+                <li>Corner stamp: <code>PSD-2026 · CROP</code> annotates that the source was art-directed</li>
+                <li>Use cases: InterviewHero, PlayerHero, long-form lead, transfer announcement</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Same component, same source, same plate — only the crop changes. No fork in the figure tree, no second image asset. The CSS crop is non-destructive: switching <code>isTight</code> off restores the default 3:4 framing instantly. Editors get art-direction headroom without a Sanity-side asset duplication.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Auto-cropping a wide-angle <code>psdImage</code> to a tight chest-up framing produces uglier edges on some sources (player off-centre, helmet partly cut, etc). Mitigation: <code>isTight</code> is editor-opt-in per article — never automatic. The fixed scale value (1.35) is a compromise between "head fills frame" and "shoulders still visible"; very tall portraits may need a per-document override token in a follow-up.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           04 · REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse-map">
+        <div class="section-meta">
+          <span class="mono">★ 04 · REUSE MAP</span>
+          <span class="mono mono--muted">— each surface → composed primitive already on main</span>
+        </div>
+        <h2>Wat <em>hergebruikt</em> elke state?</h2>
+        <p class="lead">
+          Every surface on this page composes from primitives already shipped
+          to <code>apps/web/src/components/design-system</code>. The
+          matchday-programme reading comes from arrangement, not invention —
+          PlayerFigure introduces no new chrome atom.
+        </p>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th>SURFACE</th>
+                <th>STATE</th>
+                <th>COMPOSED PRIMITIVE</th>
+                <th>NEW MATERIAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Surrounding card</td>
+                <td>both</td>
+                <td><code>TapedCard</code> + <code>TapeStrip</code> (top, no rotation)</td>
+                <td>None — TapedCard rendered with rotation prop unset.</td>
+              </tr>
+              <tr>
+                <td>Frame (photo)</td>
+                <td>A · photo</td>
+                <td>1px ink rule + 8px paper shadow (paper vocabulary)</td>
+                <td>Hairline inner inset rule (10px from frame, cream-at-60%-opacity); editorial duotone filter <code>contrast(1.05) saturate(0.92)</code>.</td>
+              </tr>
+              <tr>
+                <td>Frame (illustration)</td>
+                <td>B · illustration</td>
+                <td>1px ink rule + 8px paper shadow (paper vocabulary)</td>
+                <td>Hairline inner inset rule at 8% ink opacity. Same outer frame as state A — only the contents differ.</td>
+              </tr>
+              <tr>
+                <td>Corner stamp</td>
+                <td>both</td>
+                <td><code>MonoLabel</code> typography (10px caps, 0.08em tracking)</td>
+                <td>Top-left placement inside the frame; ink-bordered cream box. Functionally a MonoLabel inside an ink rule.</td>
+              </tr>
+              <tr>
+                <td>Drawing</td>
+                <td>B · illustration</td>
+                <td>(none — pure SVG asset inside the frame)</td>
+                <td>Single <code>&lt;svg&gt;</code> with 1.25px stroke, no fills. Library will grow with youth/keeper/staff variants.</td>
+              </tr>
+              <tr>
+                <td>Name plate</td>
+                <td>both</td>
+                <td><code>MonoLabel</code> + 1px ink rule + cream surface</td>
+                <td>Sits flush against the frame via <code>margin-top: -1px</code> so the two ink edges collapse into one shared rule.</td>
+              </tr>
+              <tr>
+                <td>Optional tag</td>
+                <td>both</td>
+                <td><code>TicketStub</code> beneath the figure (centered)</td>
+                <td>None — TicketStub used at default scale.</td>
+              </tr>
+              <tr>
+                <td>Hover affordance</td>
+                <td>both (when interactive)</td>
+                <td>Press-down canon: <code>hover:translate-x-1</code> + <code>hover:translate-y-1</code> + <code>hover:shadow-none</code></td>
+                <td>None — applied to <code>TapedCard</code> when the figure is a link (e.g. roster grid card).</td>
+              </tr>
+              <tr>
+                <td>Editorial heading (host)</td>
+                <td>contextual</td>
+                <td><code>EditorialHeading</code> Playfair italic + jersey-deep emphasis</td>
+                <td>Used by host components (<code>PlayerHero</code>, <code>InterviewHero</code>) — never by PlayerFigure itself.</td>
+              </tr>
+              <tr>
+                <td>Stamp badge</td>
+                <td>not used</td>
+                <td><code>StampBadge</code></td>
+                <td>Deliberately omitted from PlayerFigure — reserved for award/captain markers on host pages, not on the figure itself.</td>
+              </tr>
+              <tr>
+                <td>Clipped card</td>
+                <td>not used</td>
+                <td><code>ClippedCard</code></td>
+                <td>Deliberately omitted — PlayerFigure uses a sharp 1px rectangular frame to keep the programme-booklet reading. ClippedCard is a sibling component for elsewhere on the redesign.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Every chrome decision in this revised PlayerFigure maps to a primitive already shipped on main. Migration risk is the lowest of the three Tier C directions — the only "new" material is the inner inset rule (a single CSS pseudo-element) and the line-art SVG (a single asset). Photo and illustration share the frame and the plate, so the component contract stays small: one prop selects the state, one prop opts into the tight crop.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Two states means the consumer has to know which to render — the host page (PlayerHero, RosterGrid, etc.) needs a small piece of conditional logic that asks "is there a <code>psdImage</code>?" before picking the state. Acceptable: that decision lives in the data layer (<code>player.psdImage</code> is nullable in the Sanity schema) and is a one-line check at the call site.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— direction-level summary · structure decisions · production handoff</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>PlayerFigure ships as <strong>two mutually-exclusive states</strong>: photo OR illustration. Never both.</li>
+          <li>Photo state uses a rectangular <code>psdImage</code> inside a 1px ink rule frame with 8px paper shadow.</li>
+          <li>Illustration state is a full-figure 1px line-art drawing — jersey + arms + stylised oval head — on cream paper. No fills, no shading, no facial features.</li>
+          <li>Both states share the same frame, the same inner inset rule, and the same sans-mono name plate beneath.</li>
+          <li>Name plate format: <code>#NN · NAME · POSITION</code> — <code>#NN</code> in jersey-deep is the only colour spike.</li>
+          <li>Cropped-tight variant of the photo state uses <code>object-position</code> + <code>transform: scale</code> on the same source — no second image asset.</li>
+          <li>Surrounding TapedCard has no rotation; TapeStrip and TicketStub are optional ornaments on the host card, not the figure.</li>
+          <li>Press-down hover canon applied per memo: <code>hover:translate-x-1 hover:translate-y-1 hover:shadow-none</code> + <code>transition-all duration-300</code>.</li>
+          <li>No emoji, no Lucide — typographic glyphs only. Stenciletta off-limits per visual-preferences memo.</li>
+          <li>No radial glows, no rim-lights — chrome stays paper-thin throughout.</li>
+        </ul>
+
+        <h3>Rejected</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          The original master-design hybrid (photographic face composited onto
+          a drawn jersey + drawn arms) is rejected for reading as a costume
+          ("Mickey Mouse"). The corrected spec disjoins the two: photo OR
+          illustration, never composited. This file is the canonical reference
+          for that correction.
+        </p>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick on the illustration's stroke weight (1.25px here vs 1px
+          in the JerseyShirt mockup) — needs alignment across PlayerFigure +
+          JerseyShirt before shipping. SVG library size (one figure now, six
+          variants planned) needs a directory plan inside
+          <code>apps/web/src/components/design-system/PlayerFigure/illustrations/</code>.
+        </p>
+
+        <p class="foot">
+          ★ END · DIRECTION C — PLAYERFIGURE (REVISED) · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

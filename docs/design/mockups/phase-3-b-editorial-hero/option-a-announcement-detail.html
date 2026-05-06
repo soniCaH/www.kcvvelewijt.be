@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EditorialHero · announcement · DETAIL PAGE — Phase 3 · Checkpoint B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: 0.5deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 40px 48px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .change-list { background: rgba(10,10,10,0.04); border-left: 3px solid var(--color-jersey-deep); padding: 16px 20px; margin: 16px 0 28px; font-size: 14px; line-height: 1.55; }
+      .change-list h4 { margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-jersey-deep); }
+      .change-list ul { margin: 0; padding-left: 18px; }
+      .change-list li { margin: 4px 0; }
+      .change-list code { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; }
+
+      /* Detail page wrapper — simulates real page chrome around the hero */
+      .page-frame {
+        background: var(--color-cream);
+        border: 1px dashed var(--color-paper-edge);
+        padding: 28px;
+        position: relative;
+      }
+      .page-frame__label {
+        position: absolute; top: -10px; left: 16px;
+        background: var(--color-cream);
+        padding: 0 8px;
+        font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ====================================================================
+         EDITORIAL HERO — asymmetric broadsheet shell · DETAIL placement
+         (no CTA row; body flows below)
+         ==================================================================== */
+
+      .ed-hero {
+        display: grid;
+        grid-template-columns: 60% 40%;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 56px;
+        position: relative;
+      }
+      .ed-hero::before {
+        content: "";
+        position: absolute;
+        top: 56px; bottom: 56px;
+        left: calc(60% + 8px);
+        width: 1px;
+        background: var(--color-ink);
+        opacity: 0.55;
+      }
+      .ed-hero__left { padding-right: 56px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+      .ed-hero__right { padding-left: 56px; display: flex; align-items: center; justify-content: center; min-height: 380px; }
+
+      /* Kicker — dot-separator with star sandwich */
+      .kicker {
+        display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+        font-weight: 600; color: var(--color-ink);
+        line-height: 1;
+      }
+      .kicker > span { display: inline-flex; align-items: center; line-height: 1; }
+      .kicker__star { color: var(--color-jersey-deep); font-size: 14px; }
+      .kicker__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--color-ink); }
+      .kicker__muted { color: var(--color-ink-muted); }
+
+      .editorial-heading {
+        font-family: var(--font-display); font-weight: 900;
+        font-size: clamp(40px, 5.2vw, 64px); line-height: 1.0;
+        margin: 0;
+      }
+      .editorial-heading em { font-style: italic; color: var(--color-jersey-deep); }
+      .editorial-heading::after { content: "."; color: var(--color-jersey-deep); }
+
+      .ed-hero__lead {
+        font-family: var(--font-display); font-style: italic; font-weight: 400;
+        font-size: 18px; line-height: 1.55;
+        color: var(--color-ink-soft);
+        margin: 6px 0 4px;
+        max-width: 52ch;
+      }
+
+      .byline {
+        margin-top: 14px; padding-top: 12px;
+        border-top: 1px solid var(--color-paper-edge);
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+        line-height: 1;
+      }
+      .byline > span { display: inline-flex; align-items: center; line-height: 1; }
+      .byline__star { color: var(--color-jersey-deep); font-size: 13px; }
+
+      /* TapedCard — paper card wrapper for the artefact */
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 28px;
+      }
+      .taped-card--rot-a { transform: rotate(var(--rotate-tape-a)); }
+      .taped-card--rot-b { transform: rotate(var(--rotate-tape-b)); }
+      .taped-card__tape {
+        position: absolute; top: -14px; left: 18%; transform: rotate(-4deg);
+        width: 72px; height: 24px;
+        background: rgba(74, 207, 82, 0.55);
+        border: 1px solid rgba(0,0,0,0.18);
+      }
+
+      /* Cover artefact — coverImage in TapedCard fills the right column */
+      .cover-artefact {
+        width: 100%;
+        max-width: 460px;
+      }
+      .cover-artefact__frame {
+        aspect-ratio: 16 / 9;
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-paper-edge);
+        overflow: hidden;
+      }
+      .cover-artefact__frame img {
+        width: 100%; height: 100%; object-fit: cover;
+        filter: contrast(1.02) saturate(0.95);
+      }
+      .cover-artefact__caption {
+        padding: 12px 4px 2px;
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: flex; align-items: center; gap: 8px;
+        line-height: 1;
+      }
+      .cover-artefact__caption .star { color: var(--color-jersey-deep); font-size: 13px; }
+
+      /* Article body simulation — for context that hero is followed by body */
+      .body-sim {
+        margin-top: 48px;
+        max-width: 720px;
+      }
+      .body-sim p {
+        font-size: 17px; line-height: 1.7; color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+      .body-sim p:first-child::first-letter {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 4em; line-height: 0.85;
+        color: var(--color-jersey-deep);
+        float: left;
+        margin: 8px 8px 0 0;
+      }
+
+      /* Field-source map */
+      .map-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .map-table thead th {
+        text-align: left; padding: 12px 8px;
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .map-table tbody td { padding: 10px 8px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .map-table code { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; }
+      .map-table .col-static { color: var(--color-ink-muted); font-style: italic; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIAL HERO · DIRECTION A</span>
+          <span class="mono mono--muted">★ ANNOUNCEMENT · DETAIL PAGE</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Variant <em>announcement</em> — detail-page hero.</h1>
+        <p class="lead">
+          Hero at the top of <code>/nieuws/[slug]</code> when <code>articleType=announcement</code>.
+          The reader is already committed — body flows directly below the hero. <strong>No click-through
+          CTAs</strong> ("Read announcement" makes no sense here). Homepage adaptation with CTA row layered
+          later via <code>placement="homepage"</code>.
+        </p>
+
+        <div class="change-list">
+          <h4>★ Iteration 2 — direction change captured</h4>
+          <ul>
+            <li><strong>StampBadge dropped entirely.</strong> Owner direction 2026-05-05: stamp reads "too official". Replaced with <code>article.coverImage</code> in TapedCard rotation A — image carries the variant.</li>
+            <li><strong>coverImage required for ALL article types.</strong> New blocking schema requirement (Ask 8 — see <code>fields.md</code>). Implementation question: hard-required (always upload) vs render-time fallback (default-image library). Pending owner pick.</li>
+            <li><strong>Image lives INSIDE the hero</strong> — right column (40%), incorporated with title/metadata. No separate strip below.</li>
+            <li><strong>Glyph alignment fix</strong> in kicker + byline — stars now vertically centered with mono caps via <code>display: inline-flex; align-items: center; line-height: 1</code> on items + small font-size bump on the glyph itself.</li>
+            <li><strong>Title emphasis</strong> still hard-coded as <code>&lt;em&gt;</code> in the markup. Real implementation needs schema change (Ask 9 — title to constrained Portable Text with Accent decorator) — see <code>fields.md</code>. Pending owner pick.</li>
+            <li><strong>No CTA row</strong> (detail placement). Body flows directly below.</li>
+          </ul>
+        </div>
+      </header>
+
+      <!-- ===========================================================
+           1. DETAIL HERO — coverImage required, image in right column
+           =========================================================== -->
+      <section class="section" id="detail-no-cover">
+        <div class="section-meta">
+          <span class="mono">★ 01 · DETAIL HERO · COVER IMAGE IS THE ARTEFACT</span>
+          <span class="mono mono--muted">— image lives inside the hero, right column</span>
+        </div>
+        <h2>De <em>nieuwe</em> richting.</h2>
+        <p class="lead">
+          Cover image is now required for every article. It occupies the right column of the locked Asymmetric
+          Broadsheet shell — same place the StampBadge sat before. Title, metadata, lead, byline live to its
+          left; body flows directly below.
+        </p>
+
+        <div class="page-frame">
+          <span class="page-frame__label">★ /NIEUWS/[SLUG] · DETAIL PAGE</span>
+
+          <div class="ed-hero">
+            <div class="ed-hero__left">
+              <span class="kicker">
+                <span class="kicker__star">★</span>
+                <span>MEDEDELING</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">06 MIN LEZEN</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">12 APR 2026</span>
+                <span class="kicker__star">★</span>
+              </span>
+
+              <h2 class="editorial-heading">Werken aan de <em>hoofdtribune</em></h2>
+
+              <p class="ed-hero__lead">
+                Vanaf 15 april starten de werken aan de daken van de hoofdtribune. De wedstrijd van zaterdag
+                18 april wordt verplaatst naar de jeugdterreinen. Voorverkoop blijft geldig — gelieve uw
+                ticket mee te nemen.
+              </p>
+
+              <div class="byline">
+                <span class="byline__star">★</span>
+                <span>DOOR REDACTIE</span>
+              </div>
+            </div>
+
+            <div class="ed-hero__right">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape" aria-hidden="true"></span>
+                <div class="cover-artefact">
+                  <div class="cover-artefact__frame">
+                    <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1600&q=70" alt="Werken aan de hoofdtribune" />
+                  </div>
+                  <p class="cover-artefact__caption">
+                    <span class="star">★</span><span>FOTO &middot; <code>article.coverImage</code> @ 16:9</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="body-sim">
+            <p>
+              Vanaf 15 april starten de werken aan de daken van de hoofdtribune. De aannemer plaatst die week
+              de stelling op; de eigenlijke afbraak begint op 22 april en duurt naar verwachting drie weken.
+              In die periode is het hoofdterrein zelf wel beschikbaar voor trainingen en wedstrijden …
+            </p>
+            <p>
+              De wedstrijd tegen FC Achterboorde van zaterdag 18 april wordt verplaatst naar het terrein A van
+              de jeugdterreinen, dezelfde aftrap (16u). Tickets uit de voorverkoop blijven geldig …
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           2. DETAIL HERO — second example
+           =========================================================== -->
+      <section class="section" id="detail-with-cover">
+        <div class="section-meta">
+          <span class="mono">★ 02 · DETAIL HERO · SECOND EXAMPLE</span>
+          <span class="mono mono--muted">— different content, same shell</span>
+        </div>
+        <h2>Korter <em>verhaal,</em> zelfde shell.</h2>
+        <p class="lead">
+          Same hero structure, different content. The shell behaves consistently regardless of headline length
+          or lead density.
+        </p>
+
+        <div class="page-frame">
+          <span class="page-frame__label">★ /NIEUWS/[SLUG] · ANOTHER ANNOUNCEMENT</span>
+
+          <div class="ed-hero">
+            <div class="ed-hero__left">
+              <span class="kicker">
+                <span class="kicker__star">★</span>
+                <span>MEDEDELING</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">04 MIN LEZEN</span>
+                <span class="kicker__dot"></span>
+                <span class="kicker__muted">05 MEI 2026</span>
+                <span class="kicker__star">★</span>
+              </span>
+
+              <h2 class="editorial-heading">De <em>kantine</em> blijft open tijdens de winterstop</h2>
+
+              <p class="ed-hero__lead">
+                Tussen Kerst en Nieuwjaar draait de kantine elke vrijdag- en zaterdagavond gewoon door. Geen
+                wedstrijden, wel toogwerk, wel pintjes, wel mensen — een plezante compagnie laat zijn tappers
+                niet droogvallen.
+              </p>
+
+              <div class="byline">
+                <span class="byline__star">★</span>
+                <span>DOOR REDACTIE</span>
+              </div>
+            </div>
+
+            <div class="ed-hero__right">
+              <div class="taped-card taped-card--rot-a">
+                <span class="taped-card__tape" aria-hidden="true"></span>
+                <div class="cover-artefact">
+                  <div class="cover-artefact__frame">
+                    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1600&q=70" alt="Kantine KCVV Elewijt" />
+                  </div>
+                  <p class="cover-artefact__caption">
+                    <span class="star">★</span><span>FOTO &middot; KANTINE</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="body-sim">
+            <p>
+              Het bestuur van KCVV bevestigt dat de kantine ook tijdens de winterstop dagelijks open blijft.
+              Concreet betekent dit dat tussen 22 december en 6 januari de toog elke vrijdag- en zaterdagavond
+              vanaf 19u tot middernacht bemand is door de gebruikelijke vrijwilligersploeg.
+            </p>
+            <p>
+              "We hebben de afgelopen weken vaak gehoord dat de kantine voor heel wat leden meer is dan een
+              plek om iets te drinken na de match," aldus voorzitter <em>(naam)</em>. "Een familie heeft geen
+              winterstop. Een plezante compagnie ook niet."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           3. FIELD-SOURCE MAP — DETAIL placement
+           =========================================================== -->
+      <section class="section" id="field-map">
+        <div class="section-meta">
+          <span class="mono">★ 03 · FIELD-SOURCE MAP · DETAIL PLACEMENT</span>
+          <span class="mono mono--muted">— every element traces to a Sanity field or template constant</span>
+        </div>
+        <h2>Niets <em>verzonnen.</em></h2>
+        <p class="lead">
+          Verified against <code>packages/sanity-schemas/src/article.ts</code> +
+          <code>apps/web/src/lib/utils/reading-time.ts</code> + the <code>fields.md</code> decision sheet.
+        </p>
+
+        <div class="panel">
+          <table class="map-table">
+            <thead>
+              <tr><th>UI element</th><th>Source</th><th>Treatment</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Kicker — first label "MEDEDELING"</td>
+                <td><span class="col-static">Static · derived from <code>articleType==='announcement'</code></span></td>
+                <td>Mono caps with jersey-deep star sandwich</td>
+              </tr>
+              <tr>
+                <td>Kicker — reading time</td>
+                <td><code>computeReadingTime(article.body)</code></td>
+                <td>Mono muted; hides when undefined</td>
+              </tr>
+              <tr>
+                <td>Kicker — date</td>
+                <td><code>article.publishedAt</code> formatted "DD MMM YYYY"</td>
+                <td>Mono muted</td>
+              </tr>
+              <tr>
+                <td>Headline</td>
+                <td><code>article.title</code> (req)</td>
+                <td>EditorialHeading · Playfair display 900 + jersey-deep period</td>
+              </tr>
+              <tr>
+                <td>Lead / dek</td>
+                <td><code>article.lead</code> (NEW field — Ask 1) · falls back to <code>body[0]</code> first paragraph (truncate ~280 chars)</td>
+                <td>Italic display, max ~52ch</td>
+              </tr>
+              <tr style="background: rgba(184,74,58,0.06);">
+                <td style="color: #b84a3a;"><strong>(absent)</strong> CTA row</td>
+                <td colspan="2">Detail placement — reader is already on the article; CTAs added by <code>placement="homepage"</code> only.</td>
+              </tr>
+              <tr>
+                <td>Byline</td>
+                <td>Default stub <code>"DOOR REDACTIE"</code> · future <code>article.author</code> override (Ask 2 follow-up)</td>
+                <td>Mono caps muted, jersey-deep leading star</td>
+              </tr>
+              <tr>
+                <td>Cover image (right column artefact)</td>
+                <td><code>article.coverImage</code> @ 16:9 — <strong>required</strong> per Ask 8 direction</td>
+                <td>TapedCard rotation A frame, hotspot-aware, contrast/saturate filters for editorial feel</td>
+              </tr>
+              <tr>
+                <td>Cover caption</td>
+                <td><span class="col-static">Static · "FOTO" + reference</span> (or omit if too noisy)</td>
+                <td>Mono caps muted</td>
+              </tr>
+              <tr>
+                <td>Image alt</td>
+                <td><code>article.title</code> rendered as plain text (Ask 5 fallback)</td>
+                <td>If title becomes Portable Text (Ask 9), serialise to plain string for alt</td>
+              </tr>
+              <tr style="background: rgba(184,74,58,0.06);">
+                <td style="color: #b84a3a;"><strong>(removed)</strong> StampBadge</td>
+                <td colspan="2">Direction change 2026-05-05 — too official, replaced by coverImage</td>
+              </tr>
+              <tr style="background: rgba(184,74,58,0.06);">
+                <td style="color: #b84a3a;"><strong>(removed)</strong> Optional context strip below hero</td>
+                <td colspan="2">Cover image is now inside the hero (right column)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           4. NOTES BEFORE LOCK
+           =========================================================== -->
+      <section class="section" id="lock-notes">
+        <div class="section-meta">
+          <span class="mono">★ 04 · OPEN QUESTIONS BEFORE LOCK</span>
+        </div>
+
+        <div class="panel panel--soft">
+          <ul style="margin: 0; padding-left: 20px; line-height: 1.7;">
+            <li><strong>Ask 8 — coverImage required:</strong> hard-required (every editor must upload) vs render-time fallback (default-image library: club crest / kantine / paper texture)? Pending pick.</li>
+            <li><strong>Ask 9 — title emphasis:</strong> convert <code>article.title</code> from plain string to constrained Portable Text + Accent decorator (so editors mark the word that gets jersey-deep italic), OR drop emphasis from the title in the redesign. Pending pick.</li>
+            <li><strong>Cover caption</strong> — "★ FOTO · article.coverImage @ 16:9" is technical / dev-facing. For real renders, drop the caption row entirely OR render a free-text caption from a future <code>coverImageCaption</code> field. Confirm.</li>
+            <li><strong>Byline keeping its keep?</strong> Reading time + date already in the kicker. Today the byline is just "★ DOOR REDACTIE" — owner ack'd "feels useless at this moment" but kept for future <code>article.author</code>. Stays as designed.</li>
+            <li><strong>Mobile collapse</strong> — under 768px, the right-column coverImage TapedCard slides above the headline (per shell rule). Image stays at meaningful size; caption + byline shrink. Mobile drill in <code>compose.md</code> after all 4 variants lock.</li>
+            <li><strong>Long titles</strong> — clamp(40px, 5.2vw, 64px). Owner ack'd headroom is fine.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

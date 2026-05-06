@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction C — Taped Flyer · Phase 3 · Checkpoint C · SiteHeader + MatchStrip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --color-tape: #e6dcc4;
+        --color-tape-edge: #d4c8a8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-tape: 1px 2px 3px rgba(10, 10, 10, 0.18);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .panel--wide { padding: 40px 32px; }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         TAPED CARD CHROME — header wrapper, taped flyer feel.
+         The whole SiteHeader composes a TapedCard: cream paper with
+         ink border + paper shadow + tape strips at top corners.
+         ============================================================ */
+
+      .taped-card {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 22px 28px;
+      }
+
+      /* Tape strips — soft tan-paper rectangles rotated and shadowed.
+         Top-left rotates clockwise into the page; top-right rotates
+         counter-clockwise. Sit slightly outside the card edge. */
+      .tape {
+        position: absolute;
+        width: 96px;
+        height: 22px;
+        background: var(--color-tape);
+        border: 1px solid var(--color-tape-edge);
+        box-shadow: var(--shadow-tape);
+        pointer-events: none;
+        /* faint horizontal rule mimicking masking-tape weave */
+        background-image: linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 6px,
+          rgba(10, 10, 10, 0.04) 6px,
+          rgba(10, 10, 10, 0.04) 7px,
+          transparent 7px,
+          transparent 14px
+        );
+      }
+      .tape--tl { top: -10px; left: 24px; transform: rotate(-6deg); }
+      .tape--tr { top: -10px; right: 24px; transform: rotate(5deg); }
+      .tape--bl { bottom: -10px; left: 64px; transform: rotate(4deg); }
+      .tape--br { bottom: -10px; right: 64px; transform: rotate(-5deg); }
+
+      /* ============================================================
+         SITE HEADER — desktop
+         ============================================================ */
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .site-header__brand {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .site-header__wordmark {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: var(--color-ink);
+      }
+      .site-header__wordmark em {
+        font-style: italic;
+        color: var(--color-jersey-deep);
+      }
+      .site-header__tagline {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* Nav reads as a printed contents-list row — section glyph "§"
+         followed by mono caps separated by middots. */
+      .site-header__nav {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        padding-left: 16px;
+        border-left: 1px solid var(--color-paper-edge);
+      }
+      .site-header__nav .glyph {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      .site-header__nav a {
+        color: var(--color-ink);
+        text-decoration: none;
+        position: relative;
+        padding: 2px 0;
+      }
+      .site-header__nav a:hover {
+        color: var(--color-jersey-deep);
+      }
+      .site-header__nav .sep {
+        color: var(--color-ink-muted);
+        font-weight: 400;
+      }
+
+      .site-header__actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      /* Search glyph — typographic magnifier in a small ink-bordered box */
+      .search-btn {
+        width: 36px;
+        height: 36px;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 15px;
+        line-height: 1;
+        color: var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        transition: all 300ms ease;
+        padding: 0;
+      }
+      .search-btn:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+
+      /* WORD LID — primary ink button with paper press */
+      .btn-primary {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 10px 18px;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 0 var(--color-jersey-deep);
+        transition: all 300ms ease;
+      }
+      .btn-primary:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+
+      /* Mobile header */
+      .site-header--mobile {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .site-header--mobile .site-header__wordmark { font-size: 26px; }
+      .hamburger {
+        width: 44px;
+        height: 36px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        padding: 0;
+      }
+      .hamburger span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: var(--color-ink);
+      }
+
+      /* ============================================================
+         MATCH STRIP — TicketStub aesthetic
+         Perforated edges via CSS mask + dashed inner rule between
+         segments. Sits as a flat sub-header below SiteHeader.
+         ============================================================ */
+
+      .match-strip {
+        position: relative;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        border-top: 0; /* sits under the header */
+        box-shadow: var(--shadow-paper-sm);
+        /* perforated bottom edge: tiny semicircles cut out */
+        --perf-size: 10px;
+        padding: 0;
+      }
+      .match-strip__inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 0;
+      }
+      .match-strip__seg {
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-right: 1.5px dashed var(--color-ink);
+        min-height: 64px;
+      }
+      .match-strip__seg:last-child {
+        border-right: 0;
+      }
+      .match-strip__seg--meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+      }
+      .match-strip__kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .match-strip__date {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--color-ink);
+      }
+      .match-strip__teams {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+      }
+      .shield {
+        width: 36px;
+        height: 40px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 14px;
+        color: var(--color-ink);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+      }
+      .shield--jersey { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-ink); }
+      .match-strip__team-name {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 17px;
+        line-height: 1.1;
+      }
+      .match-strip__vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--color-ink-muted);
+      }
+      .match-strip__score {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 28px;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        color: var(--color-ink);
+      }
+
+      /* LIVE pill — alert red, animated heartbeat */
+      .live-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        background: var(--color-alert);
+        border: 1.5px solid var(--color-ink);
+        padding: 4px 8px;
+      }
+      .live-pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        background: var(--color-cream);
+        border-radius: 50%;
+        animation: live-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes live-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+      }
+
+      /* CTA at end of strip — TicketStub flavour */
+      .strip-cta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 8px 14px;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        transition: all 300ms ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .strip-cta:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+      .strip-cta--ghost {
+        background: var(--color-cream);
+        color: var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+
+      /* The placeholder state (no upcoming match) */
+      .match-strip--hidden {
+        background: var(--color-cream);
+        opacity: 0.45;
+        font-style: italic;
+        color: var(--color-ink-muted);
+      }
+      .match-strip--hidden .match-strip__seg {
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* Combined preview canvas — shows header+strip stacked with a fake
+         page underneath to illustrate the sticky behavior. */
+      .preview-canvas {
+        background: var(--color-cream);
+        border: 1px dashed var(--color-paper-edge);
+        padding: 24px;
+        margin-top: 24px;
+      }
+      .preview-stage {
+        position: relative;
+        background:
+          linear-gradient(180deg, transparent 0, transparent 220px, rgba(10,10,10,0.02) 220px),
+          var(--color-cream);
+        min-height: 480px;
+        padding: 0;
+        border: 1px solid var(--color-paper-edge);
+      }
+      .preview-stage .ghost-page {
+        padding: 220px 32px 32px;
+        font-family: var(--font-display);
+        font-style: italic;
+        color: var(--color-ink-muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .sticky-rail {
+        position: sticky;
+        top: 0;
+      }
+
+      /* Reuse map table */
+      table.reuse-map {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      table.reuse-map th, table.reuse-map td {
+        border: 1px solid var(--color-paper-edge);
+        padding: 10px 14px;
+        text-align: left;
+        vertical-align: top;
+      }
+      table.reuse-map th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: var(--color-cream-soft);
+        font-weight: 700;
+      }
+      table.reuse-map td code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 6px;
+        border: 1px solid var(--color-paper-edge);
+      }
+      .pill-density {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 8px;
+        border: 1.5px solid var(--color-ink);
+      }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HERO
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT C · SITEHEADER + MATCHSTRIP · DIRECTION C</span>
+          <span class="mono mono--muted">★ TAPED FLYER</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Een <span class="display"><em>geplakt</em></span> affiche.</h1>
+        <p class="lead">
+          Direction C reads the SiteHeader as a TapedCard pinned to the top of
+          the page — cream paper, ink border, paper shadow, and a soft tan
+          masking-tape strip at each upper corner. The MatchStrip beneath wears
+          a TicketStub treatment: dashed-line rule between segments, perforated
+          edge, ticket-style CTA. Most fanzine-leaning of the three checkpoint
+          options, and the highest in primitive-reuse density — TapedCard,
+          TapeStrip, and TicketStub all live in the chrome.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           01 · SITE HEADER — DESKTOP DEFAULT
+           =========================================================== -->
+      <section class="section" id="header-desktop">
+        <div class="section-meta">
+          <span class="mono">★ 01 · SITEHEADER — DESKTOP DEFAULT</span>
+          <span class="mono mono--muted">— TapedCard wrap · TapeStrip top corners · contents-list nav</span>
+        </div>
+        <h2>Een <em>kop</em> als affiche.</h2>
+        <p class="lead">
+          The wordmark sits in Freight Display 900 with an italic accent on
+          <em>Elewijt</em> in jersey-deep green. The nav follows as a printed
+          contents-list row — leading section glyph <code>§</code> in italic
+          serif, then mono caps separated by middots. A search affordance and
+          a primary <strong>WORD LID</strong> button sit at the right rail.
+          Tape strips are <code>--color-tape</code> rotated 5–6° outward.
+        </p>
+
+        <div class="panel panel--wide">
+          <div class="label-row">
+            <span class="row-label">DESKTOP</span>
+            <span class="mono">≥ 1024px · sticky top · TapedCard chrome</span>
+          </div>
+
+          <div class="taped-card site-header" role="banner">
+            <span class="tape tape--tl" aria-hidden="true"></span>
+            <span class="tape tape--tr" aria-hidden="true"></span>
+            <div class="site-header__brand">
+              <span class="site-header__wordmark">KCVV <em>Elewijt</em></span>
+              <span class="site-header__tagline">★ Er is maar één plezante compagnie</span>
+            </div>
+            <nav class="site-header__nav" aria-label="Hoofdmenu">
+              <span class="glyph" aria-hidden="true">§</span>
+              <a href="#">Nieuws</a>
+              <span class="sep">·</span>
+              <a href="#">Kalender</a>
+              <span class="sep">·</span>
+              <a href="#">Teams</a>
+              <span class="sep">·</span>
+              <a href="#">Jeugd</a>
+              <span class="sep">·</span>
+              <a href="#">Club</a>
+              <span class="sep">·</span>
+              <a href="#">Webshop</a>
+            </nav>
+            <div class="site-header__actions">
+              <button class="search-btn" type="button" aria-label="Zoeken">⌕</button>
+              <button class="btn-primary" type="button">Word lid</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Header reads instantly as part of the redesign vocabulary — same paper foundation, same press idiom, same canon of corners and shadows. Tape strips reinforce the fanzine direction without polluting the nav with motion or rim-light. The contents-list nav (§ + middots) is a typographic move that costs zero tokens and zero new icons.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>A taped header sits "loose" on the page — visually it is a card pinned in place, not a chrome rail. For users expecting a flat opaque app-bar this can feel less stable. Tape strips also require rendering decoration above the card edge, which complicates strict overflow-clip patterns at very narrow widths.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           02 · SITE HEADER — MOBILE
+           =========================================================== -->
+      <section class="section" id="header-mobile">
+        <div class="section-meta">
+          <span class="mono">★ 02 · SITEHEADER — MOBILE</span>
+          <span class="mono mono--muted">— wordmark + hamburger · tape strips kept</span>
+        </div>
+        <h2>Op een <em>klein</em> formaat.</h2>
+        <p class="lead">
+          On mobile, the contents-list nav and primary CTA collapse behind a
+          paper-card hamburger. The TapedCard wrapper and tape strips remain so
+          the header still reads as a flyer pinned to the top — just narrower.
+          Wordmark drops to <code>26px</code>; tagline hides.
+        </p>
+
+        <div class="panel" style="max-width: 420px">
+          <div class="label-row">
+            <span class="row-label">MOBILE</span>
+            <span class="mono">&lt; 768px</span>
+          </div>
+          <div class="taped-card site-header--mobile" role="banner">
+            <span class="tape tape--tl" aria-hidden="true" style="width: 70px"></span>
+            <span class="tape tape--tr" aria-hidden="true" style="width: 70px"></span>
+            <span class="site-header__wordmark">KCVV <em>Elewijt</em></span>
+            <button class="hamburger" type="button" aria-label="Menu openen">
+              <span></span><span></span><span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Mobile collapse is a single wrapper rule — the TapedCard chrome itself does not change, only what it contains. Tape strips shrink proportionally (70px) keeping the flyer feel without crowding the wordmark. Hamburger is a paper-card mini, same press idiom as the desktop search button.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Tape on a narrow card sits close to the wordmark — at very small widths (&lt;320px) the left tape can visually crowd the K. Mitigation: a min-width clamp on the card or an even narrower tape. Drawer state itself is out of scope for this checkpoint.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03 · MATCH STRIP — 4-STATE MATRIX
+           =========================================================== -->
+      <section class="section" id="match-strip">
+        <div class="section-meta">
+          <span class="mono">★ 03 · MATCHSTRIP — 4-STATE MATRIX</span>
+          <span class="mono mono--muted">— TicketStub flavour · dashed inter-segment rule</span>
+        </div>
+        <h2>De <em>strook</em> in vier toestanden.</h2>
+        <p class="lead">
+          MatchStrip wears a TicketStub aesthetic. Segments are split by a
+          <code>1.5px</code> dashed ink rule — same idiom as a paper match
+          ticket. Four states: hidden placeholder (no upcoming fixture),
+          upcoming (shield + tickets), live (LIVE pill + score), concluded
+          (final score + match-report stub). The component never inflates the
+          page — it sits as a flat sub-header band beneath SiteHeader.
+        </p>
+
+        <!-- STATE A — no upcoming -->
+        <div class="panel">
+          <div class="label-row">
+            <span class="row-label">STATE A</span>
+            <span class="mono">no upcoming match · placeholder, dimmed</span>
+          </div>
+          <div class="match-strip match-strip--hidden" aria-label="Geen aankomende wedstrijd">
+            <div class="match-strip__inner" style="grid-template-columns: 1fr">
+              <div class="match-strip__seg">— Geen aankomende wedstrijd · check de kalender —</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE B — upcoming -->
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">STATE B</span>
+            <span class="mono">upcoming · shield + opponent + tickets stub</span>
+          </div>
+          <div class="match-strip" aria-label="Aankomende wedstrijd">
+            <div class="match-strip__inner">
+              <div class="match-strip__seg match-strip__seg--meta">
+                <span class="match-strip__kicker">★ Volgende thuiswedstrijd</span>
+                <span class="match-strip__date">ZAT 09 MEI · 15:00</span>
+              </div>
+              <div class="match-strip__seg match-strip__teams">
+                <span class="shield shield--jersey">KCVV</span>
+                <span class="match-strip__team-name">KCVV Elewijt</span>
+                <span class="match-strip__vs">vs</span>
+                <span class="shield">SPC</span>
+                <span class="match-strip__team-name">Sporting Tisselt</span>
+              </div>
+              <div class="match-strip__seg">
+                <span class="match-strip__kicker">Competitie</span>
+                <span class="mono" style="font-size:12px;font-weight:700">P3D · SPEELDAG 28</span>
+              </div>
+              <div class="match-strip__seg">
+                <a class="strip-cta" href="#">Tickets <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE C — live -->
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">STATE C</span>
+            <span class="mono">live · LIVE pill + running score</span>
+          </div>
+          <div class="match-strip" aria-label="Wedstrijd is bezig" role="status">
+            <div class="match-strip__inner">
+              <div class="match-strip__seg match-strip__seg--meta">
+                <span class="live-pill" aria-label="Live">LIVE · 67'</span>
+                <span class="match-strip__date" style="margin-top:6px">ZAT 03 MEI</span>
+              </div>
+              <div class="match-strip__seg match-strip__teams">
+                <span class="shield shield--jersey">KCVV</span>
+                <span class="match-strip__team-name">KCVV</span>
+                <span class="match-strip__score">2 — 1</span>
+                <span class="match-strip__team-name">Tisselt</span>
+                <span class="shield">SPC</span>
+              </div>
+              <div class="match-strip__seg match-strip__seg--meta">
+                <span class="match-strip__kicker">Doelpunten</span>
+                <span class="mono" style="font-size:12px;font-weight:700">VAN R. 22' · DE B. 41' · J. 58'</span>
+              </div>
+              <div class="match-strip__seg">
+                <a class="strip-cta" href="#">Volg live <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE D — concluded -->
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">STATE D</span>
+            <span class="mono">concluded · final score + match-report stub</span>
+          </div>
+          <div class="match-strip" aria-label="Afgelopen wedstrijd">
+            <div class="match-strip__inner">
+              <div class="match-strip__seg match-strip__seg--meta">
+                <span class="match-strip__kicker">★ Eindstand · ZON 27 APR</span>
+                <span class="match-strip__date">P3D · SPEELDAG 27</span>
+              </div>
+              <div class="match-strip__seg match-strip__teams">
+                <span class="shield shield--jersey">KCVV</span>
+                <span class="match-strip__team-name">KCVV</span>
+                <span class="match-strip__score">3 — 0</span>
+                <span class="match-strip__team-name">Boortmeerbeek</span>
+                <span class="shield">BMB</span>
+              </div>
+              <div class="match-strip__seg match-strip__seg--meta">
+                <span class="match-strip__kicker">Toeschouwers</span>
+                <span class="mono" style="font-size:12px;font-weight:700">412 · ZONNIG</span>
+              </div>
+              <div class="match-strip__seg">
+                <a class="strip-cta strip-cta--ghost" href="#">Verslag <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>The dashed-rule treatment between segments is a one-token operation — <code>border-right: 1.5px dashed ink</code>. It evokes a torn ticket without needing actual SVG perforations, and the same rule scales cleanly to all four states. Live pill heart-beat is the only motion, and it is bound to a single element with <code>aria-label="Live"</code>.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>Four segments at desktop widths is dense: shield + opponent + competition + CTA fits 1100px+ comfortably but compresses below 900px. Production needs a tablet rule that drops the competition segment first and keeps shield + CTA as the priority two. The hidden state intentionally renders empty space to prevent CLS — owners should confirm that's preferred over absent-from-DOM.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           04 · COMBINED PREVIEW (sticky illustrated)
+           =========================================================== -->
+      <section class="section" id="combined">
+        <div class="section-meta">
+          <span class="mono">★ 04 · COMBINED PREVIEW</span>
+          <span class="mono mono--muted">— SiteHeader + MatchStrip stacked · sticky behavior illustrated</span>
+        </div>
+        <h2>Samen <em>bovenaan</em>.</h2>
+        <p class="lead">
+          Header sits flush above the strip; the strip's top border is removed
+          so the two share a single ink rule. The combined assembly is what
+          becomes <code>position: sticky; top: 0</code> in production. Below
+          is a static illustration with a faint page silhouette to show
+          dropshadow priority.
+        </p>
+
+        <div class="preview-canvas">
+          <div class="preview-stage">
+            <div class="sticky-rail">
+              <!-- Header -->
+              <div class="taped-card site-header" role="banner" style="border-bottom: 0">
+                <span class="tape tape--tl" aria-hidden="true"></span>
+                <span class="tape tape--tr" aria-hidden="true"></span>
+                <div class="site-header__brand">
+                  <span class="site-header__wordmark">KCVV <em>Elewijt</em></span>
+                  <span class="site-header__tagline">★ Er is maar één plezante compagnie</span>
+                </div>
+                <nav class="site-header__nav" aria-label="Hoofdmenu">
+                  <span class="glyph" aria-hidden="true">§</span>
+                  <a href="#">Nieuws</a>
+                  <span class="sep">·</span>
+                  <a href="#">Kalender</a>
+                  <span class="sep">·</span>
+                  <a href="#">Teams</a>
+                  <span class="sep">·</span>
+                  <a href="#">Jeugd</a>
+                  <span class="sep">·</span>
+                  <a href="#">Club</a>
+                  <span class="sep">·</span>
+                  <a href="#">Webshop</a>
+                </nav>
+                <div class="site-header__actions">
+                  <button class="search-btn" type="button" aria-label="Zoeken">⌕</button>
+                  <button class="btn-primary" type="button">Word lid</button>
+                </div>
+              </div>
+
+              <!-- Strip -->
+              <div class="match-strip" aria-label="Aankomende wedstrijd">
+                <div class="match-strip__inner">
+                  <div class="match-strip__seg match-strip__seg--meta">
+                    <span class="match-strip__kicker">★ Volgende thuiswedstrijd</span>
+                    <span class="match-strip__date">ZAT 09 MEI · 15:00</span>
+                  </div>
+                  <div class="match-strip__seg match-strip__teams">
+                    <span class="shield shield--jersey">KCVV</span>
+                    <span class="match-strip__team-name">KCVV Elewijt</span>
+                    <span class="match-strip__vs">vs</span>
+                    <span class="shield">SPC</span>
+                    <span class="match-strip__team-name">Sporting Tisselt</span>
+                  </div>
+                  <div class="match-strip__seg">
+                    <span class="match-strip__kicker">Competitie</span>
+                    <span class="mono" style="font-size:12px;font-weight:700">P3D · SPEELDAG 28</span>
+                  </div>
+                  <div class="match-strip__seg">
+                    <a class="strip-cta" href="#">Tickets <span aria-hidden="true">→</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ghost-page">
+              <p>— Pagina-inhoud begint hier. De TapedCard-header en de TicketStub-strook blijven boven aan het scherm geplakt terwijl je scrollt. —</p>
+              <p>Eerste sectie · EditorialHero. Tweede sectie · NewsGrid. Derde sectie · ScheduleStandingsBlock.</p>
+              <p>De schaduw onder de strook valt op deze pagina, niet op de header — zo leest het samenstel als één samengestelde chrome-laag.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>Stacking the two as a single sticky assembly keeps total chrome height predictable and lets the page below scroll under one continuous shadow. Sharing the ink border between header and strip reduces visible rule count from two to one — quieter than the alternative.</p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>A combined sticky block is taller (≈148px desktop). Pages with their own EditorialHero need to budget for that vertical space. If the strip is hidden (state A), the header alone sticks at ≈84px, which is fine — but transitions between states need to be opacity-only, never height-collapse, to avoid scroll-jank.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           05 · TRADEOFFS — DIRECTION-LEVEL
+           =========================================================== -->
+      <section class="section" id="direction-tradeoffs">
+        <div class="section-meta">
+          <span class="mono">★ 05 · DIRECTION-LEVEL TRADEOFFS</span>
+          <span class="mono mono--muted">— summary across all four surfaces</span>
+        </div>
+        <h2>Waarom <em>deze</em> richting.</h2>
+        <p class="lead">
+          Direction C is the most fanzine-leaning of the three. It pushes the
+          chrome closer to editorial — the header reads as a flyer pinned to
+          the page, the strip reads as a torn ticket. It also has the highest
+          primitive-reuse density: TapedCard, TapeStrip, and TicketStub all
+          appear in chrome that runs on every page.
+        </p>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Maximum primitive reuse — TapedCard is the wrapper, TapeStrip
+              the corner flourish, TicketStub the strip aesthetic. Every
+              decision maps back to a primitive already locked in the catalogue.
+              The fanzine reading lands harder than directions A or B without
+              introducing a new shape vocabulary. Tape colour
+              (<code>--color-tape</code>) is a single new token. Press idiom is
+              canonical (<code>translate(1px,1px)</code> + shadow loss).
+              Mobile collapse is structural, not a separate component.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Highest editorial commitment of the three. Tape strips above the
+              header card edge complicate strict overflow rules and can read
+              as decoration where chrome usually reads as system. Two stacked
+              chrome elements with their own decoration (tape + dashed rule)
+              add visual weight at the very top of every page — pages with a
+              loud EditorialHero need to defer to this assembly visually.
+              Owners who want a quieter, more app-bar-like header should pick
+              direction A or B; this is the maximalist option.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           06 · PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse-map">
+        <div class="section-meta">
+          <span class="mono">★ 06 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— every chrome surface mapped back to an existing locked primitive</span>
+          <span class="pill-density">Density: HIGH</span>
+        </div>
+        <h2>Waar elke <em>vorm</em> vandaan komt.</h2>
+        <p class="lead">
+          Direction C is the highest in primitive-reuse density of the three
+          options at this checkpoint. TapedCard, TapeStrip, and TicketStub all
+          appear in the chrome itself — not just in editorial body content.
+        </p>
+
+        <table class="reuse-map">
+          <thead>
+            <tr>
+              <th>Surface</th>
+              <th>Primitive reused</th>
+              <th>How it appears here</th>
+              <th>Locked in</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SiteHeader wrap</td>
+              <td><code>&lt;TapedCard&gt;</code></td>
+              <td>Cream paper card, ink border, paper shadow — full-width at top of page.</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>Header corner flourish</td>
+              <td><code>&lt;TapeStrip&gt;</code></td>
+              <td>Two soft tan-paper rectangles rotated -6° / +5° at top corners.</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>Wordmark</td>
+              <td><code>&lt;EditorialHeading&gt;</code> tokens</td>
+              <td>Freight Display 900 with italic jersey-deep accent on "Elewijt".</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>Tagline / kicker</td>
+              <td><code>&lt;MonoLabel&gt;</code></td>
+              <td>Mono caps with leading star glyph — same as MonoLabelRow.</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>Nav contents-list</td>
+              <td>typography only (no new primitive)</td>
+              <td><code>§</code> glyph in italic display + mono caps separated by middots.</td>
+              <td>Phase 3</td>
+            </tr>
+            <tr>
+              <td>Search affordance</td>
+              <td>paper-card mini button</td>
+              <td>36×36 ink-bordered cream box, typographic <code>⌕</code> glyph.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>WORD LID button</td>
+              <td><code>&lt;Button variant="primary"&gt;</code></td>
+              <td>Ink fill on cream, jersey-deep paper shadow, mono caps label.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>Mobile hamburger</td>
+              <td>paper-card mini button</td>
+              <td>44×36 ink-bordered cream box, three ink bars.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>MatchStrip wrap</td>
+              <td><code>&lt;TicketStub&gt;</code></td>
+              <td>Cream-soft band, ink border, dashed inter-segment rules.</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>Team shield</td>
+              <td><code>&lt;Shield&gt;</code> (clip-path)</td>
+              <td>40×36 pentagonal shield — jersey fill for KCVV, cream for opponent.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>Strip dates / kickers</td>
+              <td><code>&lt;MonoLabel&gt;</code></td>
+              <td>Mono caps with leading star glyph for dates and competition meta.</td>
+              <td>Phase 1</td>
+            </tr>
+            <tr>
+              <td>LIVE pill</td>
+              <td><code>&lt;StatusPill tone="alert"&gt;</code></td>
+              <td>Alert-red fill, mono caps, single pulsing dot animation.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>Score readout</td>
+              <td><code>&lt;ScoreDisplay&gt;</code> tokens</td>
+              <td>Freight Display 900, em-dash separator, no decoration.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>Strip CTA (tickets / report)</td>
+              <td><code>&lt;Button variant="primary | ghost"&gt;</code></td>
+              <td>Jersey-deep fill or cream ghost, mono caps, paper press idiom.</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>Hidden state</td>
+              <td><code>&lt;TicketStub&gt;</code> at 0.45 opacity</td>
+              <td>Same wrapper, dimmed, italic placeholder copy — no new shape.</td>
+              <td>Phase 3</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="lead" style="margin-top: 24px">
+          Three primitives (<code>TapedCard</code>, <code>TapeStrip</code>,
+          <code>TicketStub</code>) carry the bulk of the chrome — every other
+          surface is either typography or a paper-card mini. <strong>This is
+          the highest reuse density of the three Phase 3 Checkpoint C
+          options.</strong> Direction A keeps the header flat and skips
+          TapeStrip; Direction B keeps the strip rectangular and skips
+          TicketStub. Only C composes all three at once.
+        </p>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— token map, structure decisions, production handoff</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>SiteHeader wraps in <code>&lt;TapedCard&gt;</code> — cream surface, <code>border-2 ink</code>, <code>--shadow-paper-sm</code></li>
+          <li>Two <code>&lt;TapeStrip&gt;</code> at top-left (-6°) and top-right (+5°) — soft tan <code>--color-tape</code> + faint shadow, no rim-light</li>
+          <li>Wordmark: Freight Display 900, italic accent on "Elewijt" in <code>--color-jersey-deep</code></li>
+          <li>Nav reads as a typographic contents list — leading <code>§</code> glyph in italic serif, mono caps separated by middot <code>·</code></li>
+          <li>Search button: 36×36 ink-bordered cream paper-card mini, typographic <code>⌕</code> glyph (no Lucide)</li>
+          <li>WORD LID: ink fill, cream label, jersey-deep paper shadow, canonical press idiom (<code>translate(1px,1px)</code> + shadow loss)</li>
+          <li>Mobile collapse: same TapedCard wrap; nav + CTA replaced by single hamburger paper-card mini; tape strips shrink to 70px</li>
+          <li>MatchStrip wears TicketStub flavour: cream-soft surface, dashed-rule inter-segment dividers (<code>1.5px dashed ink</code>), TapedCard's bottom border becomes the strip's top border (shared rule)</li>
+          <li>4 states: hidden placeholder (dimmed, italic copy), upcoming (shield + opponent + competition + Tickets CTA), live (LIVE pill + running score + heart-beat), concluded (final score + Verslag CTA)</li>
+          <li>LIVE pill animates a single 7×7 dot via <code>opacity</code> only — no glow, no rim-light, respects reduced-motion</li>
+          <li>Stenciletta off-limits — wordmark uses Freight Display, kickers use IBM Plex Mono</li>
+          <li>Combined header + strip becomes <code>position: sticky; top: 0</code> in production; transitions between strip states are opacity-only, never height-collapse</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between this Direction C and the sibling A / B options at
+          Phase 3 Checkpoint C. If C is chosen, follow-on tasks include
+          (a) extracting <code>&lt;TapeStrip&gt;</code> as a reusable corner-flourish
+          primitive in <code>apps/web/src/components/design-system/TapeStrip/</code>
+          if not already extracted, (b) wiring <code>&lt;MatchStrip&gt;</code> to the
+          BFF next-match query with its 4-state matrix, and (c) Storybook
+          stories covering all four MatchStrip states as VR-tagged compositions.
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px">
+          <div>
+            <h4 style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px">SURFACE / TINT</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft)">
+              <li>Header surface: <code>--color-cream</code></li>
+              <li>Strip surface: <code>--color-cream-soft</code></li>
+              <li>Tape strip fill: <code>--color-tape</code> (#e6dcc4)</li>
+              <li>Tape strip edge: <code>--color-tape-edge</code> (#d4c8a8)</li>
+              <li>KCVV shield fill: <code>--color-jersey-deep</code></li>
+              <li>Opponent shield fill: <code>--color-cream</code></li>
+              <li>LIVE pill fill: <code>--color-alert</code></li>
+              <li>Wordmark accent: <code>--color-jersey-deep</code> (italic only)</li>
+              <li>Hidden state opacity: <code>0.45</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px">STRUCTURE / DEPTH</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft)">
+              <li>Header border: <code>2px solid var(--color-ink)</code></li>
+              <li>Header shadow: <code>--shadow-paper-sm</code> (4×4 ink)</li>
+              <li>Tape rotation: <code>-6deg</code> (TL) / <code>+5deg</code> (TR)</li>
+              <li>Tape shadow: <code>1px 2px 3px rgba(10,10,10,0.18)</code></li>
+              <li>Strip border: shares header bottom border (single rule)</li>
+              <li>Inter-segment rule: <code>1.5px dashed var(--color-ink)</code></li>
+              <li>Press idiom: <code>translate(1px,1px)</code> + shadow loss · <code>300ms ease</code></li>
+              <li>No <code>border-radius</code> anywhere — sharp corners canon</li>
+              <li>No glows, no rim-lights, no radial gradients on chrome</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 32px">Production handoff checklist</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Confirm <code>&lt;TapeStrip&gt;</code> exists as a reusable primitive at <code>apps/web/src/components/design-system/TapeStrip/</code> — if not, extract it before SiteHeader work; tape rotation + dimensions become <code>variant</code> props (e.g. <code>"corner-tl" | "corner-tr" | "spine-bl" | "spine-br"</code>)</li>
+          <li>Wire <code>&lt;MatchStrip&gt;</code> to existing BFF next-match query (already in <code>packages/api-contract</code> as <code>Match</code> normalized output); state matrix lives in component, not in caller</li>
+          <li>State A (hidden) renders DOM at 0.45 opacity rather than <code>display: none</code> to prevent CLS — confirm with PM</li>
+          <li>Storybook: one story per state (A/B/C/D) plus mobile-collapse story for SiteHeader; tag <code>["autodocs","vr"]</code> so Phase 3 visual regression catches drift</li>
+          <li>A11y: nav uses <code>&lt;nav aria-label="Hoofdmenu"&gt;</code>; LIVE state uses <code>role="status"</code> on the strip wrapper; LIVE pill has <code>aria-label="Live"</code>; reduced-motion media query disables the heartbeat animation</li>
+          <li>Sticky behaviour: combined header+strip uses <code>position: sticky; top: 0; z-index: 30</code>; page below scrolls under one continuous shadow</li>
+          <li>Tablet (768–1024): drop the competition meta segment first; keep shield/teams/CTA; below 768px the strip stacks to two rows OR collapses to a single line with score-only</li>
+          <li>Reduced-motion: disable LIVE pulse and disable any <code>transition</code> on tape strips (current spec has none, future-proof)</li>
+          <li>Print stylesheet: tape strips and shadows hide; dashed rules become solid; nav becomes a flat list — keep the editorial reading on paper</li>
+        </ul>
+
+        <h3 style="margin-top: 32px">Naming consistency</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Component names referenced here align with the redesign master design
+          doc (<code>docs/plans/2026-04-27-redesign-master-design.md</code>):
+          <code>&lt;SiteHeader&gt;</code>, <code>&lt;MatchStrip&gt;</code>,
+          <code>&lt;TapedCard&gt;</code>, <code>&lt;TapeStrip&gt;</code>,
+          <code>&lt;TicketStub&gt;</code>, <code>&lt;MonoLabel&gt;</code>,
+          <code>&lt;EditorialHeading&gt;</code>, <code>&lt;Button&gt;</code>.
+          The existing <code>&lt;PageHeader&gt;</code> in
+          <code>apps/web/src/components/Layout/</code> is the rename target —
+          per §4.4 of the master design doc, it gets reworked nav typography
+          (mono caps), <code>&lt;MatchStrip&gt;</code> integration, and the new
+          colour scheme during Phase 3.
+        </p>
+
+        <h3 style="margin-top: 32px">Comparison to siblings A and B</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Direction A — flat opaque header, no tape, rectangular MatchStrip with
+          solid inter-segment rules. Quietest. Reads as a system app-bar.
+        </p>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Direction B — TapedCard header (no tape strips), TicketStub strip
+          (no perforation, only dashed rules). Mid-fanzine. Reads as paper but
+          not as decoration.
+        </p>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Direction C (this) — TapedCard + TapeStrip + TicketStub together.
+          Loudest. Reads as a flyer pinned to the page with a torn ticket
+          beneath. Highest primitive-reuse density of the three.
+        </p>
+
+        <h3 style="margin-top: 32px">Motion budget</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Tape strips: static — no entry animation, no hover transform. Tape is decoration that pretends to be physical; movement breaks the illusion.</li>
+          <li>Search button, hamburger, WORD LID, strip CTAs: canonical press idiom — <code>translate(1px,1px)</code> + shadow loss, <code>300ms ease</code>. No additional hover effect (no colour swap, no border thickening).</li>
+          <li>LIVE pill dot: <code>opacity 1 ↔ 0.35</code>, <code>1.4s ease-in-out infinite</code>. Single property (opacity) keeps the animation cheap and respects reduced-motion when scoped.</li>
+          <li>Nav links: hover swaps colour to <code>--color-jersey-deep</code> only — no underline animation, no transform.</li>
+          <li>Sticky behaviour: native <code>position: sticky</code>. No scroll-triggered shadow change, no colour fade — the assembly looks identical at <code>scrollY: 0</code> and <code>scrollY: 1000</code>.</li>
+          <li>State transitions in the strip: opacity-only fade <code>200ms</code> when shifting between A → B / B → C / C → D. Never animate height.</li>
+        </ul>
+
+        <h3 style="margin-top: 32px">Edge cases handled in this mockup</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>Long opponent names — <code>match-strip__team-name</code> uses <code>line-height: 1.1</code>; production should add <code>max-width</code> + ellipsis at small widths</li>
+          <li>Kickoff time without minutes — date format <code>ZAT 09 MEI · 15:00</code> always renders the time even when it's <code>00:00</code>; production should drop the time when source data has time component <code>00:00</code> (per PSD memory: <code>date</code> field carries dummy <code>00:00</code> from PSD <code>/games</code> endpoint)</li>
+          <li>Match identification — never compare by club name; always by <code>teamId</code>. The KCVV / opponent shield assignment in production reads <code>homeTeamId === selectedTeamId</code> to determine "we are home" (per PSD memory)</li>
+          <li>Sponsor logos / shields with no asset — fall back to mono-caps initial in the shield slot, never render a broken <code>&lt;img&gt;</code></li>
+          <li>State A placeholder copy is editor-tunable via Sanity setting; default Dutch copy shown here</li>
+          <li>Reduced-motion: when <code>prefers-reduced-motion: reduce</code> is set, the LIVE pulse is replaced by a static dot at full opacity and all <code>300ms</code> press transitions drop to <code>0ms</code></li>
+          <li>RTL — wordmark, nav, CTA group flip via <code>flex-direction: row-reverse</code> on the header; tape rotations mirror (<code>+6deg</code> / <code>-5deg</code>); dashed inter-segment rules are direction-agnostic</li>
+          <li>Print stylesheet — tape strips and shadows hide; dashed rules become solid; nav becomes a flat list; LIVE pulse stops</li>
+          <li>High-contrast mode — relies on system <code>border-2 ink</code> and ink-on-cream text only; tape strips remain visible at full contrast (no transparency-based effects)</li>
+        </ul>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION C — TAPED FLYER · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

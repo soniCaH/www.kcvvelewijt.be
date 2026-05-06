@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EditorialHero · event · COMPARISONS — Phase 3 · Checkpoint B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-alert: #b84a3a;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --rotate-tape-a: -0.5deg;
+        --rotate-tape-b: 0.5deg;
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 12px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-jersey-deep); margin: 0 0 12px; font-weight: 700; }
+      .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .header-bar { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 32px 40px; margin-bottom: 40px; }
+      .header-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 12px; }
+
+      .question {
+        margin: 60px 0;
+        padding: 32px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+      }
+      .question__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-jersey-deep); margin: 0 0 8px; font-weight: 700; }
+      .question__title { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 32px; line-height: 1.1; margin: 0 0 14px; }
+      .question__title em { color: var(--color-jersey-deep); }
+      .question__brief { font-size: 16px; color: var(--color-ink-soft); margin: 0 0 28px; max-width: 800px; }
+
+      .options {
+        display: grid; gap: 24px;
+        margin-top: 24px;
+      }
+      .options--2, .options--3 { grid-template-columns: 1fr; gap: 32px; }
+
+      .option-card {
+        background: var(--color-cream-soft);
+        border: 1px dashed var(--color-paper-edge);
+        padding: 16px;
+      }
+      .option-card__label {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--color-ink); font-weight: 700;
+        margin: 0 0 4px;
+      }
+      .option-card__hint {
+        font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
+        color: var(--color-ink-muted); margin: 0 0 14px;
+      }
+
+      /* Hero shell — same as locked direction A */
+      .ed-hero { display: grid; grid-template-columns: 60% 40%; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 36px; position: relative; }
+      .ed-hero::before { content: ""; position: absolute; top: 36px; bottom: 36px; left: calc(60% + 8px); width: 1px; background: var(--color-ink); opacity: 0.55; }
+      .ed-hero__left { padding-right: 36px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+      .ed-hero__right { padding-left: 36px; display: flex; align-items: center; justify-content: center; min-height: 280px; position: relative; }
+
+      .kicker { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--color-ink); line-height: 1; }
+      .kicker > span { display: inline-flex; align-items: center; line-height: 1; }
+      .kicker__star { color: var(--color-jersey-deep); font-size: 12px; }
+      .kicker__dot { width: 3px; height: 3px; border-radius: 50%; background: var(--color-ink); }
+      .kicker__muted { color: var(--color-ink-muted); }
+
+      .editorial-heading { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3.5vw, 42px); line-height: 1.0; margin: 0; }
+      .editorial-heading em { font-style: italic; color: var(--color-jersey-deep); }
+      .editorial-heading::after { content: "."; color: var(--color-jersey-deep); }
+
+      .ed-hero__lead { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 14px; line-height: 1.55; color: var(--color-ink-soft); margin: 4px 0 4px; max-width: 52ch; }
+
+      .byline { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--color-paper-edge); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; line-height: 1; }
+      .byline > span { display: inline-flex; align-items: center; line-height: 1; }
+      .byline__star { color: var(--color-jersey-deep); font-size: 11px; }
+
+      /* HeroCoverImage — TapedCard wrap */
+      .taped-card { position: relative; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 16px; }
+      .taped-card--rot-a { transform: rotate(-0.6deg); }
+      .taped-card--rot-b { transform: rotate(0.5deg); }
+      .taped-card__tape { position: absolute; top: -10px; left: 18%; transform: rotate(-3deg); width: 56px; height: 18px; background: rgba(74, 207, 82, 0.55); border: 1px solid rgba(0,0,0,0.18); }
+      .cover-artefact { width: 100%; max-width: 360px; }
+      .cover-artefact__frame { aspect-ratio: 16 / 9; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); overflow: hidden; }
+      .cover-artefact__frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.02) saturate(0.95); }
+      .cover-artefact__caption { padding: 8px 4px 0; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); display: flex; align-items: center; gap: 6px; line-height: 1; }
+      .cover-artefact__caption .star { color: var(--color-jersey-deep); font-size: 11px; }
+
+      /* Poster label — small mono caps banner ABOVE the image inside the TapedCard padding (not clipping) */
+      .poster-label {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 6px 12px;
+        margin-bottom: 10px;
+        background: var(--color-ink); color: var(--color-cream);
+        font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+        font-weight: 700;
+        line-height: 1;
+        align-self: flex-start;
+      }
+      .poster-label__star { color: var(--color-jersey); font-size: 11px; }
+
+      /* TicketStub sibling — sits BENEATH the image, no overlap with photo */
+      .ticket-stub-sibling {
+        margin-top: 10px;
+        align-self: center;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        padding: 8px 14px;
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+        font-weight: 700;
+        transform: rotate(-1.5deg);
+        display: inline-flex; align-items: stretch; gap: 10px;
+        line-height: 1;
+      }
+      .ticket-stub-sibling__day { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 26px; color: var(--color-jersey-deep); letter-spacing: 0; }
+      .ticket-stub-sibling__seam { width: 0; border-left: 2px dashed var(--color-ink); align-self: stretch; }
+      .ticket-stub-sibling__meta { display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+      .ticket-stub-sibling__month { font-size: 9px; opacity: 0.7; }
+      .ticket-stub-sibling__year { font-size: 11px; }
+
+      /* ====================================================================
+         Q1 — EventFactStrip layout options
+         ==================================================================== */
+      .strip-shell {
+        margin-top: 16px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 20px;
+      }
+
+      /* Layout A — 3-cell row: DATE | LOCATION | TICKETS */
+      .strip-3cell {
+        display: grid; grid-template-columns: auto 1fr auto;
+        gap: 0; align-items: center;
+      }
+      .strip-3cell > * { padding: 0 18px; }
+      .strip-3cell > * + * { border-left: 1px dashed rgba(10,10,10,0.3); }
+
+      .strip-date {
+        text-align: center; flex-shrink: 0;
+      }
+      .strip-date__day {
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        font-size: 56px; line-height: 1; color: var(--color-jersey-deep);
+      }
+      .strip-date__month {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+        color: var(--color-ink); font-weight: 700; margin-top: 4px;
+      }
+      .strip-date__year {
+        font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+        color: var(--color-ink-muted); margin-top: 2px;
+      }
+
+      .strip-location { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+      .strip-location__role { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; }
+      .strip-location__venue { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; color: var(--color-ink); }
+      .strip-location__address { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); }
+
+      .strip-tickets {
+        display: flex; flex-direction: column; align-items: center; gap: 8px;
+      }
+      .strip-tickets__cta {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+        font-weight: 700;
+        background: var(--color-jersey-deep); color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        padding: 10px 16px; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 6px; line-height: 1;
+      }
+      .strip-tickets__cap { font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+      /* Layout B — Big date left + details column right */
+      .strip-2cell { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; }
+      .strip-2cell .strip-date__day { font-size: 80px; }
+      .strip-details { display: flex; flex-direction: column; gap: 14px; }
+      .strip-details__row { display: flex; gap: 12px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px dashed rgba(10,10,10,0.2); }
+      .strip-details__row:last-child { border-bottom: none; padding-bottom: 0; }
+      .strip-details__key { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; min-width: 80px; flex-shrink: 0; }
+      .strip-details__val { font-family: var(--font-body); font-size: 14px; color: var(--color-ink); flex: 1; }
+      .strip-details__val em { font-family: var(--font-display); font-style: italic; font-weight: 900; color: var(--color-ink); }
+      .strip-tickets-inline { padding-top: 8px; border-top: 1px solid var(--color-paper-edge); }
+
+      /* Layout C — TicketStub-styled horizontal banner */
+      .strip-ticket-banner {
+        display: flex; align-items: stretch; gap: 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        position: relative;
+        margin-top: 16px;
+        transform: rotate(-0.3deg);
+      }
+      .strip-ticket-banner__day {
+        background: var(--color-jersey-deep); color: var(--color-cream);
+        padding: 20px 28px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-family: var(--font-display); font-style: italic; font-weight: 900;
+        flex-shrink: 0;
+      }
+      .strip-ticket-banner__day-num { font-size: 48px; line-height: 1; }
+      .strip-ticket-banner__day-month { font-family: var(--font-mono); font-style: normal; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 4px; font-weight: 700; }
+      .strip-ticket-banner__seam { width: 0; border-left: 2px dashed var(--color-ink); align-self: stretch; }
+      .strip-ticket-banner__body { flex: 1; padding: 16px 24px; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+      .strip-ticket-banner__cta { padding: 20px 28px; display: flex; align-items: center; flex-shrink: 0; }
+
+      /* ====================================================================
+         Q2 — Sessions[] placement
+         ==================================================================== */
+      .sessions-inline {
+        margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(10,10,10,0.2);
+        display: flex; flex-direction: column; gap: 6px;
+      }
+      .sessions-inline__row { display: flex; gap: 12px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-soft); align-items: baseline; }
+      .sessions-inline__day { color: var(--color-jersey-deep); font-weight: 700; min-width: 60px; }
+      .sessions-inline__time { color: var(--color-ink); }
+
+      .sessions-block {
+        margin-top: 16px;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 18px 24px;
+        transform: rotate(-0.2deg);
+      }
+      .sessions-block__title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0 0 12px; }
+      .sessions-block__list { display: flex; flex-direction: column; gap: 6px; }
+      .sessions-block__list .sessions-inline__row { font-size: 13px; }
+
+      .sessions-body-placeholder {
+        margin-top: 16px;
+        padding: 20px;
+        border: 1px dashed var(--color-paper-edge);
+        background: rgba(10,10,10,0.03);
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+      }
+
+      /* ====================================================================
+         Q3 — Standalone event document linkage
+         ==================================================================== */
+      .agenda-link {
+        margin-top: 16px;
+        padding: 12px 18px;
+        background: var(--color-cream-soft);
+        border-left: 3px solid var(--color-jersey-deep);
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--color-ink); font-weight: 600;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .agenda-link__star { color: var(--color-jersey-deep); }
+      .agenda-link__arrow { color: var(--color-jersey-deep); margin-left: auto; }
+
+      /* Tradeoff note */
+      .tradeoff {
+        margin-top: 16px;
+        padding: 12px 16px;
+        background: rgba(10,10,10,0.04);
+        border-left: 3px solid var(--color-jersey-deep);
+        font-size: 13px; line-height: 1.5;
+        color: var(--color-ink-soft);
+      }
+      .tradeoff strong { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="header-bar">
+        <div class="header-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT B · EDITORIAL HERO · DIRECTION A</span>
+          <span class="mono mono--muted">★ EVENT · DRILL-DOWN COMPARISONS</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Event variant — <em>compare each choice.</em></h1>
+        <p class="lead">
+          Four open questions before the <code>articleType=event</code> hero locks. Each section below shows
+          2–3 visual options to compare side-by-side. Pick one option per question — I'll build the final
+          mockup once all four are picked.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           Q4 — LOCKED: A1 plain cover image
+           =========================================================== -->
+      <section class="question" id="q4-locked" style="background: var(--color-cream-soft); border-style: dashed;">
+        <p class="question__label" style="color: var(--color-jersey-deep);">★ Q4 · LOCKED — 2026-05-05</p>
+        <h2 class="question__title" style="font-size: 22px;">A1 — plain cover photo. <em>No overlay, no extra label.</em></h2>
+        <p class="question__brief" style="margin: 0;">
+          Owner picked A1 (plain): hero artefact = <code>article.coverImage</code> in TapedCard rotation A,
+          identical treatment to announcement and transfer. Date prominence lives in the EventFactStrip
+          below (Q1) — confirm the strip there carries the date weight.
+        </p>
+      </section>
+
+      <!-- (Old Q4 v2 sub-options collapsed since the choice landed on A1 plain.) -->
+
+      <section class="question" id="q4-cover" style="display: none;">
+        <p class="question__label">★ Q4 · Cover image treatment — event flair without defacing the photo</p>
+        <h2 class="question__title">Hoe maken we het <em>event-y</em> zonder de foto te beschadigen?</h2>
+        <p class="question__brief">
+          You picked clean (no ticket-stub clipping the photo) but flagged that A doesn't read as
+          "event". Three sub-options below — each adds an event-specific flourish to the right-column
+          artefact <strong>without overlapping the photo itself</strong>.
+        </p>
+
+        <div class="options options--3">
+          <!-- A1 -->
+          <div class="option-card">
+            <p class="option-card__label">★ A1 · Plain (current — for reference)</p>
+            <p class="option-card__hint">Same as announcement / transfer. Maximum consistency, zero event flavour at hero level.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-clean/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- A2 -->
+          <div class="option-card">
+            <p class="option-card__label">★ A2 · Poster label above the image</p>
+            <p class="option-card__hint">Small mono-caps "★ POSTER · 14 NOV 2026 ★" banner ABOVE the photo, INSIDE the TapedCard's padding. Doesn't clip anything; reads "this is an event poster".</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a" style="display: flex; flex-direction: column;">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <span class="poster-label">
+                    <span class="poster-label__star">★</span>POSTER &middot; 14 NOV 2026<span class="poster-label__star">★</span>
+                  </span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-clean/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- A3 -->
+          <div class="option-card">
+            <p class="option-card__label">★ A3 · TicketStub as sibling BENEATH the image</p>
+            <p class="option-card__hint">Same TicketStub primitive as Option B from Q4 v1, but sitting BENEATH the photo (museum-tag style, no overlap with the image).</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right" style="flex-direction: column; gap: 0;">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-clean/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+                <div class="ticket-stub-sibling">
+                  <span class="ticket-stub-sibling__day">14</span>
+                  <span class="ticket-stub-sibling__seam" aria-hidden="true"></span>
+                  <span class="ticket-stub-sibling__meta">
+                    <span class="ticket-stub-sibling__month">NOV</span>
+                    <span class="ticket-stub-sibling__year">2026</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          A1 stays maximally consistent with announcement/transfer (zero event-specific). A2 adds a small
+          "POSTER · DATE" lapel ABOVE the photo, inside the TapedCard padding — reads as "event poster"
+          via the type label, doesn't deface the image, reuses MonoLabel-style typography. A3 places a
+          small TicketStub date BENEATH the photo as a sibling — same date-moment as the rejected overlay
+          but not overlapping the image. A2 = quietest event signal; A3 = louder, museum-tag feel.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q1 — LOCKED: Layout C ticket-stub banner (without perforation circle)
+           =========================================================== -->
+      <section class="question" id="q1-locked" style="background: var(--color-cream-soft); border-style: dashed;">
+        <p class="question__label" style="color: var(--color-jersey-deep);">★ Q1 · LOCKED — 2026-05-05</p>
+        <h2 class="question__title" style="font-size: 22px;">Layout C — ticket-stub banner. <em>One giant ticket beneath the hero.</em></h2>
+        <p class="question__brief" style="margin: 0 0 16px;">
+          Owner picked Layout C: the EventFactStrip itself reads as one large perforated ticket — jersey-deep
+          filled date block on the left, dashed-perforation seam, cream body with location + aftrap, CTA on
+          the right edge. Perforation pseudo-element circle removed (added no value).
+        </p>
+        <div class="strip-ticket-banner">
+          <div class="strip-ticket-banner__day">
+            <span class="strip-ticket-banner__day-num">14</span>
+            <span class="strip-ticket-banner__day-month">Nov '26</span>
+          </div>
+          <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+          <div class="strip-ticket-banner__body">
+            <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+            <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 19:00</p>
+            <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+          </div>
+          <div class="strip-ticket-banner__cta">
+            <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- (Old Q1 comparison hidden since layout C is locked.) -->
+      <section class="question" id="q1-strip" style="display: none;">
+        <p class="question__label">★ Q1 · EventFactStrip layout</p>
+        <h2 class="question__title">Welke <em>shape</em> voor de strip onder de hero?</h2>
+        <p class="question__brief">
+          The variant-specific block below the locked A1 hero. Same role as
+          <code>&lt;TransferFactStrip&gt;</code>, but for events. Three layouts compared.
+          Each option below shows the <strong>full composition</strong> — locked A1 hero up top, that
+          strip layout directly below — so you can judge the date prominence and the rhythm together.
+          All three pull the same eventFact data.
+        </p>
+
+        <div class="options">
+          <!-- Layout A -->
+          <div class="option-card">
+            <p class="option-card__label">★ Layout A · 3-cell row (date · location · tickets)</p>
+            <p class="option-card__hint">Mirrors TransferFactStrip's rhythm — three cells with dashed dividers, each carrying one concept. Date marker is medium (56px italic display).</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q1a/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-shell">
+              <div class="strip-3cell">
+                <div class="strip-date">
+                  <p class="strip-date__day">14</p>
+                  <p class="strip-date__month">November</p>
+                  <p class="strip-date__year">2026 · vrijdag</p>
+                </div>
+                <div class="strip-location">
+                  <p class="strip-location__role">Locatie</p>
+                  <p class="strip-location__venue">Clubhuis KCVV</p>
+                  <p class="strip-location__address">Driesstraat 14, Elewijt</p>
+                  <p class="strip-location__address" style="margin-top: 4px;">Aftrap 19:00 · max 80 plaatsen</p>
+                </div>
+                <div class="strip-tickets">
+                  <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+                  <p class="strip-tickets__cap">€ 22 · incl. soep + toetje</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Layout B -->
+          <div class="option-card">
+            <p class="option-card__label">★ Layout B · Big date marker + details column</p>
+            <p class="option-card__hint">Oversized date on the left (80px italic display) — biggest date moment of the three. Right column carries structured key/value rows + CTA.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q1b/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-shell">
+              <div class="strip-2cell">
+                <div class="strip-date">
+                  <p class="strip-date__day">14</p>
+                  <p class="strip-date__month">Nov</p>
+                  <p class="strip-date__year">'26 · vrijdag</p>
+                </div>
+                <div class="strip-details">
+                  <div class="strip-details__row">
+                    <span class="strip-details__key">Locatie</span>
+                    <span class="strip-details__val"><em>Clubhuis KCVV</em> &middot; Driesstraat 14</span>
+                  </div>
+                  <div class="strip-details__row">
+                    <span class="strip-details__key">Aftrap</span>
+                    <span class="strip-details__val">19:00 · max 80 plaatsen · € 22 pp</span>
+                  </div>
+                  <div class="strip-tickets-inline">
+                    <a class="strip-tickets__cta" href="#">RESERVEER PLAATS <span aria-hidden="true">→</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Layout C -->
+          <div class="option-card">
+            <p class="option-card__label">★ Layout C · Ticket-stub banner (whole strip = one giant ticket)</p>
+            <p class="option-card__hint">Strip itself is a perforated paper ticket. Date block in jersey-deep filled bg (loudest contrast); meta in cream body; CTA on the right edge. Most editorial, most variant-distinct.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q1c/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 19:00</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>A</strong> is the most consistent with TransferFactStrip rhythm (3 cells, dashed dividers,
+          evenly weighted). <strong>B</strong> gives the date the loudest typographic moment (80px italic
+          display) — directly addresses "the date is small in the kicker". <strong>C</strong> is the most
+          editorial / event-specific (entire strip reads as one big perforated ticket — jersey-deep filled
+          date block, paper texture). C is the visually loudest; A is the most reusable pattern; B is the
+          best balance between date prominence and reuse.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q2 — LOCKED: Option A · sessions inline in strip body
+           =========================================================== -->
+      <section class="question" id="q2-locked" style="background: var(--color-cream-soft); border-style: dashed;">
+        <p class="question__label" style="color: var(--color-jersey-deep);">★ Q2 · LOCKED — 2026-05-05</p>
+        <h2 class="question__title" style="font-size: 22px;">Sessions inline in the strip body. <em>One cohesive block per event.</em></h2>
+        <p class="question__brief" style="margin: 0;">
+          Owner picked Option A: when <code>eventFact.sessions[]</code> is set, the Layout C ticket-stub
+          banner's body grows to fit the per-day schedule list. Date block shows the date range
+          (e.g. <code>14–16 Nov '26</code>). Reader gets all schedule info in one place; no separate block
+          to scroll past. Strip will stretch taller for events with many sessions — implementation accepts
+          that trade-off.
+        </p>
+      </section>
+
+      <!-- (Old Q2 comparison hidden since A is locked.) -->
+      <section class="question" id="q2-sessions" style="display: none;">
+        <p class="question__label">★ Q2 · Sessions[] placement — recurring events</p>
+        <h2 class="question__title">Waar tonen we het <em>uurschema</em> per dag?</h2>
+        <p class="question__brief">
+          When <code>eventFact.sessions[]</code> is set (eetfestijn fri/sat/sun, weekend tornooi,
+          school-holiday camp), each day has its own start/end time. Below: full composition (locked hero
+          + locked Layout C ticket-stub strip) with three different sessions placements. Example data:
+          Steakfestijn 14/15/16 Nov — vrijdag 18-22, zaterdag 17-23, zondag 11:30-15:00.
+        </p>
+
+        <div class="options">
+          <!-- Option A — sessions inline in the ticket-banner body -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option A · Sessions inline in the strip body</p>
+            <p class="option-card__hint">Sessions list lives in the strip's body cell, replacing the single "Aftrap" line. Strip grows taller; everything stays in one place.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14–16 NOV</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Steak</em>festijn '26</h2>
+                <p class="ed-hero__lead">Drie dagen lang steak op het bord en de halve gemeente aan tafel. Vorig jaar driehonderd reservaties — schrijf je in voor het te laat is.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q2a/1600/900" alt="Steakfestijn '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14–16</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Uurschema per dag</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 16px; line-height: 1.1; margin: 4px 0 6px;">Clubhuis KCVV · Driesstraat 14</p>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div class="sessions-inline__row" style="font-size: 11px;"><span class="sessions-inline__day">Vrijdag 14/11</span><span class="sessions-inline__time">18:00 — 22:00</span></div>
+                  <div class="sessions-inline__row" style="font-size: 11px;"><span class="sessions-inline__day">Zaterdag 15/11</span><span class="sessions-inline__time">17:00 — 23:00</span></div>
+                  <div class="sessions-inline__row" style="font-size: 11px;"><span class="sessions-inline__day">Zondag 16/11</span><span class="sessions-inline__time">11:30 — 15:00</span></div>
+                </div>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option B — strip stays compact, sessions render as separate paper-card block below -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option B · Sessions as separate paper-card block under the strip</p>
+            <p class="option-card__hint">Strip stays compact (date range + venue + capacity). Sessions render as their own rotated paper-card titled "Uurschema per dag" directly below the strip.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14–16 NOV</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Steak</em>festijn '26</h2>
+                <p class="ed-hero__lead">Drie dagen lang steak op het bord en de halve gemeente aan tafel. Vorig jaar driehonderd reservaties — schrijf je in voor het te laat is.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q2b/1600/900" alt="Steakfestijn '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14–16</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Capaciteit</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · 3 dagen · max 80 plaatsen / dag · € 22 pp</p>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+
+            <div class="sessions-block">
+              <h4 class="sessions-block__title">★ Uurschema per dag</h4>
+              <div class="sessions-block__list">
+                <div class="sessions-inline__row"><span class="sessions-inline__day">Vrijdag 14/11</span><span class="sessions-inline__time">18:00 — 22:00</span></div>
+                <div class="sessions-inline__row"><span class="sessions-inline__day">Zaterdag 15/11</span><span class="sessions-inline__time">17:00 — 23:00</span></div>
+                <div class="sessions-inline__row"><span class="sessions-inline__day">Zondag 16/11</span><span class="sessions-inline__time">11:30 — 15:00</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option C — strip ignores sessions; editor writes them in body -->
+          <div class="option-card">
+            <p class="option-card__label">★ Option C · Strip ignores sessions; editor writes them in body</p>
+            <p class="option-card__hint">Strip never renders sessions. Editor manually writes the schedule in the article body via list / table / Q&A block. Wastes the structured field.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14–16 NOV</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Steak</em>festijn '26</h2>
+                <p class="ed-hero__lead">Drie dagen lang steak op het bord en de halve gemeente aan tafel. Vorig jaar driehonderd reservaties — schrijf je in voor het te laat is.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q2c/1600/900" alt="Steakfestijn '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14–16</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Capaciteit</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+
+            <div class="sessions-body-placeholder">
+              ★ <code>sessions[]</code> niet gerenderd door het strip — editor moet uurschema handmatig in body inschrijven (HTML-tabel of Q&A block).
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>A</strong> keeps everything cohesive (reader doesn't scroll) but the ticket-strip body
+          balloons on 3+ session events — the perforated banner shape works best when it's compact.
+          <strong>B</strong> keeps the strip the same shape regardless of session count + adds a clear
+          "uurschema" moment as its own paper card. <strong>C</strong> wastes the structured
+          <code>sessions[]</code> field — editors re-author the same data manually, which always drifts.
+          B is my pick on schema/UX hygiene. A works if 95%+ of events are 1-day or 3-or-fewer sessions.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Q3 v2 — Agenda link, but embedded in existing chrome (not a new strip)
+           Owner: yes link, no extra strip below.
+           Three sub-options showing where the link can live INSIDE the existing layout.
+           =========================================================== -->
+      <section class="question" id="q3-event-doc">
+        <p class="question__label">★ Q3 · Agenda link — embedded in existing chrome</p>
+        <h2 class="question__title">Waar leeft de <em>agenda-link</em> zonder een extra strip te zijn?</h2>
+        <p class="question__brief">
+          Owner: "I do like a link, but another strip below the eventfact strip is too much." Three
+          sub-options below — each tucks the agenda link into existing chrome (kicker / strip body /
+          date block) instead of adding a new block. Hides entirely when <code>article.relatedContent[]</code>
+          has no event-document reference.
+        </p>
+
+        <div class="options">
+          <!-- B1 · Link in hero kicker -->
+          <div class="option-card">
+            <p class="option-card__label">★ B1 · Extra mono-label in the hero kicker</p>
+            <p class="option-card__hint">An additional <code>OOK IN AGENDA →</code> mono-label appended to the kicker row, keyed off the linked event doc. Reuses MonoLabelRow vocabulary, costs zero new chrome.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__dot"></span>
+                  <a href="#" style="color: var(--color-jersey-deep); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; line-height: 1;"><span>OOK IN AGENDA</span><span style="color: var(--color-jersey-deep);">→</span></a>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q3-b1/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 19:00</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- B2 · Link as last small line inside strip body cell -->
+          <div class="option-card">
+            <p class="option-card__label">★ B2 · Small link line inside the strip body cell</p>
+            <p class="option-card__hint">A small mono-caps link tucked beneath the address line in the strip's body cell. Same surface, one extra row of compressed mono.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q3-b2/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 19:00</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+                <a href="#" style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; line-height: 1;"><span>★</span><span>OOK IN AGENDA</span><span>→</span></a>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- B3 · Date block becomes the link with subtle indicator -->
+          <div class="option-card">
+            <p class="option-card__label">★ B3 · Date block IS the agenda link (subtle hover indicator)</p>
+            <p class="option-card__hint">The whole jersey-deep date block becomes a clickable link to /events/[slug]. No extra text — a small <code>→</code> appears in the corner on hover. Most subtle; relies on hover discovery.</p>
+
+            <div class="ed-hero">
+              <div class="ed-hero__left">
+                <span class="kicker">
+                  <span class="kicker__star">★</span><span>EVENT</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">CLUBFEEST</span>
+                  <span class="kicker__dot"></span><span class="kicker__muted">14 NOV 2026</span>
+                  <span class="kicker__star">★</span>
+                </span>
+                <h2 class="editorial-heading"><em>Mosselsouper</em> '26</h2>
+                <p class="ed-hero__lead">Eén lange tafel, één avond mosselen, en het halve dorp aan dezelfde tap. Vorig jaar uitverkocht in twee dagen.</p>
+                <div class="byline"><span class="byline__star">★</span><span>DOOR REDACTIE</span></div>
+              </div>
+              <div class="ed-hero__right">
+                <div class="taped-card taped-card--rot-a">
+                  <span class="taped-card__tape" aria-hidden="true"></span>
+                  <div class="cover-artefact">
+                    <div class="cover-artefact__frame">
+                      <img src="https://picsum.photos/seed/event-q3-b3/1600/900" alt="Mosselsouper '26" />
+                    </div>
+                    <p class="cover-artefact__caption"><span class="star">★</span><span>FOTO &middot; KCVV CLUBHUIS</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-ticket-banner">
+              <a href="#" class="strip-ticket-banner__day" style="text-decoration: none; position: relative;">
+                <span class="strip-ticket-banner__day-num">14</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+                <span style="display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.14em; opacity: 0.85; margin-top: 6px;">★ AGENDA →</span>
+              </a>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 19:00</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · max 80 plaatsen · € 22 pp</p>
+              </div>
+              <div class="strip-ticket-banner__cta">
+                <a class="strip-tickets__cta" href="#">RESERVEER <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bonus rendering: strip without ticketUrl (CTA hides) — implementation contract -->
+          <div class="option-card">
+            <p class="option-card__label">★ Bonus · Strip without <code>ticketUrl</code> (CTA hides)</p>
+            <p class="option-card__hint">Implementation contract — applies to every event hero. When <code>eventFact.ticketUrl</code> is empty, the right-edge CTA hides; body cell stretches.</p>
+
+            <div class="strip-ticket-banner">
+              <div class="strip-ticket-banner__day">
+                <span class="strip-ticket-banner__day-num">14</span>
+                <span class="strip-ticket-banner__day-month">Nov '26</span>
+              </div>
+              <div class="strip-ticket-banner__seam" aria-hidden="true"></div>
+              <div class="strip-ticket-banner__body" style="flex: 1; padding-right: 28px;">
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin: 0;">Locatie · Aftrap</p>
+                <p style="font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0;">Clubhuis KCVV · 14:00</p>
+                <p style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0;">Driesstraat 14 · vrije toegang · geen reservatie nodig</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tradeoff">
+          <strong>Trade-off:</strong>
+          <strong>B1</strong> (kicker label) is the most discoverable but adds noise to the kicker row.
+          <strong>B2</strong> (small line in strip body) is the cleanest fit — uses existing strip surface,
+          one compressed mono row. <strong>B3</strong> (date block IS the link) is the most editorial and
+          subtle — the whole date block becomes clickable, with a tiny <code>★ AGENDA →</code> beneath the
+          month label as the only on-screen indicator. All three hide entirely when <code>relatedContent[]</code>
+          has no event doc.
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           Summary picker
+           =========================================================== -->
+      <section class="question" id="picker">
+        <p class="question__label">★ Owner picker</p>
+        <h2 class="question__title">Pick één per <em>vraag</em>.</h2>
+        <p class="question__brief">
+          Reply with picks (e.g. "Q1=B, Q2=A, Q3=A, Q4=B") and I'll build the locked event mockup using
+          those choices. Final mockup will pull together hero + strip + sessions + (optional agenda link)
+          into a single composed page rendering at desktop + mobile.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

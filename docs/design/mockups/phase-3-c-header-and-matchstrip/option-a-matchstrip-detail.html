@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · Checkpoint C · MatchStrip — locked composition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1240px; margin: 0 auto; padding: 56px 32px 96px; }
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 5vw, 60px); line-height: 1.05; margin: 16px 0 12px; }
+      h1 em { font-style: italic; color: var(--color-jersey-deep); }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(24px, 2.4vw, 32px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h4 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 18px; margin: 0 0 8px; }
+      .lead { max-width: 800px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 36px 44px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+      .section { margin: 64px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+      .panel { background: var(--color-cream); padding: 28px; border: 1px solid var(--color-paper-edge); margin-top: 20px; }
+      .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: hidden; }
+      .frame__chrome { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; }
+      .frame__viewport--mobile { max-width: 420px; margin: 0 auto; border-left: 1px dashed var(--color-paper-edge); border-right: 1px dashed var(--color-paper-edge); }
+
+      /* Site header (for in-context demo) */
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); }
+      .site-header__inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 16px 24px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 26px; line-height: 1; letter-spacing: -0.01em; color: var(--color-ink); white-space: nowrap; text-decoration: none; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .wordmark__sup { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-left: 8px; vertical-align: super; }
+      .site-nav { display: flex; justify-content: center; gap: 22px; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 6px 2px; }
+      .site-nav__link.is-active { color: var(--color-jersey-deep); border-bottom: 2px solid var(--color-jersey-deep); padding-bottom: 4px; }
+      .site-nav__caret { font-family: var(--font-mono); font-size: 9px; opacity: 0.6; }
+      .site-actions { display: flex; align-items: center; gap: 12px; }
+      .site-search { width: 30px; height: 30px; background: transparent; border: 1.5px solid var(--color-ink); font-family: var(--font-mono); font-size: 15px; color: var(--color-ink); display: inline-flex; align-items: center; justify-content: center; border-radius: 0; }
+      .btn-wordlid { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--color-ink); color: var(--color-cream); border: 2px solid var(--color-ink); padding: 9px 16px; box-shadow: var(--shadow-paper-sm); border-radius: 0; text-decoration: none; }
+
+      /* MatchStrip — locked composition */
+      .match-strip {
+        background: var(--color-cream);
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+        padding: 12px 24px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 24px;
+      }
+      .fixture { display: flex; align-items: center; gap: 14px; }
+      .shield {
+        width: 36px;
+        height: 42px;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: italic;
+        font-size: 12px;
+        color: var(--color-ink);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+      }
+      .shield--kcvv { background: var(--color-jersey-deep); color: var(--color-cream); }
+      .shield--away { background: var(--color-cream-soft); }
+      .vs { font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 16px; color: var(--color-ink-muted); padding: 0 4px; }
+      .fixture__teams { display: flex; align-items: center; gap: 8px; }
+      .fixture__team-name { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 16px; color: var(--color-ink); line-height: 1; }
+      .fixture__team-name--muted { color: var(--color-ink-muted); font-weight: 400; }
+      .strip-meta { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: center; }
+      .strip-meta__item { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; }
+      .strip-meta__label { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); }
+      .strip-meta__value { font-family: var(--font-body); font-size: 13.5px; font-weight: 600; color: var(--color-ink); }
+      .strip-meta__divider { width: 1px; height: 22px; background: var(--color-paper-edge); }
+      .strip-cta {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 7px 12px;
+        box-shadow: var(--shadow-paper-sm);
+        border-radius: 0;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+        white-space: nowrap;
+      }
+      .strip-cta:hover { transform: translate(4px, 4px); box-shadow: none; }
+
+      /* Mobile strip variant */
+      .match-strip--mobile {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 10px 14px;
+      }
+      .match-strip--mobile .fixture { justify-content: center; gap: 8px; }
+      .match-strip--mobile .shield { width: 28px; height: 33px; font-size: 10px; }
+      .match-strip--mobile .fixture__team-name { font-size: 13px; }
+      .match-strip--mobile .vs { font-size: 13px; }
+      .match-strip--mobile .strip-meta { gap: 10px; justify-content: center; }
+      .match-strip--mobile .strip-meta__value { font-size: 11.5px; }
+      .match-strip--mobile .strip-cta { padding: 5px 10px; font-size: 9.5px; }
+
+      /* Annotation pattern */
+      .anno { display: grid; grid-template-columns: 1fr 280px; gap: 20px; margin-top: 12px; }
+      .anno__notes { font-size: 13.5px; color: var(--color-ink-soft); line-height: 1.5; padding: 6px 0 0; }
+      .anno__notes h5 { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 6px; }
+      .anno__notes ul { margin: 0 0 14px; padding-left: 16px; }
+      .anno__notes li { margin-bottom: 4px; }
+      .anno__notes code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      /* Reuse table / matrix */
+      .reuse-table, .matrix-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 12px; }
+      .reuse-table th, .reuse-table td, .matrix-table th, .matrix-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .reuse-table th, .matrix-table th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-muted); background: var(--color-cream-soft); border-bottom: 1.5px solid var(--color-ink); font-weight: 600; }
+      .reuse-table code, .matrix-table code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+      .matrix-table .render-yes { color: var(--color-jersey-deep); font-weight: 700; }
+
+      footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT C · MATCHSTRIP LOCK</span>
+          <span class="mono mono--muted">★ CANONICAL DETAIL</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>De <em>MatchStrip</em>, vergrendeld.</h1>
+        <p class="lead">
+          Single-mockup composition of the locked MatchStrip: 2-state
+          matrix (hidden / upcoming) · landing-only render · cream
+          paper + hairline ink rules · shield-name-vs-name-shield fixture
+          · MonoLabel meta cluster · primary <code>Wedstrijddetails →</code>
+          CTA. <strong>No live state, no concluded state, no ticketing.</strong>
+          Companion: <code>option-a-header-detail.html</code>. Spec:
+          <code>matchstrip-locked.md</code>.
+        </p>
+      </header>
+
+      <!-- DESKTOP -->
+      <section class="section" id="desktop">
+        <div class="section-meta">
+          <span class="mono">★ 01 · DESKTOP — UPCOMING (THE ONLY RENDERED STATE)</span>
+          <span class="mono mono--muted">— ≥ 1024px · in-context below sticky header · landing surface only</span>
+        </div>
+        <h2>De <em>upcoming</em> rij.</h2>
+        <p class="lead">
+          The strip lives in document flow on landing surfaces only —
+          rendered immediately below the sticky <code>SiteHeader</code>.
+          Three-column grid: fixture (shield · KCVV · vs · opponent ·
+          shield) left, MonoLabel meta cluster centre,
+          <code>Wedstrijddetails →</code> CTA right.
+        </p>
+
+        <div class="anno">
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be · landing surface · upcoming</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a href="#" class="wordmark">KCVV <em>Elewijt</em><span class="wordmark__sup">SINDS 1948</span></a>
+                  <nav class="site-nav" aria-label="Hoofdnavigatie">
+                    <a class="site-nav__link is-active" href="#">Home</a>
+                    <a class="site-nav__link" href="#">Nieuws</a>
+                    <a class="site-nav__link" href="#">Evenementen</a>
+                    <a class="site-nav__link" href="#">Teams<span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link" href="#">Jeugd<span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link" href="#">Sponsors</a>
+                    <a class="site-nav__link" href="#">Hulp</a>
+                    <a class="site-nav__link" href="#">De club<span class="site-nav__caret">▾</span></a>
+                  </nav>
+                  <div class="site-actions">
+                    <button class="site-search" type="button" aria-label="Zoeken">⌕</button>
+                    <a href="#" class="btn-wordlid">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="match-strip">
+                <div class="fixture">
+                  <div class="fixture__teams">
+                    <span class="shield shield--kcvv" aria-label="KCVV">K</span>
+                    <span class="fixture__team-name">KCVV</span>
+                    <span class="vs">vs.</span>
+                    <span class="fixture__team-name fixture__team-name--muted">RC Mechelen</span>
+                    <span class="shield shield--away" aria-label="RC Mechelen">M</span>
+                  </div>
+                </div>
+                <div class="strip-meta">
+                  <div class="strip-meta__item">
+                    <span class="strip-meta__label">Competitie</span>
+                    <span class="strip-meta__value">2e Provinciale A</span>
+                  </div>
+                  <span class="strip-meta__divider"></span>
+                  <div class="strip-meta__item">
+                    <span class="strip-meta__label">Aftrap</span>
+                    <span class="strip-meta__value">Zat 10 mei · 19:30</span>
+                  </div>
+                  <span class="strip-meta__divider"></span>
+                  <div class="strip-meta__item">
+                    <span class="strip-meta__label">Terrein</span>
+                    <span class="strip-meta__value">Sportcentrum Elewijt</span>
+                  </div>
+                </div>
+                <a href="#" class="strip-cta">Wedstrijddetails <span aria-hidden="true">→</span></a>
+              </div>
+              <div style="padding: 22px 32px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); text-align: center;">
+                <span class="mono mono--muted">★ HOMEPAGE HERO MODULE — strip sits above this</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="anno__notes">
+            <h5>★ Fixture cluster</h5>
+            <ul>
+              <li>Shield: 36×42px, 1.5px ink border, heraldic clip-path</li>
+              <li>KCVV shield: jersey-deep fill + cream initial</li>
+              <li>Opponent shield: cream-soft fill + ink initial</li>
+              <li>Team names: Playfair italic 700, 16px; opponent muted</li>
+              <li><code>vs.</code> separator: italic display, ink-muted</li>
+            </ul>
+            <h5>★ Meta cluster (3 items)</h5>
+            <ul>
+              <li>MonoLabel caption (9px, ink-muted) above 14/600 body value</li>
+              <li>Items: Competitie · Aftrap · Terrein</li>
+              <li>Vertical 1px paper-edge dividers between</li>
+              <li>Each item maps to BFF Match field</li>
+            </ul>
+            <h5>★ CTA</h5>
+            <ul>
+              <li><code>Wedstrijddetails →</code> primary button (small)</li>
+              <li>Links to <code>/wedstrijden/[id]</code> (real route)</li>
+              <li>No tickets CTA (KCVV doesn't sell tickets)</li>
+            </ul>
+            <h5>★ Container</h5>
+            <ul>
+              <li>Cream paper bg + 1px ink top &amp; bottom rules</li>
+              <li>~40px tall</li>
+              <li>No rotation, no tape, no shadow</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOBILE -->
+      <section class="section" id="mobile">
+        <div class="section-meta">
+          <span class="mono">★ 02 · MOBILE — UPCOMING (compact)</span>
+          <span class="mono mono--muted">— ≤ 768px · single centred row · KCVV vs Opp + Aftrap</span>
+        </div>
+        <h2>Op een <em>telefoon</em>.</h2>
+        <p class="lead">
+          Mobile collapses the 3-column grid into a single centred
+          stack: fixture row above, single-value meta below
+          (<code>Aftrap</code> only — Competitie + Terrein moved into
+          the match-detail page itself). CTA shrinks but keeps its press-down
+          hover idiom.
+        </p>
+
+        <div class="anno">
+          <div class="frame" style="max-width: 420px;">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be · ≤ 420px · landing</span>
+            </div>
+            <div class="frame__viewport frame__viewport--mobile">
+              <header class="site-header" style="grid-template-columns: auto 1fr auto;">
+                <div class="site-header__inner" style="padding: 14px 16px; gap: 10px;">
+                  <button style="width: 32px; height: 32px; background: transparent; border: 1.5px solid var(--color-ink); padding: 8px 6px; display: inline-flex; flex-direction: column; gap: 4px;">
+                    <span style="display: block; height: 2px; background: var(--color-ink);"></span>
+                    <span style="display: block; height: 2px; background: var(--color-ink);"></span>
+                    <span style="display: block; height: 2px; background: var(--color-ink);"></span>
+                  </button>
+                  <a href="#" class="wordmark" style="font-size: 20px;">KCVV <em>Elewijt</em></a>
+                  <button class="site-search" type="button" aria-label="Zoeken">⌕</button>
+                </div>
+              </header>
+              <div class="match-strip match-strip--mobile">
+                <div class="fixture">
+                  <div class="fixture__teams">
+                    <span class="shield shield--kcvv" aria-label="KCVV">K</span>
+                    <span class="fixture__team-name">KCVV</span>
+                    <span class="vs">vs.</span>
+                    <span class="fixture__team-name fixture__team-name--muted">RC Mechelen</span>
+                    <span class="shield shield--away" aria-label="RC Mechelen">M</span>
+                  </div>
+                </div>
+                <div class="strip-meta">
+                  <div class="strip-meta__item" style="align-items: center;">
+                    <span class="strip-meta__value">Zat 10 mei · 19:30</span>
+                  </div>
+                </div>
+                <a href="#" class="strip-cta">Wedstrijddetails →</a>
+              </div>
+              <div style="padding: 18px 16px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); text-align: center;">
+                <span class="mono mono--muted">★ homepage hero mobile</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="anno__notes">
+            <h5>★ Compact stack</h5>
+            <ul>
+              <li>Single column, gap 8px</li>
+              <li>Fixture row centred</li>
+              <li>Meta value only (no MonoLabel caption — saves space)</li>
+              <li>CTA centred below or trailing right</li>
+            </ul>
+            <h5>★ Drop on mobile</h5>
+            <ul>
+              <li>Competitie label (still in match-detail page)</li>
+              <li>Terrein (still in match-detail page)</li>
+              <li>MonoLabel captions in meta (only the value shows)</li>
+            </ul>
+            <h5>★ Total height</h5>
+            <ul>
+              <li>~80–90px (fixture row + meta row + CTA row)</li>
+              <li>Below the ~52px header</li>
+              <li>~140px combined chrome at landing on mobile</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- RENDER MATRIX -->
+      <section class="section" id="render-matrix">
+        <div class="section-meta">
+          <span class="mono">★ 03 · RENDER RULE MATRIX</span>
+          <span class="mono mono--muted">— landing only · 2 states (hidden / upcoming)</span>
+        </div>
+        <h2>Wanneer rendert <em>de strip</em>?</h2>
+        <p class="lead">
+          The strip is rendered by the <em>landing layout slot</em>, not
+          the root layout. Detail-page templates inherit from a layout
+          that omits the slot; the strip is therefore literally absent
+          from those page subtrees in the DOM.
+        </p>
+
+        <div class="panel">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th style="width: 32%;">Page type</th>
+                <th style="width: 22%;">Has upcoming match</th>
+                <th style="width: 18%;">Strip render</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Homepage <code>/</code></td>
+                <td>Yes</td>
+                <td class="render-yes">Render</td>
+                <td>Landing surface — primary front door, next-match is highest-priority info</td>
+              </tr>
+              <tr>
+                <td>Homepage <code>/</code></td>
+                <td>No</td>
+                <td>Hidden (<code>null</code>)</td>
+                <td>Component returns null. No placeholder, no skeleton.</td>
+              </tr>
+              <tr>
+                <td>Section index — <code>/nieuws</code></td>
+                <td>Yes</td>
+                <td class="render-yes">Render</td>
+                <td>Landing layout slot</td>
+              </tr>
+              <tr>
+                <td>Section index — <code>/evenementen</code> · <code>/teams</code> · <code>/jeugd</code> · <code>/sponsors</code></td>
+                <td>Yes</td>
+                <td class="render-yes">Render</td>
+                <td>Same landing layout slot</td>
+              </tr>
+              <tr>
+                <td>Section indexes</td>
+                <td>No</td>
+                <td>Hidden</td>
+                <td><code>null</code> from data layer</td>
+              </tr>
+              <tr>
+                <td>Article detail <code>/nieuws/[slug]</code> (any articleType)</td>
+                <td>Yes / No</td>
+                <td>Hidden</td>
+                <td>Detail-page template uses chrome-free layout</td>
+              </tr>
+              <tr>
+                <td>Single team page <code>/ploegen/[slug]</code></td>
+                <td>Yes / No</td>
+                <td>Hidden</td>
+                <td>Detail-page template</td>
+              </tr>
+              <tr>
+                <td>Single player page</td>
+                <td>Yes / No</td>
+                <td>Hidden</td>
+                <td>Detail-page template</td>
+              </tr>
+              <tr>
+                <td>Match detail <code>/wedstrijden/[id]</code></td>
+                <td>Yes / No</td>
+                <td>Hidden</td>
+                <td>The match itself owns the page; strip would be redundant</td>
+              </tr>
+              <tr>
+                <td>Hero-less utility (<code>/zoeken</code>, <code>/sitemap</code>, errors)</td>
+                <td>Yes / No</td>
+                <td>Hidden</td>
+                <td>Not landing surfaces. Header-only chrome.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FIELD SOURCE MAP -->
+      <section class="section" id="field-map">
+        <div class="section-meta">
+          <span class="mono">★ 04 · FIELD-SOURCE MAP</span>
+          <span class="mono mono--muted">— every rendered element traces to a real source</span>
+        </div>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">UI element</th>
+                <th style="width: 36%;">Source</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>KCVV shield</td>
+                <td>Static SVG asset (KCVV brand)</td>
+                <td>Heraldic clip-path applied; jersey-deep fill</td>
+              </tr>
+              <tr>
+                <td>KCVV team name</td>
+                <td>Static literal <code>"KCVV"</code></td>
+                <td>Always the home identity</td>
+              </tr>
+              <tr>
+                <td>Opponent name</td>
+                <td><code>match.home_team.name</code> or <code>match.away_team.name</code> (whichever is not KCVV)</td>
+                <td>From BFF <code>/matches/next</code> endpoint</td>
+              </tr>
+              <tr>
+                <td>Opponent shield</td>
+                <td><code>match.home_team.logo</code> or <code>match.away_team.logo</code></td>
+                <td>Optional URL from PSD; cream-soft placeholder when absent</td>
+              </tr>
+              <tr>
+                <td><code>vs.</code> / <code>@</code></td>
+                <td>Computed from <code>match.is_home</code></td>
+                <td>"vs." for home matches, "@" or location prefix for away</td>
+              </tr>
+              <tr>
+                <td>Competitie</td>
+                <td><code>match.competition</code></td>
+                <td>Optional field; row hides if undefined</td>
+              </tr>
+              <tr>
+                <td>Aftrap</td>
+                <td><code>formatDate(match.date)</code> + <code>match.time</code></td>
+                <td>Format <code>"Zat 10 mei · 19:30"</code> Dutch locale</td>
+              </tr>
+              <tr>
+                <td>Terrein</td>
+                <td><code>match.venue</code></td>
+                <td>Optional field; row hides if undefined; <strong>desktop only</strong></td>
+              </tr>
+              <tr>
+                <td>CTA destination</td>
+                <td><code>/wedstrijden/{match.id}</code></td>
+                <td>Real route — match-detail page</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- REUSE MAP -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 05 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— composition mapping for sub-issue 3.C.2</span>
+        </div>
+
+        <div class="panel">
+          <table class="reuse-table">
+            <thead>
+              <tr>
+                <th style="width: 32%;">Strip part</th>
+                <th style="width: 30%;">Composed primitive(s)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Strip container</td>
+                <td>New <code>MatchStrip</code> sub-component</td>
+                <td>Cream paper + 1px ink top &amp; bottom rules. CSS grid <code>auto · 1fr · auto</code>.</td>
+              </tr>
+              <tr>
+                <td>Team shield</td>
+                <td>New <code>ShieldFigure</code> primitive (Storybook required)</td>
+                <td>36×42 desktop / 28×33 mobile, 1.5px ink border, heraldic clip-path. Variants: <code>kcvv</code> (jersey-deep fill) · <code>opponent</code> (cream-soft fill).</td>
+              </tr>
+              <tr>
+                <td>Team name</td>
+                <td><code>EditorialHeading</code> at <code>display-italic-700-16</code></td>
+                <td>Same Playfair vocabulary as the wordmark, scaled smaller. KCVV ink-full; opponent ink-muted.</td>
+              </tr>
+              <tr>
+                <td>Meta items (Competitie · Aftrap · Terrein)</td>
+                <td><code>MonoLabel</code> caption + body 14/600 value</td>
+                <td>Same caption-over-value pattern as Phase 2 alert label rows.</td>
+              </tr>
+              <tr>
+                <td>Meta dividers</td>
+                <td>1px paper-edge vertical line</td>
+                <td>Same divider used elsewhere in chrome rows.</td>
+              </tr>
+              <tr>
+                <td>Wedstrijddetails CTA</td>
+                <td><code>Button</code> variant=<code>"primary"</code> size=<code>"sm"</code></td>
+                <td>Same primary button at smaller padding (7px×12px). <code>shadow-paper-sm</code> + canonical press-down hover.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— locked decisions cross-referenced</span>
+        </div>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0 0">
+          <li>Q1 lock — strip in document flow (not sticky); scrolls away on scroll-down with the page</li>
+          <li>Q5 lock — strip rendered on landing surfaces only (homepage + section indexes); detail pages omit the slot</li>
+          <li>Q6 lock — 2-state matrix (hidden / upcoming); component returns <code>null</code> in hidden cases (no placeholder)</li>
+          <li>Owner direction (2026-05-05) — no live data feed, no concluded state, no ticketing CTA; strip is forward-looking only</li>
+          <li>Reuse mandate — <code>ShieldFigure</code> ships with Storybook coverage (<code>UI/ShieldFigure</code>, vr-tagged); <code>MatchStrip</code> ships with one Storybook story per render-state (only "upcoming" renders; "hidden" verified at integration)</li>
+          <li>Field availability — all data fields present on the existing <code>UpcomingMatch</code> shape (BFF <code>/matches/next</code>); no schema migrations needed for Checkpoint C</li>
+        </ul>
+        <p style="margin-top: 32px" class="mono mono--muted">★ END · MATCHSTRIP LOCK · KCVV ELEWIJT · 2026-05-05</p>
+      </footer>
+    </main>
+  </body>
+</html>

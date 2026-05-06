@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Direction B — Ink Band · Phase 3 · Checkpoint C · SiteHeader + MatchStrip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #4acf52;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-alert-soft: #e8d5cf;
+        --color-warning: #c68b2c;
+        --color-warning-soft: #ecddb8;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px),
+          radial-gradient(circle at 45% 90%, rgba(10, 10, 10, 0.02) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px, 320px 320px;
+      }
+      main { max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
+
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 1.05; }
+      .display em { font-style: italic; color: var(--color-jersey-deep); }
+
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(48px, 6vw, 72px); line-height: 1.05; margin: 16px 0 12px; }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h3 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 22px; margin: 0 0 4px; }
+      .lead { max-width: 720px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+
+      .hero {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 40px 48px;
+      }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+
+      .section { margin: 80px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+
+      .panel { background: var(--color-cream); padding: 32px; border: 1px solid var(--color-paper-edge); margin-top: 24px; }
+      .panel--soft { background: var(--color-cream-soft); }
+      .panel--frame {
+        padding: 0;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        background: var(--color-cream);
+        overflow: hidden;
+      }
+
+      .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .stack { display: flex; flex-direction: column; gap: 16px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; min-height: 28px; padding: 16px 24px 0; }
+      .label-row--bare { padding: 0; margin-bottom: 12px; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      /* ============================================================
+         SITE HEADER — Direction B "Ink Band"
+         Solid ink top band, cream wordmark + cream mono caps nav,
+         jersey-green primary CTA. No tape, no rotation, sharp corners.
+         ============================================================ */
+
+      .stage {
+        /* Frames a header preview against the cream paper foundation */
+        background: var(--color-cream);
+        padding: 0;
+      }
+
+      .site-header {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border-bottom: 2px solid var(--color-ink);
+        font-family: var(--font-body);
+      }
+
+      .site-header__inner {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        padding: 18px 28px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* Wordmark — Playfair italic 900, cream-on-ink */
+      .wordmark {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        color: var(--color-cream);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+      .wordmark .dot { color: var(--color-jersey); }
+      .wordmark__sub {
+        display: block;
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-weight: 500;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        opacity: 0.7;
+        margin-top: 2px;
+      }
+
+      /* Nav — mono caps, cream, hover swaps to jersey */
+      .site-nav {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        margin-left: auto;
+      }
+      .site-nav a {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        text-decoration: none;
+        position: relative;
+        padding: 4px 0;
+      }
+      .site-nav a:hover {
+        color: var(--color-jersey);
+      }
+      .site-nav a.is-active::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -2px;
+        height: 2px;
+        background: var(--color-jersey);
+      }
+
+      /* Search glyph — cream typographic glyph in a hairline cream box */
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .icon-button {
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: 1.5px solid var(--color-cream);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 16px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        border-radius: 0;
+        transition: all 200ms ease;
+      }
+      .icon-button:hover {
+        background: var(--color-cream);
+        color: var(--color-ink);
+      }
+
+      /* WORD LID — jersey-green button on the ink band, sharp corners,
+         press-down hover canon: shadow-none + translate(1px,1px) */
+      .btn-primary {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--color-jersey);
+        color: var(--color-ink);
+        border: 2px solid var(--color-cream);
+        padding: 10px 18px;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 0 var(--color-cream);
+        border-radius: 0;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 300ms ease;
+      }
+      .btn-primary:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+
+      /* Mobile header — collapses nav, exposes hamburger */
+      .site-header--mobile .site-header__inner {
+        padding: 14px 18px;
+        gap: 16px;
+      }
+      .site-header--mobile .wordmark { font-size: 22px; }
+      .site-header--mobile .site-nav,
+      .site-header--mobile .header-actions .header-search-label,
+      .site-header--mobile .btn-primary {
+        display: none;
+      }
+      .hamburger {
+        margin-left: auto;
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: 1.5px solid var(--color-cream);
+        color: var(--color-cream);
+        cursor: pointer;
+        padding: 0;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        border-radius: 0;
+      }
+      .hamburger span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: var(--color-cream);
+      }
+
+      /* Phone frame — gives mobile preview a context */
+      .phone-frame {
+        max-width: 380px;
+        margin: 0 auto;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        overflow: hidden;
+      }
+      .phone-frame .site-header {
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .phone-frame__body {
+        padding: 24px 18px 32px;
+        background: var(--color-cream);
+        font-size: 13px;
+        color: var(--color-ink-muted);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-align: center;
+      }
+
+      /* ============================================================
+         MATCH STRIP — cream sub-header band beneath the ink header
+         2px jersey-green left rail + cream bg + ink type
+         Lives directly under .site-header
+         ============================================================ */
+
+      .match-strip {
+        background: var(--color-cream);
+        border-bottom: 2px solid var(--color-ink);
+        border-left: none;
+        position: relative;
+        font-family: var(--font-body);
+      }
+      .match-strip::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 6px;
+        background: var(--color-jersey);
+      }
+      .match-strip__inner {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 12px 28px 12px 36px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .match-strip__kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        white-space: nowrap;
+      }
+      .match-strip__sep {
+        width: 1px;
+        height: 22px;
+        background: var(--color-paper-edge);
+      }
+
+      /* Shield — cream square with ink border, 2-letter code, no logo asset */
+      .shield {
+        width: 32px;
+        height: 32px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .shield--home { background: var(--color-jersey); }
+
+      .match-strip__teams {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--color-ink);
+      }
+      .match-strip__teams .vs {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        color: var(--color-ink-muted);
+        text-transform: uppercase;
+      }
+
+      .match-strip__meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-ink-soft);
+        white-space: nowrap;
+      }
+      .match-strip__meta strong { color: var(--color-ink); font-weight: 700; }
+
+      .match-strip__cta {
+        margin-left: auto;
+      }
+
+      /* secondary mini button — ink outline, sharp corners, press-down */
+      .btn-mini {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        border: 2px solid var(--color-ink);
+        padding: 7px 14px;
+        cursor: pointer;
+        box-shadow: var(--shadow-paper-sm);
+        border-radius: 0;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 300ms ease;
+      }
+      .btn-mini:hover {
+        box-shadow: none;
+        transform: translate(1px, 1px);
+      }
+      .btn-mini--ink {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        border-color: var(--color-ink);
+      }
+      .btn-mini--jersey {
+        background: var(--color-jersey);
+        color: var(--color-ink);
+        border-color: var(--color-ink);
+      }
+
+      /* LIVE state — pulsing pill, jersey-bright */
+      .live-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--color-alert);
+        color: var(--color-cream);
+        padding: 4px 10px;
+        border: 2px solid var(--color-ink);
+      }
+      .live-pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        background: var(--color-cream);
+        border-radius: 50%;
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+      }
+
+      .score {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 22px;
+        color: var(--color-ink);
+        letter-spacing: 0.02em;
+      }
+      .score .sep { color: var(--color-ink-muted); margin: 0 6px; font-style: italic; }
+
+      .minute {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-ink);
+        letter-spacing: 0.06em;
+      }
+      .minute strong { color: var(--color-jersey-deep); }
+
+      /* No-upcoming placeholder — kept hidden in real prod, shown here
+         as a "what does empty look like" reference */
+      .match-strip--placeholder {
+        opacity: 0.55;
+      }
+      .match-strip--placeholder .match-strip__teams,
+      .match-strip--placeholder .match-strip__meta {
+        font-style: italic;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         COMBINED PREVIEW — sticky illustrated
+         ============================================================ */
+      .sticky-preview {
+        background: var(--color-cream-soft);
+        padding: 24px;
+        border: 1px solid var(--color-paper-edge);
+        margin-top: 24px;
+      }
+      .sticky-preview__viewport {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        max-height: 460px;
+        overflow: hidden;
+        position: relative;
+      }
+      .sticky-preview__page-content {
+        padding: 32px 28px 64px;
+        font-family: var(--font-display);
+      }
+      .sticky-preview__page-content .placeholder-line {
+        height: 14px;
+        background: var(--color-paper-edge);
+        margin: 0 0 14px;
+        border-radius: 0;
+        opacity: 0.6;
+      }
+      .sticky-preview__page-content .placeholder-line.short { width: 40%; }
+      .sticky-preview__page-content .placeholder-line.med { width: 70%; }
+      .sticky-preview__page-content .placeholder-line.long { width: 92%; }
+      .sticky-preview__page-content h2 {
+        margin-top: 0;
+        margin-bottom: 16px;
+      }
+      .sticky-overlay-note {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border: 2px solid var(--color-ink);
+      }
+
+      /* ============================================================
+         REUSE TABLE
+         ============================================================ */
+      .reuse-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      .reuse-table th,
+      .reuse-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-paper-edge);
+        vertical-align: top;
+      }
+      .reuse-table th {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+      }
+      .reuse-table code {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        background: var(--color-cream-soft);
+        padding: 1px 5px;
+        border: 1px solid var(--color-paper-edge);
+      }
+
+      footer { margin-top: 80px; padding-top: 32px; border-top: 2px solid var(--color-ink); }
+      .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+      .map-grid h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .map-grid ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-soft); }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      @media (max-width: 720px) {
+        .site-nav { display: none; }
+        .header-actions .btn-primary,
+        .header-actions .icon-button.search-button { display: none; }
+        .map-grid { grid-template-columns: 1fr; }
+        .tradeoffs { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ===========================================================
+           HERO
+           =========================================================== -->
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · CHECKPOINT C · DIRECTION B</span>
+          <span class="mono mono--muted">★ INK BAND</span>
+          <span class="mono mono--muted">2026-05-03</span>
+        </div>
+        <h1>Een <span class="display"><em>concourse</em></span> in ink.</h1>
+        <p class="lead">
+          The site header is a single solid ink band — cream wordmark, cream mono caps nav,
+          jersey-green WORD LID that pops off the dark like an LED. Underneath it sits a
+          quieter cream <code>MatchStrip</code> with a 6px jersey-green rail down its left
+          edge. Two bands, hard contrast, club-shop signage feel — reads like a stadium
+          concourse sign welcoming you into the page.
+        </p>
+      </header>
+
+      <!-- ===========================================================
+           01 · SITE HEADER — DESKTOP DEFAULT
+           =========================================================== -->
+      <section class="section" id="header-desktop">
+        <div class="section-meta">
+          <span class="mono">★ 01 · SITEHEADER · DESKTOP DEFAULT</span>
+          <span class="mono mono--muted">— ink band, cream wordmark, cream mono caps nav, jersey-green CTA</span>
+        </div>
+        <h2>Het <em>signage</em>-band.</h2>
+        <p class="lead">
+          Wordmark sits hard left in Playfair italic 900, cream on ink. Nav links push to
+          the right margin in IBM Plex Mono caps with 0.12em tracking — every label reads
+          as a stamped sign, not a soft web link. Active state underlines in jersey green.
+          The search affordance is a hairline cream square with a typographic magnifier
+          glyph; <code>WORD LID</code> sits on the far right as the only saturated colour
+          on the band.
+        </p>
+
+        <div class="panel--frame">
+          <div class="label-row">
+            <span class="row-label">DESKTOP</span>
+            <span class="mono">≥ 1024px · full nav visible · primary CTA always pinned right</span>
+          </div>
+
+          <div class="stage">
+            <header class="site-header" role="banner">
+              <div class="site-header__inner">
+                <a class="wordmark" href="#" aria-label="KCVV Elewijt — home">
+                  KCVV Elewijt<span class="dot">.</span>
+                  <span class="wordmark__sub">SINDS 1942 · ER IS MAAR ÉÉN PLEZANTE</span>
+                </a>
+                <nav class="site-nav" aria-label="Hoofdnavigatie">
+                  <a href="#" class="is-active">Nieuws</a>
+                  <a href="#">Kalender</a>
+                  <a href="#">Teams</a>
+                  <a href="#">Jeugd</a>
+                  <a href="#">Club</a>
+                  <a href="#">Webshop</a>
+                </nav>
+                <div class="header-actions">
+                  <button class="icon-button search-button" type="button" aria-label="Zoeken">⌕</button>
+                  <a class="btn-primary" href="#">Word lid</a>
+                </div>
+              </div>
+            </header>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              Maximum contrast against the cream paper foundation — the header
+              acts as a literal frame for the page, the way a kiosk fascia frames
+              a concourse. Cream-on-ink mono caps nav reads as inarguably "club
+              sign", not as a generic SaaS top bar. The jersey-green CTA is the
+              only colour on the band, so it cannot fail to draw the eye. Search
+              and nav remain quiet so they don't compete with content below.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              A solid ink band is heavy — it visually weighs more than the
+              cream-on-cream alternative and crops the page from above. Light-mode
+              reading is unaffected, but pages with an ink hero just below
+              (e.g. <code>EditorialHero</code> on dark ground) will need a clear
+              seam treatment so the header doesn't merge with the hero. Mitigation:
+              MatchStrip in cream provides natural breath between the two ink
+              surfaces.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           02 · SITE HEADER — MOBILE
+           =========================================================== -->
+      <section class="section" id="header-mobile">
+        <div class="section-meta">
+          <span class="mono">★ 02 · SITEHEADER · MOBILE</span>
+          <span class="mono mono--muted">— hamburger + collapsed nav, wordmark scales, CTA hides</span>
+        </div>
+        <h2>Het <em>compacte</em> band.</h2>
+        <p class="lead">
+          On narrow viewports the nav, search, and primary CTA all collapse behind
+          a single hamburger affordance — a hairline cream square mirroring the
+          search button on desktop. Wordmark drops to 22px so it doesn't crowd the
+          chrome; the secondary "SINDS 1942" caption remains because it carries
+          visual identity at a glance, and at this scale it costs almost nothing.
+        </p>
+
+        <div class="panel">
+          <div class="label-row label-row--bare">
+            <span class="row-label">MOBILE</span>
+            <span class="mono">≤ 720px · single-row band · all interactions behind hamburger</span>
+          </div>
+
+          <div class="phone-frame">
+            <header class="site-header site-header--mobile" role="banner">
+              <div class="site-header__inner">
+                <a class="wordmark" href="#" aria-label="KCVV Elewijt — home">
+                  KCVV Elewijt<span class="dot">.</span>
+                </a>
+                <button class="hamburger" type="button" aria-label="Menu openen" aria-expanded="false">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+              </div>
+            </header>
+            <div class="phone-frame__body">— PAGE CONTENT —</div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              One row, one affordance — the entire nav surface is one tap away.
+              Wordmark stays unmissable at 22px italic 900; the band carries the
+              same ink/cream contrast as desktop so the brand reads identically
+              across breakpoints. Hamburger inherits the same hairline-cream
+              border as the desktop search button, so the chrome vocabulary is
+              consistent.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              <code>WORD LID</code> hides behind the menu — the conversion CTA
+              loses its always-visible slot. Mitigation: the open menu sheet
+              (out of scope here, drawn at Phase 3 Checkpoint D) leads with the
+              same jersey-green button at the top of the list. Search also
+              hides; users who want to search must open the menu, then tap
+              search — two taps instead of one.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03 · MATCHSTRIP — 4-STATE MATRIX
+           =========================================================== -->
+      <section class="section" id="matchstrip">
+        <div class="section-meta">
+          <span class="mono">★ 03 · MATCHSTRIP · 4-STATE MATRIX</span>
+          <span class="mono mono--muted">— no-upcoming · upcoming · live · concluded</span>
+        </div>
+        <h2>Vier <em>toestanden.</em></h2>
+        <p class="lead">
+          MatchStrip is the persistent sub-header band that renders directly beneath
+          SiteHeader when a relevant match exists. Cream background, 2px ink bottom
+          border, and a 6px jersey-green vertical rail down the leftmost edge — the
+          rail is the only constant; everything else (kicker, teams, meta, CTA)
+          reflows per state.
+        </p>
+
+        <!-- State 01 — UPCOMING -->
+        <div class="panel--frame" style="margin-top: 24px">
+          <div class="label-row">
+            <span class="row-label">UPCOMING</span>
+            <span class="mono">— next match, opponent shield, tickets CTA</span>
+          </div>
+          <div class="match-strip" role="region" aria-label="Volgende wedstrijd">
+            <div class="match-strip__inner">
+              <span class="match-strip__kicker">Volgende wedstrijd</span>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <div class="match-strip__teams">
+                <span class="shield shield--home" aria-hidden="true">EW</span>
+                <span>Elewijt</span>
+                <span class="vs">vs</span>
+                <span>Tisselt</span>
+                <span class="shield" aria-hidden="true">TS</span>
+              </div>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <span class="match-strip__meta"><strong>Zat 17 mei</strong> · 19:30 · 1e Provinciale</span>
+              <span class="match-strip__cta">
+                <a class="btn-mini btn-mini--jersey" href="#">Tickets →</a>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- State 02 — LIVE -->
+        <div class="panel--frame" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">LIVE</span>
+            <span class="mono">— pulsing red pill + score + minute, follow-live CTA</span>
+          </div>
+          <div class="match-strip" role="region" aria-label="Live wedstrijd">
+            <div class="match-strip__inner">
+              <span class="live-pill">Live</span>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <div class="match-strip__teams">
+                <span class="shield shield--home" aria-hidden="true">EW</span>
+                <span>Elewijt</span>
+                <span class="score">2<span class="sep">–</span>1</span>
+                <span>Tisselt</span>
+                <span class="shield" aria-hidden="true">TS</span>
+              </div>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <span class="minute"><strong>67'</strong> · 2e helft</span>
+              <span class="match-strip__cta">
+                <a class="btn-mini btn-mini--ink" href="#">Volg live →</a>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- State 03 — CONCLUDED -->
+        <div class="panel--frame" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">CONCLUDED</span>
+            <span class="mono">— final score, win/draw/loss colouring, match-report CTA</span>
+          </div>
+          <div class="match-strip" role="region" aria-label="Beëindigde wedstrijd">
+            <div class="match-strip__inner">
+              <span class="match-strip__kicker">Eindstand · zaterdag</span>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <div class="match-strip__teams">
+                <span class="shield shield--home" aria-hidden="true">EW</span>
+                <span>Elewijt</span>
+                <span class="score">3<span class="sep">–</span>0</span>
+                <span>Tisselt</span>
+                <span class="shield" aria-hidden="true">TS</span>
+              </div>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <span class="match-strip__meta"><strong>Winst</strong> · 1e Provinciale · speeldag 28</span>
+              <span class="match-strip__cta">
+                <a class="btn-mini" href="#">Wedstrijdverslag →</a>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- State 04 — NO-UPCOMING (placeholder reference; in prod the
+             whole strip is unmounted) -->
+        <div class="panel--frame" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">NO-UPCOMING</span>
+            <span class="mono">— reference only; strip unmounts in production when no match exists</span>
+          </div>
+          <div class="match-strip match-strip--placeholder" role="region" aria-label="Geen aankomende wedstrijd">
+            <div class="match-strip__inner">
+              <span class="match-strip__kicker">Geen wedstrijd gepland</span>
+              <span class="match-strip__sep" aria-hidden="true"></span>
+              <span class="match-strip__meta">Het seizoen pauzeert · check de kalender voor het zomerprogramma</span>
+              <span class="match-strip__cta">
+                <a class="btn-mini" href="#">Kalender →</a>
+              </span>
+            </div>
+          </div>
+          <p class="mono mono--muted" style="margin: 12px 24px 20px">
+            ★ NOTE — in production, MatchStrip <em>does not render at all</em> when
+            no upcoming/live/recent match is in window. This placeholder is a
+            reference for editorial/Storybook only, so designers know what
+            "empty" looks like before deciding to suppress the band.
+          </p>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              One band, four payloads, identical chrome. Cream bg + jersey rail
+              gives MatchStrip a distinct identity from the ink SiteHeader without
+              introducing a third surface colour. Ink-bordered shields scale to
+              both PSD club codes (no logo asset required) and full club logos
+              once available. The 6px jersey rail is the connective tissue — same
+              colour as the WORD LID button above, so the eye reads "this band
+              belongs to KCVV's chrome system, not to a third-party widget".
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              The band crowds quickly — kicker + teams + meta + CTA + sep rules
+              is a lot to fit in 56px of vertical real estate, and at narrower
+              viewports something must drop. Likely casualty in tablet view: the
+              kicker label collapses; in mobile view: the meta date string
+              collapses to a tap-through. Live-state's red pill against the
+              cream + jersey rail also flirts with three saturated colours in a
+              very small band — must be tested for accessibility contrast at
+              the rail/pill boundary.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           03b · MATCHSTRIP — MOBILE COLLAPSE
+           =========================================================== -->
+      <section class="section" id="matchstrip-mobile">
+        <div class="section-meta">
+          <span class="mono">★ 03b · MATCHSTRIP · MOBILE COLLAPSE</span>
+          <span class="mono mono--muted">— kicker drops, meta truncates, CTA condenses to glyph + label</span>
+        </div>
+        <h2>Op een <em>klein scherm.</em></h2>
+        <p class="lead">
+          Below 540px the strip can no longer afford every payload at once.
+          The kicker label drops first (the band's purpose is implied by
+          context — this is not a generic widget). Meta text truncates to a
+          single token (date <em>or</em> competition, never both). CTA becomes
+          a tighter button that still carries its label so screen readers
+          remain happy. The 6px jersey rail stays — it is the band's identity.
+        </p>
+
+        <div class="panel">
+          <div class="label-row label-row--bare">
+            <span class="row-label">UPCOMING · MOBILE</span>
+            <span class="mono">— phone-frame, sticky beneath collapsed SiteHeader</span>
+          </div>
+          <div class="phone-frame">
+            <header class="site-header site-header--mobile" role="banner">
+              <div class="site-header__inner">
+                <a class="wordmark" href="#" aria-label="KCVV Elewijt — home">
+                  KCVV Elewijt<span class="dot">.</span>
+                </a>
+                <button class="hamburger" type="button" aria-label="Menu openen" aria-expanded="false">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+              </div>
+            </header>
+            <div class="match-strip" role="region" aria-label="Volgende wedstrijd">
+              <div class="match-strip__inner" style="padding: 10px 14px 10px 22px; gap: 10px">
+                <div class="match-strip__teams" style="font-size: 14px">
+                  <span class="shield shield--home" aria-hidden="true" style="width: 26px; height: 26px; font-size: 10px">EW</span>
+                  <span>Elewijt</span>
+                  <span class="vs">vs</span>
+                  <span>Tisselt</span>
+                </div>
+                <span class="match-strip__cta" style="margin-left: auto">
+                  <a class="btn-mini btn-mini--jersey" href="#" style="padding: 6px 10px; font-size: 10px">Tickets →</a>
+                </span>
+              </div>
+            </div>
+            <div class="phone-frame__body">— PAGE CONTENT —</div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px">
+          <div class="label-row label-row--bare">
+            <span class="row-label">LIVE · MOBILE</span>
+            <span class="mono">— pill stays, score stays, minute condenses, CTA condenses</span>
+          </div>
+          <div class="phone-frame">
+            <header class="site-header site-header--mobile" role="banner">
+              <div class="site-header__inner">
+                <a class="wordmark" href="#" aria-label="KCVV Elewijt — home">
+                  KCVV Elewijt<span class="dot">.</span>
+                </a>
+                <button class="hamburger" type="button" aria-label="Menu openen" aria-expanded="false">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+              </div>
+            </header>
+            <div class="match-strip" role="region" aria-label="Live wedstrijd">
+              <div class="match-strip__inner" style="padding: 10px 14px 10px 22px; gap: 10px">
+                <span class="live-pill" style="font-size: 9px; padding: 3px 8px">Live</span>
+                <span class="score" style="font-size: 18px">2<span class="sep">–</span>1</span>
+                <span class="minute" style="font-size: 10px"><strong>67'</strong></span>
+                <span class="match-strip__cta" style="margin-left: auto">
+                  <a class="btn-mini btn-mini--ink" href="#" style="padding: 6px 10px; font-size: 10px">Live →</a>
+                </span>
+              </div>
+            </div>
+            <div class="phone-frame__body">— PAGE CONTENT —</div>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              The jersey rail + ink-bordered shield + score type carry the
+              identity at any width. Even at 360px the strip never crosses
+              two lines — a hard visual rule that keeps the chrome from
+              eating the viewport. Live state condenses to its essentials
+              (status pill + score + minute + CTA) which is exactly what a
+              scrolling fan glances down at during a match.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Information loss is real — the kicker, the kickoff time, the
+              competition name, the speeldag — all of these disappear on
+              mobile. The band relies on the user tapping through to the
+              tickets / live / report page to recover full context.
+              Acceptable tradeoff for the strip's role (orientation, not
+              destination), but worth flagging at editorial review.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           04 · COMBINED PREVIEW — STICKY ILLUSTRATED
+           =========================================================== -->
+      <section class="section" id="combined">
+        <div class="section-meta">
+          <span class="mono">★ 04 · COMBINED PREVIEW</span>
+          <span class="mono mono--muted">— SiteHeader + MatchStrip stacked, sticky illustrated</span>
+        </div>
+        <h2>Stacked &amp; <em>sticky.</em></h2>
+        <p class="lead">
+          In production both bands are <code>position: sticky; top: 0</code> as a
+          single chrome assembly. Below is a constrained viewport that shows the
+          stack against scrolled page content — the combined chrome is 110–120px
+          tall on desktop, ink-band-on-cream-band, and reads as one signage
+          assembly even though it composes two layout primitives.
+        </p>
+
+        <div class="sticky-preview">
+          <div class="sticky-preview__viewport">
+            <header class="site-header" role="banner" style="position: sticky; top: 0; z-index: 2">
+              <div class="site-header__inner">
+                <a class="wordmark" href="#" aria-label="KCVV Elewijt — home">
+                  KCVV Elewijt<span class="dot">.</span>
+                  <span class="wordmark__sub">SINDS 1942 · ER IS MAAR ÉÉN PLEZANTE</span>
+                </a>
+                <nav class="site-nav" aria-label="Hoofdnavigatie">
+                  <a href="#" class="is-active">Nieuws</a>
+                  <a href="#">Kalender</a>
+                  <a href="#">Teams</a>
+                  <a href="#">Jeugd</a>
+                  <a href="#">Club</a>
+                  <a href="#">Webshop</a>
+                </nav>
+                <div class="header-actions">
+                  <button class="icon-button search-button" type="button" aria-label="Zoeken">⌕</button>
+                  <a class="btn-primary" href="#">Word lid</a>
+                </div>
+              </div>
+            </header>
+            <div class="match-strip" role="region" aria-label="Volgende wedstrijd" style="position: sticky; top: 76px; z-index: 1">
+              <div class="match-strip__inner">
+                <span class="match-strip__kicker">Volgende wedstrijd</span>
+                <span class="match-strip__sep" aria-hidden="true"></span>
+                <div class="match-strip__teams">
+                  <span class="shield shield--home" aria-hidden="true">EW</span>
+                  <span>Elewijt</span>
+                  <span class="vs">vs</span>
+                  <span>Tisselt</span>
+                  <span class="shield" aria-hidden="true">TS</span>
+                </div>
+                <span class="match-strip__sep" aria-hidden="true"></span>
+                <span class="match-strip__meta"><strong>Zat 17 mei</strong> · 19:30 · 1e Provinciale</span>
+                <span class="match-strip__cta">
+                  <a class="btn-mini btn-mini--jersey" href="#">Tickets →</a>
+                </span>
+              </div>
+            </div>
+            <div class="sticky-preview__page-content">
+              <h2>Laatste <em>nieuws.</em></h2>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line med"></div>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line short"></div>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line med"></div>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line short"></div>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line long"></div>
+              <div class="placeholder-line med"></div>
+              <div class="placeholder-line short"></div>
+            </div>
+            <span class="sticky-overlay-note">↑ STICKY · TOP: 0</span>
+          </div>
+        </div>
+
+        <div class="tradeoffs">
+          <div>
+            <h4 class="for">↑ FOR</h4>
+            <p>
+              The combined assembly reads as a single piece of chrome despite
+              being two separate layout primitives — the ink band frames KCVV
+              identity, the cream band frames "what's happening this weekend".
+              Vertical hierarchy is unambiguous: brand first, action second,
+              content third. The 6px jersey rail aligns with the
+              <code>WORD LID</code> button above, so colour repetition stitches
+              the two bands together.
+            </p>
+          </div>
+          <div>
+            <h4 class="against">↓ AGAINST</h4>
+            <p>
+              Combined sticky chrome is 110–120px tall on desktop — that is a
+              lot of permanent vertical real estate, especially on shorter
+              viewports (laptops at 768px tall lose 15% to chrome). Mitigation
+              option (out of scope, would be Phase 3 Checkpoint D): collapse
+              the secondary <code>SINDS 1942</code> caption when scrolled past
+              a threshold, dropping the band to ~64px.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           05 · PRIMITIVE REUSE MAP
+           =========================================================== -->
+      <section class="section" id="reuse">
+        <div class="section-meta">
+          <span class="mono">★ 05 · PRIMITIVE REUSE MAP</span>
+          <span class="mono mono--muted">— every visual choice traced to an approved primitive</span>
+        </div>
+        <h2>Hergebruik <em>in tabel.</em></h2>
+        <p class="lead">
+          Every atom in this direction maps back to a primitive already approved
+          in Phase 1 / Phase 2. No net-new chrome shapes, no new font weights, no
+          new colours outside the locked token set.
+        </p>
+
+        <table class="reuse-table" aria-label="Primitive reuse map">
+          <thead>
+            <tr>
+              <th>Surface / atom</th>
+              <th>Source primitive</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SiteHeader ink band</td>
+              <td><code>--color-ink</code> surface + cream foreground</td>
+              <td>Same ink/cream pairing used by <code>PosterWordmark</code> and ink-bg <code>NewsCard</code> variants.</td>
+            </tr>
+            <tr>
+              <td>Wordmark</td>
+              <td><code>EditorialHeading</code> typography (Playfair italic 900)</td>
+              <td>Drops to 22px on mobile; secondary mono caption mirrors <code>MonoLabel</code> tracking.</td>
+            </tr>
+            <tr>
+              <td>Nav links</td>
+              <td><code>MonoLabel</code> (IBM Plex Mono caps, 0.12em tracking)</td>
+              <td>Active state underline = <code>--color-jersey</code>; matches the <code>BrandedTabs</code> active rule.</td>
+            </tr>
+            <tr>
+              <td>Search button</td>
+              <td>Hairline icon-button shell (Phase 2 chrome)</td>
+              <td>Typographic glyph (<code>⌕</code>); never Lucide. Inverts on hover (cream fill, ink glyph).</td>
+            </tr>
+            <tr>
+              <td>WORD LID button</td>
+              <td><code>Button variant="primary"</code> + press-down hover canon</td>
+              <td>Jersey-green fill, cream border, 4×4 cream shadow → <code>shadow-none</code> + <code>translate(1px, 1px)</code> on hover.</td>
+            </tr>
+            <tr>
+              <td>Hamburger</td>
+              <td>Hairline icon-button shell (mobile reskin)</td>
+              <td>Same border-weight + size as desktop search button — chrome continuity across breakpoints.</td>
+            </tr>
+            <tr>
+              <td>MatchStrip surface</td>
+              <td><code>--color-cream</code> + 2px ink bottom border</td>
+              <td>Identical surface vocabulary to <code>TapedCard bg="cream"</code>; no new bg token introduced.</td>
+            </tr>
+            <tr>
+              <td>MatchStrip left rail</td>
+              <td>6px <code>--color-jersey</code> bar</td>
+              <td>Repeats the WORD LID jersey colour; ties the two bands into one assembly.</td>
+            </tr>
+            <tr>
+              <td>Opponent shield</td>
+              <td><code>StampBadge</code> chrome (2px ink border, sharp corners)</td>
+              <td>Cream square with 2-letter PSD code; jersey-filled variant for Elewijt's home shield.</td>
+            </tr>
+            <tr>
+              <td>Score type</td>
+              <td><code>EditorialHeading display</code> (Playfair 900)</td>
+              <td>22px on the strip; italic separator dash echoes <code>EditorialHeading em</code> styling.</td>
+            </tr>
+            <tr>
+              <td>LIVE pill</td>
+              <td><code>StampBadge</code> with <code>--color-alert</code> fill</td>
+              <td>Pulsing dot is the only motion permitted — explicit deviation, scoped to live-only.</td>
+            </tr>
+            <tr>
+              <td>Tickets / Volg live / Verslag CTAs</td>
+              <td><code>Button variant="mini"</code> + press-down hover canon</td>
+              <td>Three colour scales (jersey / ink / cream) reuse existing button tokens; sharp corners; same press idiom.</td>
+            </tr>
+            <tr>
+              <td>Vertical separators</td>
+              <td>1px <code>--color-paper-edge</code> hair</td>
+              <td>Same hairline used inside <code>MatchScheduleTable</code> column dividers.</td>
+            </tr>
+            <tr>
+              <td>Kicker / meta strings</td>
+              <td><code>MonoLabel</code> + <code>MonoLabelRow</code></td>
+              <td>10–11px caps, 0.06–0.14em tracking — direct reuse of the Phase 1 type ramp.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===========================================================
+           FOOTER NOTES
+           =========================================================== -->
+      <footer>
+        <div class="section-meta">
+          <span class="mono">★ NOTES</span>
+          <span class="mono mono--muted">— resolved decisions, open questions, token map</span>
+        </div>
+
+        <h3>Resolved</h3>
+        <ul style="font-size: 14px; color: var(--color-ink-soft); padding-left: 18px; margin: 12px 0">
+          <li>SiteHeader is a solid <code>--color-ink</code> band — cream wordmark + cream mono caps nav + jersey-green CTA</li>
+          <li>Wordmark uses <code>var(--font-display)</code> italic 900 with a small mono caption beneath; caption hides under 560px width</li>
+          <li>Nav links are mono caps (IBM Plex Mono, 12px, 600, 0.12em tracking); active state underlined in jersey-green 2px</li>
+          <li>Search affordance is a typographic glyph (<code>⌕</code>) inside a hairline cream-bordered square — never Lucide</li>
+          <li>WORD LID button uses the press-down hover canon: <code>box-shadow → none</code> + <code>translate(1px, 1px)</code></li>
+          <li>MatchStrip sits directly under SiteHeader with no margin gap; it has 2px ink bottom border + 6px jersey-green left rail</li>
+          <li>MatchStrip renders four states — upcoming, live, concluded, no-upcoming (the last is a Storybook reference; in production the band is unmounted entirely)</li>
+          <li>Opponent shields are <code>StampBadge</code> instances: 32×32, 2px ink border, 2-letter code in mono caps; KCVV home shield gets jersey fill</li>
+          <li>LIVE pill is the only saturated red on the page — pulsing dot is the only permitted motion in this chrome assembly</li>
+          <li>Combined sticky chrome is 110–120px on desktop, 96–104px on mobile (single-row header + slimmed strip)</li>
+          <li>No glows, no rotations, no border-radius, no Stenciletta — every choice maps back to an existing primitive (see reuse table above)</li>
+        </ul>
+
+        <h3>Open</h3>
+        <p style="font-size: 14px; color: var(--color-ink-soft); margin: 8px 0">
+          Owner pick between Direction A (out of scope here) and Direction B (this).
+          Once locked, ship <code>SiteHeader</code> + <code>MatchStrip</code> as Phase 3
+          components in <code>apps/web/src/components/layout/</code>, retire the existing
+          <code>PageHeader</code>, and add Storybook stories per state. MatchStrip data
+          source is the existing <code>useMatchStripData</code> hook (reads next/live/recent
+          window from the BFF endpoint).
+        </p>
+
+        <h3 style="margin-top: 32px">Token map</h3>
+        <div class="map-grid">
+          <div>
+            <h4>SURFACES</h4>
+            <ul>
+              <li>Header band: <code>--color-ink</code></li>
+              <li>Header foreground: <code>--color-cream</code></li>
+              <li>MatchStrip band: <code>--color-cream</code></li>
+              <li>MatchStrip rail: <code>--color-jersey</code> (6px)</li>
+              <li>Shield surface (default): <code>--color-cream</code></li>
+              <li>Shield surface (KCVV home): <code>--color-jersey</code></li>
+              <li>LIVE pill surface: <code>--color-alert</code></li>
+              <li>LIVE pill foreground: <code>--color-cream</code></li>
+            </ul>
+          </div>
+          <div>
+            <h4>STRUCTURE / TYPE</h4>
+            <ul>
+              <li>Header height: 64–72px desktop, 56–60px mobile</li>
+              <li>MatchStrip height: 48–56px desktop, 44–48px mobile</li>
+              <li>Combined sticky chrome: 110–120px / 96–104px</li>
+              <li>Wordmark: <code>--font-display</code> italic 900, 26px / 22px</li>
+              <li>Nav links: <code>--font-mono</code> 12px 600, 0.12em tracking</li>
+              <li>Score type: <code>--font-display</code> 900, 22px</li>
+              <li>LIVE / kicker / meta: <code>--font-mono</code> 10–11px</li>
+              <li>Sharp corners across all chrome — no <code>border-radius</code></li>
+              <li>Press canon (CTAs): <code>shadow-none</code> + <code>translate(1px, 1px)</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px" class="mono mono--muted">
+          ★ END · DIRECTION B — INK BAND · KCVV ELEWIJT · 2026-05-03
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

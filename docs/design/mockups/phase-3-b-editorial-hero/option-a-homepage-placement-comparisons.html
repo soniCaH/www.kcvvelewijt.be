@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · B follow-up · EditorialHero homepage placement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --color-alert: #b84a3a;
+        --color-warning: #c68b2c;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", "Quasimoda", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 56px 32px 96px; }
+      .mono { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+      .mono--muted { color: var(--color-ink-muted); }
+      h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 5vw, 60px); line-height: 1.05; margin: 16px 0 12px; }
+      h1 em { font-style: italic; color: var(--color-jersey-deep); }
+      h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(26px, 2.6vw, 36px); line-height: 1.1; margin: 0 0 6px; }
+      h2 em { font-style: italic; color: var(--color-jersey-deep); }
+      h4 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 18px; margin: 0 0 8px; }
+      .lead { max-width: 800px; font-size: 17px; color: var(--color-ink-soft); margin: 0 0 24px; }
+      .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 36px 44px; }
+      .hero-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+      .section { margin: 48px 0; padding-top: 32px; border-top: 1px solid var(--color-paper-edge); }
+      .section-meta { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 16px; }
+      .panel { background: var(--color-cream); padding: 28px; border: 1px solid var(--color-paper-edge); margin-top: 20px; }
+      .label-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; min-height: 28px; flex-wrap: wrap; }
+      .label-row .row-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); min-width: 96px; }
+
+      .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; padding: 18px; background: rgba(255, 255, 255, 0.4); border: 1px dashed var(--color-paper-edge); }
+      .tradeoffs h4 { margin: 0 0 6px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+      .tradeoffs h4.for { color: var(--color-jersey-deep); }
+      .tradeoffs h4.against { color: var(--color-alert); }
+      .tradeoffs p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+      .tradeoffs code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      .audit { background: rgba(184, 74, 58, 0.06); border: 1.5px solid var(--color-alert); padding: 20px 24px; margin: 24px 0; }
+      .audit__head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 10px; }
+      .audit__title { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-alert); }
+      .audit__star { color: var(--color-alert); font-family: var(--font-display); font-style: italic; font-weight: 900; }
+      .audit ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; color: var(--color-ink-soft); }
+      .audit li { margin-bottom: 6px; }
+      .audit code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+
+      .compare-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px; }
+      .compare-cell { background: var(--color-cream); border: 1px solid var(--color-paper-edge); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+      .compare-cell__head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--color-paper-edge); }
+      .compare-cell__num { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; color: var(--color-jersey-deep); line-height: 1; }
+      .compare-cell__title { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink); }
+      .compare-cell__copy { font-size: 13px; color: var(--color-ink-soft); margin: 0; line-height: 1.5; }
+      .compare-cell__copy code { font-family: var(--font-mono); font-size: 11.5px; background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+
+      /* ============================================================
+         EDITORIAL HERO mock — locked Asymmetric Broadsheet shell
+         (announcement variant for visual rendering)
+         ============================================================ */
+      .eh-shell {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        display: grid;
+        grid-template-columns: 60% 40%;
+        position: relative;
+      }
+      .eh-shell__rule {
+        position: absolute;
+        top: 32px;
+        bottom: 32px;
+        left: 60%;
+        width: 1px;
+        background: var(--color-ink);
+      }
+      .eh-text { padding: 32px 36px; display: flex; flex-direction: column; gap: 18px; }
+      .eh-kicker {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .eh-kicker__star { color: var(--color-ink); font-family: var(--font-display); font-style: italic; font-weight: 900; }
+      .eh-kicker__sep { color: var(--color-paper-edge); }
+      .eh-heading {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: italic;
+        font-size: clamp(36px, 4.2vw, 56px);
+        line-height: 1.04;
+        margin: 0;
+        color: var(--color-ink);
+        letter-spacing: -0.005em;
+      }
+      .eh-heading em { color: var(--color-jersey-deep); font-style: italic; }
+      .eh-heading::after { content: "."; color: var(--color-jersey-deep); }
+      .eh-lead {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+        max-width: 52ch;
+      }
+      .eh-byline {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .eh-byline__star { color: var(--color-ink); font-family: var(--font-display); font-style: italic; font-weight: 900; }
+      .eh-cover {
+        padding: 32px 32px 32px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .eh-cover__taped {
+        background: var(--color-cream-soft);
+        border: 1.5px solid var(--color-ink);
+        box-shadow: 6px 6px 0 0 var(--color-ink);
+        padding: 12px;
+        transform: rotate(-1.3deg);
+        position: relative;
+      }
+      .eh-cover__img {
+        background:
+          repeating-linear-gradient(45deg, transparent, transparent 14px, rgba(10,10,10,0.05) 14px, rgba(10,10,10,0.05) 15px),
+          var(--color-cream);
+        aspect-ratio: 16 / 9;
+        width: 360px;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         HOMEPAGE PLACEMENT — CTA variants
+         ============================================================ */
+      .eh-cta-band {
+        grid-column: 1 / -1;
+        background: var(--color-cream-soft);
+        border-top: 1px solid var(--color-ink);
+        padding: 14px 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .eh-cta-band__lead {
+        color: var(--color-ink-muted);
+        font-weight: 500;
+      }
+      .eh-cta-band__link {
+        color: var(--color-ink);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-bottom: 1.5px solid var(--color-ink);
+        padding-bottom: 1px;
+        transition: color 150ms ease, border-color 150ms ease;
+      }
+      .eh-cta-band__link:hover { color: var(--color-jersey-deep); border-bottom-color: var(--color-jersey-deep); }
+
+      .eh-byline--with-cta { justify-content: space-between; width: 100%; display: flex; }
+      .eh-byline--with-cta .eh-byline__cta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        text-decoration: none;
+        border-bottom: 1.5px solid var(--color-ink);
+        padding-bottom: 1px;
+        transition: color 150ms ease, border-color 150ms ease;
+      }
+      .eh-byline--with-cta .eh-byline__cta:hover { color: var(--color-jersey-deep); border-bottom-color: var(--color-jersey-deep); }
+
+      .eh-clickable {
+        cursor: pointer;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+      }
+      /* Keyboard parity (a11y):
+         the <div class="eh-clickable"> is wrapped by the focusable <a>,
+         so `.eh-clickable` itself isn't focusable and `:focus-visible` /
+         `:focus-within` on the div alone won't fire. Pair every `:hover`
+         rule below with `a:focus-visible .eh-clickable` so Tab focus
+         mirrors the press-up + accent + hint affordances. */
+      .eh-clickable:hover,
+      a:focus-visible .eh-clickable {
+        transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0 0 var(--color-ink);
+      }
+      /* Default state — accented word reads as ink-soft; hover/focus
+         shifts it to jersey-deep so the colour change is visible
+         (previously the default already was jersey-deep, leaving the
+         "accent on hover" indistinguishable from the resting state). */
+      .eh-clickable .eh-heading em {
+        color: var(--color-ink-soft);
+        transition: color 200ms ease;
+      }
+      .eh-clickable:hover .eh-heading em,
+      a:focus-visible .eh-clickable .eh-heading em {
+        color: var(--color-jersey-deep);
+      }
+      .eh-clickable .eh-hover-hint {
+        position: absolute;
+        bottom: 12px;
+        right: 16px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        opacity: 0;
+        transition: opacity 200ms ease;
+        pointer-events: none;
+      }
+      .eh-clickable:hover .eh-hover-hint,
+      a:focus-visible .eh-clickable .eh-hover-hint {
+        opacity: 1;
+      }
+      /* Keyboard focus ring — explicit, high-contrast, sits OUTSIDE
+         the card's paper shadow. Replaces the previous `outline: none`
+         suppression which broke focus visibility for users whose
+         lift-on-focus animation isn't sufficient (reduced-motion,
+         high-contrast, or non-pointer input). */
+      a:has(> .eh-clickable):focus-visible {
+        outline: 3px solid var(--color-jersey-deep);
+        outline-offset: 4px;
+      }
+
+      /* prefers-reduced-motion — preserve the visual state changes
+         (lift, accent colour shift, hint visibility) but skip the
+         animations between rest and hover/focus. Users who opt out
+         of motion still get the affordance immediately, without the
+         200ms transitions. */
+      @media (prefers-reduced-motion: reduce) {
+        .eh-clickable,
+        .eh-clickable .eh-heading em,
+        .eh-clickable .eh-hover-hint {
+          transition: none;
+        }
+      }
+
+      footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
+      footer .next-step { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 24px 28px; margin-bottom: 24px; }
+      footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="hero-meta">
+          <span class="mono mono--muted">PHASE 3 · B FOLLOW-UP · HOMEPAGE PLACEMENT</span>
+          <span class="mono mono--muted">★ EDITORIALHERO · placement="homepage"</span>
+          <span class="mono mono--muted">2026-05-05</span>
+        </div>
+        <h1>Het hero op de <em>homepage.</em></h1>
+        <p class="lead">
+          The locked detail-page hero (Asymmetric Broadsheet, 60/40
+          + ink rule) renders <em>without</em> click-through CTAs —
+          the reader is already on the article. Homepage placement
+          adds a click-through affordance so the same hero can act as
+          a featured-article teaser at the top of the homepage's news
+          section. One drill question, three CTA strategies.
+        </p>
+      </header>
+
+      <!-- Q0 — DATA AUDIT -->
+      <section id="q0-data-audit">
+        <div class="audit">
+          <div class="audit__head">
+            <span class="audit__star">★</span>
+            <span class="audit__title">Q0 — CONTEXT AUDIT</span>
+          </div>
+          <ul>
+            <li>
+              <strong>Same shell, different placement.</strong> The
+              <code>placement="homepage"</code> extension reuses the
+              locked Asymmetric Broadsheet shell verbatim (60/40
+              grid · ink rule · TapedCard cover image · Playfair
+              italic 900 heading · jersey-deep accent on the title's
+              accent decorator span). Variant-specific artefacts
+              (eventFact strip, transferFact strip, Q&amp;A divider in
+              interview) <strong>do not render</strong> in homepage
+              placement — those are body content, not hero content.
+            </li>
+            <li>
+              <strong>Single featured slot.</strong> Homepage shows
+              one EditorialHero teaser at the top of its news section;
+              other articles render as smaller preview cards (Phase 4
+              homepage rebuild owns those). The drill below is for the
+              single featured slot.
+            </li>
+            <li>
+              <strong>Click destination.</strong> The CTA always links
+              to <code>/nieuws/{article.slug}</code> regardless of
+              variant. No variant-specific routes.
+            </li>
+            <li>
+              <strong>Reading-time + publishedAt</strong> stay in the
+              kicker (already there in the detail spec); they're
+              equally meaningful as teaser metadata.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Q1 — CTA placement strategy — LOCKED (P3) -->
+      <section class="section" id="q1-cta-strategy">
+        <div class="section-meta">
+          <span class="mono">★ Q1 · CTA PLACEMENT STRATEGY — LOCKED</span>
+          <span class="mono mono--muted">— P3 (whole-card click) · press-up hover · "★ Lees verder →" hint on hover</span>
+        </div>
+
+        <div class="audit" style="border-color: var(--color-jersey-deep); background: rgba(0, 135, 85, 0.06);">
+          <div class="audit__head">
+            <span style="color: var(--color-jersey-deep); font-family: var(--font-display); font-style: italic; font-weight: 900;">★</span>
+            <span class="audit__title" style="color: var(--color-jersey-deep);">Q1 — LOCKED · P3 (Whole-card click) · 2026-05-05</span>
+          </div>
+          <p style="margin: 0 0 6px; font-size: 14.5px; color: var(--color-ink-soft);">
+            <strong>The entire hero is wrapped as a link to
+            <code>/nieuws/{article.slug}</code>.</strong> At rest:
+            identical to the detail-page hero — same kicker, heading,
+            lead, byline, right-column artefact. No CTA text, no extra
+            band. <strong>On hover:</strong> press-up
+            (<code>translate(-2px, -2px)</code> + grown shadow) — the
+            natural inverse of the canonical press-down idiom used
+            elsewhere on paper-stamped primitives. A small
+            <code>"★ Lees verder →"</code> hint fades in at the
+            bottom-right.
+          </p>
+          <p style="margin: 0; font-size: 13.5px; color: var(--color-ink-muted);">
+            Variant-specific body content (eventFact strip,
+            transferFact strip, Q&amp;A divider, EndMark) does
+            <em>not</em> render in homepage placement — those are
+            article-detail-only. The homepage hero is a pure teaser.
+            P1 (CTA band below) and P2 (inline with byline) panels
+            archived <code>display:none</code> below for diff history.
+            The lock applies to all 4 article-type variants
+            (announcement / transfer / event / interview); see
+            <code>{variant}-locked.md</code> for each variant's
+            "Homepage placement" section.
+          </p>
+        </div>
+
+        <!-- Locked example (preview) -->
+        <h4 style="margin-top: 24px">Locked example — announcement variant in homepage placement</h4>
+        <a href="/nieuws/de-nieuwe-trainersstaf" style="text-decoration: none; color: inherit; display: block;">
+          <div class="eh-shell eh-clickable">
+            <div class="eh-shell__rule"></div>
+            <div class="eh-text">
+              <span class="eh-kicker">
+                <span class="eh-kicker__star">★</span>
+                MEDEDELING
+                <span class="eh-kicker__sep">·</span>
+                4 MIN LEZEN
+                <span class="eh-kicker__sep">·</span>
+                5 MEI 2026
+                <span class="eh-kicker__star">★</span>
+              </span>
+              <h2 class="eh-heading">De <em>nieuwe</em> trainersstaf</h2>
+              <p class="eh-lead">
+                Met de jaarlijkse trainerswissel zet KCVV opnieuw vol
+                in op continuïteit én vernieuwing voor het komende
+                seizoen.
+              </p>
+              <span class="eh-byline">
+                <span class="eh-byline__star">★</span>
+                DOOR REDACTIE
+              </span>
+            </div>
+            <div class="eh-cover">
+              <div class="eh-cover__taped">
+                <div class="eh-cover__img">★ COVER · article.coverImage @ 16:9</div>
+              </div>
+            </div>
+            <span class="eh-hover-hint">★ Lees verder →</span>
+          </div>
+        </a>
+        <p style="font-size: 13px; color: var(--color-ink-muted); margin: 8px 0 0">
+          ↑ Hover the card to see the press-up + jersey-deep accent +
+          "★ Lees verder →" hint appear in the bottom-right.
+        </p>
+
+        <!-- archive (P1/P2/P3 originals) -->
+        <div style="display: none" id="q1-archive" aria-hidden="true">
+
+        <h2>Waar zit de <em>doorklik</em>? (archived)</h2>
+        <p class="lead">
+          Three sub-options below. All three render the announcement
+          variant for visual reference (same shell applies to
+          transfer / event / interview). Variant-specific artefacts
+          are intentionally absent — the homepage hero is a pure
+          teaser, not a content-rich block.
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">P1</span>
+              <span class="compare-cell__title">CTA band below</span>
+            </div>
+            <p class="compare-cell__copy">
+              Full-width band at the bottom of the hero with
+              <code>"LEES VERDER →"</code> on the right and a small
+              kicker (e.g. <code>"★ MEDEDELING ★"</code>) on the
+              left. Most explicit affordance.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">P2</span>
+              <span class="compare-cell__title">Inline with byline</span>
+            </div>
+            <p class="compare-cell__copy">
+              Byline row gets a <code>"LEES VERDER →"</code> link on
+              the right edge: <em>★ DOOR REDACTIE     LEES VERDER →</em>.
+              Most minimal — no new band, no extra height.
+            </p>
+          </div>
+          <div class="compare-cell">
+            <div class="compare-cell__head">
+              <span class="compare-cell__num">P3</span>
+              <span class="compare-cell__title">Whole-card click</span>
+            </div>
+            <p class="compare-cell__copy">
+              No explicit CTA text. Entire hero is a link. Hover state:
+              card lifts (translate -2,-2 + shadow grows) + small
+              "★ LEES VERDER →" hint appears bottom-right. Zero added
+              chrome at rest.
+            </p>
+          </div>
+        </div>
+
+        <!-- P1 — CTA BAND BELOW -->
+        <div class="panel" id="q1-p1">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION P1</span>
+            <span class="mono">CTA band below the hero · explicit affordance</span>
+          </div>
+
+          <div class="eh-shell">
+            <div class="eh-shell__rule"></div>
+            <div class="eh-text">
+              <span class="eh-kicker">
+                <span class="eh-kicker__star">★</span>
+                MEDEDELING
+                <span class="eh-kicker__sep">·</span>
+                4 MIN LEZEN
+                <span class="eh-kicker__sep">·</span>
+                5 MEI 2026
+                <span class="eh-kicker__star">★</span>
+              </span>
+              <h2 class="eh-heading">De <em>nieuwe</em> trainersstaf</h2>
+              <p class="eh-lead">
+                Met de jaarlijkse trainerswissel zet KCVV opnieuw vol
+                in op continuïteit én vernieuwing voor het komende
+                seizoen.
+              </p>
+              <span class="eh-byline">
+                <span class="eh-byline__star">★</span>
+                DOOR REDACTIE
+              </span>
+            </div>
+            <div class="eh-cover">
+              <div class="eh-cover__taped">
+                <div class="eh-cover__img">★ COVER · article.coverImage @ 16:9</div>
+              </div>
+            </div>
+            <div class="eh-cta-band">
+              <span class="eh-cta-band__lead">★ MEDEDELING ★</span>
+              <a href="/nieuws/de-nieuwe-trainersstaf" class="eh-cta-band__link">Lees verder <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Most explicit affordance — the band is unambiguous chrome that says "this is a teaser, click here". Reads as a deliberate component (not just a styled article fragment). Repeated kicker on the left mirrors the teaser conventions of newspaper-page leads. CTA is in a stable, predictable slot users learn fast on a feed-heavy homepage.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>Adds ~50px to the hero's vertical footprint. Repeats the kicker label (top + bottom) — could feel redundant on the announcement variant where the kicker already reads "★ MEDEDELING ★ · 4 MIN LEZEN · 5 MEI 2026 ★". On variants with longer kickers (transfer with player name, event with date) the bottom band may need a different label scheme.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- P2 — INLINE WITH BYLINE -->
+        <div class="panel" id="q1-p2" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION P2</span>
+            <span class="mono">CTA appended to byline · minimal · no extra height</span>
+          </div>
+
+          <div class="eh-shell">
+            <div class="eh-shell__rule"></div>
+            <div class="eh-text">
+              <span class="eh-kicker">
+                <span class="eh-kicker__star">★</span>
+                MEDEDELING
+                <span class="eh-kicker__sep">·</span>
+                4 MIN LEZEN
+                <span class="eh-kicker__sep">·</span>
+                5 MEI 2026
+                <span class="eh-kicker__star">★</span>
+              </span>
+              <h2 class="eh-heading">De <em>nieuwe</em> trainersstaf</h2>
+              <p class="eh-lead">
+                Met de jaarlijkse trainerswissel zet KCVV opnieuw vol
+                in op continuïteit én vernieuwing voor het komende
+                seizoen.
+              </p>
+              <div class="eh-byline eh-byline--with-cta">
+                <span><span class="eh-byline__star">★</span> DOOR REDACTIE</span>
+                <a href="/nieuws/de-nieuwe-trainersstaf" class="eh-byline__cta">Lees verder <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+            <div class="eh-cover">
+              <div class="eh-cover__taped">
+                <div class="eh-cover__img">★ COVER · article.coverImage @ 16:9</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Zero new chrome — same height as the detail-page hero. CTA sits in the predictable byline slot, where the eye lands naturally after reading the lead. Pattern adapts cleanly to all 4 variants without per-variant logic. Cheapest implementation: one extra <code>&lt;a&gt;</code> in the existing byline component when <code>placement === "homepage"</code>.</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>The byline row gets visually busier — author + read-more link compete for the same horizontal space. On variants where the byline is denser (e.g. interview's "★ DOOR JOHN DOE / GESPREK MET KEVIN VAN RANSBEECK"), the inline CTA may not fit cleanly. Less unambiguously a teaser — could be missed by users who don't make it to the byline.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- P3 — WHOLE-CARD CLICK -->
+        <div class="panel" id="q1-p3" style="margin-top: 16px">
+          <div class="label-row">
+            <span class="row-label">SUB-OPTION P3</span>
+            <span class="mono">whole hero is a link · hover-only affordance · zero added chrome at rest</span>
+          </div>
+
+          <a href="/nieuws/de-nieuwe-trainersstaf" style="text-decoration: none; color: inherit; display: block;">
+            <div class="eh-shell eh-clickable">
+              <div class="eh-shell__rule"></div>
+              <div class="eh-text">
+                <span class="eh-kicker">
+                  <span class="eh-kicker__star">★</span>
+                  MEDEDELING
+                  <span class="eh-kicker__sep">·</span>
+                  4 MIN LEZEN
+                  <span class="eh-kicker__sep">·</span>
+                  5 MEI 2026
+                  <span class="eh-kicker__star">★</span>
+                </span>
+                <h2 class="eh-heading">De <em>nieuwe</em> trainersstaf</h2>
+                <p class="eh-lead">
+                  Met de jaarlijkse trainerswissel zet KCVV opnieuw
+                  vol in op continuïteit én vernieuwing voor het
+                  komende seizoen.
+                </p>
+                <span class="eh-byline">
+                  <span class="eh-byline__star">★</span>
+                  DOOR REDACTIE
+                </span>
+              </div>
+              <div class="eh-cover">
+                <div class="eh-cover__taped">
+                  <div class="eh-cover__img">★ COVER · article.coverImage @ 16:9</div>
+                </div>
+              </div>
+              <span class="eh-hover-hint">★ Lees verder →</span>
+            </div>
+          </a>
+
+          <p style="font-size: 13px; color: var(--color-ink-muted); margin: 8px 0 0">
+            ↑ Hover the card above to see the press-up + jersey-deep
+            accent + "★ Lees verder →" hint appear in the bottom-right.
+          </p>
+
+          <div class="tradeoffs">
+            <div>
+              <h4 class="for">↑ FOR</h4>
+              <p>Cleanest possible look — same chrome as the detail-page hero, zero added affordances at rest. Press-up hover (translate -2px,-2px + grown shadow) is the inverse of the canonical press-down hover used on paper-stamped buttons; signals "lift / pick up" rather than "press down". Hover hint appears only on focus/hover so the card stays editorial-clean by default. Pattern is widely understood (entire teaser cards are clickable everywhere on the web).</p>
+            </div>
+            <div>
+              <h4 class="against">↓ AGAINST</h4>
+              <p>No explicit affordance for non-hover devices — touch users get no visible "click me" signal at all (hover hint never appears). Users with reduced-motion preferences may not see the lift-on-hover feedback. Selecting text inside the hero (e.g. copying the lead) becomes harder because the whole block is a link. A11y: harder to communicate "this whole card navigates to X" via screen reader without adding an <code>aria-label</code> wrapping the entire hero.</p>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- /Q1 archive -->
+      </section>
+
+      <footer>
+        <div class="next-step">
+          <div class="section-meta">
+            <span class="mono">★ HOMEPAGE PLACEMENT — LOCKED</span>
+            <span class="mono mono--muted">— P3 (whole-card click) folded into all 4 variant locked specs</span>
+          </div>
+          <h4 style="margin: 0 0 12px;">P3 picked 2026-05-05.</h4>
+          <p style="font-size: 14.5px; color: var(--color-ink-soft); margin: 0">
+            <strong>Folded into:</strong>
+            <code>announcement-locked.md</code>,
+            <code>transfer-locked.md</code>,
+            <code>event-locked.md</code>,
+            <code>interview-locked.md</code> — each gets a "Homepage
+            placement" section appended documenting the whole-card
+            click + press-up hover + Lees verder hint. Shell, kicker,
+            heading, lead, byline, and cover all stay verbatim from
+            the detail spec.
+          </p>
+          <p style="font-size: 13.5px; color: var(--color-ink-muted); margin: 12px 0 0">
+            <strong>Implementation hook:</strong> the
+            <code>placement</code> prop on
+            <code>&lt;EditorialHero&gt;</code> already exists in the
+            shell's discriminated union (<code>"detail" | "homepage"</code>).
+            <code>placement="homepage"</code> wraps the hero in an
+            <code>&lt;a&gt;</code> with the article href, applies
+            press-up hover + hint, and skips rendering body content
+            (article body, factStrips, Q&amp;A, EndMark).
+          </p>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>
