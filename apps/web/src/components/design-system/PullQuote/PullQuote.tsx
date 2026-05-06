@@ -5,6 +5,15 @@ import { TapedCard, type TapedCardProps } from "../TapedCard";
 
 export type PullQuoteTone = "cream" | "ink" | "jersey";
 
+interface TonePalette {
+  bg: TapedCardProps["bg"];
+  shadow?: TapedCardProps["shadow"];
+  body: string;
+  name: string;
+  metaText: string;
+  quoteMark: QuoteMarkColor;
+}
+
 export interface PullQuoteAttribution {
   name: string;
   role?: string;
@@ -26,16 +35,7 @@ export interface PullQuoteProps {
   className?: string;
 }
 
-const TONE: Record<
-  PullQuoteTone,
-  {
-    bg: TapedCardProps["bg"];
-    body: string;
-    name: string;
-    metaText: string;
-    quoteMark: QuoteMarkColor;
-  }
-> = {
+const TONE: Record<PullQuoteTone, TonePalette> = {
   cream: {
     bg: "cream",
     body: "text-ink",
@@ -45,6 +45,10 @@ const TONE: Record<
   },
   ink: {
     bg: "ink",
+    // Black-on-black silhouette — the standard `--shadow-paper-md` is pure
+    // ink and disappears against the ink card. Use the soft (ink-muted)
+    // shadow for the same reason buttons do.
+    shadow: "soft",
     body: "text-cream",
     // ink bg needs cream text for the name — MonoLabel variant=plain hard-codes
     // text-ink, so render the name in a directly-styled span instead.
@@ -53,10 +57,13 @@ const TONE: Record<
     quoteMark: "jersey",
   },
   jersey: {
-    bg: "jersey",
-    body: "text-ink",
-    name: "text-ink",
-    metaText: "text-ink-muted",
+    // Phase 3 redesign — bright `--color-jersey` is retired (per owner
+    // direction). The "jersey" tone now renders as the dark jersey-deep
+    // paper card with cream typography.
+    bg: "jersey-deep",
+    body: "text-cream",
+    name: "text-cream",
+    metaText: "text-cream/70",
     quoteMark: "cream",
   },
 };
@@ -103,6 +110,7 @@ export function PullQuote({
   return (
     <TapedCard
       bg={palette.bg}
+      shadow={palette.shadow}
       rotation={rotation}
       tape={tape}
       padding="lg"

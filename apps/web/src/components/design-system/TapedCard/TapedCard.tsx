@@ -11,8 +11,13 @@ export type TapedCardRotation =
   | "auto"
   | number;
 
-export type TapedCardShadow = "sm" | "md" | "lift";
-export type TapedCardBg = "cream" | "cream-soft" | "ink" | "jersey";
+export type TapedCardShadow = "sm" | "md" | "lift" | "soft";
+export type TapedCardBg =
+  | "cream"
+  | "cream-soft"
+  | "ink"
+  | "jersey"
+  | "jersey-deep";
 export type TapedCardPadding = "sm" | "md" | "lg" | "none";
 export type TapedCardAs = "div" | "article" | "section" | "li" | "figure";
 
@@ -46,6 +51,10 @@ const SHADOW_CLASS: Record<TapedCardShadow, string> = {
   sm: "shadow-paper-sm",
   md: "shadow-paper-md",
   lift: "shadow-paper-lift",
+  // Soft sibling — uses ink-muted instead of pure ink for the offset.
+  // Same rationale as the canonical button soft-shadow: black-on-black
+  // ink-bg cards lose their silhouette without it.
+  soft: "shadow-paper-sm-soft",
 };
 
 const BG_CLASS: Record<TapedCardBg, string> = {
@@ -53,6 +62,7 @@ const BG_CLASS: Record<TapedCardBg, string> = {
   "cream-soft": "bg-cream-soft text-ink",
   ink: "bg-ink text-cream",
   jersey: "bg-jersey text-ink",
+  "jersey-deep": "bg-jersey-deep text-cream",
 };
 
 const PADDING_CLASS: Record<TapedCardPadding, string> = {

@@ -1,0 +1,1 @@
+export { EventFactStrip } from "./EventFactStrip";

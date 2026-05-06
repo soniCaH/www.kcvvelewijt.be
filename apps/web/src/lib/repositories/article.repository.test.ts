@@ -44,6 +44,8 @@ function makeArticleDetailRow(
     id: "article-1",
     updatedAt: "2026-03-21T12:00:00Z",
     title: "Test Article Detail",
+    titleRich: null,
+    lead: "",
     slug: "test-article-detail",
     publishedAt: "2026-03-20T10:00:00Z",
     featured: true,

@@ -17,8 +17,11 @@
  * Spec: PRD redesign-phase-3 §5.B.1.
  */
 import Image from "next/image";
+import Link from "next/link";
+import type { PortableTextBlock } from "@portabletext/react";
 import {
   EditorialByline,
+  EditorialHeading,
   EditorialHeroShell,
   EditorialKicker,
   EditorialLead,
@@ -40,8 +43,13 @@ export interface EditorialHeroCoverImage {
 }
 
 interface EditorialHeroBaseProps {
-  /** Article title rendered as the H1. */
-  title: string;
+  /**
+   * Article title rendered as the H1. Plain string (legacy) OR a
+   * single-block constrained Portable Text array with the `accent`
+   * decorator (post Ask 9). PT spans tagged `accent` render italic +
+   * jersey-deep via <EditorialHeading>.
+   */
+  title: string | PortableTextBlock[];
   /** Editor-supplied lead, or a body-derived fallback truncated via `truncateLead`. */
   lead?: string;
   /** Editorial chrome row (article type, date, read time, etc.). */
@@ -50,8 +58,18 @@ interface EditorialHeroBaseProps {
   author?: string;
   /** Cover image artefact rendered in the right column (40fr). */
   coverImage?: EditorialHeroCoverImage;
-  /** `"detail"` (default) or `"homepage"`. Variant rendering for `"homepage"` lands in #1638. */
+  /**
+   * `"detail"` (default) or `"homepage"`. Homepage placement wraps the
+   * hero in a link to `/nieuws/{slug}` with press-up hover and a
+   * `★ Lees verder →` hint at the bottom-right; body content
+   * (factStrips, Q&A, EndMark) is suppressed at the call site.
+   */
   placement?: EditorialHeroPlacement;
+  /**
+   * Required when `placement="homepage"` — used to build the link
+   * target `/nieuws/{slug}`. Detail placement ignores it.
+   */
+  slug?: string;
 }
 
 interface AnnouncementProps extends EditorialHeroBaseProps {
@@ -100,22 +118,22 @@ function EditorialHeroCover({
 }
 
 export function EditorialHero(props: EditorialHeroProps) {
-  const { title, lead, kicker, author, coverImage } = props;
+  const { title, lead, kicker, author, coverImage, placement, slug } = props;
   const editorial = (
     <>
       {kicker !== undefined && kicker.length > 0 ? (
         <EditorialKicker items={kicker} />
       ) : null}
-      <h1 className="text-ink font-serif text-4xl leading-[0.95] font-black italic md:text-5xl lg:text-6xl">
+      <EditorialHeading level={1} size="display-xl">
         {title}
-      </h1>
+      </EditorialHeading>
       {lead !== undefined && lead.trim() !== "" ? (
         <EditorialLead>{lead}</EditorialLead>
       ) : null}
       <EditorialByline author={author} />
     </>
   );
-  return (
+  const shell = (
     <EditorialHeroShell
       editorial={editorial}
       cover={
@@ -125,4 +143,36 @@ export function EditorialHero(props: EditorialHeroProps) {
       }
     />
   );
+
+  if (placement === "homepage") {
+    if (slug === undefined || slug === "") {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          '[EditorialHero] placement="homepage" requires a non-empty `slug` to build the /nieuws/{slug} link target.',
+        );
+      }
+      return shell;
+    }
+    // Press-up hover: inverse of the canonical press-down on paper-stamped
+    // primitives. Body content (factStrips, Q&A, EndMark) does not render in
+    // homepage placement — the call site is responsible for that gate.
+    return (
+      <Link
+        href={`/nieuws/${slug}`}
+        className="group relative block pb-8 transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+        aria-label={
+          typeof title === "string" ? title : "Lees het volledige artikel"
+        }
+      >
+        {shell}
+        <span
+          aria-hidden="true"
+          className="text-jersey-deep pointer-events-none absolute right-2 bottom-1 font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          ★ Lees verder →
+        </span>
+      </Link>
+    );
+  }
+  return shell;
 }

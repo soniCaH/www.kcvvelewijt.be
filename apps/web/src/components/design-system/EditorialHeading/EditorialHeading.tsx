@@ -1,5 +1,13 @@
 import { createElement, type ReactNode } from "react";
+import type { PortableTextBlock } from "@portabletext/react";
 import { cn } from "@/lib/utils/cn";
+
+interface TitleSpan {
+  _type?: "span";
+  _key?: string;
+  text?: string;
+  marks?: string[];
+}
 import { HighlighterStroke } from "../HighlighterStroke";
 
 export type EditorialHeadingSize =
@@ -25,7 +33,12 @@ export interface EditorialHeadingEmphasis {
 
 export interface EditorialHeadingProps {
   level: EditorialHeadingLevel;
-  children: string;
+  /**
+   * Plain string (legacy, with optional `emphasis` substring) OR a
+   * single-block constrained Portable Text array (post Ask 9 — the
+   * `accent` decorator on a span renders italic + jersey-deep).
+   */
+  children: string | PortableTextBlock[];
   size?: EditorialHeadingSize;
   emphasis?: EditorialHeadingEmphasis;
   tone?: EditorialHeadingTone;
@@ -69,6 +82,43 @@ function splitOnEmphasis(
   };
 }
 
+function renderPortableTextTitle(blocks: PortableTextBlock[]): {
+  body: ReactNode;
+  endsWithPeriod: boolean;
+} {
+  const block = blocks[0];
+  if (!block || !Array.isArray((block as { children?: unknown }).children)) {
+    return { body: null, endsWithPeriod: false };
+  }
+  const spans = (block as PortableTextBlock).children as TitleSpan[];
+  const flat = spans.map((s) => s.text ?? "").join("");
+  const endsWithPeriod = flat.trim().endsWith(".");
+  const lastIdx = spans.length - 1;
+  const body = (
+    <>
+      {spans.map((span, i) => {
+        const isAccent = (span.marks ?? []).includes("accent");
+        const text =
+          i === lastIdx && !endsWithPeriod
+            ? ensureTrailingPeriod(span.text ?? "")
+            : (span.text ?? "");
+        if (isAccent) {
+          return (
+            <em
+              key={span._key ?? i}
+              className="font-display text-jersey-deep italic"
+            >
+              {text}
+            </em>
+          );
+        }
+        return <span key={span._key ?? i}>{text}</span>;
+      })}
+    </>
+  );
+  return { body, endsWithPeriod };
+}
+
 export function EditorialHeading({
   level,
   children,
@@ -77,46 +127,46 @@ export function EditorialHeading({
   tone = "ink",
   className,
 }: EditorialHeadingProps) {
-  const display = ensureTrailingPeriod(children);
+  let body: ReactNode;
 
-  let body: ReactNode = display;
-  if (emphasis) {
-    const split = splitOnEmphasis(display, emphasis.text);
-    if (!split) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn(
-          `[EditorialHeading] emphasis.text "${emphasis.text}" not found in heading children "${display}"`,
+  if (typeof children !== "string") {
+    body = renderPortableTextTitle(children).body;
+  } else {
+    const display = ensureTrailingPeriod(children);
+    body = display;
+    if (emphasis) {
+      const split = splitOnEmphasis(display, emphasis.text);
+      if (!split) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn(
+            `[EditorialHeading] emphasis.text "${emphasis.text}" not found in heading children "${display}"`,
+          );
+        }
+      } else {
+        const isHighlight = !!emphasis.highlight;
+        const emEl = (
+          <em
+            className={cn(
+              "font-display italic",
+              !isHighlight && "text-jersey-deep",
+            )}
+          >
+            {split.match}
+          </em>
+        );
+        const wrapped = isHighlight ? (
+          <HighlighterStroke>{emEl}</HighlighterStroke>
+        ) : (
+          emEl
+        );
+        body = (
+          <>
+            {split.before}
+            {wrapped}
+            {split.after}
+          </>
         );
       }
-    } else {
-      // Two mutually-exclusive emphasis variants:
-      // - highlight=true: italic + body tone, wrapped in <HighlighterStroke>
-      //   (the "marker pass" treatment).
-      // - highlight=false: italic + jersey-deep accent colour, no underline
-      //   (the "colour accent" treatment from the design source).
-      const isHighlight = !!emphasis.highlight;
-      const emEl = (
-        <em
-          className={cn(
-            "font-display italic",
-            !isHighlight && "text-jersey-deep",
-          )}
-        >
-          {split.match}
-        </em>
-      );
-      const wrapped = isHighlight ? (
-        <HighlighterStroke>{emEl}</HighlighterStroke>
-      ) : (
-        emEl
-      );
-      body = (
-        <>
-          {split.before}
-          {wrapped}
-          {split.after}
-        </>
-      );
     }
   }
 

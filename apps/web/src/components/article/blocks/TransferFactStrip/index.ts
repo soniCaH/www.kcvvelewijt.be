@@ -1,0 +1,1 @@
+export { TransferFactStrip } from "./TransferFactStrip";
