@@ -33,9 +33,9 @@ Three things must share a single vertical centerline, accurate to within 1px at 
 - Use **flexbox**, not grid. `display: flex; align-items: center;` on the wrapper.
 - `★` glyphs: rendered as `<span class="endmark__star" aria-hidden="true">★</span>` — NOT pseudo-elements on the label. Pseudo-elements share the label's line-box, which can offset the star from the rule by sub-pixel amounts depending on font metrics.
 - Set `line-height: 1` on the wrapper so the flex centerline equals the optical centerline.
-- `★` glyphs use `display: inline-flex; align-items: center;` and a font-size tuned so the optical centre sits at 50% of the star's bounding box (typical: `font-size: 14px` with `--color-jersey-deep`).
+- `★` glyphs use `display: inline-flex; align-items: center;` with `margin: 0 12px;` so the rule-to-star gap matches the star-to-label gap — visually balanced spacing confirmed during #1635 review (a label-only `padding: 0 12px;` left the stars glued to the rules). Font-size is tuned so the optical centre sits at 50% of the star's bounding box (typical: `font-size: 14px` with `--color-jersey-deep`).
 - The 1px rules render as flex children: `<span class="endmark__rule" aria-hidden="true"></span>` with `flex: 1; height: 1px; background: var(--color-ink); align-self: center;`.
-- The label is mono caps: `font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; font-weight: 600; padding: 0 12px;`. **No background fill** — the label sits on cream paper, no need to "knock out" the rule.
+- The label is mono caps: `font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; font-weight: 600; white-space: nowrap;`. **No background fill** — the label sits on cream paper, no need to "knock out" the rule. `white-space: nowrap;` prevents the label from breaking onto two lines on narrow viewports — without it, flex shrinkage compresses the rules to zero and the label wraps left-aligned (mobile bug confirmed during #1635 review).
 
 ### Visual verification (mandatory before merge)
 
