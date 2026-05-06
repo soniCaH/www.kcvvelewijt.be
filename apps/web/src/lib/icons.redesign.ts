@@ -17,6 +17,8 @@ import {
   CaretRight as PhCaretRight,
   CheckCircle as PhCheckCircle,
   Heart as PhHeart,
+  List as PhList,
+  MagnifyingGlass as PhMagnifyingGlass,
   Warning as PhWarning,
   WarningCircle as PhWarningCircle,
   X as PhX,
@@ -40,6 +42,8 @@ export const CaretLeft = fillWrapper(PhCaretLeft);
 export const CaretRight = fillWrapper(PhCaretRight);
 export const CheckCircle = fillWrapper(PhCheckCircle);
 export const Heart = fillWrapper(PhHeart);
+export const List = fillWrapper(PhList);
+export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
 export const Warning = fillWrapper(PhWarning);
 export const WarningCircle = fillWrapper(PhWarningCircle);
 export const X = fillWrapper(PhX);
