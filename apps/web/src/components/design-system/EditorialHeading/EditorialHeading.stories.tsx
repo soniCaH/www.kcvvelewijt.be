@@ -76,6 +76,72 @@ export const EverySize: Story = {
   ),
 };
 
+/**
+ * Phase 3 Ask 9 — title as constrained Portable Text with the `accent`
+ * decorator on the word "kantine" / "hoofdtribune". Editor selects a
+ * word in Studio and clicks the Accent button — it renders italic +
+ * jersey-deep without substring matching.
+ */
+export const PortableTextAccent: Story = {
+  args: { level: 1, children: "x" },
+  render: () => (
+    <div className="flex flex-col gap-8">
+      <EditorialHeading level={1} size="display-xl">
+        {[
+          {
+            _type: "block",
+            _key: "a",
+            style: "normal",
+            markDefs: [],
+            children: [
+              { _type: "span", _key: "a1", text: "De ", marks: [] },
+              { _type: "span", _key: "a2", text: "kantine", marks: ["accent"] },
+              { _type: "span", _key: "a3", text: " blijft open", marks: [] },
+            ],
+          },
+        ]}
+      </EditorialHeading>
+      <EditorialHeading level={1} size="display-xl">
+        {[
+          {
+            _type: "block",
+            _key: "b",
+            style: "normal",
+            markDefs: [],
+            children: [
+              { _type: "span", _key: "b1", text: "Werken aan de ", marks: [] },
+              {
+                _type: "span",
+                _key: "b2",
+                text: "hoofdtribune",
+                marks: ["accent"],
+              },
+            ],
+          },
+        ]}
+      </EditorialHeading>
+      <EditorialHeading level={1} size="display-xl">
+        {[
+          {
+            _type: "block",
+            _key: "c",
+            style: "normal",
+            markDefs: [],
+            children: [
+              {
+                _type: "span",
+                _key: "c1",
+                text: "Geen accent hier",
+                marks: [],
+              },
+            ],
+          },
+        ]}
+      </EditorialHeading>
+    </div>
+  ),
+};
+
 export const ToneVariants: Story = {
   args: { level: 2, children: "x" },
   render: () => (

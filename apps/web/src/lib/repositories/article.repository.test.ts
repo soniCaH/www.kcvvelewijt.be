@@ -44,6 +44,29 @@ function makeArticleDetailRow(
     id: "article-1",
     updatedAt: "2026-03-21T12:00:00Z",
     title: "Test Article Detail",
+    titleRich: [
+      {
+        _type: "block",
+        _key: "title-block",
+        style: "normal",
+        markDefs: null,
+        children: [
+          {
+            _type: "span",
+            _key: "title-span-1",
+            text: "Test Article ",
+            marks: [],
+          },
+          {
+            _type: "span",
+            _key: "title-span-2",
+            text: "Detail",
+            marks: ["accent"],
+          },
+        ],
+      },
+    ],
+    lead: "Korte samenvatting voor de kaart-, hero- en social share-renderers.",
     slug: "test-article-detail",
     publishedAt: "2026-03-20T10:00:00Z",
     featured: true,
@@ -261,6 +284,10 @@ describe("ArticleRepository", () => {
       expect(a.id).toBe("article-1");
       expect(a.updatedAt).toBe("2026-03-21T12:00:00Z");
       expect(a.title).toBe("Test Article Detail");
+      expect(a.titleRich).toEqual(row.titleRich);
+      expect(a.lead).toBe(
+        "Korte samenvatting voor de kaart-, hero- en social share-renderers.",
+      );
       expect(a.slug).toBe("test-article-detail");
       expect(a.publishedAt).toBe("2026-03-20T10:00:00Z");
       expect(a.featured).toBe(true);

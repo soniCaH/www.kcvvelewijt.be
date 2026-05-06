@@ -54,10 +54,45 @@ export const article = defineType({
     defineField({
       name: "title",
       title: "Title",
+      type: "array",
+      description:
+        "Houd de titel kort en krachtig (richtlijn: ~60 tekens). Selecteer één woord en klik op 'Accent' voor de groene cursief. Op de homepagina wordt de titel na 3 regels afgekapt met een ellipsis.",
+      // Constrained Portable Text — single block, no styles, no
+      // annotations, ONE custom decorator named `accent`. Editor selects
+      // a word + clicks Accent → that span renders italic + jersey-deep
+      // via <EditorialHeading>.
+      // Spec: docs/design/mockups/phase-3-b-editorial-hero/fields.md Ask 9.
+      of: [
+        {
+          type: "block",
+          styles: [{ title: "Normal", value: "normal" }],
+          lists: [],
+          marks: {
+            decorators: [{ title: "Accent", value: "accent" }],
+            annotations: [],
+          },
+        },
+      ],
+      validation: (r) =>
+        r
+          .required()
+          .max(1)
+          .custom((blocks) => {
+            const arr = blocks as
+              | { children?: { text?: string }[] }[]
+              | undefined;
+            const text =
+              arr?.[0]?.children?.map((c) => c.text ?? "").join("") ?? "";
+            return text.trim().length > 0 ? true : "Titel mag niet leeg zijn.";
+          }),
+    }),
+    defineField({
+      name: "lead",
+      title: "Lead",
       type: "string",
       description:
-        "Houd de titel kort en krachtig (richtlijn: ~60 tekens). Op de homepagina wordt de titel na 3 regels afgekapt met een ellipsis.",
-      validation: (r) => r.required(),
+        "Korte samenvatting boven het artikel — toont op homepage, news cards, hero, social shares. Laat leeg om de eerste alinea van de body te gebruiken. Richtlijn: ~280 tekens.",
+      validation: (r) => r.max(280),
     }),
     defineField({
       name: "slug",
@@ -82,7 +117,10 @@ export const article = defineType({
       name: "coverImage",
       title: "Cover image",
       type: "image",
+      description:
+        "Verplichte cover-afbeelding (16:9 landschap). Wordt overal gebruikt — homepage, news cards, hero, social shares. Eén upload per artikel.",
       options: { hotspot: true },
+      validation: (r) => r.required(),
     }),
     defineField({
       name: "tags",
@@ -95,6 +133,28 @@ export const article = defineType({
       name: "body",
       title: "Body",
       type: "array",
+      // articleType=event requires ≥1 eventFact block, articleType=transfer
+      // requires ≥1 transferFact block. Hero has nothing to render without
+      // it. Spec: fields.md Ask 6.
+      validation: (r) =>
+        r.custom((blocks, ctx) => {
+          const articleType = (ctx.document as { articleType?: string })
+            ?.articleType;
+          const arr = (blocks as { _type?: string }[] | undefined) ?? [];
+          if (
+            articleType === "event" &&
+            !arr.some((b) => b._type === "eventFact")
+          ) {
+            return "Een event-artikel heeft minstens één Event-fact nodig in de inhoud — voeg er één toe via het + menu in de body editor.";
+          }
+          if (
+            articleType === "transfer" &&
+            !arr.some((b) => b._type === "transferFact")
+          ) {
+            return "Een transfer-artikel heeft minstens één Transfer-fact nodig in de inhoud — voeg er één toe via het + menu in de body editor.";
+          }
+          return true;
+        }),
       of: [
         {
           type: "block",

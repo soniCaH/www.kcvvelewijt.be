@@ -14,7 +14,7 @@ import { formatArticleDate } from "../utils/dates";
 
 export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
 }`);
@@ -25,19 +25,27 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 export const RELATED_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
 }`);
 
+// Title is constrained Portable Text (single block, accent decorator).
+// `pt::text(title)` flattens to plain string for non-display contexts
+// (cards, OG, JSON-LD, sitemap, search, RSS); `titleRich` keeps the
+// PT shape for the EditorialHero accent rendering.
 export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
-  "id": _id, "updatedAt": _updatedAt, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  "id": _id, "updatedAt": _updatedAt,
+  "title": coalesce(pt::text(title), title, ""),
+  "titleRich": title,
+  "lead": coalesce(lead, ""),
+  "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   metaDescription,
   "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
@@ -71,12 +79,12 @@ export const ARTICLE_BY_SLUG_QUERY =
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
-  relatedArticles[]-> { "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
   relatedContent[]->{
     _type,
     _id,
     ...select(_type == "article" => {
-      "title": coalesce(title, ""),
+      "title": coalesce(pt::text(title), title, ""),
       "slug": coalesce(slug.current, ""),
       publishedAt,
       unpublishAt,
@@ -102,7 +110,7 @@ export const ARTICLE_BY_SLUG_QUERY =
       "role": functionTitle
     }),
     ...select(_type == "event" => {
-      "title": coalesce(title, ""),
+      "title": coalesce(pt::text(title), title, ""),
       "slug": coalesce(slug.current, ""),
       "dateStart": coalesce(dateStart, ""),
       dateEnd,

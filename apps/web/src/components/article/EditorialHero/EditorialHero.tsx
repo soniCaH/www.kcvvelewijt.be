@@ -17,14 +17,18 @@
  * Spec: PRD redesign-phase-3 §5.B.1.
  */
 import Image from "next/image";
+import Link from "next/link";
+import type { PortableTextBlock } from "@portabletext/react";
 import {
   EditorialByline,
+  EditorialHeading,
   EditorialHeroShell,
   EditorialKicker,
   EditorialLead,
   type EditorialKickerProps,
 } from "@/components/design-system";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
+import { serializeTitle } from "@/lib/utils/serialize-title";
 
 export type EditorialHeroVariant =
   | "announcement"
@@ -39,9 +43,14 @@ export interface EditorialHeroCoverImage {
   alt: string;
 }
 
-interface EditorialHeroBaseProps {
-  /** Article title rendered as the H1. */
-  title: string;
+interface EditorialHeroSharedProps {
+  /**
+   * Article title rendered as the H1. Plain string (legacy) OR a
+   * single-block constrained Portable Text array with the `accent`
+   * decorator (post Ask 9). PT spans tagged `accent` render italic +
+   * jersey-deep via <EditorialHeading>.
+   */
+  title: string | PortableTextBlock[];
   /** Editor-supplied lead, or a body-derived fallback truncated via `truncateLead`. */
   lead?: string;
   /** Editorial chrome row (article type, date, read time, etc.). */
@@ -50,25 +59,32 @@ interface EditorialHeroBaseProps {
   author?: string;
   /** Cover image artefact rendered in the right column (40fr). */
   coverImage?: EditorialHeroCoverImage;
-  /** `"detail"` (default) or `"homepage"`. Variant rendering for `"homepage"` lands in #1638. */
-  placement?: EditorialHeroPlacement;
 }
 
-interface AnnouncementProps extends EditorialHeroBaseProps {
+// Discriminated union over `placement`: `"homepage"` requires a `slug`
+// (the link target /nieuws/{slug}); `"detail"` (default) doesn't.
+// TypeScript enforces this at every call site without a runtime check.
+interface DetailPlacementProps extends EditorialHeroSharedProps {
+  placement?: "detail";
+  slug?: never;
+}
+
+interface HomepagePlacementProps extends EditorialHeroSharedProps {
+  placement: "homepage";
+  /** Required for homepage placement — builds the link target. */
+  slug: string;
+}
+
+type EditorialHeroPlacementProps =
+  | DetailPlacementProps
+  | HomepagePlacementProps;
+
+type AnnouncementProps = EditorialHeroPlacementProps & {
   variant: "announcement";
-}
-
-interface TransferProps extends EditorialHeroBaseProps {
-  variant: "transfer";
-}
-
-interface EventProps extends EditorialHeroBaseProps {
-  variant: "event";
-}
-
-interface InterviewProps extends EditorialHeroBaseProps {
-  variant: "interview";
-}
+};
+type TransferProps = EditorialHeroPlacementProps & { variant: "transfer" };
+type EventProps = EditorialHeroPlacementProps & { variant: "event" };
+type InterviewProps = EditorialHeroPlacementProps & { variant: "interview" };
 
 export type EditorialHeroProps =
   | AnnouncementProps
@@ -100,22 +116,22 @@ function EditorialHeroCover({
 }
 
 export function EditorialHero(props: EditorialHeroProps) {
-  const { title, lead, kicker, author, coverImage } = props;
+  const { title, lead, kicker, author, coverImage, placement, slug } = props;
   const editorial = (
     <>
       {kicker !== undefined && kicker.length > 0 ? (
         <EditorialKicker items={kicker} />
       ) : null}
-      <h1 className="text-ink font-serif text-4xl leading-[0.95] font-black italic md:text-5xl lg:text-6xl">
+      <EditorialHeading level={1} size="display-xl">
         {title}
-      </h1>
+      </EditorialHeading>
       {lead !== undefined && lead.trim() !== "" ? (
         <EditorialLead>{lead}</EditorialLead>
       ) : null}
       <EditorialByline author={author} />
     </>
   );
-  return (
+  const shell = (
     <EditorialHeroShell
       editorial={editorial}
       cover={
@@ -125,4 +141,28 @@ export function EditorialHero(props: EditorialHeroProps) {
       }
     />
   );
+
+  if (placement === "homepage") {
+    // `slug` is enforced by the discriminated union — TypeScript
+    // guarantees it's a non-empty string here. No runtime guard needed.
+    // Press-up hover: inverse of the canonical press-down on paper-stamped
+    // primitives. Body content (factStrips, Q&A, EndMark) does not render in
+    // homepage placement — the call site is responsible for that gate.
+    return (
+      <Link
+        href={`/nieuws/${slug}`}
+        className="group relative block pb-8 transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+        aria-label={serializeTitle(title)}
+      >
+        {shell}
+        <span
+          aria-hidden="true"
+          className="text-jersey-deep pointer-events-none absolute right-2 bottom-1 font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          ★ Lees verder →
+        </span>
+      </Link>
+    );
+  }
+  return shell;
 }
