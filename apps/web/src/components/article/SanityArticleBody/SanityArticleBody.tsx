@@ -30,6 +30,7 @@ import {
   VideoBlock,
   type VideoBlockValue,
 } from "@/components/article/VideoBlock";
+import { QASectionDivider } from "@/components/design-system/QASectionDivider";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -235,6 +236,11 @@ export const SanityArticleBody = ({
         qaBlock: ({ value }: { value: QaBlockValue }) => (
           <QaBlock value={value} subjects={subjects} />
         ),
+        qaSectionDivider: ({
+          value,
+        }: {
+          value: { title: PortableTextBlock[]; kicker?: string };
+        }) => <QASectionDivider title={value.title} kicker={value.kicker} />,
         transferFact: ({ value }: { value: TransferFactValue }) => (
           // In the transfer template, the first transferFact is absorbed
           // by the hero — the template filters it out of the body before

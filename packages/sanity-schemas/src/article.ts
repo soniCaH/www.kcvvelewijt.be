@@ -209,6 +209,7 @@ export const article = defineType({
         { type: "fileAttachment" },
         { type: "htmlTable" },
         { type: "qaBlock" },
+        { type: "qaSectionDivider" },
         { type: "transferFact" },
         { type: "eventFact" },
       ],

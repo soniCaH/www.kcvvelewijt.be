@@ -15,6 +15,7 @@ export {article} from './article'
 export {articleImage} from './articleImage'
 export {videoBlock} from './videoBlock'
 export {qaBlock, qaPair} from './qaBlock'
+export {qaSectionDivider} from './blocks/qaSectionDivider'
 export {transferFact} from './transferFact'
 export {eventFact} from './eventFact'
 export {subject} from './subject'
@@ -38,6 +39,7 @@ import {article} from './article'
 import {articleImage} from './articleImage'
 import {videoBlock} from './videoBlock'
 import {qaBlock, qaPair} from './qaBlock'
+import {qaSectionDivider} from './blocks/qaSectionDivider'
 import {transferFact} from './transferFact'
 import {eventFact} from './eventFact'
 import {subject} from './subject'
@@ -64,6 +66,7 @@ export const schemaTypes = [
   videoBlock,
   qaBlock,
   qaPair,
+  qaSectionDivider,
   transferFact,
   eventFact,
   subject,
