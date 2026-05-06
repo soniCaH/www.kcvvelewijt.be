@@ -126,6 +126,10 @@ export type {
 export { JerseyShirt } from "./JerseyShirt";
 export type { JerseyShirtProps } from "./JerseyShirt";
 
+// PlayerFigure
+export { PlayerFigure } from "./PlayerFigure";
+export type { PlayerFigureProps, PlayerFigureTag } from "./PlayerFigure";
+
 // EditorialLink
 export { EditorialLink } from "./EditorialLink";
 export type {

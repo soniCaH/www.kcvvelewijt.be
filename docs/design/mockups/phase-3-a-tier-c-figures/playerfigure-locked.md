@@ -48,7 +48,7 @@ Reference renders:
 The illustration replaces the **photo well only**. The surrounding meta column (position, name, jerseyNumber, bio, tag, teamLabel) renders identically to the photo state — players without a `psdImage` are not second-class.
 
 ```text
-TapedCard (polaroid, slight rotation, two cream tape strips at top corners)
+TapedCard (polaroid, slight rotation, jersey-deep tape strip at top edge — cream tape on cream-soft has no contrast in the design-system token set; jersey is the canonical Phase 3 visible tape colour, decided during #1633 visual review)
   ├─ Inner panel — desaturated grey rectangle (option-b's .figure__photo gradient, no real photo)
   ├─ jersey-deep block silhouette (head ellipse + curved torso + shoulder stripe blocks)
   ├─ ink overprint outline shifted 2-3px (head ellipse + torso + V-collar + 4 vertical stripes)
