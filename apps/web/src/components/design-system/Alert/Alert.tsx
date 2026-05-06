@@ -23,6 +23,7 @@
  */
 
 import { forwardRef, type ReactNode } from "react";
+import { MonoStar } from "../MonoStar/MonoStar";
 import { CheckCircle, Warning, WarningCircle, X } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
@@ -63,7 +64,7 @@ const variantConfig: Record<
     bg: string;
     iconBlock: string;
     kicker: string;
-    kickerLabel: string;
+    kickerLabel: ReactNode;
     Icon: typeof CheckCircle;
     /** WAI-ARIA role + live-region politeness. Errors are assertive; */
     /** success/warning are polite (status), avoiding interruption. */
@@ -75,7 +76,11 @@ const variantConfig: Record<
     bg: "bg-success-soft",
     iconBlock: "bg-jersey-deep text-cream",
     kicker: "text-jersey-deep",
-    kickerLabel: "★ MELDING",
+    kickerLabel: (
+      <>
+        <MonoStar /> MELDING
+      </>
+    ),
     Icon: CheckCircle,
     role: "status",
     ariaLive: "polite",
@@ -181,7 +186,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
         <span
           className={cn(
-            "block font-mono text-[10px] font-semibold tracking-[0.12em] uppercase",
+            "flex items-center gap-1 font-mono text-[10px] leading-none font-semibold tracking-[0.12em] uppercase",
             config.kicker,
           )}
         >

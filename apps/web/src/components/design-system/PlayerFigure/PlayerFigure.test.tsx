@@ -20,8 +20,10 @@ describe("PlayerFigure", () => {
     const figure = container.querySelector("[data-playerfigure-state]");
     expect(figure).toHaveAttribute("data-playerfigure-state", "photo");
     expect(screen.getByAltText("Maxim Breugelmans")).toBeInTheDocument();
+    // The ★ now renders as a separate <MonoStar> component, leaving the
+    // static caption text alone. Assert the text content directly.
     expect(
-      screen.getByText("★ KCVV ELEWIJT · SEIZOEN 25–26"),
+      screen.getByText("KCVV ELEWIJT · SEIZOEN 25–26"),
     ).toBeInTheDocument();
   });
 

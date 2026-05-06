@@ -130,6 +130,25 @@ export type { JerseyShirtProps } from "./JerseyShirt";
 export { PlayerFigure } from "./PlayerFigure";
 export type { PlayerFigureProps, PlayerFigureTag } from "./PlayerFigure";
 
+// EditorialByline
+export { EditorialByline } from "./EditorialByline";
+export type { EditorialBylineProps } from "./EditorialByline";
+
+// EditorialHeroShell
+export { EditorialHeroShell } from "./EditorialHeroShell";
+export type { EditorialHeroShellProps } from "./EditorialHeroShell";
+
+// EditorialKicker
+export { EditorialKicker } from "./EditorialKicker";
+export type { EditorialKickerProps } from "./EditorialKicker";
+
+// EditorialLead
+export { EditorialLead, truncateLead } from "./EditorialLead";
+export type { EditorialLeadProps } from "./EditorialLead";
+
+// MonoStar
+export { MonoStar } from "./MonoStar";
+
 // EditorialLink
 export { EditorialLink } from "./EditorialLink";
 export type {
