@@ -132,18 +132,18 @@ When `transferFact.note` is empty, no PullQuote renders — body flows directly 
 
 **Existing primitives reused verbatim** (continued from announcement-locked):
 
-| Primitive                        | Use                                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------ |
-| `<TapedCard>`                    | Each of the 3 cards in TransferFactStrip composes TapedCard with a different rotation prop |
-| `<TapedFigure>`                  | Wraps the cover image in HeroCoverImage at `aspect="landscape-16-9"`                       |
-| `<MonoLabel>` / `<MonoLabelRow>` | Kicker, role labels, sub-meta in cards                                                     |
-| `<EditorialHeading>`             | Hero headline (PT-aware post-Ask-9)                                                        |
-| `<DropCapParagraph>`             | First body paragraph (article body, not hero-side)                                         |
-| `<PullQuote tone="jersey">`      | The transferFact.note treatment between strip and body                                     |
+| Primitive                        | Use                                                                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `<TapedCard>`                    | Each of the 3 cards in TransferFactStrip composes TapedCard with a different rotation prop                                               |
+| `<TapedFigure>`                  | Inline cover-image: `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` (supersedes `<HeroCoverImage>` per Phase 3 PRD §8b) |
+| `<MonoLabel>` / `<MonoLabelRow>` | Kicker, role labels, sub-meta in cards                                                                                                   |
+| `<EditorialHeading>`             | Hero headline (PT-aware post-Ask-9)                                                                                                      |
+| `<DropCapParagraph>`             | First body paragraph (article body, not hero-side)                                                                                       |
+| `<PullQuote tone="jersey">`      | The transferFact.note treatment between strip and body                                                                                   |
 
 **New shared sub-components** (continued — same set as announcement):
 
-- `<EditorialHero>` (top-level) · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` · `<HeroCoverImage>` — all locked with announcement.
+- `<EditorialHero>` (top-level) · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` — all locked with announcement. (Cover image composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` per Phase 3 PRD §8b; `<HeroCoverImage>` is superseded.)
 
 **New variant-specific component:**
 

@@ -8,8 +8,14 @@ const mockupsRoot = path.resolve(__dirname, "..", "..");
 
 const variant = process.argv[2];
 const placement = process.argv[3] ?? "detail";
-if (!variant) {
+const allowedPlacements = ["detail", "homepage", "compare"];
+if (!variant || !/^[a-z0-9_-]+$/i.test(variant)) {
   console.error("usage: node _capture-revised.mjs <variant> [detail|homepage|compare]");
+  console.error("  <variant> must be non-empty and match /^[a-z0-9_-]+$/i");
+  process.exit(1);
+}
+if (!allowedPlacements.includes(placement)) {
+  console.error(`invalid placement '${placement}'; expected one of: ${allowedPlacements.join(", ")}`);
   process.exit(1);
 }
 
@@ -139,6 +145,7 @@ await page.evaluate(async () => {
       img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r; })
     )
   );
+  if (document.fonts) await document.fonts.ready;
 });
 await page.waitForTimeout(500);
 // Full page

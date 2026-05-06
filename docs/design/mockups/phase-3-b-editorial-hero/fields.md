@@ -184,9 +184,9 @@ Design coordinated through #1470 once Phase 3 B four article variants are locked
 
 Per master design line 698 (owner correction 2026-04-28) + owner direction 2026-05-05:
 
-- **Source:** `article.coverImage` at **16:9 landscape**, hotspot, optional.
+- **Source:** `article.coverImage` at **16:9 landscape**, hotspot. **Required** post-migration per Ask 8 decision (a) — `validation: (r) => r.required()`. Until the schema migration ships, it remains optional in `ARTICLE_BY_SLUG_QUERY_RESULT`; treat that as a transitional state. `<EditorialHero>` is designed against the post-migration (required) contract — see Ask 8 below.
 - **One upload per article.** Used by every surface that needs an image.
-- The current `coverImagePortraitUrl` (4:5 portrait crop in `ARTICLE_BY_SLUG_QUERY_RESULT`) is a redesign target — drops in Phase 3.B.2 implementation. No portrait crops anywhere.
+- `coverImagePortraitUrl` (4:5 portrait crop currently in `ARTICLE_BY_SLUG_QUERY_RESULT`) is **deprecated** — removed by Phase 3.B.2 implementation. No portrait crops anywhere.
 
 ## Owner asks — fields not in schema today
 

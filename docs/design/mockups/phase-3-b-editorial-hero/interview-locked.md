@@ -96,7 +96,7 @@ For N≥2, no in-strip quote — multi-subject quotes belong to the body's QaSec
 
 **Shared sub-components** (locked with announcement, reused here):
 
-`<EditorialHero>` · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` · `<HeroCoverImage>` — no fork.
+`<EditorialHero>` · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` — no fork. (Cover image composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` per Phase 3 PRD §8b; `<HeroCoverImage>` is superseded.)
 
 **`<PlayerFigure>` extension** (Ask 4 follow-up):
 

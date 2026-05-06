@@ -164,13 +164,14 @@ type NavTakeoverItemProps = {
 3. **Storybook coverage on every new primitive.** `<NavTakeover>` and `<NavTakeover.Item>` each ship with `<Name>.stories.tsx` (title `UI/<Name>`), VR-tagged, `vr` tag in meta. The reused `<Button>` variants are already covered by the existing `<Button>` baseline.
 4. **Server / Client split.** `<SiteHeader>` is a **Client Component** (uses `usePathname()` for active-item detection — same as the existing `PageHeader.tsx` it replaces). Senior/youth team data is server-fetched in the root layout (`TeamRepository.findAll()`) and passed in as props; nothing else is fetched inside `<SiteHeader>`. Drawer state (open/close, focus management, body-scroll lock) lives in `<NavTakeover>`, also a Client Component. No `useRouter()` is needed — navigation happens via standard `<Link>` / `<a>` clicks.
 
+## Required (blocking) implementation behaviour
+
+- **a11y focus trap.** When drawer opens, focus moves to the first nav item; on close, focus returns to the hamburger (the `<Button variant="ghost" size="sm">` that triggered open). Tab-cycle is trapped inside `<NavTakeover>` until close. Must coexist with the Drawer scroll lock (`document.body.style.overflow = 'hidden'`) and the locked Q1 sticky `<PageHeader>` — sticky behaviour must not fight scroll lock or focus management. Active route handling stays on `usePathname()` inside `<NavTakeover.Item>` (same approach as existing `PageHeader`).
+
 ## Open follow-ups (non-blocking)
 
 - **Production search glyph.** Mockup uses typographic `⌕`; production should swap to Phosphor `MagnifyingGlass` (or equivalent) — confirm during 3.C.1 implementation.
-- **Drawer scroll lock.** When drawer is open, `document.body.style.overflow = 'hidden'`. Coordinate with the locked Q1 sticky header (sticky behaviour shouldn't fight scroll lock).
-- **Active route detection.** Existing `PageHeader` does this via `usePathname()`; preserve the same approach.
 - **Sub-item lazy reveal.** Drawer submenu sub-items render lazily (not in initial DOM) to keep the closed list short on small phones. State managed in `<NavTakeover.Item>` open prop.
-- **a11y focus trap.** When drawer opens, focus moves to the first nav item; on close, focus returns to the hamburger. Tab-cycle inside the drawer (focus trap) until close.
 
 ## Approval checklist
 

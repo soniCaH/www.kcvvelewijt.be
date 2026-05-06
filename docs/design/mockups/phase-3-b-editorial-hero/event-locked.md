@@ -30,9 +30,10 @@ Drilled down per question, owner-approved each:
 ```text
 ┌──────────────────────────────────────────────┬───────────────────────────┐
 │  EditorialKicker (★ EVENT · category · …)     │                           │
-│  EditorialHeading (PT-aware, accent)          │   HeroCoverImage          │
-│  EditorialLead                                │   (TapedCard rotation A   │
-│  EditorialByline                              │    + 16:9 image, plain)   │
+│  EditorialHeading (PT-aware, accent)          │   <TapedCard rotation A>  │
+│  EditorialLead                                │     + <TapedFigure        │
+│  EditorialByline                              │       aspect="landscape-  │
+│                                               │       16-9"> (plain)      │
 └──────────────────────────────────────────────┴───────────────────────────┘
                                             ↓
 ┌─────────────┬───────────────────────────────────────────┬────────────────┐
@@ -72,17 +73,17 @@ The body cell is the only mutable area — date block on the left and CTA cell o
 
 **Existing primitives reused** (continued from announcement-locked / transfer-locked):
 
-| Primitive                        | Use                                                     |
-| -------------------------------- | ------------------------------------------------------- |
-| `<TapedCard>`                    | Wraps the cover image in HeroCoverImage at rotation A   |
-| `<TapedFigure>`                  | Composes TapedCard + image at `aspect="landscape-16-9"` |
-| `<MonoLabel>` / `<MonoLabelRow>` | Kicker, role labels                                     |
-| `<EditorialHeading>`             | Hero headline (PT-aware post-Ask-9)                     |
-| `<DropCapParagraph>`             | First body paragraph (article body, not hero)           |
+| Primitive                        | Use                                                                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `<TapedCard>`                    | Wraps the cover image at rotation A                                                                                                      |
+| `<TapedFigure>`                  | Inline cover-image: `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` (supersedes `<HeroCoverImage>` per Phase 3 PRD §8b) |
+| `<MonoLabel>` / `<MonoLabelRow>` | Kicker, role labels                                                                                                                      |
+| `<EditorialHeading>`             | Hero headline (PT-aware post-Ask-9)                                                                                                      |
+| `<DropCapParagraph>`             | First body paragraph (article body, not hero)                                                                                            |
 
 **Shared sub-components** (locked with announcement, reused here):
 
-`<EditorialHero>` · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` · `<HeroCoverImage>` — no fork.
+`<EditorialHero>` · `<EditorialHeroShell>` · `<EditorialKicker>` · `<EditorialLead>` · `<EditorialByline>` — no fork. (Cover image composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` per Phase 3 PRD §8b; `<HeroCoverImage>` is superseded.)
 
 **New variant-specific component:**
 
