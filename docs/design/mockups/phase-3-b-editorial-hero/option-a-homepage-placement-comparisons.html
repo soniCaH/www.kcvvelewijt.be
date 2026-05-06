@@ -282,6 +282,19 @@
         outline-offset: 4px;
       }
 
+      /* prefers-reduced-motion — preserve the visual state changes
+         (lift, accent colour shift, hint visibility) but skip the
+         animations between rest and hover/focus. Users who opt out
+         of motion still get the affordance immediately, without the
+         200ms transitions. */
+      @media (prefers-reduced-motion: reduce) {
+        .eh-clickable,
+        .eh-clickable .eh-heading em,
+        .eh-clickable .eh-hover-hint {
+          transition: none;
+        }
+      }
+
       footer { margin-top: 64px; padding-top: 28px; border-top: 2px solid var(--color-ink); }
       footer .next-step { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 24px 28px; margin-bottom: 24px; }
       footer code { font-family: var(--font-mono); font-size: 13px; background: var(--color-cream-soft); padding: 1px 6px; border: 1px solid var(--color-paper-edge); }

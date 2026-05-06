@@ -22,48 +22,59 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
 });
 
-for (const opt of options) {
-  const page = await context.newPage();
-  const url = pathToFileURL(path.join(dir, opt.file)).href;
-  await page.goto(url, { waitUntil: "networkidle" });
-  // Wait for fonts + images to settle so the screenshot captures
-  // final glyph metrics + remote artwork rather than fallback fonts
-  // or broken-image placeholders.
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(
-      Array.from(document.images).map((img) =>
-        img.complete
-          ? null
-          : new Promise((resolve) => {
-              img.addEventListener("load", resolve, { once: true });
-              img.addEventListener("error", resolve, { once: true });
-            })
-      )
-    );
-  });
-  // Full page
-  await page.screenshot({
-    path: path.join(__dirname, `option-${opt.slug}-full.png`),
-    fullPage: true,
-  });
-  console.log(`✓ option-${opt.slug}-full.png`);
+// Wrap the whole run in try/finally so a thrown error during
+// goto/evaluate/screenshot doesn't leave a Chromium process attached
+// to a stale context. Each `opt` iteration also has its own
+// try/finally for `page` cleanup so a single failing option doesn't
+// orphan its tab.
+try {
+  for (const opt of options) {
+    const page = await context.newPage();
+    try {
+      const url = pathToFileURL(path.join(dir, opt.file)).href;
+      await page.goto(url, { waitUntil: "networkidle" });
+      // Wait for fonts + images to settle so the screenshot captures
+      // final glyph metrics + remote artwork rather than fallback fonts
+      // or broken-image placeholders.
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await Promise.all(
+          Array.from(document.images).map((img) =>
+            img.complete
+              ? null
+              : new Promise((resolve) => {
+                  img.addEventListener("load", resolve, { once: true });
+                  img.addEventListener("error", resolve, { once: true });
+                })
+          )
+        );
+      });
+      // Full page
+      await page.screenshot({
+        path: path.join(__dirname, `option-${opt.slug}-full.png`),
+        fullPage: true,
+      });
+      console.log(`✓ option-${opt.slug}-full.png`);
 
-  // Per-variant
-  for (const v of variants) {
-    const sel = opt.variantSelectorTpl.replace("{slug}", v);
-    const el = await page.$(sel);
-    if (!el) {
-      console.warn(`  ! missing ${sel} in ${opt.file}`);
-      continue;
+      // Per-variant
+      for (const v of variants) {
+        const sel = opt.variantSelectorTpl.replace("{slug}", v);
+        const el = await page.$(sel);
+        if (!el) {
+          console.warn(`  ! missing ${sel} in ${opt.file}`);
+          continue;
+        }
+        await el.screenshot({
+          path: path.join(__dirname, `option-${opt.slug}-${v}.png`),
+        });
+        console.log(`  ✓ option-${opt.slug}-${v}.png`);
+      }
+    } finally {
+      await page.close();
     }
-    await el.screenshot({
-      path: path.join(__dirname, `option-${opt.slug}-${v}.png`),
-    });
-    console.log(`  ✓ option-${opt.slug}-${v}.png`);
   }
-  await page.close();
+} finally {
+  await context.close();
+  await browser.close();
 }
-
-await browser.close();
 console.log("Done.");

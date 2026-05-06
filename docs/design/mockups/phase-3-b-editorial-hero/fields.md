@@ -203,7 +203,7 @@ Each item below is a real gap the heroes need to render meaningfully. Please dec
 **Options:**
 
 - **(a) Add `lead` field** to article schema — `string`, ~280 char max, optional. Editor-authored. Most direct.
-- **(b) Auto-extract from `body[0]`** — first Portable Text paragraph. Free, no schema change. Risk: editors write the body's first paragraph as a continuation of the headline, not as a stand-alone summary; the hero dek then reads weird.
+- **(b) Auto-extract from `body[0]`** — first Portable Text paragraph. Free, no schema change. Risk: editors write the body's first paragraph as a continuation of the headline, not as a standalone summary; the hero dek then reads weird.
 - **(c) Hybrid** — `lead` field, fall back to `body[0]` first paragraph when `lead` is empty.
 
 **My recommendation:** (c). Lets editors craft a hero-specific dek when they want, and not worry when they don't. Schema cost: 1 string field, optional.
