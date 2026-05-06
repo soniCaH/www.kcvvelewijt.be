@@ -30,6 +30,7 @@
  */
 import Image from "next/image";
 import { MonoLabel, type MonoLabelVariant } from "../MonoLabel/MonoLabel";
+import { MonoStar } from "../MonoStar/MonoStar";
 import { TapedCard } from "../TapedCard/TapedCard";
 import {
   JERSEY_FIGURE_VIEWBOX,
@@ -69,7 +70,7 @@ export interface PlayerFigureProps {
   crop?: "default" | "tight";
 }
 
-const STATIC_PHOTO_CAPTION = "★ KCVV ELEWIJT · SEIZOEN 25–26";
+const STATIC_PHOTO_CAPTION_TEXT = "KCVV ELEWIJT · SEIZOEN 25–26";
 const BIO_MAX_CHARS = 120;
 const STRIPE_STROKE_WIDTH = 2;
 const OUTLINE_STROKE_WIDTH = 3;
@@ -194,9 +195,10 @@ function PhotoState({
       </div>
       <p
         data-playerfigure="caption"
-        className="text-ink-muted mt-3 text-center font-mono text-[10px] tracking-[0.1em] uppercase"
+        className="text-ink-muted mt-3 flex items-center justify-center gap-1 text-center font-mono text-[10px] leading-none tracking-[0.1em] uppercase"
       >
-        {STATIC_PHOTO_CAPTION}
+        <MonoStar />
+        {STATIC_PHOTO_CAPTION_TEXT}
       </p>
     </TapedCard>
   );
