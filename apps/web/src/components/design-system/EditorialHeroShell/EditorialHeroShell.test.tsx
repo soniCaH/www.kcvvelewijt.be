@@ -15,10 +15,17 @@ describe("EditorialHeroShell", () => {
     expect(screen.getByText("cover")).toBeInTheDocument();
   });
 
-  it("omits the cover wrapper entirely when cover prop is missing", () => {
-    const { container } = render(
-      <EditorialHeroShell editorial={<p>editorial</p>} />,
-    );
-    expect(container.querySelectorAll("section > div")).toHaveLength(1);
-  });
+  it.each([
+    ["undefined", undefined],
+    ["null", null],
+    ["false", false],
+  ])(
+    "omits the cover wrapper when cover is %s (any non-renderable ReactNode)",
+    (_label, cover) => {
+      const { container } = render(
+        <EditorialHeroShell editorial={<p>editorial</p>} cover={cover} />,
+      );
+      expect(container.querySelectorAll("section > div")).toHaveLength(1);
+    },
+  );
 });

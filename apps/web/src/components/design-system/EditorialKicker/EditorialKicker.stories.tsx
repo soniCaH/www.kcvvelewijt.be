@@ -53,5 +53,11 @@ export const FourItems: Story = {
 
 export const EmptyItems: Story = {
   args: { items: [] },
-  tags: ["vr-skip"],
+  parameters: {
+    vr: {
+      disable: true,
+      reason:
+        "EditorialKicker returns null when items=[]; an empty snapshot adds noise to the VR diff suite without exercising layout.",
+    },
+  },
 };

@@ -23,7 +23,7 @@ export function EditorialHeroShell({
   return (
     <section className="border-ink mx-auto grid w-full max-w-[1120px] grid-cols-1 gap-x-12 gap-y-8 border-b py-12 lg:grid-cols-[60fr_40fr]">
       <div className="flex flex-col gap-3">{editorial}</div>
-      {cover !== undefined ? (
+      {cover ? (
         <div className="flex items-start justify-center">{cover}</div>
       ) : null}
     </section>
