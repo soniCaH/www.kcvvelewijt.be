@@ -5,7 +5,10 @@ const meta = {
   title: "UI/EndMark",
   component: EndMark,
   tags: ["autodocs", "vr"],
-  parameters: { layout: "padded" },
+  parameters: {
+    layout: "padded",
+    a11y: { test: "error" },
+  },
   decorators: [
     (Story) => (
       <div className="bg-cream-soft border-paper-edge border p-12">

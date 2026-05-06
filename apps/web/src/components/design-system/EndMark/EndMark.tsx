@@ -22,7 +22,7 @@ export interface EndMarkProps {
 
 export function EndMark({ label = "EINDE GESPREK" }: EndMarkProps) {
   return (
-    <aside className="mx-auto my-12 mb-8 flex w-full max-w-[560px] items-center leading-none">
+    <aside className="mx-auto mt-12 mb-8 flex w-full max-w-[560px] items-center leading-none">
       <span
         data-endmark="rule"
         aria-hidden="true"
@@ -31,20 +31,20 @@ export function EndMark({ label = "EINDE GESPREK" }: EndMarkProps) {
       <span
         data-endmark="star"
         aria-hidden="true"
-        className="text-jersey-deep mx-3 inline-flex items-center text-[14px] leading-none"
+        className="text-jersey-deep inline-flex items-center text-[14px] leading-none"
       >
         ★
       </span>
       <span
         data-endmark="label"
-        className="text-ink font-mono text-[10px] leading-none font-semibold tracking-[0.18em] uppercase"
+        className="text-ink px-3 font-mono text-[10px] leading-none font-semibold tracking-[0.18em] uppercase"
       >
         {label}
       </span>
       <span
         data-endmark="star"
         aria-hidden="true"
-        className="text-jersey-deep mx-3 inline-flex items-center text-[14px] leading-none"
+        className="text-jersey-deep inline-flex items-center text-[14px] leading-none"
       >
         ★
       </span>
