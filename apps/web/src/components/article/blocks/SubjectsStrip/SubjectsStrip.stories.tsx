@@ -4,8 +4,12 @@ import { SubjectsStrip, type Subject } from "./SubjectsStrip";
 const meta = {
   title: "Article/SubjectsStrip",
   component: SubjectsStrip,
-  tags: ["autodocs", "vr"],
-  parameters: { layout: "fullscreen" },
+  // VR disabled — fixture portraits are network-fetched from placehold.co
+  // (no local SVGs for the four subject kinds yet); the stories would
+  // produce non-deterministic baselines on each VR run. Re-enable once
+  // local fixtures are in place.
+  tags: ["autodocs"],
+  parameters: { layout: "fullscreen", vr: { disable: true } },
   decorators: [
     (Story) => (
       <div className="bg-cream-soft px-12 py-8">

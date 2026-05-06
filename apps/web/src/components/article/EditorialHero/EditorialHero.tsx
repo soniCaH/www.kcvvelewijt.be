@@ -28,6 +28,7 @@ import {
   type EditorialKickerProps,
 } from "@/components/design-system";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
+import { serializeTitle } from "@/lib/utils/serialize-title";
 
 export type EditorialHeroVariant =
   | "announcement"
@@ -42,7 +43,7 @@ export interface EditorialHeroCoverImage {
   alt: string;
 }
 
-interface EditorialHeroBaseProps {
+interface EditorialHeroSharedProps {
   /**
    * Article title rendered as the H1. Plain string (legacy) OR a
    * single-block constrained Portable Text array with the `accent`
@@ -58,35 +59,32 @@ interface EditorialHeroBaseProps {
   author?: string;
   /** Cover image artefact rendered in the right column (40fr). */
   coverImage?: EditorialHeroCoverImage;
-  /**
-   * `"detail"` (default) or `"homepage"`. Homepage placement wraps the
-   * hero in a link to `/nieuws/{slug}` with press-up hover and a
-   * `★ Lees verder →` hint at the bottom-right; body content
-   * (factStrips, Q&A, EndMark) is suppressed at the call site.
-   */
-  placement?: EditorialHeroPlacement;
-  /**
-   * Required when `placement="homepage"` — used to build the link
-   * target `/nieuws/{slug}`. Detail placement ignores it.
-   */
-  slug?: string;
 }
 
-interface AnnouncementProps extends EditorialHeroBaseProps {
+// Discriminated union over `placement`: `"homepage"` requires a `slug`
+// (the link target /nieuws/{slug}); `"detail"` (default) doesn't.
+// TypeScript enforces this at every call site without a runtime check.
+interface DetailPlacementProps extends EditorialHeroSharedProps {
+  placement?: "detail";
+  slug?: never;
+}
+
+interface HomepagePlacementProps extends EditorialHeroSharedProps {
+  placement: "homepage";
+  /** Required for homepage placement — builds the link target. */
+  slug: string;
+}
+
+type EditorialHeroPlacementProps =
+  | DetailPlacementProps
+  | HomepagePlacementProps;
+
+type AnnouncementProps = EditorialHeroPlacementProps & {
   variant: "announcement";
-}
-
-interface TransferProps extends EditorialHeroBaseProps {
-  variant: "transfer";
-}
-
-interface EventProps extends EditorialHeroBaseProps {
-  variant: "event";
-}
-
-interface InterviewProps extends EditorialHeroBaseProps {
-  variant: "interview";
-}
+};
+type TransferProps = EditorialHeroPlacementProps & { variant: "transfer" };
+type EventProps = EditorialHeroPlacementProps & { variant: "event" };
+type InterviewProps = EditorialHeroPlacementProps & { variant: "interview" };
 
 export type EditorialHeroProps =
   | AnnouncementProps
@@ -145,14 +143,8 @@ export function EditorialHero(props: EditorialHeroProps) {
   );
 
   if (placement === "homepage") {
-    if (slug === undefined || slug === "") {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn(
-          '[EditorialHero] placement="homepage" requires a non-empty `slug` to build the /nieuws/{slug} link target.',
-        );
-      }
-      return shell;
-    }
+    // `slug` is enforced by the discriminated union — TypeScript
+    // guarantees it's a non-empty string here. No runtime guard needed.
     // Press-up hover: inverse of the canonical press-down on paper-stamped
     // primitives. Body content (factStrips, Q&A, EndMark) does not render in
     // homepage placement — the call site is responsible for that gate.
@@ -160,9 +152,7 @@ export function EditorialHero(props: EditorialHeroProps) {
       <Link
         href={`/nieuws/${slug}`}
         className="group relative block pb-8 transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
-        aria-label={
-          typeof title === "string" ? title : "Lees het volledige artikel"
-        }
+        aria-label={serializeTitle(title)}
       >
         {shell}
         <span

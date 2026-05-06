@@ -235,12 +235,56 @@ export function SubjectsStrip({
   if (subjects.length === 0) return null;
   const forceVertical = orientation === "vertical";
 
-  // N≥3 + narrow → compact mono-caps list (no polaroids).
+  // N≥3 → compact mono-caps list at narrow viewports, polaroid layout
+  // at md+. Server-renders both and CSS-toggles by viewport so the
+  // component stays a Server Component (no useMediaQuery hook needed).
+  // forceVertical (storybook fixture) renders only the compact list.
   if (subjects.length >= 3 && forceVertical) {
     return (
       <div className="mx-auto my-10 max-w-[420px]">
         <CompactList subjects={subjects} />
       </div>
+    );
+  }
+  if (subjects.length >= 3) {
+    const polaroidLayout =
+      subjects.length === 3 ? (
+        <div className="flex flex-row justify-center gap-8">
+          {subjects.map((s, i) => (
+            <Polaroid
+              key={s._key}
+              subject={s}
+              rotation={POLAROID_LOOKS[i]!.rotation}
+              tapeColor={POLAROID_LOOKS[i]!.tapeColor}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-8">
+          {subjects.map((s, i) => (
+            <div key={s._key} className="flex justify-center">
+              <Polaroid
+                subject={s}
+                rotation={POLAROID_LOOKS[i % POLAROID_LOOKS.length]!.rotation}
+                tapeColor={POLAROID_LOOKS[i % POLAROID_LOOKS.length]!.tapeColor}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    return (
+      <>
+        <div className="mx-auto my-10 max-w-[420px] md:hidden">
+          <CompactList subjects={subjects} />
+        </div>
+        <div
+          className={`mx-auto my-12 hidden md:block ${
+            subjects.length === 3 ? "max-w-[920px]" : "max-w-[640px]"
+          }`}
+        >
+          {polaroidLayout}
+        </div>
+      </>
     );
   }
 
@@ -292,25 +336,7 @@ export function SubjectsStrip({
     );
   }
 
-  // N=3 → three polaroids inline (desktop). md:flex-row.
-  if (subjects.length === 3) {
-    return (
-      <div className="mx-auto my-12 max-w-[920px]">
-        <div className="flex flex-col items-center gap-6 md:flex-row md:justify-center md:gap-8">
-          {subjects.map((s, i) => (
-            <Polaroid
-              key={s._key}
-              subject={s}
-              rotation={POLAROID_LOOKS[i]!.rotation}
-              tapeColor={POLAROID_LOOKS[i]!.tapeColor}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // N=4 (and any over-cap) → 2×2 grid.
+  // N=4+ fallback for safety (validateSubjectsCount caps at 4 in schema).
   return (
     <div className="mx-auto my-12 max-w-[640px]">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
