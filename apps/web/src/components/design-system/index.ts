@@ -111,6 +111,10 @@ export type { FooterSafeAreaProps } from "./FooterSafeArea";
 export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 
+// EndMark
+export { EndMark } from "./EndMark";
+export type { EndMarkProps } from "./EndMark";
+
 // HighlighterStroke
 export { HighlighterStroke } from "./HighlighterStroke";
 export type {
