@@ -54,10 +54,14 @@ export const FourItems: Story = {
 export const EmptyItems: Story = {
   args: { items: [] },
   parameters: {
-    vr: {
-      disable: true,
-      reason:
-        "EditorialKicker returns null when items=[]; an empty snapshot adds noise to the VR diff suite without exercising layout.",
-    },
+    // vr.disable: EditorialKicker returns null when items=[]; the snapshot
+    // would be a transparent empty image that adds noise to the VR diff
+    // suite without exercising any layout the component is responsible for.
+    // Repro: render <EditorialKicker items={[]} />; component returns null
+    // (asserted by the unit test "renders nothing when items is empty").
+    // Approved by: PR #1649 code review 2026-05-06
+    // Re-evaluate: when EditorialKicker grows an empty-state visual, or
+    // when the unit test stops covering the null-return contract.
+    vr: { disable: true },
   },
 };
