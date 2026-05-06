@@ -73,23 +73,23 @@ If the tracer fails, every Phase 3 sub-issue is at risk. If it passes, the four 
 ## 4. Sub-issues — 11 children of #1525
 
 ```text
-3.0  — Tracer bullet · <EndMark> primitive shipped end-to-end
+3.0   #1632 — Tracer bullet · <EndMark> primitive shipped end-to-end
    ↓
    ├── 3.A — Tier C figures track (parallel after 3.0)
-   │     3.A.1  <PlayerFigure>
-   │     3.A.2  <JerseyShirt>
-   │     3.A.3  <EndMark>          ← tracer; just ensure Storybook polish + final VR
-   │     3.A.4  <QASectionDivider>
+   │     3.A.1  #1633  <PlayerFigure>
+   │     3.A.2  #1634  <JerseyShirt>
+   │     3.A.3  #1635  <EndMark>          ← Storybook polish + final VR after tracer
+   │     3.A.4  #1636  <QASectionDivider>
    │
    ├── 3.B — Composition track (serial)
-   │     3.B.1  <EditorialHero> shell + discriminated union types (no variants)
-   │     3.B.2  <EditorialHero> variants ← depends on 3.A.1 + 3.A.2 + 3.B.1
-   │     3.B.3  <PageHero> retirement + call-site migration ← depends on 3.B.2
+   │     3.B.1  #1637  <EditorialHero> shell + discriminated union types (no variants)
+   │     3.B.2  #1638  <EditorialHero> variants ← depends on 3.A.1 + 3.A.2 + 3.B.1
+   │     3.B.3  #1639  <PageHero> retirement + call-site migration ← depends on 3.B.2
    │
    └── 3.C — Layout track (parallel after the relevant locks)
-         3.C.1  <SiteHeader> rework (icon + drawer + sticky behaviour)
-         3.C.2  <MatchStrip> rework (landing-only render, 2-state matrix)
-         3.C.3  <SiteFooter> rework (H3 + I2 + role-based items)
+         3.C.1  #1640  <SiteHeader> rework (icon + drawer + sticky behaviour)
+         3.C.2  #1641  <MatchStrip> rework (landing-only render, 2-state matrix)
+         3.C.3  #1642  <SiteFooter> rework (H3 + I2 + role-based items)
 ```
 
 **Dependency edges (`addBlockedBy` GraphQL mutations):**
