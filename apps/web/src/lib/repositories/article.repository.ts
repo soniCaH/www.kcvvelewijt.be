@@ -42,7 +42,7 @@ export const RELATED_ARTICLES_QUERY =
 export const ARTICLE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
   "id": _id, "updatedAt": _updatedAt,
-  "title": pt::text(title),
+  "title": coalesce(pt::text(title), title, ""),
   "titleRich": title,
   "lead": coalesce(lead, ""),
   "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
