@@ -1,15 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { portraitSvgDataUri } from "../_fixtures";
 import { SubjectsStrip, type Subject } from "./SubjectsStrip";
 
 const meta = {
   title: "Article/SubjectsStrip",
   component: SubjectsStrip,
-  // VR disabled — fixture portraits are network-fetched from placehold.co
-  // (no local SVGs for the four subject kinds yet); the stories would
-  // produce non-deterministic baselines on each VR run. Re-enable once
-  // local fixtures are in place.
-  tags: ["autodocs"],
-  parameters: { layout: "fullscreen", vr: { disable: true } },
+  tags: ["autodocs", "vr"],
+  parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
       <div className="bg-cream-soft px-12 py-8">
@@ -23,7 +20,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const PORTRAIT_PLACEHOLDER = (label: string, hue: string) =>
-  `https://placehold.co/400x500/${hue}/ffffff/svg?text=${encodeURIComponent(label)}`;
+  portraitSvgDataUri({ label, bg: `#${hue}`, fg: "#ffffff" });
 
 const PLAYER: Subject = {
   _key: "p1",

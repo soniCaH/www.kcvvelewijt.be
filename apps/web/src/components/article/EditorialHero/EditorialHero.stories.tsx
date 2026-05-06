@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PullQuote } from "@/components/design-system/PullQuote";
+import {
+  portraitSvgDataUri,
+  shieldSvgDataUri,
+} from "@/components/article/blocks/_fixtures";
 import { TransferFactStrip } from "@/components/article/blocks/TransferFactStrip";
 import { EventFactStrip } from "@/components/article/blocks/EventFactStrip";
 import {
@@ -8,6 +12,17 @@ import {
 } from "@/components/article/blocks/SubjectsStrip";
 import { EndMark } from "@/components/design-system/EndMark";
 import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
+
+const STANDARD_LOGO = shieldSvgDataUri({
+  label: "STD",
+  bg: "#d62828",
+  fg: "#ffffff",
+});
+const MECHELEN_LOGO = shieldSvgDataUri({
+  label: "KVM",
+  bg: "#ffd60a",
+  fg: "#000000",
+});
 
 const meta = {
   title: "Article/EditorialHero",
@@ -138,8 +153,7 @@ export const TransferVariant: Story = {
           position: "Middenvelder",
           age: 27,
           otherClubName: "Standard Luik",
-          otherClubLogoUrl:
-            "https://placehold.co/80x80/d62828/ffffff/svg?text=STD",
+          otherClubLogoUrl: STANDARD_LOGO,
           otherClubContext: "Jupiler Pro League · U23",
           kcvvContext: "Derde Amateur · A-ploeg · #8",
           note: "Hier kan ik tonen wat ik in mij heb. KCVV ademt voetbal — dat zegt me alles.",
@@ -199,8 +213,7 @@ export const TransferVariantOutgoing: Story = {
           position: "Aanvaller",
           age: 24,
           otherClubName: "KV Mechelen",
-          otherClubLogoUrl:
-            "https://placehold.co/80x80/ffd60a/000000/svg?text=KVM",
+          otherClubLogoUrl: MECHELEN_LOGO,
           otherClubContext: "Eerste klasse",
           kcvvContext: "Vier seizoenen, 38 doelpunten",
         }}
@@ -367,7 +380,7 @@ export const EventVariantRecurring: Story = {
  * (no format token at N=1; fields.md spec).
  */
 const INTERVIEW_PORTRAIT = (label: string, hue: string) =>
-  `https://placehold.co/400x500/${hue}/ffffff/svg?text=${encodeURIComponent(label)}`;
+  portraitSvgDataUri({ label, bg: `#${hue}`, fg: "#ffffff" });
 
 const SUBJECT_MAXIM: Subject = {
   _key: "p1",

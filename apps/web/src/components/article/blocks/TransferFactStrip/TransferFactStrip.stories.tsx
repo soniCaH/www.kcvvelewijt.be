@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { shieldSvgDataUri } from "../_fixtures";
 import { TransferFactStrip } from "./TransferFactStrip";
 
 const meta = {
@@ -18,11 +19,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Storybook fixtures only — Wikipedia hotlinking is unreliable (Referer
-// blocks), so use placehold.co with stable SVG output. Production logos
-// arrive as Sanity-CDN URLs via the GROQ projection.
-const STANDARD_LOGO = "https://placehold.co/80x80/d62828/ffffff/svg?text=STD";
-const MECHELEN_LOGO = "https://placehold.co/80x80/ffd60a/000000/svg?text=KVM";
+// Storybook fixtures only — inline SVG data URIs for deterministic VR
+// baselines (no network, no cache flakiness). Production logos arrive
+// as Sanity-CDN URLs via the GROQ projection.
+const STANDARD_LOGO = shieldSvgDataUri({
+  label: "STD",
+  bg: "#d62828",
+  fg: "#ffffff",
+});
+const MECHELEN_LOGO = shieldSvgDataUri({
+  label: "KVM",
+  bg: "#ffd60a",
+  fg: "#000000",
+});
 
 /** Inkomende transfer — jersey-deep arrows, andere club in 'Van', KCVV in 'Naar'. */
 export const Incoming: Story = {
