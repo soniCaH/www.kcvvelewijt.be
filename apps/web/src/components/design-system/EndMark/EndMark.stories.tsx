@@ -18,6 +18,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  args: { label: "EINDE GESPREK" },
+};
+
 export const Default: Story = {
   args: { label: "EINDE GESPREK" },
 };
