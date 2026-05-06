@@ -218,7 +218,7 @@ Inherits all 5 from announcement-locked, plus the transferFact body validator (A
 - [x] Asymmetric Broadsheet shell (locked direction A).
 - [x] Detail placement — no click-through CTAs.
 - [x] coverImage in right column (same as announcement).
-- [x] EditorialKicker · EditorialHeading · EditorialLead · EditorialByline · HeroCoverImage all reused from announcement-locked.
+- [x] EditorialKicker · EditorialHeading · EditorialLead · EditorialByline reused from announcement-locked. Cover image composes inline as `<TapedCard rotation>` + `<TapedFigure aspect="landscape-16-9">` per Phase 3 PRD §8b; `<HeroCoverImage>` is superseded.
 - [x] TransferFactStrip — 3 paper cards + jersey-deep arrows for incoming.
 - [x] Outgoing — alert-red arrows.
 - [x] Extension — single centered card with extension stamp; no arrows.
