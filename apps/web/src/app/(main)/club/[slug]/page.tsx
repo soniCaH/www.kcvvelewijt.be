@@ -5,7 +5,7 @@ import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
 interface Props {
@@ -56,7 +56,7 @@ export default async function DynamicClubPage({ params }: Props) {
 
   return (
     <>
-      <PageHero
+      <InteriorPageHero
         image={page.heroImageUrl ?? undefined}
         imageAlt={page.title}
         label="Club"

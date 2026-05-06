@@ -7,7 +7,7 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
 import { YouthTeamsDirectory } from "@/components/teams/YouthTeamsDirectory";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
@@ -48,7 +48,7 @@ export default async function TeamsPage() {
       <SectionStack
         sections={getPloegenSections({
           hero: aTeam ? (
-            <PageHero
+            <InteriorPageHero
               image={aTeam.teamImageUrl ?? undefined}
               imageAlt={`Team foto ${aTeam.name}`}
               label="Eerste ploeg"

@@ -1,18 +1,18 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the PageHero + calendar widget layout.
+ * Matches the InteriorPageHero + calendar widget layout.
  *
  * Note: Unlike /club and /ploegen, this skeleton does not use the SectionStack
  * factory pattern because the calendar page itself uses a flat layout
- * (PageHero + single content div) rather than SectionStack sections.
+ * (InteriorPageHero + single content div) rather than SectionStack sections.
  */
 
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 
 export default function CalendarLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <PageHero
+      <InteriorPageHero
         label="Kalender"
         headline="Wedstrijdkalender"
         body="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."

@@ -5,7 +5,7 @@
  * `/club/jeugdbestuur`, `/club/angels`, …) — composed as a `SectionStack`
  * matching the "Dark Roster Spotlight" prototype:
  *
- *   1. Compact `PageHero` ("De club" / team name)
+ *   1. Compact `InteriorPageHero` ("De club" / team name)
  *   2. `gray-100` description block with green left-border accent
  *   3. `kcvv-black` member roster (white StaffCards pop on dark)
  *   4. `kcvv-green-dark` organigram CTA
@@ -16,7 +16,7 @@ import {
   SectionStack,
   type SectionConfig,
 } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { SectionHeader } from "@/components/design-system/SectionHeader/SectionHeader";
 import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
 import {
@@ -109,7 +109,7 @@ export function BestuurPage({
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
       content: (
-        <PageHero
+        <InteriorPageHero
           size="compact"
           gradient="dark"
           image={header.imageUrl}

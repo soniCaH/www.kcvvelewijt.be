@@ -2,12 +2,12 @@
  * Help / Hulp page — route-level loading skeleton
  *
  * Renders for full cold navigations (e.g. direct URL hit before the RSC
- * payload arrives). Uses the same SectionStack + PageHero layout as
+ * payload arrives). Uses the same SectionStack + InteriorPageHero layout as
  * page.tsx so the skeleton is structurally identical to the real page.
  * The search shell and skeleton grid mirror the Suspense fallback.
  */
 
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import { SearchInputShell } from "@/components/hulp/HulpPage/SearchInputShell";
 import { QuestionCardSkeletonGrid } from "@/components/hulp/HulpPage/QuestionCardSkeleton";
@@ -22,7 +22,7 @@ export default function HulpLoading() {
           paddingTop: "pt-0",
           paddingBottom: "pb-0",
           content: (
-            <PageHero
+            <InteriorPageHero
               size="compact"
               gradient="dark"
               label="Help"

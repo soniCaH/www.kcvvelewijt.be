@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 
 interface JeugdSectionsContent {
   editorial: ReactNode;
@@ -17,7 +17,7 @@ export function getJeugdSections(
       key: "hero",
       bg: "kcvv-black",
       content: (
-        <PageHero
+        <InteriorPageHero
           image="/images/youth-trainers.jpg"
           label="Jeugdopleiding"
           headline={

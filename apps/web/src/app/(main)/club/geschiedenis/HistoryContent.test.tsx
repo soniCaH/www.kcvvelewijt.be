@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { HistoryContent } from "./HistoryContent";
 
 describe("HistoryContent", () => {
-  it("renders PageHero with the Onze club label", () => {
+  it("renders InteriorPageHero with the Onze club label", () => {
     render(<HistoryContent />);
     expect(screen.getByText("Onze club")).toBeInTheDocument();
     expect(

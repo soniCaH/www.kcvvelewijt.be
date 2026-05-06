@@ -1,7 +1,7 @@
 /**
  * Help / Hulp Page
  *
- * Server-side shell renders the PageHero immediately (consistent with
+ * Server-side shell renders the InteriorPageHero immediately (consistent with
  * every other route), then streams the data-dependent content inside a
  * Suspense boundary. The interactive HulpPage client component receives
  * `paths` only after `ResponsibilityRepository.findAll()` resolves.
@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { Effect } from "effect";
 import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
 import { HulpPage } from "@/components/hulp/HulpPage";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 import { SearchInputShell } from "@/components/hulp/HulpPage/SearchInputShell";
 import { QuestionCardSkeletonGrid } from "@/components/hulp/HulpPage/QuestionCardSkeleton";
@@ -118,7 +118,7 @@ export default function HulpPageRoute() {
             paddingTop: "pt-0",
             paddingBottom: "pb-0",
             content: (
-              <PageHero
+              <InteriorPageHero
                 size="compact"
                 gradient="dark"
                 label="Help"

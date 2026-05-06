@@ -4,7 +4,7 @@
  * HulpPage — content-only orchestration for the /hulp page
  *
  * Renders the search input, browse/search/answer views, and closing CTA.
- * The PageHero and SectionStack layout are owned by the server layer
+ * The InteriorPageHero and SectionStack layout are owned by the server layer
  * (`page.tsx`) so the hero streams immediately and the data-dependent
  * content loads inside a Suspense boundary.
  *

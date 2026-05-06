@@ -3,7 +3,7 @@ import Image from "next/image";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import {
   ULTRAS_HEADER_HERO,
   ULTRAS_KAMPIOEN,
@@ -33,7 +33,7 @@ export default function UltrasPage() {
           { name: "Ultras", url: `${SITE_CONFIG.siteUrl}/club/ultras` },
         ])}
       />
-      <PageHero
+      <InteriorPageHero
         image={ULTRAS_HEADER_HERO}
         imageAlt="KCVV Ultra's sfeeractie"
         label="Supporters"

@@ -65,7 +65,7 @@ describe("/club/[slug] page", () => {
     vi.clearAllMocks();
   });
 
-  it("renders PageHero with gradient when heroImage is not set", async () => {
+  it("renders InteriorPageHero with gradient when heroImage is not set", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(makePage()));
 
     const page = await DynamicClubPage({
@@ -73,7 +73,7 @@ describe("/club/[slug] page", () => {
     });
     const { container } = render(page);
 
-    // PageHero renders the title and label even without image
+    // InteriorPageHero renders the title and label even without image
     expect(screen.getByText("Downloads")).toBeInTheDocument();
     expect(screen.getByText("Club")).toBeInTheDocument();
     // Should use gradient fallback (no img element)
@@ -83,7 +83,7 @@ describe("/club/[slug] page", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders PageHero when heroImage is set", async () => {
+  it("renders InteriorPageHero when heroImage is set", async () => {
     mockFindBySlug.mockReturnValue(
       Effect.succeed(
         makePage({
@@ -98,7 +98,7 @@ describe("/club/[slug] page", () => {
     });
     render(page);
 
-    // PageHero renders the label
+    // InteriorPageHero renders the label
     expect(screen.getByText("Club")).toBeInTheDocument();
     expect(screen.getByText("Downloads")).toBeInTheDocument();
   });

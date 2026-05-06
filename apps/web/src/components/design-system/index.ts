@@ -91,10 +91,6 @@ export type { LinkButtonProps } from "./LinkButton";
 export { SectionCta } from "./SectionCta";
 export type { SectionCtaProps } from "./SectionCta";
 
-// PageHero
-export { PageHero } from "./PageHero";
-export type { PageHeroProps } from "./PageHero";
-
 // ScrollHint
 export { useScrollHint, ScrollArrowButton } from "./ScrollHint";
 export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";

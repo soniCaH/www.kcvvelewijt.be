@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import UltrasPage from "./page";
 
 describe("/club/ultras page", () => {
-  it("renders PageHero with ultras content", () => {
+  it("renders InteriorPageHero with ultras content", () => {
     render(<UltrasPage />);
 
     expect(screen.getByText("Supporters")).toBeInTheDocument();

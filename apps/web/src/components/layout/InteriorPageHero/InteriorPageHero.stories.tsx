@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { PageHero } from "./PageHero";
+import { InteriorPageHero } from "./InteriorPageHero";
 
 const meta = {
-  title: "UI/PageHero",
-  component: PageHero,
+  title: "Layout/InteriorPageHero",
+  component: InteriorPageHero,
   parameters: {
     layout: "fullscreen",
   },
@@ -27,7 +27,7 @@ const meta = {
       description: "Gradient preset (used when no image)",
     },
   },
-} satisfies Meta<typeof PageHero>;
+} satisfies Meta<typeof InteriorPageHero>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

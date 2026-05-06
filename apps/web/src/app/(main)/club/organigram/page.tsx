@@ -16,7 +16,7 @@ import { UnifiedOrganigramClient } from "@/components/organigram";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import { Spinner } from "@/components/design-system/Spinner";
 import {
   SectionStack,
@@ -74,7 +74,7 @@ export default async function OrganigramPage() {
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
       content: (
-        <PageHero
+        <InteriorPageHero
           size="compact"
           gradient="dark"
           label="De club"

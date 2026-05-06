@@ -14,7 +14,7 @@ import {
   type EventVM,
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
-import { PageHero } from "@/components/design-system";
+import { InteriorPageHero } from "@/components/layout";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { transformMatchToCalendar } from "./utils";
 import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
@@ -138,7 +138,7 @@ export default async function CalendarPage() {
     // triangle then reveals the page's own gray surface rather than
     // white body. See #1360.
     <div className="min-h-screen bg-gray-100 pb-[var(--footer-diagonal)]">
-      <PageHero
+      <InteriorPageHero
         image="/images/youth-trainers.jpg"
         imageAlt="KCVV jeugdtraining"
         label="Kalender"

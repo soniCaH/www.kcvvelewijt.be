@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { PageHero } from "@/components/design-system/PageHero";
+import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
 import {
   SectionStack,
   type SectionConfig,
@@ -603,7 +603,7 @@ export function HistoryContent() {
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
       content: (
-        <PageHero
+        <InteriorPageHero
           image={HISTORY_24_25_HERO}
           imageAlt="KCVV Elewijt kampioen 2024-2025"
           label="Onze club"

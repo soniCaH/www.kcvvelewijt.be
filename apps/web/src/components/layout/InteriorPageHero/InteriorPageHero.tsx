@@ -1,6 +1,17 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
-import { LinkButton } from "../LinkButton";
+import { LinkButton } from "@/components/design-system/LinkButton";
+
+// `<InteriorPageHero>` is the acknowledged-debt placeholder for non-article
+// hero surfaces (legacy `page` documents, team detail, ploegen index,
+// kalender, hulp, jeugd, club indexes, etc.) during the redesign-phase-3
+// retirement of `<PageHero>` from the design-system. The locked Phase 3
+// scope only ships `<EditorialHero>` for article-typed surfaces; non-article
+// heroes get redesigned in a later phase. This component matches the legacy
+// `<PageHero>` API verbatim so call-site migration is a one-line import swap.
+//
+// Spec: `docs/plans/2026-05-03-redesign-phase-3-plan.md` §Task 3.B.3,
+// `docs/prd/redesign-phase-3.md` §5.B.3.
 
 export type HeroGradient = "dark" | "green" | "neutral";
 
@@ -10,7 +21,7 @@ const GRADIENTS: Record<HeroGradient, string> = {
   neutral: "linear-gradient(135deg, #1E2024 0%, #31404b 50%, #1E2024 100%)",
 };
 
-export interface PageHeroProps {
+export interface InteriorPageHeroProps {
   image?: string;
   imageAlt?: string;
   label: string;
@@ -21,7 +32,7 @@ export interface PageHeroProps {
   gradient?: HeroGradient;
 }
 
-export function PageHero({
+export function InteriorPageHero({
   image,
   imageAlt = "",
   label,
@@ -30,7 +41,7 @@ export function PageHero({
   cta,
   size = "default",
   gradient = "dark",
-}: PageHeroProps) {
+}: InteriorPageHeroProps) {
   return (
     <div className="relative">
       {/* Background layers */}

@@ -79,9 +79,9 @@ function resetMocks() {
 describe("HulpPage", () => {
   beforeEach(resetMocks);
 
-  it("does not render PageHero — hero is owned by the server layer", () => {
+  it("does not render InteriorPageHero — hero is owned by the server layer", () => {
     render(<HulpPage paths={FIXTURE_PATHS} />);
-    // PageHero renders a heading with the headline text. After extracting
+    // InteriorPageHero renders a heading with the headline text. After extracting
     // the hero to page.tsx (server), HulpPage should NOT render it.
     expect(
       screen.queryByRole("heading", { name: /vind de juiste persoon/i }),

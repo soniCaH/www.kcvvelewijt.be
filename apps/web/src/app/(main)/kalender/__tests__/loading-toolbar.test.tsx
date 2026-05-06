@@ -59,7 +59,7 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
 
     // Anchor the lookup to the toolbar testid so we only assert against the
     // CalendarLoading/CalendarWidget hierarchy, not any unrelated descendant
-    // (e.g. PageHero internals) that might also use space-y-4.
+    // (e.g. InteriorPageHero internals) that might also use space-y-4.
     const toolbarTop = container.querySelector(
       "[data-testid='calendar-skeleton-toolbar-top']",
     );
