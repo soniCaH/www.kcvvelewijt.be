@@ -350,7 +350,13 @@ export const NavDropdown = ({
                     <p className="border-ink-muted text-ink-muted mb-2 border-b border-dashed pb-1.5 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
                       {group.label}
                     </p>
-                    <ul className="m-0 list-none p-0">
+                    {/*
+                     * `role="none"` removes the intermediate `<ul>` from the
+                     * accessibility tree so the surrounding `role="menu"`
+                     * directly owns the `role="menuitem"` rows (per WAI-ARIA
+                     * menu pattern).
+                     */}
+                    <ul role="none" className="m-0 list-none p-0">
                       {group.items.map((item) => (
                         <NavDropdownRow
                           key={`${group.label}-${item.href}`}
@@ -364,9 +370,10 @@ export const NavDropdown = ({
                 ))}
             </div>
           ) : (
+            // `role="none"` removes this `<ul>` from the a11y tree.
             // p-0 wins over the UA `<ul>` `padding-inline-start: 40px` default;
             // narrow rows manage their own horizontal padding via `variant`.
-            <ul className="m-0 list-none p-0 py-2">
+            <ul role="none" className="m-0 list-none p-0 py-2">
               {items?.map((item) => (
                 <NavDropdownRow
                   key={item.href}
@@ -400,7 +407,10 @@ interface NavDropdownRowProps {
 }
 
 const NavDropdownRow = ({ item, variant, onClick }: NavDropdownRowProps) => (
-  <li>
+  // `role="none"` keeps only the inner `<a role="menuitem">` in the a11y
+  // tree — without this, screen readers announce a list-item layer between
+  // the menu and each menuitem.
+  <li role="none">
     <Link
       href={item.href}
       role="menuitem"
