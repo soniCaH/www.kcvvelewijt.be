@@ -49,12 +49,14 @@ export function ShieldFigure({
 
   const initial = deriveInitial(name);
 
+  const ariaLabel = name.trim() || "Unnamed team";
+
   return (
     <span
       data-variant={variant}
       data-size={size}
       role="img"
-      aria-label={name}
+      aria-label={ariaLabel}
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center",
         className,

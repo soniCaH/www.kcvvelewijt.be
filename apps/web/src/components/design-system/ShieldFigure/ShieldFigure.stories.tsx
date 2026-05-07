@@ -18,6 +18,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  args: { variant: "kcvv", name: "KCVV", size: "md" },
+};
+
 export const KcvvInitial: Story = {
   args: { variant: "kcvv", name: "KCVV", size: "md" },
 };
