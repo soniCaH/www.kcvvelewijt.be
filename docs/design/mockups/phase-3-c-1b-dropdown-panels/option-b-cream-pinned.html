@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Dropdown — Option B · Cream-soft pinned</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .opt-meta { margin-bottom: 32px; }
+      .opt-tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .opt-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.04; margin: 8px 0 12px; }
+      .opt-meta h1 em { color: var(--color-jersey-deep); }
+      .opt-meta .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+
+      .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: visible; margin: 32px 0 40px; }
+      .frame__chrome { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 580px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: sticky; top: 0; z-index: 50; }
+      .site-header__inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 14px 28px; max-width: 1240px; margin: 0 auto; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 24px; line-height: 1; color: var(--color-ink); white-space: nowrap; text-decoration: none; letter-spacing: -0.01em; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; justify-content: center; align-items: center; gap: 22px; padding-left: 28px; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 6px 0; display: inline-flex; align-items: center; gap: 4px; transition: color 150ms ease; cursor: pointer; }
+      .site-nav__link:hover { color: var(--color-jersey-deep); }
+      .site-nav__caret { font-family: var(--font-mono); font-size: 10px; line-height: 1; opacity: 0.6; transition: transform 150ms ease, opacity 150ms ease; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; color: var(--color-jersey-deep); }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-actions { display: flex; align-items: center; gap: 14px; }
+      .site-search { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink); text-decoration: none; font-size: 18px; }
+      .site-search:hover { color: var(--color-jersey-deep); }
+      .site-cta { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 8px 14px; border: 1.5px solid var(--color-ink); color: var(--color-ink); text-decoration: none; transition: all 200ms ease; }
+      .site-cta:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 0 var(--color-ink); }
+
+      .nav-trigger { position: relative; }
+
+      /* ===== DROPDOWN PANEL — OPTION B specific ===== */
+      .dropdown-panel {
+        position: absolute;
+        top: calc(100% + 6px);                           /* small gap so panel reads as separate sheet */
+        right: 0;
+        min-width: 244px;
+        background: var(--color-cream-soft);             /* slightly darker than header */
+        border: 2px solid var(--color-ink);              /* heavy ink border */
+        box-shadow: var(--shadow-paper-sm);              /* hard 4px offset shadow */
+        padding: 8px 0;
+        z-index: 60;
+        animation: dropdownStamp 160ms ease-out;
+      }
+      @keyframes dropdownStamp {
+        from { opacity: 0; transform: translateY(-3px) scale(0.99); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .dropdown-panel ul { list-style: none; margin: 0; padding: 0; }
+      .dropdown-panel li { margin: 0; }
+      .dropdown-panel a {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 18px 10px 14px;
+        font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--color-ink); text-decoration: none;
+        transition: color 150ms ease, background 150ms ease;
+      }
+      .dropdown-panel a::before {
+        content: "—";
+        color: var(--color-ink-muted);
+        font-size: 13px;
+        line-height: 1;
+        flex-shrink: 0;
+        width: 12px;
+      }
+      .dropdown-panel a:hover { color: var(--color-jersey-deep); background: rgba(0, 135, 85, 0.06); }
+      .dropdown-panel a:hover::before { color: var(--color-jersey-deep); }
+
+      .page-content { padding: 56px 28px 80px; max-width: 1240px; margin: 0 auto; }
+      .page-mock { opacity: 0.42; pointer-events: none; }
+      .page-mock h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 46px; line-height: 1.05; margin: 0 0 16px; }
+      .page-mock h2 em { color: var(--color-jersey-deep); }
+      .page-mock .kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px; }
+      .page-mock p { font-size: 16px; max-width: 620px; color: var(--color-ink-soft); }
+      .page-mock .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 32px; }
+      .page-mock .card { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 14px; height: 120px; }
+
+      .annotations { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin: 24px 0 0; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .annotations h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 10px; font-weight: 600; }
+      .annotations ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft); }
+      .annotations li { margin: 4px 0; }
+      .annotations p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+      .tokens-list { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; }
+      .tokens-list li { margin: 6px 0; }
+
+      .detail-row { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .detail-row h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 24px; margin: 0 0 12px; }
+
+      .reads-as { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px 22px; margin: 18px 0 0; }
+      .reads-as p { margin: 0; font-size: 15px; color: var(--color-ink); }
+      .reads-as strong { color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="opt-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q1 Surface · 2 of 4</p>
+        <span class="opt-tag">Option B</span>
+        <h1>Cream-soft <em>pinned</em></h1>
+        <p class="lead">
+          The dropdown panel uses <code>--color-cream-soft</code> (slightly darker than the
+          header) with a 2px ink border and a hard <code>--shadow-paper-sm</code> offset —
+          the same paper-shadow vocabulary as <code>&lt;TapedCard&gt;</code> and the
+          <code>WORD LID</code> button hover. Reads as a separate flyer pinned just below
+          the masthead seam.
+        </p>
+      </header>
+
+      <section class="frame" aria-label="Mockup viewport">
+        <div class="frame__chrome">
+          <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+          <span class="frame__url">kcvvelewijt.be/club</span>
+        </div>
+
+        <div class="frame__viewport">
+          <header class="site-header">
+            <div class="site-header__inner">
+              <a class="wordmark" href="#">
+                KCVV <em>Elewijt</em>
+              </a>
+              <nav class="site-nav" aria-label="Hoofdnavigatie">
+                <a class="site-nav__link" href="#">Home</a>
+                <a class="site-nav__link" href="#">Nieuws</a>
+                <a class="site-nav__link" href="#">Evenementen</a>
+                <a class="site-nav__link" href="#">A-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link" href="#">B-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link" href="#">Jeugd <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link" href="#">Sponsors</a>
+                <a class="site-nav__link" href="#">Hulp</a>
+                <span class="nav-trigger">
+                  <a class="site-nav__link is-open" href="#">De club <span class="site-nav__caret">▾</span></a>
+                  <div class="dropdown-panel" role="menu" aria-label="De club submenu">
+                    <ul>
+                      <li><a href="#" role="menuitem">Geschiedenis</a></li>
+                      <li><a href="#" role="menuitem">Organigram</a></li>
+                      <li><a href="#" role="menuitem">Bestuur</a></li>
+                      <li><a href="#" role="menuitem">Jeugdbestuur</a></li>
+                      <li><a href="#" role="menuitem">KCVV Angels</a></li>
+                      <li><a href="#" role="menuitem">KCVV Ultras</a></li>
+                      <li><a href="#" role="menuitem">Contact</a></li>
+                      <li><a href="#" role="menuitem">Word vrijwilliger</a></li>
+                      <li><a href="#" role="menuitem">Downloads</a></li>
+                      <li><a href="#" role="menuitem">Praktische Info</a></li>
+                      <li><a href="#" role="menuitem">Cashless clubkaart</a></li>
+                    </ul>
+                  </div>
+                </span>
+              </nav>
+              <div class="site-actions">
+                <a class="site-search" href="#" aria-label="Zoeken">⌕</a>
+                <a class="site-cta" href="#">Word lid</a>
+              </div>
+            </div>
+          </header>
+
+          <div class="page-content">
+            <div class="page-mock">
+              <p class="kicker">Sectie · De club</p>
+              <h2>Een club met een <em>eigen plek</em> aan de Hollestraat</h2>
+              <p>
+                KCVV Elewijt speelt al meer dan honderd jaar in de tweede helft van het amateurvoetbal.
+                Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte —
+                kinderen, ouders, koffie, gevolgd door een halve liter en een match.
+              </p>
+              <div class="grid">
+                <div class="card"></div>
+                <div class="card"></div>
+                <div class="card"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="reads-as">
+        <p>
+          <strong>Reads as:</strong> a flyer pinned beneath the masthead. The 2px border + hard
+          offset shadow are the same vocabulary <code>&lt;TapedCard&gt;</code> and editorial chrome
+          already use elsewhere — most "fanzine" of the four. The 6px gap between header seam and
+          panel edge announces "this is a separate sheet of paper."
+        </p>
+      </div>
+
+      <section class="annotations">
+        <div>
+          <h3>Tokens used</h3>
+          <ul class="tokens-list">
+            <li>--color-cream-soft</li>
+            <li>--color-ink (2px border)</li>
+            <li>--shadow-paper-sm (hard)</li>
+            <li>--color-ink (text)</li>
+            <li>--color-ink-muted (em-dash bullet)</li>
+            <li>--color-jersey-deep (hover)</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Pros</h3>
+          <ul>
+            <li>Strongest fanzine register — paper-shadow vocabulary is the redesign's signature.</li>
+            <li>Heavy 2px ink border separates panel cleanly from header at any scroll position.</li>
+            <li>Hard offset shadow signals "this is a card-like artefact" — feels like a poster pinned to a noticeboard.</li>
+            <li>Distinct from chrome Surface — never confused with a system menu.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Cons</h3>
+          <ul>
+            <li>Hard offset shadow ignores master design §3.6 advisory ("blurred shadows for chrome").</li>
+            <li>2px border + offset shadow against scrolling page content can feel heavy on long pages.</li>
+            <li>11-item De club panel becomes a tall heavy slab — risks visual weight imbalance.</li>
+            <li>Implementation: requires hover-state arbitration so the shadow doesn't collide with the next nav row's content.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="detail-row">
+        <h2>What changes if Q1 locks <em>B</em></h2>
+        <p>
+          All three submenus (Teams, Jeugd, De club) get the cream-soft + 2px border + hard
+          offset shadow treatment. Sticky-scroll behaviour gains weight — the page content
+          scrolling under the panel will pass behind a 4px hard shadow band. Q3 Composition
+          is unchanged.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
