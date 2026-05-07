@@ -266,3 +266,13 @@ export type {
   StampBadgeTone,
   StampBadgePosition,
 } from "./StampBadge";
+
+// ShieldFigure
+// NOTE: partial geometry overlap with <StampBadge> — flag for post-Phase-3
+// unification (per issue #1641 acceptance criteria).
+export { ShieldFigure } from "./ShieldFigure";
+export type {
+  ShieldFigureProps,
+  ShieldFigureSize,
+  ShieldFigureVariant,
+} from "./ShieldFigure";

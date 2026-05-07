@@ -1,26 +1,14 @@
-import { Suspense } from "react";
-import {
-  MatchStripClient,
-  MatchStripSkeleton,
-} from "@/components/layout/MatchStrip";
-import { getFirstTeamNextMatch } from "@/lib/server/match-data";
-
-async function MatchStripLoader() {
-  const nextMatch = await getFirstTeamNextMatch();
-  return <MatchStripClient match={nextMatch} />;
-}
-
+/**
+ * (main) route group — detail-page surfaces. The match strip is intentionally
+ * absent here per Phase 3 Checkpoint C spec
+ * (`docs/design/mockups/phase-3-c-header-and-matchstrip/matchstrip-locked.md`).
+ * Landing pages (homepage + section indexes) live under (landing) which mounts
+ * `<MatchStrip />` in its own layout.
+ */
 export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      <Suspense fallback={<MatchStripSkeleton />}>
-        <MatchStripLoader />
-      </Suspense>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

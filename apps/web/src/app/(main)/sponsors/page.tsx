@@ -14,6 +14,7 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
+import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
 export const metadata: Metadata = {
@@ -77,6 +78,7 @@ export default async function SponsorsPageRoute() {
 
   return (
     <>
+      <MatchStripSlot />
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
