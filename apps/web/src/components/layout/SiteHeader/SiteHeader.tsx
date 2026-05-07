@@ -188,7 +188,7 @@ function SiteHeaderInner({
           <Link
             href="/club/inschrijven"
             onClick={handleClose}
-            className="border-ink bg-ink text-cream shadow-paper-sm flex w-full items-center justify-center border-2 px-6 py-4 font-mono text-[14px] font-semibold tracking-[0.04em] uppercase no-underline transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+            className="group border-ink bg-jersey-deep text-cream shadow-paper-sm flex w-full items-center justify-center border-2 px-6 py-4 font-mono text-[14px] font-semibold tracking-[0.04em] uppercase no-underline transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:brightness-110"
           >
             Word lid
           </Link>
