@@ -3,9 +3,17 @@
  * Central export point for all layout components
  */
 
-// PageHeader
+// PageHeader (legacy — replaced site-wide by <SiteHeader>)
 export { PageHeader } from "./PageHeader";
 export type { PageHeaderProps } from "./PageHeader";
+
+// SiteHeader
+export { SiteHeader } from "./SiteHeader";
+export type { SiteHeaderProps } from "./SiteHeader";
+
+// NavTakeover
+export { NavTakeover, NavTakeoverItem } from "./NavTakeover";
+export type { NavTakeoverProps, NavTakeoverItemProps } from "./NavTakeover";
 
 // Navigation
 export { Navigation } from "./Navigation";
