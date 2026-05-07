@@ -207,8 +207,8 @@ the same contract on every route:
 - HTTP status matches the expected status (200 for content routes, 404 for the
   unknown-slug test).
 - `<h1>` is rendered and visible. Page-shells without a visible heading carry a
-  `sr-only` h1 — see `apps/web/src/app/page.tsx` and
-  `apps/web/src/app/(main)/nieuws/page.tsx`.
+  `sr-only` h1 — see `apps/web/src/app/(landing)/page.tsx` and
+  `apps/web/src/app/(landing)/nieuws/page.tsx`.
 - Primary `<nav>` and `<footer>` are visible.
 - No visible `<img>` is broken (`naturalWidth > 0`).
 - No `console.error` was emitted during page load (modulo a small known-noise

@@ -2,7 +2,8 @@
  * Loading Envelope Drift Guard
  *
  * Prevents loading.tsx skeletons from silently desyncing with their page.tsx
- * envelopes. Parametrized over all (main) routes that have a loading.tsx.
+ * envelopes. Parametrized over all (main) and (landing) routes that have a
+ * loading.tsx.
  *
  * - SectionStack routes: verifies loading.tsx renders via the shared factory
  *   by checking transition count and background classes.
@@ -21,31 +22,31 @@ import { resolve } from "node:path";
 // ---------------------------------------------------------------------------
 // SectionStack loading components
 // ---------------------------------------------------------------------------
-import ClubLoading from "../club/loading";
-import HulpLoading from "../hulp/loading";
-import JeugdLoading from "../jeugd/loading";
-import PloegenLoading from "../ploegen/loading";
-import SponsorsLoading from "../sponsors/loading";
+import ClubLoading from "../(main)/club/loading";
+import HulpLoading from "../(main)/hulp/loading";
+import JeugdLoading from "../(landing)/jeugd/loading";
+import PloegenLoading from "../(main)/ploegen/loading";
+import SponsorsLoading from "../(landing)/sponsors/loading";
 
 // ---------------------------------------------------------------------------
 // Non-SectionStack loading components
 // ---------------------------------------------------------------------------
-import EventsLoading from "../events/loading";
-import KalenderLoading from "../kalender/loading";
-import NieuwsLoading from "../nieuws/loading";
-import NieuwsDetailLoading from "../nieuws/[slug]/loading";
-import ScheurkalenderLoading from "../scheurkalender/loading";
-import ZoekenLoading from "../zoeken/loading";
-import ClubDetailLoading from "../club/[slug]/loading";
-import AngelsLoading from "../club/angels/loading";
-import BestuurLoading from "../club/bestuur/loading";
-import JeugdbestuurLoading from "../club/jeugdbestuur/loading";
-import OrganigramLoading from "../club/organigram/loading";
-import PloegenDetailLoading from "../ploegen/[slug]/loading";
-import SpelersDetailLoading from "../spelers/[slug]/loading";
-import StafDetailLoading from "../staf/[slug]/loading";
-import TegenstanderLoading from "../tegenstander/[clubId]/loading";
-import WedstrijdLoading from "../wedstrijd/[matchId]/loading";
+import EventsLoading from "../(landing)/events/loading";
+import KalenderLoading from "../(main)/kalender/loading";
+import NieuwsLoading from "../(landing)/nieuws/loading";
+import NieuwsDetailLoading from "../(main)/nieuws/[slug]/loading";
+import ScheurkalenderLoading from "../(main)/scheurkalender/loading";
+import ZoekenLoading from "../(main)/zoeken/loading";
+import ClubDetailLoading from "../(main)/club/[slug]/loading";
+import AngelsLoading from "../(main)/club/angels/loading";
+import BestuurLoading from "../(main)/club/bestuur/loading";
+import JeugdbestuurLoading from "../(main)/club/jeugdbestuur/loading";
+import OrganigramLoading from "../(main)/club/organigram/loading";
+import PloegenDetailLoading from "../(main)/ploegen/[slug]/loading";
+import SpelersDetailLoading from "../(main)/spelers/[slug]/loading";
+import StafDetailLoading from "../(main)/staf/[slug]/loading";
+import TegenstanderLoading from "../(main)/tegenstander/[clubId]/loading";
+import WedstrijdLoading from "../(main)/wedstrijd/[matchId]/loading";
 
 // ---------------------------------------------------------------------------
 // SectionStack routes — shared factory envelope
@@ -223,18 +224,23 @@ describe("loading.tsx envelope drift guard", () => {
   // Completeness guard — fail if a loading.tsx is added but not tested
   // -------------------------------------------------------------------------
 
-  it("test arrays cover all loading.tsx files under (main)", () => {
-    const mainDir = resolve(__dirname, "..");
-    const loadingFiles = globSync("**/loading.tsx", { cwd: mainDir });
+  it("test arrays cover all loading.tsx files under (main) and (landing)", () => {
+    const appDir = resolve(__dirname, "..");
+    const loadingFiles = [
+      ...globSync("(main)/**/loading.tsx", { cwd: appDir }),
+      ...globSync("(landing)/**/loading.tsx", { cwd: appDir }),
+    ];
     const testedRoutes =
       sectionStackRoutes.length + nonSectionStackRoutes.length;
-    const expectedFiles = new Set(
-      [...sectionStackRoutes, ...nonSectionStackRoutes].map(
-        ({ name }) => `${name.replace(/^\//, "")}/loading.tsx`,
+    const expectedRouteNames = new Set(
+      [...sectionStackRoutes, ...nonSectionStackRoutes].map(({ name }) =>
+        name.replace(/^\//, ""),
       ),
     );
+    const stripGroup = (file: string) =>
+      file.replace(/^\((main|landing)\)\//, "").replace(/\/loading\.tsx$/, "");
     const missingFiles = loadingFiles
-      .filter((f) => !expectedFiles.has(f))
+      .filter((f) => !expectedRouteNames.has(stripGroup(f)))
       .sort();
     expect(
       loadingFiles.length,

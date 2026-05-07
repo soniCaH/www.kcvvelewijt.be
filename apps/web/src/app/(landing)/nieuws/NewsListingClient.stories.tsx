@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
-import NewsLoading from "@/app/(main)/nieuws/loading";
+import NewsLoading from "@/app/(landing)/nieuws/loading";
 
 function makeMockArticle(
   id: number,

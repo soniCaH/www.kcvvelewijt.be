@@ -30,7 +30,6 @@ import {
 import type { FeaturedEventStub } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
-import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -327,7 +326,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <MatchStripSlot />
       <h1 className="sr-only">KCVV Elewijt</h1>
       <JsonLd data={buildSportsClubJsonLd()} />
       <JsonLd
