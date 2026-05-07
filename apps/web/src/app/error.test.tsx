@@ -56,7 +56,7 @@ describe("Global Error page", () => {
     expect(homeLink).toHaveAttribute("href", "/");
   });
 
-  it("does not render PageHeader or PageFooter", () => {
+  it("does not render header or footer landmarks", () => {
     const { container } = render(
       <ErrorPage error={defaultError} reset={mockReset} />,
     );

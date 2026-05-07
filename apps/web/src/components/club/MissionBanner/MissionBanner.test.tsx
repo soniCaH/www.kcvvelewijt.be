@@ -12,7 +12,7 @@ describe("MissionBanner", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("— Sportpark Elewijt, sinds 1948"),
+      screen.getByText("— Sportpark Elewijt, sinds 1909"),
     ).toBeInTheDocument();
   });
 

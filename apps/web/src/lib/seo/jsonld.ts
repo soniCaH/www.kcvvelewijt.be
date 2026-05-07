@@ -90,7 +90,7 @@ export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
     name: SITE_CONFIG.title,
     url: SITE_CONFIG.siteUrl,
     logo: LOGO_URL,
-    foundingDate: "1924",
+    foundingDate: "1909",
     sameAs: [EXTERNAL_LINKS.facebook, EXTERNAL_LINKS.instagram],
     sport: "Soccer",
     address: {

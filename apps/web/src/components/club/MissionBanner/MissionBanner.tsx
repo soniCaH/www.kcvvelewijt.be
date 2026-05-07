@@ -5,7 +5,7 @@ interface MissionBannerProps {
 
 const DEFAULT_QUOTE =
   "Wij zijn KCVV Elewijt. Een plek waar jong en oud samenkomen, waar passie voor voetbal het hele dorp verbindt.";
-const DEFAULT_ATTRIBUTION = "— Sportpark Elewijt, sinds 1948";
+const DEFAULT_ATTRIBUTION = "— Sportpark Elewijt, sinds 1909";
 
 export function MissionBanner({
   quote = DEFAULT_QUOTE,
