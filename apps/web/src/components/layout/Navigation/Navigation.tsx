@@ -16,6 +16,7 @@ import {
   buildSeniorMenuItem,
   seniorNavLabel,
   buildJeugdItem,
+  flattenChildren,
   isMenuItemActive,
 } from "../menuItems";
 import type { MenuItem } from "../menuItems";
@@ -92,7 +93,7 @@ export const Navigation = ({
     isMenuItemActive(href, pathname, searchParams);
 
   const hasActiveChild = (item: MenuItem) => {
-    return item.children?.some((child) => isActive(child.href)) || false;
+    return flattenChildren(item).some((child) => isActive(child.href));
   };
 
   return (
@@ -100,7 +101,8 @@ export const Navigation = ({
       <ul className="m-0 flex grow list-none flex-nowrap items-center justify-between p-0">
         {menuItems.map((item, index) => {
           const active = isActive(item.href) || hasActiveChild(item);
-          const hasDropdown = item.children && item.children.length > 0;
+          const dropdownChildren = flattenChildren(item);
+          const hasDropdown = dropdownChildren.length > 0;
           // Align dropdown to right for last 2 items to prevent overflow
           const isNearEnd = index >= menuItems.length - 2;
 
@@ -131,7 +133,7 @@ export const Navigation = ({
                   )}
                 >
                   <ul className="m-0 list-none p-0">
-                    {item.children?.map((child) => {
+                    {dropdownChildren.map((child) => {
                       const childActive = isActive(child.href);
 
                       return (

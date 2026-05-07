@@ -12,10 +12,18 @@ import {
   buildSeniorMenuItem,
   seniorNavLabel,
   buildJeugdItem,
+  flattenChildren,
+  hasSubmenu,
   isMenuItemActive,
   type MenuItem,
 } from "../menuItems";
 import { NavTakeover, NavTakeoverItem } from "../NavTakeover";
+import {
+  NavDropdown,
+  NavDropdownProvider,
+  type NavDropdownItem,
+  type NavDropdownGroup,
+} from "../NavDropdown";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
 export interface SiteHeaderProps {
@@ -57,7 +65,24 @@ function SiteHeaderInner({
   const isActive = (href: string) =>
     isMenuItemActive(href, pathname, searchParams);
   const hasActiveChild = (item: MenuItem) =>
-    item.children?.some((child) => isActive(child.href)) ?? false;
+    flattenChildren(item).some((child) => isActive(child.href));
+
+  const toDropdownItems = (
+    children: readonly MenuItem[],
+  ): readonly NavDropdownItem[] =>
+    children.map((c) => ({
+      label: c.label,
+      href: c.href,
+      active: isActive(c.href),
+    }));
+
+  const toDropdownGroups = (
+    item: MenuItem,
+  ): readonly NavDropdownGroup[] | undefined =>
+    item.childGroups?.map((g) => ({
+      label: g.label,
+      items: toDropdownItems(g.items),
+    }));
 
   return (
     <>
@@ -99,32 +124,47 @@ function SiteHeaderInner({
           <Wordmark />
 
           <nav aria-label="Hoofdnavigatie" className="flex w-full">
-            <ul className="m-0 flex w-full list-none items-center justify-between gap-x-4 gap-y-0 py-0 pr-0 pl-6 xl:gap-x-8 xl:pl-10 2xl:gap-x-10 2xl:pl-12">
-              {menuItems.map((item) => {
-                const active = isActive(item.href) || hasActiveChild(item);
-                const hasChildren = !!item.children?.length;
-                return (
-                  <li key={item.href} className="relative">
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]",
-                        active
-                          ? "text-jersey-deep"
-                          : "text-ink hover:text-jersey-deep",
-                      )}
-                    >
-                      {item.label}
-                      {hasChildren && (
-                        <span aria-hidden="true" className="ml-1">
-                          ▾
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <NavDropdownProvider>
+              <ul className="m-0 flex w-full list-none items-center justify-between gap-x-4 gap-y-0 py-0 pr-0 pl-6 xl:gap-x-8 xl:pl-10 2xl:gap-x-10 2xl:pl-12">
+                {menuItems.map((item) => {
+                  const active = isActive(item.href) || hasActiveChild(item);
+                  if (hasSubmenu(item)) {
+                    const groups = toDropdownGroups(item);
+                    return (
+                      <NavDropdown
+                        key={item.href}
+                        label={item.label}
+                        href={item.href}
+                        triggerActive={active}
+                        items={
+                          groups
+                            ? undefined
+                            : item.children
+                              ? toDropdownItems(item.children)
+                              : undefined
+                        }
+                        itemGroups={groups}
+                      />
+                    );
+                  }
+                  return (
+                    <li key={item.href} className="relative">
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]",
+                          active
+                            ? "text-jersey-deep"
+                            : "text-ink hover:text-jersey-deep",
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </NavDropdownProvider>
           </nav>
 
           <div className="flex items-center gap-3 xl:gap-5">
@@ -153,8 +193,7 @@ function SiteHeaderInner({
       >
         {menuItems.map((item) => {
           const active = isActive(item.href) || hasActiveChild(item);
-          const hasChildren = !!item.children?.length;
-          if (hasChildren) {
+          if (hasSubmenu(item)) {
             return (
               <NavTakeoverItem
                 key={item.href}
@@ -162,7 +201,7 @@ function SiteHeaderInner({
                 hasSubmenu
                 active={active}
               >
-                {item.children?.map((child) => (
+                {flattenChildren(item).map((child) => (
                   <NavTakeoverItem
                     key={child.href}
                     label={child.label}

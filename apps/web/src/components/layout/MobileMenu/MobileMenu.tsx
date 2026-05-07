@@ -19,6 +19,8 @@ import {
   buildSeniorMenuItem,
   seniorNavLabel,
   buildJeugdItem,
+  flattenChildren,
+  hasSubmenu,
   isMenuItemActive,
 } from "../menuItems";
 import "./MobileMenu.css";
@@ -164,7 +166,8 @@ export const MobileMenu = ({
           <ul className="m-0 list-none p-0">
             {menuItems.map((item) => {
               const active = isActive(item.href);
-              const hasChildren = item.children && item.children.length > 0;
+              const submenuChildren = flattenChildren(item);
+              const hasChildren = hasSubmenu(item);
               const isSubmenuOpen = openSubmenu === item.href;
 
               return (
@@ -205,7 +208,7 @@ export const MobileMenu = ({
                               "inset 0 7px 9px -7px var(--color-kcvv-black), inset 0 -7px 9px -7px var(--color-kcvv-black)",
                           }}
                         >
-                          {item.children?.map((child) => {
+                          {submenuChildren.map((child) => {
                             const childActive = isActive(child.href);
 
                             return (

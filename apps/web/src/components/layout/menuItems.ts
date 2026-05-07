@@ -3,7 +3,15 @@ import type { TeamNavVM } from "@/lib/repositories/team.repository";
 export interface MenuItem {
   label: string;
   href: string;
+  /** Flat children — narrow dropdown panel (Teams, Jeugd). */
   children?: MenuItem[];
+  /** Grouped children — wide dropdown panel (De club). Takes precedence over `children` when both are set. */
+  childGroups?: MenuItemGroup[];
+}
+
+export interface MenuItemGroup {
+  label: string;
+  items: MenuItem[];
 }
 
 export const staticMenuItems: MenuItem[] = [
@@ -15,21 +23,47 @@ export const staticMenuItems: MenuItem[] = [
   {
     label: "De club",
     href: "/club",
-    children: [
-      { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
-      { label: "Bestuur", href: "/club/bestuur" },
-      { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
-      { label: "KCVV Angels", href: "/club/angels" },
-      { label: "KCVV Ultras", href: "/club/ultras" },
-      { label: "Contact", href: "/club/contact" },
-      { label: "Word vrijwilliger", href: "/club/vrijwilliger" },
-      { label: "Downloads", href: "/club/downloads" },
-      { label: "Praktische Info", href: "/club/inschrijven" },
-      { label: "Cashless clubkaart", href: "/club/cashless" },
+    childGroups: [
+      {
+        label: "Wie we zijn",
+        items: [
+          { label: "Geschiedenis", href: "/club/geschiedenis" },
+          { label: "Organigram", href: "/club/organigram" },
+          { label: "Bestuur", href: "/club/bestuur" },
+          { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
+          { label: "KCVV Angels", href: "/club/angels" },
+          { label: "KCVV Ultras", href: "/club/ultras" },
+        ],
+      },
+      {
+        label: "Praktisch",
+        items: [
+          { label: "Praktische Info", href: "/club/inschrijven" },
+          { label: "Word vrijwilliger", href: "/club/vrijwilliger" },
+          { label: "Cashless clubkaart", href: "/club/cashless" },
+          { label: "Contact", href: "/club/contact" },
+          { label: "Downloads", href: "/club/downloads" },
+        ],
+      },
     ],
   },
 ];
+
+/**
+ * Flatten a MenuItem's child entries regardless of whether they live under
+ * `children` (flat) or `childGroups` (grouped). `childGroups` wins when both
+ * are present, mirroring the `<NavDropdown>` precedence rule.
+ */
+export const flattenChildren = (item: MenuItem): readonly MenuItem[] => {
+  if (item.childGroups && item.childGroups.length > 0) {
+    return item.childGroups.flatMap((g) => g.items);
+  }
+  return item.children ?? [];
+};
+
+/** True when a MenuItem has at least one child (flat or grouped). */
+export const hasSubmenu = (item: MenuItem): boolean =>
+  (item.children?.length ?? 0) > 0 || (item.childGroups?.length ?? 0) > 0;
 
 // Senior/jeugd items are inserted after the first 3 static items (Home, Nieuws, Evenementen)
 const HEADER_COUNT = 3;
