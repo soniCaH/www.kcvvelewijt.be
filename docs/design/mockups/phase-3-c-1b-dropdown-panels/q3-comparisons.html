@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Dropdown — Q3 Grouping comparisons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.5;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1440px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .page-meta { margin-bottom: 32px; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin: 0 0 4px; }
+      .page-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5vw, 60px); line-height: 1.04; margin: 8px 0 16px; }
+      .page-meta h1 em { color: var(--color-jersey-deep); }
+      .page-meta .lead { max-width: 820px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+
+      /* 3-col grid for the panels */
+      .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 32px; }
+      @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } .grid > .cell:nth-child(3) { grid-column: span 2; } }
+
+      .cell { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px; }
+      .cell__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+      .cell__tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .cell h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; line-height: 1.1; margin: 4px 0 0; flex: 1 0 auto; }
+      .cell h2 em { color: var(--color-jersey-deep); }
+      .cell__sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-muted); margin: 0 0 4px; }
+
+      .frame { background: var(--color-cream); border: 1.5px solid var(--color-ink); overflow: hidden; }
+      .frame__chrome { display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 7px; height: 7px; border: 1px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 8px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 360px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: relative; z-index: 50; }
+      .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 12px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 13px; line-height: 1; color: var(--color-ink); white-space: nowrap; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; gap: 8px; align-items: center; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 3px 0; display: inline-flex; align-items: center; gap: 2px; }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-nav__caret { font-size: 6px; opacity: 0.6; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; }
+      .site-actions { display: flex; gap: 5px; align-items: center; }
+      .site-search { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-ink); }
+      .site-cta { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 6px; border: 1px solid var(--color-ink); color: var(--color-ink); }
+
+      .nav-trigger { position: relative; }
+
+      .page-mock { padding: 24px 14px 18px; opacity: 0.4; pointer-events: none; }
+      .page-mock h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0 0 5px; }
+      .page-mock h3 em { color: var(--color-jersey-deep); }
+      .page-mock p { font-size: 9px; color: var(--color-ink-soft); margin: 0; max-width: 280px; }
+
+      /* Locked Q1+Q2 panel surface */
+      .panel { position: absolute; top: calc(100% + 1px); right: 8px; background: var(--color-ink-soft); border: 1px solid var(--color-ink); box-shadow: var(--shadow-paper-sm-soft); padding: 9px 11px; z-index: 60; animation: fade 150ms ease-out; }
+      @keyframes fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+      @media (prefers-reduced-motion: reduce) {
+        .panel { animation: none; }
+      }
+      .panel ul { list-style: none; margin: 0; padding: 0; }
+      .panel a {
+        display: flex; align-items: center; gap: 4px;
+        padding: 3px 2px;
+        font-family: var(--font-mono); font-size: 8px; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--color-cream-soft); text-decoration: none;
+      }
+      .panel a::before { content: "—"; color: var(--color-ink-muted); font-size: 9px; line-height: 1; flex-shrink: 0; width: 7px; }
+
+      .panel-heading { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 5px; padding-bottom: 3px; border-bottom: 1px dashed var(--color-ink-muted); }
+      .panel-heading--action { color: var(--color-jersey-bright); }
+
+      /* Per-option layouts */
+      .panel--alpha { width: 380px; }
+      .panel--alpha .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px 14px; }
+
+      .panel--beta { width: 380px; }
+      .panel--beta .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px 14px; }
+
+      .panel--gamma { width: 360px; }
+      .panel--gamma .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; }
+
+      .cell__caption { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--color-paper-edge); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; }
+      .cell__caption dt { color: var(--color-ink-muted); text-transform: uppercase; }
+      .cell__caption dd { margin: 0; color: var(--color-ink); }
+
+      .group-summary { background: var(--color-cream); border: 1px dashed var(--color-paper-edge); padding: 10px 12px; margin-top: 12px; font-size: 11px; line-height: 1.55; }
+      .group-summary strong { color: var(--color-jersey-deep); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+      .tradeoffs { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .tradeoffs h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; margin: 0 0 16px; }
+      .tradeoffs table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .tradeoffs th, .tradeoffs td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .tradeoffs th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); font-weight: 600; }
+      .tradeoffs td:first-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); white-space: nowrap; }
+      .score { display: inline-block; min-width: 40px; }
+      .score-h { color: var(--color-jersey-deep); font-weight: 600; }
+      .score-m { color: var(--color-ink-soft); }
+      .score-l { color: var(--color-ink-muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q3 Grouping &amp; labels · Comparisons</p>
+        <h1>Grouping &amp; labels — <em>3 schemes</em>, De club only</h1>
+        <p class="lead">
+          Same locked Q1 surface (C ink-fill) and Q2 width (D wide 560px). Three different
+          ways to label the De club children's groups, three different distributions.
+          Teams + Jeugd panels stay narrow + flat — Q3 only affects the wide De club panel.
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- ============== Option α — Topic-led ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option α · Topic-led</p>
+              <h2>Over ons / <em>Helpen</em> / Praktisch</h2>
+            </div>
+            <span class="cell__tag">α</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--alpha">
+                        <div class="cols-3">
+                          <div>
+                            <p class="panel-heading">Over ons</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Helpen</p>
+                            <ul>
+                              <li><a>Vrijwill.</a></li><li><a>Contact</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Cashless</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Distribution</dt><dd>6 / 2 / 3</dd>
+            <dt>Voice</dt><dd>descriptive nouns</dd>
+            <dt>Hulp conflict?</dt><dd>YES (Helpen ≈ Hulp)</dd>
+          </dl>
+
+          <div class="group-summary">
+            <strong>Over ons (6)</strong> · Geschiedenis · Organigram · Bestuur · Jeugdbestuur · Angels · Ultras<br>
+            <strong>Helpen (2)</strong> · Word vrijwilliger · Contact<br>
+            <strong>Praktisch (3)</strong> · Praktische Info · Cashless clubkaart · Downloads
+          </div>
+        </article>
+
+        <!-- ============== Option β — Role-led ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option β · Role-led</p>
+              <h2>Wie we zijn / <em>Doe mee</em> / Contact</h2>
+            </div>
+            <span class="cell__tag">β</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--beta">
+                        <div class="cols-3">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading panel-heading--action">Doe mee</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Contact</p>
+                            <ul>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Distribution</dt><dd>6 / 3 / 2</dd>
+            <dt>Voice</dt><dd>identity / verb / noun</dd>
+            <dt>Hulp conflict?</dt><dd>NO</dd>
+          </dl>
+
+          <div class="group-summary">
+            <strong>Wie we zijn (6)</strong> · Geschiedenis · Organigram · Bestuur · Jeugdbestuur · Angels · Ultras<br>
+            <strong>Doe mee (3)</strong> · Praktische Info · Word vrijwilliger · Cashless clubkaart<br>
+            <strong>Contact (2)</strong> · Contact · Downloads
+          </div>
+        </article>
+
+        <!-- ============== Option γ — Two-group fold ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option γ · Two-group fold</p>
+              <h2>Wie we zijn / <em>Praktisch</em></h2>
+            </div>
+            <span class="cell__tag">γ</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--gamma">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Distribution</dt><dd>6 / 5 (2-col)</dd>
+            <dt>Voice</dt><dd>identity / functional</dd>
+            <dt>Hulp conflict?</dt><dd>NO</dd>
+          </dl>
+
+          <div class="group-summary">
+            <strong>Wie we zijn (6)</strong> · Geschiedenis · Organigram · Bestuur · Jeugdbestuur · Angels · Ultras<br>
+            <strong>Praktisch (5)</strong> · Praktische Info · Word vrijwilliger · Cashless clubkaart · Contact · Downloads
+          </div>
+        </article>
+      </div>
+
+      <section class="tradeoffs">
+        <h2>Trade-off matrix</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>α · Topic</th>
+              <th>β · Role</th>
+              <th>γ · Two-group</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Distribution balance</td>
+              <td><span class="score score-l">6/2/3 — lopsided</span></td>
+              <td><span class="score score-m">6/3/2 — tapered</span></td>
+              <td><span class="score score-h">6/5 — balanced</span></td>
+            </tr>
+            <tr>
+              <td>Hulp top-level conflict</td>
+              <td><span class="score score-l">YES (Helpen ≈ Hulp)</span></td>
+              <td><span class="score score-h">No</span></td>
+              <td><span class="score score-h">No</span></td>
+            </tr>
+            <tr>
+              <td>Editorial voice consistency</td>
+              <td><span class="score score-h">3 nouns</span></td>
+              <td><span class="score score-m">noun / verb / noun</span></td>
+              <td><span class="score score-h">noun / compound</span></td>
+            </tr>
+            <tr>
+              <td>Action emphasis</td>
+              <td><span class="score score-l">Buried in "Praktisch"</span></td>
+              <td><span class="score score-h">Highlighted as "Doe mee"</span></td>
+              <td><span class="score score-l">Folded into bucket</span></td>
+            </tr>
+            <tr>
+              <td>Membership signup placement</td>
+              <td><span class="score score-l">Under "Praktisch" (mislabeled)</span></td>
+              <td><span class="score score-h">Under "Doe mee" (correct)</span></td>
+              <td><span class="score score-m">Under "Praktisch &amp; contact"</span></td>
+            </tr>
+            <tr>
+              <td>Visual rhythm</td>
+              <td><span class="score score-l">Tall · short · medium</span></td>
+              <td><span class="score score-h">Tall · medium · short</span></td>
+              <td><span class="score score-h">Balanced 2-page spread</span></td>
+            </tr>
+            <tr>
+              <td>Heading wrapping risk at 11px mono</td>
+              <td><span class="score score-h">No (max 10 chars)</span></td>
+              <td><span class="score score-h">No (max 11 chars)</span></td>
+              <td><span class="score score-l">YES — "Praktisch &amp; contact" is 18 chars</span></td>
+            </tr>
+            <tr>
+              <td>Editorial nuance</td>
+              <td><span class="score score-m">Brochure index</span></td>
+              <td><span class="score score-h">Verb-led club voice</span></td>
+              <td><span class="score score-l">Utilitarian split</span></td>
+            </tr>
+            <tr>
+              <td>Maintenance — labels to author</td>
+              <td><span class="score score-m">3 labels</span></td>
+              <td><span class="score score-m">3 labels</span></td>
+              <td><span class="score score-h">2 labels</span></td>
+            </tr>
+            <tr>
+              <td>Composes with future Hulp fold-in</td>
+              <td><span class="score score-l">Helpen group already exists — collision deepens</span></td>
+              <td><span class="score score-h">Hulp could become 4th group or join Doe mee</span></td>
+              <td><span class="score score-h">Hulp could fold into "Praktisch &amp; contact"</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

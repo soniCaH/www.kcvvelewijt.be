@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Dropdown — Q1 Surface comparisons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+
+        /* C′ proposes warm-ink — included for the comparison panel */
+        --color-ink-warm:        #2a1d10;
+        --color-ink-warm-rule:   #5a4628;
+        --color-ink-warm-bullet: #9a8a60;
+
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.5;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1380px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .page-meta { margin-bottom: 32px; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin: 0 0 4px; }
+      .page-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5vw, 60px); line-height: 1.04; margin: 8px 0 16px; }
+      .page-meta h1 em { color: var(--color-jersey-deep); }
+      .page-meta .lead { max-width: 800px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 32px; }
+
+      .cell { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px; }
+      .cell__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+      .cell__tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .cell h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 24px; line-height: 1.1; margin: 4px 0 0; flex: 1 0 auto; }
+      .cell h2 em { color: var(--color-jersey-deep); }
+      .cell__sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-muted); margin: 0 0 4px; }
+
+      .frame { background: var(--color-cream); border: 1.5px solid var(--color-ink); overflow: visible; }
+      .frame__chrome { display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 7px; height: 7px; border: 1px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 8px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 460px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: relative; z-index: 50; }
+      .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 16px; line-height: 1; color: var(--color-ink); white-space: nowrap; text-decoration: none; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; gap: 12px; align-items: center; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 3px; cursor: pointer; }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-nav__caret { font-size: 8px; opacity: 0.6; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; }
+      .site-actions { display: flex; gap: 8px; align-items: center; }
+      .site-search { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--color-ink); }
+      .site-cta { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 5px 9px; border: 1.25px solid var(--color-ink); color: var(--color-ink); text-decoration: none; }
+
+      .nav-trigger { position: relative; }
+
+      .page-mock { padding: 28px 16px 24px; opacity: 0.4; pointer-events: none; }
+      .page-mock h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 24px; line-height: 1.1; margin: 0 0 6px; }
+      .page-mock h3 em { color: var(--color-jersey-deep); }
+      .page-mock p { font-size: 11px; color: var(--color-ink-soft); margin: 0; max-width: 360px; }
+      .page-mock .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+      .page-mock .card { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); height: 50px; }
+
+      /* ================= OPTION B — Cream-soft pinned ================= */
+      .panel--b {
+        position: absolute;
+        top: calc(100% + 5px);
+        right: 8px;
+        min-width: 178px;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 6px 0;
+        z-index: 60;
+      }
+
+      /* ================= OPTION B′ — Cream-soft + ink letterhead ================= */
+      .panel--b-prime {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 8px;
+        min-width: 178px;
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-paper-edge);
+        border-top: 4px solid var(--color-ink);
+        box-shadow: var(--shadow-soft);
+        padding: 0;
+        z-index: 60;
+      }
+      .panel--b-prime ul { padding: 6px 0 !important; }
+
+      /* ================= OPTION C — Ink-fill (cool) ================= */
+      .panel--c {
+        position: absolute;
+        top: calc(100% + 1px);
+        right: 8px;
+        min-width: 178px;
+        background: var(--color-ink-soft);
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm-soft);
+        padding: 6px 0;
+        z-index: 60;
+      }
+      .panel--c a { color: var(--color-cream-soft); }
+      .panel--c a::before { color: var(--color-ink-muted); }
+      .panel--c a:hover { color: var(--color-cream); background: rgba(245, 241, 230, 0.06); }
+      .panel--c a:hover::before { color: var(--color-jersey-bright); }
+
+      /* ================= OPTION C′ — Warm-ink coffee ================= */
+      .panel--c-prime {
+        position: absolute;
+        top: calc(100% + 1px);
+        right: 8px;
+        min-width: 178px;
+        background-color: var(--color-ink-warm);
+        background-image:
+          radial-gradient(circle at 24% 38%, rgba(245, 241, 230, 0.045) 0 1px, transparent 1px),
+          radial-gradient(circle at 72% 62%, rgba(245, 241, 230, 0.035) 0 1px, transparent 1px);
+        background-size: 70px 70px, 55px 55px;
+        border: 1px solid var(--color-ink-warm-rule);
+        box-shadow: var(--shadow-paper-sm-soft);
+        padding: 6px 0;
+        z-index: 60;
+      }
+      .panel--c-prime a { color: var(--color-cream-soft); }
+      .panel--c-prime a::before { color: var(--color-ink-warm-bullet); }
+      .panel--c-prime a:hover { color: var(--color-cream); background: rgba(245, 241, 230, 0.06); }
+      .panel--c-prime a:hover::before { color: var(--color-jersey-bright); }
+
+      /* Shared panel item styles */
+      .panel--b, .panel--b-prime, .panel--c, .panel--c-prime { animation: fade 150ms ease-out; }
+      @keyframes fade {
+        from { opacity: 0; transform: translateY(-3px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .panel--b ul, .panel--b-prime ul, .panel--c ul, .panel--c-prime ul { list-style: none; margin: 0; padding: 0; }
+      .panel--b a, .panel--b-prime a, .panel--c a, .panel--c-prime a {
+        display: flex; align-items: center; gap: 6px;
+        padding: 5px 12px 5px 10px;
+        font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--color-ink); text-decoration: none;
+        transition: color 150ms ease, background 150ms ease;
+      }
+      .panel--b a::before, .panel--b-prime a::before, .panel--c a::before, .panel--c-prime a::before {
+        content: "—";
+        color: var(--color-ink-muted);
+        font-size: 11px;
+        line-height: 1;
+        flex-shrink: 0;
+        width: 9px;
+      }
+      .panel--b a:hover, .panel--b-prime a:hover { color: var(--color-jersey-deep); background: rgba(0, 135, 85, 0.04); }
+      .panel--b a:hover::before, .panel--b-prime a:hover::before { color: var(--color-jersey-deep); }
+
+      .cell__caption { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--color-paper-edge); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; }
+      .cell__caption dt { color: var(--color-ink-muted); text-transform: uppercase; }
+      .cell__caption dd { margin: 0; color: var(--color-ink); }
+
+      /* Tradeoff table */
+      .tradeoffs { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .tradeoffs h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; margin: 0 0 16px; }
+      .tradeoffs table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .tradeoffs th, .tradeoffs td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .tradeoffs th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); font-weight: 600; }
+      .tradeoffs td:first-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); white-space: nowrap; }
+      .score { display: inline-block; min-width: 40px; }
+      .score-h { color: var(--color-jersey-deep); font-weight: 600; }
+      .score-m { color: var(--color-ink-soft); }
+      .score-l { color: var(--color-ink-muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q1 Surface · Comparisons</p>
+        <h1>Surface — <em>4 options</em> side-by-side</h1>
+        <p class="lead">
+          Originals on top (B · C). Refinements below (B′ · C′). Same SiteHeader, same
+          <strong>De club</strong> trigger open, same 11 child links — comparing
+          <em>surfaces</em>, not layouts. Layout-per-panel is Q3, decided after Q1 locks.
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- ================== OPTION B ================== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option B · Original · Most fanzine</p>
+              <h2>Cream-soft <em>pinned</em></h2>
+            </div>
+            <span class="cell__tag">B</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel--b"><ul>
+                        <li><a>Geschiedenis</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                        <li><a>Jeugdbestuur</a></li><li><a>KCVV Angels</a></li><li><a>KCVV Ultras</a></li>
+                        <li><a>Contact</a></li><li><a>Word vrijwilliger</a></li><li><a>Downloads</a></li>
+                        <li><a>Praktische Info</a></li><li><a>Cashless clubkaart</a></li>
+                      </ul></div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+                <div class="row"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Surface</dt><dd>--color-cream-soft</dd>
+            <dt>Border</dt><dd>2px --color-ink (full frame)</dd>
+            <dt>Shadow</dt><dd>--shadow-paper-sm (hard 4px)</dd>
+            <dt>Reads as</dt><dd>flyer pinned beneath masthead</dd>
+          </dl>
+        </article>
+
+        <!-- ================== OPTION B′ ================== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option B′ · Refinement · Letterhead anchor</p>
+              <h2>Cream-soft + <em>ink letterhead</em></h2>
+            </div>
+            <span class="cell__tag">B′</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel--b-prime"><ul>
+                        <li><a>Geschiedenis</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                        <li><a>Jeugdbestuur</a></li><li><a>KCVV Angels</a></li><li><a>KCVV Ultras</a></li>
+                        <li><a>Contact</a></li><li><a>Word vrijwilliger</a></li><li><a>Downloads</a></li>
+                        <li><a>Praktische Info</a></li><li><a>Cashless clubkaart</a></li>
+                      </ul></div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+                <div class="row"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Surface</dt><dd>--color-cream-soft</dd>
+            <dt>Border</dt><dd>4px --color-ink (top only) + 1px paper-edge sides/btm</dd>
+            <dt>Shadow</dt><dd>--shadow-soft (blurred)</dd>
+            <dt>Reads as</dt><dd>printed flyer with section letterhead</dd>
+          </dl>
+        </article>
+
+        <!-- ================== OPTION C ================== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option C · Original · Highest contrast</p>
+              <h2>Ink-fill <em>panel</em></h2>
+            </div>
+            <span class="cell__tag">C</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel--c"><ul>
+                        <li><a>Geschiedenis</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                        <li><a>Jeugdbestuur</a></li><li><a>KCVV Angels</a></li><li><a>KCVV Ultras</a></li>
+                        <li><a>Contact</a></li><li><a>Word vrijwilliger</a></li><li><a>Downloads</a></li>
+                        <li><a>Praktische Info</a></li><li><a>Cashless clubkaart</a></li>
+                      </ul></div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+                <div class="row"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Surface</dt><dd>--color-ink-soft (cool)</dd>
+            <dt>Border</dt><dd>1px --color-ink</dd>
+            <dt>Shadow</dt><dd>--shadow-paper-sm-soft</dd>
+            <dt>Reads as</dt><dd>stadium board, inverted from masthead</dd>
+          </dl>
+        </article>
+
+        <!-- ================== OPTION C′ ================== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option C′ · Refinement · Inverted newsprint</p>
+              <h2>Warm-ink <em>coffee</em></h2>
+            </div>
+            <span class="cell__tag">C′</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel--c-prime"><ul>
+                        <li><a>Geschiedenis</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                        <li><a>Jeugdbestuur</a></li><li><a>KCVV Angels</a></li><li><a>KCVV Ultras</a></li>
+                        <li><a>Contact</a></li><li><a>Word vrijwilliger</a></li><li><a>Downloads</a></li>
+                        <li><a>Praktische Info</a></li><li><a>Cashless clubkaart</a></li>
+                      </ul></div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+                <div class="row"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Surface</dt><dd>--color-ink-warm <em>(new)</em>: #1d1812</dd>
+            <dt>Border</dt><dd>1px --color-ink-warm-rule (new)</dd>
+            <dt>Shadow</dt><dd>--shadow-paper-sm-soft</dd>
+            <dt>Reads as</dt><dd>inverted newsprint, warm</dd>
+          </dl>
+        </article>
+      </div>
+
+      <section class="tradeoffs">
+        <h2>Trade-off matrix</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>B · Pinned</th>
+              <th>B′ · Letterhead</th>
+              <th>C · Ink-fill</th>
+              <th>C′ · Warm-ink</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Coherence with locked Direction A</td>
+              <td><span class="score score-m">High</span></td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-l">Lowest</span> (clashes)</td>
+              <td><span class="score score-m">Medium</span></td>
+            </tr>
+            <tr>
+              <td>Distinct from "more nav row"</td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-h">High</span> (band signals)</td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-h">Highest</span></td>
+            </tr>
+            <tr>
+              <td>Fanzine character</td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-h">High</span></td>
+              <td><span class="score score-l">Low</span> (different register)</td>
+              <td><span class="score score-m">Medium</span> (printed inverse)</td>
+            </tr>
+            <tr>
+              <td>Sticky-scroll behaviour</td>
+              <td><span class="score score-m">Medium</span> (heavy shadow)</td>
+              <td><span class="score score-h">Strong</span></td>
+              <td><span class="score score-h">Strong</span> (always distinct)</td>
+              <td><span class="score score-h">Strong</span></td>
+            </tr>
+            <tr>
+              <td>Readability vs page content</td>
+              <td><span class="score score-h">High</span></td>
+              <td><span class="score score-m">Medium</span></td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-h">High</span></td>
+            </tr>
+            <tr>
+              <td>Implementation complexity</td>
+              <td><span class="score score-h">Lowest</span> (existing tokens)</td>
+              <td><span class="score score-h">Lowest</span> (border swap)</td>
+              <td><span class="score score-m">Medium</span> (jersey on dark)</td>
+              <td><span class="score score-l">Highest</span> (3 new tokens)</td>
+            </tr>
+            <tr>
+              <td>Jersey-deep accent contrast</td>
+              <td><span class="score score-h">Passes AA</span></td>
+              <td><span class="score score-h">Passes AA</span></td>
+              <td><span class="score score-l">Fails</span> (jersey-bright req.)</td>
+              <td><span class="score score-l">Fails</span> (jersey-bright req.)</td>
+            </tr>
+            <tr>
+              <td>Holds up across 11-item De club</td>
+              <td><span class="score score-m">Heavy slab</span></td>
+              <td><span class="score score-h">Yes</span></td>
+              <td><span class="score score-h">Yes</span></td>
+              <td><span class="score score-h">Yes</span></td>
+            </tr>
+            <tr>
+              <td>New palette tokens needed</td>
+              <td><span class="score score-h">0</span></td>
+              <td><span class="score score-h">0</span></td>
+              <td><span class="score score-m">0</span> (jersey-bright carve-out)</td>
+              <td><span class="score score-l">3</span> (warm-ink family)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

@@ -4,6 +4,8 @@ import {
   buildMenuItems,
   buildJeugdItem,
   isMenuItemActive,
+  flattenChildren,
+  hasSubmenu,
 } from "./menuItems";
 import type { MenuItem } from "./menuItems";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
@@ -14,18 +16,48 @@ describe("staticMenuItems", () => {
     expect(labels).not.toContain("Zoeken");
   });
 
-  it("includes 'Word vrijwilliger' in 'De club' children after 'Contact'", () => {
+  it("places De club children under two groups: Wie we zijn / Praktisch", () => {
     const deClub = staticMenuItems.find((item) => item.label === "De club");
     expect(deClub).toBeDefined();
-    const children = deClub!.children!;
-    const labels = children.map((c) => c.label);
-    expect(labels).toContain("Word vrijwilliger");
+    expect(deClub!.children).toBeUndefined();
+    const groupLabels = deClub!.childGroups!.map((g) => g.label);
+    expect(groupLabels).toEqual(["Wie we zijn", "Praktisch"]);
+  });
 
-    const contactIdx = labels.indexOf("Contact");
-    const vrijwilligerIdx = labels.indexOf("Word vrijwilliger");
-    expect(vrijwilligerIdx).toBe(contactIdx + 1);
+  it("groups identity content under 'Wie we zijn' (6 items)", () => {
+    const deClub = staticMenuItems.find((item) => item.label === "De club")!;
+    const wieWeZijn = deClub.childGroups!.find(
+      (g) => g.label === "Wie we zijn",
+    )!;
+    const labels = wieWeZijn.items.map((i) => i.label);
+    expect(labels).toEqual([
+      "Geschiedenis",
+      "Organigram",
+      "Bestuur",
+      "Jeugdbestuur",
+      "KCVV Angels",
+      "KCVV Ultras",
+    ]);
+  });
 
-    const vrijwilliger = children.find((c) => c.label === "Word vrijwilliger");
+  it("groups operational content under 'Praktisch' (5 items)", () => {
+    const deClub = staticMenuItems.find((item) => item.label === "De club")!;
+    const praktisch = deClub.childGroups!.find((g) => g.label === "Praktisch")!;
+    const labels = praktisch.items.map((i) => i.label);
+    expect(labels).toEqual([
+      "Praktische Info",
+      "Word vrijwilliger",
+      "Cashless clubkaart",
+      "Contact",
+      "Downloads",
+    ]);
+  });
+
+  it("preserves Word vrijwilliger href for backwards compatibility", () => {
+    const deClub = staticMenuItems.find((item) => item.label === "De club")!;
+    const vrijwilliger = deClub
+      .childGroups!.flatMap((g) => g.items)
+      .find((i) => i.label === "Word vrijwilliger");
     expect(vrijwilliger?.href).toBe("/club/vrijwilliger");
   });
 });
@@ -96,13 +128,128 @@ describe("buildMenuItems", () => {
     ]);
   });
 
-  it("preserves children on all items", () => {
+  it("preserves children/childGroups on all items", () => {
     const result = buildMenuItems(seniorItems, jeugdItem);
     const jeugd = result.find((item) => item.label === "Jeugd");
     expect(jeugd?.children).toEqual([{ label: "U21", href: "/ploegen/u21" }]);
 
     const club = result.find((item) => item.label === "De club");
-    expect(club?.children?.length).toBeGreaterThan(0);
+    expect(club?.childGroups?.length).toBeGreaterThan(0);
+  });
+});
+
+describe("flattenChildren", () => {
+  it("returns empty array when neither children nor childGroups are set", () => {
+    const item: MenuItem = { label: "Home", href: "/" };
+    expect(flattenChildren(item)).toEqual([]);
+  });
+
+  it("returns flat children when only children is set", () => {
+    const item: MenuItem = {
+      label: "Teams",
+      href: "/ploegen",
+      children: [
+        { label: "Info", href: "/ploegen/a" },
+        { label: "Stand", href: "/ploegen/a?tab=stand" },
+      ],
+    };
+    expect(flattenChildren(item)).toEqual(item.children);
+  });
+
+  it("flattens childGroups into a single array preserving order", () => {
+    const item: MenuItem = {
+      label: "De club",
+      href: "/club",
+      childGroups: [
+        {
+          label: "A",
+          items: [{ label: "X", href: "/x" }],
+        },
+        {
+          label: "B",
+          items: [
+            { label: "Y", href: "/y" },
+            { label: "Z", href: "/z" },
+          ],
+        },
+      ],
+    };
+    expect(flattenChildren(item).map((c) => c.label)).toEqual(["X", "Y", "Z"]);
+  });
+
+  it("prefers childGroups over children when both are set", () => {
+    const item: MenuItem = {
+      label: "Both",
+      href: "/both",
+      children: [{ label: "from-children", href: "/c" }],
+      childGroups: [
+        { label: "G", items: [{ label: "from-groups", href: "/g" }] },
+      ],
+    };
+    expect(flattenChildren(item).map((c) => c.label)).toEqual(["from-groups"]);
+  });
+});
+
+describe("hasSubmenu", () => {
+  it("is false for leaf items", () => {
+    expect(hasSubmenu({ label: "Home", href: "/" })).toBe(false);
+  });
+
+  it("is true when children has at least one entry", () => {
+    expect(
+      hasSubmenu({
+        label: "Teams",
+        href: "/ploegen",
+        children: [{ label: "Info", href: "/ploegen/a" }],
+      }),
+    ).toBe(true);
+  });
+
+  it("is true when childGroups has at least one entry", () => {
+    expect(
+      hasSubmenu({
+        label: "De club",
+        href: "/club",
+        childGroups: [{ label: "G", items: [{ label: "X", href: "/x" }] }],
+      }),
+    ).toBe(true);
+  });
+
+  it("is false when both arrays are present but empty", () => {
+    expect(
+      hasSubmenu({
+        label: "Empty",
+        href: "/e",
+        children: [],
+        childGroups: [],
+      }),
+    ).toBe(false);
+  });
+
+  it("is false when childGroups holds only empty group shells", () => {
+    expect(
+      hasSubmenu({
+        label: "Shells",
+        href: "/s",
+        childGroups: [
+          { label: "G1", items: [] },
+          { label: "G2", items: [] },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when at least one childGroup has items (mixed)", () => {
+    expect(
+      hasSubmenu({
+        label: "Mixed",
+        href: "/m",
+        childGroups: [
+          { label: "Empty", items: [] },
+          { label: "HasItems", items: [{ label: "X", href: "/x" }] },
+        ],
+      }),
+    ).toBe(true);
   });
 });
 

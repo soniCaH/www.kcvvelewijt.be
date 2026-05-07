@@ -3,10 +3,6 @@
  * Central export point for all layout components
  */
 
-// PageHeader (legacy — replaced site-wide by <SiteHeader>)
-export { PageHeader } from "./PageHeader";
-export type { PageHeaderProps } from "./PageHeader";
-
 // SiteHeader
 export { SiteHeader } from "./SiteHeader";
 export type { SiteHeaderProps } from "./SiteHeader";
@@ -15,13 +11,14 @@ export type { SiteHeaderProps } from "./SiteHeader";
 export { NavTakeover, NavTakeoverItem } from "./NavTakeover";
 export type { NavTakeoverProps, NavTakeoverItemProps } from "./NavTakeover";
 
-// Navigation
-export { Navigation } from "./Navigation";
-export type { NavigationProps } from "./Navigation";
-
-// MobileMenu
-export { MobileMenu } from "./MobileMenu";
-export type { MobileMenuProps } from "./MobileMenu";
+// NavDropdown
+export { NavDropdown, NavDropdownProvider } from "./NavDropdown";
+export type {
+  NavDropdownProps,
+  NavDropdownProviderProps,
+  NavDropdownItem,
+  NavDropdownGroup,
+} from "./NavDropdown";
 
 // SiteFooter
 export { SiteFooter } from "./SiteFooter";

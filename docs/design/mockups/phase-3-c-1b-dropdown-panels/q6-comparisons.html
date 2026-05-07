@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Q6 Hover-grace timing comparisons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --color-cream: #f5f1e6; --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755; --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --font-display: "Playfair Display", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { font-family: var(--font-body); background: var(--color-cream); color: var(--color-ink); font-size: 16px; line-height: 1.5; background-image: radial-gradient(circle at 12% 20%, rgba(10,10,10,0.022) 0 1px, transparent 1px), radial-gradient(circle at 78% 65%, rgba(10,10,10,0.018) 0 1px, transparent 1px); background-size: 240px 240px, 180px 180px; }
+      main { max-width: 1440px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .page-meta { margin-bottom: 32px; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin: 0 0 4px; }
+      .page-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5vw, 60px); line-height: 1.04; margin: 8px 0 16px; }
+      .page-meta h1 em { color: var(--color-jersey-deep); }
+      .page-meta .lead { max-width: 820px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+
+      .live-note { background: var(--color-ink-soft); color: var(--color-cream-soft); padding: 12px 18px; margin: 16px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; }
+      .live-note strong { color: var(--color-jersey-bright); }
+
+      .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 32px; }
+      @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+      .cell { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px; }
+      .cell__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+      .cell__tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .cell h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; line-height: 1.1; margin: 4px 0 0; flex: 1 0 auto; }
+      .cell h2 em { color: var(--color-jersey-deep); }
+      .cell__sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-muted); margin: 0 0 4px; }
+
+      .frame { background: var(--color-cream); border: 1.5px solid var(--color-ink); overflow: visible; }
+      .frame__chrome { display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 7px; height: 7px; border: 1px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 8px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 300px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: relative; z-index: 50; }
+      .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 12px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 13px; line-height: 1; color: var(--color-ink); white-space: nowrap; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; gap: 8px; align-items: center; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
+      .site-nav__caret { font-size: 7px; opacity: 0.6; }
+
+      .nav-trigger { position: relative; }
+      .nav-trigger:hover .site-nav__link { color: var(--color-jersey-deep); }
+      .nav-trigger:hover .site-nav__caret { transform: rotate(180deg); opacity: 1; color: var(--color-jersey-deep); }
+
+      .site-actions { display: flex; gap: 5px; align-items: center; }
+      .site-search { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-ink); }
+      .site-cta { font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 6px; border: 1px solid var(--color-ink); color: var(--color-ink); }
+
+      .page-mock { padding: 22px 14px 18px; opacity: 0.4; pointer-events: none; }
+      .page-mock h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0 0 5px; }
+      .page-mock h3 em { color: var(--color-jersey-deep); }
+      .page-mock p { font-size: 9px; color: var(--color-ink-soft); margin: 0; max-width: 280px; }
+
+      /* Locked panel (Q1+Q2+Q3+Q4+Q5 applied) */
+      .panel {
+        position: absolute; top: calc(100% + 1px); right: 8px;
+        width: 360px;
+        background: var(--color-ink-soft);
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm-soft);
+        padding: 9px 11px;
+        z-index: 60;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-4px);
+        /* Q4-C close transition */
+        transition:
+          opacity 100ms ease-in var(--close-grace, 200ms),
+          transform 100ms ease-in var(--close-grace, 200ms),
+          visibility 0s linear calc(var(--close-grace, 200ms) + 100ms);
+      }
+      .nav-trigger:hover .panel,
+      .panel:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        /* Q4-C open transition with grace delay */
+        transition:
+          opacity 150ms ease-out var(--open-grace, 80ms),
+          transform 150ms ease-out var(--open-grace, 80ms),
+          visibility 0s linear var(--open-grace, 80ms);
+      }
+      .panel ul { list-style: none; margin: 0; padding: 0; }
+      .panel a { display: flex; align-items: center; gap: 4px; padding: 3px 2px; font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-cream-soft); text-decoration: none; position: relative; }
+      .panel a::before { content: "—"; color: var(--color-ink-muted); font-size: 9px; line-height: 1; flex-shrink: 0; width: 7px; }
+      .panel a.is-active { color: var(--color-jersey-bright); }
+      .panel a.is-active::before { content: "▶"; color: var(--color-jersey-bright); font-size: 6px; line-height: 1; flex-shrink: 0; width: 7px; }
+      .panel-heading { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 5px; padding-bottom: 3px; border-bottom: 1px dashed var(--color-ink-muted); }
+      .panel .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; }
+
+      /* === Preset A — Snappy === */
+      .frame--a { --open-grace: 0ms; --close-grace: 100ms; }
+
+      /* === Preset B — Forgiving (recommended) === */
+      .frame--b { --open-grace: 80ms; --close-grace: 200ms; }
+
+      /* === Preset C — Sticky === */
+      .frame--c { --open-grace: 150ms; --close-grace: 300ms; }
+
+      .cell__caption { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--color-paper-edge); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; }
+      .cell__caption dt { color: var(--color-ink-muted); text-transform: uppercase; }
+      .cell__caption dd { margin: 0; color: var(--color-ink); }
+
+      .test-hint { background: var(--color-cream); border: 1px dashed var(--color-paper-edge); padding: 10px 12px; margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--color-ink-soft); }
+      .test-hint strong { color: var(--color-jersey-deep); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+      .tradeoffs { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .tradeoffs h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; margin: 0 0 16px; }
+      .tradeoffs table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .tradeoffs th, .tradeoffs td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .tradeoffs th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); font-weight: 600; }
+      .tradeoffs td:first-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); white-space: nowrap; }
+      .score-h { color: var(--color-jersey-deep); font-weight: 600; }
+      .score-m { color: var(--color-ink-soft); }
+      .score-l { color: var(--color-ink-muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q6 Close paths · Hover-grace presets</p>
+        <h1>Hover-grace timing — <em>3 presets</em>, hover to feel</h1>
+        <p class="lead">
+          Same locked panel (Q1 ink-fill / Q2 wide / Q3 two-group / Q4 paper-slide / Q5 chevron).
+          Three different sets of grace timings around the hover-open / hover-close cycle.
+          The <code>open-grace</code> debounce delays opening so brief hovers don't trigger.
+          The <code>close-grace</code> delays closing so cursor sweeps don't lose the panel mid-flight.
+        </p>
+        <p class="live-note"><strong>HOVER:</strong> hover the <code>De club</code> nav item in each frame. Sweep your cursor in and out at different speeds to feel the timing differences.</p>
+      </header>
+
+      <div class="grid">
+        <!-- A — Snappy -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Preset A · Snappy</p>
+              <h2>0ms in / <em>100ms out</em></h2>
+            </div>
+            <span class="cell__tag">A</span>
+          </header>
+          <div class="frame frame--a">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a class="is-active" aria-current="page">Geschied.</a></li>
+                              <li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Hover the De club item to test snappy timing.</p>
+              </div>
+            </div>
+          </div>
+          <dl class="cell__caption">
+            <dt>Open grace</dt><dd>0ms (instant)</dd>
+            <dt>Close grace</dt><dd>100ms</dd>
+            <dt>Total to fully open</dt><dd>0 + 150ms (transition) = 150ms</dd>
+            <dt>Total to fully close</dt><dd>100 + 100ms (transition) = 200ms</dd>
+            <dt>Feel</dt><dd>responsive, bordering on skittish</dd>
+          </dl>
+          <p class="test-hint"><strong>TRY:</strong> sweep cursor across A-Pl./Jeugd/De club rapidly. Notice how each panel opens immediately — feels reactive but can flicker if you graze the trigger.</p>
+        </article>
+
+        <!-- B — Forgiving (recommended) -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Preset B · Forgiving (recommended)</p>
+              <h2>80ms in / <em>200ms out</em></h2>
+            </div>
+            <span class="cell__tag">B</span>
+          </header>
+          <div class="frame frame--b">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a class="is-active" aria-current="page">Geschied.</a></li>
+                              <li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Hover the De club item to test forgiving timing.</p>
+              </div>
+            </div>
+          </div>
+          <dl class="cell__caption">
+            <dt>Open grace</dt><dd>80ms debounce</dd>
+            <dt>Close grace</dt><dd>200ms</dd>
+            <dt>Total to fully open</dt><dd>80 + 150ms = 230ms</dd>
+            <dt>Total to fully close</dt><dd>200 + 100ms = 300ms</dd>
+            <dt>Feel</dt><dd>tolerant, no skitter, panel "stays" for cursor traversal</dd>
+          </dl>
+          <p class="test-hint"><strong>TRY:</strong> hover De club for &lt; 80ms then leave — panel never opens. Now hover &gt; 80ms — panel opens. Sweep cursor between trigger and panel — no flicker, the 200ms close-grace catches diagonal paths.</p>
+        </article>
+
+        <!-- C — Sticky -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Preset C · Sticky</p>
+              <h2>150ms in / <em>300ms out</em></h2>
+            </div>
+            <span class="cell__tag">C</span>
+          </header>
+          <div class="frame frame--c">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a class="is-active" aria-current="page">Geschied.</a></li>
+                              <li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Hover the De club item to test sticky timing.</p>
+              </div>
+            </div>
+          </div>
+          <dl class="cell__caption">
+            <dt>Open grace</dt><dd>150ms debounce</dd>
+            <dt>Close grace</dt><dd>300ms</dd>
+            <dt>Total to fully open</dt><dd>150 + 150ms = 300ms</dd>
+            <dt>Total to fully close</dt><dd>300 + 100ms = 400ms</dd>
+            <dt>Feel</dt><dd>deliberate, panel "lingers", risk of feeling clingy</dd>
+          </dl>
+          <p class="test-hint"><strong>TRY:</strong> hover De club briefly — feels noticeably slow to open. Move cursor away — panel persists for ~300ms before fading. Good if you want certainty; bad if you want to dismiss quickly.</p>
+        </article>
+      </div>
+
+      <section class="tradeoffs">
+        <h2>Trade-off matrix</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>A · Snappy</th>
+              <th>B · Forgiving</th>
+              <th>C · Sticky</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Perceived responsiveness</td>
+              <td><span class="score-h">Highest</span></td>
+              <td><span class="score-h">High</span></td>
+              <td><span class="score-m">Medium</span></td>
+            </tr>
+            <tr>
+              <td>Resistance to accidental hover</td>
+              <td><span class="score-l">Low (0ms debounce)</span></td>
+              <td><span class="score-h">High (80ms)</span></td>
+              <td><span class="score-h">Highest (150ms)</span></td>
+            </tr>
+            <tr>
+              <td>Tolerance of cursor sweep across triggers</td>
+              <td><span class="score-l">Lowest</span></td>
+              <td><span class="score-h">High</span></td>
+              <td><span class="score-h">Highest</span></td>
+            </tr>
+            <tr>
+              <td>Tolerance of diagonal trigger→panel sweeps</td>
+              <td><span class="score-m">Medium (100ms close-grace)</span></td>
+              <td><span class="score-h">High (200ms)</span></td>
+              <td><span class="score-h">Highest (300ms)</span></td>
+            </tr>
+            <tr>
+              <td>Risk of "skitter" / flicker</td>
+              <td><span class="score-l">Highest</span></td>
+              <td><span class="score-h">Low</span></td>
+              <td><span class="score-h">Lowest</span></td>
+            </tr>
+            <tr>
+              <td>Risk of "clingy" feel (panel won't go away)</td>
+              <td><span class="score-h">None</span></td>
+              <td><span class="score-h">Low</span></td>
+              <td><span class="score-l">Real</span></td>
+            </tr>
+            <tr>
+              <td>Total time to fully visible (open)</td>
+              <td><span class="score-h">150ms</span></td>
+              <td><span class="score-h">230ms</span></td>
+              <td><span class="score-m">300ms</span></td>
+            </tr>
+            <tr>
+              <td>Total time to fully hidden (close)</td>
+              <td><span class="score-h">200ms</span></td>
+              <td><span class="score-h">300ms</span></td>
+              <td><span class="score-m">400ms</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

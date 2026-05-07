@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Q3 Grouping — Option γ · Two-group fold</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .opt-meta { margin-bottom: 32px; }
+      .opt-tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .opt-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.04; margin: 8px 0 12px; }
+      .opt-meta h1 em { color: var(--color-jersey-deep); }
+      .opt-meta .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+
+      .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: visible; margin: 32px 0 24px; }
+      .frame__chrome { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 540px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: sticky; top: 0; z-index: 50; }
+      .site-header__inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 14px 28px; max-width: 1240px; margin: 0 auto; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 24px; line-height: 1; color: var(--color-ink); white-space: nowrap; text-decoration: none; letter-spacing: -0.01em; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; justify-content: center; align-items: center; gap: 22px; padding-left: 28px; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 6px 0; display: inline-flex; align-items: center; gap: 4px; transition: color 150ms ease; cursor: pointer; }
+      .site-nav__caret { font-family: var(--font-mono); font-size: 10px; line-height: 1; opacity: 0.6; transition: transform 150ms ease, opacity 150ms ease; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; color: var(--color-jersey-deep); }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-actions { display: flex; align-items: center; gap: 14px; }
+      .site-search { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink); text-decoration: none; font-size: 18px; }
+      .site-cta { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 8px 14px; border: 1.5px solid var(--color-ink); color: var(--color-ink); text-decoration: none; }
+
+      .nav-trigger { position: relative; }
+
+      .dropdown-panel {
+        position: absolute;
+        top: calc(100% + 1px);
+        right: 0;
+        width: 560px;
+        background: var(--color-ink-soft);
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm-soft);
+        padding: 20px 22px;
+        z-index: 60;
+        animation: dropdownFade 150ms ease-out;
+      }
+      @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* γ specifically: 2 columns instead of 3 */
+      .panel-cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; }
+      .panel-heading { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--color-ink-muted); }
+
+      .dropdown-panel ul { list-style: none; margin: 0; padding: 0; }
+      .dropdown-panel li { margin: 0; }
+      .dropdown-panel a {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 4px;
+        font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--color-cream-soft); text-decoration: none;
+        transition: color 150ms ease, background 150ms ease;
+      }
+      .dropdown-panel a::before {
+        content: "—";
+        color: var(--color-ink-muted);
+        font-size: 13px; line-height: 1;
+        flex-shrink: 0; width: 12px;
+      }
+      .dropdown-panel a:hover { color: var(--color-cream); background: rgba(245, 241, 230, 0.06); }
+      .dropdown-panel a:hover::before { color: var(--color-jersey-bright); }
+
+      .page-content { padding: 56px 28px 56px; max-width: 1240px; margin: 0 auto; }
+      .page-mock { opacity: 0.42; pointer-events: none; }
+      .page-mock h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 36px; line-height: 1.05; margin: 0 0 12px; }
+      .page-mock h2 em { color: var(--color-jersey-deep); }
+      .page-mock .kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px; }
+      .page-mock p { font-size: 14px; max-width: 580px; color: var(--color-ink-soft); }
+
+      .annotations { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin: 24px 0 0; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .annotations h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 10px; font-weight: 600; }
+      .annotations ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft); }
+      .annotations li { margin: 4px 0; }
+      .annotations p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .reads-as { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px 22px; margin: 18px 0 0; }
+      .reads-as p { margin: 0; font-size: 15px; color: var(--color-ink); }
+      .reads-as strong { color: var(--color-jersey-deep); }
+
+      .group-table { margin: 24px 0; padding: 14px 18px; background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); font-family: var(--font-mono); font-size: 12px; line-height: 1.6; }
+      .group-table strong { color: var(--color-jersey-deep); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="opt-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q3 Grouping &amp; labels · Option γ · 3 of 3</p>
+        <span class="opt-tag">Option γ</span>
+        <h1>Two-group <em>fold</em></h1>
+        <p class="lead">
+          Only two columns total: identity on the left, everything-actionable on the right.
+          The 11 children fold into a 6/5 split. Avoids the "two short columns" problem of α
+          and β by collapsing the small groups into one larger functional bucket.
+        </p>
+      </header>
+
+      <section class="frame" aria-label="Mockup viewport">
+        <div class="frame__chrome">
+          <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+          <span class="frame__url">kcvvelewijt.be/club</span>
+        </div>
+        <div class="frame__viewport">
+          <header class="site-header">
+            <div class="site-header__inner">
+              <a class="wordmark">KCVV <em>Elewijt</em></a>
+              <nav class="site-nav">
+                <a class="site-nav__link">Home</a>
+                <a class="site-nav__link">Nieuws</a>
+                <a class="site-nav__link">Evenementen</a>
+                <a class="site-nav__link">A-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">B-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Sponsors</a>
+                <a class="site-nav__link">Hulp</a>
+                <span class="nav-trigger">
+                  <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                  <div class="dropdown-panel" role="menu">
+                    <div class="panel-cols-2">
+                      <div>
+                        <p class="panel-heading">Wie we zijn</p>
+                        <ul>
+                          <li><a>Geschiedenis</a></li>
+                          <li><a>Organigram</a></li>
+                          <li><a>Bestuur</a></li>
+                          <li><a>Jeugdbestuur</a></li>
+                          <li><a>KCVV Angels</a></li>
+                          <li><a>KCVV Ultras</a></li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p class="panel-heading">Praktisch</p>
+                        <ul>
+                          <li><a>Praktische Info</a></li>
+                          <li><a>Word vrijwilliger</a></li>
+                          <li><a>Cashless clubkaart</a></li>
+                          <li><a>Contact</a></li>
+                          <li><a>Downloads</a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </nav>
+              <div class="site-actions">
+                <span class="site-search">⌕</span>
+                <a class="site-cta">Word lid</a>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <div class="page-mock">
+              <p class="kicker">De club · meer dan een eeuw</p>
+              <h2>Een club met een <em>eigen plek</em></h2>
+              <p>KCVV Elewijt speelt al meer dan honderd jaar in het amateurvoetbal. Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="group-table">
+        <strong>Distribution: 6 / 5</strong><br>
+        <strong>Wie we zijn (6)</strong> — Geschiedenis · Organigram · Bestuur · Jeugdbestuur · KCVV Angels · KCVV Ultras<br>
+        <strong>Praktisch (5)</strong> — Praktische Info · Word vrijwilliger · Cashless clubkaart · Contact · Downloads
+      </div>
+
+      <div class="reads-as">
+        <p>
+          <strong>Reads as:</strong> a 2-page spread. Left page = identity (who we are),
+          right page = everything practical (what you can do). Cleanest distribution of the
+          three options — both columns are visually balanced. Reads less like an index and
+          more like a functional split.
+        </p>
+      </div>
+
+      <section class="annotations">
+        <div>
+          <h3>Pros</h3>
+          <ul>
+            <li>Cleanest visual balance: 6 vs 5 reads as nearly symmetrical.</li>
+            <li>No "short orphan column" — both groups feel substantial.</li>
+            <li>Wider columns (≈ 240px each) give labels more breathing room.</li>
+            <li>Two groups are easier to scan-and-decide than three.</li>
+            <li>Easier to maintain — one fewer label to author and translate.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Cons</h3>
+          <ul>
+            <li>"Praktisch" is a heterogeneous bucket — Word vrijwilliger sits next to Downloads, which is conceptually odd.</li>
+            <li>Loses the "Doe mee" jersey-bright accent moment β has — engagement actions are no longer isolated.</li>
+            <li>Compound heading ("Praktisch") is the longest of any option — risks wrapping at 240px col width.</li>
+            <li>Less editorial nuance — the structure looks more utilitarian, less curated.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Distribution profile</h3>
+          <ul>
+            <li>Col 1: 6 items (full-height)</li>
+            <li>Col 2: 5 items (~⅚ height)</li>
+            <li>Visual rhythm: balanced</li>
+            <li>Each column ≈ 240px wide (more roomy)</li>
+            <li>Panel overall feels like a 2-page spread, not a 3-col index</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

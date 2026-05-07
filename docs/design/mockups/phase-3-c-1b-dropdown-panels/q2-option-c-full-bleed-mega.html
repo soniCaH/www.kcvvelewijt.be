@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Q2 Width — Option C · Full-bleed ink band mega-menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-band: 0 6px 16px -8px rgba(0, 0, 0, 0.30);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body);
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.6;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1280px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .opt-meta { margin-bottom: 32px; }
+      .opt-tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .opt-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.04; margin: 8px 0 12px; }
+      .opt-meta h1 em { color: var(--color-jersey-deep); }
+      .opt-meta .lead { max-width: 760px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+
+      .frame-group-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 32px 0 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--color-paper-edge); }
+
+      .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: visible; margin: 12px 0 28px; }
+      .frame__chrome { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 10px; height: 10px; border: 1.25px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 540px; overflow: hidden; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: relative; z-index: 50; }
+      .site-header__inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 14px 28px; max-width: 1240px; margin: 0 auto; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 24px; line-height: 1; color: var(--color-ink); white-space: nowrap; text-decoration: none; letter-spacing: -0.01em; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; justify-content: center; align-items: center; gap: 22px; padding-left: 28px; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 6px 0; display: inline-flex; align-items: center; gap: 4px; transition: color 150ms ease; cursor: pointer; }
+      .site-nav__caret { font-family: var(--font-mono); font-size: 10px; line-height: 1; opacity: 0.6; transition: transform 150ms ease, opacity 150ms ease; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; color: var(--color-jersey-deep); }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-actions { display: flex; align-items: center; gap: 14px; }
+      .site-search { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink); text-decoration: none; font-size: 18px; }
+      .site-cta { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 8px 14px; border: 1.5px solid var(--color-ink); color: var(--color-ink); text-decoration: none; }
+
+      /* ===== Q2-C panel: full-bleed ink band ===== */
+      .dropdown-panel {
+        position: absolute;
+        top: 100%;                            /* sits flush against masthead seam */
+        left: 0;
+        right: 0;
+        background: var(--color-ink-soft);
+        border-bottom: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-band);
+        padding: 24px 28px;
+        z-index: 60;
+        animation: dropdownFade 180ms ease-out;
+      }
+      @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Inner container — aligned to masthead grid */
+      .dropdown-inner { max-width: 1240px; margin: 0 auto; }
+
+      /* Mono-caps section heading inside panel */
+      .panel-heading { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-cream-soft); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px dashed rgba(245, 241, 230, 0.18); }
+      .panel-heading--accent { color: var(--color-jersey-bright); }
+
+      .dropdown-panel ul { list-style: none; margin: 0; padding: 0; }
+      .dropdown-panel li { margin: 0; }
+      .dropdown-panel a {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 4px;
+        font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--color-cream-soft); text-decoration: none;
+        transition: color 150ms ease, background 150ms ease;
+      }
+      .dropdown-panel a::before {
+        content: "—";
+        color: var(--color-ink-muted);
+        font-size: 14px; line-height: 1;
+        flex-shrink: 0; width: 12px;
+      }
+      .dropdown-panel a:hover { color: var(--color-cream); background: rgba(245, 241, 230, 0.06); }
+      .dropdown-panel a:hover::before { color: var(--color-jersey-bright); }
+
+      /* ============== Per-panel internal layouts ============== */
+
+      /* Teams: horizontal tab-row */
+      .panel-tabrow { display: flex; gap: 8px; align-items: stretch; }
+      .panel-tabrow a {
+        flex: 1; justify-content: center;
+        padding: 16px 20px;
+        border: 1px solid rgba(245, 241, 230, 0.18);
+        font-size: 13px;
+      }
+      .panel-tabrow a::before { content: none; }
+      .panel-tabrow a:hover { border-color: var(--color-jersey-bright); color: var(--color-cream); background: rgba(34, 197, 94, 0.08); }
+
+      /* Jeugd: horizontal pill row, 2 lines */
+      .panel-pillrow { display: flex; flex-wrap: wrap; gap: 8px; }
+      .panel-pillrow a {
+        padding: 10px 18px;
+        border: 1px solid rgba(245, 241, 230, 0.22);
+        font-size: 12px;
+        min-width: 64px;
+        justify-content: center;
+      }
+      .panel-pillrow a::before { content: none; }
+      .panel-pillrow a:hover { border-color: var(--color-jersey-bright); color: var(--color-cream); background: rgba(34, 197, 94, 0.08); }
+
+      /* De club: 3-col grouped + brand accent strip */
+      .panel-mega { display: grid; grid-template-columns: 1fr 1fr 1fr 240px; gap: 0 36px; }
+      .panel-mega .group { padding-right: 24px; }
+      .panel-mega .accent { padding: 16px 18px; background: rgba(34, 197, 94, 0.08); border-left: 2px solid var(--color-jersey-bright); }
+      .panel-mega .accent h4 { font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 18px; line-height: 1.15; margin: 0 0 8px; color: var(--color-cream); }
+      .panel-mega .accent h4 em { color: var(--color-jersey-bright); font-style: italic; }
+      .panel-mega .accent p { margin: 0 0 12px; font-size: 12px; color: var(--color-cream-soft); line-height: 1.5; }
+      .panel-mega .accent .accent-cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-jersey-bright); text-decoration: none; }
+
+      /* Faded page content */
+      .page-content { padding: 56px 28px 56px; max-width: 1240px; margin: 0 auto; }
+      .page-mock { opacity: 0.42; pointer-events: none; }
+      .page-mock h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 36px; line-height: 1.05; margin: 0 0 12px; }
+      .page-mock h2 em { color: var(--color-jersey-deep); }
+      .page-mock .kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px; }
+      .page-mock p { font-size: 14px; max-width: 580px; color: var(--color-ink-soft); }
+
+      .annotations { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin: 24px 0 0; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .annotations h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 10px; font-weight: 600; }
+      .annotations ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--color-ink-soft); }
+      .annotations li { margin: 4px 0; }
+      .annotations p { margin: 0; font-size: 14px; color: var(--color-ink-soft); }
+
+      .reads-as { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px 22px; margin: 18px 0 0; }
+      .reads-as p { margin: 0; font-size: 15px; color: var(--color-ink); }
+      .reads-as strong { color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="opt-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q2 Width &amp; position · Option C · 3 of 4</p>
+        <span class="opt-tag">Option C</span>
+        <h1>Full-bleed <em>ink band</em></h1>
+        <p class="lead">
+          The panel spans the full viewport width and sits as a continuous ink band under
+          the masthead. Every hover paints a stripe across the page. Each submenu uses the
+          full width differently: Teams as a horizontal tab-row, Jeugd as a pill row, De club
+          as a 3-column grouped index with a brand accent strip on the right.
+        </p>
+      </header>
+
+      <!-- ============== Teams (horizontal tab-row) ============== -->
+      <p class="frame-group-title">A-Ploeg · 4 children · horizontal tab-row across full viewport</p>
+      <section class="frame">
+        <div class="frame__chrome">
+          <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+          <span class="frame__url">kcvvelewijt.be/ploegen/a</span>
+        </div>
+        <div class="frame__viewport">
+          <header class="site-header">
+            <div class="site-header__inner">
+              <a class="wordmark">KCVV <em>Elewijt</em></a>
+              <nav class="site-nav">
+                <a class="site-nav__link">Home</a>
+                <a class="site-nav__link">Nieuws</a>
+                <a class="site-nav__link">Evenementen</a>
+                <a class="site-nav__link is-open">A-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">B-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Sponsors</a>
+                <a class="site-nav__link">Hulp</a>
+                <a class="site-nav__link">De club <span class="site-nav__caret">▾</span></a>
+              </nav>
+              <div class="site-actions">
+                <span class="site-search">⌕</span>
+                <a class="site-cta">Word lid</a>
+              </div>
+            </div>
+            <div class="dropdown-panel" role="menu">
+              <div class="dropdown-inner">
+                <p class="panel-heading">A-Ploeg sub-secties</p>
+                <div class="panel-tabrow">
+                  <a>Info</a>
+                  <a>Spelers &amp; Staff</a>
+                  <a>Wedstrijden</a>
+                  <a>Stand</a>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <div class="page-mock">
+              <p class="kicker">A-Ploeg · 2025-2026</p>
+              <h2>Volgende thuiswedstrijd <em>zaterdag 14u30</em></h2>
+              <p>Tegen Sint-Pieters-Leeuw aan de Hollestraat. Eerste fluitsignaal om 14u30, kleedkamer open vanaf 13u.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== Jeugd (pill row) ============== -->
+      <p class="frame-group-title">Jeugd · 10 age groups · horizontal pill row</p>
+      <section class="frame">
+        <div class="frame__chrome">
+          <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+          <span class="frame__url">kcvvelewijt.be/jeugd</span>
+        </div>
+        <div class="frame__viewport">
+          <header class="site-header">
+            <div class="site-header__inner">
+              <a class="wordmark">KCVV <em>Elewijt</em></a>
+              <nav class="site-nav">
+                <a class="site-nav__link">Home</a>
+                <a class="site-nav__link">Nieuws</a>
+                <a class="site-nav__link">Evenementen</a>
+                <a class="site-nav__link">A-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">B-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link is-open">Jeugd <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Sponsors</a>
+                <a class="site-nav__link">Hulp</a>
+                <a class="site-nav__link">De club <span class="site-nav__caret">▾</span></a>
+              </nav>
+              <div class="site-actions">
+                <span class="site-search">⌕</span>
+                <a class="site-cta">Word lid</a>
+              </div>
+            </div>
+            <div class="dropdown-panel" role="menu">
+              <div class="dropdown-inner">
+                <p class="panel-heading">Leeftijdsgroepen</p>
+                <div class="panel-pillrow">
+                  <a>U6</a>
+                  <a>U7</a>
+                  <a>U8</a>
+                  <a>U9</a>
+                  <a>U10</a>
+                  <a>U11</a>
+                  <a>U12</a>
+                  <a>U13</a>
+                  <a>U15</a>
+                  <a>U17</a>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <div class="page-mock">
+              <p class="kicker">Jeugd · 2025-2026</p>
+              <h2>Een ploeg voor <em>elke leeftijd</em></h2>
+              <p>Van U6 tot U17 — bovenbouw, middenbouw en onderbouw. Trainingen op maandag, woensdag, vrijdag aan de Hollestraat.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== De club (3-col grouped + accent strip) ============== -->
+      <p class="frame-group-title">De club · 11 children · 3-column grouped + brand accent strip</p>
+      <section class="frame">
+        <div class="frame__chrome">
+          <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+          <span class="frame__url">kcvvelewijt.be/club</span>
+        </div>
+        <div class="frame__viewport">
+          <header class="site-header">
+            <div class="site-header__inner">
+              <a class="wordmark">KCVV <em>Elewijt</em></a>
+              <nav class="site-nav">
+                <a class="site-nav__link">Home</a>
+                <a class="site-nav__link">Nieuws</a>
+                <a class="site-nav__link">Evenementen</a>
+                <a class="site-nav__link">A-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">B-Ploeg <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                <a class="site-nav__link">Sponsors</a>
+                <a class="site-nav__link">Hulp</a>
+                <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+              </nav>
+              <div class="site-actions">
+                <span class="site-search">⌕</span>
+                <a class="site-cta">Word lid</a>
+              </div>
+            </div>
+            <div class="dropdown-panel" role="menu">
+              <div class="dropdown-inner">
+                <div class="panel-mega">
+                  <div class="group">
+                    <p class="panel-heading">Over ons</p>
+                    <ul>
+                      <li><a>Geschiedenis</a></li>
+                      <li><a>Organigram</a></li>
+                      <li><a>Bestuur</a></li>
+                      <li><a>Jeugdbestuur</a></li>
+                      <li><a>KCVV Angels</a></li>
+                      <li><a>KCVV Ultras</a></li>
+                    </ul>
+                  </div>
+                  <div class="group">
+                    <p class="panel-heading">Helpen</p>
+                    <ul>
+                      <li><a>Word vrijwilliger</a></li>
+                      <li><a>Contact</a></li>
+                    </ul>
+                  </div>
+                  <div class="group">
+                    <p class="panel-heading">Praktisch</p>
+                    <ul>
+                      <li><a>Praktische Info</a></li>
+                      <li><a>Cashless clubkaart</a></li>
+                      <li><a>Downloads</a></li>
+                    </ul>
+                  </div>
+                  <div class="accent">
+                    <p class="panel-heading panel-heading--accent">Kom langs</p>
+                    <h4>Maar één plezante <em>compagnie</em></h4>
+                    <p>Hollestraat 22, 1982 Elewijt. Wedstrijden op zaterdag, training door de week.</p>
+                    <a class="accent-cta">Praktische info →</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <div class="page-mock">
+              <p class="kicker">De club · meer dan een eeuw</p>
+              <h2>Een club met een <em>eigen plek</em></h2>
+              <p>KCVV Elewijt speelt al meer dan honderd jaar in het amateurvoetbal. Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="reads-as">
+        <p>
+          <strong>Reads as:</strong> a stadium-concourse mega-menu — every hover triggers a
+          continuous ink band across the full viewport. Strongest visual statement of the four
+          options. Per-panel layouts (tab-row, pill row, 3-col + accent strip) get full
+          editorial treatment because there's room for it. The accent strip on De club is a
+          mini brand moment ("Maar één plezante compagnie") — could become a recurring fanzine
+          gesture across panels.
+        </p>
+      </div>
+
+      <section class="annotations">
+        <div>
+          <h3>Geometry</h3>
+          <ul>
+            <li>width: 100% of viewport</li>
+            <li>position: absolute, top: 100% (flush against masthead seam)</li>
+            <li>Internal container max-width: 1240px (matches masthead)</li>
+            <li>Distinct layouts per panel: tab-row / pill-row / 3-col + accent</li>
+            <li>Drop shadow extends downward 16px to lift the band off content</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Pros</h3>
+          <ul>
+            <li>Every panel gets the editorial treatment it deserves — Teams as tabs, Jeugd as ages, De club as an index.</li>
+            <li>Brand accent strip on De club opens a new fanzine gesture (motto, address, CTA) — could repeat for Jeugd ("Trainingstijden") or Teams ("Volgende match") later.</li>
+            <li>Symmetrical alignment with the masthead inner container — visually disciplined.</li>
+            <li>Makes the dropdown a feature of the chrome, not an afterthought.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Cons</h3>
+          <ul>
+            <li>Every hover paints a full-bleed ink band — visually heaviest of all options.</li>
+            <li>Cursor traverses across triggers and the whole band reflows — hover-grace timing becomes critical.</li>
+            <li>Three completely different internal layouts to maintain (tab-row / pill-row / mega-grid).</li>
+            <li>Brand accent strip on De club introduces a new component (essentially an editorial card inside the dropdown).</li>
+            <li>Highest implementation cost — full-bleed positioning, three layout variants, accent micro-component.</li>
+            <li>Risk of being too "corporate" — clashes with the fanzine register the locked Direction A leans into.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

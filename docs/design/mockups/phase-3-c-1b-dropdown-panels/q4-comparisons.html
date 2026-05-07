@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 3 · 3.C.1b · Q4 Animation comparisons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-bright: #22c55e;
+        --color-paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --font-display: "Playfair Display", "Freight Display Pro", Georgia, serif;
+        --font-body: "Inter", -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-body); background: var(--color-cream); color: var(--color-ink); font-size: 16px; line-height: 1.5;
+        background-image:
+          radial-gradient(circle at 12% 20%, rgba(10, 10, 10, 0.022) 0 1px, transparent 1px),
+          radial-gradient(circle at 78% 65%, rgba(10, 10, 10, 0.018) 0 1px, transparent 1px);
+        background-size: 240px 240px, 180px 180px;
+      }
+      main { max-width: 1440px; margin: 0 auto; padding: 48px 28px 96px; }
+
+      .page-meta { margin-bottom: 32px; }
+      .crumb { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-ink-muted); text-transform: uppercase; margin: 0 0 4px; }
+      .page-meta h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5vw, 60px); line-height: 1.04; margin: 8px 0 16px; }
+      .page-meta h1 em { color: var(--color-jersey-deep); }
+      .page-meta .lead { max-width: 820px; font-size: 17px; color: var(--color-ink-soft); margin: 0; }
+
+      .live-note { background: var(--color-ink-soft); color: var(--color-cream-soft); padding: 12px 18px; margin: 16px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; }
+      .live-note strong { color: var(--color-jersey-bright); }
+
+      .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 32px; }
+      @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } .grid > .cell:nth-child(3) { grid-column: span 2; } }
+
+      .cell { background: var(--color-cream-soft); border: 1px solid var(--color-paper-edge); padding: 18px; }
+      .cell__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+      .cell__tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 600; }
+      .cell h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; line-height: 1.1; margin: 4px 0 0; flex: 1 0 auto; }
+      .cell h2 em { color: var(--color-jersey-deep); }
+      .cell__sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-ink-muted); margin: 0 0 4px; }
+
+      .frame { background: var(--color-cream); border: 1.5px solid var(--color-ink); overflow: hidden; }
+      .frame__chrome { display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: var(--color-cream-soft); border-bottom: 1px solid var(--color-paper-edge); }
+      .frame__dot { width: 7px; height: 7px; border: 1px solid var(--color-ink); border-radius: 50%; background: var(--color-cream); }
+      .frame__url { margin-left: 8px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); letter-spacing: 0.04em; }
+      .frame__viewport { background: var(--color-cream); position: relative; min-height: 360px; }
+
+      .site-header { background: var(--color-cream); border-bottom: 1px solid var(--color-ink); position: relative; z-index: 50; }
+      .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 12px; }
+      .wordmark { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 13px; line-height: 1; color: var(--color-ink); white-space: nowrap; }
+      .wordmark em { font-style: italic; color: var(--color-jersey-deep); }
+      .site-nav { display: flex; gap: 8px; align-items: center; }
+      .site-nav__link { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); text-decoration: none; padding: 3px 0; display: inline-flex; align-items: center; gap: 2px; }
+      .site-nav__link.is-open { color: var(--color-jersey-deep); }
+      .site-nav__caret { font-size: 6px; opacity: 0.6; }
+      .site-nav__link.is-open .site-nav__caret { transform: rotate(180deg); opacity: 1; }
+      .site-actions { display: flex; gap: 5px; align-items: center; }
+      .site-search { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-ink); }
+      .site-cta { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 6px; border: 1px solid var(--color-ink); color: var(--color-ink); }
+
+      .nav-trigger { position: relative; }
+
+      .page-mock { padding: 24px 14px 18px; opacity: 0.4; pointer-events: none; }
+      .page-mock h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; line-height: 1.1; margin: 0 0 5px; }
+      .page-mock h3 em { color: var(--color-jersey-deep); }
+      .page-mock p { font-size: 9px; color: var(--color-ink-soft); margin: 0; max-width: 280px; }
+
+      /* Locked Q1+Q2+Q3 panel surface */
+      .panel { position: absolute; top: calc(100% + 1px); right: 8px; width: 360px; background: var(--color-ink-soft); border: 1px solid var(--color-ink); box-shadow: var(--shadow-paper-sm-soft); padding: 9px 11px; z-index: 60; pointer-events: none; }
+      .panel ul { list-style: none; margin: 0; padding: 0; }
+      .panel a { display: flex; align-items: center; gap: 4px; padding: 3px 2px; font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-cream-soft); text-decoration: none; }
+      .panel a::before { content: "—"; color: var(--color-ink-muted); font-size: 9px; line-height: 1; flex-shrink: 0; width: 7px; }
+      .panel-heading { font-family: var(--font-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin: 0 0 5px; padding-bottom: 3px; border-bottom: 1px dashed var(--color-ink-muted); }
+      .panel .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; }
+
+      /* All three animations share the same 4s cycle so panels open/close in sync */
+
+      /* === Option A: instant snap === */
+      .panel--a {
+        opacity: 0;
+        animation: cycleA 4s infinite;
+      }
+      @keyframes cycleA {
+        0%, 49.99% { opacity: 0; }
+        50%        { opacity: 1; }
+        89.99%     { opacity: 1; }
+        90%        { opacity: 0; }
+        100%       { opacity: 0; }
+      }
+
+      /* === Option B: fade only === */
+      .panel--b {
+        opacity: 0;
+        animation: cycleB 4s infinite;
+      }
+      @keyframes cycleB {
+        0%   { opacity: 0; }
+        45%  { opacity: 0; }
+        50%  { opacity: 1; }
+        85%  { opacity: 1; }
+        88%  { opacity: 0; }
+        100% { opacity: 0; }
+      }
+
+      /* === Option C: fade + paper-slide === */
+      .panel--c {
+        opacity: 0;
+        transform: translateY(-4px);
+        animation: cycleC 4s infinite;
+      }
+      @keyframes cycleC {
+        0%   { opacity: 0; transform: translateY(-4px); }
+        45%  { opacity: 0; transform: translateY(-4px); }
+        48.75% { opacity: 1; transform: translateY(0); }
+        85%  { opacity: 1; transform: translateY(0); }
+        87.5% { opacity: 0; transform: translateY(-2px); }
+        100% { opacity: 0; transform: translateY(-2px); }
+      }
+
+      .cell__caption { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--color-paper-edge); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; }
+      .cell__caption dt { color: var(--color-ink-muted); text-transform: uppercase; }
+      .cell__caption dd { margin: 0; color: var(--color-ink); }
+
+      .tradeoffs { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--color-paper-edge); }
+      .tradeoffs h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; margin: 0 0 16px; }
+      .tradeoffs table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .tradeoffs th, .tradeoffs td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-paper-edge); vertical-align: top; }
+      .tradeoffs th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); font-weight: 600; }
+      .tradeoffs td:first-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink); white-space: nowrap; }
+      .score { display: inline-block; min-width: 40px; }
+      .score-h { color: var(--color-jersey-deep); font-weight: 600; }
+      .score-m { color: var(--color-ink-soft); }
+      .score-l { color: var(--color-ink-muted); }
+
+      @media (prefers-reduced-motion: reduce) {
+        .panel--b, .panel--c { animation-name: cycleA; transform: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-meta">
+        <p class="crumb">Phase 3 · Checkpoint 3.C.1b · Q4 Animation · Comparisons</p>
+        <h1>Animation — <em>3 styles</em>, all cycling in sync</h1>
+        <p class="lead">
+          Same locked panel (Q1 ink-fill / Q2 wide / Q3 two-group). Three different ways
+          to bring it on screen. All three frames are running the same 4-second cycle in
+          sync — open at 50% mark, close at 88% mark — so you can compare the rhythm
+          across panels in real time.
+        </p>
+        <p class="live-note"><strong>LIVE:</strong> the three panels below are auto-cycling. Watch them open/close together to compare the animation styles. Reload the page if they fall out of sync.</p>
+      </header>
+
+      <div class="grid">
+        <!-- ============== Option A — Instant snap ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option A · Instant snap</p>
+              <h2>No <em>transition</em></h2>
+            </div>
+            <span class="cell__tag">A</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--a">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Open</dt><dd>0ms (instant)</dd>
+            <dt>Close</dt><dd>0ms (instant)</dd>
+            <dt>Easing</dt><dd>none</dd>
+            <dt>Spatial</dt><dd>none</dd>
+            <dt>Reads as</dt><dd>chrome — system menu</dd>
+          </dl>
+        </article>
+
+        <!-- ============== Option B — Fade only ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option B · Fade only</p>
+              <h2>Opacity <em>0 → 1</em></h2>
+            </div>
+            <span class="cell__tag">B</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--b">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Open</dt><dd>200ms ease-out</dd>
+            <dt>Close</dt><dd>120ms ease-in</dd>
+            <dt>Easing</dt><dd>asymmetric</dd>
+            <dt>Spatial</dt><dd>none</dd>
+            <dt>Reads as</dt><dd>soft UI — develops in</dd>
+          </dl>
+        </article>
+
+        <!-- ============== Option C — Paper-slide ============== -->
+        <article class="cell">
+          <header class="cell__head">
+            <div>
+              <p class="cell__sub">Option C · Fade + paper-slide</p>
+              <h2>Opacity + <em>4px drop</em></h2>
+            </div>
+            <span class="cell__tag">C</span>
+          </header>
+
+          <div class="frame">
+            <div class="frame__chrome">
+              <span class="frame__dot"></span><span class="frame__dot"></span><span class="frame__dot"></span>
+              <span class="frame__url">kcvvelewijt.be/club</span>
+            </div>
+            <div class="frame__viewport">
+              <header class="site-header">
+                <div class="site-header__inner">
+                  <a class="wordmark">KCVV <em>Elewijt</em></a>
+                  <nav class="site-nav">
+                    <a class="site-nav__link">Home</a>
+                    <a class="site-nav__link">Nieuws</a>
+                    <a class="site-nav__link">A-Pl. <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Jeugd <span class="site-nav__caret">▾</span></a>
+                    <a class="site-nav__link">Hulp</a>
+                    <span class="nav-trigger">
+                      <a class="site-nav__link is-open">De club <span class="site-nav__caret">▾</span></a>
+                      <div class="panel panel--c">
+                        <div class="cols-2">
+                          <div>
+                            <p class="panel-heading">Wie we zijn</p>
+                            <ul>
+                              <li><a>Geschied.</a></li><li><a>Organigram</a></li><li><a>Bestuur</a></li>
+                              <li><a>Jeugdbest.</a></li><li><a>Angels</a></li><li><a>Ultras</a></li>
+                            </ul>
+                          </div>
+                          <div>
+                            <p class="panel-heading">Praktisch</p>
+                            <ul>
+                              <li><a>Praktische</a></li><li><a>Vrijwill.</a></li><li><a>Cashless</a></li>
+                              <li><a>Contact</a></li><li><a>Downloads</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </span>
+                  </nav>
+                  <div class="site-actions">
+                    <span class="site-search">⌕</span>
+                    <a class="site-cta">Word lid</a>
+                  </div>
+                </div>
+              </header>
+              <div class="page-mock">
+                <h3>Een club met een <em>eigen plek</em></h3>
+                <p>Onder de eik aan de Hollestraat is de zaterdagochtend een gewoonte.</p>
+              </div>
+            </div>
+          </div>
+
+          <dl class="cell__caption">
+            <dt>Open</dt><dd>150ms ease-out</dd>
+            <dt>Close</dt><dd>100ms ease-in</dd>
+            <dt>Easing</dt><dd>asymmetric</dd>
+            <dt>Spatial</dt><dd>4px down → 0, then 0 → −2px</dd>
+            <dt>Reads as</dt><dd>printed sheet dropping</dd>
+          </dl>
+        </article>
+      </div>
+
+      <section class="tradeoffs">
+        <h2>Trade-off matrix</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>A · Instant</th>
+              <th>B · Fade</th>
+              <th>C · Paper-slide</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Perceived responsiveness</td>
+              <td><span class="score score-h">Highest</span> (0ms)</td>
+              <td><span class="score score-m">Medium</span> (200ms)</td>
+              <td><span class="score score-h">High</span> (150ms)</td>
+            </tr>
+            <tr>
+              <td>Animation complexity</td>
+              <td><span class="score score-h">None</span></td>
+              <td><span class="score score-h">Opacity only</span></td>
+              <td><span class="score score-m">Opacity + transform</span></td>
+            </tr>
+            <tr>
+              <td>Spatial cue (panel comes from somewhere)</td>
+              <td><span class="score score-l">No</span></td>
+              <td><span class="score score-l">No</span></td>
+              <td><span class="score score-h">Yes — from masthead seam</span></td>
+            </tr>
+            <tr>
+              <td>Editorial register fit</td>
+              <td><span class="score score-l">Pure chrome</span></td>
+              <td><span class="score score-m">Soft UI</span></td>
+              <td><span class="score score-h">Printed sheet</span></td>
+            </tr>
+            <tr>
+              <td>Stutter resistance under load</td>
+              <td><span class="score score-h">Highest</span></td>
+              <td><span class="score score-h">High</span></td>
+              <td><span class="score score-m">Medium</span> (transform paint)</td>
+            </tr>
+            <tr>
+              <td>Rapid-cursor sweep tolerance</td>
+              <td><span class="score score-h">High</span></td>
+              <td><span class="score score-h">High</span></td>
+              <td><span class="score score-l">Lower</span> (slide stack risk)</td>
+            </tr>
+            <tr>
+              <td>Reduced-motion compliance</td>
+              <td><span class="score score-h">Already complies</span></td>
+              <td><span class="score score-h">Falls back to instant</span></td>
+              <td><span class="score score-h">Falls back to instant</span></td>
+            </tr>
+            <tr>
+              <td>Composes with existing redesign motion</td>
+              <td><span class="score score-l">No motion</span></td>
+              <td><span class="score score-m">Generic fade</span></td>
+              <td><span class="score score-h">Same as NavTakeover</span></td>
+            </tr>
+            <tr>
+              <td>Implementation cost</td>
+              <td><span class="score score-h">Zero</span></td>
+              <td><span class="score score-h">CSS opacity + transition</span></td>
+              <td><span class="score score-m">Opacity + transform + GPU layer</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
