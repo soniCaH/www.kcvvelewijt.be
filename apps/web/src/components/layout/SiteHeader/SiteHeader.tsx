@@ -4,7 +4,7 @@ import { useCallback, useRef, useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/design-system/Button";
+import { Button, getButtonClasses } from "@/components/design-system/Button";
 import { List } from "@/lib/icons.redesign";
 import { Search } from "@/lib/icons";
 import {
@@ -188,7 +188,12 @@ function SiteHeaderInner({
           <Link
             href="/club/inschrijven"
             onClick={handleClose}
-            className="group border-ink bg-jersey-deep text-cream shadow-paper-sm flex w-full items-center justify-center border-2 px-6 py-4 font-mono text-[14px] font-semibold tracking-[0.04em] uppercase no-underline transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:brightness-110"
+            className={getButtonClasses({
+              variant: "primary",
+              size: "md",
+              fullWidth: true,
+              className: "no-underline",
+            })}
           >
             Word lid
           </Link>

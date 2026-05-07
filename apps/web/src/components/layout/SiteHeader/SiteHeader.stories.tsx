@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, userEvent } from "storybook/test";
 import { SiteHeader } from "./SiteHeader";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
@@ -41,4 +42,22 @@ export const Default: Story = {
 
 export const NoDynamicTeams: Story = {
   args: {},
+};
+
+/**
+ * Renders the actual `<SiteHeader>` with its drawer opened via the hamburger
+ * trigger. Locks down the real composition (drawer hero CTA, drawer nav,
+ * close button) so divergence between the deployed site and the design system
+ * fails the VR diff. Hamburger is only visible <1024px, so this story should
+ * only be evaluated at the mobile/tablet VR viewports.
+ */
+export const DrawerOpen: Story = {
+  args: { seniorTeams, youthTeams },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const hamburger = canvas.queryByRole("button", { name: /open menu/i });
+    if (hamburger) {
+      await userEvent.click(hamburger);
+    }
+  },
 };
