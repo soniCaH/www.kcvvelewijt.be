@@ -100,6 +100,29 @@ describe("NavTakeover", () => {
     rerender(<Harness open={false} />);
     expect(document.activeElement).toBe(screen.getByTestId("trigger"));
   });
+
+  it("does not steal focus on initial mount when open=false", () => {
+    function Harness() {
+      const triggerRef = useRef<HTMLButtonElement>(null);
+      return (
+        <>
+          <button ref={triggerRef} data-testid="trigger">
+            open
+          </button>
+          <NavTakeover
+            open={false}
+            onOpenChange={() => {}}
+            wordmark={<span>WM</span>}
+            returnFocusRef={triggerRef}
+          >
+            <NavTakeoverItem label="Home" href="/" />
+          </NavTakeover>
+        </>
+      );
+    }
+    render(<Harness />);
+    expect(document.activeElement).not.toBe(screen.getByTestId("trigger"));
+  });
 });
 
 describe("NavTakeover.Item", () => {

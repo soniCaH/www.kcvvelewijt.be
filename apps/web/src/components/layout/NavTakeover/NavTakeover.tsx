@@ -64,9 +64,15 @@ export const NavTakeover = ({
     };
   }, [open, onOpenChange]);
 
+  // Track the previous `open` value so we only return focus on a true→false
+  // transition. Without this guard the effect would fire on initial mount with
+  // `open === false`, stealing focus from the trigger as soon as the page loads.
+  const prevOpenRef = useRef(open);
   useEffect(() => {
-    if (open) return;
-    returnFocusRef?.current?.focus();
+    if (prevOpenRef.current && !open) {
+      returnFocusRef?.current?.focus();
+    }
+    prevOpenRef.current = open;
   }, [open, returnFocusRef]);
 
   const handleTabTrap = (e: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -93,7 +99,7 @@ export const NavTakeover = ({
       ref={panelRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Hoofdnavigatie"
+      aria-label="Navigatiemenu"
       onKeyDown={handleTabTrap}
       className={cn(
         "bg-cream fixed inset-0 z-[60] flex flex-col",
