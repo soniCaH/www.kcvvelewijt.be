@@ -44,9 +44,9 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-7">
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.heading}>
-              <p className="border-jersey-deep text-ink mb-3 border-b-[1.5px] pb-2 font-mono text-[11px] font-bold tracking-[0.1em] uppercase">
+              <h3 className="border-jersey-deep text-ink mb-3 border-b-[1.5px] pb-2 font-mono text-[11px] font-bold tracking-[0.1em] uppercase">
                 {column.heading}
-              </p>
+              </h3>
               <ul className="flex flex-col gap-2.5">
                 {column.links.map((link) => (
                   <li key={link.href + link.label}>
