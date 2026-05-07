@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="nl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -88,6 +88,9 @@
       /* Locked Q1+Q2 panel surface */
       .panel { position: absolute; top: calc(100% + 1px); right: 8px; background: var(--color-ink-soft); border: 1px solid var(--color-ink); box-shadow: var(--shadow-paper-sm-soft); padding: 9px 11px; z-index: 60; animation: fade 150ms ease-out; }
       @keyframes fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+      @media (prefers-reduced-motion: reduce) {
+        .panel { animation: none; }
+      }
       .panel ul { list-style: none; margin: 0; padding: 0; }
       .panel a {
         display: flex; align-items: center; gap: 4px;
