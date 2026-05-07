@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 6b · Schedule depth</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: rgba(31, 95, 63, 0.12);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 30px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; max-width: 56ch; }
+      .surface { background: var(--cream-soft); padding: 24px 20px; }
+
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .tab {
+        flex: 1;
+        padding: 8px 14px;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-align: center;
+        background: transparent;
+        border: 1px solid var(--ink);
+        border-bottom: none;
+      }
+      .tab.active { background: var(--ink); color: var(--cream); }
+      .tab:not(.active) { background: var(--cream-soft); opacity: 0.7; }
+
+      .panel {
+        background: #fff;
+        border: 1px solid var(--ink);
+        border-top: none;
+        box-shadow: var(--shadow-card);
+        padding: 12px 14px;
+      }
+
+      .schedule-item {
+        display: grid;
+        grid-template-columns: 60px 1fr auto;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.18);
+        align-items: center;
+      }
+      .schedule-item:last-child { border-bottom: 0; }
+      .schedule-item .when {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .schedule-item .when .day { font-weight: 700; }
+      .schedule-item .when .time { opacity: 0.6; font-size: 10px; }
+      .schedule-item .matchup {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .schedule-item .matchup .teams {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.2;
+      }
+      .schedule-item .matchup .teams .kcvv { font-weight: 700; }
+      .schedule-item .matchup .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .schedule-item .badge {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 2px 6px;
+      }
+      .schedule-item .badge.home { background: var(--jersey-deep); }
+
+      .week-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin: 12px 0 6px;
+        padding-top: 8px;
+        border-top: 1px dashed rgba(26, 26, 26, 0.3);
+      }
+      .week-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+      .more-link {
+        margin-top: 12px;
+        text-align: center;
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 8px 0;
+        border-top: 1px dashed rgba(26, 26, 26, 0.3);
+      }
+
+      .scroll-track {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 4px 4px 14px;
+        scroll-snap-type: x mandatory;
+      }
+      .scroll-card {
+        flex: 0 0 220px;
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 10px 12px;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .scroll-card .when {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .scroll-card .teams {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.18;
+      }
+      .scroll-card .teams .kcvv { font-weight: 700; }
+      .scroll-card .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        opacity: 0.6;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .scroll-hint {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        opacity: 0.6;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding-top: 8px;
+        text-align: center;
+      }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 6b · Schedule depth</div>
+      <h1>How many matches show in the Wedstrijden tab?</h1>
+      <p>
+        L.2 tabs locked in Round 6. This round picks the schedule depth — how many upcoming
+        matches the Wedstrijden tab renders. Realistic: KCVV has ~5–8 teams playing once per
+        week, so the data set is rich.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from Rounds 6 + 6a.</strong> Section is a <strong>single schedule panel</strong>
+      — no tabs (Round 6's L.2 lock superseded by Round 6a's S.4 drop). Section will be renamed from
+      <code>&lt;ScheduleStandingsBlock&gt;</code> to <code>&lt;UpcomingMatches&gt;</code>. Standings
+      live on <code>/ranking</code>. Schedule items use when + matchup + home/away badge format.
+      This round picks how many rows render.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ D.1 — Next 3 ============ -->
+      <section class="candidate" id="D1">
+        <header>
+          <div class="key">D.1</div>
+          <div class="name">Next 3 matches · compact</div>
+          <div class="desc">
+            Most glanceable — only the very next 3 matches across all KCVV teams. Forces
+            visitors to hit <code>/kalender</code> for anything beyond the immediate weekend.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="panel">
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div class="matchup">
+                <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                <div class="meta">A-ploeg · 1ste prov.</div>
+              </div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+              <div class="matchup">
+                <div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div>
+                <div class="meta">U17 · gewest.</div>
+              </div>
+              <span class="badge">UIT</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+              <div class="matchup">
+                <div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div>
+                <div class="meta">Reserves · prov.</div>
+              </div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="more-link">Volledige kalender →</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ D.2 — Next 5 ============ -->
+      <section class="candidate" id="D2">
+        <header>
+          <div class="key">D.2</div>
+          <div class="name">Next 5 matches · scannable</div>
+          <div class="desc">
+            Five rows — covers the next ~1–2 weekends across teams. Default proven by the
+            mockups in Round 6. Right balance of weight and skim-ability.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="panel">
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+              <div class="matchup"><div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div><div class="meta">U17 · gewest.</div></div>
+              <span class="badge">UIT</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div><div class="meta">Reserves · prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+              <div class="matchup"><div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge">UIT</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 25/05</div><div class="time">15:00</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="more-link">Volledige kalender →</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ D.3 — Grouped by week ============ -->
+      <section class="candidate" id="D3">
+        <header>
+          <div class="key">D.3</div>
+          <div class="name">This week + next week · grouped headers</div>
+          <div class="desc">
+            All matches in the current week, then all matches in the next week. Grouped under
+            week labels ("Dit weekend", "Volgend weekend"). Variable count (typically 5–8).
+            Most natural for fans planning their weekend.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="panel">
+            <div class="week-label">Dit weekend · 11–12 mei</div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+              <div class="matchup"><div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div><div class="meta">U17 · gewest.</div></div>
+              <span class="badge">UIT</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 12/05</div><div class="time">14:00</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV U15</span> — Tisselt</div><div class="meta">U15 · gewest.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="week-label">Volgend weekend · 18–19 mei</div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+              <div class="matchup"><div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div><div class="meta">Reserves · prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-item">
+              <div class="when"><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+              <div class="matchup"><div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge">UIT</span>
+            </div>
+            <div class="more-link">Volledige kalender →</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ D.4 — Horizontal scroll-track (today's slider) ============ -->
+      <section class="candidate" id="D4">
+        <header>
+          <div class="key">D.4</div>
+          <div class="name">Horizontal scroll-track · "MatchesSlider" replacement</div>
+          <div class="desc">
+            All upcoming matches as scroll-snap cards in a horizontal track. Closest to today's
+            <code>&lt;MatchesSlider&gt;</code>. Each card is a tape-card. Mouse drag / swipe /
+            arrow keys to navigate.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="panel">
+            <div class="scroll-track">
+              <div class="scroll-card">
+                <div class="when">ZA 11/05 · 15:00</div>
+                <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                <div class="meta">A · prov · THUIS</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZO 12/05 · 10:30</div>
+                <div class="teams">Werchter — <span class="kcvv">KCVV U17</span></div>
+                <div class="meta">U17 · gewest · UIT</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZO 12/05 · 14:00</div>
+                <div class="teams"><span class="kcvv">KCVV U15</span> — Tisselt</div>
+                <div class="meta">U15 · gewest · THUIS</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZA 18/05 · 14:30</div>
+                <div class="teams"><span class="kcvv">KCVV Res.</span> — SOK</div>
+                <div class="meta">Res · prov · THUIS</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZO 19/05 · 15:00</div>
+                <div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div>
+                <div class="meta">A · prov · UIT</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZA 25/05 · 15:00</div>
+                <div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div>
+                <div class="meta">A · prov · THUIS</div>
+              </div>
+              <div class="scroll-card">
+                <div class="when">ZO 26/05 · 10:30</div>
+                <div class="teams"><span class="kcvv">KCVV U17</span> — Eppegem</div>
+                <div class="meta">U17 · gewest · THUIS</div>
+              </div>
+            </div>
+            <div class="scroll-hint">← scroll →</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Realistic data context.</strong> KCVV has 5–8 teams playing once per week.
+        D.1 = ~½ a weekend. D.2 = full current weekend + next weekend's lead. D.3 = both weekends
+        in full. D.4 = everything upcoming, scroll-snap.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Standings shape (Round 6c — full table /
+        KCVV-context / top 5). Per-match link target — clicking a row → <code>/match/{id}</code>
+        is the obvious default; only confirm if there's reason to deviate.
+      </p>
+    </div>
+  </body>
+</html>

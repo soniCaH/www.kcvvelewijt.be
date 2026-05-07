@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 4b · Banner slot retention</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape: #d9b85a;
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1400px;
+        margin: 0 auto 28px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 32px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner {
+        max-width: 1400px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+      @media (max-width: 1180px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+      .col {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 14px 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .col-head { padding-bottom: 8px; border-bottom: 1px dashed var(--ink); }
+      .col-head .key {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .col-head .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.2;
+        margin: 4px 0 4px;
+      }
+      .col-head .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.78;
+      }
+      .stack { display: flex; flex-direction: column; gap: 0; }
+      .band {
+        position: relative;
+        padding: 8px 12px;
+        border-left: 1px solid var(--ink);
+        border-right: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .band:first-child { border-top: 1px solid var(--ink); }
+      .band .label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .band .sub { font-size: 10px; opacity: 0.65; margin-top: 2px; }
+      .band.locked { background: var(--cream-deep); }
+      .band.locked .label::before { content: "★ "; opacity: 0.6; }
+      .band.locked .label { opacity: 0.6; }
+      .bg-cream { background: var(--cream); }
+      .bg-cream-soft { background: var(--cream-soft); }
+      .bg-cream-deep { background: var(--cream-deep); }
+      .bg-ink { background: var(--ink); color: var(--cream); }
+      .bg-jersey { background: var(--jersey-deep); color: var(--cream); }
+      .bg-banner {
+        background:
+          repeating-linear-gradient(
+            45deg,
+            #f0d878 0,
+            #f0d878 8px,
+            #d9b85a 8px,
+            #d9b85a 16px
+          );
+        color: var(--ink);
+      }
+      .bg-banner .label { color: var(--ink); }
+      .h-strip { min-height: 30px; }
+      .h-chrome { min-height: 32px; }
+      .h-hero { min-height: 70px; }
+      .h-event { min-height: 42px; }
+      .h-grid { min-height: 80px; }
+      .h-block { min-height: 46px; }
+      .h-banner { min-height: 28px; }
+
+      .footnote {
+        max-width: 1400px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.55;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 4b · Banner slots</div>
+      <h1>Banner slot retention on the locked spine</h1>
+      <p>
+        Today the homepage exposes 3 optional <code>banner</code> refs (<code>bannerSlotA/B/C</code> on
+        the homePage Sanity document) — generic promotional / sponsor banners with image + alt + href.
+        Each slot is already drop-if-empty (no banner ref → section hidden). This round drills how many
+        slots Phase 4 keeps, and where they sit in the locked Spine A. Yellow striped bands below mark
+        banner positions.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Hero D.1 carousel + S.2 source · FeaturedEventBand
+      (E.2) between hero and NewsGrid · Spine A: NewsGrid → ScheduleStandings → Youth → Webshop →
+      Sponsors. Banner positions vary across the 4 candidates below.
+    </div>
+
+    <div class="grid">
+
+      <!-- ============ BS.1 — Keep all 3 ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">BS.1</div>
+          <div class="name">Keep all 3 slots</div>
+          <div class="desc">
+            Three banner positions, drop-if-empty: between event-and-grid, between
+            schedule-and-youth, between webshop-and-sponsors. Editor-flexible. Most legacy-faithful.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlotA</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlotB</div></div>
+          <div class="band bg-jersey h-block locked"><div class="label">YouthBlock</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlotC</div></div>
+          <div class="band bg-cream-deep h-block locked"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter</div></div>
+        </div>
+      </div>
+
+      <!-- ============ BS.2 — 2 slots ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">BS.2</div>
+          <div class="name">2 slots · drop the middle</div>
+          <div class="desc">
+            Keep slot A (high-attention, between event and grid) and slot C (commercial cluster
+            with shop + sponsors). Drop slot B (was between schedule and youth — interrupts the
+            data → brand transition).
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlotA</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-jersey h-block locked"><div class="label">YouthBlock</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlotC</div></div>
+          <div class="band bg-cream-deep h-block locked"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter</div></div>
+        </div>
+      </div>
+
+      <!-- ============ BS.3 — 1 slot ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">BS.3</div>
+          <div class="name">1 slot · between News and Schedule</div>
+          <div class="desc">
+            One banner only, between the editorial body (NewsGrid) and the data band
+            (ScheduleStandings). Single high-attention placement; lets the editor target one
+            promotion without crowding the spine.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid</div></div>
+          <div class="band bg-banner h-banner"><div class="label">→ bannerSlot (one)</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-jersey h-block locked"><div class="label">YouthBlock</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-cream-deep h-block locked"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter</div></div>
+        </div>
+      </div>
+
+      <!-- ============ BS.4 — Drop all ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">BS.4</div>
+          <div class="name">Drop all banner slots</div>
+          <div class="desc">
+            Cleanest editorial spine. Sponsor visibility lives entirely in
+            <code>SponsorsBlock</code> + <code>SiteFooter</code>; promotional callouts go through
+            the FeaturedEventBand. Removes 3 ref fields from <code>homePage</code> (small migration).
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-jersey h-block locked"><div class="label">YouthBlock</div></div>
+          <div class="band bg-cream h-block locked"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-cream-deep h-block locked"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>What is a banner today?</strong> A simple <code>banner</code> Sanity document
+        with <code>image</code> + <code>alt</code> + <code>href</code>. No tier, no expiry, no
+        analytics binding. Used historically for sponsor-of-the-month placements and ad-hoc
+        promos (e.g. season-ticket reminders, away-trip carpooling sign-ups).
+      </p>
+      <p>
+        <strong>If banners stay,</strong> the redesign treats them with the cream/ink retro
+        palette (taped frame, jersey-tape strip, hard shadow) — not yellow stripes. The yellow
+        striping above is just so banner positions are visible against the locked spine.
+      </p>
+      <p>
+        <strong>If banners go,</strong> we remove <code>bannerSlotA/B/C</code> from
+        <code>homePage</code> in a Sanity migration. Existing <code>banner</code> documents stay
+        (other surfaces may use them later) — the homepage just stops referencing them.
+      </p>
+    </div>
+  </body>
+</html>

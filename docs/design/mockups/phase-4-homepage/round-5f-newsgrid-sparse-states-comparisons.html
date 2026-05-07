@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 5f · NewsGrid empty / sparse states</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 30px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 13px; line-height: 1.55; opacity: 0.85; max-width: 70ch; }
+      .surface {
+        background: var(--cream-soft);
+        padding: 24px 20px;
+      }
+
+      /* === Card === */
+      .card {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 6px 6px 8px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        height: 100%;
+      }
+      .card .tape {
+        position: absolute;
+        top: -6px;
+        left: 14px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .card .img {
+        flex: 1;
+        min-height: 60px;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+      }
+      .card .img.alt-2 { background: linear-gradient(135deg, #4d2a2a, #c19a4a); }
+      .card .img.alt-3 { background: linear-gradient(135deg, #2a3a4d, #4a8ac1); }
+      .card .img.alt-4 { background: linear-gradient(135deg, #3a2a4d, #8a4ac1); }
+      .card .img.alt-5 { background: linear-gradient(135deg, #4d3a2a, #c17a4a); }
+      .card .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 1px 5px;
+        width: fit-content;
+      }
+      .card .h { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.18; }
+      .card.lead .h { font-size: 16px; }
+      .card.placeholder {
+        background: var(--cream-deep);
+        opacity: 0.6;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        text-align: center;
+        padding: 24px 12px;
+      }
+      .card.placeholder .img { display: none; }
+      .card.placeholder .pill { display: none; }
+      .rot-a { transform: rotate(-0.5deg); }
+      .rot-b { transform: rotate(-0.25deg); }
+      .rot-c { transform: rotate(0.25deg); }
+      .rot-d { transform: rotate(0.5deg); }
+      .rot-none { transform: none; }
+
+      /* === States === */
+      .states-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 880px) { .states-grid { grid-template-columns: 1fr; } }
+      .state-block {
+        background: #fff;
+        border: 1px dashed var(--ink);
+        padding: 14px;
+      }
+      .state-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 8px;
+      }
+      .state-empty {
+        padding: 28px 14px;
+        text-align: center;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        background: var(--cream);
+        border: 1px solid var(--ink);
+      }
+
+      /* Geometry — 1 lead (1fr) + 2x2 right (1fr) */
+      .grid-D {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 8px;
+        min-height: 220px;
+      }
+      .grid-D .lead { grid-column: 1; grid-row: 1 / 3; }
+      .grid-D .b-2 { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .grid-D .b-3 { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .grid-D-lead-only {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        min-height: 220px;
+      }
+      .grid-D-1plus1 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        min-height: 200px;
+      }
+      .grid-D-1plus2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 8px;
+        min-height: 220px;
+      }
+      .grid-D-1plus2 .lead { grid-column: 1; grid-row: 1 / 3; }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+      .annotate {
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: var(--cream-deep);
+        font-size: 11px;
+        line-height: 1.5;
+        font-family: ui-monospace, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 5f · NewsGrid empty / sparse</div>
+      <h1>What does NewsGrid render with 0–4 articles?</h1>
+      <p>
+        Realistic data flow: <code>articles.slice(3, 8)</code> = 5 articles. But the site can have
+        fewer published — at first launch, after a content prune, with category filters applied
+        (later phases), or when the most recent 3 are all in the hero. This round picks the rule
+        for sparse-data behaviour. Each candidate shows what the grid renders at N = 0, 1, 2,
+        and 3 articles.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Geometry D · 50/50 · 5 cards (1 lead + 2×2)
+      when N ≥ 5 · all 16:9 · slot-index rotation · press-down hover. <strong>This round picks
+      what happens when N &lt; 5.</strong>
+    </div>
+
+    <div class="container">
+
+      <!-- ============ E.1 — Graceful collapse ============ -->
+      <section class="candidate" id="E1">
+        <header>
+          <div class="key">E.1</div>
+          <div class="name">Graceful collapse · render N cards, hide empty slots</div>
+          <div class="desc">
+            Lead always renders if at least 1 article. Supporting slots fill in slot-index order;
+            unfilled slots are not rendered. Geometry adapts: lead-only at N=1 (full width),
+            lead + 1 at N=2 (50/50), lead + 2 at N=3 (lead 50% × 2 rows, 2 supp top row only),
+            etc. Section returns null at N=0.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="states-grid">
+            <div class="state-block">
+              <div class="state-label">N = 0 articles</div>
+              <div class="state-empty">section returns null<br />(no NewsGrid section on the page)</div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 1 article · lead-only full width</div>
+              <div class="grid-D-lead-only">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim Geeraerts tekent voor 2 seizoenen.</div>
+                </div>
+              </div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 2 articles · lead + 1 at 50/50</div>
+              <div class="grid-D-1plus1">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div class="card rot-b">
+                  <div class="tape"></div>
+                  <div class="img alt-3"></div>
+                  <span class="pill">Wedstr.</span>
+                  <div class="h">U17 wint 3-1.</div>
+                </div>
+              </div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 3 articles · lead + 2 (top row only)</div>
+              <div class="grid-D-1plus2">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div style="grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div class="card rot-b"><div class="tape"></div><div class="img alt-3"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+                  <div class="card rot-c"><div class="tape"></div><div class="img alt-4"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+                </div>
+                <div style="grid-column: 2; grid-row: 2;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="annotate">
+            <strong>rule:</strong> render `min(N, 5)` cards · lead always present at N≥1 · supporting fills slot index 1,2,3,4 in order · empty slots not rendered<br />
+            <strong>edge:</strong> N=0 → return null (no section header, no card grid)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ E.2 — Hide section under threshold ============ -->
+      <section class="candidate" id="E2">
+        <header>
+          <div class="key">E.2</div>
+          <div class="name">Hide entire section if N &lt; 3</div>
+          <div class="desc">
+            Section requires at least 3 articles to render. Below threshold, NewsGrid returns null
+            entirely (no header, no cards). At N=3+, render the geometry from E.1 (graceful
+            collapse). Avoids the "lonely lead card" look.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="states-grid">
+            <div class="state-block">
+              <div class="state-label">N = 0 / 1 / 2 articles</div>
+              <div class="state-empty">section returns null<br />(no NewsGrid section, regardless of which articles exist)</div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 3 articles · same as E.1 N=3</div>
+              <div class="grid-D-1plus2">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div style="grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div class="card rot-b"><div class="tape"></div><div class="img alt-3"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+                  <div class="card rot-c"><div class="tape"></div><div class="img alt-4"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+                </div>
+                <div style="grid-column: 2; grid-row: 2;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="annotate">
+            <strong>rule:</strong> if N &lt; 3 → return null · else render with E.1 geometry<br />
+            <strong>tradeoff:</strong> avoids sparse layouts but loses content visibility at N=1,2
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ E.3 — Placeholder cards ============ -->
+      <section class="candidate" id="E3">
+        <header>
+          <div class="key">E.3</div>
+          <div class="name">Placeholder cards · "geen recent nieuws"</div>
+          <div class="desc">
+            All 5 slots always render. Empty slots become muted "geen recent nieuws" placeholder
+            cards (cream-deep background, opacity 0.6, no image, no pill). Preserves the full
+            geometry visually but signals empty state. Section returns null only at N=0.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="states-grid">
+            <div class="state-block">
+              <div class="state-label">N = 0 articles</div>
+              <div class="state-empty">section returns null<br />(no NewsGrid section on the page)</div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 1 · 1 real + 4 placeholders</div>
+              <div class="grid-D">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div class="b-2">
+                  <div class="card placeholder rot-b">geen recent nieuws</div>
+                  <div class="card placeholder rot-c">geen recent nieuws</div>
+                </div>
+                <div class="b-3">
+                  <div class="card placeholder rot-d">geen recent nieuws</div>
+                  <div class="card placeholder rot-a">geen recent nieuws</div>
+                </div>
+              </div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 3 · 3 real + 2 placeholders</div>
+              <div class="grid-D">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div class="b-2">
+                  <div class="card rot-b"><div class="tape"></div><div class="img alt-3"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+                  <div class="card rot-c"><div class="tape"></div><div class="img alt-4"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+                </div>
+                <div class="b-3">
+                  <div class="card placeholder rot-d">geen recent nieuws</div>
+                  <div class="card placeholder rot-a">geen recent nieuws</div>
+                </div>
+              </div>
+            </div>
+            <div class="state-block">
+              <div class="state-label">N = 5 · all real (full layout)</div>
+              <div class="grid-D">
+                <div class="card rot-a lead">
+                  <div class="tape"></div>
+                  <div class="img alt-2"></div>
+                  <span class="pill">Transfer</span>
+                  <div class="h">Wim G. tekent.</div>
+                </div>
+                <div class="b-2">
+                  <div class="card rot-b"><div class="tape"></div><div class="img alt-3"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+                  <div class="card rot-c"><div class="tape"></div><div class="img alt-4"></div><span class="pill">Aank.</span><div class="h">Inschr.</div></div>
+                </div>
+                <div class="b-3">
+                  <div class="card rot-d"><div class="tape"></div><div class="img alt-5"></div><span class="pill">Aank.</span><div class="h">Training mei.</div></div>
+                  <div class="card rot-a"><div class="tape"></div><div class="img"></div><span class="pill">Wedstr.</span><div class="h">Reserves.</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="annotate">
+            <strong>rule:</strong> always render full geometry · empty slots = placeholder cards<br />
+            <strong>tradeoff:</strong> full geometry preserved but creates "fake content" debt
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> E.1 = adapts geometry to content (most flexible, no fake
+        content). E.2 = hides section to avoid sparse layouts (loses content visibility on launch
+        / pruned states). E.3 = preserves full geometry with placeholders (most visually
+        consistent but feels deceptive).
+      </p>
+      <p>
+        <strong>Why not "auto-resize lead to fill remaining space"?</strong> A 5th option (lead
+        grows when supporting is sparse) was considered and dropped — it makes the lead's image
+        size unpredictable, breaks the cropping contract on coverImage, and creates layout shifts
+        as new articles publish. Phase 4 should commit to a stable lead size.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Loading states (separate from sparse data — the
+        loading skeleton question lives in <code>docs/prd/loading-skeleton-consistency.md</code>).
+        Mobile collapse rules at sparse N (1+1, 1+2 stack vertically; not a separate decision).
+      </p>
+    </div>
+  </body>
+</html>

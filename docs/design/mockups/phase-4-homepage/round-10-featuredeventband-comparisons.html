@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 10 · FeaturedEventBand</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-deep-dark: #133d28;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 28px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 14px 18px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; max-width: 56ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      /* Shared atoms */
+      .meta-line {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        margin-bottom: 10px;
+      }
+      .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 32px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 12px;
+      }
+      .h .accent { color: #f0c264; }
+      .when {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.92;
+        margin-bottom: 16px;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        text-decoration: none;
+      }
+      .cta .arrow { color: var(--jersey-deep); }
+
+      /* Image placeholder — would render real coverImage */
+      .cover-img {
+        background: linear-gradient(135deg, var(--jersey-deep-soft), #f0c264);
+        position: relative;
+      }
+      .cover-img::after {
+        content: "Quiz \\1F37B";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        color: var(--cream);
+        background: rgba(31, 95, 63, 0.55);
+      }
+
+      /* L.1 — Image left, text right */
+      .l1 {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 36px 28px;
+      }
+      .l1-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 32px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .l1-grid { grid-template-columns: 1fr; } }
+      .l1 .image {
+        position: relative;
+      }
+      .l1 .taped {
+        background: var(--cream);
+        padding: 8px 8px 10px;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 #000;
+        transform: rotate(-1deg);
+        position: relative;
+      }
+      .l1 .taped::before, .l1 .taped::after {
+        content: "";
+        position: absolute;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+      }
+      .l1 .taped::before { top: -8px; left: 16px; width: 50px; height: 12px; transform: rotate(-3deg); }
+      .l1 .taped::after { top: -8px; right: 18px; width: 44px; height: 11px; transform: rotate(3deg); }
+      .l1 .cover-img { aspect-ratio: 16/9; }
+      .l1 .meta-line { color: var(--cream); }
+
+      /* L.2 — Image right, text left */
+      .l2 {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 36px 28px;
+      }
+      .l2-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 32px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .l2-grid { grid-template-columns: 1fr; } .l2 .image-col { order: -1; } }
+      .l2 .taped {
+        background: var(--cream);
+        padding: 8px 8px 10px;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 #000;
+        transform: rotate(1deg);
+        position: relative;
+      }
+      .l2 .taped::before {
+        content: "";
+        position: absolute;
+        top: -8px; right: 18px;
+        width: 50px; height: 12px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(3deg);
+      }
+      .l2 .cover-img { aspect-ratio: 16/9; }
+      .l2 .meta-line { color: var(--cream); }
+
+      /* L.3 — Backdrop image with text overlay */
+      .l3 {
+        position: relative;
+        overflow: hidden;
+        color: var(--cream);
+        min-height: 280px;
+      }
+      .l3-bg {
+        position: absolute;
+        inset: -8px;
+        z-index: 0;
+      }
+      .l3-bg .cover-img {
+        width: 100%;
+        height: 100%;
+        filter: blur(2px) brightness(0.7);
+      }
+      .l3-bg .cover-img::after {
+        font-size: 48px;
+      }
+      .l3-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(31, 95, 63, 0.85) 0%, rgba(19, 61, 40, 0.7) 60%, rgba(19, 61, 40, 0.92) 100%);
+        z-index: 1;
+      }
+      .l3-content {
+        position: relative;
+        z-index: 2;
+        padding: 48px 36px;
+        max-width: 620px;
+      }
+
+      /* L.4 — Inline ticket-stub */
+      .l4 {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 22px 28px;
+      }
+      .l4-stack {
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        gap: 20px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .l4-stack { grid-template-columns: 1fr; } }
+      .l4-stub {
+        background: #f0c264;
+        color: var(--ink);
+        padding: 12px 18px;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        position: relative;
+      }
+      .l4-stub::before, .l4-stub::after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: var(--jersey-deep);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .l4-stub::before { left: -7px; }
+      .l4-stub::after { right: -7px; }
+      .l4 .cover-img {
+        width: 100px;
+        aspect-ratio: 16/9;
+        border: 1px solid var(--ink);
+      }
+      .l4 .cover-img::after {
+        font-size: 14px;
+      }
+      .l4 .text { min-width: 240px; }
+      .l4 .h { font-size: 22px; line-height: 1.18; margin-bottom: 4px; }
+      .l4 .when { margin-bottom: 0; }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 10 · FeaturedEventBand composition</div>
+      <h1>FeaturedEventBand — composition</h1>
+      <p>
+        New component from Round 3 (IA · E.2). Jersey-deep band between EditorialHero and
+        bannerSlotA. Drop-if-empty. Renders one event flagged
+        <code>featuredOnHome === true</code> with future <code>dateStart</code>. This round
+        picks the layout.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Section background = jersey-deep. Section is
+      drop-if-empty. Renders one event with <code>title</code>, <code>dateStart</code> (required),
+      optional <code>dateEnd</code>, <code>coverImage</code>, optional <code>externalLink</code>.
+      Cream text + warm-yellow accent. <strong>This round picks the composition.</strong>
+    </div>
+
+    <div class="container">
+
+      <!-- L.1 — Image left, text right -->
+      <section class="candidate" id="L1">
+        <header>
+          <div>
+            <div class="key">L.1</div>
+            <div class="name">Image left (TapedFigure) · text right</div>
+            <div class="desc">
+              Cover image as a TapedFigure polaroid on the left (1fr), text + CTA on the right
+              (1.4fr). Image carries the visual moment; text is supportive. Mobile stacks
+              image-above-text.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Reuses TapedFigure (NewsCard cover, EditorialHero cover)<br />
+            + Image is real, not decorative<br />
+            − Vertical height larger than text-only<br />
+            − Two TapedFigures in a row if hero also has cover
+          </div>
+        </header>
+        <div class="l1">
+          <div class="l1-grid">
+            <div class="image">
+              <div class="taped">
+                <div class="cover-img"></div>
+              </div>
+            </div>
+            <div>
+              <div class="meta-line">Aanstaand evenement</div>
+              <h2 class="h"><span class="accent">Quiz</span> in de kantine, vrijdagavond.</h2>
+              <div class="when">Vr 10 mei · 20:00 · Kantine</div>
+              <a class="cta">Reserveer je plaats <span class="arrow">→</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- L.2 — Image right, text left -->
+      <section class="candidate" id="L2">
+        <header>
+          <div>
+            <div class="key">L.2</div>
+            <div class="name">Text left · image right (TapedFigure)</div>
+            <div class="desc">
+              Mirror of L.1. Text left (1.4fr), image right (1fr). Reading-order priority on
+              text. Mobile flips image to top.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Text gets reading priority<br />
+            + Image acts as "what's coming" pull<br />
+            − Mirror of L.1 — same band, same height<br />
+            − Mobile order reversal needs care
+          </div>
+        </header>
+        <div class="l2">
+          <div class="l2-grid">
+            <div>
+              <div class="meta-line">Aanstaand evenement</div>
+              <h2 class="h"><span class="accent">Quiz</span> in de kantine, vrijdagavond.</h2>
+              <div class="when">Vr 10 mei · 20:00 · Kantine</div>
+              <a class="cta">Reserveer je plaats <span class="arrow">→</span></a>
+            </div>
+            <div class="image-col">
+              <div class="taped">
+                <div class="cover-img"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- L.3 — Backdrop image with text overlay -->
+      <section class="candidate" id="L3">
+        <header>
+          <div>
+            <div class="key">L.3</div>
+            <div class="name">Image as backdrop · text overlay (YouthBlock pattern)</div>
+            <div class="desc">
+              Cover image fills the full section, blurred 2px, with jersey-deep gradient overlay.
+              Same backdrop pattern as YouthBlock. Text foreground, no separate image element.
+              Image becomes atmospheric.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Compact vertical, no extra image area<br />
+            + Atmospheric register<br />
+            − Same pattern as YouthBlock (could feel repetitive)<br />
+            − Cover image detail lost
+          </div>
+        </header>
+        <div class="l3">
+          <div class="l3-bg">
+            <div class="cover-img"></div>
+          </div>
+          <div class="l3-overlay"></div>
+          <div class="l3-content">
+            <div class="meta-line" style="color: var(--cream);">Aanstaand evenement</div>
+            <h2 class="h"><span class="accent">Quiz</span> in de kantine, vrijdagavond.</h2>
+            <div class="when">Vr 10 mei · 20:00 · Kantine</div>
+            <a class="cta">Reserveer je plaats <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- L.4 — Inline ticket-stub (compact) -->
+      <section class="candidate" id="L4">
+        <header>
+          <div>
+            <div class="key">L.4</div>
+            <div class="name">Inline ticket-stub · narrow band, compact</div>
+            <div class="desc">
+              Compact 1-row band. Yellow ticket-stub chip ("VR 10/05") + small thumbnail image
+              + headline + when + CTA. Smallest vertical footprint. Reads like a ticket clipped
+              to the page.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Smallest vertical footprint<br />
+            + Strong "ticket / save the date" register<br />
+            − Image very small (less visual weight)<br />
+            − Mobile must reflow gracefully
+          </div>
+        </header>
+        <div class="l4">
+          <div class="l4-stack">
+            <span class="l4-stub">VR · 10/05</span>
+            <div class="cover-img"></div>
+            <div class="text">
+              <div class="meta-line">Aanstaand evenement</div>
+              <h2 class="h"><span class="accent">Quiz</span> in de kantine.</h2>
+              <div class="when">20:00 · Kantine</div>
+            </div>
+            <a class="cta">Reserveer <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>CTA copy.</strong> "Reserveer je plaats →" assumes the event has reservation
+        flow. If <code>externalLink.label</code> is present on the event, use that instead
+        ("Bekijk evenement" / "Meer info" / supplier-supplied label). Fallback when no
+        externalLink: link to <code>/evenementen/{slug}</code> with "Meer info →".
+      </p>
+      <p>
+        <strong>Out of scope.</strong> dateEnd display rules (event spans multiple days):
+        likely "10 mei – 12 mei" formatting at implementation. Time-zone formatting (always
+        Europe/Brussels). Empty externalLink fallback URL.
+      </p>
+    </div>
+  </body>
+</html>

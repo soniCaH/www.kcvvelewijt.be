@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 2 · Hero source — how are the 3 articles picked?</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --studio-bg: #f6f6f7;
+        --studio-border: #d4d4d8;
+        --studio-input: #ffffff;
+        --studio-accent: #156dff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1280px;
+        margin: 0 auto 28px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .lock-banner {
+        max-width: 1280px;
+        margin: 0 auto 20px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      @media (max-width: 1080px) {
+        .container { grid-template-columns: 1fr; }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin: 4px 0 6px;
+      }
+      .candidate header .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        max-width: 56ch;
+      }
+      .candidate .body {
+        padding: 18px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .panel-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 6px;
+      }
+
+      /* ===== Studio mockup ===== */
+      .studio {
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        font-family: -apple-system, "Segoe UI", sans-serif;
+        font-size: 13px;
+        color: #1a1d20;
+        padding: 14px 16px;
+      }
+      .studio .doc-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2a2d31;
+      }
+      .studio .doc-title .icon {
+        width: 18px;
+        height: 18px;
+        background: var(--studio-accent);
+        color: white;
+        font-size: 11px;
+        line-height: 18px;
+        text-align: center;
+        font-weight: 700;
+      }
+      .studio .field {
+        margin-bottom: 12px;
+      }
+      .studio .field-label {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #2a2d31;
+      }
+      .studio .field-help {
+        font-size: 11px;
+        color: #6b7079;
+        margin-bottom: 4px;
+        line-height: 1.4;
+      }
+      .studio .input {
+        background: var(--studio-input);
+        border: 1px solid var(--studio-border);
+        padding: 7px 10px;
+        font-size: 13px;
+        border-radius: 2px;
+      }
+      .studio .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+      .studio .toggle .switch {
+        width: 28px;
+        height: 16px;
+        background: var(--studio-accent);
+        border-radius: 16px;
+        position: relative;
+      }
+      .studio .toggle .switch::after {
+        content: "";
+        position: absolute;
+        right: 2px;
+        top: 2px;
+        width: 12px;
+        height: 12px;
+        background: white;
+        border-radius: 50%;
+      }
+      .studio .toggle.off .switch { background: #c8cbd0; }
+      .studio .toggle.off .switch::after { left: 2px; right: auto; }
+      .studio .ref-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--studio-input);
+        border: 1px solid var(--studio-border);
+        padding: 7px 10px;
+        font-size: 13px;
+        border-radius: 2px;
+        margin-bottom: 4px;
+      }
+      .studio .ref-row .grip {
+        font-family: monospace;
+        color: #c8cbd0;
+        cursor: grab;
+      }
+      .studio .ref-row .num {
+        font-family: monospace;
+        font-size: 11px;
+        color: #6b7079;
+        background: #eaecef;
+        padding: 1px 5px;
+        border-radius: 2px;
+      }
+      .studio .ref-row .article-icon {
+        width: 16px;
+        height: 16px;
+        background: #e8e9eb;
+        font-size: 10px;
+        line-height: 16px;
+        text-align: center;
+        font-weight: 600;
+        color: #6b7079;
+      }
+      .studio .add-ref {
+        font-size: 12px;
+        color: var(--studio-accent);
+        padding: 6px 10px;
+        border: 1px dashed var(--studio-border);
+        text-align: left;
+        margin-top: 4px;
+      }
+      .studio .row-list {
+        display: flex;
+        flex-direction: column;
+      }
+      .studio .article-row-tiny {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--studio-input);
+        border: 1px solid var(--studio-border);
+        border-bottom: none;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      .studio .article-row-tiny:last-child { border-bottom: 1px solid var(--studio-border); }
+      .studio .article-row-tiny .star {
+        font-size: 13px;
+        opacity: 0.5;
+      }
+      .studio .article-row-tiny.featured .star {
+        opacity: 1;
+        color: #f0a020;
+      }
+      .studio .article-row-tiny .meta {
+        flex: 1;
+      }
+      .studio .article-row-tiny .meta .t {
+        font-weight: 500;
+        color: #2a2d31;
+      }
+      .studio .article-row-tiny .meta .d {
+        font-size: 10px;
+        color: #6b7079;
+      }
+      .studio .article-row-tiny .at {
+        font-size: 10px;
+        color: #6b7079;
+      }
+      .studio .help-block {
+        background: #fffbe5;
+        border: 1px solid #f0d878;
+        padding: 8px 10px;
+        font-size: 11px;
+        color: #604a00;
+        line-height: 1.4;
+      }
+
+      /* ===== Result preview (the homepage hero D.1) ===== */
+      .result {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 14px 16px;
+        font-size: 11px;
+        font-family: ui-monospace, monospace;
+      }
+      .result-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 8px;
+      }
+      .hero-mini {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 8px;
+      }
+      .hero-mini .left { display: flex; flex-direction: column; justify-content: center; }
+      .hero-mini .pill {
+        display: inline-block;
+        background: var(--cream);
+        color: var(--ink);
+        padding: 1px 5px;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        width: fit-content;
+      }
+      .hero-mini .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.15;
+        color: var(--cream);
+        margin-bottom: 4px;
+      }
+      .hero-mini .h .accent { color: #f0c264; }
+      .hero-mini .b {
+        font-size: 9px;
+        opacity: 0.6;
+      }
+      .hero-mini .cover {
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        aspect-ratio: 16 / 9;
+        position: relative;
+        outline: 1px solid var(--cream);
+      }
+      .strip-mini {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(245, 239, 225, 0.25);
+      }
+      .strip-mini .thumb {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        opacity: 0.55;
+      }
+      .strip-mini .thumb.active { opacity: 1; }
+      .strip-mini .thumb.active .img {
+        outline: 1px solid #f0c264;
+      }
+      .strip-mini .thumb .img {
+        width: 28px;
+        flex-shrink: 0;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #2a4d3a, #c1a04a);
+      }
+      .strip-mini .thumb .img.alt-2 { background: linear-gradient(135deg, #4d2a2a, #c19a4a); }
+      .strip-mini .thumb .img.alt-3 { background: linear-gradient(135deg, #2a3a4d, #4a8ac1); }
+      .strip-mini .thumb .meta {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+      .strip-mini .thumb .meta .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+      }
+      .strip-mini .thumb .meta .num {
+        opacity: 0.6;
+      }
+
+      /* ===== Edge case + cost callouts ===== */
+      .matrix {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .matrix-row {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        gap: 12px;
+        padding: 8px 10px;
+        background: var(--cream-soft);
+        border-left: 3px solid var(--ink);
+      }
+      .matrix-row.warn { border-left-color: #c87a00; }
+      .matrix-row.cost-add { border-left-color: var(--jersey-deep); }
+      .matrix-row .k {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .matrix-row .v {
+        font-size: 12px;
+      }
+      .matrix-row code {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        background: rgba(26, 26, 26, 0.06);
+        padding: 1px 4px;
+      }
+
+      .footnote {
+        max-width: 1280px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 2 · Hero source</div>
+      <h1>How are the 3 hero articles picked?</h1>
+      <p>
+        Round 1 + 1b locked: hero shape = <strong>D.1 carousel with strip-below thumbnails</strong>.
+        Visual output is identical regardless of source. This round drills the editorial workflow:
+        which of the published articles end up in the carousel, who decides, and what happens at
+        the edges (0 featured, 1 featured, 5+ featured, no published articles).
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from Round 1 / 1b.</strong> Carousel reskinned (<strong>D</strong>) ·
+      strip-below thumbnails (<strong>D.1</strong>). All 4 candidates below render the same
+      D.1 hero — the difference is upstream.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ S.1 — Auto: 3 most recent ============ -->
+      <section class="candidate" id="S1">
+        <header>
+          <div class="key">S.1</div>
+          <div class="name">Auto · 3 most recent</div>
+          <div class="desc">
+            Today's behavior, kept as-is. Carousel renders the 3 most recently published articles
+            ordered by <code>publishedAt desc</code>. Editor does nothing — every new article
+            becomes the lead the moment it publishes; the previous lead demotes to slot 2.
+          </div>
+        </header>
+        <div class="body">
+          <div>
+            <div class="panel-label">Studio editor view</div>
+            <div class="studio">
+              <div class="doc-title"><span class="icon">A</span> Article — "Met deze ploeg…"</div>
+              <div class="field">
+                <div class="field-label">Title</div>
+                <div class="input">"Met deze ploeg kunnen we ver geraken."</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Published at</div>
+                <div class="input">5 mei 2026 · 09:30</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Featured</div>
+                <div class="toggle off"><span class="switch"></span><span>Off — not used by homepage hero</span></div>
+              </div>
+              <div class="help-block">
+                The <code>featured</code> field is on the schema but the homepage hero ignores it.
+                No editor action selects which articles appear — recency wins.
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Resulting hero (always)</div>
+            <div class="result">
+              <div class="result-label">/ — homepage hero</div>
+              <div class="hero-mini">
+                <div class="left">
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                  <div class="b">5 mei · most recent</div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="thumb active"><div class="img"></div><div class="meta"><div class="num">1/3</div><div class="h">Interview</div></div></div>
+                <div class="thumb"><div class="img alt-2"></div><div class="meta"><div class="num">2/3</div><div class="h">Transfer</div></div></div>
+                <div class="thumb"><div class="img alt-3"></div><div class="meta"><div class="num">3/3</div><div class="h">Event</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Edge cases + cost</div>
+            <div class="matrix">
+              <div class="matrix-row"><div class="k">0 articles</div><div class="v">Hero hidden; page renders without the carousel band.</div></div>
+              <div class="matrix-row"><div class="k">1 or 2 articles</div><div class="v">Carousel renders with 1 or 2 thumbs; strip is <code>repeat(N, 1fr)</code>.</div></div>
+              <div class="matrix-row"><div class="k">5+ articles</div><div class="v">Slice the 3 newest; older articles drop off the hero into NewsGrid.</div></div>
+              <div class="matrix-row"><div class="k">Schema cost</div><div class="v"><strong>Zero.</strong> Ships the existing <code>ARTICLES_QUERY</code> as-is.</div></div>
+              <div class="matrix-row"><div class="k">Editor cost</div><div class="v"><strong>Zero per week.</strong> Article publish = automatic hero placement.</div></div>
+              <div class="matrix-row warn"><div class="k">Risk</div><div class="v">No editorial control. A throwaway transfer note can supplant a long-form interview the same day.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.2 — article.featured boolean ============ -->
+      <section class="candidate" id="S2">
+        <header>
+          <div class="key">S.2</div>
+          <div class="name">Editor flips <code>featured</code> on each article</div>
+          <div class="desc">
+            Use the <code>featured</code> boolean already on the article schema. Hero shows the
+            3 most recent articles where <code>featured = true</code>; falls back to most-recent
+            (S.1 logic) if fewer than 3 are flagged. Editor curates by toggling the flag on
+            individual article documents.
+          </div>
+        </header>
+        <div class="body">
+          <div>
+            <div class="panel-label">Studio editor view</div>
+            <div class="studio">
+              <div class="doc-title"><span class="icon">A</span> Article — "Met deze ploeg…"</div>
+              <div class="field">
+                <div class="field-label">Featured</div>
+                <div class="field-help">Toggle on to surface this article in the homepage hero carousel. The 3 most recently flagged articles are shown.</div>
+                <div class="toggle"><span class="switch"></span><span>On — shown in homepage hero</span></div>
+              </div>
+              <div class="row-list" style="margin-top: 14px;">
+                <div class="panel-label" style="margin-bottom: 4px;">Currently flagged (admin view)</div>
+                <div class="article-row-tiny featured"><span class="star">★</span><div class="meta"><div class="t">"Met deze ploeg…"</div><div class="d">interview · 5 mei</div></div><span class="at">1/3</span></div>
+                <div class="article-row-tiny featured"><span class="star">★</span><div class="meta"><div class="t">Wim G. tekent voor 2 seizoenen.</div><div class="d">transfer · 3 mei</div></div><span class="at">2/3</span></div>
+                <div class="article-row-tiny featured"><span class="star">★</span><div class="meta"><div class="t">Quiz in de kantine, vrijdag.</div><div class="d">event · 1 mei</div></div><span class="at">3/3</span></div>
+                <div class="article-row-tiny"><span class="star">★</span><div class="meta"><div class="t">U17 wint van VKT.</div><div class="d">match · 28 apr</div></div><span class="at">—</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Resulting hero</div>
+            <div class="result">
+              <div class="result-label">/ — homepage hero · featured curated</div>
+              <div class="hero-mini">
+                <div class="left">
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                  <div class="b">5 mei · ★ flagged</div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="thumb active"><div class="img"></div><div class="meta"><div class="num">1/3 ★</div><div class="h">Interview</div></div></div>
+                <div class="thumb"><div class="img alt-2"></div><div class="meta"><div class="num">2/3 ★</div><div class="h">Transfer</div></div></div>
+                <div class="thumb"><div class="img alt-3"></div><div class="meta"><div class="num">3/3 ★</div><div class="h">Event</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Edge cases + cost</div>
+            <div class="matrix">
+              <div class="matrix-row"><div class="k">0 flagged</div><div class="v">Falls back to S.1: 3 most recent published.</div></div>
+              <div class="matrix-row"><div class="k">1 or 2 flagged</div><div class="v">Use the flagged ones first, fill remaining slots with most-recent unflagged.</div></div>
+              <div class="matrix-row"><div class="k">5+ flagged</div><div class="v">Show 3 newest flagged; older flagged ones still appear in NewsGrid.</div></div>
+              <div class="matrix-row"><div class="k">Schema cost</div><div class="v"><strong>Zero.</strong> <code>featured</code> already exists. <strong>Query change only:</strong> <code>order(featured desc, publishedAt desc)</code>.</div></div>
+              <div class="matrix-row"><div class="k">Editor cost</div><div class="v">~5s per article. One toggle per published doc; flip off when superseded.</div></div>
+              <div class="matrix-row warn"><div class="k">Risk</div><div class="v">Stale flags drift over time (editor forgets to flip off). Monthly Studio "review featured" task likely needed.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.3 — homePage.heroArticles[] ordered ref array ============ -->
+      <section class="candidate" id="S3">
+        <header>
+          <div class="key">S.3</div>
+          <div class="name">Curated array on <code>homePage</code> document</div>
+          <div class="desc">
+            New field <code>homePage.heroArticles</code> — an ordered array of 1–3 article
+            references on the existing <code>homePage</code> singleton (mirrors
+            <code>bannerSlotA/B/C</code>). Editor opens one document and explicitly picks the
+            carousel order. Most editorial control; one place to manage the hero.
+          </div>
+        </header>
+        <div class="body">
+          <div>
+            <div class="panel-label">Studio editor view</div>
+            <div class="studio">
+              <div class="doc-title"><span class="icon">H</span> Homepage</div>
+              <div class="field">
+                <div class="field-label">Hero articles</div>
+                <div class="field-help">Pick 1–3 articles for the homepage hero carousel. Drag to reorder. Slot 1 leads.</div>
+                <div class="ref-row"><span class="grip">⋮⋮</span><span class="num">1</span><span class="article-icon">A</span><span style="flex:1;">"Met deze ploeg…" · interview · 5 mei</span><span style="opacity:0.5;">×</span></div>
+                <div class="ref-row"><span class="grip">⋮⋮</span><span class="num">2</span><span class="article-icon">A</span><span style="flex:1;">Wim G. tekent voor 2 seizoenen. · transfer · 3 mei</span><span style="opacity:0.5;">×</span></div>
+                <div class="ref-row"><span class="grip">⋮⋮</span><span class="num">3</span><span class="article-icon">A</span><span style="flex:1;">Quiz in de kantine, vrijdag. · event · 1 mei</span><span style="opacity:0.5;">×</span></div>
+                <div class="add-ref">＋ Add article reference (max 3)</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Banner slot A</div>
+                <div class="ref-row"><span class="article-icon">B</span><span style="flex:1;">Sponsor banner · KCVV trainings</span></div>
+              </div>
+              <div class="help-block">
+                Other homepage controls (banner slots, matchesSliderPlaceholder) already live on
+                this same document — heroArticles fits the existing pattern.
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Resulting hero</div>
+            <div class="result">
+              <div class="result-label">/ — homepage hero · explicit pick</div>
+              <div class="hero-mini">
+                <div class="left">
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                  <div class="b">slot 1 · curated</div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="thumb active"><div class="img"></div><div class="meta"><div class="num">slot 1</div><div class="h">Interview</div></div></div>
+                <div class="thumb"><div class="img alt-2"></div><div class="meta"><div class="num">slot 2</div><div class="h">Transfer</div></div></div>
+                <div class="thumb"><div class="img alt-3"></div><div class="meta"><div class="num">slot 3</div><div class="h">Event</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Edge cases + cost</div>
+            <div class="matrix">
+              <div class="matrix-row"><div class="k">Empty array</div><div class="v">Fall back to S.1 (3 most recent). Never block the hero on a missed update.</div></div>
+              <div class="matrix-row"><div class="k">1 or 2 picked</div><div class="v">Render only the picks (1 or 2 thumbs). No auto-fill.</div></div>
+              <div class="matrix-row"><div class="k">Picked article unpublished</div><div class="v">Skip it; if &lt; 3 valid, fill remaining slots from S.1 fallback.</div></div>
+              <div class="matrix-row cost-add"><div class="k">Schema cost</div><div class="v"><strong>Sanity migration.</strong> Add field to <code>homePage.ts</code>; no data backfill (default empty = S.1 behavior).</div></div>
+              <div class="matrix-row"><div class="k">Editor cost</div><div class="v">~30s per change. One trip to the homepage doc to swap the lead. Predictable.</div></div>
+              <div class="matrix-row"><div class="k">Risk</div><div class="v">Forgotten updates feel stale visibly (same lead for weeks). Visible to editor — easier to remember.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.4 — Hybrid: 1 lead + 2 auto-fill ============ -->
+      <section class="candidate" id="S4">
+        <header>
+          <div class="key">S.4</div>
+          <div class="name">Hybrid · 1 lead pick + 2 auto-fill</div>
+          <div class="desc">
+            Singleton <code>homePage.leadArticle</code> reference. Slot 1 of the carousel = the
+            picked lead. Slots 2 + 3 = the next 2 most-recent published articles, excluding the
+            lead. Editor manages one decision (the lead); recency does the rest.
+          </div>
+        </header>
+        <div class="body">
+          <div>
+            <div class="panel-label">Studio editor view</div>
+            <div class="studio">
+              <div class="doc-title"><span class="icon">H</span> Homepage</div>
+              <div class="field">
+                <div class="field-label">Lead article</div>
+                <div class="field-help">Pick one article to lead the hero carousel. Slots 2 & 3 fill automatically with the next 2 most recent published articles.</div>
+                <div class="ref-row"><span class="article-icon">A</span><span style="flex:1;">"Met deze ploeg…" · interview · 5 mei</span><span style="opacity:0.5;">×</span></div>
+              </div>
+              <div class="field">
+                <div class="field-label">Auto-fill (preview)</div>
+                <div class="row-list">
+                  <div class="article-row-tiny"><span class="star" style="opacity:0.3;">+</span><div class="meta"><div class="t">Wim G. tekent voor 2 seizoenen.</div><div class="d">transfer · 3 mei · auto</div></div><span class="at">slot 2</span></div>
+                  <div class="article-row-tiny"><span class="star" style="opacity:0.3;">+</span><div class="meta"><div class="t">Quiz in de kantine, vrijdag.</div><div class="d">event · 1 mei · auto</div></div><span class="at">slot 3</span></div>
+                </div>
+              </div>
+              <div class="help-block">
+                Read-only "auto-fill" preview keeps editors honest about what they'll actually
+                see published. Auto rows update as new articles publish.
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Resulting hero</div>
+            <div class="result">
+              <div class="result-label">/ — homepage hero · lead + auto</div>
+              <div class="hero-mini">
+                <div class="left">
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                  <div class="b">slot 1 · curated lead</div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="thumb active"><div class="img"></div><div class="meta"><div class="num">1/3 ★</div><div class="h">Interview</div></div></div>
+                <div class="thumb"><div class="img alt-2"></div><div class="meta"><div class="num">2/3 auto</div><div class="h">Transfer</div></div></div>
+                <div class="thumb"><div class="img alt-3"></div><div class="meta"><div class="num">3/3 auto</div><div class="h">Event</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-label">Edge cases + cost</div>
+            <div class="matrix">
+              <div class="matrix-row"><div class="k">No lead picked</div><div class="v">Fall back to S.1 (3 most recent).</div></div>
+              <div class="matrix-row"><div class="k">Lead unpublished</div><div class="v">Treat as no lead → S.1 fallback. Studio shows a warning chip.</div></div>
+              <div class="matrix-row"><div class="k">Only 1 other published</div><div class="v">Carousel renders 2 thumbs; strip is <code>repeat(2, 1fr)</code>.</div></div>
+              <div class="matrix-row cost-add"><div class="k">Schema cost</div><div class="v"><strong>Small Sanity migration.</strong> Add singleton <code>leadArticle</code> ref. No data backfill needed.</div></div>
+              <div class="matrix-row"><div class="k">Editor cost</div><div class="v">~15s per change. One field, one document. Less ceremony than S.3.</div></div>
+              <div class="matrix-row"><div class="k">Risk</div><div class="v">Slots 2 + 3 still drift with publish order — editor cannot pin a "second story". For most weeks, that's fine.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> S.1 = zero effort, zero control. S.2 = light effort,
+        per-article control, fragile to flag-drift. S.3 = explicit ordered list in one place, costs
+        a Sanity migration. S.4 = "lead first, recency for the rest" — middle ground in effort and
+        control.
+      </p>
+      <p>
+        <strong>One subtle point.</strong> S.2 and S.3 are not mutually exclusive — we could keep
+        the <code>featured</code> boolean for NewsGrid prioritization (later round) while using a
+        ref array for the hero. The choice here is purely about the hero source.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> NewsGrid feed (later round). Featured event
+        placement (Round 3). Whether the carousel becomes "use client" (implementation detail).
+        Studio guidance copy (separate from data shape — handled by Sanity Studio editor-ux
+        rework, see <code>project_sanity_studio_ux_rework</code>).
+      </p>
+    </div>
+  </body>
+</html>

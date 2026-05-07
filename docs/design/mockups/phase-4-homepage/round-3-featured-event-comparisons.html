@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 3 · Featured event placement</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1320px;
+        margin: 0 auto 28px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin: 4px 0 6px;
+      }
+      .candidate header .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        max-width: 56ch;
+      }
+      .surface { background: var(--cream); padding: 0; }
+
+      /* ===== Schematic page ===== */
+      .pageshape {
+        display: flex;
+        flex-direction: column;
+      }
+      .band {
+        position: relative;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--ink);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .band:last-child { border-bottom: none; }
+      .band .label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .band .sub {
+        font-size: 11px;
+        opacity: 0.6;
+        margin-top: 3px;
+      }
+      .band.locked { background: var(--cream-deep); }
+      .band.locked .label::before { content: "★ LOCKED · "; opacity: 0.6; font-style: italic; }
+      .band.event-call { background: var(--jersey-deep); color: var(--cream); }
+      .band.event-call .sub { opacity: 0.85; }
+      .band.event-call .label { color: #f0c264; }
+
+      .band.hero {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 18px;
+      }
+      .band.hero .label { color: var(--cream); }
+      .band.hero .sub { opacity: 0.7; }
+      .band.hero .hero-mini {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 12px;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .band.hero .hero-mini .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 16px;
+        line-height: 1.2;
+        color: var(--cream);
+      }
+      .band.hero .hero-mini .h .accent { color: #f0c264; }
+      .band.hero .hero-mini .pill {
+        display: inline-block;
+        background: var(--cream);
+        color: var(--ink);
+        padding: 1px 5px;
+        font-size: 9px;
+        font-family: ui-monospace, monospace;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .band.hero .hero-mini .cover {
+        background: linear-gradient(135deg, #2a4d3a, #c1a04a);
+        aspect-ratio: 16 / 9;
+        outline: 1px solid var(--cream);
+      }
+      .band.hero .strip-mini {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(245, 239, 225, 0.25);
+        font-size: 9px;
+        opacity: 0.85;
+      }
+      .band.hero .strip-mini .t {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        opacity: 0.6;
+      }
+      .band.hero .strip-mini .t.a { opacity: 1; }
+      .band.hero .strip-mini .t .img {
+        width: 24px;
+        aspect-ratio: 16 / 9;
+        background: #547a5e;
+      }
+      .band.hero .strip-mini .t .img.alt-2 { background: #7a5454; }
+      .band.hero .strip-mini .t .img.alt-3 { background: #54627a; }
+      .band.hero .strip-mini .t.a .img { outline: 1px solid #f0c264; }
+
+      /* ===== NewsGrid schematic ===== */
+      .grid-mini {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .card-mini {
+        background: #fff;
+        border: 1px solid var(--ink);
+        padding: 6px 8px 8px;
+        position: relative;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .card-mini.event {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        border-color: var(--ink);
+        outline: 2px solid #f0c264;
+        outline-offset: -2px;
+      }
+      .card-mini .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #c1a04a);
+        margin-bottom: 6px;
+      }
+      .card-mini.event .img { background: linear-gradient(135deg, #1f5f3f, #f0c264); }
+      .card-mini .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 1px 4px;
+        margin-bottom: 3px;
+      }
+      .card-mini.event .pill { background: #f0c264; color: var(--ink); }
+      .card-mini .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 11px;
+        line-height: 1.2;
+      }
+      @media (max-width: 700px) {
+        .grid-mini { grid-template-columns: 1fr 1fr; }
+      }
+
+      /* ===== Featured-event standalone band ===== */
+      .event-band {
+        display: grid;
+        grid-template-columns: 35fr 65fr;
+        gap: 16px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .event-band .img {
+        background: linear-gradient(135deg, #1f5f3f, #f0c264);
+        aspect-ratio: 16 / 9;
+        outline: 2px solid #f0c264;
+      }
+      .event-band .meta { display: flex; flex-direction: column; gap: 6px; }
+      .event-band .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: #f0c264;
+        color: var(--ink);
+        padding: 2px 6px;
+        width: fit-content;
+      }
+      .event-band .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.18;
+      }
+      .event-band .when {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+      .event-band .cta {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #f0c264;
+        font-weight: bold;
+      }
+
+      /* ===== Footer / context callouts ===== */
+      .matrix {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        font-size: 11px;
+        line-height: 1.5;
+        padding: 14px 18px;
+        background: var(--cream-soft);
+      }
+      .matrix-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 12px;
+      }
+      .matrix-row .k {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.65;
+      }
+      .matrix-row code {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        background: rgba(26, 26, 26, 0.06);
+        padding: 1px 4px;
+      }
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 3 · Featured event placement</div>
+      <h1>Where does the next featured event live on the homepage?</h1>
+      <p>
+        Today the homepage fetches one event from <code>EventRepository.findNextFeatured()</code>
+        (next upcoming event with <code>featuredOnHome = true</code>) and tucks it inside
+        <code>&lt;NewsGrid&gt;</code> as a special card. Phase 4 redesigns that decision. Below: 4
+        placements, all using the same event fields (<code>title</code>, <code>dateStart</code>,
+        optional <code>dateEnd</code>, <code>coverImage</code>, optional <code>externalLink</code>).
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Hero shape = D.1 (carousel · strip-below thumbs).
+      Hero source = S.2 (article.featured boolean). The schematics below show the body of <code>/</code>
+      in compressed form so you can see the event's relative position.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ E.1 — Inline NewsGrid card ============ -->
+      <section class="candidate" id="E1">
+        <header>
+          <div class="key">E.1</div>
+          <div class="name">Inline NewsGrid card · today's behavior</div>
+          <div class="desc">
+            Featured event keeps its current spot inside <code>&lt;NewsGrid&gt;</code> — one slot
+            of the grid renders as a special "EVENEMENT" card with jersey-deep background +
+            jersey-yellow outline. Mixed editorial + event grid. Promoted to the lead grid slot.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="pageshape">
+            <div class="band locked"><div class="label">MatchStrip + SiteHeader</div></div>
+            <div class="band hero locked">
+              <div class="label">EditorialHero · D.1</div>
+              <div class="hero-mini">
+                <div>
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="t a"><div class="img"></div><span>1/3 NU</span></div>
+                <div class="t"><div class="img alt-2"></div><span>2/3</span></div>
+                <div class="t"><div class="img alt-3"></div><span>3/3</span></div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="label">NewsGrid · 6 articles + 1 event</div>
+              <div class="grid-mini">
+                <div class="card-mini event">
+                  <div class="img"></div>
+                  <div class="pill">Evenement · 10 mei</div>
+                  <div class="h">Quiz in de kantine, vrijdagavond.</div>
+                </div>
+                <div class="card-mini">
+                  <div class="img"></div>
+                  <div class="pill">Aankondiging</div>
+                  <div class="h">Inschrijvingen jeugd geopend.</div>
+                </div>
+                <div class="card-mini">
+                  <div class="img"></div>
+                  <div class="pill">Wedstrijd</div>
+                  <div class="h">U17 wint van VKT met 3-1.</div>
+                </div>
+                <div class="card-mini">
+                  <div class="img"></div>
+                  <div class="pill">Aankondiging</div>
+                  <div class="h">Trainingsschema mei online.</div>
+                </div>
+                <div class="card-mini">
+                  <div class="img"></div>
+                  <div class="pill">Aankondiging</div>
+                  <div class="h">Nieuwe truitjes binnenkort.</div>
+                </div>
+                <div class="card-mini">
+                  <div class="img"></div>
+                  <div class="pill">Wedstrijd</div>
+                  <div class="h">Reserves veroveren punt.</div>
+                </div>
+              </div>
+            </div>
+            <div class="band locked"><div class="label">… ScheduleStandings · Youth · Webshop · Sponsors · SiteFooter</div></div>
+          </div>
+          <div class="matrix">
+            <div class="matrix-row"><div class="k">Editor</div><div class="v">Per event: toggle <code>featuredOnHome = true</code>. One per week typical.</div></div>
+            <div class="matrix-row"><div class="k">No featured event</div><div class="v">NewsGrid renders 6 article cards (no event slot). Same as today.</div></div>
+            <div class="matrix-row"><div class="k">Tradeoff</div><div class="v">+ Familiar to editors · − Event quietly competes with article cards in the same grid; visual hierarchy depends on outline alone.</div></div>
+            <div class="matrix-row"><div class="k">Schema cost</div><div class="v"><strong>Zero.</strong> <code>featuredOnHome</code> already exists.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ E.2 — Standalone band BEFORE NewsGrid ============ -->
+      <section class="candidate" id="E2">
+        <header>
+          <div class="key">E.2</div>
+          <div class="name">Standalone band · between hero and NewsGrid</div>
+          <div class="desc">
+            Featured event becomes its own full-width section directly below the hero — a jersey-deep
+            band with a 2-column "image + title + when + CTA" composition. Distinct from news. Read
+            as a "what's coming up at the club this week" callout above the editorial body.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="pageshape">
+            <div class="band locked"><div class="label">MatchStrip + SiteHeader</div></div>
+            <div class="band hero locked">
+              <div class="label">EditorialHero · D.1</div>
+              <div class="hero-mini">
+                <div>
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="t a"><div class="img"></div><span>1/3 NU</span></div>
+                <div class="t"><div class="img alt-2"></div><span>2/3</span></div>
+                <div class="t"><div class="img alt-3"></div><span>3/3</span></div>
+              </div>
+            </div>
+            <div class="band event-call">
+              <div class="label">FeaturedEventBand · between hero and grid</div>
+              <div class="event-band">
+                <div class="img"></div>
+                <div class="meta">
+                  <span class="pill">Evenement · 10 mei</span>
+                  <div class="h">Quiz in de kantine, vrijdagavond 20:00.</div>
+                  <div class="when">Vr 10 mei · 20:00 · Kantine</div>
+                  <div class="cta">→ Reserveer je plaats</div>
+                </div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="label">NewsGrid · 6 articles, no event slot</div>
+              <div class="grid-mini">
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Inschrijvingen jeugd.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">U17 wint 3-1.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Trainingsschema mei.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Nieuwe truitjes.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">Reserves veroveren punt.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Transfer</div><div class="h">Wim G. tekent voor 2 seizoenen.</div></div>
+              </div>
+            </div>
+            <div class="band locked"><div class="label">… ScheduleStandings · Youth · Webshop · Sponsors · SiteFooter</div></div>
+          </div>
+          <div class="matrix">
+            <div class="matrix-row"><div class="k">Editor</div><div class="v">Per event: toggle <code>featuredOnHome = true</code>. One per week typical.</div></div>
+            <div class="matrix-row"><div class="k">No featured event</div><div class="v">Band hidden entirely; NewsGrid sits flush against hero.</div></div>
+            <div class="matrix-row"><div class="k">Tradeoff</div><div class="v">+ Strong visual hierarchy + clear call-to-action · − Adds a section the editor must remember to flag, or it stays empty.</div></div>
+            <div class="matrix-row"><div class="k">Schema cost</div><div class="v"><strong>Zero.</strong> <code>featuredOnHome</code> already exists; new <code>&lt;FeaturedEventBand&gt;</code> component.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ E.3 — Standalone band AFTER NewsGrid ============ -->
+      <section class="candidate" id="E3">
+        <header>
+          <div class="key">E.3</div>
+          <div class="name">Standalone band · after NewsGrid, before YouthBlock</div>
+          <div class="desc">
+            Same shape as E.2 but lower in the page. Sits between the editorial body (hero +
+            news) and the brand interlude (youth + shop). Reads as "after you've caught up on
+            news, here's what's next on the calendar." Less prominent than E.2.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="pageshape">
+            <div class="band locked"><div class="label">MatchStrip + SiteHeader</div></div>
+            <div class="band hero locked">
+              <div class="label">EditorialHero · D.1</div>
+              <div class="hero-mini">
+                <div>
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="t a"><div class="img"></div><span>1/3 NU</span></div>
+                <div class="t"><div class="img alt-2"></div><span>2/3</span></div>
+                <div class="t"><div class="img alt-3"></div><span>3/3</span></div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="label">NewsGrid · 6 articles, no event slot</div>
+              <div class="grid-mini">
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Inschrijvingen jeugd.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">U17 wint 3-1.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Trainingsschema mei.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Nieuwe truitjes.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">Reserves veroveren punt.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Transfer</div><div class="h">Wim G. tekent voor 2 seizoenen.</div></div>
+              </div>
+            </div>
+            <div class="band locked"><div class="label">… ScheduleStandingsBlock</div></div>
+            <div class="band event-call">
+              <div class="label">FeaturedEventBand · between schedule and youth</div>
+              <div class="event-band">
+                <div class="img"></div>
+                <div class="meta">
+                  <span class="pill">Evenement · 10 mei</span>
+                  <div class="h">Quiz in de kantine, vrijdagavond 20:00.</div>
+                  <div class="when">Vr 10 mei · 20:00 · Kantine</div>
+                  <div class="cta">→ Reserveer je plaats</div>
+                </div>
+              </div>
+            </div>
+            <div class="band locked"><div class="label">… YouthBlock · Webshop · Sponsors · SiteFooter</div></div>
+          </div>
+          <div class="matrix">
+            <div class="matrix-row"><div class="k">Editor</div><div class="v">Same as E.2.</div></div>
+            <div class="matrix-row"><div class="k">No featured event</div><div class="v">Band hidden; ScheduleStandings sits flush against YouthBlock.</div></div>
+            <div class="matrix-row"><div class="k">Tradeoff</div><div class="v">+ Doesn't compete with hero · − Lower-prominence; bigger risk of being missed by visitors who bounce after the news grid.</div></div>
+            <div class="matrix-row"><div class="k">Schema cost</div><div class="v">Same as E.2.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ E.4 — Retire from homepage ============ -->
+      <section class="candidate" id="E4">
+        <header>
+          <div class="key">E.4</div>
+          <div class="name">Retire featured event from homepage</div>
+          <div class="desc">
+            Events live only on <code>/evenementen</code>. Homepage gets a cleaner editorial
+            spine — no event slot in the grid, no event band. The kalender + events list page
+            handles event prominence; SiteHeader nav already exposes <code>/evenementen</code>.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="pageshape">
+            <div class="band locked"><div class="label">MatchStrip + SiteHeader</div></div>
+            <div class="band hero locked">
+              <div class="label">EditorialHero · D.1</div>
+              <div class="hero-mini">
+                <div>
+                  <span class="pill">Interview</span>
+                  <div class="h"><span class="accent">"Met deze ploeg…"</span></div>
+                </div>
+                <div class="cover"></div>
+              </div>
+              <div class="strip-mini">
+                <div class="t a"><div class="img"></div><span>1/3 NU</span></div>
+                <div class="t"><div class="img alt-2"></div><span>2/3</span></div>
+                <div class="t"><div class="img alt-3"></div><span>3/3</span></div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="label">NewsGrid · 6 articles only</div>
+              <div class="grid-mini">
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Inschrijvingen jeugd.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">U17 wint 3-1.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Trainingsschema mei.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Aank.</div><div class="h">Nieuwe truitjes.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Wedstrijd</div><div class="h">Reserves veroveren punt.</div></div>
+                <div class="card-mini"><div class="img"></div><div class="pill">Transfer</div><div class="h">Wim G. tekent voor 2 seizoenen.</div></div>
+              </div>
+            </div>
+            <div class="band locked"><div class="label">… ScheduleStandings · Youth · Webshop · Sponsors · SiteFooter</div></div>
+          </div>
+          <div class="matrix">
+            <div class="matrix-row"><div class="k">Editor</div><div class="v">No homepage event work. <code>featuredOnHome</code> field becomes legacy / unused (consider removing in cleanup).</div></div>
+            <div class="matrix-row"><div class="k">No featured event</div><div class="v">N/A — homepage doesn't surface events.</div></div>
+            <div class="matrix-row"><div class="k">Tradeoff</div><div class="v">+ Cleanest homepage spine · + Editor saves a per-event step · − Visitors who land on / and never click "Evenementen" miss the upcoming quiz.</div></div>
+            <div class="matrix-row"><div class="k">Schema cost</div><div class="v">Optional cleanup: remove <code>featuredOnHome</code> from event schema in Phase 9.</div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Background.</strong> The event field is <code>featuredOnHome</code>, not <code>featured</code>.
+        That keeps it distinct from <code>article.featured</code> (Round 2 lock). Same boolean pattern, two
+        different schemas — no field reuse, no ambiguity.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Event detail page redesign (Phase 6). Events list / kalender
+        page redesign (Phase 6). Event schema field additions (location, RSVP) — separate question.
+        <code>&lt;FeaturedEventBand&gt;</code> visual treatment beyond placement (its tape rotation,
+        whether it uses TapedFigure for the cover image, how the CTA renders) — locks in a sub-round
+        if E.2 or E.3 wins.
+      </p>
+    </div>
+  </body>
+</html>

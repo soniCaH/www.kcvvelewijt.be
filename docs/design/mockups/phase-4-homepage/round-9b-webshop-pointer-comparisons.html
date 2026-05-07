@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 9b · Webshop pointer (no specific products)</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 28px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .reframe-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: #fff8d6;
+        border: 1px solid #c89500;
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .reframe-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 14px 18px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; max-width: 56ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--cream);
+        padding: 36px 28px;
+      }
+
+      .meta-line {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 12px;
+      }
+      .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 14px;
+      }
+      .h .accent { color: var(--jersey-deep); }
+      .lead {
+        font-size: 15px;
+        line-height: 1.55;
+        max-width: 50ch;
+        margin: 0 0 16px;
+        opacity: 0.92;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        background: var(--ink);
+        color: var(--cream);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--jersey-deep);
+        text-decoration: none;
+      }
+      .cta .arrow { color: #f0c264; }
+      .cta-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        text-decoration: none;
+      }
+      .ext { font-size: 14px; }
+
+      /* P.1 — Single CTA card */
+      .p1 {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 32px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .p1 { grid-template-columns: 1fr; } }
+      .p1 .visual {
+        background: var(--jersey-deep);
+        aspect-ratio: 4/3;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        position: relative;
+        overflow: hidden;
+        transform: rotate(-0.5deg);
+      }
+      .p1 .visual .jersey-mock {
+        position: absolute;
+        inset: 18%;
+        background:
+          repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(0,0,0,0.18) 14px, rgba(0,0,0,0.18) 28px),
+          var(--jersey-deep-soft);
+        border: 2px solid var(--ink);
+        clip-path: polygon(20% 0%, 30% 0%, 35% 6%, 65% 6%, 70% 0%, 80% 0%, 100% 22%, 92% 38%, 80% 30%, 80% 100%, 20% 100%, 20% 30%, 8% 38%, 0% 22%);
+      }
+
+      /* P.2 — Two-column with category chips */
+      .p2 { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+      @media (max-width: 880px) { .p2 { grid-template-columns: 1fr; } }
+      .p2 .chips {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .chip {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--cream-soft);
+        padding: 10px 14px;
+        border-left: 3px solid var(--jersey-deep);
+        display: flex;
+        gap: 12px;
+        align-items: baseline;
+      }
+      .chip .name { font-weight: 700; }
+      .chip .desc-line {
+        font-family: ui-sans-serif, sans-serif;
+        font-style: italic;
+        font-size: 13px;
+        opacity: 0.85;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      /* P.3 — Wide jersey-tape banner */
+      .p3 {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 36px 28px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+      }
+      .p3 .tape-line {
+        position: absolute;
+        top: -12px;
+        left: 30px;
+        right: 30px;
+        height: 18px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-0.5deg);
+      }
+      .p3 .h { color: var(--cream); }
+      .p3 .h .accent { color: #f0c264; }
+      .p3 .lead { color: var(--cream); opacity: 0.92; }
+      .p3 .cta {
+        background: var(--cream);
+        color: var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+      }
+      .p3 .cta .arrow { color: var(--jersey-deep); }
+
+      /* P.4 — Inline ticket-stub */
+      .p4 {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 22px 28px;
+        background: var(--cream-soft);
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        flex-wrap: wrap;
+      }
+      .p4 .stub {
+        flex: 0 0 auto;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 12px 18px;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        position: relative;
+      }
+      .p4 .stub::before, .p4 .stub::after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: var(--cream-soft);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .p4 .stub::before { left: -7px; }
+      .p4 .stub::after { right: -7px; }
+      .p4 .text-block { flex: 1; min-width: 280px; }
+      .p4 .text-block .h { font-size: 22px; margin-bottom: 4px; }
+      .p4 .text-block .lead { font-size: 13px; margin-bottom: 0; }
+      .p4 .actions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 9b · Webshop pointer</div>
+      <h1>Webshop block — pointer to external supplier, not a product gallery</h1>
+      <p>
+        Round 9 was wrong premise. KCVV doesn't sell merch directly — the section is a
+        click-through to an external supplier (training gear + limited personalized "club
+        packages"). Audience is primarily youth and parents who need training kit. No specific
+        products to advertise — just the pointer + context.
+      </p>
+    </header>
+
+    <div class="reframe-banner">
+      <strong>What's actually true (owner clarification 2026-05-07).</strong>
+      No in-site store. Always external link. Use case = youth/parents picking general training
+      gear from the supplier + limited personalized "club packages" (bundled new-player kit).
+      Section needs to: tell visitors the supplier exists, frame the use case, single CTA
+      click-through. Specific product thumbnails are misleading (no stock guarantee, no per-item
+      curation effort).
+    </div>
+
+    <div class="container">
+
+      <!-- P.1 — Single CTA card with one visual -->
+      <section class="candidate" id="P1">
+        <header>
+          <div>
+            <div class="key">P.1</div>
+            <div class="name">Single CTA card · one visual + headline + CTA</div>
+            <div class="desc">
+              Two-column: visual on the left (a single tape-rotated jersey illustration), text +
+              CTA on the right. Honest single-purpose card. Reuses <code>&lt;JerseyShirt&gt;</code>
+              at right scale (small thumbnail-sized). One click-through. Cleanest.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Single click-through, no clutter<br />
+            + No product stock to maintain<br />
+            − Doesn't differentiate "training gear" vs "club packages"<br />
+            − Single visual carries less variety
+          </div>
+        </header>
+        <div class="surface">
+          <div class="p1">
+            <div class="visual"><div class="jersey-mock"></div></div>
+            <div>
+              <div class="meta-line">Webshop · supplier link</div>
+              <h2 class="h"><span class="accent">Trainingsgear</span><br />en clubpakketten.</h2>
+              <p class="lead">Onze partner levert alle trainingsuitrusting en gepersonaliseerde clubpakketten voor jeugd- en seniorenspelers. Snelle levering op de club.</p>
+              <a class="cta">Naar de webshop <span class="arrow ext">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- P.2 — Two-column with category chips -->
+      <section class="candidate" id="P2">
+        <header>
+          <div>
+            <div class="key">P.2</div>
+            <div class="name">Two-column · headline + category chips</div>
+            <div class="desc">
+              Headline + lead on the left. Right: 3 category chips ("Trainingskledij" /
+              "Clubpakketten jeugd" / "Personalisatie") that explain what's available without
+              listing specific products. Single CTA below. Honest about category breadth.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Differentiates use cases without faking products<br />
+            + Lower stock-management cognitive load<br />
+            − Three rows of text feels busier than P.1<br />
+            − Chips might read as actionable when they're descriptive
+          </div>
+        </header>
+        <div class="surface">
+          <div class="p2">
+            <div>
+              <div class="meta-line">Webshop · supplier link</div>
+              <h2 class="h"><span class="accent">Trainingsgear</span><br />op maat van de club.</h2>
+              <p class="lead">Onze partner verzorgt de uitrusting voor onze jeugd- en seniorenspelers. Bestellingen verlopen via hun externe webshop.</p>
+              <a class="cta">Naar de webshop <span class="arrow ext">↗</span></a>
+            </div>
+            <div class="chips">
+              <div class="chip"><span class="name">Trainingskledij</span><span class="desc-line">algemeen aanbod van de leverancier</span></div>
+              <div class="chip"><span class="name">Clubpakketten jeugd</span><span class="desc-line">gebundelde startuitrusting</span></div>
+              <div class="chip"><span class="name">Personalisatie</span><span class="desc-line">naam + nummer op aanvraag</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- P.3 — Wide jersey-tape banner -->
+      <section class="candidate" id="P3">
+        <header>
+          <div>
+            <div class="key">P.3</div>
+            <div class="name">Wide jersey-tape banner</div>
+            <div class="desc">
+              Full-width jersey-deep band, single line of huge editorial copy + CTA. Reads as a
+              poster strip — a moment of brand emphasis between Webshop and Sponsors. Most
+              minimal information density; strongest typographic moment.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Strongest typographic moment<br />
+            + Simplest to maintain<br />
+            − Visual register competes with FeaturedEventBand (also jersey-deep)<br />
+            − Less informative
+          </div>
+        </header>
+        <div class="surface" style="padding: 24px;">
+          <div class="p3">
+            <div class="tape-line"></div>
+            <div class="meta-line" style="color: var(--cream); opacity: 0.8;">Webshop · onze partner</div>
+            <h2 class="h"><span class="accent">Trainingsgear</span> bestel je rechtstreeks bij onze partner.</h2>
+            <p class="lead">Trainingskledij, clubpakketten en personalisatie voor onze jeugd- en seniorenspelers.</p>
+            <a class="cta">Naar de webshop <span class="arrow ext">↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- P.4 — Inline ticket-stub -->
+      <section class="candidate" id="P4">
+        <header>
+          <div>
+            <div class="key">P.4</div>
+            <div class="name">Inline ticket-stub · narrow horizontal band</div>
+            <div class="desc">
+              Compact one-row banner with a TicketStub-style chip on the left ("WEBSHOP") + headline +
+              two CTAs (primary "Naar de webshop", secondary "Clubpakketten →"). Smallest
+              vertical footprint. Two click-through actions for the two main use cases.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Compact (saves homepage vertical space)<br />
+            + Two CTAs split the use cases (general / packages)<br />
+            − Less editorial weight<br />
+            − Two CTAs introduce decision noise
+          </div>
+        </header>
+        <div class="surface" style="padding: 24px;">
+          <div class="p4">
+            <span class="stub">WEBSHOP</span>
+            <div class="text-block">
+              <div class="h"><span class="accent">Trainingsgear</span> via onze partner.</div>
+              <div class="lead">Algemene uitrusting + clubpakketten + personalisatie.</div>
+            </div>
+            <div class="actions">
+              <a class="cta-secondary">Clubpakketten →</a>
+              <a class="cta">Naar de webshop <span class="arrow ext">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Section name change.</strong> "WebshopStrip" implied product strip — likely
+        renames to <code>&lt;WebshopPointer&gt;</code> or <code>&lt;WebshopBanner&gt;</code>
+        depending on which variant wins. The Phase 4 issue AC list will be updated accordingly.
+      </p>
+      <p>
+        <strong>External link target.</strong> All variants point to a single external URL
+        configured in <code>EXTERNAL_LINKS.webshop</code>. P.4's secondary "Clubpakketten" CTA
+        could deep-link to a clubpakketten landing page on the supplier site if one exists —
+        otherwise it points to the same root URL as the primary CTA.
+      </p>
+      <p>
+        <strong>Out of scope.</strong> Whether the supplier offers a deep-linkable
+        "/jeugd-pakket" URL (verifiable later — not a Phase 4 design concern). Whether KCVV
+        adopts an inhouse store later (definitely not Phase 4).
+      </p>
+    </div>
+  </body>
+</html>

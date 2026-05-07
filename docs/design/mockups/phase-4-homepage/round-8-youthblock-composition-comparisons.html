@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 8 · YouthBlock composition</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 30px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 13px; line-height: 1.55; opacity: 0.85; max-width: 56ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+      }
+
+      /* Jersey shirt SVG-like illustration */
+      .jersey {
+        position: relative;
+        width: 220px;
+        height: 280px;
+        background:
+          /* sleeves */
+          linear-gradient(135deg, transparent 35%, var(--ink) 35%, var(--ink) 38%, transparent 38%) no-repeat,
+          /* stripes */
+          repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 28px,
+            rgba(0, 0, 0, 0.18) 28px,
+            rgba(0, 0, 0, 0.18) 56px
+          ),
+          var(--jersey-deep-soft);
+        border: 2px solid var(--ink);
+        border-radius: 12% 12% 8% 8% / 8% 8% 6% 6%;
+        clip-path: polygon(
+          25% 0%, 35% 0%, 40% 6%, 60% 6%, 65% 0%, 75% 0%,
+          100% 22%, 95% 38%, 80% 30%,
+          80% 100%, 20% 100%, 20% 30%, 5% 38%, 0% 22%
+        );
+      }
+      .jersey-number {
+        position: absolute;
+        bottom: 36%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 88px;
+        color: var(--ink);
+        text-shadow: 2px 2px 0 var(--cream);
+        line-height: 1;
+      }
+
+      .text {
+        color: var(--cream);
+      }
+      .text .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 14px;
+      }
+      .text .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 48px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 16px;
+      }
+      .text .h .accent { color: #f0c264; }
+      .text .lead {
+        font-size: 16px;
+        line-height: 1.55;
+        opacity: 0.92;
+        max-width: 50ch;
+        margin: 0 0 18px;
+      }
+      .text .stat {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-right: 18px;
+      }
+      .text .stat strong {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 28px;
+        color: #f0c264;
+        font-weight: 900;
+      }
+      .text .divisions {
+        margin-top: 18px;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+      .text .divisions span {
+        margin-right: 14px;
+      }
+      .text .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 22px;
+        padding: 10px 18px;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 #000;
+      }
+
+      /* L.1 — Image left, text right */
+      .l1 {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 36px;
+        padding: 48px 36px;
+        align-items: center;
+      }
+      .l1 .image-col { display: flex; justify-content: center; }
+      @media (max-width: 880px) { .l1 { grid-template-columns: 1fr; } }
+
+      /* L.2 — Image right, text left */
+      .l2 {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 36px;
+        padding: 48px 36px;
+        align-items: center;
+      }
+      .l2 .image-col { display: flex; justify-content: center; }
+      @media (max-width: 880px) { .l2 { grid-template-columns: 1fr; } .l2 .image-col { order: -1; } }
+
+      /* L.3 — Centered image + text below */
+      .l3 {
+        padding: 48px 36px;
+        text-align: center;
+      }
+      .l3 .image-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 26px;
+      }
+      .l3 .text { display: inline-block; max-width: 720px; }
+      .l3 .text .lead { margin-left: auto; margin-right: auto; }
+
+      /* L.4 — Decorative background JerseyShirt (large, behind) + text foreground */
+      .l4 {
+        position: relative;
+        padding: 60px 36px;
+      }
+      .l4 .image-col {
+        position: absolute;
+        top: -60px;
+        right: -50px;
+        opacity: 0.16;
+      }
+      .l4 .image-col .jersey {
+        width: 400px;
+        height: 460px;
+      }
+      .l4 .image-col .jersey-number { font-size: 160px; opacity: 0.9; }
+      .l4 .text {
+        position: relative;
+        max-width: 640px;
+      }
+      .l4 .text .h { font-size: 56px; }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 8 · YouthBlock composition</div>
+      <h1>How is the youth interlude composed?</h1>
+      <p>
+        Full-bleed jersey-deep band between WebshopStrip… wait — between ScheduleStandings and
+        WebshopStrip per Spine A. Reuses <code>&lt;JerseyShirt&gt;</code> primitive (Phase 3
+        deliverable). Hardcoded copy. This round picks the layout — image position vs text.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked.</strong> Section is full-bleed (no max-width). Background = jersey-deep.
+      Text colour = cream. Accent colour = #f0c264 (warm yellow). Stats (220+ spelers · 16 ploegen)
+      are hardcoded today — verifying current accuracy is a Sanity-rework concern (not Phase 4 scope).
+      Divisions (Bovenbouw / Middenbouw / Onderbouw per <code>project_youth_divisions</code>)
+      may surface explicitly. Reuses <code>&lt;JerseyShirt&gt;</code> from Phase 3.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ L.1 — Image left, text right ============ -->
+      <section class="candidate" id="L1">
+        <header>
+          <div>
+            <div class="key">L.1</div>
+            <div class="name">Image left · text right</div>
+            <div class="desc">
+              JerseyShirt fills the left column (1fr); text fills the right column (1.4fr). Mobile
+              stacks image-above-text. Image carries the visual weight on its own, balanced by
+              the text density on the right.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Conventional reading order<br />
+            + Image is supportive, not dominant<br />
+            − Mobile = jersey on top + tall text below<br />
+            − Right-column text wraps tighter
+          </div>
+        </header>
+        <div class="surface">
+          <div class="l1">
+            <div class="image-col">
+              <div class="jersey"><div class="jersey-number">9</div></div>
+            </div>
+            <div class="text">
+              <div class="meta">Word jeugdspeler</div>
+              <h2 class="h"><span class="accent">De toekomst</span><br />van Elewijt.</h2>
+              <p class="lead">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <div class="stat"><strong>220+</strong>spelers</div>
+              <div class="stat"><strong>16</strong>ploegen</div>
+              <div class="divisions"><span>· Bovenbouw</span><span>· Middenbouw</span><span>· Onderbouw</span></div>
+              <a class="cta">Schrijf je in →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.2 — Image right, text left ============ -->
+      <section class="candidate" id="L2">
+        <header>
+          <div>
+            <div class="key">L.2</div>
+            <div class="name">Image right · text left</div>
+            <div class="desc">
+              Mirror of L.1. Text on the left (1.4fr), JerseyShirt on the right (1fr). Reading
+              order = text-first. Mobile flips: jersey above text. Image still supportive but
+              acts as a "where to next" visual anchor at the right.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Text gets reading priority<br />
+            + Image acts as visual pull to right<br />
+            − Mobile order needs explicit reversal<br />
+            − Right-aligned image less anchored
+          </div>
+        </header>
+        <div class="surface">
+          <div class="l2">
+            <div class="text">
+              <div class="meta">Word jeugdspeler</div>
+              <h2 class="h"><span class="accent">De toekomst</span><br />van Elewijt.</h2>
+              <p class="lead">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <div class="stat"><strong>220+</strong>spelers</div>
+              <div class="stat"><strong>16</strong>ploegen</div>
+              <div class="divisions"><span>· Bovenbouw</span><span>· Middenbouw</span><span>· Onderbouw</span></div>
+              <a class="cta">Schrijf je in →</a>
+            </div>
+            <div class="image-col">
+              <div class="jersey"><div class="jersey-number">9</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.3 — Centered image + text below ============ -->
+      <section class="candidate" id="L3">
+        <header>
+          <div>
+            <div class="key">L.3</div>
+            <div class="name">Centered image · text below</div>
+            <div class="desc">
+              JerseyShirt centered at the top, text centered below. Symmetric vertical. Reads as
+              a "shrine" composition — the jersey is the icon, the text is the explanation.
+              Mobile and desktop look identical.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Same composition mobile and desktop<br />
+            + Image = icon, strongest emphasis<br />
+            − Symmetrical = quieter, less editorial<br />
+            − Text-block reads centered (harder to scan than left-aligned)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="l3">
+            <div class="image-wrap">
+              <div class="jersey"><div class="jersey-number">9</div></div>
+            </div>
+            <div class="text">
+              <div class="meta">Word jeugdspeler</div>
+              <h2 class="h"><span class="accent">De toekomst</span> van Elewijt.</h2>
+              <p class="lead">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel.</p>
+              <div class="stat"><strong>220+</strong>spelers</div>
+              <div class="stat"><strong>16</strong>ploegen</div>
+              <div style="margin-top: 22px;"><a class="cta">Schrijf je in →</a></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.4 — Decorative bg + text foreground ============ -->
+      <section class="candidate" id="L4">
+        <header>
+          <div>
+            <div class="key">L.4</div>
+            <div class="name">Background JerseyShirt · text foreground</div>
+            <div class="desc">
+              JerseyShirt huge, behind the text (top-right offset, low opacity). Text fills the
+              foreground at editorial scale. Most "poster" feel — image is decorative
+              atmosphere, headline is the message.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Most editorial weight on the headline<br />
+            + Image becomes pattern, not subject<br />
+            − Image is barely-there; weakens jersey-illustration vocabulary<br />
+            − Mobile must reposition or hide image
+          </div>
+        </header>
+        <div class="surface">
+          <div class="l4">
+            <div class="image-col">
+              <div class="jersey"><div class="jersey-number">9</div></div>
+            </div>
+            <div class="text">
+              <div class="meta">Word jeugdspeler</div>
+              <h2 class="h"><span class="accent">De toekomst</span><br />van Elewijt.</h2>
+              <p class="lead">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <div class="stat"><strong>220+</strong>spelers</div>
+              <div class="stat"><strong>16</strong>ploegen</div>
+              <a class="cta">Schrijf je in →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Note on the JerseyShirt placeholder.</strong> The shirt above is a CSS sketch with
+        a number "9" — production renders the real <code>&lt;JerseyShirt&gt;</code> primitive
+        from Phase 3. Per <code>project_jersey_illustration_vocabulary</code>: jersey-deep
+        underprint + ink overprint + ink stripes; no Celtic green / no sponsors / no
+        photo-realism. The number choice (canonical jersey number? randomized? rotating per
+        page-load?) is a Phase-3-primitive decision, not a Phase 4 one — defaults from the
+        primitive carry through here.
+      </p>
+      <p>
+        <strong>Out of scope.</strong> Whether stats ("220+ spelers · 16 ploegen") come from
+        Sanity or stay hardcoded (likely hardcoded for Phase 4; Studio rework concern). CTA
+        copy ("Schrijf je in" vs "Word jeugdspeler" vs "Ontdek de jeugdwerking") — separate
+        sub-round if the answer here doesn't already pin it. Background pattern / texture
+        beyond solid jersey-deep — separate question.
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 5e · NewsCard hover behaviour</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-up: 8px 8px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 30px; margin: 6px 0 10px; letter-spacing: -0.02em; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; }
+      .surface {
+        background: var(--cream-soft);
+        padding: 28px 20px;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        min-height: 260px;
+      }
+      .demo-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+        padding: 6px 6px 8px;
+        width: 200px;
+        transform: rotate(-0.25deg);
+        transition: all 300ms ease;
+      }
+      .demo-card .tape {
+        position: absolute;
+        top: -6px;
+        left: 14px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .demo-card .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #4d2a2a 0%, #c19a4a 100%);
+      }
+      .demo-card .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 1px 5px;
+        margin: 6px 0 2px;
+      }
+      .demo-card .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.18;
+      }
+      .demo-card .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-top: 4px;
+      }
+
+      /* H.1 — Press-down (canonical per feedback_canonical_press_down_hover) */
+      .h1-rest { /* default */ }
+      .h1-hover {
+        transform: rotate(-0.25deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+
+      /* H.2 — Press-up (matches EditorialHero) */
+      .h2-rest { /* default */ }
+      .h2-hover {
+        transform: rotate(-0.25deg) translate(-2px, -2px);
+        box-shadow: var(--shadow-up);
+      }
+
+      /* H.3 — None / static */
+      .h3-rest { /* default */ }
+      .h3-hover {
+        outline: 2px solid var(--jersey-deep);
+        outline-offset: 2px;
+      }
+
+      .demo-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+      }
+      .demo-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .annotate {
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: var(--cream-deep);
+        font-size: 11px;
+        line-height: 1.5;
+        font-family: ui-monospace, monospace;
+      }
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 5e · NewsCard hover</div>
+      <h1>How does a NewsCard respond to hover/focus?</h1>
+      <p>
+        Each candidate shows two states side-by-side: <strong>rest</strong> (left) and
+        <strong>hovered</strong> (right). Memory <code>feedback_canonical_press_down_hover</code>
+        locks "every paper-stamped interactive primitive uses press-down hover," but
+        EditorialHero placement="homepage" uses press-UP. NewsCard picks one — and the rule
+        carries to every NewsCard usage site (homepage, related-content, search results).
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Geometry D · 50/50 · 5 cards · all 16:9 · slot
+      index rotation cycle. Hover behaviour drills here.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ H.1 — Press-down (canonical) ============ -->
+      <section class="candidate" id="H1">
+        <header>
+          <div class="key">H.1</div>
+          <div class="name">Press-down (canonical)</div>
+          <div class="desc">
+            Card translates +4px/+4px (down-right), shadow becomes 0 (collapses). Card looks
+            "pressed into the page". Matches every other paper-stamped primitive in the system
+            (TapedCard, MonoLabel button, etc.) per memory.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="demo-row">
+            <div class="demo-label">Rest</div>
+            <div class="demo-card h1-rest">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-label">Hover / focus</div>
+            <div class="demo-card h1-hover">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotate">
+          <strong>transform:</strong> +4px x · +4px y<br />
+          <strong>box-shadow:</strong> 4px 4px 0 → none<br />
+          <strong>matches:</strong> TapedCard · MonoLabel · button · feedback_canonical_press_down_hover
+        </div>
+      </section>
+
+      <!-- ============ H.2 — Press-up (matches EditorialHero) ============ -->
+      <section class="candidate" id="H2">
+        <header>
+          <div class="key">H.2</div>
+          <div class="name">Press-up (matches EditorialHero)</div>
+          <div class="desc">
+            Card translates -2px/-2px (up-left), shadow grows to 8px. Card lifts off the page.
+            Matches the hero's hover behaviour for visual consistency at the homepage scroll.
+            Departs from the canonical press-down rule.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="demo-row">
+            <div class="demo-label">Rest</div>
+            <div class="demo-card h2-rest">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-label">Hover / focus</div>
+            <div class="demo-card h2-hover">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotate">
+          <strong>transform:</strong> -2px x · -2px y<br />
+          <strong>box-shadow:</strong> 4px 4px 0 → 8px 8px 0<br />
+          <strong>matches:</strong> EditorialHero placement="homepage"<br />
+          <strong>conflicts:</strong> feedback_canonical_press_down_hover
+        </div>
+      </section>
+
+      <!-- ============ H.3 — None / outline ============ -->
+      <section class="candidate" id="H3">
+        <header>
+          <div class="key">H.3</div>
+          <div class="name">No transform · jersey-deep outline only</div>
+          <div class="desc">
+            No card movement. Hover/focus adds a 2px jersey-deep outline (inset 2px). Cleanest,
+            no motion at all. Best for accessibility (no implied "depth"). Loses the tactile
+            paper feedback the rest of the system communicates.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="demo-row">
+            <div class="demo-label">Rest</div>
+            <div class="demo-card h3-rest">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-label">Hover / focus</div>
+            <div class="demo-card h3-hover">
+              <div class="tape"></div>
+              <div class="img"></div>
+              <div class="pill">Transfer</div>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotate">
+          <strong>transform:</strong> none<br />
+          <strong>outline:</strong> 0 → 2px solid jersey-deep, offset 2px<br />
+          <strong>matches:</strong> nothing in current system (new pattern)
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> H.1 = canonical, matches everything except the hero.
+        H.2 = matches the hero specifically — visually consistent at the homepage scroll but
+        breaks the system-wide rule. H.3 = removes motion entirely; trades tactile feedback for
+        accessibility safety.
+      </p>
+      <p>
+        <strong>Why does the hero use press-up?</strong> The hero is the largest visual element on
+        the homepage and its press-up "lifts toward the reader" reads as inviting at scale.
+        Smaller cards pressing up at the same scale create more visual noise (5 cards lifting
+        simultaneously vs. 1 large hero). Press-down on cards keeps the page "flat" while the
+        hero is the only element with depth.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Reduced-motion fallback (always shown — applies
+        to whichever wins). Focus-visible ring spec (separate from hover transform). NewsCard
+        click target / hit-area (the entire card is a Link in every variant).
+      </p>
+    </div>
+  </body>
+</html>

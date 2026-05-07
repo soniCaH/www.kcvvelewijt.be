@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 7 · SponsorsBlock layout</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 32px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 13px; line-height: 1.55; opacity: 0.85; max-width: 56ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--cream-deep);
+        padding: 32px 24px 36px;
+      }
+
+      .section-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .section-sub {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-align: center;
+        opacity: 0.65;
+        margin-top: -14px;
+        margin-bottom: 22px;
+      }
+      .tier-label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      /* Logo card */
+      .logo {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        text-align: center;
+        line-height: 1.2;
+        filter: grayscale(100%);
+        transition: filter 200ms ease;
+        position: relative;
+      }
+      .logo:hover { filter: grayscale(0%); }
+      .logo.main { font-size: 18px; padding: 22px 16px; min-height: 90px; }
+      .logo.second { font-size: 13px; padding: 14px 10px; min-height: 64px; }
+      .logo.tape::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: 14px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .logo.color-1 { color: #c00; background: #fff; }
+      .logo.color-2 { color: #006bb3; background: #fff; }
+      .logo.color-3 { color: #2d6e2d; background: #fff; }
+      .logo.color-4 { color: #7a3d00; background: #fff; }
+      .logo.color-5 { color: #6a4400; background: #fff; }
+      .logo.color-6 { color: #b30086; background: #fff; }
+      .logo.color-7 { color: #006666; background: #fff; }
+      .logo.color-8 { color: #cc6600; background: #fff; }
+
+      .rot-a { transform: rotate(-0.5deg); }
+      .rot-b { transform: rotate(-0.25deg); }
+      .rot-c { transform: rotate(0.25deg); }
+      .rot-d { transform: rotate(0.5deg); }
+      .rot-none { transform: none; }
+
+      /* L.1 — Tiered grid */
+      .l1-main {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+      .l1-second {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+      }
+      @media (max-width: 880px) {
+        .l1-main { grid-template-columns: 1fr 1fr; }
+        .l1-second { grid-template-columns: repeat(3, 1fr); }
+      }
+      @media (max-width: 600px) {
+        .l1-main { grid-template-columns: 1fr; }
+        .l1-second { grid-template-columns: 1fr 1fr; }
+      }
+
+      /* L.2 — Single equal grid */
+      .l2-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+      }
+      @media (max-width: 880px) {
+        .l2-grid { grid-template-columns: repeat(3, 1fr); }
+      }
+      @media (max-width: 600px) {
+        .l2-grid { grid-template-columns: 1fr 1fr; }
+      }
+
+      /* L.3 — Classifieds (irregular) */
+      .l3-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        grid-auto-rows: minmax(80px, auto);
+        gap: 12px;
+      }
+      .l3-grid .logo.main {
+        grid-column: span 4;
+        grid-row: span 1;
+      }
+      .l3-grid .logo.main.lead {
+        grid-column: span 4;
+        grid-row: span 2;
+        font-size: 24px;
+      }
+      .l3-grid .logo.second { grid-column: span 2; }
+      @media (max-width: 880px) {
+        .l3-grid { grid-template-columns: repeat(4, 1fr); }
+        .l3-grid .logo.main { grid-column: span 4; grid-row: auto; }
+        .l3-grid .logo.main.lead { grid-column: span 4; grid-row: auto; }
+        .l3-grid .logo.second { grid-column: span 2; }
+      }
+
+      /* L.4 — Horizontal scroll */
+      .l4-track {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 14px;
+      }
+      .l4-track .logo {
+        flex: 0 0 200px;
+        scroll-snap-align: start;
+      }
+      .l4-track .logo.main { flex: 0 0 240px; }
+      .scroll-hint {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        opacity: 0.6;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-align: center;
+        margin-top: 12px;
+      }
+      .all-sponsors-link {
+        margin-top: 24px;
+        padding-top: 14px;
+        border-top: 1px dashed rgba(26, 26, 26, 0.35);
+        text-align: center;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .all-sponsors-link a {
+        color: var(--jersey-deep);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        font-weight: 700;
+      }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 7 · SponsorsBlock</div>
+      <h1>How are sponsors arranged on the homepage?</h1>
+      <p>
+        SponsorsBlock receives all sponsors with <code>tier === "hoofdsponsor"</code> or
+        <code>tier === "sponsor"</code> (sympathisanten excluded per
+        <code>reference_sponsor_tiers</code>). Realistic data: 1–3 hoofdsponsors and 8–15 sponsors.
+        Logos are greyscale by default and reveal full colour on hover (CSS <code>filter:
+        grayscale(100%)</code> + transition). This round picks the layout.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Section sits last in the body before
+      SiteFooter (Spine A · BS.1 keeps bannerSlotC just before sponsors). Greyscale-default
+      colour-on-hover is the locked logo treatment. This round picks the grid.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ L.1 — Tiered grid ============ -->
+      <section class="candidate" id="L1">
+        <header>
+          <div>
+            <div class="key">L.1</div>
+            <div class="name">Tiered grid · main row + second row</div>
+            <div class="desc">
+              Hoofdsponsors in a top row of 3 (larger logos). Below them, sponsors in a row of
+              5 (smaller logos). Hierarchy is explicit. Most conventional sponsor-page pattern.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Tier hierarchy crystal clear<br />
+            + Easy editor mental model<br />
+            − Two distinct logo sizes per row<br />
+            − Top row breaks if &lt; 3 hoofdsponsors
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">Met dank aan onze sponsors</div>
+          <div class="tier-label">Hoofdsponsors</div>
+          <div class="l1-main">
+            <div class="logo main color-1 rot-a">Crossing Auto</div>
+            <div class="logo main color-2 rot-b">KBC Verzekeringen</div>
+            <div class="logo main color-3 rot-c">Bouw Janssens</div>
+          </div>
+          <div class="tier-label">Sponsors</div>
+          <div class="l1-second">
+            <div class="logo second color-4 rot-d">De Bonte Slager</div>
+            <div class="logo second color-5 rot-a">Hapje &amp; Tapje</div>
+            <div class="logo second color-6 rot-b">Fitness Plus</div>
+            <div class="logo second color-7 rot-c">AC Audio</div>
+            <div class="logo second color-8 rot-d">Wouters Schilder</div>
+            <div class="logo second color-1 rot-a">Steenhouwerij Dupont</div>
+            <div class="logo second color-2 rot-b">Verbiest Auto</div>
+            <div class="logo second color-3 rot-c">Tandarts Heyligen</div>
+            <div class="logo second color-4 rot-d">Praktijk Berk</div>
+            <div class="logo second color-5 rot-a">De Sportshop</div>
+          </div>
+          <div class="all-sponsors-link">
+            <a href="/sponsors">Alle sponsors &amp; sympathisanten →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.2 — Single equal grid ============ -->
+      <section class="candidate" id="L2">
+        <header>
+          <div>
+            <div class="key">L.2</div>
+            <div class="name">Single equal grid · all sponsors equal size</div>
+            <div class="desc">
+              No size hierarchy. All hoofdsponsors and sponsors render at the same logo size in a
+              single 5-column grid. Order: hoofdsponsors first, then sponsors. Cleanest grid;
+              loses the tier-emphasis cue.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Cleanest grid, single sizing rule<br />
+            + Most paper-newspaper register<br />
+            − Tier hierarchy invisible<br />
+            − Hoofdsponsors lose emphasis they paid for
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">Met dank aan onze sponsors</div>
+          <div class="l2-grid">
+            <div class="logo main color-1 rot-a" style="font-size: 14px; padding: 14px 10px; min-height: 64px;">Crossing Auto</div>
+            <div class="logo main color-2 rot-b" style="font-size: 14px; padding: 14px 10px; min-height: 64px;">KBC Verzekeringen</div>
+            <div class="logo main color-3 rot-c" style="font-size: 14px; padding: 14px 10px; min-height: 64px;">Bouw Janssens</div>
+            <div class="logo second color-4 rot-d">De Bonte</div>
+            <div class="logo second color-5 rot-a">Hapje &amp; Tapje</div>
+            <div class="logo second color-6 rot-b">Fitness Plus</div>
+            <div class="logo second color-7 rot-c">AC Audio</div>
+            <div class="logo second color-8 rot-d">Wouters Schilder</div>
+            <div class="logo second color-1 rot-a">Dupont</div>
+            <div class="logo second color-2 rot-b">Verbiest Auto</div>
+            <div class="logo second color-3 rot-c">Heyligen</div>
+            <div class="logo second color-4 rot-d">Praktijk Berk</div>
+            <div class="logo second color-5 rot-a">De Sportshop</div>
+          </div>
+          <div class="all-sponsors-link">
+            <a href="/sponsors">Alle sponsors &amp; sympathisanten →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.3 — Classifieds-style ============ -->
+      <section class="candidate" id="L3">
+        <header>
+          <div>
+            <div class="key">L.3</div>
+            <div class="name">Classifieds · irregular newspaper grid</div>
+            <div class="desc">
+              12-column woven grid. One large hoofdsponsor (4 × 2 cells) anchors. Remaining
+              hoofdsponsors take 4 × 1 cells. Sponsors fill 2-cell slots. Most fanzine /
+              classifieds-page feel. Slot sizes hand-tuned per tier.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Most magazine-feeling register<br />
+            + Tier hierarchy via slot size, not row<br />
+            − Slot-tuned for specific N values<br />
+            − Lead hoofdsponsor gets disproportionate emphasis
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">Met dank aan onze sponsors</div>
+          <div class="l3-grid">
+            <div class="logo main lead color-1 rot-a">Crossing Auto</div>
+            <div class="logo main color-2 rot-b">KBC Verzekeringen</div>
+            <div class="logo main color-3 rot-c">Bouw Janssens</div>
+            <div class="logo second color-4 rot-d">De Bonte</div>
+            <div class="logo second color-5 rot-a">Hapje &amp; Tapje</div>
+            <div class="logo second color-6 rot-b">Fitness Plus</div>
+            <div class="logo second color-7 rot-c">AC Audio</div>
+            <div class="logo second color-8 rot-d">Wouters Schilder</div>
+            <div class="logo second color-1 rot-a">Dupont</div>
+            <div class="logo second color-2 rot-b">Verbiest Auto</div>
+            <div class="logo second color-3 rot-c">Heyligen</div>
+            <div class="logo second color-4 rot-d">Berk</div>
+            <div class="logo second color-5 rot-a">Sportshop</div>
+          </div>
+          <div class="all-sponsors-link">
+            <a href="/sponsors">Alle sponsors &amp; sympathisanten →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.4 — Horizontal scroll ============ -->
+      <section class="candidate" id="L4">
+        <header>
+          <div>
+            <div class="key">L.4</div>
+            <div class="name">Horizontal scroll-track · sponsor reel</div>
+            <div class="desc">
+              Single-row horizontal scroll. Hoofdsponsors first (slightly larger), sponsors after.
+              Compact vertical footprint. Reads like a sponsor-banner reel that you scroll
+              through. Mobile-friendly by default.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Compact vertical (1 row)<br />
+            + Mobile-native (already scrolls)<br />
+            − Hides ~half the sponsors below the fold<br />
+            − No grid presence on the page
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">Met dank aan onze sponsors</div>
+          <div class="l4-track">
+            <div class="logo main color-1 rot-a">Crossing Auto</div>
+            <div class="logo main color-2 rot-b">KBC Verzekeringen</div>
+            <div class="logo main color-3 rot-c">Bouw Janssens</div>
+            <div class="logo second color-4 rot-d">De Bonte</div>
+            <div class="logo second color-5 rot-a">Hapje &amp; Tapje</div>
+            <div class="logo second color-6 rot-b">Fitness Plus</div>
+            <div class="logo second color-7 rot-c">AC Audio</div>
+            <div class="logo second color-8 rot-d">Wouters Schilder</div>
+            <div class="logo second color-1 rot-a">Dupont</div>
+            <div class="logo second color-2 rot-b">Verbiest Auto</div>
+            <div class="logo second color-3 rot-c">Heyligen</div>
+            <div class="logo second color-4 rot-d">Berk</div>
+            <div class="logo second color-5 rot-a">Sportshop</div>
+          </div>
+          <div class="scroll-hint">← scroll voor meer sponsors →</div>
+          <div class="all-sponsors-link">
+            <a href="/sponsors">Alle sponsors &amp; sympathisanten →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Note on logos.</strong> Real production logos are SVG / PNG files uploaded by
+        editors per sponsor. The italic Freight Display name treatment shown above is a fallback
+        for sponsors without a logo asset uploaded — and a mockup convenience here. Greyscale +
+        colour on hover applies uniformly via CSS <code>filter</code>.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Spotlight section (sponsors flagged
+        <code>featured: true</code> + <code>description</code> shown — likely a separate sub-component).
+        Per-logo card variant (TapedCard? plain tile? square frame?) — Round 7b.
+        Tape rotation pool (likely follows the same pattern as NewsGrid). Empty / single-tier states.
+      </p>
+    </div>
+  </body>
+</html>
