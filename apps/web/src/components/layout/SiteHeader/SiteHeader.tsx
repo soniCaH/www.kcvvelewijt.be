@@ -79,10 +79,12 @@ function SiteHeaderInner({
   const toDropdownGroups = (
     item: MenuItem,
   ): readonly NavDropdownGroup[] | undefined =>
-    item.childGroups?.map((g) => ({
-      label: g.label,
-      items: toDropdownItems(g.items),
-    }));
+    item.childGroups && item.childGroups.length > 0
+      ? item.childGroups.map((g) => ({
+          label: g.label,
+          items: toDropdownItems(g.items),
+        }))
+      : undefined;
 
   return (
     <>

@@ -225,6 +225,32 @@ describe("hasSubmenu", () => {
       }),
     ).toBe(false);
   });
+
+  it("is false when childGroups holds only empty group shells", () => {
+    expect(
+      hasSubmenu({
+        label: "Shells",
+        href: "/s",
+        childGroups: [
+          { label: "G1", items: [] },
+          { label: "G2", items: [] },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when at least one childGroup has items (mixed)", () => {
+    expect(
+      hasSubmenu({
+        label: "Mixed",
+        href: "/m",
+        childGroups: [
+          { label: "Empty", items: [] },
+          { label: "HasItems", items: [{ label: "X", href: "/x" }] },
+        ],
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("isMenuItemActive", () => {

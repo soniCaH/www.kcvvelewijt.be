@@ -61,9 +61,15 @@ export const flattenChildren = (item: MenuItem): readonly MenuItem[] => {
   return item.children ?? [];
 };
 
-/** True when a MenuItem has at least one child (flat or grouped). */
+/**
+ * True when a MenuItem has at least one renderable child — either via
+ * `children` or via at least one non-empty group inside `childGroups`. An
+ * item with `childGroups: [{ label: 'X', items: [] }]` (empty shells) must
+ * report `false` so the dropdown doesn't render an empty panel.
+ */
 export const hasSubmenu = (item: MenuItem): boolean =>
-  (item.children?.length ?? 0) > 0 || (item.childGroups?.length ?? 0) > 0;
+  (item.children?.length ?? 0) > 0 ||
+  (item.childGroups?.some((g) => (g.items?.length ?? 0) > 0) ?? false);
 
 // Senior/jeugd items are inserted after the first 3 static items (Home, Nieuws, Evenementen)
 const HEADER_COUNT = 3;

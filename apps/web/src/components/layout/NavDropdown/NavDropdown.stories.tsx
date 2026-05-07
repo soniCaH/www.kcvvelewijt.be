@@ -17,7 +17,12 @@ const meta = {
   title: "UI/NavDropdown",
   component: NavDropdown,
   tags: ["autodocs", "vr"],
-  parameters: { layout: "fullscreen" },
+  parameters: {
+    layout: "fullscreen",
+    // Pin VR baselines to desktop — the dropdown is desktop-only (mobile
+    // is covered by `<NavTakeover>`).
+    vr: { viewports: ["desktop"] },
+  },
 } satisfies Meta<typeof NavDropdown>;
 
 export default meta;
@@ -169,11 +174,11 @@ export const WithActiveItem: Story = {
     itemGroups: [
       {
         label: "Wie we zijn",
-        items: deClubGroups[0]!.items.map((item) =>
+        items: (deClubGroups[0]?.items ?? []).map((item) =>
           item.label === "Geschiedenis" ? { ...item, active: true } : item,
         ),
       },
-      deClubGroups[1]!,
+      deClubGroups[1] ?? { label: "Praktisch", items: [] },
     ],
   },
   render: (args) => (

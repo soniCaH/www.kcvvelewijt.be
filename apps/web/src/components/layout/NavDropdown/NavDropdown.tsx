@@ -351,8 +351,9 @@ export const NavDropdown = ({
                   <ul className="m-0 list-none p-0">
                     {group.items.map((item) => (
                       <NavDropdownRow
-                        key={item.href}
+                        key={`${group.label}-${item.href}`}
                         item={item}
+                        variant="wide"
                         onClick={handleItemClick}
                       />
                     ))}
@@ -361,11 +362,14 @@ export const NavDropdown = ({
               ))}
             </div>
           ) : (
-            <ul className="m-0 list-none px-0 py-2">
+            // p-0 wins over the UA `<ul>` `padding-inline-start: 40px` default;
+            // narrow rows manage their own horizontal padding via `variant`.
+            <ul className="m-0 list-none p-0 py-2">
               {items?.map((item) => (
                 <NavDropdownRow
                   key={item.href}
                   item={item}
+                  variant="narrow"
                   onClick={handleItemClick}
                 />
               ))}
@@ -383,10 +387,17 @@ export const NavDropdown = ({
 
 interface NavDropdownRowProps {
   item: NavDropdownItem;
+  /**
+   * Controls horizontal padding. `narrow` rows live directly inside a
+   * panel with no horizontal container padding, so the row carries the
+   * 14px-left / 18px-right design padding itself. `wide` rows live inside
+   * a `px-[22px]` panel container and only need a hover-pad nudge.
+   */
+  variant: "narrow" | "wide";
   onClick: () => void;
 }
 
-const NavDropdownRow = ({ item, onClick }: NavDropdownRowProps) => (
+const NavDropdownRow = ({ item, variant, onClick }: NavDropdownRowProps) => (
   <li>
     <Link
       href={item.href}
@@ -394,7 +405,8 @@ const NavDropdownRow = ({ item, onClick }: NavDropdownRowProps) => (
       aria-current={item.active ? "page" : undefined}
       onClick={onClick}
       className={cn(
-        "group/row flex items-center gap-2.5 px-1 py-2 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase no-underline transition-colors",
+        "group/row flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase no-underline transition-colors",
+        variant === "narrow" ? "py-2.5 pr-[18px] pl-[14px]" : "px-1 py-2",
         item.active ? "text-jersey-bright" : "text-cream-soft hover:text-cream",
       )}
     >
