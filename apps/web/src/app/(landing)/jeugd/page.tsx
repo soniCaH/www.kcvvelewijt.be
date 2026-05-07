@@ -15,7 +15,6 @@ import {
   type EditorialCardConfig,
 } from "@/lib/repositories/jeugd-landing-page.repository";
 import { TeamOverview, type TeamData } from "@/components/team/TeamOverview";
-import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
@@ -109,7 +108,6 @@ export default async function JeugdPage() {
 
   return (
     <>
-      <MatchStripSlot />
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },

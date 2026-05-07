@@ -13,7 +13,6 @@ import {
   type EventVM,
 } from "@/lib/repositories/event.repository";
 import { EventsList, type EventsListItem } from "@/components/event/EventsList";
-import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { Calendar, Newspaper, CalendarDays } from "@/lib/icons";
 
 export const metadata: Metadata = {
@@ -65,7 +64,6 @@ export default async function EventsPage() {
 
   return (
     <>
-      <MatchStripSlot />
       <div className="min-h-screen bg-linear-to-br from-gray-50 to-white pb-[var(--footer-diagonal)]">
         {/* Hero */}
         <div className="from-green-main via-green-hover to-green-dark-hover bg-linear-to-br px-4 py-16 text-white">

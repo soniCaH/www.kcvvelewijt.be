@@ -15,7 +15,6 @@ import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
 import { INITIAL_TOTAL } from "./constants";
 import { FooterSafeArea } from "@/components/design-system";
-import { MatchStripSlot } from "@/components/layout/MatchStrip";
 
 interface NewsPageProps {
   searchParams: Promise<{ categorie?: string }>;
@@ -72,7 +71,6 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
 
   return (
     <>
-      <MatchStripSlot />
       <h1 className="sr-only">Nieuwsarchief</h1>
       <JsonLd
         data={buildBreadcrumbJsonLd([

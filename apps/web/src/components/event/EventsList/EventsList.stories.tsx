@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EventsList, type EventsListItem } from "./EventsList";
-import EventsLoading from "@/app/(main)/events/loading";
+import EventsLoading from "@/app/(landing)/events/loading";
 
 const mockEvents: EventsListItem[] = [
   {
