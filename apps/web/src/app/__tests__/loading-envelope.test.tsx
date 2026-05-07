@@ -230,8 +230,6 @@ describe("loading.tsx envelope drift guard", () => {
       ...globSync("(main)/**/loading.tsx", { cwd: appDir }),
       ...globSync("(landing)/**/loading.tsx", { cwd: appDir }),
     ];
-    const testedRoutes =
-      sectionStackRoutes.length + nonSectionStackRoutes.length;
     const expectedRouteNames = new Set(
       [...sectionStackRoutes, ...nonSectionStackRoutes].map(({ name }) =>
         name.replace(/^\//, ""),
@@ -239,13 +237,20 @@ describe("loading.tsx envelope drift guard", () => {
     );
     const stripGroup = (file: string) =>
       file.replace(/^\((main|landing)\)\//, "").replace(/\/loading\.tsx$/, "");
+    const onDiskRouteNames = new Set(loadingFiles.map(stripGroup));
     const missingFiles = loadingFiles
       .filter((f) => !expectedRouteNames.has(stripGroup(f)))
       .sort();
+    const staleInArrays = [...expectedRouteNames]
+      .filter((name) => !onDiskRouteNames.has(name))
+      .sort();
     expect(
-      loadingFiles.length,
-      `Found ${loadingFiles.length} loading.tsx files on disk but only ${testedRoutes} in test arrays. ` +
-        `Missing: ${missingFiles.join(", ")}`,
-    ).toBe(testedRoutes);
+      missingFiles,
+      `loading.tsx files on disk not covered by test arrays: ${missingFiles.join(", ")}`,
+    ).toEqual([]);
+    expect(
+      staleInArrays,
+      `test array entries with no matching loading.tsx on disk: ${staleInArrays.join(", ")}`,
+    ).toEqual([]);
   });
 });
