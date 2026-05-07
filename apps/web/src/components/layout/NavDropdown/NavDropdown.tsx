@@ -343,23 +343,25 @@ export const NavDropdown = ({
         >
           {isWide ? (
             <div className="grid grid-cols-2 gap-x-8 px-[22px] py-5">
-              {itemGroups!.map((group) => (
-                <div key={group.label}>
-                  <p className="border-ink-muted text-ink-muted mb-2 border-b border-dashed pb-1.5 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
-                    {group.label}
-                  </p>
-                  <ul className="m-0 list-none p-0">
-                    {group.items.map((item) => (
-                      <NavDropdownRow
-                        key={`${group.label}-${item.href}`}
-                        item={item}
-                        variant="wide"
-                        onClick={handleItemClick}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              ))}
+              {itemGroups!
+                .filter((group) => group.items.length > 0)
+                .map((group) => (
+                  <div key={group.label}>
+                    <p className="border-ink-muted text-ink-muted mb-2 border-b border-dashed pb-1.5 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
+                      {group.label}
+                    </p>
+                    <ul className="m-0 list-none p-0">
+                      {group.items.map((item) => (
+                        <NavDropdownRow
+                          key={`${group.label}-${item.href}`}
+                          item={item}
+                          variant="wide"
+                          onClick={handleItemClick}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
             </div>
           ) : (
             // p-0 wins over the UA `<ul>` `padding-inline-start: 40px` default;

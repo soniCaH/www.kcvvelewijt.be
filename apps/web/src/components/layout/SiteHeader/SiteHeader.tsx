@@ -132,19 +132,19 @@ function SiteHeaderInner({
                   const active = isActive(item.href) || hasActiveChild(item);
                   if (hasSubmenu(item)) {
                     const groups = toDropdownGroups(item);
+                    // `groups` (wide) wins over `items` (narrow) when both
+                    // would resolve. Only pass `items` when groups is absent.
+                    const dropdownItems =
+                      !groups && item.children
+                        ? toDropdownItems(item.children)
+                        : undefined;
                     return (
                       <NavDropdown
                         key={item.href}
                         label={item.label}
                         href={item.href}
                         triggerActive={active}
-                        items={
-                          groups
-                            ? undefined
-                            : item.children
-                              ? toDropdownItems(item.children)
-                              : undefined
-                        }
+                        items={dropdownItems}
                         itemGroups={groups}
                       />
                     );

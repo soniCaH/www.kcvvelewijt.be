@@ -420,6 +420,33 @@ describe("NavDropdown — wide / grouped layout", () => {
     ).toBeInTheDocument();
   });
 
+  it("filters out empty group columns before rendering", () => {
+    render(
+      <ul>
+        <NavDropdown
+          label="De club"
+          href="/club"
+          itemGroups={[
+            { label: "EmptyShell", items: [] },
+            {
+              label: "HasItems",
+              items: [{ label: "Geschiedenis", href: "/club/geschiedenis" }],
+            },
+          ]}
+        />
+      </ul>,
+    );
+    const li = screen.getByRole("link", { name: /de club/i }).closest("li")!;
+    act(() => {
+      fireEvent.mouseEnter(li);
+      vi.advanceTimersByTime(80);
+    });
+
+    // Empty heading should NOT render; only the populated group should appear.
+    expect(screen.queryByText("EmptyShell")).toBeNull();
+    expect(screen.getByText("HasItems")).toBeInTheDocument();
+  });
+
   it("itemGroups takes precedence over items when both are passed", () => {
     render(
       <ul>
