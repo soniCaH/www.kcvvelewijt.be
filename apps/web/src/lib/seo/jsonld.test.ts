@@ -27,7 +27,7 @@ describe("buildSportsClubJsonLd", () => {
     expect(result.name).toBe("KCVV Elewijt");
     expect(result.url).toBe("https://www.kcvvelewijt.be");
     expect(result.sport).toBe("Soccer");
-    expect(result.foundingDate).toBe("1924");
+    expect(result.foundingDate).toBe("1909");
   });
 
   it("includes an absolute logo URL", () => {

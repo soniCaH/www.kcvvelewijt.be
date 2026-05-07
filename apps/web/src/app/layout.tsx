@@ -4,7 +4,7 @@ import { Montserrat, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AccentStrip } from "@/components/layout/AccentStrip";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { PageFooter } from "@/components/layout/PageFooter";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoader";
 import { Effect } from "effect";
@@ -119,13 +119,8 @@ export default async function RootLayout({
         <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         <AccentStrip />
         <SiteHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        {/* The footer's overlap="full" diagonal lifts over the last
-            DIAGONAL_HEIGHT of content — each page's final section is
-            responsible for extending its bg through that zone (see
-            SectionStack's last-section padding and the per-page fixes
-            for non-stack pages). See #1360. */}
         <main>{children}</main>
-        <PageFooter />
+        <SiteFooter />
         <CookieConsentBanner />
       </body>
     </html>

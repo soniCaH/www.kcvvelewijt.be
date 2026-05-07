@@ -23,9 +23,9 @@ export type { NavigationProps } from "./Navigation";
 export { MobileMenu } from "./MobileMenu";
 export type { MobileMenuProps } from "./MobileMenu";
 
-// PageFooter
-export { PageFooter } from "./PageFooter";
-export type { PageFooterProps } from "./PageFooter";
+// SiteFooter
+export { SiteFooter } from "./SiteFooter";
+export type { SiteFooterProps } from "./SiteFooter";
 
 // CookieConsentBanner
 export { CookieConsentBanner } from "./CookieConsentBanner";

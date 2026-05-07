@@ -38,7 +38,7 @@ describe("Global NotFound page", () => {
     expect(homeLink).toHaveAttribute("href", "/");
   });
 
-  it("does not render PageHeader or PageFooter", () => {
+  it("does not render header or footer landmarks", () => {
     const { container } = render(<NotFound />);
     expect(container.querySelector("header")).toBeNull();
     expect(container.querySelector("footer")).toBeNull();

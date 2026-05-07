@@ -6,7 +6,7 @@ import { MatchWidget } from "./MatchWidget";
 import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
 import { YouthSection, YouthBackdrop } from "./YouthSection";
-import { PageFooter } from "@/components/layout/PageFooter";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Sponsors } from "@/components/sponsors/Sponsors";
 import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
 import { SectionStack, SectionHeader } from "@/components/design-system";
@@ -255,7 +255,7 @@ export const Default: Story = {
   render: () => (
     <>
       <SectionStack sections={buildSections()} />
-      <PageFooter />
+      <SiteFooter />
     </>
   ),
 };
@@ -278,7 +278,7 @@ export const WithFeaturedEvent: Story = {
           isExternal: false,
         })}
       />
-      <PageFooter />
+      <SiteFooter />
     </>
   ),
 };
@@ -300,7 +300,7 @@ export const NoAutoRotation: Story = {
   render: () => (
     <>
       <SectionStack sections={buildSections(undefined, false)} />
-      <PageFooter />
+      <SiteFooter />
     </>
   ),
 };
