@@ -79,7 +79,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
           <div className="flex items-center gap-4">
             <Link
               href="/privacy"
-              className="text-cream/85 hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-opacity md:text-[10.5px]"
+              className="text-cream/85 hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
             >
               Privacy
             </Link>

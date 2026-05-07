@@ -12,7 +12,7 @@ export function CookiePreferencesButton() {
           CookieConsent.showPreferences();
         }
       }}
-      className="text-cream/85 hover:text-cream inline-flex h-6 cursor-pointer items-center border-0 bg-transparent p-0 font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-opacity md:text-[10.5px]"
+      className="text-cream/85 hover:text-cream inline-flex h-6 cursor-pointer items-center border-0 bg-transparent p-0 font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
     >
       Cookie-instellingen
     </button>
