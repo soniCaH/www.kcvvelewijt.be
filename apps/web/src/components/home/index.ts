@@ -5,11 +5,7 @@ export type {
 } from "./FeaturedArticles";
 
 export { NewsGrid } from "./NewsGrid";
-export type {
-  NewsGridProps,
-  NewsGridArticle,
-  FeaturedEventStub,
-} from "./NewsGrid";
+export type { NewsGridProps, NewsGridArticle } from "./NewsGrid";
 
 export { NewsCard } from "@/components/article/NewsCard";
 export type { NewsCardProps } from "@/components/article/NewsCard";

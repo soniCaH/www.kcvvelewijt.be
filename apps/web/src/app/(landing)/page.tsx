@@ -4,16 +4,11 @@
  */
 
 import { Effect } from "effect";
-import { DateTime } from "luxon";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   ArticleRepository,
   toHomepageArticles,
 } from "@/lib/repositories/article.repository";
-import {
-  EventRepository,
-  type EventVM,
-} from "@/lib/repositories/event.repository";
 import { HomepageRepository } from "@/lib/repositories/homepage.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
@@ -27,7 +22,6 @@ import {
   WebshopSection,
   SponsorsSection,
 } from "@/components/home";
-import type { FeaturedEventStub } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
@@ -50,61 +44,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/**
- * Builds the featured event stub for the NewsGrid section.
- * Same-day event: shows date + time range.
- * Multi-day event: shows "d MMM HH:mm – d MMM HH:mm" as single date string.
- */
-function buildFeaturedEventStub(event: EventVM): FeaturedEventStub {
-  const start = DateTime.fromISO(event.dateStart).setLocale("nl");
-  const end = event.dateEnd
-    ? DateTime.fromISO(event.dateEnd).setLocale("nl")
-    : null;
-
-  const now = DateTime.now();
-  const diffDays = Math.ceil(start.diff(now, "days").days);
-  const countdown =
-    diffDays > 0
-      ? `over ${diffDays} ${diffDays === 1 ? "dag" : "dagen"}`
-      : undefined;
-
-  let eventDate: string;
-  let eventTime: string | undefined;
-
-  if (end && end.startOf("day").valueOf() !== start.startOf("day").valueOf()) {
-    // Multi-day: "26 apr 10:00 – 28 apr 12:00"
-    eventDate = `${start.toFormat("d MMM HH:mm")} – ${end.toFormat("d MMM HH:mm")}`;
-    eventTime = undefined;
-  } else {
-    // Same-day: date + optional time range
-    eventDate = start.toFormat("d MMM");
-    const startTime = start.toFormat("HH:mm");
-    eventTime =
-      end && end.valueOf() !== start.valueOf()
-        ? `${startTime}–${end.toFormat("HH:mm")}`
-        : startTime !== "00:00"
-          ? startTime
-          : undefined;
-  }
-
-  const isExternal = event.href !== "#";
-  return {
-    title: event.title,
-    href: isExternal ? event.href : undefined,
-    imageUrl: event.coverImageUrl ?? undefined,
-    badge: "EVENEMENT",
-    date: eventDate,
-    time: eventTime,
-    countdown,
-    isExternal,
-  };
-}
-
 export default async function HomePage() {
   const [
     articlesResult,
     matchesResult,
-    eventResult,
     bannersResult,
     matchesSliderPlaceholderResult,
   ] = await Promise.all([
@@ -112,7 +55,9 @@ export default async function HomePage() {
       Effect.gen(function* () {
         const repo = yield* ArticleRepository;
         const all = yield* repo.findAll();
-        return all.slice(0, 9);
+        // Phase 4 (#1672) — slice changes from [0..9] (6 grid articles) to
+        // [0..8] (5 grid articles) per locked NewsGrid spec.
+        return all.slice(0, 8);
       }).pipe(Effect.catchAll(() => Effect.succeed([]))),
     ),
     runPromise(
@@ -125,12 +70,6 @@ export default async function HomePage() {
           return Effect.succeed([]);
         }),
       ),
-    ),
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* EventRepository;
-        return yield* repo.findNextFeatured();
-      }).pipe(Effect.catchAll(() => Effect.succeed(null))),
     ),
     runPromise(
       Effect.gen(function* () {
@@ -160,14 +99,11 @@ export default async function HomePage() {
   const matchesSliderPlaceholder = matchesSliderPlaceholderResult;
 
   const featuredArticles = toHomepageArticles(articles.slice(0, 3));
-  const newsGridArticles = toHomepageArticles(articles.slice(3, 9));
+  // Phase 4 (#1672) — NewsGrid takes articles[3..8] (5) per locked spec.
+  const newsGridArticles = toHomepageArticles(articles.slice(3, 8));
 
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const nextMatch = upcomingMatches[0];
-
-  const featuredEvent = eventResult
-    ? buildFeaturedEventStub(eventResult)
-    : undefined;
 
   const sliderMatches = upcomingMatches.map((m) => ({
     ...m,
@@ -236,14 +172,13 @@ export default async function HomePage() {
     : null;
 
   const latestNewsSection: SectionConfig | null =
-    newsGridArticles.length > 0 || featuredEvent
+    newsGridArticles.length > 0
       ? {
           key: "latest-news",
           bg: "gray-100",
           content: (
             <NewsGrid
               articles={newsGridArticles}
-              featuredEvent={featuredEvent}
               title="Laatste nieuws"
               showViewAll
               viewAllHref="/nieuws"
