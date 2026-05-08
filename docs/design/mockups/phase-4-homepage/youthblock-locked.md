@@ -8,7 +8,7 @@
 <YouthBlock>                                  // server component
   <YouthBackdrop>                             // existing component, reskinned palette
     <Image src="/images/youth-trainers.jpg" blur="2px" />
-    <div className="bg-gradient (jersey-deep 90% → 75% → 50%)" />
+    <div className="bg-[var(--gradient-jersey-deep-overlay)]" />
   </YouthBackdrop>
   <div className="text-block">
     <span className="meta-line">Word jeugdspeler</span>
@@ -58,7 +58,7 @@
   ```
   - Cream dots @ 5% alpha on an 8×8 grid, `screen` blend mode.
   - Layered ON TOP of `--gradient-jersey-deep-overlay` to add subtle risograph print texture without competing with the photo.
-- Mobile gradient direction: `135deg` works on both viewports — no orientation flip needed (round-8c locked at desktop only; verify mobile at implementation).
+- Mobile gradient direction: gradient flips to vertical on `<640px` (today's `bg-gradient-to-b md:bg-gradient-to-r` behavior preserved). Round-8c was authored at the desktop 135deg axis — implementers should re-render the composed `--gradient-jersey-deep-overlay` along the vertical axis on mobile by overriding the gradient direction at the consumer side.
 
 ## Text + CTA
 

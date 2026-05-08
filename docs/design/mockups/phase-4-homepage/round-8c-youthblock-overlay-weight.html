@@ -201,13 +201,15 @@
         );
       }
 
-      /* 8c.D — baseline gradient + retro halftone dot pattern (cream @ 8%) */
+      /* 8c.D — LOCKED COMBO (8c.B palette + 8c.D dot overlay).
+         Baseline gradient at the desaturated #133d28 third stop +
+         retro halftone dot pattern at 5% cream. */
       .d .gradient {
         background: linear-gradient(
           135deg,
           color-mix(in srgb, var(--jersey-deep) 88%, transparent) 0%,
           color-mix(in srgb, var(--jersey-deep) 65%, transparent) 60%,
-          color-mix(in srgb, var(--jersey-deep-dark-brand) 92%, transparent) 100%
+          color-mix(in srgb, var(--jersey-deep-dark-mockup) 92%, transparent) 100%
         );
       }
       .d .pattern {
@@ -412,14 +414,16 @@
       <article class="candidate d">
         <header>
           <div>
-            <div class="key">8c.D · Q2 — halftone dot pattern</div>
-            <h2 class="name">Baseline gradient + cream halftone dots @ 8%</h2>
+            <div class="key">8c.D · Q2 — halftone dot pattern (LOCKED)</div>
+            <h2 class="name">Baseline gradient + cream halftone dots @ 5%</h2>
             <p class="desc">
-              Baseline 88/65/92 alphas; layer a fine cream dot grid (8px,
-              <code>screen</code> blend, ~18% per dot) on top. The dots read as
+              Baseline 88/65/92 alphas at the desaturated <code>#133d28</code>
+              third stop (8c.B palette); layer a fine cream dot grid (8px,
+              <code>screen</code> blend, 5% per dot) on top. The dots read as
               risograph / printed-programme texture — same vocabulary as the
               fanzine source mockups — without committing to a heavier opaque
-              overlay.
+              overlay. Iterated 0.18 → 0.10 → 0.05 alpha until the dots stopped
+              competing with the photo.
             </p>
           </div>
           <div class="tradeoffs">
