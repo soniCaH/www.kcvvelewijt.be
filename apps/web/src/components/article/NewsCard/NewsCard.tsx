@@ -1,8 +1,12 @@
 // apps/web/src/components/article/NewsCard/NewsCard.tsx
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Clock, ExternalLink } from "@/lib/icons";
+
+export type NewsCardAspectRatio = "landscape-16-9" | "square" | "portrait-3-4";
+export type NewsCardRotation = "a" | "b" | "c" | "d" | "none";
 
 export interface NewsCardProps {
   title: string;
@@ -21,9 +25,36 @@ export interface NewsCardProps {
   /** When true, full-card link opens in new tab with ExternalLink indicator */
   isExternal?: boolean;
   variant?: "standard" | "featured" | "listing";
+  /**
+   * Aspect ratio of the card surface (standard/featured) or inner image
+   * wrapper (listing). Defaults to 16:9 per the locked NewsGrid spec —
+   * `<NewsGrid>` (#1672) and other Phase 4 consumers rely on this default.
+   * Pre-redesign callers (`/nieuws` archive, `<RelatedContentSection>`)
+   * pick up 16:9 too; their full retro-terrace rebuild is Phase 5+ scope.
+   */
+  aspectRatio?: NewsCardAspectRatio;
+  /**
+   * Phase 4 / NewsGrid — applies a small slot-deterministic rotation using
+   * the shared `--rotate-tape-{a,b,c,d}` tokens. Default `"none"` preserves
+   * existing rendering (no transform).
+   */
+  rotation?: NewsCardRotation;
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }
+
+const ASPECT_CLASS: Record<NewsCardAspectRatio, string> = {
+  "landscape-16-9": "aspect-video",
+  square: "aspect-square",
+  "portrait-3-4": "aspect-[3/4]",
+};
+
+const ROTATION_VAR: Record<Exclude<NewsCardRotation, "none">, string> = {
+  a: "var(--rotate-tape-a)",
+  b: "var(--rotate-tape-b)",
+  c: "var(--rotate-tape-c)",
+  d: "var(--rotate-tape-d)",
+};
 
 export const NewsCard = ({
   title,
@@ -37,15 +68,27 @@ export const NewsCard = ({
   countdown,
   isExternal,
   variant = "standard",
+  aspectRatio = "landscape-16-9",
+  rotation = "none",
   as: Heading = "h3",
   className,
 }: NewsCardProps) => {
   const isFeatured = variant === "featured";
   const isListing = variant === "listing";
 
+  const aspectClass = ASPECT_CLASS[aspectRatio];
+
+  const rotationStyle: CSSProperties | undefined =
+    rotation !== "none"
+      ? { transform: `rotate(${ROTATION_VAR[rotation]})` }
+      : undefined;
+
   if (isListing) {
     return (
       <article
+        data-rotation={rotation}
+        data-aspect={aspectRatio}
+        style={rotationStyle}
         className={cn(
           "group rounded-card relative flex h-full flex-col overflow-hidden bg-white",
           href &&
@@ -76,7 +119,7 @@ export const NewsCard = ({
         {/* Image area — stacked on top */}
         {imageUrl ? (
           <div
-            className="relative aspect-[3/2] overflow-hidden"
+            className={cn("relative overflow-hidden", aspectClass)}
             data-testid="listing-image"
           >
             <Image
@@ -89,7 +132,7 @@ export const NewsCard = ({
           </div>
         ) : (
           <div
-            className="bg-kcvv-green-dark aspect-[3/2]"
+            className={cn("bg-kcvv-green-dark", aspectClass)}
             aria-hidden="true"
             data-testid="listing-image-fallback"
           />
@@ -121,11 +164,14 @@ export const NewsCard = ({
 
   return (
     <article
+      data-rotation={rotation}
+      data-aspect={aspectRatio}
+      style={rotationStyle}
       className={cn(
         "group rounded-card bg-kcvv-black relative overflow-hidden",
         href &&
           "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
-        "aspect-[3/2]",
+        aspectClass,
         className,
       )}
     >
