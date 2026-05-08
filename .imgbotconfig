@@ -1,3 +1,13 @@
 {
-    "schedule": "daily"
+    "schedule": "daily",
+    "ignoredFiles": [
+        "apps/web/test/vr/__snapshots__/**",
+        "**/__snapshots__/**",
+        "**/*.snapshot.png",
+        "**/node_modules/**",
+        "**/.next/**",
+        "**/dist/**",
+        "**/storybook-static/**",
+        "**/coverage/**"
+    ]
 }
