@@ -78,7 +78,6 @@ type FixtureShape =
 type GroqShape = {
   kind: "groq";
   query: string;
-  imagePath: string; // GROQ projection key, e.g. "coverImage" or "logo"
   width: number;
   height: number;
   aspect: string;
@@ -119,7 +118,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // privacy pass replaces if mismatched.
     kind: "groq",
     query: `*[_type=="article" && articleType=="announcement" && "A-Ploeg" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [30...50] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -130,7 +128,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // closest semantic match. Owner privacy pass on the PR catches misses.
     kind: "groq",
     query: `*[_type=="article" && articleType=="announcement" && "A-Ploeg" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -140,7 +137,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // Production uses the "Transfernieuws" tag, not articleType=="transfer".
     kind: "groq",
     query: `*[_type=="article" && "Transfernieuws" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -149,7 +145,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "article-hero-jeugd": {
     kind: "groq",
     query: `*[_type=="article" && "Jeugd" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -158,7 +153,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "article-hero-evenement": {
     kind: "groq",
     query: `*[_type=="article" && (articleType=="event" || "Evenement" in tags) && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -167,7 +161,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "article-hero-generic": {
     kind: "groq",
     query: `*[_type=="article" && articleType=="announcement" && !("A-Ploeg" in tags) && !("Jeugd" in tags) && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -187,7 +180,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // attention strategy so the face stays in-frame.
     kind: "groq",
     query: `*[_type=="player" && defined(psdImage.asset._ref) && !(_id in path("drafts.**"))] | order(lastName asc) [0...30] {_id, "slug": coalesce(slug.current, _id), "ref": psdImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_PORTRAIT,
     height: 640,
     aspect: "3:4",
@@ -206,7 +198,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "staff-portrait": {
     kind: "groq",
     query: `*[_type=="staffMember" && defined(photo.asset._ref) && !(_id in path("drafts.**"))] | order(lastName asc) [0...12] {_id, "slug": coalesce(slug.current, lastName, _id), "ref": photo.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_PORTRAIT,
     height: 640,
     aspect: "3:4",
@@ -215,7 +206,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "event-cover": {
     kind: "groq",
     query: `*[_type=="event" && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(dateStart desc) [0...12] {_id, "slug": coalesce(slug.current, _id), "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -226,7 +216,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // photos). Owner privacy pass to confirm.
     kind: "groq",
     query: `*[_type=="article" && "A-Ploeg" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [12...30] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -246,7 +235,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // A-Ploeg article covers (different slice from match-action).
     kind: "groq",
     query: `*[_type=="article" && "A-Ploeg" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [50...70] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -256,7 +244,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // No dedicated content type; pull from "Clubinfo"-tagged articles.
     kind: "groq",
     query: `*[_type=="article" && "Clubinfo" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -266,7 +253,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // No semantic tag; reuse Jeugd covers (training-heavy).
     kind: "groq",
     query: `*[_type=="article" && "Jeugd" in tags && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [12...30] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -276,7 +262,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
     // No semantic tag; reuse Beker Van Zemst (cup runs draw crowds).
     kind: "groq",
     query: `*[_type=="article" && ("Beker Van Zemst" in tags || "Beker Van Brabant" in tags) && defined(coverImage.asset._ref) && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...12] {_id, slug, "ref": coverImage.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_HERO,
     height: 675,
     aspect: "16:9",
@@ -285,7 +270,6 @@ const SHAPES: Record<FixtureShape, ShapeSpec> = {
   "sponsor-logo": {
     kind: "groq",
     query: `*[_type=="sponsor" && defined(logo.asset._ref) && !(_id in path("drafts.**"))] | order(_updatedAt desc) [0...12] {_id, "slug": coalesce(slug.current, _id, name), "ref": logo.asset._ref}`,
-    imagePath: "ref",
     width: TARGET_WIDTH_LOGO,
     height: 160,
     aspect: "free",
