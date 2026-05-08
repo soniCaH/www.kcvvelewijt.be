@@ -208,10 +208,14 @@ export const MobileView: Story = {
 // They are vr-tagged individually rather than via meta.tags so the existing
 // 14 legacy NewsCard stories don't get baselined as a side effect.
 
+// Seeded picsum URLs (`/seed/{seed}/{w}/{h}`) return the same image content
+// regardless of the upstream width Next.js Image requests for a given
+// viewport — necessary for cross-viewport VR determinism. The legacy
+// `?random=N` URLs are width-dependent and produce mobile/desktop drift.
 const phase4SharedArgs = {
   title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
   href: "/nieuws/derby-overwinning",
-  imageUrl: "https://picsum.photos/800/500?random=1",
+  imageUrl: "https://picsum.photos/seed/kcvv-news-1/800/500",
   imageAlt: "Derby match",
   badge: "Competitie",
   date: "15 januari 2025",
@@ -253,7 +257,7 @@ export const RotationCycle: Story = {
           {...phase4SharedArgs}
           rotation={r}
           aspectRatio="landscape-16-9"
-          imageUrl={`https://picsum.photos/800/500?random=rot-${r}`}
+          imageUrl={`https://picsum.photos/seed/kcvv-news-rot-${r}/800/500`}
         />
       ))}
     </div>
