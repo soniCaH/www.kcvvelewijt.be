@@ -3,7 +3,7 @@
 > **PRD:** `docs/prd/redesign-phase-4.md`
 > **Tracking issue:** [#1526](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1526)
 > **Master design:** `docs/plans/2026-04-27-redesign-master-design.md`
-> **Design brief:** `docs/design/mockups/phase-4-homepage/` — 11 round HTMLs + 7 `*-locked.md` specs (all locked 2026-05-07)
+> **Design brief:** `docs/design/mockups/phase-4-homepage/` — 24 round HTMLs + 7 `*-locked.md` specs (all locked 2026-05-07)
 > **Predecessor plan:** `docs/plans/2026-05-03-redesign-phase-3-plan.md` (structure mirrored)
 > **Sub-issues to create:** 12 children of #1526 (see §15 for `gh` recipes + GraphQL `addBlockedBy` script)
 
@@ -128,7 +128,12 @@ Run once before opening any sub-issue:
 
 **Sub-issue:** `4.B.2 · <UpcomingMatches> rename + schedule depth + expand`. `addBlockedBy 4.0`.
 
-**Goal:** Rename and rebuild today's `<MatchesSliderSection>` per `upcoming-matches-locked.md`.
+**Goal:** Build `<UpcomingMatches>` per `upcoming-matches-locked.md`. Two lineage threads converge here:
+
+1. **Replaces the original Phase 4 issue's `<ScheduleStandingsBlock>` proposal** — standings are dropped from the homepage entirely (Round 6a S.4 lock; standings live on `/ranking` only). Component is schedule-only — no tabs, no standings table.
+2. **Absorbs today's `<MatchesSliderSection>` and `<MatchWidget>` legacy components** — both are deleted (moved to `_legacy/`). The new component renders 5 chronological matches default + inline expand-to-all.
+
+This dual-rename matters for implementation drift: the spec's name (`<ScheduleStandingsBlock>`) and the legacy code's name (`<MatchesSliderSection>` / `<MatchWidget>`) are both retired in favour of `<UpcomingMatches>`.
 
 **Files to create:**
 

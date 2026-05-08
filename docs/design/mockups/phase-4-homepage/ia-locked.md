@@ -21,7 +21,9 @@
 [Phase 4 — body]
   <BannerSlot a>        drop-if-empty
   <NewsGrid>            6 article cards · NO event slot
-  <UpcomingMatches>  tabs: schedule | standings
+  <UpcomingMatches>     5-row chronological schedule (all KCVV teams) +
+                        inline expand-to-all + /kalender link when expanded
+                        (standings dropped from homepage — see upcoming-matches-locked.md)
   <BannerSlot b>        drop-if-empty
   <YouthBlock>          full-bleed jersey-deep interlude
   <WebshopBanner>       single-CTA banner pointing to external supplier (renamed from
@@ -70,7 +72,7 @@
 ## Open questions deferred to per-section rounds
 
 - **NewsGrid card composition** — 4 aspect-ratio variants (16:9 / square / 3:4 / text-only), tape rotation rules per card position, kicker / byline / articleType MonoLabel placement. Round 5 (NewsGrid + NewsCard).
-- **ScheduleStandingsBlock layout** — tabs vs split, schedule depth (next 3? next 5? grouped by week?), standings shape (group only or full table), KCVV row highlight (psd_club_id 1235), empty-state. Round 6.
+- **UpcomingMatches** (renamed from `<ScheduleStandingsBlock>`; standings dropped per Round 6a) — schedule depth, expand pattern, KCVV row highlight (psd_club_id 1235), empty-state. Round 6 / 6a / 6b.
 - **SponsorsBlock tier rendering** — main (`hoofdsponsor`) vs second (`sponsor`) layout density per tier; missing-logo fallback (italic Freight Display name treatment). Round 7.
 - **YouthBlock copy + composition** — JerseyShirt placement, headline treatment, stat ("220+ spelers · 16 ploegen" — verify still accurate), CTA copy, divisions mention. Round 8.
 - **WebshopBanner** — composition (single-CTA banner pointer to external supplier per Round 9b lock; ink palette per F.1 to avoid YouthBlock adjacency). Round 9.
