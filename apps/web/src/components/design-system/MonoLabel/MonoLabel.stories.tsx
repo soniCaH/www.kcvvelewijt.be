@@ -30,6 +30,42 @@ export const PlainMd: Story = {
   args: { variant: "plain", size: "md", children: "MATCHVERSLAG" },
 };
 
+// Plain variant + tone="cream" on a jersey-deep surface — the contrast
+// pairing this tone exists for (#1675 YouthBlock meta line / stats).
+export const PlainCreamOnJerseyDeep: Story = {
+  args: {
+    variant: "plain",
+    size: "md",
+    tone: "cream",
+    children: "WORD JEUGDSPELER",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep border-jersey-deep-dark border p-6">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+// Plain variant + tone="cream" on the ink surface — confirms the tone
+// reads against pure ink as well, not just jersey-deep.
+export const PlainCreamOnInk: Story = {
+  args: {
+    variant: "plain",
+    size: "md",
+    tone: "cream",
+    children: "MATCHVERSLAG",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-ink border-paper-edge border p-6">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 export const PillJerseySm: Story = {
   args: { variant: "pill-jersey", size: "sm", children: "JEUGD ⋅ U15" },
 };
