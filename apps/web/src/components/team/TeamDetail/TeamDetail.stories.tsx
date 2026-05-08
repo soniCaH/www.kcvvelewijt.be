@@ -12,6 +12,7 @@ import type { RosterPlayer, StaffMember } from "../TeamRoster";
 import type { ScheduleMatch } from "../TeamSchedule";
 import type { StandingsEntry } from "../TeamStandings";
 import TeamDetailLoading from "@/app/(main)/ploegen/[slug]/loading";
+import { fixtureImage } from "@test-fixtures/images";
 
 // ---------------------------------------------------------------------------
 // Fixture images
@@ -319,7 +320,7 @@ export const SeniorTeam: Story = {
       name: "Eerste Ploeg",
       tagline: "3de Nationale A",
       teamType: "senior",
-      imageUrl: "https://picsum.photos/seed/team-senior/1200/400",
+      imageUrl: fixtureImage("team-group", 0),
     },
     contactInfo,
     staff: mockStaff,
@@ -341,7 +342,7 @@ export const YouthTeam: Story = {
       tagline: "GEWESTELIJKE U15 K",
       ageGroup: "U15",
       teamType: "youth",
-      imageUrl: "https://picsum.photos/seed/team-u15/1200/400",
+      imageUrl: fixtureImage("team-group", 1),
     },
     contactInfo,
     bodyContent,

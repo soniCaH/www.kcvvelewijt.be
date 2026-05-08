@@ -7,16 +7,17 @@ import type {
   CalendarTeamInfo,
 } from "@/app/(main)/kalender/utils";
 import CalendarLoading from "@/app/(main)/kalender/loading";
+import { fixtureImage } from "@test-fixtures/images";
 
 const kcvv = {
   id: 1,
   name: "KCVV Elewijt A",
-  logo: "https://placehold.co/40x40/4acf52/ffffff?text=KE",
+  logo: fixtureImage("sponsor-logo", 0),
 };
 const opponent = {
   id: 2,
   name: "Racing Mechelen",
-  logo: "https://placehold.co/40x40/cccccc/333333?text=RM",
+  logo: fixtureImage("sponsor-logo", 1),
 };
 
 const matches: CalendarMatch[] = [

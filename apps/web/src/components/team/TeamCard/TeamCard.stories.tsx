@@ -7,6 +7,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TeamCard } from "./TeamCard";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Teams/TeamCard",
@@ -117,7 +118,7 @@ export const WithCoach: Story = {
     teamType: "senior",
     coach: {
       name: "Jan Peeters",
-      imageUrl: "https://picsum.photos/seed/coach/100/100",
+      imageUrl: fixtureImage("staff-portrait", 0),
     },
   },
 };

@@ -4,6 +4,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SearchResults } from "./SearchResults";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Search/SearchResults",
@@ -25,7 +26,7 @@ const mockResults = [
     description:
       "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen.",
     url: "/nieuws/kcvv-elewijt-wint",
-    imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match",
+    imageUrl: fixtureImage("article-hero-matchverslag", 0),
     tags: ["A-ploeg", "Wedstrijdverslag"],
     date: "2026-01-15T10:00:00Z",
   },
@@ -35,14 +36,14 @@ const mockResults = [
     title: "John De Ron",
     description: "Doelman",
     url: "/spelers/john-de-ron",
-    imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JDR",
+    imageUrl: fixtureImage("player-portrait-square", 0),
   },
   {
     id: "3",
     type: "team" as const,
     title: "A-Ploeg",
     url: "/ploegen/a-ploeg",
-    imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
+    imageUrl: fixtureImage("team-group", 0),
   },
 ];
 

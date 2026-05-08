@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { InterviewTemplate } from "./InterviewTemplate";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
+import { fixtureImage } from "@test-fixtures/images";
 
 const block = (text: string, key: string): PortableTextBlock => ({
   _type: "block",
@@ -22,8 +23,7 @@ const MAXIM: IndexedSubject = {
     jerseyNumber: 9,
     position: "Middenvelder",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 0),
   },
 };
 
@@ -36,8 +36,7 @@ const JEROEN: IndexedSubject = {
     jerseyNumber: 5,
     position: "Verdediger",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1568572933382-74d440642117?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 1),
   },
 };
 
@@ -50,8 +49,7 @@ const THOMAS: IndexedSubject = {
     jerseyNumber: 11,
     position: "Aanvaller",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1605235186583-a65c4f4d1c3a?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 2),
   },
 };
 
@@ -64,8 +62,7 @@ const LUC: IndexedSubject = {
     jerseyNumber: 3,
     position: "Keeper",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 3),
   },
 };
 
@@ -99,8 +96,7 @@ export const FullComposition: Story = {
   args: {
     title:
       "Drive, passie, doorzettingsvermogen — vijf seizoenen Maxim Breugelmans",
-    coverImageUrl:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=80",
+    coverImageUrl: fixtureImage("article-hero-interview", 0),
     publishedDate: "19.04.2026",
     readingTime: "6 min lezen",
     shareConfig: {

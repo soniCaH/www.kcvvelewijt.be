@@ -1,4 +1,8 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
+import { fileURLToPath } from "node:url";
+import { resolve, dirname } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: [
@@ -21,6 +25,21 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  staticDirs: ["../public"],
+  staticDirs: [
+    "../public",
+    // Curated local fixture pool for stories — see
+    // apps/web/test/fixtures/images/README.md. Served at
+    // `/test-fixtures/images/...` so VR snapshots don't depend on
+    // remote placeholder services.
+    { from: "../test/fixtures/images", to: "/test-fixtures/images" },
+  ],
+  viteFinal: async (cfg) => {
+    cfg.resolve ??= {};
+    cfg.resolve.alias = {
+      ...(cfg.resolve.alias as Record<string, string> | undefined),
+      "@test-fixtures": resolve(__dirname, "../test/fixtures"),
+    };
+    return cfg;
+  },
 };
 export default config;

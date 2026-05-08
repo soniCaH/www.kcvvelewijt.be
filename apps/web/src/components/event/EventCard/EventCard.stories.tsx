@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EventCard } from "./EventCard";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Calendar/EventCard",
@@ -21,7 +22,7 @@ export const Default: Story = {};
 
 export const WithImage: Story = {
   args: {
-    imageUrl: "https://placehold.co/600x400/4acf52/ffffff?text=Event",
+    imageUrl: fixtureImage("event-cover", 0),
   },
 };
 
@@ -44,7 +45,7 @@ export const NoDate: Story = {
 
 export const FullCard: Story = {
   args: {
-    imageUrl: "https://placehold.co/600x400/4acf52/ffffff?text=Event",
+    imageUrl: fixtureImage("event-cover", 0),
     endDate: new Date("2026-06-15T18:00:00"),
     excerpt: "Gezellig samen genieten met het hele gezin.",
   },

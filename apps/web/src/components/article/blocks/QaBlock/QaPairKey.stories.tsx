@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { QaPairKey } from "./QaPairKey";
 import type { SubjectValue } from "@/components/article/SubjectAttribution";
+import { fixtureImage } from "@test-fixtures/images";
 
 const answer = (text: string): PortableTextBlock[] => [
   {
@@ -20,8 +21,7 @@ const playerSubject: SubjectValue = {
     lastName: "Breugelmans",
     jerseyNumber: 9,
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 0),
   },
 };
 
@@ -29,8 +29,7 @@ const customSubject: SubjectValue = {
   kind: "custom",
   customName: "Luc Janssens",
   customRole: "Oud-speler",
-  customPhotoUrl:
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&q=80",
+  customPhotoUrl: fixtureImage("player-portrait", 1),
 };
 
 const meta = {

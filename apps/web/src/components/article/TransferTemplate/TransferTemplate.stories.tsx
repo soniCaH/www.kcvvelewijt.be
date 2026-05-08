@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { TransferTemplate } from "./TransferTemplate";
+import { fixtureImage } from "@test-fixtures/images";
 
 const paragraph = (key: string, text: string): PortableTextBlock =>
   ({
@@ -79,8 +80,7 @@ type Story = StoryObj<typeof meta>;
 export const FullComposition: Story = {
   args: {
     title: "Maxim Breugelmans versterkt Elewijt",
-    coverImageUrl:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=1000&q=80&fit=crop",
+    coverImageUrl: fixtureImage("article-hero-transfer", 0),
     publishedDate: "19 April 2026",
     readingTime: "3 min lezen",
     shareConfig: {

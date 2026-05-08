@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PlayerFigure } from "./PlayerFigure";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "UI/PlayerFigure",
@@ -21,8 +22,7 @@ type Story = StoryObj<typeof meta>;
 const SAMPLE_BIO =
   "Linkse spits met een neus voor de tweede paal. Dertiende seizoen in groen-wit.";
 
-const PLACEHOLDER_PHOTO =
-  "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600&h=800&fit=crop";
+const PLACEHOLDER_PHOTO = fixtureImage("player-portrait", 0);
 
 export const Playground: Story = {
   args: {

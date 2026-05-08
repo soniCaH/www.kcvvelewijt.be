@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Homepage/FeaturedArticles",
@@ -29,7 +30,7 @@ const mockArticles = [
     title: "Definitieve reeksindeling 3e Nationale BIS",
     description:
       "De reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is bekend. KCVV Elewijt komt uit in reeks A.",
-    imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Stadion",
+    imageUrl: fixtureImage("stadium-hero", 0),
     imageAlt: "Stadion KCVV Elewijt",
     date: "20 juni 2025",
     tags: [{ name: "Ploeg" }, { name: "Competitie" }],
@@ -39,7 +40,7 @@ const mockArticles = [
     title: "Overlijden Jean Lepage",
     description:
       "Met diepe droefheid hebben we vernomen dat Jean Lepage op 82-jarige leeftijd is overleden. Jean was jarenlang een trouwe supporter en vrijwilliger van KCVV Elewijt.",
-    imageUrl: "https://placehold.co/800x600/1e2024/fff?text=In+Memoriam",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     imageAlt: "Jean Lepage tribute",
     date: "25 maart 2025",
     tags: [{ name: "In Memoriam" }],
@@ -49,7 +50,7 @@ const mockArticles = [
     title: "Winterstage in Spanje: voorbereiding op play-offs",
     description:
       "De A-ploeg vertrekt volgende week naar Spanje voor een intensieve winterstage. Coach Deferm wil zijn spelers optimaal voorbereiden op de cruciale play-off wedstrijden.",
-    imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Training",
+    imageUrl: fixtureImage("training", 0),
     imageAlt: "Training KCVV Elewijt",
     date: "15 januari 2025",
     tags: [{ name: "Ploeg" }, { name: "Training" }, { name: "Stage" }],
@@ -189,7 +190,7 @@ export const LongTitle: Story = {
           "Definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is officieel bekendgemaakt en staat online",
         description:
           "De Koninklijke Belgische Voetbalbond heeft vandaag de definitieve reeksindeling voor het seizoen 2025-2026 bekendgemaakt.",
-        imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Long+Title",
+        imageUrl: fixtureImage("article-hero-generic", 1),
         imageAlt: "Long title clamp demo",
         date: "20 juni 2025",
         dateIso: "2025-06-20",
@@ -214,7 +215,7 @@ export const WorstCaseContent: Story = {
           "Definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is officieel bekendgemaakt",
         description:
           "De Koninklijke Belgische Voetbalbond heeft vandaag de definitieve reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS bekendgemaakt. KCVV Elewijt komt uit in reeks A samen met enkele bekende tegenstanders uit de buurt. De volledige kalender wordt later deze maand gepubliceerd.",
-        imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Worst+Case",
+        imageUrl: fixtureImage("article-hero-generic", 2),
         imageAlt: "Worst-case content test",
         date: "20 juni 2025",
         dateIso: "2025-06-20",

@@ -1,6 +1,7 @@
 // apps/web/src/components/article/NewsCard/NewsCard.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NewsCard } from "./NewsCard";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Articles/NewsCard",
@@ -34,7 +35,7 @@ export const Default: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
     href: "/nieuws/derby-overwinning",
-    imageUrl: "https://picsum.photos/800/500?random=1",
+    imageUrl: fixtureImage("article-hero-matchverslag", 0),
     imageAlt: "Derby match",
     badge: "Competitie",
     date: "15 januari 2025",
@@ -47,7 +48,7 @@ export const Featured: Story = {
     title:
       "Spelersvoorstelling seizoen 2025-2026: versterkingen voor nationaal debuut",
     href: "/nieuws/spelersvoorstelling",
-    imageUrl: "https://picsum.photos/1200/500?random=2",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     imageAlt: "New players announcement",
     badge: "Selectie",
     date: "14 maart 2026",
@@ -59,7 +60,7 @@ export const Listing: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
     href: "/nieuws/derby-overwinning",
-    imageUrl: "https://picsum.photos/800/500?random=7",
+    imageUrl: fixtureImage("article-hero-matchverslag", 1),
     imageAlt: "Derby match",
     badge: "Competitie",
     date: "15 januari 2025",
@@ -82,7 +83,7 @@ export const ListingLongTitle: Story = {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
     href: "/nieuws/titel",
-    imageUrl: "https://picsum.photos/800/500?random=8",
+    imageUrl: fixtureImage("article-hero-generic", 1),
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
     date: "5 mei 2025",
@@ -94,7 +95,7 @@ export const ListingGrid: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
     href: "/nieuws/derby-overwinning",
-    imageUrl: "https://picsum.photos/800/500?random=9",
+    imageUrl: fixtureImage("article-hero-matchverslag", 2),
     imageAlt: "Derby match",
     badge: "Competitie",
     date: "15 januari 2025",
@@ -107,7 +108,7 @@ export const ListingGrid: Story = {
         <NewsCard
           title="Spelersvoorstelling seizoen 2025-2026"
           href="/nieuws/spelersvoorstelling"
-          imageUrl="https://picsum.photos/800/500?random=10"
+          imageUrl={fixtureImage("article-hero-jeugd", 0)}
           badge="Selectie"
           date="14 maart 2026"
           variant="listing"
@@ -139,7 +140,7 @@ export const LongTitle: Story = {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
     href: "/nieuws/titel",
-    imageUrl: "https://picsum.photos/800/500?random=3",
+    imageUrl: fixtureImage("article-hero-generic", 2),
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
     date: "5 mei 2025",
@@ -152,7 +153,7 @@ export const FeaturedLongTitle: Story = {
     title:
       "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
     href: "/nieuws/titel",
-    imageUrl: "https://picsum.photos/1200/500?random=4",
+    imageUrl: fixtureImage("article-hero-generic", 1),
     imageAlt: "Championship celebration",
     badge: "Clubnieuws",
     date: "5 mei 2025",
@@ -164,7 +165,7 @@ export const NoBadge: Story = {
   args: {
     title: "Clubbericht zonder categorie",
     href: "/nieuws/bericht",
-    imageUrl: "https://picsum.photos/800/500?random=5",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     imageAlt: "Club news",
     date: "10 januari 2025",
     variant: "standard",
@@ -181,7 +182,7 @@ export const FeaturedEvent: Story = {
     eventTime: "19:00",
     countdown: "over 33 dagen",
     isExternal: true,
-    imageUrl: "https://picsum.photos/1200/500?random=6",
+    imageUrl: fixtureImage("event-cover", 0),
   },
 };
 
@@ -208,14 +209,12 @@ export const MobileView: Story = {
 // They are vr-tagged individually rather than via meta.tags so the existing
 // 14 legacy NewsCard stories don't get baselined as a side effect.
 
-// Seeded picsum URLs (`/seed/{seed}/{w}/{h}`) return the same image content
-// regardless of the upstream width Next.js Image requests for a given
-// viewport — necessary for cross-viewport VR determinism. The legacy
-// `?random=N` URLs are width-dependent and produce mobile/desktop drift.
+// Local fixture URLs are deterministic across viewports and runs, so VR
+// baselines are stable regardless of upstream width Next.js Image requests.
 const phase4SharedArgs = {
   title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
   href: "/nieuws/derby-overwinning",
-  imageUrl: "https://picsum.photos/seed/kcvv-news-1/800/500",
+  imageUrl: fixtureImage("article-hero-matchverslag", 0),
   imageAlt: "Derby match",
   badge: "Competitie",
   date: "15 januari 2025",
@@ -251,13 +250,13 @@ export const RotationCycle: Story = {
   tags: ["vr"],
   render: () => (
     <div className="grid max-w-5xl grid-cols-2 gap-12 p-12">
-      {(["a", "b", "c", "d"] as const).map((r) => (
+      {(["a", "b", "c", "d"] as const).map((r, i) => (
         <NewsCard
           key={r}
           {...phase4SharedArgs}
           rotation={r}
           aspectRatio="landscape-16-9"
-          imageUrl={`https://picsum.photos/seed/kcvv-news-rot-${r}/800/500`}
+          imageUrl={fixtureImage("article-hero-matchverslag", i)}
         />
       ))}
     </div>

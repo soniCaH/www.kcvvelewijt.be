@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TeamFeaturedCard } from "./TeamFeaturedCard";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Teams/TeamFeaturedCard",
@@ -23,7 +24,7 @@ export const WithPhoto: Story = {
       division: "4C",
       divisionFull: "4de Provinciale C",
       tagline: null,
-      teamImageUrl: "https://picsum.photos/800/600",
+      teamImageUrl: fixtureImage("team-group", 0),
       staff: null,
     },
     label: "Tweede ploeg",

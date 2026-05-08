@@ -9,6 +9,7 @@ import type {
   RelatedStaffItem,
   RelatedContentItem,
 } from "../types";
+import { fixtureImage } from "@test-fixtures/images";
 
 const articles: RelatedArticleItem[] = [
   {
@@ -18,7 +19,7 @@ const articles: RelatedArticleItem[] = [
     title:
       "Wedstrijdverslag: KCVV pakt drie punten in derby tegen Boortmeerbeek",
     slug: "verslag-derby",
-    imageUrl: "https://picsum.photos/seed/derby/1200/800",
+    imageUrl: fixtureImage("article-hero-matchverslag", 0),
     date: "2026-04-12T15:00:00Z",
     excerpt:
       "Een doelpuntenrijke namiddag in Elewijt levert KCVV de derde overwinning op rij op. De jonge spits scoorde twee keer en bezorgde het thuispubliek een onvergetelijke middag.",
@@ -29,7 +30,7 @@ const articles: RelatedArticleItem[] = [
     id: "art-2",
     title: "Interview met de kapitein voor de bekerfinale",
     slug: "interview-kapitein",
-    imageUrl: "https://picsum.photos/seed/captain/1200/800",
+    imageUrl: fixtureImage("article-hero-interview", 0),
     date: "2026-04-08T09:00:00Z",
     excerpt:
       "De kapitein blikt vooruit op de belangrijkste match van het seizoen.",
@@ -40,7 +41,7 @@ const articles: RelatedArticleItem[] = [
     id: "art-3",
     title: "Herfststage 2026: inschrijvingen open",
     slug: "herfststage-2026",
-    imageUrl: "https://picsum.photos/seed/stage/1200/800",
+    imageUrl: fixtureImage("article-hero-jeugd", 0),
     date: "2026-04-01T10:00:00Z",
     excerpt: null,
   },
@@ -50,7 +51,7 @@ const articles: RelatedArticleItem[] = [
     id: "art-4",
     title: "Word trainer bij de plezantste compagnie",
     slug: "word-trainer",
-    imageUrl: "https://picsum.photos/seed/coach/1200/800",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     date: "2026-03-28T10:00:00Z",
     excerpt: null,
   },
@@ -60,7 +61,7 @@ const articles: RelatedArticleItem[] = [
     id: "art-5",
     title: "Nieuwe kantineopening na de zomervakantie",
     slug: "kantine-opening",
-    imageUrl: "https://picsum.photos/seed/canteen/1200/800",
+    imageUrl: fixtureImage("article-hero-generic", 1),
     date: "2026-03-22T10:00:00Z",
     excerpt: null,
   },
@@ -73,7 +74,7 @@ const pages: RelatedPageItem[] = [
     id: "page-1",
     title: "Praktische informatie voor nieuwe spelers",
     slug: "aansluiten",
-    imageUrl: "https://picsum.photos/seed/info/1200/800",
+    imageUrl: fixtureImage("article-hero-generic", 2),
     excerpt: "Alles over inschrijven, lidgeld en uitrusting.",
   },
 ];
@@ -86,7 +87,7 @@ const players: RelatedPlayerItem[] = [
     firstName: "Lirian",
     lastName: "Zumberaj",
     position: "Aanvaller",
-    imageUrl: "https://picsum.photos/seed/lirian/200/200",
+    imageUrl: fixtureImage("player-portrait-square", 0),
     psdId: "12345",
   },
   {
@@ -96,7 +97,7 @@ const players: RelatedPlayerItem[] = [
     firstName: "Jan",
     lastName: "Janssens",
     position: "Middenvelder",
-    imageUrl: "https://picsum.photos/seed/jan/200/200",
+    imageUrl: fixtureImage("player-portrait-square", 1),
     psdId: "23456",
   },
   {
@@ -117,7 +118,7 @@ const team: RelatedTeamItem = {
   id: "t-1",
   name: "Eerste Elftal A",
   slug: "eerste-elftal-a",
-  imageUrl: "https://picsum.photos/seed/team-a/300/200",
+  imageUrl: fixtureImage("team-group", 0),
   tagline: "3e Nationale A",
 };
 
@@ -127,7 +128,7 @@ const curatedTeam: RelatedTeamItem = {
   id: "t-2",
   name: "U17 — Wit",
   slug: "u17-wit",
-  imageUrl: "https://picsum.photos/seed/team-u17/300/200",
+  imageUrl: fixtureImage("team-group", 1),
   tagline: "Provinciaal",
 };
 
@@ -138,7 +139,7 @@ const staff: RelatedStaffItem = {
   firstName: "Marc",
   lastName: "Vermeulen",
   role: "Hoofdtrainer",
-  imageUrl: "https://picsum.photos/seed/marc/200/200",
+  imageUrl: fixtureImage("staff-portrait", 0),
 };
 
 const curatedStaff: RelatedStaffItem = {
@@ -148,7 +149,7 @@ const curatedStaff: RelatedStaffItem = {
   firstName: "Sofie",
   lastName: "De Backer",
   role: "Jeugdcoördinator",
-  imageUrl: "https://picsum.photos/seed/sofie/200/200",
+  imageUrl: fixtureImage("staff-portrait", 1),
 };
 
 const curatedEvent: RelatedEventItem = {
@@ -159,7 +160,7 @@ const curatedEvent: RelatedEventItem = {
   slug: "spaghetti-avond-2026",
   dateStart: "2026-05-15T18:00:00Z",
   dateEnd: "2026-05-15T22:00:00Z",
-  imageUrl: "https://picsum.photos/seed/spaghetti/1200/800",
+  imageUrl: fixtureImage("event-cover", 0),
 };
 
 const curatedEventNoImage: RelatedEventItem = {

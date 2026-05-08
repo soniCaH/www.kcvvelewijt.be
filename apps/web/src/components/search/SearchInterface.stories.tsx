@@ -8,6 +8,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SearchInterface } from "./SearchInterface";
 import type { SearchResponse } from "@/types/search";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Search/SearchInterface",
@@ -34,7 +35,7 @@ const mockResponse: SearchResponse = {
       description:
         "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen van de stadsrivaal.",
       url: "/nieuws/kcvv-elewijt-wint",
-      imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match",
+      imageUrl: fixtureImage("article-hero-matchverslag", 0),
       tags: ["A-ploeg", "Wedstrijdverslag"],
       date: "2026-01-15T10:00:00Z",
     },
@@ -45,7 +46,7 @@ const mockResponse: SearchResponse = {
       description:
         "Zaterdag ontvangt KCVV Elewijt Racing Mechelen op eigen veld.",
       url: "/nieuws/voorbeschouwing-racing-mechelen",
-      imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Preview",
+      imageUrl: fixtureImage("article-hero-generic", 0),
       tags: ["A-ploeg", "Voorbeschouwing"],
       date: "2026-01-10T08:00:00Z",
     },
@@ -55,7 +56,7 @@ const mockResponse: SearchResponse = {
       title: "Kevin De Smedt",
       description: "Aanvaller — A-ploeg",
       url: "/spelers/kevin-de-smedt",
-      imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=KDS",
+      imageUrl: fixtureImage("player-portrait-square", 0),
     },
     {
       id: "4",
@@ -63,7 +64,7 @@ const mockResponse: SearchResponse = {
       title: "Jonas Van Acker",
       description: "Doelman — A-ploeg",
       url: "/spelers/jonas-van-acker",
-      imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JVA",
+      imageUrl: fixtureImage("player-portrait-square", 1),
     },
     {
       id: "5",
@@ -71,7 +72,7 @@ const mockResponse: SearchResponse = {
       title: "A-Ploeg",
       description: "Eerste ploeg — Nationale 1",
       url: "/ploegen/a-ploeg",
-      imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
+      imageUrl: fixtureImage("team-group", 0),
     },
   ],
   count: 5,

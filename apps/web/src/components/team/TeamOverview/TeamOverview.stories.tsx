@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TeamOverview } from "./TeamOverview";
+import { fixtureImage } from "@test-fixtures/images";
 
 // Mock team data matching Drupal API structure
 const MOCK_TEAMS = {
@@ -33,7 +34,7 @@ const MOCK_TEAMS = {
       name: "A-Ploeg",
       slug: "a-ploeg",
       tagline: "The A-Team",
-      imageUrl: "https://picsum.photos/seed/ateam/400/300",
+      imageUrl: fixtureImage("team-group", 0),
     },
     { name: "B-Ploeg", slug: "b-ploeg", tagline: "The B-Team" },
     { name: "Veteranen", slug: "veteranen", tagline: "Vets" },

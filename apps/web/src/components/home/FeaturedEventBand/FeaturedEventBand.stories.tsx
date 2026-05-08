@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DateTime } from "luxon";
 import { FeaturedEventBand } from "./FeaturedEventBand";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Homepage/FeaturedEventBand",
@@ -34,9 +35,8 @@ const baseEvent = {
   slug: "sponsorfeest-2026",
   // 19:00 Europe/Brussels (CEST in April) — component pins formatting to BE.
   dateStart: "2026-04-26T17:00:00.000Z",
-  // placehold.co — byte-stable SVG, see #1672 follow-up.
   coverImage: {
-    url: "https://placehold.co/900x500/008755/f0c264?text=Sponsorfeest",
+    url: fixtureImage("event-cover", 0),
     alt: "Sponsorfeest 2026 visual",
   },
   externalLink: {
@@ -67,7 +67,7 @@ export const MultiDay: Story = {
       dateStart: "2026-07-06T08:00:00.000Z",
       dateEnd: "2026-07-10T15:00:00.000Z",
       coverImage: {
-        url: "https://placehold.co/900x500/4acf52/0a0a0a?text=Jeugdkampweek",
+        url: fixtureImage("event-cover", 1),
         alt: "Jeugdkampweek 2026",
       },
       location: "Sportzone Elewijt",

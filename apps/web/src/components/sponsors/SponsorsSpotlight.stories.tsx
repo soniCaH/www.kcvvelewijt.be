@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SponsorsSpotlight } from "./SponsorsSpotlight";
 import type { SpotlightSponsor } from "./SponsorsSpotlight";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Sponsors/SponsorsSpotlight",
@@ -24,7 +25,7 @@ const mockSpotlight: SpotlightSponsor[] = [
   {
     id: "1",
     name: "Bakkerij De Smet",
-    logo: "https://placehold.co/400x300/4B9B48/FFFFFF?text=Bakkerij+De+Smet",
+    logo: fixtureImage("sponsor-logo", 0),
     url: "https://example.com/bakkerij-de-smet",
     description:
       "Al meer dan 30 jaar trouwe partner van KCVV Elewijt. Vers brood en gebak voor de hele regio.",
@@ -32,7 +33,7 @@ const mockSpotlight: SpotlightSponsor[] = [
   {
     id: "2",
     name: "Garage Van Acker",
-    logo: "https://placehold.co/400x300/4acf52/FFFFFF?text=Garage+Van+Acker",
+    logo: fixtureImage("sponsor-logo", 1),
     url: "https://example.com/garage-van-acker",
     description:
       "Officieel dealer van Ford en Volkswagen. Rijdt u ook mee met KCVV?",
@@ -40,7 +41,7 @@ const mockSpotlight: SpotlightSponsor[] = [
   {
     id: "3",
     name: "Immobiliën Claes",
-    logo: "https://placehold.co/400x300/31404b/FFFFFF?text=Immo+Claes",
+    logo: fixtureImage("sponsor-logo", 2),
     description: "Uw vastgoedspecialist in de regio Elewijt en omstreken.",
   },
 ];

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { SanityArticleBody } from "./SanityArticleBody";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Articles/SanityArticleBody",
@@ -48,7 +49,7 @@ const imageBlock = (alt: string, fullBleed = false): PortableTextBlock =>
     _type: "image",
     _key: `img-${alt.slice(0, 5)}`,
     asset: {
-      url: `https://placehold.co/800x450/4acf52/fff?text=${encodeURIComponent(alt)}`,
+      url: fixtureImage("article-hero-generic", 0),
     },
     alt,
     width: 800,

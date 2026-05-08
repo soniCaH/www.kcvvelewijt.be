@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { InterviewHero } from "./InterviewHero";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
+import { fixtureImage } from "@test-fixtures/images";
 
 const playerFull: IndexedSubject = {
   _key: "k1",
@@ -63,8 +64,7 @@ const JEROEN: IndexedSubject = {
     jerseyNumber: 5,
     position: "Verdediger",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1568572933382-74d440642117?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 0),
   },
 };
 
@@ -77,8 +77,7 @@ const THOMAS: IndexedSubject = {
     jerseyNumber: 11,
     position: "Aanvaller",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1605235186583-a65c4f4d1c3a?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 1),
   },
 };
 
@@ -91,8 +90,7 @@ const LUC: IndexedSubject = {
     jerseyNumber: 3,
     position: "Keeper",
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 2),
   },
 };
 
@@ -100,8 +98,7 @@ const playerFullPhoto: IndexedSubject = {
   ...playerFull,
   playerRef: {
     ...(playerFull.playerRef ?? {}),
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 3),
   },
 };
 
@@ -115,8 +112,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const COVER =
-  "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=80";
+const COVER = fixtureImage("article-hero-interview", 0);
 
 // N=1 variants — kicker meta populated for players, bare for staff/custom.
 

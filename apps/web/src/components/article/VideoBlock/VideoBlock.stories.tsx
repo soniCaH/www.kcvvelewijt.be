@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { VideoBlock } from "./VideoBlock";
+import { fixtureImage } from "@test-fixtures/images";
 
 /**
  * Phase 1 (#1363) shipped the upload path; Phase 2 (#1364) added the
@@ -12,12 +13,11 @@ import { VideoBlock } from "./VideoBlock";
  * on Google's gtv-videos-bucket — a long-standing open reference clip
  * used across the web video testing ecosystem, picked here so the story
  * doesn't depend on any private or ephemeral asset. Poster fixtures use
- * picsum.photos with stable seeds so the same image renders every time.
+ * local test fixtures so the same image renders every time.
  */
 const SAMPLE_MP4_URL =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-const SAMPLE_POSTER_URL =
-  "https://picsum.photos/seed/kcvv-video-poster/1280/720";
+const SAMPLE_POSTER_URL = fixtureImage("article-hero-generic", 0);
 
 const meta = {
   title: "Features/Articles/VideoBlock",
