@@ -22,12 +22,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Seeded picsum URLs for VR determinism — see #1671 follow-up. The slot
-// suffix doubles as a stable cross-browser image-content marker.
+// placehold.co URLs render text-on-color SVG — byte-stable across runs.
+// Picsum's "/seed/" endpoint is best-effort deterministic and observed to
+// return different images cross-environment for the same seed/dim tuple
+// (#1695 tablet diff), so we avoid it on VR-tagged stories. Per-slot colour
+// keeps the stories visually distinct when reviewing baselines.
+const SLOT_BG = ["4acf52", "008755", "1e2024", "ffd700", "008755"];
 const article = (slot: number, title: string, tag: string) => ({
   href: `/nieuws/slot-${slot}`,
   title,
-  imageUrl: `https://picsum.photos/seed/kcvv-news-grid-${slot}/900/500`,
+  imageUrl: `https://placehold.co/900x500/${SLOT_BG[slot]}/fff?text=Slot+${slot}`,
   imageAlt: title,
   date: `${15 + slot} mei 2025`,
   tags: [{ name: tag }],
