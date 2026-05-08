@@ -7,6 +7,12 @@ export type {
 export { NewsGrid } from "./NewsGrid";
 export type { NewsGridProps, NewsGridArticle } from "./NewsGrid";
 
+export { FeaturedEventBand } from "./FeaturedEventBand";
+export type {
+  FeaturedEventBandProps,
+  FeaturedEventBandEvent,
+} from "./FeaturedEventBand";
+
 export { NewsCard } from "@/components/article/NewsCard";
 export type { NewsCardProps } from "@/components/article/NewsCard";
 
