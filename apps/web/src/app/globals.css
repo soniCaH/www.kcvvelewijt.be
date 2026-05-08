@@ -363,6 +363,14 @@
   --color-jersey:       #4acf52;
   --color-jersey-deep:  #008755;
   --color-jersey-bright: #22c55e;
+  /* Desaturated retro forest — third stop of `--gradient-jersey-deep-overlay`
+     and any darker-jersey accent (e.g. <TapeStrip warm> story border).
+     Locked at #133d28 (not the brand-darker #005a39) by #1700 round-8c.B. */
+  --color-jersey-deep-dark: #133d28;
+
+  /* Warm yellow — accent text (#1698), tape (`--tape-warm`), button stripes.
+     Single source of truth for the hue; alpha variants derive via color-mix. */
+  --color-warm:         #f0c264;
 
   /* Edges */
   --color-paper-edge:   #d9d2bd;
@@ -418,8 +426,9 @@
   --rotate-tape-d:      0.5deg;
 
   /* Warm-yellow tape — Phase 4. Used on jersey-deep surfaces where the
-     default jersey-green tape lacks contrast (e.g. <FeaturedEventBand>). */
-  --tape-warm:         rgba(240, 194, 100, 0.85);
+     default jersey-green tape lacks contrast (e.g. <FeaturedEventBand>).
+     Derives from `--color-warm` so the hue lives in exactly one place. */
+  --tape-warm:         color-mix(in srgb, var(--color-warm) 85%, transparent);
 
   --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
   --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
@@ -448,6 +457,32 @@
     -45deg,
     var(--color-ink) 0 8px,
     var(--color-cream) 8px 16px
+  );
+
+  /* Risograph halftone — cream dots @ 5% on an 8x8 grid.
+     Consumer applies `background-size: 8px 8px; mix-blend-mode: screen`.
+     Layered over `--gradient-jersey-deep-overlay` on jersey-deep photo
+     surfaces (<YouthBackdrop>) to add print texture without competing
+     with the photo. Locked by #1700 round-8c.D after iterating
+     0.18 → 0.10 → 0.05 alpha. */
+  --pattern-halftone-dots: radial-gradient(
+    circle at 1px 1px,
+    rgb(from var(--color-cream) r g b / 0.05) 1px,
+    transparent 1.6px
+  );
+
+  /* ===== Redesign / Gradient Tokens (Phase 4) ===== */
+
+  /* Composed jersey-deep photo overlay — locked by #1700 round-8c.B.
+     Three stops at 88/65/92 alpha steps; third stop lands on the
+     desaturated `--color-jersey-deep-dark`. Reusable on any future
+     jersey-deep photographic surface. Consumer overrides direction
+     (e.g. `to bottom` on mobile) at the call site. */
+  --gradient-jersey-deep-overlay: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-jersey-deep) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-jersey-deep) 65%, transparent) 60%,
+    color-mix(in srgb, var(--color-jersey-deep-dark) 92%, transparent) 100%
   );
 
   /* ===== Redesign / Retro semantic palette (Phase 2) =====

@@ -94,6 +94,9 @@ export const ShortLength: Story = {
 
 // Warm-yellow tape on a jersey-deep panel — the contrast pairing this
 // variant exists for. <FeaturedEventBand> (#1677) is the first consumer.
+// The `bg-jersey-deep` + `border-jersey-deep-dark` utilities double as the
+// smoke test that the new tokens (#1697) reach Tailwind via `@theme` —
+// if either utility doesn't generate, the panel renders unstyled.
 export const WarmOnJerseyDeep: Story = {
   args: { color: "warm", length: "lg" },
   decorators: [
@@ -103,11 +106,9 @@ export const WarmOnJerseyDeep: Story = {
           {
             "--tape-rotation": "var(--rotate-tape-a)",
             "--tape-left": "12%",
-            backgroundColor: "var(--color-jersey-deep)",
-            borderColor: "#005a39",
           } as CSSProperties
         }
-        className="relative h-40 w-64 border"
+        className="bg-jersey-deep border-jersey-deep-dark relative h-40 w-64 border"
       >
         <Story />
       </div>
