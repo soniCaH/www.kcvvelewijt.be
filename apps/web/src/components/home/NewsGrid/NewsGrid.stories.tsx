@@ -89,8 +89,13 @@ export const Empty: Story = {
   args: { ...Default5.args, articles: [] },
 };
 
+// MobileView is a docs-only convenience for previewing the 1+2+2 mobile
+// collapse in Storybook. Tagged "vr-skip" because the VR runner already
+// captures Default5 at desktop / tablet / mobile viewports, and MobileView
+// shares Default5.args — running VR on it would only duplicate the existing
+// default-5--mobile baseline.
 export const MobileView: Story = {
   args: Default5.args,
   globals: { viewport: { value: "mobile1" } },
-  tags: ["autodocs"],
+  tags: ["vr-skip"],
 };
