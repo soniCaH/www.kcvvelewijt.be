@@ -417,6 +417,10 @@
   --rotate-tape-c:      0.25deg;
   --rotate-tape-d:      0.5deg;
 
+  /* Warm-yellow tape — Phase 4. Used on jersey-deep surfaces where the
+     default jersey-green tape lacks contrast (e.g. <FeaturedEventBand>). */
+  --tape-warm:         rgba(240, 194, 100, 0.85);
+
   --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
   --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
   --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);

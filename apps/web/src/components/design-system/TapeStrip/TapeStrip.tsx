@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export type TapeStripColor = "jersey" | "ink" | "cream";
+export type TapeStripColor = "jersey" | "ink" | "cream" | "warm";
 export type TapeStripLength = "sm" | "md" | "lg";
 
 export interface TapeStripProps {
@@ -18,6 +18,10 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
   jersey: "bg-jersey",
   ink: "bg-ink",
   cream: "bg-cream",
+  // Warm uses an inline background-color sourced from --tape-warm. The
+  // token lives on :root so it cannot be expressed as a Tailwind utility
+  // without polluting the color theme namespace with a tape-specific value.
+  warm: "",
 };
 
 // Single canonical placement: tape sits centered on the card's top edge,
@@ -30,6 +34,9 @@ const TAPE_TRANSFORM =
 
 export function TapeStrip({ color = "jersey", length = "lg" }: TapeStripProps) {
   const style: CSSProperties = { transform: TAPE_TRANSFORM };
+  if (color === "warm") {
+    style.backgroundColor = "var(--tape-warm)";
+  }
   return (
     <span
       data-color={color}
