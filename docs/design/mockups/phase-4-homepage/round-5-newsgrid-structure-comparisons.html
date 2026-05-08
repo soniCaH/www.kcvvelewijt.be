@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 5 · NewsGrid structure</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1320px;
+        margin: 0 auto 28px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate header {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin: 4px 0 6px;
+      }
+      .candidate header .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        max-width: 60ch;
+      }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--cream-soft);
+        padding: 28px 24px 32px;
+      }
+      .section-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .section-title .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+      }
+      .section-title .all {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* ===== Card primitive ===== */
+      .card {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 8px 8px 10px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .card .tape {
+        position: absolute;
+        top: -8px;
+        width: 44px;
+        height: 12px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .card .tape.right { right: 14px; transform: rotate(3deg); left: auto; }
+      .card .tape.left { left: 14px; }
+      .card.rot-a { transform: rotate(-0.4deg); }
+      .card.rot-b { transform: rotate(0.4deg); }
+      .card.rot-c { transform: rotate(-0.8deg); }
+      .card.rot-d { transform: rotate(0.8deg); }
+      .card.rot-flat { transform: none; }
+      .card .img {
+        width: 100%;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        position: relative;
+      }
+      .card .img.alt-2 { background: linear-gradient(135deg, #4d2a2a 0%, #c19a4a 100%); }
+      .card .img.alt-3 { background: linear-gradient(135deg, #2a3a4d 0%, #4a8ac1 100%); }
+      .card .img.alt-4 { background: linear-gradient(135deg, #3a2a4d 0%, #8a4ac1 100%); }
+      .card .img.alt-5 { background: linear-gradient(135deg, #4d3a2a 0%, #c17a4a 100%); }
+      .card .img.alt-6 { background: linear-gradient(135deg, #2a4d4d 0%, #4ac1c1 100%); }
+      .card .img.aspect-16-9 { aspect-ratio: 16 / 9; }
+      .card .img.aspect-square { aspect-ratio: 1 / 1; }
+      .card .img.aspect-3-4 { aspect-ratio: 3 / 4; }
+      .card.text-only { background: var(--ink); color: var(--cream); }
+      .card.text-only .pill { background: var(--cream); color: var(--ink); }
+      .card .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 2px 5px;
+        width: fit-content;
+      }
+      .card .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      .card.lg .h { font-size: 22px; }
+      .card .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .card.text-only .meta { opacity: 0.7; }
+      .card.text-only .h { font-size: 16px; }
+      .card.lead .h { font-size: 26px; }
+
+      /* ===== N.1 — Strict 3×2 uniform ===== */
+      .grid-n1 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, auto);
+        gap: 16px;
+      }
+      @media (max-width: 880px) {
+        .grid-n1 { grid-template-columns: 1fr 1fr; }
+      }
+      @media (max-width: 600px) {
+        .grid-n1 { grid-template-columns: 1fr; }
+      }
+
+      /* ===== N.2 — Broadsheet lead + 5 ===== */
+      .grid-n2 {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 16px;
+      }
+      .n2-lead {
+        grid-column: 1 / 2;
+        grid-row: 1 / 3;
+        display: flex;
+        flex-direction: column;
+      }
+      @media (max-width: 880px) {
+        .grid-n2 { grid-template-columns: 1fr 1fr; }
+        .n2-lead { grid-column: 1 / 3; grid-row: auto; }
+      }
+      @media (max-width: 600px) {
+        .grid-n2 { grid-template-columns: 1fr; }
+        .n2-lead { grid-column: 1 / 2; }
+      }
+
+      /* ===== N.3 — Asymmetric editorial ===== */
+      .grid-n3 {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: minmax(180px, auto);
+        gap: 16px;
+      }
+      .n3-portrait { grid-column: span 4; grid-row: span 2; }
+      .n3-square-1 { grid-column: span 4; grid-row: span 1; }
+      .n3-square-2 { grid-column: span 4; grid-row: span 1; }
+      .n3-wide-1 { grid-column: span 4; grid-row: span 1; }
+      .n3-wide-2 { grid-column: span 4; grid-row: span 1; }
+      .n3-wide-3 { grid-column: span 4; grid-row: span 1; }
+      @media (max-width: 880px) {
+        .grid-n3 { grid-template-columns: repeat(6, 1fr); }
+        .n3-portrait { grid-column: span 6; grid-row: auto; }
+        .n3-square-1, .n3-square-2 { grid-column: span 3; }
+        .n3-wide-1, .n3-wide-2, .n3-wide-3 { grid-column: span 6; }
+      }
+      @media (max-width: 600px) {
+        .grid-n3 { grid-template-columns: 1fr; }
+        .n3-portrait, .n3-square-1, .n3-square-2,
+        .n3-wide-1, .n3-wide-2, .n3-wide-3 { grid-column: span 1; }
+      }
+
+      /* ===== N.4 — Mixed 2-row ===== */
+      .grid-n4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: auto auto;
+        gap: 16px;
+      }
+      .n4-row1-a { grid-column: span 2; }
+      .n4-row1-b { grid-column: span 2; }
+      .n4-row2 { grid-column: span 1; }
+      @media (max-width: 880px) {
+        .grid-n4 { grid-template-columns: repeat(2, 1fr); }
+        .n4-row1-a, .n4-row1-b { grid-column: span 2; }
+        .n4-row2 { grid-column: span 1; }
+      }
+      @media (max-width: 600px) {
+        .grid-n4 { grid-template-columns: 1fr; }
+        .n4-row1-a, .n4-row1-b, .n4-row2 { grid-column: span 1; }
+      }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 5 · NewsGrid structure</div>
+      <h1>How is the NewsGrid laid out?</h1>
+      <p>
+        The IA round locked NewsGrid as the body section after the FeaturedEventBand: 6 article
+        cards, no event slot. This round drills the <em>structural arrangement</em> — number of
+        cards, sizes, and how they tile into the page. Aspect-ratio assignment per card and tape
+        rotation rules drill in subsequent sub-rounds.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> NewsGrid receives 6 articles
+      (<code>articles.slice(3, 9)</code> — skipping the 3 hero articles). Aspect-ratio variants
+      available: <code>landscape-16-9 · square · portrait-3-4 · text-only</code>. Below: 4
+      structural arrangements, all rendered with realistic Sanity-shape data.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ N.1 — Strict 3×2 uniform ============ -->
+      <section class="candidate" id="N1">
+        <header>
+          <div>
+            <div class="key">N.1</div>
+            <div class="name">Strict 3×2 uniform</div>
+          </div>
+          <div class="desc">
+            6 equal cards in a 3-column, 2-row grid. All 16:9. Tape rotation alternates per card
+            (a/b/c/d) so the grid feels hand-pasted, not mechanical, but the structure is
+            predictable.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Most predictable for editors<br />
+            + Trivial responsive collapse (3→2→1)<br />
+            − Loses magazine rhythm<br />
+            − Aspect-ratio prop barely used (only 16:9)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">
+            <span class="h">Laatste nieuws</span>
+            <span class="all">Alle berichten →</span>
+          </div>
+          <div class="grid-n1">
+            <div class="card rot-a"><span class="tape left"></span><div class="img alt-2 aspect-16-9"></div><span class="pill">Transfer</span><div class="h">Wim G. tekent voor 2 seizoenen.</div><div class="meta">3 mei · door redactie</div></div>
+            <div class="card rot-b"><span class="tape right"></span><div class="img alt-3 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">U17 wint van VKT met 3-1.</div><div class="meta">28 apr · door Tom Janssens</div></div>
+            <div class="card rot-c"><span class="tape left"></span><div class="img alt-4 aspect-16-9"></div><span class="pill">Aankondiging</span><div class="h">Inschrijvingen jeugd geopend.</div><div class="meta">25 apr · door redactie</div></div>
+            <div class="card rot-d"><span class="tape right"></span><div class="img alt-5 aspect-16-9"></div><span class="pill">Aankondiging</span><div class="h">Trainingsschema mei online.</div><div class="meta">22 apr · door redactie</div></div>
+            <div class="card rot-a"><span class="tape left"></span><div class="img alt-6 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">Reserves veroveren punt op het veld.</div><div class="meta">20 apr · door Tom Janssens</div></div>
+            <div class="card rot-b"><span class="tape right"></span><div class="img aspect-16-9"></div><span class="pill">Aankondiging</span><div class="h">Nieuwe truitjes binnenkort beschikbaar.</div><div class="meta">18 apr · door redactie</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ N.2 — Broadsheet lead + 5 supporting ============ -->
+      <section class="candidate" id="N2">
+        <header>
+          <div>
+            <div class="key">N.2</div>
+            <div class="name">Broadsheet · lead + 5 supporting</div>
+          </div>
+          <div class="desc">
+            One large lead card on the left (2 col × 2 row, 16:9 large image, bigger headline). Right
+            side: 5 stacked smaller cards (mix of 16:9 and text-only). Reads as a printed front
+            page below the masthead.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Strong editorial weight on the lead<br />
+            + Full aspect-ratio prop usage<br />
+            − Lead repeats the EditorialHero's "spotlight one article" pattern<br />
+            − 5 stacked cards on right tightens text
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">
+            <span class="h">Laatste nieuws</span>
+            <span class="all">Alle berichten →</span>
+          </div>
+          <div class="grid-n2">
+            <div class="card rot-a lead n2-lead">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img alt-2 aspect-16-9"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent voor twee seizoenen.</div>
+              <div class="meta">3 mei · door redactie · 4 min lezen</div>
+            </div>
+            <div class="card rot-b"><span class="tape right"></span><div class="img alt-3 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">U17 wint 3-1.</div><div class="meta">28 apr</div></div>
+            <div class="card rot-c"><span class="tape left"></span><div class="img alt-4 aspect-16-9"></div><span class="pill">Aank.</span><div class="h">Inschrijvingen jeugd.</div><div class="meta">25 apr</div></div>
+            <div class="card rot-d text-only"><span class="pill">Aank.</span><div class="h">Trainingsschema mei online.</div><div class="meta">22 apr · tekst-only</div></div>
+            <div class="card rot-a"><span class="tape right"></span><div class="img alt-6 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">Reserves veroveren punt.</div><div class="meta">20 apr</div></div>
+            <div class="card rot-b text-only"><span class="pill">Aank.</span><div class="h">Nieuwe truitjes binnenkort.</div><div class="meta">18 apr · tekst-only</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ N.3 — Asymmetric editorial ============ -->
+      <section class="candidate" id="N3">
+        <header>
+          <div>
+            <div class="key">N.3</div>
+            <div class="name">Asymmetric editorial · woven 12-col</div>
+          </div>
+          <div class="desc">
+            12-column grid woven with mixed aspects. 1 portrait (3:4, spans 4 cols × 2 rows),
+            2 squares (4 cols each), 3 landscape (4 cols each). Every aspect-ratio variant gets
+            used at least once; the grid feels hand-set.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Most magazine-feeling cadence<br />
+            + Exercises every aspect variant<br />
+            − Slot positions dictate aspect (less editor flexibility)<br />
+            − Responsive collapse needs care
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">
+            <span class="h">Laatste nieuws</span>
+            <span class="all">Alle berichten →</span>
+          </div>
+          <div class="grid-n3">
+            <div class="card rot-a n3-portrait">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img alt-2 aspect-3-4"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent voor twee seizoenen.</div>
+              <div class="meta">3 mei · 4 min lezen</div>
+            </div>
+            <div class="card rot-b n3-square-1"><span class="tape right"></span><div class="img alt-3 aspect-square"></div><span class="pill">Wedstrijd</span><div class="h">U17 wint 3-1.</div></div>
+            <div class="card rot-c n3-square-2"><span class="tape left"></span><div class="img alt-4 aspect-square"></div><span class="pill">Aankondiging</span><div class="h">Inschrijvingen jeugd.</div></div>
+            <div class="card rot-d n3-wide-1"><span class="tape right"></span><div class="img alt-5 aspect-16-9"></div><span class="pill">Aank.</span><div class="h">Trainingsschema mei online.</div></div>
+            <div class="card rot-a n3-wide-2"><span class="tape left"></span><div class="img alt-6 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">Reserves veroveren punt.</div></div>
+            <div class="card rot-b n3-wide-3"><span class="tape right"></span><div class="img aspect-16-9"></div><span class="pill">Aank.</span><div class="h">Nieuwe truitjes binnenkort.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ N.4 — Mixed 2-row ============ -->
+      <section class="candidate" id="N4">
+        <header>
+          <div>
+            <div class="key">N.4</div>
+            <div class="name">Mixed 2-row · 2 large + 4 small</div>
+          </div>
+          <div class="desc">
+            Row 1: 2 large cards side-by-side (one 16:9 landscape, one square). Row 2: 4 smaller
+            equal-width cards (mix of 16:9 + text-only). Compromise between strict-uniform and
+            full asymmetric — predictable rows, varied aspects within rows.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Mid-complexity, predictable<br />
+            + Exercises 16:9 + square + text-only<br />
+            − Portrait 3:4 still unused at this slot<br />
+            − Less hand-pasted than N.3
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title">
+            <span class="h">Laatste nieuws</span>
+            <span class="all">Alle berichten →</span>
+          </div>
+          <div class="grid-n4">
+            <div class="card rot-a lg n4-row1-a">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img alt-2 aspect-16-9"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim G. tekent voor 2 seizoenen.</div>
+              <div class="meta">3 mei · door redactie · 4 min</div>
+            </div>
+            <div class="card rot-b lg n4-row1-b">
+              <span class="tape right"></span>
+              <div class="img alt-3 aspect-square"></div>
+              <span class="pill">Wedstrijd</span>
+              <div class="h">U17 wint van VKT met 3-1.</div>
+              <div class="meta">28 apr · door Tom Janssens</div>
+            </div>
+            <div class="card rot-c n4-row2"><span class="tape left"></span><div class="img alt-4 aspect-16-9"></div><span class="pill">Aank.</span><div class="h">Inschrijvingen jeugd.</div></div>
+            <div class="card rot-d text-only n4-row2"><span class="pill">Aank.</span><div class="h">Trainingsschema mei online.</div><div class="meta">22 apr</div></div>
+            <div class="card rot-a n4-row2"><span class="tape right"></span><div class="img alt-6 aspect-16-9"></div><span class="pill">Wedstrijd</span><div class="h">Reserves veroveren punt.</div></div>
+            <div class="card rot-b text-only n4-row2"><span class="pill">Aank.</span><div class="h">Nieuwe truitjes binnenkort.</div><div class="meta">18 apr</div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>What's the same in every variant.</strong> 6 cards · <code>tags[0]</code> (or
+        articleType once #1470 ships) renders as the MonoLabel pill · publishedAt + author render
+        in the meta line · taped paper card primitive (TapedCard) · canonical press-down hover
+        applied at card level · NewsGrid header reuses Phase 2's <code>&lt;SectionHeader&gt;</code>
+        (now thin wrapper over <code>&lt;EditorialHeading&gt;</code> + <code>&lt;MonoLabelRow&gt;</code>).
+      </p>
+      <p>
+        <strong>What this round does NOT decide.</strong> How aspect-ratio is assigned per card
+        (Round 5b — editor pick? auto by article-type? slot-templated?). Tape rotation pattern
+        (Round 5c — alternating? deterministic by index? randomized? Sanity-driven?). Card hover
+        + click behaviour (Round 5d). Empty / single-card states (Round 5e).
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 6a · Schedule + standings scope</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: rgba(31, 95, 63, 0.12);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 30px; margin: 6px 0 10px; letter-spacing: -0.02em; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .conflict-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: #fff8d6;
+        border: 1px solid #c89500;
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .conflict-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; }
+      .surface { background: var(--cream-soft); padding: 22px 18px; }
+
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 12px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .tab {
+        flex: 1;
+        padding: 8px 12px;
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-align: center;
+        background: transparent;
+        border: 1px solid var(--ink);
+        border-bottom: none;
+      }
+      .tab.active { background: var(--ink); color: var(--cream); }
+      .tab:not(.active) { background: var(--cream-soft); opacity: 0.7; }
+
+      .panel {
+        background: #fff;
+        border: 1px solid var(--ink);
+        border-top: none;
+        box-shadow: var(--shadow-card);
+        padding: 12px 14px;
+        font-size: 12px;
+      }
+      .panel-title {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 10px;
+      }
+      .schedule-row {
+        display: grid;
+        grid-template-columns: 56px 1fr auto;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.18);
+        align-items: center;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .schedule-row:last-child { border-bottom: 0; }
+      .schedule-row .day { font-family: ui-monospace, monospace; font-weight: 700; font-size: 10px; }
+      .schedule-row .time { font-family: ui-monospace, monospace; font-size: 9px; opacity: 0.6; }
+      .schedule-row .teams { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 12px; }
+      .schedule-row .meta { font-family: ui-monospace, monospace; font-size: 8px; opacity: 0.55; letter-spacing: 0.1em; text-transform: uppercase; }
+      .schedule-row .badge { font-family: ui-monospace, monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; padding: 1px 5px; }
+      .schedule-row .badge.home { background: var(--jersey-deep); color: var(--cream); }
+      .schedule-row .badge.away { background: var(--ink); color: var(--cream); }
+      .kcvv { font-weight: 700; }
+
+      table.standings {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+      }
+      table.standings th, table.standings td {
+        text-align: left;
+        padding: 4px 4px;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.18);
+      }
+      table.standings th { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.65; }
+      table.standings .num { text-align: right; font-variant-numeric: tabular-nums; }
+      table.standings tr.kcvv-row {
+        background: var(--jersey-deep-soft);
+        outline: 1.5px solid var(--jersey-deep);
+        outline-offset: -2px;
+      }
+      table.standings tr.kcvv-row .team { font-weight: 700; color: var(--jersey-deep); }
+      table.standings .team { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 12px; }
+      table.standings .pts { font-weight: 700; }
+
+      .picker {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+      .pick {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        background: var(--cream-deep);
+        border: 1px solid var(--ink);
+        cursor: pointer;
+      }
+      .pick.active { background: var(--jersey-deep); color: var(--cream); }
+
+      .note {
+        margin-top: 10px;
+        padding: 8px 10px;
+        background: var(--cream-deep);
+        font-size: 10px;
+        line-height: 1.5;
+        font-family: ui-monospace, monospace;
+        opacity: 0.85;
+      }
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 6a · Scope (precursor to depth)</div>
+      <h1>What scope does each tab cover?</h1>
+      <p>
+        Round 6 locked the L.2 tabs layout, but Round 6b (depth) revealed a real mismatch:
+        all-team schedule paired with single-team standings is incoherent. This round picks the
+        scope of each tab.
+      </p>
+    </header>
+
+    <div class="conflict-banner">
+      <strong>The conflict, clearly stated.</strong>
+      Round 6 mockups showed: Wedstrijden tab = all KCVV teams (A · U17 · U15 · Res …), Stand
+      tab = 1ste provinciale A only. A visitor sees U17 vs Werchter on tab 1, then a 1ste-prov-A
+      table on tab 2 — no way to know where U17 sits in the U17 ranking. Pick a coherent scope
+      per tab below before re-asking schedule depth.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ S.1 — Both A-team only ============ -->
+      <section class="candidate" id="S1">
+        <header>
+          <div class="key">S.1</div>
+          <div class="name">Both A-team only</div>
+          <div class="desc">
+            Wedstrijden = next A-team fixtures · Stand = 1ste prov. A. Internally consistent.
+            Section on the homepage is laser-focused on the senior team. Loses youth / reserves
+            visibility from <code>/</code>.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="tabs">
+            <button class="tab active">Komende A-wedstrijden</button>
+            <button class="tab">Stand 1ste prov. A</button>
+          </div>
+          <div class="panel">
+            <div class="schedule-row">
+              <div><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+              <div><div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge away">UIT</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZA 25/05</div><div class="time">15:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 02/06</div><div class="time">15:00</div></div>
+              <div><div class="teams">FC Werchter — <span class="kcvv">KCVV</span></div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge away">UIT</span>
+            </div>
+          </div>
+          <div class="note">
+            Filters: <code>kcvv_team_id === 1235 (A-ploeg)</code> on the schedule call · standings table for the A-team's group only · "U17 / U15 / Reserves" matches & tables live on per-team pages and <code>/kalender</code> only.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.2 — Both all-team (multi-table picker) ============ -->
+      <section class="candidate" id="S2">
+        <header>
+          <div class="key">S.2</div>
+          <div class="name">Both all-team · multi-table picker</div>
+          <div class="desc">
+            Wedstrijden = all upcoming KCVV matches across teams · Stand = a team-picker
+            (A-ploeg / U21 / U17 / U15 / Res …) with each team's own standings table on
+            selection. Most complete; heaviest UX.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="tabs">
+            <button class="tab">Komende wedstrijden</button>
+            <button class="tab active">Stand</button>
+          </div>
+          <div class="panel">
+            <div class="picker">
+              <span class="pick active">A-PLOEG</span>
+              <span class="pick">U21</span>
+              <span class="pick">U17</span>
+              <span class="pick">U15</span>
+              <span class="pick">RES.</span>
+            </div>
+            <div class="panel-title">Stand A-ploeg · 1ste prov. A</div>
+            <table class="standings">
+              <thead><tr><th>#</th><th>Team</th><th class="num">G</th><th class="num">DP</th><th class="num">Pt</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td><span class="team">RC Mechelen</span></td><td class="num">22</td><td class="num">+34</td><td class="num pts">53</td></tr>
+                <tr><td>2</td><td><span class="team">FC Werchter</span></td><td class="num">22</td><td class="num">+22</td><td class="num pts">48</td></tr>
+                <tr class="kcvv-row"><td>3</td><td><span class="team">KCVV</span></td><td class="num">22</td><td class="num">+18</td><td class="num pts">45</td></tr>
+                <tr><td>4</td><td><span class="team">VK Tildonk</span></td><td class="num">22</td><td class="num">+5</td><td class="num pts">38</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            Schedule call = all upcoming · 5 BFF standings calls (one per active KCVV team-id) — cached. Picker is "use client" — initial render = A-ploeg, click swaps table without server round-trip.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.3 — Mixed scope, named honestly ============ -->
+      <section class="candidate" id="S3">
+        <header>
+          <div class="key">S.3</div>
+          <div class="name">Mixed scope · named honestly</div>
+          <div class="desc">
+            Wedstrijden = all KCVV upcoming matches (community view). Stand =
+            <strong>explicitly A-ploeg only</strong> (label says "Stand A-ploeg"). Conflict
+            acknowledged via labeling: schedule = "what's coming up at the club", standings =
+            "headline rank for the senior team."
+          </div>
+        </header>
+        <div class="surface">
+          <div class="tabs">
+            <button class="tab active">Komende wedstrijden</button>
+            <button class="tab">Stand A-ploeg</button>
+          </div>
+          <div class="panel">
+            <div class="schedule-row">
+              <div><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+              <div><div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div><div class="meta">U17 · gewest.</div></div>
+              <span class="badge away">UIT</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 12/05</div><div class="time">14:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV U15</span> — Tisselt</div><div class="meta">U15 · gewest.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+              <div><div class="teams"><span class="kcvv">Reserves</span> — Steenokkerzeel</div><div class="meta">Reserves · prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+          </div>
+          <div class="note">
+            Schedule = all KCVV teams · Stand tab is explicitly named "Stand A-ploeg" so a visitor checking U17's matches doesn't expect to find U17's table here · per-team standings on team pages.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ S.4 — Drop standings entirely ============ -->
+      <section class="candidate" id="S4">
+        <header>
+          <div class="key">S.4</div>
+          <div class="name">Drop standings · schedule-only block</div>
+          <div class="desc">
+            No tabs. Section becomes a single-purpose <code>&lt;ScheduleBlock&gt;</code> showing
+            all upcoming KCVV matches. Standings live on <code>/ranking</code> (or per-team
+            pages). Cleanest. Loses the "we're 3rd" headline signal from <code>/</code>.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="panel" style="border-top: 1px solid var(--ink);">
+            <div class="panel-title">Komende wedstrijden</div>
+            <div class="schedule-row">
+              <div><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div><div class="meta">A-ploeg · 1ste prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+              <div><div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div><div class="meta">U17 · gewest.</div></div>
+              <span class="badge away">UIT</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZO 12/05</div><div class="time">14:00</div></div>
+              <div><div class="teams"><span class="kcvv">KCVV U15</span> — Tisselt</div><div class="meta">U15 · gewest.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row">
+              <div><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+              <div><div class="teams"><span class="kcvv">Reserves</span> — Steenokkerzeel</div><div class="meta">Reserves · prov.</div></div>
+              <span class="badge home">THUIS</span>
+            </div>
+            <div class="schedule-row" style="opacity: 0.7;">
+              <div></div>
+              <div style="text-align: right; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;">Volledige stand op /ranking →</div>
+              <span></span>
+            </div>
+          </div>
+          <div class="note">
+            Section renamed: <code>&lt;ScheduleStandingsBlock&gt;</code> → <code>&lt;UpcomingMatches&gt;</code> (or similar). Issue #1526 AC list updated. /ranking page unchanged from today (it's a separate phase).
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> S.1 is purest A-team focus (loses youth/reserves
+        visibility on /). S.2 is most complete (heaviest UX — picker + 5 BFF standings calls).
+        S.3 is honest about mixed scope via labels (matches = community, standings = headline
+        only). S.4 simplifies by dropping the second tab entirely (loses headline rank signal).
+      </p>
+      <p>
+        <strong>What this resolves for Round 6b.</strong> If S.1 wins → schedule depth picks
+        next-N A-team fixtures (likely 3 since A plays once a week). If S.2/S.3 win → schedule
+        depth picks next-N across all teams (5 or grouped-by-week makes sense). If S.4 wins →
+        schedule depth picks all-team count, no standings to coordinate with.
+      </p>
+    </div>
+  </body>
+</html>

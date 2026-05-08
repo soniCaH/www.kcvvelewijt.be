@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 5d · NewsCard tape rotation rules</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+        --rot-a: -0.5deg;
+        --rot-b: -0.25deg;
+        --rot-c: 0.25deg;
+        --rot-d: 0.5deg;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 34px; margin: 6px 0 10px; letter-spacing: -0.02em; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 13px; line-height: 1.55; opacity: 0.85; }
+      .candidate header .rule {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        background: rgba(26, 26, 26, 0.06);
+        padding: 4px 8px;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+      .surface {
+        background: var(--cream-soft);
+        padding: 24px 20px 28px;
+      }
+      .grid-D {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 12px;
+        min-height: 320px;
+      }
+      .grid-D .lead { grid-column: 1; grid-row: 1 / 3; }
+      .grid-D .b-2 { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .grid-D .b-3 { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .card {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 6px 6px 8px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        height: 100%;
+      }
+      .card .tape {
+        position: absolute;
+        top: -6px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .card .tape.right { right: 14px; transform: rotate(3deg); left: auto; }
+      .card .tape.left { left: 14px; }
+      .card .img {
+        width: 100%;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        position: relative;
+      }
+      .card .img.alt-2 { background: linear-gradient(135deg, #4d2a2a 0%, #c19a4a 100%); }
+      .card .img.alt-3 { background: linear-gradient(135deg, #2a3a4d 0%, #4a8ac1 100%); }
+      .card .img.alt-4 { background: linear-gradient(135deg, #3a2a4d 0%, #8a4ac1 100%); }
+      .card .img.alt-5 { background: linear-gradient(135deg, #4d3a2a 0%, #c17a4a 100%); }
+      .card .img.fill { flex: 1; min-height: 80px; }
+      .card .pill {
+        display: inline-block;
+        font-family: ui-monospace, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 1px 5px;
+        width: fit-content;
+      }
+      .card .h { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.18; }
+      .card.lead .h { font-size: 16px; }
+
+      /* Rotation classes — production values from globals.css. Subtle by design. */
+      .rot-none { transform: none; }
+      .rot-a { transform: rotate(-0.5deg); }
+      .rot-b { transform: rotate(-0.25deg); }
+      .rot-c { transform: rotate(0.25deg); }
+      .rot-d { transform: rotate(0.5deg); }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+      .annotate-row {
+        margin-top: 10px;
+        font-size: 10px;
+        font-family: ui-monospace, monospace;
+        opacity: 0.65;
+        text-align: center;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 5d · NewsCard rotation</div>
+      <h1>How is tape rotation assigned per NewsCard?</h1>
+      <p>
+        Phase 1's <code>&lt;TapedCardGrid&gt;</code> already established a deterministic-by-slot-index
+        rotation pattern: <code>ROTATION_POOL[index % 4]</code> cycling a/b/c/d (= -0.5° / -0.25° /
+        +0.25° / +0.5°). NewsGrid uses a custom 1+4 layout (not TapedCardGrid), so it picks its
+        own rule but respects the precedent of "deterministic, no run-time randomness."
+      </p>
+      <p>
+        Rotations below render at production values — <code>a = -0.5°</code>, <code>b = -0.25°</code>,
+        <code>c = +0.25°</code>, <code>d = +0.5°</code>. Subtle by design (Phase 0 token spec).
+        At full-page rendering, the difference reads as "hand-pasted" rather than "tilted."
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Geometry D · 50/50 split · 5 cards (1 lead + 2×2
+      supporting) · all 16:9 aspect (C.1). Rotation rule below applies to the rest position only —
+      hover behaviour drills next round.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ T.1 — Slot index cycle ============ -->
+      <section class="candidate" id="T1">
+        <header>
+          <div class="key">T.1</div>
+          <div class="name">Slot index cycle (matches Phase 1 TapedCardGrid)</div>
+          <div class="desc">
+            Treat the 5 cards as a flat indexed list. Slot 0 (lead) → a · Slot 1 → b · Slot 2 →
+            c · Slot 3 → d · Slot 4 → a. Same rule as Phase 1's TapedCardGrid. Lead has subtle
+            rotation; supporting cards cycle the full a/b/c/d range.
+          </div>
+          <div class="rule">slots = [a, b, c, d, a] · cycle(4) by index</div>
+        </header>
+        <div class="surface">
+          <div class="grid-D">
+            <div class="card rot-a lead">
+              <span class="tape left"></span><span class="tape right"></span>
+              <div class="img alt-2 fill"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent.</div>
+            </div>
+            <div class="b-2">
+              <div class="card rot-b"><span class="tape right"></span><div class="img alt-3 fill"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+              <div class="card rot-c"><span class="tape left"></span><div class="img alt-4 fill"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+            </div>
+            <div class="b-3">
+              <div class="card rot-d"><span class="tape right"></span><div class="img alt-5 fill"></div><span class="pill">Aank.</span><div class="h">Training mei.</div></div>
+              <div class="card rot-a"><span class="tape left"></span><div class="img fill"></div><span class="pill">Wedstr.</span><div class="h">Reserves punt.</div></div>
+            </div>
+          </div>
+          <div class="annotate-row">
+            lead = a (-0.5°) · supp1 = b (-0.25°) · supp2 = c (+0.25°) · supp3 = d (+0.5°) · supp4 = a (-0.5°)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ T.2 — Lead anchored, supporting cycle ============ -->
+      <section class="candidate" id="T2">
+        <header>
+          <div class="key">T.2</div>
+          <div class="name">Lead anchored (none) · 4 supporting cycle a/b/c/d</div>
+          <div class="desc">
+            Lead stays flat (rotation=none) — anchors the section visually. The 4 supporting
+            cards cycle a/b/c/d in slot order, matching the TapedCardGrid pattern. Most magazine
+            "lead anchored, edges fluttery" feel.
+          </div>
+          <div class="rule">slots = [none, a, b, c, d]</div>
+        </header>
+        <div class="surface">
+          <div class="grid-D">
+            <div class="card rot-none lead">
+              <span class="tape left"></span><span class="tape right"></span>
+              <div class="img alt-2 fill"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent.</div>
+            </div>
+            <div class="b-2">
+              <div class="card rot-a"><span class="tape right"></span><div class="img alt-3 fill"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+              <div class="card rot-b"><span class="tape left"></span><div class="img alt-4 fill"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+            </div>
+            <div class="b-3">
+              <div class="card rot-c"><span class="tape right"></span><div class="img alt-5 fill"></div><span class="pill">Aank.</span><div class="h">Training mei.</div></div>
+              <div class="card rot-d"><span class="tape left"></span><div class="img fill"></div><span class="pill">Wedstr.</span><div class="h">Reserves punt.</div></div>
+            </div>
+          </div>
+          <div class="annotate-row">
+            lead = none (0°) · supp1 = a (-0.5°) · supp2 = b (-0.25°) · supp3 = c (+0.25°) · supp4 = d (+0.5°)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ T.3 — Symmetric pairs ============ -->
+      <section class="candidate" id="T3">
+        <header>
+          <div class="key">T.3</div>
+          <div class="name">Symmetric pairs · paired toward center</div>
+          <div class="desc">
+            Lead = none. Top-row supporting (1+2) lean outward (a, d). Bottom-row supporting (3+4)
+            lean inward toward the lead (b, c). Cards "frame" the lead. Most designed feel; least
+            organic / fanzine.
+          </div>
+          <div class="rule">slots = [none, a (out), d (out), b (in), c (in)]</div>
+        </header>
+        <div class="surface">
+          <div class="grid-D">
+            <div class="card rot-none lead">
+              <span class="tape left"></span><span class="tape right"></span>
+              <div class="img alt-2 fill"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent.</div>
+            </div>
+            <div class="b-2">
+              <div class="card rot-a"><span class="tape right"></span><div class="img alt-3 fill"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+              <div class="card rot-d"><span class="tape left"></span><div class="img alt-4 fill"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+            </div>
+            <div class="b-3">
+              <div class="card rot-b"><span class="tape right"></span><div class="img alt-5 fill"></div><span class="pill">Aank.</span><div class="h">Training mei.</div></div>
+              <div class="card rot-c"><span class="tape left"></span><div class="img fill"></div><span class="pill">Wedstr.</span><div class="h">Reserves punt.</div></div>
+            </div>
+          </div>
+          <div class="annotate-row">
+            lead = none · top row = a/d (lean outward) · bottom row = b/c (lean inward)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ T.4 — All flat ============ -->
+      <section class="candidate" id="T4">
+        <header>
+          <div class="key">T.4</div>
+          <div class="name">All flat (rotation = none)</div>
+          <div class="desc">
+            No card rotation. The tape strips, hard shadow, and slight crooked pinning of the
+            tape itself create the "stamped onto the page" feel without any per-card rotation.
+            Cleanest, most predictable. Removes a class of subtle visual jitter.
+          </div>
+          <div class="rule">slots = [none, none, none, none, none]</div>
+        </header>
+        <div class="surface">
+          <div class="grid-D">
+            <div class="card rot-none lead">
+              <span class="tape left"></span><span class="tape right"></span>
+              <div class="img alt-2 fill"></div>
+              <span class="pill">Transfer</span>
+              <div class="h">Wim Geeraerts tekent.</div>
+            </div>
+            <div class="b-2">
+              <div class="card rot-none"><span class="tape right"></span><div class="img alt-3 fill"></div><span class="pill">Wedstr.</span><div class="h">U17 wint 3-1.</div></div>
+              <div class="card rot-none"><span class="tape left"></span><div class="img alt-4 fill"></div><span class="pill">Aank.</span><div class="h">Inschr. jeugd.</div></div>
+            </div>
+            <div class="b-3">
+              <div class="card rot-none"><span class="tape right"></span><div class="img alt-5 fill"></div><span class="pill">Aank.</span><div class="h">Training mei.</div></div>
+              <div class="card rot-none"><span class="tape left"></span><div class="img fill"></div><span class="pill">Wedstr.</span><div class="h">Reserves punt.</div></div>
+            </div>
+          </div>
+          <div class="annotate-row">
+            lead = none · all supporting = none · only tape strip + shadow create the paper feel
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Why no random / hash rotation?</strong> Phase 1 deliberately picked deterministic
+        slot-index rotation — same index always gets the same rotation, so the layout is stable across
+        re-renders, page refreshes, and feed changes. T.1 and T.2 follow this. Hashing by slug would
+        keep stability per article but break visual rhythm when the article order changes (next-most-recent
+        would never sit in the same position relative to its siblings).
+      </p>
+      <p>
+        <strong>Tape strip rotation is separate.</strong> Phase 1 also cycles the tape strip's own
+        rotation through 6 values (-1° to -6°) and 4 inset positions (4–12% from edge). That layer
+        of variation is independent of the card body rotation rule chosen here — the tape always
+        looks hand-pasted regardless of which card-rotation rule wins.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> NewsCard hover (Round 5e — canonical press-down per
+        <code>feedback_canonical_press_down_hover</code>). Empty / single-card states (Round 5f).
+        Whether the lead card has its own custom rotation override prop (likely no — the rule
+        should apply identically).
+      </p>
+    </div>
+  </body>
+</html>

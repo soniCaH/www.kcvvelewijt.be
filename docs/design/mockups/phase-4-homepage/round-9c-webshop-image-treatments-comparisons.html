@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 9c · Webshop · jerseys.png treatment</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-deep-dark: #133d28;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 28px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 14px 18px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; max-width: 56ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .meta-line {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 12px;
+      }
+      .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 32px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 14px;
+      }
+      .h .accent { color: var(--jersey-deep); }
+      .lead {
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 50ch;
+        margin: 0 0 16px;
+        opacity: 0.92;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        background: var(--ink);
+        color: var(--cream);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--jersey-deep);
+        text-decoration: none;
+      }
+      .cta .arrow { color: #f0c264; }
+
+      /* ========== T.1 — Polaroid TapedFigure ========== */
+      .t1-surface {
+        background: var(--cream);
+        padding: 36px 28px;
+      }
+      .t1 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .t1 { grid-template-columns: 1fr; } }
+      .polaroid {
+        position: relative;
+        background: var(--cream);
+        padding: 12px 12px 36px;
+        border: 1px solid var(--ink);
+        box-shadow: 6px 6px 0 0 var(--ink);
+        transform: rotate(-1deg);
+        max-width: 480px;
+      }
+      .polaroid::before, .polaroid::after {
+        content: "";
+        position: absolute;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+      }
+      .polaroid::before {
+        top: -10px; left: 24px;
+        width: 60px; height: 14px;
+        transform: rotate(-3deg);
+      }
+      .polaroid::after {
+        top: -8px; right: 30px;
+        width: 50px; height: 12px;
+        transform: rotate(3deg);
+      }
+      .polaroid img {
+        width: 100%;
+        display: block;
+        margin-bottom: 10px;
+      }
+      .polaroid .caption {
+        text-align: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        color: var(--ink);
+        position: absolute;
+        bottom: 12px;
+        left: 0;
+        right: 0;
+      }
+
+      /* ========== T.2 — Section backdrop (blur + gradient) ========== */
+      .t2-surface {
+        position: relative;
+        overflow: hidden;
+        color: var(--cream);
+        min-height: 320px;
+        display: grid;
+        align-items: center;
+        padding: 48px 36px;
+      }
+      .t2-bg {
+        position: absolute;
+        inset: -8px;
+        z-index: 0;
+      }
+      .t2-bg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: blur(3px) brightness(0.7);
+      }
+      .t2-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(31, 95, 63, 0.88) 0%, rgba(19, 61, 40, 0.78) 60%, rgba(19, 61, 40, 0.95) 100%);
+        z-index: 1;
+      }
+      .t2-content {
+        position: relative;
+        z-index: 2;
+        max-width: 620px;
+      }
+      .t2-content .h { color: var(--cream); }
+      .t2-content .h .accent { color: #f0c264; }
+      .t2-content .lead { color: var(--cream); opacity: 0.92; }
+      .t2-content .cta {
+        background: var(--cream);
+        color: var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+      }
+      .t2-content .cta .arrow { color: var(--jersey-deep); }
+
+      /* ========== T.3 — Halftone / duotone print treatment ========== */
+      .t3-surface {
+        background: var(--cream);
+        padding: 36px 28px;
+        position: relative;
+      }
+      .t3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+        align-items: center;
+      }
+      @media (max-width: 880px) { .t3 { grid-template-columns: 1fr; } }
+      .duotone-frame {
+        position: relative;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        transform: rotate(-0.5deg);
+        background: var(--jersey-deep);
+        overflow: hidden;
+      }
+      .duotone-frame::before {
+        content: "";
+        position: absolute;
+        top: -8px; left: 18px;
+        width: 56px; height: 12px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+        z-index: 2;
+      }
+      .duotone-frame img {
+        width: 100%;
+        display: block;
+        filter: grayscale(100%) contrast(1.15) brightness(1.05);
+        mix-blend-mode: multiply;
+      }
+      .duotone-frame .halftone-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle 1px at 1px 1px, rgba(0,0,0,0.55) 1px, transparent 1.5px),
+          var(--jersey-deep);
+        background-size: 4px 4px, 100% 100%;
+        mix-blend-mode: multiply;
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      /* ========== T.4 — Narrow strip background under banner ========== */
+      .t4-surface {
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+      }
+      .t4-strip {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+      }
+      .t4-strip img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 40%;
+        filter: grayscale(60%) brightness(0.92);
+      }
+      .t4-strip::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 0%, transparent 30%, var(--cream) 100%);
+      }
+      .t4-banner {
+        background: var(--cream);
+        padding: 0 28px 32px;
+        margin-top: -50px;
+        position: relative;
+        z-index: 2;
+      }
+      .t4-banner-card {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        padding: 24px 28px;
+        position: relative;
+      }
+      .t4-banner-card::before {
+        content: "";
+        position: absolute;
+        top: -9px; left: 28px;
+        width: 70px; height: 14px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .t4-stack {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
+      }
+      @media (max-width: 700px) { .t4-stack { grid-template-columns: 1fr; } }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 9c · jerseys.png in retro register</div>
+      <h1>Bringing today's jersey photo into the retro vocabulary</h1>
+      <p>
+        Today's <code>/images/jerseys.png</code> is a clean modern flat-lay of 5 KCVV kits.
+        Below: four ways to keep that image in Phase 4 without breaking the fanzine voice.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked.</strong> Webshop section is a pointer to an external supplier (no in-site
+      products). The image is identity-level ("these are our kits") not transactional ("these
+      are products you can buy"). All variants below honour that — no specific-product CTAs.
+      Image source: <code>/images/jerseys.png</code> (existing).
+    </div>
+
+    <div class="container">
+
+      <!-- ========== T.1 — Polaroid TapedFigure ========== -->
+      <section class="candidate" id="T1">
+        <header>
+          <div>
+            <div class="key">T.1</div>
+            <div class="name">Polaroid · taped paper frame</div>
+            <div class="desc">
+              The image sits inside a polaroid-style TapedFigure: cream paper border, two
+              jersey-tape strips, slight rotation, italic caption. The photo is unmodified —
+              fully visible at full clarity. The frame brings it into the retro vocabulary.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Image fully visible, undistorted<br />
+            + Reuses TapedFigure (consistent with NewsCard)<br />
+            − Photo modernity contrasts with cream/ink palette<br />
+            − Polaroid framing makes it feel "pinned up" rather than current
+          </div>
+        </header>
+        <div class="t1-surface">
+          <div class="t1">
+            <div class="polaroid">
+              <img src="/images/jerseys.png" alt="KCVV kits 2025" />
+              <div class="caption">KCVV kits — seizoen 2025</div>
+            </div>
+            <div>
+              <div class="meta-line">Webshop · supplier link</div>
+              <h2 class="h"><span class="accent">Trainingsgear</span><br />en clubpakketten.</h2>
+              <p class="lead">Onze partner levert alle trainingsuitrusting en gepersonaliseerde clubpakketten voor jeugd- en seniorenspelers.</p>
+              <a class="cta">Naar de webshop <span class="arrow">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== T.2 — Backdrop with blur + jersey-deep gradient ========== -->
+      <section class="candidate" id="T2">
+        <header>
+          <div>
+            <div class="key">T.2</div>
+            <div class="name">Section backdrop · blur + jersey-deep gradient (YouthBackdrop pattern)</div>
+            <div class="desc">
+              Image fills the full section background, blurred 3px and darkened, with a
+              jersey-deep gradient overlay (88/78/95). Photo becomes atmospheric texture rather
+              than a literal product shot. Same pattern as YouthBlock for visual consistency.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Same backdrop pattern as YouthBlock — consistent<br />
+            + Photo loses literal product detail (ageing matters less)<br />
+            − Photo content (5 kits) becomes invisible<br />
+            − May feel too similar to YouthBlock if both use this treatment
+          </div>
+        </header>
+        <div class="t2-surface">
+          <div class="t2-bg">
+            <img src="/images/jerseys.png" alt="" />
+          </div>
+          <div class="t2-overlay"></div>
+          <div class="t2-content">
+            <div class="meta-line" style="opacity: 0.85;">Webshop · supplier link</div>
+            <h2 class="h"><span class="accent">Trainingsgear</span><br />en clubpakketten.</h2>
+            <p class="lead">Onze partner levert alle trainingsuitrusting en gepersonaliseerde clubpakketten voor jeugd- en seniorenspelers.</p>
+            <a class="cta">Naar de webshop <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== T.3 — Halftone / duotone print treatment ========== -->
+      <section class="candidate" id="T3">
+        <header>
+          <div>
+            <div class="key">T.3</div>
+            <div class="name">Halftone duotone print · jersey-deep tinted, dot pattern</div>
+            <div class="desc">
+              Image rendered greyscale + jersey-deep multiply blend + halftone dot overlay. Reads
+              as a printed-newspaper photo. Photo content stays partly visible (shapes still
+              recognisable) but enters the printed-zine register fully. Most fanzine treatment.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Strongest fanzine register<br />
+            + Photo enters cream/ink palette without breaking voice<br />
+            − Detail in kits gets sacrificed to dot pattern<br />
+            − CSS-driven halftone is approximate; may not work on all browsers
+          </div>
+        </header>
+        <div class="t3-surface">
+          <div class="t3">
+            <div class="duotone-frame">
+              <img src="/images/jerseys.png" alt="KCVV kits" />
+              <div class="halftone-overlay"></div>
+            </div>
+            <div>
+              <div class="meta-line">Webshop · supplier link</div>
+              <h2 class="h"><span class="accent">Trainingsgear</span><br />en clubpakketten.</h2>
+              <p class="lead">Onze partner levert alle trainingsuitrusting en gepersonaliseerde clubpakketten voor jeugd- en seniorenspelers.</p>
+              <a class="cta">Naar de webshop <span class="arrow">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== T.4 — Narrow image strip + banner card on top ========== -->
+      <section class="candidate" id="T4">
+        <header>
+          <div>
+            <div class="key">T.4</div>
+            <div class="name">Narrow photo strip · banner card overlapping</div>
+            <div class="desc">
+              The image fills a narrow horizontal band (220px tall, mild grayscale 60% + slight
+              brightness reduction). A taped banner card sits halfway over it, holding the
+              headline + CTA. Image is environmental backdrop; the card is the content. Quiet
+              transition between photo and cream paper below.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Image has its own real estate<br />
+            + Banner card carries the message<br />
+            + Strong layered "magazine spread" feel<br />
+            − Banner card mid-overlap is unusual; needs care on mobile
+          </div>
+        </header>
+        <div class="t4-surface">
+          <div class="t4-strip">
+            <img src="/images/jerseys.png" alt="KCVV kits 2025" />
+          </div>
+          <div class="t4-banner">
+            <div class="t4-banner-card">
+              <div class="t4-stack">
+                <div>
+                  <div class="meta-line">Webshop · supplier link</div>
+                  <h2 class="h" style="font-size: 26px;"><span class="accent">Trainingsgear</span> en clubpakketten via onze partner.</h2>
+                  <p class="lead" style="margin-bottom: 0;">Algemene uitrusting + gepersonaliseerde clubpakketten voor jeugd- en seniorenspelers.</p>
+                </div>
+                <a class="cta">Naar de webshop <span class="arrow">↗</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Image asset.</strong> Same <code>/images/jerseys.png</code> in every variant —
+        7.7 MB PNG. For production, ship a smaller WebP at the rendered display size; lazy-load
+        unless the section is above the fold (it isn't).
+      </p>
+      <p>
+        <strong>Out of scope.</strong> Whether the image gets refreshed each season (Phase 7
+        editor concern). Image alt text variants. Whether T.3's halftone effect is implemented in
+        SVG, CSS, or as a pre-processed asset (implementation detail; effect locks first).
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 6 · ScheduleStandingsBlock layout</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: rgba(31, 95, 63, 0.12);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-rest: 4px 4px 0 0 var(--ink);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 32px; margin: 6px 0 10px; letter-spacing: -0.02em; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-rest);
+      }
+      .candidate header {
+        padding: 16px 20px 12px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 13px; line-height: 1.55; opacity: 0.85; max-width: 60ch; }
+      .candidate header .tradeoffs {
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+        font-family: ui-monospace, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--cream-soft);
+        padding: 28px 24px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .section-title .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+      }
+      .section-title .all {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* === Schedule list === */
+      .schedule {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 14px 16px;
+        transform: rotate(-0.25deg);
+      }
+      .schedule .label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 10px;
+      }
+      .schedule-item {
+        display: grid;
+        grid-template-columns: 60px 1fr auto;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.18);
+        align-items: center;
+      }
+      .schedule-item:last-child { border-bottom: 0; }
+      .schedule-item .when {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        line-height: 1.3;
+      }
+      .schedule-item .when .day { font-weight: 700; }
+      .schedule-item .when .time { opacity: 0.6; font-size: 10px; }
+      .schedule-item .matchup {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .schedule-item .matchup .teams {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      .schedule-item .matchup .teams .kcvv { font-weight: 700; }
+      .schedule-item .matchup .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .schedule-item .badge {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 2px 6px;
+      }
+      .schedule-item .badge.home { background: var(--jersey-deep); }
+
+      /* === Standings table === */
+      .standings {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 14px 16px;
+        transform: rotate(0.25deg);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+      }
+      .standings .label {
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 10px;
+      }
+      .standings table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .standings th, .standings td {
+        text-align: left;
+        padding: 5px 4px;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.18);
+      }
+      .standings th {
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.65;
+      }
+      .standings td .pos { font-weight: 700; }
+      .standings td .team {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+      }
+      .standings td .pts { font-weight: 700; }
+      .standings tr.kcvv-row {
+        background: var(--jersey-deep-soft);
+        outline: 2px solid var(--jersey-deep);
+        outline-offset: -2px;
+      }
+      .standings tr.kcvv-row td .team { font-weight: 700; color: var(--jersey-deep); }
+      .standings .num { text-align: right; font-variant-numeric: tabular-nums; }
+      .standings tbody td:first-child { width: 32px; text-align: center; }
+
+      /* === Layouts === */
+      .layout-l1 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .layout-l3 {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .layout-l4 {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .layout-l4 .standings-collapse {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+        padding: 14px 18px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .layout-l4 .standings-collapse .arrow { opacity: 0.6; }
+      @media (max-width: 880px) {
+        .layout-l1 { grid-template-columns: 1fr; }
+      }
+
+      /* === Tabs (L.2) === */
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 16px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .tab {
+        flex: 1;
+        padding: 10px 16px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-align: center;
+        background: transparent;
+        border: 1px solid var(--ink);
+        border-bottom: none;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: var(--ink);
+        color: var(--cream);
+      }
+      .tab:not(.active) { background: var(--cream-soft); opacity: 0.7; }
+      .tab-content {
+        background: #fff;
+        border: 1px solid var(--ink);
+        border-top: none;
+        box-shadow: var(--shadow-card);
+        padding: 14px 16px;
+      }
+      .tab-content.standings table th, .tab-content.standings table td {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+      }
+      .tab-content .label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 10px;
+      }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 6 · ScheduleStandingsBlock layout</div>
+      <h1>Schedule + standings — one block, what shape?</h1>
+      <p>
+        New section in Phase 4 — combines the next several matches with the league standings on a
+        single homepage band. Replaces today's <code>&lt;MatchesSlider&gt;</code> (which only
+        shows matches, no standings). Phase 3 chrome <code>&lt;MatchStrip&gt;</code> still handles
+        the "next match peek" above the hero — this section goes deeper.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Section sits between bannerSlotA and bannerSlotB
+      on the spine (right after NewsGrid). Data: <code>getNextMatches()</code> from BFF
+      (PSD-sourced) + <code>getRanking(teamId=1235)</code> (new homepage call). KCVV row in
+      standings highlighted by <code>team_id === 1235</code>.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ L.1 — Side-by-side split ============ -->
+      <section class="candidate" id="L1">
+        <header>
+          <div>
+            <div class="key">L.1</div>
+            <div class="name">Side-by-side split</div>
+            <div class="desc">
+              Schedule on left, standings on right. Both visible at once. Mobile stacks
+              schedule above standings. Most data exposed without interaction.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Both visible at once<br />
+            + No interaction needed<br />
+            − Doubles horizontal real-estate<br />
+            − Mobile = tall stacked block
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title"><span class="h">Wedstrijden &amp; stand</span></div>
+          <div class="layout-l1">
+            <div class="schedule">
+              <div class="label">Komende wedstrijden</div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+                <div class="matchup">
+                  <div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div>
+                  <div class="meta">U17 · gewest.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div>
+                  <div class="meta">Reserves · prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 25/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+            </div>
+            <div class="standings">
+              <div class="label">Stand · 1ste provinciale A</div>
+              <table>
+                <thead><tr><th>#</th><th>Team</th><th class="num">G</th><th class="num">W</th><th class="num">DP</th><th class="num">Pt</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="pos">1</span></td><td><span class="team">RC Mechelen</span></td><td class="num">22</td><td class="num">17</td><td class="num">+34</td><td class="num pts">53</td></tr>
+                  <tr><td><span class="pos">2</span></td><td><span class="team">FC Werchter</span></td><td class="num">22</td><td class="num">15</td><td class="num">+22</td><td class="num pts">48</td></tr>
+                  <tr class="kcvv-row"><td><span class="pos">3</span></td><td><span class="team">KCVV</span></td><td class="num">22</td><td class="num">14</td><td class="num">+18</td><td class="num pts">45</td></tr>
+                  <tr><td><span class="pos">4</span></td><td><span class="team">VK Tildonk</span></td><td class="num">22</td><td class="num">12</td><td class="num">+5</td><td class="num pts">38</td></tr>
+                  <tr><td><span class="pos">5</span></td><td><span class="team">Steenokkerzeel</span></td><td class="num">22</td><td class="num">11</td><td class="num">+1</td><td class="num pts">35</td></tr>
+                  <tr><td><span class="pos">6</span></td><td><span class="team">SK Heffen</span></td><td class="num">22</td><td class="num">9</td><td class="num">−3</td><td class="num pts">29</td></tr>
+                  <tr><td><span class="pos">…</span></td><td colspan="5" style="text-align: center; opacity: 0.5; font-size: 11px;">Volledige stand op /ranking →</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.2 — Tabs ============ -->
+      <section class="candidate" id="L2">
+        <header>
+          <div>
+            <div class="key">L.2</div>
+            <div class="name">Tabs · "Wedstrijden / Stand"</div>
+            <div class="desc">
+              Two tab buttons; click switches the panel. Default tab = Wedstrijden (matches)
+              since "what's next?" is the more time-sensitive question. Saves vertical space;
+              hides one of the two until interaction.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Compact vertical footprint<br />
+            + Focused single-panel reading<br />
+            − Hides one of the two by default<br />
+            − Requires "use client" component (motion + state)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title"><span class="h">Wedstrijden &amp; stand</span></div>
+          <div class="tabs">
+            <button class="tab active">Komende wedstrijden</button>
+            <button class="tab">Stand · 1ste prov. A</button>
+          </div>
+          <div class="tab-content">
+            <div class="schedule" style="transform: none; box-shadow: none; border: none; padding: 0;">
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+                <div class="matchup">
+                  <div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div>
+                  <div class="meta">U17 · gewest.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div>
+                  <div class="meta">Reserves · prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 25/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.3 — Stacked ============ -->
+      <section class="candidate" id="L3">
+        <header>
+          <div>
+            <div class="key">L.3</div>
+            <div class="name">Stacked · schedule above standings</div>
+            <div class="desc">
+              Schedule first (full width), standings below (full width). Both visible without
+              interaction. Vertically tall. Each block can use its full width to breathe.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Both visible at full width<br />
+            + No interaction, no client component<br />
+            − Tall section (≈600px desktop)<br />
+            − Mobile is even taller
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title"><span class="h">Wedstrijden &amp; stand</span></div>
+          <div class="layout-l3">
+            <div class="schedule">
+              <div class="label">Komende wedstrijden</div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+                <div class="matchup">
+                  <div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div>
+                  <div class="meta">U17 · gewest.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div>
+                  <div class="meta">Reserves · prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+            </div>
+            <div class="standings">
+              <div class="label">Stand · 1ste provinciale A</div>
+              <table>
+                <thead><tr><th>#</th><th>Team</th><th class="num">G</th><th class="num">W</th><th class="num">G</th><th class="num">V</th><th class="num">DP</th><th class="num">Pt</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="pos">1</span></td><td><span class="team">RC Mechelen</span></td><td class="num">22</td><td class="num">17</td><td class="num">2</td><td class="num">3</td><td class="num">+34</td><td class="num pts">53</td></tr>
+                  <tr><td><span class="pos">2</span></td><td><span class="team">FC Werchter</span></td><td class="num">22</td><td class="num">15</td><td class="num">3</td><td class="num">4</td><td class="num">+22</td><td class="num pts">48</td></tr>
+                  <tr class="kcvv-row"><td><span class="pos">3</span></td><td><span class="team">KCVV</span></td><td class="num">22</td><td class="num">14</td><td class="num">3</td><td class="num">5</td><td class="num">+18</td><td class="num pts">45</td></tr>
+                  <tr><td><span class="pos">4</span></td><td><span class="team">VK Tildonk</span></td><td class="num">22</td><td class="num">12</td><td class="num">2</td><td class="num">8</td><td class="num">+5</td><td class="num pts">38</td></tr>
+                  <tr><td><span class="pos">5</span></td><td><span class="team">Steenokkerzeel</span></td><td class="num">22</td><td class="num">11</td><td class="num">2</td><td class="num">9</td><td class="num">+1</td><td class="num pts">35</td></tr>
+                  <tr><td><span class="pos">6</span></td><td><span class="team">SK Heffen</span></td><td class="num">22</td><td class="num">9</td><td class="num">2</td><td class="num">11</td><td class="num">−3</td><td class="num pts">29</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ L.4 — Schedule primary + standings collapsed ============ -->
+      <section class="candidate" id="L4">
+        <header>
+          <div>
+            <div class="key">L.4</div>
+            <div class="name">Schedule primary · standings as expand link</div>
+            <div class="desc">
+              Schedule shows in full. Below it: a single-row "Stand · KCVV staat 3e · 45pt →"
+              link that either expands inline or routes to <code>/ranking</code>. Prioritizes
+              schedule; standings is one click away with the headline summary visible.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Schedule gets full prominence<br />
+            + Standings summary is still visible (rank + points)<br />
+            − Full standings table requires interaction<br />
+            − Only really suits fans who care more about fixtures than tables
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-title"><span class="h">Komende wedstrijden</span></div>
+          <div class="layout-l4">
+            <div class="schedule">
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 11/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — VK Tildonk</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 12/05</div><div class="time">10:30</div></div>
+                <div class="matchup">
+                  <div class="teams">FC Werchter — <span class="kcvv">KCVV U17</span></div>
+                  <div class="meta">U17 · gewest.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 18/05</div><div class="time">14:30</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV Reserves</span> — Steenokkerzeel</div>
+                  <div class="meta">Reserves · prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZO 19/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams">SK Heffen — <span class="kcvv">KCVV</span></div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge">UIT</span>
+              </div>
+              <div class="schedule-item">
+                <div class="when"><div class="day">ZA 25/05</div><div class="time">15:00</div></div>
+                <div class="matchup">
+                  <div class="teams"><span class="kcvv">KCVV</span> — RC Mechelen</div>
+                  <div class="meta">A-ploeg · 1ste prov.</div>
+                </div>
+                <span class="badge home">THUIS</span>
+              </div>
+            </div>
+            <div class="standings-collapse">
+              <span>STAND · 1ste prov. A · KCVV staat <strong style="color: var(--jersey-deep);">3e</strong> met <strong style="color: var(--jersey-deep);">45 pt</strong></span>
+              <span class="arrow">Volledige stand →</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>What's the same in every variant.</strong> Schedule items are tape-card list rows
+        with day/time + matchup + home/away badge. Standings is a tabular list with KCVV row
+        highlighted (jersey-deep tint + outline). Schedule is server-rendered (BFF call); standings
+        is server-rendered (BFF call).
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Schedule depth (next 3 / 5 / week-grouped — Round 6b).
+        Standings shape (full / KCVV-context / top 5 — Round 6c). Per-match link target (Round 6d).
+        Hover behaviour (canonical press-down). Mobile collapse rules (each variant collapses
+        deterministically; explicit rules in lock spec).
+      </p>
+    </div>
+  </body>
+</html>

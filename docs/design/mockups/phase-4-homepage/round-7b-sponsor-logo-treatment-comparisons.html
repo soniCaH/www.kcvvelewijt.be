@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 7b · Sponsor logo container treatment</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-card: 3px 3px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 28px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 14px; line-height: 1.6; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+      }
+      .candidate header {
+        padding: 14px 18px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 19px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; }
+      .surface {
+        background: var(--cream-deep);
+        padding: 28px 20px 32px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .logo-base {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 10px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.2;
+        min-height: 70px;
+        filter: grayscale(100%);
+        transition: filter 200ms ease;
+        position: relative;
+      }
+      .logo-base:hover { filter: grayscale(0%); }
+      .rot-a { transform: rotate(-0.5deg); }
+      .rot-b { transform: rotate(-0.25deg); }
+      .rot-c { transform: rotate(0.25deg); }
+      .rot-d { transform: rotate(0.5deg); }
+
+      /* C.1 — Paper card, no tape */
+      .c1 {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+      }
+      /* C.2 — Paper card with tape strip on every logo */
+      .c2 {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-card);
+      }
+      .c2::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: 14px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      /* C.3 — Borderless tile */
+      .c3 {
+        background: var(--cream);
+        border: none;
+        box-shadow: none;
+      }
+      .color-1 { color: #c00; background: #fff; }
+      .color-2 { color: #006bb3; background: #fff; }
+      .color-3 { color: #2d6e2d; background: #fff; }
+      .color-4 { color: #7a3d00; background: #fff; }
+      .color-5 { color: #6a4400; background: #fff; }
+      .color-6 { color: #b30086; background: #fff; }
+      .c3.color-1, .c3.color-2, .c3.color-3, .c3.color-4, .c3.color-5, .c3.color-6 {
+        background: var(--cream);
+      }
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 7b · Sponsor logo container</div>
+      <h1>How does each sponsor logo render?</h1>
+      <p>
+        Same L.2 grid layout in every variant — only the per-logo container changes.
+        13 logos shown for direct comparison. Remember: in production each cell shows the actual
+        SVG/PNG logo file, not the italic name treatment used here as a fallback.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from Round 7.</strong> L.2 single equal grid · all sponsors same size ·
+      hoofdsponsors first then sponsors · /sponsors link at the bottom · greyscale-default,
+      colour-on-hover. This sub-round picks the per-logo container treatment.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ C.1 — Paper card, no tape ============ -->
+      <section class="candidate" id="C1">
+        <header>
+          <div class="key">C.1</div>
+          <div class="name">Paper card · no tape per logo</div>
+          <div class="desc">
+            Each logo sits inside a clean white paper card (border + hard shadow + subtle
+            rotation per slot). No tape strip per logo — keeps the grid scannable at 13 cells.
+            Most balanced: paper register without ornament clutter.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="grid">
+            <div class="logo-base c1 rot-a color-1">Crossing Auto</div>
+            <div class="logo-base c1 rot-b color-2">KBC</div>
+            <div class="logo-base c1 rot-c color-3">Bouw Janssens</div>
+            <div class="logo-base c1 rot-d color-4">De Bonte</div>
+            <div class="logo-base c1 rot-a color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base c1 rot-b color-6">Fitness Plus</div>
+            <div class="logo-base c1 rot-c color-1">AC Audio</div>
+            <div class="logo-base c1 rot-d color-2">Wouters</div>
+            <div class="logo-base c1 rot-a color-3">Dupont</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ C.2 — Paper card WITH tape ============ -->
+      <section class="candidate" id="C2">
+        <header>
+          <div class="key">C.2</div>
+          <div class="name">Paper card · tape strip on every logo</div>
+          <div class="desc">
+            Each logo gets a tape strip (jersey-tape green, top-left, slight rotation). Most
+            paper-pasted register, mirrors NewsCard tape exactly. At 13 logos, the tape grid
+            becomes a visual rhythm of its own.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="grid">
+            <div class="logo-base c2 rot-a color-1">Crossing Auto</div>
+            <div class="logo-base c2 rot-b color-2">KBC</div>
+            <div class="logo-base c2 rot-c color-3">Bouw Janssens</div>
+            <div class="logo-base c2 rot-d color-4">De Bonte</div>
+            <div class="logo-base c2 rot-a color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base c2 rot-b color-6">Fitness Plus</div>
+            <div class="logo-base c2 rot-c color-1">AC Audio</div>
+            <div class="logo-base c2 rot-d color-2">Wouters</div>
+            <div class="logo-base c2 rot-a color-3">Dupont</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ C.3 — Borderless tile ============ -->
+      <section class="candidate" id="C3">
+        <header>
+          <div class="key">C.3</div>
+          <div class="name">Borderless tile · no card, no shadow</div>
+          <div class="desc">
+            Logos sit directly on the cream background with no card frame. No rotation. Cleanest,
+            most minimal. Logos float as a "wall of marks" rather than as papered card grid.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="grid">
+            <div class="logo-base c3 color-1">Crossing Auto</div>
+            <div class="logo-base c3 color-2">KBC</div>
+            <div class="logo-base c3 color-3">Bouw Janssens</div>
+            <div class="logo-base c3 color-4">De Bonte</div>
+            <div class="logo-base c3 color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base c3 color-6">Fitness Plus</div>
+            <div class="logo-base c3 color-1">AC Audio</div>
+            <div class="logo-base c3 color-2">Wouters</div>
+            <div class="logo-base c3 color-3">Dupont</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> C.1 = paper register without per-logo ornament (most
+        scalable visually at 13+ cells). C.2 = paper register with maximum ornament (mirrors
+        NewsCard treatment exactly). C.3 = wall-of-logos with no per-logo frame (most clinical
+        when production logos arrive on white backgrounds).
+      </p>
+      <p>
+        <strong>Production reality.</strong> Real uploaded logos may be transparent PNG, white-bg
+        SVG, or coloured. The card frames in C.1/C.2 normalize varying logo backgrounds; C.3 risks
+        white-on-white when a sponsor's logo has a white background.
+      </p>
+    </div>
+  </body>
+</html>

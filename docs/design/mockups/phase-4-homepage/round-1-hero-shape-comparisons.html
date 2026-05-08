@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 1 · Homepage hero shape</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1280px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate header .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+      }
+      .candidate header .tradeoffs {
+        font-size: 12px;
+        line-height: 1.55;
+        max-width: 38ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate .surface {
+        background: var(--cream);
+        padding: 36px 32px 44px;
+      }
+
+      /* ===== Hero primitives ===== */
+      .kicker {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+      .kicker .pill {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .kicker .dot {
+        opacity: 0.45;
+      }
+      .h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 14px 0 14px;
+      }
+      .h1.size-xl { font-size: 56px; }
+      .h1.size-lg { font-size: 38px; }
+      .h1.size-md { font-size: 26px; }
+      .h1 .accent { color: var(--jersey-deep); font-style: italic; }
+      .lead {
+        font-size: 16px;
+        line-height: 1.55;
+        max-width: 50ch;
+        margin: 0 0 16px;
+        opacity: 0.92;
+      }
+      .lead.compact { font-size: 14px; line-height: 1.5; max-width: 38ch; }
+      .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        margin-top: 12px;
+        font-weight: bold;
+      }
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 8px 8px 10px;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+      }
+      .taped .tape {
+        position: absolute;
+        top: -10px;
+        width: 56px;
+        height: 14px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+        transform: rotate(-3deg);
+      }
+      .taped .tape.left { left: 14px; }
+      .taped .tape.right { right: 14px; transform: rotate(3deg); }
+      .taped.rot-a { transform: rotate(-1deg); }
+      .taped.rot-b { transform: rotate(0.6deg); }
+      .taped.rot-c { transform: rotate(-0.4deg); }
+      .img {
+        width: 100%;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        position: relative;
+      }
+      .img::after {
+        content: attr(data-tag);
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(26, 26, 26, 0.78);
+        color: var(--cream);
+        padding: 3px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .img.aspect-16-9 { aspect-ratio: 16 / 9; }
+      .img.aspect-4-3 { aspect-ratio: 4 / 3; }
+      .img.aspect-square { aspect-ratio: 1 / 1; }
+      .caption {
+        font-size: 11px;
+        font-style: italic;
+        opacity: 0.75;
+        padding: 6px 4px 0;
+      }
+
+      /* ===== Layout: A (single spotlight) ===== */
+      .layout-spotlight {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 40px;
+        align-items: center;
+      }
+      @media (max-width: 880px) {
+        .layout-spotlight { grid-template-columns: 1fr; gap: 32px; }
+      }
+
+      /* ===== Layout: B (lead + sidebar) ===== */
+      .layout-lead-sidebar {
+        display: grid;
+        grid-template-columns: 64fr 36fr;
+        gap: 32px;
+      }
+      .lead-block { display: flex; flex-direction: column; }
+      .sidebar-block {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding-left: 24px;
+        border-left: 1px solid var(--ink);
+      }
+      .sidebar-block .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .sidebar-card {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-card .h3 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.2;
+      }
+      @media (max-width: 880px) {
+        .layout-lead-sidebar { grid-template-columns: 1fr; }
+        .sidebar-block { padding-left: 0; border-left: 0; border-top: 1px solid var(--ink); padding-top: 24px; }
+      }
+
+      /* ===== Layout: C (lead trio) ===== */
+      .layout-trio {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 28px;
+      }
+      .trio-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .trio-card.lead { grid-column: span 1; }
+      @media (max-width: 880px) {
+        .layout-trio { grid-template-columns: 1fr; }
+      }
+      .trio-card .h3 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.18;
+      }
+      .trio-card .h3.lg { font-size: 26px; }
+
+      /* ===== Layout: D (carousel reskinned) ===== */
+      .carousel-shell {
+        position: relative;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 36px 32px 32px;
+        overflow: hidden;
+      }
+      .carousel-stack {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 32px;
+        align-items: center;
+      }
+      @media (max-width: 880px) {
+        .carousel-stack { grid-template-columns: 1fr; }
+      }
+      .carousel-shell .h1 { color: var(--cream); }
+      .carousel-shell .lead { opacity: 0.85; }
+      .carousel-shell .byline { color: var(--cream); opacity: 0.65; }
+      .carousel-controls {
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+      .dot-row { display: inline-flex; gap: 6px; align-items: center; }
+      .dot-row .pip {
+        width: 10px; height: 10px; border-radius: 50%;
+        border: 1px solid var(--cream);
+      }
+      .dot-row .pip.on { background: var(--cream); }
+      .dot-row .progress {
+        width: 56px; height: 2px; background: rgba(245, 239, 225, 0.25);
+        position: relative;
+      }
+      .dot-row .progress::after {
+        content: "";
+        position: absolute; left: 0; top: 0; bottom: 0; width: 35%;
+        background: var(--cream);
+      }
+
+      .footnote {
+        max-width: 1280px;
+        margin: 36px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+      .question-summary {
+        max-width: 1280px;
+        margin: 0 auto 28px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 1 · Homepage hero shape</div>
+      <h1>What shape is the homepage hero?</h1>
+      <p>
+        Today the top of <code>/</code> renders <code>&lt;FeaturedArticles&gt;</code>: a 3-article auto-rotating carousel
+        seeded from <code>articles.slice(0, 3)</code> (no editor pick). Phase 3 shipped
+        <code>&lt;EditorialHero placement="homepage"&gt;</code> as a <em>single-article spotlight</em> for one
+        explicitly-chosen slug. This round picks which shape the homepage hero takes. Round 2 then drills
+        <em>how the hero article(s) are selected</em>; Round 3 places the featured event; Round 4 locks the
+        body-section spine on top of all of those.
+      </p>
+    </header>
+
+    <div class="question-summary">
+      <strong>What's locked above this round.</strong> Phase 3 chrome — <code>&lt;MatchStrip&gt;</code>,
+      <code>&lt;SiteHeader&gt;</code>, <code>&lt;SiteFooter&gt;</code> — already sits above and below every variant.
+      Variants below show <em>only</em> the hero region (the band immediately under the chrome). The grid /
+      schedule / youth / shop / sponsors that follow are out-of-frame for this round.
+    </div>
+
+    <div class="container">
+
+      <!-- ============ A — Single spotlight (Phase 3 as-shipped) ============ -->
+      <section class="candidate" id="A">
+        <header>
+          <div>
+            <div class="key">Variant A</div>
+            <div class="name">Single spotlight</div>
+          </div>
+          <div class="desc">
+            One editor-picked lead article rendered with the full Phase 3
+            <code>&lt;EditorialHero placement="homepage"&gt;</code>: kicker chips, italic display H1, lead
+            sentence, byline, taped 16:9 cover. Whole block is a Link to <code>/nieuws/{slug}</code>
+            with the canonical press-up hover. <strong>One article, one moment, one click target.</strong>
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Strongest editorial weight<br />
+            + Reuses Phase 3 component as-is<br />
+            − Requires editor to pick a lead<br />
+            − Loses 2 of 3 currently-rotated stories
+          </div>
+        </header>
+        <div class="surface">
+          <div class="layout-spotlight">
+            <div>
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>5 mei 2026</span>
+                <span class="dot">·</span>
+                <span>6 min lezen</span>
+              </div>
+              <h2 class="h1 size-xl">
+                <em class="accent">"Met deze ploeg</em> <br />
+                kunnen we ver geraken."
+              </h2>
+              <p class="lead">
+                Aanvoerder Jens De Smet over de promotiekansen, het nieuwe trainingsritme en
+                waarom de groep dit jaar anders aanvoelt dan vorig seizoen.
+              </p>
+              <div class="byline">door Tom Janssens</div>
+              <div class="read-more">★ Lees verder →</div>
+            </div>
+            <div>
+              <div class="taped rot-b">
+                <div class="tape left"></div>
+                <div class="tape right"></div>
+                <div class="img aspect-16-9" data-tag="kcvv · jens"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ B — Lead + secondary sidebar ============ -->
+      <section class="candidate" id="B">
+        <header>
+          <div>
+            <div class="key">Variant B</div>
+            <div class="name">Lead + sidebar</div>
+          </div>
+          <div class="desc">
+            Magazine "front page" pattern: one big EditorialHero on the left at ~64% width, two
+            smaller secondary feature cards stacked on the right. Two extra editor-picks (or
+            "next 2 most recent"). Both right-column cards are Links; the lead is the dominant
+            click target.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Surfaces 3 stories, none rotating<br />
+            + Reads as broadsheet front page<br />
+            − Needs sidebar card design (new sub-component)<br />
+            − Three editorial picks per week is more work
+          </div>
+        </header>
+        <div class="surface">
+          <div class="layout-lead-sidebar">
+            <div class="lead-block">
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>5 mei 2026</span>
+                <span class="dot">·</span>
+                <span>6 min lezen</span>
+              </div>
+              <h2 class="h1 size-lg">
+                <em class="accent">"Met deze ploeg</em> kunnen we<br />ver geraken."
+              </h2>
+              <p class="lead">
+                Aanvoerder Jens De Smet over de promotiekansen, het nieuwe trainingsritme en
+                waarom de groep dit jaar anders aanvoelt dan vorig seizoen.
+              </p>
+              <div class="byline">door Tom Janssens · ★ lees verder →</div>
+              <div style="margin-top: 18px; max-width: 420px;">
+                <div class="taped rot-a">
+                  <div class="tape left"></div>
+                  <div class="tape right"></div>
+                  <div class="img aspect-16-9" data-tag="kcvv · jens"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sidebar-block">
+              <div class="label">Ook deze week</div>
+              <div class="sidebar-card">
+                <div class="taped rot-c">
+                  <div class="tape left"></div>
+                  <div class="img aspect-4-3" data-tag="transfer"></div>
+                </div>
+                <div class="kicker">
+                  <span class="pill">Transfer</span>
+                  <span class="dot">·</span>
+                  <span>3 mei</span>
+                </div>
+                <div class="h3" style="font-family: ui-serif; font-style: italic; font-size: 19px; line-height: 1.2;">
+                  Wim Geeraerts tekent voor twee seizoenen.
+                </div>
+              </div>
+              <div class="sidebar-card">
+                <div class="taped rot-b">
+                  <div class="tape right"></div>
+                  <div class="img aspect-4-3" data-tag="event"></div>
+                </div>
+                <div class="kicker">
+                  <span class="pill">Evenement</span>
+                  <span class="dot">·</span>
+                  <span>10 mei</span>
+                </div>
+                <div class="h3" style="font-family: ui-serif; font-style: italic; font-size: 19px; line-height: 1.2;">
+                  Quiz in de kantine, vrijdagavond.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ C — Lead trio (3-up TapedCardGrid) ============ -->
+      <section class="candidate" id="C">
+        <header>
+          <div>
+            <div class="key">Variant C</div>
+            <div class="name">Lead trio</div>
+          </div>
+          <div class="desc">
+            Three editorial cards side-by-side at hero size — all visible simultaneously. Same
+            primitives as NewsCard but at a larger display size. No carousel. Equivalent to
+            today's 3 featured articles, just static + reskinned.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + Closest to today's editorial workflow<br />
+            + No editor pick needed (auto-fed)<br />
+            − Risks redundancy with NewsGrid below<br />
+            − Loses the single-spotlight emphasis of Phase 3 hero
+          </div>
+        </header>
+        <div class="surface">
+          <div class="layout-trio">
+            <div class="trio-card lead">
+              <div class="taped rot-a">
+                <div class="tape left"></div>
+                <div class="img aspect-16-9" data-tag="lead"></div>
+              </div>
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>5 mei</span>
+              </div>
+              <div class="h3 lg">
+                "Met deze ploeg kunnen we ver geraken."
+              </div>
+              <div class="byline">door Tom Janssens</div>
+            </div>
+            <div class="trio-card">
+              <div class="taped rot-b">
+                <div class="tape right"></div>
+                <div class="img aspect-16-9" data-tag="transfer"></div>
+              </div>
+              <div class="kicker">
+                <span class="pill">Transfer</span>
+                <span class="dot">·</span>
+                <span>3 mei</span>
+              </div>
+              <div class="h3">
+                Wim Geeraerts tekent voor twee seizoenen.
+              </div>
+              <div class="byline">door redactie</div>
+            </div>
+            <div class="trio-card">
+              <div class="taped rot-c">
+                <div class="tape left"></div>
+                <div class="img aspect-16-9" data-tag="event"></div>
+              </div>
+              <div class="kicker">
+                <span class="pill">Evenement</span>
+                <span class="dot">·</span>
+                <span>1 mei</span>
+              </div>
+              <div class="h3">
+                Quiz in de kantine, vrijdagavond.
+              </div>
+              <div class="byline">door redactie</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ D — Carousel reskinned ============ -->
+      <section class="candidate" id="D">
+        <header>
+          <div>
+            <div class="key">Variant D</div>
+            <div class="name">Carousel reskinned</div>
+          </div>
+          <div class="desc">
+            Preserves today's auto-rotating 3-article behaviour but on the retro fanzine palette:
+            ink-band background, taped cover image, Pause/Play + dot indicator + progress bar
+            redrawn as monospace chrome. Most conservative — same editorial workflow,
+            same content shape.
+          </div>
+          <div class="tradeoffs">
+            <strong>Tradeoffs</strong>
+            + No editor workflow change<br />
+            + Familiar to returning visitors<br />
+            − Carousels are widely under-engaged with<br />
+            − Retains a "marketing" register at odds with the editorial-fanzine voice
+          </div>
+        </header>
+        <div class="surface" style="padding: 0;">
+          <div class="carousel-shell">
+            <div class="carousel-stack">
+              <div>
+                <div class="kicker" style="color: var(--cream);">
+                  <span class="pill" style="background: var(--cream); color: var(--ink);">Interview</span>
+                  <span class="dot" style="opacity: 0.55;">·</span>
+                  <span>5 mei 2026</span>
+                </div>
+                <h2 class="h1 size-lg">
+                  <em class="accent" style="color: #f0c264;">"Met deze ploeg</em><br />
+                  kunnen we ver geraken."
+                </h2>
+                <p class="lead">
+                  Aanvoerder Jens De Smet over de promotiekansen, het nieuwe trainingsritme en
+                  waarom de groep dit jaar anders aanvoelt.
+                </p>
+                <div class="byline">door Tom Janssens</div>
+                <div class="carousel-controls">
+                  <span>1 / 3</span>
+                  <span class="dot-row">
+                    <span class="pip on"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                  </span>
+                  <span class="dot-row"><span class="progress"></span></span>
+                  <span>auto · 5s</span>
+                  <span>‖ pauzeer</span>
+                </div>
+              </div>
+              <div>
+                <div class="taped rot-a">
+                  <div class="tape left"></div>
+                  <div class="tape right"></div>
+                  <div class="img aspect-16-9" data-tag="rotating"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the comparison.</strong> Each candidate shows only the hero band — the strip immediately under
+        the (locked) MatchStrip + SiteHeader. Whatever is picked, the body-section spine below it (NewsGrid,
+        UpcomingMatches, Youth, Webshop, Sponsors) follows in Round 4.
+      </p>
+      <p>
+        <strong>Open consequences for later rounds.</strong> Variant A leans hardest on Round 2 (we'll need a
+        clean editor-pick mechanism for the single hero article). Variant B introduces a new "secondary
+        feature card" sub-component that NewsCard cannot satisfy as-is. Variant C blurs the line between hero
+        and NewsGrid (Round 2 NewsGrid drill must explicitly differentiate the two). Variant D preserves the
+        carousel workflow but is the only option that keeps a client-side <code>"use client"</code> motion
+        component in the hero slot.
+      </p>
+    </div>
+  </body>
+</html>

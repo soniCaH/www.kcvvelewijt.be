@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 7c · Sponsor logo · minimal treatments</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1320px; margin: 0 auto 28px; }
+      header.page .meta { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 26px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 8px; max-width: 80ch; font-size: 13px; line-height: 1.55; }
+      .lock-banner {
+        max-width: 1320px;
+        margin: 0 auto 24px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 1080px) { .container { grid-template-columns: 1fr; } }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+      }
+      .candidate header {
+        padding: 14px 18px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key { font-family: ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.7; }
+      .candidate header .name { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 18px; line-height: 1.15; margin: 4px 0 6px; }
+      .candidate header .desc { font-size: 12px; line-height: 1.5; opacity: 0.85; }
+      .surface {
+        background: var(--cream-deep);
+        padding: 28px 18px 32px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .logo-base {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 8px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.2;
+        min-height: 70px;
+        filter: grayscale(100%);
+        transition: filter 200ms ease;
+      }
+      .logo-base:hover { filter: grayscale(0%); }
+
+      /* Note: half logos shown on white-bg (production reality) so the contrast
+         with cream/cream-soft variants becomes visible. */
+      .white-bg { background: #fff; }
+      .cream-bg { background: var(--cream); }
+      .color-1 { color: #c00; }
+      .color-2 { color: #006bb3; }
+      .color-3 { color: #2d6e2d; }
+      .color-4 { color: #7a3d00; }
+      .color-5 { color: #6a4400; }
+      .color-6 { color: #b30086; }
+
+      /* M.1 — Borderless · pure cream */
+      .m1 .logo-base {
+        background: transparent;
+      }
+      /* M.2 — Hairline ink border, no shadow */
+      .m2 .logo-base {
+        background: #fff;
+        border: 1px solid var(--ink);
+      }
+      /* M.3 — Cream-soft tile, no border */
+      .m3 .logo-base {
+        background: var(--cream-soft);
+      }
+
+      .footnote {
+        max-width: 1320px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 7c · Minimal logo treatments</div>
+      <h1>Minimal treatments — addressing the "too busy" concern</h1>
+      <p>
+        Round 7b's three options all carried paper-card weight. Quieter alternatives below — no
+        tape, no rotation, no hard shadow. Only the per-logo frame varies. Each variant shows 9
+        cells: greyscale-default, with hover producing colour. Six logos render with a colored
+        wordmark; three (placeholder) render plain to mimic logos that arrive on a white
+        background.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Owner concern.</strong> "Each sponsor also has its own logo — might be too busy
+      with tapes/rotation alongside the rest of the homepage's paper-pasted weight." This sub-round
+      offers three quieter levels of per-logo frame.
+    </div>
+
+    <div class="container">
+
+      <!-- M.1 — Borderless -->
+      <section class="candidate" id="M1">
+        <header>
+          <div class="key">M.1</div>
+          <div class="name">Borderless · pure cream backdrop</div>
+          <div class="desc">
+            Logos sit directly on the cream-deep section background. No frame, no fill, no
+            shadow. Quietest. Risk: a sponsor's logo with a white background blends into nothing
+            (loses edge definition). For SVG / transparent PNG logos, this is fine.
+          </div>
+        </header>
+        <div class="surface m1">
+          <div class="grid">
+            <div class="logo-base color-1">Crossing Auto</div>
+            <div class="logo-base color-2">KBC Verzekeringen</div>
+            <div class="logo-base color-3">Bouw Janssens</div>
+            <div class="logo-base color-4">De Bonte Slager</div>
+            <div class="logo-base color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base color-6">Fitness Plus</div>
+            <div class="logo-base white-bg color-1">AC Audio</div>
+            <div class="logo-base white-bg color-2">Wouters Schilder</div>
+            <div class="logo-base white-bg color-3">Steenhouwerij Dupont</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- M.2 — Hairline border -->
+      <section class="candidate" id="M2">
+        <header>
+          <div class="key">M.2</div>
+          <div class="name">Hairline ink border · 1px frame, no shadow</div>
+          <div class="desc">
+            Each logo gets a 1px ink hairline border on a white tile. No shadow, no rotation, no
+            tape. Provides edge definition for white-bg logos. Most "uniform marks board" feel.
+            Slight visual quietness compared to paper cards.
+          </div>
+        </header>
+        <div class="surface m2">
+          <div class="grid">
+            <div class="logo-base color-1">Crossing Auto</div>
+            <div class="logo-base color-2">KBC Verzekeringen</div>
+            <div class="logo-base color-3">Bouw Janssens</div>
+            <div class="logo-base color-4">De Bonte Slager</div>
+            <div class="logo-base color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base color-6">Fitness Plus</div>
+            <div class="logo-base color-1">AC Audio</div>
+            <div class="logo-base color-2">Wouters Schilder</div>
+            <div class="logo-base color-3">Steenhouwerij Dupont</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- M.3 — Cream-soft tile -->
+      <section class="candidate" id="M3">
+        <header>
+          <div class="key">M.3</div>
+          <div class="name">Cream-soft tile · subtle tone shift, no border</div>
+          <div class="desc">
+            Each logo on a cream-soft fill (slightly darker than the section background). No
+            border, no shadow. The tone shift gives logos a frame without an explicit line. Most
+            paper-y in feel; quietest in detail.
+          </div>
+        </header>
+        <div class="surface m3">
+          <div class="grid">
+            <div class="logo-base color-1">Crossing Auto</div>
+            <div class="logo-base color-2">KBC Verzekeringen</div>
+            <div class="logo-base color-3">Bouw Janssens</div>
+            <div class="logo-base color-4">De Bonte Slager</div>
+            <div class="logo-base color-5">Hapje &amp; Tapje</div>
+            <div class="logo-base color-6">Fitness Plus</div>
+            <div class="logo-base color-1">AC Audio</div>
+            <div class="logo-base color-2">Wouters Schilder</div>
+            <div class="logo-base color-3">Steenhouwerij Dupont</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Reading the trade.</strong> M.1 = quietest, but white-bg logos disappear. M.2 =
+        hairline frame solves white-bg risk with minimum ornament. M.3 = soft-tone tile reads as
+        paper, no explicit border, keeps the cream/ink palette uniform.
+      </p>
+      <p>
+        <strong>Out of scope.</strong> Whether the SponsorsBlock section itself sits inside an
+        outer paper card frame (likely yes — section header gets a tape strip). That's a section-level
+        decision, not a per-logo one.
+      </p>
+    </div>
+  </body>
+</html>

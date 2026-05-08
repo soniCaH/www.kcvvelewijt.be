@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4 · Round 4 · Body section spine</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1400px;
+        margin: 0 auto 28px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .lock-banner {
+        max-width: 1400px;
+        margin: 0 auto 28px;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .lock-banner strong {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+      @media (max-width: 1180px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+      .col {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 14px 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .col-head {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .col-head .key {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .col-head .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 19px;
+        line-height: 1.2;
+      }
+      .col-head .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.78;
+      }
+      .stack { display: flex; flex-direction: column; gap: 0; }
+      .band {
+        position: relative;
+        padding: 10px 12px;
+        border-left: 1px solid var(--ink);
+        border-right: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+      .band:first-child { border-top: 1px solid var(--ink); }
+      .band .label {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .band .sub {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 2px;
+      }
+      .band.locked { background: var(--cream-deep); }
+      .band.locked .label { opacity: 0.6; }
+      .band.locked .label::before { content: "★ "; }
+      .band.in-play .label { opacity: 0.85; }
+
+      /* Background tokens — cream/ink/jersey rhythm */
+      .bg-cream { background: var(--cream); }
+      .bg-cream-soft { background: var(--cream-soft); }
+      .bg-cream-deep { background: var(--cream-deep); }
+      .bg-ink { background: var(--ink); color: var(--cream); }
+      .bg-jersey { background: var(--jersey-deep); color: var(--cream); }
+
+      /* Heights communicating relative weight */
+      .h-strip { min-height: 36px; }
+      .h-chrome { min-height: 40px; }
+      .h-hero { min-height: 110px; }
+      .h-event { min-height: 70px; }
+      .h-grid { min-height: 130px; }
+      .h-block { min-height: 70px; }
+      .h-block-short { min-height: 56px; }
+
+      .legend {
+        max-width: 1400px;
+        margin: 12px auto 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 11px;
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--ink);
+      }
+      .footnote {
+        max-width: 1400px;
+        margin: 28px auto 0;
+        font-size: 12px;
+        line-height: 1.55;
+        background: var(--cream-soft);
+        border: 1px dashed var(--ink);
+        padding: 14px 18px;
+      }
+      .footnote strong {
+        font-family: ui-monospace, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4 · Round 4 · Spine</div>
+      <h1>Order of the 4 sections after NewsGrid</h1>
+      <p>
+        Hero (D.1) → FeaturedEventBand → NewsGrid is locked at the top. SiteFooter is locked at the
+        bottom. This round picks the order of the four remaining body sections in between:
+        <strong>ScheduleStandingsBlock</strong>, <strong>YouthBlock</strong>,
+        <strong>WebshopStrip</strong>, <strong>SponsorsBlock</strong>. Sponsors is conventionally the
+        commercial close in every variant — the variability is in the three sections above it.
+      </p>
+    </header>
+
+    <div class="lock-banner">
+      <strong>Locked from prior rounds.</strong> Hero shape = D.1 carousel + strip-below thumbnails ·
+      Hero source = S.2 article.featured boolean · Featured event = E.2 standalone band between hero
+      and NewsGrid. Banner slots A/B/C deferred to a separate round.
+    </div>
+
+    <div class="legend">
+      <span><span class="swatch" style="background: var(--cream);"></span>cream (paper)</span>
+      <span><span class="swatch" style="background: var(--cream-soft);"></span>cream-soft</span>
+      <span><span class="swatch" style="background: var(--cream-deep);"></span>cream-deep</span>
+      <span><span class="swatch" style="background: var(--ink);"></span>ink</span>
+      <span><span class="swatch" style="background: var(--jersey-deep);"></span>jersey-deep</span>
+    </div>
+
+    <div class="grid">
+
+      <!-- ============ Spine A — Schedule next, brand mid, commercial close ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">Spine A</div>
+          <div class="name">Schedule first, youth interlude, commercial close</div>
+          <div class="desc">
+            Data follows news (read → check fixtures → standings). Brand interlude breaks the
+            editorial flow before the commercial close. Most conventional fanzine cadence.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip · chrome</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader · chrome</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1 carousel</div><div class="sub" style="opacity:0.7;">3 articles · article.featured</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div><div class="sub" style="opacity:0.85;">jersey-deep band</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid · 6 cards</div></div>
+          <div class="band bg-cream h-block in-play"><div class="label">ScheduleStandings</div><div class="sub">tabs: schedule / standings</div></div>
+          <div class="band bg-jersey h-block in-play"><div class="label">YouthBlock · full-bleed</div><div class="sub">JerseyShirt interlude</div></div>
+          <div class="band bg-cream h-block-short in-play"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-cream-deep h-block in-play"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter · chrome</div></div>
+        </div>
+      </div>
+
+      <!-- ============ Spine B — Youth interlude first, data, commercial close ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">Spine B</div>
+          <div class="name">Youth interlude first, schedule, commercial close</div>
+          <div class="desc">
+            Brand interlude breaks the editorial flow before data hits. Visitor reads news, sees
+            "this is who we're building", then checks the calendar before the commercial close.
+            Most magazine-feeling.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip · chrome</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader · chrome</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1 carousel</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid · 6 cards</div></div>
+          <div class="band bg-jersey h-block in-play"><div class="label">YouthBlock · full-bleed</div></div>
+          <div class="band bg-cream h-block in-play"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-cream-soft h-block-short in-play"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-cream-deep h-block in-play"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter · chrome</div></div>
+        </div>
+      </div>
+
+      <!-- ============ Spine C — Schedule next, brand outro before commercial ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">Spine C</div>
+          <div class="name">Schedule, webshop, youth as outro, sponsors</div>
+          <div class="desc">
+            Data + commercial pair early; YouthBlock becomes the warm "thank you for visiting"
+            outro just before sponsors. Useful if Sponsors should feel like a separate civic
+            section rather than a brand close.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip · chrome</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader · chrome</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1 carousel</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid · 6 cards</div></div>
+          <div class="band bg-cream h-block in-play"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-cream-soft h-block-short in-play"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-jersey h-block in-play"><div class="label">YouthBlock · full-bleed</div></div>
+          <div class="band bg-cream-deep h-block in-play"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter · chrome</div></div>
+        </div>
+      </div>
+
+      <!-- ============ Spine D — Schedule late ============ -->
+      <div class="col">
+        <div class="col-head">
+          <div class="key">Spine D</div>
+          <div class="name">Brand mid, commercial pair, schedule late</div>
+          <div class="desc">
+            Editorial → brand → commercial → data → sponsors. Schedule sits low (closer to
+            sponsors). Risk: data gets lost above the footer. Useful only if schedule isn't a
+            primary draw.
+          </div>
+        </div>
+        <div class="stack">
+          <div class="band bg-ink h-strip locked"><div class="label">MatchStrip · chrome</div></div>
+          <div class="band bg-cream h-chrome locked"><div class="label">SiteHeader · chrome</div></div>
+          <div class="band bg-ink h-hero locked"><div class="label">EditorialHero · D.1 carousel</div></div>
+          <div class="band bg-jersey h-event locked"><div class="label">FeaturedEventBand</div></div>
+          <div class="band bg-cream-soft h-grid locked"><div class="label">NewsGrid · 6 cards</div></div>
+          <div class="band bg-jersey h-block in-play"><div class="label">YouthBlock · full-bleed</div></div>
+          <div class="band bg-cream-soft h-block-short in-play"><div class="label">WebshopStrip</div></div>
+          <div class="band bg-cream h-block in-play"><div class="label">ScheduleStandings</div></div>
+          <div class="band bg-cream-deep h-block in-play"><div class="label">SponsorsBlock</div></div>
+          <div class="band bg-ink h-chrome locked"><div class="label">SiteFooter · chrome</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footnote">
+      <p>
+        <strong>Sponsors stays last in every variant.</strong> Convention from
+        <code>reference_sponsor_tiers</code> + ubiquitous "commercial close before footer". Variability
+        is in the 3 sections above it.
+      </p>
+      <p>
+        <strong>Why MatchStrip ≠ ScheduleStandings.</strong> MatchStrip (Phase 3 chrome) shows ONE next
+        match peek above the hero. ScheduleStandings (Phase 4 body section) shows the next several
+        matches + the group standings. They serve different jobs at different positions; not redundant.
+      </p>
+      <p>
+        <strong>Out of scope this round.</strong> Banner slots A/B/C between sections (separate round).
+        Cream/ink/jersey rhythm token map (later, after section internals lock). Mobile-specific
+        compression of the spine (Phase 4 implementation; layout intentionally collapses to a single
+        column at &lt;640px).
+      </p>
+    </div>
+  </body>
+</html>
