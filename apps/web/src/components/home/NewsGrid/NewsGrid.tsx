@@ -1,6 +1,7 @@
 // apps/web/src/components/home/NewsGrid/NewsGrid.tsx
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
+import type { NewsCardRotation } from "@/components/article/NewsCard/NewsCard";
 
 export interface NewsGridArticle {
   href: string;
@@ -11,47 +12,52 @@ export interface NewsGridArticle {
   tags?: Array<{ name: string }>;
 }
 
-/** Stub for upcoming featured event — wired in #802 */
-export interface FeaturedEventStub {
-  title: string;
-  href?: string;
-  imageUrl?: string;
-  imageAlt?: string;
-  badge?: string;
-  date?: string;
-  time?: string;
-  countdown?: string;
-  isExternal?: boolean;
-}
-
 export interface NewsGridProps {
-  /** 2–3 articles; first becomes featured when no featuredEvent */
+  /** 0–5 articles. N=0 returns null. Slot 0 is the lead, slots 1..4 the cluster. */
   articles: NewsGridArticle[];
-  /** When provided, fills the featured slot instead of articles[0]. #802 */
-  featuredEvent?: FeaturedEventStub;
   title?: string;
   showViewAll?: boolean;
   viewAllHref?: string;
   className?: string;
 }
 
+// Slot-index rotation cycle per Round 5d T.1. Matches the
+// <TapedCardGrid> ROTATION_POOL ordering. Slot 0 is the lead.
+const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "c", "d", "a"];
+
+const renderCard = (
+  article: NewsGridArticle,
+  slot: number,
+  variant: "featured" | "standard",
+) => (
+  <NewsCard
+    key={article.href}
+    variant={variant}
+    title={article.title}
+    href={article.href}
+    imageUrl={article.imageUrl}
+    imageAlt={article.imageAlt}
+    badge={article.tags?.[0]?.name}
+    date={article.date}
+    aspectRatio="landscape-16-9"
+    rotation={SLOT_ROTATIONS[slot]}
+  />
+);
+
 export const NewsGrid = ({
   articles,
-  featuredEvent,
   title = "Laatste nieuws",
   showViewAll = true,
   viewAllHref = "/nieuws",
   className,
 }: NewsGridProps) => {
-  if (articles.length === 0 && !featuredEvent) {
+  if (articles.length === 0) {
     return null;
   }
 
-  // When an event fills the featured slot, articles[0] and [1] are standard.
-  // Otherwise articles[0] is featured, articles[1] and [2] are standard.
-  const standardArticles = featuredEvent
-    ? articles.slice(0, 2)
-    : articles.slice(1, 3);
+  const lead = articles[0]!;
+  const supporting = articles.slice(1, 5);
+  const leadSpansTwoRows = supporting.length >= 2;
 
   return (
     <section className={className}>
@@ -66,50 +72,21 @@ export const NewsGrid = ({
           <SectionHeader title={title} />
         )}
 
-        {/* 1 featured + 2 standard grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
-          {/* Featured slot — event (if provided) or first article */}
-          {featuredEvent ? (
-            <NewsCard
-              variant="featured"
-              title={featuredEvent.title}
-              href={featuredEvent.href}
-              imageUrl={featuredEvent.imageUrl}
-              imageAlt={featuredEvent.imageAlt}
-              badge={featuredEvent.badge ?? "EVENEMENT"}
-              eventDate={featuredEvent.date}
-              eventTime={featuredEvent.time}
-              countdown={featuredEvent.countdown}
-              isExternal={featuredEvent.isExternal}
-            />
-          ) : articles[0] ? (
-            <NewsCard
-              variant="featured"
-              title={articles[0].title}
-              href={articles[0].href}
-              imageUrl={articles[0].imageUrl}
-              imageAlt={articles[0].imageAlt}
-              badge={articles[0].tags?.[0]?.name}
-              date={articles[0].date}
-            />
-          ) : null}
+        {/*
+          Geometry — Round 5b D.1 (50/50) + Round 5f E.1 (graceful collapse).
+          Mobile: 1-col stack (1 lead + 2-col supporting cluster below).
+          Desktop: 2-col, lead in left col spanning 2 rows when N>=3.
+        */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className={leadSpansTwoRows ? "md:row-span-2" : undefined}>
+            {renderCard(lead, 0, "featured")}
+          </div>
 
-          {/* Standard slots — right column fills featured card height on desktop */}
-          {standardArticles.length > 0 && (
-            <div className="flex flex-col gap-4 md:h-full">
-              {standardArticles.map((article) => (
-                <NewsCard
-                  key={article.href}
-                  variant="standard"
-                  title={article.title}
-                  href={article.href}
-                  imageUrl={article.imageUrl}
-                  imageAlt={article.imageAlt}
-                  badge={article.tags?.[0]?.name}
-                  date={article.date}
-                  className="md:aspect-auto md:flex-1"
-                />
-              ))}
+          {supporting.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 md:grid-rows-2">
+              {supporting.map((article, idx) =>
+                renderCard(article, idx + 1, "standard"),
+              )}
             </div>
           )}
         </div>

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FeaturedArticles } from "./FeaturedArticles";
 import { NewsGrid } from "./NewsGrid";
-import type { FeaturedEventStub } from "./NewsGrid";
 import { MatchWidget } from "./MatchWidget";
 import { BannerSlot } from "./BannerSlot";
 import { MatchesSliderSection } from "./MatchesSliderSection";
@@ -143,10 +142,7 @@ const SponsorsSectionContent = () => (
   </section>
 );
 
-function buildSections(
-  featuredEvent?: FeaturedEventStub,
-  autoRotate = true,
-): SectionConfig[] {
+function buildSections(autoRotate = true): SectionConfig[] {
   return [
     {
       key: "hero",
@@ -186,8 +182,7 @@ function buildSections(
       bg: "gray-100",
       content: (
         <NewsGrid
-          articles={featuredEvent ? mockLatestNews.slice(0, 2) : mockLatestNews}
-          featuredEvent={featuredEvent}
+          articles={mockLatestNews}
           title="Laatste nieuws"
           showViewAll
           viewAllHref="/nieuws"
@@ -261,29 +256,6 @@ export const Default: Story = {
 };
 
 /**
- * v3 homepage with featured event in the news section
- */
-export const WithFeaturedEvent: Story = {
-  render: () => (
-    <>
-      <SectionStack
-        sections={buildSections({
-          title: "Jeugdtoernooi 2026 — schrijf je nu in!",
-          imageUrl: "https://placehold.co/800x600/008755/fff?text=Toernooi",
-          imageAlt: "Jeugdtoernooi KCVV",
-          badge: "EVENEMENT",
-          date: "26 apr",
-          time: "10:00–17:00",
-          countdown: "over 40 dagen",
-          isExternal: false,
-        })}
-      />
-      <SiteFooter />
-    </>
-  ),
-};
-
-/**
  * Mobile viewport — single-column layout
  */
 export const MobileViewport: Story = {
@@ -299,7 +271,7 @@ export const MobileViewport: Story = {
 export const NoAutoRotation: Story = {
   render: () => (
     <>
-      <SectionStack sections={buildSections(undefined, false)} />
+      <SectionStack sections={buildSections(false)} />
       <SiteFooter />
     </>
   ),

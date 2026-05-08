@@ -11,53 +11,38 @@ vi.mock("next/image", () => ({
   },
 }));
 
-describe("NewsGrid", () => {
-  const mockArticles: NewsGridArticle[] = [
-    {
-      href: "/nieuws/article-1",
-      title: "First News Article",
-      imageUrl: "/images/article-1.jpg",
-      imageAlt: "Article 1 image",
-      date: "20 januari 2025",
-      tags: [{ name: "Ploeg" }],
-    },
-    {
-      href: "/nieuws/article-2",
-      title: "Second News Article",
-      imageUrl: "/images/article-2.jpg",
-      imageAlt: "Article 2 image",
-      date: "19 januari 2025",
-      tags: [{ name: "Jeugd" }],
-    },
-    {
-      href: "/nieuws/article-3",
-      title: "Third News Article",
-      imageUrl: "/images/article-3.jpg",
-      imageAlt: "Article 3 image",
-      date: "18 januari 2025",
-    },
-  ];
+const makeArticle = (n: number): NewsGridArticle => ({
+  href: `/nieuws/article-${n}`,
+  title: `Article ${n}`,
+  imageUrl: `/images/article-${n}.jpg`,
+  imageAlt: `Article ${n} image`,
+  date: `${n} januari 2025`,
+  tags: [{ name: `Tag${n}` }],
+});
 
+const fiveArticles: NewsGridArticle[] = [1, 2, 3, 4, 5].map(makeArticle);
+
+describe("NewsGrid", () => {
   describe("Section structure", () => {
     it("renders a section element", () => {
-      const { container } = render(<NewsGrid articles={mockArticles} />);
+      const { container } = render(<NewsGrid articles={fiveArticles} />);
       expect(container.querySelector("section")).toBeInTheDocument();
     });
 
     it("renders default title", () => {
-      render(<NewsGrid articles={mockArticles} />);
+      render(<NewsGrid articles={fiveArticles} />);
       // SectionHeader composes EditorialHeading which auto-appends a period.
       expect(screen.getByText("Laatste nieuws.")).toBeInTheDocument();
     });
 
     it("renders custom title", () => {
-      render(<NewsGrid articles={mockArticles} title="Nieuwsoverzicht" />);
+      render(<NewsGrid articles={fiveArticles} title="Nieuwsoverzicht" />);
       expect(screen.getByText("Nieuwsoverzicht.")).toBeInTheDocument();
     });
 
     it("accepts custom className", () => {
       const { container } = render(
-        <NewsGrid articles={mockArticles} className="custom-class" />,
+        <NewsGrid articles={fiveArticles} className="custom-class" />,
       );
       expect(container.firstChild).toHaveClass("custom-class");
     });
@@ -65,131 +50,122 @@ describe("NewsGrid", () => {
 
   describe("View All link", () => {
     it("renders view all link by default", () => {
-      render(<NewsGrid articles={mockArticles} />);
+      render(<NewsGrid articles={fiveArticles} />);
       const link = screen.getByRole("link", { name: /Alle berichten/i });
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute("href", "/nieuws");
     });
 
     it("hides view all link when showViewAll is false", () => {
-      render(<NewsGrid articles={mockArticles} showViewAll={false} />);
+      render(<NewsGrid articles={fiveArticles} showViewAll={false} />);
       expect(
         screen.queryByRole("link", { name: /Alle berichten/i }),
       ).not.toBeInTheDocument();
     });
 
     it("uses custom viewAllHref", () => {
-      render(<NewsGrid articles={mockArticles} viewAllHref="/nieuws" />);
+      render(<NewsGrid articles={fiveArticles} viewAllHref="/archief" />);
       expect(
         screen.getByRole("link", { name: /Alle berichten/i }),
-      ).toHaveAttribute("href", "/nieuws");
+      ).toHaveAttribute("href", "/archief");
     });
   });
 
-  describe("Grid layout", () => {
-    it("renders the grid container", () => {
-      const { container } = render(<NewsGrid articles={mockArticles} />);
-      expect(container.querySelector(".grid")).toBeInTheDocument();
-    });
-
-    it("uses 2-column responsive grid", () => {
-      const { container } = render(<NewsGrid articles={mockArticles} />);
-      // outer grid is 2-col on md+
-      const outerGrid = container.querySelector(".grid");
-      expect(outerGrid).toHaveClass("grid-cols-1");
-      expect(outerGrid?.className).toContain("md:grid-cols-");
-    });
-  });
-
-  describe("Article rendering", () => {
-    it("renders all article titles", () => {
-      render(<NewsGrid articles={mockArticles} />);
-      expect(screen.getByText("First News Article")).toBeInTheDocument();
-      expect(screen.getByText("Second News Article")).toBeInTheDocument();
-      expect(screen.getByText("Third News Article")).toBeInTheDocument();
-    });
-
-    it("renders article dates", () => {
-      render(<NewsGrid articles={mockArticles} />);
-      expect(screen.getByText("20 januari 2025")).toBeInTheDocument();
-      expect(screen.getByText("19 januari 2025")).toBeInTheDocument();
-      expect(screen.getByText("18 januari 2025")).toBeInTheDocument();
-    });
-
-    it("renders first article with featured variant (text-2xl heading)", () => {
-      render(<NewsGrid articles={mockArticles} />);
-      // First article heading is h3 with text-2xl!
+  describe("Lead vs supporting variant", () => {
+    it("renders the first article with featured variant (text-2xl heading)", () => {
+      render(<NewsGrid articles={fiveArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
       expect(headings[0]).toHaveClass("text-2xl!");
     });
 
     it("renders subsequent articles with standard variant (text-base heading)", () => {
-      render(<NewsGrid articles={mockArticles} />);
+      render(<NewsGrid articles={fiveArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
-      // headings[1] and [2] are standard
       expect(headings[1]).toHaveClass("text-base!");
-      expect(headings[2]).toHaveClass("text-base!");
-    });
-
-    it("renders article tags as badge", () => {
-      render(<NewsGrid articles={mockArticles} />);
-      // Tags rendered as badge text (no # prefix in NewsCard)
-      expect(screen.getAllByText("Ploeg").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText("Jeugd").length).toBeGreaterThanOrEqual(1);
+      expect(headings[4]).toHaveClass("text-base!");
     });
   });
 
-  describe("Featured event stub", () => {
-    const featuredEvent = {
-      title: "Jeugdtoernooi 2026",
-      href: "/evenementen/jeugdtoernooi",
-      imageUrl: "/events/toernooi.jpg",
-      imageAlt: "Jeugdtoernooi",
-      badge: "Evenement",
-      date: "18 april 2026",
-    };
-
-    it("renders event title in featured slot when featuredEvent provided", () => {
-      render(
-        <NewsGrid articles={mockArticles} featuredEvent={featuredEvent} />,
-      );
-      expect(screen.getByText("Jeugdtoernooi 2026")).toBeInTheDocument();
-    });
-
-    it("renders first article as standard (not featured) when event fills featured slot", () => {
-      render(
-        <NewsGrid articles={mockArticles} featuredEvent={featuredEvent} />,
-      );
-      const headings = screen.getAllByRole("heading", { level: 3 });
-      // Event is featured (text-2xl), articles are standard (text-base)
-      const featuredHeading = headings.find((h) =>
-        h.textContent?.includes("Jeugdtoernooi"),
-      );
-      expect(featuredHeading).toHaveClass("text-2xl!");
-      // First article is now standard
-      const firstArticleHeading = headings.find((h) =>
-        h.textContent?.includes("First News Article"),
-      );
-      expect(firstArticleHeading).toHaveClass("text-base!");
+  describe("Slot rotation cycle (Round 5d T.1)", () => {
+    it("applies rotations [a, b, c, d, a] across the 5 slots", () => {
+      const { container } = render(<NewsGrid articles={fiveArticles} />);
+      const cards = container.querySelectorAll("[data-rotation]");
+      expect(cards).toHaveLength(5);
+      expect(cards[0]).toHaveAttribute("data-rotation", "a");
+      expect(cards[1]).toHaveAttribute("data-rotation", "b");
+      expect(cards[2]).toHaveAttribute("data-rotation", "c");
+      expect(cards[3]).toHaveAttribute("data-rotation", "d");
+      expect(cards[4]).toHaveAttribute("data-rotation", "a");
     });
   });
 
-  describe("Empty state", () => {
-    it("returns null when no articles and no featuredEvent", () => {
+  describe("Aspect ratio (Round 5c C.1)", () => {
+    it("applies landscape-16-9 aspect to every card", () => {
+      const { container } = render(<NewsGrid articles={fiveArticles} />);
+      const cards = container.querySelectorAll("[data-aspect]");
+      expect(cards).toHaveLength(5);
+      cards.forEach((card) => {
+        expect(card).toHaveAttribute("data-aspect", "landscape-16-9");
+      });
+    });
+  });
+
+  describe("Sparse states (Round 5f E.1)", () => {
+    it("N=0 returns null", () => {
       const { container } = render(<NewsGrid articles={[]} />);
       expect(container.firstChild).toBeNull();
     });
 
-    it("renders when only featuredEvent provided (no articles)", () => {
-      const featuredEvent = {
-        title: "Evenement zonder artikelen",
-        href: "/evenementen/test",
-        badge: "Evenement",
-      };
-      render(<NewsGrid articles={[]} featuredEvent={featuredEvent} />);
-      expect(
-        screen.getByText("Evenement zonder artikelen"),
-      ).toBeInTheDocument();
+    it("N=1 renders only the lead", () => {
+      render(<NewsGrid articles={fiveArticles.slice(0, 1)} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
+    });
+
+    it("N=2 renders lead + 1 supporting", () => {
+      render(<NewsGrid articles={fiveArticles.slice(0, 2)} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(2);
+    });
+
+    it("N=3 renders lead + 2 supporting", () => {
+      render(<NewsGrid articles={fiveArticles.slice(0, 3)} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
+    });
+
+    it("N=4 renders lead + 3 supporting", () => {
+      render(<NewsGrid articles={fiveArticles.slice(0, 4)} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(4);
+    });
+
+    it("N=5 renders lead + 4 supporting (full cluster)", () => {
+      render(<NewsGrid articles={fiveArticles} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(5);
+    });
+
+    it("only spans the lead 2 rows when N>=3", () => {
+      const { container: c2 } = render(
+        <NewsGrid articles={fiveArticles.slice(0, 2)} />,
+      );
+      expect(c2.querySelector(".md\\:row-span-2")).toBeNull();
+
+      const { container: c3 } = render(
+        <NewsGrid articles={fiveArticles.slice(0, 3)} />,
+      );
+      expect(c3.querySelector(".md\\:row-span-2")).toBeInTheDocument();
+    });
+  });
+
+  describe("Article rendering", () => {
+    it("renders all article titles", () => {
+      render(<NewsGrid articles={fiveArticles} />);
+      fiveArticles.forEach((a) => {
+        expect(screen.getByText(a.title)).toBeInTheDocument();
+      });
+    });
+
+    it("renders article tags as badge", () => {
+      render(<NewsGrid articles={fiveArticles} />);
+      expect(screen.getAllByText("Tag1").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("Tag5").length).toBeGreaterThanOrEqual(1);
     });
   });
 });
