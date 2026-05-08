@@ -252,6 +252,22 @@
         .grid-pair { grid-template-columns: 1fr; }
       }
       .grid-pair .candidate { box-shadow: none; border-color: rgba(10, 10, 10, 0.5); }
+
+      /* Q2 row — three candidates side-by-side at desktop, wraps to a
+         single column on narrow viewports so the tradeoff text and surface
+         photos stay legible. */
+      .q2-comparison-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      @media (max-width: 1080px) {
+        .q2-comparison-row { grid-template-columns: 1fr; }
+      }
+      .q2-comparison-row .candidate { box-shadow: none; border-color: rgba(10, 10, 10, 0.5); }
+      .q2-comparison-row .candidate header { flex-direction: column; gap: 12px; }
+      .q2-comparison-row .text-block { padding: 36px 28px; }
+      .q2-comparison-row .h { font-size: 36px; }
     </style>
   </head>
   <body>
@@ -371,9 +387,14 @@
 
       <!-- =====================================================================
            Q2 · Overlay weight & pattern — 8c.C / 8c.D / 8c.E
-           (all assume the brand-consistent palette winning Q1)
+           Palette mix: 8c.C and 8c.E render against the Q1-winning brand
+           palette (`#005a39`) — they're the alternatives that lost Q2 and
+           are kept for the record. 8c.D is the LOCKED COMBO and uses the
+           desaturated 8c.B third stop (`#133d28`), so the rendered tile
+           matches the documented lock without scrolling back to the Q1 row.
            ===================================================================== -->
 
+      <div class="q2-comparison-row">
       <article class="candidate c">
         <header>
           <div>
@@ -490,6 +511,7 @@
           </div>
         </div>
       </article>
+      </div>
     </div>
   </body>
 </html>
