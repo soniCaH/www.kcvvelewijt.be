@@ -19,16 +19,32 @@ export type EditorialHeadingSize =
 
 export type EditorialHeadingTone = "ink" | "jersey-deep" | "cream";
 
+/**
+ * Accent colour for the italic emphasis (string-emphasis path) or the
+ * `accent`-marked spans (Portable Text path).
+ *
+ * - `jersey-deep` (default) — readable on cream / paper surfaces.
+ * - `warm` — readable on jersey-deep / ink surfaces (`text-warm` token
+ *   landed in #1697). Used by `<FeaturedEventBand>` and `<YouthBlock>`.
+ */
+export type EditorialHeadingAccentTone = "jersey-deep" | "warm";
+
 export type EditorialHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface EditorialHeadingEmphasis {
   text: string;
   /**
    * `true`  → italic + green HighlighterStroke (marker variant).
-   * `false` (default) → italic + jersey-deep accent colour (accent variant).
+   * `false` (default) → italic + accent colour (accent variant).
    * The two variants are mutually exclusive — see PRD §4.1 / §11.
    */
   highlight?: boolean;
+  /**
+   * Accent colour when NOT highlighting. Default `"jersey-deep"` preserves
+   * the original behaviour. `"warm"` for dark surfaces. Ignored when
+   * `highlight: true` (HighlighterStroke owns its own colour).
+   */
+  tone?: EditorialHeadingAccentTone;
 }
 
 export interface EditorialHeadingProps {
@@ -36,12 +52,17 @@ export interface EditorialHeadingProps {
   /**
    * Plain string (legacy, with optional `emphasis` substring) OR a
    * single-block constrained Portable Text array (post Ask 9 — the
-   * `accent` decorator on a span renders italic + jersey-deep).
+   * `accent` decorator on a span renders italic + accent colour).
    */
   children: string | PortableTextBlock[];
   size?: EditorialHeadingSize;
   emphasis?: EditorialHeadingEmphasis;
   tone?: EditorialHeadingTone;
+  /**
+   * Accent colour for `accent`-marked spans in the Portable Text path.
+   * Mirrors `emphasis.tone` for the string path. Default `"jersey-deep"`.
+   */
+  accentTone?: EditorialHeadingAccentTone;
   className?: string;
 }
 
@@ -64,6 +85,11 @@ const TONE_CLASS: Record<EditorialHeadingTone, string> = {
   cream: "text-cream",
 };
 
+const ACCENT_TONE_CLASS: Record<EditorialHeadingAccentTone, string> = {
+  "jersey-deep": "text-jersey-deep",
+  warm: "text-warm",
+};
+
 function ensureTrailingPeriod(text: string): string {
   return text.endsWith(".") ? text : `${text}.`;
 }
@@ -82,7 +108,10 @@ function splitOnEmphasis(
   };
 }
 
-function renderPortableTextTitle(blocks: PortableTextBlock[]): {
+function renderPortableTextTitle(
+  blocks: PortableTextBlock[],
+  accentTone: EditorialHeadingAccentTone,
+): {
   body: ReactNode;
   endsWithPeriod: boolean;
 } {
@@ -94,6 +123,7 @@ function renderPortableTextTitle(blocks: PortableTextBlock[]): {
   const flat = spans.map((s) => s.text ?? "").join("");
   const endsWithPeriod = flat.trim().endsWith(".");
   const lastIdx = spans.length - 1;
+  const accentClass = ACCENT_TONE_CLASS[accentTone];
   const body = (
     <>
       {spans.map((span, i) => {
@@ -106,7 +136,7 @@ function renderPortableTextTitle(blocks: PortableTextBlock[]): {
           return (
             <em
               key={span._key ?? i}
-              className="font-display text-jersey-deep italic"
+              className={cn("font-display italic", accentClass)}
             >
               {text}
             </em>
@@ -125,12 +155,13 @@ export function EditorialHeading({
   size = "display-lg",
   emphasis,
   tone = "ink",
+  accentTone = "jersey-deep",
   className,
 }: EditorialHeadingProps) {
   let body: ReactNode;
 
   if (typeof children !== "string") {
-    body = renderPortableTextTitle(children).body;
+    body = renderPortableTextTitle(children, accentTone).body;
   } else {
     const display = ensureTrailingPeriod(children);
     body = display;
@@ -144,11 +175,12 @@ export function EditorialHeading({
         }
       } else {
         const isHighlight = !!emphasis.highlight;
+        const emphasisTone = emphasis.tone ?? "jersey-deep";
         const emEl = (
           <em
             className={cn(
               "font-display italic",
-              !isHighlight && "text-jersey-deep",
+              !isHighlight && ACCENT_TONE_CLASS[emphasisTone],
             )}
           >
             {split.match}

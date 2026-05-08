@@ -99,6 +99,10 @@ export const FeaturedEventBand = ({
   const ctaUrl = event.externalLink?.url || `/evenementen/${event.slug}`;
   const ctaLabel = event.externalLink?.label || "Meer info";
   const isExternal = Boolean(event.externalLink?.url);
+  // Locked spec: warm-yellow accent on the first word of the title.
+  // Skip emphasis when the title starts with whitespace or is empty so
+  // splitOnEmphasis doesn't warn on dev.
+  const firstWord = event.title.trim().split(/\s+/)[0] ?? "";
 
   return (
     <section
@@ -122,23 +126,25 @@ export const FeaturedEventBand = ({
         </TapedFigure>
 
         <div className="flex flex-col justify-between gap-4">
+          {/* Default ink tone — 6.9:1 on jersey-deep, AA pass. Cream tone
+             is reserved for the "when · location" line below where the
+             original inline span already failed AA. */}
           <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
 
-          {/*
-            Locked spec calls for a warm-yellow accent on the first word.
-            <EditorialHeading>'s accent decorator hardcodes text-jersey-deep
-            (invisible against this bg), so we render the title without the
-            accent for now. Tracked under the Phase 9 cleanup list (#1531)
-            — when EditorialHeading gains a tone-aware accent colour, the
-            warm-yellow accent lights up here automatically.
-          */}
-          <EditorialHeading level={2} size="display-lg" tone="cream">
+          <EditorialHeading
+            level={2}
+            size="display-lg"
+            tone="cream"
+            {...(firstWord
+              ? { emphasis: { text: firstWord, tone: "warm" as const } }
+              : {})}
+          >
             {event.title}
           </EditorialHeading>
 
-          <span className="text-cream/85 text-[13px] tracking-[0.06em] uppercase">
+          <MonoLabel size="md" tone="cream">
             {formatDateTime(event.dateStart, event.dateEnd)} · {location}
-          </span>
+          </MonoLabel>
 
           <div className="mt-2">
             <LinkButton

@@ -92,6 +92,95 @@ describe("EditorialHeading", () => {
     expect(container.querySelector("em")).not.toBeNull();
   });
 
+  it("emphasis defaults to text-jersey-deep accent colour", () => {
+    const { container } = render(
+      <EditorialHeading level={2} emphasis={{ text: "nieuws" }}>
+        Het laatste nieuws
+      </EditorialHeading>,
+    );
+    const em = container.querySelector("em");
+    expect(em?.className).toContain("text-jersey-deep");
+    expect(em?.className).not.toContain("text-warm");
+  });
+
+  it("emphasis with tone='warm' applies text-warm, not text-jersey-deep", () => {
+    const { container } = render(
+      <EditorialHeading level={2} emphasis={{ text: "nieuws", tone: "warm" }}>
+        Het laatste nieuws
+      </EditorialHeading>,
+    );
+    const em = container.querySelector("em");
+    expect(em?.className).toContain("text-warm");
+    expect(em?.className).not.toContain("text-jersey-deep");
+  });
+
+  it("emphasis tone is ignored when highlight=true (HighlighterStroke owns colour)", () => {
+    const { container } = render(
+      <EditorialHeading
+        level={2}
+        emphasis={{ text: "nieuws", highlight: true, tone: "warm" }}
+      >
+        Het laatste nieuws
+      </EditorialHeading>,
+    );
+    const em = container.querySelector("em");
+    // No accent text-* utility on the em — HighlighterStroke wraps it.
+    expect(em?.className).not.toContain("text-warm");
+    expect(em?.className).not.toContain("text-jersey-deep");
+    expect(container.querySelector("[data-highlighter-stroke]")).not.toBeNull();
+  });
+
+  it("Portable Text accent span defaults to text-jersey-deep", () => {
+    const { container } = render(
+      <EditorialHeading level={2}>
+        {[
+          {
+            _type: "block",
+            _key: "a",
+            style: "normal",
+            markDefs: [],
+            children: [
+              { _type: "span", _key: "a1", text: "De ", marks: [] },
+              { _type: "span", _key: "a2", text: "kantine", marks: ["accent"] },
+            ],
+          },
+        ]}
+      </EditorialHeading>,
+    );
+    const em = container.querySelector("em");
+    expect(em?.textContent).toBe("kantine.");
+    expect(em?.className).toContain("text-jersey-deep");
+  });
+
+  it("Portable Text accent span honours accentTone='warm'", () => {
+    const { container } = render(
+      <EditorialHeading level={2} accentTone="warm">
+        {[
+          {
+            _type: "block",
+            _key: "b",
+            style: "normal",
+            markDefs: [],
+            children: [
+              { _type: "span", _key: "b1", text: "De ", marks: [] },
+              {
+                _type: "span",
+                _key: "b2",
+                text: "toekomst",
+                marks: ["accent"],
+              },
+              { _type: "span", _key: "b3", text: " van Elewijt", marks: [] },
+            ],
+          },
+        ]}
+      </EditorialHeading>,
+    );
+    const em = container.querySelector("em");
+    expect(em?.textContent).toBe("toekomst");
+    expect(em?.className).toContain("text-warm");
+    expect(em?.className).not.toContain("text-jersey-deep");
+  });
+
   it("warns in dev when emphasis text is not found", () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

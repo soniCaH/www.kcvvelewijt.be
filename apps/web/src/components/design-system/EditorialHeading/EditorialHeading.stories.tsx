@@ -38,6 +38,91 @@ export const WithEmphasisHighlighted: Story = {
   },
 };
 
+/**
+ * Emphasis at default tone (`jersey-deep`) on the cream surface — the
+ * canonical editorial accent. Same surface as `WithEmphasisInline`,
+ * named explicitly so the per-tone matrix is grep-able.
+ */
+export const AccentJerseyDeep: Story = {
+  args: {
+    level: 2,
+    children: "Het laatste nieuws",
+    emphasis: { text: "nieuws", tone: "jersey-deep" },
+  },
+};
+
+/**
+ * Emphasis at `tone="warm"` on a jersey-deep surface — the contrast
+ * pairing this tone exists for. `<FeaturedEventBand>` (#1531 workaround
+ * removed in this PR) and `<YouthBlock>` (#1675) consume it.
+ */
+export const AccentWarmOnJerseyDeep: Story = {
+  args: {
+    level: 2,
+    size: "display-lg",
+    tone: "cream",
+    children: "De toekomst van Elewijt",
+    emphasis: { text: "De toekomst", tone: "warm" },
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep border-jersey-deep-dark max-w-2xl border p-10">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+/**
+ * Marker variant — kept under `HighlightMarker` to match the issue body's
+ * named story list (alias of `WithEmphasisHighlighted`).
+ */
+export const HighlightMarker: Story = {
+  args: {
+    level: 2,
+    children: "Het laatste nieuws",
+    emphasis: { text: "nieuws", highlight: true },
+  },
+};
+
+/**
+ * Portable Text accent span at `accentTone="warm"` on jersey-deep —
+ * mirrors `AccentWarmOnJerseyDeep` for the Portable Text path so the
+ * Studio editor's accent decorator works on dark surfaces too.
+ */
+export const PortableTextAccentWarmOnJerseyDeep: Story = {
+  args: { level: 2, children: "x" },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep border-jersey-deep-dark max-w-2xl border p-10">
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => (
+    <EditorialHeading
+      level={2}
+      size="display-lg"
+      tone="cream"
+      accentTone="warm"
+    >
+      {[
+        {
+          _type: "block",
+          _key: "a",
+          style: "normal",
+          markDefs: [],
+          children: [
+            { _type: "span", _key: "a1", text: "De ", marks: [] },
+            { _type: "span", _key: "a2", text: "toekomst", marks: ["accent"] },
+            { _type: "span", _key: "a3", text: " van Elewijt", marks: [] },
+          ],
+        },
+      ]}
+    </EditorialHeading>
+  ),
+};
+
 export const EveryLevel: Story = {
   args: { level: 2, children: "x" },
   render: () => (
