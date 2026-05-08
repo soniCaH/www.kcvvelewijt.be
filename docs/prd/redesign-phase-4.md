@@ -80,26 +80,26 @@ If the tracer fails, every Phase 4 sub-issue depending on the warm tape (`<Featu
 ## 4. Sub-issues — children of #1526
 
 ```text
-4.0   #TBA  — Tracer bullet · <TapeStrip color="warm"> primitive variant
+4.0   #1670  — Tracer bullet · <TapeStrip color="warm"> primitive variant
    ↓
    ├── 4.A — Primitives track (parallel after 4.0)
-   │     4.A.1  #TBA  <NewsCard> aspectRatio + rotation props
+   │     4.A.1  #1671  <NewsCard> aspectRatio + rotation props
    │
    ├── 4.B — Section components track (parallel after 4.A.1)
-   │     4.B.1  #TBA  <NewsGrid> rebuild (1+4 · 50/50 geometry)
-   │     4.B.2  #TBA  <UpcomingMatches> renamed + schedule-depth + expand
-   │     4.B.3  #TBA  <SponsorsBlock> homepage variant (single grid · M.3 tiles)
-   │     4.B.4  #TBA  <YouthBlock> palette swap on existing <YouthSection>/<YouthBackdrop>
-   │     4.B.5  #TBA  <WebshopBanner> renamed + ink palette
-   │     4.B.6  #TBA  <FeaturedEventBand> NEW component (depends on 4.0 warm tape)
+   │     4.B.1  #1672  <NewsGrid> rebuild (1+4 · 50/50 geometry)
+   │     4.B.2  #1673  <UpcomingMatches> renamed + schedule-depth + expand
+   │     4.B.3  #1674  <SponsorsBlock> homepage variant (single grid · M.3 tiles)
+   │     4.B.4  #1675  <YouthBlock> palette swap on existing <YouthSection>/<YouthBackdrop>
+   │     4.B.5  #1676  <WebshopBanner> renamed + ink palette
+   │     4.B.6  #1677  <FeaturedEventBand> NEW component (depends on 4.0 warm tape)
    │
    ├── 4.C — EditorialHero homepage placement track (after 4.B.* ready)
-   │     4.C.1  #TBA  Carousel client component (D.1 strip-below thumbnails) wraps <EditorialHero placement="homepage">
-   │     4.C.2  #TBA  Article query update — `order(featured desc, publishedAt desc)`; fallback to most-recent if < 3 flagged
+   │     4.C.1  #1678  Carousel client component (D.1 strip-below thumbnails) wraps <EditorialHero placement="homepage">
+   │     4.C.2  #1679  Article query update — `order(featured desc, publishedAt desc)`; fallback to most-recent if < 3 flagged
    │
    └── 4.D — Homepage page.tsx integration (final, after all 4.B/4.C merged)
-         4.D.1  #TBA  Compose new section ordering; drop legacy components
-         4.D.2  #TBA  Pages/Homepage Storybook story rebuild
+         4.D.1  #1680  Compose new section ordering; drop legacy components
+         4.D.2  #1681  Pages/Homepage Storybook story rebuild
 ```
 
 **Dependency edges (`addBlockedBy` GraphQL mutations):**

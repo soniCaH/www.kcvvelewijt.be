@@ -45,7 +45,7 @@
 | NewsGrid | Sanity `article` | `ARTICLES_QUERY[3..9]` (skip the 3 hero articles) | Drop the section if 0 |
 | UpcomingMatches | BFF | `getNextMatches()` (existing) — all KCVV teams, chronological | Return null if 0 upcoming. Standings dropped from homepage scope; live on `/ranking` only. See `upcoming-matches-locked.md` |
 | YouthBlock | Hardcoded | n/a | n/a |
-| WebshopStrip | Hardcoded thumbs + external link | n/a | n/a |
+| WebshopBanner | Hardcoded copy + external link | n/a | n/a |
 | SponsorsBlock | Sanity `sponsor[]` | `tier in ["hoofdsponsor", "sponsor"]` only on homepage | Drop if 0 sponsors |
 
 ## Round-by-round lock log
@@ -73,7 +73,7 @@
 - **ScheduleStandingsBlock layout** — tabs vs split, schedule depth (next 3? next 5? grouped by week?), standings shape (group only or full table), KCVV row highlight (psd_club_id 1235), empty-state. Round 6.
 - **SponsorsBlock tier rendering** — main (`hoofdsponsor`) vs second (`sponsor`) layout density per tier; missing-logo fallback (italic Freight Display name treatment). Round 7.
 - **YouthBlock copy + composition** — JerseyShirt placement, headline treatment, stat ("220+ spelers · 16 ploegen" — verify still accurate), CTA copy, divisions mention. Round 8.
-- **WebshopStrip** — 4-col jersey thumbs source (Sanity vs hardcoded), tape/rotation pattern, CTA copy, external-link indicator. Round 9.
+- **WebshopBanner** — composition (single-CTA banner pointer to external supplier per Round 9b lock; ink palette per F.1 to avoid YouthBlock adjacency). Round 9.
 - **Cream / ink / jersey rhythm token map** — locks after all section internals. Round 10.
 - **Mobile compression rules** — single-column rules at <640px. Implementation-time, not design-time.
 

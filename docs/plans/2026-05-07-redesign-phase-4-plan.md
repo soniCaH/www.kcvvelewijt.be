@@ -5,9 +5,9 @@
 > **Master design:** `docs/plans/2026-04-27-redesign-master-design.md`
 > **Design brief:** `docs/design/mockups/phase-4-homepage/` — 11 round HTMLs + 7 `*-locked.md` specs (all locked 2026-05-07)
 > **Predecessor plan:** `docs/plans/2026-05-03-redesign-phase-3-plan.md` (structure mirrored)
-> **Sub-issues to create:** 11 children of #1526 (see §15 for `gh` recipes + GraphQL `addBlockedBy` script)
+> **Sub-issues to create:** 12 children of #1526 (see §15 for `gh` recipes + GraphQL `addBlockedBy` script)
 
-This plan executes the 11 Phase 4 sub-issues. Each is a separate Ralph-eligible work item with its own PR. This document is the source of execution order, file paths, acceptance criteria, and `addBlockedBy` graph.
+This plan executes the 12 Phase 4 sub-issues. Each is a separate Ralph-eligible work item with its own PR. This document is the source of execution order, file paths, acceptance criteria, and `addBlockedBy` graph.
 
 ---
 
@@ -245,7 +245,10 @@ Run once before opening any sub-issue:
 **Files to delete (or move to _legacy/):**
 
 - `apps/web/src/components/home/WebshopSection/`
-- `/public/images/jerseys.png` — keep in repo for now (other surfaces may use it); just stop importing it.
+
+**Files to retain (out of deletion scope):**
+
+- `apps/web/public/images/jerseys.png` — retained in the repo for other surfaces. WebshopBanner does not import it; just remove the import in the legacy WebshopSection move.
 
 **Implementation:**
 
@@ -452,7 +455,7 @@ Move (not delete) into a `_legacy/` directory for blame trace; deletion happens 
 
 ## Definition of done — overall
 
-- All 11 sub-issues closed.
+- All 12 sub-issues closed.
 - All VR baselines committed in their respective sub-issue PRs.
 - `pnpm --filter @kcvv/web check-all` green on `main` after final merge.
 - Storybook `Pages/Homepage` reviewable.
