@@ -200,3 +200,62 @@ export const MobileView: Story = {
   args: { ...Default.args },
   globals: { viewport: { value: "mobile1" } },
 };
+
+// ===== Phase 4 / NewsGrid prop additions =====
+//
+// The four stories below exist to capture VR baselines for the new
+// `aspectRatio` and `rotation` props introduced for `<NewsGrid>` (#1672).
+// They are vr-tagged individually rather than via meta.tags so the existing
+// 14 legacy NewsCard stories don't get baselined as a side effect.
+
+const phase4SharedArgs = {
+  title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
+  href: "/nieuws/derby-overwinning",
+  imageUrl: "https://picsum.photos/800/500?random=1",
+  imageAlt: "Derby match",
+  badge: "Competitie",
+  date: "15 januari 2025",
+  variant: "standard" as const,
+};
+
+export const Lead: Story = {
+  args: {
+    ...phase4SharedArgs,
+    variant: "featured",
+    title: "Spelersvoorstelling seizoen 2025-2026: versterkingen voor debuut",
+    aspectRatio: "landscape-16-9",
+    rotation: "a",
+  },
+  tags: ["vr"],
+};
+
+export const SquareAspect: Story = {
+  args: { ...phase4SharedArgs, aspectRatio: "square" },
+  tags: ["vr"],
+};
+
+export const PortraitAspect: Story = {
+  args: { ...phase4SharedArgs, aspectRatio: "portrait-3-4" },
+  tags: ["vr"],
+};
+
+// All four rotation slots in one story so VR captures the cycle as a unit.
+// Matches the `[a, b, c, d]` pool consumed by `<NewsGrid>` (#1672) per the
+// locked NewsGrid spec.
+export const RotationCycle: Story = {
+  args: phase4SharedArgs,
+  tags: ["vr"],
+  render: () => (
+    <div className="grid max-w-5xl grid-cols-2 gap-12 p-12">
+      {(["a", "b", "c", "d"] as const).map((r) => (
+        <NewsCard
+          key={r}
+          {...phase4SharedArgs}
+          rotation={r}
+          aspectRatio="landscape-16-9"
+          imageUrl={`https://picsum.photos/800/500?random=rot-${r}`}
+        />
+      ))}
+    </div>
+  ),
+};
