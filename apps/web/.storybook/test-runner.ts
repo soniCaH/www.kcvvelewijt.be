@@ -198,6 +198,13 @@ const config: TestRunnerConfig = {
       // the whole runner — failures emit a console.warn so the cause is
       // discoverable from CI logs without re-running locally.
       await page.evaluate(async (timeoutMs: number) => {
+        // `next/image` defaults to lazy loading — images below the initial
+        // viewport never start loading because the runner does not scroll.
+        // Force every image to eager so the wait below actually covers
+        // them. Test-runner-only; production behaviour is untouched.
+        for (const img of Array.from(document.images)) {
+          if (img.loading === "lazy") img.loading = "eager";
+        }
         const imageWaits = Array.from(document.images)
           .filter((img) => !img.complete)
           .map(
