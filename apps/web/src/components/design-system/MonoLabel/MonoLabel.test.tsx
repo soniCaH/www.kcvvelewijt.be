@@ -28,11 +28,14 @@ describe("MonoLabel", () => {
     expect(container.firstChild).toHaveAttribute("data-size", "md");
   });
 
-  it("plain variant + tone='cream' applies text-cream/85, not text-ink", () => {
+  it("plain variant + tone='cream' applies text-cream (full opacity), not text-ink", () => {
     const { container } = render(<MonoLabel tone="cream">X</MonoLabel>);
     const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain("text-cream/85");
+    expect(el.className).toMatch(/(?:^|\s)text-cream(?:\s|$)/);
     expect(el.className).not.toMatch(/(?:^|\s)text-ink(?:\s|$)/);
+    // Guard: any future regression to `text-cream/<alpha>` will fail axe on
+    // jersey-deep surfaces (contrast drops below 4.5:1).
+    expect(el.className).not.toMatch(/text-cream\/\d/);
   });
 
   it("plain variant + tone='ink' (default) applies text-ink, not text-cream", () => {
@@ -50,9 +53,6 @@ describe("MonoLabel", () => {
     );
     const el = container.firstChild as HTMLElement;
     expect(el.className).toContain("text-cream");
-    // Should NOT pick up the plain-tone text-cream/85 utility — the pill's
-    // own text-cream wins because PLAIN_TONE_CLASS is gated on !isPill.
-    expect(el.className).not.toContain("text-cream/85");
   });
 
   it("pill variants ignore tone — pill-jersey keeps text-ink even when tone='cream'", () => {

@@ -31,9 +31,16 @@ const VARIANT_CLASS: Record<MonoLabelVariant, string> = {
 
 // Applied only to the `plain` variant — pills already carry their own text
 // colour and shouldn't have it overridden by `tone`.
+//
+// Cream tone uses full opacity. An earlier draft used `text-cream/85` to match
+// the locked spec's "opacity 0.7" mood, but cream-at-85% blended on
+// `bg-jersey-deep` computes to ~2.86:1 contrast and trips axe (sub-AA for
+// normal text). If a consumer wants a softer mono label on a dark surface,
+// they can wrap the label in a parent with reduced opacity rather than baking
+// it into the token.
 const PLAIN_TONE_CLASS: Record<MonoLabelTone, string> = {
   ink: "text-ink",
-  cream: "text-cream/85",
+  cream: "text-cream",
 };
 
 // Per-size font + spacing: pill variants need real vertical padding to read
