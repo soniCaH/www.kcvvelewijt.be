@@ -36,7 +36,10 @@ type Story = StoryObj<typeof meta>;
 const article = (slot: number, title: string, tag: string) => ({
   href: `/nieuws/slot-${slot}`,
   title,
-  imageUrl: fixtureImage(SLOT_SHAPES[slot % SLOT_SHAPES.length]!, slot),
+  imageUrl: fixtureImage(
+    SLOT_SHAPES[slot % SLOT_SHAPES.length] ?? "article-hero-generic",
+    slot,
+  ),
   imageAlt: title,
   date: `${15 + slot} mei 2025`,
   tags: [{ name: tag }],

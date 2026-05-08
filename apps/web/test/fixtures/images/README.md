@@ -18,7 +18,7 @@ services (placehold.co, picsum, unsplash) that produced flaky baselines.
 ## Usage in stories
 
 ```typescript
-import { fixtureImage } from "../../../test/fixtures/images";
+import { fixtureImage } from "@test-fixtures/images";
 
 // Pick deterministically by index — siblings render different content
 const meta = {

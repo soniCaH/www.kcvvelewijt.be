@@ -29,7 +29,10 @@ function makeMockArticle(
     publishedAt: `2025-01-${String(20 - id).padStart(2, "0")}T12:00:00Z`,
     featured: id <= 3,
     tags: ["Clubnieuws"],
-    coverImageUrl: fixtureImage(heroShapes[id % heroShapes.length]!, id),
+    coverImageUrl: fixtureImage(
+      heroShapes[id % heroShapes.length] ?? "article-hero-generic",
+      id,
+    ),
     ...overrides,
   };
 }
