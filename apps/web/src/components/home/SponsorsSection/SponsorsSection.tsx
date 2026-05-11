@@ -1,30 +1,43 @@
-import { cn } from "@/lib/utils/cn";
-import { SectionHeader } from "@/components/design-system";
+import { Effect } from "effect";
+import { runPromise } from "@/lib/effect/runtime";
+import { SponsorRepository } from "@/lib/repositories/sponsor.repository";
 import { SponsorsBlock } from "@/components/sponsors";
+import type { Sponsor } from "@/components/sponsors";
 
 export interface SponsorsSectionProps {
   className?: string;
 }
 
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
-  return (
-    <section className={cn("py-6", className)}>
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
-        <SectionHeader
-          title="Onze sponsors"
-          linkText="Alle partners"
-          linkHref="/sponsors"
-          variant="dark"
-        />
-        <SponsorsBlock
-          title=""
-          description=""
-          showViewAll={false}
-          variant="dark"
-          columns={5}
-          className="py-0"
-        />
-      </div>
-    </section>
+  const sponsors = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* SponsorRepository;
+      const all = yield* repo.findAll();
+      return all
+        .filter(
+          (s) =>
+            s.tier === "hoofdsponsor" ||
+            s.tier === "sponsor" ||
+            (!s.tier &&
+              s.type &&
+              ["crossing", "green", "white"].includes(s.type)),
+        )
+        .map(
+          (s): Sponsor => ({
+            id: s.id,
+            name: s.name,
+            logo: s.logoUrl ?? "",
+            url: s.url ?? undefined,
+            tier: s.tier ?? "sponsor",
+          }),
+        );
+    }).pipe(
+      Effect.catchAll((error) => {
+        console.error("[SponsorsSection] Failed to fetch sponsors:", error);
+        return Effect.succeed<Sponsor[]>([]);
+      }),
+    ),
   );
+
+  return <SponsorsBlock sponsors={sponsors} className={className} />;
 }
