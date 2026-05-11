@@ -49,7 +49,7 @@ export const Mobile: Story = {
     docs: {
       description: {
         story:
-          "Mobile (<640px) — gradient flips to vertical via the Tailwind base/md cascade on the backdrop.",
+          "Mobile (<640px) — same layout as Default. The locked spec asks for the gradient to flip to a vertical axis at this breakpoint, but the composed `--gradient-jersey-deep-overlay` token bakes in 135deg and does not yet expose direction. The flip is deferred until the gradient-token API gains a direction parameter.",
       },
     },
   },
