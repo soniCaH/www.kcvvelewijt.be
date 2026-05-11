@@ -6,15 +6,53 @@ import { SectionStack } from "@/components/design-system/SectionStack/SectionSta
 const meta = {
   title: "Features/Homepage/YouthSection",
   component: YouthSection,
-  tags: ["autodocs"],
-  parameters: { layout: "fullscreen" },
+  tags: ["autodocs", "vr"],
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          'Homepage Jeugd block (Phase 4.B.4). Palette swap to retro jersey-deep tokens with the composed gradient overlay + halftone print texture. Text rebuilt on `<EditorialHeading>` (italic accent on "De toekomst") + `<MonoLabel>` + `<LinkButton variant=primary>` per the locked spec.',
+      },
+    },
+  },
 } satisfies Meta<typeof YouthSection>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const withBackdrop = (children: React.ReactNode) => (
+  <div className="relative isolate min-h-[640px] overflow-hidden">
+    <YouthBackdrop />
+    <div className="relative z-10 py-20 md:py-28">{children}</div>
+  </div>
+);
+
 export const Default: Story = {
   args: {},
+  render: () => withBackdrop(<YouthSection />),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Desktop default — jersey-deep gradient (135deg) + halftone overlay layered on the blurred youth-trainers photo.",
+      },
+    },
+  },
+};
+
+export const Mobile: Story = {
+  args: {},
+  render: () => withBackdrop(<YouthSection />),
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
+    docs: {
+      description: {
+        story:
+          "Mobile (<640px) — same layout as Default. The locked spec asks for the gradient to flip to a vertical axis at this breakpoint, but the composed `--gradient-jersey-deep-overlay` token bakes in 135deg and does not yet expose direction. The flip is deferred until the gradient-token API gains a direction parameter.",
+      },
+    },
+  },
 };
 
 /** YouthSection sandwiched between sections — diagonals are owned by `SectionStack`

@@ -11,9 +11,9 @@ vi.mock("next/image", () => ({
 }));
 
 describe("YouthSection", () => {
-  it("renders the section label", () => {
+  it("renders the meta label", () => {
     render(<YouthSection />);
-    expect(screen.getByText("Jeugdwerking")).toBeInTheDocument();
+    expect(screen.getByText("Word jeugdspeler")).toBeInTheDocument();
   });
 
   it("renders the editorial title", () => {
@@ -23,9 +23,11 @@ describe("YouthSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the body text", () => {
+  it("renders the lead copy", () => {
     render(<YouthSection />);
-    expect(screen.getByText(/meer dan 220 jonge spelers/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/onze jeugdwerking groeit elk jaar/i),
+    ).toBeInTheDocument();
   });
 
   it("renders the stats line", () => {
@@ -66,5 +68,17 @@ describe("YouthBackdrop", () => {
     const { container } = render(<YouthBackdrop />);
     const root = container.firstElementChild;
     expect(root?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("uses the jersey-deep gradient token, not legacy kcvv-green-dark classes", () => {
+    const { container } = render(<YouthBackdrop />);
+    expect(container.innerHTML).toContain("--gradient-jersey-deep-overlay");
+    expect(container.innerHTML).not.toContain("kcvv-green-dark");
+  });
+
+  it("layers the halftone print texture on top of the gradient", () => {
+    const { container } = render(<YouthBackdrop />);
+    expect(container.innerHTML).toContain("--pattern-halftone-dots");
+    expect(container.innerHTML).toContain("mix-blend-screen");
   });
 });
