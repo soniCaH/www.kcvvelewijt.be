@@ -197,7 +197,23 @@ const config: TestRunnerConfig = {
       // IMAGE_LOAD_TIMEOUT_MS so a story with a broken image doesn't hang
       // the whole runner — failures emit a console.warn so the cause is
       // discoverable from CI logs without re-running locally.
+      // `next/image` lazy-loads via the `loading="lazy"` attribute AND an
+      // intersection observer. Flipping the attribute alone does not
+      // retrigger the IO; CI screenshots showed below-fold images still
+      // empty even after the eager flip. Scroll to bottom + back to top
+      // first so every IO callback fires, then flip the attribute as a
+      // belt-and-braces, then wait. Test-runner-only.
+      await page.evaluate(async () => {
+        const fullHeight = document.documentElement.scrollHeight;
+        window.scrollTo(0, fullHeight);
+        await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+        window.scrollTo(0, 0);
+        await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      });
       await page.evaluate(async (timeoutMs: number) => {
+        for (const img of Array.from(document.images)) {
+          if (img.loading === "lazy") img.loading = "eager";
+        }
         const imageWaits = Array.from(document.images)
           .filter((img) => !img.complete)
           .map(

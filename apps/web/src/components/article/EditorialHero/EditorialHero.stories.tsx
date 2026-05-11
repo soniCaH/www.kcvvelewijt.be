@@ -12,6 +12,7 @@ import {
 } from "@/components/article/blocks/SubjectsStrip";
 import { EndMark } from "@/components/design-system/EndMark";
 import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
+import { fixtureImage } from "@test-fixtures/images";
 
 const STANDARD_LOGO = shieldSvgDataUri({
   label: "STD",
@@ -56,7 +57,7 @@ const SAMPLE_LEAD =
   "Een rustige editorial lead die de toon zet voor het artikel zonder alles te verklappen.";
 
 const COVER = {
-  url: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80&fm=webp&fit=max",
+  url: fixtureImage("article-hero-generic", 0),
   alt: "Spelers vieren een doelpunt",
 };
 

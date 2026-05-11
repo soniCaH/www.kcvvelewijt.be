@@ -4,6 +4,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SearchResult } from "./SearchResult";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Search/SearchResult",
@@ -29,7 +30,7 @@ export const Article: Story = {
       description:
         "In een spannende wedstrijd heeft KCVV Elewijt met 3-2 gewonnen van de tegenstander. De goals kwamen van De Bruyne, Lukaku en Hazard.",
       url: "/nieuws/kcvv-elewijt-wint-belangrijke-wedstrijd",
-      imageUrl: "https://placehold.co/400x300/4acf52/ffffff?text=Match+Win",
+      imageUrl: fixtureImage("article-hero-matchverslag", 0),
       tags: ["A-ploeg", "Wedstrijdverslag", "Overwinning"],
       date: "2026-01-15T10:00:00Z",
     },
@@ -65,7 +66,7 @@ export const Player: Story = {
       title: "John De Ron",
       description: "Doelman",
       url: "/spelers/john-de-ron",
-      imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=JDR",
+      imageUrl: fixtureImage("player-portrait-square", 0),
     },
   },
 };
@@ -96,7 +97,7 @@ export const Team: Story = {
       title: "A-Ploeg",
       description: "3e Provinciale",
       url: "/ploegen/a-ploeg",
-      imageUrl: "https://placehold.co/200x200/4acf52/ffffff?text=A",
+      imageUrl: fixtureImage("team-group", 0),
     },
   },
 };

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SubjectAttribution, SubjectPhoto } from "./SubjectAttribution";
 import type { SubjectValue } from "./resolveSubject";
+import { fixtureImage } from "@test-fixtures/images";
 
 const playerSubject: SubjectValue = {
   kind: "player",
@@ -9,8 +10,7 @@ const playerSubject: SubjectValue = {
     lastName: "Breugelmans",
     jerseyNumber: 9,
     transparentImageUrl: null,
-    psdImageUrl:
-      "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=600&q=80",
+    psdImageUrl: fixtureImage("player-portrait", 0),
   },
 };
 
@@ -20,8 +20,7 @@ const staffSubject: SubjectValue = {
     firstName: "Jeroen",
     lastName: "Van den Berghe",
     functionTitle: "Hoofdcoach A-ploeg",
-    photoUrl:
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80",
+    photoUrl: fixtureImage("staff-portrait", 0),
   },
 };
 
@@ -29,8 +28,7 @@ const customSubject: SubjectValue = {
   kind: "custom",
   customName: "Luc Janssens",
   customRole: "Oud-speler",
-  customPhotoUrl:
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&q=80",
+  customPhotoUrl: fixtureImage("player-portrait", 1),
 };
 
 const meta = {

@@ -9,6 +9,14 @@ import { fn } from "storybook/test";
 import { NewsListingClient } from "./NewsListingClient";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import NewsLoading from "@/app/(landing)/nieuws/loading";
+import { fixtureImage } from "@test-fixtures/images";
+
+const heroShapes = [
+  "article-hero-generic",
+  "article-hero-matchverslag",
+  "article-hero-jeugd",
+  "article-hero-transfer",
+] as const;
 
 function makeMockArticle(
   id: number,
@@ -21,7 +29,10 @@ function makeMockArticle(
     publishedAt: `2025-01-${String(20 - id).padStart(2, "0")}T12:00:00Z`,
     featured: id <= 3,
     tags: ["Clubnieuws"],
-    coverImageUrl: `https://picsum.photos/seed/article${id}/800/500`,
+    coverImageUrl: fixtureImage(
+      heroShapes[id % heroShapes.length] ?? "article-hero-generic",
+      id,
+    ),
     ...overrides,
   };
 }

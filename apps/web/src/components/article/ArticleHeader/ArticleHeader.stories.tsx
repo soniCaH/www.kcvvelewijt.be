@@ -6,6 +6,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleMetadata } from "../ArticleMetadata/ArticleMetadata";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Articles/ArticleHeader",
@@ -39,7 +40,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning tegen rivaal",
-    imageUrl: "https://picsum.photos/1120/560?random=10",
+    imageUrl: fixtureImage("article-hero-matchverslag", 0),
     imageAlt: "Match photo",
     category: "Eerste ploeg",
     date: "15 maart 2026",
@@ -53,7 +54,7 @@ export const Default: Story = {
 export const WithContent: Story = {
   args: {
     title: "Nieuwe transfers aangekondigd voor komend seizoen",
-    imageUrl: "https://picsum.photos/1120/560?random=11",
+    imageUrl: fixtureImage("article-hero-transfer", 0),
     imageAlt: "New players",
     category: "Transfers",
     date: "15 maart 2026",
@@ -93,7 +94,7 @@ export const LongTitle: Story = {
   args: {
     title:
       "KCVV Elewijt behaalt een fantastische overwinning in de belangrijke wedstrijd tegen de rivaal van de regio na een spannende pot voetbal",
-    imageUrl: "https://picsum.photos/1120/560?random=20",
+    imageUrl: fixtureImage("article-hero-matchverslag", 1),
     imageAlt: "Team celebration",
     category: "Wedstrijdverslag",
     date: "15 maart 2026",
@@ -107,7 +108,7 @@ export const LongTitle: Story = {
 export const ShortTitle: Story = {
   args: {
     title: "Overwinning!",
-    imageUrl: "https://picsum.photos/1120/560?random=30",
+    imageUrl: fixtureImage("article-hero-matchverslag", 2),
     imageAlt: "Victory",
     category: "Eerste ploeg",
     date: "15 maart 2026",
@@ -133,7 +134,7 @@ export const NoImage: Story = {
 export const Minimal: Story = {
   args: {
     title: "Overwinning!",
-    imageUrl: "https://picsum.photos/1120/560?random=31",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     imageAlt: "Victory",
   },
 };
@@ -144,7 +145,7 @@ export const Minimal: Story = {
 export const MobileView: Story = {
   args: {
     title: "Jeugdwerking start nieuwe training",
-    imageUrl: "https://picsum.photos/1120/560?random=40",
+    imageUrl: fixtureImage("article-hero-jeugd", 0),
     imageAlt: "Youth training",
     category: "Jeugd",
     date: "12 maart 2026",

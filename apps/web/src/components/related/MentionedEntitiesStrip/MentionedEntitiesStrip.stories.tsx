@@ -5,6 +5,7 @@ import type {
   RelatedTeamItem,
   RelatedStaffItem,
 } from "../types";
+import { fixtureImage } from "@test-fixtures/images";
 
 const player1: RelatedPlayerItem = {
   type: "player",
@@ -13,7 +14,7 @@ const player1: RelatedPlayerItem = {
   firstName: "Lirian",
   lastName: "Zumberaj",
   position: "Aanvaller",
-  imageUrl: "https://picsum.photos/seed/lirian/200/200",
+  imageUrl: fixtureImage("player-portrait-square", 0),
   psdId: "12345",
 };
 
@@ -24,7 +25,7 @@ const player2: RelatedPlayerItem = {
   firstName: "Jan",
   lastName: "Janssens",
   position: "Middenvelder",
-  imageUrl: "https://picsum.photos/seed/jan/200/200",
+  imageUrl: fixtureImage("player-portrait-square", 1),
   psdId: "23456",
 };
 
@@ -45,7 +46,7 @@ const team1: RelatedTeamItem = {
   id: "t-1",
   name: "Eerste Elftal A",
   slug: "eerste-elftal-a",
-  imageUrl: "https://picsum.photos/seed/team-a/300/200",
+  imageUrl: fixtureImage("team-group", 0),
   tagline: "3e Nationale A",
 };
 
@@ -66,7 +67,7 @@ const staff1: RelatedStaffItem = {
   firstName: "Marc",
   lastName: "Vermeulen",
   role: "Hoofdtrainer",
-  imageUrl: "https://picsum.photos/seed/marc/200/200",
+  imageUrl: fixtureImage("staff-portrait", 0),
 };
 
 const staff2: RelatedStaffItem = {

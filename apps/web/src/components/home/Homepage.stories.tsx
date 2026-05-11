@@ -12,6 +12,7 @@ import { SectionStack, SectionHeader } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
 import { mockMatches } from "@/components/match/match.mocks";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Pages/Homepage",
@@ -30,7 +31,7 @@ const mockFeaturedArticles = [
     title: "Definitieve reeksindeling 3e Nationale BIS",
     description:
       "De reeksindeling voor het seizoen 2025-2026 in 3e Nationale BIS is bekend. KCVV Elewijt komt uit in reeks A.",
-    imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Stadion",
+    imageUrl: fixtureImage("stadium-hero", 0),
     imageAlt: "Stadion KCVV Elewijt",
     date: "20 juni 2025",
     tags: [{ name: "Ploeg" }, { name: "Competitie" }],
@@ -40,7 +41,7 @@ const mockFeaturedArticles = [
     title: "Overlijden Jean Lepage",
     description:
       "Met diepe droefheid hebben we vernomen dat Jean Lepage op 82-jarige leeftijd is overleden. Jean was jarenlang een trouwe supporter en vrijwilliger van KCVV Elewijt.",
-    imageUrl: "https://placehold.co/800x600/1e2024/fff?text=In+Memoriam",
+    imageUrl: fixtureImage("article-hero-generic", 0),
     imageAlt: "Jean Lepage tribute",
     date: "25 maart 2025",
     tags: [{ name: "In Memoriam" }],
@@ -50,7 +51,7 @@ const mockFeaturedArticles = [
     title: "Winterstage in Spanje: voorbereiding op play-offs",
     description:
       "De A-ploeg vertrekt volgende week naar Spanje voor een intensieve winterstage. Coach Deferm wil zijn spelers optimaal voorbereiden op de cruciale play-off wedstrijden.",
-    imageUrl: "https://placehold.co/800x600/4acf52/fff?text=Training",
+    imageUrl: fixtureImage("training", 0),
     imageAlt: "Training KCVV Elewijt",
     date: "15 januari 2025",
     tags: [{ name: "Ploeg" }, { name: "Training" }, { name: "Stage" }],
@@ -61,7 +62,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2025-01-10-jeugdwerking-uitbreiding",
     title: "Jeugdwerking breidt uit met nieuwe trainers",
-    imageUrl: "https://placehold.co/600x400/ffd700/000?text=Jeugd",
+    imageUrl: fixtureImage("article-hero-jeugd", 0),
     imageAlt: "Jeugdtraining",
     date: "10 januari 2025",
     tags: [{ name: "Jeugd" }],
@@ -69,7 +70,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2025-01-05-nieuwe-sponsor",
     title: "Nieuwe hoofdsponsor voor seizoen 2025-2026",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Sponsor",
+    imageUrl: fixtureImage("article-hero-generic", 1),
     imageAlt: "Sponsorcontract ondertekening",
     date: "5 januari 2025",
     tags: [{ name: "Sponsoring" }],
@@ -77,7 +78,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2024-12-20-kersttoernooi",
     title: "Kersttoernooi groot succes",
-    imageUrl: "https://placehold.co/600x400/ff0000/fff?text=Kerst",
+    imageUrl: fixtureImage("article-hero-evenement", 0),
     imageAlt: "Kersttoernooi",
     date: "20 december 2024",
     tags: [{ name: "Evenement" }, { name: "Jeugd" }],
@@ -85,7 +86,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2024-12-15-algemene-vergadering",
     title: "Algemene vergadering uitnodiging",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Vergadering",
+    imageUrl: fixtureImage("article-hero-generic", 2),
     imageAlt: "Algemene vergadering",
     date: "15 december 2024",
     tags: [{ name: "Bestuur" }],
@@ -93,7 +94,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2024-12-10-spelersvoorstelling",
     title: "Spelersvoorstelling seizoen 2024-2025",
-    imageUrl: "https://placehold.co/600x400/4acf52/fff?text=Spelers",
+    imageUrl: fixtureImage("team-group", 0),
     imageAlt: "Spelersvoorstelling",
     date: "10 december 2024",
     tags: [{ name: "Ploeg" }, { name: "Evenement" }],
@@ -101,7 +102,7 @@ const mockLatestNews = [
   {
     href: "/nieuws/2024-12-05-clubkampioenschap",
     title: "Clubkampioenschap jeugd 2024",
-    imageUrl: "https://placehold.co/600x400/ffd700/000?text=Kampioen",
+    imageUrl: fixtureImage("article-hero-jeugd", 1),
     imageAlt: "Clubkampioenschap",
     date: "5 december 2024",
     tags: [{ name: "Jeugd" }, { name: "Kampioenschap" }],
@@ -114,7 +115,7 @@ const mockSliderMatches = mockMatches.mixed.map((m, i) => ({
 }));
 
 const mockBanner = {
-  image: "https://placehold.co/1280x213/1e2024/4acf52?text=Banner+Slot",
+  image: fixtureImage("sponsor-logo", 0),
   alt: "Mock banner",
   href: "https://example.com",
 };

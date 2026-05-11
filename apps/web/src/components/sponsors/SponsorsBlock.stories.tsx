@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Sponsors, type Sponsor } from "./Sponsors";
+import { fixtureImage } from "@test-fixtures/images";
 
 /**
  * SponsorsBlock is an async server component that fetches sponsors from Sanity
@@ -34,36 +35,36 @@ const mockSponsors: Sponsor[] = [
   {
     id: "sponsor-1",
     name: "Bakkerij Peeters",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Bakkerij",
+    logo: fixtureImage("sponsor-logo", 0),
     url: "https://example.com/bakkerij",
   },
   {
     id: "sponsor-2",
     name: "Garage Willems",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Garage",
+    logo: fixtureImage("sponsor-logo", 1),
     url: "https://example.com/garage",
   },
   {
     id: "sponsor-3",
     name: "Slagerij De Smet",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Slagerij",
+    logo: fixtureImage("sponsor-logo", 2),
   },
   {
     id: "sponsor-4",
     name: "Elektro Janssens",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Elektro",
+    logo: fixtureImage("sponsor-logo", 3),
     url: "https://example.com/elektro",
   },
   {
     id: "sponsor-5",
     name: "Apotheek Centrum",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Apotheek",
+    logo: fixtureImage("sponsor-logo", 4),
     url: "https://example.com/apotheek",
   },
   {
     id: "sponsor-6",
     name: "Tuincentrum Groen",
-    logo: "https://placehold.co/200x133/e2e8f0/475569?text=Tuin",
+    logo: fixtureImage("sponsor-logo", 5),
   },
 ];
 
@@ -93,7 +94,7 @@ export const Loading: Story = {
     sponsors: Array.from({ length: 4 }, (_, i) => ({
       id: `skeleton-${i}`,
       name: " ",
-      logo: "https://placehold.co/200x133/f1f5f9/f1f5f9?text=+",
+      logo: fixtureImage("sponsor-logo", i),
     })),
     title: "Onze sponsors",
     description: "Laden...",

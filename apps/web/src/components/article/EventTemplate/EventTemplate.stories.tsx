@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { EventTemplate } from "./EventTemplate";
+import { fixtureImage } from "@test-fixtures/images";
 
 const paragraph = (key: string, text: string): PortableTextBlock =>
   ({
@@ -97,8 +98,7 @@ type Story = StoryObj<typeof meta>;
 export const FullComposition: Story = {
   args: {
     title: "Lentetornooi U13 — zaterdag in Elewijt",
-    coverImageUrl:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1600&q=80&fit=max",
+    coverImageUrl: fixtureImage("article-hero-evenement", 0),
     publishedDate: "19 April 2026",
     readingTime: "2 min lezen",
     shareConfig: {

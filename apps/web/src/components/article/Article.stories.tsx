@@ -7,6 +7,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArticleHeader, ArticleMetadata, ArticleFooter } from "./index";
 import { SanityArticleBody } from "./SanityArticleBody/SanityArticleBody";
 import type { PortableTextBlock } from "@portabletext/react";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Pages/Article",
@@ -81,7 +82,7 @@ const sampleArticleContent: PortableTextBlock[] = [
     _type: "image",
     _key: "img1",
     asset: {
-      url: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80&fm=webp&fit=max",
+      url: fixtureImage("match-action", 0),
     },
     alt: "Voetbalveld tijdens wedstrijd",
     width: 800,
@@ -105,7 +106,7 @@ const sampleArticleContent: PortableTextBlock[] = [
     _type: "articleImage",
     _key: "img2",
     asset: {
-      url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1600&q=80&fm=webp&fit=max",
+      url: fixtureImage("stadium-hero", 0),
     },
     alt: "Panorama van het stadion",
     width: 1600,
@@ -142,7 +143,7 @@ export const Default: Story = {
     <div className="min-h-screen bg-white">
       <ArticleHeader
         title="KCVV Elewijt wint met 3-1 in spannende derby"
-        imageUrl="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=1120&h=560&fit=crop"
+        imageUrl={fixtureImage("article-hero-matchverslag", 0)}
         imageAlt="Voetbalwedstrijd KCVV Elewijt"
       />
 
@@ -238,7 +239,7 @@ export const LongArticle: Story = {
     <div className="min-h-screen bg-white">
       <ArticleHeader
         title="Seizoensoverzicht 2024-2025: Een analyse van onze prestaties"
-        imageUrl="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1120&h=560&fit=crop"
+        imageUrl={fixtureImage("article-hero-generic", 1)}
         imageAlt="KCVV Elewijt seizoen analyse"
       />
 

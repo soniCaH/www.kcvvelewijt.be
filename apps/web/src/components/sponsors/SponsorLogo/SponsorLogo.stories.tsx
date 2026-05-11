@@ -6,18 +6,19 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SponsorLogo } from "./SponsorLogo";
 import { mockSponsors } from "../Sponsors.mocks";
+import { fixtureImage } from "@test-fixtures/images";
 
 const s1 = mockSponsors[0] ?? {
   id: "1",
   name: "Sponsor One",
-  logo: "https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+1",
+  logo: fixtureImage("sponsor-logo", 0),
   url: "https://example.com",
 };
 
 const s3 = mockSponsors[2] ?? {
   id: "3",
   name: "Sponsor Three",
-  logo: "https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+3",
+  logo: fixtureImage("sponsor-logo", 2),
 };
 
 const meta = {

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EventsList, type EventsListItem } from "./EventsList";
 import EventsLoading from "@/app/(landing)/events/loading";
+import { fixtureImage } from "@test-fixtures/images";
 
 const mockEvents: EventsListItem[] = [
   {
@@ -9,7 +10,7 @@ const mockEvents: EventsListItem[] = [
     date: new Date("2026-06-15T14:00:00"),
     endDate: new Date("2026-06-15T18:00:00"),
     location: "Sporthal Elewijt",
-    imageUrl: "https://placehold.co/600x400/4acf52/ffffff?text=BBQ",
+    imageUrl: fixtureImage("event-cover", 0),
     excerpt: "Gezellig samen genieten met het hele gezin.",
   },
   {
@@ -17,7 +18,7 @@ const mockEvents: EventsListItem[] = [
     href: "/events/sponsorfeest",
     date: new Date("2026-07-01T19:00:00"),
     location: "Feestzaal De Kroon",
-    imageUrl: "https://placehold.co/600x400/1a3a5c/ffffff?text=Feest",
+    imageUrl: fixtureImage("event-cover", 1),
   },
   {
     title: "Jeugdkamp 2026",

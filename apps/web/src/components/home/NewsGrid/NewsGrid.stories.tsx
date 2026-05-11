@@ -1,6 +1,15 @@
 // apps/web/src/components/home/NewsGrid/NewsGrid.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NewsGrid } from "./NewsGrid";
+import { fixtureImage } from "@test-fixtures/images";
+
+const SLOT_SHAPES = [
+  "article-hero-generic",
+  "article-hero-matchverslag",
+  "article-hero-jeugd",
+  "article-hero-transfer",
+  "article-hero-evenement",
+] as const;
 
 const meta = {
   title: "Features/Homepage/NewsGrid",
@@ -22,16 +31,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// placehold.co URLs render text-on-color SVG — byte-stable across runs.
-// Picsum's "/seed/" endpoint is best-effort deterministic and observed to
-// return different images cross-environment for the same seed/dim tuple
-// (#1695 tablet diff), so we avoid it on VR-tagged stories. Per-slot colour
-// keeps the stories visually distinct when reviewing baselines.
-const SLOT_BG = ["4acf52", "008755", "1e2024", "ffd700", "008755"];
+// Local fixture URLs are byte-stable across runs and viewports. Per-slot
+// shape variation keeps the stories visually distinct when reviewing baselines.
 const article = (slot: number, title: string, tag: string) => ({
   href: `/nieuws/slot-${slot}`,
   title,
-  imageUrl: `https://placehold.co/900x500/${SLOT_BG[slot]}/fff?text=Slot+${slot}`,
+  imageUrl: fixtureImage(
+    SLOT_SHAPES[slot % SLOT_SHAPES.length] ?? "article-hero-generic",
+    slot,
+  ),
   imageAlt: title,
   date: `${15 + slot} mei 2025`,
   tags: [{ name: tag }],

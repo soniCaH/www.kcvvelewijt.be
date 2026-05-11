@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Sponsors } from "./Sponsors";
 import { mockSponsors } from "./Sponsors.mocks";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Sponsors/SponsorsGrid",
@@ -198,7 +199,7 @@ export const ManySponsors: Story = {
     sponsors: Array.from({ length: 20 }, (_, i) => ({
       id: `${i + 1}`,
       name: `Sponsor ${i + 1}`,
-      logo: `https://placehold.co/200x133/4B9B48/FFFFFF?text=Sponsor+${i + 1}`,
+      logo: fixtureImage("sponsor-logo", i),
       url: i % 3 === 0 ? `https://example.com/sponsor${i + 1}` : undefined,
     })),
     columns: 4,

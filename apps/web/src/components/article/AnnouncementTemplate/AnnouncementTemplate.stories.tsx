@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { AnnouncementTemplate } from "./AnnouncementTemplate";
+import { fixtureImage } from "@test-fixtures/images";
 
 const paragraph = (key: string, text: string): PortableTextBlock =>
   ({
@@ -65,8 +66,7 @@ export const WithDropCapBlockquoteAndInlineImage: Story = {
   args: {
     title: "Een nieuw hoofdstuk voor het eerste elftal.",
     category: "Nieuws",
-    coverImageUrl:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1600&q=80",
+    coverImageUrl: fixtureImage("article-hero-generic", 0),
     publishedDate: "19 April 2026",
     readingTime: "4 min lezen",
     shareConfig: {
@@ -97,7 +97,7 @@ export const WithDropCapBlockquoteAndInlineImage: Story = {
       ),
       inlineImage(
         "img1",
-        "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=1200&q=80",
+        fixtureImage("training", 0),
         "Spelers KCVV Elewijt tijdens de training",
       ),
       heading("h2", "Wat verandert er concreet?"),

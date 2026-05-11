@@ -36,6 +36,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@test-fixtures": path.resolve(__dirname, "./test/fixtures"),
     },
   },
 });
