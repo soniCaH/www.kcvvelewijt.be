@@ -23,7 +23,12 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  // vr-skip — this story still composes the pre-redesign layout via
+  // ./_legacy/* imports. The Phase 4 homepage swap lives in page.tsx
+  // (#1680); a fresh Pages/Homepage story matching the new ordering
+  // is owned by #1681. Excluded from VR until then so we don't ship
+  // baselines for a layout that's about to be replaced.
+  tags: ["autodocs", "vr-skip"],
 } satisfies Meta;
 
 export default meta;

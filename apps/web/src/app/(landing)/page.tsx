@@ -38,17 +38,26 @@ import {
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
-import { SITE_CONFIG } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const title = "Er is maar één plezante compagnie | KCVV Elewijt";
+  const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
-    title: "Er is maar één plezante compagnie | KCVV Elewijt",
-    description: "Startpagina van stamnummer 00055: KCVV Elewijt.",
+    title,
+    description,
     keywords:
       "KCVV, Voetbal, Elewijt, Crossing, KCVVE, Zemst, 00055, 55, 1982, 1980",
+    openGraph: {
+      title,
+      description,
+      url: SITE_CONFIG.siteUrl,
+      type: "website",
+      images: [DEFAULT_OG_IMAGE],
+    },
   };
 }
 
