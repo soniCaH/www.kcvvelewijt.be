@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { cn } from "@/lib/utils/cn";
 
 export const YouthBackdrop = () => (
   <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -12,12 +11,22 @@ export const YouthBackdrop = () => (
         sizes="100vw"
       />
     </div>
+    {/* Composed jersey-deep overlay (Round 8c.B). The token bakes in a
+        135deg axis for desktop; the locked spec calls for a vertical
+        flip on mobile — deferred (token doesn't expose direction; tracked
+        as a follow-up on the gradient-token API). */}
     <div
-      className={cn(
-        "absolute inset-0",
-        "from-kcvv-green-dark/90 via-kcvv-green-dark/75 to-kcvv-green-dark/50",
-        "bg-gradient-to-b md:bg-gradient-to-r",
-      )}
+      className="absolute inset-0"
+      style={{ backgroundImage: "var(--gradient-jersey-deep-overlay)" }}
+    />
+    {/* Halftone print texture (Round 8c.D). Cream dots @ 5% on an 8x8 grid,
+        screen blend so they layer on top of the gradient without competing. */}
+    <div
+      className="absolute inset-0 mix-blend-screen"
+      style={{
+        backgroundImage: "var(--pattern-halftone-dots)",
+        backgroundSize: "8px 8px",
+      }}
     />
   </div>
 );
