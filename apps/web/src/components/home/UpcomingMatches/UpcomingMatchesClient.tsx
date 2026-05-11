@@ -14,6 +14,17 @@ export interface UpcomingMatchesClientProps {
   initialExpanded?: boolean;
 }
 
+const matchTimestamp = (m: UpcomingMatch): number => {
+  const base =
+    m.date instanceof Date ? m.date.getTime() : new Date(m.date).getTime();
+  if (!m.time) return base;
+  const [h, min] = m.time.split(":").map((n) => Number.parseInt(n, 10));
+  if (Number.isNaN(h) || Number.isNaN(min)) return base;
+  const d = new Date(base);
+  d.setUTCHours(h ?? 0, min ?? 0, 0, 0);
+  return d.getTime();
+};
+
 export const UpcomingMatchesClient = ({
   matches,
   initialVisible,
@@ -23,7 +34,10 @@ export const UpcomingMatchesClient = ({
   const [expanded, setExpanded] = useState(initialExpanded);
   const total = matches.length;
   const showExpandButton = total > initialVisible && !expanded;
-  const visible = expanded ? matches : matches.slice(0, initialVisible);
+  const sorted = matches
+    .slice()
+    .sort((a, b) => matchTimestamp(a) - matchTimestamp(b));
+  const visible = expanded ? sorted : sorted.slice(0, initialVisible);
 
   return (
     <>

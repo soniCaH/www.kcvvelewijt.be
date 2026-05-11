@@ -24,6 +24,33 @@ describe("UpcomingMatches", () => {
     expect(screen.queryByText(/volledige kalender/i)).not.toBeInTheDocument();
   });
 
+  it("sorts unsorted input chronologically before slicing", () => {
+    const shuffled = [
+      mockUpcomingTwelve[6]!,
+      mockUpcomingTwelve[0]!,
+      mockUpcomingTwelve[9]!,
+      mockUpcomingTwelve[3]!,
+      mockUpcomingTwelve[1]!,
+      mockUpcomingTwelve[11]!,
+      mockUpcomingTwelve[2]!,
+      mockUpcomingTwelve[8]!,
+      mockUpcomingTwelve[4]!,
+      mockUpcomingTwelve[5]!,
+      mockUpcomingTwelve[7]!,
+      mockUpcomingTwelve[10]!,
+    ];
+    render(<UpcomingMatches matches={shuffled} />);
+    const renderedHrefs = screen
+      .getAllByRole("link", { name: /^(?!Volledige).*/i })
+      .map((el) => el.getAttribute("href"));
+    const expected = mockUpcomingTwelve
+      .slice()
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(0, 5)
+      .map((m) => `/wedstrijd/${m.id}`);
+    expect(renderedHrefs).toEqual(expected);
+  });
+
   it("hides the expand button when exactly 5 upcoming matches", () => {
     render(<UpcomingMatches matches={mockUpcomingFive} />);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
