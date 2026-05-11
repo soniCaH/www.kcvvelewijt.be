@@ -25,7 +25,9 @@ describe("WebshopBanner", () => {
 
   it("renders a single CTA opening the partner webshop in a new tab", () => {
     render(<WebshopBanner />);
-    const cta = screen.getByRole("link", { name: /naar de webshop/i });
+    const ctas = screen.getAllByRole("link", { name: /naar de webshop/i });
+    expect(ctas).toHaveLength(1);
+    const cta = ctas[0]!;
     expect(cta).toHaveAttribute("href", EXTERNAL_LINKS.webshop);
     expect(cta).toHaveAttribute("target", "_blank");
     expect(cta).toHaveAttribute("rel", expect.stringContaining("noopener"));

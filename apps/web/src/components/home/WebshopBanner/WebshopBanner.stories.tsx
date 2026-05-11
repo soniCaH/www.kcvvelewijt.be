@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Homepage webshop pointer banner (Phase 4.B.5). Solid ink band with a jersey-tape strip on top, editorial italic headline accenting "Trainingsgear", lead copy, and a single cream paper CTA that opens the partner webshop in a new tab. KCVV does not run an in-site store — no product thumbnails, no imagery.',
+          'Homepage webshop pointer banner (Phase 4.B.5). Cream-deep page surface with a deep jersey-deep-dark <TapedCard> (ink border + lift offset shadow), an editorial italic headline accenting "Trainingsgear", and a single cream paper (inverted) CTA opening the partner webshop in a new tab. KCVV does not run an in-site store — no product thumbnails, no imagery, no top tape strip.',
       },
     },
   },
@@ -25,7 +25,7 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          "Desktop default — ink section, jersey-tape green strip at top, warm-yellow accent on Trainingsgear, single primary CTA.",
+          "Desktop default — cream-deep surface, jersey-deep-dark TapedCard (ink border + lift offset shadow), warm-yellow accent on Trainingsgear, single cream inverted CTA with a green arrow.",
       },
     },
   },
@@ -38,7 +38,7 @@ export const Mobile: Story = {
     docs: {
       description: {
         story:
-          "Mobile (<640px) — narrower headline wrap, single-column lead + CTA stack. Tape strip stays full-width.",
+          "Mobile (<640px) — same composition as Default; the headline wraps over multiple lines and the lead + CTA stack vertically inside the jersey-deep-dark card.",
       },
     },
   },
