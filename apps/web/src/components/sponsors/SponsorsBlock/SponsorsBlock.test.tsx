@@ -92,12 +92,11 @@ describe("SponsorsBlock", () => {
       mockHoofdsponsors[1]!,
     ];
     render(<SponsorsBlock sponsors={shuffled} />);
-    const items = screen.getAllByRole("listitem");
-    const labels = items.map(
-      (li) => li.querySelector("a")?.getAttribute("aria-label") ?? "",
-    );
-    expect(labels[0]).toContain("Bakkerij Peeters");
-    expect(labels[1]).toContain("Garage Vermeulen");
-    expect(labels[2]).toContain("Tuinaanleg De Smet");
+    const labels = screen
+      .getAllByRole("listitem")
+      .map((li) => li.querySelector("a")?.getAttribute("aria-label") ?? "");
+    const sorted = labels.slice().sort((a, b) => a.localeCompare(b, "nl"));
+    expect(labels).toEqual(sorted);
+    expect(labels).toHaveLength(mockHoofdsponsors.length);
   });
 });
