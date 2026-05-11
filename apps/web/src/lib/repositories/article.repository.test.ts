@@ -206,6 +206,79 @@ describe("ArticleRepository", () => {
 
       expect(a.title).toBe("");
     });
+
+    it("ARTICLES_QUERY orders by featured desc, publishedAt desc (Phase 4.C.2)", async () => {
+      const { ARTICLES_QUERY } = await import("./article.repository");
+      expect(ARTICLES_QUERY).toContain(
+        "order(featured desc, publishedAt desc)",
+      );
+      expect(ARTICLES_QUERY).not.toContain("order(publishedAt desc)");
+    });
+
+    it("preserves the GROQ-imposed featured-first ordering (no client-side re-sort)", async () => {
+      const newest = makeArticleListRow({
+        id: "newest-unfeatured",
+        publishedAt: "2026-03-25T10:00:00Z",
+        featured: false,
+      });
+      const olderFeatured = makeArticleListRow({
+        id: "older-featured",
+        publishedAt: "2026-03-10T10:00:00Z",
+        featured: true,
+      });
+      const oldestFeatured = makeArticleListRow({
+        id: "oldest-featured",
+        publishedAt: "2026-03-05T10:00:00Z",
+        featured: true,
+      });
+      // Server returns featured-first, then recency within each tier.
+      mockFetch.mockResolvedValueOnce([olderFeatured, oldestFeatured, newest]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(articles.map((a) => a.id)).toEqual([
+        "older-featured",
+        "oldest-featured",
+        "newest-unfeatured",
+      ]);
+    });
+
+    it("falls back to recency when fewer than 3 articles are flagged featured", async () => {
+      const onlyFeatured = makeArticleListRow({
+        id: "only-featured",
+        publishedAt: "2026-03-20T10:00:00Z",
+        featured: true,
+      });
+      const recentB = makeArticleListRow({
+        id: "recent-b",
+        publishedAt: "2026-03-18T10:00:00Z",
+        featured: false,
+      });
+      const recentC = makeArticleListRow({
+        id: "recent-c",
+        publishedAt: "2026-03-12T10:00:00Z",
+        featured: false,
+      });
+      mockFetch.mockResolvedValueOnce([onlyFeatured, recentB, recentC]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(articles.map((a) => a.id)).toEqual([
+        "only-featured",
+        "recent-b",
+        "recent-c",
+      ]);
+    });
   });
 
   describe("toHomepageArticle", () => {
