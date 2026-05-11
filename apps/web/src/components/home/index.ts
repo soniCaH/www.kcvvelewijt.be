@@ -4,6 +4,12 @@ export type {
   FeaturedArticle,
 } from "./FeaturedArticles";
 
+export { HomepageHeroCarousel } from "./HomepageHeroCarousel";
+export type {
+  HomepageHeroCarouselProps,
+  HomepageHeroArticle,
+} from "./HomepageHeroCarousel";
+
 export { NewsGrid } from "./NewsGrid";
 export type { NewsGridProps, NewsGridArticle } from "./NewsGrid";
 
