@@ -98,6 +98,9 @@ export const Paused: Story = {
 
 export const Empty: Story = {
   args: { articles: [] },
+  // vr-skip — story renders null; capturing blank frames adds 3 baselines
+  // (desktop/tablet/mobile) with no visual signal.
+  tags: ["vr-skip"],
   parameters: {
     docs: {
       description: {

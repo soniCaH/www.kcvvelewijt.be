@@ -78,10 +78,11 @@ export const HomepageHeroCarousel = ({
 }: HomepageHeroCarouselProps) => {
   const safeArticles = articles.slice(0, 3);
   const total = safeArticles.length;
+  const maxIndex = Math.max(0, total - 1);
   const reducedMotion = usePrefersReducedMotion();
 
   const [activeIndex, setActiveIndex] = useState(
-    Math.min(initialIndex, Math.max(0, total - 1)),
+    Math.min(Math.max(0, initialIndex), maxIndex),
   );
   const [userPaused, setUserPaused] = useState(initialPaused);
   const [hovering, setHovering] = useState(false);
