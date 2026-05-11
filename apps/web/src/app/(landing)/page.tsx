@@ -19,7 +19,7 @@ import {
   MatchesSliderSection,
   YouthSection,
   YouthBackdrop,
-  WebshopSection,
+  WebshopBanner,
   SponsorsSection,
 } from "@/components/home";
 import { SectionStack } from "@/components/design-system";
@@ -246,7 +246,7 @@ export default async function HomePage() {
   const webshopSection: SectionConfig = {
     key: "webshop",
     bg: "gray-100",
-    content: <WebshopSection />,
+    content: <WebshopBanner />,
     transition: { type: "diagonal", direction: "right" },
   };
 
