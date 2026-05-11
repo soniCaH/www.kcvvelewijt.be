@@ -27,6 +27,11 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
   `array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
 );
 
+// Intentionally pure chronological order — paginated listings power the
+// /nieuws archive (`app/(landing)/nieuws/actions.ts`) and the youth-news
+// section on /jeugd (`app/(landing)/jeugd/page.tsx`). Archive UX assumes
+// strict date ordering so readers can scan by publication date; the
+// featured-first rule applies only to the homepage feed (ARTICLES_QUERY).
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
