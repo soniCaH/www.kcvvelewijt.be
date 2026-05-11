@@ -1,16 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FeaturedArticles } from "./FeaturedArticles";
+// Phase 4.D.1 (#1680) — these imports reach into `./_legacy/` because the
+// `Pages/Homepage` story still composes the pre-redesign layout. It is
+// replaced wholesale in #1681 with the new section ordering; until then
+// the legacy imports keep this fixture rendering.
+import { FeaturedArticles } from "./_legacy/FeaturedArticles";
 import { NewsGrid } from "./NewsGrid";
-import { MatchWidget } from "./MatchWidget";
+import { MatchWidget } from "./_legacy/MatchWidget";
 import { BannerSlot } from "./BannerSlot";
-import { MatchesSliderSection } from "./MatchesSliderSection";
+import { MatchesSliderSection } from "./_legacy/MatchesSliderSection";
 import { YouthSection, YouthBackdrop } from "./YouthSection";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Sponsors } from "@/components/sponsors/Sponsors";
 import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
 import { SectionStack, SectionHeader } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
-import { mockUpcomingMatch } from "./MatchWidget/MatchWidget.mocks";
+import { mockUpcomingMatch } from "./_legacy/MatchWidget/MatchWidget.mocks";
 import { mockMatches } from "@/components/match/match.mocks";
 import { fixtureImage } from "@test-fixtures/images";
 

@@ -22,9 +22,19 @@ export function EditorialHeroShell({
 }: EditorialHeroShellProps) {
   return (
     <section className="border-ink mx-auto grid w-full max-w-[1120px] grid-cols-1 gap-x-12 gap-y-8 border-b py-12 lg:grid-cols-[60fr_40fr]">
-      <div className="flex flex-col gap-3">{editorial}</div>
+      {/* `min-w-0` on each grid child stops a long unbreakable token in the
+          headline (e.g. "doorzettingsvermogen") from blowing out the
+          `60fr_40fr` ratio — default grid-item `min-width: auto` resolves to
+          min-content and lets fr columns expand past their fraction.
+          `hyphens-auto` then asks the browser to hyphenate the headline using
+          the page's `lang="nl"` dictionary so long Dutch compound words split
+          on syllable boundaries (door-zet-tings-ver-mo-gen) rather than
+          overflowing the column. */}
+      <div className="flex min-w-0 flex-col gap-3 hyphens-auto">
+        {editorial}
+      </div>
       {cover ? (
-        <div className="flex items-start justify-center">{cover}</div>
+        <div className="flex min-w-0 items-start justify-center">{cover}</div>
       ) : null}
     </section>
   );

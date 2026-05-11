@@ -85,13 +85,15 @@ export const HomepageHeroCarousel = ({
     Math.min(Math.max(0, initialIndex), maxIndex),
   );
   const [userPaused, setUserPaused] = useState(initialPaused);
-  const [hovering, setHovering] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isAutoPlaying =
-    total > 1 && !userPaused && !hovering && !focused && !reducedMotion;
+  // Auto-rotation only stops on explicit user pause or
+  // `prefers-reduced-motion: reduce`. Hover- and focus-pause used to
+  // hang here too, but the carousel section spans the full viewport
+  // width — the cursor is "always hovering" — so hover-pause made
+  // auto-advance effectively never fire.
+  const isAutoPlaying = total > 1 && !userPaused && !reducedMotion;
 
   // Auto-advance
   useEffect(() => {
@@ -131,7 +133,7 @@ export const HomepageHeroCarousel = ({
     return (
       <section
         aria-label="Uitgelicht artikel"
-        className="bg-cream py-8 md:py-12"
+        className="bg-cream py-4 md:py-6"
       >
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <EditorialHero
@@ -157,15 +159,7 @@ export const HomepageHeroCarousel = ({
       aria-label="Uitgelichte artikels"
       tabIndex={0}
       onKeyDown={onKeyDown}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setFocused(false);
-        }
-      }}
-      className="bg-cream focus-visible:outline-jersey-deep py-8 focus-visible:outline-2 focus-visible:outline-offset-2 md:py-12"
+      className="bg-cream focus-visible:outline-jersey-deep py-4 focus-visible:outline-2 focus-visible:outline-offset-2 md:py-6"
     >
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div aria-live="polite" aria-atomic="true">

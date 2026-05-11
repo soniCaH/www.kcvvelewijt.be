@@ -1,6 +1,6 @@
 import { MatchesSlider } from "@/components/match/MatchesSlider/MatchesSlider";
 import { SectionHeader } from "@/components/design-system";
-import { MatchesSliderEmptyState } from "@/components/home/MatchesSliderEmptyState";
+import { MatchesSliderEmptyState } from "@/components/home/_legacy/MatchesSliderEmptyState";
 import type { UpcomingMatch } from "@/components/match/types";
 import type { MatchesSliderPlaceholderVM } from "@/lib/repositories/homepage.repository";
 
