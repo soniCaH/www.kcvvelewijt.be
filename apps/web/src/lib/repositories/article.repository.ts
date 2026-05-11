@@ -12,8 +12,12 @@ import { formatArticleDate } from "../utils/dates";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
+// Phase 4.C.2 — Round 2 S.2 lock: featured articles surface first in the
+// homepage carousel (slots 0..2); ties and overflow fall back to recency.
+// `featured: false` articles still appear after all featured ones, so the
+// NewsGrid slice [3..8] inherits the same ordering automatically.
 export const ARTICLES_QUERY =
-  defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
+  defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
