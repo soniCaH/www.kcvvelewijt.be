@@ -25,6 +25,9 @@ export type { BannerSlotProps } from "./BannerSlot";
 export { MatchesSliderSection } from "./MatchesSliderSection";
 export type { MatchesSliderSectionProps } from "./MatchesSliderSection";
 
+export { UpcomingMatches } from "./UpcomingMatches";
+export type { UpcomingMatchesProps } from "./UpcomingMatches";
+
 export { YouthSection, YouthBackdrop } from "./YouthSection";
 export type { YouthSectionProps } from "./YouthSection";
 
