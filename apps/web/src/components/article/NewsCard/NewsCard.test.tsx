@@ -25,9 +25,14 @@ describe("NewsCard", () => {
 
     it("renders title in a heading", () => {
       render(<NewsCard {...defaultProps} />);
-      expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent(
-        "Test Article Title",
-      );
+      // EditorialHeading appends a trailing period — anchor with optional `.`
+      // so partial matches don't mask future regressions in the title chain.
+      expect(
+        screen.getByRole("heading", {
+          level: 3,
+          name: /^Test Article Title\.?$/,
+        }),
+      ).toBeInTheDocument();
     });
 
     it("renders as a link with correct href", () => {
@@ -126,27 +131,41 @@ describe("NewsCard", () => {
   });
 
   describe("Bg + tone", () => {
-    it("defaults to cream surface with ink heading tone", () => {
-      render(<NewsCard {...defaultProps} />);
+    it("defaults to cream surface with ink heading + label tone", () => {
+      render(<NewsCard {...defaultProps} badge="Clubnieuws" />);
       expect(screen.getByRole("link")).toHaveAttribute("data-bg", "cream");
       expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
         "data-tone",
         "ink",
       );
+      expect(screen.getByText("Clubnieuws")).toHaveAttribute(
+        "data-tone",
+        "ink",
+      );
     });
 
-    it("ink surface flips heading tone to cream", () => {
-      render(<NewsCard {...defaultProps} bg="ink" />);
+    it("ink surface flips heading + label tone to cream", () => {
+      render(<NewsCard {...defaultProps} bg="ink" badge="Clubnieuws" />);
       expect(screen.getByRole("link")).toHaveAttribute("data-bg", "ink");
       expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
         "data-tone",
         "cream",
       );
+      expect(screen.getByText("Clubnieuws")).toHaveAttribute(
+        "data-tone",
+        "cream",
+      );
     });
 
-    it("jersey-deep surface flips heading tone to cream", () => {
-      render(<NewsCard {...defaultProps} bg="jersey-deep" />);
+    it("jersey-deep surface flips heading + label tone to cream", () => {
+      render(
+        <NewsCard {...defaultProps} bg="jersey-deep" badge="Clubnieuws" />,
+      );
       expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-tone",
+        "cream",
+      );
+      expect(screen.getByText("Clubnieuws")).toHaveAttribute(
         "data-tone",
         "cream",
       );
