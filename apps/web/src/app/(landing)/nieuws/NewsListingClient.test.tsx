@@ -76,10 +76,19 @@ describe("NewsListingClient", () => {
       />,
     );
 
-    expect(screen.getByText("Featured One")).toBeInTheDocument();
-    expect(screen.getByText("Featured Two")).toBeInTheDocument();
-    expect(screen.getByText("Featured Three")).toBeInTheDocument();
-    expect(screen.getByText("Grid One")).toBeInTheDocument();
+    // `<EditorialHeading>` appends a trailing period — match optional `.`.
+    expect(
+      screen.getByRole("heading", { name: /^Featured One\.?$/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^Featured Two\.?$/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^Featured Three\.?$/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^Grid One\.?$/ }),
+    ).toBeInTheDocument();
   });
 
   it("renders category filter tabs as buttons", () => {
@@ -159,10 +168,15 @@ describe("NewsListingClient", () => {
       intersectionCallback([{ isIntersecting: true }]);
     }
 
-    // New articles should appear, duplicates should not create extra DOM nodes
+    // New articles should appear, duplicates should not create extra DOM nodes.
+    // EditorialHeading appends a period, so match by heading role with optional `.`.
     await waitFor(() => {
-      expect(screen.getByText("Article Seven")).toBeInTheDocument();
-      expect(screen.getByText("Article Eight")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /^Article Seven\.?$/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /^Article Eight\.?$/ }),
+      ).toBeInTheDocument();
     });
 
     // Verify no duplicate IDs in the rendered output
@@ -177,7 +191,9 @@ describe("NewsListingClient", () => {
       "Article Eight",
     ];
     for (const title of allArticleTitles) {
-      const elements = screen.getAllByText(title);
+      const elements = screen.getAllByRole("heading", {
+        name: new RegExp(`^${title}\\.?$`),
+      });
       expect(elements).toHaveLength(1);
     }
   });
@@ -217,11 +233,15 @@ describe("NewsListingClient", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Jeugd" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Cat Four")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /^Cat Four\.?$/ }),
+      ).toBeInTheDocument();
     });
 
     // Cat One should appear exactly once (featured), not also in the grid
-    expect(screen.getAllByText("Cat One")).toHaveLength(1);
+    expect(
+      screen.getAllByRole("heading", { name: /^Cat One\.?$/ }),
+    ).toHaveLength(1);
   });
 
   it("shows loading indicator while fetching", async () => {

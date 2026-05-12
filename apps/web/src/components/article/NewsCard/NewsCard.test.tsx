@@ -59,50 +59,96 @@ describe("NewsCard", () => {
       );
     });
 
-    it("renders no img element when imageUrl not provided", () => {
-      render(<NewsCard {...defaultProps} />);
+    it("renders fallback placeholder when imageUrl not provided", () => {
+      const { container } = render(<NewsCard {...defaultProps} />);
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(
+        container.querySelector("[data-testid='newscard-image-fallback']"),
+      ).toBeInTheDocument();
     });
   });
 
-  describe("Badge and date", () => {
-    it("renders badge above title", () => {
+  describe("Badge, date and dek", () => {
+    it("renders badge", () => {
       render(<NewsCard {...defaultProps} badge="Clubnieuws" />);
       expect(screen.getByText("Clubnieuws")).toBeInTheDocument();
     });
 
-    it("renders date in footer", () => {
+    it("renders date when no event meta is present", () => {
       render(<NewsCard {...defaultProps} date="5 mei 2025" />);
       expect(screen.getByText("5 mei 2025")).toBeInTheDocument();
     });
 
-    it("does not render footer when no date", () => {
-      const { container } = render(<NewsCard {...defaultProps} />);
+    it("renders optional dek paragraph", () => {
+      render(
+        <NewsCard
+          {...defaultProps}
+          dek="Korte samenvatting van het artikel."
+        />,
+      );
       expect(
-        container.querySelector(".border-t.border-white\\/20"),
+        screen.getByText("Korte samenvatting van het artikel."),
+      ).toBeInTheDocument();
+    });
+
+    it("omits dek when not provided", () => {
+      render(<NewsCard {...defaultProps} />);
+      expect(
+        screen.queryByText("Korte samenvatting van het artikel."),
       ).not.toBeInTheDocument();
     });
   });
 
-  describe("Variants", () => {
-    it("standard variant uses text-base title", () => {
+  describe("Variant heading size", () => {
+    it("standard variant uses display-sm heading size", () => {
       render(<NewsCard {...defaultProps} variant="standard" />);
-      expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
-        "text-base!",
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-size",
+        "display-sm",
       );
     });
 
-    it("featured variant uses text-2xl title", () => {
+    it("featured variant uses display-md heading size", () => {
       render(<NewsCard {...defaultProps} variant="featured" />);
-      expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
-        "text-2xl!",
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-size",
+        "display-md",
       );
     });
 
-    it("defaults to standard variant", () => {
+    it("listing variant uses display-sm heading size", () => {
+      render(<NewsCard {...defaultProps} variant="listing" />);
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-size",
+        "display-sm",
+      );
+    });
+  });
+
+  describe("Bg + tone", () => {
+    it("defaults to cream surface with ink heading tone", () => {
       render(<NewsCard {...defaultProps} />);
-      expect(screen.getByRole("heading", { level: 3 })).toHaveClass(
-        "text-base!",
+      expect(screen.getByRole("link")).toHaveAttribute("data-bg", "cream");
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-tone",
+        "ink",
+      );
+    });
+
+    it("ink surface flips heading tone to cream", () => {
+      render(<NewsCard {...defaultProps} bg="ink" />);
+      expect(screen.getByRole("link")).toHaveAttribute("data-bg", "ink");
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-tone",
+        "cream",
+      );
+    });
+
+    it("jersey-deep surface flips heading tone to cream", () => {
+      render(<NewsCard {...defaultProps} bg="jersey-deep" />);
+      expect(screen.getByRole("heading", { level: 3 })).toHaveAttribute(
+        "data-tone",
+        "cream",
       );
     });
   });
@@ -113,16 +159,24 @@ describe("NewsCard", () => {
       expect(container.querySelector("article")).toHaveClass("group");
     });
 
-    it("has hover translate class", () => {
+    it("applies canonical press-down translate on hover when interactive", () => {
       const { container } = render(<NewsCard {...defaultProps} />);
-      expect(container.querySelector("article")).toHaveClass(
-        "hover:-translate-y-1",
-      );
+      const article = container.querySelector("article");
+      expect(article?.className).toMatch(/hover:translate-x-1/);
+      expect(article?.className).toMatch(/hover:translate-y-1/);
+      expect(article?.className).toMatch(/hover:shadow-none/);
+    });
+
+    it("includes motion-reduce reset for press-down", () => {
+      const { container } = render(<NewsCard {...defaultProps} />);
+      const article = container.querySelector("article");
+      expect(article?.className).toMatch(/motion-reduce:hover:translate-x-0/);
+      expect(article?.className).toMatch(/motion-reduce:hover:translate-y-0/);
     });
   });
 
-  describe("event card features", () => {
-    it("renders eventTime with Calendar and Clock icons when time provided", () => {
+  describe("Event card features", () => {
+    it("renders eventDate and eventTime when provided", () => {
       render(
         <NewsCard
           title="Sponsorfeest"
@@ -136,7 +190,7 @@ describe("NewsCard", () => {
       expect(screen.getByText("19:00")).toBeInTheDocument();
     });
 
-    it("renders countdown chip when countdown provided", () => {
+    it("renders countdown when provided", () => {
       render(
         <NewsCard
           title="Sponsorfeest"
@@ -148,23 +202,7 @@ describe("NewsCard", () => {
       expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
     });
 
-    it("renders eventDate alongside countdown when both provided", () => {
-      render(
-        <NewsCard
-          title="Sponsorfeest"
-          href="/event/1"
-          variant="featured"
-          eventDate="26 apr"
-          eventTime="19:00"
-          countdown="over 33 dagen"
-        />,
-      );
-      expect(screen.getByText("26 apr")).toBeInTheDocument();
-      expect(screen.getByText("19:00")).toBeInTheDocument();
-      expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
-    });
-
-    it("renders ExternalLink indicator when isExternal=true and href is set", () => {
+    it("opens external links in a new tab", () => {
       render(
         <NewsCard
           title="Sponsorfeest"
@@ -173,65 +211,26 @@ describe("NewsCard", () => {
           isExternal
         />,
       );
-      // ExternalLink icon is aria-hidden, verify the link has target="_blank"
       const link = screen.getByRole("link");
       expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
     });
 
-    it("renders as non-interactive div when no href", () => {
+    it("renders as non-interactive (no link) when no href", () => {
       render(<NewsCard title="Sponsorfeest" variant="featured" />);
       expect(screen.queryByRole("link")).not.toBeInTheDocument();
     });
   });
 
-  describe("listing variant", () => {
-    it("uses light background instead of dark overlay", () => {
-      const { container } = render(
-        <NewsCard {...defaultProps} variant="listing" />,
-      );
-      const article = container.querySelector("article");
-      expect(article).toHaveClass("bg-white");
-      expect(article).not.toHaveClass("bg-kcvv-black");
+  describe("Aspect ratio + rotation", () => {
+    it("forwards aspectRatio to data-aspect on the link", () => {
+      render(<NewsCard {...defaultProps} aspectRatio="square" />);
+      expect(screen.getByRole("link")).toHaveAttribute("data-aspect", "square");
     });
 
-    it("renders image in a non-absolute container (stacked layout)", () => {
-      const { container } = render(
-        <NewsCard {...defaultProps} variant="listing" imageUrl="/test.jpg" />,
-      );
-      // Image should be in a relative container, not fill the entire card
-      const imgContainer = container.querySelector(
-        "[data-testid='listing-image']",
-      );
-      expect(imgContainer).toBeInTheDocument();
-    });
-
-    it("renders fallback when no image provided", () => {
-      const { container } = render(
-        <NewsCard {...defaultProps} variant="listing" />,
-      );
-      const fallback = container.querySelector(
-        "[data-testid='listing-image-fallback']",
-      );
-      expect(fallback).toBeInTheDocument();
-    });
-
-    it("renders title with dark text", () => {
-      render(<NewsCard {...defaultProps} variant="listing" />);
-      const heading = screen.getByRole("heading", { level: 3 });
-      expect(heading).toHaveClass("text-kcvv-black!");
-    });
-
-    it("renders badge and date below image", () => {
-      render(
-        <NewsCard
-          {...defaultProps}
-          variant="listing"
-          badge="Clubnieuws"
-          date="5 mei 2025"
-        />,
-      );
-      expect(screen.getByText("Clubnieuws")).toBeInTheDocument();
-      expect(screen.getByText("5 mei 2025")).toBeInTheDocument();
+    it("forwards rotation to data-rotation on the link", () => {
+      render(<NewsCard {...defaultProps} rotation="b" />);
+      expect(screen.getByRole("link")).toHaveAttribute("data-rotation", "b");
     });
   });
 
