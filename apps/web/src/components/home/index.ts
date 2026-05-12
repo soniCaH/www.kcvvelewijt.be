@@ -1,8 +1,8 @@
-export { FeaturedArticles } from "./FeaturedArticles";
-export type {
-  FeaturedArticlesProps,
-  FeaturedArticle,
-} from "./FeaturedArticles";
+// Phase 4.D.1 (#1680) — the homepage has migrated to the new section
+// ordering. Legacy `FeaturedArticles`, `MatchWidget`, `MatchesSliderSection`
+// (+ `MatchesSliderEmptyState`) moved to `./_legacy/` for blame trace and
+// are no longer re-exported from this barrel. Deletion happens in Phase 9
+// cleanup.
 
 export { HomepageHeroCarousel } from "./HomepageHeroCarousel";
 export type {
@@ -22,14 +22,8 @@ export type {
 export { NewsCard } from "@/components/article/NewsCard";
 export type { NewsCardProps } from "@/components/article/NewsCard";
 
-export { MatchWidget } from "./MatchWidget";
-export type { MatchWidgetProps } from "./MatchWidget";
-
 export { BannerSlot } from "./BannerSlot";
 export type { BannerSlotProps } from "./BannerSlot";
-
-export { MatchesSliderSection } from "./MatchesSliderSection";
-export type { MatchesSliderSectionProps } from "./MatchesSliderSection";
 
 export { UpcomingMatches } from "./UpcomingMatches";
 export type { UpcomingMatchesProps } from "./UpcomingMatches";
