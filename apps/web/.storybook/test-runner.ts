@@ -24,6 +24,12 @@ const PRNG_SEED = 0x1234abcd;
 // Cap on the per-viewport image-load wait. A broken image must not hang the
 // runner, but we still need long enough for a real srcset swap to settle.
 const IMAGE_LOAD_TIMEOUT_MS = 1500;
+// Cap on the per-viewport `page.waitForLoadState("networkidle")` wait. Storybook
+// keeps a few long-poll connections open for HMR, so networkidle is a soft
+// signal — if it doesn't resolve in time we still fall through to the explicit
+// per-image load + decode pair below, which is what actually guarantees a
+// stable screenshot.
+const NETWORK_IDLE_TIMEOUT_MS = 3000;
 
 // Runs in the page context BEFORE any story script. Stubs sources of
 // non-determinism that would otherwise produce per-run pixel drift:
@@ -184,12 +190,37 @@ const config: TestRunnerConfig = {
     }
 
     await page.addStyleTag({ content: DETERMINISM_STYLESHEET });
+    // Park the mouse off-canvas before any screenshot so a stray cursor
+    // position from the previous story can't trigger `:hover` styles on
+    // whichever element happens to sit under (0, 0) (the Playwright default).
+    // Hover transitions are zero-duration via DETERMINISM_STYLESHEET, but the
+    // end-state — `group-hover:scale-105`, `hover:-translate-y-1`, the green
+    // top-border clip-path swap — would still snap on and produce a diff.
+    await page.mouse.move(-1, -1);
     await waitForPageReady(page);
     await page.evaluate(() => document.fonts?.ready);
 
     for (const name of requestedViewports) {
       const vp = VIEWPORTS[name];
       await page.setViewportSize(vp);
+      // `page.setViewportSize` returns as soon as the browser has accepted the
+      // resize, but CSS reflow + the next paint pass happen asynchronously.
+      // Poll on the document's own `clientWidth` so we don't proceed until the
+      // page has actually adopted the new viewport — without this, the
+      // screenshot can land mid-reflow and capture content laid out for the
+      // previous viewport inside the new viewport's clip box (#1731 desktop
+      // failure mode). Soft-capped so a story that somehow never adopts the
+      // width can't hang the runner.
+      await page
+        .waitForFunction(
+          (expectedWidth) =>
+            document.documentElement.clientWidth === expectedWidth,
+          vp.width,
+          { timeout: 2000 },
+        )
+        .catch(() => {
+          // Fall through — the rAF wait below will still flush layout.
+        });
       await page.evaluate(() => document.fonts?.ready);
       // Viewport changes can re-trigger Next/Image's responsive `srcset`,
       // swapping in a different file. Without this wait the screenshot races
@@ -210,32 +241,64 @@ const config: TestRunnerConfig = {
         window.scrollTo(0, 0);
         await new Promise((r) => requestAnimationFrame(() => r(undefined)));
       });
-      await page.evaluate(async (timeoutMs: number) => {
-        for (const img of Array.from(document.images)) {
-          if (img.loading === "lazy") img.loading = "eager";
-        }
-        const imageWaits = Array.from(document.images)
-          .filter((img) => !img.complete)
-          .map(
-            (img) =>
-              new Promise<void>((resolve) => {
-                img.addEventListener("load", () => resolve(), { once: true });
-                img.addEventListener(
-                  "error",
-                  () => {
-                    console.warn(`[VR] image failed to load: ${img.src}`);
-                    resolve();
-                  },
-                  { once: true },
-                );
+      // After `setViewportSize`, the browser may pick a different `srcset`
+      // candidate for every `<img>` and kick off a fresh network request. Wait
+      // for the network to settle so the per-image load/decode pair below
+      // operates on the final candidate, not the previous one. Soft-capped so
+      // Storybook's HMR long-poll can't hang the runner.
+      await page
+        .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_TIMEOUT_MS })
+        .catch(() => {
+          // networkidle is a soft signal — fall through to the explicit
+          // per-image waits, which are what actually gate the screenshot.
+        });
+      await page.evaluate(
+        async ([loadTimeoutMs]: [number]) => {
+          for (const img of Array.from(document.images)) {
+            if (img.loading === "lazy") img.loading = "eager";
+          }
+          const imageWaits = Array.from(document.images)
+            .filter((img) => !img.complete)
+            .map(
+              (img) =>
+                new Promise<void>((resolve) => {
+                  img.addEventListener("load", () => resolve(), { once: true });
+                  img.addEventListener(
+                    "error",
+                    () => {
+                      console.warn(`[VR] image failed to load: ${img.src}`);
+                      resolve();
+                    },
+                    { once: true },
+                  );
+                }),
+            );
+          if (imageWaits.length > 0) {
+            await Promise.race([
+              Promise.all(imageWaits),
+              new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+            ]);
+          }
+          // `img.complete === true` (and the `load` event having fired) only
+          // means bytes arrived — the bitmap may still be undecoded and not
+          // yet committed to the compositor when `page.screenshot()` runs,
+          // producing intermittent low-res / placeholder-bleed diffs in CI.
+          // `HTMLImageElement.decode()` resolves only once the bitmap is
+          // decoded and ready to paint, which is the actual guarantee
+          // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
+          // tablet tile flake) and is intentionally applied to every image,
+          // not just NewsGrid's, so any future story with srcset-driven
+          // tiles inherits the same guarantee.
+          await Promise.allSettled(
+            Array.from(document.images).map((img) =>
+              img.decode().catch(() => {
+                console.warn(`[VR] image failed to decode: ${img.src}`);
               }),
+            ),
           );
-        if (imageWaits.length === 0) return;
-        await Promise.race([
-          Promise.all(imageWaits),
-          new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-        ]);
-      }, IMAGE_LOAD_TIMEOUT_MS);
+        },
+        [IMAGE_LOAD_TIMEOUT_MS] as [number],
+      );
       // Wait for two animation frames so that ResizeObserver callbacks
       // (e.g. useScrollHint in FilterTabs) and the React re-renders they
       // trigger have been painted before the screenshot is taken.
