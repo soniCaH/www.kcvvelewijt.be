@@ -72,24 +72,25 @@ describe("NewsGrid", () => {
   });
 
   describe("Lead vs supporting variant", () => {
-    it("renders the first article with featured variant (text-2xl heading)", () => {
+    it("renders the first article with featured variant (display-md heading)", () => {
       render(<NewsGrid articles={fiveArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
-      expect(headings[0]).toHaveClass("text-2xl!");
+      expect(headings[0]).toHaveAttribute("data-size", "display-md");
     });
 
-    it("renders subsequent articles with standard variant (text-base heading)", () => {
+    it("renders subsequent articles with standard variant (display-sm heading)", () => {
       render(<NewsGrid articles={fiveArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
-      expect(headings[1]).toHaveClass("text-base!");
-      expect(headings[4]).toHaveClass("text-base!");
+      expect(headings[1]).toHaveAttribute("data-size", "display-sm");
+      expect(headings[4]).toHaveAttribute("data-size", "display-sm");
     });
   });
 
   describe("Slot rotation cycle (Round 5d T.1)", () => {
     it("applies rotations [a, b, c, d, a] across the 5 slots", () => {
+      // `data-rotation` lives on the NewsCard <Link> wrapper (one per card).
       const { container } = render(<NewsGrid articles={fiveArticles} />);
-      const cards = container.querySelectorAll("[data-rotation]");
+      const cards = container.querySelectorAll("a[data-rotation]");
       expect(cards).toHaveLength(5);
       expect(cards[0]).toHaveAttribute("data-rotation", "a");
       expect(cards[1]).toHaveAttribute("data-rotation", "b");
@@ -99,10 +100,23 @@ describe("NewsGrid", () => {
     });
   });
 
+  describe("Slot bg pattern (paper-stamp variety)", () => {
+    it("applies bgs [cream, jersey-deep, cream-soft, ink, cream] across the 5 slots", () => {
+      const { container } = render(<NewsGrid articles={fiveArticles} />);
+      const cards = container.querySelectorAll("a[data-bg]");
+      expect(cards).toHaveLength(5);
+      expect(cards[0]).toHaveAttribute("data-bg", "cream");
+      expect(cards[1]).toHaveAttribute("data-bg", "jersey-deep");
+      expect(cards[2]).toHaveAttribute("data-bg", "cream-soft");
+      expect(cards[3]).toHaveAttribute("data-bg", "ink");
+      expect(cards[4]).toHaveAttribute("data-bg", "cream");
+    });
+  });
+
   describe("Aspect ratio (Round 5c C.1)", () => {
     it("applies landscape-16-9 aspect to every card", () => {
       const { container } = render(<NewsGrid articles={fiveArticles} />);
-      const cards = container.querySelectorAll("[data-aspect]");
+      const cards = container.querySelectorAll("a[data-aspect]");
       expect(cards).toHaveLength(5);
       cards.forEach((card) => {
         expect(card).toHaveAttribute("data-aspect", "landscape-16-9");
@@ -157,8 +171,14 @@ describe("NewsGrid", () => {
   describe("Article rendering", () => {
     it("renders all article titles", () => {
       render(<NewsGrid articles={fiveArticles} />);
+      // EditorialHeading appends a trailing period — match with optional `.`.
       fiveArticles.forEach((a) => {
-        expect(screen.getByText(a.title)).toBeInTheDocument();
+        expect(
+          screen.getByRole("heading", {
+            level: 3,
+            name: new RegExp(`^${a.title}\\.?$`),
+          }),
+        ).toBeInTheDocument();
       });
     });
 

@@ -159,6 +159,7 @@ export type {
   MonoLabelProps,
   MonoLabelVariant,
   MonoLabelSize,
+  MonoLabelTone,
 } from "./MonoLabel";
 
 // QuoteMark

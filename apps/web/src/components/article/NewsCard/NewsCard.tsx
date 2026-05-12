@@ -1,60 +1,84 @@
 // apps/web/src/components/article/NewsCard/NewsCard.tsx
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { Calendar, Clock, ExternalLink } from "@/lib/icons";
+import {
+  TapedCard,
+  type TapedCardBg,
+  TapedFigure,
+  MonoLabel,
+  type MonoLabelTone,
+  EditorialHeading,
+  type EditorialHeadingTone,
+} from "@/components/design-system";
 
 export type NewsCardAspectRatio = "landscape-16-9" | "square" | "portrait-3-4";
 export type NewsCardRotation = "a" | "b" | "c" | "d" | "none";
+export type NewsCardVariant = "standard" | "featured" | "listing";
+export type NewsCardBg = TapedCardBg;
 
 export interface NewsCardProps {
   title: string;
-  href?: string; // now optional — cards without href are non-interactive
+  /** Optional — cards without href are non-interactive. */
+  href?: string;
   imageUrl?: string;
   imageAlt?: string;
-  /** Single category label — shown above title and in footer */
+  /** Single category label — shown in the MonoLabel row above the title. */
   badge?: string;
+  /** Display date for articles (shown in MonoLabel row when no event meta). */
   date?: string;
-  /** ISO datetime or formatted string for event date (shown with Calendar icon) */
+  /** ISO datetime or formatted string for event date (shown with Calendar icon). */
   eventDate?: string;
-  /** HH:MM time string for events (shown with Clock icon) */
+  /** HH:MM time string for events (shown with Clock icon). */
   eventTime?: string;
-  /** Countdown label shown in footer chip (e.g. "over 33 dagen") */
+  /** Countdown label shown in the footer chip (e.g. "over 33 dagen"). */
   countdown?: string;
-  /** When true, full-card link opens in new tab with ExternalLink indicator */
-  isExternal?: boolean;
-  variant?: "standard" | "featured" | "listing";
   /**
-   * Aspect ratio of the card surface (standard/featured) or inner image
-   * wrapper (listing). Defaults to 16:9 per the locked NewsGrid spec —
-   * `<NewsGrid>` (#1672) and other Phase 4 consumers rely on this default.
-   * Pre-redesign callers (`/nieuws` archive, `<RelatedContentSection>`)
-   * pick up 16:9 too; their full retro-terrace rebuild is Phase 5+ scope.
+   * Optional lead/dek paragraph (article `lead` field). Falls back to nothing
+   * when absent — cards with no lead still read correctly.
+   */
+  dek?: string;
+  /** When true, full-card link opens in a new tab with an ExternalLink indicator. */
+  isExternal?: boolean;
+  variant?: NewsCardVariant;
+  /**
+   * Aspect ratio of the inner polaroid figure. Defaults to 16:9 per the
+   * locked NewsGrid spec — `<NewsGrid>` (#1672) and other Phase 4 consumers
+   * rely on this default. Pre-redesign callers (`/nieuws` archive,
+   * `<RelatedContentSection>`) pick up 16:9 too; their full retro-terrace
+   * rebuild is Phase 5+ scope.
    */
   aspectRatio?: NewsCardAspectRatio;
   /**
    * Phase 4 / NewsGrid — applies a small slot-deterministic rotation using
    * the shared `--rotate-tape-{a,b,c,d}` tokens. Default `"none"` preserves
-   * existing rendering (no transform).
+   * un-rotated rendering.
    */
   rotation?: NewsCardRotation;
+  /**
+   * Paper surface for the outer `<TapedCard>`. Default `"cream"`. `<NewsGrid>`
+   * slots `bg` per position for paper-stamp variety across the 1+4 cluster.
+   */
+  bg?: NewsCardBg;
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }
 
-const ASPECT_CLASS: Record<NewsCardAspectRatio, string> = {
-  "landscape-16-9": "aspect-video",
-  square: "aspect-square",
-  "portrait-3-4": "aspect-[3/4]",
+const HEADING_LEVEL: Record<
+  NonNullable<NewsCardProps["as"]>,
+  1 | 2 | 3 | 4 | 5 | 6
+> = {
+  h1: 1,
+  h2: 2,
+  h3: 3,
+  h4: 4,
+  h5: 5,
+  h6: 6,
 };
 
-const ROTATION_VAR: Record<Exclude<NewsCardRotation, "none">, string> = {
-  a: "var(--rotate-tape-a)",
-  b: "var(--rotate-tape-b)",
-  c: "var(--rotate-tape-c)",
-  d: "var(--rotate-tape-d)",
-};
+// Dark backgrounds need cream-toned typography; cream/jersey accept ink.
+const DARK_BGS: ReadonlySet<TapedCardBg> = new Set(["ink", "jersey-deep"]);
 
 export const NewsCard = ({
   title,
@@ -66,224 +90,176 @@ export const NewsCard = ({
   eventDate,
   eventTime,
   countdown,
+  dek,
   isExternal,
   variant = "standard",
   aspectRatio = "landscape-16-9",
   rotation = "none",
-  as: Heading = "h3",
+  bg = "cream",
+  as = "h3",
   className,
 }: NewsCardProps) => {
-  const isFeatured = variant === "featured";
-  const isListing = variant === "listing";
+  const isDark = DARK_BGS.has(bg);
+  const labelTone: MonoLabelTone = isDark ? "cream" : "ink";
+  const headingTone: EditorialHeadingTone = isDark ? "cream" : "ink";
+  const headingSize = variant === "featured" ? "display-md" : "display-sm";
+  const figureTape = { color: "warm", length: "md" } as const;
 
-  const aspectClass = ASPECT_CLASS[aspectRatio];
-
-  const rotationStyle: CSSProperties | undefined =
-    rotation !== "none"
-      ? { transform: `rotate(${ROTATION_VAR[rotation]})` }
-      : undefined;
-
-  if (isListing) {
-    return (
-      <article
-        data-rotation={rotation}
-        data-aspect={aspectRatio}
-        style={rotationStyle}
-        className={cn(
-          "group rounded-card relative flex h-full flex-col overflow-hidden bg-white",
-          href &&
-            "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
-          className,
-        )}
-      >
-        {/* Green top-border: hidden by default, expands from center on hover */}
-        {href && (
-          <div
-            className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
-            aria-hidden="true"
-          />
-        )}
-
-        {/* Full-card link */}
-        {href && (
-          <Link
-            href={href}
-            className="absolute inset-0 z-10"
-            aria-label={title}
-            {...(isExternal
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
-          />
-        )}
-
-        {/* Image area — stacked on top */}
-        {imageUrl ? (
-          <div
-            className={cn("relative overflow-hidden", aspectClass)}
-            data-testid="listing-image"
-          >
-            <Image
-              src={imageUrl}
-              alt={imageAlt ?? title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 33vw"
-            />
-          </div>
-        ) : (
-          <div
-            className={cn("bg-kcvv-green-dark", aspectClass)}
-            aria-hidden="true"
-            data-testid="listing-image-fallback"
-          />
-        )}
-
-        {/* Content below image */}
-        <div className="pointer-events-none flex flex-1 flex-col p-4">
-          {badge && (
-            <span className="border-kcvv-green-bright text-kcvv-green-bright mb-2 block border-l-2 pl-2 text-xs font-bold tracking-wider uppercase">
-              {badge}
-            </span>
-          )}
-
-          <div className="flex-1">
-            <Heading className="font-body text-kcvv-black! group-hover:text-kcvv-black/75! mb-0! line-clamp-3 text-base! leading-snug! font-bold! transition-colors">
-              {title}
-            </Heading>
-          </div>
-
-          {date && (
-            <div className="mt-3 border-t border-gray-200 pt-3 text-xs text-gray-500">
-              <time>{date}</time>
-            </div>
-          )}
-        </div>
-      </article>
-    );
-  }
+  const hasFooterMeta =
+    Boolean(countdown) || Boolean(date && !eventDate && !eventTime);
 
   return (
-    <article
-      data-rotation={rotation}
-      data-aspect={aspectRatio}
-      style={rotationStyle}
+    <TapedCard
+      as="article"
+      rotation={rotation}
+      bg={bg}
+      padding={variant === "featured" ? "lg" : "md"}
+      shadow="md"
       className={cn(
-        "group rounded-card bg-kcvv-black relative overflow-hidden",
+        "group relative flex h-full flex-col gap-4",
+        // Canonical paper press-down hover — matches the press-down convention
+        // used across paper-stamped interactive primitives.
         href &&
-          "hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1",
-        aspectClass,
+          "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0",
         className,
       )}
     >
-      {/* Green top-border: hidden by default, expands from center on hover */}
-      {href && (
-        <div
-          className="bg-kcvv-green-bright pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] transition-[clip-path] duration-300 ease-out [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)]"
-          aria-hidden="true"
-        />
+      {/* Inner polaroid figure — always TapedFigure for tape + border parity. */}
+      <TapedFigure
+        aspect={aspectRatio}
+        bg="cream-soft"
+        tape={figureTape}
+        className="relative"
+      >
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={imageAlt ?? title}
+            fill
+            className="object-cover"
+            sizes={
+              variant === "featured"
+                ? "(max-width: 768px) 100vw, 66vw"
+                : "(max-width: 768px) 100vw, 33vw"
+            }
+          />
+        ) : (
+          <div
+            data-testid="newscard-image-fallback"
+            aria-hidden="true"
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
+            }}
+          />
+        )}
+      </TapedFigure>
+
+      {/* MonoLabel row — badge + optional event meta. Truthy check (not `??`)
+          guards against empty-string CMS values. */}
+      {(badge || eventDate || eventTime) && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {badge && <MonoLabel tone={labelTone}>{badge}</MonoLabel>}
+          {eventDate && (
+            <MonoLabel tone={labelTone}>
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-3 w-3 flex-shrink-0" aria-hidden />
+                <time>{eventDate}</time>
+              </span>
+            </MonoLabel>
+          )}
+          {eventTime && (
+            <MonoLabel tone={labelTone}>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3 w-3 flex-shrink-0" aria-hidden />
+                {eventTime}
+              </span>
+            </MonoLabel>
+          )}
+        </div>
       )}
 
-      {/* Full-card link — click target only, text sits outside */}
+      <EditorialHeading
+        level={HEADING_LEVEL[as]}
+        size={headingSize}
+        tone={headingTone}
+        className="line-clamp-3"
+      >
+        {title}
+      </EditorialHeading>
+
+      {dek && (
+        <p
+          className={cn(
+            "text-body-md line-clamp-3",
+            // Full-opacity cream on dark surfaces — opacity-reduced cream
+            // (e.g. `text-cream/85`) trips axe contrast on bg-jersey-deep.
+            isDark ? "text-cream" : "text-ink-soft",
+          )}
+        >
+          {dek}
+        </p>
+      )}
+
+      {(href ?? hasFooterMeta) && (
+        <div
+          className={cn(
+            "mt-auto flex items-center justify-between gap-3 border-t-2 pt-3",
+            isDark ? "border-cream/30" : "border-paper-edge",
+          )}
+        >
+          <div className="flex items-center gap-3 text-xs">
+            {date && !eventDate && !eventTime && (
+              <MonoLabel tone={labelTone}>
+                <time>{date}</time>
+              </MonoLabel>
+            )}
+            {countdown && <MonoLabel tone={labelTone}>{countdown}</MonoLabel>}
+          </div>
+          {href && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "inline-flex items-center gap-1 font-mono text-[length:var(--text-label)] font-medium tracking-[var(--text-label--tracking)] uppercase",
+                isDark ? "text-cream" : "text-jersey-deep",
+              )}
+            >
+              {isExternal ? (
+                <>
+                  Bekijk
+                  <ExternalLink className="h-3 w-3" aria-hidden />
+                </>
+              ) : (
+                <>Lees verder →</>
+              )}
+            </span>
+          )}
+        </div>
+      )}
+
       {href && (
         <Link
           href={href}
-          className="absolute inset-0 z-10"
-          aria-label={title}
+          aria-label={
+            isExternal
+              ? `${title.trim() || "Nieuwsbericht"} (opent in nieuw venster)`
+              : title.trim() || "Nieuwsbericht"
+          }
+          data-variant={variant}
+          data-rotation={rotation}
+          data-aspect={aspectRatio}
+          data-bg={bg}
+          className={cn(
+            "absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-2",
+            // Outline tone follows surface — ink outline disappears on bg=ink.
+            isDark ? "focus-visible:outline-warm" : "focus-visible:outline-ink",
+          )}
           {...(isExternal
             ? { target: "_blank", rel: "noopener noreferrer" }
             : {})}
         />
       )}
-
-      {/* Background image */}
-      {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={imageAlt ?? title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes={
-            isFeatured
-              ? "(max-width: 768px) 100vw, 66vw"
-              : "(max-width: 768px) 100vw, 33vw"
-          }
-        />
-      ) : (
-        <div
-          className="from-kcvv-green-dark via-kcvv-black to-kcvv-black absolute inset-0 bg-gradient-to-br"
-          aria-hidden="true"
-        >
-          {/* Diagonal accent stripe — brand motif */}
-          <div
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(135deg, transparent 0, transparent 24px, var(--color-kcvv-green-bright) 24px, var(--color-kcvv-green-bright) 25px)",
-            }}
-          />
-        </div>
-      )}
-
-      {/* Bottom gradient for text legibility */}
-      <div
-        className="from-kcvv-black/90 absolute inset-0 bg-gradient-to-t to-transparent"
-        aria-hidden="true"
-      />
-
-      {/* Content overlay — outside <Link> so article a { color } can't bleed in */}
-      <div
-        className={cn(
-          "pointer-events-none absolute right-0 bottom-0 left-0",
-          isFeatured ? "p-6 md:p-8" : "p-5",
-        )}
-      >
-        {badge && (
-          <span className="border-kcvv-green-bright text-kcvv-green-bright mb-2 block border-l-2 pl-2 text-xs font-bold tracking-wider uppercase">
-            {badge}
-          </span>
-        )}
-
-        <Heading
-          className={cn(
-            "font-body mb-0! line-clamp-3 leading-snug! font-bold! text-white! transition-colors group-hover:text-white/75!",
-            isFeatured ? "text-2xl!" : "text-base!",
-          )}
-        >
-          {title}
-        </Heading>
-
-        {/* Footer bar: date+time on left, countdown chip on right */}
-        {(countdown ?? date ?? eventDate ?? eventTime) && (
-          <div className="mt-3 flex items-center justify-between border-t border-white/20 pt-3 text-xs text-white/60">
-            <div className="flex items-center gap-3">
-              {eventDate && (
-                <time className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3 flex-shrink-0" aria-hidden />
-                  {eventDate}
-                </time>
-              )}
-              {eventTime && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3 flex-shrink-0" aria-hidden />
-                  {eventTime}
-                </span>
-              )}
-              {!eventDate && !eventTime && date && <time>{date}</time>}
-            </div>
-            {countdown && (
-              <span className="rounded-sm bg-white/10 px-2 py-0.5 text-xs font-medium tracking-wider text-white/70 uppercase">
-                {countdown}
-              </span>
-            )}
-            {isExternal && !countdown && (
-              <ExternalLink
-                className="h-3 w-3 flex-shrink-0 text-white/40"
-                aria-hidden
-              />
-            )}
-          </div>
-        )}
-      </div>
-    </article>
+    </TapedCard>
   );
 };

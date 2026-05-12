@@ -1,7 +1,10 @@
 // apps/web/src/components/home/NewsGrid/NewsGrid.tsx
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
-import type { NewsCardRotation } from "@/components/article/NewsCard/NewsCard";
+import type {
+  NewsCardBg,
+  NewsCardRotation,
+} from "@/components/article/NewsCard/NewsCard";
 
 export interface NewsGridArticle {
   href: string;
@@ -25,6 +28,17 @@ export interface NewsGridProps {
 // <TapedCardGrid> ROTATION_POOL ordering. Slot 0 is the lead.
 const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "c", "d", "a"];
 
+// Slot-index paper-stamp variety. Lead anchors on cream; supporting
+// cluster cycles cream / jersey-deep / cream-soft / ink so the 1+4
+// reads as a mixed-paper sheet rather than 5 uniform tiles.
+const SLOT_BGS: NewsCardBg[] = [
+  "cream",
+  "jersey-deep",
+  "cream-soft",
+  "ink",
+  "cream",
+];
+
 const renderCard = (
   article: NewsGridArticle,
   slot: number,
@@ -41,6 +55,7 @@ const renderCard = (
     date={article.date}
     aspectRatio="landscape-16-9"
     rotation={SLOT_ROTATIONS[slot]}
+    bg={SLOT_BGS[slot]}
   />
 );
 

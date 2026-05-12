@@ -194,13 +194,18 @@ describe("RelatedContentSection", () => {
 
       // Lead + rightStack + overflow = 1 + 2 + 3 = 6 titles rendered
       // (7th is dropped by slice(3,6))
-      expect(screen.getByText("Artikel 1")).toBeInTheDocument();
-      expect(screen.getByText("Artikel 2")).toBeInTheDocument();
-      expect(screen.getByText("Artikel 3")).toBeInTheDocument();
-      expect(screen.getByText("Artikel 4")).toBeInTheDocument();
-      expect(screen.getByText("Artikel 5")).toBeInTheDocument();
-      expect(screen.getByText("Artikel 6")).toBeInTheDocument();
-      expect(screen.queryByText("Artikel 7")).not.toBeInTheDocument();
+      // `<EditorialHeading>` appends a trailing period, so titles render
+      // as e.g. "Artikel 1." — regex assertion accepts both forms.
+      for (let i = 1; i <= 6; i++) {
+        expect(
+          screen.getByRole("heading", {
+            name: new RegExp(`^Artikel ${i}\\.?$`),
+          }),
+        ).toBeInTheDocument();
+      }
+      expect(
+        screen.queryByRole("heading", { name: /^Artikel 7\.?$/ }),
+      ).not.toBeInTheDocument();
     });
 
     it("renders only lead when exactly one content item", () => {
@@ -212,7 +217,9 @@ describe("RelatedContentSection", () => {
         />,
       );
 
-      expect(screen.getByText("Solo")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /^Solo\.?$/ }),
+      ).toBeInTheDocument();
     });
   });
 

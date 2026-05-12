@@ -262,3 +262,54 @@ export const RotationCycle: Story = {
     </div>
   ),
 };
+
+// ===== Phase 4.A.2 / paper-card bg variants =====
+//
+// One story per `<TapedCardBg>` surface so `<NewsGrid>` slot-bg patterns can
+// be reviewed against locked baselines without spinning up the full grid.
+
+const bgSharedArgs = {
+  ...phase4SharedArgs,
+  dek: "Een korte samenvatting van het artikel — drie regels mogelijk voor de paper-card variant.",
+  rotation: "a" as const,
+};
+
+export const BgCream: Story = {
+  args: { ...bgSharedArgs, bg: "cream" },
+  tags: ["vr"],
+};
+
+export const BgCreamSoft: Story = {
+  args: { ...bgSharedArgs, bg: "cream-soft" },
+  tags: ["vr"],
+};
+
+export const BgJersey: Story = {
+  args: { ...bgSharedArgs, bg: "jersey" },
+  tags: ["vr"],
+};
+
+export const BgJerseyDeep: Story = {
+  args: { ...bgSharedArgs, bg: "jersey-deep" },
+  tags: ["vr"],
+};
+
+export const BgInk: Story = {
+  args: { ...bgSharedArgs, bg: "ink" },
+  tags: ["vr"],
+};
+
+export const FeaturedLead: Story = {
+  args: {
+    ...bgSharedArgs,
+    variant: "featured",
+    bg: "cream",
+    title: "Kampioen! 58 punten en titel in eerste provinciale.",
+  },
+  tags: ["vr"],
+};
+
+export const NoImagePlaceholder: Story = {
+  args: { ...bgSharedArgs, bg: "cream", imageUrl: undefined },
+  tags: ["vr"],
+};
