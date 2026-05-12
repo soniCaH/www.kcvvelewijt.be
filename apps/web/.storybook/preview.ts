@@ -37,6 +37,23 @@ const preview: Preview = {
       router: {
         basePath: "",
       },
+      // Force `unoptimized: true` on every <Image /> in Storybook. Without
+      // this, Next/Image emits a 10-entry `srcset` with width-keyed URLs
+      // (`?w=384`, `?w=640`, ...); when the VR runner resizes the viewport
+      // across mobile/tablet/desktop, the browser re-selects a different
+      // srcset candidate at each step and issues a fresh request per
+      // image — and because `<img>` cache keys include the query string,
+      // each width re-runs the full fetch + decode pipeline even though
+      // every variant resolves to identical bytes (`http-server` ignores
+      // query params). Whichever decode happens to commit mid-screenshot
+      // produces the intermittent NewsGrid 2x2 tile diffs in #1731. With
+      // `unoptimized: true`, every Image renders as a single `<img src>`
+      // with no srcset, so viewport changes do not trigger a re-fetch
+      // and decode timing is deterministic. Storybook-only — production
+      // builds still use the full Next/Image optimizer.
+      image: {
+        unoptimized: true,
+      },
     },
   },
 };
