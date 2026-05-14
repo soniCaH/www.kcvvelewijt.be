@@ -74,7 +74,7 @@ The refinement is a single deliverable: a homepage that visually matches the ret
 
 The thinnest cross-layer slice that proves Phase 4.5 architecture works:
 
-> **Extend `ARTICLES_QUERY` projection per `docs/design/articles-query-interface.md`, wire homepage hero to use the real `article.articleType` instead of the hardcoded `"announcement"`, and verify all four existing callers (`page.tsx`, `nieuws`, `jeugd`, `sponsors`, `events`) keep type-checking.**
+> **Extend `ARTICLES_QUERY` projection per `docs/design/articles-query-interface.md`, wire homepage hero to use the real `article.articleType` instead of the hardcoded `"announcement"`, and verify all five existing callers (`page.tsx`, `nieuws`, `jeugd`, `sponsors`, `events`) keep type-checking.**
 
 Demonstrated by:
 

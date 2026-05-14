@@ -34,15 +34,17 @@ an `edge` prop:
 The `edge="torn"` variant swaps the SVG mask from a rectangle to a
 "hand-torn" polyline along the LONG edges (top + bottom) only —
 short edges (left + right) stay clean since they suggest "cut by
-scissors" rather than "torn off a roll." Implementation: SVG `<path>`
-with 4–6 randomised vertices along each long edge, vertex jitter
-~1.5px peak-to-trough.
+scissors" rather than "torn off a roll." The masks are designed to
+look irregular but are fixed assets, not runtime-randomised:
+implementation is an SVG `<path>` with 4–6 irregularly-spaced
+vertices (≈1.5px depth variation) per long edge to simulate a
+hand-torn look.
 
-For determinism (so all tape strips don't look identical), four
-canonical torn-edge SVG masks shipping as `--tape-edge-{1,2,3,4}`,
-cycled deterministically per surface slot (same approach as
-`--rotate-tape-*`). New cards in a grid get different tear patterns
-without renderer randomness leaking into VR baselines.
+Four canonical torn-edge SVG masks ship as `--tape-edge-{1,2,3,4}`
+and are cycled deterministically per surface slot (same approach
+as `--rotate-tape-*`). There is no renderer-side randomness —
+identical inputs always produce identical output, so VR baselines
+stay stable.
 
 ### When to use which
 

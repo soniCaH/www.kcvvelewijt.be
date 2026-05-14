@@ -55,17 +55,19 @@ Per `hero-locked.md`:
 - ARTICLES_QUERY: `order(featured desc, publishedAt desc)`
 - Position 1 → `<EditorialHero placement="homepage" />`
 - **Positions 2..4 → `<FeaturedUitgelichtRow>`** (this round)
-- Positions 5..9 → `<NewsGrid>` (geometry pending R2)
+- Positions 5..10 → `<NewsGrid>` (3×2 geometry — see
+  `newsgrid-revisit-locked.md`, which supersedes this section's
+  position range)
 
 ## Empty / partial states
 
-| Featured count (`featured: true`) | Hero                          | Uitgelicht              | News grid                          |
-| --------------------------------- | ----------------------------- | ----------------------- | ---------------------------------- |
-| 0                                 | Most-recent published article | Hidden                  | Most-recent N                      |
-| 1                                 | Sole featured article         | Hidden                  | Next 5 most-recent                 |
-| 2                                 | Position 1 (featured)         | 1 card (position 2)     | Next 5 most-recent                 |
-| 3                                 | Position 1 (featured)         | 2 cards (positions 2–3) | Next 5 most-recent                 |
-| 4+                                | Position 1 (featured)         | 3 cards (positions 2–4) | Next 5 most-recent (positions 5–9) |
+| Featured count (`featured: true`) | Hero                          | Uitgelicht              | News grid                           |
+| --------------------------------- | ----------------------------- | ----------------------- | ----------------------------------- |
+| 0                                 | Most-recent published article | Hidden                  | Most-recent N                       |
+| 1                                 | Sole featured article         | Hidden                  | Next 6 most-recent                  |
+| 2                                 | Position 1 (featured)         | 1 card (position 2)     | Next 6 most-recent                  |
+| 3                                 | Position 1 (featured)         | 2 cards (positions 2–3) | Next 6 most-recent                  |
+| 4+                                | Position 1 (featured)         | 3 cards (positions 2–4) | Next 6 most-recent (positions 5–10) |
 
 Implementation: `<FeaturedUitgelichtRow articles={featured.slice(1, 4)} />`.
 Drop section header + section entirely when array is empty. Render fewer

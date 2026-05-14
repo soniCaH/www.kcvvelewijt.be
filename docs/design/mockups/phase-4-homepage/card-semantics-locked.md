@@ -67,10 +67,14 @@ from the lookup, defaulting to `cream` when articleType is missing
 ### Tape, rotation, and figure-tape stay slot-indexed
 
 These visual decorations remain deterministic per slot for paper-stamp
-variety across the 6 cards:
+variety across the 6 cards. R10 removed the nested `<TapedFigure>` from
+`<NewsCard>`, so tape/figure-tape behaviour is now applied at the outer
+card element (`<NewsCard>` / `<TapedCard>`) rather than a nested
+`<TapedFigure>`:
 
-- `SLOT_ROTATIONS` (`a`/`b`/`c`/`d`/`a`/`b`) → unchanged.
-- `<TapedFigure>` tape colour per slot (warm vs jersey alternation)
+- `SLOT_ROTATIONS` (`a`/`b`/`c`/`d`/`a`/`b`) on the outer card
+  → unchanged.
+- Outer card figure-tape colour per slot (warm vs jersey alternation)
   → unchanged.
 - `<TapedCard>` external tape strip colour per slot → unchanged.
 

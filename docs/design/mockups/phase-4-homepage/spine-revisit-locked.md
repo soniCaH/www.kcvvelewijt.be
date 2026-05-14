@@ -81,13 +81,11 @@ sections={[
 ]}
 ```
 
-Implementation note: the existing `SectionStack` `reserveFooterSafeArea={false}`
-needs review. Currently it's set because `<SponsorsBlock>` owns its cream-deep
-background and the safe-area padding would paint a transparent strip below
-it. After R4.B, `<WebshopBanner>` is the last section before the footer —
-the safe-area logic depends on which surface paints last. Likely flip
-`reserveFooterSafeArea={true}` since the webshop's jersey-deep-dark
-background paints to the section edge.
+Implementation note: set `SectionStack` `reserveFooterSafeArea={true}`.
+After R4.B `<WebshopBanner>` is the last section before the footer and
+paints a jersey-deep-dark background to the section edge, so the
+safe-area padding is needed to prevent the footer's cream tone from
+butting directly against the webshop's dark band.
 
 ### Tone-rhythm risk register (accepted)
 

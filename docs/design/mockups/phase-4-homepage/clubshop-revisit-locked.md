@@ -110,7 +110,7 @@ R6 replaces with:
 <LinkButton>Naar de Brandsfit clubshop ↗</LinkButton>
 
 <JerseyShirt
-  className="absolute top-8 right-8 w-[140px]"
+  className="absolute top-8 right-8 w-36"
   aria-hidden
 />
 ```

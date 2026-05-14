@@ -16,7 +16,7 @@ carousel locked in Phase 4 Round 1/1b is **retired**.
 Owner's rejection of the carousel cited three concrete failures of the
 shipped implementation:
 
-1. **Takes up way too much space** — the carousel shell + thumb strip +
+1. **Consumes excessive vertical space** — the carousel shell + thumb strip +
    pause/progress chrome was vertically tall, even when the active slide
    itself had a small footprint.
 2. **Jumps in height** between slides — articles with different lead

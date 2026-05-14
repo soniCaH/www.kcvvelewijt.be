@@ -257,7 +257,7 @@ Resolvers can be pure functions (in `apps/web/src/components/article/blocks/`) o
 
 2. **GROQ typegen does the work.** Sanity's typegen reads the GROQ query and emits TypeScript types directly. Option A is what typegen naturally produces. Options B and C require additional machinery on top (a narrowing function or a resolver layer) that adds code without obviously buying more safety than A + per-component narrowing inside consumers.
 
-3. **Only 3 new optional fields.** `articleType`, `subjects`, `firstTransferFact`, `firstEventFact` (plus the existing `body[]`). The "fat shape is hard to reason about" concern doesn't apply at this scale.
+3. **Only 4 new optional fields.** `articleType`, `subjects`, `firstTransferFact`, `firstEventFact` (plus the existing `body[]`). The "fat shape is hard to reason about" concern doesn't apply at this scale.
 
 4. **Future-proof for matchPreview/matchRecap (#1470).** When those land, the projection grows by one or two more optional fields (`firstMatchPreviewFact`, `firstMatchRecapFact`, or a shared `firstMatchFact`). No union-branch surgery, no resolver-per-new-variant work.
 

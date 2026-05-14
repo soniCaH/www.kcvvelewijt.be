@@ -11,6 +11,13 @@ Reference images (in repo / available alongside this prompt):
 
 The panorama is a design mockup, not a content spec. Some content shown in it (match previews, match reports, illustration fallbacks instead of real photos) does NOT apply — see "What NOT to do" at the end.
 
+**Normative vs illustrative.** When the rest of this document (or any later instruction) says "compare visually against the panorama", match only the **normative** aspects below, not the content instances:
+
+- _Normative (match these):_ visual treatment, layout/composition, typography, color palette, decorative patterns (washi tape, diagonal/horizontal stripes), spacing rhythm, card variants and their bg/accent rules.
+- _Illustrative (ignore these):_ specific article subjects, match preview / match report content, illustration fallbacks used in place of real photos, any other concrete example content referenced under "What NOT to do".
+
+When a section of this doc tells you to "compare against the panorama", read it as "compare against the normative visual aspects above" — not the example content rendered into the mockup.
+
 ## Visual Direction
 
 The site should read as an editorial/fanzine, not a generic amateur-football website. Distinctive elements:

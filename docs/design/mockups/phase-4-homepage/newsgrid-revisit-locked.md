@@ -45,6 +45,13 @@ hero → Uitgelicht 3-up grand → NewsGrid 3×2 small.
 
 ## Per-card spec
 
+> **Superseded by R10 flush-edge lock.** The card primitives and
+> internal anatomy below (notably `<TapedFigure>` and nested padding)
+> are amended by `card-structure-locked.md`. Implementers should follow
+> `card-structure-locked.md` as the authoritative card-anatomy spec;
+> only the grid geometry (3×2, positions 5..10) in this file remains
+> normative.
+
 The card primitive is unchanged from Phase 4 Round 5b — same
 `<NewsCard>` consumer with the news-grid sizing. Only the grid
 geometry changes.
