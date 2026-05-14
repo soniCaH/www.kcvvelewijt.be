@@ -12,6 +12,10 @@ function makeArticle(
     featured: false,
     coverImageUrl: null,
     tags: ["Jeugd"],
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
     ...overrides,
   };
 }

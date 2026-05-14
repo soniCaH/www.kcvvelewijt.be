@@ -1056,7 +1056,7 @@ export type AllSanitySchemaTypes =
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLES_QUERY
-// Query: *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }}
+// Query: *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",  articleType,  subjects[]{    _key, kind,    playerRef->{      _id, firstName, lastName, jerseyNumber, position,      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      psdId    },    staffRef->{      _id, firstName, lastName, functionTitle,      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"    },    customName, customRole,    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  "firstTransferFact": body[_type == "transferFact"][0]{    direction, playerName, position, age,    otherClubName, until, note, noteAttribution, kcvvContext  },  "firstEventFact": body[_type == "eventFact"][0]{    title, date, endDate, startTime, endTime,    location, address, ageGroup, competitionTag,    ticketUrl, ticketLabel  },  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }}
 export type ARTICLES_QUERY_RESULT = Array<{
   id: string;
   title: string;
@@ -1065,6 +1065,61 @@ export type ARTICLES_QUERY_RESULT = Array<{
   featured: boolean | false;
   tags: Array<string> | Array<never>;
   coverImageUrl: string | null;
+  articleType: "announcement" | "event" | "interview" | "transfer" | null;
+  subjects: Array<{
+    _key: string;
+    kind: "custom" | "player" | "staff" | null;
+    playerRef: {
+      _id: string;
+      firstName: string | null;
+      lastName: string | null;
+      jerseyNumber: number | null;
+      position:
+        | "Aanvaller"
+        | "Keeper"
+        | "Middenvelder"
+        | "Speler"
+        | "Verdediger"
+        | null;
+      transparentImageUrl: string | null;
+      psdImageUrl: string | null;
+      psdId: string | null;
+    } | null;
+    staffRef: {
+      _id: string;
+      firstName: string | null;
+      lastName: string | null;
+      functionTitle: string | null;
+      photoUrl: string | null;
+    } | null;
+    customName: string | null;
+    customRole: string | null;
+    customPhotoUrl: string | null;
+  }> | null;
+  firstTransferFact: {
+    direction: "extension" | "incoming" | "outgoing" | null;
+    playerName: string | null;
+    position: "Aanvaller" | "Keeper" | "Middenvelder" | "Verdediger" | null;
+    age: number | null;
+    otherClubName: string | null;
+    until: string | null;
+    note: string | null;
+    noteAttribution: string | null;
+    kcvvContext: string | null;
+  } | null;
+  firstEventFact: {
+    title: string | null;
+    date: string | null;
+    endDate: string | null;
+    startTime: string | null;
+    endTime: string | null;
+    location: string | null;
+    address: string | null;
+    ageGroup: string | null;
+    competitionTag: string | null;
+    ticketUrl: string | null;
+    ticketLabel: string | null;
+  } | null;
   body: Array<
     | {
         _key: string;
@@ -2461,7 +2516,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }\n}': ARTICLES_QUERY_RESULT;
+    '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  articleType,\n  subjects[]{\n    _key, kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber, position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName, customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  "firstTransferFact": body[_type == "transferFact"][0]{\n    direction, playerName, position, age,\n    otherClubName, until, note, noteAttribution, kcvvContext\n  },\n  "firstEventFact": body[_type == "eventFact"][0]{\n    title, date, endDate, startTime, endTime,\n    location, address, ageGroup, competitionTag,\n    ticketUrl, ticketLabel\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }\n}': ARTICLES_QUERY_RESULT;
     'array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n}': RELATED_ARTICLES_QUERY_RESULT;

@@ -11,6 +11,10 @@ function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
     featured: false,
     coverImageUrl: null,
     tags: [],
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
     ...overrides,
   };
 }

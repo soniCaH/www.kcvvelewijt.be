@@ -33,6 +33,10 @@ function makeMockArticle(
       heroShapes[id % heroShapes.length] ?? "article-hero-generic",
       id,
     ),
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
     ...overrides,
   };
 }

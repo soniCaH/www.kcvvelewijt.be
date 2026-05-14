@@ -20,6 +20,10 @@ const mockArticles = [
     featured: false,
     coverImageUrl: "https://cdn.sanity.io/img1.jpg",
     tags: [],
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
   },
   {
     id: "article-2",
@@ -29,6 +33,10 @@ const mockArticles = [
     featured: false,
     coverImageUrl: null,
     tags: [],
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
   },
 ];
 

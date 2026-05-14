@@ -11,6 +11,10 @@ function makeArticle(id: string): ArticleVM {
     featured: false,
     coverImageUrl: null,
     tags: [],
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
   };
 }
 

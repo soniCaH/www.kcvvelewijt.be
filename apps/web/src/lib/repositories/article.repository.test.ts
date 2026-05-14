@@ -32,6 +32,10 @@ function makeArticleListRow(
     featured: false,
     tags: ["Eerste ploeg", "Wedstrijdverslag"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
     body: [],
     ...overrides,
   };
