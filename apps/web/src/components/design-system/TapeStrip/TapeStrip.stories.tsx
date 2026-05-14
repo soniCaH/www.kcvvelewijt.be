@@ -92,6 +92,34 @@ export const ShortLength: Story = {
   decorators: [panelDecorator],
 };
 
+// Right-anchored tape — R10 (#1748). Used on the outer NewsCard frame
+// for the top-right corner pairing the top-left strip.
+export const PositionRight: Story = {
+  args: { color: "jersey", length: "md", position: "right" },
+  decorators: [panelDecorator],
+};
+
+// Both strips composed on a single panel — exactly the NewsCard pairing:
+// warm tape at TL + jersey tape at TR. Demonstrates that the two
+// position anchors read independent CSS variables.
+export const CornerPair: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          "--tape-rotation": "var(--rotate-tape-a)",
+          "--tape-left": "8%",
+          "--tape-right": "8%",
+        } as CSSProperties
+      }
+      className="bg-cream-soft border-paper-edge relative h-40 w-72 border"
+    >
+      <TapeStrip color="warm" length="md" position="left" />
+      <TapeStrip color="jersey" length="md" position="right" />
+    </div>
+  ),
+};
+
 // Warm-yellow tape on a jersey-deep panel — the contrast pairing this
 // variant exists for. <FeaturedEventBand> (#1677) is the first consumer.
 // The `bg-jersey-deep` + `border-jersey-deep-dark` utilities double as the

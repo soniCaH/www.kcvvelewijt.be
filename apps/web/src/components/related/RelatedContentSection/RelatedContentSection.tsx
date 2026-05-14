@@ -208,7 +208,7 @@ export const RelatedContentSection = ({
 
   const renderCard = (
     item: ContentItem,
-    variant: "featured" | "standard" | "listing",
+    variant: "featured" | "standard",
     position: number,
     className?: string,
   ) => (

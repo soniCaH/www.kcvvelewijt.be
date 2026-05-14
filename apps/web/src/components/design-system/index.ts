@@ -181,6 +181,8 @@ export type {
   TapeStripProps,
   TapeStripColor,
   TapeStripLength,
+  TapeStripPosition,
+  TapeStripRotation,
 } from "./TapeStrip";
 
 // TapedCard
