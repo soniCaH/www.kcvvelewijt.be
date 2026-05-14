@@ -17,10 +17,11 @@ const LENGTH_CLASS: Record<TapeStripLength, string> = {
 const COLOR_CLASS: Record<TapeStripColor, string> = {
   jersey: "bg-jersey",
   ink: "bg-ink",
-  cream: "bg-cream",
-  // Warm uses an inline background-color sourced from --tape-warm. The
-  // token lives on :root so it cannot be expressed as a Tailwind utility
-  // without polluting the color theme namespace with a tape-specific value.
+  // Cream + warm use inline background-color sourced from tape-specific
+  // tokens (`--color-tape-cream`, `--tape-warm`). Both tokens live on :root
+  // so they cannot be expressed as Tailwind utilities without polluting the
+  // color theme namespace with tape-specific values.
+  cream: "",
   warm: "",
 };
 
@@ -36,6 +37,8 @@ export function TapeStrip({ color = "jersey", length = "lg" }: TapeStripProps) {
   const style: CSSProperties = { transform: TAPE_TRANSFORM };
   if (color === "warm") {
     style.backgroundColor = "var(--tape-warm)";
+  } else if (color === "cream") {
+    style.backgroundColor = "var(--color-tape-cream)";
   }
   return (
     <span

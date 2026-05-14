@@ -198,6 +198,72 @@
   mask-repeat: repeat-y;
 }
 
+/* ===== <TapedFigure> photo treatment (Phase 4.5 R9) =====
+
+   Newsprint warm-tint filter on the image, paper-grain noise overlay on
+   the figure body, and a layered "lift" hover (photo translates up while
+   the card presses down).
+
+   Each rule uses a `>` child combinator from `.taped-figure` to
+   `.taped-figure__photo` so a hypothetical nested `<TapedFigure>` cannot
+   inherit its ancestor's `data-tint` / `data-lift` / grain treatment.
+   Every figure owns exactly its own treatment. `data-tint="none"` is the
+   per-instance opt-out for non-photographic image content (designed
+   graphics that the warm tint would compromise).
+
+   Source-of-record: docs/design/mockups/phase-4-homepage/photo-treatment-system-locked.md
+*/
+
+.taped-figure > .taped-figure__photo img {
+  filter: var(--filter-photo-newsprint);
+}
+
+.taped-figure[data-tint="none"] > .taped-figure__photo img {
+  filter: none;
+}
+
+.taped-figure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-paper-grain);
+  opacity: 0.04;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Layered lift hover — Variant A from the R9 lock. The card itself
+   presses down via TapedCard's `interactive="press"` (translate +1/+1 +
+   shadow→none); here we add the independent photo lift of -2px. Tape
+   strips render inside the TapedCard frame so they translate with the
+   card — never with the photo. Reduced motion collapses both moves. */
+.taped-figure[data-lift="true"] > .taped-figure__photo {
+  transition: transform 300ms ease;
+}
+
+@media (hover: hover) {
+  .taped-figure[data-lift="true"]:hover > .taped-figure__photo {
+    transform: translateY(-2px);
+  }
+}
+
+/* Storybook hover-state mirror — applied by the InteractiveLiftHover
+   story via a `[data-lift-state="active"]` wrapper. Lets VR baselines
+   capture the lifted state without depending on a `:hover` simulation
+   addon. Not used outside Storybook; production hover stays bound to
+   `:hover` above. */
+[data-lift-state="active"] .taped-figure[data-lift="true"] > .taped-figure__photo {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taped-figure[data-lift="true"] > .taped-figure__photo,
+  .taped-figure[data-lift="true"]:hover > .taped-figure__photo {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* Fade In Animation (for result cards, modals, etc.) */
 @keyframes fadeIn {
   from {
@@ -431,10 +497,36 @@
      Derives from `--color-warm` so the hue lives in exactly one place. */
   --tape-warm:         color-mix(in srgb, var(--color-warm) 85%, transparent);
 
+  /* Cream-soft tape — Phase 4.5 (R9). Third tape colour that nearly
+     disappears into the paper, visible by edge and shadow only. Breaks
+     the warm/jersey rhythm per the photo-treatment slot cycle table. */
+  --color-tape-cream:  rgb(232 224 200 / 0.85);
+
+  /* Newsprint warm-tint filter — Phase 4.5 (R9). Applied to all <TapedFigure>
+     images for a "very subtle warm tint" (slight cream shift in highlights,
+     slight green in deepest shadows — like aged newsprint). Opt out per
+     instance via `data-tint="none"`. */
+  --filter-photo-newsprint: sepia(0.06) saturate(0.94) hue-rotate(-4deg)
+    contrast(1.02) brightness(1.01);
+
+  /* Paper-grain noise overlay — Phase 4.5 (R9). Inline-encoded SVG turbulence
+     applied as a ::after pseudo on <TapedFigure>. Consumer sets opacity 0.04
+     and mix-blend-mode multiply. Cache-friendly (ships with stylesheet, no
+     network request). */
+  --pattern-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+
   --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
   --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
   --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
   --shadow-soft:       0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Asymmetric photo shadow — Phase 4.5 (R9). Different cadence from
+     `--shadow-paper-{sm,md,lg}` (symmetric, for cards): tape-shadow offsets
+     2px right + 4px down ("leans forward" feel). Hover-lift moves to
+     `tape-lift` to suggest the photo rising off the page. Used by
+     <TapedFigure>. */
+  --shadow-photo-tape:      2px 4px 0 0 var(--color-ink);
+  --shadow-photo-tape-lift: 4px 8px 0 0 var(--color-ink);
 
   --motion-fast:  150ms ease-out;
   --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);

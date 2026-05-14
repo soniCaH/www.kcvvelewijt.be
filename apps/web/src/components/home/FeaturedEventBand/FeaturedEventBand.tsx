@@ -113,7 +113,7 @@ export const FeaturedEventBand = ({
         <TapedFigure
           aspect="landscape-16-9"
           rotation="a"
-          tape={[{ color: "warm" }]}
+          tape={{ color: "warm" }}
           bg="cream"
         >
           <Image

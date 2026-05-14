@@ -101,7 +101,7 @@ function EditorialHeroCover({
     <TapedFigure
       aspect="landscape-16-9"
       rotation="b"
-      tape={[{ color: "jersey", length: "md" }]}
+      tape={{ color: "jersey", length: "md" }}
       className="max-w-[440px]"
     >
       <Image

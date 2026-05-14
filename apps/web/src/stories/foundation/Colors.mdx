@@ -287,5 +287,41 @@ trio so hover/focus presses stay in lockstep — never inline these values.
       <td><div style={{ background: '#fff', height: '2.5rem', width: '5rem', border: '2px solid var(--color-alert)', boxShadow: 'var(--shadow-paper-sm-alert-hover)', transform: 'translate(1px, 1px)' }} /></td>
       <td>Form-field error hover — same press idiom, alert-soft tint.</td>
     </tr>
+    <tr>
+      <td><code>--shadow-photo-tape</code></td>
+      <td><code>2px 4px 0 0 ink</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '5rem', border: '2px solid var(--color-ink)', boxShadow: 'var(--shadow-photo-tape)' }} /></td>
+      <td>Phase 4.5 (R9) — asymmetric photo shadow ("leans forward" feel) used by `&lt;TapedFigure&gt;`.</td>
+    </tr>
+    <tr>
+      <td><code>--shadow-photo-tape-lift</code></td>
+      <td><code>4px 8px 0 0 ink</code></td>
+      <td><div style={{ background: 'var(--color-cream)', height: '2.5rem', width: '5rem', border: '2px solid var(--color-ink)', boxShadow: 'var(--shadow-photo-tape-lift)' }} /></td>
+      <td>Phase 4.5 (R9) — hover-lift companion to `--shadow-photo-tape`.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Tape colour tokens
+
+The cream-soft tape token introduced in Phase 4.5 (R9) breaks the warm/jersey rhythm with a third colour that nearly disappears into the paper — visible only via edge and shadow. Used in the photo-treatment slot cycle table on news-grid and uitgelicht surfaces.
+
+<table>
+  <thead>
+    <tr><th>Token</th><th>Value</th><th>Swatch</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--tape-warm</code></td>
+      <td><code>color-mix(srgb, --color-warm 85%, transparent)</code></td>
+      <td><div style={{ background: 'var(--color-cream-soft)', height: '2.5rem', width: '5rem', padding: '0.5rem' }}><div style={{ background: 'var(--tape-warm)', height: '100%', width: '100%' }} /></div></td>
+      <td>Phase 4 warm-yellow tape — used on jersey-deep surfaces (`&lt;FeaturedEventBand&gt;`).</td>
+    </tr>
+    <tr>
+      <td><code>--color-tape-cream</code></td>
+      <td><code>rgb(232 224 200 / 0.85)</code></td>
+      <td><div style={{ background: 'var(--color-cream-soft)', height: '2.5rem', width: '5rem', padding: '0.5rem' }}><div style={{ background: 'var(--color-tape-cream)', height: '100%', width: '100%' }} /></div></td>
+      <td>Phase 4.5 (R9) — third tape colour, breaks the warm/jersey rhythm. Visible by edge and shadow only on cream cards.</td>
+    </tr>
   </tbody>
 </table>
