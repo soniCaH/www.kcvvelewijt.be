@@ -401,6 +401,8 @@ Stack:
 
 Domain shape: the existing Sanity `article` schema needs the `articleType: "interview"` discriminator and a `subjects: Reference[]` field for multi-subject interviews. See `docs/design/interview-multi-subject-review.md` for the precedent. Duo / triple interviews drive layout choice — single-subject interviews use a simpler hero variant.
 
+**Phase 5 kickoff input:** see `docs/design/phase-5-article-detail-brief.md` — consolidated brief (Phase 4.5 system inheritance + element-by-element primitive map + confirmed deltas + drill questions). Synthesised 2026-05-14 from owner refinement prompts against the Julien & Niels interview mockup. Reads as the design-drill input for this section; no separate prompt parking doc.
+
 ### 5.3 Player profile (`/spelers/[slug]`)
 
 Stack:
@@ -419,6 +421,8 @@ Stack:
 12. `<SiteFooter>`.
 
 Data note: `<PlayerFigure>` accepts `imageSrc` directly — Sanity `player.psdImage` becomes a circular crop (CSS `clip-path`). When missing, falls back to the illustrated cartoon face. Aligns with the "subject photos default to rectangular" reality: PlayerFigure crops a circle out of a rectangular source, which works for any reasonable headshot.
+
+**Phase 6 kickoff input:** see `docs/design/phase-6-player-profile-brief.md` — consolidated brief (Phase 4.5 system inheritance + element-by-element primitive map + confirmed deltas + drill questions). Synthesised 2026-05-14 from owner refinement prompts against the Maxim Breugelmans mockup, including a sticky next-match bar and "vorm" indicator with palette implications. Reads as the design-drill input for this section.
 
 ### 5.4 Cross-template observations
 
