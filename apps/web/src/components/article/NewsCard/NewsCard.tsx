@@ -302,7 +302,10 @@ export const NewsCard = ({
           </p>
         )}
 
-        {(href ?? hasFooterMeta) && (
+        {/* `||` not `??` — an empty-string href (possible from a stale
+            CMS field) must defer to hasFooterMeta rather than render
+            the footer with an unusable empty link. */}
+        {(href || hasFooterMeta) && (
           <div
             className={cn(
               "mt-auto flex items-center justify-between gap-3 border-t-2 pt-3",
