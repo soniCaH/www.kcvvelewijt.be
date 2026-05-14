@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { CSSProperties } from "react";
 import { TapedCardGrid } from "../TapedCardGrid";
 import { TapedFigure } from "./TapedFigure";
 
@@ -107,52 +106,6 @@ export const TintNone: Story = {
     caption: "Filter off (data-tint=none).",
     children: photoPlaceholder,
   },
-};
-
-// Interactive lift — R9 §7 Variant A. Card press-down + photo translateY(-2).
-// VR captures the rest state; the hover-active counterpart lives in
-// `InteractiveLiftHover` per `feedback_state_coverage_stories`.
-export const InteractiveLiftRest: Story = {
-  args: {
-    interactive: true,
-    tape: { color: "warm", length: "lg" },
-    caption: "Hover-lift idle.",
-    children: photoPlaceholder,
-  },
-};
-
-// Hover-state mirror for the layered lift. The repo has no
-// pseudo-states Storybook addon (and we'd rather not install one for a
-// single story), so this story renders an inline visual mirror of the
-// hover state by setting the same CSS variables that the `:hover` rule
-// flips on the live component. The wrapper applies `--card-press-x/y`
-// and a `data-lift-state="active"` attribute that the global rule
-// recognises as a non-hover-driven trigger for the photo lift. Pure
-// visual reference for design review + VR baselines — the live hover
-// path stays bound to `:hover` in production.
-export const InteractiveLiftHover: Story = {
-  args: {
-    interactive: true,
-    tape: { color: "warm", length: "lg" },
-    caption: "Hover-lift active (mirror).",
-    children: photoPlaceholder,
-  },
-  decorators: [
-    (Story) => (
-      <div
-        style={
-          {
-            "--card-press-x": "1px",
-            "--card-press-y": "1px",
-          } as CSSProperties
-        }
-        data-lift-state="active"
-        className="[&_.taped-figure]:shadow-none"
-      >
-        <Story />
-      </div>
-    ),
-  ],
 };
 
 export const InsideGrid: Story = {

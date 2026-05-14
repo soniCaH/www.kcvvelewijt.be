@@ -186,7 +186,7 @@ export function NewsListingClient({
 
   const renderCard = (
     article: ArticleVM,
-    variant: "featured" | "standard" | "listing",
+    variant: "featured" | "standard",
     className?: string,
   ) => (
     <NewsCard
@@ -245,10 +245,10 @@ export function NewsListingClient({
           </section>
         )}
 
-        {/* Grid of listing cards */}
+        {/* Grid of standard cards */}
         {gridArticles.length > 0 && (
           <section className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {gridArticles.map((article) => renderCard(article, "listing"))}
+            {gridArticles.map((article) => renderCard(article, "standard"))}
           </section>
         )}
 

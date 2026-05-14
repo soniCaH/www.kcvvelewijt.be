@@ -19,10 +19,20 @@ describe("TapeStrip", () => {
     expect(el).toHaveAttribute("data-length", "sm");
   });
 
-  it("left position reads var(--tape-left,12%) via Tailwind arbitrary class", () => {
+  it("defaults to position=left and reads var(--tape-left,12%)", () => {
     const { container } = render(<TapeStrip />);
     const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-position", "left");
     expect(el.className).toContain("left-[var(--tape-left,12%)]");
+    expect(el.className).not.toContain("right-[var(--tape-right,12%)]");
+  });
+
+  it("position=right reads var(--tape-right,12%) and drops the left anchor", () => {
+    const { container } = render(<TapeStrip position="right" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-position", "right");
+    expect(el.className).toContain("right-[var(--tape-right,12%)]");
+    expect(el.className).not.toContain("left-[var(--tape-left,12%)]");
   });
 
   it("rotation reads var(--tape-rotation,-5deg) so grid slots can auto-vary", () => {
@@ -48,5 +58,27 @@ describe("TapeStrip", () => {
     const { container } = render(<TapeStrip color="warm" />);
     const el = container.firstChild as HTMLElement;
     expect(el.style.backgroundColor).toBe("var(--tape-warm)");
+  });
+
+  it("rotation prop pins the transform to the named pool entry", () => {
+    // Without the prop, transform falls back to var(--tape-rotation).
+    // With rotation="c", it skips the var and uses --rotate-tape-c
+    // directly — so a per-strip rotation can override grid context.
+    const { container } = render(<TapeStrip rotation="c" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-rotation", "c");
+    expect(el.style.transform).toContain("var(--rotate-tape-c)");
+    expect(el.style.transform).not.toContain("var(--tape-rotation");
+  });
+
+  it("renders above absolutely-positioned siblings (z-20) and is non-interactive", () => {
+    // Flush-edge NewsCard has the tape rendered before <Image fill>;
+    // without a positive z-index + pointer-events override the image
+    // overlays the tape and the tape would intercept clicks meant for
+    // the cover link.
+    const { container } = render(<TapeStrip />);
+    const el = container.firstChild as HTMLElement;
+    expect(el.className).toContain("z-20");
+    expect(el.className).toContain("pointer-events-none");
   });
 });

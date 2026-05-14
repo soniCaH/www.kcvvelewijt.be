@@ -36,10 +36,6 @@ export interface TapedFigureProps {
   tape?: TapeStripProps;
   bg?: TapedFigureBg;
   tint?: TapedFigureTint;
-  /** Opt-in layered hover (R9 §7 Variant A) — card press-down + photo
-   *  lift. Composes with the underlying <TapedCard interactive="press">
-   *  so rotation is preserved on hover. */
-  interactive?: boolean;
   className?: string;
 }
 
@@ -58,7 +54,6 @@ export function TapedFigure({
   tape,
   bg = "cream",
   tint = "newsprint",
-  interactive = false,
   className,
 }: TapedFigureProps) {
   const aspectStyle: CSSProperties =
@@ -66,13 +61,12 @@ export function TapedFigure({
 
   const showFigcaption = Boolean(caption || credit);
 
-  // `data-tint` and `data-lift` are read by the global `.taped-figure`
-  // rules in globals.css. Forwarded onto the TapedCard root so the
-  // same element anchors the `> .taped-figure__photo` selectors and
-  // the `::after` grain overlay.
+  // `data-tint` is read by the global `.taped-figure[data-tint]` rule
+  // in globals.css. Forwarded onto the TapedCard root so the same
+  // element anchors the `> .taped-figure__photo` selectors and the
+  // `::after` grain overlay.
   const figureAttrs: Record<`data-${string}`, string> = {
     "data-tint": tint,
-    "data-lift": interactive ? "true" : "false",
   };
 
   return (
@@ -82,7 +76,6 @@ export function TapedFigure({
       tape={tape}
       bg={bg}
       padding="sm"
-      interactive={interactive ? "press" : false}
       className={cn("taped-figure block w-full", className)}
       dataAttrs={figureAttrs}
     >

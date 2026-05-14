@@ -105,19 +105,11 @@ describe("TapedFigure", () => {
     expect(fig).toHaveAttribute("data-tint", "none");
   });
 
-  it("interactive=false (default) emits data-lift=false and no press hover classes", () => {
+  it("does not emit a data-lift attribute (R9 §7 lift hover retired in #1748)", () => {
     const { container } = render(<TapedFigure>{Img}</TapedFigure>);
     const fig = container.firstChild as HTMLElement;
-    expect(fig).toHaveAttribute("data-lift", "false");
+    expect(fig).not.toHaveAttribute("data-lift");
     expect(fig.className).not.toMatch(/--card-press-x/);
-  });
-
-  it("interactive=true emits data-lift=true and wires press-mode hover on the card", () => {
-    const { container } = render(<TapedFigure interactive>{Img}</TapedFigure>);
-    const fig = container.firstChild as HTMLElement;
-    expect(fig).toHaveAttribute("data-lift", "true");
-    expect(fig).toHaveAttribute("data-interactive", "press");
-    expect(fig.className).toMatch(/motion-safe:hover:\[--card-press-x:1px\]/);
   });
 
   it("renders the single tape strip when tape prop is set", () => {

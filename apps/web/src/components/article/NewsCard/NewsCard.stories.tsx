@@ -12,15 +12,16 @@ const meta = {
     docs: {
       description: {
         component:
-          "Versatile news card with three variants: dark image-overlay (standard/featured) " +
-          "for homepage use, and a light stacked layout (listing) for dense archive grids.",
+          "Flush-edge news card (R10) — image fills the outer card top region; meta panel " +
+          "below an ink rule. `standard` and `featured` variants differ in heading size and " +
+          "internal padding only; surface (`bg`) and rotation are surface-level concerns.",
       },
     },
   },
   argTypes: {
     variant: {
       control: "radio",
-      options: ["standard", "featured", "listing"],
+      options: ["standard", "featured"],
     },
     badge: { control: "text" },
     date: { control: "text" },
@@ -56,42 +57,11 @@ export const Featured: Story = {
   },
 };
 
-export const Listing: Story = {
-  args: {
-    title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
-    href: "/nieuws/derby-overwinning",
-    imageUrl: fixtureImage("article-hero-matchverslag", 1),
-    imageAlt: "Derby match",
-    badge: "Competitie",
-    date: "15 januari 2025",
-    variant: "listing",
-  },
-};
-
-export const ListingWithoutImage: Story = {
-  args: {
-    title: "Nieuwe trainingsschema seizoen 2025-2026 bekendgemaakt",
-    href: "/nieuws/trainingsschema",
-    badge: "Club",
-    date: "12 januari 2025",
-    variant: "listing",
-  },
-};
-
-export const ListingLongTitle: Story = {
-  args: {
-    title:
-      "KCVV Elewijt pakt de titel in eerste provinciale na een ijzersterk seizoen met maar liefst 17 overwinningen en 58 punten",
-    href: "/nieuws/titel",
-    imageUrl: fixtureImage("article-hero-generic", 1),
-    imageAlt: "Championship celebration",
-    badge: "Clubnieuws",
-    date: "5 mei 2025",
-    variant: "listing",
-  },
-};
-
-export const ListingGrid: Story = {
+// Three-up archive grid — formerly `ListingGrid` while the `listing`
+// variant existed. Post-R10 there's no visual difference between
+// listing and standard; the grid composition still proves the surface
+// behaves under realistic archive-page constraints.
+export const Grid: Story = {
   args: {
     title: "KCVV Elewijt behaalt belangrijke overwinning in Zemst derby",
     href: "/nieuws/derby-overwinning",
@@ -99,7 +69,7 @@ export const ListingGrid: Story = {
     imageAlt: "Derby match",
     badge: "Competitie",
     date: "15 januari 2025",
-    variant: "listing",
+    variant: "standard",
   },
   decorators: [
     (Story) => (
@@ -111,14 +81,14 @@ export const ListingGrid: Story = {
           imageUrl={fixtureImage("article-hero-jeugd", 0)}
           badge="Selectie"
           date="14 maart 2026"
-          variant="listing"
+          variant="standard"
         />
         <NewsCard
           title="Nieuwe trainingsschema bekendgemaakt"
           href="/nieuws/trainingsschema"
           badge="Club"
           date="12 januari 2025"
-          variant="listing"
+          variant="standard"
         />
       </div>
     ),
