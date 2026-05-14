@@ -7,6 +7,8 @@ import {
   TapedCard,
   type TapedCardBg,
   type TapeStripColor,
+  type TapeStripLength,
+  type TapeStripProps,
   type TapeStripRotation,
   MonoLabel,
   type MonoLabelTone,
@@ -71,6 +73,20 @@ export interface NewsCardProps {
    * corner anchors on a paper card are the accepted R10 idiom).
    */
   tapeColors?: readonly [TapeStripColor, TapeStripColor];
+  /**
+   * Number of corner tape strips. `2` (default) = the R10 TL + TR
+   * corner pair. `1` = TL only, used by cramped-card surfaces (e.g.
+   * the Uitgelicht 3-up row at #1750) where two corner strips
+   * dominate the photo. Right strip simply isn't rendered.
+   */
+  tapeCount?: 1 | 2;
+  /**
+   * Tape length override. Defaults to the variant-derived size
+   * (`featured` → `"lg"`, `standard` → `"md"`). Surfaces that keep
+   * the featured-heading size but live in medium real estate (e.g.
+   * Uitgelicht) opt out of the default with `"md"`.
+   */
+  tapeLength?: TapeStripLength;
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }
@@ -154,6 +170,8 @@ export const NewsCard = ({
   rotation = "none",
   bg = "cream",
   tapeColors = DEFAULT_TAPE_COLORS,
+  tapeCount = 2,
+  tapeLength,
   as = "h3",
   className,
 }: NewsCardProps) => {
@@ -179,24 +197,29 @@ export const NewsCard = ({
       shadow="md"
       tape={(() => {
         // Featured cards span a wider grid column, so the `md` tape
-        // looked proportionally small at PR review — bump to `lg` for
-        // featured, keep `md` for standard.
-        const stripLength = variant === "featured" ? "lg" : "md";
+        // looked proportionally small in #1748 — default to `lg` for
+        // featured, `md` for standard. `tapeLength` overrides per
+        // consumer (Uitgelicht passes `"md"` even on featured cards).
+        const stripLength: TapeStripLength =
+          tapeLength ?? (variant === "featured" ? "lg" : "md");
         const [leftRotation, rightRotation] = deriveTapeRotations(title);
-        return [
+        const strips: TapeStripProps[] = [
           {
             color: tapeColors[0],
             length: stripLength,
             position: "left",
             rotation: leftRotation,
           },
-          {
+        ];
+        if (tapeCount === 2) {
+          strips.push({
             color: tapeColors[1],
             length: stripLength,
             position: "right",
             rotation: rightRotation,
-          },
-        ];
+          });
+        }
+        return strips;
       })()}
       // Press-down hover is wired via TapedCard's `press` interactive mode
       // when the card is a link. Composes with rotation; `motion-reduce`
@@ -284,7 +307,11 @@ export const NewsCard = ({
           level={HEADING_LEVEL[as]}
           size={headingSize}
           tone={headingTone}
-          className="line-clamp-3"
+          // `break-words` + `hyphens-auto` — long Dutch compounds
+          // (e.g. "Voorbeschouwing", "competitiestart") overflowed the
+          // card horizontally before `line-clamp-3` could vertically
+          // truncate, producing a mid-word visual clip.
+          className="line-clamp-3 break-words hyphens-auto"
         >
           {title}
         </EditorialHeading>
