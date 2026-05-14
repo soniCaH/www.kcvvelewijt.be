@@ -20,3 +20,14 @@ reviews:
     - "!apps/web/test/vr/__snapshots__/**/*.png"
     - "!apps/web/test/vr/__diff_output__/**/*.png"
     - "!apps/web/test/vr/__received_output__/**/*.png"
+
+  # CodeRabbit's sandbox runs ESLint from the repo root with ESLint 9's
+  # flat-config semantics. Our flat configs live per-workspace
+  # (`apps/web/eslint.config.mjs`, etc.), so ESLint exits with
+  # "couldn't find an eslint.config.(js|mjs|cjs) file" on every reviewed
+  # file. Our own CI (`pnpm --filter @kcvv/web lint`) already enforces
+  # ESLint per-workspace, so CodeRabbit's run is duplicate coverage —
+  # disabling it removes the noise without losing real signal.
+  tools:
+    eslint:
+      enabled: false
