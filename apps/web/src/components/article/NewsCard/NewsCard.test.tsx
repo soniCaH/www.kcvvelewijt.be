@@ -304,6 +304,28 @@ describe("NewsCard", () => {
       ).not.toBeNull();
     });
 
+    it("tapeCount=1 drops the right corner strip — TL only", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} tapeCount={1} />,
+      );
+      const tapes = container.querySelectorAll("[data-color][data-position]");
+      expect(tapes).toHaveLength(1);
+      expect(tapes[0]).toHaveAttribute("data-position", "left");
+    });
+
+    it("tapeLength override applies even at variant=featured", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} variant="featured" tapeLength="md" />,
+      );
+      // Default for featured is "lg" (w-24). The override forces "md"
+      // (w-16) on the rendered strips — verify via data-length so we
+      // don't tie the test to Tailwind class-name churn.
+      const tapes = container.querySelectorAll("[data-length]");
+      tapes.forEach((tape) => {
+        expect(tape).toHaveAttribute("data-length", "md");
+      });
+    });
+
     it("aspect-ratio class is applied to the image region", () => {
       const { container } = render(
         <NewsCard {...defaultProps} aspectRatio="portrait-3-4" />,

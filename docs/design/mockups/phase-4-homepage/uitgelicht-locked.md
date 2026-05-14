@@ -1,9 +1,34 @@
 # Phase 4.5 · Uitgelicht row — Locked (R1.6)
 
-**Locked 2026-05-13.**
+**Locked 2026-05-13. Revised at implementation (#1750, 2026-05-14).**
 **Source compare page:** `round-r1-6-uitgelicht-sizing-comparisons.html`.
 **Companion:** `hero-locked.md` (R1) introduces the Uitgelicht section.
 **Owner:** @climacon.
+
+## Revisions during implementation (#1750)
+
+- **Per-articleType backgrounds — adopted.** First-pass lock said
+  "cream (consistent)" for the prominence-delta intent; #1750 review
+  resolved the AC-vs-lock conflict in favour of the per-articleType
+  `BG_BY_TYPE` lookup (R3.B, `card-semantics-locked.md`). Transfer
+  articles render on jersey-deep; interview / announcement / event /
+  matchPreview / matchRecap stay cream. The prominence delta vs the
+  news grid is preserved by SIZE + EMPHASIS (display-md heading, lg
+  padding) — not by tone uniformity.
+- **Right-side section meta — dropped.** "Drie picks van de redactie"
+  was a proposal in §"Section header". Owner reviewed an A/B mockup
+  at PR time and selected the heading-alone variant. No right-meta
+  MonoLabel ships.
+- **Tablet responsive — 3-column at all viewports ≥ 640px.** The lock
+  flagged the choice as implementer's call; resolved 3-col so the
+  heading + 3 cards stay symmetrical. Mobile collapses to 1-col below
+  640px.
+- **Tape strips — single `md` strip at top-left.** R10 ships two
+  corner strips on `<NewsCard>` by default. The Uitgelicht cards live
+  in medium real estate (3 cards in a ~7xl container); the 2-corner
+  `lg`-size pair dominated the photo at PR review. Resolved: drop to
+  one strip on TL, size `md`. New `<NewsCard>` props `tapeCount` and
+  `tapeLength` expose this knob for any future cramped surface.
 
 ## Decision
 

@@ -13,6 +13,13 @@ export type {
 export { NewsGrid } from "./NewsGrid";
 export type { NewsGridProps, NewsGridArticle } from "./NewsGrid";
 
+export { FeaturedUitgelichtRow } from "./FeaturedUitgelichtRow";
+export type {
+  FeaturedUitgelichtRowProps,
+  UitgelichtArticle,
+  ArticleType,
+} from "./FeaturedUitgelichtRow";
+
 export { FeaturedEventBand } from "./FeaturedEventBand";
 export type {
   FeaturedEventBandProps,
