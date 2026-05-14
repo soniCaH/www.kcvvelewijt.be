@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · R8 vs hero · what's the difference?</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-light: #4a8f6a;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #e8e0c8;
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 24px;
+      }
+      header.page { max-width: 1300px; margin: 0 auto 24px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 32px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 6px;
+        max-width: 80ch;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .compare {
+        max-width: 1300px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .column { display: flex; flex-direction: column; gap: 0; }
+      .column-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: bold;
+      }
+      .column-label.new { background: var(--jersey-deep); }
+      .column-label .sub {
+        display: block;
+        font-weight: normal;
+        opacity: 0.8;
+        margin-top: 3px;
+        letter-spacing: 0.08em;
+        font-size: 10px;
+        text-transform: none;
+      }
+
+      /* Page surface */
+      .page-surface {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        overflow: hidden;
+      }
+
+      /* ===== Hero section ===== */
+      .section {
+        position: relative;
+        padding: 22px 22px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .section.section-label::before {
+        content: attr(data-label);
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.4;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 50fr 50fr;
+        gap: 18px;
+        align-items: center;
+      }
+      .hero-copy .kicker {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+      .hero-copy .kicker .pill {
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 2px 6px;
+      }
+      .hero-copy h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        margin: 8px 0 6px;
+        line-height: 1.05;
+      }
+      .hero-copy h2 .accent { color: var(--jersey-deep); }
+      .hero-copy .lead {
+        font-size: 11px;
+        line-height: 1.5;
+        opacity: 0.9;
+        margin: 0 0 8px;
+      }
+      .hero-copy .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 5px 5px 7px;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        transform: rotate(-0.4deg);
+        max-width: 240px;
+        justify-self: end;
+      }
+      .taped .tape {
+        position: absolute;
+        top: -7px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+        z-index: 2;
+      }
+      .taped .tape.left { left: 12px; }
+      .taped .tape.right { right: 12px; transform: rotate(3deg); background: var(--tape-jersey); }
+      .taped .img {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        background: linear-gradient(135deg, #547a5e 0%, #2a4d3a 100%);
+      }
+      .taped .cap {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 9px;
+        opacity: 0.6;
+        padding: 4px 4px 0;
+      }
+
+      /* Uitgelicht 3-up */
+      .uitg-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .uitg-card {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 8px 8px 10px;
+        position: relative;
+      }
+      .uitg-card .tape {
+        position: absolute;
+        top: -6px;
+        left: 8px;
+        width: 28px;
+        height: 8px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+      }
+      .uitg-card .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .uitg-card .img.b { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .uitg-card .img.c { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .uitg-card .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 12px;
+        margin: 6px 0 2px;
+      }
+      .uitg-card .h .accent { color: var(--jersey-deep); }
+
+      /* News grid 3×2 */
+      .news-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .nc {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 2px 2px 0 0 var(--ink);
+        padding: 6px 6px 8px;
+        position: relative;
+      }
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc .tape {
+        position: absolute;
+        top: -5px;
+        left: 8px;
+        width: 22px;
+        height: 7px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+      }
+      .nc .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .nc .img.b { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .nc .img.c { background: linear-gradient(135deg, #6f7c66, #3a4a3f); }
+      .nc .img.d { background: linear-gradient(135deg, #8aa599, #2a4d3a); }
+      .nc .img.e { background: linear-gradient(135deg, #b89678, #6b4d2f); }
+      .nc .img.f { background: linear-gradient(135deg, #d9c193, #8c6f4a); }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 10px;
+        margin: 4px 0 0;
+        line-height: 1.15;
+      }
+
+      /* Section header */
+      .sec-h {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .sec-h h3 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        margin: 0;
+      }
+      .sec-h h3 .accent { color: var(--jersey-deep); }
+      .sec-h .right {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* ===== R8 — full-bleed editorial photo moment ===== */
+      .fullbleed {
+        position: relative;
+        background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 40%, #b89678 100%);
+        height: 280px;
+        /* Optional subtle grain overlay (5% opacity) */
+        box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.15);
+      }
+      .fullbleed::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(45deg, transparent 0, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 3px);
+        pointer-events: none;
+      }
+      .fullbleed .caption-overlay {
+        position: absolute;
+        bottom: 14px;
+        left: 16px;
+        color: var(--cream);
+        font-family: ui-serif, Georgia, serif;
+        max-width: 60%;
+      }
+      .fullbleed .caption-overlay .k {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        opacity: 0.85;
+      }
+      .fullbleed .caption-overlay .q {
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.25;
+        margin: 0 0 4px;
+      }
+      .fullbleed .caption-overlay .cred {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+
+      /* Upcoming */
+      .upcoming {
+        background: var(--cream-soft);
+        padding: 18px 22px 22px;
+      }
+      .upcoming-rows {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .upcoming-rows .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        padding: 4px 0;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.15);
+      }
+      .upcoming-rows .row:last-child { border-bottom: none; }
+
+      /* Annotation pulse — calls out the NEW section */
+      .annotation {
+        position: relative;
+      }
+      .annotation::after {
+        content: "NEW";
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        background: var(--tape);
+        color: var(--ink);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 0.14em;
+        padding: 3px 8px;
+        border: 1.5px solid var(--ink);
+        box-shadow: 2px 2px 0 0 var(--ink);
+        transform: rotate(6deg);
+        z-index: 5;
+      }
+
+      /* Diff table */
+      .diff-table {
+        max-width: 1300px;
+        margin: 32px auto 0;
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .diff-table > h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        margin: 0;
+        padding: 18px 24px 0;
+      }
+      .diff-table table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 0;
+      }
+      .diff-table thead th {
+        background: var(--ink);
+        color: var(--cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 10px 16px;
+        text-align: left;
+      }
+      .diff-table tbody td {
+        padding: 10px 16px;
+        font-size: 13px;
+        line-height: 1.5;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.2);
+        vertical-align: top;
+      }
+      .diff-table tbody tr:last-child td { border-bottom: none; }
+      .diff-table tbody th {
+        text-align: left;
+        padding: 10px 16px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: rgba(26, 26, 26, 0.04);
+        font-weight: bold;
+        vertical-align: top;
+        width: 18%;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · R8 vs hero · same article in two treatments</div>
+      <h1>How does a full-bleed photo differ from the hero we already have?</h1>
+      <p>
+        Both columns below show the same Sanity content. <strong>Left</strong>
+        is what we locked in R1.B / R1.6 / R2 — hero (taped polaroid) +
+        Uitgelicht + NewsGrid. <strong>Right</strong> adds the new
+        full-bleed editorial photo band between NewsGrid and
+        UpcomingMatches. Look at how differently the SAME visual moment
+        reads in each treatment.
+      </p>
+    </header>
+
+    <div class="compare">
+
+      <!-- LEFT: current locked state -->
+      <div class="column">
+        <div class="column-label">Current (R1.B + R1.6 + R2 + R3 + R4 locked)<span class="sub">No full-bleed photo moment</span></div>
+        <div class="page-surface">
+
+          <!-- Hero -->
+          <div class="section section-label" data-label="Hero · R1.B">
+            <div class="hero-grid">
+              <div class="hero-copy">
+                <div class="kicker"><span class="pill">Interview</span> · Do 14 mei</div>
+                <h2>Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h2>
+                <p class="lead">Na een seizoen langs de zijlijn keert onze kapitein terug op de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </div>
+              <div class="taped">
+                <span class="tape left"></span>
+                <span class="tape right"></span>
+                <div class="img"></div>
+                <div class="cap">Foto · KCVV / A. De Wachter</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Uitgelicht -->
+          <div class="section section-label" data-label="Uitgelicht · R1.6.A">
+            <div class="sec-h"><h3>Uit<span class="accent">gelicht</span>.</h3></div>
+            <div class="uitg-row">
+              <div class="uitg-card"><span class="tape"></span><div class="img"></div><h4 class="h">Maxim <span class="accent">tekent</span>.</h4></div>
+              <div class="uitg-card"><span class="tape"></span><div class="img b"></div><h4 class="h">Seizoen <span class="accent">17 aug</span>.</h4></div>
+              <div class="uitg-card"><span class="tape"></span><div class="img c"></div><h4 class="h">Familiedag <span class="accent">park</span>.</h4></div>
+            </div>
+          </div>
+
+          <!-- News -->
+          <div class="section section-label" data-label="NewsGrid · R2.B">
+            <div class="sec-h"><h3>Laatste <span class="accent">nieuws</span>.</h3><span class="right">Alle berichten →</span></div>
+            <div class="news-grid">
+              <div class="nc"><span class="tape"></span><div class="img"></div><h4 class="h">Elewijt scoort in slotfase.</h4></div>
+              <div class="nc jersey"><span class="tape"></span><div class="img b"></div><h4 class="h">Maxim tekent.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img c"></div><h4 class="h">Sponsor bord.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img d"></div><h4 class="h">U13 wint beker.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img e"></div><h4 class="h">"Wat een seizoen?"</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img f"></div><h4 class="h">B-ploeg verliest.</h4></div>
+            </div>
+          </div>
+
+          <!-- Upcoming -->
+          <div class="upcoming">
+            <div class="sec-h" style="margin-bottom:10px"><h3>Komende <span class="accent">wedstrijden</span>.</h3></div>
+            <div class="upcoming-rows">
+              <div class="row"><span>Do 14 mei · 18:00</span><span>KCVV vs Hofstade</span></div>
+              <div class="row"><span>Za 16 mei · 14:30</span><span>KCVV U17 vs Putte</span></div>
+              <div class="row"><span>Zo 17 mei · 15:00</span><span>Berlaar vs KCVV B</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: with full-bleed photo -->
+      <div class="column">
+        <div class="column-label new">Proposed (current + R8 full-bleed photo)<span class="sub">Adds 1 section between NewsGrid and UpcomingMatches</span></div>
+        <div class="page-surface">
+
+          <!-- Hero (identical) -->
+          <div class="section section-label" data-label="Hero · R1.B">
+            <div class="hero-grid">
+              <div class="hero-copy">
+                <div class="kicker"><span class="pill">Interview</span> · Do 14 mei</div>
+                <h2>Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h2>
+                <p class="lead">Na een seizoen langs de zijlijn keert onze kapitein terug op de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </div>
+              <div class="taped">
+                <span class="tape left"></span>
+                <span class="tape right"></span>
+                <div class="img"></div>
+                <div class="cap">Foto · KCVV / A. De Wachter</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Uitgelicht (identical) -->
+          <div class="section section-label" data-label="Uitgelicht · R1.6.A">
+            <div class="sec-h"><h3>Uit<span class="accent">gelicht</span>.</h3></div>
+            <div class="uitg-row">
+              <div class="uitg-card"><span class="tape"></span><div class="img"></div><h4 class="h">Maxim <span class="accent">tekent</span>.</h4></div>
+              <div class="uitg-card"><span class="tape"></span><div class="img b"></div><h4 class="h">Seizoen <span class="accent">17 aug</span>.</h4></div>
+              <div class="uitg-card"><span class="tape"></span><div class="img c"></div><h4 class="h">Familiedag <span class="accent">park</span>.</h4></div>
+            </div>
+          </div>
+
+          <!-- News (identical) -->
+          <div class="section section-label" data-label="NewsGrid · R2.B">
+            <div class="sec-h"><h3>Laatste <span class="accent">nieuws</span>.</h3><span class="right">Alle berichten →</span></div>
+            <div class="news-grid">
+              <div class="nc"><span class="tape"></span><div class="img"></div><h4 class="h">Elewijt scoort in slotfase.</h4></div>
+              <div class="nc jersey"><span class="tape"></span><div class="img b"></div><h4 class="h">Maxim tekent.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img c"></div><h4 class="h">Sponsor bord.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img d"></div><h4 class="h">U13 wint beker.</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img e"></div><h4 class="h">"Wat een seizoen?"</h4></div>
+              <div class="nc"><span class="tape"></span><div class="img f"></div><h4 class="h">B-ploeg verliest.</h4></div>
+            </div>
+          </div>
+
+          <!-- R8 FULL-BLEED PHOTO MOMENT -->
+          <div class="annotation">
+            <div class="fullbleed">
+              <div class="caption-overlay">
+                <div class="k">A-ploeg · za 11 mei</div>
+                <p class="q">"In de 92e drijft Stevens de kopbal binnen — Hofstade kan alleen toekijken."</p>
+                <div class="cred">Foto · KCVV / E. Vermeulen</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming (identical) -->
+          <div class="upcoming">
+            <div class="sec-h" style="margin-bottom:10px"><h3>Komende <span class="accent">wedstrijden</span>.</h3></div>
+            <div class="upcoming-rows">
+              <div class="row"><span>Do 14 mei · 18:00</span><span>KCVV vs Hofstade</span></div>
+              <div class="row"><span>Za 16 mei · 14:30</span><span>KCVV U17 vs Putte</span></div>
+              <div class="row"><span>Zo 17 mei · 15:00</span><span>Berlaar vs KCVV B</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Diff table -->
+    <section class="diff-table">
+      <h2>Hero (R1.B) vs full-bleed photo (R8) — the actual difference.</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Hero (R1.B · locked)</th>
+            <th>Full-bleed photo (R8 · proposed)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Position</th>
+            <td>Top of page · the marquee</td>
+            <td>Mid-page · breathing room between NewsGrid and UpcomingMatches</td>
+          </tr>
+          <tr>
+            <th>Width</th>
+            <td>Container-constrained · <code>max-w-6xl</code> (~1152px)</td>
+            <td>Edge-to-edge full-bleed · 100vw</td>
+          </tr>
+          <tr>
+            <th>Photo treatment</th>
+            <td>Taped polaroid · TapedFigure with border, paper-shadow, tape strips, rotation</td>
+            <td>Naked photo · no card, no border, no rotation, no tape, subtle grain overlay</td>
+          </tr>
+          <tr>
+            <th>Surrounding chrome</th>
+            <td>Kicker · H1 · Lead · Byline · "Lees verder →" link wraps the whole shell</td>
+            <td>Just a small caption overlay bottom-left (kicker + 1-line quote + photographer)</td>
+          </tr>
+          <tr>
+            <th>Editorial function</th>
+            <td>"What's the lead story?" · click-through to a specific article</td>
+            <td>"Here's an editorial photo moment" · pause, not click — caption is read-only</td>
+          </tr>
+          <tr>
+            <th>Click target</th>
+            <td>Wraps the whole hero · routes to <code>/nieuws/[slug]</code></td>
+            <td>Optional · could be no-link, or link to the most-recent wedstrijd / match details</td>
+          </tr>
+          <tr>
+            <th>Aspect ratio</th>
+            <td>Photo is 3:2 inside the polaroid frame</td>
+            <td>Photo is cinematic — ~2:1 or 21:9, fills viewport width at ~50vh max</td>
+          </tr>
+          <tr>
+            <th>Vocabulary register</th>
+            <td>Retro-fanzine paper-card · italic serif · tape · rotation</td>
+            <td>Sports magazine cinematic · clean photo · subtle paper-grain integration</td>
+          </tr>
+          <tr>
+            <th>Data source</th>
+            <td>Article #1 in <code>order(featured desc, publishedAt desc)</code></td>
+            <td>Open question — that's conflict 3</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </body>
+</html>

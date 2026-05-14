@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R5 · Youth section revisit</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-light: #4a8f6a;
+        --jersey-dark: #133d28;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      header.page .constants {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .constants strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .candidate header .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+        max-width: 60ch;
+      }
+      .candidate header .tradeoffs {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs span { display: block; }
+      .candidate .surface { padding: 0; }
+
+      /* Cream lead-in (the section above Youth, for context) */
+      .lead-in {
+        background: var(--cream);
+        padding: 24px 32px 18px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.45;
+        border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+      }
+
+      /* The diagonal stripe seam (brief: green-on-green, ~24px) */
+      .striped-seam {
+        height: 28px;
+        background:
+          repeating-linear-gradient(
+            -45deg,
+            var(--jersey-deep) 0,
+            var(--jersey-deep) 14px,
+            var(--jersey-light) 14px,
+            var(--jersey-light) 28px
+          );
+        border-top: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+      }
+
+      /* Youth section body */
+      .youth-section {
+        position: relative;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 48px 32px 56px;
+        overflow: hidden;
+      }
+      /* Subtle photo-overlay backdrop (simulating the photo + green overlay) */
+      .youth-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 80% 20%, rgba(245, 239, 225, 0.05) 0, transparent 40%),
+          radial-gradient(circle at 20% 80%, rgba(19, 61, 40, 0.4) 0, transparent 50%),
+          linear-gradient(135deg, var(--jersey-deep) 0%, var(--jersey-dark) 100%);
+        pointer-events: none;
+      }
+      .youth-section > * { position: relative; z-index: 1; }
+      .youth-section .container-inner {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .youth-section .eyebrow {
+        display: inline-block;
+        background: rgba(245, 239, 225, 0.92);
+        color: var(--ink);
+        padding: 4px 10px 5px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+      }
+      .youth-section h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 56px;
+        line-height: 1.02;
+        margin: 0 0 18px;
+        max-width: 14ch;
+        color: var(--cream);
+        letter-spacing: -0.02em;
+      }
+      .youth-section h2 .accent { color: var(--tape); }
+      .youth-section .body {
+        font-size: 16px;
+        line-height: 1.55;
+        max-width: 56ch;
+        margin: 0 0 24px;
+        color: rgba(245, 239, 225, 0.92);
+      }
+      .youth-section .stats {
+        display: inline-block;
+        background: rgba(26, 26, 26, 0.25);
+        color: var(--cream);
+        padding: 6px 12px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+        border: 1px solid rgba(245, 239, 225, 0.3);
+      }
+      .youth-section .cta-row {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px 11px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 2px solid var(--cream);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        text-decoration: none;
+      }
+      .cta.primary {
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .cta.secondary {
+        background: transparent;
+        color: var(--cream);
+      }
+
+      /* Cream tail (the section after Youth, for context) */
+      .tail {
+        background: var(--cream-soft);
+        padding: 18px 32px 24px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.45;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R5 · Youth section revisit</div>
+      <h1>Diagonal stripe top frame + second CTA.</h1>
+      <p>
+        Brief §8 wants: (1) a diagonal green-on-green stripe band at the
+        very top of the youth section, (2) two CTAs side by side, and
+        (3) the headline emphasis on "Elewijt" rather than the current
+        "De toekomst". Three variants below differ only on the second
+        CTA's wording — the stripe band and headline change are
+        constants across all three.
+      </p>
+      <div class="constants">
+        <strong>Constants across all three variants</strong>
+        Diagonal stripe band — full-bleed, ~28px tall, jersey-deep +
+        jersey-light alternating at 45°, with ink borders top &amp;
+        bottom. Reuses the existing &lt;StripedSeam&gt; primitive (Phase 0).
+        <br>
+        Headline emphasis shifts: <em>De toekomst</em> van Elewijt. →
+        De toekomst van <em>Elewijt</em>. (italic + warm-accent on
+        "Elewijt", per brief §8).
+        <br>
+        Background stays: photo + green overlay (existing
+        &lt;YouthBackdrop&gt;). Stats inline below headline.
+      </div>
+      <div class="anchor-list">
+        <a href="#a">R5.A — Brief verbatim</a>
+        <a href="#b">R5.B — Word-avoidance CTA</a>
+        <a href="#c">R5.C — Single CTA</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R5.A · brief verbatim ============= -->
+      <section class="candidate" id="a">
+        <header>
+          <div>
+            <div class="key">R5.A · Brief verbatim</div>
+            <div class="name">"Ontdek onze jeugd →" + "Word zelf lid →"</div>
+            <div class="desc">
+              Both CTAs exactly as the brief specifies. Primary cream-on-jersey,
+              secondary outlined cream. Side by side on desktop.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Matches brief §8 verbatim</span>
+            <span class="pro">Action verbs "Ontdek" + "Word" feel imperative</span>
+            <span class="con">Eyebrow already says "Word jeugdspeler" — same Word verb appears 2× in close proximity</span>
+            <span class="con">"Word zelf lid" is broader scope than youth (adult lid too); could mislead</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ Previous section (Banner B / cream)</div>
+          <div class="striped-seam"></div>
+          <div class="youth-section">
+            <div class="container-inner">
+              <span class="eyebrow">Word jeugdspeler</span>
+              <h2>De toekomst van <span class="accent">Elewijt</span>.</h2>
+              <p class="body">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <span class="stats">220+ spelers · 16 ploegen</span>
+              <div class="cta-row">
+                <a class="cta primary">Ontdek onze jeugd →</a>
+                <a class="cta secondary">Word zelf lid →</a>
+              </div>
+            </div>
+          </div>
+          <div class="tail">↓ Next section (Banner C / cream-soft)</div>
+        </div>
+      </section>
+
+      <!-- ============= R5.B · word-avoidance ============= -->
+      <section class="candidate" id="b">
+        <header>
+          <div>
+            <div class="key">R5.B · Word-avoidance CTA</div>
+            <div class="name">"Ontdek onze jeugd →" + "Schrijf je in →"</div>
+            <div class="desc">
+              Primary unchanged. Secondary swaps the Dutch action verb to
+              break the eyebrow's "Word" repetition. Still imperative,
+              still onboarding-oriented.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Breaks "Word jeugdspeler / Word zelf lid" pattern</span>
+            <span class="pro">"Schrijf je in" is the standard Dutch youth-football onboarding verb</span>
+            <span class="con">Diverges from brief §8 wording (small)</span>
+            <span class="con">Less specific than "lid worden" — could read as "sign up for the newsletter" without context</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ Previous section (Banner B / cream)</div>
+          <div class="striped-seam"></div>
+          <div class="youth-section">
+            <div class="container-inner">
+              <span class="eyebrow">Word jeugdspeler</span>
+              <h2>De toekomst van <span class="accent">Elewijt</span>.</h2>
+              <p class="body">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <span class="stats">220+ spelers · 16 ploegen</span>
+              <div class="cta-row">
+                <a class="cta primary">Ontdek onze jeugd →</a>
+                <a class="cta secondary">Schrijf je in →</a>
+              </div>
+            </div>
+          </div>
+          <div class="tail">↓ Next section (Banner C / cream-soft)</div>
+        </div>
+      </section>
+
+      <!-- ============= R5.C · single CTA ============= -->
+      <section class="candidate" id="c">
+        <header>
+          <div>
+            <div class="key">R5.C · Single CTA</div>
+            <div class="name">"Ontdek onze jeugd →" (only)</div>
+            <div class="desc">
+              Skip the second CTA. The /jeugd landing page is itself the
+              onboarding funnel — visitors who want to register click
+              "Ontdek onze jeugd" and find the "Schrijf je in" CTA there.
+              Section stays focused on the editorial story.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Cleanest CTA hierarchy — no primary/secondary tension</span>
+            <span class="pro">Onboarding funnel concentrated on /jeugd page</span>
+            <span class="con">Diverges from brief §8 — explicit ask is two CTAs</span>
+            <span class="con">Visitors with high commit-intent need an extra click</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ Previous section (Banner B / cream)</div>
+          <div class="striped-seam"></div>
+          <div class="youth-section">
+            <div class="container-inner">
+              <span class="eyebrow">Word jeugdspeler</span>
+              <h2>De toekomst van <span class="accent">Elewijt</span>.</h2>
+              <p class="body">Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw delen één doel: voetbal als zelfontplooiing — nooit als prestatie alleen.</p>
+              <span class="stats">220+ spelers · 16 ploegen</span>
+              <div class="cta-row">
+                <a class="cta primary">Ontdek onze jeugd →</a>
+              </div>
+            </div>
+          </div>
+          <div class="tail">↓ Next section (Banner C / cream-soft)</div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

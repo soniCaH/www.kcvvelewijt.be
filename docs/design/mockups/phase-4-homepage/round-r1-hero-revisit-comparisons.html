@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R1 · Hero placement revisit</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1280px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 12px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 38ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate header .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .tradeoffs {
+        font-size: 12px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs .pro,
+      .candidate header .tradeoffs .con { display: block; }
+      .candidate .surface {
+        background: var(--cream);
+        padding: 36px 32px 44px;
+      }
+      .candidate .surface .stamp {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin-bottom: 14px;
+      }
+
+      /* ===== Shared primitives ===== */
+      .kicker {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+      .kicker .pill {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .kicker .pill.warm { background: var(--tape); color: var(--ink); }
+      .kicker .pill.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .kicker .dot { opacity: 0.45; }
+      .h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 14px 0 14px;
+      }
+      .h1.xl { font-size: 54px; }
+      .h1.lg { font-size: 38px; }
+      .h1.md { font-size: 24px; }
+      .h1.sm { font-size: 18px; }
+      .h1 .accent { color: var(--jersey-deep); }
+      .lead {
+        font-size: 15px;
+        line-height: 1.55;
+        max-width: 50ch;
+        margin: 0 0 14px;
+        opacity: 0.92;
+      }
+      .lead.compact { font-size: 13px; line-height: 1.5; max-width: 36ch; }
+      .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        margin-top: 6px;
+        font-weight: bold;
+      }
+      .meta-row {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-top: 8px;
+      }
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 8px 8px 10px;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+      }
+      .taped .tape {
+        position: absolute;
+        top: -10px;
+        width: 56px;
+        height: 14px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .taped .tape.left { left: 14px; }
+      .taped .tape.right { right: 14px; transform: rotate(3deg); }
+      .taped .tape.jersey { background: var(--tape-jersey); }
+      .taped.rot-a { transform: rotate(-0.5deg); }
+      .taped.rot-b { transform: rotate(0.4deg); }
+      .taped.rot-c { transform: rotate(-0.3deg); }
+      .taped.rot-d { transform: rotate(0.25deg); }
+      .img {
+        width: 100%;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        position: relative;
+      }
+      .img.alt {
+        background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%);
+      }
+      .img.alt2 {
+        background: linear-gradient(135deg, #c1a04a 0%, #8c6f2a 100%);
+      }
+      .img.alt3 {
+        background: linear-gradient(135deg, #547a5e 0%, #2a4d3a 100%);
+      }
+      .img::after {
+        content: attr(data-tag);
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(26, 26, 26, 0.78);
+        color: var(--cream);
+        padding: 3px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .img.aspect-16-9 { aspect-ratio: 16 / 9; }
+      .img.aspect-4-3 { aspect-ratio: 4 / 3; }
+      .img.aspect-square { aspect-ratio: 1 / 1; }
+      .img.aspect-3-2 { aspect-ratio: 3 / 2; }
+      .card {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 14px 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        position: relative;
+      }
+      .card.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .card.jersey .h1 .accent { color: var(--tape); }
+      .card.jersey .read-more { color: var(--tape); }
+      .card.jersey .meta-row { opacity: 0.85; }
+      .card .tape {
+        position: absolute;
+        top: -10px;
+        width: 56px;
+        height: 14px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .card .tape.left { left: 14px; }
+      .card .tape.right { right: 14px; transform: rotate(3deg); }
+      .card .tape.jersey { background: var(--tape-jersey); }
+      .card .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .card.jersey .label { opacity: 0.92; }
+
+      /* ===== Section header (reused) ===== */
+      .section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 36px 0 18px;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 30px;
+        line-height: 1.1;
+        margin: 0;
+      }
+      .section-header h2 .period { color: var(--jersey-deep); font-style: italic; }
+      .section-header .right-link {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+
+      /* ===== R1.A — Status quo: auto-rotating carousel ===== */
+      .v-carousel-hero {
+        display: grid;
+        grid-template-columns: 62fr 38fr;
+        gap: 32px;
+        align-items: center;
+      }
+      .v-carousel-hero .copy { padding-right: 6px; }
+      .carousel-progress {
+        display: flex;
+        gap: 6px;
+        margin-top: 22px;
+        align-items: center;
+      }
+      .carousel-progress .bar {
+        flex: 1;
+        height: 3px;
+        background: rgba(26, 26, 26, 0.18);
+        position: relative;
+      }
+      .carousel-progress .bar.active::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--ink);
+        width: 42%;
+      }
+      .carousel-progress .bar.done::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--ink);
+      }
+      .carousel-progress .pause {
+        width: 28px;
+        height: 28px;
+        border: 1.5px solid var(--ink);
+        background: var(--cream);
+        box-shadow: 2px 2px 0 0 var(--ink);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        display: grid;
+        place-items: center;
+      }
+      .carousel-thumbs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 16px;
+      }
+      .carousel-thumbs .thumb {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        opacity: 0.55;
+      }
+      .carousel-thumbs .thumb.active { opacity: 1; }
+      .carousel-thumbs .thumb.active .frame {
+        outline: 2px solid var(--tape);
+        outline-offset: 2px;
+      }
+      .carousel-thumbs .frame {
+        width: 80px;
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .carousel-thumbs .frame.alt { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .carousel-thumbs .frame.alt3 { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .carousel-thumbs .thumb-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .carousel-thumbs .thumb-meta .idx {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        opacity: 0.7;
+      }
+      .carousel-thumbs .thumb-meta .t {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.2;
+      }
+
+      /* ===== R1.B — Single hero + Uitgelicht 3-card row ===== */
+      .v-single-hero {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 36px;
+        align-items: center;
+      }
+      .v-single-hero .copy .h1 { font-size: 50px; }
+      .uitgelicht-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .uitgelicht-row .card { padding: 16px 16px 18px; }
+      .uitgelicht-row .card .h1 { font-size: 22px; }
+      .uitgelicht-row .card.taped-rot-a { transform: rotate(-0.5deg); }
+      .uitgelicht-row .card.taped-rot-b { transform: rotate(0.3deg); }
+      .uitgelicht-row .card.taped-rot-c { transform: rotate(-0.2deg); }
+
+      /* ===== R1.C — Static lead + 2-card stack ===== */
+      .v-static-lead {
+        display: grid;
+        grid-template-columns: 62fr 38fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+      .v-static-lead .lead-block { display: flex; flex-direction: column; }
+      .v-static-lead .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .v-static-lead .sidebar .sidebar-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 0;
+      }
+      .v-static-lead .mini-card {
+        background: var(--cream-soft);
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 12px 14px 14px;
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 12px;
+        align-items: flex-start;
+        position: relative;
+      }
+      .v-static-lead .mini-card.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .v-static-lead .mini-card.jersey .read-more { color: var(--tape); }
+      .v-static-lead .mini-card .mini-img {
+        width: 96px;
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #c1a04a, #8c6f2a);
+      }
+      .v-static-lead .mini-card .mini-img.alt { background: linear-gradient(135deg, #547a5e, #2a4d3a); }
+      .v-static-lead .mini-card .h1 { font-size: 18px; margin: 4px 0 6px; }
+      .v-static-lead .mini-card .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 44px;
+        height: 12px;
+        background: var(--tape-warm);
+        opacity: 0.85;
+      }
+      .v-static-lead .mini-card.jersey .tape { background: var(--tape-jersey); }
+
+      /* ===== R1.D — Editorial spread (1 lead + 3 medium) ===== */
+      .v-editorial {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+      .v-editorial .lead-block { display: flex; flex-direction: column; }
+      .v-editorial .spread {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .v-editorial .spread-card {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 10px 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+      }
+      .v-editorial .spread-card.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .v-editorial .spread-card.jersey .read-more { color: var(--tape); }
+      .v-editorial .spread-card .tape {
+        position: absolute;
+        top: -8px;
+        left: 18px;
+        width: 40px;
+        height: 12px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+        opacity: 0.85;
+      }
+      .v-editorial .spread-card.jersey .tape { background: var(--tape-jersey); }
+      .v-editorial .spread-card .h1 { font-size: 18px; margin: 4px 0 4px; }
+      .v-editorial .spread-card .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .v-editorial .spread-card.jersey .label { opacity: 0.92; }
+      .v-editorial .spread-card.span2 { grid-column: span 2; }
+      .v-editorial .spread-card .row {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .v-editorial .spread-card .row .img-sm {
+        width: 90px;
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #c1a04a, #8c6f2a);
+      }
+      .v-editorial .spread-card .row .img-sm.alt { background: linear-gradient(135deg, #547a5e, #2a4d3a); }
+
+      /* ===== Phantom news grid (shown under each variant for context) ===== */
+      .phantom-grid {
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px dashed rgba(26, 26, 26, 0.35);
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 14px;
+      }
+      .phantom-grid .phantom {
+        background: rgba(26, 26, 26, 0.08);
+        border: 1px dashed rgba(26, 26, 26, 0.3);
+        min-height: 60px;
+        display: grid;
+        place-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.55;
+      }
+      .phantom-grid .lead-phantom {
+        grid-row: span 2;
+      }
+      .phantom-grid-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin: 18px 0 -4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R1 · Hero placement revisit</div>
+      <h1>Carousel of three, or the brief's split layout?</h1>
+      <p>
+        The Phase 4 hero locked an auto-rotating carousel of 3 featured articles
+        (Round 1 D · Round 1b D.1). The refinement brief drops the carousel and
+        adds a separate "Uitgelicht." row of three prominently-sized featured
+        cards above the news grid. This round revisits that decision with four
+        concrete placement variants and a fixed news-grid phantom underneath
+        each so you can judge how the hero competes with the grid below.
+      </p>
+      <p>
+        Variants share the retro-fanzine vocabulary: TapedCard, TapeStrip,
+        EditorialHeading (italic serif + jersey-deep accent), MonoLabel,
+        EditorialLead, EditorialKicker.
+      </p>
+      <div class="anchor-list">
+        <a href="#r1a">R1.A — Locked carousel</a>
+        <a href="#r1b">R1.B — Hero + Uitgelicht row</a>
+        <a href="#r1c">R1.C — Lead + 2-stack</a>
+        <a href="#r1d">R1.D — Editorial spread</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R1.A ============= -->
+      <section class="candidate" id="r1a">
+        <header>
+          <div>
+            <div class="key">R1.A · Status quo (Phase 4 Round 1 D · 1b D.1)</div>
+            <div class="name">Auto-rotating carousel of three</div>
+            <div class="desc">
+              One large hero slot cycles through 3 featured articles every 5s
+              (pauseable, respects prefers-reduced-motion). A strip of 3
+              thumbnails below shows what's next; click any thumb to jump.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Single attention slot, no clutter</span>
+            <span class="pro">Motion telegraphs "this is the marquee"</span>
+            <span class="con">2 of 3 articles hidden at any moment</span>
+            <span class="con">Carousels are mobile-friction-heavy</span>
+            <span class="con">A11y: auto-rotate needs pause UI</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">Match-strip + nav · stamped at top — out of round scope</div>
+          <div class="v-carousel-hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>Do 14 mei</span>
+              </div>
+              <h2 class="h1 xl">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <p class="lead">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op de
+                A-ploeg. We praatten met hem over revalidatie, focus en de
+                ploeg van morgen.
+              </p>
+              <div class="read-more">Lees verder →</div>
+            </div>
+            <div class="taped rot-a" style="max-width: 360px; justify-self: end;">
+              <span class="tape left"></span>
+              <span class="tape right jersey"></span>
+              <div class="img aspect-4-3" data-tag="A-PLOEG"></div>
+              <div class="caption">Foto · KCVV / A. De Wachter</div>
+            </div>
+          </div>
+          <div class="carousel-progress">
+            <span class="bar done"></span>
+            <span class="bar active"></span>
+            <span class="bar"></span>
+            <span class="pause">❚❚</span>
+          </div>
+          <div class="carousel-thumbs">
+            <div class="thumb">
+              <span class="frame alt"></span>
+              <div class="thumb-meta">
+                <span class="idx">01 · Transfer</span>
+                <span class="t">Maxim Breugelmans tekent voor twee jaar.</span>
+              </div>
+            </div>
+            <div class="thumb active">
+              <span class="frame"></span>
+              <div class="thumb-meta">
+                <span class="idx">02 · Interview</span>
+                <span class="t">Dieter Van Dionant over zijn rentree.</span>
+              </div>
+            </div>
+            <div class="thumb">
+              <span class="frame alt3"></span>
+              <div class="thumb-meta">
+                <span class="idx">03 · Aankondiging</span>
+                <span class="t">Nieuw seizoen start zaterdag 17 augustus.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="phantom-grid-label">↓ Below: NewsGrid (5 articles · current lock)</div>
+          <div class="phantom-grid">
+            <div class="phantom lead-phantom">Lead article</div>
+            <div class="phantom">News card 2</div>
+            <div class="phantom">News card 3</div>
+            <div class="phantom">News card 4</div>
+            <div class="phantom">News card 5</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R1.B ============= -->
+      <section class="candidate" id="r1b">
+        <header>
+          <div>
+            <div class="key">R1.B · The brief's proposal</div>
+            <div class="name">Single hero + Uitgelicht 3-card row</div>
+            <div class="desc">
+              One large static hero (the most-recently-published featured
+              article), followed by a separate "Uitgelicht." section with three
+              prominently-sized featured cards. Carousel is dropped entirely.
+              Featured semantics live in the row, not in motion.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">All 4 featured visible simultaneously</span>
+            <span class="pro">No motion · no a11y cost</span>
+            <span class="pro">"Uitgelicht" reads explicitly</span>
+            <span class="con">Pushes news grid further down the page</span>
+            <span class="con">Repeats card treatment 4× before the grid</span>
+            <span class="con">Loses "this-is-the-marquee" punch</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">Match-strip + nav · stamped at top — out of round scope</div>
+
+          <div class="v-single-hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>Do 14 mei · 18:00</span>
+              </div>
+              <h2 class="h1 xl">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <p class="lead">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op de
+                A-ploeg.
+              </p>
+              <div class="read-more">Lees verder →</div>
+            </div>
+            <div class="taped rot-a" style="max-width: 360px; justify-self: end;">
+              <span class="tape left"></span>
+              <div class="img aspect-4-3" data-tag="A-PLOEG"></div>
+              <div class="caption">Foto · KCVV / A. De Wachter</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top:46px;">
+            <h2>Uit<span class="period">gelicht</span>.</h2>
+          </div>
+          <div class="uitgelicht-row">
+            <div class="card taped-rot-a">
+              <span class="tape left"></span>
+              <div class="img aspect-16-9 alt" data-tag="Transfer"></div>
+              <span class="label">Transfer · Vr 9 mei</span>
+              <h3 class="h1 md">Maxim Breugelmans <span class="accent">tekent</span> voor twee jaar.</h3>
+              <div class="read-more">Lees verder →</div>
+            </div>
+            <div class="card jersey taped-rot-b">
+              <span class="tape right jersey"></span>
+              <div class="img aspect-16-9 alt3" data-tag="A-Ploeg"></div>
+              <span class="label">Aankondiging · Ma 5 mei</span>
+              <h3 class="h1 md">Nieuw seizoen start zaterdag <span class="accent">17 augustus</span>.</h3>
+              <div class="read-more">Lees verder →</div>
+            </div>
+            <div class="card taped-rot-c">
+              <span class="tape left"></span>
+              <div class="img aspect-16-9 alt2" data-tag="Event"></div>
+              <span class="label">Event · Za 24 mei</span>
+              <h3 class="h1 md">Familiedag <span class="accent">in 't park</span> — kom mee.</h3>
+              <div class="read-more">Lees verder →</div>
+            </div>
+          </div>
+
+          <div class="phantom-grid-label">↓ Below: 3×2 NewsGrid (per brief §6) or 1+4 lock</div>
+          <div class="phantom-grid">
+            <div class="phantom lead-phantom">Lead article</div>
+            <div class="phantom">News card 2</div>
+            <div class="phantom">News card 3</div>
+            <div class="phantom">News card 4</div>
+            <div class="phantom">News card 5</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R1.C ============= -->
+      <section class="candidate" id="r1c">
+        <header>
+          <div>
+            <div class="key">R1.C · Hybrid</div>
+            <div class="name">Static lead hero + 2-card "Ook uitgelicht" stack</div>
+            <div class="desc">
+              One large static hero on the left, two mid-sized featured cards
+              stacked on the right. Same vertical footprint as R1.A. All 3
+              featured articles visible at once, no motion. Closer in spirit to
+              the original retro-fanzine mockups (left-headline / right-photo)
+              but extends the right column to a vertical "featured sidebar."
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">3 featured visible, no motion</span>
+            <span class="pro">Same vertical footprint as carousel</span>
+            <span class="pro">No new section; news grid stays close</span>
+            <span class="con">Right column reads as "sidebar"</span>
+            <span class="con">Only 3 featured slots (vs 4 in R1.B)</span>
+            <span class="con">Smaller cards on right lose some punch</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">Match-strip + nav · stamped at top — out of round scope</div>
+          <div class="v-static-lead">
+            <div class="lead-block">
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>Do 14 mei · 18:00</span>
+              </div>
+              <h2 class="h1 xl">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <p class="lead">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op de
+                A-ploeg.
+              </p>
+              <div class="taped rot-a" style="margin-top: 14px;">
+                <span class="tape left"></span>
+                <div class="img aspect-16-9" data-tag="A-PLOEG"></div>
+                <div class="caption">Foto · KCVV / A. De Wachter</div>
+              </div>
+              <div class="read-more" style="margin-top: 14px;">Lees verder →</div>
+            </div>
+            <div class="sidebar">
+              <span class="sidebar-label">Ook uitgelicht.</span>
+              <div class="mini-card">
+                <span class="tape"></span>
+                <div class="mini-img"></div>
+                <div>
+                  <span class="label">Transfer · Vr 9 mei</span>
+                  <h3 class="h1 sm">Maxim Breugelmans <span class="accent">tekent</span> voor twee jaar.</h3>
+                  <div class="read-more">Lees verder →</div>
+                </div>
+              </div>
+              <div class="mini-card jersey">
+                <span class="tape jersey"></span>
+                <div class="mini-img alt"></div>
+                <div>
+                  <span class="label">Aankondiging · Ma 5 mei</span>
+                  <h3 class="h1 sm">Nieuw seizoen start zaterdag <span class="accent">17 aug</span>.</h3>
+                  <div class="read-more">Lees verder →</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="phantom-grid-label">↓ Below: NewsGrid (current 1+4 lock)</div>
+          <div class="phantom-grid">
+            <div class="phantom lead-phantom">Lead article</div>
+            <div class="phantom">News card 2</div>
+            <div class="phantom">News card 3</div>
+            <div class="phantom">News card 4</div>
+            <div class="phantom">News card 5</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R1.D ============= -->
+      <section class="candidate" id="r1d">
+        <header>
+          <div>
+            <div class="key">R1.D · Editorial spread</div>
+            <div class="name">One lead + three sibling-strength featured</div>
+            <div class="desc">
+              A two-column editorial spread: one large lead on the left with a
+              full hero photo, three roughly co-equal featured items on the
+              right (one big-photo card + two text-led headline rows). Mimics a
+              newspaper above-the-fold layout. All 4 featured articles visible
+              at once, hero reads as the marquee but the right column carries
+              real weight.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">All 4 featured visible at once</span>
+            <span class="pro">Highest density · most editorial energy</span>
+            <span class="pro">No motion · no Uitgelicht section needed</span>
+            <span class="con">Right column dense — risks visual noise</span>
+            <span class="con">Two stacked sub-cards lose photographic emphasis</span>
+            <span class="con">Hardest to balance on mobile</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">Match-strip + nav · stamped at top — out of round scope</div>
+          <div class="v-editorial">
+            <div class="lead-block">
+              <div class="kicker">
+                <span class="pill">Interview</span>
+                <span class="dot">·</span>
+                <span>Do 14 mei · 18:00</span>
+              </div>
+              <h2 class="h1 lg">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <p class="lead">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op de
+                A-ploeg. Een gesprek over revalidatie, focus, en de ploeg van morgen.
+              </p>
+              <div class="taped rot-a" style="margin-top: 8px;">
+                <span class="tape left"></span>
+                <div class="img aspect-3-2" data-tag="A-PLOEG"></div>
+              </div>
+              <div class="read-more" style="margin-top: 12px;">Lees verder →</div>
+            </div>
+            <div class="spread">
+              <div class="spread-card span2">
+                <span class="tape"></span>
+                <div class="img aspect-16-9 alt" data-tag="Transfer"></div>
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h1 md">Maxim Breugelmans <span class="accent">tekent</span> voor twee jaar.</h3>
+                <div class="read-more">Lees verder →</div>
+              </div>
+              <div class="spread-card jersey">
+                <span class="tape jersey"></span>
+                <div class="row">
+                  <span class="img-sm alt"></span>
+                  <div>
+                    <span class="label">Aankondiging</span>
+                    <h3 class="h1 sm">Nieuw seizoen start <span class="accent">17 aug</span>.</h3>
+                    <div class="read-more">Lees verder →</div>
+                  </div>
+                </div>
+              </div>
+              <div class="spread-card">
+                <span class="tape"></span>
+                <div class="row">
+                  <span class="img-sm"></span>
+                  <div>
+                    <span class="label">Event · Za 24 mei</span>
+                    <h3 class="h1 sm">Familiedag <span class="accent">in 't park</span>.</h3>
+                    <div class="read-more">Lees verder →</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="phantom-grid-label">↓ Below: NewsGrid (no separate Uitgelicht section needed)</div>
+          <div class="phantom-grid">
+            <div class="phantom lead-phantom">Lead article</div>
+            <div class="phantom">News card 2</div>
+            <div class="phantom">News card 3</div>
+            <div class="phantom">News card 4</div>
+            <div class="phantom">News card 5</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

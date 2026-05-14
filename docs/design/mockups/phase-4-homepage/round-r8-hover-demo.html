@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Hover demo · 3 options for photo-lift vs canonical press-down</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --tape-cream: rgba(245, 239, 225, 0.85);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 48px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .instruction {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 12px 16px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .instruction strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .grid {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+
+      .demo-col {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .demo-col > h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin: 0;
+      }
+      .demo-col > .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+        margin-bottom: -10px;
+      }
+      .demo-col > .desc {
+        font-size: 13px;
+        line-height: 1.5;
+        opacity: 0.85;
+        margin: 0;
+      }
+      .demo-col > .mech {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.5;
+        background: rgba(26, 26, 26, 0.05);
+        padding: 10px 12px;
+        border-left: 3px solid var(--jersey-deep);
+        margin: 0;
+      }
+      .demo-col > .mech strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 9px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .hover-prompt {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.6;
+        margin-top: 12px;
+      }
+      .hover-prompt::before { content: "↑ "; }
+
+      /* ===== Shared card primitive — matches NewsCard ===== */
+      .nc {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: visible; /* allow tape + lifted photo to escape */
+        transition: all 300ms ease;
+        cursor: pointer;
+        /* sub-degree rotation per Phase 1 lock */
+        transform: rotate(-0.4deg);
+      }
+      .nc .photo {
+        position: relative;
+        background: var(--cream);
+        padding: 5px 5px 7px;
+        border-bottom: 1px solid var(--ink);
+        transition: transform 300ms ease;
+      }
+      .nc .photo .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e 0%, #2a4d3a 70%, #1a3a2a 100%);
+        position: relative;
+        display: block;
+      }
+      .nc .photo .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 11px;
+        opacity: 0.65;
+        padding: 4px 4px 0;
+      }
+
+      /* Tape strips — positioned relative to .photo so they appear AT the photo edges.
+         (For "tape stays put" in variants A/B, the tape lives on the CARD frame
+         instead — see per-variant overrides below.) */
+      .nc .photo .tape-strip {
+        position: absolute;
+        height: 18px;
+        background: var(--tape-warm);
+        border: 1px solid rgba(26, 26, 26, 0.3);
+        opacity: 0.92;
+        z-index: 4;
+        pointer-events: none;
+      }
+      .nc .photo .tape-strip.tl {
+        top: -8px;
+        left: 12px;
+        width: 56px;
+        transform: rotate(-4deg);
+      }
+      .nc .photo .tape-strip.br {
+        bottom: -6px;
+        right: 14px;
+        width: 48px;
+        background: var(--tape-jersey);
+        transform: rotate(3deg);
+      }
+
+      .nc .meta-panel {
+        padding: 12px 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 18px;
+      }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+        gap: 8px;
+      }
+      .nc .footer-row .date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .nc .footer-row .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+
+      /* ============ Variant A — Layered ============
+         Card press-down (canonical) + photo lifts (new).
+         Tape lives ON THE CARD edges (not the photo), so the photo
+         can lift while the tape stays anchored where the card frame is. */
+      .nc.var-a:hover {
+        transform: rotate(-0.4deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      .nc.var-a:hover .photo {
+        transform: translateY(-4px);
+      }
+      /* Tape strips on card-frame for variant A */
+      .nc.var-a .tape-strip {
+        z-index: 5;
+      }
+
+      /* ============ Variant B — Photo-only lift ============
+         Card does NOT press down. Only the photo lifts.
+         Tape stays put (it lives on the card frame, card doesn't move). */
+      .nc.var-b:hover .photo {
+        transform: translateY(-4px);
+      }
+      /* Card doesn't move at all on hover */
+
+      /* ============ Variant C — Canonical press-down only ============
+         Card press-down only. Photo doesn't move. Tape moves WITH the
+         card (because it's on the card frame, and the card translates).
+         No new hover patterns. */
+      .nc.var-c:hover {
+        transform: rotate(-0.4deg) translate(4px, 4px);
+        box-shadow: none;
+      }
+      /* .photo does NOT have a hover transform here */
+
+      /* Hover trail — visual aid showing where the card "was" before press */
+      .nc::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(26, 26, 26, 0.04);
+        border: 1px dashed rgba(26, 26, 26, 0);
+        z-index: -1;
+        transition: all 300ms ease;
+      }
+      .nc:hover::before {
+        background: rgba(26, 26, 26, 0.08);
+        border: 1px dashed rgba(26, 26, 26, 0.2);
+        transform: translate(-4px, -4px);
+      }
+
+      /* Diff annotation pill */
+      .pill {
+        display: inline-block;
+        background: var(--tape);
+        color: var(--ink);
+        padding: 2px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        font-weight: bold;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid var(--ink);
+        margin-right: 4px;
+      }
+      .pill.jersey { background: var(--jersey-deep); color: var(--cream); }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · R8 hover demo · 3 options · live · move your cursor</div>
+      <h1>Photo lift vs canonical press-down — interactive demo.</h1>
+      <p>
+        Three taped news cards, each implementing one of the three hover
+        models. Same card content, same sub-degree rotation, same tape
+        layout. Only the hover transform differs.
+      </p>
+      <div class="instruction">
+        <strong>How to read this</strong>
+        Hover each card. Watch what moves: the CARD (depresses 4px
+        down/right), the PHOTO (lifts 4px up), the TAPE (anchored to card
+        frame in all three; moves with card when card moves). The dashed
+        ghost shows where the card was before hover so the press-down is
+        legible.
+        <br>
+        Transform values are exaggerated for visibility (4px instead of the
+        production 1–2px) — judge the relative effect, not the exact magnitude.
+      </div>
+    </header>
+
+    <main class="grid">
+
+      <!-- ============ A — Layered ============ -->
+      <div class="demo-col">
+        <span class="key">Variant A · Layered (Recommended)</span>
+        <h2>Card press-down + photo lift</h2>
+        <p class="desc">
+          The card depresses canonically (translate down-right). The
+          photo INSIDE the card translates up at the same time. Tape
+          strips stay on the card frame and travel with the card's
+          press-down. Net visual: photo "comes off" the card while the
+          card "sinks into the page."
+        </p>
+        <article class="nc var-a">
+          <div class="photo">
+            <span class="tape-strip tl"></span>
+            <span class="tape-strip br"></span>
+            <span class="img"></span>
+            <span class="caption">Foto · KCVV / A. De Wachter</span>
+          </div>
+          <div class="meta-panel">
+            <span class="label">Interview · Do 14 mei</span>
+            <h3 class="h">Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h3>
+            <div class="footer-row">
+              <span class="date">Do 14 mei</span>
+              <span class="read-more">Lees verder →</span>
+            </div>
+          </div>
+        </article>
+        <p class="hover-prompt">Hover the card above</p>
+        <p class="mech">
+          <strong>What moves on hover</strong>
+          <span class="pill jersey">Card</span> translate (+4, +4) · shadow→none<br>
+          <span class="pill">Photo</span> translate(0, -4)<br>
+          <span>Tape</span> moves with card (on frame)
+        </p>
+      </div>
+
+      <!-- ============ B — Photo-only lift ============ -->
+      <div class="demo-col">
+        <span class="key">Variant B · Photo-only lift</span>
+        <h2>Card stays · only photo lifts</h2>
+        <p class="desc">
+          Card doesn't move at all on hover. Only the taped photo lifts
+          up. Tape stays put (it's on the card frame, card doesn't move).
+          Deviates from the canonical press-down for this surface
+          specifically — documents an exception.
+        </p>
+        <article class="nc var-b">
+          <div class="photo">
+            <span class="tape-strip tl"></span>
+            <span class="tape-strip br"></span>
+            <span class="img"></span>
+            <span class="caption">Foto · KCVV / A. De Wachter</span>
+          </div>
+          <div class="meta-panel">
+            <span class="label">Interview · Do 14 mei</span>
+            <h3 class="h">Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h3>
+            <div class="footer-row">
+              <span class="date">Do 14 mei</span>
+              <span class="read-more">Lees verder →</span>
+            </div>
+          </div>
+        </article>
+        <p class="hover-prompt">Hover the card above</p>
+        <p class="mech">
+          <strong>What moves on hover</strong>
+          <span class="pill jersey">Card</span> no transform<br>
+          <span class="pill">Photo</span> translate(0, -4)<br>
+          <span>Tape</span> stays put
+        </p>
+      </div>
+
+      <!-- ============ C — Canonical press-down only ============ -->
+      <div class="demo-col">
+        <span class="key">Variant C · Canonical only</span>
+        <h2>Card press-down · photo doesn't move</h2>
+        <p class="desc">
+          The current canonical pattern, unchanged. Whole card depresses;
+          photo travels with it. No new hover patterns introduced. Simplest
+          and consistent with every other paper-stamped primitive on the
+          site.
+        </p>
+        <article class="nc var-c">
+          <div class="photo">
+            <span class="tape-strip tl"></span>
+            <span class="tape-strip br"></span>
+            <span class="img"></span>
+            <span class="caption">Foto · KCVV / A. De Wachter</span>
+          </div>
+          <div class="meta-panel">
+            <span class="label">Interview · Do 14 mei</span>
+            <h3 class="h">Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h3>
+            <div class="footer-row">
+              <span class="date">Do 14 mei</span>
+              <span class="read-more">Lees verder →</span>
+            </div>
+          </div>
+        </article>
+        <p class="hover-prompt">Hover the card above</p>
+        <p class="mech">
+          <strong>What moves on hover</strong>
+          <span class="pill jersey">Card</span> translate (+4, +4) · shadow→none<br>
+          <span class="pill">Photo</span> moves with card<br>
+          <span>Tape</span> moves with card
+        </p>
+      </div>
+
+    </main>
+  </body>
+</html>

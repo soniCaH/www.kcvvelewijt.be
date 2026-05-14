@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R1.5b · Hero per-articleType flourishes — HYBRID</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1280px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .legend {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .legend strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 42ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate header .desc {
+        max-width: 62ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .artefacts {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      .candidate header .artefacts strong {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.7;
+      }
+      .candidate header .artefacts ul {
+        margin: 0;
+        padding-left: 16px;
+      }
+      .candidate header .artefacts ul li { margin-bottom: 3px; }
+      .candidate header .artefacts .port {
+        color: var(--ink);
+      }
+      .candidate header .artefacts .port::before {
+        content: "\21A9  ";
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-right: 2px;
+      }
+      .candidate header .artefacts .keep {
+        background: rgba(31, 95, 63, 0.12);
+        color: var(--jersey-deep);
+        padding: 0 4px;
+        border-radius: 1px;
+      }
+      .candidate header .artefacts .keep::before {
+        content: "\2605  ";
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-right: 2px;
+      }
+      .candidate header .artefacts .drop {
+        color: #8a3a3a;
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+      .candidate header .artefacts .drop::before {
+        content: "\2715  ";
+        color: #8a3a3a;
+        font-weight: bold;
+        margin-right: 2px;
+      }
+      .candidate .surface {
+        background: var(--cream);
+        padding: 40px 36px 48px;
+      }
+      .candidate .surface .stamp {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin-bottom: 18px;
+      }
+
+      /* ===== Shared hero shell (BIGGER images) ===== */
+      .hero {
+        display: grid;
+        grid-template-columns: 50fr 50fr;
+        gap: 44px;
+        align-items: center;
+      }
+      .hero .copy { padding-right: 6px; }
+      .hero .kicker {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+      .hero .kicker .pill {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .pill.warm { background: var(--tape); color: var(--ink); }
+      .hero .kicker .pill.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .hero .kicker .dot { opacity: 0.45; }
+      .hero .kicker .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        opacity: 0.72;
+      }
+      .hero .h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 18px 0 14px;
+        font-size: 52px;
+      }
+      .hero .h1 .accent { color: var(--jersey-deep); }
+      .hero .subtitle {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 20px;
+        line-height: 1.3;
+        opacity: 0.78;
+        margin: 0 0 16px;
+      }
+      .hero .meta-row {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 15px;
+        margin: 6px 0 14px;
+        opacity: 0.78;
+      }
+      .hero .meta-row .meta-sep { color: rgba(26, 26, 26, 0.3); }
+      .hero .lead {
+        font-size: 16px;
+        line-height: 1.55;
+        max-width: 52ch;
+        margin: 0 0 14px;
+        opacity: 0.92;
+      }
+      .hero .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        margin-top: 10px;
+        font-weight: bold;
+        display: inline-block;
+      }
+      .hero .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-top: 14px;
+      }
+
+      /* Larger taped polaroid hero photo */
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 12px 12px 14px;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        max-width: 520px;
+        width: 100%;
+        justify-self: end;
+      }
+      /* All landscape (no portrait crop). `.portrait` retained for backward
+         class compatibility but renders the same landscape frame. */
+      .taped.portrait { max-width: 520px; }
+      .taped .tape {
+        position: absolute;
+        top: -12px;
+        width: 72px;
+        height: 18px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .taped .tape.left { left: 22px; }
+      .taped .tape.right { right: 22px; transform: rotate(3deg); }
+      .taped .tape.jersey { background: var(--tape-jersey); }
+      .taped.rot-a { transform: rotate(-0.5deg); }
+      .taped.rot-b { transform: rotate(0.4deg); }
+      .taped.rot-c { transform: rotate(-0.3deg); }
+      .taped .img {
+        width: 100%;
+        position: relative;
+      }
+      /* All hero photos are landscape — article.coverImage is uploaded
+         in landscape orientation only (owner constraint, 2026-05-13). */
+      .taped .img.interview { aspect-ratio: 3 / 2; background: linear-gradient(160deg, #d9c193 0%, #8c6f4a 50%, #4a3a22 100%); }
+      .taped .img.announcement { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #547a5e 0%, #2a4d3a 60%, #c1a04a 100%); }
+      .taped .img.event { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%); }
+      .taped .img.transfer { aspect-ratio: 3 / 2; background: linear-gradient(135deg, #c4b18a 0%, #8c6f4a 50%, #4a3a22 100%); }
+      .taped .caption {
+        font-size: 11px;
+        font-style: italic;
+        opacity: 0.65;
+        padding: 8px 6px 0;
+      }
+
+      /* ===== Event keeper: day-block overlay ===== */
+      .day-block {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        background: var(--cream);
+        color: var(--ink);
+        padding: 10px 14px 12px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        letter-spacing: 0.1em;
+        font-weight: bold;
+        border: 2px solid var(--ink);
+        box-shadow: 4px 4px 0 0 var(--ink);
+        transform: rotate(-2deg);
+        z-index: 2;
+        min-width: 80px;
+        text-align: center;
+      }
+      .day-block .dow {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .day-block .date {
+        display: block;
+        font-size: 28px;
+        line-height: 1.1;
+        margin-top: 3px;
+      }
+
+      /* ===== Transfer keeper: directional chip (in kicker) ===== */
+      .dir-chip {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 3px 9px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--ink);
+      }
+      .dir-chip.out { background: #6b2a2a; }
+      .dir-chip.ext { background: var(--tape); color: var(--ink); }
+      .dir-chip .glyph { font-weight: bold; font-size: 12px; }
+
+      /* ===== Event ported: venue strip (compressed EventStrip) ===== */
+      .venue-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 14px;
+        padding: 8px 0;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        border-top: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+      }
+      .venue-strip .glyph { color: var(--jersey-deep); font-weight: bold; font-size: 14px; }
+
+      /* ===== Transfer ported: pull-quote (compressed from detail) ===== */
+      .pull {
+        position: relative;
+        margin: 14px 0 10px;
+        padding: 6px 0 6px 18px;
+        border-left: 3px solid var(--jersey-deep);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 17px;
+        line-height: 1.4;
+        max-width: 46ch;
+      }
+      .pull cite {
+        display: block;
+        font-style: normal;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.7;
+        margin-top: 6px;
+      }
+      .pull cite::before { content: "— "; color: var(--jersey-deep); margin-right: 2px; }
+
+      /* ===== Per-variant header tinting ===== */
+      .candidate.var-interview header { background: rgba(31, 95, 63, 0.05); }
+      .candidate.var-announcement header { background: rgba(217, 184, 90, 0.12); }
+      .candidate.var-event header { background: rgba(31, 95, 63, 0.08); }
+      .candidate.var-transfer header { background: rgba(107, 42, 42, 0.06); }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R1.5b · Hero per-articleType flourishes — HYBRID</div>
+      <h1>Detail-hero compositions, ported · one signature overlay per variant where it earns it.</h1>
+      <p>
+        After comparing the R1.5 overlay-first proposals to the existing
+        detail-page heroes (`InterviewHero`, `AnnouncementHero`,
+        `EventHero`, `TransferHero`), this round adopts the
+        <strong>port + one keeper</strong> approach: re-use the data-aware
+        compositions the detail heroes already ship (joined names,
+        ported kicker meta, directional kickerLabel, event ageGroup tag),
+        render them in retro-fanzine vocabulary (TapedFigure,
+        EditorialHeading), and keep ONE overlay artefact per variant only
+        where it pays for itself visually.
+      </p>
+      <p>
+        Image sizing also bumps significantly — the prior round capped the
+        taped polaroid at ~360px; these mockups go to ~440px (portrait) /
+        ~520px (landscape) to match the photographic emphasis of the
+        detail-page heroes.
+      </p>
+      <div class="legend">
+        <strong>Artefact key</strong>
+        <span style="color: var(--jersey-deep); font-weight: bold;">↩</span>
+        <span>Ported from detail hero</span>
+        &nbsp;·&nbsp;
+        <span style="background: rgba(31, 95, 63, 0.12); color: var(--jersey-deep); padding: 0 4px;">
+          <span style="font-weight: bold;">★</span> Kept overlay (signature)
+        </span>
+        &nbsp;·&nbsp;
+        <span style="color: #8a3a3a; text-decoration: line-through; opacity: 0.6;">
+          <span style="font-weight: bold;">✕</span> Dropped from R1.5 proposal
+        </span>
+      </div>
+      <div class="anchor-list">
+        <a href="#interview">Interview</a>
+        <a href="#announcement">Announcement</a>
+        <a href="#event">Event</a>
+        <a href="#transfer">Transfer</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= Interview ============= -->
+      <section class="candidate var-interview" id="interview">
+        <header>
+          <div>
+            <div class="key">R1.5b · Variant 1 of 4 · articleType = interview</div>
+            <div class="name">Interview hero · ported</div>
+            <div class="desc">
+              The interviewee carries the page through their name and
+              portrait. Ported from `InterviewHero` (detail page): kicker
+              `Interview | #9 · Middenvelder` for single-player subjects,
+              subtitle joined via Dutch grammar ("Met A & B" / "Met A, B
+              en C"), single 4:5 taped portrait at hero scale. No clipped
+              overlay thumbnail — the hero photo IS the portrait.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts (port + keep + drop)</strong>
+            <ul>
+              <li class="port">Kicker meta: <code>#9 · MIDDENVELDER</code> (N=1 only)</li>
+              <li class="port">Subtitle: <code>Met Dieter Van Dionant</code> (joined names)</li>
+              <li class="port">Single taped 4:5 portrait at hero scale (~440px)</li>
+              <li class="drop">Name chip(s) under H1 — replaced by subtitle</li>
+              <li class="drop">Portrait thumb clipped to hero photo — redundant when hero is the portrait</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "interview" · port + drop overlays</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill jersey">Interview</span>
+                <span class="dot">|</span>
+                <span class="meta">#9 · MIDDENVELDER</span>
+                <span class="dot">·</span>
+                <span class="meta">Do 14 mei · 18:00</span>
+              </div>
+              <h2 class="h1">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <p class="subtitle">Met Dieter Van Dionant</p>
+              <p class="lead">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op
+                de A-ploeg. Een gesprek over revalidatie, focus, en de
+                ploeg van morgen.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · Tom Janssens</div>
+            </div>
+            <div class="taped portrait rot-a">
+              <span class="tape left"></span>
+              <span class="tape right jersey"></span>
+              <div class="img interview"></div>
+              <div class="caption">Foto · KCVV / A. De Wachter</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Announcement ============= -->
+      <section class="candidate var-announcement" id="announcement">
+        <header>
+          <div>
+            <div class="key">R1.5b · Variant 2 of 4 · articleType = announcement</div>
+            <div class="name">Announcement hero · ported</div>
+            <div class="desc">
+              The minimum-friction variant. Ported from `AnnouncementHero`
+              (detail page): kicker `category · date`, clean 16:9 cover
+              with no overlay (design §5.1 "no overlay, no shadow"),
+              tape strips. The date is in the kicker — no separate stamp
+              on the photo.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts (port + drop)</strong>
+            <ul>
+              <li class="port">Kicker: <code>category · date</code></li>
+              <li class="port">Clean 16:9 taped cover (no overlay)</li>
+              <li class="port">Byline kept on homepage (detail omits it because the metadata bar below carries author/date/read-time; homepage hero has no metadata bar, so byline stays)</li>
+              <li class="drop">Date-stamp overlay on photo — date already in kicker</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "announcement" · port, no overlays</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Aankondiging</span>
+                <span class="dot">·</span>
+                <span class="meta">Nieuws · Ma 5 mei</span>
+              </div>
+              <h2 class="h1">
+                Nieuw seizoen start <span class="accent">zaterdag 17 augustus</span>.
+              </h2>
+              <p class="lead">
+                De kalender is rond, de loting bekend. Drie thuiswedstrijden
+                in de openingsmaand en de derby tegen Zemst valt op
+                zondag 15 september.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · redactie</div>
+            </div>
+            <div class="taped rot-c">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img announcement"></div>
+              <div class="caption">Foto · KCVV — seizoen 2026/2027</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Event ============= -->
+      <section class="candidate var-event" id="event">
+        <header>
+          <div>
+            <div class="key">R1.5b · Variant 3 of 4 · articleType = event</div>
+            <div class="name">Event hero · ported + day-block kept</div>
+            <div class="desc">
+              The event hero gets ONE kept overlay: the day-block stamp
+              that telegraphs "this is an event" before the visitor reads
+              anything. It earns its place because event articles have a
+              date the visitor cares about (am I free that day?) more than
+              any other variant. Below the H1, a compressed venue strip
+              ports the most-essential `&lt;EventStrip&gt;` row to the homepage
+              shell.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts (port + keep + drop)</strong>
+            <ul>
+              <li class="port">Kicker: <code>EVENT · ${ageGroup || competitionTag}</code></li>
+              <li class="port">Venue strip below H1 (compressed EventStrip · venue + date row only)</li>
+              <li class="keep">Day-block overlay on photo lower-left — signature visual hook</li>
+              <li class="drop">Generic "EVENT" tape sticker — kicker carries it</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "event" · port + 1 kept overlay</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill warm">Event</span>
+                <span class="dot">|</span>
+                <span class="meta">Jeugd</span>
+              </div>
+              <h2 class="h1">
+                Familiedag <span class="accent">in 't park</span> — kom mee.
+              </h2>
+              <p class="venue-strip">
+                <span class="glyph">▸</span>
+                <span>Sportcentrum Elewijt · Zemstsesteenweg 11</span>
+                <span class="glyph" style="margin-left: auto;">·</span>
+                <span>14:00 — 18:00</span>
+              </p>
+              <p class="lead">
+                Springkastelen, schmink, oude wedstrijdshirts en
+                bratwurst-met-kop voor wie te lang gewacht heeft. Inkom
+                gratis voor leden en supporters.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · jeugdwerking</div>
+            </div>
+            <div class="taped rot-b">
+              <span class="tape left"></span>
+              <div class="img event">
+                <span class="day-block">
+                  <span class="dow">Za</span>
+                  <span class="date">27/4</span>
+                </span>
+              </div>
+              <div class="caption">Foto · Familiedag 2025 — KCVV</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Transfer ============= -->
+      <section class="candidate var-transfer" id="transfer">
+        <header>
+          <div>
+            <div class="key">R1.5b · Variant 4 of 4 · articleType = transfer</div>
+            <div class="name">Transfer hero · ported + directional chip in kicker kept</div>
+            <div class="desc">
+              The transfer hero gets ONE kept artefact: the directional
+              chip sits inside the kicker (Inkomend / Uitgaand / Verlengd
+              + arrow glyph) — functional indicator, not decoration. Body
+              composition ports from `TransferHero` (detail): player name
+              as H1, age + position meta line, optional pull-quote with
+              attribution, 4:5 portrait. Jersey number lives in the meta
+              line as `#8`, not as a photo overlay. Van→naar `<TransferStrip>`
+              stays on the detail page only — too dense for hero scale.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts (port + keep + drop)</strong>
+            <ul>
+              <li class="port">Kicker: <code>Transfer | ${kickerLabel}</code> (Inkomend / Uitgaand / Verlengd)</li>
+              <li class="port">Meta line: <code>#8 · 23 jaar · Middenvelder</code></li>
+              <li class="port">Optional pull-quote with attribution</li>
+              <li class="port">4:5 taped portrait</li>
+              <li class="keep">Directional glyph (↓ / ↑ / ↻) inside kicker chip — functional</li>
+              <li class="drop">Jersey-number badge overlaid on photo — moved to meta line</li>
+              <li class="drop">Portrait thumb clipped to hero photo — hero IS the portrait</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "transfer" · port + 1 kept overlay (in kicker, not on photo)</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Transfer</span>
+                <span class="dot">|</span>
+                <span class="dir-chip">
+                  <span class="glyph">↓</span>
+                  <span>Inkomend</span>
+                </span>
+                <span class="dot">·</span>
+                <span class="meta">Vr 9 mei</span>
+              </div>
+              <h2 class="h1">
+                Maxim <span class="accent">Breugelmans</span>.
+              </h2>
+              <p class="meta-row">
+                <span>#8</span>
+                <span class="meta-sep">·</span>
+                <span>23 jaar</span>
+                <span class="meta-sep">·</span>
+                <span>Middenvelder</span>
+                <span class="meta-sep">·</span>
+                <span>Tot juni 2028</span>
+              </p>
+              <blockquote class="pull">
+                Ik wil zo snel mogelijk bij de A-ploeg horen.
+                <cite>Maxim Breugelmans</cite>
+              </blockquote>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · sportief comité</div>
+            </div>
+            <div class="taped portrait rot-a">
+              <span class="tape left"></span>
+              <span class="tape right jersey"></span>
+              <div class="img transfer"></div>
+              <div class="caption">Foto · KV Mechelen / J. Geeraerts</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R2 · NewsGrid geometry revisit</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 38px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      header.page .note {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .candidate header .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .tradeoffs {
+        font-size: 12px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs .pro, .candidate header .tradeoffs .con { display: block; }
+      .candidate .surface { padding: 28px 32px 36px; }
+
+      .section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 0 0 16px;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 30px;
+        line-height: 1;
+        margin: 0;
+        letter-spacing: -0.015em;
+      }
+      .section-header h2 .period { color: var(--jersey-deep); }
+      .section-header .right-link {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+      .section-header .ml {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+
+      /* ===== Uitgelicht (locked R1.6.A) — shown on EVERY variant ===== */
+      .uitgelicht {
+        margin-bottom: 32px;
+        padding-bottom: 28px;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.25);
+      }
+      .uitgelicht-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .uc {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        padding: 16px 16px 18px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .uc .tape {
+        position: absolute;
+        top: -8px;
+        width: 48px;
+        height: 12px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .uc .tape.left { left: 16px; }
+      .uc .tape.right { right: 16px; transform: rotate(3deg); }
+      .uc .tape.jersey { background: var(--tape-jersey); }
+      .uc .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .uc .img.alt2 { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .uc .img.alt3 { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .uc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .uc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 20px;
+      }
+      .uc .h .accent { color: var(--jersey-deep); }
+      .uc .dek {
+        font-size: 11px;
+        line-height: 1.45;
+        opacity: 0.8;
+        margin: 0;
+      }
+      .uc .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-top: auto;
+      }
+
+      /* ===== NewsGrid cards (each variant uses the same primitive) ===== */
+      .nc {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 12px 12px 14px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc.jersey .accent { color: var(--tape); }
+      .nc.jersey .read-more { color: var(--tape); }
+      .nc.jersey .label { color: rgba(245, 239, 225, 0.85); }
+      .nc.cream-soft { background: var(--cream-soft); }
+      .nc.ink { background: var(--ink); color: var(--cream); }
+      .nc.ink .accent { color: var(--tape); }
+      .nc.ink .read-more { color: var(--tape); }
+      .nc.ink .label { color: rgba(245, 239, 225, 0.85); }
+      .nc .tape {
+        position: absolute;
+        top: -7px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .nc .tape.left { left: 12px; }
+      .nc .tape.right { right: 12px; transform: rotate(3deg); }
+      .nc .tape.jersey { background: var(--tape-jersey); }
+      .nc .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .nc .img.alt2 { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .nc .img.alt3 { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .nc .img.alt4 { background: linear-gradient(135deg, #6f7c66, #3a4a3f); }
+      .nc .img.alt5 { background: linear-gradient(135deg, #8aa599, #2a4d3a); }
+      .nc .img.alt6 { background: linear-gradient(135deg, #c4b18a, #6b5a3c); }
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 16px;
+      }
+      .nc .h.lead { font-size: 26px; }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-top: auto;
+      }
+      .nc .dek {
+        font-size: 10px;
+        line-height: 1.45;
+        opacity: 0.8;
+        margin: 0;
+      }
+
+      /* ===== R2.A · 1+4 layout (current Phase 4 lock) ===== */
+      .grid-1plus4 {
+        display: grid;
+        grid-template-columns: 50fr 50fr;
+        gap: 16px;
+      }
+      .grid-1plus4 .lead-slot {
+        grid-row: span 2;
+      }
+      .grid-1plus4 .lead-slot .img { aspect-ratio: 4 / 3; }
+      .grid-1plus4 .cluster {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 12px;
+      }
+
+      /* ===== R2.B · 3×2 equal (brief proposal) ===== */
+      .grid-3x2 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      /* ===== R2.C · 2×3 (vertical-leaning) ===== */
+      .grid-2x3 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .grid-2x3 .nc .h { font-size: 20px; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R2 · NewsGrid geometry revisit</div>
+      <h1>Keep the locked 1+4, or switch to a flat grid?</h1>
+      <p>
+        Phase 4 Round 5b locked the news grid as 1 lead spanning 2 rows +
+        2×2 supporting cluster (`newsgrid-locked.md`). The refinement brief
+        §6 wants 3×2 equal-sized cards — "the variety lives in the cards,
+        not the layout." Round R1.6 just locked Uitgelicht as the
+        prominent 3-up surface above the news grid, which changes the
+        prominence math: the news grid no longer needs internal hierarchy
+        to feel important.
+      </p>
+      <div class="note">
+        <strong>Reminder:</strong> all three variants below render the
+        locked Uitgelicht row at the TOP of the surface so you can judge
+        the prominence gradient. Uitgelicht is identical across variants;
+        only the news grid geometry changes.
+      </div>
+      <div class="anchor-list">
+        <a href="#a">R2.A — Keep 1+4</a>
+        <a href="#b">R2.B — 3×2 equal</a>
+        <a href="#c">R2.C — 2×3 vertical</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R2.A · status quo ============= -->
+      <section class="candidate" id="a">
+        <header>
+          <div>
+            <div class="key">R2.A · Status quo (Phase 4 Round 5b lock)</div>
+            <div class="name">1 lead + 4 supporting (asymmetric)</div>
+            <div class="desc">
+              The current shipping geometry. One large lead card spans
+              both rows; four supporting cards form a 2×2 cluster in the
+              right column. Lead card has a bigger H2 (display-md ~26px),
+              4:3 photo, optional dek. 5 cards total.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">No rework — current implementation stays</span>
+            <span class="pro">Internal hierarchy = chronological emphasis on most-recent</span>
+            <span class="con">Now redundant with Uitgelicht above (already has a 'feature' surface)</span>
+            <span class="con">Lead-card pattern echoed twice on the page</span>
+          </div>
+        </header>
+        <div class="surface">
+          <!-- Uitgelicht (locked) -->
+          <div class="uitgelicht">
+            <div class="section-header">
+              <h2>Uit<span class="period">gelicht</span>.</h2>
+            </div>
+            <div class="uitgelicht-row">
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img"></div>
+                <span class="label">Interview · Do 14 mei</span>
+                <h3 class="h">Dieter <span class="accent">Van Dionant</span>.</h3>
+                <p class="dek">Onze kapitein over zijn rentree op de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape right jersey"></span>
+                <div class="img alt2"></div>
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h">Maxim Breugelmans <span class="accent">tekent</span>.</h3>
+                <p class="dek">De jonge middenvelder versterkt de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img alt3"></div>
+                <span class="label">Aankondiging · Ma 5 mei</span>
+                <h3 class="h">Seizoen start <span class="accent">17 augustus</span>.</h3>
+                <p class="dek">Derby tegen Zemst valt op zondag 15 september.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+            </div>
+          </div>
+
+          <!-- News grid: 1+4 -->
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-1plus4">
+            <article class="nc lead-slot">
+              <span class="tape left"></span>
+              <div class="img"></div>
+              <span class="label">Wedstrijd · Za 11 mei</span>
+              <h3 class="h lead">Elewijt <span class="accent">scoort</span> in slotfase tegen Hofstade.</h3>
+              <p class="dek">Wat aanvankelijk een mat duel leek, kreeg in de laatste tien minuten een nieuwe twist toen Daan Stevens vanuit een hoekschop binnen kopte.</p>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <div class="cluster">
+              <article class="nc jersey">
+                <span class="tape left jersey"></span>
+                <div class="img alt2"></div>
+                <span class="label">Jeugd</span>
+                <h3 class="h">U13 wint provinciale beker.</h3>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="nc">
+                <span class="tape right"></span>
+                <div class="img alt4"></div>
+                <span class="label">Sponsoring</span>
+                <h3 class="h">Nieuw bord voor Coppens Bouw.</h3>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="nc cream-soft">
+                <span class="tape left"></span>
+                <div class="img alt5"></div>
+                <span class="label">Club · Wo 8 mei</span>
+                <h3 class="h">Algemene vergadering kondigt nieuwe statuten aan.</h3>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="nc ink">
+                <span class="tape right jersey"></span>
+                <div class="img alt6"></div>
+                <span class="label">Column</span>
+                <h3 class="h">"Wat een seizoen, hé?"</h3>
+                <span class="read-more">Lees verder →</span>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R2.B · 3×2 equal ============= -->
+      <section class="candidate" id="b">
+        <header>
+          <div>
+            <div class="key">R2.B · Brief §6 proposal</div>
+            <div class="name">3×2 equal-sized cards (6 total)</div>
+            <div class="desc">
+              Six chronological news cards in a 3-column × 2-row grid. All
+              cards same size, no lead/supporting hierarchy. Variety lives
+              in the cards themselves (background cycle, tape colours,
+              rotation), not in the layout. Calmer below the more-prominent
+              Uitgelicht.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Clear prominence gradient: Uitgelicht 3-up grand vs news 3×2 small</span>
+            <span class="pro">Chronological clarity — no implied priority within news</span>
+            <span class="pro">+1 article visible (6 vs 5)</span>
+            <span class="con">Requires NewsGrid component rework</span>
+            <span class="con">Loses the editorial 'lead story' emphasis</span>
+          </div>
+        </header>
+        <div class="surface">
+          <!-- Uitgelicht (locked, identical) -->
+          <div class="uitgelicht">
+            <div class="section-header">
+              <h2>Uit<span class="period">gelicht</span>.</h2>
+            </div>
+            <div class="uitgelicht-row">
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img"></div>
+                <span class="label">Interview · Do 14 mei</span>
+                <h3 class="h">Dieter <span class="accent">Van Dionant</span>.</h3>
+                <p class="dek">Onze kapitein over zijn rentree op de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape right jersey"></span>
+                <div class="img alt2"></div>
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h">Maxim Breugelmans <span class="accent">tekent</span>.</h3>
+                <p class="dek">De jonge middenvelder versterkt de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img alt3"></div>
+                <span class="label">Aankondiging · Ma 5 mei</span>
+                <h3 class="h">Seizoen start <span class="accent">17 augustus</span>.</h3>
+                <p class="dek">Derby tegen Zemst valt op zondag 15 september.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+            </div>
+          </div>
+
+          <!-- News grid: 3×2 -->
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc">
+              <span class="tape left"></span>
+              <div class="img"></div>
+              <span class="label">Wedstrijd · Za 11 mei</span>
+              <h3 class="h">Elewijt <span class="accent">scoort</span> in slotfase.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc jersey">
+              <span class="tape right jersey"></span>
+              <div class="img alt2"></div>
+              <span class="label">Jeugd</span>
+              <h3 class="h">U13 wint <span class="accent">provinciale beker</span>.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc cream-soft">
+              <span class="tape left"></span>
+              <div class="img alt4"></div>
+              <span class="label">Sponsoring</span>
+              <h3 class="h">Nieuw bord voor <span class="accent">Coppens Bouw</span>.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc">
+              <span class="tape right"></span>
+              <div class="img alt5"></div>
+              <span class="label">Club · Wo 8 mei</span>
+              <h3 class="h">Algemene vergadering kondigt nieuwe statuten aan.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc ink">
+              <span class="tape right jersey"></span>
+              <div class="img alt6"></div>
+              <span class="label">Column</span>
+              <h3 class="h">"Wat een <span class="accent">seizoen</span>, hé?"</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc">
+              <span class="tape left"></span>
+              <div class="img alt3"></div>
+              <span class="label">Wedstrijd · Vr 3 mei</span>
+              <h3 class="h">B-ploeg verliest <span class="accent">nipt</span> in Berlaar.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R2.C · 2×3 ============= -->
+      <section class="candidate" id="c">
+        <header>
+          <div>
+            <div class="key">R2.C · Alternative geometry</div>
+            <div class="name">2×3 equal — wider cards in 2 columns</div>
+            <div class="desc">
+              Same 6 cards, but laid out 2 columns × 3 rows. Each card is
+              ~50% width — wider than R2.B's 33% — so each H2 has room to
+              breathe and the dek can render reliably. More like a
+              digital newspaper inner-page than a tile grid.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Each card has more horizontal room — H2 breathes</span>
+            <span class="pro">Dek line renders comfortably (1 or 2 lines)</span>
+            <span class="con">Wider cards may compete visually with Uitgelicht above</span>
+            <span class="con">Takes more vertical space than 3×2 (3 rows vs 2)</span>
+          </div>
+        </header>
+        <div class="surface">
+          <!-- Uitgelicht (locked, identical) -->
+          <div class="uitgelicht">
+            <div class="section-header">
+              <h2>Uit<span class="period">gelicht</span>.</h2>
+            </div>
+            <div class="uitgelicht-row">
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img"></div>
+                <span class="label">Interview · Do 14 mei</span>
+                <h3 class="h">Dieter <span class="accent">Van Dionant</span>.</h3>
+                <p class="dek">Onze kapitein over zijn rentree op de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape right jersey"></span>
+                <div class="img alt2"></div>
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h">Maxim Breugelmans <span class="accent">tekent</span>.</h3>
+                <p class="dek">De jonge middenvelder versterkt de A-ploeg.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+              <article class="uc">
+                <span class="tape left"></span>
+                <div class="img alt3"></div>
+                <span class="label">Aankondiging · Ma 5 mei</span>
+                <h3 class="h">Seizoen start <span class="accent">17 augustus</span>.</h3>
+                <p class="dek">Derby tegen Zemst valt op zondag 15 september.</p>
+                <span class="read-more">Lees verder →</span>
+              </article>
+            </div>
+          </div>
+
+          <!-- News grid: 2×3 -->
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-2x3">
+            <article class="nc">
+              <span class="tape left"></span>
+              <div class="img"></div>
+              <span class="label">Wedstrijd · Za 11 mei</span>
+              <h3 class="h">Elewijt <span class="accent">scoort</span> in slotfase tegen Hofstade.</h3>
+              <p class="dek">Daan Stevens kopt binnen vanuit een hoekschop.</p>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc jersey">
+              <span class="tape right jersey"></span>
+              <div class="img alt2"></div>
+              <span class="label">Jeugd</span>
+              <h3 class="h">U13 wint <span class="accent">provinciale beker</span>.</h3>
+              <p class="dek">Strafschoppen in finale tegen K. Mariekerke.</p>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc cream-soft">
+              <span class="tape left"></span>
+              <div class="img alt4"></div>
+              <span class="label">Sponsoring</span>
+              <h3 class="h">Nieuw bord voor <span class="accent">Coppens Bouw</span>.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc">
+              <span class="tape right"></span>
+              <div class="img alt5"></div>
+              <span class="label">Club · Wo 8 mei</span>
+              <h3 class="h">Algemene vergadering kondigt nieuwe statuten aan.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc ink">
+              <span class="tape right jersey"></span>
+              <div class="img alt6"></div>
+              <span class="label">Column</span>
+              <h3 class="h">"Wat een <span class="accent">seizoen</span>, hé?"</h3>
+              <p class="dek">Onze hoofdredactrice blikt terug op een grillig parcours.</p>
+              <span class="read-more">Lees verder →</span>
+            </article>
+            <article class="nc">
+              <span class="tape left"></span>
+              <div class="img alt3"></div>
+              <span class="label">Wedstrijd · Vr 3 mei</span>
+              <h3 class="h">B-ploeg verliest <span class="accent">nipt</span> in Berlaar.</h3>
+              <span class="read-more">Lees verder →</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>
