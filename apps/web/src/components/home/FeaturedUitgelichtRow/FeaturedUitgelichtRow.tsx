@@ -96,12 +96,9 @@ export const FeaturedUitgelichtRow = ({
           Uitgelicht
         </EditorialHeading>
 
-        <div
-          role="list"
-          className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8"
-        >
+        <ul className="grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-3 md:gap-8">
           {cards.map((article) => (
-            <div key={article.href} role="listitem" className="h-full">
+            <li key={article.href} className="h-full">
               <NewsCard
                 variant="featured"
                 title={article.title}
@@ -120,9 +117,9 @@ export const FeaturedUitgelichtRow = ({
                 tapeCount={1}
                 tapeLength="md"
               />
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

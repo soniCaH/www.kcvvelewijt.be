@@ -95,7 +95,13 @@ export const NoArticles: Story = {
 export const TransferShowcase: Story = {
   args: {
     articles: [
-      threeArticles[1]!,
+      article(
+        1,
+        "Welkom Aaron Daniels: 26-jarige spits versterkt de aanval",
+        "transfer",
+        "Transfer",
+        "De Belgisch-Engelse aanvaller tekent voor twee seizoenen.",
+      ),
       article(
         3,
         "Verlenging voor sluitstuk Lennert Geens — drie jaar erbij",
