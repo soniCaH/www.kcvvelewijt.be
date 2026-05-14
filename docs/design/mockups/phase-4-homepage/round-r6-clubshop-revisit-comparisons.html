@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R6 · Clubshop framing</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-light: #4a8f6a;
+        --jersey-dark: #133d28;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      header.page .constants {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .constants strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .candidate header .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+        max-width: 60ch;
+      }
+      .candidate header .tradeoffs {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs span { display: block; }
+      .candidate .surface { padding: 0; }
+
+      /* Sponsors lead-in (cream section above clubshop) */
+      .lead-in {
+        background: var(--cream);
+        padding: 24px 32px 22px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.45;
+        border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+      }
+
+      /* Mirrored stripe seams */
+      .striped-seam {
+        height: 28px;
+        background:
+          repeating-linear-gradient(
+            -45deg,
+            var(--jersey-dark) 0,
+            var(--jersey-dark) 14px,
+            var(--jersey-deep) 14px,
+            var(--jersey-deep) 28px
+          );
+        border-top: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+      }
+      .striped-seam.bottom {
+        background:
+          repeating-linear-gradient(
+            45deg,
+            var(--jersey-dark) 0,
+            var(--jersey-dark) 14px,
+            var(--jersey-deep) 14px,
+            var(--jersey-deep) 28px
+          );
+      }
+
+      /* Clubshop section */
+      .clubshop {
+        position: relative;
+        background: var(--jersey-dark);
+        color: var(--cream);
+        padding: 48px 32px 56px;
+        overflow: hidden;
+      }
+      .clubshop::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 70% 25%, rgba(245, 239, 225, 0.04) 0, transparent 40%),
+          radial-gradient(circle at 20% 75%, rgba(31, 95, 63, 0.2) 0, transparent 50%);
+        pointer-events: none;
+      }
+      .clubshop > * { position: relative; z-index: 1; }
+      .clubshop .inner {
+        max-width: 1180px;
+        margin: 0 auto;
+        position: relative;
+      }
+      .clubshop h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 56px;
+        line-height: 1.02;
+        margin: 0 0 14px;
+        color: var(--cream);
+        letter-spacing: -0.02em;
+      }
+      .clubshop h2 .accent { color: var(--tape); }
+      .clubshop .sub {
+        font-size: 16px;
+        line-height: 1.5;
+        max-width: 56ch;
+        margin: 0 0 28px;
+        color: rgba(245, 239, 225, 0.92);
+      }
+      .clubshop .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 22px 12px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 2px solid var(--cream);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        text-decoration: none;
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .clubshop .cta .ext { color: var(--jersey-deep); font-weight: bold; }
+
+      /* OFFICIEEL washi-tape sticker (R6.B) */
+      .sticker {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: var(--tape);
+        color: var(--ink);
+        padding: 6px 14px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        border: 2px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        transform: rotate(8deg);
+      }
+      .sticker::before, .sticker::after {
+        content: "";
+        position: absolute;
+        height: 6px;
+        background: rgba(245, 239, 225, 0.6);
+      }
+      .sticker::before {
+        top: -3px;
+        left: 8px;
+        width: 30px;
+        transform: rotate(-3deg);
+      }
+      .sticker::after {
+        bottom: -3px;
+        right: 8px;
+        width: 30px;
+        transform: rotate(-3deg);
+      }
+
+      /* JerseyShirt illustration (R6.C) — simulated */
+      .jersey-illus {
+        position: absolute;
+        top: 32px;
+        right: 32px;
+        width: 140px;
+        height: 160px;
+      }
+      .jersey-illus svg { width: 100%; height: 100%; display: block; }
+
+      /* Tail (footer placeholder) */
+      .tail {
+        background: var(--cream-soft);
+        padding: 18px 32px 24px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.45;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R6 · Clubshop framing</div>
+      <h1>Optional flourish in the clubshop section.</h1>
+      <p>
+        R4.B locked the clubshop's position (final dark band before footer).
+        Brief §10 locks the framing chrome: full-bleed dark green section,
+        mirrored stripe bands at top AND bottom, new heading "Onze clubkledij.",
+        Brandsfit-led subheading, single CTA. The one open variable is the
+        small optional flourish — three options below.
+      </p>
+      <div class="constants">
+        <strong>Constants across all three variants</strong>
+        Mirrored `<StripedSeam>` at the TOP and BOTTOM of the section
+        (~28px tall, jersey-dark + jersey-deep alternating). The clubshop
+        is the ONLY section with stripe bands on both edges — frames it
+        like a taped package.
+        <br>
+        Full-bleed `bg-jersey-deep-dark`. Photo + green overlay is NOT
+        used here (different treatment from Youth).
+        <br>
+        Heading "Onze <em>clubkledij</em>." (italic + warm-accent on
+        "clubkledij" per brief §10). Subheading
+        "Beschikbaar via Brandsfit, onze kledingpartner."
+        <br>
+        Single CTA "Naar de Brandsfit clubshop →" (cream-on-jersey
+        button, external link with ↗ glyph).
+        <br>
+        Drops the generic "WEBSHOP · ONZE PARTNER" eyebrow — Brandsfit
+        is surfaced in the subheading and CTA instead.
+      </div>
+      <div class="anchor-list">
+        <a href="#a">R6.A — No flourish</a>
+        <a href="#b">R6.B — Washi-tape OFFICIEEL sticker</a>
+        <a href="#c">R6.C — Small jersey illustration</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R6.A · no flourish ============= -->
+      <section class="candidate" id="a">
+        <header>
+          <div>
+            <div class="key">R6.A · Minimal</div>
+            <div class="name">No flourish — heading, subheading, CTA only</div>
+            <div class="desc">
+              The cleanest demotion. The mirrored stripe bands are
+              already a distinct visual signature; nothing else needed.
+              No icon, no sticker, no illustration.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Cleanest, most demoted treatment</span>
+            <span class="pro">No new component / icon work</span>
+            <span class="pro">Stripe bands carry the section identity</span>
+            <span class="con">Visually quieter — may feel under-decorated next to Youth's photo backdrop</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ SponsorsBlock (cream · editorial close)</div>
+          <div class="striped-seam"></div>
+          <div class="clubshop">
+            <div class="inner">
+              <h2>Onze <span class="accent">clubkledij</span>.</h2>
+              <p class="sub">Beschikbaar via Brandsfit, onze kledingpartner.</p>
+              <a class="cta">Naar de Brandsfit clubshop <span class="ext">↗</span></a>
+            </div>
+          </div>
+          <div class="striped-seam bottom"></div>
+          <div class="tail">↓ Footer</div>
+        </div>
+      </section>
+
+      <!-- ============= R6.B · OFFICIEEL sticker ============= -->
+      <section class="candidate" id="b">
+        <header>
+          <div>
+            <div class="key">R6.B · Washi-tape sticker</div>
+            <div class="name">"OFFICIEEL" tape stamp top-right</div>
+            <div class="desc">
+              A small rotated tape sticker reading "OFFICIEEL" sits in the
+              top-right corner of the section. Reuses the retro-fanzine
+              washi-tape vocabulary (TapeStrip / sticker style). Signals
+              "authentic partnership" without product imagery.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Reuses retro-fanzine vocabulary (washi tape)</span>
+            <span class="pro">Adds "official partner" semantic without an external logo</span>
+            <span class="pro">Small visual interest, doesn't compete with heading</span>
+            <span class="con">"OFFICIEEL" wording is a touch promotional</span>
+            <span class="con">One more thing to maintain (sticker rotation, placement)</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ SponsorsBlock (cream · editorial close)</div>
+          <div class="striped-seam"></div>
+          <div class="clubshop">
+            <span class="sticker">Officieel</span>
+            <div class="inner">
+              <h2>Onze <span class="accent">clubkledij</span>.</h2>
+              <p class="sub">Beschikbaar via Brandsfit, onze kledingpartner.</p>
+              <a class="cta">Naar de Brandsfit clubshop <span class="ext">↗</span></a>
+            </div>
+          </div>
+          <div class="striped-seam bottom"></div>
+          <div class="tail">↓ Footer</div>
+        </div>
+      </section>
+
+      <!-- ============= R6.C · jersey illustration ============= -->
+      <section class="candidate" id="c">
+        <header>
+          <div>
+            <div class="key">R6.C · Small jersey illustration</div>
+            <div class="name">Reuse &lt;JerseyShirt&gt; at small scale</div>
+            <div class="desc">
+              A compact `<JerseyShirt>` SVG sits in the top-right corner.
+              Reuses the existing two-pass print-style jersey vocabulary
+              (`project_jersey_illustration_vocabulary`). More literal
+              "clubkledij" signal than a tape sticker.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Direct visual signal: clubkledij = jersey</span>
+            <span class="pro">Reuses an existing design-system component</span>
+            <span class="con">Risks reading as 'product image' even though it's an illustration</span>
+            <span class="con">More visual weight than A or B; competes with heading</span>
+            <span class="con">Brief §10 explicitly says 'no product images'; an illustrated jersey skirts this line</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="lead-in">↑ SponsorsBlock (cream · editorial close)</div>
+          <div class="striped-seam"></div>
+          <div class="clubshop">
+            <div class="jersey-illus" aria-hidden="true">
+              <!-- Simulated JerseyShirt SVG (two-pass print style approximation) -->
+              <svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
+                <!-- jersey-deep underprint -->
+                <path d="M30,30 L50,18 L60,28 Q70,32 80,28 L90,18 L110,30 L122,42 L114,52 L102,46 L102,140 L38,140 L38,46 L26,52 L18,42 Z" fill="#1f5f3f" />
+                <!-- ink overprint stripes -->
+                <path d="M30,30 L50,18 L60,28 Q70,32 80,28 L90,18 L110,30 L122,42 L114,52 L102,46 L102,140 L38,140 L38,46 L26,52 L18,42 Z" fill="none" stroke="#1a1a1a" stroke-width="2.5" />
+                <line x1="56" y1="50" x2="56" y2="140" stroke="#1a1a1a" stroke-width="3.5" />
+                <line x1="84" y1="50" x2="84" y2="140" stroke="#1a1a1a" stroke-width="3.5" />
+                <!-- collar -->
+                <path d="M60,28 Q70,40 80,28" fill="none" stroke="#1a1a1a" stroke-width="2.5" />
+              </svg>
+            </div>
+            <div class="inner">
+              <h2>Onze <span class="accent">clubkledij</span>.</h2>
+              <p class="sub">Beschikbaar via Brandsfit, onze kledingpartner.</p>
+              <a class="cta">Naar de Brandsfit clubshop <span class="ext">↗</span></a>
+            </div>
+          </div>
+          <div class="striped-seam bottom"></div>
+          <div class="tail">↓ Footer</div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

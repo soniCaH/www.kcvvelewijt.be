@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · R10b · Display variants — polished</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-light: #4a8f6a;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --tape-cream: rgba(232, 224, 200, 0.85);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #e8e0c8;
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1200px; margin: 0 auto 32px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 32px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .note {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .variant-row {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 32px;
+        align-items: start;
+        margin-bottom: 56px;
+        padding-bottom: 40px;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.3);
+      }
+      .variant-row:last-child { border-bottom: none; }
+      .variant-label {
+        position: sticky;
+        top: 32px;
+      }
+      .variant-label .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .variant-label .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        margin: 4px 0 12px;
+        line-height: 1.1;
+      }
+      .variant-label .desc {
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+      }
+      .variant-label .ingredients {
+        margin-top: 14px;
+        padding: 10px 12px;
+        background: rgba(26, 26, 26, 0.05);
+        border-left: 3px solid var(--jersey-deep);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        line-height: 1.55;
+      }
+      .variant-label .ingredients strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 9px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .card-stage {
+        background: var(--cream);
+        padding: 36px 28px;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* ===== Card frame (shared) ===== */
+      .nc {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+        width: 340px;
+        max-width: 100%;
+      }
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc.jersey .accent { color: var(--tape); }
+      .nc.jersey .read-more { color: var(--tape); }
+      .nc.jersey .label { color: rgba(245, 239, 225, 0.85); }
+      .nc.jersey .date { color: rgba(245, 239, 225, 0.7); }
+      .nc.ink { background: var(--ink); color: var(--cream); }
+      .nc.ink .accent { color: var(--tape); }
+      .nc.ink .read-more { color: var(--tape); }
+      .nc.ink .label { color: rgba(245, 239, 225, 0.85); }
+      .nc.ink .date { color: rgba(245, 239, 225, 0.7); }
+      .nc .tape-tl, .nc .tape-tr {
+        position: absolute;
+        top: -8px;
+        width: 50px;
+        height: 14px;
+        background: var(--tape-warm);
+        border: 1px solid rgba(26, 26, 26, 0.3);
+        z-index: 5;
+      }
+      .nc .tape-tl { left: 14px; transform: rotate(-4deg); }
+      .nc .tape-tr { right: 14px; transform: rotate(4deg); background: var(--tape-jersey); }
+
+      .nc .meta {
+        padding: 14px 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border-top: 1px solid var(--ink);
+      }
+      .nc.jersey .meta, .nc.ink .meta { border-top: 1px solid rgba(245, 239, 225, 0.3); }
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 18px;
+      }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+      }
+      .nc .date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .nc .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+
+      /* ===========================================================
+         EVENT — TICKET STUB
+         =========================================================== */
+      .event-stub {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background:
+          linear-gradient(135deg, var(--cream) 0%, var(--cream-soft) 100%);
+        padding: 18px 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+      }
+      /* Subtle grain overlay */
+      .event-stub::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(45deg, transparent 0, transparent 2px, rgba(26,26,26,0.03) 2px, rgba(26,26,26,0.03) 3px);
+        pointer-events: none;
+      }
+      /* Perforation along the right edge (ticket stub geometry) */
+      .event-stub::after {
+        content: "";
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        right: 14px;
+        width: 1px;
+        background-image: radial-gradient(circle, var(--ink) 1px, transparent 1.5px);
+        background-size: 1px 7px;
+        background-repeat: repeat-y;
+      }
+      .event-stub .stub-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      .event-stub .admit {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .event-stub .stub-no {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        opacity: 0.55;
+      }
+      .event-stub .stub-date {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 44px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      .event-stub .stub-date .slash { color: var(--jersey-deep); }
+      .event-stub .stub-venue {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        line-height: 1.4;
+      }
+      .event-stub .stub-venue .dot { color: var(--jersey-deep); margin: 0 4px; }
+
+      /* ===========================================================
+         TRANSFER — JERSEY NUMBER STAMP
+         =========================================================== */
+      .transfer-stamp {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 16px 18px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+        overflow: hidden;
+      }
+      .transfer-stamp::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 80% 30%, rgba(245, 239, 225, 0.07) 0, transparent 50%);
+        pointer-events: none;
+      }
+      .transfer-stamp .number {
+        position: relative;
+        z-index: 2;
+        width: 76px;
+        height: 76px;
+        background: var(--cream);
+        color: var(--jersey-deep);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 56px;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        border: 2px solid var(--ink);
+        outline: 1px solid var(--cream);
+        outline-offset: -5px;
+        transform: rotate(-3deg);
+        box-shadow: 3px 3px 0 0 var(--ink);
+      }
+      .transfer-stamp .number-meta {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .transfer-stamp .dir-chip {
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+        background: var(--cream);
+        color: var(--jersey-deep);
+        padding: 3px 8px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--ink);
+        align-self: flex-start;
+      }
+      .transfer-stamp .player-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 22px;
+        line-height: 1.05;
+        margin: 0;
+        color: var(--cream);
+      }
+      .transfer-stamp .player-name .accent { color: var(--tape); }
+      .transfer-stamp .player-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+
+      /* ===========================================================
+         COLUMN — NEWSPAPER PULL-QUOTE
+         =========================================================== */
+      .column-pull {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 18px 22px 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      /* Horizontal stripe pattern — newspaper-column register */
+      .column-pull::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(0deg,
+            transparent 0, transparent 5px,
+            rgba(245, 239, 225, 0.07) 5px, rgba(245, 239, 225, 0.07) 6px);
+        pointer-events: none;
+      }
+      .column-pull .quote-mark {
+        position: absolute;
+        top: 12px;
+        left: 20px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 64px;
+        line-height: 0.7;
+        color: var(--tape);
+        opacity: 0.85;
+        z-index: 2;
+      }
+      .column-pull .pull {
+        position: relative;
+        z-index: 3;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.2;
+        margin: 0 0 6px;
+        padding-left: 36px;
+        max-width: 90%;
+      }
+      .column-pull .attrib {
+        position: relative;
+        z-index: 3;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        padding-left: 36px;
+      }
+      .column-pull .attrib::before {
+        content: "—";
+        color: var(--tape);
+        margin-right: 4px;
+      }
+
+      .verdict {
+        max-width: 1200px;
+        margin: 36px auto 0;
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        padding: 18px 22px 22px;
+      }
+      .verdict h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      .verdict p {
+        font-size: 13px;
+        line-height: 1.55;
+        margin: 0 0 8px;
+        max-width: 75ch;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · R10b · Display variants — polished compositions</div>
+      <h1>Three display variants for image-less cards.</h1>
+      <p>
+        Polished compositions for the cards where a photograph isn't the
+        right answer: event = ticket stub, transfer = jersey-number paper
+        stamp, column = newspaper pull-quote. Each is shown at full
+        NewsCard scale (340px wide) so you can judge whether they
+        actually shine vs the all-photo Option 1.
+      </p>
+      <div class="note">
+        These compositions reuse retro-fanzine vocabulary across the
+        site: the event stub borrows ticket-perforation geometry, the
+        transfer stamp uses the same number-disc treatment as the
+        future Phase 5 squad surfaces, the column variant uses
+        horizontal stripes (the same pattern R7 considered for meta
+        accents but rejected on news cards — used here as a content-
+        register signal, not a subtle accent).
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ===================== EVENT ===================== -->
+      <section class="variant-row">
+        <div class="variant-label">
+          <div class="key">Variant · displayMode = ticket</div>
+          <div class="name">Event ticket stub.</div>
+          <p class="desc">
+            Big italic display date with a slash in jersey-green between
+            day and month. "ADMIT ONE" + stub number in mono-uppercase at
+            the top. Venue + time below the date. Right-edge dotted
+            perforation suggests the tear-line of an admission ticket.
+            Subtle paper grain.
+          </p>
+          <div class="ingredients">
+            <strong>Reused vocabulary</strong>
+            EditorialHeading italic display<br>
+            MonoLabel mono-uppercase rows<br>
+            Dotted-perforation pattern<br>
+            Paper-grain overlay (R9)
+          </div>
+        </div>
+        <div class="card-stage">
+          <article class="nc">
+            <span class="tape-tl"></span>
+            <div class="event-stub">
+              <div class="stub-top">
+                <span class="admit">Admit one · Eetfestijn</span>
+                <span class="stub-no">№ 027</span>
+              </div>
+              <p class="stub-date">ZA 27<span class="slash">/</span>4</p>
+              <p class="stub-venue">vanaf 18:00 <span class="dot">·</span> Zaal De Semse</p>
+            </div>
+            <div class="meta">
+              <span class="label">Evenement · Supporters</span>
+              <h3 class="h">Eetfestijn · <span class="accent">De plezante compagnie</span>.</h3>
+              <div class="footer-row">
+                <span class="date">27 apr</span>
+                <span class="read-more">Lees verder →</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== TRANSFER ===================== -->
+      <section class="variant-row">
+        <div class="variant-label">
+          <div class="key">Variant · displayMode = transfer-stamp</div>
+          <div class="name">Jersey-number paper stamp.</div>
+          <p class="desc">
+            Big rotated cream-on-jersey number disc (the kind of stamp
+            you'd find on a 1970s programme), with cream paper border
+            and ink outline. To the right: directional chip
+            (Inkomend ↓ / Uitgaand ↑ / Verlengd ↻) + player name in
+            italic display + position/age in mono. Lives on a
+            jersey-deep card surface so it sits in the per-articleType
+            colour from R3.B.
+          </p>
+          <div class="ingredients">
+            <strong>Reused vocabulary</strong>
+            NumberDisplay (Phase 1 primitive)<br>
+            Dir-chip (R1.5 locked)<br>
+            EditorialHeading display-sm italic<br>
+            jersey-deep card bg (R3.B)<br>
+            Paper-shadow (R9)
+          </div>
+        </div>
+        <div class="card-stage">
+          <article class="nc jersey">
+            <span class="tape-tl"></span>
+            <div class="transfer-stamp">
+              <span class="number">9</span>
+              <div class="number-meta">
+                <span class="dir-chip">↓ Inkomend</span>
+                <h4 class="player-name">J. <span class="accent">Willems</span></h4>
+                <span class="player-meta">B-ploeg · tot '28</span>
+              </div>
+            </div>
+            <div class="meta">
+              <span class="label">Transfer · B-ploeg</span>
+              <h3 class="h">Jonas Willems <span class="accent">tekent</span> voor twee seizoenen bij B.</h3>
+              <div class="footer-row">
+                <span class="date">15 apr</span>
+                <span class="read-more">Lees verder →</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== COLUMN ===================== -->
+      <section class="variant-row" style="border-bottom: none;">
+        <div class="variant-label">
+          <div class="key">Variant · displayMode = column-pull</div>
+          <div class="name">Newspaper pull-quote.</div>
+          <p class="desc">
+            Ink-black card with horizontal stripe pattern overlay (the
+            same pattern R7 rejected as a meta accent — here it's the
+            whole top region, registering as "newspaper column"). Big
+            italic pull quote with a tape-gold open-quote glyph hovering
+            top-left, attribution underneath. Reads as a clipping torn
+            from a paper.
+          </p>
+          <div class="ingredients">
+            <strong>Reused vocabulary</strong>
+            QuoteMark (Phase 0 primitive)<br>
+            PullQuote (Phase 1 primitive)<br>
+            Horizontal-stripe pattern<br>
+            Ink card bg<br>
+            HighlighterStroke optional under attrib
+          </div>
+        </div>
+        <div class="card-stage">
+          <article class="nc ink">
+            <span class="tape-tr"></span>
+            <div class="column-pull">
+              <span class="quote-mark">"</span>
+              <p class="pull">Een extra shawl. <em>Omdat zondag belangrijker is dan we toegeven.</em></p>
+              <span class="attrib">Luc · Plezante Co.</span>
+            </div>
+            <div class="meta">
+              <span class="label">Column · Plezante Co.</span>
+              <h3 class="h">Waarom we zondag een <span class="accent">extra shawl</span> dragen.</h3>
+              <div class="footer-row">
+                <span class="date">14 apr</span>
+                <span class="read-more">Lees verder →</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+    <section class="verdict">
+      <h2>If these shine for you, Option 2 wins. If they feel like work, Option 1 wins.</h2>
+      <p>
+        Option 2 (with these compositions) adds a `displayMode` prop on
+        `<NewsCard>` with at least three sub-templates: <code>ticket</code>,
+        <code>transfer-stamp</code>, <code>column-pull</code>. Each consumes
+        article-type-specific fields (event start time / venue · transferFact
+        playerName/direction/number · article pull-quote/author).
+      </p>
+      <p>
+        Implementation cost is real — each sub-template is ~30-60 lines
+        of TSX + a story + a VR baseline. Editor workflow also expands:
+        editors decide per-article whether to surface a photo or a display
+        variant. The payoff is the kind of editorial variety that made
+        the source design feel hand-typeset rather than templated.
+      </p>
+      <p>
+        If photographs are typically available and good-quality, Option 1
+        is the right call — the photos themselves carry the visual
+        variety. If photographs are often missing / weak / awkward (the
+        flag you raised at the start of the photo-treatment thread),
+        Option 2 hedges by giving content-specific display variants that
+        don't depend on photo quality.
+      </p>
+    </section>
+
+  </body>
+</html>

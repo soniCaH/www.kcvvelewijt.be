@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · R10 · NewsCard structure fix (flush-edge image, not nested frame)</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1200px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 32px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .compare {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+      .column { display: flex; flex-direction: column; gap: 18px; }
+      .column-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        background: var(--ink);
+        color: var(--cream);
+        font-weight: bold;
+      }
+      .column-label.good { background: var(--jersey-deep); }
+      .column-label .sub {
+        display: block;
+        font-weight: normal;
+        opacity: 0.85;
+        margin-top: 3px;
+        letter-spacing: 0.06em;
+        font-size: 10px;
+        text-transform: none;
+      }
+
+      .card-stage {
+        background: var(--cream);
+        padding: 36px 28px;
+        display: flex;
+        justify-content: center;
+        border: 1px solid var(--ink);
+      }
+
+      /* ===== Variant A — CURRENT (what we have) ===== */
+      /* Outer TapedCard with padding + inner TapedFigure with its own border + image inside */
+      .nc-current {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        padding: 16px;       /* ← outer padding around the figure */
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+      }
+      .nc-current .figure-frame {
+        background: #fff;
+        border: 1px solid var(--ink);      /* ← inner frame border */
+        padding: 5px 5px 7px;              /* ← inner padding */
+        box-shadow: 3px 3px 0 0 var(--ink); /* ← inner shadow */
+        position: relative;
+      }
+      .nc-current .figure-frame .tape {
+        position: absolute;
+        top: -7px;
+        left: 12px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+      }
+      .nc-current .figure-frame .img {
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .nc-current .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      /* ===== Variant B — PROPOSED (matching original design) ===== */
+      /* Outer TapedCard ONLY. Image flush to top + sides. Tape strips on outer card frame. */
+      .nc-fixed {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        padding: 0;                /* ← no outer padding around image */
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: visible;
+      }
+      .nc-fixed .img-area {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+        /* Image fills top of card edge-to-edge, no inner frame */
+      }
+      .nc-fixed .tape-corner {
+        position: absolute;
+        top: -8px;
+        width: 56px;
+        height: 14px;
+        background: var(--tape-warm);
+        border: 1px solid rgba(26, 26, 26, 0.3);
+        z-index: 3;
+      }
+      .nc-fixed .tape-corner.tl {
+        left: 12px;
+        transform: rotate(-4deg);
+      }
+      .nc-fixed .tape-corner.tr {
+        right: 12px;
+        transform: rotate(4deg);
+        background: var(--tape-jersey);
+      }
+      .nc-fixed .meta {
+        padding: 14px 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border-top: 1px solid var(--ink);  /* divider between image and meta */
+      }
+
+      /* Shared meta-panel typography */
+      .nc-current .meta,
+      .nc-fixed .meta {
+        font-size: 12px;
+      }
+      .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 4px 0;
+        font-size: 18px;
+      }
+      .h .accent { color: var(--jersey-deep); }
+      .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-top: 4px;
+      }
+
+      /* Callouts */
+      .callout {
+        position: relative;
+      }
+      .callout::after {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+      .callout-bad::after {
+        content: attr(data-callout);
+        position: absolute;
+        right: -6px;
+        bottom: -22px;
+        background: rgba(196, 60, 60, 0.15);
+        color: #a33;
+        padding: 2px 6px;
+        border: 1px solid #a33;
+        white-space: nowrap;
+      }
+      .callout-good::after {
+        content: attr(data-callout);
+        position: absolute;
+        right: -6px;
+        bottom: -22px;
+        background: rgba(31, 95, 63, 0.15);
+        color: var(--jersey-deep);
+        padding: 2px 6px;
+        border: 1px solid var(--jersey-deep);
+        white-space: nowrap;
+      }
+
+      .annotations {
+        max-width: 1200px;
+        margin: 36px auto 0;
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .annotations h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        margin: 0;
+        padding: 18px 24px 0;
+      }
+      .annotations table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+      }
+      .annotations th {
+        background: var(--ink);
+        color: var(--cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 10px 16px;
+        text-align: left;
+      }
+      .annotations td {
+        padding: 10px 16px;
+        font-size: 13px;
+        line-height: 1.5;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.2);
+        vertical-align: top;
+      }
+      .annotations tbody th {
+        background: rgba(26, 26, 26, 0.04);
+        color: var(--ink);
+        text-align: left;
+        width: 22%;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · R10 · NewsCard structure fix</div>
+      <h1>Flush-edge image vs nested frame.</h1>
+      <p>
+        Comparing what we shipped (left) against what your source design
+        shows (right). The original news cards use a SINGLE outer frame
+        with the image flush to the top + side edges, divided from the
+        meta panel by an ink rule. My mockups have been showing a nested
+        `<TapedFigure>` inside the outer `<TapedCard>` — two frames with
+        padding between them.
+      </p>
+    </header>
+
+    <main class="compare">
+
+      <div class="column">
+        <div class="column-label">Current implementation<span class="sub">Nested TapedFigure inside TapedCard</span></div>
+        <div class="card-stage">
+          <article class="nc-current callout callout-bad" data-callout="Two frames · inner padding gap">
+            <div class="figure-frame">
+              <span class="tape"></span>
+              <div class="img"></div>
+            </div>
+            <div class="meta">
+              <span class="label">Interview · Do 14 mei</span>
+              <h3 class="h">Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h3>
+              <span class="read-more">Lees verder →</span>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-label good">Source design (your image)<span class="sub">Single TapedCard · image flush · ink rule divider</span></div>
+        <div class="card-stage">
+          <article class="nc-fixed callout callout-good" data-callout="One frame · image edge-to-edge">
+            <span class="tape-corner tl"></span>
+            <span class="tape-corner tr"></span>
+            <div class="img-area"></div>
+            <div class="meta">
+              <span class="label">Interview · Do 14 mei</span>
+              <h3 class="h">Dieter <span class="accent">Van Dionant</span> over zijn rentree.</h3>
+              <span class="read-more">Lees verder →</span>
+            </div>
+          </article>
+        </div>
+      </div>
+
+    </main>
+
+    <section class="annotations">
+      <h2>What changes structurally.</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Current (nested)</th>
+            <th>Proposed (flush)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Outer frame</th>
+            <td>TapedCard with `padding="md"` (~16px)</td>
+            <td>TapedCard with `padding="0"` on top + sides; padding ONLY inside meta panel</td>
+          </tr>
+          <tr>
+            <th>Inner figure</th>
+            <td>`<TapedFigure>` inside the card · own border + paper-shadow + padding</td>
+            <td>No `<TapedFigure>` inside the card · image fills top region of TapedCard directly</td>
+          </tr>
+          <tr>
+            <th>Image positioning</th>
+            <td>Inset, surrounded by 16px of cream + 1px ink border on all four sides</td>
+            <td>Flush to top, left, right edges of the outer card · bounded only by the card's own border</td>
+          </tr>
+          <tr>
+            <th>Tape strips</th>
+            <td>On the inner `<TapedFigure>` frame</td>
+            <td>On the outer `<TapedCard>` frame · positioned at top-left + top-right corners, overlapping the image</td>
+          </tr>
+          <tr>
+            <th>Image / meta divider</th>
+            <td>The figure's own bottom border + 16px cream padding gap</td>
+            <td>Single 1px ink rule (`border-top` on the meta panel section)</td>
+          </tr>
+          <tr>
+            <th>Visual register</th>
+            <td>"Taped polaroid placed on a paper card" · two paper levels</td>
+            <td>"Photo printed directly onto a paper card" · one paper level</td>
+          </tr>
+          <tr>
+            <th>Where this applies</th>
+            <td>n/a</td>
+            <td>NewsGrid cards (R2.B), Uitgelicht cards (R1.6.A), and any future consumer of `<NewsCard>`</td>
+          </tr>
+          <tr>
+            <th>Where this does NOT apply</th>
+            <td>n/a</td>
+            <td>Hero photo (R1.B) — that's a single taped polaroid in the right column, deliberately framed as a photo-object. FeaturedEventBand — image inside a band, separate composition.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

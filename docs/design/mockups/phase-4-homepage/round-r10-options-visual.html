@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · R10 · Three options, visualised</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --tape-cream: rgba(232, 224, 200, 0.85);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #e8e0c8;
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 32px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 32px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+
+      .option-block {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .option-block > header {
+        padding: 16px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .option-block header .left .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .option-block header .left .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        margin-top: 4px;
+      }
+      .option-block header .left .desc {
+        font-size: 13px;
+        line-height: 1.5;
+        opacity: 0.85;
+        max-width: 65ch;
+        margin-top: 8px;
+      }
+      .option-block header .right {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.5;
+        max-width: 36ch;
+      }
+      .option-block header .right strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .option-block header .right .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .option-block header .right .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .option-block header .right span { display: block; }
+
+      .option-block .surface {
+        background: var(--cream);
+        padding: 28px 28px 36px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 0 0 18px;
+      }
+      .section-header h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 30px;
+        margin: 0;
+      }
+      .section-header h2 .accent { color: var(--jersey-deep); }
+      .section-header .right-link {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+
+      .grid-3x2 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      /* ============ NESTED FRAME (current — option 3 = hold) ============ */
+      .nc.nested {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 14px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .nc.nested .figure {
+        background: #fff;
+        border: 1px solid var(--ink);
+        padding: 5px 5px 7px;
+        box-shadow: 3px 3px 0 0 var(--ink);
+        position: relative;
+      }
+      .nc.nested .figure .tape {
+        position: absolute;
+        top: -6px;
+        left: 10px;
+        width: 30px;
+        height: 9px;
+        background: var(--tape-warm);
+        transform: rotate(-3deg);
+      }
+      .nc.nested .figure .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+
+      /* ============ FLUSH (proposed — option 1 + 2) ============ */
+      .nc.flush {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+      }
+      .nc.flush .img-area {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .nc.flush .tape-tl,
+      .nc.flush .tape-tr {
+        position: absolute;
+        top: -7px;
+        width: 44px;
+        height: 12px;
+        background: var(--tape-warm);
+        border: 1px solid rgba(26, 26, 26, 0.3);
+        z-index: 3;
+      }
+      .nc.flush .tape-tl {
+        left: 10px;
+        transform: rotate(-4deg);
+      }
+      .nc.flush .tape-tr {
+        right: 10px;
+        transform: rotate(4deg);
+        background: var(--tape-jersey);
+      }
+      .nc.flush .tape-cream { background: var(--tape-cream); }
+
+      /* ============ Card variants ============ */
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc.jersey .accent { color: var(--tape); }
+      .nc.jersey .read-more { color: var(--tape); }
+      .nc.jersey .label { color: rgba(245, 239, 225, 0.85); }
+
+      /* Image colour by article type */
+      .img-interview { background: linear-gradient(135deg, #547a5e, #2a4d3a); }
+      .img-transfer { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .img-announcement { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .img-event { background: linear-gradient(135deg, #6f7c66, #3a4a3f); }
+      .img-jeugd { background: linear-gradient(135deg, #b89678, #6b4d2f); }
+      .img-column { background: linear-gradient(135deg, #8aa599, #4a5e50); }
+
+      /* Display-content (no image) variants for Option 2 */
+      .display-area {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: var(--cream);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 14px 14px;
+        border-bottom: 1px solid var(--ink);
+      }
+      .display-area .display-kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 4px;
+      }
+      .display-area .display-date {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 36px;
+        line-height: 1;
+        letter-spacing: -0.015em;
+        margin: 0 0 8px;
+      }
+      .display-area .display-sub {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.65;
+      }
+      .display-area .display-headline {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 30px;
+        line-height: 1.05;
+        margin: 0;
+        letter-spacing: -0.015em;
+      }
+      .display-area .display-headline .accent { color: var(--jersey-deep); }
+      .display-area .display-headline.transfer { font-size: 26px; }
+
+      /* Meta panel (shared) */
+      .nc .meta {
+        padding: 12px 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .nc.flush .meta { border-top: 1px solid var(--ink); }
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 16px;
+      }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+      }
+      .nc .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+      .nc .date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · R10 · Three options visualised</div>
+      <h1>The three options for handling R10, side by side.</h1>
+      <p>
+        Same 6 articles, three different card-structure treatments.
+        Scroll to compare; the differences are entirely structural
+        (frame nesting + image-vs-display content), the data is identical
+        across all three.
+      </p>
+      <div class="anchor-list">
+        <a href="#opt1">Option 1 — Flush-edge only</a>
+        <a href="#opt2">Option 2 — Flush-edge + display variants</a>
+        <a href="#opt3">Option 3 — Hold (current state)</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ===================== Option 1 ===================== -->
+      <section class="option-block" id="opt1">
+        <header>
+          <div class="left">
+            <div class="key">Option 1 · Minimal fix</div>
+            <div class="name">Flush-edge structure, all cards have photos</div>
+            <p class="desc">
+              Drop the inner `<TapedFigure>`. Image flushes to top + sides
+              of the outer card. Ink rule divides image from meta panel.
+              All 6 cards render with the article's `coverImage` as the
+              top region — including event and transfer cards (which
+              would use their own cover image, not a display block).
+            </p>
+          </div>
+          <div class="right">
+            <strong>Trade-offs</strong>
+            <span class="pro">Matches source image's frame structure</span>
+            <span class="pro">Single, predictable card primitive</span>
+            <span class="pro">No new prop on NewsCard</span>
+            <span class="con">Event / transfer / column cards still need a coverImage</span>
+            <span class="con">No room for the display-text variants from the source image</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="accent">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc flush">
+              <span class="tape-tl"></span>
+              <div class="img-area img-announcement"></div>
+              <div class="meta">
+                <span class="label">Matchverslag · A-ploeg</span>
+                <h3 class="h">Eindelijk weer een <span class="accent">zege</span> tegen Kraainem.</h3>
+                <div class="footer-row"><span class="date">20 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="img-area img-interview"></div>
+              <div class="meta">
+                <span class="label">Interview · Sneltrein</span>
+                <h3 class="h">11 vragen aan <span class="accent">Maxim</span>.</h3>
+                <div class="footer-row"><span class="date">18 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tl"></span>
+              <div class="img-area img-jeugd"></div>
+              <div class="meta">
+                <span class="label">Jeugd · U15</span>
+                <h3 class="h">U15 kronen zich <span class="accent">provinciaal kampioen</span>.</h3>
+                <div class="footer-row"><span class="date">17 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="img-area img-event"></div>
+              <div class="meta">
+                <span class="label">Evenement · Supporters</span>
+                <h3 class="h">Eetfestijn · <span class="accent">De plezante compagnie</span>.</h3>
+                <div class="footer-row"><span class="date">27 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush jersey">
+              <span class="tape-tl"></span>
+              <div class="img-area img-transfer"></div>
+              <div class="meta">
+                <span class="label">Transfer · B-ploeg</span>
+                <h3 class="h">Jonas Willems <span class="accent">tekent</span> voor twee seizoenen bij B.</h3>
+                <div class="footer-row"><span class="date">15 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="img-area img-column"></div>
+              <div class="meta">
+                <span class="label">Column · Plezante Co.</span>
+                <h3 class="h">Waarom we zondag een <span class="accent">extra shawl</span> dragen.</h3>
+                <div class="footer-row"><span class="date">14 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== Option 2 ===================== -->
+      <section class="option-block" id="opt2">
+        <header>
+          <div class="left">
+            <div class="key">Option 2 · Full source-design match</div>
+            <div class="name">Flush-edge + per-type display variants</div>
+            <p class="desc">
+              Same flush-edge structure as Option 1, PLUS new `displayMode`
+              prop on `<NewsCard>` that swaps the top region for
+              display-text variants where it suits the article type:
+              event cards show a date stamp, transfer cards show a
+              display headline, columns can show a pull quote. Photos
+              still default for interview / announcement /
+              matchverslag.
+            </p>
+          </div>
+          <div class="right">
+            <strong>Trade-offs</strong>
+            <span class="pro">Closest match to the source image</span>
+            <span class="pro">Cards without strong photos still feel intentional</span>
+            <span class="pro">Editorial flexibility per articleType</span>
+            <span class="con">New `displayMode` prop + 3 sub-templates inside NewsCard</span>
+            <span class="con">Editor decides what to fill in (date / headline / quote) per article</span>
+            <span class="con">More implementation surface area</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="accent">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc flush">
+              <span class="tape-tl"></span>
+              <div class="img-area img-announcement"></div>
+              <div class="meta">
+                <span class="label">Matchverslag · A-ploeg</span>
+                <h3 class="h">Eindelijk weer een <span class="accent">zege</span> tegen Kraainem.</h3>
+                <div class="footer-row"><span class="date">20 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="img-area img-interview"></div>
+              <div class="meta">
+                <span class="label">Interview · Sneltrein</span>
+                <h3 class="h">11 vragen aan <span class="accent">Maxim</span>.</h3>
+                <div class="footer-row"><span class="date">18 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tl"></span>
+              <div class="img-area img-jeugd"></div>
+              <div class="meta">
+                <span class="label">Jeugd · U15</span>
+                <h3 class="h">U15 kronen zich <span class="accent">provinciaal kampioen</span>.</h3>
+                <div class="footer-row"><span class="date">17 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="display-area">
+                <span class="display-kicker">Admit one · Eetfestijn</span>
+                <p class="display-date">ZA 27/4</p>
+                <span class="display-sub">vanaf 18:00 · Zaal De Semse</span>
+              </div>
+              <div class="meta">
+                <span class="label">Evenement · Supporters</span>
+                <h3 class="h">Eetfestijn · <span class="accent">De plezante compagnie</span>.</h3>
+                <div class="footer-row"><span class="date">27 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tl"></span>
+              <div class="display-area">
+                <span class="display-kicker">B-ploeg</span>
+                <h4 class="display-headline transfer">J. Willems <br><span class="accent">tekent</span>.</h4>
+              </div>
+              <div class="meta">
+                <span class="label">Transfer · B-ploeg</span>
+                <h3 class="h">Jonas Willems tekent voor twee seizoenen bij B.</h3>
+                <div class="footer-row"><span class="date">15 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc flush">
+              <span class="tape-tr"></span>
+              <div class="display-area">
+                <h4 class="display-headline"><em>"Een extra shawl."</em></h4>
+              </div>
+              <div class="meta">
+                <span class="label">Column · Plezante Co.</span>
+                <h3 class="h">Waarom we zondag een <span class="accent">extra shawl</span> dragen.</h3>
+                <div class="footer-row"><span class="date">14 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== Option 3 ===================== -->
+      <section class="option-block" id="opt3">
+        <header>
+          <div class="left">
+            <div class="key">Option 3 · Hold — current state</div>
+            <div class="name">Nested TapedFigure inside TapedCard (no change)</div>
+            <p class="desc">
+              What ships today. Each card is an outer paper card with
+              an inner taped-polaroid figure containing the image.
+              Two paper levels of border + shadow. Image floats inset
+              within the card with cream padding around it.
+            </p>
+          </div>
+          <div class="right">
+            <strong>Trade-offs</strong>
+            <span class="pro">Zero implementation change</span>
+            <span class="con">Diverges from the source image's flush-edge structure</span>
+            <span class="con">"Frame around frame" reads as taped polaroid on a card, not a printed-photo card</span>
+            <span class="con">Visually busier — more borders compete with content</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="accent">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc nested">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-announcement"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Matchverslag · A-ploeg</span>
+                <h3 class="h">Eindelijk weer een <span class="accent">zege</span> tegen Kraainem.</h3>
+                <div class="footer-row"><span class="date">20 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc nested">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-interview"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Interview · Sneltrein</span>
+                <h3 class="h">11 vragen aan <span class="accent">Maxim</span>.</h3>
+                <div class="footer-row"><span class="date">18 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc nested">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-jeugd"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Jeugd · U15</span>
+                <h3 class="h">U15 kronen zich <span class="accent">provinciaal kampioen</span>.</h3>
+                <div class="footer-row"><span class="date">17 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc nested">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-event"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Evenement · Supporters</span>
+                <h3 class="h">Eetfestijn · <span class="accent">De plezante compagnie</span>.</h3>
+                <div class="footer-row"><span class="date">27 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc nested jersey">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-transfer"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Transfer · B-ploeg</span>
+                <h3 class="h">Jonas Willems <span class="accent">tekent</span> voor twee seizoenen bij B.</h3>
+                <div class="footer-row"><span class="date">15 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc nested">
+              <div class="figure">
+                <span class="tape"></span>
+                <div class="img img-column"></div>
+              </div>
+              <div class="meta">
+                <span class="label">Column · Plezante Co.</span>
+                <h3 class="h">Waarom we zondag een <span class="accent">extra shawl</span> dragen.</h3>
+                <div class="footer-row"><span class="date">14 apr</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

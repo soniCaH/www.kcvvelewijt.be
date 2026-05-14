@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R7 · Horizontal-stripe accent — in a real grid</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 32px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .quote {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 12px 16px;
+        margin: 14px 0 20px;
+        max-width: 80ch;
+        line-height: 1.55;
+        font-size: 14px;
+      }
+      header.page .quote strong {
+        font-style: normal;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.7;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .scenario {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+      }
+      .scenario > header {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .scenario header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .scenario header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .scenario header .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.8;
+        margin-top: 6px;
+        max-width: 75ch;
+      }
+      .scenario .surface { padding: 24px 22px 28px; background: var(--cream); }
+
+      .section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 0 0 14px;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        margin: 0;
+        letter-spacing: -0.015em;
+      }
+      .section-header h2 .period { color: var(--jersey-deep); }
+      .section-header .right-link {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+      .grid-3x2 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      /* ===== Card primitive — matches R2.B / R3.B newsgrid card ===== */
+      .nc {
+        background: var(--cream);
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc.jersey .accent { color: var(--tape); }
+      .nc.jersey .read-more { color: var(--tape); }
+      .nc.jersey .meta-panel { background: var(--jersey-deep); }
+      .nc.jersey .label,
+      .nc.jersey .h,
+      .nc.jersey .footer-row .date,
+      .nc.jersey .footer-row .read-more { background: transparent; color: var(--cream); }
+      .nc.jersey .footer-row .date { opacity: 0.85; }
+      .nc.jersey .footer-row .read-more { color: var(--tape); }
+
+      .nc .tape {
+        position: absolute;
+        top: -7px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+        z-index: 2;
+      }
+      .nc .tape.left { left: 12px; }
+      .nc .tape.right { right: 12px; transform: rotate(3deg); }
+      .nc .tape.jersey { background: var(--tape-jersey); }
+      .nc .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+      }
+      .nc .img.transf { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .nc .img.intv { background: linear-gradient(135deg, #d9c193, #8c6f4a); }
+      .nc .img.anncmt { background: linear-gradient(135deg, #2a4d3a, #1a3a2a); }
+      .nc .img.event { background: linear-gradient(135deg, #6f7c66, #3a4a3f); }
+      .nc .img.match { background: linear-gradient(135deg, #547a5e, #2a4d3a); }
+      .nc .img.column { background: linear-gradient(135deg, #8aa599, #2a4d3a); }
+      .nc .img.jeugd { background: linear-gradient(135deg, #b89678, #6b4d2f); }
+
+      .nc .meta-panel {
+        padding: 12px 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: var(--cream);
+        flex: 1;
+      }
+
+      /* Horizontal-stripe accent — ONLY on cards that match the trigger */
+      .nc.with-stripe .meta-panel {
+        background:
+          repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 5px,
+            rgba(26, 26, 26, 0.09) 5px,
+            rgba(26, 26, 26, 0.09) 6px
+          ),
+          var(--cream);
+        border-top: 1px solid rgba(26, 26, 26, 0.18);
+      }
+
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        background: var(--cream);
+        display: inline-block;
+        padding: 1px 4px;
+        align-self: flex-start;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 16px;
+        background: var(--cream);
+        padding: 0 4px;
+        align-self: flex-start;
+      }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 6px;
+      }
+      .nc .footer-row .date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        background: var(--cream);
+        padding: 1px 4px;
+      }
+      .nc .footer-row .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        background: var(--cream);
+        padding: 1px 4px;
+      }
+      .accent-badge {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 1px 5px;
+        z-index: 3;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R7 · Stripe accent — selective application in context</div>
+      <h1>Same 6-card grid, with and without the selective stripe accent.</h1>
+      <p>
+        Below: two copies of the same 3×2 news grid. Top = R3.B baseline
+        (no stripe accent anywhere). Bottom = stripe accent ON for two
+        cards only (the announcements about jeugd success + the
+        column-style piece). All other content is identical between the
+        two grids.
+      </p>
+      <p>
+        The trigger question (R7's actual decision) is only meaningful if
+        you can see the visual differentiation in context. Cards with the
+        accent are tagged with a small <strong>STRIPE</strong> badge so
+        you can spot them in the bottom grid without hunting.
+      </p>
+      <div class="quote">
+        <strong>Brief §6 — Horizontal stripe pattern</strong>
+        Subtle repeating horizontal dark stripes. Applied to the card's
+        meta panel below the photo, not the whole card background. Used
+        as a meta-panel accent on specific news cards (jeugd-milestone,
+        column subcategories).
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= Baseline ============= -->
+      <section class="scenario">
+        <header>
+          <div class="key">Scenario 1 · Baseline (today's R3.B)</div>
+          <div class="name">No stripe accent anywhere</div>
+          <div class="desc">
+            R3.B per-articleType: transfer→jersey-deep, everything
+            else→cream. No meta-panel decoration on any card.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc">
+              <span class="tape left"></span><div class="img intv"></div>
+              <div class="meta-panel">
+                <span class="label">Interview · Do 14 mei</span>
+                <h3 class="h">Tom Janssens over <span class="accent">de B-ploeg</span>.</h3>
+                <div class="footer-row"><span class="date">Do 14 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc">
+              <span class="tape right"></span><div class="img jeugd"></div>
+              <div class="meta-panel">
+                <span class="label">Aankondiging · Jeugd</span>
+                <h3 class="h">U13 wint <span class="accent">provinciale beker</span>.</h3>
+                <div class="footer-row"><span class="date">Vr 10 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc jersey">
+              <span class="tape right jersey"></span><div class="img transf"></div>
+              <div class="meta-panel">
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3>
+                <div class="footer-row"><span class="date">Vr 9 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc">
+              <span class="tape left"></span><div class="img column"></div>
+              <div class="meta-panel">
+                <span class="label">Column · Wo 8 mei</span>
+                <h3 class="h">"Wat een <span class="accent">seizoen</span>, hé?"</h3>
+                <div class="footer-row"><span class="date">Wo 8 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc">
+              <span class="tape right"></span><div class="img event"></div>
+              <div class="meta-panel">
+                <span class="label">Event · Za 24 mei</span>
+                <h3 class="h">Familiedag <span class="accent">in 't park</span>.</h3>
+                <div class="footer-row"><span class="date">Za 24 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc">
+              <span class="tape left"></span><div class="img anncmt"></div>
+              <div class="meta-panel">
+                <span class="label">Aankondiging</span>
+                <h3 class="h">Algemene vergadering <span class="accent">nieuwe statuten</span>.</h3>
+                <div class="footer-row"><span class="date">Ma 5 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= With selective stripe ============= -->
+      <section class="scenario">
+        <header>
+          <div class="key">Scenario 2 · With brief §6 stripe accent applied selectively</div>
+          <div class="name">2 of 6 cards get the stripe — "jeugd-milestone" + "column"</div>
+          <div class="desc">
+            Cards tagged <strong>STRIPE</strong> get the horizontal
+            stripe accent on their meta panel. Same grid, same content,
+            same backgrounds — only the meta-panel texture differs on
+            those two cards.
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+          <div class="grid-3x2">
+            <article class="nc">
+              <span class="tape left"></span><div class="img intv"></div>
+              <div class="meta-panel">
+                <span class="label">Interview · Do 14 mei</span>
+                <h3 class="h">Tom Janssens over <span class="accent">de B-ploeg</span>.</h3>
+                <div class="footer-row"><span class="date">Do 14 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc with-stripe">
+              <span class="tape right"></span><div class="img jeugd"></div>
+              <div class="meta-panel">
+                <span class="label">Aankondiging · Jeugd</span>
+                <h3 class="h">U13 wint <span class="accent">provinciale beker</span>.</h3>
+                <div class="footer-row"><span class="date">Vr 10 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+              <span class="accent-badge">stripe</span>
+            </article>
+            <article class="nc jersey">
+              <span class="tape right jersey"></span><div class="img transf"></div>
+              <div class="meta-panel">
+                <span class="label">Transfer · Vr 9 mei</span>
+                <h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3>
+                <div class="footer-row"><span class="date">Vr 9 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc with-stripe">
+              <span class="tape left"></span><div class="img column"></div>
+              <div class="meta-panel">
+                <span class="label">Column · Wo 8 mei</span>
+                <h3 class="h">"Wat een <span class="accent">seizoen</span>, hé?"</h3>
+                <div class="footer-row"><span class="date">Wo 8 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+              <span class="accent-badge">stripe</span>
+            </article>
+            <article class="nc">
+              <span class="tape right"></span><div class="img event"></div>
+              <div class="meta-panel">
+                <span class="label">Event · Za 24 mei</span>
+                <h3 class="h">Familiedag <span class="accent">in 't park</span>.</h3>
+                <div class="footer-row"><span class="date">Za 24 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+            <article class="nc">
+              <span class="tape left"></span><div class="img anncmt"></div>
+              <div class="meta-panel">
+                <span class="label">Aankondiging</span>
+                <h3 class="h">Algemene vergadering <span class="accent">nieuwe statuten</span>.</h3>
+                <div class="footer-row"><span class="date">Ma 5 mei</span><span class="read-more">Lees verder →</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

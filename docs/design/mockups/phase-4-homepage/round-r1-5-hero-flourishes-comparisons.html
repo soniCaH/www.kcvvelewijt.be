@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R1.5 · Hero per-articleType flourishes</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-light: #8aba8a;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --tape-cream: rgba(245, 239, 225, 0.92);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1280px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .legend {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(31, 95, 63, 0.08);
+        border-left: 3px solid var(--jersey-deep);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 40ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate header .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .artefacts {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      .candidate header .artefacts strong {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.7;
+      }
+      .candidate header .artefacts ul {
+        margin: 0;
+        padding-left: 16px;
+      }
+      .candidate header .artefacts ul li { margin-bottom: 3px; }
+      .candidate header .artefacts .new {
+        background: rgba(31, 95, 63, 0.12);
+        color: var(--jersey-deep);
+        padding: 0 4px;
+        border-radius: 1px;
+      }
+      .candidate .surface {
+        background: var(--cream);
+        padding: 36px 32px 44px;
+      }
+      .candidate .surface .stamp {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin-bottom: 14px;
+      }
+
+      /* ===== Shared hero shell ===== */
+      .hero {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 36px;
+        align-items: center;
+      }
+      .hero .copy { padding-right: 6px; }
+      .hero .kicker {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+      .hero .kicker .pill {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .pill.warm { background: var(--tape); color: var(--ink); }
+      .hero .kicker .pill.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .hero .kicker .dot { opacity: 0.45; }
+      .hero .h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 14px 0 14px;
+        font-size: 50px;
+      }
+      .hero .h1 .accent { color: var(--jersey-deep); }
+      .hero .lead {
+        font-size: 15px;
+        line-height: 1.55;
+        max-width: 50ch;
+        margin: 0 0 14px;
+        opacity: 0.92;
+      }
+      .hero .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        margin-top: 8px;
+        font-weight: bold;
+        display: inline-block;
+      }
+      .hero .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-top: 12px;
+      }
+
+      /* Taped polaroid hero photo (right column) */
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 8px 8px 10px;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-hard);
+        max-width: 360px;
+        justify-self: end;
+      }
+      .taped .tape {
+        position: absolute;
+        top: -10px;
+        width: 56px;
+        height: 14px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .taped .tape.left { left: 14px; }
+      .taped .tape.right { right: 14px; transform: rotate(3deg); }
+      .taped .tape.jersey { background: var(--tape-jersey); }
+      .taped.rot-a { transform: rotate(-0.5deg); }
+      .taped.rot-b { transform: rotate(0.4deg); }
+      .taped.rot-c { transform: rotate(-0.3deg); }
+      .taped .img {
+        width: 100%;
+        position: relative;
+      }
+      .taped .img.interview {
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #547a5e 0%, #2a4d3a 100%);
+      }
+      .taped .img.announcement {
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #c1a04a 0%, #8c6f2a 100%);
+      }
+      .taped .img.event {
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%);
+      }
+      .taped .img.transfer {
+        aspect-ratio: 4 / 3;
+        background: linear-gradient(135deg, #6f7c66 0%, #3a4a3f 100%);
+      }
+      .taped .caption {
+        font-size: 11px;
+        font-style: italic;
+        opacity: 0.65;
+        padding: 6px 4px 0;
+      }
+
+      /* ===== Sticker tape labels (per variant) ===== */
+      .sticker-label {
+        position: absolute;
+        top: -14px;
+        right: -10px;
+        background: var(--tape);
+        color: var(--ink);
+        padding: 4px 10px 5px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 0.18em;
+        transform: rotate(6deg);
+        border: 1px solid var(--ink);
+        box-shadow: 2px 2px 0 0 var(--ink);
+        z-index: 4;
+      }
+      .sticker-label.jersey { background: var(--jersey-deep); color: var(--cream); }
+
+      /* ===== Interview: name chip + portrait thumb ===== */
+      .name-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 12px 0 0;
+      }
+      .name-chip {
+        background: rgba(31, 95, 63, 0.1);
+        color: var(--jersey-deep);
+        padding: 4px 10px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid var(--jersey-deep);
+      }
+      .portrait-thumb {
+        position: absolute;
+        top: -18px;
+        left: -52px;
+        width: 76px;
+        background: #fff;
+        padding: 5px 5px 7px;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        transform: rotate(-4deg);
+        z-index: 3;
+      }
+      .portrait-thumb .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 40px;
+        height: 11px;
+        background: var(--tape-jersey);
+        opacity: 0.85;
+      }
+      .portrait-thumb .photo {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        background: linear-gradient(160deg, #d9c193 0%, #8c6f4a 100%);
+      }
+      .portrait-thumb .caption {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-align: center;
+        padding-top: 3px;
+        opacity: 0.7;
+      }
+
+      /* ===== Announcement: date-stamp overlay ===== */
+      .date-stamp {
+        position: absolute;
+        bottom: 14px;
+        right: 14px;
+        background: var(--ink);
+        color: var(--cream);
+        padding: 6px 10px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--cream);
+        outline: 1px solid var(--ink);
+        transform: rotate(-1.5deg);
+        z-index: 2;
+      }
+      .date-stamp .day { display: block; font-size: 9px; opacity: 0.8; }
+      .date-stamp .num { display: block; font-size: 16px; line-height: 1; }
+
+      /* ===== Event: day-number block + venue strip ===== */
+      .day-block {
+        position: absolute;
+        bottom: 14px;
+        left: 14px;
+        background: var(--cream);
+        color: var(--ink);
+        padding: 8px 12px 10px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        letter-spacing: 0.1em;
+        font-weight: bold;
+        border: 2px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        transform: rotate(-2deg);
+        z-index: 2;
+        min-width: 64px;
+        text-align: center;
+      }
+      .day-block .dow {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .day-block .date {
+        display: block;
+        font-size: 22px;
+        line-height: 1.1;
+        margin-top: 2px;
+      }
+      .venue-strip {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 0 6px;
+        padding: 4px 0;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        border-top: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+        padding-left: 0;
+        padding-right: 20px;
+      }
+      .venue-strip .glyph { color: var(--jersey-deep); font-weight: bold; }
+
+      /* ===== Transfer: directional chip + jersey-number badge + portrait ===== */
+      .dir-chip {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 3px 9px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--ink);
+        box-shadow: 2px 2px 0 0 var(--ink);
+      }
+      .dir-chip.in { background: var(--jersey-deep); }
+      .dir-chip.out { background: #6b2a2a; }
+      .dir-chip.extension { background: var(--tape); color: var(--ink); }
+      .dir-chip .glyph { font-weight: bold; font-size: 12px; }
+      .number-badge {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        width: 44px;
+        height: 44px;
+        background: var(--ink);
+        color: var(--cream);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        border: 2px solid var(--cream);
+        outline: 1px solid var(--ink);
+        transform: rotate(-3deg);
+        z-index: 2;
+      }
+      .portrait-thumb.transfer .photo {
+        background: linear-gradient(160deg, #c4b18a 0%, #6b5a3c 100%);
+      }
+
+      /* ===== Per-variant header tinting ===== */
+      .candidate.var-interview header { background: rgba(31, 95, 63, 0.05); }
+      .candidate.var-announcement header { background: rgba(217, 184, 90, 0.12); }
+      .candidate.var-event header { background: rgba(31, 95, 63, 0.08); }
+      .candidate.var-transfer header { background: rgba(107, 42, 42, 0.06); }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R1.5 · Hero per-articleType flourishes</div>
+      <h1>What hangs off each articleType on the hero?</h1>
+      <p>
+        With R1.B locked (single static hero + Uitgelicht row), the hero now
+        renders ONE article at a time — and the visitor sees its full
+        composition rather than a rotating shell. That means per-articleType
+        artefacts read clearly: the interview gets its interviewee chips, the
+        event gets its day-stamp, the transfer gets its directional chip and
+        jersey number. This round locks the composition for all 4 variants
+        side-by-side so they read coherently as a family.
+      </p>
+      <p>
+        Each variant below shows the SAME shared shell (kicker · headline ·
+        lead · taped polaroid right · Lees verder →) with only the per-type
+        artefacts varying. Layout, typography, tape rotation, and shadows are
+        identical across variants — only the highlighted <span
+        style="color: var(--jersey-deep); font-weight: bold;">new artefacts</span>
+        differ.
+      </p>
+      <div class="legend">
+        <strong>Shared base (locked):</strong> 60/40 split (copy left, photo right),
+        italic-serif H1 with optional jersey-deep accent, mono-uppercase kicker
+        row, EditorialLead, jersey-deep "Lees verder →" link, byline,
+        TapedFigure with warm/jersey tape strips. Hero photo is the article's
+        cover image (landscape, no cutout per <code>feedback_subject_photo_fallback</code>).
+      </div>
+      <div class="anchor-list">
+        <a href="#interview">Interview</a>
+        <a href="#announcement">Announcement</a>
+        <a href="#event">Event</a>
+        <a href="#transfer">Transfer</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= Interview ============= -->
+      <section class="candidate var-interview" id="interview">
+        <header>
+          <div>
+            <div class="key">R1.5 · Variant 1 of 4 · articleType = interview</div>
+            <div class="name">Interview hero</div>
+            <div class="desc">
+              The interviewee takes centre stage. Their name appears as a
+              chip beneath the headline (one chip per interviewee for duo
+              or multi-subject interviews). When the referenced Person has
+              a portrait, a small taped polaroid clips onto the hero photo's
+              top-left edge.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts</strong>
+            <ul>
+              <li>Shared shell ✓</li>
+              <li><span class="new">Sticker tape</span> INTERVIEW (top-right of hero photo)</li>
+              <li><span class="new">Name chip(s)</span> under H1, one per interviewee</li>
+              <li><span class="new">Portrait thumb</span> taped polaroid clipped to hero photo (when Person has a portrait)</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "interview" · 1 of 4</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill jersey">Interview</span>
+                <span class="dot">·</span>
+                <span>Do 14 mei · 18:00</span>
+              </div>
+              <h2 class="h1">
+                Dieter <span class="accent">Van Dionant</span> over zijn rentree.
+              </h2>
+              <div class="name-chips">
+                <span class="name-chip">Met Dieter Van Dionant</span>
+              </div>
+              <p class="lead" style="margin-top: 14px;">
+                Na een seizoen langs de zijlijn keert onze kapitein terug op
+                de A-ploeg. Een gesprek over revalidatie, focus, en de ploeg
+                van morgen.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · Tom Janssens</div>
+            </div>
+            <div class="taped rot-a" style="position: relative;">
+              <span class="sticker-label jersey">Interview</span>
+              <div class="portrait-thumb">
+                <span class="tape"></span>
+                <div class="photo"></div>
+                <div class="caption">D. V. D.</div>
+              </div>
+              <span class="tape left"></span>
+              <span class="tape right jersey"></span>
+              <div class="img interview"></div>
+              <div class="caption">Foto · KCVV / A. De Wachter</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Announcement ============= -->
+      <section class="candidate var-announcement" id="announcement">
+        <header>
+          <div>
+            <div class="key">R1.5 · Variant 2 of 4 · articleType = announcement</div>
+            <div class="name">Announcement hero</div>
+            <div class="desc">
+              The most flexible variant — minimal extra structure beyond the
+              shared base. Optional date-stamp overlay on the photo's
+              bottom-right, formatted as a small ink stamp with day-of-week
+              + day-of-month. Used for club news, season announcements,
+              policy updates.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts</strong>
+            <ul>
+              <li>Shared shell ✓</li>
+              <li><span class="new">Sticker tape</span> AANKONDIGING (top-right of hero photo)</li>
+              <li><span class="new">Date stamp</span> optional · bottom-right of hero photo · day-of-week + date</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "announcement" · 2 of 4</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Aankondiging</span>
+                <span class="dot">·</span>
+                <span>Ma 5 mei</span>
+              </div>
+              <h2 class="h1">
+                Nieuw seizoen start <span class="accent">zaterdag 17 augustus</span>.
+              </h2>
+              <p class="lead" style="margin-top: 4px;">
+                De kalender is rond, de loting bekend. Drie thuiswedstrijden
+                in de openingsmaand en de derby tegen Zemst valt op
+                zondag 15 september.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · redactie</div>
+            </div>
+            <div class="taped rot-c" style="position: relative;">
+              <span class="sticker-label">Aankondiging</span>
+              <span class="tape left"></span>
+              <div class="img announcement">
+                <span class="date-stamp">
+                  <span class="day">Ma</span>
+                  <span class="num">05.05</span>
+                </span>
+              </div>
+              <div class="caption">Foto · KCVV — kalender 2026/2027</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Event ============= -->
+      <section class="candidate var-event" id="event">
+        <header>
+          <div>
+            <div class="key">R1.5 · Variant 3 of 4 · articleType = event</div>
+            <div class="name">Event hero</div>
+            <div class="desc">
+              The day-block is the visual hook — a paper-stamped block
+              overlaid on the hero photo's lower-left, showing the day of
+              the week + date. The venue strip below the headline carries
+              the place. Together they communicate "when + where" before
+              the visitor reads the H1.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts</strong>
+            <ul>
+              <li>Shared shell ✓</li>
+              <li><span class="new">Sticker tape</span> EVENT (top-right of hero photo)</li>
+              <li><span class="new">Day block</span> overlaid bottom-left of hero photo · ZA 27/4</li>
+              <li><span class="new">Venue strip</span> under the H1 · "▸ Sportcentrum Elewijt"</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "event" · 3 of 4</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill warm">Event</span>
+                <span class="dot">·</span>
+                <span>Za 27 apr · 14:00</span>
+              </div>
+              <h2 class="h1">
+                Familiedag <span class="accent">in 't park</span> — kom mee.
+              </h2>
+              <span class="venue-strip">
+                <span class="glyph">▸</span>
+                <span>Sportcentrum Elewijt · Zemstsesteenweg 11</span>
+              </span>
+              <p class="lead" style="margin-top: 4px;">
+                Springkastelen, schmink, oude wedstrijdshirts en
+                bratwurst-met-kop voor wie te lang gewacht heeft. Inkom
+                gratis voor leden en supporters.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · jeugdwerking</div>
+            </div>
+            <div class="taped rot-b" style="position: relative;">
+              <span class="sticker-label">Event</span>
+              <span class="tape left"></span>
+              <div class="img event">
+                <span class="day-block">
+                  <span class="dow">Za</span>
+                  <span class="date">27/4</span>
+                </span>
+              </div>
+              <div class="caption">Foto · Familiedag 2025 — KCVV</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Transfer ============= -->
+      <section class="candidate var-transfer" id="transfer">
+        <header>
+          <div>
+            <div class="key">R1.5 · Variant 4 of 4 · articleType = transfer</div>
+            <div class="name">Transfer hero</div>
+            <div class="desc">
+              Three artefacts work together: the directional chip
+              (IN / OUT / VERLENGING) reads as a status badge, the
+              jersey-number badge anchors the player visually on the photo,
+              and the portrait thumbnail (when available) clips onto the
+              hero photo just like Interview. For squad-wide transfer
+              announcements without a single Person, the thumbnail is omitted.
+            </div>
+          </div>
+          <div class="artefacts">
+            <strong>Artefacts</strong>
+            <ul>
+              <li>Shared shell ✓</li>
+              <li><span class="new">Sticker tape</span> TRANSFER (top-right of hero photo)</li>
+              <li><span class="new">Directional chip</span> IN ↓ / OUT ↑ / VERLENGING ↻ · near the kicker</li>
+              <li><span class="new">Jersey number badge</span> bottom-left of hero photo (when Person has a number)</li>
+              <li><span class="new">Portrait thumb</span> taped polaroid clipped to hero photo (when Person has a portrait)</li>
+            </ul>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="stamp">articleType: "transfer" · 4 of 4</div>
+          <div class="hero">
+            <div class="copy">
+              <div class="kicker">
+                <span class="pill">Transfer</span>
+                <span class="dot">·</span>
+                <span class="dir-chip in">
+                  <span class="glyph">↓</span>
+                  <span>In</span>
+                </span>
+                <span class="dot">·</span>
+                <span>Vr 9 mei</span>
+              </div>
+              <h2 class="h1">
+                Maxim Breugelmans <span class="accent">tekent</span> voor twee jaar.
+              </h2>
+              <p class="lead" style="margin-top: 4px;">
+                De jonge middenvelder verlaat de KV Mechelen-jeugd en
+                versterkt de A-ploeg vanaf 1 juli. Verbintenis tot juni 2028.
+              </p>
+              <a class="read-more">Lees verder →</a>
+              <div class="byline">Door · sportief comité</div>
+            </div>
+            <div class="taped rot-a" style="position: relative;">
+              <span class="sticker-label jersey">Transfer</span>
+              <div class="portrait-thumb transfer">
+                <span class="tape"></span>
+                <div class="photo"></div>
+                <div class="caption">M. B.</div>
+              </div>
+              <span class="tape left"></span>
+              <span class="tape right jersey"></span>
+              <div class="img transfer">
+                <span class="number-badge">8</span>
+              </div>
+              <div class="caption">Foto · KV Mechelen / J. Geeraerts</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

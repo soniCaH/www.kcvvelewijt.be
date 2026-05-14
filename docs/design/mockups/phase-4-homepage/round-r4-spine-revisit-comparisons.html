@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R4 · Section spine ordering revisit</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --jersey-dark: #133d28;
+        --tape: #d9b85a;
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: var(--shadow-deep);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate > header {
+        padding: 14px 16px 12px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 20px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .candidate header .desc {
+        font-size: 12px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .tradeoffs {
+        margin-top: 10px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs span { display: block; }
+
+      /* The page schematic */
+      .schema {
+        padding: 16px 20px 24px;
+        background: var(--cream);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .section {
+        border: 1px solid var(--ink);
+        padding: 14px 14px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        position: relative;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section .num {
+        background: var(--ink);
+        color: var(--cream);
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+      .section .name { flex: 1; line-height: 1.3; font-weight: bold; }
+      .section .sub {
+        font-size: 8px;
+        opacity: 0.6;
+        font-weight: normal;
+        text-transform: none;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+        display: block;
+      }
+      .section.cream { background: var(--cream); }
+      .section.cream-soft { background: var(--cream-soft); border-style: dashed; opacity: 0.65; }
+      .section.dark {
+        background: var(--jersey-deep);
+        color: var(--cream);
+      }
+      .section.dark .num {
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .section.dark-deep {
+        background: var(--jersey-dark);
+        color: var(--cream);
+      }
+      .section.dark-deep .num {
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .section.banner {
+        background: var(--cream-soft);
+        border-style: dashed;
+        opacity: 0.55;
+        font-style: italic;
+      }
+      .section.removed {
+        background: transparent;
+        border: 1px dashed rgba(26, 26, 26, 0.4);
+        color: rgba(26, 26, 26, 0.5);
+        font-style: italic;
+        opacity: 0.6;
+      }
+      .section.removed .num {
+        background: rgba(26, 26, 26, 0.15);
+        color: rgba(26, 26, 26, 0.5);
+      }
+      .section .tag {
+        font-size: 8px;
+        background: var(--tape);
+        color: var(--ink);
+        padding: 1px 5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+      .section.dark .tag { background: var(--tape); color: var(--ink); }
+
+      .rhythm-strip {
+        margin-top: 14px;
+        padding: 10px 12px;
+        background: rgba(26, 26, 26, 0.05);
+        border-left: 3px solid var(--jersey-deep);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+      .rhythm-strip strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 9px;
+        display: block;
+        margin-bottom: 3px;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R4 · Section spine ordering</div>
+      <h1>How much should the Brandsfit clubshop be demoted?</h1>
+      <p>
+        Phase 4 Round 4 locked the order:
+        Hero → Featured event → Banner A → NewsGrid → UpcomingMatches →
+        Banner B → Youth → <strong>Webshop/Clubshop</strong> → Banner C →
+        Sponsors. Brief §10 wants the clubshop AFTER Sponsors to make it
+        "less prominent." Three demotion options below, sorted by how
+        aggressively each pushes the clubshop down. Tonal rhythm
+        (cream-vs-dark band sequence) noted under each.
+      </p>
+      <div class="anchor-list">
+        <a href="#a">R4.A — Status quo</a>
+        <a href="#b">R4.B — Brief's move (after sponsors)</a>
+        <a href="#c">R4.C — Drop section entirely</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R4.A ============= -->
+      <section class="candidate" id="a">
+        <header>
+          <div class="key">R4.A · Status quo</div>
+          <div class="name">Sponsors stays the commercial close</div>
+          <div class="desc">
+            Phase 4 Round 4 spine. Youth and Webshop sit back-to-back as
+            two dark bands; Banner C and Sponsors close on cream. No
+            override.
+          </div>
+          <div class="tradeoffs">
+            <span class="pro">No rework — current ordering stays</span>
+            <span class="pro">Two dark bands cluster (Youth + Webshop) read as one editorial moment</span>
+            <span class="con">Webshop is more prominent than the brief wants</span>
+            <span class="con">Diverges from brief §10</span>
+          </div>
+        </header>
+        <div class="schema">
+          <div class="section cream"><span class="num">1</span><span class="name">Hero<span class="sub">EditorialHero (R1.B)</span></span></div>
+          <div class="section cream"><span class="num">2</span><span class="name">Uitgelicht<span class="sub">3-up featured (R1.6.A)</span></span></div>
+          <div class="section dark"><span class="num">3</span><span class="name">FeaturedEventBand<span class="sub">drop-if-empty · jersey-deep</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">4</span><span class="name">Banner A<span class="sub">drop-if-empty</span></span></div>
+          <div class="section cream"><span class="num">5</span><span class="name">Laatste nieuws<span class="sub">NewsGrid 3×2 (R2.B)</span></span></div>
+          <div class="section cream-soft"><span class="num">6</span><span class="name">Komende wedstrijden<span class="sub">UpcomingMatches</span></span></div>
+          <div class="section banner"><span class="num">7</span><span class="name">Banner B<span class="sub">drop-if-empty</span></span></div>
+          <div class="section dark-deep"><span class="num">8</span><span class="name">Youth<span class="sub">jersey-deep full-bleed</span></span><span class="tag">dark</span></div>
+          <div class="section dark"><span class="num">9</span><span class="name">Webshop / Clubshop<span class="sub">jersey-deep-dark · Brandsfit CTA</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">10</span><span class="name">Banner C<span class="sub">drop-if-empty</span></span></div>
+          <div class="section cream"><span class="num">11</span><span class="name">Onze sponsors<span class="sub">SponsorsBlock — commercial close</span></span></div>
+          <div class="section cream-soft"><span class="num">12</span><span class="name">Footer</span></div>
+          <div class="rhythm-strip">
+            <strong>Tonal rhythm (light→dark→light)</strong>
+            cream → DARK (event) → cream → cream → CREAM-soft → cream →
+            <strong>DARK → DARK</strong> → cream → cream → cream
+            <br>2 dark bands back-to-back (Youth+Webshop)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R4.B ============= -->
+      <section class="candidate" id="b">
+        <header>
+          <div class="key">R4.B · Brief §10 proposal</div>
+          <div class="name">Clubshop moves AFTER Sponsors</div>
+          <div class="desc">
+            Sponsors becomes the editorial close on cream; the Brandsfit
+            clubshop becomes the very last dark band before the footer.
+            Tonal rhythm bounces (dark Youth → cream Sponsors → dark
+            Clubshop).
+          </div>
+          <div class="tradeoffs">
+            <span class="pro">Matches brief §10 demotion intent</span>
+            <span class="pro">Sponsors is the editorial close (our partners, not someone else's shop)</span>
+            <span class="con">Tonal rhythm bounces (dark/light/dark)</span>
+            <span class="con">Last full-bleed dark band right before the footer feels heavy</span>
+          </div>
+        </header>
+        <div class="schema">
+          <div class="section cream"><span class="num">1</span><span class="name">Hero<span class="sub">EditorialHero (R1.B)</span></span></div>
+          <div class="section cream"><span class="num">2</span><span class="name">Uitgelicht<span class="sub">3-up featured (R1.6.A)</span></span></div>
+          <div class="section dark"><span class="num">3</span><span class="name">FeaturedEventBand<span class="sub">drop-if-empty · jersey-deep</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">4</span><span class="name">Banner A<span class="sub">drop-if-empty</span></span></div>
+          <div class="section cream"><span class="num">5</span><span class="name">Laatste nieuws<span class="sub">NewsGrid 3×2 (R2.B)</span></span></div>
+          <div class="section cream-soft"><span class="num">6</span><span class="name">Komende wedstrijden<span class="sub">UpcomingMatches</span></span></div>
+          <div class="section banner"><span class="num">7</span><span class="name">Banner B<span class="sub">drop-if-empty</span></span></div>
+          <div class="section dark-deep"><span class="num">8</span><span class="name">Youth<span class="sub">jersey-deep full-bleed</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">9</span><span class="name">Banner C<span class="sub">drop-if-empty · moved up</span></span></div>
+          <div class="section cream"><span class="num">10</span><span class="name">Onze sponsors<span class="sub">SponsorsBlock — editorial close</span></span></div>
+          <div class="section dark"><span class="num">11</span><span class="name">Onze clubkledij<span class="sub">jersey-deep-dark · Brandsfit CTA · final dark band</span></span><span class="tag">dark</span></div>
+          <div class="section cream-soft"><span class="num">12</span><span class="name">Footer</span></div>
+          <div class="rhythm-strip">
+            <strong>Tonal rhythm (bouncier)</strong>
+            cream → DARK (event) → cream → cream → CREAM-soft → cream →
+            <strong>DARK → cream → DARK</strong> → cream
+            <br>Youth dark, Sponsors light, Clubshop dark
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R4.C ============= -->
+      <section class="candidate" id="c">
+        <header>
+          <div class="key">R4.C · Strongest demotion</div>
+          <div class="name">Drop the Clubshop section · footer link only</div>
+          <div class="desc">
+            Remove the Clubshop section entirely from the homepage. The
+            Brandsfit clubshop is reachable via the footer "Ontdek" column
+            link (brief §11 already requested this). One fewer full-bleed
+            section, cleanest tonal rhythm, smallest editorial-to-commerce
+            ratio.
+          </div>
+          <div class="tradeoffs">
+            <span class="pro">Cleanest tonal rhythm (no back-to-back dark bands, no late bounce)</span>
+            <span class="pro">Sponsors close is the only commercial moment on homepage</span>
+            <span class="pro">Brandsfit still reachable via footer (no functionality lost)</span>
+            <span class="con">Stronger demotion than brief §10 asked for</span>
+            <span class="con">Loses the prominent CTA to Brandsfit</span>
+            <span class="con">Brandsfit may push back (assuming they paid for the slot)</span>
+          </div>
+        </header>
+        <div class="schema">
+          <div class="section cream"><span class="num">1</span><span class="name">Hero<span class="sub">EditorialHero (R1.B)</span></span></div>
+          <div class="section cream"><span class="num">2</span><span class="name">Uitgelicht<span class="sub">3-up featured (R1.6.A)</span></span></div>
+          <div class="section dark"><span class="num">3</span><span class="name">FeaturedEventBand<span class="sub">drop-if-empty · jersey-deep</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">4</span><span class="name">Banner A<span class="sub">drop-if-empty</span></span></div>
+          <div class="section cream"><span class="num">5</span><span class="name">Laatste nieuws<span class="sub">NewsGrid 3×2 (R2.B)</span></span></div>
+          <div class="section cream-soft"><span class="num">6</span><span class="name">Komende wedstrijden<span class="sub">UpcomingMatches</span></span></div>
+          <div class="section banner"><span class="num">7</span><span class="name">Banner B<span class="sub">drop-if-empty</span></span></div>
+          <div class="section dark-deep"><span class="num">8</span><span class="name">Youth<span class="sub">jersey-deep full-bleed</span></span><span class="tag">dark</span></div>
+          <div class="section banner"><span class="num">9</span><span class="name">Banner C<span class="sub">drop-if-empty</span></span></div>
+          <div class="section cream"><span class="num">10</span><span class="name">Onze sponsors<span class="sub">SponsorsBlock — only commercial close</span></span></div>
+          <div class="section removed"><span class="num">×</span><span class="name">Webshop / Clubshop<span class="sub">removed — link in footer "Ontdek" column</span></span></div>
+          <div class="section cream-soft"><span class="num">11</span><span class="name">Footer<span class="sub">incl. Brandsfit clubshop link in Ontdek column</span></span></div>
+          <div class="rhythm-strip">
+            <strong>Tonal rhythm (calmest)</strong>
+            cream → DARK (event) → cream → cream → CREAM-soft → cream →
+            <strong>DARK (Youth) → cream → cream</strong>
+            <br>Single late dark band, then cream close — sponsors carries
+            the final commercial moment cleanly
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

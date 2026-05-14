@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R3 · Per-card semantics vs rhythm</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page { max-width: 1280px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 38px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+      header.page .note {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(217, 184, 90, 0.16);
+        border-left: 3px solid var(--tape);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .note strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-deep);
+      }
+      .candidate > header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36ch);
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--ink);
+      }
+      .candidate header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .candidate header .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .candidate header .tradeoffs {
+        font-size: 12px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate header .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate header .tradeoffs .pro::before { content: "+ "; color: var(--jersey-deep); font-weight: bold; }
+      .candidate header .tradeoffs .con::before { content: "− "; color: #a33; font-weight: bold; }
+      .candidate header .tradeoffs .pro, .candidate header .tradeoffs .con { display: block; }
+      .candidate .surface { padding: 28px 32px 36px; }
+
+      .section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 0 0 16px;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 28px;
+        line-height: 1;
+        margin: 0;
+        letter-spacing: -0.015em;
+      }
+      .section-header h2 .period { color: var(--jersey-deep); }
+      .section-header .right-link {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+      }
+
+      /* Show distribution label above each grid */
+      .distribution {
+        margin-bottom: 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+
+      /* Sub-grids for distribution scenarios */
+      .scenario {
+        margin-bottom: 28px;
+      }
+      .scenario:last-child { margin-bottom: 0; }
+      .scenario-header {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin: 0 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed rgba(26, 26, 26, 0.25);
+      }
+      .scenario-header strong { color: var(--jersey-deep); }
+
+      .grid-3x2 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .nc {
+        background: #fff;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        padding: 12px 12px 14px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .nc.cream { background: var(--cream); }
+      .nc.cream-soft { background: var(--cream-soft); }
+      .nc.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .nc.jersey .accent { color: var(--tape); }
+      .nc.jersey .read-more { color: var(--tape); }
+      .nc.jersey .label { color: rgba(245, 239, 225, 0.85); }
+      .nc.ink { background: var(--ink); color: var(--cream); }
+      .nc.ink .accent { color: var(--tape); }
+      .nc.ink .read-more { color: var(--tape); }
+      .nc.ink .label { color: rgba(245, 239, 225, 0.85); }
+      .nc .tape {
+        position: absolute;
+        top: -7px;
+        width: 36px;
+        height: 10px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .nc .tape.left { left: 12px; }
+      .nc .tape.right { right: 12px; transform: rotate(3deg); }
+      .nc .tape.jersey { background: var(--tape-jersey); }
+      .nc .img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #547a5e, #2a4d3a);
+      }
+      .nc .img.transf { background: linear-gradient(135deg, #c1a04a, #8c6f2a); }
+      .nc .img.intv { background: linear-gradient(135deg, #d9c193 0%, #8c6f4a 100%); }
+      .nc .img.anncmt { background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%); }
+      .nc .img.event { background: linear-gradient(135deg, #6f7c66, #3a4a3f); }
+      .nc .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .nc .h {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.1;
+        margin: 0;
+        font-size: 16px;
+      }
+      .nc .h .accent { color: var(--jersey-deep); }
+      .nc .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        margin-top: auto;
+      }
+      /* Type-badge in the corner of each card (visualization aid) */
+      .type-badge {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(31, 95, 63, 0.15);
+        color: var(--jersey-deep);
+        padding: 1px 5px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 7px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--jersey-deep);
+        pointer-events: none;
+        z-index: 2;
+      }
+      .nc.jersey .type-badge,
+      .nc.ink .type-badge {
+        background: rgba(245, 239, 225, 0.18);
+        color: var(--cream);
+        border-color: var(--cream);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R3 · Per-card semantics vs rhythm</div>
+      <h1>Card backgrounds: type-driven semantic, or slot-driven rhythm?</h1>
+      <p>
+        With R2.B locked (3×2 equal news grid), the question is how each
+        card's background is picked. Three strategies below. Each variant
+        shows TWO distribution scenarios — a "balanced grid" (mixed
+        article types) and a "transfer-heavy grid" (winter window with
+        4 transfers in a row) — so we can judge how the strategy holds up
+        when content reality is uneven.
+      </p>
+      <div class="note">
+        <strong>Calibration</strong>
+        Transfers cluster seasonally: heavy in June–July (incoming) and
+        January (winter). A balanced grid sees ~1 transfer per 6; a
+        transfer-heavy grid sees 3–4. The "transfer-heavy" scenario is
+        the stress test for any strategy that ties background to
+        articleType.
+      </div>
+      <div class="anchor-list">
+        <a href="#a">R3.A — Slot rhythm (status quo)</a>
+        <a href="#b">R3.B — Per-articleType (brief)</a>
+        <a href="#c">R3.C — Hybrid</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= R3.A · slot rhythm ============= -->
+      <section class="candidate" id="a">
+        <header>
+          <div>
+            <div class="key">R3.A · Status quo (extended)</div>
+            <div class="name">Slot rhythm — backgrounds cycle by position</div>
+            <div class="desc">
+              The current Phase 4 pattern, extended to 6 slots:
+              cream → jersey-deep → cream-soft → ink → cream →
+              cream-soft. Background is decoupled from article type;
+              variety is layout-driven, not content-driven. Visual
+              texture is predictable regardless of which types fill
+              the grid.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Predictable visual texture every grid</span>
+            <span class="pro">Resilient to content clustering</span>
+            <span class="pro">No data-driven re-renders</span>
+            <span class="con">Background carries no semantic signal</span>
+            <span class="con">Diverges from brief §6 'variant treatment per type is intentional'</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Balanced grid · <strong>1 transfer</strong> · 2 interviews · 1 event · 2 announcements</p>
+            <div class="grid-3x2">
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Dieter Van Dionant.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Seizoen <span class="accent">17 aug</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+              <article class="nc cream-soft"><span class="tape left"></span><div class="img event"></div><span class="label">Event</span><h3 class="h">Familiedag in 't park.</h3><span class="read-more">Lees verder →</span><span class="type-badge">event</span></article>
+              <article class="nc ink"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens over de B-ploeg.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream-soft"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Sportkamp jeugd <span class="accent">augustus</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Transfer-heavy grid · <strong>4 transfers</strong> · 1 interview · 1 announcement</p>
+            <div class="grid-3x2">
+              <article class="nc cream"><span class="tape left"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Pieters <span class="accent">verlengt</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream-soft"><span class="tape left"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">De Vos <span class="accent">naar</span> Berlaar.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc ink"><span class="tape right jersey"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream"><span class="tape left"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Van Eyck <span class="accent">in</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream-soft"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Open trainingsdag <span class="accent">6 juli</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R3.B · per-articleType ============= -->
+      <section class="candidate" id="b">
+        <header>
+          <div>
+            <div class="key">R3.B · Brief §6 proposal</div>
+            <div class="name">Per-articleType — background = type signal</div>
+            <div class="desc">
+              Background is determined by `article.articleType`:
+              transfer → jersey-deep, interview / announcement / event →
+              cream. Background carries semantic meaning — visitor
+              learns "green = transfer" over time. Pattern recognition
+              for repeat visitors.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Matches brief §6 'variant treatment per type is intentional'</span>
+            <span class="pro">Pattern recognition for repeat visitors</span>
+            <span class="con">Visually flat when grid is mono-type (5–6 cream)</span>
+            <span class="con">Visually heavy when transfer-heavy (4+ jersey-deep)</span>
+            <span class="con">No paper-stamp variety in calm periods</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Balanced grid · 1 transfer · 2 interviews · 1 event · 2 announcements</p>
+            <div class="grid-3x2">
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Dieter Van Dionant.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Seizoen <span class="accent">17 aug</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+              <article class="nc cream"><span class="tape left"></span><div class="img event"></div><span class="label">Event</span><h3 class="h">Familiedag in 't park.</h3><span class="read-more">Lees verder →</span><span class="type-badge">event</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens over de B-ploeg.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Sportkamp jeugd <span class="accent">augustus</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Transfer-heavy grid · <strong>4 transfers</strong> · 1 interview · 1 announcement</p>
+            <div class="grid-3x2">
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Pieters <span class="accent">verlengt</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">De Vos <span class="accent">naar</span> Berlaar.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape right"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Van Eyck <span class="accent">in</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Open trainingsdag <span class="accent">6 juli</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= R3.C · hybrid ============= -->
+      <section class="candidate" id="c">
+        <header>
+          <div>
+            <div class="key">R3.C · Hybrid (Recommended)</div>
+            <div class="name">Transfer always jersey-deep; others cycle</div>
+            <div class="desc">
+              Transfers ALWAYS render on jersey-deep — preserves the
+              semantic "green = transfer" signal from the brief. All
+              other types fill the remaining slots with a 3-bg cycle
+              (cream → cream-soft → ink → cream → cream-soft → ink),
+              preserving rhythm variety. Best of both: semantic on
+              transfer, rhythm on everything else.
+            </div>
+          </div>
+          <div class="tradeoffs">
+            <strong>Trade-offs</strong>
+            <span class="pro">Semantic signal preserved (transfers stand out)</span>
+            <span class="pro">Paper-stamp variety on the 80%+ non-transfer slots</span>
+            <span class="pro">Mostly resilient to clustering</span>
+            <span class="con">Slightly more complex assignment logic</span>
+            <span class="con">Transfer-heavy grids still get 3–4 jersey-deep tiles</span>
+          </div>
+        </header>
+        <div class="surface">
+          <div class="section-header">
+            <h2>Laatste <span class="period">nieuws</span>.</h2>
+            <span class="right-link">Alle berichten →</span>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Balanced grid · 1 transfer · 2 interviews · 1 event · 2 announcements</p>
+            <div class="grid-3x2">
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Dieter Van Dionant.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream-soft"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Seizoen <span class="accent">17 aug</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+              <article class="nc ink"><span class="tape left"></span><div class="img event"></div><span class="label">Event</span><h3 class="h">Familiedag in 't park.</h3><span class="read-more">Lees verder →</span><span class="type-badge">event</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape left"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens over de B-ploeg.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc cream-soft"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Sportkamp jeugd <span class="accent">augustus</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+
+          <div class="scenario">
+            <p class="scenario-header">Transfer-heavy grid · <strong>4 transfers</strong> · 1 interview · 1 announcement</p>
+            <div class="grid-3x2">
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Breugelmans <span class="accent">tekent</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc jersey"><span class="tape right jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Pieters <span class="accent">verlengt</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">De Vos <span class="accent">naar</span> Berlaar.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream"><span class="tape right"></span><div class="img intv"></div><span class="label">Interview</span><h3 class="h">Tom Janssens.</h3><span class="read-more">Lees verder →</span><span class="type-badge">interview</span></article>
+              <article class="nc jersey"><span class="tape left jersey"></span><div class="img transf"></div><span class="label">Transfer</span><h3 class="h">Van Eyck <span class="accent">in</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">transfer</span></article>
+              <article class="nc cream-soft"><span class="tape right"></span><div class="img anncmt"></div><span class="label">Aankondiging</span><h3 class="h">Open trainingsdag <span class="accent">6 juli</span>.</h3><span class="read-more">Lees verder →</span><span class="type-badge">announce</span></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

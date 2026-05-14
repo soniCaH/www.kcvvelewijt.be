@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4.5 · Round R1.5c · Hero iterations (Interview / Event / Transfer)</title>
+    <style>
+      :root {
+        --cream: #f5efe1;
+        --cream-soft: #ece5d3;
+        --cream-deep: #ddd4ba;
+        --ink: #1a1a1a;
+        --ink-soft: #2a2a2a;
+        --jersey-deep: #1f5f3f;
+        --jersey-deep-soft: #2a7a52;
+        --tape: #d9b85a;
+        --tape-warm: rgba(217, 184, 90, 0.85);
+        --tape-jersey: rgba(31, 95, 63, 0.78);
+        --shadow-hard: 4px 4px 0 0 var(--ink);
+        --shadow-deep: 6px 6px 0 0 var(--ink);
+        --rule: #1a1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1400px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page .constraint {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        background: rgba(217, 184, 90, 0.16);
+        border-left: 3px solid var(--tape);
+        padding: 10px 14px;
+        margin-top: 14px;
+        max-width: 80ch;
+        line-height: 1.55;
+      }
+      header.page .anchor-list {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        margin-top: 14px;
+      }
+      header.page .anchor-list a {
+        color: var(--jersey-deep);
+        margin-right: 18px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 64px;
+      }
+
+      .variant-section > h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 30px;
+        margin: 0 0 6px;
+      }
+      .variant-section > h2 .period { color: var(--jersey-deep); }
+      .variant-section > .blurb {
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0 0 18px;
+        max-width: 80ch;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .option {
+        background: #fff;
+        border: 1px solid var(--rule);
+        box-shadow: var(--shadow-hard);
+      }
+      .option > header {
+        padding: 14px 16px 10px;
+        border-bottom: 1px dashed var(--ink);
+        background: rgba(31, 95, 63, 0.05);
+      }
+      .option header .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .option header .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.15;
+        margin-top: 2px;
+      }
+      .option header .note {
+        font-size: 11px;
+        line-height: 1.5;
+        opacity: 0.8;
+        margin-top: 6px;
+      }
+      .option .surface {
+        background: var(--cream);
+        padding: 24px 20px 28px;
+      }
+      .option .stamp {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.5;
+        margin-bottom: 12px;
+      }
+
+      .mini-hero {
+        display: grid;
+        grid-template-columns: 50fr 50fr;
+        gap: 18px;
+        align-items: center;
+      }
+      .mini-hero .copy { padding-right: 2px; }
+      .kicker {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .kicker .pill {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 2px 6px;
+        line-height: 1;
+      }
+      .kicker .pill.warm { background: var(--tape); color: var(--ink); }
+      .kicker .pill.jersey { background: var(--jersey-deep); color: var(--cream); }
+      .kicker .dot { opacity: 0.45; }
+      .kicker .meta { opacity: 0.7; font-size: 9px; }
+      .h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 8px 0 8px;
+        font-size: 22px;
+      }
+      .h1 .accent { color: var(--jersey-deep); }
+      .subtitle {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.3;
+        opacity: 0.78;
+        margin: 0 0 8px;
+      }
+      .meta-row {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        font-size: 10px;
+        margin: 2px 0 8px;
+        opacity: 0.78;
+      }
+      .meta-row .meta-sep { color: rgba(26, 26, 26, 0.3); }
+      .lead {
+        font-size: 11px;
+        line-height: 1.5;
+        margin: 0 0 6px;
+        opacity: 0.92;
+      }
+      .read-more {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 4px;
+      }
+      .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin-top: 8px;
+      }
+      .name-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 4px 0 6px;
+      }
+      .name-chip {
+        background: rgba(31, 95, 63, 0.1);
+        color: var(--jersey-deep);
+        padding: 2px 6px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        font-weight: bold;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid var(--jersey-deep);
+      }
+
+      /* Person-thumbnail strip: small inline portraits next to / inside name chips */
+      .person-credits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin: 4px 0 8px;
+      }
+      .person-credit {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--cream);
+        border: 1px solid var(--jersey-deep);
+        padding: 2px 7px 2px 2px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        font-weight: bold;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+      }
+      .person-credit .face {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #d9c193, #8c6f4a);
+        border: 1px solid var(--jersey-deep);
+      }
+      .person-credit.b .face { background: linear-gradient(135deg, #a0a78a, #5e6650); }
+      .person-credit.c .face { background: linear-gradient(135deg, #c4b18a, #6b5a3c); }
+
+      /* Taped photo — LANDSCAPE only */
+      .taped {
+        position: relative;
+        background: #fff;
+        padding: 5px 5px 7px;
+        border: 1px solid var(--ink);
+        box-shadow: 3px 3px 0 0 var(--ink);
+        width: 100%;
+        max-width: 235px;
+        justify-self: end;
+      }
+      .taped .tape {
+        position: absolute;
+        top: -7px;
+        width: 36px;
+        height: 9px;
+        background: var(--tape-warm);
+        opacity: 0.9;
+        transform: rotate(-3deg);
+      }
+      .taped .tape.left { left: 10px; }
+      .taped .tape.right { right: 10px; transform: rotate(3deg); }
+      .taped .tape.jersey { background: var(--tape-jersey); }
+      .taped .img {
+        width: 100%;
+        position: relative;
+      }
+      /* All landscape — owner constraint 2026-05-13 */
+      .taped .img.interview-single { aspect-ratio: 3 / 2; background: linear-gradient(135deg, #d9c193 0%, #8c6f4a 50%, #4a3a22 100%); }
+      .taped .img.interview-group {
+        aspect-ratio: 3 / 2;
+        background:
+          radial-gradient(circle at 25% 50%, #d9c193 8%, transparent 11%),
+          radial-gradient(circle at 50% 45%, #c4b18a 8%, transparent 11%),
+          radial-gradient(circle at 75% 52%, #a0a78a 8%, transparent 11%),
+          linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%);
+      }
+      .taped .img.event { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #2a4d3a 0%, #1a3a2a 100%); }
+      .taped .img.transfer { aspect-ratio: 3 / 2; background: linear-gradient(135deg, #c4b18a 0%, #6b5a3c 50%, #2f2718 100%); }
+
+      .day-block {
+        position: absolute;
+        bottom: 7px;
+        left: 7px;
+        background: var(--cream);
+        color: var(--ink);
+        padding: 4px 6px 5px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        letter-spacing: 0.08em;
+        font-weight: bold;
+        border: 1.5px solid var(--ink);
+        box-shadow: 2px 2px 0 0 var(--ink);
+        transform: rotate(-2deg);
+        min-width: 40px;
+        text-align: center;
+      }
+      .day-block .dow { display: block; font-size: 7px; text-transform: uppercase; opacity: 0.75; }
+      .day-block .date { display: block; font-size: 13px; line-height: 1.1; margin-top: 1px; }
+
+      .venue-strip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 0 8px;
+        padding: 4px 0;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        border-top: 1px solid var(--ink);
+        border-bottom: 1px solid var(--ink);
+        line-height: 1.2;
+      }
+      .venue-strip .glyph { color: var(--jersey-deep); font-weight: bold; font-size: 10px; }
+
+      .dir-chip {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        background: var(--jersey-deep);
+        color: var(--cream);
+        padding: 2px 6px 3px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: bold;
+        border: 1px solid var(--ink);
+      }
+      .dir-chip.row {
+        margin: 4px 0 6px;
+        align-self: flex-start;
+      }
+      .dir-chip .glyph { font-weight: bold; font-size: 10px; }
+
+      .pull {
+        position: relative;
+        margin: 6px 0 6px;
+        padding: 3px 0 3px 10px;
+        border-left: 2px solid var(--jersey-deep);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+      .pull cite {
+        display: block;
+        font-style: normal;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 7px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        opacity: 0.7;
+        margin-top: 3px;
+      }
+      .pull cite::before { content: "— "; color: var(--jersey-deep); }
+
+      .variant-section.iv .option header { background: rgba(31, 95, 63, 0.05); }
+      .variant-section.ev .option header { background: rgba(217, 184, 90, 0.10); }
+      .variant-section.tr .option header { background: rgba(107, 42, 42, 0.05); }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 4.5 · Round R1.5c · Hero iterations — LANDSCAPE-only</div>
+      <h1>Iterating Interview, Event, and Transfer at hero scale.</h1>
+      <p>
+        Announcement is approved from R1.5b. This page iterates the three
+        remaining variants with three options each. Same hero shell, smaller
+        scale (mini-hero ~235px photo) so we can fit nine mockups
+        comparable side-by-side. Pick one per variant — or call out the
+        bits worth combining.
+      </p>
+      <div class="constraint">
+        <strong>Constraint (owner, 2026-05-13):</strong> all uploaded
+        article hero images (Sanity <code>article.coverImage</code>) are
+        ALWAYS landscape — no portrait or square crops. Mockups in earlier
+        rounds that used 4:5 portrait crops for Interview / Transfer are
+        retired. The right column of the hero ALWAYS renders a landscape
+        taped polaroid.
+        <br><br>
+        Person photos (<code>player.psdImage</code> / <code>transparentImage</code>)
+        are separate from the hero image and may appear as small inline
+        credit thumbnails (16px or so) but never as the hero focal point.
+      </div>
+      <div class="anchor-list">
+        <a href="#interview">Interview · multi-subject</a>
+        <a href="#event">Event · venue strip</a>
+        <a href="#transfer">Transfer · chip + pull</a>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ============= INTERVIEW ============= -->
+      <section class="variant-section iv" id="interview">
+        <h2>Interview<span class="period">.</span></h2>
+        <p class="blurb">
+          With landscape-only hero photos, multi-subject articles get ONE
+          landscape cover (article.coverImage, which can be a group shot
+          for duo/panel interviews). The three options vary how the
+          interviewees' NAMES are surfaced in the left column copy.
+        </p>
+        <div class="options">
+
+          <!-- IV.1 -->
+          <div class="option">
+            <header>
+              <div class="key">IV.1 · Joined-names subtitle</div>
+              <div class="name">Subtitle line below H1</div>
+              <div class="note">
+                Ports the detail-hero subtitle pattern verbatim:
+                "Met A & B" / "Met A, B en C". Most minimal — one extra
+                row of italic serif beneath the H1.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">N=2 example · single subtitle line</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill jersey">Interview</span>
+                    <span class="dot">·</span>
+                    <span class="meta">Do 14 mei</span>
+                  </div>
+                  <h3 class="h1">Aan tafel met <span class="accent">de kapiteins</span>.</h3>
+                  <p class="subtitle">Met Dieter Van Dionant &amp; Jeroen Van den Berghe</p>
+                  <p class="lead">
+                    Hoe de A-ploeg samenkomt op één ploeg.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · Tom Janssens</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <span class="tape right jersey"></span>
+                  <div class="img interview-group"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IV.2 -->
+          <div class="option">
+            <header>
+              <div class="key">IV.2 · Name chips</div>
+              <div class="name">One chip per interviewee</div>
+              <div class="note">
+                Chips replace the subtitle line. Each chip carries one
+                interviewee's name in mono-uppercase. Reads more like a
+                "byline strip" — clearer multi-subject signal at a glance.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">N=2 example · two name chips, no subtitle</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill jersey">Interview</span>
+                    <span class="dot">·</span>
+                    <span class="meta">Do 14 mei</span>
+                  </div>
+                  <h3 class="h1">Aan tafel met <span class="accent">de kapiteins</span>.</h3>
+                  <div class="name-chips">
+                    <span class="name-chip">Dieter Van Dionant</span>
+                    <span class="name-chip">Jeroen Van den Berghe</span>
+                  </div>
+                  <p class="lead">
+                    Hoe de A-ploeg samenkomt op één ploeg.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · Tom Janssens</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <div class="img interview-group"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IV.3 — REVISED for landscape -->
+          <div class="option">
+            <header>
+              <div class="key">IV.3 · Credit chips with mini-faces</div>
+              <div class="name">Tiny Person thumbnails inline with names</div>
+              <div class="note">
+                Each interviewee's name gets a small 16px square
+                psdImage thumbnail inside its chip (left of the name).
+                Reads as a credit line / cast row. Uses
+                <code>player.psdImage</code> when the subject is a player;
+                falls back to a coloured initial-block otherwise. More
+                informative than IV.2 — visitor sees WHO before reading.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">N=2 example · credit chips with psdImage thumbnails</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill jersey">Interview</span>
+                    <span class="dot">·</span>
+                    <span class="meta">Do 14 mei</span>
+                  </div>
+                  <h3 class="h1">Aan tafel met <span class="accent">de kapiteins</span>.</h3>
+                  <div class="person-credits">
+                    <span class="person-credit">
+                      <span class="face"></span>
+                      <span>Dieter Van Dionant</span>
+                    </span>
+                    <span class="person-credit b">
+                      <span class="face"></span>
+                      <span>Jeroen Van den Berghe</span>
+                    </span>
+                  </div>
+                  <p class="lead">
+                    Hoe de A-ploeg samenkomt op één ploeg.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · Tom Janssens</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <span class="tape right jersey"></span>
+                  <div class="img interview-group"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============= EVENT ============= -->
+      <section class="variant-section ev" id="event">
+        <h2>Event<span class="period">.</span></h2>
+        <p class="blurb">
+          The venue strip below H1 (in R1.5b) gives event content a
+          when-and-where row, but it crowds the lead. Three options for
+          venue-strip integration. Day-block overlay on the photo is kept
+          across all three (locked from R1.5b).
+        </p>
+        <div class="options">
+
+          <!-- EV.1 -->
+          <div class="option">
+            <header>
+              <div class="key">EV.1 · Strip above H1</div>
+              <div class="name">Venue ABOVE the headline</div>
+              <div class="note">
+                The strip sits between kicker and H1, giving the venue
+                visual priority over the headline. Reads as "where + when"
+                then "what". Lead breathes.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">venue above H1</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill warm">Event</span>
+                    <span class="dot">|</span>
+                    <span class="meta">Jeugd</span>
+                  </div>
+                  <p class="venue-strip" style="margin-top: 6px;">
+                    <span class="glyph">▸</span>
+                    <span>Sportcentrum Elewijt · 14:00</span>
+                  </p>
+                  <h3 class="h1">Familiedag <span class="accent">in 't park</span>.</h3>
+                  <p class="lead">
+                    Springkastelen, schmink, oude wedstrijdshirts en bratwurst-met-kop.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · jeugdwerking</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <div class="img event">
+                    <span class="day-block"><span class="dow">Za</span><span class="date">27/4</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EV.2 -->
+          <div class="option">
+            <header>
+              <div class="key">EV.2 · Venue merged into kicker</div>
+              <div class="name">No separate strip</div>
+              <div class="note">
+                Kicker carries everything: `EVENT · JEUGD · ▸ SPORTCENTRUM
+                ELEWIJT · 14:00`. Most compact. H1 + lead breathe fully.
+                Day-block on photo still anchors the date visually.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">venue collapsed into kicker</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill warm">Event</span>
+                    <span class="dot">|</span>
+                    <span class="meta">Jeugd</span>
+                    <span class="dot">·</span>
+                    <span class="meta">▸ Sportcentrum Elewijt</span>
+                    <span class="dot">·</span>
+                    <span class="meta">14:00</span>
+                  </div>
+                  <h3 class="h1">Familiedag <span class="accent">in 't park</span>.</h3>
+                  <p class="lead">
+                    Springkastelen, schmink, oude wedstrijdshirts en bratwurst-met-kop voor wie te lang gewacht heeft.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · jeugdwerking</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <div class="img event">
+                    <span class="day-block"><span class="dow">Za</span><span class="date">27/4</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EV.3 -->
+          <div class="option">
+            <header>
+              <div class="key">EV.3 · Skip venue on hero</div>
+              <div class="name">EventStrip rendered below the hero card</div>
+              <div class="note">
+                Hero stays minimal (kicker · H1 · lead · byline). A
+                compressed `<EventStrip>` component renders below the
+                hero, INSIDE the hero card / link target. Decouples
+                venue/date from the H1 area entirely.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">no venue strip in hero; rendered below</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill warm">Event</span>
+                    <span class="dot">|</span>
+                    <span class="meta">Jeugd</span>
+                  </div>
+                  <h3 class="h1">Familiedag <span class="accent">in 't park</span>.</h3>
+                  <p class="lead">
+                    Springkastelen, schmink, oude wedstrijdshirts en bratwurst-met-kop voor wie te lang gewacht heeft.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · jeugdwerking</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <div class="img event">
+                    <span class="day-block"><span class="dow">Za</span><span class="date">27/4</span></span>
+                  </div>
+                </div>
+              </div>
+              <p class="venue-strip" style="margin: 14px 0 0;">
+                <span class="glyph">▸</span>
+                <span>Sportcentrum Elewijt · Zemstsesteenweg 11 · Za 27/4 · 14:00 — 18:00</span>
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============= TRANSFER ============= -->
+      <section class="variant-section tr" id="transfer">
+        <h2>Transfer<span class="period">.</span></h2>
+        <p class="blurb">
+          The R1.5b transfer hero is the densest (kicker + dir-chip + H1 +
+          meta line + pull-quote + byline). Three options to lighten it.
+          All three use the landscape article cover for the right column —
+          player psdImage stays on the detail page.
+        </p>
+        <div class="options">
+
+          <!-- TR.1 -->
+          <div class="option">
+            <header>
+              <div class="key">TR.1 · Drop pull-quote</div>
+              <div class="name">Pull-quote stays on detail page only</div>
+              <div class="note">
+                Hero shows kicker + dir-chip + H1 + meta line + lead + byline.
+                Pull-quote is reserved for the detail-page TransferHero.
+                Simplest, most readable at homepage scale.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">no pull-quote on homepage hero</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill">Transfer</span>
+                    <span class="dot">|</span>
+                    <span class="dir-chip">
+                      <span class="glyph">↓</span>
+                      <span>Inkomend</span>
+                    </span>
+                    <span class="dot">·</span>
+                    <span class="meta">Vr 9 mei</span>
+                  </div>
+                  <h3 class="h1">Maxim <span class="accent">Breugelmans</span>.</h3>
+                  <p class="meta-row">
+                    <span>#8</span>
+                    <span class="meta-sep">·</span>
+                    <span>23 jaar</span>
+                    <span class="meta-sep">·</span>
+                    <span>Middenvelder</span>
+                  </p>
+                  <p class="lead">
+                    Tekent voor twee jaar. Versterkt de A-ploeg vanaf 1 juli.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · sportief comité</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <span class="tape right jersey"></span>
+                  <div class="img transfer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TR.2 -->
+          <div class="option">
+            <header>
+              <div class="key">TR.2 · Dir-chip on its own row</div>
+              <div class="name">Chip outside the kicker</div>
+              <div class="note">
+                Kicker stays simple (`TRANSFER · Vr 9 mei`). Directional
+                chip sits on its own row between kicker and H1, large
+                enough to read as a status badge. Pull-quote dropped (per TR.1).
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">dir-chip is its own row · no pull-quote</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill">Transfer</span>
+                    <span class="dot">·</span>
+                    <span class="meta">Vr 9 mei</span>
+                  </div>
+                  <span class="dir-chip row">
+                    <span class="glyph">↓</span>
+                    <span>Inkomend</span>
+                  </span>
+                  <h3 class="h1">Maxim <span class="accent">Breugelmans</span>.</h3>
+                  <p class="meta-row">
+                    <span>#8</span>
+                    <span class="meta-sep">·</span>
+                    <span>23 jaar</span>
+                    <span class="meta-sep">·</span>
+                    <span>Middenvelder</span>
+                  </p>
+                  <p class="lead">
+                    Tekent voor twee jaar. Versterkt de A-ploeg vanaf 1 juli.
+                  </p>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · sportief comité</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <span class="tape right jersey"></span>
+                  <div class="img transfer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TR.3 -->
+          <div class="option">
+            <header>
+              <div class="key">TR.3 · Keep pull-quote, drop meta</div>
+              <div class="name">Pull-quote replaces meta line</div>
+              <div class="note">
+                Kicker carries direction + age + position summary
+                (`TRANSFER · Inkomend · 23j · Middenvelder`). Separate
+                meta line is dropped. Pull-quote stays — it's the
+                editorial voice that distinguishes a transfer note from a
+                fact-strip on the detail page.
+              </div>
+            </header>
+            <div class="surface">
+              <div class="stamp">pull-quote stays · meta collapsed into kicker</div>
+              <div class="mini-hero">
+                <div class="copy">
+                  <div class="kicker">
+                    <span class="pill">Transfer</span>
+                    <span class="dot">|</span>
+                    <span class="dir-chip">
+                      <span class="glyph">↓</span>
+                      <span>Inkomend</span>
+                    </span>
+                    <span class="dot">·</span>
+                    <span class="meta">23j · Middenvelder · #8</span>
+                  </div>
+                  <h3 class="h1">Maxim <span class="accent">Breugelmans</span>.</h3>
+                  <blockquote class="pull">
+                    Ik wil zo snel mogelijk bij de A-ploeg horen.
+                    <cite>Maxim Breugelmans</cite>
+                  </blockquote>
+                  <a class="read-more">Lees verder →</a>
+                  <div class="byline">Door · sportief comité</div>
+                </div>
+                <div class="taped">
+                  <span class="tape left"></span>
+                  <span class="tape right jersey"></span>
+                  <div class="img transfer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>
