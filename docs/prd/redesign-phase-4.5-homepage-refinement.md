@@ -51,7 +51,7 @@ The refinement is a single deliverable: a homepage that visually matches the ret
 - **Spine reorder — clubshop AFTER sponsors** — supersedes Phase 4 Round 4 "Sponsors stays the commercial close". `<SponsorsBlock>` becomes the editorial close on cream; `<ClubshopBanner>` (renamed from `<WebshopBanner>`) is the final dark band before footer. BannerSlot c moves up to sit between Youth and Sponsors. (R4.B)
 - **`<YouthSection>` updates** — adds a `<StripedSeam>` band at the top of the section (jersey-deep + jersey-light alternating, ~28px tall). Adds a second CTA `Schrijf je in →` alongside the existing `Ontdek onze jeugd →`. Shifts the EditorialHeading italic+warm-accent emphasis from "De toekomst" to "Elewijt" per brief §8. (R5.B)
 - **`<ClubshopBanner>` — renamed from `<WebshopBanner>`** — mirrored `<StripedSeam>` top + bottom (jersey-dark + jersey-deep alternating). New copy: "Onze clubkledij." italic-emphasis heading + "Beschikbaar via Brandsfit, onze kledingpartner." subheading + "Naar de Brandsfit clubshop ↗" single CTA. Small `<JerseyShirt>` illustration corner-anchored top-right. Drops the generic "Webshop · onze partner" eyebrow. Analytics events renamed (`webshop_banner_*` → `clubshop_banner_*`). (R4 + R6.C)
-- **Photo treatment system tokens** — adds `<TapeStrip edge="clean" | "torn">` prop with 4 canonical SVG masks (slot-deterministic cycling), `--color-tape-cream` token (3rd tape colour), `--filter-photo-newsprint` warm-tint CSS filter, `--pattern-paper-grain` overlay (~4% opacity, multiply blend), `--shadow-photo-tape` asymmetric shadow (2px right / 4px down), and Variant A layered hover (card press-down + photo lift). (R9)
+- **Photo treatment system tokens** — adds `--color-tape-cream` token (3rd tape colour), `--filter-photo-newsprint` warm-tint CSS filter, `--pattern-paper-grain` overlay (~4% opacity, multiply blend), `--shadow-photo-tape` asymmetric shadow (2px right / 4px down), and Variant A layered hover (card press-down + photo lift). (R9 — torn-edge variant and 2-strip cycle dropped at implementation; see lock doc.)
 - **`<HomepageHeroCarousel>` retirement** — moves to `apps/web/src/components/home/_legacy/` for blame trace per the Phase 4 `_legacy/` convention. Deletion deferred to a future cleanup phase.
 - **`<NewsCard>` callers across the site** — `NewsGrid`, `RelatedContentSection` on article detail, the `/nieuws` archive, the `/jeugd` news section. Phase 4.5 ships the flush-edge refactor across all callers (single-pass), not just NewsGrid. (Implementer to confirm caller list at PR time.)
 - **CLAUDE.md update** — `apps/web/CLAUDE.md` "Implemented Routes" section unchanged; the design-system "Redesign primitives" subsection adds the new tape edge, photo filter, and grain tokens.
@@ -128,7 +128,7 @@ All blockedBy relationships wired via GraphQL `addBlockedBy` mutations (17 total
 **Dependency edges (`addBlockedBy` GraphQL mutations):**
 
 - All 4.5.A / 4.5.B sub-issues blocked by `4.5.0` (tracer must pass first).
-- `4.5.B.1` (NewsCard flush-edge) blocked by `4.5.A.1` (consumes new torn-edge tape prop, asymmetric photo-shadow token, layered hover).
+- `4.5.B.1` (NewsCard flush-edge) blocked by `4.5.A.1` (consumes asymmetric photo-shadow token and layered hover).
 - `4.5.B.4` (NewsGrid + per-type bg) blocked by `4.5.B.1` (consumes new NewsCard structure).
 - `4.5.B.3` (FeaturedUitgelichtRow) blocked by `4.5.B.1` (likely reuses NewsCard primitive at larger scale).
 - `4.5.B.2` (EditorialHero per-variant) blocked by `4.5.0` only — uses its own composition, not NewsCard.
@@ -155,17 +155,17 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use the GitHub Graph
 
 ### 5.5.A.1 — Photo treatment system tokens (R9)
 
-- [ ] `<TapeStrip>` extended with `edge: "clean" | "torn"` prop. Default `"clean"` (existing behaviour preserved).
-- [ ] Four canonical torn-edge SVG masks shipped as `--tape-edge-{1,2,3,4}`, cycled deterministically per slot.
+- [ ] ~~`<TapeStrip>` extended with `edge: "clean" | "torn"` prop.~~ **Dropped at implementation (#1747)** — both polygon and feathered-mask implementations read wrong at design review. Clean rectangular tape stays canonical. See `photo-treatment-system-locked.md` "Revisions during implementation".
+- [ ] ~~Four canonical torn-edge SVG masks shipped as `--tape-edge-{1,2,3,4}`.~~ **Dropped at implementation (#1747).**
 - [ ] New token `--color-tape-cream: rgb(232 224 200 / 0.85)` in `apps/web/src/app/globals.css`.
 - [ ] New CSS variable `--filter-photo-newsprint: sepia(0.06) saturate(0.94) hue-rotate(-4deg) contrast(1.02) brightness(1.01)`.
 - [ ] New token `--pattern-paper-grain: url("data:image/svg+xml,…")` — inline-encoded SVG `<feTurbulence>` noise. Default opacity 0.04, blend mode `multiply`.
 - [ ] New tokens `--shadow-photo-tape: 2px 4px 0 0 var(--color-ink)` and `--shadow-photo-tape-lift: 4px 8px 0 0 var(--color-ink)`.
-- [ ] `<TapedFigure>` extended to accept up to 2 strips with independent colour / rotation per strip (per `photo-treatment-system-locked.md` §2 slot cycle table).
+- [ ] ~~`<TapedFigure>` extended to accept up to 2 strips with independent colour / rotation per strip.~~ **Reduced to 1 at implementation (#1747)** — type signature hard-caps at a single `TapeStripProps`.
 - [ ] `<TapedFigure>` images receive `filter: var(--filter-photo-newsprint)` via CSS.
 - [ ] `<TapedFigure>` containers receive `::after` paper-grain overlay.
 - [ ] Layered hover Variant A: card press-down (`translate(1px, 1px) shadow→none`) + photo independent `translate(0, -2px)`. Tape strips anchored to card frame.
-- [ ] Storybook stories cover: `<TapeStrip>` clean vs torn variants per colour (cream + warm + jersey); `<TapedFigure>` with grain + filter on/off (opt-out via `data-tint="none"`); hover state captured in a separate story per `feedback_state_coverage_stories`.
+- [ ] Storybook stories cover: `<TapedFigure>` with grain + filter on/off (opt-out via `tint="none"`); hover state captured in a separate story per `feedback_state_coverage_stories`.
 - [ ] VR baselines regenerated for all `<TapeStrip>` and `<TapedFigure>` stories.
 - [ ] Foundation MDX (`Colors.mdx`, `Patterns.mdx`, `SpacingAndIcons.mdx`) updated for new tokens per `apps/web/CLAUDE.md` "When to update Foundation MDX".
 
@@ -300,7 +300,7 @@ These are NOT blockers to writing the PRD. List of what is genuinely unknown —
 - [ ] **`<StripedSeam>` primitive API.** R5 + R6 both consume `<StripedSeam>`. Confirm the existing primitive (Phase 0) ships configurable height + colour-stop props. If not, extend additively as part of 5.5.A.1 or 5.5.B.5 (whichever lands first). **Resolves:** implementer audit at the top of 5.5.A.1.
 - [ ] **`<NewsCard>` flush-edge refactor blast radius.** The refactor affects `<NewsGrid>`, `<RelatedContentSection>`, `/nieuws` archive page, `/jeugd` news section. Confirm the visual regression on archive/jeugd is acceptable (cards there may currently look slightly different). **Resolves:** VR baselines in 5.5.B.1 PR; if regressions look wrong on archive/jeugd, defer that surface to a follow-up.
 - [ ] **`--filter-photo-newsprint` value tuning.** The R9 lock proposed concrete values (`sepia(0.06) saturate(0.94) hue-rotate(-4deg) contrast(1.02) brightness(1.01)`). These need real-photo validation at hero scale — if the warm tint reads wrong on action shots (green pitch turning swampy, jerseys looking dated in a bad way), dial back at PR time. **Resolves:** implementer judgment in 5.5.A.1 PR review.
-- [ ] **Torn-edge tape geometry at small scale.** R9 spec is "4-6 randomised vertices along each long edge, ~1.5px jitter." Confirm this reads as "hand-torn paper" at the small tape widths used on news cards (~36px). If too noisy at small scale, simplify to 3 vertices. **Resolves:** implementer judgment in 5.5.A.1 PR review.
+- [x] ~~**Torn-edge tape geometry at small scale.**~~ **Resolved (#1747):** torn-edge variant dropped entirely at implementation. Both polygon clip-path and feathered alpha-mask approaches read wrong at design review. Clean rectangular tape is the only variant.
 - [ ] **Display variants for image-less cards (future phase).** Per `feedback_display_variants_need_imagery`, if a future round revisits cards without photos, the variants must incorporate imagery (illustrations, photo collages, jersey graphics), not pure typography. Phase 4.5 doesn't address this — all cards always render the article's `coverImage`. **Resolves:** future phase scope decision, not Phase 4.5.
 - [ ] **`/nieuws`, `/jeugd`, `/sponsors`, `/events` projection adoption.** The new `ARTICLES_QUERY` projection adds optional fields the non-homepage pages don't need today. If those pages later want per-articleType card backgrounds (R3.B applied off-homepage), they'd consume the same projection. **Resolves:** out of Phase 4.5 scope; revisit when off-homepage adoption is desired.
 - [ ] **Subject portrait image sizing in projection.** Detail-page query uses `?w=600`; homepage R1.5 IV.3 only needs ~16px thumbs. Worth `?w=64` for the homepage variant to reduce payload, OR keep `?w=600` for parity with detail use? **Resolves:** implementer judgment in 5.5.0 or 5.5.B.2 PR review.

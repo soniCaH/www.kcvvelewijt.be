@@ -19,3 +19,27 @@ Tight green/cream horizontal stripes (14 px / 14 px). Used on small player figur
 Diagonal black/cream barber-pole stripe at -45° (8 px / 8 px). Used by `<StripedSeam>` for horizontal section dividers. Never apply with negative margins; `<StripedSeam>` is SVG-backed for clean caps.
 
 <div style={{ height: '24px', background: 'var(--pattern-seam)' }} />
+
+## `--pattern-paper-grain`
+
+Inline-encoded SVG `<feTurbulence>` noise (Phase 4.5, R9). Applied as a `::after` pseudo overlay on `<TapedFigure>` at 4 % opacity with `mix-blend-mode: multiply` — adds fine paper grain to taped photos so they read as printed rather than digital. The data-URL ships with the stylesheet, no network request. Consumers don't reach for this token directly: it's wired into the `.taped-figure::after` rule in `globals.css`. The preview below shows the noise at a higher 30 % opacity for visibility.
+
+<div style={{ position: 'relative', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', overflow: 'hidden' }}>
+  <div style={{ position: 'absolute', inset: 0, backgroundImage: 'var(--pattern-paper-grain)', opacity: 0.3, mixBlendMode: 'multiply' }} />
+</div>
+
+## `--filter-photo-newsprint`
+
+CSS filter pipeline applied to `<TapedFigure>` photographs (Phase 4.5, R9). Delivers a "very subtle warm tint" — slight cream shift in highlights, slight green in deepest shadows, like aged newsprint. Composes `sepia(0.06)` `saturate(0.94)` `hue-rotate(-4deg)` `contrast(1.02)` `brightness(1.01)`. Opt out per-instance with `<TapedFigure tint="none">` for designed graphics where the warm cast shifts brand colours.
+
+<div style={{ display: 'flex', gap: '12px' }}>
+  <div style={{ flex: 1 }}>
+    <div style={{ height: '120px', background: 'linear-gradient(135deg, #2c5530, #6da870 30%, #c8a060 70%, #f5e6b4)', border: '1px solid var(--color-paper-edge)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '6px' }}>filter: none</div>
+  </div>
+  <div style={{ flex: 1 }}>
+    <div style={{ height: '120px', background: 'linear-gradient(135deg, #2c5530, #6da870 30%, #c8a060 70%, #f5e6b4)', filter: 'var(--filter-photo-newsprint)', border: '1px solid var(--color-paper-edge)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '6px' }}>filter: var(--filter-photo-newsprint)</div>
+  </div>
+</div>
+

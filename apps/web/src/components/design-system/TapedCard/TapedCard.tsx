@@ -21,15 +21,30 @@ export type TapedCardBg =
 export type TapedCardPadding = "sm" | "md" | "lg" | "none";
 export type TapedCardAs = "div" | "article" | "section" | "li" | "figure";
 
+/**
+ * `false` — no hover behaviour.
+ * `true` / `"tilt"` — rotation delta on hover (the historical default).
+ * `"press"` — canonical paper press-down: translate(1px, 1px) and shadow →
+ *   none on hover. Composes with `rotation` (rotation is preserved on hover).
+ *   Used by <TapedFigure interactive> for the layered photo-lift model
+ *   locked in the R9 photo-treatment system.
+ */
+export type TapedCardInteractive = boolean | "tilt" | "press";
+
 export interface TapedCardProps {
   rotation?: TapedCardRotation;
   tape?: TapeStripProps | TapeStripProps[];
   shadow?: TapedCardShadow;
   bg?: TapedCardBg;
   padding?: TapedCardPadding;
-  interactive?: boolean;
+  interactive?: TapedCardInteractive;
   as?: TapedCardAs;
   className?: string;
+  /** Extra `data-*` attributes forwarded onto the rendered root. Used by
+   *  composers (e.g. <TapedFigure>) that need to expose state-bearing
+   *  attributes to global CSS rules without bleeding their concerns into
+   *  TapedCard's prop API. */
+  dataAttrs?: Record<`data-${string}`, string>;
   children: ReactNode;
 }
 
@@ -83,13 +98,24 @@ export function TapedCard({
   interactive = false,
   as: Tag = "div",
   className,
+  dataAttrs,
   children,
 }: TapedCardProps) {
   const restRotation = rotationToCss(rotation);
-  const style: StyleWithVars = interactive
+  // Normalise `interactive: true` to the historical "tilt" idiom so the
+  // boolean form keeps its existing meaning for current consumers.
+  const interactiveMode: false | "tilt" | "press" =
+    interactive === true ? "tilt" : interactive === false ? false : interactive;
+  const isInteractive = interactiveMode !== false;
+  const style: StyleWithVars = isInteractive
     ? {
         "--card-rest-rotation": restRotation,
+        // Composes translate (press mode) + rotation (always) + tilt-delta
+        // (tilt mode only — defaults to 0deg). Both `--card-press-{x,y}` and
+        // `--card-hover-delta` default to 0, so a press-mode card only ever
+        // translates and a tilt-mode card only ever rotates.
         transform:
+          "translate(var(--card-press-x, 0px), var(--card-press-y, 0px)) " +
           "rotate(calc(var(--card-rest-rotation) + var(--card-hover-delta, 0deg)))",
       }
     : { transform: `rotate(${restRotation})` };
@@ -102,7 +128,8 @@ export function TapedCard({
       data-bg={bg}
       data-shadow={shadow}
       data-padding={padding}
-      data-interactive={interactive ? "true" : "false"}
+      data-interactive={interactiveMode === false ? "false" : interactiveMode}
+      {...dataAttrs}
       style={style}
       className={cn(
         "relative",
@@ -113,8 +140,13 @@ export function TapedCard({
         SHADOW_CLASS[shadow],
         BG_CLASS[bg],
         PADDING_CLASS[padding],
-        interactive &&
+        interactiveMode === "tilt" &&
           "motion-safe:hover:shadow-paper-lift transition-[transform,box-shadow] duration-300 motion-safe:hover:[--card-hover-delta:1deg]",
+        interactiveMode === "press" &&
+          // Canonical paper press-down: card translates +1/+1 and the offset
+          // shadow collapses to flush. Tape strips are children so they
+          // translate with the card frame (R9 §7: "anchored to card frame").
+          "transition-[transform,box-shadow] duration-300 motion-safe:hover:shadow-none motion-safe:hover:[--card-press-x:1px] motion-safe:hover:[--card-press-y:1px]",
         className,
       )}
     >

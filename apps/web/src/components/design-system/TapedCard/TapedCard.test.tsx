@@ -119,18 +119,32 @@ describe("TapedCard", () => {
     );
   });
 
-  it("interactive=true sets data-interactive and adds hover/transition classes", () => {
+  it("interactive=true aliases to tilt mode and adds the hover-delta class", () => {
     const { container } = render(<TapedCard interactive>X</TapedCard>);
     const el = container.firstChild as HTMLElement;
-    expect(el).toHaveAttribute("data-interactive", "true");
-    expect(el.className).toMatch(/motion-safe:hover:/);
+    expect(el).toHaveAttribute("data-interactive", "tilt");
+    expect(el.className).toMatch(
+      /motion-safe:hover:\[--card-hover-delta:1deg\]/,
+    );
     expect(el.className).toMatch(/transition-/);
+  });
+
+  it('interactive="press" sets canonical press-down hover (translate + shadow→none)', () => {
+    const { container } = render(<TapedCard interactive="press">X</TapedCard>);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-interactive", "press");
+    expect(el.className).toMatch(/motion-safe:hover:\[--card-press-x:1px\]/);
+    expect(el.className).toMatch(/motion-safe:hover:\[--card-press-y:1px\]/);
+    expect(el.className).toMatch(/motion-safe:hover:shadow-none/);
+    // Tilt-specific class must NOT be applied in press mode.
+    expect(el.className).not.toMatch(/--card-hover-delta/);
   });
 
   it("interactive=false (default) does not add hover classes", () => {
     const { container } = render(<TapedCard>X</TapedCard>);
     const el = container.firstChild as HTMLElement;
     expect(el.className).not.toMatch(/motion-safe:hover:/);
+    expect(el).toHaveAttribute("data-interactive", "false");
   });
 
   it("merges className with the computed classes", () => {

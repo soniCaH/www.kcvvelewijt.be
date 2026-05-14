@@ -80,4 +80,54 @@ describe("TapedFigure", () => {
     render(<TapedFigure>{Img}</TapedFigure>);
     expect(screen.getByAltText("t")).toBeInTheDocument();
   });
+
+  it("root carries .taped-figure class so global filter + grain rules apply", () => {
+    const { container } = render(<TapedFigure>{Img}</TapedFigure>);
+    const fig = container.firstChild as HTMLElement;
+    expect(fig.className).toContain("taped-figure");
+  });
+
+  it("photo container carries .taped-figure__photo class", () => {
+    const { container } = render(<TapedFigure>{Img}</TapedFigure>);
+    const photo = container.querySelector(".taped-figure__photo");
+    expect(photo).not.toBeNull();
+  });
+
+  it("defaults to data-tint=newsprint (filter applies via globals.css)", () => {
+    const { container } = render(<TapedFigure>{Img}</TapedFigure>);
+    const fig = container.firstChild as HTMLElement;
+    expect(fig).toHaveAttribute("data-tint", "newsprint");
+  });
+
+  it('tint="none" emits data-tint=none for per-instance opt-out', () => {
+    const { container } = render(<TapedFigure tint="none">{Img}</TapedFigure>);
+    const fig = container.firstChild as HTMLElement;
+    expect(fig).toHaveAttribute("data-tint", "none");
+  });
+
+  it("interactive=false (default) emits data-lift=false and no press hover classes", () => {
+    const { container } = render(<TapedFigure>{Img}</TapedFigure>);
+    const fig = container.firstChild as HTMLElement;
+    expect(fig).toHaveAttribute("data-lift", "false");
+    expect(fig.className).not.toMatch(/--card-press-x/);
+  });
+
+  it("interactive=true emits data-lift=true and wires press-mode hover on the card", () => {
+    const { container } = render(<TapedFigure interactive>{Img}</TapedFigure>);
+    const fig = container.firstChild as HTMLElement;
+    expect(fig).toHaveAttribute("data-lift", "true");
+    expect(fig).toHaveAttribute("data-interactive", "press");
+    expect(fig.className).toMatch(/motion-safe:hover:\[--card-press-x:1px\]/);
+  });
+
+  it("renders the single tape strip when tape prop is set", () => {
+    // Hard-capped at one strip per photo by design — the two-strip slot
+    // cycle in the R9 first-pass lock was rejected at review.
+    const { container } = render(
+      <TapedFigure tape={{ color: "warm", length: "lg" }}>{Img}</TapedFigure>,
+    );
+    const tapes = container.querySelectorAll("[data-color]");
+    expect(tapes).toHaveLength(1);
+    expect(tapes[0]).toHaveAttribute("data-color", "warm");
+  });
 });

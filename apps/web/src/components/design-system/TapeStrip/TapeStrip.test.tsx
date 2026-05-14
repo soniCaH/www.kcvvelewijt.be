@@ -33,4 +33,20 @@ describe("TapeStrip", () => {
     );
     expect(el.style.transform).toContain("translateY(-50%)");
   });
+
+  it("color=cream applies --color-tape-cream as inline background-color", () => {
+    // Cream tape is the dedicated tape token (rgb 232 224 200 / 0.85), NOT
+    // the body cream surface colour. The bg-cream Tailwind utility must not
+    // be applied — that would render the tape invisible on cream cards.
+    const { container } = render(<TapeStrip color="cream" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el.className).not.toContain("bg-cream");
+    expect(el.style.backgroundColor).toBe("var(--color-tape-cream)");
+  });
+
+  it("color=warm applies --tape-warm as inline background-color (regression)", () => {
+    const { container } = render(<TapeStrip color="warm" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el.style.backgroundColor).toBe("var(--tape-warm)");
+  });
 });

@@ -331,7 +331,19 @@ soft shadow stays available for chrome that should sit subtly above content
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-soft</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>diffuse, for chrome</div>
   </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-photo-tape)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-photo-tape</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>2px / 4px asymmetric (R9)</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-photo-tape-lift)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-photo-tape-lift</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>4px / 8px asymmetric hover (R9)</div>
+  </div>
 </div>
+
+The two `--shadow-photo-tape*` tokens use an asymmetric offset (2 / 4 and 4 / 8) different from the symmetric paper shadows. Photos lean forward; cards rest flat. Both vocabularies coexist — see `<TapedFigure>` for the photo idiom.
 
 ### Motion
 

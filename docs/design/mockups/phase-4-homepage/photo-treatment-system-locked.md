@@ -1,10 +1,31 @@
 # Phase 4.5 · R9 · Photo treatment system — Locked
 
-**Locked 2026-05-14.**
+**Locked 2026-05-14. Revised at implementation (#1747, 2026-05-14).**
 **Source directive:** Owner photo-treatment prompt (directives 1 + 4).
 **Companion locks:** all R1.x / R2 / R3 / R5 / R6 locks consume these
 tokens.
 **Owner:** @climacon.
+
+## Revisions during implementation (#1747)
+
+Two §-level decisions from this lock did not survive design review at
+implementation time:
+
+1. **§1 Torn-edge tape variant — DROPPED.** Two attempts at implementation
+   (polygon clip-path with 4–6 hand-torn vertices, and a feathered
+   alpha-mask alternative) both read wrong at review. No torn-edge
+   variant ships; `<TapeStrip>` stays clean-rectangular only. The
+   `--tape-edge-{1..4}` and `--tape-mask-torn` tokens were never
+   committed.
+2. **§2 Per-strip variety (1–2 strips per photo) — REDUCED to 1.**
+   The two-strip slot cycle was rejected at review as visually
+   unjustified. The `--color-tape-cream` token still ships (third tape
+   colour is genuinely needed — see §2 for usage), but the slot cycle
+   table below is informational only. `<TapedFigure>` hard-caps at one
+   tape strip per photo in its type signature.
+
+The rest of the lock (newsprint filter, paper-grain overlay, photo
+shadow tokens, layered hover model) ships as authored.
 
 ## Decision
 
@@ -13,7 +34,11 @@ and 4 of the photo-treatment prompt. No visual A/B round — these are
 concrete token values for implementation. Adjust at PR time if any
 value reads wrong against real photos.
 
-## 1. Tape strip · torn-edge variant
+## 1. Tape strip · torn-edge variant — SUPERSEDED
+
+> **Superseded at implementation (#1747).** See "Revisions during
+> implementation" above. The rest of this section is preserved as
+> historical record of the lock as authored — none of it ships.
 
 ### New `<TapeStrip variant>` prop
 
@@ -75,7 +100,13 @@ A cream-soft on cream-soft variant — visible by edge / shadow but
 nearly disappears into the paper. Used for the third tape colour
 that breaks the warm/jersey rhythm.
 
-### Per-strip variety on TapedFigure
+### Per-strip variety on TapedFigure — SUPERSEDED
+
+> **Superseded at implementation (#1747).** The two-strip slot cycle was
+> rejected at design review. `<TapedFigure>` hard-caps at one tape strip
+> per photo. The `--color-tape-cream` token still ships and is used by
+> consumers that explicitly opt into a cream tape; the cycle table below
+> is historical record only.
 
 Today's `<TapedFigure>` accepts `tape={[{ color: "warm" }]}` — usually
 a single strip. R9 extends usage: each photo gets 1–2 strips, EACH
@@ -253,23 +284,29 @@ transform on top, not a replacement.
 
 ## 8. Implementation pieces summary
 
+> **Some bullets superseded at implementation (#1747).** Bullets marked
+> `~~strikethrough~~` describe behaviour that was dropped at design
+> review. See "Revisions during implementation" at the top.
+
 For implementation issue authoring:
 
-- **New `<TapeStrip edge="clean" | "torn">` prop.** Adds 4 canonical
-  torn-edge SVG masks; slot-deterministic cycling.
+- ~~**New `<TapeStrip edge="clean" | "torn">` prop.** Adds 4 canonical
+  torn-edge SVG masks; slot-deterministic cycling.~~ Dropped (#1747).
 - **New `--color-tape-cream` token.** RGB value as above.
 - **New `--filter-photo-newsprint` CSS variable + application to
   `<TapedFigure>` images.**
 - **New `--pattern-paper-grain` data URL token + `::after` overlay
   rule.**
 - **New `--shadow-photo-tape` + `--shadow-photo-tape-lift` tokens.**
-- **`<TapedFigure>` extends to accept 2 strips with independent
-  colour/rotation per strip.**
-- **NewsCard / EditorialHero / Uitgelicht / FeaturedEventBand
-  consumers updated to set tape colours per the slot cycle table.**
+- ~~**`<TapedFigure>` extends to accept 2 strips with independent
+  colour/rotation per strip.**~~ Reduced to 1 strip (#1747).
+- ~~**NewsCard / EditorialHero / Uitgelicht / FeaturedEventBand
+  consumers updated to set tape colours per the slot cycle table.**~~
+  Consumer updates land in their per-issue PRs (e.g. #1748 NewsCard); the
+  slot-cycle table itself is historical.
 - **Hover transform: layered card press-down + photo lift (Variant A).**
-- **Storybook stories cover both clean and torn edges; full grid
-  shows the slot-deterministic colour cycle.**
+- ~~**Storybook stories cover both clean and torn edges; full grid
+  shows the slot-deterministic colour cycle.**~~ Torn edges dropped (#1747).
 - **VR baselines refresh after token rollout.**
 
 ## 9. Out of scope for R9
@@ -293,9 +330,9 @@ These are listed for clarity, not because they need design work:
   photos at hero scale before committing in a PR. If the warm tint
   reads wrong on action shots (e.g. green pitch turning swampy),
   dial back saturate/hue-rotate.
-- Confirm `<TapeStrip edge="torn">` reads as "hand-torn paper" and
+- ~~Confirm `<TapeStrip edge="torn">` reads as "hand-torn paper" and
   not "rough computer-generated edge" at the small tape widths used
   on news cards (~36px). If too noisy at small scale, simplify the
-  torn polyline to 3 vertices.
+  torn polyline to 3 vertices.~~ Resolved by dropping torn-edge entirely (#1747).
 - Studio description copy for `coverImage` field — editor guidance
   on landscape orientation + minimum width.
