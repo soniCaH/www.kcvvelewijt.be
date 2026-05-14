@@ -20,6 +20,31 @@ export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  articleType,
+  subjects[]{
+    _key, kind,
+    playerRef->{
+      _id, firstName, lastName, jerseyNumber, position,
+      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      psdId
+    },
+    staffRef->{
+      _id, firstName, lastName, functionTitle,
+      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
+    },
+    customName, customRole,
+    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
+  },
+  "firstTransferFact": body[_type == "transferFact"][0]{
+    direction, playerName, position, age,
+    otherClubName, until, note, noteAttribution, kcvvContext
+  },
+  "firstEventFact": body[_type == "eventFact"][0]{
+    title, date, endDate, startTime, endTime,
+    location, address, ageGroup, competitionTag,
+    ticketUrl, ticketLabel
+  },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
 }`);
 
@@ -158,6 +183,10 @@ export type ArticleVM = Omit<
     | "featured"
     | "tags"
     | "coverImageUrl"
+    | "articleType"
+    | "subjects"
+    | "firstTransferFact"
+    | "firstEventFact"
   >,
   "title" | "slug" | "featured" | "tags"
 > & {
@@ -215,6 +244,25 @@ function filterPublishedRelatedArticles(
   };
 }
 
+// `findPaginated` and `findRelated` use narrower GROQ projections that omit
+// the Phase 4.5 per-articleType fields (`articleType`, `subjects`,
+// `firstTransferFact`, `firstEventFact`). Widening them to `ArticleVM` keeps
+// the locked repository interface single-typed; consumers that need the new
+// fields call `findAll`.
+function widenToArticleVM(
+  row:
+    | ARTICLES_PAGINATED_QUERY_RESULT[number]
+    | RELATED_ARTICLES_QUERY_RESULT[number],
+): ArticleVM {
+  return {
+    ...row,
+    articleType: null,
+    subjects: null,
+    firstTransferFact: null,
+    firstEventFact: null,
+  };
+}
+
 export function toHomepageArticle(article: ArticleVM): HomepageArticle {
   return {
     href: `/nieuws/${article.slug}`,
@@ -265,10 +313,10 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
       offset,
       end: offset + limit,
       category: category ?? "",
-    }),
+    }).pipe(Effect.map((rows) => rows.map(widenToArticleVM))),
   findTags: () => fetchGroq<ARTICLE_TAGS_QUERY_RESULT>(ARTICLE_TAGS_QUERY),
   findRelated: (documentId) =>
     fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(RELATED_ARTICLES_QUERY, {
       documentId,
-    }),
+    }).pipe(Effect.map((rows) => rows.map(widenToArticleVM))),
 });

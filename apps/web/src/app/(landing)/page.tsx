@@ -64,9 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function toHeroCarouselArticle(article: ArticleVM): HomepageHeroArticle {
   return {
     slug: article.slug,
-    // ARTICLES_QUERY does not project `articleType` today; default to
-    // "announcement" until the projection grows (out of scope for #1680).
-    variant: "announcement",
+    variant: article.articleType ?? "announcement",
     title: article.title,
     coverImage: article.coverImageUrl
       ? { url: article.coverImageUrl, alt: article.title }
