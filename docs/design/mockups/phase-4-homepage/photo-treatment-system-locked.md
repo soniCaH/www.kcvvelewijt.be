@@ -284,23 +284,29 @@ transform on top, not a replacement.
 
 ## 8. Implementation pieces summary
 
+> **Some bullets superseded at implementation (#1747).** Bullets marked
+> `~~strikethrough~~` describe behaviour that was dropped at design
+> review. See "Revisions during implementation" at the top.
+
 For implementation issue authoring:
 
-- **New `<TapeStrip edge="clean" | "torn">` prop.** Adds 4 canonical
-  torn-edge SVG masks; slot-deterministic cycling.
+- ~~**New `<TapeStrip edge="clean" | "torn">` prop.** Adds 4 canonical
+  torn-edge SVG masks; slot-deterministic cycling.~~ Dropped (#1747).
 - **New `--color-tape-cream` token.** RGB value as above.
 - **New `--filter-photo-newsprint` CSS variable + application to
   `<TapedFigure>` images.**
 - **New `--pattern-paper-grain` data URL token + `::after` overlay
   rule.**
 - **New `--shadow-photo-tape` + `--shadow-photo-tape-lift` tokens.**
-- **`<TapedFigure>` extends to accept 2 strips with independent
-  colour/rotation per strip.**
-- **NewsCard / EditorialHero / Uitgelicht / FeaturedEventBand
-  consumers updated to set tape colours per the slot cycle table.**
+- ~~**`<TapedFigure>` extends to accept 2 strips with independent
+  colour/rotation per strip.**~~ Reduced to 1 strip (#1747).
+- ~~**NewsCard / EditorialHero / Uitgelicht / FeaturedEventBand
+  consumers updated to set tape colours per the slot cycle table.**~~
+  Consumer updates land in their per-issue PRs (e.g. #1748 NewsCard); the
+  slot-cycle table itself is historical.
 - **Hover transform: layered card press-down + photo lift (Variant A).**
-- **Storybook stories cover both clean and torn edges; full grid
-  shows the slot-deterministic colour cycle.**
+- ~~**Storybook stories cover both clean and torn edges; full grid
+  shows the slot-deterministic colour cycle.**~~ Torn edges dropped (#1747).
 - **VR baselines refresh after token rollout.**
 
 ## 9. Out of scope for R9
