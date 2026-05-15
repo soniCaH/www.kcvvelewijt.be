@@ -213,6 +213,11 @@ export interface HomepageArticle {
   date: string;
   dateIso: string;
   tags: Array<{ name: string }>;
+  /** Forwarded so the homepage news grid can derive its per-card
+   *  background from the R3.B `BG_BY_TYPE` lookup
+   *  (`card-semantics-locked.md`). Null / undefined for legacy
+   *  untyped articles — they fall back to cream. */
+  articleType?: ArticleVM["articleType"];
 }
 
 // ─── Transforms ──────────────────────────────────────────────────────────────
@@ -272,6 +277,7 @@ export function toHomepageArticle(article: ArticleVM): HomepageArticle {
     date: article.publishedAt ? formatArticleDate(article.publishedAt) : "",
     dateIso: article.publishedAt ?? "",
     tags: article.tags.map((t) => ({ name: t })),
+    articleType: article.articleType,
   };
 }
 

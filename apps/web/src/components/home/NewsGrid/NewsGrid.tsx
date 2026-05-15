@@ -6,17 +6,36 @@ import type {
   NewsCardRotation,
 } from "@/components/article/NewsCard/NewsCard";
 
+/**
+ * Article-type union surfaced by `ARTICLES_QUERY`. Kept inline rather
+ * than imported from the repository layer so `<NewsGrid>` doesn't
+ * couple to GROQ result types — the home barrel pattern already
+ * established by `<NewsGridArticle>` / `<UitgelichtArticle>`. Future
+ * `matchPreview` / `matchRecap` types (per `card-semantics-locked.md`
+ * §"Open follow-ups") slot in here when they land.
+ */
+type ArticleType = "transfer" | "interview" | "announcement" | "event";
+
 export interface NewsGridArticle {
   href: string;
   title: string;
   imageUrl?: string;
   imageAlt: string;
   date: string;
+  /** Drives the per-card background via the R3.B `BG_BY_TYPE` lookup
+   *  (`card-semantics-locked.md`). `null` / missing falls back to
+   *  cream so legacy untyped articles render cleanly. */
+  articleType?: ArticleType | null;
   tags?: Array<{ name: string }>;
 }
 
 export interface NewsGridProps {
-  /** 0–5 articles. N=0 returns null. Slot 0 is the lead, slots 1..4 the cluster. */
+  /**
+   * 0–6 articles in chronological order. N=0 returns null; 1..5
+   * render in a 3-col grid with the last row partially filled;
+   * 6 fills the full 3×2; 7+ silently caps at the first 6 — overflow
+   * accessible via the section header's "Alle berichten →" link.
+   */
   articles: NewsGridArticle[];
   title?: string;
   showViewAll?: boolean;
@@ -24,40 +43,27 @@ export interface NewsGridProps {
   className?: string;
 }
 
-// Slot-index rotation cycle per Round 5d T.1. Matches the
-// <TapedCardGrid> ROTATION_POOL ordering. Slot 0 is the lead.
-const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "c", "d", "a"];
+// R3.B per-articleType background lookup. Transfer carries the
+// "green = transfer" semantic (jersey-deep); every other type stays
+// on the calm cream surface. Owner-accepted risk: a transfer-window
+// run with 3–4 transfers in the grid will read heavy. See
+// `card-semantics-locked.md` for the rationale that retired the
+// previous slot-rhythm cycle.
+const BG_BY_TYPE: Record<ArticleType, NewsCardBg> = {
+  transfer: "jersey-deep",
+  interview: "cream",
+  announcement: "cream",
+  event: "cream",
+};
 
-// Slot-index paper-stamp variety. Lead anchors on cream; supporting
-// cluster cycles cream / jersey-deep / cream-soft / ink so the 1+4
-// reads as a mixed-paper sheet rather than 5 uniform tiles.
-const SLOT_BGS: NewsCardBg[] = [
-  "cream",
-  "jersey-deep",
-  "cream-soft",
-  "ink",
-  "cream",
-];
+function bgForArticle(type: NewsGridArticle["articleType"]): NewsCardBg {
+  return type ? BG_BY_TYPE[type] : "cream";
+}
 
-const renderCard = (
-  article: NewsGridArticle,
-  slot: number,
-  variant: "featured" | "standard",
-) => (
-  <NewsCard
-    key={article.href}
-    variant={variant}
-    title={article.title}
-    href={article.href}
-    imageUrl={article.imageUrl}
-    imageAlt={article.imageAlt}
-    badge={article.tags?.[0]?.name}
-    date={article.date}
-    aspectRatio="landscape-16-9"
-    rotation={SLOT_ROTATIONS[slot]}
-    bg={SLOT_BGS[slot]}
-  />
-);
+// Six-entry rotation pool covering the full 3×2 grid. The four
+// canonical pool entries cycle and the last two repeat the first two
+// so the bottom-row cards don't all share rotation `a`.
+const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "c", "d", "a", "b"];
 
 export const NewsGrid = ({
   articles,
@@ -70,9 +76,9 @@ export const NewsGrid = ({
     return null;
   }
 
-  const lead = articles[0]!;
-  const supporting = articles.slice(1, 5);
-  const leadSpansTwoRows = supporting.length >= 2;
+  // Cap at 6 per the R2.B geometry. Overflow flows through the
+  // "Alle berichten →" link, not the grid.
+  const cards = articles.slice(0, 6);
 
   return (
     <section className={className}>
@@ -87,24 +93,30 @@ export const NewsGrid = ({
           <SectionHeader title={title} />
         )}
 
-        {/*
-          Geometry — Round 5b D.1 (50/50) + Round 5f E.1 (graceful collapse).
-          Mobile: 1-col stack (1 lead + 2-col supporting cluster below).
-          Desktop: 2-col, lead in left col spanning 2 rows when N>=3.
-        */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className={leadSpansTwoRows ? "md:row-span-2" : undefined}>
-            {renderCard(lead, 0, "featured")}
-          </div>
-
-          {supporting.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 md:grid-rows-2">
-              {supporting.map((article, idx) =>
-                renderCard(article, idx + 1, "standard"),
-              )}
-            </div>
-          )}
-        </div>
+        {/* 3×2 chronological grid — R2.B (`newsgrid-revisit-locked.md`).
+            Replaces the previous Phase 4 Round 5b 1+4 asymmetric layout:
+            Uitgelicht (R1.6) now owns the editorial-lead role, so the
+            news grid drops internal hierarchy and reads as a flat
+            six-card chronological stream. Mobile collapses to one
+            column; ≥ 640px stays at three. */}
+        <ul className="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-3 md:gap-6">
+          {cards.map((article, idx) => (
+            <li key={article.href} className="h-full">
+              <NewsCard
+                variant="standard"
+                title={article.title}
+                href={article.href}
+                imageUrl={article.imageUrl}
+                imageAlt={article.imageAlt}
+                badge={article.tags?.[0]?.name}
+                date={article.date}
+                aspectRatio="landscape-16-9"
+                rotation={SLOT_ROTATIONS[idx]}
+                bg={bgForArticle(article.articleType)}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

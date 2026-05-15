@@ -140,7 +140,13 @@ export default async function HomePage() {
   const featuredEvent = featuredEventResult;
 
   const heroArticles = articles.slice(0, 3).map(toHeroCarouselArticle);
-  const newsGridArticles = toHomepageArticles(articles.slice(3, 8));
+  // R2.B (`newsgrid-revisit-locked.md`) — slice widened from 5 → 6
+  // cards and shifted from positions 4..8 to 5..10. Position 4
+  // (index 3) is now consumed by `<FeaturedUitgelichtRow>` when it
+  // ships into the spine (#1754). Until then index 3 is unused on
+  // the homepage; the article still appears on `/nieuws` via the
+  // archive page.
+  const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
 

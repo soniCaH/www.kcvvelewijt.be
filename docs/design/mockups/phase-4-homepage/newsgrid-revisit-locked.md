@@ -1,9 +1,23 @@
 # Phase 4.5 · NewsGrid geometry — Locked (R2)
 
-**Locked 2026-05-14.**
+**Locked 2026-05-14. Implemented #1751 (2026-05-15).**
 **Supersedes:** `newsgrid-locked.md` (Phase 4 Round 5b · 1+4 asymmetric).
 **Source compare page:** `round-r2-newsgrid-revisit-comparisons.html`.
 **Owner:** @climacon.
+
+## Implementation notes (#1751)
+
+- §"Background cycle" (lines 69–85) is superseded by R3.B's `BG_BY_TYPE`
+  lookup (`card-semantics-locked.md`). The slot-deterministic
+  cream/jersey-deep/cream-soft/ink table is historical; production
+  background derivation reads `article.articleType`.
+- `SLOT_ROTATIONS` extends to six entries `[a, b, c, d, a, b]` so the
+  bottom row doesn't all share `a`.
+- Mobile / tablet decision: stayed at three columns above 640px;
+  collapse to one column below. Per the lock's §"Mobile responsive"
+  out-of-round note, no intermediate 2-col tablet variant ships.
+- `articleType` is forwarded through `HomepageArticle` so the page
+  doesn't need to re-import the GROQ result type to render the grid.
 
 ## Decision
 
