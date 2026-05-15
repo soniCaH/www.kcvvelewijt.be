@@ -1,9 +1,28 @@
 # Phase 4.5 · Clubshop section — Locked (R6)
 
-**Locked 2026-05-14.**
+**Locked 2026-05-14. Implemented #1753 (2026-05-15).**
 **Supersedes:** open follow-ups in `webshopbanner-locked.md` (Round 9 + 9b + 9c).
 **Source compare page:** `round-r6-clubshop-revisit-comparisons.html`.
 **Owner:** @climacon.
+
+## Implementation notes (#1753)
+
+- `<StripedSeam>` gained `flip?: boolean` (default `-45°`; true →
+  `+45°`) and a `"jersey-tonal"` `colorPair` (jersey-deep-dark +
+  jersey-deep stripes). Both additive — existing consumers unchanged.
+- The legacy nested `<TapedCard>` is retired: the `<section>` itself
+  carries `bg-jersey-deep-dark` so the mirrored seam frames the full
+  surface rather than a card-within-a-section.
+- `<JerseyShirt>` gained a `className` prop so the corner variant can
+  override its default `h-60 w-60` to `h-35 w-35` (140 px) without
+  changing the primitive for other consumers.
+- `EXTERNAL_LINKS.webshop` renamed to `EXTERNAL_LINKS.brandsfit` so
+  the partner brand surfaces at the call site.
+- Analytics events renamed: `webshop_banner_impression` →
+  `clubshop_banner_impression`; `webshop_banner_cta_click` →
+  `clubshop_banner_cta_click`. GTM trigger + GA4 custom-dimension
+  list follow-up captured in the PR body per
+  `feedback_analytics_prd_requirement`.
 
 ## Decision
 

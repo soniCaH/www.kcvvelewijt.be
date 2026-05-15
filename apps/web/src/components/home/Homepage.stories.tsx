@@ -6,7 +6,7 @@ import {
   HomepageHeroCarousel,
   NewsGrid,
   UpcomingMatches,
-  WebshopBanner,
+  ClubshopBanner,
   YouthBackdrop,
   YouthSection,
 } from ".";
@@ -192,10 +192,10 @@ const Homepage = ({
     backdrop: <YouthBackdrop />,
   };
 
-  const webshopSection: SectionConfig = {
-    key: "webshop",
+  const clubshopSection: SectionConfig = {
+    key: "clubshop",
     bg: "transparent",
-    content: <WebshopBanner />,
+    content: <ClubshopBanner />,
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
   };
@@ -236,7 +236,7 @@ const Homepage = ({
         upcomingMatchesSection,
         bannerSlotBSection,
         youthSection,
-        webshopSection,
+        clubshopSection,
         bannerSlotCSection,
         sponsorsSection,
       ]}

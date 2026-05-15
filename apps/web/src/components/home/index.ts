@@ -41,5 +41,5 @@ export type { YouthSectionProps } from "./YouthSection";
 export { SponsorsSection } from "./SponsorsSection";
 export type { SponsorsSectionProps } from "./SponsorsSection";
 
-export { WebshopBanner } from "./WebshopBanner";
-export type { WebshopBannerProps } from "./WebshopBanner";
+export { ClubshopBanner } from "./ClubshopBanner";
+export type { ClubshopBannerProps } from "./ClubshopBanner";
