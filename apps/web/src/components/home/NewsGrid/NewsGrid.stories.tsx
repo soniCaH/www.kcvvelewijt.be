@@ -170,11 +170,20 @@ export const Empty: Story = {
   args: { ...Balanced.args, articles: [] },
 };
 
-// MobileView previews the single-column collapse below 640px. Tagged
-// `vr-skip` because the VR runner already captures `Balanced` at mobile
-// viewport and MobileView shares its args.
+// MobileView previews the single-column collapse below 640px. It
+// shares `Balanced.args` and the VR runner already captures
+// `Balanced` at the mobile viewport — running VR here would
+// duplicate that baseline. Per `apps/web/CLAUDE.md`, `vr.disable`
+// is the right opt-out (the story renders cleanly; nothing crashes).
 export const MobileView: Story = {
   args: Balanced.args,
   globals: { viewport: { value: "mobile1" } },
-  tags: ["vr-skip"],
+  parameters: {
+    // vr.disable: duplicate VR coverage — Balanced already captures
+    // the mobile viewport using identical args.
+    // Repro: render this story, compare to `--balanced--mobile.png`.
+    // Approved by: @climacon at #1751 PR review.
+    // Re-evaluate: when MobileView grows args distinct from Balanced.
+    vr: { disable: true },
+  },
 };

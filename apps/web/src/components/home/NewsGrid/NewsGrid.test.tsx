@@ -170,6 +170,12 @@ describe("NewsGrid", () => {
       const eight = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => makeArticle(n));
       render(<NewsGrid articles={eight} />);
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
+      // The link is the contract for "where does the 7th+ article go" — if
+      // it disappears (e.g. showViewAll regression) overflow becomes
+      // inaccessible from the homepage.
+      expect(
+        screen.getByRole("link", { name: /Alle berichten/i }),
+      ).toBeInTheDocument();
     });
   });
 

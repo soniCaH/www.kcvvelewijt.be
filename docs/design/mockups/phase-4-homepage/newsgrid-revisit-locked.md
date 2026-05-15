@@ -148,8 +148,12 @@ locks the geometry; R3 locks the per-card semantic treatment.
 ## Mobile responsive (out of round scope · implementation-time)
 
 Mobile (<640px): single column, 6 cards stacked. Same card composition.
-Tablet (640–1024px): 2 columns × 3 rows (i.e. R2.C's geometry as a
-fallback). Implementation-time decision, not a design-round concern.
+
+~~Tablet (640–1024px): 2 columns × 3 rows (i.e. R2.C's geometry as a
+fallback). Implementation-time decision, not a design-round concern.~~
+Resolved at implementation (#1751): the grid stays at three columns
+above 640px and collapses directly to one column below — no
+intermediate 2-col tablet variant ships.
 
 ## Retirement plan for the locked 1+4 NewsGrid
 

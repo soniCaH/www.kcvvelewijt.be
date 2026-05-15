@@ -97,8 +97,11 @@ export default async function HomePage() {
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
           const all = yield* repo.findAll();
-          // Slice [0..8] — first 3 fill the hero carousel, next 5 the news grid.
-          return all.slice(0, 8);
+          // Slice [0..10] per the R2.B + R1.6 spine: positions 1..3 fill the
+          // hero carousel, positions 5..10 fill the 3×2 news grid (6 cards).
+          // Position 4 (index 3) is reserved for `<FeaturedUitgelichtRow>`
+          // once #1754 wires it into the spine.
+          return all.slice(0, 10);
         }).pipe(Effect.catchAll(() => Effect.succeed<ArticleVM[]>([]))),
       ),
       runPromise(

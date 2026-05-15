@@ -99,7 +99,7 @@ export const NewsGrid = ({
             news grid drops internal hierarchy and reads as a flat
             six-card chronological stream. Mobile collapses to one
             column; ≥ 640px stays at three. */}
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-3 md:gap-6">
+        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-3 sm:gap-6">
           {cards.map((article, idx) => (
             <li key={article.href} className="h-full">
               <NewsCard
