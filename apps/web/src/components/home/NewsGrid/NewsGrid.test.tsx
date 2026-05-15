@@ -11,38 +11,44 @@ vi.mock("next/image", () => ({
   },
 }));
 
-const makeArticle = (n: number): NewsGridArticle => ({
+const makeArticle = (
+  n: number,
+  over: Partial<NewsGridArticle> = {},
+): NewsGridArticle => ({
   href: `/nieuws/article-${n}`,
   title: `Article ${n}`,
   imageUrl: `/images/article-${n}.jpg`,
   imageAlt: `Article ${n} image`,
   date: `${n} januari 2025`,
   tags: [{ name: `Tag${n}` }],
+  ...over,
 });
 
-const fiveArticles: NewsGridArticle[] = [1, 2, 3, 4, 5].map(makeArticle);
+const sixArticles: NewsGridArticle[] = [1, 2, 3, 4, 5, 6].map((n) =>
+  makeArticle(n),
+);
 
 describe("NewsGrid", () => {
   describe("Section structure", () => {
     it("renders a section element", () => {
-      const { container } = render(<NewsGrid articles={fiveArticles} />);
+      const { container } = render(<NewsGrid articles={sixArticles} />);
       expect(container.querySelector("section")).toBeInTheDocument();
     });
 
     it("renders default title", () => {
-      render(<NewsGrid articles={fiveArticles} />);
+      render(<NewsGrid articles={sixArticles} />);
       // SectionHeader composes EditorialHeading which auto-appends a period.
       expect(screen.getByText("Laatste nieuws.")).toBeInTheDocument();
     });
 
     it("renders custom title", () => {
-      render(<NewsGrid articles={fiveArticles} title="Nieuwsoverzicht" />);
+      render(<NewsGrid articles={sixArticles} title="Nieuwsoverzicht" />);
       expect(screen.getByText("Nieuwsoverzicht.")).toBeInTheDocument();
     });
 
     it("accepts custom className", () => {
       const { container } = render(
-        <NewsGrid articles={fiveArticles} className="custom-class" />,
+        <NewsGrid articles={sixArticles} className="custom-class" />,
       );
       expect(container.firstChild).toHaveClass("custom-class");
     });
@@ -50,129 +56,134 @@ describe("NewsGrid", () => {
 
   describe("View All link", () => {
     it("renders view all link by default", () => {
-      render(<NewsGrid articles={fiveArticles} />);
+      render(<NewsGrid articles={sixArticles} />);
       const link = screen.getByRole("link", { name: /Alle berichten/i });
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute("href", "/nieuws");
     });
 
     it("hides view all link when showViewAll is false", () => {
-      render(<NewsGrid articles={fiveArticles} showViewAll={false} />);
+      render(<NewsGrid articles={sixArticles} showViewAll={false} />);
       expect(
         screen.queryByRole("link", { name: /Alle berichten/i }),
       ).not.toBeInTheDocument();
     });
 
     it("uses custom viewAllHref", () => {
-      render(<NewsGrid articles={fiveArticles} viewAllHref="/archief" />);
+      render(<NewsGrid articles={sixArticles} viewAllHref="/archief" />);
       expect(
         screen.getByRole("link", { name: /Alle berichten/i }),
       ).toHaveAttribute("href", "/archief");
     });
   });
 
-  describe("Lead vs supporting variant", () => {
-    it("renders the first article with featured variant (display-md heading)", () => {
-      render(<NewsGrid articles={fiveArticles} />);
+  describe("R2.B flat 3×2 — no lead/supporting hierarchy", () => {
+    it("renders every card with the standard variant (display-sm heading)", () => {
+      render(<NewsGrid articles={sixArticles} />);
       const headings = screen.getAllByRole("heading", { level: 3 });
-      expect(headings[0]).toHaveAttribute("data-size", "display-md");
+      expect(headings).toHaveLength(6);
+      headings.forEach((heading) => {
+        expect(heading).toHaveAttribute("data-size", "display-sm");
+      });
     });
 
-    it("renders subsequent articles with standard variant (display-sm heading)", () => {
-      render(<NewsGrid articles={fiveArticles} />);
-      const headings = screen.getAllByRole("heading", { level: 3 });
-      expect(headings[1]).toHaveAttribute("data-size", "display-sm");
-      expect(headings[4]).toHaveAttribute("data-size", "display-sm");
+    it("renders cards inside semantic <ul>/<li> (not role='list' on divs)", () => {
+      const { container } = render(<NewsGrid articles={sixArticles} />);
+      const ul = container.querySelector("ul");
+      expect(ul).not.toBeNull();
+      expect(ul!.querySelectorAll(":scope > li")).toHaveLength(6);
     });
   });
 
-  describe("Slot rotation cycle (Round 5d T.1)", () => {
-    it("applies rotations [a, b, c, d, a] across the 5 slots", () => {
-      // `data-rotation` lives on the NewsCard <Link> wrapper (one per card).
-      const { container } = render(<NewsGrid articles={fiveArticles} />);
+  describe("Slot rotation cycle (6 entries: a / b / c / d / a / b)", () => {
+    it("applies rotations across all 6 slots", () => {
+      const { container } = render(<NewsGrid articles={sixArticles} />);
       const cards = container.querySelectorAll("a[data-rotation]");
-      expect(cards).toHaveLength(5);
-      expect(cards[0]).toHaveAttribute("data-rotation", "a");
-      expect(cards[1]).toHaveAttribute("data-rotation", "b");
-      expect(cards[2]).toHaveAttribute("data-rotation", "c");
-      expect(cards[3]).toHaveAttribute("data-rotation", "d");
-      expect(cards[4]).toHaveAttribute("data-rotation", "a");
+      expect(cards).toHaveLength(6);
+      const expected = ["a", "b", "c", "d", "a", "b"];
+      expected.forEach((rot, idx) => {
+        expect(cards[idx]).toHaveAttribute("data-rotation", rot);
+      });
     });
   });
 
-  describe("Slot bg pattern (paper-stamp variety)", () => {
-    it("applies bgs [cream, jersey-deep, cream-soft, ink, cream] across the 5 slots", () => {
-      const { container } = render(<NewsGrid articles={fiveArticles} />);
+  describe("Per-articleType backgrounds (R3.B BG_BY_TYPE)", () => {
+    it("transfer → jersey-deep; interview / announcement / event → cream", () => {
+      const articles: NewsGridArticle[] = [
+        makeArticle(1, { articleType: "transfer" }),
+        makeArticle(2, { articleType: "interview" }),
+        makeArticle(3, { articleType: "announcement" }),
+        makeArticle(4, { articleType: "event" }),
+      ];
+      const { container } = render(<NewsGrid articles={articles} />);
       const cards = container.querySelectorAll("a[data-bg]");
-      expect(cards).toHaveLength(5);
-      expect(cards[0]).toHaveAttribute("data-bg", "cream");
-      expect(cards[1]).toHaveAttribute("data-bg", "jersey-deep");
-      expect(cards[2]).toHaveAttribute("data-bg", "cream-soft");
-      expect(cards[3]).toHaveAttribute("data-bg", "ink");
-      expect(cards[4]).toHaveAttribute("data-bg", "cream");
+      expect(cards[0]).toHaveAttribute("data-bg", "jersey-deep");
+      expect(cards[1]).toHaveAttribute("data-bg", "cream");
+      expect(cards[2]).toHaveAttribute("data-bg", "cream");
+      expect(cards[3]).toHaveAttribute("data-bg", "cream");
+    });
+
+    it("falls back to cream when articleType is missing (legacy untyped)", () => {
+      const { container } = render(
+        <NewsGrid articles={[makeArticle(1, { articleType: null })]} />,
+      );
+      expect(container.querySelector("a[data-bg]")).toHaveAttribute(
+        "data-bg",
+        "cream",
+      );
     });
   });
 
-  describe("Aspect ratio (Round 5c C.1)", () => {
+  describe("Aspect ratio", () => {
     it("applies landscape-16-9 aspect to every card", () => {
-      const { container } = render(<NewsGrid articles={fiveArticles} />);
+      const { container } = render(<NewsGrid articles={sixArticles} />);
       const cards = container.querySelectorAll("a[data-aspect]");
-      expect(cards).toHaveLength(5);
+      expect(cards).toHaveLength(6);
       cards.forEach((card) => {
         expect(card).toHaveAttribute("data-aspect", "landscape-16-9");
       });
     });
   });
 
-  describe("Sparse states (Round 5f E.1)", () => {
+  describe("Partial states (R2.B graceful collapse)", () => {
     it("N=0 returns null", () => {
       const { container } = render(<NewsGrid articles={[]} />);
       expect(container.firstChild).toBeNull();
     });
 
-    it("N=1 renders only the lead", () => {
-      render(<NewsGrid articles={fiveArticles.slice(0, 1)} />);
+    it("N=1 renders 1 card", () => {
+      render(<NewsGrid articles={sixArticles.slice(0, 1)} />);
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
     });
 
-    it("N=2 renders lead + 1 supporting", () => {
-      render(<NewsGrid articles={fiveArticles.slice(0, 2)} />);
-      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(2);
-    });
-
-    it("N=3 renders lead + 2 supporting", () => {
-      render(<NewsGrid articles={fiveArticles.slice(0, 3)} />);
+    it("N=3 fills the first row", () => {
+      render(<NewsGrid articles={sixArticles.slice(0, 3)} />);
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
     });
 
-    it("N=4 renders lead + 3 supporting", () => {
-      render(<NewsGrid articles={fiveArticles.slice(0, 4)} />);
-      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(4);
+    it("N=6 fills the full 3×2", () => {
+      render(<NewsGrid articles={sixArticles} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
     });
 
-    it("N=5 renders lead + 4 supporting (full cluster)", () => {
-      render(<NewsGrid articles={fiveArticles} />);
-      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(5);
-    });
-
-    it("only spans the lead 2 rows when N>=3", () => {
-      const { container: c2 } = render(
-        <NewsGrid articles={fiveArticles.slice(0, 2)} />,
-      );
-      expect(c2.querySelector(".md\\:row-span-2")).toBeNull();
-
-      const { container: c3 } = render(
-        <NewsGrid articles={fiveArticles.slice(0, 3)} />,
-      );
-      expect(c3.querySelector(".md\\:row-span-2")).toBeInTheDocument();
+    it("N=8 caps at the first 6 — overflow flows through the 'Alle berichten →' link", () => {
+      const eight = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => makeArticle(n));
+      render(<NewsGrid articles={eight} />);
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
+      // The link is the contract for "where does the 7th+ article go" — if
+      // it disappears (e.g. showViewAll regression) overflow becomes
+      // inaccessible from the homepage.
+      expect(
+        screen.getByRole("link", { name: /Alle berichten/i }),
+      ).toBeInTheDocument();
     });
   });
 
   describe("Article rendering", () => {
     it("renders all article titles", () => {
-      render(<NewsGrid articles={fiveArticles} />);
+      render(<NewsGrid articles={sixArticles} />);
       // EditorialHeading appends a trailing period — match with optional `.`.
-      fiveArticles.forEach((a) => {
+      sixArticles.forEach((a) => {
         expect(
           screen.getByRole("heading", {
             level: 3,
@@ -183,9 +194,9 @@ describe("NewsGrid", () => {
     });
 
     it("renders article tags as badge", () => {
-      render(<NewsGrid articles={fiveArticles} />);
+      render(<NewsGrid articles={sixArticles} />);
       expect(screen.getAllByText("Tag1").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText("Tag5").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("Tag6").length).toBeGreaterThanOrEqual(1);
     });
   });
 });

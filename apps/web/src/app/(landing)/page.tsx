@@ -97,8 +97,11 @@ export default async function HomePage() {
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
           const all = yield* repo.findAll();
-          // Slice [0..8] — first 3 fill the hero carousel, next 5 the news grid.
-          return all.slice(0, 8);
+          // Slice [0..10] per the R2.B + R1.6 spine: positions 1..3 fill the
+          // hero carousel, positions 5..10 fill the 3×2 news grid (6 cards).
+          // Position 4 (index 3) is reserved for `<FeaturedUitgelichtRow>`
+          // once #1754 wires it into the spine.
+          return all.slice(0, 10);
         }).pipe(Effect.catchAll(() => Effect.succeed<ArticleVM[]>([]))),
       ),
       runPromise(
@@ -140,7 +143,13 @@ export default async function HomePage() {
   const featuredEvent = featuredEventResult;
 
   const heroArticles = articles.slice(0, 3).map(toHeroCarouselArticle);
-  const newsGridArticles = toHomepageArticles(articles.slice(3, 8));
+  // R2.B (`newsgrid-revisit-locked.md`) — slice widened from 5 → 6
+  // cards and shifted from positions 4..8 to 5..10. Position 4
+  // (index 3) is now consumed by `<FeaturedUitgelichtRow>` when it
+  // ships into the spine (#1754). Until then index 3 is unused on
+  // the homepage; the article still appears on `/nieuws` via the
+  // archive page.
+  const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
 

@@ -342,6 +342,42 @@ describe("ArticleRepository", () => {
 
       expect(hp.tags).toEqual([]);
     });
+
+    it("forwards articleType so the homepage news grid can derive bg from BG_BY_TYPE", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({ articleType: "transfer" }),
+      ]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      const { toHomepageArticle } = await import("./article.repository");
+      const hp = toHomepageArticle(articles[0]);
+
+      expect(hp.articleType).toBe("transfer");
+    });
+
+    it("preserves a null articleType (legacy untyped article)", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({ articleType: null }),
+      ]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      const { toHomepageArticle } = await import("./article.repository");
+      const hp = toHomepageArticle(articles[0]);
+
+      expect(hp.articleType).toBeNull();
+    });
   });
 
   describe("findBySlug", () => {
