@@ -49,7 +49,7 @@ jobs:
     # together — drift between the version that runs the suite and the
     # @playwright/test API can produce silent skips or false-positive failures.
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
       options: --user 0:0
     env:
       # The container ships browsers under /ms-playwright. Suppress
