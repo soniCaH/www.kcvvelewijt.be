@@ -27,8 +27,9 @@ test.describe("/ homepage integration (Phase 4.D.2)", () => {
     // Sections are identified by their aria-labels (set inside each
     // component). The PRD-locked ordering is:
     //   carousel → event band → banner → news → upcoming matches →
-    //   banner → youth → webshop → banner → sponsors
-    const expected = [/uitgelichte? artikels?/i, /webshop/i, /onze sponsors/i];
+    //   banner → youth → clubshop → banner → sponsors
+    // (Webshop was renamed to Clubshop in R6.C — see PR #1770.)
+    const expected = [/uitgelichte? artikels?/i, /clubshop/i, /onze sponsors/i];
 
     for (const label of expected) {
       const section = page.getByRole("region", { name: label }).or(
@@ -40,16 +41,16 @@ test.describe("/ homepage integration (Phase 4.D.2)", () => {
       await expect(section.first()).toBeVisible();
     }
 
-    // Hero carousel comes BEFORE the webshop banner in the DOM.
+    // Hero carousel comes BEFORE the clubshop banner in the DOM.
     const carousel = page.getByRole("region", {
       name: /uitgelichte? artikels?/i,
     });
-    const webshop = page.getByRole("region", { name: /^webshop$/i }).first();
+    const clubshop = page.getByRole("region", { name: /^clubshop$/i }).first();
     if ((await carousel.count()) === 0) {
       test.skip(true, "Carousel has no articles — section drops.");
     }
-    if ((await webshop.count()) === 0) {
-      test.skip(true, "Webshop banner is missing — staging-only seed gap.");
+    if ((await clubshop.count()) === 0) {
+      test.skip(true, "Clubshop banner is missing — staging-only seed gap.");
     }
 
     const carouselIndex = await carousel.evaluate((el) =>
@@ -57,13 +58,13 @@ test.describe("/ homepage integration (Phase 4.D.2)", () => {
         el,
       ),
     );
-    const webshopIndex = await webshop.evaluate((el) =>
+    const clubshopIndex = await clubshop.evaluate((el) =>
       Array.from(document.querySelectorAll("section, [role='region']")).indexOf(
         el,
       ),
     );
     expect(carouselIndex).toBeGreaterThanOrEqual(0);
-    expect(webshopIndex).toBeGreaterThan(carouselIndex);
+    expect(clubshopIndex).toBeGreaterThan(carouselIndex);
   });
 
   test("hero carousel: thumb click jumps the active slide", async ({
