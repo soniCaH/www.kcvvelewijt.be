@@ -35,15 +35,51 @@ describe("YouthSection", () => {
     expect(screen.getByText(/220\+ spelers · 16 ploegen/i)).toBeInTheDocument();
   });
 
-  it("renders a CTA link to /jeugd", () => {
+  it("renders the primary CTA link to /jeugd", () => {
     render(<YouthSection />);
     const link = screen.getByRole("link", { name: /ontdek onze jeugd/i });
     expect(link).toHaveAttribute("href", "/jeugd");
   });
 
-  it("renders no inline SVG diagonals (now owned by SectionTransition via SectionStack)", () => {
+  it("renders the secondary CTA 'Schrijf je in' → /club/inschrijven (R5.B)", () => {
+    render(<YouthSection />);
+    const link = screen.getByRole("link", { name: /schrijf je in/i });
+    expect(link).toHaveAttribute("href", "/club/inschrijven");
+  });
+
+  it("shifts heading emphasis to 'Elewijt' (R5.B brief §8)", () => {
     const { container } = render(<YouthSection />);
-    expect(container.querySelectorAll("svg")).toHaveLength(0);
+    const heading = container.querySelector("h2");
+    // EditorialHeading wraps the accented substring in an <em>. The
+    // emphasis lock is "Elewijt", not "De toekomst" — the previous
+    // copy emphasized the abstract concept.
+    const em = heading?.querySelector("em");
+    expect(em).not.toBeNull();
+    expect(em?.textContent?.trim()).toBe("Elewijt");
+  });
+
+  it("renders the top stripe band (StripedSeam xl cream-jersey-deep, R5.B)", () => {
+    const { container } = render(<YouthSection />);
+    const seam = container.querySelector("svg[data-color-pair]");
+    expect(seam).not.toBeNull();
+    // cream + jersey-deep — paper-tape on green, quieter than the
+    // first-pass jersey-tonal-light pair.
+    expect(seam).toHaveAttribute("data-color-pair", "cream-jersey-deep");
+    expect(seam).toHaveAttribute("data-height", "xl");
+  });
+
+  it("does not wrap the stripe band with ink hairlines (consistency with ClubshopBanner)", () => {
+    // The R5.B lock proposed 1px ink lines top + bottom around the
+    // seam. PR review dropped them — the cream stripes carry the
+    // band's edge against the photo backdrop without an extra frame,
+    // and the Clubshop section ships its seams bare for the same
+    // reason.
+    const { container } = render(<YouthSection />);
+    const seam = container.querySelector("svg[data-color-pair]");
+    const wrapper = seam?.parentElement;
+    expect(wrapper?.className).not.toMatch(/\bborder-t\b/);
+    expect(wrapper?.className).not.toMatch(/\bborder-b\b/);
+    expect(wrapper?.className).not.toMatch(/\bborder-ink\b/);
   });
 
   it("does not apply marginTop / paddingBottom positioning hacks (inline or pt-0/pb-0 classes)", () => {

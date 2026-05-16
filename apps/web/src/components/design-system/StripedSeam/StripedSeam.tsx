@@ -1,18 +1,20 @@
 export type StripedSeamDirection = "horizontal" | "vertical";
-export type StripedSeamHeight = "sm" | "md" | "lg";
+export type StripedSeamHeight = "sm" | "md" | "lg" | "xl";
 /**
  * Two-tone stripe pair.
  * - `"ink-cream"` — high-contrast graphic seam (Phase 0 default).
  * - `"jersey-cream"` — softer brand-tonal seam.
- * - `"jersey-tonal"` — two shades of jersey green
- *   (`jersey-deep-dark` + `jersey-deep`). Reserved for surfaces that
- *   sit on the dark green field (e.g. the R6.C Clubshop section)
- *   where ink-on-cream would clash with the dark surround.
+ * - `"jersey-tonal-dark"` — `jersey-deep-dark` + `jersey-deep`. For
+ *   surfaces with `bg-jersey-deep-dark` (e.g. R6.C Clubshop).
+ * - `"cream-jersey-deep"` — cream + `jersey-deep`. Reads as
+ *   masking-tape laid across a dark green field. Used for the R5.B
+ *   YouthSection top frame.
  */
 export type StripedSeamColorPair =
   | "ink-cream"
   | "jersey-cream"
-  | "jersey-tonal";
+  | "jersey-tonal-dark"
+  | "cream-jersey-deep";
 
 export interface StripedSeamProps {
   direction?: StripedSeamDirection;
@@ -27,7 +29,12 @@ export interface StripedSeamProps {
   flip?: boolean;
 }
 
-const HEIGHT_PX: Record<StripedSeamHeight, number> = { sm: 12, md: 18, lg: 24 };
+const HEIGHT_PX: Record<StripedSeamHeight, number> = {
+  sm: 12,
+  md: 18,
+  lg: 24,
+  xl: 28,
+};
 
 const COLOR_PAIR_STROKES: Record<
   StripedSeamColorPair,
@@ -38,8 +45,12 @@ const COLOR_PAIR_STROKES: Record<
     stroke1: "var(--color-jersey)",
     stroke2: "var(--color-cream)",
   },
-  "jersey-tonal": {
+  "jersey-tonal-dark": {
     stroke1: "var(--color-jersey-deep-dark)",
+    stroke2: "var(--color-jersey-deep)",
+  },
+  "cream-jersey-deep": {
+    stroke1: "var(--color-cream)",
     stroke2: "var(--color-jersey-deep)",
   },
 };

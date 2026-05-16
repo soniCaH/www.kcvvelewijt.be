@@ -1,9 +1,41 @@
 # Phase 4.5 · Youth section — Locked (R5)
 
-**Locked 2026-05-14.**
+**Locked 2026-05-14. Implemented #1752 (2026-05-16).**
 **Supersedes:** open follow-ups in `youthblock-locked.md` Round 8 (CTA + headline emphasis).
 **Source compare page:** `round-r5-youth-revisit-comparisons.html`.
 **Owner:** @climacon.
+
+## Implementation notes (#1752)
+
+- **Secondary CTA href:** `/club/inschrijven` — the same target the
+  `<SiteHeader>` "Word lid" link points at. Surfaces a single
+  registration funnel rather than a section-specific anchor.
+- **StripedSeam top frame:** `<StripedSeam height="xl"
+colorPair="cream-jersey-deep" />` (28 px, cream + `jersey-deep`
+  alternating — paper-tape vocabulary laid across the dark green
+  field).
+- **PR-review revisions:**
+  - First pass used a `jersey-tonal-light` pair (jersey-deep +
+    jersey). It read as a louder green-on-green band against the
+    photographic backdrop; owner asked for a calmer cream-on-deep
+    pair instead. The `jersey-tonal-light` variant did not ship — no
+    production consumers.
+  - Lock asked for `1px var(--color-ink)` hairlines top + bottom
+    around the seam for "clean transition edges". PR review dropped
+    them — the cream stops carry the band's edge against the photo
+    backdrop on their own, and the Clubshop section ships its seams
+    bare for the same reason. The two sections stay consistent.
+- **StripedSeam API additions** (additive, no behaviour change for
+  existing consumers):
+  - Renamed the Phase 4.5 (R6.C) clubshop pair from `"jersey-tonal"`
+    to `"jersey-tonal-dark"` (ClubshopBanner migrated to the new key).
+  - Added `"cream-jersey-deep"` for paper-on-green section frames.
+  - New `xl` height entry (28 px) to match the brief's ~28 px target.
+- **Implementation path:** path 1 from the lock — the seam renders as
+  the first child of `<YouthSection>` itself, not in a SectionStack
+  transition slot. The Phase 4 homepage already retired its legacy
+  diagonal transitions, so this section ships its own framing rather
+  than relying on inter-section chrome.
 
 ## Decision
 
