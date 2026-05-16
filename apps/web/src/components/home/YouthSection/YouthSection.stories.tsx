@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { YouthSection } from "./YouthSection";
 import { YouthBackdrop } from "./YouthBackdrop";
-import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
 
 const meta = {
   title: "Features/Homepage/YouthSection",
@@ -12,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Homepage Jeugd block (Phase 4.B.4). Palette swap to retro jersey-deep tokens with the composed gradient overlay + halftone print texture. Text rebuilt on `<EditorialHeading>` (italic accent on "De toekomst") + `<MonoLabel>` + `<LinkButton variant=primary>` per the locked spec.',
+          'Homepage Jeugd block. Phase 4.5 R5.B adds a top stripe band (cream-jersey-deep StripedSeam, xl height — cream paper-tape on the dark green field), shifts the editorial accent from "De toekomst" to "Elewijt", and introduces a dual CTA row ("Ontdek onze jeugd" → /jeugd, "Schrijf je in" → /club/inschrijven). Background stays the composed jersey-deep gradient + halftone photo overlay from Phase 4.B.4.',
       },
     },
   },
@@ -24,7 +23,10 @@ type Story = StoryObj<typeof meta>;
 const withBackdrop = (children: React.ReactNode) => (
   <div className="relative isolate min-h-[640px] overflow-hidden">
     <YouthBackdrop />
-    <div className="relative z-10 py-20 md:py-28">{children}</div>
+    {/* No top padding — the YouthSection's own top stripe band hugs
+        the section edge. Bottom padding kept so the CTA row doesn't
+        touch the next section. */}
+    <div className="relative z-10 pb-20 md:pb-28">{children}</div>
   </div>
 );
 
@@ -35,7 +37,7 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          "Desktop default — jersey-deep gradient (135deg) + halftone overlay layered on the blurred youth-trainers photo.",
+          "Desktop default — top stripe band + dual CTA row over the jersey-deep gradient + halftone overlay photo.",
       },
     },
   },
@@ -49,47 +51,8 @@ export const Mobile: Story = {
     docs: {
       description: {
         story:
-          "Mobile (<640px) — same layout as Default. The locked spec asks for the gradient to flip to a vertical axis at this breakpoint, but the composed `--gradient-jersey-deep-overlay` token bakes in 135deg and does not yet expose direction. The flip is deferred until the gradient-token API gains a direction parameter.",
+          "Mobile (<640px) — CTAs stack vertically thanks to `flex-wrap` on the dual-CTA row. Top stripe band stays full-bleed.",
       },
     },
   },
-};
-
-/** YouthSection sandwiched between sections — diagonals are owned by `SectionStack`
- *  via `SectionTransition`. The photographic backdrop bleeds into both diagonal
- *  bands because `revealFrom` / `revealTo` are auto-propagated from the
- *  `backdrop` prop. */
-export const Sandwiched: Story = {
-  render: () => (
-    <SectionStack
-      sections={[
-        {
-          key: "before",
-          bg: "kcvv-black",
-          content: (
-            <div className="px-8 py-12 text-center text-white/60">
-              Previous section (kcvv-black)
-            </div>
-          ),
-          transition: { type: "diagonal", direction: "right" },
-        },
-        {
-          key: "youth",
-          bg: "kcvv-green-dark",
-          content: <YouthSection />,
-          backdrop: <YouthBackdrop />,
-          transition: { type: "diagonal", direction: "left" },
-        },
-        {
-          key: "after",
-          bg: "gray-100",
-          content: (
-            <div className="px-8 py-12 text-center text-gray-400">
-              Next section (gray-100)
-            </div>
-          ),
-        },
-      ]}
-    />
-  ),
 };

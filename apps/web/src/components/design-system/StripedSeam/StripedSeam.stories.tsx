@@ -48,3 +48,67 @@ export const Vertical: Story = {
     ),
   ],
 };
+
+// `xl` height — 28px tall. Added in R5.B to match the YouthSection
+// top-frame brief target.
+export const HeightXl: Story = {
+  args: { direction: "horizontal", height: "xl", colorPair: "ink-cream" },
+};
+
+// `jersey-tonal-dark` — jersey-deep-dark + jersey-deep alternating.
+// Used on the R6.C Clubshop section's mirrored top + bottom frame
+// against a `bg-jersey-deep-dark` surface. The wrapper decorator
+// swaps to that surface so the seam reads as intended (the default
+// cream wrapper would make the dark stops disappear).
+export const JerseyTonalDark: Story = {
+  args: {
+    direction: "horizontal",
+    height: "md",
+    colorPair: "jersey-tonal-dark",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep-dark w-full max-w-2xl">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+// `cream-jersey-deep` — cream + jersey-deep alternating. Reads as
+// masking-tape laid across a dark green field. Used on the R5.B
+// YouthSection top frame; demoed here against a `bg-jersey-deep`
+// surface so the cream stops carry the intended contrast.
+export const CreamJerseyDeep: Story = {
+  args: {
+    direction: "horizontal",
+    height: "xl",
+    colorPair: "cream-jersey-deep",
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep w-full max-w-2xl">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+// `flip` — mirrors the diagonal angle from -45° to +45°. Used as the
+// bottom seam of a mirrored frame (R6.C Clubshop) so the two seams
+// lean toward each other.
+export const Flipped: Story = {
+  args: {
+    direction: "horizontal",
+    height: "md",
+    colorPair: "jersey-tonal-dark",
+    flip: true,
+  },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep-dark w-full max-w-2xl">
+        <Story />
+      </div>
+    ),
+  ],
+};

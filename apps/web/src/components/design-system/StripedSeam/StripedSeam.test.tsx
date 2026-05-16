@@ -21,14 +21,32 @@ describe("StripedSeam", () => {
     expect(svg).toHaveAttribute("data-color-pair", "jersey-cream");
   });
 
-  it("supports the jersey-tonal colorPair (R6.C clubshop)", () => {
-    const { container } = render(<StripedSeam colorPair="jersey-tonal" />);
+  it("supports the jersey-tonal-dark colorPair (R6.C clubshop)", () => {
+    const { container } = render(<StripedSeam colorPair="jersey-tonal-dark" />);
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("data-color-pair", "jersey-tonal");
+    expect(svg).toHaveAttribute("data-color-pair", "jersey-tonal-dark");
     // Inner pattern fills derive from jersey-deep-dark + jersey-deep
     // tokens — verify both end up in the rendered <pattern>.
     expect(container.innerHTML).toContain("var(--color-jersey-deep-dark)");
     expect(container.innerHTML).toContain("var(--color-jersey-deep)");
+  });
+
+  it("supports the cream-jersey-deep colorPair (R5.B youth top frame)", () => {
+    // Cream + jersey-deep — paper-tape vocabulary laid across a dark
+    // green section bg. Quieter than a green-tonal pair against the
+    // YouthBackdrop photo.
+    const { container } = render(<StripedSeam colorPair="cream-jersey-deep" />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("data-color-pair", "cream-jersey-deep");
+    expect(container.innerHTML).toContain('fill="var(--color-cream)"');
+    expect(container.innerHTML).toContain('fill="var(--color-jersey-deep)"');
+  });
+
+  it("supports the xl height variant (28px — R5.B youth band)", () => {
+    const { container } = render(<StripedSeam height="xl" />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("data-height", "xl");
+    expect(svg).toHaveAttribute("height", "28");
   });
 
   it("defaults to angle -45° (data-flip='false')", () => {

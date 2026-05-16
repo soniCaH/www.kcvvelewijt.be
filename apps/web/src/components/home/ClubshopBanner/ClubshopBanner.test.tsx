@@ -67,7 +67,7 @@ describe("ClubshopBanner", () => {
     expect(seams[0]).toHaveAttribute("data-flip", "false");
     expect(seams[1]).toHaveAttribute("data-flip", "true");
     seams.forEach((seam) => {
-      expect(seam).toHaveAttribute("data-color-pair", "jersey-tonal");
+      expect(seam).toHaveAttribute("data-color-pair", "jersey-tonal-dark");
     });
   });
 

@@ -38,7 +38,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
           flipped to +45° so the diagonals lean toward each other and
           visually "tape" the section as a discrete package. Only
           section on the homepage with both edges framed. */}
-      <StripedSeam height="md" colorPair="jersey-tonal" />
+      <StripedSeam height="md" colorPair="jersey-tonal-dark" />
 
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-16">
         <div className="relative">
@@ -85,7 +85,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
         </div>
       </div>
 
-      <StripedSeam height="md" colorPair="jersey-tonal" flip />
+      <StripedSeam height="md" colorPair="jersey-tonal-dark" flip />
     </section>
   );
 };
