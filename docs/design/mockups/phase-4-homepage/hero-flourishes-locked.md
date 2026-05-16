@@ -15,9 +15,15 @@
 - Five new co-located sub-components in
   `apps/web/src/components/article/EditorialHero/_variant-parts.tsx`:
   `HeroCreditChip`, `HeroDayBlockOverlay`,
-  `HeroCompressedEventStrip`, `HeroTransferDirChip`,
+  `HeroCompressedEventStrip`, `HeroTransferClubRow`,
   `HeroTransferMetaLine`. Each is tightly coupled to the hero and
-  doesn't merit a top-level design-system surface.
+  doesn't merit a top-level design-system surface. (The original
+  R1.5 proposal included a `HeroTransferDirChip` jersey-filled chip
+  carrying `↓ Inkomend` / `↑ Uitgaand` / `↻ Verlengd`; it was
+  retired during PR review in favour of `HeroTransferClubRow`,
+  which carries the same directional intent with much higher
+  information density — readers see the clubs themselves, with the
+  arrow glyph between them, instead of an abstract label.)
 - `<TapedFigure>` gained an additive `aspect="landscape-3-2"` value
   for the Interview + Transfer covers (3:2 was already in the lock;
   the primitive just didn't expose it yet).
@@ -27,12 +33,15 @@
   (the carousel input shape) migrated to a discriminated union per
   variant with the same fields. `page.tsx::toHeroCarouselArticle`
   populates each branch.
-- The Transfer kicker carries a JSX dirChip (`↓ Inkomend` / `↑ Uitgaand`
-  / `↻ Verlengd`) that doesn't fit `<EditorialKicker>`'s plain-label
-  items API, so the Transfer variant renders its kicker row manually
-  (`renderTransferEditorial`). The chip wraps `resolveTransfer()` so
-  the direction enum drives the glyph + Dutch label deterministically.
-  **Source compare pages:**
+- All four variants render their kicker via `<EditorialKicker>` with
+  the same plain-label items API (`Transfer · ${date}` etc.). The
+  Transfer variant's directional signal lives in
+  `<HeroTransferClubRow>` (below the H1) — `[Other logo + name] →
+[KCVV logo + name]` for pairs, `[KCVV] · verlengd tot ${until}`
+  for extensions — driven by `resolveTransfer()` so the direction
+  enum deterministically picks left/right sides + the extension row.
+
+**Source compare pages:**
 
 - `round-r1-5-hero-flourishes-comparisons.html` (initial overlay-first proposal — rejected as a set)
 - `round-r1-5b-hero-flourishes-hybrid-comparisons.html` (hybrid baseline — Announcement approved)
@@ -108,15 +117,21 @@ Interview variant. Never as the hero focal point.
 
 ### Transfer (R1.5c · TR.1')
 
-- Kicker: `Transfer | ${dirChip} · ${date}` where `dirChip` is the jersey-
-  filled directional chip with arrow glyph: `[↓ Inkomend]` / `[↑ Uitgaand]` /
-  `[↻ Verlengd]`. Chip stays in the kicker (functional indicator).
+- Kicker: `Transfer · ${date}` — plain `<EditorialKicker>` items, no
+  inline chip. (Earlier R1.5 round proposed a jersey-filled `dirChip`
+  in the kicker; retired at PR review in favour of the club row below
+  the H1, which carries direction with logo + name pairing.)
 - H1: `transferFact.playerName` (italic serif).
-- **Meta line** below H1, graceful-omit per missing optional field:
-  - Incoming: `${age} jaar · ${position} · van ${otherClubName}`
-  - Outgoing: `${age} jaar · ${position} · naar ${otherClubName}`
-  - Extension: `${age} jaar · ${position} · verlengd tot ${until}`
-  - Each `· ${field}` segment elided when the field is absent.
+- **Club row** below H1 (`<HeroTransferClubRow>`):
+  - Incoming/outgoing: `[Other logo + italic name] → [KCVV logo +
+italic name]`. `resolveTransfer()` picks the from/to sides from
+    the `direction` enum.
+  - Extension: `[KCVV logo + italic name] · verlengd tot ${until}`.
+- **Meta line** below the club row (`<HeroTransferMetaLine>`),
+  graceful-omit per missing optional field: `${age} jaar · ${position}`.
+  Club tail (`van …` / `naar …` / `verlengd tot …`) intentionally
+  dropped — the club row above already carries that signal, and
+  duplicating it across two rows read as repetitive at review.
 - No pull-quote on the homepage hero — `note` + `noteAttribution` stay on
   the detail-page `TransferHero` only.
 - **No jersey number on the homepage hero** (no structured field on

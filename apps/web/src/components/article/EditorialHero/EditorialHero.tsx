@@ -42,6 +42,7 @@ import {
 } from "@/components/article/blocks/TransferFact/types";
 import type { EventFactValue } from "@/components/article/blocks/EventFact/types";
 import { serializeTitle } from "@/lib/utils/serialize-title";
+import { formatArticleDate } from "@/lib/utils/dates";
 import {
   HeroCompressedEventStrip,
   HeroCreditChip,
@@ -371,10 +372,18 @@ export function EditorialHero(props: EditorialHeroProps) {
         );
       }
     }
+    // The compressed strip's date comes from the event's own
+    // `feature.date` (the day the event happens), NOT from the
+    // article's publishedAt. Format the ISO date into Dutch when
+    // present; fall back to the article-level `date` only when no
+    // structured event date is set (rare partial-content case).
+    const eventStripDate = props.feature?.date
+      ? formatArticleDate(props.feature.date)
+      : (date ?? null);
     belowHero = (
       <HeroCompressedEventStrip
         location={props.feature?.location ?? null}
-        date={date ?? null}
+        date={eventStripDate}
         startTime={props.feature?.startTime ?? null}
         endTime={props.feature?.endTime ?? null}
       />

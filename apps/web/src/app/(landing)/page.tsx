@@ -98,25 +98,38 @@ function toHeroCarouselArticle(article: ArticleVM): HomepageHeroArticle {
   // + below-H1 + below-hero artefacts. GROQ-nullable fields are
   // narrowed to optional non-null at the boundary so the discriminated
   // EditorialHero types stay strict.
+  //
+  // Exhaustive switch per the `apps/web/CLAUDE.md` discriminated-union
+  // rule — each known case is explicit and the final branch asserts
+  // the `articleType` union has been narrowed to `never`. If a new
+  // articleType lands (e.g. matchPreview / matchRecap from #1470)
+  // without a hero branch, TypeScript fails the build here rather
+  // than silently rendering as Announcement.
   const variant = article.articleType ?? "announcement";
-  if (variant === "interview") {
-    return { ...shared, variant, subjects: article.subjects };
+  switch (variant) {
+    case "interview":
+      return { ...shared, variant, subjects: article.subjects };
+    case "event":
+      return {
+        ...shared,
+        variant,
+        feature: nullsToUndefined(article.firstEventFact),
+      };
+    case "transfer":
+      return {
+        ...shared,
+        variant,
+        feature: nullsToUndefined(article.firstTransferFact),
+      };
+    case "announcement":
+      return { ...shared, variant, category: article.tags[0] };
+    default: {
+      const _exhaustive: never = variant;
+      throw new Error(
+        `Unhandled articleType in toHeroCarouselArticle: ${String(_exhaustive)}`,
+      );
+    }
   }
-  if (variant === "event") {
-    return {
-      ...shared,
-      variant,
-      feature: nullsToUndefined(article.firstEventFact),
-    };
-  }
-  if (variant === "transfer") {
-    return {
-      ...shared,
-      variant,
-      feature: nullsToUndefined(article.firstTransferFact),
-    };
-  }
-  return { ...shared, variant: "announcement", category: article.tags[0] };
 }
 
 function toFeaturedEventBandEvent(
