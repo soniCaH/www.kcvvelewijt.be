@@ -9,7 +9,11 @@ import {
 const meta = {
   title: "Features/Homepage/_legacy/HomepageHeroCarousel",
   component: HomepageHeroCarousel,
-  tags: ["autodocs"],
+  // Keep the `vr` tag so discovery still picks the story up; the
+  // `parameters.vr.disable = true` below suppresses screenshot
+  // capture per the "Defer consumer baselines via vr.disable" rule
+  // in `apps/web/CLAUDE.md`.
+  tags: ["autodocs", "vr"],
   parameters: {
     layout: "fullscreen",
     docs: {
