@@ -12,25 +12,57 @@ import Image from "next/image";
 import type { PortableTextBlock } from "@portabletext/react";
 import {
   EditorialHero,
-  type EditorialHeroVariant,
   type EditorialHeroCoverImage,
 } from "@/components/article/EditorialHero";
-import type { EditorialKickerProps } from "@/components/design-system";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
+import type { TransferFactValue } from "@/components/article/blocks/TransferFact/types";
+import type { EventFactValue } from "@/components/article/blocks/EventFact/types";
 import { cn } from "@/lib/utils/cn";
 import { serializeTitle } from "@/lib/utils/serialize-title";
 
-export interface HomepageHeroArticle {
+/**
+ * Article shape passed to the carousel. Per-variant fields carry the
+ * data `<EditorialHero>` needs to render the variant-specific kicker
+ * + below-H1 + below-hero artefacts (R1.5 / #1749).
+ *
+ * The shared fields (`slug`, `title`, `lead`, etc.) live on every
+ * variant; the variant-specific tail (`category`, `subjects`,
+ * `feature`) is keyed to the discriminator.
+ */
+interface HomepageHeroArticleShared {
   slug: string;
-  variant: EditorialHeroVariant;
   title: string | PortableTextBlock[];
   lead?: string;
-  kicker?: EditorialKickerProps["items"];
   author?: string;
   coverImage?: EditorialHeroCoverImage;
+  /** Pre-formatted Dutch date, appended to the kicker (R1.5). */
+  date?: string;
   /** Short label used in the thumb strip (e.g. "Interview"). Falls back to
    *  the variant when omitted. */
   thumbLabel?: string;
 }
+
+export type HomepageHeroArticle =
+  | (HomepageHeroArticleShared & {
+      variant: "announcement";
+      /** Single category label (typically `article.tags[0]`). */
+      category?: string;
+    })
+  | (HomepageHeroArticleShared & {
+      variant: "interview";
+      /** Article-level subjects (1..4) for the credit-chip row. */
+      subjects?: IndexedSubject[] | null;
+    })
+  | (HomepageHeroArticleShared & {
+      variant: "event";
+      /** First eventFact in the body — kicker + day-block + strip data. */
+      feature?: EventFactValue | null;
+    })
+  | (HomepageHeroArticleShared & {
+      variant: "transfer";
+      /** First transferFact in the body — kicker dirChip + meta line. */
+      feature?: TransferFactValue | null;
+    });
 
 export interface HomepageHeroCarouselProps {
   articles: HomepageHeroArticle[];
@@ -136,16 +168,7 @@ export const HomepageHeroCarousel = ({
         className="bg-cream py-4 md:py-6"
       >
         <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <EditorialHero
-            variant={active.variant}
-            placement="homepage"
-            slug={active.slug}
-            title={active.title}
-            lead={active.lead}
-            kicker={active.kicker}
-            author={active.author}
-            coverImage={active.coverImage}
-          />
+          <EditorialHero placement="homepage" {...active} />
         </div>
       </section>
     );
@@ -163,16 +186,7 @@ export const HomepageHeroCarousel = ({
     >
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div aria-live="polite" aria-atomic="true">
-          <EditorialHero
-            variant={active.variant}
-            placement="homepage"
-            slug={active.slug}
-            title={active.title}
-            lead={active.lead}
-            kicker={active.kicker}
-            author={active.author}
-            coverImage={active.coverImage}
-          />
+          <EditorialHero placement="homepage" {...active} />
         </div>
 
         <div className="mt-6">

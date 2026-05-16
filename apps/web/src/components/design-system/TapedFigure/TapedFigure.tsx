@@ -5,6 +5,7 @@ import type { TapeStripProps } from "../TapeStrip/TapeStrip";
 
 export type TapedFigureAspect =
   | "landscape-16-9"
+  | "landscape-3-2"
   | "square"
   | "portrait-3-4"
   | "auto";
@@ -41,6 +42,7 @@ export interface TapedFigureProps {
 
 const ASPECT_VALUE: Record<Exclude<TapedFigureAspect, "auto">, string> = {
   "landscape-16-9": "16 / 9",
+  "landscape-3-2": "3 / 2",
   square: "1 / 1",
   "portrait-3-4": "3 / 4",
 };

@@ -1,35 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { PullQuote } from "@/components/design-system/PullQuote";
-import {
-  portraitSvgDataUri,
-  shieldSvgDataUri,
-} from "@/components/article/blocks/_fixtures";
-import { TransferFactStrip } from "@/components/article/blocks/TransferFactStrip";
-import { EventFactStrip } from "@/components/article/blocks/EventFactStrip";
-import {
-  SubjectsStrip,
-  type Subject,
-} from "@/components/article/blocks/SubjectsStrip";
-import { EndMark } from "@/components/design-system/EndMark";
 import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
 import { fixtureImage } from "@test-fixtures/images";
-
-const STANDARD_LOGO = shieldSvgDataUri({
-  label: "STD",
-  bg: "#d62828",
-  fg: "#ffffff",
-});
-const MECHELEN_LOGO = shieldSvgDataUri({
-  label: "KVM",
-  bg: "#ffd60a",
-  fg: "#000000",
-});
 
 const meta = {
   title: "Article/EditorialHero",
   component: EditorialHero,
   tags: ["autodocs", "vr"],
-  parameters: { layout: "fullscreen" },
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "Per-articleType editorial hero (R1.5, #1749). Four variants share a 50/50 shell + landscape cover but render variant-specific kicker, below-H1 (interview credit chips, transfer meta line), and below-hero (event compressed strip) artefacts. `placement` controls whether the hero wraps in a `<Link>` (homepage) or renders bare (detail).",
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <div className="bg-cream-soft px-12 py-8">
@@ -40,603 +25,309 @@ const meta = {
 } satisfies Meta<typeof EditorialHero>;
 
 export default meta;
-// Storybook's inferred args collapses discriminated unions to `never`,
-// so override `args` with the full union — Omit drops the inferred
-// shape, then we re-introduce it with the discriminated type.
-type Story = Omit<StoryObj<typeof meta>, "args"> & {
-  args: EditorialHeroProps;
-};
+// Each story's `args` carries a literal `variant` discriminator. To
+// keep TypeScript happy through the discriminated union we narrow
+// each story's type to its specific variant — `StoryObj<typeof meta>`
+// collapses `Partial<EditorialHeroProps>` to `never`, and a
+// generic `StoryObj<EditorialHeroProps>` breaks on cross-branch spreads.
+type StoryFor<V extends EditorialHeroProps["variant"]> = StoryObj<
+  Extract<EditorialHeroProps, { variant: V }>
+>;
+type AnnouncementStory = StoryFor<"announcement">;
+type InterviewStory = StoryFor<"interview">;
+type EventStory = StoryFor<"event">;
+type TransferStory = StoryFor<"transfer">;
 
-const SAMPLE_KICKER = [
-  { label: "ANNOUNCEMENT" },
-  { label: "8 MIN" },
-  { label: "06 MEI 2026" },
-];
-
-const SAMPLE_LEAD =
-  "Een rustige editorial lead die de toon zet voor het artikel zonder alles te verklappen.";
-
-const COVER = {
+const COVER_GENERIC = {
   url: fixtureImage("article-hero-generic", 0),
   alt: "Spelers vieren een doelpunt",
 };
+const COVER_INTERVIEW = {
+  url: fixtureImage("article-hero-interview", 0),
+  alt: "Jens De Smet in gesprek na de wedstrijd",
+};
+const COVER_TRANSFER = {
+  url: fixtureImage("article-hero-transfer", 0),
+  alt: "Bocar Sarr in trainingstenue",
+};
+const COVER_EVENT = {
+  url: fixtureImage("article-hero-evenement", 0),
+  alt: "Sfeerbeeld jeugdtoernooi",
+};
 
-export const Playground: Story = {
+const PLAYER_PORTRAIT = fixtureImage("player-portrait", 0);
+
+// ─── Announcement ──────────────────────────────────────────────────────────
+
+export const AnnouncementDetail: AnnouncementStory = {
   args: {
     variant: "announcement",
-    title: "De zomer van 2026 begint nu.",
-    lead: SAMPLE_LEAD,
-    kicker: SAMPLE_KICKER,
-    author: "Tom Janssens",
-    coverImage: COVER,
+    title: "Kampioen! 58 punten en titel in eerste provinciale.",
+    lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",
+    author: "Redactie",
+    category: "Clubnieuws",
+    date: "3 mei 2026",
+    coverImage: COVER_GENERIC,
   },
 };
 
-/**
- * Phase 3 §5.B.2 announcement-locked.md — the canonical detail-page
- * composition. Kicker reads `★ MEDEDELING · 5 MIN LEZEN · 06 MEI 2026 ★`.
- * Title carries an `accent` decorator on a single word ("kantine") that
- * renders italic + jersey-deep. Byline falls back to the "Door redactie"
- * default. Cover image at 16:9 in the right column.
- */
-export const AnnouncementVariant: Story = {
+export const AnnouncementHomepage: AnnouncementStory = {
   args: {
     variant: "announcement",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "De ", marks: [] },
-          { _type: "span", _key: "t2", text: "kantine", marks: ["accent"] },
-          { _type: "span", _key: "t3", text: " blijft open", marks: [] },
-        ],
-      },
-    ],
-    lead: "Een korte samenvatting boven het artikel — toont op homepage, news cards, hero en social shares. Kort en krachtig.",
-    kicker: [
-      { label: "MEDEDELING" },
-      { label: "5 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
+    placement: "homepage",
+    slug: "kampioen-58-punten",
+    title: "Kampioen! 58 punten en titel in eerste provinciale.",
+    lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",
+    author: "Redactie",
+    category: "Clubnieuws",
+    date: "3 mei 2026",
+    coverImage: COVER_GENERIC,
   },
 };
 
-/**
- * Phase 3 §5.B.2 transfer-locked.md — full transfer composition: hero
- * shell + TransferFactStrip below + PullQuote tone="jersey" between
- * strip and body when transferFact.note is set. Kicker reads
- * `★ TRANSFER · 5 MIN LEZEN · 06 MEI 2026 ★`. Title accent on "Standard".
- */
-export const TransferVariant: Story = {
+export const AnnouncementNoCategory: AnnouncementStory = {
   args: {
-    variant: "transfer",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          {
-            _type: "span",
-            _key: "t1",
-            text: "Maxim komt over van ",
-            marks: [],
-          },
-          {
-            _type: "span",
-            _key: "t2",
-            text: "Standard",
-            marks: ["accent"],
-          },
-        ],
-      },
-    ],
-    lead: "De 27-jarige middenvelder versterkt de zes. Drie seizoenen handtekening, jeugdig leiderschap voorop.",
-    kicker: [
-      { label: "TRANSFER" },
-      { label: "5 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
+    variant: "announcement",
+    title: "Algemene mededeling van het bestuur.",
+    lead: "Korte update over het komende seizoen.",
+    author: "Bestuur",
+    date: "1 mei 2026",
+    coverImage: COVER_GENERIC,
   },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <TransferFactStrip
-        value={{
-          direction: "incoming",
-          playerName: "Maxim Breugelmans",
-          position: "Middenvelder",
-          age: 27,
-          otherClubName: "Standard Luik",
-          otherClubLogoUrl: STANDARD_LOGO,
-          otherClubContext: "Jupiler Pro League · U23",
-          kcvvContext: "Derde Amateur · A-ploeg · #8",
-          note: "Hier kan ik tonen wat ik in mij heb. KCVV ademt voetbal — dat zegt me alles.",
-          noteAttribution: "Maxim Breugelmans",
-        }}
-      />
-      <div className="mx-auto max-w-[680px] py-6">
-        <PullQuote tone="jersey" attribution={{ name: "Maxim Breugelmans" }}>
-          {
-            "Hier kan ik tonen wat ik in mij heb. KCVV ademt voetbal — dat zegt me alles."
-          }
-        </PullQuote>
-      </div>
-    </>
-  ),
 };
 
-/**
- * Outgoing transfer — alert-rode pijlen op de strip (bittersweet).
- * Without a transferFact.note the PullQuote is omitted.
- */
-export const TransferVariantOutgoing: Story = {
-  args: {
-    variant: "transfer",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          {
-            _type: "span",
-            _key: "t1",
-            text: "Jan Janssens trekt naar ",
-            marks: [],
-          },
-          { _type: "span", _key: "t2", text: "Mechelen", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Vier seizoenen, 38 doelpunten — onze topscorer kiest voor eerste klasse.",
-    kicker: [
-      { label: "TRANSFER" },
-      { label: "4 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
+// ─── Interview ─────────────────────────────────────────────────────────────
+
+const subjectJens = {
+  kind: "player" as const,
+  playerRef: {
+    firstName: "Jens",
+    lastName: "De Smet",
+    jerseyNumber: 10,
+    position: "Middenvelder",
+    psdImageUrl: PLAYER_PORTRAIT,
   },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <TransferFactStrip
-        value={{
-          direction: "outgoing",
-          playerName: "Jan Janssens",
-          position: "Aanvaller",
-          age: 24,
-          otherClubName: "KV Mechelen",
-          otherClubLogoUrl: MECHELEN_LOGO,
-          otherClubContext: "Eerste klasse",
-          kcvvContext: "Vier seizoenen, 38 doelpunten",
-        }}
-      />
-    </>
-  ),
 };
-
-/** Extension — single centered card, no arrows, no PullQuote. */
-export const TransferVariantExtension: Story = {
-  args: {
-    variant: "transfer",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Bram Vermeulen ", marks: [] },
-          { _type: "span", _key: "t2", text: "verlengt", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Stabiele verdediger blijft tot het einde van seizoen 2027–28. Continuiteit in het hart van de defensie.",
-    kicker: [
-      { label: "TRANSFER" },
-      { label: "3 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
+const subjectLars = {
+  kind: "player" as const,
+  playerRef: {
+    firstName: "Lars",
+    lastName: "Peeters",
+    jerseyNumber: 7,
+    position: "Aanvaller",
+    psdImageUrl: PLAYER_PORTRAIT,
   },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <TransferFactStrip
-        value={{
-          direction: "extension",
-          playerName: "Bram Vermeulen",
-          position: "Verdediger",
-          age: 28,
-          until: "2027 — 28",
-          kcvvContext: "Derde Amateur · A-ploeg · #4",
-        }}
-      />
-    </>
-  ),
 };
-
-/**
- * Phase 3 §5.B.2 event-locked.md — full event composition: hero shell +
- * <EventFactStrip> below. Kicker reads `★ EVENT · CLUBFEEST · 06 MEI
- * 2026 ★`. Title accent on "kantine".
- */
-export const EventVariant: Story = {
-  args: {
-    variant: "event",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Steakfestijn in de ", marks: [] },
-          { _type: "span", _key: "t2", text: "kantine", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Drie dagen lang vlees van de grill, frietjes uit de pan, en het kampioenenelftal in de zaal — vrijdag tot zondag in het clubhuis.",
-    kicker: [
-      { label: "EVENT" },
-      { label: "CLUBFEEST" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
+const subjectThomas = {
+  kind: "player" as const,
+  playerRef: {
+    firstName: "Thomas",
+    lastName: "Vermeulen",
+    jerseyNumber: 3,
+    position: "Verdediger",
+    psdImageUrl: PLAYER_PORTRAIT,
   },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <EventFactStrip
-        value={{
-          date: "2026-11-14",
-          startTime: "19:00",
-          location: "Clubhuis KCVV",
-          address: "Driesstraat 14 · 1982 Elewijt",
-          capacity: 80,
-          ticketUrl: "https://kcvv.example/inschrijven",
-          ticketLabel: "Reserveer",
-        }}
-      />
-    </>
-  ),
 };
 
-/** Recurring event — sessions[] populated, day-by-day schedule. */
-export const EventVariantRecurring: Story = {
-  args: {
-    variant: "event",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Drie dagen ", marks: [] },
-          { _type: "span", _key: "t2", text: "feest", marks: ["accent"] },
-          { _type: "span", _key: "t3", text: " in de kantine", marks: [] },
-        ],
-      },
-    ],
-    lead: "Vrijdag, zaterdag en zondag — telkens vanaf de middag tot wanneer de laatste fan vertrekt.",
-    kicker: [
-      { label: "EVENT" },
-      { label: "CLUBFEEST" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
-  },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <EventFactStrip
-        value={{
-          sessions: [
-            {
-              _key: "s1",
-              date: "2026-11-14",
-              startTime: "12:00",
-              endTime: "23:00",
-            },
-            {
-              _key: "s2",
-              date: "2026-11-15",
-              startTime: "12:00",
-              endTime: "23:00",
-            },
-            {
-              _key: "s3",
-              date: "2026-11-16",
-              startTime: "12:00",
-              endTime: "20:00",
-            },
-          ],
-          location: "Clubhuis KCVV",
-          address: "Driesstraat 14 · 1982 Elewijt",
-          capacity: 120,
-          ticketUrl: "https://kcvv.example/inschrijven",
-          ticketLabel: "Inschrijven",
-        }}
-        linkedEventSlug="steakfestijn-2026"
-      />
-    </>
-  ),
-};
-
-/**
- * Phase 3 §5.B.2 interview-locked.md — full N=1 interview composition:
- * hero shell + SubjectsStrip (single polaroid + pull-quote) + body
- * placeholder + EndMark closer. The QASectionDivider primitive (sub-
- * issue 3.A.4 / #1636) is not shipped yet — its slot is reserved with
- * a comment in the body. Kicker reads `★ INTERVIEW · 8 MIN LEZEN ★`
- * (no format token at N=1; fields.md spec).
- */
-const INTERVIEW_PORTRAIT = (label: string, hue: string) =>
-  portraitSvgDataUri({ label, bg: `#${hue}`, fg: "#ffffff" });
-
-const SUBJECT_MAXIM: Subject = {
-  _key: "p1",
-  kind: "player",
-  firstName: "Maxim",
-  lastName: "Breugelmans",
-  jerseyNumber: 8,
-  position: "Middenvelder",
-  psdImageUrl: INTERVIEW_PORTRAIT("Maxim", "008755"),
-};
-
-const SUBJECT_LIEN: Subject = {
-  _key: "s1",
-  kind: "staff",
-  firstName: "Lien",
-  lastName: "De Smet",
-  functionTitle: "Hoofdcoach U17",
-  photoUrl: INTERVIEW_PORTRAIT("Lien", "1f3a8a"),
-};
-
-export const InterviewVariant: Story = {
+export const InterviewSingleSubject: InterviewStory = {
   args: {
     variant: "interview",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Een gesprek met ", marks: [] },
-          { _type: "span", _key: "t2", text: "Maxim", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Dertiende seizoen in groen-wit. Over routine, geduld, en de tweede paal.",
-    kicker: [{ label: "INTERVIEW" }, { label: "8 MIN LEZEN" }],
-    coverImage: COVER,
+    title: '"Met deze ploeg kunnen we ver geraken."',
+    lead: "Aanvoerder Jens De Smet over de promotiekansen en het nieuwe trainingsritme.",
+    author: "Tom Janssens",
+    date: "5 mei 2026",
+    coverImage: COVER_INTERVIEW,
+    subjects: [subjectJens],
   },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <SubjectsStrip
-        subjects={[SUBJECT_MAXIM]}
-        quote={{
-          text: "KCVV ademt voetbal. Hier kan ik tonen wat ik in mij heb.",
-          attribution: "Maxim Breugelmans · Middenvelder",
-        }}
-      />
-      <div className="prose mx-auto my-12 max-w-[680px] font-serif text-lg leading-relaxed">
-        <p>
-          Op een rustige dinsdagavond in het clubhuis vraagt iemand om koffie.
-          Het kopje van Maxim staat al op tafel. Hij praat zoals hij speelt —
-          rustig, onderbouwd, met een glimlach.
-        </p>
-        {/* QASectionDivider would land here — sub-issue #1636 (3.A.4) */}
-        <p>
-          De vragen komen los, het gesprek loopt. Een halfuur later is het
-          dossier ingevuld én is duidelijk waarom hij volgend seizoen weer
-          centraal staat.
-        </p>
-      </div>
-      <EndMark />
-    </>
-  ),
 };
 
-/** N=2 duo interview — two polaroids with `&` separator, no in-strip pull-quote. */
-export const InterviewVariantDuo: Story = {
+export const InterviewTwoSubjects: InterviewStory = {
   args: {
     variant: "interview",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Twee ", marks: [] },
-          { _type: "span", _key: "t2", text: "generaties", marks: ["accent"] },
-          { _type: "span", _key: "t3", text: " in gesprek", marks: [] },
-        ],
-      },
-    ],
-    lead: "Een speler en een coach over wat er sinds 2014 veranderd is — en wat hetzelfde bleef.",
-    kicker: [
-      { label: "INTERVIEW" },
-      { label: "DUO" },
-      { label: "10 MIN LEZEN" },
-    ],
-    coverImage: COVER,
-  },
-  render: (args) => (
-    <>
-      <EditorialHero {...(args as EditorialHeroProps)} />
-      <SubjectsStrip subjects={[SUBJECT_MAXIM, SUBJECT_LIEN]} />
-      <div className="prose mx-auto my-12 max-w-[680px] font-serif text-lg leading-relaxed">
-        <p>
-          Het verschil tussen een gesprek en een interview is dat in de eerste
-          twee mensen luisteren. Vandaag horen we beide.
-        </p>
-      </div>
-      <EndMark />
-    </>
-  ),
-};
-
-export const NoCover: Story = {
-  args: {
-    variant: "announcement",
-    title: "Een korte mededeling zonder visuele begeleiding.",
-    lead: SAMPLE_LEAD,
-    kicker: SAMPLE_KICKER,
+    title: '"Met deze ploeg kunnen we ver geraken."',
+    lead: "Aanvoerder Jens De Smet over de promotiekansen en het nieuwe trainingsritme.",
     author: "Tom Janssens",
+    date: "5 mei 2026",
+    coverImage: COVER_INTERVIEW,
+    subjects: [subjectJens, subjectLars],
   },
 };
 
-export const NoLead: Story = {
+export const InterviewThreeSubjects: InterviewStory = {
   args: {
-    variant: "announcement",
-    title: "Headline-only hero met enkel kicker en byline.",
-    kicker: SAMPLE_KICKER,
+    variant: "interview",
+    title: '"Met deze ploeg kunnen we ver geraken."',
+    lead: "Aanvoerder Jens De Smet over de promotiekansen en het nieuwe trainingsritme.",
     author: "Tom Janssens",
-    coverImage: COVER,
+    date: "5 mei 2026",
+    coverImage: COVER_INTERVIEW,
+    subjects: [subjectJens, subjectLars, subjectThomas],
   },
 };
 
-export const FallbackByline: Story = {
-  args: {
-    variant: "announcement",
-    title: "Bericht zonder auteur — byline valt terug op redactie.",
-    lead: SAMPLE_LEAD,
-    kicker: SAMPLE_KICKER,
-    coverImage: COVER,
-  },
-};
-
-// ─── Homepage placement (`placement="homepage"`) ────────────────────────
-// Per all 4 *-locked.md files: the hero is wrapped in <a href="/nieuws/{slug}">.
-// At rest the composition is identical to the detail variant. On hover
-// the card press-ups (translate(-2px, -2px) + grown shadow) and a small
-// `★ Lees verder →` hint fades in at the bottom-right. Body content
-// (factStrips, Q&A, EndMark) is article-detail-only and does not render
-// in homepage placement — the call site is responsible for that gate.
-
-/** Homepage placement — announcement variant. Hover the card to see the hint. */
-export const HomepageAnnouncement: Story = {
-  args: {
-    variant: "announcement",
-    placement: "homepage",
-    slug: "kantine-blijft-open",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "De ", marks: [] },
-          { _type: "span", _key: "t2", text: "kantine", marks: ["accent"] },
-          { _type: "span", _key: "t3", text: " blijft open", marks: [] },
-        ],
-      },
-    ],
-    lead: "Een korte samenvatting boven het artikel — toont op homepage, news cards, hero en social shares.",
-    kicker: [
-      { label: "MEDEDELING" },
-      { label: "5 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
-  },
-};
-
-/** Homepage placement — transfer variant. No strip / pull-quote in homepage placement. */
-export const HomepageTransfer: Story = {
-  args: {
-    variant: "transfer",
-    placement: "homepage",
-    slug: "maxim-komt-over-van-standard",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          {
-            _type: "span",
-            _key: "t1",
-            text: "Maxim komt over van ",
-            marks: [],
-          },
-          { _type: "span", _key: "t2", text: "Standard", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "De 27-jarige middenvelder versterkt de zes. Drie seizoenen handtekening, jeugdig leiderschap voorop.",
-    kicker: [
-      { label: "TRANSFER" },
-      { label: "5 MIN LEZEN" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
-  },
-};
-
-/** Homepage placement — event variant. No EventFactStrip in homepage placement. */
-export const HomepageEvent: Story = {
-  args: {
-    variant: "event",
-    placement: "homepage",
-    slug: "steakfestijn-2026",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Steakfestijn in de ", marks: [] },
-          { _type: "span", _key: "t2", text: "kantine", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Drie dagen lang vlees van de grill, frietjes uit de pan, en het kampioenenelftal in de zaal.",
-    kicker: [
-      { label: "EVENT" },
-      { label: "CLUBFEEST" },
-      { label: "06 MEI 2026" },
-    ],
-    coverImage: COVER,
-  },
-};
-
-/** Homepage placement — interview variant. No SubjectsStrip / Q&A / EndMark in homepage placement. */
-export const HomepageInterview: Story = {
+export const InterviewHomepage: InterviewStory = {
   args: {
     variant: "interview",
     placement: "homepage",
-    slug: "een-gesprek-met-maxim",
-    title: [
-      {
-        _type: "block",
-        _key: "title",
-        style: "normal",
-        markDefs: [],
-        children: [
-          { _type: "span", _key: "t1", text: "Een gesprek met ", marks: [] },
-          { _type: "span", _key: "t2", text: "Maxim", marks: ["accent"] },
-        ],
-      },
-    ],
-    lead: "Dertiende seizoen in groen-wit. Over routine, geduld, en de tweede paal.",
-    kicker: [{ label: "INTERVIEW" }, { label: "8 MIN LEZEN" }],
-    coverImage: COVER,
+    slug: "kapitein-jens",
+    title: '"Met deze ploeg kunnen we ver geraken."',
+    lead: "Aanvoerder Jens De Smet over de promotiekansen en het nieuwe trainingsritme.",
+    author: "Tom Janssens",
+    date: "5 mei 2026",
+    coverImage: COVER_INTERVIEW,
+    subjects: [subjectJens],
+  },
+};
+
+// ─── Event ─────────────────────────────────────────────────────────────────
+
+export const EventDetail: EventStory = {
+  args: {
+    variant: "event",
+    title: "Spelerstornooi U13 — zaterdag 15 juni",
+    lead: "Acht ploegen, één toernooi. Inschrijven kan tot 1 juni.",
+    author: "Jeugdwerking",
+    date: "15 juni 2026",
+    coverImage: COVER_EVENT,
+    feature: {
+      title: "Spelerstornooi U13",
+      date: "2026-06-15",
+      startTime: "09:00",
+      endTime: "17:00",
+      location: "Sportpark Elewijt",
+      ageGroup: "U13",
+    },
+  },
+};
+
+export const EventHomepage: EventStory = {
+  args: {
+    variant: "event",
+    placement: "homepage",
+    slug: "spelerstornooi-u13",
+    title: "Spelerstornooi U13 — zaterdag 15 juni",
+    lead: "Acht ploegen, één toernooi. Inschrijven kan tot 1 juni.",
+    author: "Jeugdwerking",
+    date: "15 juni 2026",
+    coverImage: COVER_EVENT,
+    feature: {
+      title: "Spelerstornooi U13",
+      date: "2026-06-15",
+      startTime: "09:00",
+      endTime: "17:00",
+      location: "Sportpark Elewijt",
+      ageGroup: "U13",
+    },
+  },
+};
+
+export const EventCompetitionTag: EventStory = {
+  args: {
+    variant: "event",
+    title: "Spelerstornooi U13 — zaterdag 15 juni",
+    lead: "Acht ploegen, één toernooi. Inschrijven kan tot 1 juni.",
+    author: "Jeugdwerking",
+    date: "15 juni 2026",
+    coverImage: COVER_EVENT,
+    feature: {
+      title: "Vriendschappelijk",
+      date: "2026-06-15",
+      startTime: "20:00",
+      endTime: "22:00",
+      location: "Sportpark Elewijt",
+      competitionTag: "Vriendschappelijk",
+    },
+  },
+};
+
+// ─── Transfer ─────────────────────────────────────────────────────────────
+
+export const TransferIncoming: TransferStory = {
+  args: {
+    variant: "transfer",
+    title: "Aanvalsversterking voor volgend seizoen.",
+    lead: "Bocar Sarr tekent voor twee seizoenen.",
+    author: "Redactie",
+    date: "30 april 2026",
+    coverImage: COVER_TRANSFER,
+    feature: {
+      direction: "incoming",
+      playerName: "Bocar Sarr",
+      position: "Aanvaller",
+      age: 24,
+      otherClubName: "KV Mechelen B",
+    },
+  },
+};
+
+export const TransferOutgoing: TransferStory = {
+  args: {
+    variant: "transfer",
+    title: "Tom De Bie verlaat KCVV richting Sporting Mechelen.",
+    lead: "Bocar Sarr tekent voor twee seizoenen.",
+    author: "Redactie",
+    date: "30 april 2026",
+    coverImage: COVER_TRANSFER,
+    feature: {
+      direction: "outgoing",
+      playerName: "Tom De Bie",
+      position: "Middenvelder",
+      age: 22,
+      otherClubName: "Sporting Mechelen",
+    },
+  },
+};
+
+export const TransferExtension: TransferStory = {
+  args: {
+    variant: "transfer",
+    title: "Verlenging voor kapitein Frédéric Maes.",
+    lead: "Bocar Sarr tekent voor twee seizoenen.",
+    author: "Redactie",
+    date: "30 april 2026",
+    coverImage: COVER_TRANSFER,
+    feature: {
+      direction: "extension",
+      playerName: "Frédéric Maes",
+      position: "Verdediger",
+      age: 28,
+      until: "2028",
+    },
+  },
+};
+
+export const TransferHomepage: TransferStory = {
+  args: {
+    variant: "transfer",
+    placement: "homepage",
+    slug: "transfer-bocar-sarr",
+    title: "Aanvalsversterking voor volgend seizoen.",
+    lead: "Bocar Sarr tekent voor twee seizoenen.",
+    author: "Redactie",
+    date: "30 april 2026",
+    coverImage: COVER_TRANSFER,
+    feature: {
+      direction: "incoming",
+      playerName: "Bocar Sarr",
+      position: "Aanvaller",
+      age: 24,
+      otherClubName: "KV Mechelen B",
+    },
+  },
+};
+
+export const TransferMissingFields: TransferStory = {
+  args: {
+    variant: "transfer",
+    title: "Naamloze transfer (graceful-omit demo).",
+    lead: "Bocar Sarr tekent voor twee seizoenen.",
+    author: "Redactie",
+    date: "30 april 2026",
+    coverImage: COVER_TRANSFER,
+    feature: {
+      direction: "incoming",
+      playerName: "Onbekende speler",
+      otherClubName: "KV Mechelen B",
+    },
   },
 };

@@ -16,6 +16,7 @@ import {
   type ArticleVM,
   toHomepageArticles,
 } from "@/lib/repositories/article.repository";
+import { formatArticleDate } from "@/lib/utils/dates";
 import { HomepageRepository } from "@/lib/repositories/homepage.repository";
 import {
   EventRepository,
@@ -61,16 +62,74 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Drop GROQ-nullable fields (`field: string | null`) so the resulting
+ * shape matches the non-null `field?: string` API the EditorialHero
+ * variant types expect. Generic enough to work for both transfer and
+ * event projections.
+ */
+function nullsToUndefined<T extends object>(
+  src: T | null | undefined,
+): { [K in keyof T]?: NonNullable<T[K]> } | undefined {
+  if (src == null) return undefined;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(src)) {
+    if (value !== null) out[key] = value;
+  }
+  return out as { [K in keyof T]?: NonNullable<T[K]> };
+}
+
 function toHeroCarouselArticle(article: ArticleVM): HomepageHeroArticle {
-  return {
+  const shared = {
     slug: article.slug,
-    variant: article.articleType ?? "announcement",
     title: article.title,
     coverImage: article.coverImageUrl
       ? { url: article.coverImageUrl, alt: article.title }
       : undefined,
     thumbLabel: article.tags[0],
+    date: article.publishedAt
+      ? formatArticleDate(article.publishedAt)
+      : undefined,
   };
+
+  // Variant-specific tail per the R1.5 hero (`docs/design/mockups/
+  // phase-4-homepage/hero-flourishes-locked.md`). Each branch pulls
+  // the structured data the EditorialHero needs to render its kicker
+  // + below-H1 + below-hero artefacts. GROQ-nullable fields are
+  // narrowed to optional non-null at the boundary so the discriminated
+  // EditorialHero types stay strict.
+  //
+  // Exhaustive switch per the `apps/web/CLAUDE.md` discriminated-union
+  // rule — each known case is explicit and the final branch asserts
+  // the `articleType` union has been narrowed to `never`. If a new
+  // articleType lands (e.g. matchPreview / matchRecap from #1470)
+  // without a hero branch, TypeScript fails the build here rather
+  // than silently rendering as Announcement.
+  const variant = article.articleType ?? "announcement";
+  switch (variant) {
+    case "interview":
+      return { ...shared, variant, subjects: article.subjects };
+    case "event":
+      return {
+        ...shared,
+        variant,
+        feature: nullsToUndefined(article.firstEventFact),
+      };
+    case "transfer":
+      return {
+        ...shared,
+        variant,
+        feature: nullsToUndefined(article.firstTransferFact),
+      };
+    case "announcement":
+      return { ...shared, variant, category: article.tags[0] };
+    default: {
+      const _exhaustive: never = variant;
+      throw new Error(
+        `Unhandled articleType in toHeroCarouselArticle: ${String(_exhaustive)}`,
+      );
+    }
+  }
 }
 
 function toFeaturedEventBandEvent(
