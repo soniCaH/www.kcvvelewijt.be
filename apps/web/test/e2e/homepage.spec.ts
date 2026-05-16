@@ -1,14 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-// Phase 4.D.2 (#1681) — Playwright e2e regression for the assembled homepage.
-//
-// PRD: docs/prd/redesign-phase-4.md §5.D.2.
+// Phase 4.D.2 (#1681) + Phase 4.5.C.1 (#1754) — Playwright e2e
+// regression for the assembled homepage. The carousel was retired in
+// 4.5.C.1: the hero is now a single static `<EditorialHero>` plus a
+// 3-up `<FeaturedUitgelichtRow>`. Auto-rotation, thumb-strip, and
+// pause-button tests have been removed; the integration here covers
+// (a) page renders 200 with the new spine order, (b) UpcomingMatches
+// expand-collapse, (c) sponsor-logo greyscale/hover.
 //
 // The component-level Vitest + Storybook test-runner suites cover the
-// behaviour of each homepage section in isolation. This spec exercises the
-// **integration**: that page.tsx wires every section in the right order on
-// `/` and that the cross-component interactions (carousel auto-advance,
-// thumb click, UpcomingMatches expand, sponsor-logo hover) work against
+// behaviour of each homepage section in isolation. This spec exercises
+// the **integration**: that page.tsx wires every section in the right
+// order on `/` and that the cross-component interactions work against
 // real CMS data.
 //
 // Section selectors lean on aria labels and roles set inside each
@@ -18,100 +21,53 @@ import { expect, test } from "@playwright/test";
 // assertions below skip via `if (await section.count() === 0) test.skip()`
 // pattern — we only fail when something is present but broken.
 
-test.describe("/ homepage integration (Phase 4.D.2)", () => {
+test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
 
-  test("renders the new section ordering on /", async ({ page }) => {
-    // Sections are identified by their aria-labels (set inside each
-    // component). The PRD-locked ordering is:
-    //   carousel → event band → banner → news → upcoming matches →
-    //   banner → youth → clubshop → banner → sponsors
-    // (Webshop was renamed to Clubshop in R6.C — see PR #1770.)
-    const expected = [/uitgelichte? artikels?/i, /clubshop/i, /onze sponsors/i];
-
-    for (const label of expected) {
-      const section = page.getByRole("region", { name: label }).or(
-        page
-          .locator("section")
-          .filter({ has: page.getByLabel(label) })
-          .first(),
-      );
-      await expect(section.first()).toBeVisible();
-    }
-
-    // Hero carousel comes BEFORE the clubshop banner in the DOM.
-    const carousel = page.getByRole("region", {
-      name: /uitgelichte? artikels?/i,
+  test("renders the page without console errors", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
     });
-    const clubshop = page.getByRole("region", { name: /^clubshop$/i }).first();
-    if ((await carousel.count()) === 0) {
-      test.skip(true, "Carousel has no articles — section drops.");
+
+    await page.goto("/");
+    await expect(page.locator("h1")).toHaveCount(1);
+    expect(errors).toEqual([]);
+  });
+
+  test("renders the R4.B spine ordering — clubshop closes the page after sponsors", async ({
+    page,
+  }) => {
+    // Sections are identified by their aria-labels (set inside each
+    // component). The R4.B-locked ordering on `/` is:
+    //   hero → uitgelicht → event band → banner → news → upcoming →
+    //   banner → youth → banner → sponsors → clubshop
+    const sponsorsRegion = page.getByRole("region", { name: /onze sponsors/i });
+    const clubshopRegion = page
+      .getByRole("region", { name: /^clubshop$/i })
+      .first();
+
+    if ((await sponsorsRegion.count()) === 0) {
+      test.skip(true, "Sponsors section absent — staging seed gap.");
     }
-    if ((await clubshop.count()) === 0) {
+    if ((await clubshopRegion.count()) === 0) {
       test.skip(true, "Clubshop banner is missing — staging-only seed gap.");
     }
 
-    const carouselIndex = await carousel.evaluate((el) =>
+    const sponsorsIndex = await sponsorsRegion.evaluate((el) =>
       Array.from(document.querySelectorAll("section, [role='region']")).indexOf(
         el,
       ),
     );
-    const clubshopIndex = await clubshop.evaluate((el) =>
+    const clubshopIndex = await clubshopRegion.evaluate((el) =>
       Array.from(document.querySelectorAll("section, [role='region']")).indexOf(
         el,
       ),
     );
-    expect(carouselIndex).toBeGreaterThanOrEqual(0);
-    expect(clubshopIndex).toBeGreaterThan(carouselIndex);
-  });
-
-  test("hero carousel: thumb click jumps the active slide", async ({
-    page,
-  }) => {
-    const carousel = page.getByRole("region", {
-      name: /uitgelichte? artikels?/i,
-    });
-    if ((await carousel.count()) === 0) {
-      test.skip(
-        true,
-        "Carousel single-article placement or empty — no thumb strip.",
-      );
-    }
-    const thumbs = carousel.getByRole("button", {
-      name: /^slide \d+ van \d+/i,
-    });
-    const count = await thumbs.count();
-    if (count < 2) {
-      test.skip(true, "Carousel has fewer than 2 slides — thumb click moot.");
-    }
-
-    // Slide 1 starts active.
-    await expect(thumbs.nth(0)).toHaveAttribute("aria-pressed", "true");
-
-    // Click slide 2 — aria-pressed should swap.
-    await thumbs.nth(1).click();
-    await expect(thumbs.nth(1)).toHaveAttribute("aria-pressed", "true");
-    await expect(thumbs.nth(0)).toHaveAttribute("aria-pressed", "false");
-  });
-
-  test("hero carousel: pause toggle stops auto-advance", async ({ page }) => {
-    const pauseButton = page.getByRole("button", {
-      name: /auto-rotatie pauzeren/i,
-    });
-    if ((await pauseButton.count()) === 0) {
-      test.skip(true, "No carousel chrome — pause button missing.");
-    }
-
-    await expect(pauseButton).toHaveAttribute("aria-pressed", "false");
-    await pauseButton.click();
-    // After click the label flips to "hervatten" and aria-pressed=true.
-    const resumeButton = page.getByRole("button", {
-      name: /auto-rotatie hervatten/i,
-    });
-    await expect(resumeButton).toBeVisible();
-    await expect(resumeButton).toHaveAttribute("aria-pressed", "true");
+    expect(sponsorsIndex).toBeGreaterThanOrEqual(0);
+    expect(clubshopIndex).toBeGreaterThan(sponsorsIndex);
   });
 
   test("upcoming matches: expand button reveals all matches", async ({

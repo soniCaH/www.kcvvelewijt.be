@@ -7,17 +7,26 @@ import {
 } from "./HomepageHeroCarousel.mocks";
 
 const meta = {
-  title: "Features/Homepage/HomepageHeroCarousel",
+  title: "Features/Homepage/_legacy/HomepageHeroCarousel",
   component: HomepageHeroCarousel,
-  tags: ["autodocs", "vr"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
     docs: {
       description: {
         component:
-          'Homepage hero carousel (Phase 4.C.1, Round 1b D.1 lock). Client wrapper around `<EditorialHero placement="homepage">` rendering up to 3 articles with a strip-below thumbnails row. Auto-rotates every 5s; pauses on hover, focus-within, when the user toggles pause, or when `prefers-reduced-motion: reduce` is set. Active thumb has a `#f0c264` outline + full opacity; inactives sit at 60% opacity. Arrow keys advance.',
+          'Homepage hero carousel — **retired Phase 4.5.C.1 (#1754)**. Moved to `_legacy/` for blame trace; replaced on `/` by a static `<EditorialHero placement="homepage">` + `<FeaturedUitgelichtRow>` per the R1.B hero-locked spec. Kept buildable so the existing tests / story remain explorable; deletion is deferred to a future cleanup phase.',
       },
     },
+    // vr.disable: legacy component, retired from homepage spine (#1754).
+    // The static <EditorialHero> + <FeaturedUitgelichtRow> replacement
+    // owns the regenerated baselines; the carousel will be deleted in a
+    // future cleanup phase, so its baselines no longer add coverage.
+    // Repro: stories render fine but capturing baselines doubles the
+    // VR matrix for a component no consumer renders.
+    // Approved by: @climacon / https://github.com/soniCaH/www.kcvvelewijt.be/issues/1754
+    // Re-evaluate: 2026-08-01 (Phase 9 cleanup window)
+    vr: { disable: true },
   },
 } satisfies Meta<typeof HomepageHeroCarousel>;
 

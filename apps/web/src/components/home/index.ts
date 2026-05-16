@@ -1,14 +1,10 @@
-// Phase 4.D.1 (#1680) — the homepage has migrated to the new section
-// ordering. Legacy `FeaturedArticles`, `MatchWidget`, `MatchesSliderSection`
-// (+ `MatchesSliderEmptyState`) moved to `./_legacy/` for blame trace and
-// are no longer re-exported from this barrel. Deletion happens in Phase 9
-// cleanup.
-
-export { HomepageHeroCarousel } from "./HomepageHeroCarousel";
-export type {
-  HomepageHeroCarouselProps,
-  HomepageHeroArticle,
-} from "./HomepageHeroCarousel";
+// Phase 4.D.1 (#1680) + Phase 4.5.C.1 (#1754) — the homepage has
+// migrated to the new section ordering. Legacy `FeaturedArticles`,
+// `MatchWidget`, `MatchesSliderSection` (+ `MatchesSliderEmptyState`),
+// and the auto-rotating `HomepageHeroCarousel` (replaced by a static
+// `<EditorialHero>` + `<FeaturedUitgelichtRow>` per R1.B) moved to
+// `./_legacy/` for blame trace and are no longer re-exported from this
+// barrel. Deletion happens in Phase 9 cleanup.
 
 export { NewsGrid } from "./NewsGrid";
 export type { NewsGridProps, NewsGridArticle } from "./NewsGrid";

@@ -85,6 +85,33 @@ export const AnnouncementHomepage: AnnouncementStory = {
   },
 };
 
+// Phase 4.5.C.1 (#1754) — the static homepage hero swaps the canonical
+// 2px paper-stamp press-down for the `tilt-photo` treatment: only the
+// framed cover image tilts + scales on hover; the editorial column
+// stays still. Hover/focus the story to see the cover tilt.
+export const AnnouncementHomepageTiltPhoto: AnnouncementStory = {
+  args: {
+    variant: "announcement",
+    placement: "homepage",
+    hoverStyle: "tilt-photo",
+    slug: "kampioen-58-punten",
+    title: "Kampioen! 58 punten en titel in eerste provinciale.",
+    lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",
+    author: "Redactie",
+    category: "Clubnieuws",
+    date: "3 mei 2026",
+    coverImage: COVER_GENERIC,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Static homepage hero hover treatment. Used on `/` from #1754 onward — the full-width hero spans the inner content column, so the canonical 2px press-down reads as a twitch. `hoverStyle="tilt-photo"` lets the framed `<TapedFigure>` tilt -1° + scale 1.02× on group-hover instead; the editorial column stays still and "★ Lees verder →" reveals at the bottom-right.',
+      },
+    },
+  },
+};
+
 export const AnnouncementNoCategory: AnnouncementStory = {
   args: {
     variant: "announcement",

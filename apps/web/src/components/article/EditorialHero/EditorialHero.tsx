@@ -103,6 +103,21 @@ interface HomepagePlacementProps {
   placement: "homepage";
   /** Required for homepage placement — builds the link target. */
   slug: string;
+  /**
+   * Hover treatment on the wrapping link.
+   *
+   * - `"press"` (default) — paper-stamp press-down: translate by 2px +
+   *   shadow shift on the whole hero. Used by the (retired)
+   *   `<HomepageHeroCarousel>` where each slide is a small card; the
+   *   press registers without feeling oversized.
+   * - `"tilt-photo"` — keep the link affordance + the "★ Lees verder →"
+   *   reveal at the bottom-right, but skip the whole-block translate.
+   *   Instead, the cover `<TapedFigure>` tilts a fraction of a degree
+   *   and scales up by ~2% — the framed photo gets "noticed" without
+   *   the giant editorial column twitching. Used by the Phase 4.5.C.1
+   *   static homepage hero (#1754).
+   */
+  hoverStyle?: "press" | "tilt-photo";
 }
 
 type PlacementProps = DetailPlacementProps | HomepagePlacementProps;
@@ -160,19 +175,29 @@ interface EditorialHeroCoverProps {
    *  Event day-block stamp). `position: relative` is already set on
    *  the inner figure container; consumers position themselves. */
   overlay?: React.ReactNode;
+  /** When `true`, the figure adds a `group-hover` rotate + scale so
+   *  the framed photo tilts on hover. Only used by the homepage
+   *  placement when `hoverStyle === "tilt-photo"`. The wrapping
+   *  `<Link>` already carries the `group` class. */
+  tiltOnHover?: boolean;
 }
 
 function EditorialHeroCover({
   coverImage,
   aspect,
   overlay,
+  tiltOnHover,
 }: EditorialHeroCoverProps) {
   return (
     <TapedFigure
       aspect={aspect}
       rotation="b"
       tape={{ color: "jersey", length: "md" }}
-      className="relative max-w-[440px]"
+      className={`relative max-w-[440px]${
+        tiltOnHover
+          ? "transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0"
+          : ""
+      }`}
     >
       <Image
         src={coverImage.url}
@@ -400,6 +425,9 @@ export function EditorialHero(props: EditorialHeroProps) {
     );
   }
 
+  const tiltOnHover =
+    placement === "homepage" && (props.hoverStyle ?? "press") === "tilt-photo";
+
   const shell = (
     <EditorialHeroShell
       editorial={editorial}
@@ -409,6 +437,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             coverImage={coverImage}
             aspect={coverAspect}
             overlay={coverOverlay}
+            tiltOnHover={tiltOnHover}
           />
         ) : undefined
       }
@@ -427,19 +456,32 @@ export function EditorialHero(props: EditorialHeroProps) {
     // guarantees it's a non-empty string here. No runtime guard needed.
     // Below-hero strips (Event) render inside the click target so the
     // whole composition reads as one tappable card.
+    const hoverStyle = props.hoverStyle ?? "press";
+    const pressClasses =
+      "transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0";
+    // The tilt-photo treatment moves only the cover figure (handled
+    // inside `<EditorialHeroCover tiltOnHover />`); the outer Link stays
+    // still apart from the bottom-right "Lees verder" reveal.
+    const tiltPhotoClasses = "transition-colors duration-300";
     return (
       <Link
         href={`/nieuws/${slug}`}
-        className="group relative block pb-8 transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+        className={`group block ${hoverStyle === "press" ? pressClasses : tiltPhotoClasses}`}
         aria-label={serializeTitle(title)}
       >
         {body}
-        <span
-          aria-hidden="true"
-          className="text-jersey-deep pointer-events-none absolute right-2 bottom-1 font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
-        >
-          ★ Lees verder →
-        </span>
+        {/* The shell renders an `mx-auto max-w-[1120px]` <section> with a
+            bottom divider line; pin "Lees verder" inside the same inner
+            container so it aligns flush with the divider's right edge
+            rather than the outer link's wrapper-padded edge. */}
+        <div className="mx-auto mt-2 flex max-w-[1120px] justify-end">
+          <span
+            aria-hidden="true"
+            className="text-jersey-deep pointer-events-none font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            ★ Lees verder →
+          </span>
+        </div>
       </Link>
     );
   }
