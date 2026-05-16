@@ -24,6 +24,13 @@ export interface JerseyShirtProps {
   letterOverlay?: string;
   /** Accessible label. Defaults to "KCVV jersey". */
   ariaLabel?: string;
+  /**
+   * Tailwind classes merged into the outer `<figure>`. Use to override
+   * the default `h-60 w-60` size for corner-anchored variants — e.g.
+   * the R6.C Clubshop section renders the shirt at ~140px in the
+   * top-right corner via `className="h-35 w-35 mx-0"`.
+   */
+  className?: string;
 }
 
 const STRIPE_STROKE_WIDTH = 2;
@@ -38,9 +45,15 @@ const LETTER_TEXT_SHADOW =
 export function JerseyShirt({
   letterOverlay,
   ariaLabel = "KCVV jersey",
+  className,
 }: JerseyShirtProps) {
+  // The figure's default dimensions live in this base string; the
+  // consumer-supplied className appends *after* so utility wins
+  // (`h-35 w-35 mx-0` overrides `h-60 w-60 mx-auto`). Cheaper than
+  // pulling in `cn()` for one merge.
+  const figureClass = `relative mx-auto my-0 h-60 w-60${className ? ` ${className}` : ""}`;
   return (
-    <figure aria-label={ariaLabel} className="relative mx-auto my-0 h-60 w-60">
+    <figure aria-label={ariaLabel} className={figureClass}>
       <div
         aria-hidden="true"
         className="absolute top-3 right-[22px] bottom-1 left-3 opacity-95 mix-blend-multiply"

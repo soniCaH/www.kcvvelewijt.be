@@ -31,7 +31,7 @@ import {
   NewsGrid,
   SponsorsSection,
   UpcomingMatches,
-  WebshopBanner,
+  ClubshopBanner,
   YouthBackdrop,
   YouthSection,
 } from "@/components/home";
@@ -257,10 +257,10 @@ export default async function HomePage() {
     backdrop: <YouthBackdrop />,
   };
 
-  const webshopSection: SectionConfig = {
-    key: "webshop",
+  const clubshopSection: SectionConfig = {
+    key: "clubshop",
     bg: "transparent",
-    content: <WebshopBanner />,
+    content: <ClubshopBanner />,
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
   };
@@ -313,7 +313,7 @@ export default async function HomePage() {
           upcomingMatchesSection,
           bannerSlotBSection,
           youthSection,
-          webshopSection,
+          clubshopSection,
           bannerSlotCSection,
           sponsorsSection,
         ]}
