@@ -193,11 +193,11 @@ function EditorialHeroCover({
       aspect={aspect}
       rotation="b"
       tape={{ color: "jersey", length: "md" }}
-      className={`relative max-w-[440px]${
+      className={
         tiltOnHover
-          ? "transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0"
-          : ""
-      }`}
+          ? "relative max-w-[440px] transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0"
+          : "relative max-w-[440px]"
+      }
     >
       <Image
         src={coverImage.url}
