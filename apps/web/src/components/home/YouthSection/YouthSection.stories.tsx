@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Homepage Jeugd block. Phase 4.5 R5.B adds a top stripe band (jersey-tonal-light StripedSeam, xl height, ink hairlines), shifts the editorial accent from "De toekomst" to "Elewijt", and introduces a dual CTA row ("Ontdek onze jeugd" → /jeugd, "Schrijf je in" → /club/inschrijven). Background stays the composed jersey-deep gradient + halftone photo overlay from Phase 4.B.4.',
+          'Homepage Jeugd block. Phase 4.5 R5.B adds a top stripe band (cream-jersey-deep StripedSeam, xl height — cream paper-tape on the dark green field), shifts the editorial accent from "De toekomst" to "Elewijt", and introduces a dual CTA row ("Ontdek onze jeugd" → /jeugd, "Schrijf je in" → /club/inschrijven). Background stays the composed jersey-deep gradient + halftone photo overlay from Phase 4.B.4.',
       },
     },
   },

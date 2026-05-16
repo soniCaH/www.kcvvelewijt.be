@@ -89,7 +89,7 @@ emphasis={{ text: "Elewijt", tone: "warm" }}  // shift italic + warm accent to "
   <LinkButton href="/jeugd" variant="primary" withArrow>
     Ontdek onze jeugd
   </LinkButton>
-  <LinkButton href="/jeugd#inschrijven" variant="inverted" withArrow>
+  <LinkButton href="/club/inschrijven" variant="inverted" withArrow>
     Schrijf je in
   </LinkButton>
 </div>
