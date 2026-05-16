@@ -1,8 +1,38 @@
 # Phase 4.5 · Hero per-articleType flourishes — Locked (R1.5)
 
-**Locked 2026-05-13.**
+**Locked 2026-05-13. Implemented #1749 (2026-05-16).**
 **Supersedes:** open follow-up listed in `hero-locked.md` §R1.5.
-**Source compare pages:**
+
+## Implementation notes (#1749)
+
+- `<EditorialHero>` discriminated union extended per variant with the
+  structured data needed for kicker + below-H1 + cover-overlay +
+  below-hero rendering:
+  - `announcement` → `{ category?, date? }`
+  - `interview` → `{ subjects?, date? }`
+  - `event` → `{ feature?, date? }`
+  - `transfer` → `{ feature?, date? }`
+- Five new co-located sub-components in
+  `apps/web/src/components/article/EditorialHero/_variant-parts.tsx`:
+  `HeroCreditChip`, `HeroDayBlockOverlay`,
+  `HeroCompressedEventStrip`, `HeroTransferDirChip`,
+  `HeroTransferMetaLine`. Each is tightly coupled to the hero and
+  doesn't merit a top-level design-system surface.
+- `<TapedFigure>` gained an additive `aspect="landscape-3-2"` value
+  for the Interview + Transfer covers (3:2 was already in the lock;
+  the primitive just didn't expose it yet).
+- The legacy `kicker?: EditorialKickerProps["items"]` prop on
+  `<EditorialHero>` is retired — kicker is derived per variant from
+  `category` / `subjects` / `feature` + `date`. `HomepageHeroArticle`
+  (the carousel input shape) migrated to a discriminated union per
+  variant with the same fields. `page.tsx::toHeroCarouselArticle`
+  populates each branch.
+- The Transfer kicker carries a JSX dirChip (`↓ Inkomend` / `↑ Uitgaand`
+  / `↻ Verlengd`) that doesn't fit `<EditorialKicker>`'s plain-label
+  items API, so the Transfer variant renders its kicker row manually
+  (`renderTransferEditorial`). The chip wraps `resolveTransfer()` so
+  the direction enum drives the glyph + Dutch label deterministically.
+  **Source compare pages:**
 
 - `round-r1-5-hero-flourishes-comparisons.html` (initial overlay-first proposal — rejected as a set)
 - `round-r1-5b-hero-flourishes-hybrid-comparisons.html` (hybrid baseline — Announcement approved)
