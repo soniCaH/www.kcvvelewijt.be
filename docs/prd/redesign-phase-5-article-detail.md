@@ -1,6 +1,6 @@
 # PRD — Phase 5 · Article Detail Redesign
 
-**Status:** skeleton — interview variant scoped; non-interview variants gate on per-variant design drill rounds.
+**Status:** comprehensive — all 6 article variants scoped in one PRD; design decisions handled via a single drill-down tree (one question per round, A/B/C/D options) per `feedback_design_drill_pattern`. No per-variant PRD update phase.
 **Authored:** 2026-05-17.
 **Owner:** @climacon.
 **Predecessor:** Phase 4.5 homepage refinement (#1745, all R1–R10 locks merged).
@@ -13,27 +13,48 @@
 
 ## 1. Scope
 
-Rebuild `/nieuws/[slug]` for all `article.articleType` values with the retro-terrace-fanzine vocabulary established in Phase 4.5. Six article variants:
+Rebuild `apps/web/src/app/(main)/nieuws/[slug]/page.tsx` for all `article.articleType` values with the retro-terrace-fanzine vocabulary established in Phase 4.5.
 
-| Variant      | Status at PRD authoring                                                                     | Owner-direction notes                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Interview    | **Mocked** (`docs/design/mockups/retro-terrace-fanzine/duo-interview-{desktop,mobile}.png`) | Header / Q&A / pull-quote drill rounds open — see brief §5 Q1+Q2. PRD scopes interview-first implementation. |
-| Matchverslag | Not mocked. Variant inherits all system locks; needs header + body-flow drill.              | Pending.                                                                                                     |
-| Column       | Not mocked. Likely shares Interview body composition minus `<QASection>`.                   | Pending.                                                                                                     |
-| Transfer     | Not mocked. EditorialHero variant already exists (#1638 / #1749); article body needs drill. | Pending.                                                                                                     |
-| Jeugd        | Not mocked. Likely matchverslag-like with youth-specific kicker / subject treatment.        | Pending.                                                                                                     |
-| Evenement    | Not mocked. EditorialHero event variant exists; body needs drill.                           | Pending.                                                                                                     |
-| Generic      | Not mocked. Fallback for legacy untyped articles.                                           | Pending — may collapse into a "default" style without its own drill if owner agrees.                         |
+### Key insight: variant-specific work is small
 
-**Goal:** ship the Interview rebuild first (it has a locked mock + brief), then drill each non-interview variant in sequence, then implement, then close.
+All six variants share the **same body shell**:
 
-**Sanity migrations required:** 0 expected. The `articleType` field + `subjects[]` already exist. Body composition primitives are React-only. **Open follow-up — Editie line:** UI-only auto-derived from `publishedAt`; no schema field unless editorial demand surfaces during build.
+```text
+<EditorialHero placement="detail" variant={articleType} />   <-- already locked R1.5 (#1749)
+<DropCapParagraph>                                            <-- Phase 1 primitive
+<PortableText body />                                         <-- existing renderer + accent decorator
+<PullQuote interspersed />                                    <-- Phase 1 primitive
+<EndMark flourish="star" />                                   <-- Phase 1 primitive
+<VerderLezenRow />                                            <-- net-new (3-up NewsCard row, R3 backgrounds)
+<EditieLabel />                                               <-- net-new (UI-only, derived from publishedAt)
+```
+
+Each variant overlays variant-specific touches inside this shell — drilled below in §9.
+
+### Per-variant header status
+
+| `articleType`   | Header status                                                       | Variant-specific body work              |
+| --------------- | ------------------------------------------------------------------- | --------------------------------------- |
+| `interview`     | `<EditorialHero variant="interview" placement="detail">` (#1749)    | `<QASection>` + `<InterviewCredits>`    |
+| `announcement`  | `<EditorialHero variant="announcement" placement="detail">` (#1749) | column-style body (drill 5.d-col)       |
+| `transfer`      | `<EditorialHero variant="transfer" placement="detail">` (#1749)     | transfer body treatment (drill 5.d-tra) |
+| `event`         | `<EditorialHero variant="event" placement="detail">` (#1749)        | event detail block (drill 5.d-evt)      |
+| `matchPreview`  | EditorialHero variant pending #1470                                 | match details (drill 5.d-mat)           |
+| `matchRecap`    | EditorialHero variant pending #1470                                 | match details (drill 5.d-mat)           |
+| `null` (legacy) | Falls back to `announcement` variant                                | shared shell only                       |
+
+Two variant categories worth calling out:
+
+- **`announcement`** doubles as the editorial "column" variant per `feedback_design_drill_pattern` — the master plan listed `column` as a distinct articleType but Sanity merged it under `announcement`. Drill 5.d-col covers both.
+- **Matchverslag** is `matchRecap`; **matchvoorbeschouwing** is `matchPreview`. Both are gated on #1470; once that ships their EditorialHero detail variants land too. Drill 5.d-mat picks up both with the same body treatment.
+
+**Sanity migrations required:** 0 expected. `articleType`, `subjects[]`, body PT blocks, `firstTransferFact`, `firstEventFact` all already on schema. Editie line is UI-only.
 
 ---
 
 ## 2. System inheritance — non-negotiable
 
-All Phase 4.5 + earlier locks apply. **Do not re-derive in any Phase 5 round.** Quote the brief §1 instead.
+All Phase 4.5 + earlier locks apply. **Do not re-derive in any Phase 5 drill round.** Quote the brief §1 instead.
 
 ### Phase 4.5 R9 — Photo treatment
 
@@ -41,11 +62,11 @@ All Phase 4.5 + earlier locks apply. **Do not re-derive in any Phase 5 round.** 
 
 ### Phase 4.5 R10 — Card structure
 
-`<NewsCard>` flush-edge structure consumed by the "Verder lezen" related row at article footer. Outer `<TapedCard>` is the only frame; no nested `<TapedFigure>` inside `<NewsCard>`.
+`<NewsCard>` flush-edge structure consumed by `<VerderLezenRow>`. Outer `<TapedCard>` is the only frame; no nested `<TapedFigure>` inside `<NewsCard>`.
 
 ### Phase 4.5 R3 — Per-`articleType` card backgrounds
 
-`<NewsCard bg>` lookup: `transfer` → `jersey-deep` / cream text; `interview` / `announcement` / `event` → `cream` / ink text. Consumed by "Verder lezen" at the article footer.
+`<NewsCard bg>` lookup: `transfer` → `jersey-deep` / cream text; `interview` / `announcement` / `event` → `cream` / ink text. Consumed by `<VerderLezenRow>`.
 
 ### Phase 0–4 primitives (master plan §4)
 
@@ -61,140 +82,204 @@ Portable Text custom decorator only (`feedback_inline_emphasis_via_portable_text
 
 ### Hover model
 
-Canonical press-down everywhere (`hover:shadow-none hover:translate-x-1 hover:translate-y-1` + `transition-all duration-300`). No per-component soft-press variants except the EditorialHero homepage `hoverStyle="tilt-photo"` already locked in #1754.
+Canonical press-down everywhere. `<EditorialHero placement="detail">` is non-interactive (no link wrapper).
+
+### Multi-line `<HighlighterStroke>` (#1543)
+
+Phase 1 shipped single-line only; multi-line wrapping is needed once body emphasis lands inside long-form copy. The technical approach (server vs client, resize behaviour, per-line stroke variant) **locks inside this PRD during 5.A.1** — see §10 Q3.
 
 ---
 
 ## 3. Phasing
 
 ```text
-5.0   Tracer — `/nieuws/[slug]` route audit + `ARTICLE_BY_SLUG_QUERY` projection extension
-        └─ verify `subjects[]`, `firstTransferFact`, `firstEventFact`, body PT blocks ship for all variants
-5.A   Interview variant
-        ├─ 5.A.d1   Header drill (brief §5 Q1 — centered vs flanked)
-        ├─ 5.A.d2   Q&A + pull-quote avatar drill (brief §5 Q2 — photo crop / monogram / illustrated)
-        ├─ 5.A.d3   Section-break diamond + Verder-lezen placement sign-off (no design round)
-        ├─ 5.A.0    Component scaffolding (`<InterviewHero>`, `<QASection>`, `<QARow>`, `<QASectionDivider>`, `<InterviewCredits>`)
-        ├─ 5.A.1    Body composition wiring (`<DropCapParagraph>` + Portable Text body + `<PullQuote>` + `<EndMark>` + Verder-lezen row + Editie footer)
-        └─ 5.A.2    `/nieuws/[slug]` page.tsx rewire for `articleType: "interview"`
-5.B   Non-interview variants — repeat per variant
-        ├─ 5.B.d1   Header drill (per variant, owner-led; each round picks 3–4 visual options)
-        ├─ 5.B.d2   Body-flow drill (per variant — confirm what's reused, what's new)
-        └─ 5.B.<v>  Implementation per variant (matchverslag / column / transfer / jeugd / evenement / generic)
-5.C   Cleanup
-        ├─ Old `docs/prd/article-detail-redesign.md` removed
-        ├─ Old `article-detail-redesign` milestone closed
-        ├─ Legacy `<ArticleHero>` (or equivalent) + per-variant body components retired
+5.0    Tracer — `/nieuws/[slug]` route audit + ARTICLE_BY_SLUG_QUERY projection audit
+        verify subjects[], firstTransferFact, firstEventFact, body PT blocks ship for all variants;
+        confirm <EditorialHero placement="detail"> renders correctly for each variant against real Sanity data
+
+5.d.*  Design drill rounds — one decision per round, A/B/C/D options
+        Sequence: 5.d1 → 5.d2 → 5.d3 → 5.d4 → 5.d-int → 5.d-col → 5.d-tra → 5.d-evt → 5.d-mat
+        Each drill is its own ready-for-Ralph sub-issue; the user runs them as one /design-an-interface
+        loop until each closes with an owner-approved mockup committed under
+        docs/design/mockups/phase-5-article-detail/<round>/. Round outputs feed §9 lock tables here.
+
+5.A    Body composition build — shared shell across all variants
+        ├─ 5.A.1   Body container + <DropCapParagraph> + Portable Text body + multi-line <HighlighterStroke>
+        ├─ 5.A.2   <PullQuote> placement + <EndMark> + <VerderLezenRow>
+        └─ 5.A.3   <EditieLabel> + final article-footer composition
+
+5.B    Variant-specific components (depends on drill outcomes per variant)
+        ├─ 5.B.int  <QASection> + <QARow> + <QASectionDivider> + <InterviewCredits>
+        ├─ 5.B.col  Column-variant body touches (per 5.d-col outcome)
+        ├─ 5.B.tra  Transfer-variant body touches (per 5.d-tra outcome)
+        ├─ 5.B.evt  Event-variant detail block (per 5.d-evt outcome)
+        └─ 5.B.mat  Match-variant detail block (per 5.d-mat outcome) — gates on #1470 if hero variant missing
+
+5.C    Page integration + variant switch
+        rewire apps/web/src/app/(main)/nieuws/[slug]/page.tsx to compose the new shell;
+        switch on articleType injects the variant-specific overlays from 5.B.*
+
+5.D    Cleanup
+        ├─ Old docs/prd/article-detail-redesign.md removed
+        ├─ Old article-detail-redesign milestone closed
+        ├─ Legacy article-detail components retired
+        ├─ #1543 closed (multi-line HighlighterStroke landed in 5.A.1)
         └─ CLAUDE.md "Implemented Routes" + "Redesign primitives" updated
 ```
 
-Sub-issues spawn as each drill round closes. The PRD does NOT pre-spawn the 5.B sub-tree because variant scope only firms up after each drill.
+All sub-issues spawn from this PRD via `/prd-to-issues`. No PRD update needed per variant — each drill round writes its locked mockup back to `docs/design/mockups/phase-5-article-detail/<round>/` and the corresponding implementation sub-issue (`5.B.<v>`) reads that mockup.
 
 ---
 
 ## 4. Component inventory
 
-### New components (interview variant)
+### New components
 
-- `<InterviewHero>` — title-centered article header with flanking `<TapedFigure>` polaroids + tape-label breadcrumb + green star kicker. **Exact composition gated on brief §5 Q1 drill.**
-- `<QASection>` — `<MonoLabel>Q&A</MonoLabel>` heading + alternating `<QARow>` + `<QASectionDivider>`. Width pinned at `--container-prose`.
-- `<QARow>` — Freight Display 900 number left · mono speaker tag · `text-display-sm` 600 question · `text-body-md` answer. Optional avatar in the speaker-tag slot **gated on brief §5 Q2 drill.**
-- `<QASectionDivider>` — dotted divider between Q&A rows; gains a `flourish="diamond"` variant for section breaks (no design round, owner sign-off only).
-- `<InterviewCredits>` — closing credits block (author / interviewees / photographer / publish date).
-- `<VerderLezenRow>` — 3-up `<NewsCard>` row at the article footer, inheriting R3 per-`articleType` backgrounds. Same primitive vocabulary as `<NewsGrid>` — `<NewsCard variant="default">` + cream surface.
-- `<EditieLabel>` — net-new editorial flourish (UI-only, derived from `publishedAt`: season + sequence count).
+| Component               | Phase   | Role                                                                                                                                         |
+| ----------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<QASection>`           | 5.B.int | `<MonoLabel>Q&A</MonoLabel>` heading + alternating `<QARow>` + `<QASectionDivider>`. Width pinned at `--container-prose`. Interview-only.    |
+| `<QARow>`               | 5.B.int | Freight Display 900 number left · mono speaker tag · `text-display-sm` 600 question · `text-body-md` answer. Avatar slot per drill 5.d2.     |
+| `<QASectionDivider>`    | 5.B.int | Dotted divider between Q&A rows. `flourish?: "diamond"` variant for major section breaks per drill 5.d3.                                     |
+| `<InterviewCredits>`    | 5.B.int | Closing credits block (author / interviewees / photographer / publish date). Per drill 5.d-int.                                              |
+| `<VerderLezenRow>`      | 5.A.2   | 3-up `<NewsCard>` row at article footer. Inherits R3 per-`articleType` backgrounds.                                                          |
+| `<EditieLabel>`         | 5.A.3   | Editorial flourish (UI-only, derived from `publishedAt`: season + sequence count).                                                           |
+| `<MatchRecapStats>`     | 5.B.mat | Inline match-stats block (composition per drill 5.d-mat). Spans both `matchPreview` (lineup/H2H) and `matchRecap` (final stats/goalscorers). |
+| `<EventDetailBlock>`    | 5.B.evt | Full event detail card for the article body (composition per drill 5.d-evt). Companion to the existing hero day-block + compressed strip.    |
+| `<TransferDetailBlock>` | 5.B.tra | Optional transfer body block (career history, fees if disclosed, etc — per drill 5.d-tra outcome; could be no-op).                           |
 
 ### Reused components
 
-- `<TapedCard>`, `<TapedFigure>`, `<TapeStrip>` (Phase 0–4.5)
-- `<EditorialHeading>` (Phase 0–1, with accent decorator)
-- `<MonoLabel>`, `<MonoLabelRow>` (Phase 0–4.5)
-- `<DropCapParagraph>`, `<PullQuote>`, `<EndMark>` (Phase 1)
-- `<NewsCard>` (Phase 4.5 R10 flush-edge)
-- `<StripedSeam>` (Phase 0 — for article-detail section breaks if any)
-- Portable Text renderers + custom `accent` decorator (Phase 4.5 existing)
+- `<EditorialHero placement="detail" variant={articleType}>` — Phase 4.5 R1.5 (#1749). Possibly refined by drill 5.d1.
+- `<TapedCard>`, `<TapedFigure>`, `<TapeStrip>` — Phase 0–4.5
+- `<EditorialHeading>` with accent decorator — Phase 0–1
+- `<MonoLabel>`, `<MonoLabelRow>` — Phase 0–4.5
+- `<DropCapParagraph>`, `<PullQuote>`, `<EndMark>` — Phase 1
+- `<HighlighterStroke>` — Phase 0/1; multi-line support lands here (#1543)
+- `<NewsCard>` flush-edge — Phase 4.5 R10
+- `<StripedSeam>` — Phase 0
+- Portable Text renderers + custom `accent` decorator — Phase 4.5
 
-### Non-interview variants
+### EditorialHero variants pending other work
 
-Each variant's body composition is expected to be **the same shell** (DropCap → PortableText body → optional `<PullQuote>` → `<EndMark>` → `<VerderLezenRow>` → `<EditieLabel>`) **minus `<QASection>`**. Per-variant headers diverge — drill rounds lock each one.
+- `matchPreview` / `matchRecap` — gated on #1470. Their `<EditorialHero placement="detail">` variants need to land in #1470's PR. Phase 5 sub-issue `5.B.mat` blocks on #1470; the rest of the PRD does not.
 
 ---
 
 ## 5. Data layer
 
-### GROQ — `ARTICLE_BY_SLUG_QUERY` audit
+### GROQ — `ARTICLE_BY_SLUG_QUERY` audit (5.0)
 
-The query already returns `titleRich`, `subjects[]`, `firstTransferFact`, `firstEventFact`, and the body PT array. **Audit pass in 5.0:** confirm every field consumed by the new interview components ships through the projection. Likely missing today:
+The query already returns `titleRich`, `subjects[]`, `firstTransferFact`, `firstEventFact`, body PT. Audit confirms every field consumed by the new components ships through the projection.
 
-- Q&A speakers + photographer credit. **Open — gate on brief §5 Q2 drill** (avatar source determines whether new schema fields are needed).
-- Section-break markers in body PT (whether the article body emits explicit section-break nodes or whether the renderer inserts `<QASectionDivider flourish="diamond">` at heading boundaries).
+Known projection extensions to investigate during 5.0:
+
+- Q&A speakers + photographer credit on `subjects[]` or as dedicated fields. **Gate on drill 5.d2** — avatar source determines schema needs. If illustrated avatars win, no schema work; if photo crops win, projection extension only.
+- Section-break markers in body PT — explicit PT block type vs renderer-side heading-boundary insertion. Decide at 5.A.1.
+- Match data on the article — only needed if `5.d-mat` decides the body block surfaces match-level data not already on Sanity (e.g. lineups). Most likely fetched via BFF (PSD) rather than added to Sanity.
 
 ### Schema migrations
 
-**Zero expected.** Editie line is UI-only. Q&A is rendered from Portable Text body blocks already present on `article.body`. Any net-new field is deferred to a follow-up issue with explicit schema-migration scope.
+**Zero expected.** Confirmed in 5.0 audit. Any net-new field is spun out as a follow-up with explicit schema-migration scope, NOT folded into Phase 5.
 
 ---
 
 ## 6. Analytics
 
-Per `feedback_analytics_prd_requirement` — every new user-facing feature ships events.
+Per `feedback_analytics_prd_requirement`.
 
-### Events to define
+### Events
 
-- `article_detail_view` (already exists for legacy `/nieuws/[slug]`) — verify parameters cover the new shape: `article_id` (hashed), `article_type`, `article_slug`, `reading_time_estimate`.
-- `article_qa_section_in_view` — fires when `<QASection>` scrolls into the viewport for ≥ 250ms.
-- `article_pull_quote_in_view` — fires per `<PullQuote>` in-view, with `quote_position` (0-indexed).
-- `article_verder_lezen_card_click` — fires on `<VerderLezenRow>` card click, with `target_article_id` (hashed) + `target_article_type` + `source_article_id` (hashed).
-- `article_share_click` — if the redesign adds a share affordance (not yet locked — gate on drill).
+- `article_detail_view` — verify shape: `article_id` (hashed), `article_type`, `article_slug`, `reading_time_estimate`.
+- `article_qa_section_in_view` — interview-only, fires on Q&A scrolled into view ≥ 250ms.
+- `article_pull_quote_in_view` — per `<PullQuote>` in-view, `quote_position` (0-indexed).
+- `article_verder_lezen_card_click` — `<VerderLezenRow>` click, `target_article_id` (hashed) + `target_article_type` + `source_article_id` (hashed).
+- `article_match_stat_expand` — only if 5.d-mat adds an interactive stats block.
+- `article_event_cta_click` — only if 5.d-evt adds a registration / ticket CTA.
 
 ### GTM / GA4
 
-GTM regex `homepage_|news_|article_` already covers the namespace; verify the new event names match the existing trigger regex pattern. New event parameters need DLV + GA4 Event-tag parameter mapping per `apps/web/CLAUDE.md` Analytics Checklist.
+GTM regex `homepage_|news_|article_` covers the namespace; verify new event names match. New event parameters need DLV + GA4 Event-tag parameter mapping per `apps/web/CLAUDE.md` Analytics Checklist.
 
 ---
 
 ## 7. SEO + structured data
 
-- `generateMetadata` already exports OG + canonical for `/nieuws/[slug]`. Audit at 5.A.2 — confirm the new layout doesn't break the existing meta.
-- JSON-LD: `Article` schema already emitted via `buildArticleJsonLd`. Audit when subjects + Q&A land — `Article.about` / `Article.mentions` may want to enumerate the interview subjects.
-- Sitemap: `/nieuws/[slug]` already in sitemap; no change expected.
+- `generateMetadata` already exports OG + canonical. Audit at 5.C.
+- JSON-LD `Article` schema via `buildArticleJsonLd`. Audit when subjects + Q&A land — `Article.about` / `Article.mentions` may enumerate interview subjects.
+- Sitemap unchanged.
 
 ---
 
-## 8. Sub-issue tree (proposed)
+## 8. Sub-issue tree (proposed — spawn via `/prd-to-issues`)
 
-Spawn at PRD-merge time (only 5.0 + 5.A.d1 + 5.A.d2 are immediately ready):
+| Sub-issue | Title                                                                      | Blocked by            | Ready immediately?      |
+| --------- | -------------------------------------------------------------------------- | --------------------- | ----------------------- |
+| 5.0       | tracer: `/nieuws/[slug]` route + ARTICLE_BY_SLUG_QUERY audit               | —                     | ✅ (no design dep)      |
+| 5.d1      | drill: article header layout (centered vs flanked)                         | —                     | ✅ (owner-led)          |
+| 5.d2      | drill: subject avatar vocabulary (photo / monogram / illustrated)          | —                     | ✅                      |
+| 5.d3      | drill: section-break flourish (diamond vs alternatives)                    | —                     | ✅                      |
+| 5.d4      | drill: Verder-lezen + Editie footer layout (single row vs split bands etc) | —                     | ✅                      |
+| 5.d-int   | drill: interview body touches (Q&A row composition + credits block layout) | 5.d2, 5.d3            | After d2, d3            |
+| 5.d-col   | drill: column / announcement variant body treatment                        | 5.d1                  | After d1                |
+| 5.d-tra   | drill: transfer variant body treatment (deep dive vs minimal)              | 5.d1                  | After d1                |
+| 5.d-evt   | drill: event variant body detail block                                     | 5.d1                  | After d1                |
+| 5.d-mat   | drill: match variant body detail block (preview + recap)                   | 5.d1, #1470           | After d1 + #1470        |
+| 5.A.1     | body container + DropCap + PT body + multi-line HighlighterStroke          | 5.0, 5.d3             | After 5.0, d3           |
+| 5.A.2     | PullQuote + EndMark + VerderLezenRow                                       | 5.A.1, 5.d4           | After A.1, d4           |
+| 5.A.3     | EditieLabel + final footer composition                                     | 5.A.2                 | After A.2               |
+| 5.B.int   | QASection + QARow + QASectionDivider + InterviewCredits                    | 5.d-int, 5.A.3        | After d-int, A.3        |
+| 5.B.col   | column-variant body touches                                                | 5.d-col, 5.A.3        | After d-col, A.3        |
+| 5.B.tra   | transfer-variant body touches                                              | 5.d-tra, 5.A.3        | After d-tra, A.3        |
+| 5.B.evt   | EventDetailBlock                                                           | 5.d-evt, 5.A.3        | After d-evt, A.3        |
+| 5.B.mat   | MatchRecapStats                                                            | 5.d-mat, 5.A.3, #1470 | After d-mat, A.3, #1470 |
+| 5.C       | page.tsx rewire + variant switch                                           | all 5.B.\*            | After every 5.B closes  |
+| 5.D       | cleanup — retire legacy, close legacy milestone, CLAUDE.md                 | 5.C                   | After 5.C               |
 
-- **5.0** — `/nieuws/[slug]` tracer + `ARTICLE_BY_SLUG_QUERY` audit (Ralph-ready; no design dependency)
-- **5.A.d1** — Header drill (brief §5 Q1)
-- **5.A.d2** — Q&A + pull-quote avatar drill (brief §5 Q2)
-- **5.A.d3** — Section-break diamond + Verder-lezen placement sign-off (owner-only, no design round)
-- **5.A.0** — Component scaffolding (blocked by 5.A.d1 + d2 + d3)
-- **5.A.1** — Body composition wiring (blocked by 5.A.0)
-- **5.A.2** — `page.tsx` rewire for interview (blocked by 5.A.1)
-- **5.B.\*** — per-variant trees spawned after each variant's drill closes
-- **5.C** — cleanup (blocked by all 5.A + 5.B)
+`/prd-to-issues` spawns these 19 issues in one pass, wired with `blockedBy` per the table. The 5.d._ drills run first (no blockers between drills except where listed); 5.A._ + 5.B.\* run after their drills close; 5.C closes the loop.
 
 ---
 
-## 9. Open questions
+## 9. Drill rounds (consolidated)
 
-Per the brief §5:
+Per `feedback_design_drill_pattern`: **one decision per round, 3–4 visual options, owner picks, lock written to `docs/design/mockups/phase-5-article-detail/<round>/`.** No big-bang designs. The interview variant goes through the same drill cadence as the others, even though it has existing mockups — those mockups are inputs, not locks.
 
-1. **Article header — centered or flanked?** Drill 5.A.d1. Owner direction 2026-05-14 leans centered. Resolve before any interview implementation.
-2. **Q&A + pull-quote avatar fill.** Drill 5.A.d2. Three candidates: photo crop / initial monogram / illustrated character vocabulary. Same vocabulary applies to pull-quote attribution.
+### Universal drills (apply to all variants)
 
-Pre-resolved at brief level:
+| #    | Question                              | What to mock (3–4 options)                                                                                                                                                                                                                                | Resolves                                                                      |
+| ---- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 5.d1 | Article header — centered or flanked? | (A) §5.2 flanked (current spec); (B) prompt §1 stacked / centered; (C) hybrid (centered title, flanked credit-chip row); (D) full-bleed cover photo with overlay title. Use one short headline + one long headline.                                       | Hero identity. Applies to all article variants.                               |
+| 5.d2 | Subject avatar vocabulary             | (A) circular photo crop from `player.psdImage`; (B) initial monogram in jersey-deep disc; (C) illustrated character avatar (4–6 character vocabulary); (D) mixed (photo for credit chips, monogram for inline). Show at Q&A row scale + pull-quote scale. | Subject-presence vocabulary across `<QASection>` + `<PullQuote>` attribution. |
+| 5.d3 | Section-break flourish                | (A) diamond glyph between sections; (B) `<StripedSeam height="sm">` mid-article; (C) plain dotted divider (today's default); (D) no break at all — just paragraph spacing.                                                                                | `<QASectionDivider flourish>` API + body section-break rendering.             |
+| 5.d4 | Verder-lezen + Editie footer layout   | (A) single 3-up `<NewsCard>` row + Editie label below; (B) split — Verder-lezen on cream band, Editie on darker band; (C) full-bleed Verder-lezen with internal Editie chip; (D) sidebar Verder-lezen on desktop, stacked on mobile.                      | Article footer composition.                                                   |
+
+### Variant-specific drills
+
+| #       | Variant scope             | Question                                                                                            | What to mock (3–4 options)                                                                                                                                                                                                                                        |
+| ------- | ------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5.d-int | Interview                 | Q&A row composition (number style + speaker-tag layout) and `<InterviewCredits>` block              | Compose **two** sub-rounds in one drill: (Q&A) number-prefix style — display-numeral / mono index / blockquote glyph / no number · (Credits) layout — left-aligned list / centered block / sidebar / inline-with-EndMark.                                         |
+| 5.d-col | Announcement / column     | What carries "column" identity when the body is text-first?                                         | (A) author-portrait taped figure in header; (B) `<MonoLabel>` column kicker + dropcap variant; (C) jersey-deep accent rule beside the body; (D) treat as default — no variant-specific touch.                                                                     |
+| 5.d-tra | Transfer                  | How much transferFact data appears in body (the EditorialHero already shows direction + meta line)? | (A) no body block — Hero carries everything; (B) compact "career so far" mini-table; (C) `<TransferDetailBlock>` with old-club / new-club logos + arrow flourish below the dropcap; (D) inline fact pills in the body intro paragraph.                            |
+| 5.d-evt | Event                     | Where does the full event detail card live, beyond the compressed strip in the hero?                | (A) below the EndMark as `<EventDetailBlock>` with CTA; (B) sticky CTA bar on scroll; (C) inline mid-body block at the first `<h2>`; (D) sidebar on desktop.                                                                                                      |
+| 5.d-mat | matchPreview + matchRecap | What does the match detail body block carry?                                                        | (A) lineups (preview) / final stats grid (recap); (B) goalscorer roll-call + ticket-stub key moments; (C) embedded score widget (`<ScoreboxStrip>`); (D) link out to `/wedstrijd/[matchId]` only (no inline). Treat preview + recap symmetrically where possible. |
+
+### Pre-resolved (no drill needed)
 
 - ~~Editie 47 line — UI or schema?~~ **UI-only**, auto-derived from `publishedAt`.
-
-Pre-resolved at PRD level:
-
-- ~~`<QASectionDivider flourish="diamond">` variant.~~ **Approve at owner sign-off — no drill needed.**
+- ~~Whether interview gets its own drill round.~~ **Yes** — same cadence as other variants; existing master-plan §5.2 mock is an input to drill 5.d-int, not a lock.
 
 ---
 
-## 10. Discovered unknowns
+## 10. Open questions
+
+1. **Header layout** — drill 5.d1.
+2. **Avatar vocabulary** — drill 5.d2.
+3. **Multi-line `<HighlighterStroke>`** (#1543) — locks during 5.A.1 implementation. Five sub-questions parked on the issue body: server vs client / resize / per-line variant / SSR fallback / API surface.
+4. **`matchPreview` / `matchRecap` EditorialHero detail variants** — owned by #1470. `5.B.mat` is blocked on #1470 landing them; the rest of Phase 5 is not.
+5. **Variant-specific deltas** — drills 5.d-int, 5.d-col, 5.d-tra, 5.d-evt, 5.d-mat lock these.
+
+---
+
+## 11. Discovered unknowns
 
 _Empty at PRD authoring time. Append entries here when implementation surfaces something unexpected._
 
