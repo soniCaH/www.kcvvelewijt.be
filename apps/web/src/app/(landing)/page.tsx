@@ -423,7 +423,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 className="sr-only">KCVV Elewijt</h1>
+      {/* The static `<EditorialHero>` renders the page-level <h1> for the
+          featured article when present. Only emit the sr-only "KCVV
+          Elewijt" fallback when no hero is rendered (zero featured
+          articles), so the document always has exactly one <h1>. */}
+      {heroSection ? null : <h1 className="sr-only">KCVV Elewijt</h1>}
       <JsonLd data={buildSportsClubJsonLd()} />
       <JsonLd
         data={buildBreadcrumbJsonLd([
