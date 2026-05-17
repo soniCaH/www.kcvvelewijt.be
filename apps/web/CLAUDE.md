@@ -84,6 +84,25 @@ A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--p
 
 `<Badge>` was retired in favour of `<MonoLabel variant="pill-…">`. The single consumer (`<MatchStatusBadge>`) was migrated to use MonoLabel pill variants directly.
 
+**Phase 4.5 additions (homepage refinement series):**
+
+- `<TapeStrip>` — added a `position: "left" | "right"` prop (anchors the strip on the host's top-left or top-right via `--tape-left` / `--tape-right`, both with a 12% fallback). Used by `<NewsCard>`'s R10 corner-pairing. The R9-locked `edge="torn"` variant was dropped at implementation (#1747) — `<TapeStrip>` ships clean-rectangular only and the `--tape-edge-{1..4}` / `--tape-mask-torn` tokens were never committed.
+- `<TapedFigure>` — photo-treatment primitive. The newsprint filter + paper-grain overlay apply globally via `.taped-figure` / `.taped-figure__photo` CSS rules in `globals.css` (R9 photo-treatment system). Each instance accepts a single optional `tape?: TapeStripProps`; the R9-locked two-strip slot cycle was rejected at PR review and the prop is hard-capped at one. Pass `data-tint="none"` to opt out of the warm tint on non-photographic image content.
+- `<EditorialHero>` — Phase 3 hero shell + R1.5 per-articleType variants (`announcement` / `interview` / `event` / `transfer`). Two `placement`s: `"detail"` (default — no link wrapper) and `"homepage"` (wrapped in `<Link>`, requires `slug`). Homepage placement adds a `hoverStyle?: "press" | "tilt-photo"` prop — `"press"` is the canonical paper-stamp press-down used by the (retired) `<HomepageHeroCarousel>`; `"tilt-photo"` lets only the cover `<TapedFigure>` tilt + scale on hover, used by the static `/` hero where a 2px translate on a full-width block reads as a twitch.
+- `<FeaturedUitgelichtRow>` — R1.6.A equal-3-up featured row for the homepage spine. Drops itself when no featured articles are present and renders fewer cards rather than padding from the recent-articles pool.
+- `<ClubshopBanner>` — renamed from `<WebshopBanner>` per R6.C. Jersey-deep-dark full-bleed band with mirrored `<StripedSeam>` top + bottom, the new copy ("Onze clubkledij." + Brandsfit attribution), and a small `<JerseyShirt>` flourish.
+- `<JerseyShirt>` — new design-system primitive: paper-graphic jersey illustration (two-pass print, jersey-deep underprint + ink overprint, ink stripes; no Celtic green/white, no sponsors, no photo-realism). Composes with `<TapedFigure>` for the PlayerFigure no-photo fallback per `project_jersey_illustration_vocabulary`.
+- `<HomepageHeroCarousel>` — retired and moved to `apps/web/src/components/home/_legacy/`. Replaced on `/` by a static `<EditorialHero placement="homepage" hoverStyle="tilt-photo">` + `<FeaturedUitgelichtRow>` per R1.B.
+
+**New tokens (Phase 4.5, R9 photo-treatment system in `globals.css`):**
+
+- `--color-tape-cream` — third tape colour (rgb(232 224 200 / 0.85)). Consumed by `<TapeStrip color="cream">` via inline `backgroundColor`.
+- `--filter-photo-newsprint` — warm sepia/saturate/hue-rotate tint applied to `.taped-figure > .taped-figure__photo img` so editorial photos read as printed on paper.
+- `--pattern-paper-grain` — fractal-noise SVG data-URL pattern overlaid on every `.taped-figure::after` at 4% opacity with `mix-blend-mode: multiply`.
+- `--shadow-photo-tape` (`2px 4px 0 0 ink`) + `--shadow-photo-tape-lift` (`4px 8px 0 0 ink`) — asymmetric offset shadows for the photo-card system.
+
+The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hover`) was **retired in #1748** when R10 routed `<NewsCard>` hover through `<TapedCard interactive="press">` directly. The layered-lift idiom has no production consumers and the `--shadow-photo-tape-lift` token is intentionally orphaned for now in case a future surface re-introduces the model.
+
 ## Design Conventions
 
 **Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.

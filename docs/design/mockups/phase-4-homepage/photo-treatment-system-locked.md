@@ -25,7 +25,15 @@ implementation time:
    tape strip per photo in its type signature.
 
 The rest of the lock (newsprint filter, paper-grain overlay, photo
-shadow tokens, layered hover model) ships as authored.
+shadow tokens) ships as authored.
+
+3. **§7 Layered "lift" hover model (Variant A) — RETIRED at #1748.** R10
+   routed `<NewsCard>` hover through `<TapedCard interactive="press">`
+   directly, leaving the layered-lift idiom with no production
+   consumers. The `--shadow-photo-tape-lift` token stays defined for a
+   hypothetical future surface but is intentionally orphaned for now.
+   See `globals.css` `.taped-figure` block comment for the canonical
+   record of this revision.
 
 ## Decision
 

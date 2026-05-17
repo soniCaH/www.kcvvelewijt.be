@@ -121,3 +121,9 @@ R4.B implementation rolls into the same PR as the broader homepage
 restructure (hero swap, NewsGrid geometry, Uitgelicht row addition). It's
 a small change in `apps/web/src/app/(landing)/page.tsx` — about a dozen
 lines reshuffled.
+
+## Post-implementation amendments
+
+- **Implemented in #1754 (Phase 4.5.C.1).** `apps/web/src/app/(landing)/page.tsx` now lists sections in the R4.B order: hero → Uitgelicht → FeaturedEventBand → BannerSlot a → NewsGrid → UpcomingMatches → BannerSlot b → Youth → BannerSlot c → Sponsors → Clubshop. `SectionStack reserveFooterSafeArea={false}` retained so the jersey-deep-dark `<ClubshopBanner>` meets the cream footer top directly.
+- **Brandsfit partnership prominence tier (open follow-up).** Owner accepted the R4.B demotion as their editorial call; partnership terms were not re-litigated with Brandsfit. **Status: still open** — flag for revisit if Brandsfit raises it.
+- **Youth `paddingTop: "pt-0"` override.** The youth `SectionConfig` sets `paddingTop: "pt-0"` so the R5.B `<StripedSeam>` lands flush at the section boundary (default `pt-20` painted 80px of jersey-deep above the seam and the band read as "sandwiched"). Mirrored in the `Pages/Homepage` Storybook composition.
