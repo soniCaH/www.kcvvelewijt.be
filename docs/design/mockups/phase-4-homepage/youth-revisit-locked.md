@@ -188,3 +188,9 @@ schema work.
 - **StripedSeam height prop.** Verify the Phase 0 `<StripedSeam>` ships
   a configurable height OR extend it to accept one. Default Phase 0
   height may match the ~28px brief target without tuning.
+
+## Post-implementation amendments
+
+- **Implemented in #1752 (#1771) — top stripe band + dual CTA + emphasis shift.** `<StripedSeam height="xl" colorPair="cream-jersey-deep">` ships as the first child of `<YouthSection>` per path 1 from the lock. The cream-on-deep colour pair was picked over jersey-tonal greens at PR review to keep the band quieter on the photographic backdrop; ink hairlines around the seam were dropped (the cream stops carry the band's edge against the photo on their own, matching the Clubshop section's bare-seam treatment).
+- **Registration URL (open follow-up) — Resolved.** Secondary CTA points to `/club/inschrijven`, mirroring the SiteHeader "Word lid" link target.
+- **Section flush-top fix (#1754, Phase 4.5.C.1).** The homepage `SectionConfig` passes `paddingTop: "pt-0"` so the `<StripedSeam>` sits at the section's top edge directly. Without the override the SectionStack default `pt-20` left 80px of jersey-deep above the seam and the section read as "sandwiched."
