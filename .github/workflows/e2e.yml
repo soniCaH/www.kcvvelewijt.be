@@ -44,12 +44,12 @@ jobs:
     name: E2E
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
-    # Pinned to match @playwright/test in apps/web/package.json (1.59.1) and the
+    # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these
     # together — drift between the version that runs the suite and the
     # @playwright/test API can produce silent skips or false-positive failures.
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
       options: --user 0:0
     env:
       # The container ships browsers under /ms-playwright. Suppress

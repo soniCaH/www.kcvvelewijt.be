@@ -147,6 +147,15 @@
       "matchPackageNames": ["@types/node"],
       "allowedVersions": "24.x",
       "commitMessageTopic": "@types/node (aligned with .nvmrc)"
+    },
+    {
+      "description": "Group Playwright npm packages and Docker image so they update in lockstep",
+      "groupName": "playwright",
+      "matchPackageNames": [
+        "playwright",
+        "@playwright/test",
+        "mcr.microsoft.com/playwright"
+      ]
     }
   ],
   "vulnerabilityAlerts": {

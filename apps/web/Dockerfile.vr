@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 #
 # Visual-regression runner image. Pinned to match @playwright/test version in
-# apps/web/package.json (1.59.1). When upgrading Playwright bump BOTH the npm
+# apps/web/package.json (1.60.0). When upgrading Playwright bump BOTH the npm
 # dep and this FROM tag together — drift produces silent font-rendering diffs.
 #
 # Build context is the repo root (see apps/web/docker-compose.vr.yml) so the
 # workspace manifests can be copied for a cached pnpm install layer.
 
-FROM mcr.microsoft.com/playwright:v1.59.1-noble
+FROM mcr.microsoft.com/playwright:v1.60.0-noble
 
 ENV CI=true \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
