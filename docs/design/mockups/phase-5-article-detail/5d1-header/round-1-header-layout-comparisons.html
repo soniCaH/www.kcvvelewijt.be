@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Round 1 · Article header layout (vocabulary-faithful redraw)</title>
+    <style>
+      /* ============================================================
+         Tokens — pulled from the locked design system (Phase 4.5).
+         Names mirror app/web tokens 1:1 so this mock cannot drift.
+         ============================================================ */
+      :root {
+        /* core palette */
+        --color-cream:        #f5efe1;
+        --color-cream-soft:   #ece5d3;
+        --color-cream-deep:   #ddd4ba;
+        --color-ink:          #1a1a1a;
+        --color-ink-soft:     #2a2a2a;
+        --color-ink-muted:    #6a655a;
+        --color-jersey:       #2d7a4f;
+        --color-jersey-deep:  #1f5f3f;
+
+        /* tape colours (R9 three-colour rotation) */
+        --color-tape-jersey:  rgba(31, 95, 63, 0.82);
+        --color-tape-warm:    rgba(217, 184, 90, 0.85);
+        --color-tape-cream:   rgba(245, 239, 225, 0.92);
+
+        /* shadows */
+        --shadow-paper-sm:    2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md:    4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift:  6px 6px 0 0 var(--color-ink);
+        --shadow-photo-tape:  2px 4px 0 0 var(--color-ink);
+
+        /* rotations (TapedCard a/b/c/d) */
+        --rotate-tape-a: -1.4deg;
+        --rotate-tape-b:  1.0deg;
+        --rotate-tape-c: -0.6deg;
+        --rotate-tape-d:  0.8deg;
+
+        /* photo treatment (R9 newsprint filter) */
+        --filter-photo-newsprint:
+          sepia(0.06) saturate(0.94) hue-rotate(-4deg) contrast(1.02)
+          brightness(1.01);
+
+        /* container widths */
+        --container-prose: 680px;
+        --container-page:  1120px;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: var(--container-page);
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        max-width: 60ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+      }
+      .candidate > header.card .tradeoffs {
+        font-size: 12px;
+        line-height: 1.55;
+        max-width: 38ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .tradeoffs strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 38ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 36px 32px 44px;
+      }
+      .surface + .surface {
+        border-top: 1px dashed var(--color-ink);
+      }
+      .surface-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin: 0 0 24px;
+      }
+
+      /* ============================================================
+         <MonoLabel> — mono caps, ink, full opacity.
+         (NEVER cream/85 on jersey-deep per feedback memory.)
+         ============================================================ */
+      .mono-label {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink);
+      }
+      .mono-label .pill {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .mono-label .dot { opacity: 0.45; }
+
+      /* ============================================================
+         <EditorialHeading> — italic Freight Display Pro 900,
+         accent decorator = italic + jersey-deep.
+         ============================================================ */
+      .editorial-heading {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        font-style: italic;
+        line-height: 1.04;
+        letter-spacing: -0.018em;
+        margin: 12px 0 14px;
+        color: var(--color-ink);
+        font-weight: 900;
+        hyphens: auto;
+      }
+      .editorial-heading.display-xl { font-size: 64px; }
+      .editorial-heading.display-lg { font-size: 48px; }
+      .editorial-heading.display-md { font-size: 36px; }
+      .editorial-heading .accent { color: var(--color-jersey-deep); }
+
+      /* ============================================================
+         <EditorialLead> — italic display 18-20, opacity 0.92,
+         max ~60ch.
+         ============================================================ */
+      .editorial-lead {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.5;
+        max-width: 60ch;
+        margin: 0 0 14px;
+        opacity: 0.92;
+      }
+
+      /* ============================================================
+         <EditorialByline> — mono caps, ink-muted, 11px.
+         ============================================================ */
+      .editorial-byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         Credit chip — TapedCard mini variant (1px ink, sm hard shadow,
+         cream bg). Used for byline-like multi-author rows.
+         ============================================================ */
+      .credit-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        padding: 4px 10px 4px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .credit-chip .avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2a4d3a, #c1a04a);
+        filter: var(--filter-photo-newsprint);
+        flex-shrink: 0;
+      }
+      .credit-chip .role {
+        opacity: 0.6;
+      }
+      .credit-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        align-items: center;
+      }
+
+      /* ============================================================
+         <TapedCard> — ink 2px border, hard offset md shadow, rotation
+         set via CSS var; <TapedFigure> = TapedCard with photo well.
+         Tape strips anchor to the OUTER card (R9 §7).
+         ============================================================ */
+      .taped-card {
+        position: relative;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 8px;
+      }
+      .taped-card[data-bg="cream"]      { background: var(--color-cream); }
+      .taped-card[data-bg="cream-soft"] { background: var(--color-cream-soft); }
+      .taped-card[data-rotation="a"]    { transform: rotate(var(--rotate-tape-a)); }
+      .taped-card[data-rotation="b"]    { transform: rotate(var(--rotate-tape-b)); }
+      .taped-card[data-rotation="c"]    { transform: rotate(var(--rotate-tape-c)); }
+      .taped-card[data-rotation="d"]    { transform: rotate(var(--rotate-tape-d)); }
+      .taped-card[data-rotation="none"] { transform: rotate(0); }
+      .taped-card[data-shadow="lift"]   { box-shadow: var(--shadow-paper-lift); }
+      .taped-card[data-shadow="sm"]     { box-shadow: var(--shadow-paper-sm); }
+
+      .tape-strip {
+        position: absolute;
+        top: -10px;
+        width: 70px;
+        height: 16px;
+        background: var(--color-tape-jersey);
+        transform: rotate(-3deg);
+      }
+      .tape-strip[data-color="warm"]   { background: var(--color-tape-warm); }
+      .tape-strip[data-color="cream"]  { background: var(--color-tape-cream); border: 1px solid var(--color-ink); }
+      .tape-strip[data-edge="torn"] {
+        clip-path: polygon(
+          0% 0%, 5% 35%, 12% 8%, 20% 50%, 28% 18%, 36% 60%, 44% 25%, 52% 70%,
+          60% 30%, 68% 75%, 76% 35%, 84% 78%, 92% 40%, 100% 60%,
+          100% 100%, 0% 100%
+        );
+      }
+      .tape-strip[data-position="left"]  { left: 18px; }
+      .tape-strip[data-position="right"] { right: 18px; transform: rotate(3deg); }
+      .tape-strip[data-position="center"]{ left: 50%; margin-left: -35px; }
+
+      .taped-figure__photo {
+        position: relative;
+        background: linear-gradient(135deg, #2a4d3a 0%, #547a5e 50%, #c1a04a 100%);
+        overflow: hidden;
+      }
+      .taped-figure__photo::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        filter: var(--filter-photo-newsprint);
+        mix-blend-mode: multiply;
+        opacity: 0.4;
+        background: inherit;
+      }
+      .taped-figure__photo::after {
+        /* paper grain (R9 §3) */
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(26,26,26,0.18) 1px, transparent 1px);
+        background-size: 3px 3px;
+        opacity: 0.04;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+      }
+      .taped-figure__photo[data-aspect="landscape-16-9"] { aspect-ratio: 16 / 9; }
+      .taped-figure__photo[data-aspect="landscape-3-2"]  { aspect-ratio: 3 / 2; }
+      .taped-figure__photo[data-aspect="landscape-21-9"] { aspect-ratio: 21 / 9; }
+      .taped-figure__photo[data-aspect="portrait-3-4"]   { aspect-ratio: 3 / 4; }
+      .taped-figure__photo[data-aspect="square"]         { aspect-ratio: 1 / 1; }
+      .taped-figure__photo .tag {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(26,26,26,0.85);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        z-index: 1;
+      }
+      .taped-figure figcaption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        margin-top: 8px;
+        text-align: center;
+        color: var(--color-ink-soft);
+        line-height: 1.3;
+      }
+      .taped-figure figcaption .role {
+        display: block;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-style: normal;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 2px;
+      }
+
+      /* ============================================================
+         Layout E0 — reference baseline = Phase 3-b
+         <EditorialHeroShell> 60/40 + SubjectsStrip below.
+         ============================================================ */
+      .layout-e0 {
+        display: grid;
+        max-width: var(--container-page);
+        margin: 0 auto;
+        grid-template-columns: 60fr 40fr;
+        gap: 32px;
+        align-items: flex-start;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .layout-e0 .editorial { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+      .subjects-strip {
+        max-width: var(--container-page);
+        margin: 24px auto 0;
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+      }
+      .subjects-strip .taped-card { width: 200px; }
+      @media (max-width: 880px) {
+        .layout-e0 { grid-template-columns: 1fr; }
+        .subjects-strip { gap: 16px; }
+      }
+
+      /* ============================================================
+         Layout A — flanked: title between two polaroid TapedFigures.
+         No coverImage in hero. SubjectsStrip absent (subjects ARE
+         the hero polaroids).
+         ============================================================ */
+      .layout-a {
+        display: grid;
+        max-width: var(--container-page);
+        margin: 0 auto;
+        grid-template-columns: 200px 1fr 200px;
+        gap: 36px;
+        align-items: center;
+      }
+      .layout-a .editorial { display: flex; flex-direction: column; gap: 12px; text-align: center; min-width: 0; }
+      .layout-a .editorial .mono-label,
+      .layout-a .editorial .credit-row,
+      .layout-a .editorial .editorial-byline { justify-content: center; align-self: center; }
+      .layout-a .editorial .credit-row { justify-content: center; }
+      .layout-a .editorial .editorial-lead { margin-left: auto; margin-right: auto; }
+      @media (max-width: 880px) {
+        .layout-a { grid-template-columns: 1fr 1fr; grid-template-areas: "l r" "e e"; }
+        .layout-a .left { grid-area: l; }
+        .layout-a .right { grid-area: r; }
+        .layout-a .editorial { grid-area: e; }
+      }
+
+      /* ============================================================
+         Layout B — stacked centered: kicker/heading/lead/credits
+         centered above; polaroid pair below in a row.
+         SubjectsStrip merged into hero (no separate strip).
+         ============================================================ */
+      .layout-b {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 28px;
+        max-width: var(--container-page);
+        margin: 0 auto;
+      }
+      .layout-b .editorial { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 28ch; }
+      .layout-b .polaroids { display: grid; grid-template-columns: 220px 220px; gap: 36px; }
+      @media (max-width: 720px) {
+        .layout-b .polaroids { grid-template-columns: 1fr 1fr; max-width: 420px; gap: 18px; }
+      }
+
+      /* ============================================================
+         Layout C — hybrid: title block centered (full width); polaroid
+         pair flank a centered credit-row + meta. Splits the hero into
+         two stacked regions.
+         ============================================================ */
+      .layout-c {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        max-width: var(--container-page);
+        margin: 0 auto;
+      }
+      .layout-c .editorial { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; max-width: 32ch; }
+      .layout-c .flank-row {
+        display: grid;
+        grid-template-columns: 200px 1fr 200px;
+        gap: 36px;
+        width: 100%;
+        align-items: center;
+      }
+      .layout-c .flank-row .chips {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      @media (max-width: 880px) {
+        .layout-c .flank-row {
+          grid-template-columns: 1fr 1fr;
+          grid-template-areas: "l r" "c c";
+          gap: 18px;
+        }
+        .layout-c .flank-row .left  { grid-area: l; }
+        .layout-c .flank-row .right { grid-area: r; }
+        .layout-c .flank-row .chips { grid-area: c; }
+      }
+
+      /* ============================================================
+         Layout D (revised) — full-width taped cover spotlight.
+         Cover artefact = <TapedCard rotation="a"> + <TapedFigure
+         aspect="landscape-21-9"> at full hero width. Title BELOW on
+         cream, left-aligned to match Phase 3-b text alignment. Keeps
+         the Phase 3-b <SubjectsStrip> below.
+         No cream-on-dark overlay text. No gradient-on-photo trickery.
+         ============================================================ */
+      .layout-d {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 28px;
+      }
+      .layout-d .cover-wrap { width: 100%; padding-top: 8px; }
+      .layout-d .below {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .layout-d .editorial { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+      .layout-d .meta-col {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 6px;
+        border-left: 1px solid var(--color-ink);
+        padding-left: 24px;
+        min-width: 0;
+      }
+      .layout-d .meta-col .editorial-byline {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .layout-d .meta-line {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      @media (max-width: 880px) {
+        .layout-d .below { grid-template-columns: 1fr; }
+        .layout-d .meta-col { border-left: none; padding-left: 0; border-top: 1px solid var(--color-ink); padding-top: 14px; }
+      }
+
+      .meta-line {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Round 1 · Drill #1783 · 5.d1 · redraw v2</p>
+      <h1>Article header — centered or flanked? <em>(vocabulary-faithful)</em></h1>
+      <p>
+        Round 1 v1 introduced new vocabulary (full-bleed dark cover, cream-on-dark overlay text) that doesn't appear
+        anywhere on the homepage or in the Phase 3-b locks. This redraw scopes <strong>every</strong> visual choice
+        back to the established system: <code>&lt;TapedCard&gt;</code>, <code>&lt;TapedFigure&gt;</code>,
+        <code>&lt;TapeStrip&gt;</code>, <code>&lt;EditorialHeading&gt;</code>, <code>&lt;MonoLabel&gt;</code>,
+        Phase 4.5 R9 newsprint photo treatment, cream backgrounds.
+      </p>
+      <p>
+        Each option still appears twice — short headline (4 words) + long headline (12 words) — so headline-length
+        scaling stays visible. Vocabulary deltas vs. Phase 3-b's locked
+        <code>&lt;EditorialHeroShell&gt;</code> 60/40 grid + <code>&lt;SubjectsStrip&gt;</code> are called out in each
+        option's <em>Vocabulary</em> column.
+      </p>
+      <p>
+        See <code>compare.md</code> in this folder for a side-by-side primitive map.
+      </p>
+    </header>
+
+    <div class="container">
+
+      <!-- ====================== E0 — REFERENCE BASELINE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">E0 · Reference baseline (already locked, Phase 3-b)</div>
+            <div class="name"><code>&lt;EditorialHeroShell&gt;</code> 60/40 + <code>&lt;SubjectsStrip&gt;</code> below</div>
+            <div class="desc">
+              The currently-locked detail-page hero. Editorial column (kicker / heading / lead / byline) on the left;
+              <code>coverImage</code> as a <code>&lt;TapedCard rotation="a"&gt;</code> +
+              <code>&lt;TapedFigure aspect="landscape-16-9"&gt;</code> on the right. Polaroids live in a
+              <code>&lt;SubjectsStrip&gt;</code> below the hero.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>EditorialHeroShell</code> 60/40<br />
+            ✓ <code>TapedCard</code> rot. a<br />
+            ✓ <code>TapedFigure</code> 16:9 + 3:4<br />
+            ✓ <code>MonoLabel</code> kicker<br />
+            ✓ <code>EditorialHeading</code> · accent<br />
+            ✓ <code>SubjectsStrip</code> (sibling)
+          </div>
+        </header>
+        <div class="surface">
+          <p class="surface-label">Short headline · 4 words · reference state</p>
+          <div class="layout-e0">
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span><span class="dot">·</span><span>6 min</span></p>
+              <h2 class="editorial-heading display-xl">"<span class="accent">Gewoon doorgaan</span>, hé."</h2>
+              <p class="editorial-lead">Lars en trainer Wim, donderdagavond in de kantine, over wat de winterstop bracht.</p>
+              <p class="editorial-byline">Door Tom · Foto's An · 17 mei 2026</p>
+            </div>
+            <div>
+              <figure class="taped-card taped-figure" data-rotation="a" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="landscape-16-9"><span class="tag">coverImage</span></div>
+              </figure>
+            </div>
+          </div>
+          <div class="subjects-strip">
+            <figure class="taped-card taped-figure" data-rotation="b" data-bg="cream">
+              <span class="tape-strip" data-color="warm" data-position="left"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+              <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+            </figure>
+            <figure class="taped-card taped-figure" data-rotation="c" data-bg="cream">
+              <span class="tape-strip" data-color="jersey" data-position="right"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+              <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · Flanked title</div>
+            <div class="name">Title centered between two polaroid <code>&lt;TapedFigure&gt;</code>s</div>
+            <div class="desc">
+              Master-plan §5.2 baseline. Title sits between two polaroids; <code>coverImage</code> is dropped from the
+              hero (no <code>&lt;TapedFigure landscape-16-9&gt;</code>). <code>SubjectsStrip</code> retires — subjects
+              are the hero artefact.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>TapedCard</code> rot. a / b<br />
+            ✓ <code>TapedFigure</code> 3:4<br />
+            ✓ <code>MonoLabel</code> kicker<br />
+            ✓ <code>EditorialHeading</code> · accent<br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>EditorialHeroShell</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>SubjectsStrip</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>coverImage</code> in hero
+          </div>
+        </header>
+        <div class="surface">
+          <p class="surface-label">Short headline · 4 words</p>
+          <div class="layout-a">
+            <figure class="taped-card taped-figure left" data-rotation="a" data-bg="cream">
+              <span class="tape-strip" data-color="jersey" data-position="left"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+              <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+            </figure>
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span></p>
+              <h2 class="editorial-heading display-xl">"<span class="accent">Gewoon doorgaan</span>, hé."</h2>
+              <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              <div class="credit-row">
+                <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+              </div>
+              <p class="editorial-byline">17 mei 2026 · Leesduur 6 min</p>
+            </div>
+            <figure class="taped-card taped-figure right" data-rotation="b" data-bg="cream">
+              <span class="tape-strip" data-color="warm" data-position="right"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+              <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="surface">
+          <p class="surface-label">Long headline · 12 words</p>
+          <div class="layout-a">
+            <figure class="taped-card taped-figure left" data-rotation="a" data-bg="cream">
+              <span class="tape-strip" data-color="jersey" data-position="left"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+              <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+            </figure>
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span></p>
+              <h2 class="editorial-heading display-lg">Lars over zijn eerste seizoen, de groepssfeer en wat de <span class="accent">winterstop</span> bracht</h2>
+              <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              <div class="credit-row">
+                <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+              </div>
+              <p class="editorial-byline">17 mei 2026 · Leesduur 6 min</p>
+            </div>
+            <figure class="taped-card taped-figure right" data-rotation="b" data-bg="cream">
+              <span class="tape-strip" data-color="warm" data-position="right"></span>
+              <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+              <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option B · Stacked centered</div>
+            <div class="name">Title above, polaroid pair below in a row</div>
+            <div class="desc">
+              Prompt §1 direction. Centered kicker / title / lead / credits at top, polaroid pair below.
+              <code>coverImage</code> dropped from hero. <code>SubjectsStrip</code> merged into the hero (no
+              separate strip).
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>TapedCard</code> rot. b / c<br />
+            ✓ <code>TapedFigure</code> 3:4<br />
+            ✓ <code>MonoLabel</code> kicker<br />
+            ✓ <code>EditorialHeading</code> · accent<br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>EditorialHeroShell</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>SubjectsStrip</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>coverImage</code> in hero
+          </div>
+        </header>
+        <div class="surface">
+          <p class="surface-label">Short headline · 4 words</p>
+          <div class="layout-b">
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span><span class="dot">·</span><span>6 min</span></p>
+              <h2 class="editorial-heading display-xl">"<span class="accent">Gewoon doorgaan</span>, hé."</h2>
+              <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              <div class="credit-row">
+                <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+              </div>
+              <p class="editorial-byline">17 mei 2026</p>
+            </div>
+            <div class="polaroids">
+              <figure class="taped-card taped-figure" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <figure class="taped-card taped-figure" data-rotation="c" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+        <div class="surface">
+          <p class="surface-label">Long headline · 12 words</p>
+          <div class="layout-b">
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span><span class="dot">·</span><span>6 min</span></p>
+              <h2 class="editorial-heading display-xl">Lars over zijn eerste seizoen, de groepssfeer en wat de <span class="accent">winterstop</span> bracht</h2>
+              <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              <div class="credit-row">
+                <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+              </div>
+              <p class="editorial-byline">17 mei 2026</p>
+            </div>
+            <div class="polaroids">
+              <figure class="taped-card taped-figure" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <figure class="taped-card taped-figure" data-rotation="c" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option C · Hybrid</div>
+            <div class="name">Centered title, polaroids flank credit-chip row</div>
+            <div class="desc">
+              Title block centered at full width; polaroid pair frames a centered credit-row + meta below the title.
+              <code>coverImage</code> dropped from hero. <code>SubjectsStrip</code> merged into the hero.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>TapedCard</code> rot. a / b<br />
+            ✓ <code>TapedFigure</code> 3:4<br />
+            ✓ <code>MonoLabel</code> kicker<br />
+            ✓ <code>EditorialHeading</code> · accent<br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>EditorialHeroShell</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>SubjectsStrip</code><br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> drops <code>coverImage</code> in hero
+          </div>
+        </header>
+        <div class="surface">
+          <p class="surface-label">Short headline · 4 words</p>
+          <div class="layout-c">
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span></p>
+              <h2 class="editorial-heading display-xl">"<span class="accent">Gewoon doorgaan</span>, hé."</h2>
+            </div>
+            <div class="flank-row">
+              <figure class="taped-card taped-figure left" data-rotation="a" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <div class="chips">
+                <p class="editorial-lead" style="text-align:center;">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+                <div class="credit-row" style="justify-content:center;">
+                  <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                  <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+                </div>
+                <p class="editorial-byline" style="text-align:center;">17 mei 2026 · Leesduur 6 min</p>
+              </div>
+              <figure class="taped-card taped-figure right" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+        <div class="surface">
+          <p class="surface-label">Long headline · 12 words</p>
+          <div class="layout-c">
+            <div class="editorial">
+              <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span></p>
+              <h2 class="editorial-heading display-lg">Lars over zijn eerste seizoen, de groepssfeer en wat de <span class="accent">winterstop</span> bracht</h2>
+            </div>
+            <div class="flank-row">
+              <figure class="taped-card taped-figure left" data-rotation="a" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <div class="chips">
+                <p class="editorial-lead" style="text-align:center;">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+                <div class="credit-row" style="justify-content:center;">
+                  <span class="credit-chip"><span class="avatar"></span>Tom · <span class="role">tekst</span></span>
+                  <span class="credit-chip"><span class="avatar"></span>An · <span class="role">foto</span></span>
+                </div>
+                <p class="editorial-byline" style="text-align:center;">17 mei 2026 · Leesduur 6 min</p>
+              </div>
+              <figure class="taped-card taped-figure right" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D (revised) ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option D · Full-width taped cover spotlight (revised)</div>
+            <div class="name"><code>&lt;TapedCard&gt;</code> + <code>&lt;TapedFigure landscape-21-9&gt;</code> at hero width, title BELOW on cream</div>
+            <div class="desc">
+              Magazine-spread reading of D. <code>coverImage</code> stays in the hero — but instead of the 60/40
+              right column, it spans the full hero width as a taped artefact with a single <code>&lt;TapeStrip&gt;</code>.
+              Kicker / title / lead / credits sit BELOW the image on cream (no cream-on-dark overlay anywhere).
+              Phase 3-b <code>&lt;SubjectsStrip&gt;</code> retained as-is for subjects.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>TapedCard</code> rot. a (full-width)<br />
+            ✓ <code>TapedFigure</code> 21:9<br />
+            ✓ <code>TapeStrip</code> jersey + cream<br />
+            ✓ <code>MonoLabel</code> kicker<br />
+            ✓ <code>EditorialHeading</code> · accent<br />
+            ✓ <code>SubjectsStrip</code> (preserved)<br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> Hero shell becomes vertical (cover top, text below) instead of 60/40 side-by-side<br />
+            <span style="color:var(--color-jersey-deep)">Δ</span> Introduces <code>aspect="landscape-21-9"</code> on <code>TapedFigure</code>
+          </div>
+        </header>
+        <div class="surface">
+          <p class="surface-label">Short headline · 4 words</p>
+          <div class="layout-d">
+            <div class="cover-wrap">
+              <figure class="taped-card taped-figure" data-rotation="a" data-bg="cream" data-shadow="lift">
+                <span class="tape-strip" data-color="jersey" data-position="left" data-edge="torn"></span>
+                <span class="tape-strip" data-color="cream" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="landscape-21-9"><span class="tag">coverImage · hero</span></div>
+              </figure>
+            </div>
+            <div class="below">
+              <div class="editorial">
+                <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span><span class="dot">·</span><span>6 min</span></p>
+                <h2 class="editorial-heading display-xl">"<span class="accent">Gewoon doorgaan</span>, hé."</h2>
+                <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              </div>
+              <div class="meta-col">
+                <p class="meta-line">Editie · 17 mei 2026</p>
+                <p class="editorial-byline">Door <strong>Tom</strong> · tekst<br />Foto's <strong>An</strong> · beeld<br />Leesduur 6 min</p>
+              </div>
+            </div>
+            <div class="subjects-strip">
+              <figure class="taped-card taped-figure" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <figure class="taped-card taped-figure" data-rotation="c" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+        <div class="surface">
+          <p class="surface-label">Long headline · 12 words</p>
+          <div class="layout-d">
+            <div class="cover-wrap">
+              <figure class="taped-card taped-figure" data-rotation="a" data-bg="cream" data-shadow="lift">
+                <span class="tape-strip" data-color="jersey" data-position="left" data-edge="torn"></span>
+                <span class="tape-strip" data-color="cream" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="landscape-21-9"><span class="tag">coverImage · hero</span></div>
+              </figure>
+            </div>
+            <div class="below">
+              <div class="editorial">
+                <p class="mono-label"><span class="pill">Interview</span><span class="dot">·</span><span>Duo</span><span class="dot">·</span><span>6 min</span></p>
+                <h2 class="editorial-heading display-lg">Lars over zijn eerste seizoen, de groepssfeer en wat de <span class="accent">winterstop</span> bracht</h2>
+                <p class="editorial-lead">Donderdagavond, kantine 1909, twee koffies, één eerlijk gesprek.</p>
+              </div>
+              <div class="meta-col">
+                <p class="meta-line">Editie · 17 mei 2026</p>
+                <p class="editorial-byline">Door <strong>Tom</strong> · tekst<br />Foto's <strong>An</strong> · beeld<br />Leesduur 6 min</p>
+              </div>
+            </div>
+            <div class="subjects-strip">
+              <figure class="taped-card taped-figure" data-rotation="b" data-bg="cream">
+                <span class="tape-strip" data-color="warm" data-position="left"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · player</span></div>
+                <figcaption>Lars<span class="role">Aanvaller · #9</span></figcaption>
+              </figure>
+              <figure class="taped-card taped-figure" data-rotation="c" data-bg="cream">
+                <span class="tape-strip" data-color="jersey" data-position="right"></span>
+                <div class="taped-figure__photo" data-aspect="portrait-3-4"><span class="tag">subject · staff</span></div>
+                <figcaption>Wim Peeters<span class="role">Trainer</span></figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </body>
+</html>
