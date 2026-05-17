@@ -210,32 +210,38 @@ GTM regex `homepage_|news_|article_` covers the namespace; verify new event name
 
 ---
 
-## 8. Sub-issue tree (proposed — spawn via `/prd-to-issues`)
+## 8. Sub-issue tree — spawned 2026-05-17
 
-| Sub-issue | Title                                                                      | Blocked by            | Ready immediately?      |
-| --------- | -------------------------------------------------------------------------- | --------------------- | ----------------------- |
-| 5.0       | tracer: `/nieuws/[slug]` route + ARTICLE_BY_SLUG_QUERY audit               | —                     | ✅ (no design dep)      |
-| 5.d1      | drill: article header layout (centered vs flanked)                         | —                     | ✅ (owner-led)          |
-| 5.d2      | drill: subject avatar vocabulary (photo / monogram / illustrated)          | —                     | ✅                      |
-| 5.d3      | drill: section-break flourish (diamond vs alternatives)                    | —                     | ✅                      |
-| 5.d4      | drill: Verder-lezen + Editie footer layout (single row vs split bands etc) | —                     | ✅                      |
-| 5.d-int   | drill: interview body touches (Q&A row composition + credits block layout) | 5.d2, 5.d3            | After d2, d3            |
-| 5.d-col   | drill: column / announcement variant body treatment                        | 5.d1                  | After d1                |
-| 5.d-tra   | drill: transfer variant body treatment (deep dive vs minimal)              | 5.d1                  | After d1                |
-| 5.d-evt   | drill: event variant body detail block                                     | 5.d1                  | After d1                |
-| 5.d-mat   | drill: match variant body detail block (preview + recap)                   | 5.d1, #1470           | After d1 + #1470        |
-| 5.A.1     | body container + DropCap + PT body + multi-line HighlighterStroke          | 5.0, 5.d3             | After 5.0, d3           |
-| 5.A.2     | PullQuote + EndMark + VerderLezenRow                                       | 5.A.1, 5.d4           | After A.1, d4           |
-| 5.A.3     | EditieLabel + final footer composition                                     | 5.A.2                 | After A.2               |
-| 5.B.int   | QASection + QARow + QASectionDivider + InterviewCredits                    | 5.d-int, 5.A.3        | After d-int, A.3        |
-| 5.B.col   | column-variant body touches                                                | 5.d-col, 5.A.3        | After d-col, A.3        |
-| 5.B.tra   | transfer-variant body touches                                              | 5.d-tra, 5.A.3        | After d-tra, A.3        |
-| 5.B.evt   | EventDetailBlock                                                           | 5.d-evt, 5.A.3        | After d-evt, A.3        |
-| 5.B.mat   | MatchRecapStats                                                            | 5.d-mat, 5.A.3, #1470 | After d-mat, A.3, #1470 |
-| 5.C       | page.tsx rewire + variant switch                                           | all 5.B.\*            | After every 5.B closes  |
-| 5.D       | cleanup — retire legacy, close legacy milestone, CLAUDE.md                 | 5.C                   | After 5.C               |
+19 issues spawned via the spawn script (`/tmp/spawn-phase5-issues.sh`); `blockedBy` edges wired via `addBlockedBy` GraphQL.
 
-`/prd-to-issues` spawns these 19 issues in one pass, wired with `blockedBy` per the table. The 5.d._ drills run first (no blockers between drills except where listed); 5.A._ + 5.B.\* run after their drills close; 5.C closes the loop.
+| Key     | Issue | Title                                                             | Blocked by                        | Status                   |
+| ------- | ----- | ----------------------------------------------------------------- | --------------------------------- | ------------------------ |
+| 5.0     | #1782 | tracer: `/nieuws/[slug]` route + ARTICLE_BY_SLUG_QUERY audit      | —                                 | ready (no design dep)    |
+| 5.d1    | #1783 | drill: article header layout (centered vs flanked)                | —                                 | owner-led drill          |
+| 5.d2    | #1784 | drill: subject avatar vocabulary (photo / monogram / illustrated) | —                                 | owner-led drill          |
+| 5.d3    | #1785 | drill: section-break flourish (diamond vs alternatives)           | —                                 | owner-led drill          |
+| 5.d4    | #1786 | drill: Verder-lezen + Editie footer layout                        | —                                 | owner-led drill          |
+| 5.d-int | #1787 | drill: interview body touches (Q&A row + credits block layout)    | #1784, #1785                      | drill (after d2 + d3)    |
+| 5.d-col | #1788 | drill: column / announcement variant body treatment               | #1783                             | drill (after d1)         |
+| 5.d-tra | #1789 | drill: transfer variant body treatment                            | #1783                             | drill (after d1)         |
+| 5.d-evt | #1790 | drill: event variant body detail block                            | #1783                             | drill (after d1)         |
+| 5.d-mat | #1791 | drill: match variant body detail block (preview + recap)          | #1783, #1470                      | drill (after d1 + #1470) |
+| 5.A.1   | #1792 | body container + DropCap + PT body + multi-line HighlighterStroke | #1782, #1785                      | blocked                  |
+| 5.A.2   | #1793 | PullQuote + EndMark + VerderLezenRow                              | #1792, #1786                      | blocked                  |
+| 5.A.3   | #1794 | EditieLabel + final footer composition                            | #1793                             | blocked                  |
+| 5.B.int | #1795 | QASection + QARow + QASectionDivider + InterviewCredits           | #1787, #1794                      | blocked                  |
+| 5.B.col | #1796 | column-variant body touches                                       | #1788, #1794                      | blocked                  |
+| 5.B.tra | #1797 | transfer-variant body touches                                     | #1789, #1794                      | blocked                  |
+| 5.B.evt | #1798 | EventDetailBlock                                                  | #1790, #1794                      | blocked                  |
+| 5.B.mat | #1799 | MatchRecapStats                                                   | #1791, #1794, #1470               | blocked                  |
+| 5.C     | #1800 | page.tsx rewire + variant switch                                  | #1795, #1796, #1797, #1798, #1799 | blocked                  |
+| 5.D     | #1801 | cleanup — retire legacy, close legacy milestone, CLAUDE.md        | #1800                             | blocked                  |
+
+Ralph picks up:
+
+1. **#1782** (5.0 tracer) — immediately ready, no design dependency.
+2. The drill issues (#1783 / #1784 / #1785 / #1786) — owner-led via `/design-an-interface`, not Ralph-driven.
+3. Everything else unblocks as drills + 5.A.\* close.
 
 ---
 
