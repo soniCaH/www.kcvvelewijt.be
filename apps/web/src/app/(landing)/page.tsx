@@ -2,11 +2,17 @@
  * Homepage
  * Main landing page for KCVV Elewijt website
  *
- * Phase 4.D.1 (#1680) — section ordering rewired to the locked retro
- * composition. Per-section components own their own backgrounds and
- * editorial chrome, so `<SectionStack>` uses `bg: "transparent"` (no
- * inter-section diagonal transitions) for those sections and
- * `bg: "gray-100"` for the legacy `<BannerSlot>` strips.
+ * Phase 4.5.C.1 (#1754) — R4.B spine reorder + R1.B static-hero
+ * retirement of `<HomepageHeroCarousel>`. The hero is now a single
+ * static `<EditorialHero placement="homepage">` rendering the top
+ * featured article; positions 2..4 of the featured-ordered query fill
+ * the new `<FeaturedUitgelichtRow>`; `<ClubshopBanner>` slides to the
+ * bottom of the spine (after `<SponsorsSection>`), with `<BannerSlot c>`
+ * promoted to sit between Youth and Sponsors.
+ *
+ * Per-section components own their own backgrounds and editorial
+ * chrome, so `<SectionStack>` uses `bg: "transparent"` for those
+ * sections and `bg: "gray-100"` for the legacy `<BannerSlot>` strips.
  */
 
 import { Effect } from "effect";
@@ -26,9 +32,10 @@ import { BffService } from "@/lib/effect/services/BffService";
 import {
   BannerSlot,
   FeaturedEventBand,
-  HomepageHeroCarousel,
+  FeaturedUitgelichtRow,
   type FeaturedEventBandEvent,
-  type HomepageHeroArticle,
+  type UitgelichtArticle,
+  type ArticleType as UitgelichtArticleType,
   NewsGrid,
   SponsorsSection,
   UpcomingMatches,
@@ -36,6 +43,10 @@ import {
   YouthBackdrop,
   YouthSection,
 } from "@/components/home";
+import {
+  EditorialHero,
+  type EditorialHeroProps,
+} from "@/components/article/EditorialHero";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
@@ -79,32 +90,35 @@ function nullsToUndefined<T extends object>(
   return out as { [K in keyof T]?: NonNullable<T[K]> };
 }
 
-function toHeroCarouselArticle(article: ArticleVM): HomepageHeroArticle {
+/**
+ * Map an `ArticleVM` onto `<EditorialHero placement="homepage">` props.
+ * Mirrors the per-variant tail the retired `toHeroCarouselArticle`
+ * built for `<HomepageHeroCarousel>`: each `articleType` contributes
+ * the structured data the variant renderers need (subjects, transfer
+ * fact, event fact, category). The discriminated union narrowing
+ * surfaces a missing branch at compile time when a new `articleType`
+ * lands (e.g. matchPreview / matchRecap from #1470).
+ */
+function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
   const shared = {
+    placement: "homepage" as const,
+    // Phase 4.5.C.1 (#1754) — the static homepage hero spans the full
+    // inner width, so the canonical 2px paper-stamp press-down reads
+    // as a twitch instead of a press. Use the `tilt-photo` treatment:
+    // only the framed cover image tilts + scales on hover; the
+    // editorial column stays still and the "★ Lees verder →" reveal
+    // signals the link affordance.
+    hoverStyle: "tilt-photo" as const,
     slug: article.slug,
     title: article.title,
     coverImage: article.coverImageUrl
       ? { url: article.coverImageUrl, alt: article.title }
       : undefined,
-    thumbLabel: article.tags[0],
     date: article.publishedAt
       ? formatArticleDate(article.publishedAt)
       : undefined,
   };
 
-  // Variant-specific tail per the R1.5 hero (`docs/design/mockups/
-  // phase-4-homepage/hero-flourishes-locked.md`). Each branch pulls
-  // the structured data the EditorialHero needs to render its kicker
-  // + below-H1 + below-hero artefacts. GROQ-nullable fields are
-  // narrowed to optional non-null at the boundary so the discriminated
-  // EditorialHero types stay strict.
-  //
-  // Exhaustive switch per the `apps/web/CLAUDE.md` discriminated-union
-  // rule — each known case is explicit and the final branch asserts
-  // the `articleType` union has been narrowed to `never`. If a new
-  // articleType lands (e.g. matchPreview / matchRecap from #1470)
-  // without a hero branch, TypeScript fails the build here rather
-  // than silently rendering as Announcement.
   const variant = article.articleType ?? "announcement";
   switch (variant) {
     case "interview":
@@ -126,10 +140,50 @@ function toHeroCarouselArticle(article: ArticleVM): HomepageHeroArticle {
     default: {
       const _exhaustive: never = variant;
       throw new Error(
-        `Unhandled articleType in toHeroCarouselArticle: ${String(_exhaustive)}`,
+        `Unhandled articleType in toEditorialHeroProps: ${String(_exhaustive)}`,
       );
     }
   }
+}
+
+/**
+ * Narrow the `ArticleVM.articleType` union (which includes `null` for
+ * legacy untyped rows) down to the literal union
+ * `<FeaturedUitgelichtRow>` expects. Exhaustive switch — when Sanity
+ * widens the `articleType` enum (e.g. `matchPreview` / `matchRecap`
+ * from #1470) the `never` assertion surfaces the missing case at
+ * compile time. `<FeaturedUitgelichtRow>` already accepts those wider
+ * literals, so the new branches just return the same value through.
+ */
+function toUitgelichtArticleType(
+  type: ArticleVM["articleType"],
+): UitgelichtArticleType | null {
+  if (type === null || type === undefined) return null;
+  switch (type) {
+    case "transfer":
+    case "interview":
+    case "announcement":
+    case "event":
+      return type;
+    default: {
+      const _exhaustive: never = type;
+      throw new Error(
+        `Unhandled articleType in toUitgelichtArticleType: ${String(_exhaustive)}`,
+      );
+    }
+  }
+}
+
+function toUitgelichtArticle(article: ArticleVM): UitgelichtArticle {
+  return {
+    href: `/nieuws/${article.slug}`,
+    title: article.title,
+    imageUrl: article.coverImageUrl ?? undefined,
+    imageAlt: article.title,
+    date: article.publishedAt ? formatArticleDate(article.publishedAt) : "",
+    articleType: toUitgelichtArticleType(article.articleType),
+    badge: article.tags[0],
+  };
 }
 
 function toFeaturedEventBandEvent(
@@ -156,10 +210,10 @@ export default async function HomePage() {
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
           const all = yield* repo.findAll();
-          // Slice [0..10] per the R2.B + R1.6 spine: positions 1..3 fill the
-          // hero carousel, positions 5..10 fill the 3×2 news grid (6 cards).
-          // Position 4 (index 3) is reserved for `<FeaturedUitgelichtRow>`
-          // once #1754 wires it into the spine.
+          // Slice [0..10] per the R1.B + R2.B + R1.6 spine:
+          //   • position 1 (index 0) feeds the static <EditorialHero>.
+          //   • positions 2..4 (index 1..3) fill <FeaturedUitgelichtRow>.
+          //   • positions 5..10 (index 4..9) fill the 3×2 <NewsGrid>.
           return all.slice(0, 10);
         }).pipe(Effect.catchAll(() => Effect.succeed<ArticleVM[]>([]))),
       ),
@@ -201,13 +255,9 @@ export default async function HomePage() {
   const banners = bannersResult;
   const featuredEvent = featuredEventResult;
 
-  const heroArticles = articles.slice(0, 3).map(toHeroCarouselArticle);
-  // R2.B (`newsgrid-revisit-locked.md`) — slice widened from 5 → 6
-  // cards and shifted from positions 4..8 to 5..10. Position 4
-  // (index 3) is now consumed by `<FeaturedUitgelichtRow>` when it
-  // ships into the spine (#1754). Until then index 3 is unused on
-  // the homepage; the article still appears on `/nieuws` via the
-  // archive page.
+  const heroArticle = articles[0];
+  const heroProps = heroArticle ? toEditorialHeroProps(heroArticle) : null;
+  const uitgelichtArticles = articles.slice(1, 4).map(toUitgelichtArticle);
   const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
   const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
@@ -229,12 +279,35 @@ export default async function HomePage() {
   // we set pt-0/pb-0 on the SectionStack wrapper so its default pt-20/pb-20
   // doesn't paint a transparent strip (= body bg = white) above and below
   // the component's own coloured surface.
-  const heroSection: SectionConfig | null =
-    heroArticles.length > 0
+  const heroSection: SectionConfig | null = heroProps
+    ? {
+        key: "hero",
+        bg: "transparent",
+        content: (
+          <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
+            <EditorialHero {...heroProps} />
+          </div>
+        ),
+        paddingTop: "pt-0",
+        paddingBottom: "pb-0",
+      }
+    : null;
+
+  // Uitgelicht sits on `bg-cream-soft` so the warm paper backdrop carries
+  // the retro-terrace-fanzine register into the featured-row band; the
+  // cards' own cream bg reads as raised on the slightly darker soft-cream
+  // surface. The wrapper handles its own top/bottom padding so the
+  // SectionStack `pt-0 pb-0` keeps the band flush with the hero above.
+  const uitgelichtSection: SectionConfig | null =
+    uitgelichtArticles.length > 0
       ? {
-          key: "hero",
+          key: "uitgelicht",
           bg: "transparent",
-          content: <HomepageHeroCarousel articles={heroArticles} />,
+          content: (
+            <div className="bg-cream-soft py-12 md:py-16">
+              <FeaturedUitgelichtRow articles={uitgelichtArticles} />
+            </div>
+          ),
           paddingTop: "pt-0",
           paddingBottom: "pb-0",
         }
@@ -314,14 +387,14 @@ export default async function HomePage() {
     bg: "kcvv-green-dark",
     content: <YouthSection />,
     backdrop: <YouthBackdrop />,
-  };
-
-  const clubshopSection: SectionConfig = {
-    key: "clubshop",
-    bg: "transparent",
-    content: <ClubshopBanner />,
+    // R5.B `<StripedSeam>` lock — the seam is the first child of
+    // `<YouthSection>` and is meant to sit AT the section's top edge,
+    // butting against the previous section directly. With the default
+    // `pt-20` wrapper, 80px of jersey-deep paints above the seam and
+    // it reads as "sandwiched" (visible green band → seam → content).
+    // `pt-0` lets the seam land flush; the section's pb-20 stays so
+    // the dual-CTA row keeps its bottom breathing room.
     paddingTop: "pt-0",
-    paddingBottom: "pb-0",
   };
 
   const bannerSlotCSection: SectionConfig | null = banners.bannerSlotC
@@ -348,9 +421,21 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
+  const clubshopSection: SectionConfig = {
+    key: "clubshop",
+    bg: "transparent",
+    content: <ClubshopBanner />,
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+  };
+
   return (
     <>
-      <h1 className="sr-only">KCVV Elewijt</h1>
+      {/* The static `<EditorialHero>` renders the page-level <h1> for the
+          featured article when present. Only emit the sr-only "KCVV
+          Elewijt" fallback when no hero is rendered (zero featured
+          articles), so the document always has exactly one <h1>. */}
+      {heroSection ? null : <h1 className="sr-only">KCVV Elewijt</h1>}
       <JsonLd data={buildSportsClubJsonLd()} />
       <JsonLd
         data={buildBreadcrumbJsonLd([
@@ -358,23 +443,25 @@ export default async function HomePage() {
         ])}
       />
       <SectionStack
-        // Last section's bg is owned by `<SponsorsBlock>` (cream-deep). The
-        // default footer safe-area padding paints with the SectionStack
-        // wrapper's `bg: "transparent"`, leaving a white strip between the
-        // sponsor grid and the footer; disable it so SponsorsBlock connects
-        // directly to the footer's cream bg.
+        // R4.B spine ends on `<ClubshopBanner>` (jersey-deep-dark
+        // full-bleed). The default footer safe-area padding paints with
+        // the SectionStack wrapper's `bg: "transparent"`, which would
+        // leave a white strip between the dark clubshop band and the
+        // footer's jersey-deep-dark background. Keeping the flag at
+        // `false` lets ClubshopBanner connect directly to the footer.
         reserveFooterSafeArea={false}
         sections={[
           heroSection,
+          uitgelichtSection,
           featuredEventSection,
           bannerSlotASection,
           latestNewsSection,
           upcomingMatchesSection,
           bannerSlotBSection,
           youthSection,
-          clubshopSection,
           bannerSlotCSection,
           sponsorsSection,
+          clubshopSection,
         ]}
       />
     </>

@@ -79,6 +79,45 @@ describe("EditorialHero — shell + placement", () => {
       "De zomer van 2026 begint nu.",
     );
   });
+
+  it("applies the press-down translate classes on the wrapping link by default (hoverStyle='press')", () => {
+    const { container } = render(
+      <EditorialHero
+        variant="announcement"
+        {...SHARED}
+        placement="homepage"
+        slug="zomer-2026"
+      />,
+    );
+    const link = container.querySelector("a");
+    expect(link?.className).toContain("hover:-translate-x-[2px]");
+    expect(link?.className).toContain("hover:-translate-y-[2px]");
+  });
+
+  it("swaps to the tilt-photo treatment when hoverStyle='tilt-photo': link drops the translate, cover figure gets group-hover rotate+scale", () => {
+    const { container } = render(
+      <EditorialHero
+        variant="announcement"
+        {...SHARED}
+        placement="homepage"
+        slug="zomer-2026"
+        hoverStyle="tilt-photo"
+        coverImage={{
+          url: "/test-cover.jpg",
+          alt: "Spelers vieren een doelpunt",
+        }}
+      />,
+    );
+    const link = container.querySelector("a");
+    expect(link?.className).not.toContain("hover:-translate-x-[2px]");
+    expect(link?.className).not.toContain("hover:-translate-y-[2px]");
+
+    const figure = container.querySelector("figure");
+    expect(figure).not.toBeNull();
+    expect(figure?.className).toContain("group-hover:-rotate-1");
+    expect(figure?.className).toContain("group-hover:scale-[1.02]");
+    expect(figure?.className).toContain("motion-reduce:group-hover:rotate-0");
+  });
 });
 
 // ─── Announcement variant ────────────────────────────────────────────────────
