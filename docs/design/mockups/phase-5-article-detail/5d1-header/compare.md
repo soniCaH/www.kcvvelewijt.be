@@ -50,10 +50,10 @@ Reference design system locks consumed here:
 
 ## Net new primitives proposed by the new options
 
-| Option    | Primitive                                                             | Status                                                                                          |
-| --------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| A / B / C | None — all four reuse existing primitives. Compositional change only. | OK, but structural override of Phase 3-b shell.                                                 |
-| D         | `<TapedFigure aspect="landscape-21-9">` — new prop value              | Trivially additive — one line in the `ASPECT_VALUE` map of `TapedFigure.tsx`. No new component. |
+| Option    | Primitive                                                              | Status                                                                                          |
+| --------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| A / B / C | None — all three reuse existing primitives. Compositional change only. | OK, but structural override of Phase 3-b shell.                                                 |
+| D         | `<TapedFigure aspect="landscape-21-9">` — new prop value               | Trivially additive — one line in the `ASPECT_VALUE` map of `TapedFigure.tsx`. No new component. |
 
 ## Source locks consulted
 
