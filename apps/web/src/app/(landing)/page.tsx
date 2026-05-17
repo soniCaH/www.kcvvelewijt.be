@@ -387,6 +387,14 @@ export default async function HomePage() {
     bg: "kcvv-green-dark",
     content: <YouthSection />,
     backdrop: <YouthBackdrop />,
+    // R5.B `<StripedSeam>` lock — the seam is the first child of
+    // `<YouthSection>` and is meant to sit AT the section's top edge,
+    // butting against the previous section directly. With the default
+    // `pt-20` wrapper, 80px of jersey-deep paints above the seam and
+    // it reads as "sandwiched" (visible green band → seam → content).
+    // `pt-0` lets the seam land flush; the section's pb-20 stays so
+    // the dual-CTA row keeps its bottom breathing room.
+    paddingTop: "pt-0",
   };
 
   const bannerSlotCSection: SectionConfig | null = banners.bannerSlotC

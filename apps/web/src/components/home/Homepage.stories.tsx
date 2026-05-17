@@ -295,6 +295,8 @@ const Homepage = ({
     bg: "kcvv-green-dark",
     content: <YouthSection />,
     backdrop: <YouthBackdrop />,
+    // Match the page composition: StripedSeam sits flush at the top.
+    paddingTop: "pt-0",
   };
 
   const bannerSlotCSection: SectionConfig = {
