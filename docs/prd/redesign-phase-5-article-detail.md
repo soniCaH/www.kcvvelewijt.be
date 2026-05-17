@@ -181,6 +181,23 @@ Known projection extensions to investigate during 5.0:
 
 **Zero expected.** Confirmed in 5.0 audit. Any net-new field is spun out as a follow-up with explicit schema-migration scope, NOT folded into Phase 5.
 
+### 5.0 tracer audit (2026-05-17, #1782)
+
+Outcome: **no projection extension required.** `ARTICLE_BY_SLUG_QUERY` (`apps/web/src/lib/repositories/article.repository.ts:76`) already ships every field consumed by `<EditorialHero placement="detail" variant={articleType}>` for all four live variants. Per-variant verification:
+
+| Variant        | Required hero props                                                                         | Projection source                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `announcement` | `title` / `titleRich` / `lead` / `coverImageUrl` / `category` (= `tags[0]`) / `publishedAt` | `title` (pt::text) + `titleRich` + `lead` + `coverImageUrl` + `tags` + `publishedAt` — all projected.                |
+| `interview`    | `subjects[]` (playerRef + staffRef + custom\*) + `coverImagePortraitUrl`                    | `subjects[]{ _key, kind, playerRef->{…}, staffRef->{…}, customName, customRole, customPhotoUrl }` + portrait crop.   |
+| `transfer`     | `feature: TransferFactValue` (first `transferFact` from body) + `otherClubLogoUrl`          | `body[]{ ..., "otherClubLogoUrl": select(_type == "transferFact" => …) }` — derived client-side by TransferTemplate. |
+| `event`        | `feature: EventFactValue` (first `eventFact` from body) + `coverImageUrl`                   | `body[]{ ... }` spread carries every `eventFact` field — derived client-side by EventTemplate.                       |
+
+Body PT shape: the `body[]{ ... }` spread preserves `marks[]` on text spans, so the `accent` decorator (a flat mark name — no markDef) ships unchanged. `markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } }` covers the only mark that needs reference expansion.
+
+`firstTransferFact` / `firstEventFact` (present on `ARTICLES_QUERY` for card listings) are **intentionally absent** on `ARTICLE_BY_SLUG_QUERY`: the detail templates derive them by filtering `body[]` client-side (`TransferTemplate.tsx:68`, `EventTemplate.tsx:67`), so duplicating them at projection level would be dead data.
+
+`matchPreview` / `matchRecap` remain gated on #1470; re-audit when those `articleType` values land.
+
 ---
 
 ## 6. Analytics
