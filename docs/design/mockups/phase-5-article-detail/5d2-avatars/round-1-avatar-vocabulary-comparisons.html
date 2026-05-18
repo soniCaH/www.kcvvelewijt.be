@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Round 1 · Subject avatar vocabulary (5.d2)</title>
+    <style>
+      /* ============================================================
+         Tokens — mirrored 1:1 from the locked design system.
+         ============================================================ */
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-paper-edge: #c8bea2;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --color-tape-warm: rgba(217, 184, 90, 0.85);
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --filter-photo-newsprint: sepia(0.06) saturate(0.94) hue-rotate(-4deg)
+          contrast(1.02) brightness(1.01);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        max-width: 56ch;
+        font-size: 13px;
+        line-height: 1.55;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 32ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .surface {
+        background: var(--color-cream);
+        padding: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+      .surface + .surface {
+        border-top: 1px dashed var(--color-ink);
+      }
+      .surface-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin: 0 0 16px;
+        padding: 0;
+      }
+      .scale-block {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* ============================================================
+         Q&A row mock — shows the avatar in its natural use site.
+         Number left, mono speaker tag right of avatar, question + answer.
+         ============================================================ */
+      .qa-row {
+        display: grid;
+        grid-template-columns: 36px 32px 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .qa-row:last-child {
+        border-bottom: 0;
+      }
+      .qa-row .num {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 24px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      .qa-row .avatar-slot {
+        align-self: start;
+      }
+      .qa-row .body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .qa-row .speaker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .qa-row .q {
+        font-family: ui-serif, Georgia, serif;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1.3;
+        color: var(--color-ink);
+      }
+      .qa-row .a {
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--color-ink-soft);
+      }
+
+      /* ============================================================
+         Pull-quote mock — shows the avatar at attribution scale.
+         ============================================================ */
+      .pull-quote {
+        max-width: 480px;
+        margin: 8px 0;
+        padding: 20px 0;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .pull-quote .mark {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 48px;
+        line-height: 0.6;
+        color: var(--color-jersey-deep);
+      }
+      .pull-quote blockquote {
+        margin: 8px 0 16px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 20px;
+        line-height: 1.35;
+        color: var(--color-ink);
+      }
+      .pull-quote .attrib {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+      .pull-quote .attrib-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .pull-quote .attrib-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+      }
+      .pull-quote .attrib-role {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         OPTION A — circular photo crop
+         ============================================================ */
+      .avatar-photo {
+        border-radius: 50%;
+        border: 1px solid var(--color-ink);
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          #2a4d3a 0%,
+          #547a5e 50%,
+          #c1a04a 100%
+        );
+        flex-shrink: 0;
+      }
+      .avatar-photo::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        filter: var(--filter-photo-newsprint);
+        mix-blend-mode: multiply;
+        background: inherit;
+        opacity: 0.4;
+        border-radius: inherit;
+      }
+      .avatar-photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+          rgba(26, 26, 26, 0.18) 1px,
+          transparent 1px
+        );
+        background-size: 3px 3px;
+        opacity: 0.04;
+        mix-blend-mode: multiply;
+        border-radius: inherit;
+      }
+      .avatar-photo[data-subject="lars"] {
+        background: linear-gradient(135deg, #2a4d3a, #5a8567);
+      }
+      .avatar-photo[data-subject="wim"] {
+        background: linear-gradient(135deg, #b89244, #d6b56b);
+      }
+      .avatar-photo[data-subject="an"] {
+        background: linear-gradient(135deg, #3d5e4f, #748f7e);
+      }
+      .avatar-photo[data-subject="anouk"] {
+        background: linear-gradient(135deg, #5a3d4a, #8a6470);
+      }
+      .avatar-photo.sm {
+        width: 32px;
+        height: 32px;
+      }
+      .avatar-photo.lg {
+        width: 64px;
+        height: 64px;
+      }
+
+      /* ============================================================
+         OPTION B — initial monogram disc
+         ============================================================ */
+      .avatar-mono {
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        line-height: 1;
+        flex-shrink: 0;
+        letter-spacing: -0.02em;
+      }
+      .avatar-mono.sm {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+      .avatar-mono.lg {
+        width: 64px;
+        height: 64px;
+        font-size: 30px;
+      }
+
+      /* ============================================================
+         OPTION C — illustrated character avatar (two-pass print)
+         Per project_jersey_illustration_vocabulary: jersey-deep
+         underprint + ink overprint, ink stripes.
+         ============================================================ */
+      .avatar-illus {
+        display: inline-block;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .avatar-illus.sm {
+        width: 32px;
+        height: 32px;
+      }
+      .avatar-illus.lg {
+        width: 64px;
+        height: 64px;
+      }
+      .avatar-illus svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* ============================================================
+         OPTION D — mixed: photo at hero, monogram at row scale.
+         ============================================================ */
+
+      /* utility for hint blocks under each row */
+      .hint {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Round 1 · Drill #1784 · 5.d2</p>
+      <h1>
+        Subject avatar vocabulary — photo / monogram / illustration / mixed
+      </h1>
+      <p>
+        Drill resolves the avatar fill used inside
+        <code>&lt;QARow&gt;</code> (interview Q&amp;A row, ~32px) and
+        <code>&lt;PullQuote&gt;</code> attribution (all variants, ~64px). The
+        same speaker often appears multiple times in a single article — the
+        chosen vocabulary applies
+        <strong>everywhere a subject's avatar renders</strong>, not just one
+        site.
+      </p>
+      <p>
+        Each option renders four sample subjects: <strong>Lars</strong> (player
+        · psdImage), <strong>Wim</strong> (staff · photo),
+        <strong>An</strong> (custom · own photo),
+        <strong>Anouk</strong> (subject without a photo — the
+        <code>~10%</code> case per
+        <code>feedback_subject_photo_fallback</code>). Two scales per option so
+        scaling-down behavior is visible.
+      </p>
+      <p>
+        Vocabulary deltas mapped per option. See <code>compare.md</code> in this
+        folder.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · Circular photo crop</div>
+            <div class="name">
+              Circle clip from <code>player.psdImage</code> (with Phase 4.5 R9
+              photo treatment)
+            </div>
+            <div class="desc">
+              Bounded-box circular clip of the existing subject photo. Newsprint
+              filter + paper grain identical to
+              <code>&lt;TapedFigure&gt;</code>. Thin 1px ink border. Fallback
+              for ~10% of subjects without a photo is the monogram from Option B
+              — but the primary vocabulary is photo.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing <code>player.psdImage</code> / <code>staff.photo</code> /
+            <code>customPhoto</code><br />
+            ✓ R9 newsprint filter<br />
+            ✓ R9 paper grain<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            <code>aspect="circle"</code> on <code>TapedFigure</code> (one-line
+            prop value, or a thin
+            <code>&lt;SubjectAvatar&gt;</code> wrapper)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> No-photo
+            fallback rule (defer to B monogram)
+          </div>
+        </header>
+
+        <div class="surface">
+          <div class="scale-block">
+            <p class="surface-label">Q&amp;A row · ~32px</p>
+            <div class="qa-row">
+              <span class="num">01</span>
+              <span class="avatar-slot"
+                ><span class="avatar-photo sm" data-subject="lars"></span
+              ></span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="q">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">02</span>
+              <span class="avatar-slot"
+                ><span class="avatar-photo sm" data-subject="wim"></span
+              ></span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="a">
+                  Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het.
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">03</span>
+              <span class="avatar-slot"
+                ><span class="avatar-photo sm" data-subject="an"></span
+              ></span>
+              <div class="body">
+                <span class="speaker">An · Fan</span>
+                <p class="q">En daarna?</p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">04</span>
+              <span class="avatar-slot"
+                ><span
+                  class="avatar-photo sm"
+                  data-subject="anouk"
+                  style="
+                    background: repeating-linear-gradient(
+                      45deg,
+                      #ddd4ba 0 6px,
+                      #c8bea2 6px 12px
+                    );
+                  "
+                ></span
+              ></span>
+              <div class="body">
+                <span class="speaker">Anouk · Geen foto · fallback</span>
+                <p class="a">
+                  Sample fallback subject — no photo on file. (Option A would
+                  defer to B's monogram here.)
+                </p>
+              </div>
+            </div>
+            <p class="hint">
+              No-photo fallback would use the monogram from Option B.
+            </p>
+          </div>
+
+          <div class="scale-block">
+            <p class="surface-label">Pull-quote · ~64px</p>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+                ik wist: hij snapt het.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-photo lg" data-subject="wim"></span>
+                <div class="attrib-text">
+                  <span class="attrib-name">Wim Peeters</span>
+                  <span class="attrib-role">Trainer · 21 seizoenen</span>
+                </div>
+              </div>
+            </div>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Mijn man zegt dat hij oud wordt van mij. Maar hij gaat ook mee,
+                hè.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-photo lg" data-subject="an"></span>
+                <div class="attrib-text">
+                  <span class="attrib-name">An Verheyden</span>
+                  <span class="attrib-role">Fan sinds '78</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option B · Initial monogram disc</div>
+            <div class="name">
+              First-letter monogram, italic Freight Display, on
+              <code>bg-jersey-deep</code> disc
+            </div>
+            <div class="desc">
+              Single initial (capital, Freight Display 900 italic) on a solid
+              jersey-deep circle. Cream text at full opacity per
+              <code>feedback_monolabel_cream_full_opacity</code>. Same primitive
+              regardless of subject kind. No photo dependency.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>EditorialHeading</code> typography reused<br />
+            ✓ <code>--color-jersey-deep</code> + cream full-opacity text<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            <code>&lt;SubjectMonogram&gt;</code> primitive (small disc +
+            initial)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses photo
+            presence — every subject looks the same shape
+          </div>
+        </header>
+
+        <div class="surface">
+          <div class="scale-block">
+            <p class="surface-label">Q&amp;A row · ~32px</p>
+            <div class="qa-row">
+              <span class="num">01</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">L</span></span
+              >
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="q">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">02</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">W</span></span
+              >
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="a">
+                  Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het.
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">03</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">A</span></span
+              >
+              <div class="body">
+                <span class="speaker">An · Fan</span>
+                <p class="q">En daarna?</p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">04</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">A</span></span
+              >
+              <div class="body">
+                <span class="speaker">Anouk · Geen foto</span>
+                <p class="a">
+                  Same monogram as An. Initials collide. Could fall back to
+                  first-two-letters (Lr, Wm, An, Ao) — flag for the lock.
+                </p>
+              </div>
+            </div>
+            <p class="hint">
+              Collision risk: same initial = same monogram. Could mitigate with
+              role-based hue shift or two-letter initials.
+            </p>
+          </div>
+
+          <div class="scale-block">
+            <p class="surface-label">Pull-quote · ~64px</p>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+                ik wist: hij snapt het.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-mono lg">W</span>
+                <div class="attrib-text">
+                  <span class="attrib-name">Wim Peeters</span>
+                  <span class="attrib-role">Trainer · 21 seizoenen</span>
+                </div>
+              </div>
+            </div>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Mijn man zegt dat hij oud wordt van mij. Maar hij gaat ook mee,
+                hè.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-mono lg">A</span>
+                <div class="attrib-text">
+                  <span class="attrib-name">An Verheyden</span>
+                  <span class="attrib-role">Fan sinds '78</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option C · Illustrated character avatar</div>
+            <div class="name">
+              4 line-art portraits in two-pass print style (jersey-deep
+              underprint + ink overprint)
+            </div>
+            <div class="desc">
+              Net-new vocabulary: 4 illustrated character avatars rotated per
+              speaker. Two-pass print register per
+              <code>project_jersey_illustration_vocabulary</code> (jersey-deep
+              underprint slightly offset under an ink line drawing). NOT bound
+              to subject identity — the avatar repeats across subjects with the
+              same slot index, like the rotation pool. Closest to the original
+              fanzine sketch register.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>--color-jersey-deep</code> +
+            <code>--color-ink</code> two-pass<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            illustration set (4–6 portrait glyphs)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span>
+            Subject-to-slot mapping rule (hash? round-robin?)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Identity
+            decoupled from data — every speaker reads as a generic "character"
+          </div>
+        </header>
+
+        <div class="surface">
+          <div class="scale-block">
+            <p class="surface-label">
+              Q&amp;A row · ~32px (slot 1 / 2 / 3 / 4 of the illustration pool)
+            </p>
+            <div class="qa-row">
+              <span class="num">01</span>
+              <span class="avatar-slot">
+                <span class="avatar-illus sm">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <!-- jersey-deep underprint (offset 0.5px) -->
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="16" cy="11" r="6" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M11 19 L 16 24 L 21 19" />
+                      <path d="M9 24 L 9 28 M 23 24 L 23 28" />
+                    </g>
+                    <!-- ink overprint -->
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="16" cy="11" r="6" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M11 19 L 16 24 L 21 19" />
+                      <path d="M9 24 L 9 28 M 23 24 L 23 28" />
+                    </g>
+                  </svg>
+                </span>
+              </span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller · slot 1</span>
+                <p class="q">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">02</span>
+              <span class="avatar-slot">
+                <span class="avatar-illus sm">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <ellipse cx="16" cy="11" rx="7" ry="6" />
+                      <path d="M11 13 q 1.5 -2 3 0 M 18 13 q 1.5 -2 3 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M10 20 L 16 23 L 22 20" />
+                    </g>
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <ellipse cx="16" cy="11" rx="7" ry="6" />
+                      <path d="M11 13 q 1.5 -2 3 0 M 18 13 q 1.5 -2 3 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M10 20 L 16 23 L 22 20" />
+                    </g>
+                  </svg>
+                </span>
+              </span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer · slot 2</span>
+                <p class="a">
+                  Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het.
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">03</span>
+              <span class="avatar-slot">
+                <span class="avatar-illus sm">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 11 a 7 7 0 0 1 14 0 a 7 7 0 0 1 -14 0 Z" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M16 19 L 16 28" />
+                      <path d="M11 23 L 21 23" />
+                    </g>
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 11 a 7 7 0 0 1 14 0 a 7 7 0 0 1 -14 0 Z" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M16 19 L 16 28" />
+                      <path d="M11 23 L 21 23" />
+                    </g>
+                  </svg>
+                </span>
+              </span>
+              <div class="body">
+                <span class="speaker">An · Fan · slot 3</span>
+                <p class="q">En daarna?</p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">04</span>
+              <span class="avatar-slot">
+                <span class="avatar-illus sm">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="16" cy="10" r="5" />
+                      <path d="M11 9 q 5 -4 10 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M13 23 q 3 2 6 0" />
+                    </g>
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="16" cy="10" r="5" />
+                      <path d="M11 9 q 5 -4 10 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M13 23 q 3 2 6 0" />
+                    </g>
+                  </svg>
+                </span>
+              </span>
+              <div class="body">
+                <span class="speaker">Anouk · Geen foto · slot 4</span>
+                <p class="a">
+                  Identity is decoupled from data — the avatar represents "the
+                  speaker", not the person. Mickey-mouse risk if combined with
+                  photo elsewhere on the page.
+                </p>
+              </div>
+            </div>
+            <p class="hint">
+              Illustrations rendered at 32px reduce to near-glyphs; detail
+              differences are barely readable.
+            </p>
+          </div>
+
+          <div class="scale-block">
+            <p class="surface-label">Pull-quote · ~64px</p>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+                ik wist: hij snapt het.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-illus lg">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <ellipse cx="16" cy="11" rx="7" ry="6" />
+                      <path d="M11 13 q 1.5 -2 3 0 M 18 13 q 1.5 -2 3 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M10 20 L 16 23 L 22 20" />
+                    </g>
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <ellipse cx="16" cy="11" rx="7" ry="6" />
+                      <path d="M11 13 q 1.5 -2 3 0 M 18 13 q 1.5 -2 3 0" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M10 20 L 16 23 L 22 20" />
+                    </g>
+                  </svg>
+                </span>
+                <div class="attrib-text">
+                  <span class="attrib-name">Wim Peeters</span>
+                  <span class="attrib-role">Trainer · slot 2</span>
+                </div>
+              </div>
+            </div>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Mijn man zegt dat hij oud wordt van mij. Maar hij gaat ook mee,
+                hè.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-illus lg">
+                  <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <g
+                      transform="translate(0.6,0.6)"
+                      stroke="var(--color-jersey-deep)"
+                      fill="none"
+                      stroke-width="1.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 11 a 7 7 0 0 1 14 0 a 7 7 0 0 1 -14 0 Z" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M16 19 L 16 28" />
+                      <path d="M11 23 L 21 23" />
+                    </g>
+                    <g
+                      stroke="var(--color-ink)"
+                      fill="none"
+                      stroke-width="1.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 11 a 7 7 0 0 1 14 0 a 7 7 0 0 1 -14 0 Z" />
+                      <path
+                        d="M5 28 C 5 21, 11 19, 16 19 C 21 19, 27 21, 27 28"
+                      />
+                      <path d="M16 19 L 16 28" />
+                      <path d="M11 23 L 21 23" />
+                    </g>
+                  </svg>
+                </span>
+                <div class="attrib-text">
+                  <span class="attrib-name">An Verheyden</span>
+                  <span class="attrib-role">Fan · slot 3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option D · Mixed (scale-conditional)</div>
+            <div class="name">
+              Monogram at Q&amp;A row scale (~32px) · photo at pull-quote scale
+              (~64px)
+            </div>
+            <div class="desc">
+              Same speaker gets two visual treatments depending on context.
+              Rationale: at 32px a photo crop is too small to recognise a face;
+              at 64px a monogram feels generic. Pick the right tool for the
+              scale. Inconsistency hazard: same person reads differently across
+              the same article.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Both A's photo + B's monogram primitives<br />
+            ✓ Scale-conditional rule keyed off the consuming component<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Two avatar
+            primitives in the system instead of one<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Same subject
+            ≠ same visual within one article (consistency risk)
+          </div>
+        </header>
+
+        <div class="surface">
+          <div class="scale-block">
+            <p class="surface-label">
+              Q&amp;A row · ~32px — monograms (= Option B)
+            </p>
+            <div class="qa-row">
+              <span class="num">01</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">L</span></span
+              >
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="q">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">02</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">W</span></span
+              >
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="a">
+                  Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het.
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">03</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">A</span></span
+              >
+              <div class="body">
+                <span class="speaker">An · Fan</span>
+                <p class="q">En daarna?</p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="num">04</span>
+              <span class="avatar-slot"
+                ><span class="avatar-mono sm">A</span></span
+              >
+              <div class="body">
+                <span class="speaker">Anouk · Geen foto</span>
+                <p class="a">
+                  Same as B at this scale — collision risk between An and Anouk
+                  persists.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scale-block">
+            <p class="surface-label">
+              Pull-quote · ~64px — photos (= Option A)
+            </p>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+                ik wist: hij snapt het.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-photo lg" data-subject="wim"></span>
+                <div class="attrib-text">
+                  <span class="attrib-name">Wim Peeters</span>
+                  <span class="attrib-role">Trainer · 21 seizoenen</span>
+                </div>
+              </div>
+            </div>
+            <div class="pull-quote">
+              <span class="mark">"</span>
+              <blockquote>
+                Mijn man zegt dat hij oud wordt van mij. Maar hij gaat ook mee,
+                hè.
+              </blockquote>
+              <div class="attrib">
+                <span class="avatar-photo lg" data-subject="an"></span>
+                <div class="attrib-text">
+                  <span class="attrib-name">An Verheyden</span>
+                  <span class="attrib-role">Fan sinds '78</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
