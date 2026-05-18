@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Round 1 · Q&amp;A row number style</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 28px 0 28px;
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .qa-section-kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        margin: 0 0 18px;
+      }
+
+      /* ============================================================
+         <QARow> — number left · avatar (monogram, 5.d2 D lock)
+         · speaker tag · question · answer
+         Divider between rows = dotted ink-muted (Phase 3-b).
+         ============================================================ */
+      .qa-row {
+        display: grid;
+        grid-template-columns: 56px 32px 1fr;
+        gap: 16px;
+        align-items: start;
+        padding: 18px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .qa-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .qa-row .marker {
+        min-height: 32px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .qa-row .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        letter-spacing: -0.02em;
+        flex-shrink: 0;
+      }
+      .qa-row .body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .qa-row .speaker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .qa-row .question {
+        font-family: ui-serif, Georgia, serif;
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 1.3;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .qa-row .answer {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+
+      /* ============================================================
+         OPTION A — Display numeral (Freight Display 900, jersey-deep)
+         ============================================================ */
+      .marker-display-numeral {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 40px;
+        line-height: 0.9;
+        color: var(--color-jersey-deep);
+        letter-spacing: -0.04em;
+      }
+
+      /* ============================================================
+         OPTION B — Mono index (e.g. "01 ·", "02 ·")
+         ============================================================ */
+      .marker-mono-index {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        line-height: 1;
+        padding-top: 6px;
+      }
+
+      /* ============================================================
+         OPTION C — Blockquote glyph (large quote mark, jersey-deep)
+         ============================================================ */
+      .marker-quote-glyph {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 0.6;
+        color: var(--color-jersey-deep);
+        margin-top: -4px;
+      }
+
+      /* ============================================================
+         OPTION D — No number (speaker tag alone)
+         Marker column collapses; layout shifts.
+         ============================================================ */
+      .qa-row--no-number {
+        grid-template-columns: 32px 1fr;
+      }
+      .qa-row--no-number .marker {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int · Round 1 · #1787</p>
+      <h1>
+        Q&amp;A row number style — display numeral / mono index / glyph / none
+      </h1>
+      <p>
+        Drill 5.d-int Round 1 of 2 — Q&amp;A row composition. Each option is a
+        different left-column marker; everything else is identical: monogram
+        avatar (from 5.d2 D lock), mono speaker tag, italic
+        <code>display-sm</code> 600 question, body <code>body-md</code> answer,
+        dotted ink-muted divider between rows.
+      </p>
+      <p>
+        Real 3-row Q&amp;A fixture. Two speakers (Lars Janssens, player —
+        <strong>L</strong> · Wim Peeters, trainer — <strong>W</strong>). All
+        four options render the same prose so the rhythm difference is honest.
+      </p>
+      <p>
+        Round 2 (InterviewCredits block layout) is drilled after this one locks.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Display numeral</div>
+          <div class="name">Italic Freight Display 900, jersey-deep, 40px</div>
+          <div class="desc">
+            Master-plan §5.2 baseline. Large italic display numeral in
+            jersey-deep on the left. Highest visual weight of the four — each
+            Q&amp;A row reads like a chapter heading.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>EditorialHeading</code> italic typography<br />
+            ✓ <code>--color-jersey-deep</code><br />
+            ✓ Existing master-plan §5.2 spec
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">
+            ★ Q&amp;A — Het seizoen, in vier vragen
+          </p>
+          <div class="qa-section">
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-display-numeral">1</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+                <p class="answer">
+                  "Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het. Pas dan wist ik dat dit ging
+                  lukken, dat ik hier hoorde."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-display-numeral">2</span></span
+              >
+              <span class="avatar">W</span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="question">En jij, zag je dat ook?</p>
+                <p class="answer">
+                  "Ik zei er niets van. Niet hardop. Maar in de kleedkamer
+                  achteraf is er een knik geweest, zo'n knik die alleen Lars en
+                  ik hebben gezien."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-display-numeral">3</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Als je nu kon kiezen — hetzelfde traject opnieuw?
+                </p>
+                <p class="answer">
+                  "Hetzelfde. Misschien niet die warming-up vóór Putte. Maar
+                  voor de rest? Hetzelfde."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Mono index</div>
+          <div class="name">
+            <code>01 ·</code> / <code>02 ·</code> / <code>03 ·</code> mono caps
+          </div>
+          <div class="desc">
+            Tracked mono-caps index in <code>ink-muted</code>. Reads as
+            transcript line-numbers — quieter than A, more structural than C.
+            Pairs naturally with the existing mono speaker tag below.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>MonoLabel</code> typography<br />
+            ✓ <code>--color-ink-muted</code><br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Light delta
+            from §5.2 spec (numeral type change)
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">
+            ★ Q&amp;A — Het seizoen, in vier vragen
+          </p>
+          <div class="qa-section">
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-mono-index">01 ·</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+                <p class="answer">
+                  "Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het. Pas dan wist ik dat dit ging
+                  lukken, dat ik hier hoorde."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-mono-index">02 ·</span></span
+              >
+              <span class="avatar">W</span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="question">En jij, zag je dat ook?</p>
+                <p class="answer">
+                  "Ik zei er niets van. Niet hardop. Maar in de kleedkamer
+                  achteraf is er een knik geweest, zo'n knik die alleen Lars en
+                  ik hebben gezien."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-mono-index">03 ·</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Als je nu kon kiezen — hetzelfde traject opnieuw?
+                </p>
+                <p class="answer">
+                  "Hetzelfde. Misschien niet die warming-up vóór Putte. Maar
+                  voor de rest? Hetzelfde."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Blockquote glyph</div>
+          <div class="name">
+            Large opening <code>"</code> in jersey-deep, replacing the number
+          </div>
+          <div class="desc">
+            Every row is a quote. The marker is the opening typographic quote
+            glyph at oversize scale (56px). Carries "this is something someone
+            said" semantics implicitly. Sequence information is lost — no
+            ordinal.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Typographic glyph<br />
+            ✓ <code>--color-jersey-deep</code><br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses ordinal
+            sequence (no <code>1</code>, <code>2</code>, <code>3</code>)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Repeats
+            opening-quote glyph + actual answer "..." — visual stutter
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">
+            ★ Q&amp;A — Het seizoen, in vier vragen
+          </p>
+          <div class="qa-section">
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-quote-glyph">“</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+                <p class="answer">
+                  "Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het. Pas dan wist ik dat dit ging
+                  lukken, dat ik hier hoorde."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-quote-glyph">“</span></span
+              >
+              <span class="avatar">W</span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="question">En jij, zag je dat ook?</p>
+                <p class="answer">
+                  "Ik zei er niets van. Niet hardop. Maar in de kleedkamer
+                  achteraf is er een knik geweest, zo'n knik die alleen Lars en
+                  ik hebben gezien."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row">
+              <span class="marker"
+                ><span class="marker-quote-glyph">“</span></span
+              >
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Als je nu kon kiezen — hetzelfde traject opnieuw?
+                </p>
+                <p class="answer">
+                  "Hetzelfde. Misschien niet die warming-up vóór Putte. Maar
+                  voor de rest? Hetzelfde."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · No number</div>
+          <div class="name">Speaker tag alone — marker column collapses</div>
+          <div class="desc">
+            Quietest of the four. Drop the left marker entirely. Each row is
+            just monogram avatar + speaker tag + Q + A. Sequence information
+            lives only in the natural reading order. Reads like a transcript.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ No new chrome<br />
+            ✓ Avatar (5.d2 lock) carries left-edge weight<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses ordinal
+            sequence<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Grid
+            collapses from 3-col to 2-col
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">
+            ★ Q&amp;A — Het seizoen, in vier vragen
+          </p>
+          <div class="qa-section">
+            <div class="qa-row qa-row--no-number">
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Wat was het moment dat je dacht 'dit gaat lukken'?
+                </p>
+                <p class="answer">
+                  "Halfweg de eerste helft, derde wedstrijd. Een loopactie
+                  waarvan ik wist: hij snapt het. Pas dan wist ik dat dit ging
+                  lukken, dat ik hier hoorde."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row qa-row--no-number">
+              <span class="avatar">W</span>
+              <div class="body">
+                <span class="speaker">Wim · Trainer</span>
+                <p class="question">En jij, zag je dat ook?</p>
+                <p class="answer">
+                  "Ik zei er niets van. Niet hardop. Maar in de kleedkamer
+                  achteraf is er een knik geweest, zo'n knik die alleen Lars en
+                  ik hebben gezien."
+                </p>
+              </div>
+            </div>
+            <div class="qa-row qa-row--no-number">
+              <span class="avatar">L</span>
+              <div class="body">
+                <span class="speaker">Lars · Aanvaller</span>
+                <p class="question">
+                  Als je nu kon kiezen — hetzelfde traject opnieuw?
+                </p>
+                <p class="answer">
+                  "Hetzelfde. Misschien niet die warming-up vóór Putte. Maar
+                  voor de rest? Hetzelfde."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
