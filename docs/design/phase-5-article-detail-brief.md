@@ -101,14 +101,13 @@ The current §5.2 spec already matches the prompt almost line-for-line. Reuse `<
 | Attribution beneath in small tracked uppercase with green em-dash                                    | `<EditorialByline>` row + green em-dash glyph                         | Reuse — the green em-dash is the canonical attribution separator (see retro-terrace-fanzine mockups).                              |
 | 1 pull quote per ~600 words                                                                          | Editorial guidance, not a component spec                              | Document in Sanity Studio description on the `pullQuote` block. Not a design decision.                                             |
 
-### "Verder lezen" + "Editie" footer (prompt §5 — "give long-reads memory")
+### "Verder lezen" footer (prompt §5 — "give long-reads memory")
 
-| Refinement element                                                                             | Source primitive                                      | Notes / delta                                                                                                                                                                                                                                             |
-| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Verder lezen" component: 2–3 related articles from Sanity tags, taped polaroid cards in a row | `<NewsCard>` × 2–3 in a `<TapedCardGrid columns={3}>` | **Reuse, but new placement.** Component already exists from Phase 4.5 R10 (flush-edge). The Sanity GROQ for "related by tags" is a small new BFF/repository function (not a design lock — implementation detail for PRD).                                 |
-| Thin "Editie" line: "Editie 47 · Lente 2026 · KCVV Elewijt Magazine" tracked uppercase         | `<MonoLabel tone="ink">` row, full-bleed centered     | **DELTA — minor.** New micro-component but composes from `<MonoLabel>`. Decision: is "Editie 47" auto-generated (publication-order count of all articles), seasonal (Lente/Zomer/Herfst/Winter from `publishedAt`), or editor-authored? Drill question 3. |
+> **Editie retired 2026-05-18.** The "Editie 47 · Lente 2026 · KCVV Elewijt Magazine" line was carried over from the retro-terrace-fanzine visual baseline without a data audit. KCVV is a club site, not a magazine; the data doesn't exist and the surface was invented chrome. See `docs/design/mockups/phase-5-article-detail/footer-locked.md` for the reasoning. The footer collapses to a `<VerderLezenRow>` only.
 
-**Owner direction 2026-05-14:** schema-migration appetite deferred to implementation-time per-field decisions, not an upfront drill. The "Editie 47" line — if it ships at all — defaults to UI-only (auto-derived season + sequence from `publishedAt`). Promote to a schema field only if editorial demands it during build. Q3 closed at brief level.
+| Refinement element                                                                             | Source primitive                                      | Notes / delta                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Verder lezen" component: 2–3 related articles from Sanity tags, taped polaroid cards in a row | `<NewsCard>` × 2–3 in a `<TapedCardGrid columns={3}>` | **Reuse, but new placement.** Component already exists from Phase 4.5 R10 (flush-edge). The Sanity GROQ for "related by tags" is a small new BFF/repository function (not a design lock — implementation detail for PRD). |
 
 ---
 
@@ -118,7 +117,7 @@ The current §5.2 spec already matches the prompt almost line-for-line. Reuse `<
 2. **Q&A row avatar fill.** Drill question 2 — photo crop / monogram / new illustration vocabulary. Decision feeds back into pull-quote avatar treatment.
 3. **Section-break diamond flourish.** Tiny — adds a `flourish="diamond"` variant to `<QASectionDivider>`. Owner sign-off needed but no design round needed.
 4. **"Verder lezen" placement** — net-new at the article footer (not in §5.2 stack). Composes from existing primitives but inherits #1745's R3 per-articleType backgrounds for visual consistency.
-5. **"Editie 47" line** — net-new editorial flourish. **Closed at brief level (2026-05-14):** UI-only auto-derived from `publishedAt` (season + sequence count). Schema field only if editorial demands during build.
+5. ~~**"Editie 47" line** — net-new editorial flourish.~~ **RETIRED 2026-05-18.** Data audit found no edition data, no editorial workflow, and no magazine sub-brand — the surface was invented chrome. See `docs/design/mockups/phase-5-article-detail/footer-locked.md`.
 
 ---
 
@@ -127,7 +126,7 @@ The current §5.2 spec already matches the prompt almost line-for-line. Reuse `<
 §5.2 covers _duo interview_. Phase 5 also has to ship variants for: matchverslag, column, transfer, jeugd, evenement, generic. The refinement prompts target the _interview_ variant only. Other variants inherit:
 
 - All system locks from §1 above.
-- The Q&A vocabulary is interview-specific. Other variants use the same body / pull-quote / EndMark / "Verder lezen" / Editie footer pattern but skip `<QASection>`.
+- The Q&A vocabulary is interview-specific. Other variants use the same body / pull-quote / EndMark / "Verder lezen" footer pattern but skip `<QASection>`.
 - Each non-interview variant likely needs its own EditorialHero variant (already locked at the type level in #1638). The article body structure is the same across variants.
 
 The Phase 5 design drill rounds should sequence: (i) interview consolidation drill (this brief), (ii) per-variant header drills (one per non-interview articleType), (iii) lock body structure once, ship.
@@ -143,7 +142,7 @@ The Phase 5 design drill rounds should sequence: (i) interview consolidation dri
 
 Drill them in order — Q1 first (defines hero identity), Q2 second (composes through pull-quotes too).
 
-~~Q3 "Editie 47" line — UI or schema?~~ — **Closed at brief level (2026-05-14):** UI-only, auto-derived from `publishedAt`. No drill round.
+~~Q3 "Editie 47" line — UI or schema?~~ — **RETIRED 2026-05-18.** Data audit retired the entire Editie surface; see `docs/design/mockups/phase-5-article-detail/footer-locked.md`.
 
 ---
 

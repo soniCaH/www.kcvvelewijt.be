@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 const sample = (
   <div className="font-display max-w-[280px]">
     <p className="text-mono-sm font-mono tracking-[0.08em] uppercase opacity-70">
-      Editie · 1909
+      ★ KCVV Elewijt · 1909
     </p>
     <h3 className="text-display-sm mt-1">Het rooster.</h3>
     <p className="text-body-sm mt-2 leading-relaxed">

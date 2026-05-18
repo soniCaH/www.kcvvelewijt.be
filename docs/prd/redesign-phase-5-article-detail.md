@@ -26,7 +26,6 @@ All six variants share the **same body shell**:
 <PullQuote interspersed />                                    <-- Phase 1 primitive
 <EndMark flourish="star" />                                   <-- Phase 1 primitive
 <VerderLezenRow />                                            <-- net-new (3-up NewsCard row, R3 backgrounds)
-<EditieLabel />                                               <-- net-new (UI-only, derived from publishedAt)
 ```
 
 Each variant overlays variant-specific touches inside this shell — drilled below in §9.
@@ -48,7 +47,9 @@ Two variant categories worth calling out:
 - **`announcement`** doubles as the editorial "column" variant per `feedback_design_drill_pattern` — the master plan listed `column` as a distinct articleType but Sanity merged it under `announcement`. Drill 5.d-col covers both.
 - **Matchverslag** is `matchRecap`; **matchvoorbeschouwing** is `matchPreview`. Both are gated on #1470; once that ships their EditorialHero detail variants land too. Drill 5.d-mat picks up both with the same body treatment.
 
-**Sanity migrations required:** 0 expected. `articleType`, `subjects[]`, body PT blocks, `firstTransferFact`, `firstEventFact` all already on schema. Editie line is UI-only.
+**Sanity migrations required:** 0 expected. `articleType`, `subjects[]`, body PT blocks, `firstTransferFact`, `firstEventFact` all already on schema.
+
+**Retired post-audit (2026-05-18):** `<EditieLabel>` ("Editie 47 · Lente 2026 · KCVV Elewijt Magazine" line) — see `docs/design/mockups/phase-5-article-detail/footer-locked.md`. KCVV is a club site, not a magazine; the data didn't exist (no edition number on `article`) and the surface was invented chrome. Drops out of the shared body shell, retires `<EditieLabel>` from §3 phasing and §6 new-components table, and downgrades drill 5.d4 to a lock-by-inheritance close.
 
 ---
 
@@ -105,8 +106,9 @@ Phase 1 shipped single-line only; multi-line wrapping is needed once body emphas
 
 5.A    Body composition build — shared shell across all variants
         ├─ 5.A.1   Body container + <DropCapParagraph> + Portable Text body + multi-line <HighlighterStroke>
-        ├─ 5.A.2   <PullQuote> placement + <EndMark> + <VerderLezenRow>
-        └─ 5.A.3   <EditieLabel> + final article-footer composition
+        └─ 5.A.2   <PullQuote> placement + <EndMark> + <VerderLezenRow>
+        # 5.A.3 retired 2026-05-18 — <EditieLabel> killed post data-audit;
+        # final footer composition collapses into 5.A.2.
 
 5.B    Variant-specific components (depends on drill outcomes per variant)
         ├─ 5.B.int  <QASection> + <QARow> + <QASectionDivider> + <InterviewCredits>
@@ -142,7 +144,6 @@ All sub-issues spawn from this PRD via `/prd-to-issues`. No PRD update needed pe
 | `<QASectionDivider>`    | 5.B.int | Dotted divider between Q&A rows. `flourish?: "diamond"` variant for major section breaks per drill 5.d3.                                     |
 | `<InterviewCredits>`    | 5.B.int | Closing credits block (author / interviewees / photographer / publish date). Per drill 5.d-int.                                              |
 | `<VerderLezenRow>`      | 5.A.2   | 3-up `<NewsCard>` row at article footer. Inherits R3 per-`articleType` backgrounds.                                                          |
-| `<EditieLabel>`         | 5.A.3   | Editorial flourish (UI-only, derived from `publishedAt`: season + sequence count).                                                           |
 | `<MatchRecapStats>`     | 5.B.mat | Inline match-stats block (composition per drill 5.d-mat). Spans both `matchPreview` (lineup/H2H) and `matchRecap` (final stats/goalscorers). |
 | `<EventDetailBlock>`    | 5.B.evt | Full event detail card for the article body (composition per drill 5.d-evt). Companion to the existing hero day-block + compressed strip.    |
 | `<TransferDetailBlock>` | 5.B.tra | Optional transfer body block (career history, fees if disclosed, etc — per drill 5.d-tra outcome; could be no-op).                           |
@@ -231,28 +232,28 @@ GTM regex `homepage_|news_|article_` covers the namespace; verify new event name
 
 19 issues spawned via the spawn script (`/tmp/spawn-phase5-issues.sh`); `blockedBy` edges wired via `addBlockedBy` GraphQL.
 
-| Key     | Issue | Title                                                             | Blocked by                        | Status                   |
-| ------- | ----- | ----------------------------------------------------------------- | --------------------------------- | ------------------------ |
-| 5.0     | #1782 | tracer: `/nieuws/[slug]` route + ARTICLE_BY_SLUG_QUERY audit      | —                                 | ready (no design dep)    |
-| 5.d1    | #1783 | drill: article header layout (centered vs flanked)                | —                                 | owner-led drill          |
-| 5.d2    | #1784 | drill: subject avatar vocabulary (photo / monogram / illustrated) | —                                 | owner-led drill          |
-| 5.d3    | #1785 | drill: section-break flourish (diamond vs alternatives)           | —                                 | owner-led drill          |
-| 5.d4    | #1786 | drill: Verder-lezen + Editie footer layout                        | —                                 | owner-led drill          |
-| 5.d-int | #1787 | drill: interview body touches (Q&A row + credits block layout)    | #1784, #1785                      | drill (after d2 + d3)    |
-| 5.d-col | #1788 | drill: column / announcement variant body treatment               | #1783                             | drill (after d1)         |
-| 5.d-tra | #1789 | drill: transfer variant body treatment                            | #1783                             | drill (after d1)         |
-| 5.d-evt | #1790 | drill: event variant body detail block                            | #1783                             | drill (after d1)         |
-| 5.d-mat | #1791 | drill: match variant body detail block (preview + recap)          | #1783, #1470                      | drill (after d1 + #1470) |
-| 5.A.1   | #1792 | body container + DropCap + PT body + multi-line HighlighterStroke | #1782, #1785                      | blocked                  |
-| 5.A.2   | #1793 | PullQuote + EndMark + VerderLezenRow                              | #1792, #1786                      | blocked                  |
-| 5.A.3   | #1794 | EditieLabel + final footer composition                            | #1793                             | blocked                  |
-| 5.B.int | #1795 | QASection + QARow + QASectionDivider + InterviewCredits           | #1787, #1794                      | blocked                  |
-| 5.B.col | #1796 | column-variant body touches                                       | #1788, #1794                      | blocked                  |
-| 5.B.tra | #1797 | transfer-variant body touches                                     | #1789, #1794                      | blocked                  |
-| 5.B.evt | #1798 | EventDetailBlock                                                  | #1790, #1794                      | blocked                  |
-| 5.B.mat | #1799 | MatchRecapStats                                                   | #1791, #1794, #1470               | blocked                  |
-| 5.C     | #1800 | page.tsx rewire + variant switch                                  | #1795, #1796, #1797, #1798, #1799 | blocked                  |
-| 5.D     | #1801 | cleanup — retire legacy, close legacy milestone, CLAUDE.md        | #1800                             | blocked                  |
+| Key     | Issue | Title                                                             | Blocked by                        | Status                                                                         |
+| ------- | ----- | ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------ |
+| 5.0     | #1782 | tracer: `/nieuws/[slug]` route + ARTICLE_BY_SLUG_QUERY audit      | —                                 | ready (no design dep)                                                          |
+| 5.d1    | #1783 | drill: article header layout (centered vs flanked)                | —                                 | owner-led drill                                                                |
+| 5.d2    | #1784 | drill: subject avatar vocabulary (photo / monogram / illustrated) | —                                 | owner-led drill                                                                |
+| 5.d3    | #1785 | drill: section-break flourish (diamond vs alternatives)           | —                                 | owner-led drill                                                                |
+| 5.d4    | #1786 | drill: Verder-lezen footer layout                                 | —                                 | LOCKED 2026-05-18 (inheritance — no drill needed; `<EditieLabel>` retired)     |
+| 5.d-int | #1787 | drill: interview body touches (Q&A row + credits block layout)    | #1784, #1785                      | drill (after d2 + d3)                                                          |
+| 5.d-col | #1788 | drill: column / announcement variant body treatment               | #1783                             | drill (after d1)                                                               |
+| 5.d-tra | #1789 | drill: transfer variant body treatment                            | #1783                             | drill (after d1)                                                               |
+| 5.d-evt | #1790 | drill: event variant body detail block                            | #1783                             | drill (after d1)                                                               |
+| 5.d-mat | #1791 | drill: match variant body detail block (preview + recap)          | #1783, #1470                      | drill (after d1 + #1470)                                                       |
+| 5.A.1   | #1792 | body container + DropCap + PT body + multi-line HighlighterStroke | #1782, #1785                      | blocked                                                                        |
+| 5.A.2   | #1793 | PullQuote + EndMark + VerderLezenRow                              | #1792, #1786                      | blocked                                                                        |
+| 5.A.3   | #1794 | ~~EditieLabel + final footer composition~~                        | n/a                               | CLOSED 2026-05-18 (`<EditieLabel>` retired; final footer collapses into 5.A.2) |
+| 5.B.int | #1795 | QASection + QARow + QASectionDivider + InterviewCredits           | #1787, #1793                      | blocked                                                                        |
+| 5.B.col | #1796 | column-variant body touches                                       | #1788, #1793                      | blocked                                                                        |
+| 5.B.tra | #1797 | transfer-variant body touches                                     | #1789, #1793                      | blocked                                                                        |
+| 5.B.evt | #1798 | EventDetailBlock                                                  | #1790, #1793                      | blocked                                                                        |
+| 5.B.mat | #1799 | MatchRecapStats                                                   | #1791, #1793, #1470               | blocked                                                                        |
+| 5.C     | #1800 | page.tsx rewire + variant switch                                  | #1795, #1796, #1797, #1798, #1799 | blocked                                                                        |
+| 5.D     | #1801 | cleanup — retire legacy, close legacy milestone, CLAUDE.md        | #1800                             | blocked                                                                        |
 
 Ralph picks up:
 
@@ -268,12 +269,12 @@ Per `feedback_design_drill_pattern`: **one decision per round, 3–4 visual opti
 
 ### Universal drills (apply to all variants)
 
-| #    | Question                                                                                                                             | What to mock (3–4 options)                                                                                                                                                                                                                                                                                                                                                     | Resolves                                                                      |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| 5.d1 | ~~Article header — centered or flanked?~~ **LOCKED 2026-05-18 → E0 (existing Phase 3-b `<EditorialHeroShell>` 60/40 shell stands).** | ~~(A) flanked / (B) stacked / (C) hybrid / (D) full-width spotlight~~ — all four alternatives required dropping locked primitives; comparison confirmed the Phase 3-b lock holds. Mockups: `docs/design/mockups/phase-5-article-detail/5d1-header/`. Lock: `header-locked.md`. Per-variant overlays drilled inside each variant drill (5.d-int / 5.d-tra / 5.d-evt / 5.d-mat). | Universal hero shell for every article variant (= Phase 3-b lock).            |
-| 5.d2 | Subject avatar vocabulary                                                                                                            | (A) circular photo crop from `player.psdImage`; (B) initial monogram in jersey-deep disc; (C) illustrated character avatar (4–6 character vocabulary); (D) mixed (photo for credit chips, monogram for inline). Show at Q&A row scale + pull-quote scale.                                                                                                                      | Subject-presence vocabulary across `<QASection>` + `<PullQuote>` attribution. |
-| 5.d3 | Section-break flourish                                                                                                               | (A) diamond glyph between sections; (B) `<StripedSeam height="sm">` mid-article; (C) plain dotted divider (today's default); (D) no break at all — just paragraph spacing.                                                                                                                                                                                                     | `<QASectionDivider flourish>` API + body section-break rendering.             |
-| 5.d4 | Verder-lezen + Editie footer layout                                                                                                  | (A) single 3-up `<NewsCard>` row + Editie label below; (B) split — Verder-lezen on cream band, Editie on darker band; (C) full-bleed Verder-lezen with internal Editie chip; (D) sidebar Verder-lezen on desktop, stacked on mobile.                                                                                                                                           | Article footer composition.                                                   |
+| #    | Question                                                                                                                             | What to mock (3–4 options)                                                                                                                                                                                                                                                                                                                                                                                                                                              | Resolves                                                                      |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 5.d1 | ~~Article header — centered or flanked?~~ **LOCKED 2026-05-18 → E0 (existing Phase 3-b `<EditorialHeroShell>` 60/40 shell stands).** | ~~(A) flanked / (B) stacked / (C) hybrid / (D) full-width spotlight~~ — all four alternatives required dropping locked primitives; comparison confirmed the Phase 3-b lock holds. Mockups: `docs/design/mockups/phase-5-article-detail/5d1-header/`. Lock: `header-locked.md`. Per-variant overlays drilled inside each variant drill (5.d-int / 5.d-tra / 5.d-evt / 5.d-mat).                                                                                          | Universal hero shell for every article variant (= Phase 3-b lock).            |
+| 5.d2 | Subject avatar vocabulary                                                                                                            | (A) circular photo crop from `player.psdImage`; (B) initial monogram in jersey-deep disc; (C) illustrated character avatar (4–6 character vocabulary); (D) mixed (photo for credit chips, monogram for inline). Show at Q&A row scale + pull-quote scale.                                                                                                                                                                                                               | Subject-presence vocabulary across `<QASection>` + `<PullQuote>` attribution. |
+| 5.d3 | Section-break flourish                                                                                                               | (A) diamond glyph between sections; (B) `<StripedSeam height="sm">` mid-article; (C) plain dotted divider (today's default); (D) no break at all — just paragraph spacing.                                                                                                                                                                                                                                                                                              | `<QASectionDivider flourish>` API + body section-break rendering.             |
+| 5.d4 | ~~Verder-lezen + Editie footer layout~~ **LOCKED 2026-05-18 → inheritance (no drill needed).**                                       | The four originally-proposed options (A stacked / B split bands / C full-bleed + Editie chip / D sidebar) were all framed around `<EditieLabel>` placement. Post data-audit, `<EditieLabel>` is retired (KCVV is not a magazine; the data doesn't exist). Footer collapses to a single `<VerderLezenRow>` inheriting Phase 4.5 R10 flush-edge `<NewsCard>` + R3 per-`articleType` background lookup. See `docs/design/mockups/phase-5-article-detail/footer-locked.md`. | Article footer composition. (= Phase 4.5 R10 + R3 inheritance, no Editie.)    |
 
 ### Variant-specific drills
 
@@ -287,7 +288,7 @@ Per `feedback_design_drill_pattern`: **one decision per round, 3–4 visual opti
 
 ### Pre-resolved (no drill needed)
 
-- ~~Editie 47 line — UI or schema?~~ **UI-only**, auto-derived from `publishedAt`.
+- ~~Editie 47 line — UI or schema?~~ **RETIRED 2026-05-18.** Post data-audit: KCVV is a club site, not a magazine; no edition data exists, no editorial workflow produces it, and the surface was invented chrome. See `docs/design/mockups/phase-5-article-detail/footer-locked.md` for the reasoning.
 - ~~Whether interview gets its own drill round.~~ **Yes** — same cadence as other variants; existing master-plan §5.2 mock is an input to drill 5.d-int, not a lock.
 
 ---
@@ -307,5 +308,5 @@ Per `feedback_design_drill_pattern`: **one decision per round, 3–4 visual opti
 _Empty at PRD authoring time. Append entries here when implementation surfaces something unexpected._
 
 ```text
-[YYYY-MM-DD] Description of unknown surfaced during implementation. Disposition: resolved in-PR / spun out as #NNNN / deferred to Phase X.
+[2026-05-18] <EditieLabel> ("Editie 47 · Lente 2026 · KCVV Elewijt Magazine" line) was carried over from the retro-terrace-fanzine visual baseline without a data audit. KCVV doesn't publish in numbered editions and isn't a magazine — the surface was invented chrome. Disposition: retired in-PR (drill 5.d4 / #1786) per `feedback_design_data_audit`; #1794 closed as no-op; references purged from PRD §1/§3/§4/§8/§9/§10 and brief §5.
 ```
