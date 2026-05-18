@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils/cn";
  * of `firstName` only. Single uppercase letter, italic Freight Display
  * 900, full-opacity cream on jersey-deep.
  */
-export type SubjectAvatarScale = "row" | "attribution";
+export type SubjectAvatarScale = "byline" | "row" | "attribution";
 
 export interface SubjectAvatarProps {
   /**
@@ -56,6 +56,14 @@ const SCALE: Record<
     sizes: string;
   }
 > = {
+  // Byline scale — the smallest variant, locked at 24px by 5.d-col for
+  // the `<EditorialByline>` author monogram chip. Sits next to mono-caps
+  // byline text so it has to read at a glance without dominating the row.
+  byline: {
+    box: "h-6 w-6",
+    monoText: "text-[12px]",
+    sizes: "24px",
+  },
   row: {
     box: "h-8 w-8",
     monoText: "text-[15px]",
