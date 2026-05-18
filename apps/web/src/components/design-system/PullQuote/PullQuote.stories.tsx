@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PullQuote } from "./PullQuote";
+import { SubjectAvatar } from "../SubjectAvatar";
 
 const meta = {
   title: "UI/PullQuote",
@@ -76,5 +77,66 @@ export const WithEmphasis: Story = {
     attribution: { name: "Maxim", role: "A-PLOEG" },
     emphasis: { text: "tribune die zingt" },
     children: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+  },
+};
+
+// 5.d2-locked attribution layout: 64px photo + italic display name +
+// mono caps role/source line beneath. The avatar slot is opt-in — the
+// caller supplies <SubjectAvatar scale="attribution" /> with the
+// subject's photo and first name.
+export const WithSubjectAvatar: Story = {
+  args: {
+    attribution: { name: "Maxim Breugelmans", role: "A-PLOEG" },
+    children: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+    avatarSlot: (
+      <SubjectAvatar
+        firstName="Maxim"
+        fullName="Maxim Breugelmans"
+        photoUrl="https://picsum.photos/seed/pullquote-photo/128/128"
+        scale="attribution"
+      />
+    ),
+  },
+};
+
+// Avatar slot when the subject has no photo — the monogram fallback
+// fills the 64px disc. Same layout, just the photo path falls through
+// to the monogram path.
+export const WithSubjectAvatarMonogramFallback: Story = {
+  args: {
+    attribution: { name: "Anouk De Wit", role: "BESTUUR" },
+    children:
+      "We bouwen geen succesverhaal in één seizoen — we bouwen een club voor de volgende vijftig jaar.",
+    avatarSlot: (
+      <SubjectAvatar
+        firstName="Anouk"
+        fullName="Anouk De Wit"
+        scale="attribution"
+      />
+    ),
+  },
+};
+
+// Avatar slot on the ink tone — confirms the cream typography on the
+// dark card still reads correctly inside the new two-line attribution
+// stack.
+export const WithSubjectAvatarToneInk: Story = {
+  args: {
+    tone: "ink",
+    attribution: {
+      name: "Wim Govaerts",
+      role: "TRAINER",
+      source: "SEIZOEN 25-26",
+    },
+    children:
+      "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
+    avatarSlot: (
+      <SubjectAvatar
+        firstName="Wim"
+        fullName="Wim Govaerts"
+        photoUrl="https://picsum.photos/seed/wim-pullquote/128/128"
+        scale="attribution"
+      />
+    ),
   },
 };

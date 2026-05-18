@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { HighlighterStroke } from "../HighlighterStroke";
 import { QuoteMark, type QuoteMarkColor } from "../QuoteMark";
@@ -32,6 +33,17 @@ export interface PullQuoteProps {
   emphasis?: PullQuoteEmphasis;
   rotation?: TapedCardProps["rotation"];
   tape?: TapedCardProps["tape"];
+  /**
+   * Optional avatar slot rendered beside the attribution name. Typically
+   * `<SubjectAvatar scale="attribution" />` resolved at the article-domain
+   * layer (PullQuote stays in design-system and does not import Subject
+   * resolution). When provided, the attribution row flips to a two-line
+   * stack (italic display name on top, mono caps role/source below) per
+   * the 5.d2 lock. When omitted, the attribution falls back to the
+   * original inline mono caps row — suitable for external-source quotes
+   * that don't reference a KCVV subject.
+   */
+  avatarSlot?: ReactNode;
   className?: string;
 }
 
@@ -53,7 +65,10 @@ const TONE: Record<PullQuoteTone, TonePalette> = {
     // ink bg needs cream text for the name — MonoLabel variant=plain hard-codes
     // text-ink, so render the name in a directly-styled span instead.
     name: "text-cream",
-    metaText: "text-cream/70",
+    // Full-opacity cream per `feedback_monolabel_cream_full_opacity` —
+    // 70% cream over jersey-deep / ink trips axe at ~2.86:1; full opacity
+    // sits at the right contrast ratio.
+    metaText: "text-cream",
     quoteMark: "jersey",
   },
   jersey: {
@@ -63,7 +78,7 @@ const TONE: Record<PullQuoteTone, TonePalette> = {
     bg: "jersey-deep",
     body: "text-cream",
     name: "text-cream",
-    metaText: "text-cream/70",
+    metaText: "text-cream",
     quoteMark: "cream",
   },
 };
@@ -104,6 +119,7 @@ export function PullQuote({
   emphasis,
   rotation,
   tape,
+  avatarSlot,
   className,
 }: PullQuoteProps) {
   const palette = TONE[tone];
@@ -127,55 +143,110 @@ export function PullQuote({
         >
           {renderBodyWithEmphasis(children, emphasis)}
         </q>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span
-            className={cn(
-              "font-mono text-[length:var(--text-label)] leading-none font-medium tracking-[var(--text-label--tracking)] uppercase",
-              palette.name,
-            )}
-          >
-            {attribution.name}
-          </span>
-          {attribution.role && (
-            <>
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "inline-block h-[3px] w-[3px] rounded-full bg-current",
-                  palette.metaText,
-                )}
-              />
-              <span
-                className={cn(
-                  "font-mono text-[length:var(--text-label)] leading-none tracking-[var(--text-label--tracking)] uppercase",
-                  palette.metaText,
-                )}
-              >
-                {attribution.role}
-              </span>
-            </>
-          )}
-          {attribution.source && (
-            <>
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "inline-block h-[3px] w-[3px] rounded-full bg-current",
-                  palette.metaText,
-                )}
-              />
-              <span
-                className={cn(
-                  "font-mono text-[length:var(--text-label)] leading-none tracking-[var(--text-label--tracking)] uppercase",
-                  palette.metaText,
-                )}
-              >
-                {attribution.source}
-              </span>
-            </>
-          )}
-        </div>
+        <PullQuoteAttributionRow
+          attribution={attribution}
+          avatarSlot={avatarSlot}
+          palette={palette}
+        />
       </div>
     </TapedCard>
+  );
+}
+
+interface PullQuoteAttributionRowProps {
+  attribution: PullQuoteAttribution;
+  avatarSlot?: ReactNode;
+  palette: TonePalette;
+}
+
+function PullQuoteAttributionRow({
+  attribution,
+  avatarSlot,
+  palette,
+}: PullQuoteAttributionRowProps) {
+  const meta = [attribution.role, attribution.source].filter(
+    (v): v is string => typeof v === "string" && v.length > 0,
+  );
+
+  if (!avatarSlot) {
+    // Inline mono caps fallback — used by external-source quotes that
+    // don't carry a KCVV subject (e.g. "uit Het Nieuwsblad").
+    return (
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span
+          className={cn(
+            "font-mono text-[length:var(--text-label)] leading-none font-medium tracking-[var(--text-label--tracking)] uppercase",
+            palette.name,
+          )}
+        >
+          {attribution.name}
+        </span>
+        {meta.map((value, i) => (
+          <span key={value} className="flex items-center gap-x-2">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "inline-block h-[3px] w-[3px] rounded-full bg-current",
+                palette.metaText,
+              )}
+            />
+            <span
+              data-pull-quote-meta-index={i}
+              className={cn(
+                "font-mono text-[length:var(--text-label)] leading-none tracking-[var(--text-label--tracking)] uppercase",
+                palette.metaText,
+              )}
+            >
+              {value}
+            </span>
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  // Avatar layout (5.d2 lock) — circular avatar on the left, italic display
+  // name on top right, mono caps role/source line beneath.
+  return (
+    <div className="flex items-center gap-3">
+      <div className="shrink-0">{avatarSlot}</div>
+      <div className="flex min-w-0 flex-col gap-1">
+        <span
+          data-pull-quote-name="display"
+          className={cn(
+            "font-display text-xl leading-tight italic",
+            palette.name,
+          )}
+        >
+          {attribution.name}
+        </span>
+        {meta.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {meta.map((value, i) => (
+              <span key={value} className="flex items-center gap-x-2">
+                {i > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "inline-block h-[3px] w-[3px] rounded-full bg-current",
+                      palette.metaText,
+                    )}
+                  />
+                )}
+                <span
+                  data-pull-quote-meta-index={i}
+                  className={cn(
+                    "font-mono text-[length:var(--text-label)] leading-none tracking-[var(--text-label--tracking)] uppercase",
+                    palette.metaText,
+                  )}
+                >
+                  {value}
+                </span>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

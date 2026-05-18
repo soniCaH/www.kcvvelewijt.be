@@ -179,4 +179,141 @@ describe("<ArticleBody>", () => {
       expect(inner.style.maxWidth).toBe("var(--container-prose)");
     });
   });
+
+  describe("EndMark closer", () => {
+    it("renders <EndMark> after the last body block when content is non-empty", () => {
+      const content = [paragraph("Body content.")];
+      const { container } = render(<ArticleBody content={content} />);
+      const endmark = container.querySelector('[data-endmark="star"]');
+      expect(endmark).not.toBeNull();
+    });
+
+    it("does not render <EndMark> when content is empty", () => {
+      const { container } = render(<ArticleBody content={[]} />);
+      expect(container.querySelector('[data-endmark="star"]')).toBeNull();
+    });
+
+    it("places <EndMark> after the DropCap paragraph in DOM order", () => {
+      const content = [paragraph("First."), paragraph("Second.")];
+      const { container } = render(<ArticleBody content={content} />);
+      const endmark = container.querySelector('[data-endmark="star"]');
+      const dropcap = container.querySelector('[data-tone="ink"]');
+      expect(endmark).not.toBeNull();
+      expect(dropcap).not.toBeNull();
+      const cmp = dropcap!.compareDocumentPosition(endmark!);
+      // Node.DOCUMENT_POSITION_FOLLOWING = 4
+      expect(cmp & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+  });
+
+  describe("pullQuote PT serializer", () => {
+    function pullQuoteBlock(
+      overrides: Record<string, unknown> = {},
+    ): PortableTextBlock {
+      return {
+        _type: "pullQuote",
+        _key: `pq-${Math.random().toString(36).slice(2, 8)}`,
+        body: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+        ...overrides,
+      } as unknown as PortableTextBlock;
+    }
+
+    it("renders nothing when body is missing or empty", () => {
+      const { container } = render(
+        <ArticleBody
+          content={[
+            paragraph("First."),
+            pullQuoteBlock({ body: "" }),
+            paragraph("Second."),
+          ]}
+        />,
+      );
+      expect(container.querySelector("[data-pull-quote-tone]")).toBeNull();
+    });
+
+    it("renders <PullQuote> with avatar slot when respondentKey resolves", () => {
+      const content = [
+        paragraph("First."),
+        pullQuoteBlock({ respondentKey: "subj-1", tone: "cream" }),
+      ];
+      const subjects = [
+        {
+          _key: "subj-1",
+          kind: "player" as const,
+          playerRef: {
+            firstName: "Maxim",
+            lastName: "Breugelmans",
+            jerseyNumber: 9,
+            psdImageUrl: "https://example.com/maxim.jpg",
+          },
+        },
+      ];
+      const { container } = render(
+        <ArticleBody content={content} subjects={subjects} />,
+      );
+      expect(
+        container.querySelector('[data-pull-quote-tone="cream"]'),
+      ).not.toBeNull();
+      expect(
+        container.querySelector('[data-subject-avatar="photo"]'),
+      ).not.toBeNull();
+      const displayName = container.querySelector(
+        '[data-pull-quote-name="display"]',
+      );
+      expect(displayName?.textContent).toBe("Maxim Breugelmans");
+    });
+
+    it("falls back to monogram avatar when the resolved subject has no photo", () => {
+      const content = [
+        paragraph("First."),
+        pullQuoteBlock({ respondentKey: "subj-1" }),
+      ];
+      const subjects = [
+        {
+          _key: "subj-1",
+          kind: "staff" as const,
+          staffRef: {
+            firstName: "Anouk",
+            lastName: "De Wit",
+            functionTitle: "BESTUUR",
+            photoUrl: null,
+          },
+        },
+      ];
+      const { container } = render(
+        <ArticleBody content={content} subjects={subjects} />,
+      );
+      expect(
+        container.querySelector('[data-subject-avatar="monogram"]'),
+      ).not.toBeNull();
+    });
+
+    it("falls back to inline mono-caps attribution for external-source quotes", () => {
+      const content = [
+        paragraph("First."),
+        pullQuoteBlock({
+          externalName: "Het Nieuwsblad",
+          externalSource: "23 MEI 2026",
+        }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      // No avatar slot.
+      expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+      // No display-name span (that only renders in the avatar layout).
+      expect(
+        container.querySelector('[data-pull-quote-name="display"]'),
+      ).toBeNull();
+    });
+
+    it("threads tone='ink' from the PT block through to <PullQuote>", () => {
+      const content = [
+        paragraph("First."),
+        pullQuoteBlock({ externalName: "Coach", tone: "ink" }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(
+        container.querySelector('[data-pull-quote-tone="ink"]'),
+      ).not.toBeNull();
+    });
+  });
 });

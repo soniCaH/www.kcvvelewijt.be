@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleBody } from "./ArticleBody";
+import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 
 const meta = {
   title: "Article/ArticleBody",
@@ -79,17 +80,29 @@ function paragraphWithAccent(
   } as PortableTextBlock;
 }
 
-// Stand-in for a future PT block type the renderer doesn't handle yet
-// (e.g. pullQuote). PortableText silently skips unknown types in #1792.
-// The double cast through `unknown` is required because the placeholder
-// shape lacks the structural `children` of a real PortableText block;
-// PortableText still accepts the value at runtime because it routes by
-// `_type` before reading any block fields.
-function pullQuotePlaceholder(text: string): PortableTextBlock {
+// pullQuote PT block fixture. The renderer consumes `body` plus either
+// `respondentKey` (when a KCVV subject is the speaker) or
+// `externalName`/`externalRole`/`externalSource` (for non-subject
+// quotes). The double cast through `unknown` is required because the
+// placeholder shape lacks the structural `children` of a real PortableText
+// block; PortableText still accepts the value at runtime because it routes
+// by `_type` before reading any block fields.
+function pullQuoteBlock(
+  body: string,
+  extras: {
+    tone?: "cream" | "ink" | "jersey";
+    respondentKey?: string;
+    emphasis?: string;
+    externalName?: string;
+    externalRole?: string;
+    externalSource?: string;
+  } = {},
+): PortableTextBlock {
   return {
     _type: "pullQuote",
-    _key: `pq-${text.slice(0, 6).replace(/\s/g, "-")}`,
-    body: text,
+    _key: `pq-${body.slice(0, 6).replace(/\s/g, "-")}`,
+    body,
+    ...extras,
   } as unknown as PortableTextBlock;
 }
 
@@ -164,9 +177,56 @@ const HEADING_ONLY_CONTENT: PortableTextBlock[] = [
 ];
 
 const ALL_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
-  pullQuotePlaceholder("Eén ploeg, één doel."),
-  pullQuotePlaceholder("De terras is altijd open."),
-  pullQuotePlaceholder("Driesstraat, vrijdagavond."),
+  pullQuoteBlock("Eén ploeg, één doel.", {
+    externalName: "Voorzitter",
+    externalRole: "BESTUUR",
+  }),
+  pullQuoteBlock("De terras is altijd open.", {
+    externalName: "Cafetariadame",
+    externalRole: "VRIJWILLIGER",
+  }),
+  pullQuoteBlock("Driesstraat, vrijdagavond.", {
+    externalName: "Supportersfederatie",
+    externalSource: "FANBLAD",
+  }),
+];
+
+const WITH_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Wim Govaerts opent de deur van zijn kantoor met een lach. Het tweede seizoen op de bank loopt op zijn einde, en het verschil met vorig jaar is voelbaar.",
+  ),
+  paragraph(
+    "We zaten samen aan een tafel in de cafetaria om terug te blikken op een seizoen dat anders begon dan voorzien.",
+  ),
+  pullQuoteBlock(
+    "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
+    {
+      tone: "ink",
+      respondentKey: "subj-coach",
+    },
+  ),
+  paragraph(
+    "Die wakker-roeper-mentaliteit zou de rode draad worden door de tweede helft van het seizoen. Geen luchtkastelen, geen excuses, alleen werken.",
+  ),
+  paragraph(
+    "Met nog vier wedstrijden te gaan, staat Elewijt op een gedeelde tweede plaats. Het lot ligt in eigen handen.",
+  ),
+];
+
+// Subjects fixture for the WithPullQuote story — supplies the resolvable
+// respondentKey on the inline pull-quote so the SubjectAvatar renders
+// with the staff photo path.
+const WITH_PULL_QUOTE_SUBJECTS = [
+  {
+    _key: "subj-coach",
+    kind: "staff" as const,
+    staffRef: {
+      firstName: "Wim",
+      lastName: "Govaerts",
+      functionTitle: "TRAINER",
+      photoUrl: "https://picsum.photos/seed/wim-coach/128/128",
+    },
+  },
 ];
 
 export const Short: Story = {
@@ -196,21 +256,26 @@ export const HeadingOnly: Story = {
   },
 };
 
-// Edge case: body is only pullQuote PT blocks. The pullQuote serializer
-// wires in 5.A.2 (#1793); until then, PortableText silently skips these
-// blocks. The story documents the graceful-degradation surface — the
-// container renders cleanly without crashing on unhandled block types.
+// Edge case: body is only `pullQuote` PT blocks (no paragraphs, no
+// headings). Each renders the external-attribution path because the
+// fixtures don't supply a respondentKey. Verifies the shell handles a
+// pull-quote-heavy body without normal paragraphs gracefully — DropCap
+// skips (no normal paragraph found), EndMark still renders.
 export const AllPullQuote: Story = {
   args: {
     content: ALL_PULL_QUOTE_CONTENT,
   },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Body of only `pullQuote` PT blocks (5.A.2 territory). #1792 does not ship a `pullQuote` serializer, so PortableText silently skips them and the body renders empty inside the cream surface — graceful no-crash baseline for the shell.",
-      },
-    },
+};
+
+// Mixed body with an inline `pullQuote` block that resolves a KCVV
+// subject (Wim Govaerts) via respondentKey. The pullQuote renders the
+// avatar layout with the staff photo + italic display name + mono caps
+// role/source. tone="ink" demonstrates the dark variant inside the
+// otherwise cream body. EndMark closes the body.
+export const WithPullQuote: Story = {
+  args: {
+    content: WITH_PULL_QUOTE_CONTENT,
+    subjects: WITH_PULL_QUOTE_SUBJECTS,
   },
 };
 
@@ -226,6 +291,60 @@ export const NoImages: Story = {
       description: {
         story:
           "Same fixture as Long, framed as the no-images edge case. The shell never emits image blocks in #1792; image-block serializers (articleImage, TapedFigure) wire in 5.A.2 / 5.B.*. This story confirms that an image-free body still reads as long-form editorial.",
+      },
+    },
+  },
+};
+
+// Full body composition (PullQuote + EndMark + VerderLezenRow). Stitches
+// the 5.A.2 surfaces together to show how `<ArticleBody>` and
+// `<VerderLezenRow>` compose inside the page template that lands at 5.C
+// (#1800). The article body ends at <EndMark>; <VerderLezenRow> sits
+// beneath as a sibling, wider than the body's prose width.
+export const BodyComposition: Story = {
+  args: {
+    content: WITH_PULL_QUOTE_CONTENT,
+    subjects: WITH_PULL_QUOTE_SUBJECTS,
+  },
+  render: (args) => (
+    <>
+      <ArticleBody {...args} />
+      <VerderLezenRow
+        items={[
+          {
+            title: "Maxim Breugelmans versterkt Elewijt",
+            href: "/nieuws/maxim-breugelmans-transfer",
+            imageUrl: "https://picsum.photos/seed/composition-transfer/800/450",
+            badge: "TRANSFER",
+            date: "18 mei 2026",
+            articleType: "transfer",
+          },
+          {
+            title: "Algemene vergadering op 12 juni",
+            href: "/nieuws/algemene-vergadering-juni",
+            imageUrl:
+              "https://picsum.photos/seed/composition-announcement/800/450",
+            badge: "MEDEDELING",
+            date: "15 mei 2026",
+            articleType: "announcement",
+          },
+          {
+            title: "Lentetornooi U13",
+            href: "/nieuws/lentetornooi-u13",
+            imageUrl: "https://picsum.photos/seed/composition-event/800/450",
+            badge: "EVENEMENT",
+            date: "10 mei 2026",
+            articleType: "event",
+          },
+        ]}
+      />
+    </>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "5.A.2 composition story — `<ArticleBody>` (with inline pull-quote + EndMark closer) followed by `<VerderLezenRow>` (3-up related articles). Mirrors what `<InterviewTemplate>` / `<AnnouncementTemplate>` / etc. will render at 5.C (#1800) once `page.tsx` rewires.",
       },
     },
   },
