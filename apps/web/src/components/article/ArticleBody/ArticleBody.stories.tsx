@@ -3,7 +3,7 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleBody } from "./ArticleBody";
 
 const meta = {
-  title: "Pages/Article/ArticleBody",
+  title: "Article/ArticleBody",
   component: ArticleBody,
   tags: ["autodocs", "vr"],
   parameters: {
