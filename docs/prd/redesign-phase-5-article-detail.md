@@ -177,7 +177,7 @@ The query already returns `titleRich`, `subjects[]`, `firstTransferFact`, `first
 Known projection extensions to investigate during 5.0:
 
 - Q&A speakers + photographer credit on `subjects[]` or as dedicated fields. **5.d2 LOCKED → D (monogram at row, photo at attribution).** Photo sources (`playerRef.psdImage` / `staffRef.photo` / `customPhoto`) already ship through `subjects[]` per the 5.0 tracer audit (§5.0 below) — no projection extension required.
-- Section-break markers in body PT — explicit PT block type vs renderer-side heading-boundary insertion. Decide at 5.A.1.
+- Section-break markers in body PT — explicit PT block type vs renderer-side heading-boundary insertion. **LOCKED 2026-05-18 in #1792 → heading-derived.** The `<ArticleBody>` PT serializer maps `style: "h2"` body blocks to `<QASectionDivider title={[block]} />`, reusing the existing Phase 3-b primitive verbatim per the 5.d3 lock. No new `sectionBreak` block type, no schema migration. Inline `accent` marks on the h2 ride through to the divider's accent renderer. Editor-facing: the body editor's h2 toolbar button is the natural section-break gesture.
 - Match data on the article — only needed if `5.d-mat` decides the body block surfaces match-level data not already on Sanity (e.g. lineups). Most likely fetched via BFF (PSD) rather than added to Sanity.
 
 ### Schema migrations
@@ -301,9 +301,51 @@ Per `feedback_design_drill_pattern`: **one decision per round, 3–4 visual opti
 
 1. ~~**Header layout**~~ — locked 2026-05-18 (5.d1 → E0).
 2. ~~**Avatar vocabulary**~~ — locked 2026-05-18 (5.d2 → D scale-conditional).
-3. **Multi-line `<HighlighterStroke>`** (#1543) — locks during 5.A.1 implementation. Five sub-questions parked on the issue body: server vs client / resize / per-line variant / SSR fallback / API surface.
+3. ~~**Multi-line `<HighlighterStroke>`**~~ (#1543) — **locked 2026-05-18 in 5.A.1 (#1792).** See §10 Q3 ADR below.
 4. **`matchPreview` / `matchRecap` EditorialHero detail variants** — owned by #1470. `5.B.mat` is blocked on #1470 landing them; the rest of Phase 5 is not.
 5. **Variant-specific deltas** — ~~5.d-int locked 2026-05-18~~; drills 5.d-col, 5.d-tra, 5.d-evt, 5.d-mat still pending.
+
+### Q3 ADR — Multi-line `<HighlighterStroke>` technical approach (closes #1543)
+
+**Decided 2026-05-18 in #1792.** `<HighlighterStroke>` stays a Server Component and uses CSS `box-decoration-break: clone` on the existing inline `background-image` to repeat the stroke per visual line. **No JavaScript, no API change, no SSR/CSR split.**
+
+#### Implementation
+
+```typescript
+// HighlighterStroke.tsx (delta only)
+style={{
+  backgroundImage: `url("${dataUrl}")`,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "0 88%",
+  backgroundSize: "100% 0.4em",
+  paddingBottom: "0.1em",
+  WebkitBoxDecorationBreak: "clone",
+  boxDecorationBreak: "clone",
+}}
+```
+
+`box-decoration-break: clone` instructs the browser to clone the background (and padding / border) per inline fragment. On wrap, each visual line becomes its own fragment with its own bounding box, and `background-size: 100% 0.4em` stretches the stroke across each line's width independently.
+
+#### Answers to #1543's 5 sub-questions
+
+1. **Server vs client component.** Server. CSS is sufficient; `Range.getClientRects()` is not needed.
+2. **Resize behaviour.** Native browser reflow re-renders the background per fragment on every resize. No `ResizeObserver`, no debounce, no JS.
+3. **Stroke per line.** Same `STROKE_PATH` (the asymmetric hand-pulled SVG) repeats per visual line. The path's mild horizontal asymmetry repeats uniformly per line, which reads as a real-marker idiom rather than a mechanical pattern.
+4. **SSR fallback.** N/A — the server output IS the final output. There is no hydration upgrade step, so there is no fallback / mismatch surface.
+5. **API surface.** `<HighlighterStroke color={...}>{children}</HighlighterStroke>` is unchanged.
+
+#### Caveats
+
+- `-webkit-box-decoration-break` prefix shipped for older Safari (still relevant — caniuse 2026-05).
+- Per-line stroke is identical (same `STROKE_PATH`). If editorial intent ever demands variation (e.g. distinct path per line for organic feel), that earns a follow-up issue with a per-line wrapper that owns its own DOM emission and `ResizeObserver`. Today's vocabulary does not need it.
+
+#### Test coverage
+
+- Storybook: `Playground`, `InAHeading`, `ColorVariants` retain their VR baselines. The Phase 0 `MultiLineUnsupported` story is **renamed** to `MultiLineWrapping` (no longer "unsupported"), its `parameters.vr.disable` is removed, and a VR baseline is added.
+
+#### Rollback
+
+Remove `boxDecorationBreak` / `WebkitBoxDecorationBreak` from the inline `style` object. The Phase 0 single-line behaviour returns unchanged.
 
 ---
 
@@ -319,4 +361,8 @@ _Empty at PRD authoring time. Append entries here when implementation surfaces s
 [2026-05-18] Drill 5.d-col scope ambiguity: PRD said "announcement doubles as column variant" but Sanity has no `column` discriminator. Mid-drill clarification surfaced two paths (Path 1: add discriminator + per-flavor treatment; Path 2: one treatment for all announcements). Disposition: Path 2 picked; originally-proposed Option B (`<MonoLabel>` COLUMN kicker, which assumed Path 1) dropped at brief level. Drill resolved with Option A (monogram author chip in `<EditorialByline>`) — composes from existing primitives (5.d-int `article.author` + 5.d2 monogram), no new chrome. Lock in `announcement-locked.md`.
 
 [2026-05-18] Drill 5.d-tra audit revealed: (a) all `transferFact` fields are already consumed by the hero (Phase 3-b R1.5 lock), so the body has nothing variant-specific to add for single-transfer articles; (b) `transferFact` carries `playerName` as a denormalized string with NO `playerRef` link to the `player` document — meaning hero player photos come only from manually-uploaded `article.coverImage` (PSD `player.psdImage` never auto-used). The drill resolved against (a) by drilling the schema-promised "subsequent transferFact renders as overview row" treatment instead: Option D (TapedCard per transferFact) + adjacency rule. The (b) playerRef gap is recorded as a follow-up — out of Phase 5 scope per the issue's own scope note. Two possible fixes: add `playerRef` to `transferFact`, or open `subjects[]` to transfer articles (currently `hidden: articleType !== "interview"`).
+
+[2026-05-18] h2 body section break — the 5.d3 lock's prose literally specifies the inline rules at 0.55 opacity and the title at Freight Display 900, but its rationale ("E0 — Phase 3-b `<QASectionDivider title>` thin-rule subtitle stands. Net new primitives: None. ships verbatim.") delegates the rendering to the existing primitive. `<QASectionDivider>` currently ships with rules at 100% opacity (`bg-ink`) and the title at font-semibold (~600), not 0.55 + 900. **RESOLVED — Path B (spec adjusted to match implementation).** `<ArticleBody>` (`apps/web/src/components/article/ArticleBody/ArticleBody.tsx`) delegates body h2 to `<QASectionDivider>` (`apps/web/src/components/design-system/QASectionDivider/QASectionDivider.tsx`) verbatim, at its current rendering (100% rules, weight ~600). The 5.d3 lock's "ships verbatim" rationale governs over the numeric specifics in its body copy; the 0.55 / 900 numbers are read as imprecise prose rather than a contract. Authoritative for implementers of #1792 and every downstream consumer: **do not rebuild the geometry inline, do not alter QASectionDivider's tokens for this surface, delegate verbatim.** If editorial intent later genuinely demands the 0.55 / 900 refinement, that opens a separate Phase 3-b follow-up against QASectionDivider's own implementation (affects every existing Phase 3-b consumer — outside Phase 5 scope).
+
+[2026-05-18] DropCap-target first paragraph flattens inline `accent` marks. `<DropCapParagraph>` accepts `children: string` so the CSS `:first-letter` pseudo-element targets a top-level text node; a ReactNode children type would require either nested-element gymnastics or moving the drop cap off the first letter. Disposition (in #1792): document the limitation in the renderer + a dedicated test (`flattens marks on the first paragraph (DropCap-target limitation)`), and leave the API change as a Phase 5 follow-up if editorial demands mark support inside the lead paragraph. Today the editorial convention is to put the accent on a later paragraph anyway — no urgent need.
 ```
