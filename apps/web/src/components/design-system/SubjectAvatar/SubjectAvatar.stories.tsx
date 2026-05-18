@@ -27,6 +27,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// 24px monogram — the smallest scale, locked at 5.d-col for the
+// `<EditorialByline>` author chip. Sits inline next to mono-caps byline
+// text. Monogram-only (no photo path).
+export const BylineMonogram: Story = {
+  args: {
+    firstName: "Tom",
+    fullName: "Tom De Smet",
+    scale: "byline",
+  },
+};
+
 // 32px monogram — the only render path at row scale, even when a photo
 // URL is supplied (per 5.d2 lock: photos at 32px are too small to
 // identify a face).
